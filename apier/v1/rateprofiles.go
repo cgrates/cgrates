@@ -29,10 +29,14 @@ import (
 
 // GetRateProfile returns an Rate Profile
 func (apierSv1 *APIerSv1) GetRateProfile(arg *utils.TenantIDWithOpts, reply *engine.RateProfile) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	rPrf, err := apierSv1.DataManager.GetRateProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional)
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	rPrf, err := apierSv1.DataManager.GetRateProfile(tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -45,10 +49,11 @@ func (apierSv1 *APIerSv1) GetRateProfile(arg *utils.TenantIDWithOpts, reply *eng
 
 // GetRateProfileIDs returns list of rate profile IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetRateProfileIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.RateProfilePrefix + args.Tenant + ":"
+	prfx := utils.RateProfilePrefix + tnt + ":"
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -67,11 +72,12 @@ func (apierSv1 *APIerSv1) GetRateProfileIDs(args *utils.PaginatorWithTenant, att
 // GetRateProfileIDsCount sets in reply var the total number of RateProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 RateProfileIDs
 func (apierSv1 *APIerSv1) GetRateProfileIDsCount(args *utils.TenantWithOpts, reply *int) (err error) {
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var keys []string
-	prfx := utils.RateProfilePrefix + args.Tenant + ":"
+	prfx := utils.RateProfilePrefix + tnt + ":"
 	if keys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
 		return err
 	}
@@ -89,8 +95,11 @@ type RateProfileWithCache struct {
 
 //SetRateProfile add/update a new Rate Profile
 func (apierSv1 *APIerSv1) SetRateProfile(rPrf *RateProfileWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(rPrf.RateProfile, []string{"Tenant", "ID", "Rates"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(rPrf.RateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if rPrf.Tenant == utils.EmptyString {
+		rPrf.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 
 	if err := apierSv1.DataManager.SetRateProfile(rPrf.RateProfile, true); err != nil {
@@ -110,10 +119,12 @@ func (apierSv1 *APIerSv1) SetRateProfile(rPrf *RateProfileWithCache, reply *stri
 
 //SetRateProfileRates add/update Rates from existing RateProfiles
 func (apierSv1 *APIerSv1) SetRateProfileRates(rPrf *RateProfileWithCache, reply *string) (err error) {
-	if missing := utils.MissingStructFields(rPrf.RateProfile, []string{"Tenant", "ID", "Rates"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(rPrf.RateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-
+	if rPrf.Tenant == utils.EmptyString {
+		rPrf.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	if err = apierSv1.DataManager.SetRateProfileRates(rPrf.RateProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -138,18 +149,22 @@ type RemoveRPrfRates struct {
 }
 
 func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRates, reply *string) (err error) {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.DataManager.RemoveRateProfileRates(args.Tenant, args.ID, args.RateIDs, true); err != nil {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if err := apierSv1.DataManager.RemoveRateProfileRates(tnt, args.ID, args.RateIDs, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheRateProfiles,
-		utils.ConcatenatedKey(args.Tenant, args.ID), nil, nil, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheRateProfiles,
+		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -158,10 +173,14 @@ func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRates, reply *s
 
 // RemoveRateProfile remove a specific Rate Profile
 func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.DataManager.RemoveRateProfile(arg.Tenant, arg.ID,
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if err := apierSv1.DataManager.RemoveRateProfile(tnt, arg.ID,
 		utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -169,8 +188,8 @@ func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithCache, reply 
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheRateProfiles,
-		utils.ConcatenatedKey(arg.Tenant, arg.ID), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheRateProfiles,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

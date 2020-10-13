@@ -46,12 +46,18 @@ var (
 		testV1RatePrfRpcConn,
 		testV1RatePrfNotFound,
 		testV1RatePrfFromFolder,
+		testV1RatePrfGetRateProfileIDs,
+		testV1RatePrfGetRateProfileIDsCount,
 		testV1RatePrfVerifyRateProfile,
 		testV1RatePrfRemoveRateProfile,
 		testV1RatePrfNotFound,
 		testV1RatePrfSetRateProfileRates,
 		testV1RatePrfRemoveRateProfileRates,
 		testV1RatePing,
+		testV1RateGetRemoveRateProfileWithoutTenant,
+		testV1RatePrfRemoveRateProfileWithoutTenant,
+		testV1RatePrfGetRateProfileRatesWithoutTenant,
+		testV1RatePrfRemoveRateProfileRatesWithoutTenant,
 		testV1RatePrfStopEngine,
 	}
 )
@@ -581,5 +587,190 @@ func testV1RatePing(t *testing.T) {
 func testV1RatePrfStopEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
+	}
+}
+
+func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
+	rateProfile := &engine.RateProfile{
+		ID:               "RPWithoutTenant",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile, rateProfile, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var result *engine.RateProfile
+	rateProfile.Tenant = "cgrates.org"
+	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "RPWithoutTenant"}},
+		&result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, rateProfile) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rateProfile), utils.ToJSON(result))
+	}
+}
+
+func testV1RatePrfRemoveRateProfileWithoutTenant(t *testing.T) {
+	var reply string
+	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfile,
+		&utils.TenantIDWithCache{ID: "RPWithoutTenant"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var result *engine.RateProfile
+	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "RPWithoutTenant"}},
+		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testV1RatePrfGetRateProfileIDs(t *testing.T) {
+	var result []string
+	expected := []string{"RP1"}
+	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfileIDs,
+		&utils.PaginatorWithTenant{},
+		&result); err != nil {
+		t.Error(err)
+	} else if len(result) != len(expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, result)
+	}
+	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfileIDs,
+		&utils.PaginatorWithTenant{Tenant: "cgrates.org"},
+		&result); err != nil {
+		t.Error(err)
+	} else if len(result) != len(expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, result)
+	}
+}
+
+func testV1RatePrfGetRateProfileIDsCount(t *testing.T) {
+	var reply int
+	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfileIDsCount,
+		&utils.TenantWithOpts{},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != 1 {
+		t.Errorf("Expected 1, received %+v", reply)
+	}
+	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfileIDsCount,
+		&utils.TenantWithOpts{Tenant: "cgrates.org"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != 1 {
+		t.Errorf("Expected 1, received %+v", reply)
+	}
+}
+
+func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
+	rPrf := &engine.RateProfile{
+		ID:               "SpecialRate",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		ConnectFee:       0.1,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*engine.IntervalRate{
+					{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.12,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Minute),
+					},
+					{
+						IntervalStart: time.Duration(1 * time.Minute),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_WEEKEND": {
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationTimes: "* * * * 0,6",
+				IntervalRates: []*engine.IntervalRate{
+					{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+			"RT_CHRISTMAS": {
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
+				IntervalRates: []*engine.IntervalRate{
+					{
+						IntervalStart: time.Duration(0 * time.Second),
+						Value:         0.06,
+						Unit:          time.Duration(1 * time.Minute),
+						Increment:     time.Duration(1 * time.Second),
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfileRates, rPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	rPrf.Tenant = "cgrates.org"
+	var rply *engine.RateProfile
+	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "SpecialRate"}},
+		&rply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rPrf, rply) {
+		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(rPrf), utils.ToJSON(rply))
+	}
+}
+
+func testV1RatePrfRemoveRateProfileRatesWithoutTenant(t *testing.T) {
+	var reply string
+	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfileRates,
+		&RemoveRPrfRates{ID: "SpecialRate"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
 	}
 }
