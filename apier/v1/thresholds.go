@@ -62,10 +62,14 @@ func (tSv1 *ThresholdSv1) ProcessEvent(args *engine.ThresholdsArgsProcessEvent, 
 
 // GetThresholdProfile returns a Threshold Profile
 func (apierSv1 *APIerSv1) GetThresholdProfile(arg *utils.TenantID, reply *engine.ThresholdProfile) (err error) {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if th, err := apierSv1.DataManager.GetThresholdProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if th, err := apierSv1.DataManager.GetThresholdProfile(tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *th
@@ -75,10 +79,11 @@ func (apierSv1 *APIerSv1) GetThresholdProfile(arg *utils.TenantID, reply *engine
 
 // GetThresholdProfileIDs returns list of thresholdProfile IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetThresholdProfileIDs(args *utils.PaginatorWithTenant, thPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ThresholdProfilePrefix + args.Tenant + ":"
+	prfx := utils.ThresholdProfilePrefix + tnt + ":"
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -97,11 +102,12 @@ func (apierSv1 *APIerSv1) GetThresholdProfileIDs(args *utils.PaginatorWithTenant
 // GetThresholdProfileIDsCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
 // returns ErrNotFound in case of 0 ThresholdProfileIDs
 func (apierSv1 *APIerSv1) GetThresholdProfileIDsCount(args *utils.TenantWithOpts, reply *int) (err error) {
-	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var keys []string
-	prfx := utils.ThresholdProfilePrefix + args.Tenant + ":"
+	prfx := utils.ThresholdProfilePrefix + tnt + ":"
 	if keys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
 		return err
 	}
@@ -114,8 +120,11 @@ func (apierSv1 *APIerSv1) GetThresholdProfileIDsCount(args *utils.TenantWithOpts
 
 // SetThresholdProfile alters/creates a ThresholdProfile
 func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(args.ThresholdProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args.ThresholdProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.DataManager.SetThresholdProfile(args.ThresholdProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
@@ -146,18 +155,22 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, r
 
 // Remove a specific Threshold Profile
 func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.DataManager.RemoveThresholdProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if err := apierSv1.DataManager.RemoveThresholdProfile(tnt, args.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
-	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheThresholdProfiles,
-		args.TenantID(), nil, nil, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheThresholdProfiles,
+		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.DataManager.RemoveThreshold(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+	if err := apierSv1.DataManager.RemoveThreshold(tnt, args.ID, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheThresholdProfiles and CacheThresholds and store it in database
@@ -167,8 +180,8 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Threshold
-	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheThresholds,
-		args.TenantID(), nil, nil, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheThresholds,
+		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
