@@ -27,10 +27,14 @@ import (
 
 // GetStatQueueProfile returns a StatQueue profile
 func (apierSv1 *APIerSv1) GetStatQueueProfile(arg *utils.TenantID, reply *engine.StatQueueProfile) (err error) {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if sCfg, err := apierSv1.DataManager.GetStatQueueProfile(arg.Tenant, arg.ID,
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if sCfg, err := apierSv1.DataManager.GetStatQueueProfile(tnt, arg.ID,
 		true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
@@ -41,10 +45,11 @@ func (apierSv1 *APIerSv1) GetStatQueueProfile(arg *utils.TenantID, reply *engine
 
 // GetStatQueueProfileIDs returns list of statQueueProfile IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetStatQueueProfileIDs(args *utils.PaginatorWithTenant, stsPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.StatQueueProfilePrefix + args.Tenant + ":"
+	prfx := utils.StatQueueProfilePrefix + tnt + ":"
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -62,8 +67,11 @@ func (apierSv1 *APIerSv1) GetStatQueueProfileIDs(args *utils.PaginatorWithTenant
 
 // SetStatQueueProfile alters/creates a StatQueueProfile
 func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, reply *string) (err error) {
-	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err = apierSv1.DataManager.SetStatQueueProfile(arg.StatQueueProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
@@ -99,18 +107,22 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 
 // Remove a specific stat configuration
 func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.DataManager.RemoveStatQueueProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if err := apierSv1.DataManager.RemoveStatQueueProfile(tnt, args.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheStatQueueProfiles,
-		args.TenantID(), nil, nil, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheStatQueueProfiles,
+		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.DataManager.RemoveStatQueue(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+	if err := apierSv1.DataManager.RemoveStatQueue(tnt, args.ID, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
@@ -120,8 +132,8 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueues
-	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheStatQueues,
-		args.TenantID(), nil, nil, args.Opts); err != nil {
+	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheStatQueues,
+		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

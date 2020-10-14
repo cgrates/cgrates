@@ -81,6 +81,8 @@ var (
 		testV1STSProcessMetricsWithFilter,
 		testV1STSProcessStaticMetrics,
 		testV1STSProcessStatWithThreshold,
+		testV1STSGetStatQueueProfileWithoutTenant,
+		testV1STSRemStatQueueProfileWithoutTenant,
 		//testV1STSProcessCDRStat,
 		testV1STSOverWriteStats,
 		testV1STSProcessStatWithThreshold2,
@@ -313,6 +315,13 @@ func testV1STSProcessEvent(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %+v", expectedFloatMetrics2, floatMetrics2)
 	}
 
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "Stats1"}}, &floatMetrics2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedFloatMetrics2, floatMetrics2) {
+		t.Errorf("expecting: %+v, received reply: %+v", expectedFloatMetrics2, floatMetrics2)
+	}
+
 }
 
 func testV1STSGetStatsAfterRestart(t *testing.T) {
@@ -434,6 +443,11 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 func testV1STSGetStatQueueProfileIDs(t *testing.T) {
 	expected := []string{"Stats1", "TEST_PROFILE1"}
 	var result []string
+	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
 	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
@@ -1168,5 +1182,65 @@ func BenchmarkSTSV1GetQueueStringMetrics(b *testing.B) {
 			&metrics); err != nil {
 			b.Error(err)
 		}
+	}
+}
+
+func testV1STSGetStatQueueProfileWithoutTenant(t *testing.T) {
+	statConfig := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			ID:        "TEST_PROFILE10",
+			FilterIDs: []string{"FLTR_1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"Val1", "Val2"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	var result string
+	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	statConfig.Tenant = "cgrates.org"
+	var reply *engine.StatQueueProfile
+	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfile,
+		&utils.TenantID{ID: "TEST_PROFILE10"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, statConfig.StatQueueProfile) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
+	}
+}
+
+func testV1STSRemStatQueueProfileWithoutTenant(t *testing.T) {
+	var reply string
+	if err := stsV1Rpc.Call(utils.APIerSv1RemoveStatQueueProfile,
+		&utils.TenantIDWithCache{ID: "TEST_PROFILE10"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var result *engine.StatQueueProfile
+	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfile,
+		&utils.TenantID{ID: "TEST_PROFILE10"},
+		&result); err == nil || utils.ErrNotFound.Error() != err.Error() {
+		t.Error(err)
 	}
 }
