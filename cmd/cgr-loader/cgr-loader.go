@@ -59,9 +59,9 @@ var (
 		"The name of redis sentinel")
 	dbRedisCluster = cgrLoaderFlags.Bool("redis_cluster", false,
 		"Is the redis datadb a cluster")
-	dbRedisClusterSync = cgrLoaderFlags.String("cluster_sync", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterSyncCfg]),
+	dbRedisClusterSync = cgrLoaderFlags.String("redis_cluster_sync", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg]),
 		"The sync interval for the redis cluster")
-	dbRedisClusterDownDelay = cgrLoaderFlags.String("cluster_ondown_delay", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]),
+	dbRedisClusterDownDelay = cgrLoaderFlags.String("redis_cluster_ondown_delay", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
 	dbQueryTimeout = cgrLoaderFlags.String("query_timeout", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
 		"The timeout for queries")
@@ -152,11 +152,11 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	if *dbRedisCluster != rdsCls {
 		ldrCfg.DataDbCfg().Opts[utils.RedisClusterCfg] = *dbRedisCluster
 	}
-	if *dbRedisClusterSync != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterSyncCfg]) {
-		ldrCfg.DataDbCfg().Opts[utils.ClusterSyncCfg] = *dbRedisClusterSync
+	if *dbRedisClusterSync != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg]) {
+		ldrCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] = *dbRedisClusterSync
 	}
-	if *dbRedisClusterDownDelay != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]) {
-		ldrCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
+	if *dbRedisClusterDownDelay != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]) {
+		ldrCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
 	}
 	if *dbQueryTimeout != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]) {
 		ldrCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg] = *dbQueryTimeout

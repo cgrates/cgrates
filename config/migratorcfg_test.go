@@ -40,8 +40,8 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		Out_storDB_user:     utils.StringPointer(utils.CGRATES),
 		Out_storDB_password: utils.StringPointer(utils.EmptyString),
 		Out_dataDB_opts: map[string]interface{}{
-			utils.RedisClusterCfg: true,
-			utils.ClusterSyncCfg:  "10s",
+			utils.RedisClusterCfg:     true,
+			utils.RedisClusterSyncCfg: "10s",
 		},
 		Out_storDB_opts: map[string]interface{}{
 			utils.RedisClusterCfg: true,
@@ -62,10 +62,10 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		OutStorDBUser:     utils.CGRATES,
 		OutStorDBPassword: utils.EmptyString,
 		OutDataDBOpts: map[string]interface{}{
-			utils.RedisSentinelNameCfg:  utils.EmptyString,
-			utils.RedisClusterCfg:       true,
-			utils.ClusterSyncCfg:        "10s",
-			utils.ClusterOnDownDelayCfg: "0",
+			utils.RedisSentinelNameCfg:       utils.EmptyString,
+			utils.RedisClusterCfg:            true,
+			utils.RedisClusterSyncCfg:        "10s",
+			utils.RedisClusterOnDownDelayCfg: "0",
 		},
 		OutStorDBOpts: map[string]interface{}{
 			utils.RedisClusterCfg: true,
@@ -91,8 +91,8 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
         "users_filters":["users","filters","Account"],
         "out_datadb_opts":{	
 		   "redis_cluster": true,					
-		   "cluster_sync": "2s",					
-		   "cluster_ondown_delay": "1",	
+		   "redis_cluster_sync": "2s",					
+		   "redis_cluster_ondown_delay": "1",	
 	    },
 	},
 }`
@@ -113,10 +113,10 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		utils.UsersFiltersCfg:      []string{"users", "filters", "Account"},
 		utils.OutStorDBOptsCfg:     map[string]interface{}{},
 		utils.OutDataDBOptsCfg: map[string]interface{}{
-			utils.RedisSentinelNameCfg:  "",
-			utils.RedisClusterCfg:       true,
-			utils.ClusterSyncCfg:        "2s",
-			utils.ClusterOnDownDelayCfg: "1",
+			utils.RedisSentinelNameCfg:       "",
+			utils.RedisClusterCfg:            true,
+			utils.RedisClusterSyncCfg:        "2s",
+			utils.RedisClusterOnDownDelayCfg: "1",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -152,10 +152,10 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 		utils.UsersFiltersCfg:      []string{"users", "filters", "Account"},
 		utils.OutStorDBOptsCfg:     map[string]interface{}{},
 		utils.OutDataDBOptsCfg: map[string]interface{}{
-			utils.RedisSentinelNameCfg:  "out_datadb_redis_sentinel",
-			utils.RedisClusterCfg:       false,
-			utils.ClusterSyncCfg:        "5s",
-			utils.ClusterOnDownDelayCfg: "0",
+			utils.RedisSentinelNameCfg:       "out_datadb_redis_sentinel",
+			utils.RedisClusterCfg:            false,
+			utils.RedisClusterSyncCfg:        "5s",
+			utils.RedisClusterOnDownDelayCfg: "0",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -186,10 +186,10 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 		utils.UsersFiltersCfg:      []string{},
 		utils.OutStorDBOptsCfg:     map[string]interface{}{},
 		utils.OutDataDBOptsCfg: map[string]interface{}{
-			utils.RedisSentinelNameCfg:  "",
-			utils.RedisClusterCfg:       false,
-			utils.ClusterSyncCfg:        "5s",
-			utils.ClusterOnDownDelayCfg: "0",
+			utils.RedisSentinelNameCfg:       "",
+			utils.RedisClusterCfg:            false,
+			utils.RedisClusterSyncCfg:        "5s",
+			utils.RedisClusterOnDownDelayCfg: "0",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

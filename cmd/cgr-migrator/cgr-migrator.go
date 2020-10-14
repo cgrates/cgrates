@@ -67,9 +67,9 @@ var (
 		"the name of redis sentinel")
 	dbRedisCluster = cgrMigratorFlags.Bool("redis_cluster", false,
 		"Is the redis datadb a cluster")
-	dbRedisClusterSync = cgrMigratorFlags.String("cluster_sync", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterSyncCfg]),
+	dbRedisClusterSync = cgrMigratorFlags.String("redis_cluster_sync", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg]),
 		"The sync interval for the redis cluster")
-	dbRedisClusterDownDelay = cgrMigratorFlags.String("cluster_ondown_delay", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]),
+	dbRedisClusterDownDelay = cgrMigratorFlags.String("redis_cluster_ondown_delay", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
 	dbQueryTimeout = cgrMigratorFlags.String("query_timeout", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
 		"The timeout for queries")
@@ -172,11 +172,11 @@ func main() {
 	if *dbRedisCluster != rdsCls {
 		mgrCfg.DataDbCfg().Opts[utils.RedisClusterCfg] = *dbRedisCluster
 	}
-	if *dbRedisClusterSync != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterSyncCfg]) {
-		mgrCfg.DataDbCfg().Opts[utils.ClusterSyncCfg] = *dbRedisClusterSync
+	if *dbRedisClusterSync != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg]) {
+		mgrCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] = *dbRedisClusterSync
 	}
-	if *dbRedisClusterDownDelay != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]) {
-		mgrCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
+	if *dbRedisClusterDownDelay != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]) {
+		mgrCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
 	}
 	if *dbQueryTimeout != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]) {
 		mgrCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg] = *dbQueryTimeout

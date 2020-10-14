@@ -57,9 +57,9 @@ var (
 	redisSentinel  = cgrTesterFlags.String("redis_sentinel", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisSentinelNameCfg]), "The name of redis sentinel")
 	dbRedisCluster = cgrTesterFlags.Bool("redis_cluster", false,
 		"Is the redis datadb a cluster")
-	dbRedisClusterSync = cgrTesterFlags.String("cluster_sync", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.ClusterSyncCfg]),
+	dbRedisClusterSync = cgrTesterFlags.String("redis_cluster_sync", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterSyncCfg]),
 		"The sync interval for the redis cluster")
-	dbRedisClusterDownDelay = cgrTesterFlags.String("cluster_ondown_delay", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]),
+	dbRedisClusterDownDelay = cgrTesterFlags.String("redis_cluster_ondown_delay", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
 	dbQueryTimeout = cgrTesterFlags.String("query_timeout", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
 		"The timeout for queries")
@@ -208,11 +208,11 @@ func main() {
 	if *dbRedisCluster != rdsCls {
 		tstCfg.DataDbCfg().Opts[utils.RedisClusterCfg] = *dbRedisCluster
 	}
-	if *dbRedisClusterSync != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.ClusterSyncCfg]) {
-		tstCfg.DataDbCfg().Opts[utils.ClusterSyncCfg] = *dbRedisClusterSync
+	if *dbRedisClusterSync != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterSyncCfg]) {
+		tstCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] = *dbRedisClusterSync
 	}
-	if *dbRedisClusterDownDelay != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg]) {
-		tstCfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
+	if *dbRedisClusterDownDelay != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]) {
+		tstCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
 	}
 	if *dbQueryTimeout != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.QueryTimeoutCfg]) {
 		tstCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg] = *dbQueryTimeout

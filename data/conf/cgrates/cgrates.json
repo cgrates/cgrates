@@ -83,9 +83,10 @@
 // 	"opts":{
 // 		"redis_sentinel": "",					// the name of sentinel when used
 // 		"redis_cluster": false,					// if enabled the datadb will try to connect to the redis cluster
-// 		"cluster_sync": "5s",					// the sync interval for the redis cluster
-// 		"cluster_ondown_delay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+// 		"redis_cluster_sync": "5s",				// the sync interval for the redis cluster
+// 		"redis_cluster_ondown_delay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
 // 		"query_timeout":"10s",
+// 		"redis_tls": false,						// if true it will use a tls connection and use the client certificate, key and ca_certificate for tls connection
 // 	}
 // },
 
@@ -222,6 +223,7 @@
 // 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// RPC connections caching
 // 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// User cache
 // 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// stirShaken cache keys
+// 		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "replicate": false}, 
 		
 // 		// only for *internal database
 // 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for version storing
@@ -316,6 +318,7 @@
 // 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 // 			"source_path": "/var/spool/cgrates/ers/in",			// read data from this path
 // 			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
+// 			"opts": {},
 // 			"xml_root_path": "",								// path towards one event in case of XML CDRs
 // 			"tenant": "",										// tenant used by import
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -351,6 +354,7 @@
 // 			"id": "*default",									// identifier of the EventReader profile
 // 			"type": "*none",									// exporter type 
 // 			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
+// 			"opts": {},											// extra options for exporter
 // 			"tenant": "",										// tenant used in filterS.Pass
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 // 			"filters": [],										// limit parsing based on the filters
@@ -512,7 +516,10 @@
 
 
 // "attributes": {								// AttributeS config
-// 	"enabled": false,						// starts attribute service: <true|false>.
+// 	"enabled": false,						// starts attribute service: <true|false>
+// 	"stats_conns": [],						// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+// 	"resources_conns": [],					// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
+// 	"apiers_conns": [],						// connections to ApierS, empty to disable: <""|*internal|$rpc_conns_id>
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -844,8 +851,8 @@
 // 	"out_datadb_opts":{
 // 		"redis_sentinel": "",					
 // 		"redis_cluster": false,					
-// 		"cluster_sync": "5s",					
-// 		"cluster_ondown_delay": "0",	
+// 		"redis_cluster_sync": "5s",					
+// 		"redis_cluster_ondown_delay": "0",	
 // 	},
 // 	"out_stordb_opts":{},
 // },
@@ -880,6 +887,7 @@
 // 	"caches_conns":["*internal"],
 // 	"scheduler_conns": [],					// connections to SchedulerS for reloads
 // 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
+// 	"ees_conns": [],						// connections to EEs
 // },
 
 
@@ -893,9 +901,10 @@
 // 	"rate_indexed_selects": true,			// enable profile matching exclusively on indexes
 // 	//"rate_string_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"rate_prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
-// 	"rate_suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // },
+
 
 // "sip_agent": {							// SIP Agents, only used for redirections
 // 	"enabled": false,					// enables the SIP agent: <true|false>
@@ -907,6 +916,7 @@
 // 	"request_processors": [				// request processors to be applied to SIP messages
 // 	],
 // },
+
 
 // "templates": {
 // 	"*err": [
@@ -967,6 +977,19 @@
 // 			{"tag": "Request", "path": "*rep.Request", "type": "*constant",
 // 				"value": "SIP/2.0 500 Internal Server Error", "mandatory": true},
 // 	],
+// },
+
+
+// "configs": {
+// 	"enabled": false,
+// 	"url": "/configs/",										// configs url 
+// 	"root_dir": "/var/spool/cgrates/configs",				// root directory in case of calling /configs request
+// },
+
+
+// "apiban": {
+// 	"enabled": false,
+// 	"keys": [],
 // },
 
 }

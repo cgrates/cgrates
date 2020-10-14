@@ -21,7 +21,7 @@
 	"db_name": "10", 						// data_db database name to connect to
 	"opts": {
 		"redis_cluster": true,
-		"cluster_sync": "100ms",				// the sync interval for the redis cluster
+		"redis_cluster_sync": "100ms",				// the sync interval for the redis cluster
 	},
 },
 

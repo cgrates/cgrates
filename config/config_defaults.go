@@ -104,9 +104,10 @@ const CGRATES_CFG_JSON = `
 	"opts":{
 		"redis_sentinel": "",					// the name of sentinel when used
 		"redis_cluster": false,					// if enabled the datadb will try to connect to the redis cluster
-		"cluster_sync": "5s",					// the sync interval for the redis cluster
-		"cluster_ondown_delay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"redis_cluster_sync": "5s",				// the sync interval for the redis cluster
+		"redis_cluster_ondown_delay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
 		"query_timeout":"10s",
+		"redis_tls": false,						// if true it will use a tls connection and use the client certificate, key and ca_certificate for tls connection
 	}
 },
 
@@ -871,8 +872,8 @@ const CGRATES_CFG_JSON = `
 	"out_datadb_opts":{
 		"redis_sentinel": "",					
 		"redis_cluster": false,					
-		"cluster_sync": "5s",					
-		"cluster_ondown_delay": "0",	
+		"redis_cluster_sync": "5s",					
+		"redis_cluster_ondown_delay": "0",	
 	},
 	"out_stordb_opts":{},
 },
