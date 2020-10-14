@@ -385,7 +385,7 @@ func TestRoutesCache(t *testing.T) {
 }
 
 func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
-	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].CGREventWithOpts, true)
+	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREventWithOpts, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -393,7 +393,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].CGREventWithOpts, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREventWithOpts, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -401,7 +401,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].CGREventWithOpts, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREventWithOpts, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -425,7 +425,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 		},
 	}
-	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[0])
+	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -462,7 +462,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		},
 	}
 
-	sprf, err = routeService.sortedRoutesForEvent(argsGetRoutes[1])
+	sprf, err = routeService.sortedRoutesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -485,7 +485,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		},
 	}
 
-	sprf, err = routeService.sortedRoutesForEvent(argsGetRoutes[2])
+	sprf, err = routeService.sortedRoutesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -519,7 +519,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	argsGetRoutes[1].Paginator = utils.Paginator{
 		Limit: utils.IntPointer(2),
 	}
-	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1])
+	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -546,7 +546,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 	argsGetRoutes[1].Paginator = utils.Paginator{
 		Offset: utils.IntPointer(2),
 	}
-	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1])
+	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -574,7 +574,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 		Limit:  utils.IntPointer(1),
 		Offset: utils.IntPointer(1),
 	}
-	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1])
+	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -635,7 +635,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 
 func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
-	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].CGREventWithOpts, true)
+	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREventWithOpts, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -643,7 +643,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].CGREventWithOpts, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREventWithOpts, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -651,7 +651,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].CGREventWithOpts, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREventWithOpts, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

@@ -197,6 +197,18 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if (*reply)[0].ID != "ResGroup2" {
 		t.Errorf("Expecting: %+v, received: %+v", "ResGroup2", (*reply)[0].ID)
 	}
+
+	args.CGREvent.Tenant = utils.EmptyString
+	args.CGREvent.ID = utils.UUIDSha1Prefix()
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
+		t.Error(err)
+	}
+	if len(*reply) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v", 1, len(*reply))
+	}
+	if (*reply)[0].ID != "ResGroup2" {
+		t.Errorf("Expecting: %+v, received: %+v", "ResGroup2", (*reply)[0].ID)
+	}
 }
 
 func testV1RsTTL0(t *testing.T) {
@@ -313,6 +325,12 @@ func testV1RsTTL0(t *testing.T) {
 			},
 		},
 	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
+		argsRU, &releaseReply); err != nil {
+		t.Error(err)
+	}
+
+	argsRU.Tenant = utils.EmptyString
 	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
 		argsRU, &releaseReply); err != nil {
 		t.Error(err)

@@ -378,9 +378,13 @@ func testAttributeSProcessEvent(t *testing.T) {
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Error(err)
-	} else if sort.Strings(eRply.AlteredFields); !reflect.DeepEqual(eRply, &rplyEv) { // second for reversed order of attributes
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	} else {
+		sort.Strings(eRply.AlteredFields)
+		sort.Strings(rplyEv.AlteredFields)
+		if !reflect.DeepEqual(eRply, &rplyEv) { // second for reversed order of attributes
+			t.Errorf("Expecting: %s, received: %s",
+				utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+		}
 	}
 
 	ev.Tenant = ""
@@ -389,9 +393,13 @@ func testAttributeSProcessEvent(t *testing.T) {
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Error(err)
-	} else if sort.Strings(eRply.AlteredFields); !reflect.DeepEqual(eRply, &rplyEv) { // second for reversed order of attributes
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	} else {
+		sort.Strings(eRply.AlteredFields)
+		sort.Strings(rplyEv.AlteredFields)
+		if !reflect.DeepEqual(eRply, &rplyEv) { // second for reversed order of attributes
+			t.Errorf("Expecting: %s, received: %s",
+				utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+		}
 	}
 }
 
