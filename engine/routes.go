@@ -153,7 +153,7 @@ func (rpS *RouteService) Shutdown() error {
 }
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREventWithOpts, singleResult bool) (matchingRPrf []*RouteProfile, err error) {
+func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGREventWithOpts, singleResult bool) (matchingRPrf []*RouteProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.Opts,
@@ -162,7 +162,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREventWithOpt
 		rpS.cgrcfg.RouteSCfg().StringIndexedFields,
 		rpS.cgrcfg.RouteSCfg().PrefixIndexedFields,
 		rpS.cgrcfg.RouteSCfg().SuffixIndexedFields,
-		rpS.dm, utils.CacheRouteFilterIndexes, ev.Tenant,
+		rpS.dm, utils.CacheRouteFilterIndexes, tnt,
 		rpS.cgrcfg.RouteSCfg().IndexedSelects,
 		rpS.cgrcfg.RouteSCfg().NestedFields,
 	)
@@ -175,7 +175,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREventWithOpt
 		matchingRPrf = make([]*RouteProfile, 0, len(rPrfIDs))
 	}
 	for lpID := range rPrfIDs {
-		rPrf, err := rpS.dm.GetRouteProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
+		rPrf, err := rpS.dm.GetRouteProfile(tnt, lpID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -186,7 +186,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ev *utils.CGREventWithOpt
 			!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := rpS.filterS.Pass(ev.Tenant, rPrf.FilterIDs,
+		if pass, err := rpS.filterS.Pass(tnt, rPrf.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -519,12 +519,12 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 
 // sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
-func (rpS *RouteService) sortedRoutesForEvent(args *ArgsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	if _, has := args.CGREvent.Event[utils.Usage]; !has {
 		args.CGREvent.Event[utils.Usage] = time.Duration(time.Minute) // make sure we have default set for Usage
 	}
 	var rPrfs []*RouteProfile
-	if rPrfs, err = rpS.matchingRouteProfilesForEvent(args.CGREventWithOpts, true); err != nil {
+	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args.CGREventWithOpts, true); err != nil {
 		return
 	}
 	rPrfl := rPrfs[0]
@@ -541,7 +541,7 @@ func (rpS *RouteService) sortedRoutesForEvent(args *ArgsGetRoutes) (sortedRoutes
 	// apply filters for event
 
 	for _, route := range rPrfl.Routes {
-		pass, lazyCheckRules, err := rpS.filterS.LazyPass(args.CGREvent.Tenant, route.FilterIDs,
+		pass, lazyCheckRules, err := rpS.filterS.LazyPass(tnt, route.FilterIDs,
 			nM, []string{utils.DynamicDataPrefix + utils.MetaReq, utils.DynamicDataPrefix + utils.MetaAccounts,
 				utils.DynamicDataPrefix + utils.MetaResources, utils.DynamicDataPrefix + utils.MetaStats})
 		if err != nil {
@@ -642,10 +642,14 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = rpS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	if len(rpS.cgrcfg.RouteSCfg().AttributeSConns) != 0 {
 		if args.Opts == nil {
@@ -674,7 +678,7 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 			return utils.NewErrAttributeS(err)
 		}
 	}
-	sSps, err := rpS.sortedRoutesForEvent(args)
+	sSps, err := rpS.sortedRoutesForEvent(tnt, args)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -687,12 +691,16 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 
 // V1GetRouteProfilesForEvent returns the list of valid route profiles
 func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREventWithOpts, reply *[]*RouteProfile) (err error) {
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	sPs, err := rpS.matchingRouteProfilesForEvent(args, false)
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = rpS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	sPs, err := rpS.matchingRouteProfilesForEvent(tnt, args, false)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
