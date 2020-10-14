@@ -194,6 +194,15 @@ func testV1RouteGetWeightRoutes(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
 	}
+
+	ev.CGREvent.Tenant = utils.EmptyString
+	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
 }
 
 func testV1RouteGetLeastCostRoutes(t *testing.T) {
@@ -1044,7 +1053,7 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 				utils.Account:     "1000",
 				utils.Destination: "1001",
 				utils.SetupTime:   "*now",
-				"Subject":         "TEST",
+				utils.Subject:     "TEST",
 			},
 		},
 	}
@@ -1100,19 +1109,21 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 	if !reflect.DeepEqual(expected, *supProf[0]) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))
 	}
-	/*
-		ev.Tenant = utils.EmptyString
-		ev.ID = "randomID"
-		expected.ID = "randomID"
-		if err := splSv1Rpc.Call(utils.RouteSv1GetRouteProfilesForEvent,
-			ev, &supProf); err != nil {
-			t.Fatal(err)
-		}
-		if !reflect.DeepEqual(expected, *supProf[0]) {
-			t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))
-		}
 
-	*/
+	ev.CGREvent.Tenant = utils.EmptyString
+	if err := splSv1Rpc.Call(utils.RouteSv1GetRouteProfilesForEvent,
+		ev, &supProf); err != nil {
+		t.Fatal(err)
+	}
+	sort.Slice(expected.Routes, func(i, j int) bool {
+		return expected.Routes[i].Weight < expected.Routes[j].Weight
+	})
+	sort.Slice(supProf[0].Routes, func(i, j int) bool {
+		return supProf[0].Routes[i].Weight < supProf[0].Routes[j].Weight
+	})
+	if !reflect.DeepEqual(&expected, supProf[0]) {
+		t.Errorf("Expected: %s \n,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf[0]))
+	}
 }
 
 // Scenario: We create two rating plans RP_MOBILE and RP_LOCAL
