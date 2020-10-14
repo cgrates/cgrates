@@ -108,7 +108,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [EEs] Empty fields in exporter config will export the full event for the exporters that use json format
   * [DynamicDP] Add support for *libphonenumber prefix
   * [Templates] Added new data converter: *unixtime
-  * [ActionsS] Add prefix *req to cdrLog action to uniformize
+  * [ActionsS] Add prefix *acnt and *act to cdrLog action
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

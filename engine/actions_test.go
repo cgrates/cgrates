@@ -2642,7 +2642,7 @@ func TestCdrLogAction(t *testing.T) {
 	a := &Action{
 		Id:              "CDRLog1",
 		ActionType:      utils.CDRLOG,
-		ExtraParameters: "{\"BalanceID\":\"~*req.BalanceID\",\"ActionID\":\"~*req.ActionID\",\"BalanceValue\":\"~*req.BalanceValue\"}",
+		ExtraParameters: "{\"BalanceID\":\"~*acnt.BalanceID\",\"ActionID\":\"~*act.ActionID\",\"BalanceValue\":\"~*acnt.BalanceValue\"}",
 		Weight:          50,
 	}
 	acs := Actions{
