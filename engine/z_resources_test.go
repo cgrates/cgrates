@@ -404,7 +404,7 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 		},
 		Units: 20,
 	}
-	if err := resService.V1AuthorizeResources(argsMissingTenant, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Tenant Event]" {
+	if err := resService.V1AuthorizeResources(argsMissingTenant, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
 		t.Error(err.Error())
 	}
 	if err := resService.V1AuthorizeResources(argsMissingUsageID, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
@@ -500,7 +500,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 }
 
 func TestResourceMatchingResourcesForEvent(t *testing.T) {
-	mres, err := resService.matchingResourcesForEvent(resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
 		"TestResourceMatchingResourcesForEvent1", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -513,7 +513,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
 	}
 
-	mres, err = resService.matchingResourcesForEvent(resEvs[1],
+	mres, err = resService.matchingResourcesForEvent(resEvs[1].Tenant, resEvs[1],
 		"TestResourceMatchingResourcesForEvent2", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -526,7 +526,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].rPrf, mres[0].rPrf)
 	}
 
-	mres, err = resService.matchingResourcesForEvent(resEvs[2],
+	mres, err = resService.matchingResourcesForEvent(resEvs[2].Tenant, resEvs[2],
 		"TestResourceMatchingResourcesForEvent3", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -551,7 +551,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	mres, err := resService.matchingResourcesForEvent(resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
 		"TestResourceUsageTTLCase1", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -578,7 +578,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	mres, err := resService.matchingResourcesForEvent(resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
 		"TestResourceUsageTTLCase2", nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -605,7 +605,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	mres, err := resService.matchingResourcesForEvent(resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
 		"TestResourceUsageTTLCase3", utils.DurationPointer(time.Duration(0)))
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -632,7 +632,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	mres, err := resService.matchingResourcesForEvent(resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
 		"TestResourceUsageTTLCase4", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -650,7 +650,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 
 func TestResourceMatchWithIndexFalse(t *testing.T) {
 	resService.cgrcfg.ResourceSCfg().IndexedSelects = false
-	mres, err := resService.matchingResourcesForEvent(resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
 		"TestResourceMatchWithIndexFalse1", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -663,7 +663,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
 	}
 
-	mres, err = resService.matchingResourcesForEvent(resEvs[1],
+	mres, err = resService.matchingResourcesForEvent(resEvs[1].Tenant, resEvs[1],
 		"TestResourceMatchWithIndexFalse2", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -676,7 +676,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].rPrf, mres[0].rPrf)
 	}
 
-	mres, err = resService.matchingResourcesForEvent(resEvs[2],
+	mres, err = resService.matchingResourcesForEvent(resEvs[2].Tenant, resEvs[2],
 		"TestResourceMatchWithIndexFalse3", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -783,7 +783,7 @@ func TestResourceCaching(t *testing.T) {
 		},
 	}
 
-	mres, err := resService.matchingResourcesForEvent(ev,
+	mres, err := resService.matchingResourcesForEvent(ev.Tenant, ev,
 		"TestResourceCaching", nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)

@@ -319,6 +319,13 @@ func testInternalRemoteITGetResource(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expectedResources) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedResources), utils.ToJSON(reply))
 	}
+
+	if err := internalRPC.Call(utils.ResourceSv1GetResource,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "ResGroup1"}}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expectedResources) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedResources), utils.ToJSON(reply))
+	}
 }
 
 func testInternalRemoteITGetResourceProfile(t *testing.T) {

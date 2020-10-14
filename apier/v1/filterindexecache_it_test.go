@@ -1333,6 +1333,17 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 		&argsRU, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+
+	argsRU.Tenant = utils.EmptyString
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
+		&argsRU, &reply); err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
 }
 func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	filter = &FilterWithCache{
