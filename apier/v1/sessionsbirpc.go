@@ -67,7 +67,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 
 func (ssv1 *SessionSv1) BiRPCv1AuthorizeEvent(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
 	rply *sessions.V1AuthorizeReply) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -78,7 +78,7 @@ func (ssv1 *SessionSv1) BiRPCv1AuthorizeEvent(clnt *rpc2.Client, args *sessions.
 
 func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
 	rply *sessions.V1AuthorizeReplyWithDigest) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -89,7 +89,7 @@ func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(clnt *rpc2.Client, args 
 
 func (ssv1 *SessionSv1) BiRPCv1InitiateSession(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
 	rply *sessions.V1InitSessionReply) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -100,7 +100,7 @@ func (ssv1 *SessionSv1) BiRPCv1InitiateSession(clnt *rpc2.Client, args *sessions
 
 func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
 	rply *sessions.V1InitReplyWithDigest) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -111,7 +111,7 @@ func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(clnt *rpc2.Client, args
 
 func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V1UpdateSessionArgs,
 	rply *sessions.V1UpdateSessionReply) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -122,7 +122,7 @@ func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V
 
 func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.TenantWithOpts,
 	rply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -133,7 +133,7 @@ func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.Tenan
 
 func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *sessions.V1TerminateSessionArgs,
 	rply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -144,7 +144,7 @@ func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *session
 
 func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREventWithOpts,
 	rply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -155,7 +155,7 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREve
 
 func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt *rpc2.Client, args *sessions.V1ProcessMessageArgs,
 	rply *sessions.V1ProcessMessageReply) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -166,7 +166,7 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt *rpc2.Client, args *sessions.
 
 func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1ProcessEventArgs,
 	rply *sessions.V1ProcessEventReply) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -177,7 +177,7 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1
 
 func (ssv1 *SessionSv1) BiRPCv1GetCost(clnt *rpc2.Client, args *sessions.V1ProcessEventArgs,
 	rply *sessions.V1GetCostReply) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -188,7 +188,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetCost(clnt *rpc2.Client, args *sessions.V1Proce
 
 func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
 	rply *[]*sessions.ExternalSession) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -199,7 +199,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.
 
 func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
 	rply *int) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -210,7 +210,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *u
 
 func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
 	rply *[]*sessions.ExternalSession) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -221,7 +221,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils
 
 func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
 	rply *int) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -232,7 +232,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args *
 
 func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args *utils.SessionFilter,
 	rply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -243,7 +243,7 @@ func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args *utils.Se
 
 func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, args string,
 	rply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -254,7 +254,7 @@ func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, arg
 
 func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREventWithOpts,
 	reply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -265,7 +265,7 @@ func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREventWithOpts
 
 func (ssv1 *SessionSv1) BiRPCv1ReplicateSessions(clnt *rpc2.Client,
 	args sessions.ArgsReplicateSessions, reply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -276,7 +276,7 @@ func (ssv1 *SessionSv1) BiRPCv1ReplicateSessions(clnt *rpc2.Client,
 
 func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt *rpc2.Client,
 	args *sessions.Session, reply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -287,7 +287,7 @@ func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt *rpc2.Client,
 
 func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
 	args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -298,7 +298,7 @@ func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
 
 func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
 	args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -310,7 +310,7 @@ func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
 // BiRPCV1ReAuthorize sends the RAR for filterd sessions
 func (ssv1 *SessionSv1) BiRPCV1ReAuthorize(clnt *rpc2.Client,
 	args *utils.SessionFilter, reply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -322,7 +322,7 @@ func (ssv1 *SessionSv1) BiRPCV1ReAuthorize(clnt *rpc2.Client,
 // BiRPCV1DisconnectPeer sends the DPR for the OriginHost and OriginRealm
 func (ssv1 *SessionSv1) BiRPCV1DisconnectPeer(clnt *rpc2.Client,
 	args *utils.DPRArgs, reply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -334,7 +334,7 @@ func (ssv1 *SessionSv1) BiRPCV1DisconnectPeer(clnt *rpc2.Client,
 // BiRPCV1STIRAuthenticate checks the identity using STIR/SHAKEN
 func (ssv1 *SessionSv1) BiRPCV1STIRAuthenticate(clnt *rpc2.Client,
 	args *sessions.V1STIRAuthenticateArgs, reply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -346,7 +346,7 @@ func (ssv1 *SessionSv1) BiRPCV1STIRAuthenticate(clnt *rpc2.Client,
 // BiRPCV1STIRIdentity creates the identity for STIR/SHAKEN
 func (ssv1 *SessionSv1) BiRPCV1STIRIdentity(clnt *rpc2.Client,
 	args *sessions.V1STIRIdentityArgs, reply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}
@@ -357,7 +357,7 @@ func (ssv1 *SessionSv1) BiRPCV1STIRIdentity(clnt *rpc2.Client,
 
 func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, arg *utils.DurationArgs,
 	reply *string) (err error) {
-	if utils.ConReqs.IsActive() {
+	if utils.ConReqs.IsLimited() {
 		if err = utils.ConReqs.Allocate(); err != nil {
 			return
 		}

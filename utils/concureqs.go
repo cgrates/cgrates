@@ -44,8 +44,8 @@ func NewConReqs(reqs int, strategy string) *ConcReqs {
 	return cR
 }
 
-// IsActive returns true if the limit is not 0
-func (cR *ConcReqs) IsActive() bool {
+// IsLimited returns true if the limit is not 0
+func (cR *ConcReqs) IsLimited() bool {
 	return ConReqs.limit != 0
 }
 
@@ -78,7 +78,7 @@ func newConcReqsJSONCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
 }
 
 func newConcReqsServerCodec(sc rpc.ServerCodec) rpc.ServerCodec {
-	if !ConReqs.IsActive() {
+	if !ConReqs.IsLimited() {
 		return sc
 	}
 	return &concReqsServerCodec2{sc: sc}

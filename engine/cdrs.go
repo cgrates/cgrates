@@ -129,7 +129,7 @@ func (cdrS *CDRServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
 				return nil, utils.ErrExists
 			}
 			return nil, cdrS.cdrDb.SetSMCost(smCost)
-		}, time.Duration(2*time.Second), lockKey) // FixMe: Possible deadlock with Guard from SMG session close()
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, lockKey) // FixMe: Possible deadlock with Guard from SMG session close()
 		return err
 	}
 	return cdrS.cdrDb.SetSMCost(smCost)
