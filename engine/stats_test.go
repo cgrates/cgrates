@@ -250,7 +250,7 @@ func TestStatQueuesPopulateStatsService(t *testing.T) {
 }
 
 func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
-	msq, err := statService.matchingStatQueuesForEvent(statsEvs[0])
+	msq, err := statService.matchingStatQueuesForEvent(statsEvs[0].Tenant, statsEvs[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -261,7 +261,7 @@ func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[0].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[0].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(statsEvs[1])
+	msq, err = statService.matchingStatQueuesForEvent(statsEvs[1].Tenant, statsEvs[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -272,7 +272,7 @@ func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[1].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[1].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(statsEvs[2])
+	msq, err = statService.matchingStatQueuesForEvent(statsEvs[2].Tenant, statsEvs[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -327,7 +327,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 
 func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	statService.cgrcfg.StatSCfg().IndexedSelects = false
-	msq, err := statService.matchingStatQueuesForEvent(statsEvs[0])
+	msq, err := statService.matchingStatQueuesForEvent(statsEvs[0].Tenant, statsEvs[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -338,7 +338,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[0].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[0].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(statsEvs[1])
+	msq, err = statService.matchingStatQueuesForEvent(statsEvs[1].Tenant, statsEvs[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -349,7 +349,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[1].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[1].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(statsEvs[2])
+	msq, err = statService.matchingStatQueuesForEvent(statsEvs[2].Tenant, statsEvs[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

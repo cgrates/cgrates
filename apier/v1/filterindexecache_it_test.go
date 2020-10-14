@@ -567,6 +567,12 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+
+	tEv.CGREventWithOpts.CGREvent.Tenant = utils.EmptyString
+	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
 }
 
 func testV1FIdxCaSetStatQueueProfile(t *testing.T) {

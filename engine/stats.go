@@ -150,7 +150,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
-func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (sqs StatQueues, err error) {
+func (sS *StatService) matchingStatQueuesForEvent(tnt string, args *StatsArgsProcessEvent) (sqs StatQueues, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.Opts,
@@ -161,7 +161,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 			sS.cgrcfg.StatSCfg().StringIndexedFields,
 			sS.cgrcfg.StatSCfg().PrefixIndexedFields,
 			sS.cgrcfg.StatSCfg().SuffixIndexedFields,
-			sS.dm, utils.CacheStatFilterIndexes, args.Tenant,
+			sS.dm, utils.CacheStatFilterIndexes, tnt,
 			sS.cgrcfg.StatSCfg().IndexedSelects,
 			sS.cgrcfg.StatSCfg().NestedFields,
 		)
@@ -171,7 +171,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 	}
 	sqs = make(StatQueues, 0, len(sqIDs))
 	for sqID := range sqIDs {
-		sqPrfl, err := sS.dm.GetStatQueueProfile(args.Tenant, sqID, true, true, utils.NonTransactional)
+		sqPrfl, err := sS.dm.GetStatQueueProfile(tnt, sqID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -182,7 +182,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 			!sqPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
 			continue
 		}
-		if pass, err := sS.filterS.Pass(args.Tenant, sqPrfl.FilterIDs,
+		if pass, err := sS.filterS.Pass(tnt, sqPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -263,8 +263,8 @@ func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
 
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
-func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs []string, err error) {
-	matchSQs, err := sS.matchingStatQueuesForEvent(args)
+func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (statQueueIDs []string, err error) {
+	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, args)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +287,7 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
-					sq.TenantID(), args.TenantID(), err.Error()))
+					sq.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
 			withErrors = true
 		}
 		if sS.cgrcfg.StatSCfg().StoreInterval != 0 && sq.dirty != nil { // don't save
@@ -352,13 +352,17 @@ func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]stri
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+	}
 	var ids []string
-	if ids, err = sS.processEvent(args); err != nil {
+	if ids, err = sS.processEvent(tnt, args); err != nil {
 		return
 	}
 	*reply = ids
@@ -370,13 +374,17 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+	}
 	var sQs StatQueues
-	if sQs, err = sS.matchingStatQueuesForEvent(args); err != nil {
+	if sQs, err = sS.matchingStatQueuesForEvent(tnt, args); err != nil {
 		return
 	}
 	ids := make([]string, len(sQs))
@@ -389,7 +397,11 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 
 // V1GetStatQueue returns a StatQueue object
 func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithOpts, reply *StatQueue) (err error) {
-	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	sq, err := sS.dm.GetStatQueue(tnt, args.ID, true, true, "")
 	if err != nil {
 		return err
 	}
@@ -399,10 +411,14 @@ func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithOpts, reply *StatQ
 
 // V1GetQueueStringMetrics returns the metrics of a Queue as string values
 func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) (err error) {
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	sq, err := sS.dm.GetStatQueue(tnt, args.ID, true, true, "")
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -421,10 +437,14 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 
 // V1GetQueueFloatMetrics returns the metrics as float64 values
 func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	sq, err := sS.dm.GetStatQueue(tnt, args.ID, true, true, "")
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
