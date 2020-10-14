@@ -44,11 +44,13 @@ func NewConReqs(reqs int, strategy string) *ConcReqs {
 	return cR
 }
 
+// IsActive returns true if the limit is not 0
+func (cR *ConcReqs) IsActive() bool {
+	return ConReqs.limit != 0
+}
+
 // Allocate will reserve a channel for the API call
 func (cR *ConcReqs) Allocate() (err error) {
-	if cR.limit == 0 {
-		return
-	}
 	switch cR.strategy {
 	case MetaBusy:
 		if len(cR.aReqs) == 0 {
@@ -63,9 +65,6 @@ func (cR *ConcReqs) Allocate() (err error) {
 
 // Deallocate will free a channel for the API call
 func (cR *ConcReqs) Deallocate() {
-	if cR.limit == 0 {
-		return
-	}
 	cR.aReqs <- struct{}{}
 	return
 }
@@ -79,6 +78,9 @@ func newConcReqsJSONCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
 }
 
 func newConcReqsServerCodec(sc rpc.ServerCodec) rpc.ServerCodec {
+	if !ConReqs.IsActive() {
+		return sc
+	}
 	return &concReqsServerCodec2{sc: sc}
 }
 
