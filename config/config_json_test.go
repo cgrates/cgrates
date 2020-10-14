@@ -331,11 +331,12 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Replication_conns: &[]string{},
 		Remote_conns:      &[]string{},
 		Opts: map[string]interface{}{
-			utils.RedisSentinelNameCfg:  "",
-			utils.QueryTimeoutCfg:       "10s",
-			utils.RedisClusterCfg:       false,
-			utils.ClusterOnDownDelayCfg: "0",
-			utils.ClusterSyncCfg:        "5s",
+			utils.RedisSentinelNameCfg:       "",
+			utils.QueryTimeoutCfg:            "10s",
+			utils.RedisClusterCfg:            false,
+			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisClusterSyncCfg:        "5s",
+			utils.RedisTLS:                   false,
 		},
 		Items: &map[string]*ItemOptJson{
 			utils.MetaAccounts: {
@@ -1628,10 +1629,10 @@ func TestDfMigratorCfg(t *testing.T) {
 		Users_filters:       &[]string{},
 		Out_storDB_opts:     make(map[string]interface{}),
 		Out_dataDB_opts: map[string]interface{}{
-			utils.RedisSentinelNameCfg:  "",
-			utils.RedisClusterCfg:       false,
-			utils.ClusterSyncCfg:        "5s",
-			utils.ClusterOnDownDelayCfg: "0",
+			utils.RedisSentinelNameCfg:       "",
+			utils.RedisClusterCfg:            false,
+			utils.RedisClusterSyncCfg:        "5s",
+			utils.RedisClusterOnDownDelayCfg: "0",
 		},
 	}
 	if cfg, err := dfCgrJSONCfg.MigratorCfgJson(); err != nil {

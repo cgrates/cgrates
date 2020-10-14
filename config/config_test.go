@@ -1732,10 +1732,10 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 		OutStorDBUser:     "cgrates",
 		OutStorDBPassword: "",
 		OutDataDBOpts: map[string]interface{}{
-			utils.ClusterOnDownDelayCfg: "0",
-			utils.ClusterSyncCfg:        "5s",
-			utils.RedisClusterCfg:       false,
-			utils.RedisSentinelNameCfg:  "",
+			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisClusterSyncCfg:        "5s",
+			utils.RedisClusterCfg:            false,
+			utils.RedisSentinelNameCfg:       "",
 		},
 		OutStorDBOpts: make(map[string]interface{}),
 	}

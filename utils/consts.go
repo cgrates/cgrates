@@ -1912,18 +1912,19 @@ const (
 
 // DataDbCfg
 const (
-	DataDbTypeCfg         = "db_type"
-	DataDbHostCfg         = "db_host"
-	DataDbPortCfg         = "db_port"
-	DataDbNameCfg         = "db_name"
-	DataDbUserCfg         = "db_user"
-	DataDbPassCfg         = "db_password"
-	RedisSentinelNameCfg  = "redis_sentinel"
-	RmtConnsCfg           = "remote_conns"
-	RplConnsCfg           = "replication_conns"
-	RedisClusterCfg       = "redis_cluster"
-	ClusterSyncCfg        = "cluster_sync"
-	ClusterOnDownDelayCfg = "cluster_ondown_delay"
+	DataDbTypeCfg              = "db_type"
+	DataDbHostCfg              = "db_host"
+	DataDbPortCfg              = "db_port"
+	DataDbNameCfg              = "db_name"
+	DataDbUserCfg              = "db_user"
+	DataDbPassCfg              = "db_password"
+	RedisSentinelNameCfg       = "redis_sentinel"
+	RmtConnsCfg                = "remote_conns"
+	RplConnsCfg                = "replication_conns"
+	RedisClusterCfg            = "redis_cluster"
+	RedisClusterSyncCfg        = "redis_cluster_sync"
+	RedisClusterOnDownDelayCfg = "redis_cluster_ondown_delay"
+	RedisTLS                   = "redis_tls"
 )
 
 // ItemOpt

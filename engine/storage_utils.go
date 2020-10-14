@@ -48,10 +48,10 @@ func NewDataDBConn(dbType, host, port, name, user,
 			return
 		}
 		var clusterSync, clusterOnDownDelay time.Duration
-		if clusterSync, err = utils.IfaceAsDuration(opts[utils.ClusterSyncCfg]); err != nil {
+		if clusterSync, err = utils.IfaceAsDuration(opts[utils.RedisClusterSyncCfg]); err != nil {
 			return
 		}
-		if clusterOnDownDelay, err = utils.IfaceAsDuration(opts[utils.ClusterOnDownDelayCfg]); err != nil {
+		if clusterOnDownDelay, err = utils.IfaceAsDuration(opts[utils.RedisClusterOnDownDelayCfg]); err != nil {
 			return
 		}
 		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler,

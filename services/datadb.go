@@ -160,8 +160,8 @@ func (db *DataDBService) needsConnectionReload() bool {
 	return db.oldDBCfg.DataDbType == utils.REDIS &&
 		(db.oldDBCfg.Opts[utils.RedisSentinelNameCfg] != db.cfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] ||
 			db.oldDBCfg.Opts[utils.RedisClusterCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterCfg] ||
-			db.oldDBCfg.Opts[utils.ClusterSyncCfg] != db.cfg.DataDbCfg().Opts[utils.ClusterSyncCfg] ||
-			db.oldDBCfg.Opts[utils.ClusterOnDownDelayCfg] != db.cfg.DataDbCfg().Opts[utils.ClusterOnDownDelayCfg])
+			db.oldDBCfg.Opts[utils.RedisClusterSyncCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] ||
+			db.oldDBCfg.Opts[utils.RedisClusterOnDownDelayCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg])
 }
 
 // GetDMChan returns the DataManager chanel
