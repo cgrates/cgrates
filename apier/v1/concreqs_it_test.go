@@ -58,6 +58,10 @@ var (
 		testConcReqsOnBiJSONQueue,
 		testConcReqsKillEngine,
 	}
+
+	// used by benchmarks
+	concReqsOnce      sync.Once
+	concReqLastCfgDir string
 )
 
 //Test start here
@@ -279,18 +283,27 @@ func testConcReqsKillEngine(t *testing.T) {
 }
 
 func benchmarkInit(b *testing.B, cfgDir string) {
-	var err error
-	concReqsCfgPath = path.Join(*dataDir, "conf", "samples", cfgDir)
-	if concReqsCfg, err = config.NewCGRConfigFromPath(concReqsCfgPath); err != nil {
-		b.Fatal(err)
+	b.StopTimer()
+	// restart cgrates only if needed
+	if cfgDir != concReqLastCfgDir {
+		concReqsOnce = sync.Once{}
 	}
-	if _, err := engine.StopStartEngine(concReqsCfgPath, *waitRater); err != nil {
-		b.Fatal(err)
-	}
-	if concReqsRPC, err = newRPCClient(concReqsCfg.ListenCfg()); err != nil {
-		b.Fatal(err)
-	}
-	b.ResetTimer()
+	concReqsOnce.Do(func() {
+		concReqLastCfgDir = cfgDir
+		var err error
+		concReqsCfgPath = path.Join(*dataDir, "conf", "samples", cfgDir)
+		if concReqsCfg, err = config.NewCGRConfigFromPath(concReqsCfgPath); err != nil {
+			b.Fatal(err)
+		}
+		if _, err := engine.StopStartEngine(concReqsCfgPath, *waitRater); err != nil {
+			b.Fatal(err)
+		}
+		if concReqsRPC, err = newRPCClient(concReqsCfg.ListenCfg()); err != nil {
+			b.Fatal(err)
+		}
+		// b.Logf("Preparation done for %s", cfgDir)
+	})
+	b.StartTimer()
 }
 
 func benchmarkCall(b *testing.B) {
