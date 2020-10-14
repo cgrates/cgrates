@@ -88,8 +88,6 @@ func testTPRatingProfilesInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpRatingProfileCfg.DataFolderPath = tpRatingProfileDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpRatingProfileCfg)
 	switch tpRatingProfileConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		tpRatingProfileDelay = 2000

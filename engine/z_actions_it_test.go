@@ -87,8 +87,6 @@ func testActionsitInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	actsLclCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(actsLclCfg)
 }
 
 func testActionsitInitCdrDb(t *testing.T) {

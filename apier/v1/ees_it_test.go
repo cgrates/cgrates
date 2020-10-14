@@ -92,8 +92,6 @@ func testEEsInitCfg(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	eeSCfg.DataFolderPath = alsPrfDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(eeSCfg)
 }
 
 func testEEsInitDataDb(t *testing.T) {

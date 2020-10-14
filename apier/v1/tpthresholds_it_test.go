@@ -85,8 +85,6 @@ func testTPThreholdInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpThresholdCfg.DataFolderPath = tpThresholdDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpThresholdCfg)
 	tpThresholdDelay = 1000
 
 }

@@ -153,8 +153,6 @@ func testSSv1ItInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	sSv1Cfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(sSv1Cfg)
 }
 
 func testSSv1ItProcessEventAuth(t *testing.T) {

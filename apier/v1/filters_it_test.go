@@ -85,8 +85,6 @@ func testFilterInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	filterCfg.DataFolderPath = filterDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(filterCfg)
 }
 
 // Wipe out the cdr database

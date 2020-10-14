@@ -92,8 +92,6 @@ func testInternalReplicateITInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	internalCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(internalCfg)
 
 	// prepare config for engine1
 	engineOneCfgPath = path.Join(*dataDir, "conf", "samples", "replication", engineOneCfgDirPath)

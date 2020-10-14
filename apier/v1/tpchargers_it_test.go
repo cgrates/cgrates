@@ -85,8 +85,6 @@ func testTPChrgsInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpChrgsCfg.DataFolderPath = tpChrgsDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpChrgsCfg)
 	tpChrgsDelay = 1000
 
 }

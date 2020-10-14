@@ -84,8 +84,6 @@ func testTPDispatcherInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpDispatcherCfg.DataFolderPath = tpDispatcherDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpDispatcherCfg)
 	tpDispatcherDelay = 1000
 
 }

@@ -76,8 +76,6 @@ func testCostInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	costCfg.DataFolderPath = costDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(costCfg)
 }
 
 func testCostInitDataDb(t *testing.T) {

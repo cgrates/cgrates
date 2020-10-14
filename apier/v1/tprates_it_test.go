@@ -84,8 +84,6 @@ func testTPRatesInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpRateCfg.DataFolderPath = tpRateDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpRateCfg)
 	switch tpRateConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		tpRateDelay = 2000

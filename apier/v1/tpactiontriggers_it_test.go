@@ -85,8 +85,6 @@ func testTPActionTriggersInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpActionTriggerCfg.DataFolderPath = tpActionTriggerDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpActionTriggerCfg)
 	switch tpActionTriggerConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		tpActionTriggerDelay = 2000

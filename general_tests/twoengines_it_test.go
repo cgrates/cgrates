@@ -68,7 +68,6 @@ func testTwoEnginesInitConfig(t *testing.T) {
 	if engineOneCfg, err = config.NewCGRConfigFromPath(engineOneCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	config.SetCgrConfig(engineOneCfg)
 	engineTwoCfgPath = path.Join(*dataDir, "conf", "samples", "twoengines", "engine2")
 	if engineTwoCfg, err = config.NewCGRConfigFromPath(engineTwoCfgPath); err != nil {
 		t.Fatal(err)

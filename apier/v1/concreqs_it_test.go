@@ -82,8 +82,6 @@ func testConcReqsInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	concReqsCfg.DataFolderPath = *dataDir
-	config.SetCgrConfig(concReqsCfg)
 }
 
 // Start CGR Engine
@@ -278,4 +276,38 @@ func testConcReqsKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
+}
+
+func benchmarkInit(b *testing.B, cfgDir string) {
+	var err error
+	concReqsCfgPath = path.Join(*dataDir, "conf", "samples", cfgDir)
+	if concReqsCfg, err = config.NewCGRConfigFromPath(concReqsCfgPath); err != nil {
+		b.Fatal(err)
+	}
+	if _, err := engine.StopStartEngine(concReqsCfgPath, *waitRater); err != nil {
+		b.Fatal(err)
+	}
+	if concReqsRPC, err = newRPCClient(concReqsCfg.ListenCfg()); err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+}
+
+func benchmarkCall(b *testing.B) {
+	var rply map[string]interface{}
+	for i := 0; i < b.N; i++ {
+		if err := concReqsRPC.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
+			b.Error(err)
+		}
+	}
+}
+
+func BenchmarkConcReqWithLimit(b *testing.B) {
+	benchmarkInit(b, "conc_reqs_queue_bench")
+	benchmarkCall(b)
+}
+
+func BenchmarkConcReqWithoutLimit(b *testing.B) {
+	benchmarkInit(b, "tutmysql")
+	benchmarkCall(b)
 }

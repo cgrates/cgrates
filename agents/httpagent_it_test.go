@@ -118,8 +118,6 @@ func testHAitInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	haCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(haCfg)
 }
 
 func testHAitHttp(t *testing.T) {

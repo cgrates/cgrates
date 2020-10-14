@@ -78,8 +78,6 @@ func testTPInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpCfg.DataFolderPath = tpDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpCfg)
 }
 
 // Wipe out the cdr database

@@ -84,8 +84,6 @@ func testTPTimingsInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpTimingCfg.DataFolderPath = tpTimingDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpTimingCfg)
 	switch tpTimingConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db
 		tpTimingDelay = 2000

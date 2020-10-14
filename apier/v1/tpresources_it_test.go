@@ -84,8 +84,6 @@ func testTPResInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpResCfg.DataFolderPath = tpResDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpResCfg)
 	tpResDelay = 1000
 }
 

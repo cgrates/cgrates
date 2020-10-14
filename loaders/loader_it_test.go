@@ -101,8 +101,6 @@ func testLoaderInitCfg(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	loaderCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(loaderCfg)
 }
 
 func testLoaderMakeFolders(t *testing.T) {

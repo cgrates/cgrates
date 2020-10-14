@@ -83,8 +83,6 @@ func testSAitInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	saCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(saCfg)
 	if isDispatcherActive {
 		saCfg.ListenCfg().RPCJSONListen = ":6012"
 	}

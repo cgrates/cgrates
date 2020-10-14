@@ -113,8 +113,6 @@ func testSessionSRplInitCfg(t *testing.T) {
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	smgRplcMasterCfg.DataFolderPath = *dataDir
-	config.SetCgrConfig(smgRplcMasterCfg)
 	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcSlaveCfgDIR)
 	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(smgRplcSlaveCfgPath); err != nil {
 		t.Fatal(err)

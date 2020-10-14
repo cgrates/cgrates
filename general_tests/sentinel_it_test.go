@@ -115,8 +115,6 @@ func testRedisSentinelInitConfig(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	sentinelConfig.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(sentinelConfig)
 }
 
 func testRedisSentinelFlushDb(t *testing.T) {

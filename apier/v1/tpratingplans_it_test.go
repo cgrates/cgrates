@@ -84,8 +84,6 @@ func testTPRatingPlansInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpRatingPlanCfg.DataFolderPath = tpRatingPlanDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpRatingPlanCfg)
 	switch tpRatingPlanConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		tpRatingPlanDelay = 2000

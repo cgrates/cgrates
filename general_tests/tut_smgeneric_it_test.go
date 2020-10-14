@@ -79,8 +79,6 @@ func testTutSMGInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tutSMGCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tutSMGCfg)
 }
 
 // Remove data in both rating and accounting db

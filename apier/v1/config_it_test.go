@@ -82,8 +82,6 @@ func testConfigSInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	configCfg.DataFolderPath = *dataDir
-	config.SetCgrConfig(configCfg)
 }
 
 func testConfigSInitDataDb(t *testing.T) {

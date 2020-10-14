@@ -86,8 +86,6 @@ func testTPRouteInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpRouteCfg.DataFolderPath = tpRouteDataDire // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpRouteCfg)
 	tpRouteDelay = 1000
 
 }
