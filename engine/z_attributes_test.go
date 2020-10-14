@@ -2620,6 +2620,134 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	}
 }
 
+func TestProcessAttributePrefix(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_PREFIX",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.ATTR:ATTR_PREFIX"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaPrefix,
+				Value: config.NewRSRParsersMustCompile("abc_", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{ //matching ATTR_VAL_EXP
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     "TestProcessAttributeValueExponent",
+				Event: map[string]interface{}{
+					"ATTR":       "ATTR_PREFIX",
+					"Field2":     "Val2",
+					utils.Weight: "20.0",
+				},
+			},
+		},
+	}
+	eNM := utils.MapStorage{
+		utils.MetaReq:  ev.CGREvent.Event,
+		utils.MetaOpts: ev.Opts,
+		utils.MetaVars: utils.MapStorage{
+			utils.ProcessRuns: utils.NewNMData(0),
+		},
+	}
+	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.CGREvent.Clone()
+	clnEv.Event["Field2"] = "abc_Val2"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_PREFIX"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: clnEv,
+		},
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
+func TestProcessAttributeSuffix(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	data := NewInternalDB(nil, nil, true)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
+	attrService, _ = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrPrf := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_SUFFIX",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.ATTR:ATTR_SUFFIX"},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaSuffix,
+				Value: config.NewRSRParsersMustCompile("_abc", utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{ //matching ATTR_VAL_EXP
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     "TestProcessAttributeValueExponent",
+				Event: map[string]interface{}{
+					"ATTR":       "ATTR_SUFFIX",
+					"Field2":     "Val2",
+					utils.Weight: "20.0",
+				},
+			},
+		},
+	}
+	eNM := utils.MapStorage{
+		utils.MetaReq:  ev.CGREvent.Event,
+		utils.MetaOpts: ev.Opts,
+		utils.MetaVars: utils.MapStorage{
+			utils.ProcessRuns: utils.NewNMData(0),
+		},
+	}
+	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	clnEv := ev.CGREvent.Clone()
+	clnEv.Event["Field2"] = "Val2_abc"
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_SUFFIX"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: clnEv,
+		},
+	}
+	if !reflect.DeepEqual(eRply, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(rcv))
+	}
+}
+
 func TestAttributeIndexSelectsFalse(t *testing.T) {
 	// change the IndexedSelects to false
 	defaultCfg, _ := config.NewDefaultCGRConfig()
@@ -2685,7 +2813,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 
 }
 
-func TestProcessAttributeWithSameWheight(t *testing.T) {
+func TestProcessAttributeWithSameWeight(t *testing.T) {
 	defaultCfg, _ := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
