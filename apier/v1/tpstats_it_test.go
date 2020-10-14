@@ -85,8 +85,6 @@ func testTPStatsInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpStatCfg.DataFolderPath = tpStatDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpStatCfg)
 	tpStatDelay = 1000
 }
 

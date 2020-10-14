@@ -88,8 +88,6 @@ func testTPAccActionsInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpAccActionsCfg.DataFolderPath = tpAccActionsDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpAccActionsCfg)
 	tpAccActionsDelay = 1000
 }
 

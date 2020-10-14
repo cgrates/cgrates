@@ -73,8 +73,6 @@ func testGOCSInitCfg(t *testing.T) {
 	if auCfg, err = config.NewCGRConfigFromPath(auCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	auCfg.DataFolderPath = *dataDir
-	config.SetCgrConfig(auCfg)
 	usCfgPath = path.Join(*dataDir, "conf", "samples", "gocs", "us_site")
 	if usCfg, err = config.NewCGRConfigFromPath(usCfgPath); err != nil {
 		t.Fatal(err)

@@ -86,8 +86,6 @@ func testTPAlsPrfInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpAlsPrfCfg.DataFolderPath = tpAlsPrfDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpAlsPrfCfg)
 	tpAlsPrfDelay = 1000
 }
 

@@ -46,11 +46,10 @@ var (
 func startRPC() {
 	var err error
 	sBenchCfg, err = config.NewCGRConfigFromPath(
-		path.Join(config.CgrConfig().DataFolderPath, "conf", "samples", "tutmongo"))
+		path.Join(*dataDir, "conf", "samples", "tutmongo"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	config.SetCgrConfig(sBenchCfg)
 	if sBenchRPC, err = jsonrpc.Dial(utils.TCP, sBenchCfg.ListenCfg().RPCJSONListen); err != nil {
 		log.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
@@ -64,7 +63,7 @@ func loadTP() {
 		log.Fatal(err)
 	}
 	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(config.CgrConfig().DataFolderPath, "tariffplans", "tutorial")}
+		FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var tpLoadInst utils.LoadInstance
 	if err := sBenchRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
 		attrs, &tpLoadInst); err != nil {
@@ -194,7 +193,7 @@ func BenchmarkEncodingJSON(b *testing.B) {
 	}
 	var err error
 	sBenchCfg, err = config.NewCGRConfigFromPath(
-		path.Join(config.CgrConfig().DataFolderPath, "conf", "samples", "tutmongo"))
+		path.Join(*dataDir, "conf", "samples", "tutmongo"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -216,7 +215,7 @@ func BenchmarkEncodingGOB(b *testing.B) {
 	}
 	var err error
 	sBenchCfg, err = config.NewCGRConfigFromPath(
-		path.Join(config.CgrConfig().DataFolderPath, "conf", "samples", "tutmongo"))
+		path.Join(*dataDir, "conf", "samples", "tutmongo"))
 	if err != nil {
 		log.Fatal(err)
 	}

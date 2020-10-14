@@ -54,7 +54,7 @@ func TestDebitUsageWithOptionsSetConfig(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	apierDebitStorage = engine.NewInternalDB(nil, nil, true)
 	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
-	dm = engine.NewDataManager(apierDebitStorage, config.CgrConfig().CacheCfg(), nil)
+	dm = engine.NewDataManager(apierDebitStorage, cfg.CacheCfg(), nil)
 	engine.SetDataStorage(dm)
 	apierDebit = &APIerSv1{
 		DataManager: dm,

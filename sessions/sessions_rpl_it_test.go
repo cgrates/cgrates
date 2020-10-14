@@ -81,8 +81,6 @@ func testSessionSRplInitCfg(t *testing.T) {
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	smgRplcMasterCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(smgRplcMasterCfg)
 	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", smgRplcSlaveCfgDIR)
 	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(smgRplcSlaveCfgPath); err != nil {
 		t.Fatal(err)

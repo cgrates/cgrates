@@ -97,8 +97,6 @@ func testSessionSv1ItInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	sSv1Cfg2.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(sSv1Cfg2)
 }
 
 func testSessionSv1ItResetDataDb(t *testing.T) {

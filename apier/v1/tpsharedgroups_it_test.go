@@ -84,8 +84,6 @@ func testTPSharedGroupsInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpSharedGroupCfg.DataFolderPath = tpSharedGroupDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpSharedGroupCfg)
 	switch tpSharedGroupConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db
 		tpSharedGroupDelay = 2000

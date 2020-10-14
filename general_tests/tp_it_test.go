@@ -87,8 +87,6 @@ func testTpInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpCfg)
 }
 
 // Remove data in both rating and accounting db

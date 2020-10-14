@@ -81,8 +81,6 @@ func testSessionsDataInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dataCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(dataCfg)
 }
 
 // Remove data in both rating and accounting db

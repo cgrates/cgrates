@@ -120,8 +120,6 @@ func testAttributeSInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	alsPrfCfg.DataFolderPath = alsPrfDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(alsPrfCfg)
 }
 
 func testAttributeSInitDataDb(t *testing.T) {

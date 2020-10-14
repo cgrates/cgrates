@@ -84,8 +84,6 @@ func testTPDstRateInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpDstRateCfg.DataFolderPath = tpDstRateDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpDstRateCfg)
 	tpDstRateDelay = 1000
 }
 

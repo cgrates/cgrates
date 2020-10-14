@@ -83,8 +83,6 @@ func testSessionsVoiceInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	voiceCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(voiceCfg)
 }
 
 // Remove data in both rating and accounting db

@@ -112,8 +112,6 @@ func testRAitInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	raCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(raCfg)
 	if isDispatcherActive {
 		raCfg.ListenCfg().RPCJSONListen = ":6012"
 	}

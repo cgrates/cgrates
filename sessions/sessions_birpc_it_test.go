@@ -84,8 +84,6 @@ func testSessionsBiRPCInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	sessionsBiRPCCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(sessionsBiRPCCfg)
 }
 
 // Remove data in both rating and accounting db

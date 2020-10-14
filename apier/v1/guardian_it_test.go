@@ -52,8 +52,6 @@ func TestGuardianSIT(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	guardianCfg.DataFolderPath = *dataDir
-	config.SetCgrConfig(guardianCfg)
 
 	if err = engine.InitDataDb(guardianCfg); err != nil {
 		t.Fatal(err)

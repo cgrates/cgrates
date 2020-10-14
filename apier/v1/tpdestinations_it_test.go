@@ -84,8 +84,6 @@ func testTPDestinationsInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpDestinationCfg.DataFolderPath = tpDestinationDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpDestinationCfg)
 	switch tpDestinationConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		tpDestinationDelay = 2000

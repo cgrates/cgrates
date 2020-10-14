@@ -34,14 +34,14 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 	config.SetCgrConfig(usrCfgIn)
 	usrTenant := "cgrates.com"
 	users := map[int]*v1UserProfile{
-		0: &v1UserProfile{
+		0: {
 			Tenant:   defaultTenant,
 			UserName: "1001",
 			Masked:   true,
 			Profile:  map[string]string{},
 			Weight:   10,
 		},
-		1: &v1UserProfile{
+		1: {
 			Tenant:   usrTenant,
 			UserName: "1001",
 			Masked:   true,
@@ -51,7 +51,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		2: &v1UserProfile{
+		2: {
 			Tenant:   defaultTenant,
 			UserName: "1001",
 			Masked:   false,
@@ -62,7 +62,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		3: &v1UserProfile{
+		3: {
 			Tenant:   usrTenant,
 			UserName: "1001",
 			Masked:   false,
@@ -72,7 +72,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		4: &v1UserProfile{
+		4: {
 			Tenant:   usrTenant,
 			UserName: "acstmusername",
 			Profile: map[string]string{

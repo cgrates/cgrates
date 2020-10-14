@@ -85,8 +85,6 @@ func testTPAccPlansInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpAccPlansCfg.DataFolderPath = tpAccPlansDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpAccPlansCfg)
 	switch tpAccPlansConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		tpAccPlansDelay = 2000

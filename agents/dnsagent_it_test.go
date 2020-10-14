@@ -79,8 +79,6 @@ func testDNSitInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dnsCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(dnsCfg)
 }
 
 // Remove data in both rating and accounting db

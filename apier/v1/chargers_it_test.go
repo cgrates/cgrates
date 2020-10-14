@@ -122,8 +122,6 @@ func testChargerSInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	chargerCfg.DataFolderPath = *dataDir
-	config.SetCgrConfig(chargerCfg)
 }
 
 func testChargerSInitDataDb(t *testing.T) {

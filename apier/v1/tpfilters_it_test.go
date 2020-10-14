@@ -86,8 +86,6 @@ func testTPFilterInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpFilterCfg.DataFolderPath = tpFilterDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tpFilterCfg)
 	tpFilterDelay = 1000
 
 }

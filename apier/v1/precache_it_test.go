@@ -81,8 +81,6 @@ func testPrecacheInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	precacheCfg.DataFolderPath = precacheDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(precacheCfg)
 }
 
 func testPrecacheResetDataDB(t *testing.T) {

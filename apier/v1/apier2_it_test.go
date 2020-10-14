@@ -94,8 +94,6 @@ func testAPIerInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	apierCfg.DataFolderPath = costDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(apierCfg)
 }
 
 func testAPIerInitDataDb(t *testing.T) {
