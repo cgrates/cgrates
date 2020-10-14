@@ -126,13 +126,13 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		return fmt.Errorf("No connection with CDR Server")
 	}
 	defaultTemplate := map[string]config.RSRParsers{
-		utils.ToR:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.BalanceType, utils.INFIELD_SEP),
+		utils.ToR:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.BalanceType, utils.INFIELD_SEP),
 		utils.OriginHost:  config.NewRSRParsersMustCompile("127.0.0.1", utils.INFIELD_SEP),
 		utils.RequestType: config.NewRSRParsersMustCompile(utils.META_NONE, utils.INFIELD_SEP),
-		utils.Tenant:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Tenant, utils.INFIELD_SEP),
-		utils.Account:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Account, utils.INFIELD_SEP),
-		utils.Subject:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Account, utils.INFIELD_SEP),
-		utils.COST:        config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+"ActionValue", utils.INFIELD_SEP),
+		utils.Tenant:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Tenant, utils.INFIELD_SEP),
+		utils.Account:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Account, utils.INFIELD_SEP),
+		utils.Subject:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Account, utils.INFIELD_SEP),
+		utils.COST:        config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)
 	// overwrite default template
@@ -846,46 +846,56 @@ func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}
 		return
 	}
 	err = nil // cancel previous err
-	if len(fldPath) == 2 && fldPath[0] == utils.MetaReq {
-		var dta *utils.TenantAccount
-		if cdrP.acnt != nil {
-			dta, err = utils.NewTAFromAccountKey(cdrP.acnt.ID) // Account information should be valid
-		}
-		if err != nil || cdrP.acnt == nil {
-			dta = new(utils.TenantAccount) // Init with empty values
-		}
-		b := cdrP.action.Balance.CreateBalance()
-		switch fldPath[1] {
-		case utils.AccountID:
-			data = cdrP.acnt.ID
-		case utils.Tenant:
-			data = dta.Tenant
-		case utils.Account:
-			data = dta.Account
-		case utils.ActionID:
-			data = cdrP.action.Id
-		case utils.ActionType:
-			data = cdrP.action.ActionType
-		case utils.ActionValue:
-			data = strconv.FormatFloat(b.GetValue(), 'f', -1, 64)
-		case utils.BalanceType:
-			data = cdrP.action.Balance.GetType()
-		case utils.BalanceUUID:
-			data = b.Uuid
-		case utils.BalanceID:
-			data = b.ID
-		case utils.BalanceValue:
-			data = strconv.FormatFloat(cdrP.action.balanceValue, 'f', -1, 64)
-		case utils.DestinationIDs:
-			data = b.DestinationIDs.String()
-		case utils.ExtraParameters:
-			data = cdrP.action.ExtraParameters
-		case utils.RatingSubject:
-			data = b.RatingSubject
-		case utils.Category:
-			data = cdrP.action.Balance.Categories.String()
-		case utils.SharedGroups:
-			data = cdrP.action.Balance.SharedGroups.String()
+	if len(fldPath) == 2 {
+		switch fldPath[0] {
+		case utils.MetaAcnt:
+			switch fldPath[1] {
+			case utils.AccountID:
+				data = cdrP.acnt.ID
+			case utils.Tenant:
+				tntAcnt := new(utils.TenantAccount) // Init with empty values
+				if cdrP.acnt != nil {
+					if tntAcnt, err = utils.NewTAFromAccountKey(cdrP.acnt.ID); err != nil {
+						return
+					}
+				}
+				data = tntAcnt.Tenant
+			case utils.Account:
+				tntAcnt := new(utils.TenantAccount) // Init with empty values
+				if cdrP.acnt != nil {
+					if tntAcnt, err = utils.NewTAFromAccountKey(cdrP.acnt.ID); err != nil {
+						return
+					}
+				}
+				data = tntAcnt.Account
+			case utils.BalanceType:
+				data = cdrP.action.Balance.GetType()
+			case utils.BalanceUUID:
+				data = cdrP.action.Balance.CreateBalance().Uuid
+			case utils.BalanceID:
+				data = cdrP.action.Balance.CreateBalance().ID
+			case utils.BalanceValue:
+				data = strconv.FormatFloat(cdrP.action.balanceValue, 'f', -1, 64)
+			case utils.DestinationIDs:
+				data = cdrP.action.Balance.CreateBalance().DestinationIDs.String()
+			case utils.ExtraParameters:
+				data = cdrP.action.ExtraParameters
+			case utils.RatingSubject:
+				data = cdrP.action.Balance.CreateBalance().RatingSubject
+			case utils.Category:
+				data = cdrP.action.Balance.Categories.String()
+			case utils.SharedGroups:
+				data = cdrP.action.Balance.SharedGroups.String()
+			}
+		case utils.MetaAct:
+			switch fldPath[1] {
+			case utils.ActionID:
+				data = cdrP.action.Id
+			case utils.ActionType:
+				data = cdrP.action.ActionType
+			case utils.ActionValue:
+				data = strconv.FormatFloat(cdrP.action.Balance.CreateBalance().GetValue(), 'f', -1, 64)
+			}
 		}
 	} else {
 		data = fldPath[0]

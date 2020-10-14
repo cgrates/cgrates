@@ -807,6 +807,7 @@ const (
 	UUID                     = "UUID"
 	ActionsID                = "ActionsID"
 	MetaAct                  = "*act"
+	MetaAcnt                 = "*acnt"
 	DestinationPrefix        = "DestinationPrefix"
 	DestinationID            = "DestinationID"
 	ExportTemplate           = "ExportTemplate"
