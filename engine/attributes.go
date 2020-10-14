@@ -349,6 +349,42 @@ func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent
 				return
 			}
 			substitute = strconv.Itoa(int(t.Unix()))
+		case utils.MetaPrefix:
+			var pathRsr config.RSRParsers
+			pathRsr, err = config.NewRSRParsers(utils.DynamicDataPrefix+attribute.Path, alS.cgrcfg.GeneralCfg().RSRSep)
+			if err != nil {
+				rply = nil
+				return
+			}
+			var pathVal string
+			if pathVal, err = pathRsr.ParseDataProvider(dynDP); err != nil {
+				rply = nil
+				return
+			}
+			var val string
+			if val, err = attribute.Value.ParseDataProvider(dynDP); err != nil {
+				rply = nil
+				return
+			}
+			substitute = val + pathVal
+		case utils.MetaSuffix:
+			var pathRsr config.RSRParsers
+			pathRsr, err = config.NewRSRParsers(utils.DynamicDataPrefix+attribute.Path, alS.cgrcfg.GeneralCfg().RSRSep)
+			if err != nil {
+				rply = nil
+				return
+			}
+			var pathVal string
+			if pathVal, err = pathRsr.ParseDataProvider(dynDP); err != nil {
+				rply = nil
+				return
+			}
+			var val string
+			if val, err = attribute.Value.ParseDataProvider(dynDP); err != nil {
+				rply = nil
+				return
+			}
+			substitute = pathVal + val
 		default: // backwards compatible in case that Type is empty
 			substitute, err = attribute.Value.ParseDataProvider(dynDP)
 		}
