@@ -242,7 +242,7 @@ func TestThresholdsCache(t *testing.T) {
 }
 
 func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0]); err != nil {
+	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].Tenant, thMatched[0].Tenant)
@@ -252,7 +252,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].Hits, thMatched[0].Hits)
 	}
 
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[1]); err != nil {
+	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[1].Tenant, argsGetThresholds[1]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[1].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].Tenant, thMatched[0].Tenant)
@@ -262,7 +262,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].Hits, thMatched[0].Hits)
 	}
 
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[2]); err != nil {
+	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[2].Tenant, argsGetThresholds[2]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[2].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[2].Tenant, thMatched[0].Tenant)
@@ -275,21 +275,21 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 
 func TestThresholdsProcessEvent(t *testing.T) {
 	thIDs := []string{"TH_1"}
-	if thMatched, err := thServ.processEvent(argsGetThresholds[0]); err != utils.ErrPartiallyExecuted {
+	if thMatched, err := thServ.processEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != utils.ErrPartiallyExecuted {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(thIDs, thMatched) {
 		t.Errorf("Expecting: %+v, received: %+v", thIDs, thMatched)
 	}
 
 	thIDs = []string{"TH_2"}
-	if thMatched, err := thServ.processEvent(argsGetThresholds[1]); err != utils.ErrPartiallyExecuted {
+	if thMatched, err := thServ.processEvent(argsGetThresholds[1].Tenant, argsGetThresholds[1]); err != utils.ErrPartiallyExecuted {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(thIDs, thMatched) {
 		t.Errorf("Expecting: %+v, received: %+v", thIDs, thMatched)
 	}
 
 	thIDs = []string{"TH_3"}
-	if thMatched, err := thServ.processEvent(argsGetThresholds[2]); err != utils.ErrPartiallyExecuted {
+	if thMatched, err := thServ.processEvent(argsGetThresholds[2].Tenant, argsGetThresholds[2]); err != utils.ErrPartiallyExecuted {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(thIDs, thMatched) {
 		t.Errorf("Expecting: %+v, received: %+v", thIDs, thMatched)
@@ -297,7 +297,7 @@ func TestThresholdsProcessEvent(t *testing.T) {
 }
 
 func TestThresholdsVerifyIfExecuted(t *testing.T) {
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0]); err != nil {
+	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].Tenant, thMatched[0].Tenant)
@@ -307,7 +307,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 		t.Errorf("Expecting: 1, received: %+v", thMatched[0].Hits)
 	}
 
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[1]); err != nil {
+	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[1].Tenant, argsGetThresholds[1]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[1].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].Tenant, thMatched[0].Tenant)
@@ -317,7 +317,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 		t.Errorf("Expecting: 1, received: %+v", thMatched[0].Hits)
 	}
 
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[2]); err != nil {
+	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[2].Tenant, argsGetThresholds[2]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[2].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[2].Tenant, thMatched[0].Tenant)
@@ -373,13 +373,13 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 	}
 	thIDs := []string{"TH_1", "TH_4"}
 	thIDsRev := []string{"TH_4", "TH_1"}
-	if thMatched, err := thServ.processEvent(ev); err != utils.ErrPartiallyExecuted {
+	if thMatched, err := thServ.processEvent(ev.Tenant, ev); err != utils.ErrPartiallyExecuted {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(thIDs, thMatched) && !reflect.DeepEqual(thIDsRev, thMatched) {
 		t.Errorf("Expecting: %+v, received: %+v", thIDs, thMatched)
 	}
 
-	if thMatched, err := thServ.matchingThresholdsForEvent(ev); err != nil {
+	if thMatched, err := thServ.matchingThresholdsForEvent(ev.Tenant, ev); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else {
 		for _, thM := range thMatched {

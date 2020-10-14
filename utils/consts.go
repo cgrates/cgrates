@@ -1478,15 +1478,16 @@ const (
 
 // ThresholdS APIs
 const (
-	ThresholdSv1ProcessEvent          = "ThresholdSv1.ProcessEvent"
-	ThresholdSv1GetThreshold          = "ThresholdSv1.GetThreshold"
-	ThresholdSv1GetThresholdIDs       = "ThresholdSv1.GetThresholdIDs"
-	ThresholdSv1Ping                  = "ThresholdSv1.Ping"
-	ThresholdSv1GetThresholdsForEvent = "ThresholdSv1.GetThresholdsForEvent"
-	APIerSv1GetThresholdProfileIDs    = "APIerSv1.GetThresholdProfileIDs"
-	APIerSv1GetThresholdProfile       = "APIerSv1.GetThresholdProfile"
-	APIerSv1RemoveThresholdProfile    = "APIerSv1.RemoveThresholdProfile"
-	APIerSv1SetThresholdProfile       = "APIerSv1.SetThresholdProfile"
+	ThresholdSv1ProcessEvent            = "ThresholdSv1.ProcessEvent"
+	ThresholdSv1GetThreshold            = "ThresholdSv1.GetThreshold"
+	ThresholdSv1GetThresholdIDs         = "ThresholdSv1.GetThresholdIDs"
+	ThresholdSv1Ping                    = "ThresholdSv1.Ping"
+	ThresholdSv1GetThresholdsForEvent   = "ThresholdSv1.GetThresholdsForEvent"
+	APIerSv1GetThresholdProfileIDs      = "APIerSv1.GetThresholdProfileIDs"
+	APIerSv1GetThresholdProfileIDsCount = "APIerSv1.GetThresholdProfileIDsCount"
+	APIerSv1GetThresholdProfile         = "APIerSv1.GetThresholdProfile"
+	APIerSv1RemoveThresholdProfile      = "APIerSv1.RemoveThresholdProfile"
+	APIerSv1SetThresholdProfile         = "APIerSv1.SetThresholdProfile"
 )
 
 // StatS APIs

@@ -232,7 +232,7 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 }
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
-func (tS *ThresholdService) matchingThresholdsForEvent(args *ThresholdsArgsProcessEvent) (ts Thresholds, err error) {
+func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *ThresholdsArgsProcessEvent) (ts Thresholds, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.Opts,
@@ -243,7 +243,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ThresholdsArgsProce
 			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
 			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields,
 			tS.cgrcfg.ThresholdSCfg().SuffixIndexedFields,
-			tS.dm, utils.CacheThresholdFilterIndexes, args.Tenant,
+			tS.dm, utils.CacheThresholdFilterIndexes, tnt,
 			tS.cgrcfg.ThresholdSCfg().IndexedSelects,
 			tS.cgrcfg.ThresholdSCfg().NestedFields,
 		)
@@ -253,7 +253,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ThresholdsArgsProce
 	}
 	ts = make(Thresholds, 0, len(tIDs))
 	for tID := range tIDs {
-		tPrfl, err := tS.dm.GetThresholdProfile(args.Tenant, tID, true, true, utils.NonTransactional)
+		tPrfl, err := tS.dm.GetThresholdProfile(tnt, tID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -264,7 +264,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ThresholdsArgsProce
 			!tPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
 			continue
 		}
-		if pass, err := tS.filterS.Pass(args.Tenant, tPrfl.FilterIDs,
+		if pass, err := tS.filterS.Pass(tnt, tPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -330,8 +330,8 @@ func (attr *ThresholdsArgsProcessEvent) Clone() *ThresholdsArgsProcessEvent {
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(args *ThresholdsArgsProcessEvent) (thresholdsIDs []string, err error) {
-	matchTs, err := tS.matchingThresholdsForEvent(args)
+func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcessEvent) (thresholdsIDs []string, err error) {
+	matchTs, err := tS.matchingThresholdsForEvent(tnt, args)
 	if err != nil {
 		return nil, err
 	}
@@ -344,7 +344,7 @@ func (tS *ThresholdService) processEvent(args *ThresholdsArgsProcessEvent) (thre
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
-					t.TenantID(), args.CGREvent.TenantID(), err.Error()))
+					t.TenantID(), utils.ConcatenatedKey(tnt, args.CGREvent.ID), err.Error()))
 			withErrors = true
 			continue
 		}
@@ -390,13 +390,17 @@ func (tS *ThresholdService) V1ProcessEvent(args *ThresholdsArgsProcessEvent, rep
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
+	}
 	var ids []string
-	if ids, err = tS.processEvent(args); err != nil {
+	if ids, err = tS.processEvent(tnt, args); err != nil {
 		return
 	}
 	*reply = ids
@@ -408,13 +412,17 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(args *ThresholdsArgsProcessE
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
+	}
 	var ts Thresholds
-	if ts, err = tS.matchingThresholdsForEvent(args); err == nil {
+	if ts, err = tS.matchingThresholdsForEvent(tnt, args); err == nil {
 		*reply = ts
 	}
 	return
