@@ -33,8 +33,11 @@ type AttributeWithCache struct {
 
 //SetAttributeProfile add/update a new Attribute Profile
 func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(arg.ExternalAttributeProfile, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(arg.ExternalAttributeProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = APIerSv2.Config.GeneralCfg().DefaultTenant
 	}
 	alsPrf, err := arg.ExternalAttributeProfile.AsAttributeProfile()
 	if err != nil {

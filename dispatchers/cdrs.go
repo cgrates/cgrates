@@ -177,9 +177,9 @@ func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithOpts, reply *s
 }
 
 func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, reply *[]*utils.EventWithFlags) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV2ProcessEvent, tnt,
@@ -192,9 +192,9 @@ func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, 
 }
 
 func (dS *DispatcherService) CDRsV2StoreSessionCost(args *engine.ArgsV2CDRSStoreSMCost, reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.Tenant != utils.EmptyString {
-		tnt = args.Tenant
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV2StoreSessionCost, tnt,
