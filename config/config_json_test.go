@@ -337,6 +337,9 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			utils.RedisClusterOnDownDelayCfg: "0",
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
 		},
 		Items: &map[string]*ItemOptJson{
 			utils.MetaAccounts: {
@@ -1633,6 +1636,10 @@ func TestDfMigratorCfg(t *testing.T) {
 			utils.RedisClusterCfg:            false,
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
 		},
 	}
 	if cfg, err := dfCgrJSONCfg.MigratorCfgJson(); err != nil {

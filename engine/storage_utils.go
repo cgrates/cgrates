@@ -54,9 +54,16 @@ func NewDataDBConn(dbType, host, port, name, user,
 		if clusterOnDownDelay, err = utils.IfaceAsDuration(opts[utils.RedisClusterOnDownDelayCfg]); err != nil {
 			return
 		}
+		var hasTlsConn bool
+		if hasTlsConn, err = utils.IfaceAsBool(opts[utils.RedisTLS]); err != nil {
+			return
+		}
 		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler,
 			utils.REDIS_MAX_CONNS, utils.IfaceAsString(opts[utils.RedisSentinelNameCfg]),
-			isCluster, clusterSync, clusterOnDownDelay)
+			isCluster, clusterSync, clusterOnDownDelay, hasTlsConn,
+			utils.IfaceAsString(opts[utils.RedisClientCertificate]),
+			utils.IfaceAsString(opts[utils.RedisClientKey]),
+			utils.IfaceAsString(opts[utils.RedisCACertificate]))
 	case utils.MONGO:
 		var ttl time.Duration
 		if ttl, err = utils.IfaceAsDuration(opts[utils.QueryTimeoutCfg]); err != nil {

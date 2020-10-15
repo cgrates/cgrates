@@ -21,6 +21,8 @@ package engine
 import (
 	"bytes"
 	"compress/zlib"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -68,7 +70,8 @@ const (
 
 func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 	maxConns int, sentinelName string, isCluster bool, clusterSync,
-	clusterOnDownDelay time.Duration) (rs *RedisStorage, err error) {
+	clusterOnDownDelay time.Duration, tlsConn bool,
+	tlsClientCert, tlsClientKey, tlsCACert string) (rs *RedisStorage, err error) {
 	rs = new(RedisStorage)
 	if rs.ms, err = NewMarshaler(mrshlerStr); err != nil {
 		rs = nil
@@ -84,6 +87,37 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 		} else {
 			dialOpts = append(dialOpts, radix.DialAuthUser(user, pass))
 		}
+	}
+
+	if tlsConn {
+		var cert tls.Certificate
+		if tlsClientCert != "" && tlsClientKey != "" {
+			cert, err = tls.LoadX509KeyPair(tlsClientCert, tlsClientKey)
+			if err != nil {
+				return
+			}
+		}
+		var rootCAs *x509.CertPool
+		if rootCAs, err = x509.SystemCertPool(); err != nil {
+			return
+		}
+		if rootCAs == nil {
+			rootCAs = x509.NewCertPool()
+		}
+		if tlsCACert != "" {
+			var ca []byte
+			if ca, err = ioutil.ReadFile(tlsCACert); err != nil {
+				return
+			}
+
+			if ok := rootCAs.AppendCertsFromPEM(ca); !ok {
+				return
+			}
+		}
+		dialOpts = append(dialOpts, radix.DialUseTLS(&tls.Config{
+			Certificates: []tls.Certificate{cert},
+			RootCAs:      rootCAs,
+		}))
 	}
 
 	dialFunc := func(network, addr string) (radix.Conn, error) {

@@ -43,9 +43,6 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 			utils.RedisClusterCfg:     true,
 			utils.RedisClusterSyncCfg: "10s",
 		},
-		Out_storDB_opts: map[string]interface{}{
-			utils.RedisClusterCfg: true,
-		},
 	}
 	expected := &MigratorCgrCfg{
 		OutDataDBType:     utils.REDIS,
@@ -66,10 +63,12 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 			utils.RedisClusterCfg:            true,
 			utils.RedisClusterSyncCfg:        "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
 		},
-		OutStorDBOpts: map[string]interface{}{
-			utils.RedisClusterCfg: true,
-		},
+		OutStorDBOpts: map[string]interface{}{},
 	}
 	if cfgJson, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
@@ -117,6 +116,10 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 			utils.RedisClusterCfg:            true,
 			utils.RedisClusterSyncCfg:        "2s",
 			utils.RedisClusterOnDownDelayCfg: "1",
+			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -156,6 +159,10 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 			utils.RedisClusterCfg:            false,
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -190,6 +197,10 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 			utils.RedisClusterCfg:            false,
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

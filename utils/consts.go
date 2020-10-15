@@ -1927,6 +1927,9 @@ const (
 	RedisClusterSyncCfg        = "redis_cluster_sync"
 	RedisClusterOnDownDelayCfg = "redis_cluster_ondown_delay"
 	RedisTLS                   = "redis_tls"
+	RedisClientCertificate     = "redis_client_certificate"
+	RedisClientKey             = "redis_client_key"
+	RedisCACertificate         = "redis_ca_certificate"
 )
 
 // ItemOpt
