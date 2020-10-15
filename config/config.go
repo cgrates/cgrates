@@ -153,6 +153,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.cacheCfg.Partitions = make(map[string]*CacheParamCfg)
 	cfg.listenCfg = new(ListenCfg)
 	cfg.httpCfg = new(HTTPCfg)
+	cfg.httpCfg.ClientOpts = make(map[string]interface{})
 	cfg.filterSCfg = new(FilterSCfg)
 	cfg.ralsCfg = new(RalsCfg)
 	cfg.ralsCfg.MaxComputedUsage = make(map[string]time.Duration)

@@ -313,7 +313,7 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 				utils.ERs, utils.ToJSON(origCgrEvs[0].Event), err.Error()))
 		return
 	}
-	record, err := cdr.AsExportRecord(rdr.Config().CacheDumpFields, false, nil, rdr.fltrS)
+	record, err := cdr.AsExportRecord(rdr.Config().CacheDumpFields, rdr.cgrCfg.HTTPCfg().GetDefaultHTTPTransort(), nil, rdr.fltrS)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
@@ -345,7 +345,7 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 						utils.ERs, utils.ToJSON(origCgrEv.Event), err.Error()))
 				return
 			}
-			record, err = cdr.AsExportRecord(rdr.Config().CacheDumpFields, false, nil, rdr.fltrS)
+			record, err = cdr.AsExportRecord(rdr.Config().CacheDumpFields, rdr.cgrCfg.HTTPCfg().GetDefaultHTTPTransort(), nil, rdr.fltrS)
 			if err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",

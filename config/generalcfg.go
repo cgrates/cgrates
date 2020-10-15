@@ -30,7 +30,6 @@ type GeneralCfg struct {
 	NodeID             string        // Identifier for this engine instance
 	Logger             string        // dictates the way logs are displayed/stored
 	LogLevel           int           // system wide log level, nothing higher than this will be logged
-	HttpSkipTlsVerify  bool          // If enabled Http Client will accept any TLS certificate
 	RoundingDecimals   int           // Number of decimals to round end prices at
 	DBDataEncoding     string        // The encoding used to store object data in strings: <msgpack|json>
 	TpExportPath       string        // Path towards export folder for offline Tariff Plans
@@ -101,9 +100,6 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Rounding_decimals != nil {
 		gencfg.RoundingDecimals = *jsnGeneralCfg.Rounding_decimals
 	}
-	if jsnGeneralCfg.Http_skip_tls_verify != nil {
-		gencfg.HttpSkipTlsVerify = *jsnGeneralCfg.Http_skip_tls_verify
-	}
 	if jsnGeneralCfg.Tpexport_dir != nil {
 		gencfg.TpExportPath = *jsnGeneralCfg.Tpexport_dir
 	}
@@ -156,7 +152,6 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.NodeIDCfg:             gencfg.NodeID,
 		utils.LoggerCfg:             gencfg.Logger,
 		utils.LogLevelCfg:           gencfg.LogLevel,
-		utils.HttpSkipTlsVerifyCfg:  gencfg.HttpSkipTlsVerify,
 		utils.RoundingDecimalsCfg:   gencfg.RoundingDecimals,
 		utils.DBDataEncodingCfg:     utils.Meta + gencfg.DBDataEncoding,
 		utils.TpExportPathCfg:       gencfg.TpExportPath,
