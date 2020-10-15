@@ -65,6 +65,10 @@ var (
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
 	dbQueryTimeout = cgrLoaderFlags.String("query_timeout", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
 		"The timeout for queries")
+	dbRedisTls               = cgrLoaderFlags.Bool(utils.RedisTLS, false, "Use a tls connection when connecting to redis")
+	dbRedisClientCertificate = cgrLoaderFlags.String(utils.RedisClientCertificate, utils.EmptyString, "Path to the client certificate")
+	dbRedisClientKey         = cgrLoaderFlags.String(utils.RedisClientKey, utils.EmptyString, "Path to the client key")
+	dbRedisCACertificate     = cgrLoaderFlags.String(utils.RedisCACertificate, utils.EmptyString, "Path to the CA certificate")
 
 	storDBType = cgrLoaderFlags.String("stordb_type", dfltCfg.StorDbCfg().Type,
 		"The type of the storDb database <*mysql|*postgres|*mongo>")
@@ -160,6 +164,20 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	}
 	if *dbQueryTimeout != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]) {
 		ldrCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg] = *dbQueryTimeout
+	}
+
+	rdsTLS, _ := utils.IfaceAsBool(dfltCfg.DataDbCfg().Opts[utils.RedisTLS])
+	if *dbRedisTls != rdsTLS {
+		ldrCfg.DataDbCfg().Opts[utils.RedisTLS] = *dbRedisTls
+	}
+	if *dbRedisClientCertificate != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClientCertificate]) {
+		ldrCfg.DataDbCfg().Opts[utils.RedisClientCertificate] = *dbRedisClientCertificate
+	}
+	if *dbRedisClientKey != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClientKey]) {
+		ldrCfg.DataDbCfg().Opts[utils.RedisClientKey] = *dbRedisClientKey
+	}
+	if *dbRedisCACertificate != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisCACertificate]) {
+		ldrCfg.DataDbCfg().Opts[utils.RedisCACertificate] = *dbRedisCACertificate
 	}
 
 	if *dbDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {

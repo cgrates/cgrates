@@ -1736,6 +1736,10 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterCfg:            false,
 			utils.RedisSentinelNameCfg:       "",
+			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
 		},
 		OutStorDBOpts: make(map[string]interface{}),
 	}

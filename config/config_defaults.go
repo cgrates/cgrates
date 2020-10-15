@@ -107,7 +107,10 @@ const CGRATES_CFG_JSON = `
 		"redis_cluster_sync": "5s",				// the sync interval for the redis cluster
 		"redis_cluster_ondown_delay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
 		"query_timeout":"10s",
-		"redis_tls": false,						// if true it will use a tls connection and use the client certificate, key and ca_certificate for tls connection
+		"redis_tls": false,					// if true it will use a tls connection and use the redis_client_certificate certificate, redis_client_key and redis_ca_certificate for tls connection
+		"redis_client_certificate":"",		// path to client certificate
+		"redis_client_key":"",				// path to client key
+		"redis_ca_certificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 	}
 },
 
@@ -873,7 +876,11 @@ const CGRATES_CFG_JSON = `
 		"redis_sentinel": "",					
 		"redis_cluster": false,					
 		"redis_cluster_sync": "5s",					
-		"redis_cluster_ondown_delay": "0",	
+		"redis_cluster_ondown_delay": "0",
+		"redis_tls": false,					// if true it will use a tls connection and use the redis_client_certificate, redis_client_key and redis_ca_certificate for tls connection
+		"redis_client_certificate":"",		// path to client certificate
+		"redis_client_key":"",				// path to client key
+		"redis_ca_certificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 	},
 	"out_stordb_opts":{},
 },

@@ -1,0 +1,47 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"node_id": "RedisTLS"
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+	"db_type": "redis",
+	"db_host":"127.0.0.1:6400",
+	"db_name": "10",
+	"opts": {
+		"redis_tls": true,
+		"redis_client_certificate":"/usr/share/cgrates/tls/client.crt",
+		"redis_client_key":"/usr/share/cgrates/tls/client.key",
+		"redis_ca_certificate":"/usr/share/cgrates/tls/ca.crt",
+	},
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"apiers": {
+	"enabled": true,
+},
+
+
+}
