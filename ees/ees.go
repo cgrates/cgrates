@@ -165,7 +165,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 		}
 
 		if len(eeCfg.Filters) != 0 {
-			tnt := cgrEv.Tenant
+			tnt := utils.FirstNonEmpty(cgrEv.Tenant, eeS.cfg.GeneralCfg().DefaultTenant)
 			if eeTnt, errTnt := eeCfg.Tenant.ParseDataProvider(cgrDp); errTnt == nil && eeTnt != utils.EmptyString {
 				tnt = eeTnt
 			}

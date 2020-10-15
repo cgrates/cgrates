@@ -51,7 +51,7 @@ func (apierSv1 *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) erro
 
 	cd := &engine.CallDescriptor{
 		Category:      attrs.Category,
-		Tenant:        attrs.Tenant,
+		Tenant:        utils.FirstNonEmpty(attrs.Tenant, apierSv1.Config.GeneralCfg().DefaultTenant),
 		Subject:       attrs.Subject,
 		Destination:   attrs.Destination,
 		TimeStart:     aTime,
@@ -91,7 +91,7 @@ func (apierSv1 *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.Data
 	}
 	cd := &engine.CallDescriptor{
 		Category:      attrs.Category,
-		Tenant:        attrs.Tenant,
+		Tenant:        utils.FirstNonEmpty(attrs.Tenant, apierSv1.Config.GeneralCfg().DefaultTenant),
 		Subject:       attrs.Subject,
 		TimeStart:     aTime,
 		TimeEnd:       aTime.Add(attrs.Usage),

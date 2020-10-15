@@ -2420,8 +2420,11 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if args.CGREvent.ID == "" {
+	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
+	}
+	if args.CGREvent.Tenant == utils.EmptyString {
+		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
@@ -2447,9 +2450,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 	if !args.GetAttributes && !args.UpdateSession {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
-	}
+
 	if args.GetAttributes {
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, args.Opts, false)
 		if err == nil {
@@ -2567,6 +2568,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
+	if args.CGREvent.Tenant == "" {
+		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	}
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.SessionSv1TerminateSession, args.CGREvent.ID)
@@ -2589,9 +2593,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 	if !args.TerminateSession && !args.ReleaseResources {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
-	}
+
 	ev := engine.MapEvent(args.CGREvent.Event)
 	opts := engine.MapEvent(args.Opts)
 	cgrID := GetSetCGRID(ev)
@@ -2688,14 +2690,17 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 
 // BiRPCv1ProcessCDR sends the CDR to CDRs
 func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
-	cgrEvWithArgDisp *utils.CGREventWithOpts, rply *string) (err error) {
-	if cgrEvWithArgDisp.ID == "" {
-		cgrEvWithArgDisp.ID = utils.GenUUID()
+	cgrEv *utils.CGREventWithOpts, rply *string) (err error) {
+	if cgrEv.ID == utils.EmptyString {
+		cgrEv.ID = utils.GenUUID()
+	}
+	if cgrEv.Tenant == utils.EmptyString {
+		cgrEv.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessCDR, cgrEvWithArgDisp.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessCDR, cgrEv.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -2713,11 +2718,11 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 	}
 	// end of RPC caching
 	// in case that source don't exist add it
-	if _, has := cgrEvWithArgDisp.Event[utils.Source]; !has {
-		cgrEvWithArgDisp.Event[utils.Source] = utils.MetaSessionS
+	if _, has := cgrEv.Event[utils.Source]; !has {
+		cgrEv.Event[utils.Source] = utils.MetaSessionS
 	}
 
-	return sS.processCDR(cgrEvWithArgDisp, []string{utils.MetaRALs}, rply, false)
+	return sS.processCDR(cgrEv, []string{utils.MetaRALs}, rply, false)
 }
 
 // NewV1ProcessMessageArgs is a constructor for MessageArgs used by ProcessMessage
@@ -2863,8 +2868,11 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
+	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
+	}
+	if args.CGREvent.Tenant == utils.EmptyString {
+		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
@@ -2887,9 +2895,6 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 	}
 	// end of RPC caching
 
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
-	}
 	me := engine.MapEvent(args.CGREvent.Event)
 	originID := me.GetStringIgnoreErrors(utils.OriginID)
 
@@ -3080,6 +3085,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
+	if args.CGREvent.Tenant == "" {
+		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
@@ -3100,10 +3108,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
-	}
 
 	//convert from Flags []string to utils.FlagsWithParams
 	argsFlagsWithParams := utils.FlagsWithParamsFromSlice(args.Flags)
@@ -3522,6 +3526,9 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
+	if args.CGREvent.Tenant == "" {
+		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
@@ -3542,10 +3549,6 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
-	}
 
 	//convert from Flags []string to utils.FlagsWithParams
 	argsFlagsWithParams := utils.FlagsWithParamsFromSlice(args.Flags)
@@ -3713,9 +3716,7 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(clnt rpcclient.ClientConnector,
 }
 
 func (sS *SessionS) processCDR(cgrEv *utils.CGREventWithOpts, flags []string, rply *string, clnb bool) (err error) {
-	if cgrEv.Tenant == "" {
-		cgrEv.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
-	}
+
 	ev := engine.MapEvent(cgrEv.Event)
 	cgrID := GetSetCGRID(ev)
 	s := sS.getRelocateSession(cgrID,
