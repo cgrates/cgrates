@@ -756,8 +756,11 @@ func (attr *ArgV1ProcessEvent) Clone() *ArgV1ProcessEvent {
 
 // V1ProcessEvent will process the CGREvent
 func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (err error) {
-	if arg.CGREvent.ID == "" {
+	if arg.CGREvent.ID == utils.EmptyString {
 		arg.CGREvent.ID = utils.GenUUID()
+	}
+	if arg.CGREvent.Tenant == utils.EmptyString {
+		arg.CGREvent.Tenant = cdrS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
