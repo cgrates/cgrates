@@ -81,6 +81,7 @@ var (
 		testV1STSProcessMetricsWithFilter,
 		testV1STSProcessStaticMetrics,
 		testV1STSProcessStatWithThreshold,
+		testV1STSV1GetQueueIDs,
 		testV1STSGetStatQueueProfileWithoutTenant,
 		testV1STSRemStatQueueProfileWithoutTenant,
 		//testV1STSProcessCDRStat,
@@ -1242,5 +1243,24 @@ func testV1STSRemStatQueueProfileWithoutTenant(t *testing.T) {
 		&utils.TenantID{ID: "TEST_PROFILE10"},
 		&result); err == nil || utils.ErrNotFound.Error() != err.Error() {
 		t.Error(err)
+	}
+}
+
+func testV1STSV1GetQueueIDs(t *testing.T) {
+	expected := []string{"StatWithThreshold", "Stats1", "StaticStatQueue", "CustomStatProfile"}
+	var qIDs []string
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
+		&utils.TenantWithOpts{},
+		&qIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(qIDs, expected) {
+		t.Errorf("Expected %+v \n ,received %+v", expected, qIDs)
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
+		&utils.TenantWithOpts{Tenant: "cgrates.org"},
+		&qIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(qIDs, expected) {
+		t.Errorf("Expected %+v \n ,received %+v", expected, qIDs)
 	}
 }

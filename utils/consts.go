@@ -1493,6 +1493,7 @@ const (
 	StatSv1Ping                    = "StatSv1.Ping"
 	StatSv1GetStatQueuesForEvent   = "StatSv1.GetStatQueuesForEvent"
 	StatSv1GetStatQueue            = "StatSv1.GetStatQueue"
+	StatSv1V1GetQueueIDs           = "StatSv1.GetQueueIDs"
 	APIerSv1GetStatQueueProfile    = "APIerSv1.GetStatQueueProfile"
 	APIerSv1RemoveStatQueueProfile = "APIerSv1.RemoveStatQueueProfile"
 	APIerSv1SetStatQueueProfile    = "APIerSv1.SetStatQueueProfile"
