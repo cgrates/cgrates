@@ -24,6 +24,7 @@ import (
 	"net/rpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -1248,19 +1249,26 @@ func testV1STSRemStatQueueProfileWithoutTenant(t *testing.T) {
 
 func testV1STSV1GetQueueIDs(t *testing.T) {
 	expected := []string{"StatWithThreshold", "Stats1", "StaticStatQueue", "CustomStatProfile"}
+	sort.Strings(expected)
 	var qIDs []string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
 		&utils.TenantWithOpts{},
 		&qIDs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(qIDs, expected) {
-		t.Errorf("Expected %+v \n ,received %+v", expected, qIDs)
-	}
-	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"},
-		&qIDs); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(qIDs, expected) {
-		t.Errorf("Expected %+v \n ,received %+v", expected, qIDs)
+	} else {
+		sort.Strings(qIDs)
+		if !reflect.DeepEqual(qIDs, expected) {
+			t.Errorf("Expected %+v \n ,received %+v", expected, qIDs)
+		}
+		if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
+			&utils.TenantWithOpts{Tenant: "cgrates.org"},
+			&qIDs); err != nil {
+			t.Error(err)
+		} else {
+			sort.Strings(qIDs)
+			if !reflect.DeepEqual(qIDs, expected) {
+				t.Errorf("Expected %+v \n ,received %+v", expected, qIDs)
+			}
+		}
 	}
 }
