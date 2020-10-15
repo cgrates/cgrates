@@ -25,18 +25,18 @@ import (
 	"net/rpc"
 	"os/exec"
 	"path"
-	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	redisTLS          = flag.Bool("redis_tls", false, "Run tests with redis tls")
 	redisTLSServer    *exec.Cmd
-	redisTLSEngineCfg = path.Join(*dataDir, "conf", "samples", "tutredis_tls")
+	redisTLSEngineCfg = path.Join(*dataDir, "conf", "samples", "redis_tls")
 	redisTLSCfg       *config.CGRConfig
 	redisTLSRPC       *rpc.Client
 
@@ -56,15 +56,6 @@ var (
 func TestRedisTLS(t *testing.T) {
 	if !*redisTLS {
 		return
-	}
-	switch *dbType {
-	case utils.MetaMySQL:
-	case utils.MetaInternal,
-		utils.MetaMongo,
-		utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
 	}
 	for _, stest := range sTestsRedisTLS {
 		t.Run("TestRedisTLS", stest)
@@ -113,43 +104,18 @@ func testRedisTLSRPCCon(t *testing.T) {
 }
 
 func testRedisTLSSetGetAttribute(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ApierTest",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Attributes: []*engine.Attribute{
-			{
-				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
-			},
-		},
-		Weight: 20,
-	}
-	alsPrf.Compile()
-	var result string
-	if err := redisTLSRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err != nil {
+	// status command to check if the engine starts
+	var rply map[string]interface{}
+	if err := redisTLSRPC.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
 		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	var reply *engine.AttributeProfile
-	if err := redisTLSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
-		t.Fatal(err)
-	}
-	reply.Compile()
-	if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
 
 func testRedisTLSKillEngine(t *testing.T) {
-	if err := exec.Command("pkill", "redis-server").Run(); err != nil {
+	if err := engine.KillEngine(2000); err != nil {
 		t.Error(err)
 	}
-
-	if err := engine.KillEngine(2000); err != nil {
+	if err := exec.Command("pkill", "redis-server").Run(); err != nil {
 		t.Error(err)
 	}
 }
