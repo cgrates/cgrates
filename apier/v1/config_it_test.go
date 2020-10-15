@@ -49,6 +49,7 @@ var (
 		testConfigSRPCConn,
 		testConfigSReloadConfigFromJSONSessionS,
 		testConfigSReloadConfigFromJSONEEs,
+		testConfigSv1GetJSONSectionWithoutTenant,
 		testConfigSKillEngine,
 		testConfigStartEngineWithConfigs,
 		testConfigStartEngineFromHTTP,
@@ -116,6 +117,7 @@ func testConfigSRPCConn(t *testing.T) {
 func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 	var reply string
 	if err := configRPC.Call(utils.ConfigSv1ReloadConfigFromJSON, &config.JSONReloadWithOpts{
+		Tenant: "cgrates.org",
 		JSON: map[string]interface{}{
 			"sessions": map[string]interface{}{
 				"enabled":          true,
@@ -176,6 +178,56 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		exp["SchedulerConns"] = empty
 		exp["StatSConns"] = empty
 		exp["ThreshSConns"] = empty
+	}
+	var rpl map[string]interface{}
+	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{
+		Tenant:  "cgrates.org",
+		Section: config.SessionSJson,
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rpl) {
+		t.Errorf("Expected %+v , received: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
+	}
+}
+
+func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
+	exp := map[string]interface{}{
+		"Enabled":             true,
+		"ListenBijson":        "127.0.0.1:2014",
+		"ChargerSConns":       []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		"RALsConns":           []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		"ResSConns":           []interface{}{utils.MetaLocalHost},
+		"ThreshSConns":        []interface{}{},
+		"StatSConns":          []interface{}{},
+		"RouteSConns":         []interface{}{utils.MetaLocalHost},
+		"AttrSConns":          []interface{}{utils.MetaLocalHost},
+		"CDRsConns":           []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		"ReplicationConns":    []interface{}{},
+		"MaxCallDuration":     float64(3 * time.Hour),
+		"MinDurLowBalance":    0.,
+		"SessionIndexes":      map[string]interface{}{"OriginID": true},
+		"ClientProtocol":      1.,
+		"TerminateAttempts":   5.,
+		"ChannelSyncInterval": 0.,
+		"DebitInterval":       0.,
+		"MinCallDuration":     0.,
+		"SessionTTL":          0.,
+		"SessionTTLLastUsed":  nil,
+		"SessionTTLMaxDelay":  nil,
+		"SessionTTLUsage":     nil,
+		"SessionTTLLastUsage": nil,
+		"StoreSCosts":         false,
+		"AlterableFields":     map[string]interface{}{},
+		"STIRCfg": map[string]interface{}{
+			"AllowedAttest": map[string]interface{}{
+				utils.META_ANY: map[string]interface{}{},
+			},
+			"DefaultAttest":      "A",
+			"PayloadMaxduration": -1.,
+			"PrivateKeyPath":     "",
+			"PublicKeyPath":      "",
+		},
+		"SchedulerConns": []interface{}{},
 	}
 	var rpl map[string]interface{}
 	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{
