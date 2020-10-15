@@ -164,7 +164,6 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *ArgsCo
 // ArgsCostForEvent arguments used for proccess event
 type ArgsCostForEvent struct {
 	RateProfileIDs []string
-	Opts           map[string]interface{}
 	*utils.CGREventWithOpts
 }
 

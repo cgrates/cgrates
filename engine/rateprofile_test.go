@@ -231,11 +231,6 @@ func TestRateProfileCompile(t *testing.T) {
 		t.Error(err)
 	}
 
-	refTime := time.Date(2018, time.January, 7, 17, 0, 0, 0, time.UTC)
-	exp := time.Date(2018, time.December, 24, 0, 0, 0, 0, time.UTC)
-	if rcv := rt.NextActivationTime(refTime); !rcv.Equal(exp) {
-		t.Errorf("Expected: %v,\n received: %v", exp, rcv)
-	}
 	rt = &Rate{
 		ID:              "RT_CHRISTMAS",
 		Weight:          30,
@@ -243,11 +238,6 @@ func TestRateProfileCompile(t *testing.T) {
 	}
 	if err := rt.Compile(); err != nil {
 		t.Error(err)
-	}
-
-	exp = time.Date(2018, time.January, 7, 17, 1, 0, 0, time.UTC)
-	if rcv := rt.NextActivationTime(refTime); !rcv.Equal(exp) {
-		t.Errorf("Expected: %v,\n received: %v", exp, rcv)
 	}
 
 	rt = &Rate{
@@ -259,3 +249,48 @@ func TestRateProfileCompile(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+/*
+func TestRateProfileRunTimes(t *testing.T) {
+	rt := &Rate{
+		ID:              "RT_CHRISTMAS",
+		Weight:          30,
+		ActivationTimes: "* * 24 12 *",
+	}
+	rt.Compile()
+	// sTime and eTime inside the activation interval
+	sTime := time.Date(2020, 12, 24, 12, 0, 0, 0, time.UTC)
+	eTime := sTime.Add(time.Duration(time.Hour))
+	eRTimes := [][]time.Time{
+		{time.Date(2020, 12, 24, 12, 1, 0, 0, time.UTC), time.Date(2020, 12, 25, 0, 0, 0, 0, time.UTC)},
+	}
+	if rTimes := rt.RunTimes(sTime, eTime); !reflect.DeepEqual(eRTimes, rTimes) {
+		t.Errorf("expecting: %+v, received: %+v", eRTimes, rTimes)
+	}
+	// sTime smaller than activation time, eTime equals aTime
+	sTime = time.Date(2020, 12, 23, 23, 0, 0, 0, time.UTC)
+	eTime = sTime.Add(time.Duration(time.Hour))
+	eRTimes = nil // cannot cover full interval
+	if rTimes := rt.RunTimes(sTime, eTime); !reflect.DeepEqual(eRTimes, rTimes) {
+		t.Errorf("expecting: %+v, received: %+v", eRTimes, rTimes)
+	}
+	// sTime smaller than activation time but first aTime inside, eTime inside activation interval
+	sTime = time.Date(2020, 12, 23, 23, 59, 59, 0, time.UTC)
+	eTime = sTime.Add(time.Duration(time.Hour))
+	eRTimes = [][]time.Time{
+		{time.Date(2020, 12, 24, 0, 0, 0, 0, time.UTC), time.Date(2020, 12, 25, 0, 0, 0, 0, time.UTC)},
+	}
+	if rTimes := rt.RunTimes(sTime, eTime); !reflect.DeepEqual(eRTimes, rTimes) {
+		t.Errorf("expecting: %+v, received: %+v", eRTimes, rTimes)
+	}
+	// sTime way before aTime, eTime inside aInterval
+	sTime = time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
+	eTime = time.Date(2021, 12, 24, 0, 1, 0, 0, time.UTC)
+	eRTimes = [][]time.Time{
+		{time.Date(2021, 12, 24, 0, 0, 0, 0, time.UTC), time.Date(2021, 12, 25, 0, 0, 0, 0, time.UTC)},
+	}
+	if rTimes := rt.RunTimes(sTime, eTime); !reflect.DeepEqual(eRTimes, rTimes) {
+		t.Errorf("expecting: %+v, received: %+v", eRTimes, rTimes)
+	}
+}
+*/

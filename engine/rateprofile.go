@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"sort"
 	"time"
 
@@ -85,8 +86,59 @@ func (rt *Rate) Compile() (err error) {
 	return
 }
 
-func (rt *Rate) NextActivationTime(t time.Time) time.Time {
-	return rt.aTime.Next(t)
+// RunTimes returns the set of activation and deactivation times for this rate on the interval between >=sTime and <eTime
+// aTimes is in the form of [][]
+func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time.Time, err error) {
+	origSTime := sTime
+	for i := 0; i < 5; i++ { // find out the first activation time in the past enabled for our sTime
+		switch i {
+		case 0:
+			sTime = origSTime.Add(-time.Minute)
+		case 1:
+			sTime = origSTime.Add(-time.Hour)
+		case 2:
+			sTime = origSTime.AddDate(0, 0, -1)
+		case 3:
+			sTime = origSTime.AddDate(0, -1, 0)
+		case 4:
+			sTime = origSTime.AddDate(-1, 0, 0)
+		}
+		aTime := rt.aTime.Next(sTime)
+		if sTime.Before(aTime) {
+			continue
+		}
+		iTime := rt.aTime.NextInactive(sTime)
+		aTimes = append(aTimes, []time.Time{aTime, iTime})
+		if iTime.IsZero() || !eTime.After(iTime) { // #TestMe
+			return
+		}
+		if iTime.IsZero() || !eTime.After(iTime) { // #TestMe
+			return
+		}
+		sTime = iTime
+		break
+	}
+	if len(aTimes) == 0 {
+		return
+	}
+	for i := 0; i < verbosity; i++ {
+		aTime := rt.aTime.Next(sTime)
+		if aTime.IsZero() || !aTime.Before(eTime) { // #TestMe
+			return
+		}
+		iTime := rt.aTime.NextInactive(sTime)
+		aTimes = append(aTimes, []time.Time{aTime, iTime})
+		if iTime.IsZero() || !eTime.After(iTime) { // #TestMe
+			return
+		}
+		sTime = iTime
+	}
+	// protect from memory leak
+	utils.Logger.Warning(
+		fmt.Sprintf(
+			"maximum runTime iterations reached for Rate: <%+v>, sTime: <%+v>, eTime: <%+v>",
+			rt, sTime, eTime))
+	return nil, utils.ErrMaxIterationsReached
 }
 
 type IntervalRate struct {

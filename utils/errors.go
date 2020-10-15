@@ -75,6 +75,7 @@ var (
 	ErrServiceAlreadyRunning         = fmt.Errorf("service already running")
 	ErrMaxConcurentRPCExceededNoCaps = errors.New("max concurent rpc exceeded") // on internal we return this error for concureq
 	ErrMaxConcurentRPCExceeded       = errors.New("MAX_CONCURENT_RPC_EXCEEDED") // but the codec will rewrite it with this one to be sure that we corectly dealocate the request
+	ErrMaxIterationsReached          = errors.New("maximum iterations reached")
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():              ErrNoMoreData,
