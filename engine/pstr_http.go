@@ -20,7 +20,6 @@ package engine
 
 import (
 	"bytes"
-	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -30,17 +29,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// keep it global in order to reuse it
-var httpPosterTransport *http.Transport
-
-// HttpJsonPost posts without automatic failover
-func HttpJsonPost(url string, skipTLSVerify bool, content []byte) (respBody []byte, err error) {
-	if httpPosterTransport == nil {
-		httpPosterTransport = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
-		}
-	}
-	client := &http.Client{Transport: httpPosterTransport}
+// HTTPPostJSON posts without automatic failover
+func HTTPPostJSON(url string, posterTransport *http.Transport, content []byte) (respBody []byte, err error) {
+	client := &http.Client{Transport: posterTransport}
 	var resp *http.Response
 	if resp, err = client.Post(url, "application/json", bytes.NewBuffer(content)); err != nil {
 		return
@@ -57,18 +48,13 @@ func HttpJsonPost(url string, skipTLSVerify bool, content []byte) (respBody []by
 }
 
 // NewHTTPPoster return a new HTTP poster
-func NewHTTPPoster(skipTLSVerify bool, replyTimeout time.Duration,
+func NewHTTPPoster(posterTransport *http.Transport, replyTimeout time.Duration,
 	addr, contentType string, attempts int) (httposter *HTTPPoster, err error) {
 	if !utils.SliceHasMember([]string{utils.CONTENT_FORM, utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
 		return nil, fmt.Errorf("unsupported ContentType: %s", contentType)
 	}
-	if httpPosterTransport == nil {
-		httpPosterTransport = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
-		}
-	}
 	return &HTTPPoster{
-		httpClient:  &http.Client{Transport: httpPosterTransport, Timeout: replyTimeout},
+		httpClient:  &http.Client{Transport: posterTransport, Timeout: replyTimeout},
 		addr:        addr,
 		contentType: contentType,
 		attempts:    attempts,

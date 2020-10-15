@@ -641,7 +641,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Value:    prsr,
 		Timezone: "UTC",
 	}
-	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != cdr.Destination {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.Destination, expRecord)
@@ -660,7 +661,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		MaskLen:    3,
 	}
 	eDst := "+4986517174***"
-	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != eDst {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", eDst, expRecord[0])
@@ -673,7 +675,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Value:      prsr,
 		MaskDestID: "MASKED_DESTINATIONS",
 	}
-	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != "1" {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", "1", expRecord[0])
@@ -689,7 +692,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Filters:  []string{"*string:~*req.Tenant:itsyscom.com"},
 		Timezone: "UTC",
 	}
-	if rcrd, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
+	if rcrd, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
 		t.Error(err)
 	} else if len(rcrd) != 0 {
 		t.Error("failed using filter")
@@ -706,7 +710,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Layout:   layout,
 		Timezone: "UTC",
 	}
-	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != "2014-06-11 19:19:00" {
 		t.Error("Expecting: 2014-06-11 19:19:00, got: ", expRecord[0])
@@ -722,7 +727,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Layout:   layout,
 		Timezone: "UTC",
 	}
-	if rcrd, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
+	if rcrd, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
 		t.Error(err)
 	} else if len(rcrd) != 0 {
 		t.Error("failed using filter")
@@ -737,7 +743,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Layout:   layout,
 		Timezone: "UTC"}
 	// Test time parse error
-	if _, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err == nil {
+	if _, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, nil); err == nil {
 		t.Error("Should give error here, got none.")
 	}
 
@@ -748,7 +755,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Path:  "*exp.CGRIDFromCostDetails",
 		Value: prsr,
 	}
-	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != cdr.CostDetails.CGRID {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.CostDetails.CGRID, expRecord)
@@ -760,7 +768,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Path:  "*exp.CustomAccountID",
 		Value: prsr,
 	}
-	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != cdr.CostDetails.AccountSummary.ID {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.CostDetails.AccountSummary.ID, expRecord)
@@ -774,7 +783,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Path:  "*exp.CustomDestinationID",
 		Value: prsr,
 	}
-	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != expected {
 		t.Errorf("Expecting: <%q>,\n Received: <%q>", expected, expRecord[0])
@@ -788,7 +798,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Path:  "*exp.CustomDestinationID",
 		Value: prsr,
 	}
-	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != expected {
 		t.Errorf("Expecting: <%q>,\n Received: <%q>", expected, expRecord[0])
@@ -802,7 +813,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Path:  "*exp.CustomDestinationID",
 		Value: prsr,
 	}
-	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != expected {
 		t.Errorf("Expecting: <%q>,\n Received: <%q>", expected, expRecord[0])
@@ -816,7 +828,8 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Path:  "*exp.CustomDestinationID",
 		Value: prsr,
 	}
-	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld},
+		config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), nil, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != expected {
 		t.Errorf("Expecting: <%q>,\n Received: <%q>", expected, expRecord[0])

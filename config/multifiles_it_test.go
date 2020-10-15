@@ -31,7 +31,7 @@ import (
 var mfCgrCfg *CGRConfig
 
 func TestMfInitConfig(t *testing.T) {
-	for key, val := range map[string]string{"LOGGER": "*syslog", "LOG_LEVEL": "6", "TLS_VERIFY": "false", "ROUND_DEC": "5",
+	for key, val := range map[string]string{"LOGGER": "*syslog", "LOG_LEVEL": "6", "ROUND_DEC": "5",
 		"DB_ENCODING": "*msgpack", "TP_EXPORT_DIR": "/var/spool/cgrates/tpe", "FAILED_POSTS_DIR": "/var/spool/cgrates/failed_posts",
 		"DF_TENANT": "cgrates.org", "TIMEZONE": "Local"} {
 		os.Setenv(key, val)
@@ -56,7 +56,6 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		NodeID:             "d80fac5",
 		Logger:             "*syslog",
 		LogLevel:           6,
-		HttpSkipTlsVerify:  false,
 		RoundingDecimals:   5,
 		DBDataEncoding:     "msgpack",
 		TpExportPath:       "/var/spool/cgrates/tpe",

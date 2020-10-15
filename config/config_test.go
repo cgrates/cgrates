@@ -229,9 +229,6 @@ func TestCgrCfgLoadJSONDefaults(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
-	if cgrCfg.GeneralCfg().HttpSkipTlsVerify != false {
-		t.Errorf("Expected: false, received: %+v", cgrCfg.GeneralCfg().HttpSkipTlsVerify)
-	}
 	if cgrCfg.GeneralCfg().RoundingDecimals != 5 {
 		t.Errorf("Expected: 5, received: %+v", cgrCfg.GeneralCfg().RoundingDecimals)
 	}

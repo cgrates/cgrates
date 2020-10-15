@@ -27,7 +27,6 @@ type GeneralJsonCfg struct {
 	Node_id              *string
 	Logger               *string
 	Log_level            *int
-	Http_skip_tls_verify *bool
 	Rounding_decimals    *int
 	Dbdata_encoding      *string
 	Tpexport_dir         *string
@@ -71,6 +70,7 @@ type HTTPJsonCfg struct {
 	Http_Cdrs                 *string
 	Use_basic_auth            *bool
 	Auth_users                *map[string]string
+	Client_opts               map[string]interface{}
 }
 
 type TlsJsonCfg struct {

@@ -1871,7 +1871,6 @@ const (
 	NodeIDCfg             = "node_id"
 	LoggerCfg             = "logger"
 	LogLevelCfg           = "log_level"
-	HttpSkipTlsVerifyCfg  = "http_skip_tls_verify"
 	RoundingDecimalsCfg   = "rounding_decimals"
 	DBDataEncodingCfg     = "dbdata_encoding"
 	TpExportPathCfg       = "tpexport_dir"
@@ -1973,7 +1972,23 @@ const (
 	HTTPCDRsURLCfg             = "http_cdrs"
 	HTTPUseBasicAuthCfg        = "use_basic_auth"
 	HTTPAuthUsersCfg           = "auth_users"
+	HTTPClientOptsCfg          = "client_opts"
 	ConfigsURL                 = "configs_url"
+
+	HTTPClientTLSClientConfigCfg       = "skip_tls_verify"
+	HTTPClientTLSHandshakeTimeoutCfg   = "tls_handshake_timeout"
+	HTTPClientDisableKeepAlivesCfg     = "disable_keep_alives"
+	HTTPClientDisableCompressionCfg    = "disable_compression"
+	HTTPClientMaxIdleConnsCfg          = "max_idle_conns"
+	HTTPClientMaxIdleConnsPerHostCfg   = "max_idle_conns_per_host"
+	HTTPClientMaxConnsPerHostCfg       = "max_conns_per_host"
+	HTTPClientIdleConnTimeoutCfg       = "idle_conn_timeout"
+	HTTPClientResponseHeaderTimeoutCfg = "response_header_timeout"
+	HTTPClientExpectContinueTimeoutCfg = "expect_continue_timeout"
+	HTTPClientForceAttemptHTTP2Cfg     = "force_attempt_http2"
+	HTTPClientDialTimeoutCfg           = "dial_timeout"
+	HTTPClientDialFallbackDelayCfg     = "dial_fallback_delay"
+	HTTPClientDialKeepAliveCfg         = "dial_keep_alive"
 )
 
 // FilterSCfg

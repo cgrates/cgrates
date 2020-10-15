@@ -20,7 +20,6 @@ package engine
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -182,12 +181,9 @@ func SureTaxProcessCdr(cdr *CDR) error {
 		return errors.New("Invalid SureTax configuration")
 	}
 	if sureTaxClient == nil { // First time used, init the client here
-		tr := &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
-			},
+		sureTaxClient = &http.Client{
+			Transport: config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(),
 		}
-		sureTaxClient = &http.Client{Transport: tr}
 	}
 	req, err := NewSureTaxRequest(cdr, stCfg)
 	if err != nil {

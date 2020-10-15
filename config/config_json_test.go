@@ -41,7 +41,6 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Node_id:              utils.StringPointer(""),
 		Logger:               utils.StringPointer(utils.MetaSysLog),
 		Log_level:            utils.IntPointer(utils.LOGLEVEL_INFO),
-		Http_skip_tls_verify: utils.BoolPointer(false),
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("*msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
@@ -1568,11 +1567,27 @@ func TestDfHttpJsonCfg(t *testing.T) {
 		Http_Cdrs:                 utils.StringPointer("/cdr_http"),
 		Use_basic_auth:            utils.BoolPointer(false),
 		Auth_users:                utils.MapStringStringPointer(map[string]string{}),
+		Client_opts: map[string]interface{}{
+			utils.HTTPClientTLSClientConfigCfg:       false,
+			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
+			utils.HTTPClientDisableKeepAlivesCfg:     false,
+			utils.HTTPClientDisableCompressionCfg:    false,
+			utils.HTTPClientMaxIdleConnsCfg:          100.,
+			utils.HTTPClientMaxIdleConnsPerHostCfg:   2.,
+			utils.HTTPClientMaxConnsPerHostCfg:       0.,
+			utils.HTTPClientIdleConnTimeoutCfg:       "90s",
+			utils.HTTPClientResponseHeaderTimeoutCfg: "0",
+			utils.HTTPClientExpectContinueTimeoutCfg: "0",
+			utils.HTTPClientForceAttemptHTTP2Cfg:     true,
+			utils.HTTPClientDialTimeoutCfg:           "30s",
+			utils.HTTPClientDialFallbackDelayCfg:     "300ms",
+			utils.HTTPClientDialKeepAliveCfg:         "30s",
+		},
 	}
 	if cfg, err := dfCgrJSONCfg.HttpJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 
