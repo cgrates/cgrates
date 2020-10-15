@@ -430,6 +430,9 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(args *ThresholdsArgsProcessE
 
 // V1GetThresholdIDs returns list of thresholdIDs configured for a tenant
 func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (err error) {
+	if tenant == utils.EmptyString {
+		tenant = tS.cgrcfg.GeneralCfg().DefaultTenant
+	}
 	prfx := utils.ThresholdPrefix + tenant + ":"
 	keys, err := tS.dm.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
@@ -446,7 +449,11 @@ func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (er
 // V1GetThreshold retrieves a Threshold
 func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) (err error) {
 	var thd *Threshold
-	if thd, err = tS.dm.GetThreshold(tntID.Tenant, tntID.ID, true, true, ""); err != nil {
+	tnt := tntID.Tenant
+	if tnt == utils.EmptyString {
+		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	if thd, err = tS.dm.GetThreshold(tnt, tntID.ID, true, true, ""); err != nil {
 		return
 	}
 	*t = *thd
