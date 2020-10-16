@@ -50,6 +50,7 @@ var (
 		testAttributeSRPCConn,
 		testAttributeSSetAlsPrf,
 		testAttributeSUpdateAlsPrf,
+		testAttributeSSetAlsPrfWithoutTenant,
 		testAttributeSKillEngine,
 	}
 )
@@ -241,5 +242,62 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 func testAttributeSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func testAttributeSSetAlsPrfWithoutTenant(t *testing.T) {
+	extAlsPrf := &AttributeWithCache{
+		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
+			ID:        "ExternalAttribute",
+			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "Account",
+					Value: "1001",
+				},
+			},
+			Weight: 20,
+		},
+	}
+	var result string
+	if err := attrSRPC.Call(utils.APIerSv2SetAttributeProfile, extAlsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	alsPrf := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ExternalAttribute",
+			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "Account",
+					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				},
+			},
+			Weight: 20,
+		},
+	}
+	alsPrf.Compile()
+	var reply *engine.AttributeProfile
+	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "ExternalAttribute"}}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 	}
 }
