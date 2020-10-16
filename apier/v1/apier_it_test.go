@@ -83,10 +83,14 @@ var (
 		testApierTPAccountActions,
 		testApierLoadRatingPlan,
 		testApierLoadRatingProfile,
+		testApierLoadRatingProfileWithoutTenant,
 		testApierLoadAccountActions,
 		testApierReloadScheduler,
 		testApierSetRatingProfile,
+		testApierSetRatingProfileWithoutTenant,
 		testAPIerSv1GetRatingProfile,
+		testAPIerSv1GetRatingProfileWithoutTenant,
+		testAPIerSv1GetRatingProfileIDsWithoutTenant,
 		testApierReloadCache,
 		testApierGetDestination,
 		testApierGetRatingPlan,
@@ -135,6 +139,7 @@ var (
 		testApierGetCacheStats2,
 		testApierLoadTariffPlanFromStorDb,
 		testApierStartStopServiceStatus,
+		testApierRemoveRatingProfilesWithoutTenant,
 		testApierReplayFldPosts,
 		testApierGetDataDBVesions,
 		testApierGetStorDBVesions,
@@ -803,6 +808,18 @@ func testApierLoadRatingProfile(t *testing.T) {
 	}
 }
 
+func testApierLoadRatingProfileWithoutTenant(t *testing.T) {
+	var reply string
+	rpf := &utils.TPRatingProfile{
+		TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL,
+		Category: "call", Subject: "*any"}
+	if err := rater.Call(utils.APIerSv1LoadRatingProfile, &rpf, &reply); err != nil {
+		t.Error("Got error on APIerSv1.LoadRatingProfile: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling APIerSv1.LoadRatingProfile got reply: ", reply)
+	}
+}
+
 // Test here LoadAccountActions
 func testApierLoadAccountActions(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
@@ -903,6 +920,17 @@ func testApierSetRatingProfile(t *testing.T) {
 	}
 }
 
+func testApierSetRatingProfileWithoutTenant(t *testing.T) {
+	var reply string
+	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2"}
+	rpf := &utils.AttrSetRatingProfile{Category: "call", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
+	if err := rater.Call(utils.APIerSv1SetRatingProfile, &rpf, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetRatingProfile: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling APIerSv1.SetRatingProfile got reply: ", reply)
+	}
+}
+
 func testAPIerSv1GetRatingProfile(t *testing.T) {
 	var rpl engine.RatingProfile
 	attrGetRatingPlan := &utils.AttrGetRatingProfile{
@@ -914,6 +942,11 @@ func testAPIerSv1GetRatingProfile(t *testing.T) {
 	expected := engine.RatingProfile{
 		Id: "*out:cgrates.org:call:dan",
 		RatingPlanActivations: engine.RatingPlanActivations{
+			{
+				ActivationTime: actTime,
+				RatingPlanId:   "RETAIL1",
+				FallbackKeys:   []string{"*out:cgrates.org:call:dan2"},
+			},
 			{
 				ActivationTime: actTime,
 				RatingPlanId:   "RETAIL1",
@@ -947,6 +980,55 @@ func testAPIerSv1GetRatingProfile(t *testing.T) {
 		t.Error(err)
 	} else if len(expectedIds) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+}
+
+func testAPIerSv1GetRatingProfileIDsWithoutTenant(t *testing.T) {
+	expectedIds := []string{"call:dan", "call:*any"}
+	var result []string
+	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, &utils.PaginatorWithTenant{}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIds)
+		sort.Strings(result)
+		if !reflect.DeepEqual(expectedIds, result) {
+			t.Errorf("Expected %+v, received %+v", expectedIds, result)
+		}
+	}
+}
+
+func testAPIerSv1GetRatingProfileWithoutTenant(t *testing.T) {
+	var rpl engine.RatingProfile
+	attrGetRatingPlan := &utils.AttrGetRatingProfile{
+		Category: "call", Subject: "dan"}
+	actTime, err := utils.ParseTimeDetectLayout("2012-01-01T00:00:00Z", utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	expected := engine.RatingProfile{
+		Id: "*out:cgrates.org:call:dan",
+		RatingPlanActivations: engine.RatingPlanActivations{
+			{
+				ActivationTime: actTime,
+				RatingPlanId:   "RETAIL1",
+				FallbackKeys:   []string{"*out:cgrates.org:call:dan2"},
+			},
+			{
+				ActivationTime: actTime,
+				RatingPlanId:   "RETAIL1",
+				FallbackKeys:   []string{"*out:cgrates.org:call:dan2"},
+			},
+			{
+				ActivationTime: actTime,
+				RatingPlanId:   "RETAIL1",
+				FallbackKeys:   []string{"*out:cgrates.org:call:dan2"},
+			},
+		},
+	}
+	if err := rater.Call(utils.APIerSv1GetRatingProfile, &attrGetRatingPlan, &rpl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v \n, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
 	}
 }
 
@@ -1934,6 +2016,18 @@ func testApierStartStopServiceStatus(t *testing.T) {
 		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling SchedulerSv1.Reload got reply: ", reply)
+	}
+}
+
+func testApierRemoveRatingProfilesWithoutTenant(t *testing.T) {
+	var reply string
+	if err := rater.Call(utils.APIerSv1RemoveRatingProfile, &AttrRemoveRatingProfile{
+		Category: utils.CALL,
+		Subject:  utils.ANY,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected: %s, received: %s ", utils.OK, reply)
 	}
 }
 
