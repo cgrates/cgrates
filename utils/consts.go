@@ -2265,13 +2265,14 @@ const (
 // EventReaderCfg
 const (
 	IDCfg                       = "id"
+	CacheCfg                    = "cache"
 	RowLengthCfg                = "row_length"
 	FieldSepCfg                 = "field_separator"
 	HeaderDefCharCfg            = "header_define_character"
 	RunDelayCfg                 = "run_delay"
 	SourcePathCfg               = "source_path"
 	ProcessedPathCfg            = "processed_path"
-	XmlRootPathCfg              = "xml_root_path"
+	XMLRootPathCfg              = "xml_root_path"
 	TenantCfg                   = "tenant"
 	FlagsCfg                    = "flags"
 	FailedCallsPrefixCfg        = "failed_calls_prefix"
@@ -2288,46 +2289,6 @@ const (
 	RegisterIntervalCfg  = "register_interval"
 	RegisterTransportCfg = "register_transport"
 	RegisterTLSCfg       = "register_tls"
-)
-
-// CGRConfig
-const (
-	LoaderCfg        = "loaders"          // from JSON
-	HttpAgentCfg     = "http_agent"       // from JSON
-	RpcConns         = "rpc_conns"        // from JSON
-	GeneralCfg       = "general"          // from JSON
-	DataDbCfg        = "data_db"          // from JSON
-	StorDbCfg        = "stor_db"          // from JSON
-	TlsCfg           = "tls"              // from JSON
-	CacheCfg         = "cache"            //from JSON
-	CachesCfg        = "caches"           // from JSON
-	HttpCfg          = "http"             // from JSON
-	FilterSCfg       = "filters"          // from JSON
-	RalsCfg          = "rals"             // from JSON
-	SchedulerCfg     = "schedulers"       // from JSON
-	CdrsCfg          = "cdrs"             // from JSON
-	SessionSCfg      = "sessions"         // from JSON
-	FsAgentCfg       = "freeswitch_agent" // from JSON
-	KamAgentCfg      = "kamailio_agent"   // from JSON
-	AsteriskAgentCfg = "asterisk_agent"   // from JSON
-	DiameterAgentCfg = "diameter_agent"   // from JSON
-	RadiusAgentCfg   = "radius_agent"     // from JSON
-	DnsAgentCfg      = "dns_agent"        // from JSON
-	AttributeSCfg    = "attributes"       // from JSON
-	ChargerSCfg      = "chargers"         // from JSON
-	ResourceSCfg     = "resources"        // from JSON
-	StatsCfg         = "stats"            // from JSON
-	ThresholdSCfg    = "thresholds"       // from JSON
-	RouteSCfg        = "routes"           // from JSON
-	SureTaxCfg       = "suretax"          // from JSON
-	DispatcherSCfg   = "dispatchers"      // from JSON
-	DispatcherHCfg   = "dispatcherh"      // from JSON
-	LoaderCgrCfg     = "loader"           // from JSON
-	MigratorCgrCfg   = "migrator"         // from JSON
-	MailerCfg        = "mailer"           // from JSON
-	AnalyzerSCfg     = "analyzers"        // from JSON
-	Apier            = "apiers"           // from JSON
-	ErsCfg           = "ers"              // from JSON
 )
 
 // APIBanCfg

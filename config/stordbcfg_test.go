@@ -238,7 +238,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		},
 		utils.ItemsCfg: map[string]interface{}{
 			utils.SessionCostsTBL: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false},
-			utils.CdrsCfg:         map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false},
+			utils.CDRsTBL:         map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false},
 		},
 	}
 	if cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
