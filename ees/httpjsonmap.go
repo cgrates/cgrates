@@ -40,9 +40,10 @@ func NewPosterJSONMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Fi
 	}
 	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
 	case utils.MetaHTTPjsonMap:
-		pstrJSON.poster, err = engine.NewHTTPPoster(cgrCfg.HTTPCfg().GetDefaultHTTPTransort(),
-			cgrCfg.GeneralCfg().ReplyTimeout, cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
-			utils.PosterTransportContentTypes[cgrCfg.EEsCfg().Exporters[cfgIdx].Type], cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts)
+		pstrJSON.poster, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
+			cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
+			utils.PosterTransportContentTypes[cgrCfg.EEsCfg().Exporters[cfgIdx].Type],
+			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts)
 	case utils.MetaAMQPjsonMap:
 		pstrJSON.poster = engine.NewAMQPPoster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
 			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)

@@ -24,7 +24,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,7 +38,7 @@ func TestHttpJsonPost(t *testing.T) {
 		Usage: "0.00000001", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	jsn, _ := json.Marshal(cdrOut)
-	if _, err := HTTPPostJSON("http://localhost:8000", config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), jsn); err == nil {
+	if _, err := HTTPPostJSON("http://localhost:8000", jsn); err == nil {
 		t.Error(err)
 	}
 }

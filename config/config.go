@@ -1569,6 +1569,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		case TlsCfgJson: // nothing to reload
 		case APIBanCfgJson: // nothing to reload
 		case HTTP_JSN:
+			cfg.rldChans[HTTP_JSN] <- struct{}{}
 		case SCHEDULER_JSN:
 			cfg.rldChans[SCHEDULER_JSN] <- struct{}{}
 		case RALS_JSN:

@@ -385,8 +385,7 @@ func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	if err != nil {
 		return err
 	}
-	pstr, err := NewHTTPPoster(config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(),
-		config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
+	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
 		utils.CONTENT_JSON, config.CgrConfig().GeneralCfg().PosterAttempts)
 	if err != nil {
 		return err
@@ -405,8 +404,7 @@ func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) er
 	if err != nil {
 		return err
 	}
-	pstr, err := NewHTTPPoster(config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(),
-		config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
+	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
 		utils.CONTENT_JSON, config.CgrConfig().GeneralCfg().PosterAttempts)
 	if err != nil {
 		return err
@@ -974,8 +972,7 @@ func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	if err != nil {
 		return err
 	}
-	pstr, err := NewHTTPPoster(config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(),
-		config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
+	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
 		utils.CONTENT_JSON, config.CgrConfig().GeneralCfg().PosterAttempts)
 	if err != nil {
 		return err

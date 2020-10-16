@@ -162,9 +162,6 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 }
 
 func TestAccountStorageStore(t *testing.T) {
-	if DB == "mongo" {
-		return // mongo will have a problem with null and {} so the Equal will not work
-	}
 	b1 := &Balance{Value: 10, Weight: 10,
 		DestinationIDs: utils.StringMap{"NAT": true}}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}

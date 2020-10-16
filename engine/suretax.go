@@ -182,7 +182,7 @@ func SureTaxProcessCdr(cdr *CDR) error {
 	}
 	if sureTaxClient == nil { // First time used, init the client here
 		sureTaxClient = &http.Client{
-			Transport: config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(),
+			Transport: httpPstrTransport,
 		}
 	}
 	req, err := NewSureTaxRequest(cdr, stCfg)

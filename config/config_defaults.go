@@ -189,22 +189,22 @@ const CGRATES_CFG_JSON = `
 	"use_basic_auth": false,								// use basic authentication
 	"auth_users": {},										// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
 	"client_opts":{
-		"skip_tls_verify": false, 							// if enabled Http Client will accept any TLS certificate
+		"skipTlsVerify": false, 							// if enabled Http Client will accept any TLS certificate
 		// the options to configure the http.Transport
-		"tls_handshake_timeout": "10s",
-		"disable_keep_alives": false,
-		"disable_compression": false,
-		"max_idle_conns": 100,
-		"max_idle_conns_per_host": 2,
-		"max_conns_per_host": 0,
-		"idle_conn_timeout": "90s",
-		"response_header_timeout": "0",
-		"expect_continue_timeout": "0",
-		"force_attempt_http2": true,
+		"tlsHandshakeTimeout": "10s",
+		"disableKeepAlives": false,
+		"disableCompression": false,
+		"maxIdleConns": 100,
+		"maxIdleConnsPerHost": 2,
+		"maxConnsPerHost": 0,
+		"idleConnTimeout": "90s",
+		"responseHeaderTimeout": "0",
+		"expectContinueTimeout": "0",
+		"forceAttemptHttp2": true,
 		// the optins to configure the net.Dialer
-		"dial_timeout": "30s",
-		"dial_fallback_delay": "300ms",
-		"dial_keep_alive": "30s",
+		"dialTimeout": "30s",
+		"dialFallbackDelay": "300ms",
+		"dialKeepAlive": "30s",
 	},
 },
 

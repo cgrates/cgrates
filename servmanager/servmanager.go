@@ -251,6 +251,8 @@ func (srvMngr *ServiceManager) handleReload() {
 			go srvMngr.reloadService(utils.SIPAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DispatcherHJson):
 			go srvMngr.reloadService(utils.DispatcherH)
+		case <-srvMngr.GetConfig().GetReloadChan(config.HTTP_JSN):
+			go srvMngr.reloadService(utils.GlobalVarS)
 		}
 		// handle RPC server
 	}

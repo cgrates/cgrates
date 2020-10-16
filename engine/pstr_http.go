@@ -30,8 +30,8 @@ import (
 )
 
 // HTTPPostJSON posts without automatic failover
-func HTTPPostJSON(url string, posterTransport *http.Transport, content []byte) (respBody []byte, err error) {
-	client := &http.Client{Transport: posterTransport}
+func HTTPPostJSON(url string, content []byte) (respBody []byte, err error) {
+	client := &http.Client{Transport: httpPstrTransport}
 	var resp *http.Response
 	if resp, err = client.Post(url, "application/json", bytes.NewBuffer(content)); err != nil {
 		return
@@ -48,13 +48,13 @@ func HTTPPostJSON(url string, posterTransport *http.Transport, content []byte) (
 }
 
 // NewHTTPPoster return a new HTTP poster
-func NewHTTPPoster(posterTransport *http.Transport, replyTimeout time.Duration,
-	addr, contentType string, attempts int) (httposter *HTTPPoster, err error) {
+func NewHTTPPoster(replyTimeout time.Duration, addr, contentType string,
+	attempts int) (httposter *HTTPPoster, err error) {
 	if !utils.SliceHasMember([]string{utils.CONTENT_FORM, utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
 		return nil, fmt.Errorf("unsupported ContentType: %s", contentType)
 	}
 	return &HTTPPoster{
-		httpClient:  &http.Client{Transport: posterTransport, Timeout: replyTimeout},
+		httpClient:  &http.Client{Transport: httpPstrTransport, Timeout: replyTimeout},
 		addr:        addr,
 		contentType: contentType,
 		attempts:    attempts,

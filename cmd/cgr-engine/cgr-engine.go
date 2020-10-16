@@ -484,7 +484,10 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatcherh):    internalDispatcherHChan,
 	})
-
+	gvService := services.NewGlobalVarS(cfg)
+	if err = gvService.Start(); err != nil {
+		return
+	}
 	dmService := services.NewDataDBService(cfg, connManager)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
 		if err = dmService.Start(); err != nil {
@@ -566,7 +569,7 @@ func main() {
 
 	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
 
-	srvManager.AddServices(attrS, chrS, tS, stS, reS, routeS, schS, rals,
+	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, schS, rals,
 		rals.GetResponder(), apiSv1, apiSv2, cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager),
 		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager),
