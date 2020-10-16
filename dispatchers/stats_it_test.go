@@ -153,23 +153,6 @@ func testDspStsGetStatFailover(t *testing.T) {
 		t.Errorf("Expected error NOT_FOUND but recived %v and reply %v\n", err, reply)
 	}
 	allEngine2.startEngine(t)
-
-	args2.Tenant = utils.EmptyString
-	allEngine.stopEngine(t)
-	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
-		args2, &metrics); err != nil {
-		t.Error(err)
-	}
-
-	allEngine.startEngine(t)
-	allEngine2.stopEngine(t)
-
-	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
-		args2, &metrics); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error NOT_FOUND but recived %v and reply %v\n", err, reply)
-	}
-	allEngine2.startEngine(t)
-
 }
 
 func testDspStsPing(t *testing.T) {
@@ -368,30 +351,6 @@ func testDspStsTestAuthKey3(t *testing.T) {
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "GetStats",
-					Event: map[string]interface{}{
-						utils.Account:     "1002",
-						utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-						utils.Usage:       time.Duration(45 * time.Second),
-						utils.RunID:       utils.MetaDefault,
-						utils.COST:        10.0,
-						utils.Destination: "1001",
-					},
-				},
-				Opts: map[string]interface{}{
-					utils.OptsAPIKey: "stat12345",
-				},
-			},
-		}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(estats, reply) {
-		t.Errorf("expecting: %+v, received reply: %v", estats, reply)
-	}
-
-	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueuesForEvent,
-		&engine.StatsArgsProcessEvent{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					ID: "GetStats",
 					Event: map[string]interface{}{
 						utils.Account:     "1002",
 						utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
