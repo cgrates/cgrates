@@ -297,7 +297,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		for i, item := range er.XmlRootPath {
 			xmlRootPath[i] = item
 		}
-		initialMP[utils.XmlRootPathCfg] = xmlRootPath
+		initialMP[utils.XMLRootPathCfg] = xmlRootPath
 	}
 	var tenant string
 	values := make([]string, len(er.Tenant))

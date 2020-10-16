@@ -62,7 +62,7 @@ func (ha *HTTPAgent) Start() (err error) {
 
 	ha.Lock()
 	defer ha.Unlock()
-	utils.Logger.Info(fmt.Sprintf("<%s> successfully started HTTPAgent", utils.HttpAgentCfg))
+	utils.Logger.Info(fmt.Sprintf("<%s> successfully started HTTPAgent", utils.HTTPAgent))
 	for _, agntCfg := range ha.cfg.HttpAgentCfg() {
 		ha.server.RegisterHttpHandler(agntCfg.Url,
 			agents.NewHTTPAgent(ha.connMgr, agntCfg.SessionSConns, filterS,
