@@ -40,7 +40,7 @@ var (
 	node2ConfigPath     = path.Join(*dataDir, "redis_sentinel", "node2.conf")
 	sentinel1ConfigPath = path.Join(*dataDir, "redis_sentinel", "sentinel1.conf")
 	sentinel2ConfigPath = path.Join(*dataDir, "redis_sentinel", "sentinel2.conf")
-	engineConfigPath    = path.Join(*dataDir, "conf", "samples", "tutsentinel")
+	engineConfigPath    = path.Join(*dataDir, "conf", "samples", "redis_sentinel")
 	sentinelConfig      *config.CGRConfig
 	sentinelRPC         *rpc.Client
 	node1Exec           *exec.Cmd

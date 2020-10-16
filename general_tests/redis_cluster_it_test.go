@@ -67,7 +67,7 @@ var (
 	clsrRPC    *rpc.Client
 
 	clsrNodeCfgPath   = path.Join(*dataDir, "redis_cluster", "node%v.conf")
-	clsrEngineCfgPath = path.Join(*dataDir, "conf", "samples", "tutredis_cluster")
+	clsrEngineCfgPath = path.Join(*dataDir, "conf", "samples", "redis_cluster")
 	clsrNodes         = make(map[string]*exec.Cmd)
 	clsrOutput        = make(map[string]*bytes.Buffer) // in order to debug if something is not working
 	clsrNoNodes       = 6                              // this is the minimum number of nodes for a cluster with 1 replica for each master
