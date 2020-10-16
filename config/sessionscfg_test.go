@@ -698,12 +698,9 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 
 func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &AsteriskAgentJsonCfg{
-		Enabled:                utils.BoolPointer(true),
-		Sessions_conns:         &[]string{utils.MetaInternal},
-		Create_cdr:             utils.BoolPointer(true),
-		Low_balance_ann_file:   utils.StringPointer("randomFile"),
-		Empty_balance_context:  utils.StringPointer("randomContext"),
-		Empty_balance_ann_file: utils.StringPointer("randomAnnFile"),
+		Enabled:        utils.BoolPointer(true),
+		Sessions_conns: &[]string{utils.MetaInternal},
+		Create_cdr:     utils.BoolPointer(true),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Alias:            utils.StringPointer("127.0.0.1:8448"),
@@ -716,12 +713,9 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := &AsteriskAgentCfg{
-		Enabled:             true,
-		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		CreateCDR:           true,
-		LowBalanceAnnFile:   "randomFile",
-		EmptyBalanceContext: "randomContext",
-		EmptyBalanceAnnFile: "randomAnnFile",
+		Enabled:       true,
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		CreateCDR:     true,
 		AsteriskConns: []*AsteriskConnCfg{{
 			Alias:           "127.0.0.1:8448",
 			Address:         "127.0.0.1:8088",
@@ -745,12 +739,9 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	"asterisk_agent": {},
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:             false,
-		utils.SessionSConnsCfg:       []string{"*internal"},
-		utils.CreateCdrCfg:           false,
-		utils.LowBalanceAnnFileCfg:   utils.EmptyString,
-		utils.EmptyBalanceContext:    utils.EmptyString,
-		utils.EmptyBalanceAnnFileCfg: utils.EmptyString,
+		utils.EnabledCfg:       false,
+		utils.SessionSConnsCfg: []string{"*internal"},
+		utils.CreateCdrCfg:     false,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5},
 		},
@@ -774,12 +765,9 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 	},
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:             true,
-		utils.SessionSConnsCfg:       []string{"*conn1", "*conn2"},
-		utils.CreateCdrCfg:           true,
-		utils.LowBalanceAnnFileCfg:   utils.EmptyString,
-		utils.EmptyBalanceContext:    utils.EmptyString,
-		utils.EmptyBalanceAnnFileCfg: utils.EmptyString,
+		utils.EnabledCfg:       true,
+		utils.SessionSConnsCfg: []string{"*conn1", "*conn2"},
+		utils.CreateCdrCfg:     true,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8},
 		},

@@ -636,13 +636,10 @@ func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]interface{} {
 }
 
 type AsteriskAgentCfg struct {
-	Enabled             bool
-	SessionSConns       []string
-	CreateCDR           bool
-	LowBalanceAnnFile   string
-	EmptyBalanceContext string
-	EmptyBalanceAnnFile string
-	AsteriskConns       []*AsteriskConnCfg
+	Enabled       bool
+	SessionSConns []string
+	CreateCDR     bool
+	AsteriskConns []*AsteriskConnCfg
 }
 
 func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err error) {
@@ -666,16 +663,6 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 	if jsnCfg.Create_cdr != nil {
 		aCfg.CreateCDR = *jsnCfg.Create_cdr
 	}
-	if jsnCfg.Low_balance_ann_file != nil {
-		aCfg.LowBalanceAnnFile = *jsnCfg.Low_balance_ann_file
-	}
-	if jsnCfg.Empty_balance_context != nil {
-		aCfg.EmptyBalanceContext = *jsnCfg.Empty_balance_context
-	}
-
-	if jsnCfg.Empty_balance_ann_file != nil {
-		aCfg.EmptyBalanceAnnFile = *jsnCfg.Empty_balance_ann_file
-	}
 
 	if jsnCfg.Asterisk_conns != nil {
 		aCfg.AsteriskConns = make([]*AsteriskConnCfg, len(*jsnCfg.Asterisk_conns))
@@ -689,11 +676,8 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 
 func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:             aCfg.Enabled,
-		utils.CreateCDRCfg:           aCfg.CreateCDR,
-		utils.LowBalanceAnnFileCfg:   aCfg.LowBalanceAnnFile,
-		utils.EmptyBalanceContext:    aCfg.EmptyBalanceContext,
-		utils.EmptyBalanceAnnFileCfg: aCfg.EmptyBalanceAnnFile,
+		utils.EnabledCfg:   aCfg.Enabled,
+		utils.CreateCDRCfg: aCfg.CreateCDR,
 	}
 	if aCfg.AsteriskConns != nil {
 		conns := make([]map[string]interface{}, len(aCfg.AsteriskConns))

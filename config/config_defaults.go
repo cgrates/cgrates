@@ -468,9 +468,6 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts the Asterisk agent: <true|false>
 	"sessions_conns": ["*internal"],
 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
-	"low_balance_ann_file": "",				// file to be played when low balance is reached for prepaid calls
-	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
-	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
 	],
