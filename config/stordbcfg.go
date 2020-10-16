@@ -142,7 +142,7 @@ func (dbcfg *StorDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.StringIndexedFieldsCfg: dbcfg.StringIndexedFields,
 		utils.PrefixIndexedFieldsCfg: dbcfg.PrefixIndexedFields,
 		utils.RmtConnsCfg:            dbcfg.RmtConns,
-		utils.RpcConns:               dbcfg.RplConns,
+		utils.RplConnsCfg:            dbcfg.RplConns,
 		utils.OptsCfg:                dbcfg.Opts,
 	}
 	if dbcfg.Items != nil {
