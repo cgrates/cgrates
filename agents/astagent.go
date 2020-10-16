@@ -57,11 +57,10 @@ const (
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 	connMgr *engine.ConnManager) (*AsteriskAgent, error) {
 	sma := &AsteriskAgent{
-		cgrCfg:         cgrCfg,
-		astConnIdx:     astConnIdx,
-		connMgr:        connMgr,
-		eventsCache:    make(map[string]*utils.CGREventWithOpts),
-		astTerminateEv: make(map[string]chan struct{}),
+		cgrCfg:      cgrCfg,
+		astConnIdx:  astConnIdx,
+		connMgr:     connMgr,
+		eventsCache: make(map[string]*utils.CGREventWithOpts),
 	}
 	return sma, nil
 }
@@ -76,9 +75,6 @@ type AsteriskAgent struct {
 	astErrChan  chan error
 	eventsCache map[string]*utils.CGREventWithOpts // used to gather information about events during various phases
 	evCacheMux  sync.RWMutex                       // Protect eventsCache
-
-	astTerminateEv    map[string]chan struct{}
-	astTerminateEvMux sync.RWMutex
 }
 
 func (sma *AsteriskAgent) connectAsterisk() (err error) {
@@ -203,7 +199,8 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			return
 		}
 		//  Set absolute timeout for non-postpaid calls
-		if !sma.setMaxCallDuration(ev.ChannelID(), *authReply.MaxUsage) {
+		if !sma.setChannelVar(ev.ChannelID(), CGRMaxSessionTime,
+			strconv.Itoa(int(authReply.MaxUsage.Seconds()*1000))) {
 			return
 		}
 	}
@@ -284,14 +281,6 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 // Channel disconnect
 func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	chID := ev.ChannelID()
-	// astTerminateEv    map[/string]chan struct{}
-	sma.astTerminateEvMux.Lock()
-	if end, has := sma.astTerminateEv[chID]; has {
-		delete(sma.astTerminateEv, chID)
-		close(end)
-	}
-	sma.astTerminateEvMux.Unlock()
-
 	sma.evCacheMux.RLock()
 	cgrEvDisp, hasIt := sma.eventsCache[chID]
 	sma.evCacheMux.RUnlock()
@@ -392,70 +381,5 @@ func (*AsteriskAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err 
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
 func (sma *AsteriskAgent) V1WarnDisconnect(args map[string]interface{}, reply *string) (err error) {
-	channelID := engine.NewMapEvent(args).GetStringIgnoreErrors(utils.OriginID)
-	if err = sma.playFileOnChannel(channelID, sma.cgrCfg.AsteriskAgentCfg().LowBalanceAnnFile); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> failed play file <%s> on channel <%s> because: %s",
-				utils.AsteriskAgent, sma.cgrCfg.AsteriskAgentCfg().LowBalanceAnnFile,
-				channelID, err.Error()))
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// hangupChannel will disconnect from CGRateS side with congestion reason
-func (sma *AsteriskAgent) playFileOnChannel(channelID, file string) (err error) {
-	if file == utils.EmptyString {
-		return
-	}
-	_, err = sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/play",
-		sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, channelID),
-		url.Values{"media": {file}})
-	return
-}
-
-// Sets the call timeout valid of starting of the call
-func (sma *AsteriskAgent) setMaxCallDuration(channelID string, maxDur time.Duration) (success bool) {
-	if len(sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceContext) == 0 &&
-		len(sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceAnnFile) == 0 {
-		//  Set absolute timeout for non-postpaid calls
-		return sma.setChannelVar(channelID, CGRMaxSessionTime,
-			strconv.Itoa(int(maxDur.Seconds()*1000)))
-	}
-	end := make(chan struct{})
-	sma.astTerminateEvMux.Lock()
-	sma.astTerminateEv[channelID] = end
-	sma.astTerminateEvMux.Unlock()
-	go func(channelID string, dur time.Duration, end chan struct{}) {
-		select {
-		case <-end:
-		case <-time.After(dur):
-			sma.doOnMaxCallDuration(channelID)
-		}
-	}(channelID, maxDur, end)
-	return true
-}
-
-func (sma *AsteriskAgent) doOnMaxCallDuration(channelID string) (err error) {
-	if len(sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceContext) != 0 {
-		if _, err = sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
-			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, channelID),
-			url.Values{"context": {sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceContext}}); err != nil {
-			utils.Logger.Err(
-				fmt.Sprintf("<%s> Could not transfer the call to empty balance context, error: <%s>, channelID: %v",
-					utils.AsteriskAgent, err.Error(), channelID))
-		}
-		return
-	}
-	if len(sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceAnnFile) != 0 {
-		if err = sma.playFileOnChannel(channelID, sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceAnnFile); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> failed play file <%s> on channel <%s> because: %s",
-					utils.AsteriskAgent, sma.cgrCfg.AsteriskAgentCfg().EmptyBalanceAnnFile,
-					channelID, err.Error()))
-		}
-		return
-	}
-	return
+	return utils.ErrNotImplemented
 }

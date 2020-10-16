@@ -286,13 +286,10 @@ type AstConnJsonCfg struct {
 }
 
 type AsteriskAgentJsonCfg struct {
-	Enabled                *bool
-	Sessions_conns         *[]string
-	Create_cdr             *bool
-	Low_balance_ann_file   *string
-	Empty_balance_context  *string
-	Empty_balance_ann_file *string
-	Asterisk_conns         *[]*AstConnJsonCfg
+	Enabled        *bool
+	Sessions_conns *[]string
+	Create_cdr     *bool
+	Asterisk_conns *[]*AstConnJsonCfg
 }
 
 type CacheParamJsonCfg struct {
