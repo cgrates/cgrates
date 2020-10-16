@@ -29,13 +29,14 @@ import (
 )
 
 func (apiv2 *APIerSv2) GetAccounts(attr *utils.AttrGetAccounts, reply *[]*engine.Account) error {
-	if len(attr.Tenant) == 0 {
-		return utils.NewErrMandatoryIeMissing("Tenant")
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apiv2.Config.GeneralCfg().DefaultTenant
 	}
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIDs) == 0 {
-		if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
+		if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + tnt); err != nil {
 			return err
 		}
 	} else {
@@ -43,7 +44,7 @@ func (apiv2 *APIerSv2) GetAccounts(attr *utils.AttrGetAccounts, reply *[]*engine
 			if len(acntID) == 0 { // Source of error returned from redis (key not found)
 				continue
 			}
-			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(attr.Tenant, acntID))
+			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(tnt, acntID))
 		}
 	}
 	if len(accountKeys) == 0 {
@@ -86,8 +87,12 @@ func (apiv2 *APIerSv2) GetAccountsCount(attr *utils.AttrGetAccountsCount, reply 
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apiv2.Config.GeneralCfg().DefaultTenant
+	}
 	var accountKeys []string
-	if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
+	if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + tnt); err != nil {
 		return err
 	}
 	if len(accountKeys) == 0 {
@@ -100,7 +105,11 @@ func (apiv2 *APIerSv2) GetAccountsCount(attr *utils.AttrGetAccountsCount, reply 
 
 // Get balance
 func (apiv2 *APIerSv2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
-	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apiv2.Config.GeneralCfg().DefaultTenant
+	}
+	tag := utils.ConcatenatedKey(tnt, attr.Account)
 	account, err := apiv2.DataManager.GetAccount(tag)
 	if err != nil {
 		return err
@@ -121,10 +130,14 @@ type AttrSetAccount struct {
 }
 
 func (apiv2 *APIerSv2) SetAccount(attr *AttrSetAccount, reply *string) error {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.Account}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apiv2.Config.GeneralCfg().DefaultTenant
+	}
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	var ub *engine.Account
 	var schedNeedsReload bool

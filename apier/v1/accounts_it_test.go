@@ -49,10 +49,13 @@ var (
 		testAccITRPCConn,
 		testAccITAddVoiceBalance,
 		testAccITDebitBalance,
+		testAccITDebitBalanceWithoutTenant,
 		testAccITAddBalance,
+		testAccITAddBalanceWithoutTenant,
 		testAccITAddBalanceWithValue0,
 		testAccITAddBalanceWithValueInMap,
 		testAccITSetBalance,
+		testAccITSetBalanceWithoutTenant,
 		testAccITSetBalanceWithVaslue0,
 		testAccITSetBalanceWithVaslueInMap,
 		testAccITSetBalanceWithExtraData,
@@ -60,12 +63,17 @@ var (
 		testAccITSetBalanceTimingIds,
 		testAccITAddBalanceWithNegative,
 		testAccITGetDisabledAccounts,
+		testAccITGetDisabledAccountsWithoutTenant,
 		testAccITCountAccounts,
+		testAccITCountAccountsWithoutTenant,
+		testAccITRemoveAccountWithoutTenant,
 		testAccITTPFromFolder,
 		testAccITAddBalanceWithDestinations,
 		testAccITAccountWithTriggers,
 		testAccITAccountMonthlyEstimated,
 		testAccITMultipleBalance,
+		testAccITMultipleBalanceWithoutTenant,
+		testAccITRemoveBalances,
 		testAccITStopCgrEngine,
 	}
 )
@@ -291,7 +299,28 @@ func testAccITDebitBalance(t *testing.T) {
 		t.Fatalf("Balance with ID %s should %sexist", accBallID, exstr)
 	}
 	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 0) })
+}
 
+func testAccITDebitBalanceWithoutTenant(t *testing.T) {
+	time.Sleep(5 * time.Second)
+	var reply string
+	if err := accRPC.Call(utils.APIerSv1DebitBalance, &AttrAddBalance{
+		Account:     accAcount,
+		BalanceType: utils.VOICE,
+		Value:       0,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	if has := testBalanceIfExists(t, accAcount, accTenant, utils.VOICE, accBallID); accExist != has {
+		var exstr string
+		if !accExist {
+			exstr = "not "
+		}
+		t.Fatalf("Balance with ID %s should %sexist", accBallID, exstr)
+	}
+	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 0) })
 }
 
 func testAccITAddBalance(t *testing.T) {
@@ -319,6 +348,30 @@ func testAccITAddBalance(t *testing.T) {
 	}
 }
 
+func testAccITAddBalanceWithoutTenant(t *testing.T) {
+	var reply string
+	attrs := &AttrAddBalance{
+		Account:     "testAccAddBalance",
+		BalanceType: utils.MONETARY,
+		Value:       1.5,
+		Cdrlog:      true,
+	}
+	if err := accRPC.Call(utils.APIerSv1AddBalance, &attrs, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
+	}
+	time.Sleep(50 * time.Millisecond)
+	// verify the cdr from CdrLog
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
+	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+}
+
 func testAccITSetBalance(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrSetBalance{
@@ -342,9 +395,37 @@ func testAccITSetBalance(t *testing.T) {
 	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
 	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(cdrs) != 2 {
+	} else if len(cdrs) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	}
+}
+
+func testAccITSetBalanceWithoutTenant(t *testing.T) {
+	var reply string
+	attrs := &utils.AttrSetBalance{
+		Account:     "testrandomAccoutSetBalance",
+		BalanceType: "*monetary",
+		Value:       1.5,
+		Balance: map[string]interface{}{
+			utils.ID: "testAccSetBalance",
+		},
+		Cdrlog: true,
+	}
+	if err := accRPC.Call(utils.APIerSv1SetBalance, &attrs, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.SetBalance received: %s", reply)
+	}
+	time.Sleep(50 * time.Millisecond)
+	// verify the cdr from CdrLog
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
+	if err := accRPC.Call(utils.APIerSv1GetCDRs, &req, &cdrs); err != nil {
+		t.Error(err)
+	} else if len(cdrs) != 4 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+
 }
 
 func testAccITSetBalanceWithExtraData(t *testing.T) {
@@ -514,6 +595,48 @@ func testAccITGetDisabledAccounts(t *testing.T) {
 		t.Errorf("Accounts received: %+v", acnts)
 	}
 }
+
+func testAccITGetDisabledAccountsWithoutTenant(t *testing.T) {
+	var reply string
+	acnt1 := utils.AttrSetAccount{Account: "account1", ExtraOptions: map[string]bool{utils.Disabled: true}}
+	acnt2 := utils.AttrSetAccount{Account: "account2", ExtraOptions: map[string]bool{utils.Disabled: false}}
+	acnt3 := utils.AttrSetAccount{Account: "account3", ExtraOptions: map[string]bool{utils.Disabled: true}}
+	acnt4 := utils.AttrSetAccount{Account: "account4", ExtraOptions: map[string]bool{utils.Disabled: true}}
+
+	for _, account := range []utils.AttrSetAccount{acnt1, acnt2, acnt3, acnt4} {
+		if err := accRPC.Call(utils.APIerSv1SetAccount, account, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
+		}
+	}
+
+	var acnts []*engine.Account
+	if err := accRPC.Call(utils.APIerSv2GetAccounts, &utils.AttrGetAccounts{Filter: map[string]bool{utils.Disabled: true}},
+		&acnts); err != nil {
+		t.Error(err)
+	} else if len(acnts) != 3 {
+		t.Errorf("Accounts received: %+v", acnts)
+	}
+}
+
+func testAccITRemoveAccountWithoutTenant(t *testing.T) {
+	var reply string
+	if err := accRPC.Call(utils.APIerSv1RemoveAccount,
+		&utils.AttrRemoveAccount{Account: "randomAccount"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.RemoveAccount received: %s", reply)
+	}
+	var result *[]*engine.Account
+	if err := accRPC.Call(utils.APIerSv2GetAccount,
+		&utils.AttrGetAccounts{},
+		&result); err == nil || utils.ErrNotFound.Error() != err.Error() {
+		t.Error(err)
+	}
+}
+
 func testAccITCountAccounts(t *testing.T) {
 	var reply int
 	args := &utils.TenantWithOpts{
@@ -521,8 +644,18 @@ func testAccITCountAccounts(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.APIerSv1GetAccountsCount, &args, &reply); err != nil {
 		t.Error(err)
-	} else if reply != 10 {
-		t.Errorf("Expecting: %v, received: %v", 10, reply)
+	} else if reply != 11 {
+		t.Errorf("Expecting: %v, received: %v", 11, reply)
+	}
+}
+func testAccITCountAccountsWithoutTenant(t *testing.T) {
+	var reply int
+	if err := accRPC.Call(utils.APIerSv1GetAccountsCount,
+		&utils.TenantIDWithOpts{},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != 11 {
+		t.Errorf("Expecting: %v, received: %v", 11, reply)
 	}
 }
 
@@ -1051,4 +1184,79 @@ func testAccITMultipleBalance(t *testing.T) {
 		t.Errorf("Expected %+v, received: %+v", 10.0, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
+}
+
+func testAccITMultipleBalanceWithoutTenant(t *testing.T) {
+	attrSetBalance := utils.AttrSetBalances{
+		Account: "testAccITMultipleBalance",
+		Balances: []*utils.AttrBalance{
+			{
+				BalanceType: utils.VOICE,
+				Value:       2 * float64(time.Second),
+				Balance: map[string]interface{}{
+					utils.ID:            "Balance1",
+					utils.RatingSubject: "*zero5ms",
+				},
+			},
+			{
+				BalanceType: utils.VOICE,
+				Value:       10 * float64(time.Second),
+				Balance: map[string]interface{}{
+					utils.ID:            "Balance2",
+					utils.RatingSubject: "*zero5ms",
+				},
+			},
+			{
+				BalanceType: utils.MONETARY,
+				Value:       10,
+				Balance: map[string]interface{}{
+					utils.ID: "MonBalance",
+				},
+			},
+		},
+	}
+	var reply string
+	if err := accRPC.Call(utils.APIerSv1SetBalances, &attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{
+		Account: "testAccITMultipleBalance",
+	}
+	if err := accRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.VOICE]) != 2 {
+		t.Errorf("Expected %+v, received: %+v", 2, len(acnt.BalanceMap[utils.VOICE]))
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != float64(12*time.Second) {
+		t.Errorf("Expected %+v, received: %+v", float64(12*time.Second), acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expected %+v, received: %+v", 1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
+		t.Errorf("Expected %+v, received: %+v", 10.0, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+}
+
+func testAccITRemoveBalances(t *testing.T) {
+	var reply string
+	if err := accRPC.Call(utils.APIerSv1RemoveBalances,
+		&utils.AttrSetBalance{Account: "testAccITMultipleBalance", BalanceType: utils.VOICE},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	attrs := &AttrAddBalance{
+		Account:     "testAccITMultipleBalance",
+		BalanceType: utils.MONETARY,
+		Value:       1.5,
+		Cdrlog:      true,
+	}
+	if err := accRPC.Call(utils.APIerSv1AddBalance, &attrs, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
+	}
 }
