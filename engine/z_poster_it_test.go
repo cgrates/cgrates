@@ -67,7 +67,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	config.CgrConfig().GeneralCfg().FailedPostsDir = "/tmp"
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
-	pstr, err := NewHTTPPoster(config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), time.Duration(2*time.Second), "http://localhost:8080/invalid", utils.CONTENT_JSON, 3)
+	pstr, err := NewHTTPPoster(time.Duration(2*time.Second), "http://localhost:8080/invalid", utils.CONTENT_JSON, 3)
 	if err != nil {
 		t.Error(err)
 	}
@@ -100,7 +100,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	content := []byte(`Test
 		Test2
 		`)
-	pstr, err := NewHTTPPoster(config.CgrConfig().HTTPCfg().GetDefaultHTTPTransort(), time.Duration(2*time.Second), "http://localhost:8080/invalid", utils.CONTENT_TEXT, 3)
+	pstr, err := NewHTTPPoster(time.Duration(2*time.Second), "http://localhost:8080/invalid", utils.CONTENT_TEXT, 3)
 	if err != nil {
 		t.Error(err)
 	}

@@ -459,13 +459,13 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 		t.Error(err)
 	}
 
-	var rpl []*engine.ChrgSProcessEventReply
 	var wgDisp1 sync.WaitGroup
 	var wgDisp2 sync.WaitGroup
 	for i := 0; i < 10; i++ {
 		wgDisp1.Add(1)
 		wgDisp2.Add(1)
 		go func() {
+			var rpl []*engine.ChrgSProcessEventReply
 			if err := dspEngine1RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
@@ -487,6 +487,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 			wgDisp1.Done()
 		}()
 		go func() {
+			var rpl []*engine.ChrgSProcessEventReply
 			if err := dspEngine2RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",

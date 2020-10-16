@@ -150,9 +150,8 @@ func (dH *DispatcherHost) TenantID() string {
 }
 
 // GetRPCConnection builds or returns the cached connection
-func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
 	if dH.rpcConn == nil {
-		var err error
 		// connect the rpcConn
 		cfg := config.CgrConfig()
 		if dH.rpcConn, err = NewRPCPool(
@@ -162,7 +161,7 @@ func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply int
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			dH.Conns, IntRPC.GetInternalChanel(), false); err != nil {
-			return err
+			return
 		}
 
 	}

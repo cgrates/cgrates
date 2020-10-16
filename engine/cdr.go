@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -334,8 +333,8 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 	return
 }
 
-func (cdr *CDR) formatField(cfgFld *config.FCTemplate, pstrTransport *http.Transport,
-	groupedCDRs []*CDR, filterS *FilterS) (outVal string, err error) {
+func (cdr *CDR) formatField(cfgFld *config.FCTemplate, groupedCDRs []*CDR,
+	filterS *FilterS) (outVal string, err error) {
 	switch cfgFld.Type {
 	case utils.META_FILLER:
 		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
@@ -364,7 +363,7 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, pstrTransport *http.Trans
 		}
 		if len(httpAddr) == 0 {
 			err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
-		} else if outValByte, err = HTTPPostJSON(httpAddr, pstrTransport, jsn); err == nil {
+		} else if outValByte, err = HTTPPostJSON(httpAddr, jsn); err == nil {
 			outVal = string(outValByte)
 			if len(outVal) == 0 && cfgFld.Mandatory {
 				err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
@@ -390,8 +389,8 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, pstrTransport *http.Trans
 
 // AsExportRecord is used in place where we need to export the CDR based on an export template
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
-func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
-	pstrTransport *http.Transport, groupedCDRs []*CDR, filterS *FilterS) (expRecord []string, err error) {
+func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate, groupedCDRs []*CDR,
+	filterS *FilterS) (expRecord []string, err error) {
 	nM := utils.MapStorage{
 		utils.MetaReq: cdr.AsMapStringIface(),
 		utils.MetaEC:  cdr.CostDetails,
@@ -407,7 +406,7 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 			continue
 		}
 		var fmtOut string
-		if fmtOut, err = cdr.formatField(cfgFld, pstrTransport, groupedCDRs, filterS); err != nil {
+		if fmtOut, err = cdr.formatField(cfgFld, groupedCDRs, filterS); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err

@@ -35,41 +35,14 @@ const (
 	RECURSION_MAX_DEPTH = 3
 	MIN_PREFIX_MATCH    = 1
 	FALLBACK_SUBJECT    = utils.ANY
-	DB                  = "map"
 )
 
-func init() {
-	var data DataDB
-	switch DB {
-	case "map":
-		if cgrCfg := config.CgrConfig(); cgrCfg == nil {
-			cgrCfg, _ = config.NewDefaultCGRConfig()
-			config.SetCgrConfig(cgrCfg)
-		}
-		data = NewInternalDB(nil, nil, true)
-	}
-	dm = NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
-}
-
 var (
-	dm                           *DataManager
-	cdrStorage                   CdrStorage
 	debitPeriod                  = 10 * time.Second
 	globalRoundingDecimals       = 6
-	connMgr                      *ConnManager
 	rpSubjectPrefixMatching      bool
 	rpSubjectPrefixMatchingMutex sync.RWMutex // used to reload rpSubjectPrefixMatching
 )
-
-// SetDataStorage is the exported method to set the storage getter.
-func SetDataStorage(dm2 *DataManager) {
-	dm = dm2
-}
-
-// SetConnManager is the exported method to set the connectionManager used when operate on an account.
-func SetConnManager(conMgr *ConnManager) {
-	connMgr = conMgr
-}
 
 // SetRoundingDecimals sets the global rounding method and decimal precision for GetCost method
 func SetRoundingDecimals(rd int) {
@@ -89,11 +62,6 @@ func getRpSubjectPrefixMatching() (flag bool) {
 	flag = rpSubjectPrefixMatching
 	rpSubjectPrefixMatchingMutex.RUnlock()
 	return
-}
-
-// SetCdrStorage sets the database for CDR storing, used by *cdrlog in first place
-func SetCdrStorage(cStorage CdrStorage) {
-	cdrStorage = cStorage
 }
 
 // NewCallDescriptorFromCGREvent converts a CGREvent into CallDescriptor
