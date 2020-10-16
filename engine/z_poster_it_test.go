@@ -63,7 +63,7 @@ type TestContent struct {
 }
 
 func TestHttpJsonPoster(t *testing.T) {
-	SetFailedPostCacheTTL(1)
+	SetFailedPostCacheTTL(1 * time.Millisecond)
 	config.CgrConfig().GeneralCfg().FailedPostsDir = "/tmp"
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
@@ -75,7 +75,7 @@ func TestHttpJsonPoster(t *testing.T) {
 		t.Error("Expected error")
 	}
 	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test1", jsn, make(map[string]interface{}))
-	time.Sleep(2)
+	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/test1*")
 	if err != nil {
 		t.Fatal(err)
@@ -95,7 +95,7 @@ func TestHttpJsonPoster(t *testing.T) {
 }
 
 func TestHttpBytesPoster(t *testing.T) {
-	SetFailedPostCacheTTL(1)
+	SetFailedPostCacheTTL(1 * time.Millisecond)
 	config.CgrConfig().GeneralCfg().FailedPostsDir = "/tmp"
 	content := []byte(`Test
 		Test2
@@ -108,7 +108,7 @@ func TestHttpBytesPoster(t *testing.T) {
 		t.Error("Expected error")
 	}
 	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test2", content, make(map[string]interface{}))
-	time.Sleep(2)
+	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/test2*")
 	if err != nil {
 		t.Fatal(err)
