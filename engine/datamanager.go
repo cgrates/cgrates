@@ -542,7 +542,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 					Opts: map[string]interface{}{
 						utils.OptsAPIKey:  itm.APIKey,
 						utils.OptsRouteID: itm.RouteID,
-					}}, sq); err == nil {
+					}}, &sq); err == nil {
 				var ssq *StoredStatQueue
 				if dm.dataDB.GetStorageType() != utils.MetaInternal {
 					// in case of internal we don't marshal
