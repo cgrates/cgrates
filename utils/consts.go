@@ -298,6 +298,7 @@ const (
 	SetupTime                    = "SetupTime"
 	AnswerTime                   = "AnswerTime"
 	Usage                        = "Usage"
+	CustomValue                  = "CustomValue"
 	Value                        = "Value"
 	LastUsed                     = "LastUsed"
 	PDD                          = "PDD"

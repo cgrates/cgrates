@@ -83,6 +83,8 @@ var (
 		testV1STSProcessStaticMetrics,
 		testV1STSProcessStatWithThreshold,
 		testV1STSV1GetQueueIDs,
+		testV1STSV1GetStatQueuesForEventWithoutTenant,
+		testV1STSV1StatSv1GetQueueStringMetricsWithoutTenant,
 		testV1STSGetStatQueueProfileWithoutTenant,
 		testV1STSRemStatQueueProfileWithoutTenant,
 		//testV1STSProcessCDRStat,
@@ -179,6 +181,34 @@ func testV1STSGetStats(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
+
+func testV1STSV1StatSv1GetQueueStringMetricsWithoutTenant(t *testing.T) {
+	var reply []string
+	expectedIDs := []string{"CustomStatProfile", "Stats1", "StaticStatQueue", "StatWithThreshold"}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
+		&utils.TenantWithOpts{}, &reply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(reply)
+		sort.Strings(expectedIDs)
+		if !reflect.DeepEqual(expectedIDs, reply) {
+			t.Errorf("expecting: %+v, received reply: %s", expectedIDs, reply)
+		}
+	}
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.MetaACD: "12s",
+		utils.MetaTCD: "18s",
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.CustomValue: "10",
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: expectedIDs[0]}},
+		&metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", utils.ToJSON(expectedMetrics), utils.ToJSON(metrics))
 	}
 }
 
@@ -1270,5 +1300,33 @@ func testV1STSV1GetQueueIDs(t *testing.T) {
 				t.Errorf("Expected %+v \n ,received %+v", expected, qIDs)
 			}
 		}
+	}
+}
+
+func testV1STSV1GetStatQueuesForEventWithoutTenant(t *testing.T) {
+	var reply []string
+	estats := []string{"Stats1"}
+	if err := stsV1Rpc.Call(utils.StatSv1GetStatQueuesForEvent,
+		&engine.StatsArgsProcessEvent{
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: &utils.CGREvent{
+					ID: "GetStats",
+					Event: map[string]interface{}{
+						utils.Account:     "1002",
+						utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+						utils.Usage:       time.Duration(45 * time.Second),
+						utils.RunID:       utils.MetaDefault,
+						utils.COST:        10.0,
+						utils.Destination: "1001",
+					},
+				},
+				Opts: map[string]interface{}{
+					utils.OptsAPIKey: "stat12345",
+				},
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(estats, reply) {
+		t.Errorf("expecting: %+v, received reply: %v", estats, reply)
 	}
 }
