@@ -368,13 +368,14 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 }
 
 func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]interface{}) error {
-	if len(attr.Tenant) == 0 {
-		return utils.NewErrMandatoryIeMissing("Tenant")
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIDs) == 0 {
-		if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
+		if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + tnt); err != nil {
 			return err
 		}
 	} else {
@@ -382,7 +383,7 @@ func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]inte
 			if len(acntID) == 0 { // Source of error returned from redis (key not found)
 				continue
 			}
-			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(attr.Tenant, acntID))
+			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(tnt, acntID))
 		}
 	}
 	if len(accountKeys) == 0 {
@@ -415,7 +416,11 @@ func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]inte
 
 // GetAccount returns the account
 func (apierSv1 *APIerSv1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
-	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	tag := utils.ConcatenatedKey(tnt, attr.Account)
 	userBalance, err := apierSv1.DataManager.GetAccount(tag)
 	if err != nil {
 		return err
@@ -720,11 +725,12 @@ func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *stri
 }
 
 func (apierSv1 *APIerSv1) GetAccountsCount(attr *utils.TenantWithOpts, reply *int) (err error) {
-	if len(attr.Tenant) == 0 {
-		return utils.NewErrMandatoryIeMissing("Tenant")
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var accountKeys []string
-	if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
+	if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + tnt); err != nil {
 		return
 	}
 	*reply = len(accountKeys)

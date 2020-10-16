@@ -107,6 +107,7 @@ var (
 		testApierGetAccountActionPlanWithoutTenant,
 		testApierITGetScheduledActionsForAccount,
 		testApierRemUniqueIDActionTiming,
+		testApierRemUniqueIDActionTimingWithoutTenant,
 		testApierGetAccount,
 		testApierTriggersExecute,
 		testApierResetDataBeforeLoadFromFolder,
@@ -1356,6 +1357,23 @@ func testApierRemUniqueIDActionTiming(t *testing.T) {
 	}
 	var reply []*AccountActionTiming
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan4"}
+	if err := rater.Call(utils.APIerSv1GetAccountActionPlan, &req, &reply); err != nil {
+		t.Error("Got error on APIerSv1.GetAccountActionPlan: ", err.Error())
+	} else if len(reply) != 0 {
+		t.Error("Action timings was not removed")
+	}
+}
+
+func testApierRemUniqueIDActionTimingWithoutTenant(t *testing.T) {
+	var rmReply string
+	rmReq := AttrRemoveActionTiming{ActionPlanId: "ATMS_1", Account: "dan4"}
+	if err := rater.Call(utils.APIerSv1RemoveActionTiming, &rmReq, &rmReply); err != nil {
+		t.Error("Got error on APIerSv1.RemoveActionTiming: ", err.Error())
+	} else if rmReply != utils.OK {
+		t.Error("Unexpected answer received", rmReply)
+	}
+	var reply []*AccountActionTiming
+	req := utils.TenantAccount{Account: "dan4"}
 	if err := rater.Call(utils.APIerSv1GetAccountActionPlan, &req, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 0 {
