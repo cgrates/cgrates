@@ -197,8 +197,12 @@ func (apierSv1 *APIerSv1) ExecuteAction(attr *utils.AttrExecuteAction, reply *st
 	at := &engine.ActionTiming{
 		ActionsID: attr.ActionsId,
 	}
-	if attr.Tenant != "" && attr.Account != "" {
-		at.SetAccountIDs(utils.StringMap{utils.ConcatenatedKey(attr.Tenant, attr.Account): true})
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if attr.Account != "" {
+		at.SetAccountIDs(utils.StringMap{utils.ConcatenatedKey(tnt, attr.Account): true})
 	}
 	if err := at.Execute(nil, nil); err != nil {
 		*reply = err.Error()
@@ -270,6 +274,9 @@ func (apiv1 *APIerSv1) LoadRatingPlan(attrs *AttrLoadRatingPlan, reply *string) 
 func (apiv1 *APIerSv1) LoadRatingProfile(attrs *utils.TPRatingProfile, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
+	}
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apiv1.Config.GeneralCfg().DefaultTenant
 	}
 	dbReader, err := engine.NewTpReader(apiv1.DataManager.DataDB(), apiv1.StorDb,
 		attrs.TPid, apiv1.Config.GeneralCfg().DefaultTimezone,
@@ -1181,6 +1188,9 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 }
 
 func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, reply *string) error {
+	if attr.Tenant == utils.EmptyString {
+		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	if (attr.Subject != "" && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, "")) ||
 		(attr.Category != "" && attr.Tenant == "") {
 		return utils.ErrMandatoryIeMissing
