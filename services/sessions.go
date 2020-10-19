@@ -80,11 +80,7 @@ func (smg *SessionService) Start() (err error) {
 
 	smg.sm = sessions.NewSessionS(smg.cfg, datadb, smg.connMgr)
 	//start sync session in a separate gorutine
-	go func(sm *sessions.SessionS) {
-		if err = sm.ListenAndServe(smg.exitChan); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
-		}
-	}(smg.sm)
+	go smg.sm.ListenAndServe(smg.exitChan)
 	// Pass internal connection via BiRPCClient
 	smg.connChan <- smg.sm
 	// Register RPC handler
