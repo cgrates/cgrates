@@ -84,9 +84,6 @@ func (apiv2 *APIerSv2) GetAccounts(attr *utils.AttrGetAccounts, reply *[]*engine
 // GetAccountsCount sets in reply var the total number of accounts registered for the received tenant
 // returns ErrNotFound in case of 0 accounts
 func (apiv2 *APIerSv2) GetAccountsCount(attr *utils.AttrGetAccountsCount, reply *int) (err error) {
-	if len(attr.Tenant) == 0 {
-		return utils.NewErrMandatoryIeMissing("Tenant")
-	}
 	tnt := attr.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apiv2.Config.GeneralCfg().DefaultTenant
