@@ -396,13 +396,15 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 		for _, schedAct := range rply {
 			switch schedAct.ActionPlanID {
 			case "AP_WEEKLY":
-				if schedAct.NextRunTime.Before(time.Now().Add(167*time.Hour+59*time.Minute+58*time.Second)) ||
-					schedAct.NextRunTime.After(time.Now().Add(168*time.Hour+1*time.Second)) {
+				t1 := time.Now().AddDate(0, 0, 7)
+				if schedAct.NextRunTime.Before(t1.Add(-2*time.Second)) ||
+					schedAct.NextRunTime.After(t1.Add(time.Second)) {
 					t.Errorf("Expected the nextRuntime to be after 1 week,but received: <%+v>", utils.ToJSON(schedAct))
 				}
 			case "AP_DAILY":
-				if schedAct.NextRunTime.Before(time.Now().Add(23*time.Hour+59*time.Minute+58*time.Second)) ||
-					schedAct.NextRunTime.After(time.Now().Add(24*time.Hour+1*time.Second)) {
+				t1 := time.Now().AddDate(0, 0, 1)
+				if schedAct.NextRunTime.Before(t1.Add(-2*time.Second)) ||
+					schedAct.NextRunTime.After(t1.Add(time.Second)) {
 					t.Errorf("Expected the nextRuntime to be after 1 day,but received: <%+v>", utils.ToJSON(schedAct))
 				}
 			case "AP_HOURLY":
