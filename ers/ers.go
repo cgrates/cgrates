@@ -81,11 +81,13 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 	for {
 		select {
 		case err = <-erS.rdrErr: // got application error
+			erS.closeAllRdrs()
 			utils.Logger.Crit(
 				fmt.Sprintf("<%s> running reader got error: <%s>",
 					utils.ERs, err.Error()))
 			return
 		case <-erS.stopChan:
+			erS.closeAllRdrs()
 			return
 		case erEv := <-erS.rdrEvents:
 			if err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg, erEv.opts); err != nil {
@@ -301,4 +303,10 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	}
 
 	return
+}
+
+func (erS *ERService) closeAllRdrs() {
+	for _, stopL := range erS.stopLsn {
+		close(stopL)
+	}
 }

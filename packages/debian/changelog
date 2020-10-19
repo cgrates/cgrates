@@ -112,6 +112,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [AttributeS] Add support for *prefix and *suffix type
   * [ConfigS] Add "redis_" prefix to "dataDB" option for redis
   * [DataDB] Add support for redis with TLS connection ( + integration test )
+  * [ERs] Added support for *s3_json_map type
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
