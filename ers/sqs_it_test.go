@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"reflect"
@@ -31,18 +30,18 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	itTestS3 = flag.Bool("s3", false, "Run the test for S3Reader")
+	itTestSQS = flag.Bool("sqs", false, "Run the test for SQSReader")
 )
 
-func TestS3ER(t *testing.T) {
-	if !*itTestS3 {
+func TestSQSER(t *testing.T) {
+	if !*itTestSQS {
 		t.SkipNow()
 	}
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
@@ -50,11 +49,11 @@ func TestS3ER(t *testing.T) {
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"readers": [
 		{
-			"id": "s3",										// identifier of the EventReader profile
-			"type": "*s3_json_map",							// reader type <*file_csv>
+			"id": "sqs",										// identifier of the EventReader profile
+			"type": "*sqs_json_map",							// reader type <*file_csv>
 			"run_delay":  "-1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-			"source_path": "s3.us-east-2.amazonaws.com",		// read data from this path
+			"source_path": "sqs.us-east-2.amazonaws.com",		// read data from this path
 			// "processed_path": "/var/spool/cgrates/ers/out",	// move processed data here
 			"tenant": "cgrates.org",							// tenant used by import
 			"filters": [],										// limit parsing based on the filters
@@ -81,26 +80,25 @@ func TestS3ER(t *testing.T) {
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
 
-	if rdr, err = NewS3ER(cfg, 1, rdrEvents,
+	if rdr, err = NewSQSER(cfg, 1, rdrEvents,
 		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
-	s3Rdr := rdr.(*S3ER)
+	sqsRdr := rdr.(*SQSER)
 	var sess *session.Session
 	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
-	awsCfg.Region = aws.String(s3Rdr.awsRegion)
-	awsCfg.Credentials = credentials.NewStaticCredentials(s3Rdr.awsID, s3Rdr.awsKey, s3Rdr.awsToken)
+	awsCfg.Region = aws.String(sqsRdr.awsRegion)
+	awsCfg.Credentials = credentials.NewStaticCredentials(sqsRdr.awsID, sqsRdr.awsKey, sqsRdr.awsToken)
 
 	if sess, err = session.NewSessionWithOptions(session.Options{Config: awsCfg}); err != nil {
 		return
 	}
-	scv := s3manager.NewUploader(sess)
+	scv := sqs.New(sess)
 
 	randomCGRID := utils.UUIDSha1Prefix()
-	scv.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(s3Rdr.queueID),
-		Key:    aws.String("home/test.json"),
-		Body:   bytes.NewReader([]byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID))),
+	scv.SendMessage(&sqs.SendMessageInput{
+		MessageBody: aws.String(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)),
+		QueueUrl:    sqsRdr.queueURL,
 	})
 
 	if err = rdr.Serve(); err != nil {
@@ -111,8 +109,8 @@ func TestS3ER(t *testing.T) {
 	case err = <-rdrErr:
 		t.Error(err)
 	case ev := <-rdrEvents:
-		if ev.rdrCfg.ID != "s3" {
-			t.Errorf("Expected 's3' received `%s`", ev.rdrCfg.ID)
+		if ev.rdrCfg.ID != "sqs" {
+			t.Errorf("Expected 'sqs' received `%s`", ev.rdrCfg.ID)
 		}
 		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
