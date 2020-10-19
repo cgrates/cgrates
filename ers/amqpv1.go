@@ -22,23 +22,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-
-	kafka "github.com/segmentio/kafka-go"
+	amqpv1 "pack.ag/amqp"
 )
 
-// NewKafkaER return a new kafka event reader
-func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
+// NewAMQPv1ER return a new amqpv1 event reader
+func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
-
-	rdr := &KafkaER{
+	rdr := &AMQPv1ER{
 		cgrCfg:    cfg,
 		cfgIdx:    cfgIdx,
 		fltrS:     fltrS,
@@ -52,96 +49,103 @@ func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
-	rdr.dialURL = rdr.Config().SourcePath
+	if vals, has := rdr.Config().Opts[utils.QueueID]; has {
+		rdr.queueID = "/" + utils.IfaceAsString(vals)
+	}
 	rdr.createPoster()
-	er = rdr
-	err = rdr.setOpts(rdr.Config().Opts)
-	return
-
+	return rdr, nil
 }
 
-// KafkaER implements EventReader interface for kafka message
-type KafkaER struct {
+// AMQPv1ER implements EventReader interface for amqpv1 message
+type AMQPv1ER struct {
 	// sync.RWMutex
 	cgrCfg *config.CGRConfig
 	cfgIdx int // index of config instance within ERsCfg.Readers
 	fltrS  *engine.FilterS
 
-	dialURL string
-	topic   string
-	groupID string
-	maxWait time.Duration
+	queueID string
 
 	rdrEvents chan *erEvent // channel to dispatch the events created to
 	rdrExit   chan struct{}
 	rdrErr    chan error
 	cap       chan struct{}
 
+	conn *amqpv1.Client
+	ses  *amqpv1.Session
+
 	poster engine.Poster
 }
 
 // Config returns the curent configuration
-func (rdr *KafkaER) Config() *config.EventReaderCfg {
+func (rdr *AMQPv1ER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
-// Serve will start the gorutines needed to watch the kafka topic
-func (rdr *KafkaER) Serve() (err error) {
-	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{rdr.dialURL},
-		GroupID: rdr.groupID,
-		Topic:   rdr.topic,
-		MaxWait: rdr.maxWait,
-	})
-
+// Serve will start the gorutines needed to watch the amqpv1 topic
+func (rdr *AMQPv1ER) Serve() (err error) {
+	if rdr.conn, err = amqpv1.Dial(rdr.Config().SourcePath); err != nil {
+		return
+	}
+	if rdr.ses, err = rdr.conn.NewSession(); err != nil {
+		rdr.close()
+		return
+	}
 	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
 		return
 	}
 
-	go func(r *kafka.Reader) { // use a secondary gorutine because the ReadMessage is blocking function
+	var receiver *amqpv1.Receiver
+	if receiver, err = rdr.ses.NewReceiver(
+		amqpv1.LinkSourceAddress(rdr.queueID),
+	); err != nil {
+		return
+	}
+	go func() {
 		select {
 		case <-rdr.rdrExit:
-			utils.Logger.Info(
-				fmt.Sprintf("<%s> stop monitoring kafka path <%s>",
-					utils.ERs, rdr.dialURL))
-			if rdr.poster != nil {
-				rdr.poster.Close()
-			}
-			r.Close() // already locked in library
-			return
+			receiver.Close(context.Background())
+			rdr.close()
 		}
-	}(r)
-	go rdr.readLoop(r) // read until the connection is closed
+	}()
+
+	go rdr.readLoop(receiver) // read until the connection is closed
 	return
 }
 
-func (rdr *KafkaER) readLoop(r *kafka.Reader) {
+func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 	for {
 		if rdr.Config().ConcurrentReqs != -1 {
 			<-rdr.cap // do not try to read if the limit is reached
 		}
-		msg, err := r.ReadMessage(context.Background())
-		if err != nil {
-			if err == io.EOF {
-				// ignore io.EOF received from closing the connection from our side
-				// this is happening when we stop the reader
+		ctx := context.Background()
+		var msg *amqpv1.Message
+		if msg, err = recv.Receive(ctx); err != nil {
+			if err == amqpv1.ErrLinkClosed {
+				err = nil
 				return
 			}
-			//  send it to the error channel
 			rdr.rdrErr <- err
 			return
 		}
-		go func(msg kafka.Message) {
-			if err := rdr.processMessage(msg.Value); err != nil {
+		if err = msg.Accept(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> unable to accept message error: %s",
+					utils.ERs, err.Error()))
+			continue
+		}
+
+		go func(msg *amqpv1.Message) {
+			body := msg.GetData()
+			if err := rdr.processMessage(body); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> processing message %s error: %s",
-						utils.ERs, string(msg.Key), err.Error()))
+					fmt.Sprintf("<%s> processing message error: %s",
+						utils.ERs, err.Error()))
 			}
 			if rdr.poster != nil { // post it
-				if err := rdr.poster.Post(msg.Value, string(msg.Key)); err != nil {
+				if err := rdr.poster.Post(body, utils.EmptyString); err != nil {
 					utils.Logger.Warning(
-						fmt.Sprintf("<%s> writing message %s error: %s",
-							utils.ERs, string(msg.Key), err.Error()))
+						fmt.Sprintf("<%s> writing message error: %s",
+							utils.ERs, err.Error()))
 				}
 			}
 			if rdr.Config().ConcurrentReqs != -1 {
@@ -151,12 +155,11 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 	}
 }
 
-func (rdr *KafkaER) processMessage(msg []byte) (err error) {
+func (rdr *AMQPv1ER) processMessage(msg []byte) (err error) {
 	var decodedMessage map[string]interface{}
 	if err = json.Unmarshal(msg, &decodedMessage); err != nil {
 		return
 	}
-
 	agReq := agents.NewAgentRequest(
 		utils.MapStorage(decodedMessage), nil,
 		nil, nil, nil, rdr.Config().Tenant,
@@ -180,29 +183,24 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 	return
 }
 
-func (rdr *KafkaER) setOpts(opts map[string]interface{}) (err error) {
-	rdr.topic = utils.KafkaDefaultTopic
-	rdr.groupID = utils.KafkaDefaultGroupID
-	rdr.maxWait = utils.KafkaDefaultMaxWait
-
-	if vals, has := opts[utils.KafkaTopic]; has {
-		rdr.topic = utils.IfaceAsString(vals)
+func (rdr *AMQPv1ER) close() (err error) {
+	if rdr.poster != nil {
+		rdr.poster.Close()
 	}
-	if vals, has := opts[utils.KafkaGroupID]; has {
-		rdr.groupID = utils.IfaceAsString(vals)
+	if rdr.ses != nil {
+		if err = rdr.ses.Close(context.Background()); err != nil {
+			return
+		}
 	}
-	if vals, has := opts[utils.KafkaMaxWait]; has {
-		rdr.maxWait, err = utils.IfaceAsDuration(vals)
-	}
-	return
+	return rdr.conn.Close()
 }
 
-func (rdr *KafkaER) createPoster() {
+func (rdr *AMQPv1ER) createPoster() {
 	processedOpt := getProcessOptions(rdr.Config().Opts)
 	if len(processedOpt) == 0 &&
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
-	rdr.poster = engine.NewKafkaPoster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+	rdr.poster = engine.NewAMQPv1Poster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
 		rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
 }

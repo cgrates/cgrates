@@ -34,7 +34,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewSQSER return a new s3 event reader
+// NewSQSER return a new sqs event reader
 func NewSQSER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
@@ -57,7 +57,7 @@ func NewSQSER(cfg *config.CGRConfig, cfgIdx int,
 	return rdr, nil
 }
 
-// SQSER implements EventReader interface for kafka message
+// SQSER implements EventReader interface for sqs message
 type SQSER struct {
 	// sync.RWMutex
 	cgrCfg *config.CGRConfig
@@ -85,7 +85,7 @@ func (rdr *SQSER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
-// Serve will start the gorutines needed to watch the kafka topic
+// Serve will start the gorutines needed to watch the sqs topic
 func (rdr *SQSER) Serve() (err error) {
 	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
 		return

@@ -147,24 +147,10 @@ func (pstr *AMQPv1Poster) newPosterSession() (s *amqpv1.Session, err error) {
 	return pstr.client.NewSession()
 }
 
-func isRecoverableCloseError(err error) bool {
-	return err == amqpv1.ErrConnClosed ||
+func (pstr *AMQPv1Poster) isRecoverableError(err error) bool {
+	netErr, ok := err.(net.Error)
+	return (ok && netErr.Temporary()) ||
+		err == amqpv1.ErrConnClosed ||
 		err == amqpv1.ErrLinkClosed ||
 		err == amqpv1.ErrSessionClosed
-}
-
-func (pstr *AMQPv1Poster) isRecoverableError(err error) bool {
-	switch err.(type) {
-	case *amqpv1.Error, *amqpv1.DetachError, net.Error:
-		if netErr, ok := err.(net.Error); ok {
-			if !netErr.Temporary() {
-				return false
-			}
-		}
-	default:
-		if !isRecoverableCloseError(err) {
-			return false
-		}
-	}
-	return true
 }

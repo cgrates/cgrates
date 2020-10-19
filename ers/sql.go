@@ -35,7 +35,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// NewSQLEventReader return a new kafka event reader
+// NewSQLEventReader return a new sql event reader
 func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
@@ -88,7 +88,7 @@ func (rdr *SQLEventReader) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
-// Serve will start the gorutines needed to watch the kafka topic
+// Serve will start the gorutines needed to watch the sql topic
 func (rdr *SQLEventReader) Serve() (err error) {
 	var db *gorm.DB
 	if db, err = gorm.Open(rdr.connType, rdr.connString); err != nil {

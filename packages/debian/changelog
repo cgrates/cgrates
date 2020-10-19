@@ -114,6 +114,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [DataDB] Add support for redis with TLS connection ( + integration test )
   * [ERs] Added support for *s3_json_map type
   * [ERs] Added support for *sqs_json_map type
+  * [ERs] Added support for *amqpv1_json_map type
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

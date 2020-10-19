@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// creates a new rjReader from a io.Reader
+// NewRjReader creates a new rjReader from a io.Reader
 func NewRjReader(rdr io.Reader) (r *rjReader, err error) {
 	var b []byte
 	b, err = ioutil.ReadAll(rdr)
@@ -40,7 +40,7 @@ func NewRjReader(rdr io.Reader) (r *rjReader, err error) {
 	return NewRjReaderFromBytes(b), nil
 }
 
-// creates a new rjReader from a slice of bytes
+// NewRjReaderFromBytes creates a new rjReader from a slice of bytes
 func NewRjReaderFromBytes(b []byte) *rjReader {
 	return &rjReader{buf: b}
 }
@@ -289,12 +289,12 @@ func (rjr *rjReader) HandleJSONError(err error) error {
 	}
 	rjr.indx = 0
 
-	line, character := rjr.getJsonOffsetLine(offset)
+	line, character := rjr.getJSONOffsetLine(offset)
 	return fmt.Errorf("%s around line %v and position %v\n line: %q", err.Error(), line, character,
 		strings.Split(string(rjr.buf), "\n")[line-1])
 }
 
-func (rjr *rjReader) getJsonOffsetLine(offset int64) (line, character int64) {
+func (rjr *rjReader) getJSONOffsetLine(offset int64) (line, character int64) {
 	line = 1 // start line counting from 1
 	var lastChar byte
 

@@ -30,7 +30,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
-// NewAMQPER return a new kafka event reader
+// NewAMQPER return a new amqp event reader
 func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
@@ -54,7 +54,7 @@ func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
 	return rdr, nil
 }
 
-// AMQPER implements EventReader interface for kafka message
+// AMQPER implements EventReader interface for amqp message
 type AMQPER struct {
 	// sync.RWMutex
 	cgrCfg *config.CGRConfig
@@ -84,7 +84,7 @@ func (rdr *AMQPER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
-// Serve will start the gorutines needed to watch the kafka topic
+// Serve will start the gorutines needed to watch the amqp topic
 func (rdr *AMQPER) Serve() (err error) {
 	if rdr.conn, err = amqp.Dial(rdr.dialURL); err != nil {
 		return
@@ -151,7 +151,7 @@ func (rdr *AMQPER) readLoop(msgChan <-chan amqp.Delivery) {
 		select {
 		case <-rdr.rdrExit:
 			utils.Logger.Info(
-				fmt.Sprintf("<%s> stop monitoring kafka path <%s>",
+				fmt.Sprintf("<%s> stop monitoring amqp path <%s>",
 					utils.ERs, rdr.dialURL))
 			rdr.close()
 			return
