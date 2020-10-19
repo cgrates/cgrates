@@ -31,10 +31,14 @@ import (
 
 // Returns a list of ActionTriggers on an account
 func (apierSv1 *APIerSv1) GetAccountActionTriggers(attrs *utils.TenantAccount, reply *engine.ActionTriggers) error {
-	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{utils.Account}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if account, err := apierSv1.DataManager.GetAccount(utils.ConcatenatedKey(attrs.Tenant, attrs.Account)); err != nil {
+	tnt := attrs.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	if account, err := apierSv1.DataManager.GetAccount(utils.ConcatenatedKey(tnt, attrs.Account)); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		ats := account.ActionTriggers
@@ -56,15 +60,19 @@ type AttrAddAccountActionTriggers struct {
 }
 
 func (apierSv1 *APIerSv1) AddAccountActionTriggers(attr *AttrAddAccountActionTriggers, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.Account}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var actTime time.Time
 	if actTime, err = utils.ParseTimeDetectLayout(attr.ActivationDate,
 		apierSv1.Config.GeneralCfg().DefaultTimezone); err != nil {
 		return
 	}
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	var account *engine.Account
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		if account, err = apierSv1.DataManager.GetAccount(accID); err != nil {
@@ -111,10 +119,14 @@ type AttrRemoveAccountActionTriggers struct {
 }
 
 func (apierSv1 *APIerSv1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTriggers, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{utils.Account}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		var account *engine.Account
 		if acc, err := apierSv1.DataManager.GetAccount(accID); err == nil {
@@ -153,10 +165,14 @@ type AttrResetAccountActionTriggers struct {
 
 func (apierSv1 *APIerSv1) ResetAccountActionTriggers(attr AttrResetAccountActionTriggers, reply *string) error {
 
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{utils.Account}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		if acc, err := apierSv1.DataManager.GetAccount(accID); err == nil {
@@ -337,10 +353,14 @@ func (attr *AttrSetActionTrigger) UpdateActionTrigger(at *engine.ActionTrigger, 
 
 // SetAccountActionTriggers updates or creates if not present the ActionTrigger for an Account
 func (apierSv1 *APIerSv1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{utils.Account}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
+	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		if acc, err := apierSv1.DataManager.GetAccount(accID); err == nil {
@@ -509,8 +529,12 @@ type AttrAddActionTrigger struct {
 
 // Deprecated in rc8, replaced by AddAccountActionTriggers
 func (apierSv1 *APIerSv1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{utils.Account}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	at := &engine.ActionTrigger{
 		ID:             attr.ActionTriggersId,
@@ -545,7 +569,7 @@ func (apierSv1 *APIerSv1) AddTriggeredAction(attr AttrAddActionTrigger, reply *s
 	if attr.BalanceSharedGroup != "" {
 		at.Balance.SharedGroups = &utils.StringMap{attr.BalanceSharedGroup: true}
 	}
-	acntID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	acntID := utils.ConcatenatedKey(tnt, attr.Account)
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		acnt, err := apierSv1.DataManager.GetAccount(acntID)
 		if err != nil {
