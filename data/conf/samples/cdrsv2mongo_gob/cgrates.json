@@ -25,7 +25,6 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": ["conn1"],
 	"dynaprepaid_actionplans": ["PACKAGE_1001"],
 },
 

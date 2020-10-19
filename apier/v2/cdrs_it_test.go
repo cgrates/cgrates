@@ -59,7 +59,7 @@ var (
 		testV2CDRsGetCdrsNoRattingPlan,
 
 		testV2CDRsRateCDRsWithRatingPlan,
-		testV2CDRsGetCdrsWithRattingPlan,
+		testV2CDRsGetCdrsWithRatingPlan,
 
 		testV2CDRsSetThreshold,
 		testV2CDRsProcessCDRWithThreshold,
@@ -674,7 +674,7 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 	}
 }
 
-func testV2CDRsGetCdrsWithRattingPlan(t *testing.T) {
+func testV2CDRsGetCdrsWithRatingPlan(t *testing.T) {
 	var cdrCnt int64
 	req := utils.AttrGetCdrs{}
 	if err := cdrsRpc.Call(utils.APIerSv2CountCDRs, &req, &cdrCnt); err != nil {
