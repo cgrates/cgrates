@@ -21,25 +21,25 @@ package ers
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewS3ER return a new s3 event reader
-func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
+// NewSQSER return a new s3 event reader
+func NewSQSER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 
-	rdr := &S3ER{
+	rdr := &SQSER{
 		cgrCfg:    cfg,
 		cfgIdx:    cfgIdx,
 		fltrS:     fltrS,
@@ -57,8 +57,8 @@ func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
 	return rdr, nil
 }
 
-// S3ER implements EventReader interface for kafka message
-type S3ER struct {
+// SQSER implements EventReader interface for kafka message
+type SQSER struct {
 	// sync.RWMutex
 	cgrCfg *config.CGRConfig
 	cfgIdx int // index of config instance within ERsCfg.Readers
@@ -69,6 +69,7 @@ type S3ER struct {
 	rdrErr    chan error
 	cap       chan struct{}
 
+	queueURL  *string
 	awsRegion string
 	awsID     string
 	awsKey    string
@@ -80,35 +81,20 @@ type S3ER struct {
 }
 
 // Config returns the curent configuration
-func (rdr *S3ER) Config() *config.EventReaderCfg {
+func (rdr *SQSER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
 // Serve will start the gorutines needed to watch the kafka topic
-func (rdr *S3ER) Serve() (err error) {
-	var sess *session.Session
-	cfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
-	if len(rdr.awsRegion) != 0 {
-		cfg.Region = aws.String(rdr.awsRegion)
-	}
-	if len(rdr.awsID) != 0 &&
-		len(rdr.awsKey) != 0 {
-		cfg.Credentials = credentials.NewStaticCredentials(rdr.awsID, rdr.awsKey, rdr.awsToken)
-	}
-	if sess, err = session.NewSessionWithOptions(session.Options{Config: cfg}); err != nil {
-		return
-	}
-	rdr.session = sess
-
+func (rdr *SQSER) Serve() (err error) {
 	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
 		return
 	}
-
 	go rdr.readLoop() // read until the connection is closed
 	return
 }
 
-func (rdr *S3ER) processMessage(body []byte) (err error) {
+func (rdr *SQSER) processMessage(body []byte) (err error) {
 	var decodedMessage map[string]interface{}
 	if err = json.Unmarshal(body, &decodedMessage); err != nil {
 		return
@@ -137,7 +123,7 @@ func (rdr *S3ER) processMessage(body []byte) (err error) {
 	return
 }
 
-func (rdr *S3ER) parseOpts(opts map[string]interface{}) {
+func (rdr *SQSER) parseOpts(opts map[string]interface{}) {
 	rdr.queueID = utils.DefaultQueueID
 	if val, has := opts[utils.QueueID]; has {
 		rdr.queueID = utils.IfaceAsString(val)
@@ -154,43 +140,75 @@ func (rdr *S3ER) parseOpts(opts map[string]interface{}) {
 	if val, has := opts[utils.AWSToken]; has {
 		rdr.awsToken = utils.IfaceAsString(val)
 	}
+	rdr.getQueueURL()
 }
 
-func (rdr *S3ER) readLoop() (err error) {
-	scv := s3.New(rdr.session)
-	var keys []string
-	if err = scv.ListObjectsV2Pages(&s3.ListObjectsV2Input{Bucket: aws.String(rdr.queueID)},
-		func(lovo *s3.ListObjectsV2Output, b bool) bool {
-			for _, objMeta := range lovo.Contents {
-				if objMeta.Key != nil {
-					keys = append(keys, *objMeta.Key)
-				}
-			}
-			return !rdr.isClosed()
-		}); err != nil {
-		rdr.rdrErr <- err
+func (rdr *SQSER) getQueueURL() (err error) {
+	if rdr.queueURL != nil {
+		return nil
+	}
+	if err = rdr.newSession(); err != nil {
 		return
 	}
-	if rdr.isClosed() {
+	svc := sqs.New(rdr.session)
+	var result *sqs.GetQueueUrlOutput
+	if result, err = svc.GetQueueUrl(&sqs.GetQueueUrlInput{
+		QueueName: aws.String(rdr.queueID),
+	}); err == nil {
+		rdr.queueURL = new(string)
+		*(rdr.queueURL) = *result.QueueUrl
 		return
 	}
-	for _, key := range keys {
-		go rdr.readMsg(scv, key)
+	if aerr, ok := err.(awserr.Error); ok && aerr.Code() == sqs.ErrCodeQueueDoesNotExist {
+		// For CreateQueue
+		var createResult *sqs.CreateQueueOutput
+		if createResult, err = svc.CreateQueue(&sqs.CreateQueueInput{
+			QueueName: aws.String(rdr.queueID),
+		}); err == nil {
+			rdr.queueURL = utils.StringPointer(*createResult.QueueUrl)
+			return
+		}
 	}
+	utils.Logger.Warning(fmt.Sprintf("<SQSPoster> can not get url for queue with ID=%s because err: %v", rdr.queueID, err))
 	return
 }
 
-func (rdr *S3ER) createPoster() {
+func (rdr *SQSER) readLoop() (err error) {
+	scv := sqs.New(rdr.session)
+	for !rdr.isClosed() {
+		if rdr.Config().ConcurrentReqs != -1 {
+			<-rdr.cap // do not try to read if the limit is reached
+		}
+		var msgs *sqs.ReceiveMessageOutput
+		if msgs, err = scv.ReceiveMessage(&sqs.ReceiveMessageInput{
+			QueueUrl:            rdr.queueURL,
+			MaxNumberOfMessages: aws.Int64(1),
+			WaitTimeSeconds:     aws.Int64(1),
+		}); err != nil {
+			return
+		}
+		if len(msgs.Messages) != 0 {
+			go rdr.readMsg(scv, msgs.Messages[0])
+		} else if rdr.Config().ConcurrentReqs != -1 {
+			rdr.cap <- struct{}{}
+		}
+
+	}
+
+	return
+}
+
+func (rdr *SQSER) createPoster() {
 	processedOpt := getProcessOptions(rdr.Config().Opts)
 	if len(processedOpt) == 0 &&
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
-	rdr.poster = engine.NewS3Poster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+	rdr.poster = engine.NewSQSPoster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
 		rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
 }
 
-func (rdr *S3ER) isClosed() bool {
+func (rdr *SQSER) isClosed() bool {
 	select {
 	case <-rdr.rdrExit:
 		return true
@@ -199,46 +217,51 @@ func (rdr *S3ER) isClosed() bool {
 	}
 }
 
-func (rdr *S3ER) readMsg(scv *s3.S3, key string) (err error) {
+func (rdr *SQSER) readMsg(scv *sqs.SQS, msg *sqs.Message) (err error) {
 	if rdr.Config().ConcurrentReqs != -1 {
-		<-rdr.cap // do not try to read if the limit is reached
 		defer func() { rdr.cap <- struct{}{} }()
 	}
-	if rdr.isClosed() {
-		return
-	}
-
-	obj, err := scv.GetObject(&s3.GetObjectInput{Bucket: &rdr.queueID, Key: &key})
-	if err != nil {
-		rdr.rdrErr <- err
-		return
-	}
-	var msg []byte
-	if msg, err = ioutil.ReadAll(obj.Body); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> decoding message %s error: %s",
-				utils.ERs, key, err.Error()))
-		return
-	}
-	obj.Body.Close()
-	if err = rdr.processMessage(msg); err != nil {
+	body := []byte(*msg.Body)
+	key := *msg.MessageId
+	if err = rdr.processMessage(body); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> processing message %s error: %s",
 				utils.ERs, key, err.Error()))
 		return
 	}
-	if _, err = scv.DeleteObject(&s3.DeleteObjectInput{Bucket: &rdr.queueID, Key: &key}); err != nil {
+	if _, err = scv.DeleteMessage(&sqs.DeleteMessageInput{
+		QueueUrl:      rdr.queueURL,
+		ReceiptHandle: msg.ReceiptHandle,
+	}); err != nil {
 		rdr.rdrErr <- err
 		return
 	}
 
 	if rdr.poster != nil { // post it
-		if err = rdr.poster.Post(msg, key); err != nil {
+		if err = rdr.poster.Post(body, key); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> writing message %s error: %s",
 					utils.ERs, key, err.Error()))
 			return
 		}
 	}
+
+	return
+}
+
+func (rdr *SQSER) newSession() (err error) {
+	cfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
+	if len(rdr.awsRegion) != 0 {
+		cfg.Region = aws.String(rdr.awsRegion)
+	}
+	if len(rdr.awsID) != 0 &&
+		len(rdr.awsKey) != 0 {
+		cfg.Credentials = credentials.NewStaticCredentials(rdr.awsID, rdr.awsKey, rdr.awsToken)
+	}
+	rdr.session, err = session.NewSessionWithOptions(
+		session.Options{
+			Config: cfg,
+		},
+	)
 	return
 }
