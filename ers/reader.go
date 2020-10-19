@@ -61,6 +61,8 @@ func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
 		return NewS3ER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaSQSjsonMap:
 		return NewSQSER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
+	case utils.MetaAMQPV1jsonMap:
+		return NewAMQPv1ER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	}
 	return
 }

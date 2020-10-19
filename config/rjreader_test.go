@@ -309,7 +309,7 @@ func TestGetErrorLine(t *testing.T) {
 	r := NewRjReaderFromBytes([]byte(jsonstr))
 	var offset int64 = 31
 	var expLine, expChar int64 = 10, 23
-	if line, character := r.getJsonOffsetLine(offset); expLine != line {
+	if line, character := r.getJSONOffsetLine(offset); expLine != line {
 		t.Errorf("Expected line %v received:%v", expLine, line)
 	} else if expChar != character {
 		t.Errorf("Expected line %v received:%v", expChar, character)
@@ -343,7 +343,7 @@ func TestGetErrorLine2(t *testing.T) {
 	r := NewRjReaderFromBytes([]byte(jsonstr))
 	var offset int64 = 31
 	var expLine, expChar int64 = 10, 46
-	if line, character := r.getJsonOffsetLine(offset); expLine != line {
+	if line, character := r.getJSONOffsetLine(offset); expLine != line {
 		t.Errorf("Expected line %v received:%v", expLine, line)
 	} else if expChar != character {
 		t.Errorf("Expected line %v received:%v", expChar, character)

@@ -57,7 +57,7 @@ func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
 	return rdr, nil
 }
 
-// S3ER implements EventReader interface for kafka message
+// S3ER implements EventReader interface for s3 message
 type S3ER struct {
 	// sync.RWMutex
 	cgrCfg *config.CGRConfig
@@ -84,7 +84,7 @@ func (rdr *S3ER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
-// Serve will start the gorutines needed to watch the kafka topic
+// Serve will start the gorutines needed to watch the s3 topic
 func (rdr *S3ER) Serve() (err error) {
 	var sess *session.Session
 	cfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
