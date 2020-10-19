@@ -189,7 +189,7 @@ func (tS *ThresholdService) runBackup() {
 // storeThresholds represents one task of complete backup
 func (tS *ThresholdService) storeThresholds() {
 	var failedTdIDs []string
-	for { // don't stop untill we store all dirty resources
+	for { // don't stop until we store all dirty resources
 		tS.stMux.Lock()
 		tID := tS.storedTdIDs.GetOne()
 		if tID != "" {
@@ -200,7 +200,7 @@ func (tS *ThresholdService) storeThresholds() {
 			break // no more keys, backup completed
 		}
 		if tIf, ok := Cache.Get(utils.CacheThresholds, tID); !ok || tIf == nil {
-			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache resource with ID: %s", tID))
+			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache treshold with ID: %s", tID))
 		} else if err := tS.StoreThreshold(tIf.(*Threshold)); err != nil {
 			failedTdIDs = append(failedTdIDs, tID) // record failure so we can schedule it for next backup
 		}
