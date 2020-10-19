@@ -97,6 +97,7 @@ var (
 		testApierRemoveRatingPlan,
 		testApierAddBalance,
 		testApierExecuteAction,
+		testApierExecuteActionWithoutTenant,
 		testApierSetActions,
 		testApierGetActions,
 		testApierSetActionPlan,
@@ -1177,6 +1178,23 @@ func testApierExecuteAction(t *testing.T) {
 	reply2 := utils.EmptyString
 	// Add balance to an account which does n exist
 	attrs = utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "dan2", ActionsId: "DUMMY_ACTION"}
+	if err := rater.Call(utils.APIerSv1ExecuteAction, attrs, &reply2); err == nil || reply2 == utils.OK {
+		t.Error("Expecting error on APIerSv1.ExecuteAction.", err, reply2)
+	}
+}
+
+func testApierExecuteActionWithoutTenant(t *testing.T) {
+	var reply string
+	// Add balance to a previously known account
+	attrs := utils.AttrExecuteAction{Account: "dan2", ActionsId: "PREPAID_10"}
+	if err := rater.Call(utils.APIerSv1ExecuteAction, attrs, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
+	}
+	reply2 := utils.EmptyString
+	// Add balance to an account which does n exist
+	attrs = utils.AttrExecuteAction{Account: "dan2", ActionsId: "DUMMY_ACTION"}
 	if err := rater.Call(utils.APIerSv1ExecuteAction, attrs, &reply2); err == nil || reply2 == utils.OK {
 		t.Error("Expecting error on APIerSv1.ExecuteAction.", err, reply2)
 	}
