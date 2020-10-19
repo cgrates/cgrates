@@ -947,7 +947,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	time.Sleep(200 * time.Millisecond)
-	eAcntVal = 4.0567 // rounding issue; old values : 4.0565 , 4.0566
+	eAcntVal = 4.0566 // rounding issue; old values : 4.0565 , 4.0566
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -964,7 +964,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 		if cdrs[0].Usage != "2m30.05s" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		}
-		if cdrs[0].Cost != 1.5333 {
+		if cdrs[0].Cost != 1.5332 {
 			t.Errorf("Unexpected CDR Cost received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
 		}
 	}
