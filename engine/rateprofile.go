@@ -82,6 +82,15 @@ func (rt *Rate) UID() string {
 	return rt.uID
 }
 
+type IntervalRate struct {
+	IntervalStart time.Duration // Starting point when the Rate kicks in
+	Unit          time.Duration // RateUnit
+	Increment     time.Duration // RateIncrement
+	Value         float64       // RateValue
+
+	val *utils.Decimal // cached version of the Decimal
+}
+
 func (rt *Rate) Compile() (err error) {
 	aTime := rt.ActivationTimes
 	if aTime == utils.EmptyString {
@@ -96,39 +105,6 @@ func (rt *Rate) Compile() (err error) {
 // RunTimes returns the set of activation and deactivation times for this rate on the interval between >=sTime and <eTime
 // aTimes is in the form of [][]
 func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time.Time, err error) {
-	/*oSTime := sTime
-	for i := 0; i < 5; i++ { // find out the first activation time in the past enabled for our sTime
-		switch i {
-		case 0:
-			sTime = oSTime.Add(-time.Minute)
-		case 1:
-			sTime = oSTime.Add(-time.Hour)
-		case 2:
-			sTime = oSTime.AddDate(0, 0, -1)
-		case 3:
-			sTime = oSTime.AddDate(0, -1, 0)
-		case 4:
-			sTime = oSTime.AddDate(-1, 0, 0)
-		}
-		aTime := rt.aTime.Next(sTime)
-		if oSTime.Before(aTime) {
-			continue
-		}
-		iTime := rt.aTime.NextInactive(sTime)
-		aTimes = append(aTimes, []time.Time{aTime, iTime})
-		if iTime.IsZero() || !eTime.After(iTime) { // #TestMe
-			return
-		}
-		if iTime.IsZero() || !eTime.After(iTime) { // #TestMe
-			return
-		}
-		sTime = iTime
-		break
-	}
-	if len(aTimes) == 0 {
-		return
-	}
-	*/
 	sTime = sTime.Add(-time.Minute) // to make sure we can cover startTime
 	for i := 0; i < verbosity; i++ {
 		aTime := rt.sched.Next(sTime)
@@ -150,15 +126,6 @@ func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time
 	return nil, utils.ErrMaxIterationsReached
 }
 
-type IntervalRate struct {
-	IntervalStart time.Duration // Starting point when the Rate kicks in
-	Unit          time.Duration // RateUnit
-	Increment     time.Duration // RateIncrement
-	Value         float64       // RateValue
-
-	val *utils.Decimal // cached version of the Decimal
-}
-
 // RateProfileWithOpts is used in replicatorV1 for dispatcher
 type RateProfileWithOpts struct {
 	*RateProfile
@@ -167,14 +134,16 @@ type RateProfileWithOpts struct {
 
 // RateSInterval is used by RateS to integrate Rate info for one charging interval
 type RateSInterval struct {
-	UsageStart time.Duration
-	Increments []*RateSIncrement
+	UsageStart     time.Duration
+	Increments     []*RateSIncrement
+	CompressFactor int64
 }
 
 type RateSIncrement struct {
 	Rate              *Rate
 	IntervalRateIndex int
 	Usage             time.Duration
+	CompressFactor    int64
 }
 
 // Sort will sort the IntervalRates from each Rate based on IntervalStart

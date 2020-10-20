@@ -66,7 +66,7 @@ func (rs *ratesWithWinner) has(rtID string) (has bool) {
 	return
 }
 
-// rateWithTimes keeps the aTime and iTime attached to the rate
+// rateWithTimes activates a rate on an interval
 type rateWithTimes struct {
 	uId string
 	rt  *engine.Rate
@@ -74,6 +74,7 @@ type rateWithTimes struct {
 	iTime time.Time
 }
 
+// id is used to provide an unique identifier for a rateWithTimes
 func (rWt *rateWithTimes) id() string {
 	if rWt.uId == "" {
 		rWt.uId = fmt.Sprintf("%s_%d", rWt.rt.ID, rWt.aTime.Unix())
