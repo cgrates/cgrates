@@ -831,6 +831,7 @@ func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 		AttributeSConns:     []string{},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
+		RALsConns:           []string{},
 		DefaultRatio:        1,
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.supplierSCfg) {

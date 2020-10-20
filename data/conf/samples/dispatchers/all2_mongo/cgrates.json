@@ -59,6 +59,7 @@
 
 "suppliers": {
 	"enabled": true,
+	"rals_conns": ["*internal"]
 },
 
 "stats": {

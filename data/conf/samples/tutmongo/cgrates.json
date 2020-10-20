@@ -97,6 +97,7 @@
 	"enabled": true,
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
 },
 
 
