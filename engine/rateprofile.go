@@ -72,7 +72,7 @@ type Rate struct {
 	Blocker         bool     // RateBlocker will make this rate recurrent, deactivating further intervals
 	IntervalRates   []*IntervalRate
 
-	aTime cron.Schedule // compiled version of activation time as cron.Schedule interface
+	sched cron.Schedule // compiled version of activation time as cron.Schedule interface
 }
 
 func (rt *Rate) Compile() (err error) {
@@ -80,7 +80,7 @@ func (rt *Rate) Compile() (err error) {
 	if aTime == utils.EmptyString {
 		aTime = "* * * * *"
 	}
-	if rt.aTime, err = cron.ParseStandard(aTime); err != nil {
+	if rt.sched, err = cron.ParseStandard(aTime); err != nil {
 		return
 	}
 	return
@@ -89,22 +89,22 @@ func (rt *Rate) Compile() (err error) {
 // RunTimes returns the set of activation and deactivation times for this rate on the interval between >=sTime and <eTime
 // aTimes is in the form of [][]
 func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time.Time, err error) {
-	origSTime := sTime
+	/*oSTime := sTime
 	for i := 0; i < 5; i++ { // find out the first activation time in the past enabled for our sTime
 		switch i {
 		case 0:
-			sTime = origSTime.Add(-time.Minute)
+			sTime = oSTime.Add(-time.Minute)
 		case 1:
-			sTime = origSTime.Add(-time.Hour)
+			sTime = oSTime.Add(-time.Hour)
 		case 2:
-			sTime = origSTime.AddDate(0, 0, -1)
+			sTime = oSTime.AddDate(0, 0, -1)
 		case 3:
-			sTime = origSTime.AddDate(0, -1, 0)
+			sTime = oSTime.AddDate(0, -1, 0)
 		case 4:
-			sTime = origSTime.AddDate(-1, 0, 0)
+			sTime = oSTime.AddDate(-1, 0, 0)
 		}
 		aTime := rt.aTime.Next(sTime)
-		if sTime.Before(aTime) {
+		if oSTime.Before(aTime) {
 			continue
 		}
 		iTime := rt.aTime.NextInactive(sTime)
@@ -121,12 +121,14 @@ func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time
 	if len(aTimes) == 0 {
 		return
 	}
+	*/
+	sTime = sTime.Add(-time.Minute) // to make sure we can cover startTime
 	for i := 0; i < verbosity; i++ {
-		aTime := rt.aTime.Next(sTime)
+		aTime := rt.sched.Next(sTime)
 		if aTime.IsZero() || !aTime.Before(eTime) { // #TestMe
 			return
 		}
-		iTime := rt.aTime.NextInactive(sTime)
+		iTime := rt.sched.NextInactive(aTime)
 		aTimes = append(aTimes, []time.Time{aTime, iTime})
 		if iTime.IsZero() || !eTime.After(iTime) { // #TestMe
 			return

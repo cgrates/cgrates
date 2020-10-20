@@ -18,7 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package rates
 
-/*
+import (
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
 func TestOrderRatesOnIntervals(t *testing.T) {
 	rt0 := &engine.Rate{
 		ID:     "RATE0",
@@ -52,10 +60,12 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 			},
 		},
 	}
-
-	if ordRts := orderRatesOnIntervals(
-		allRts, time.Date(2020, time.June, 28, 18, 56, 05, 0, time.UTC),
-		time.Duration(2*time.Minute), true, 10); !reflect.DeepEqual(expOrdered, ordRts) {
+	sTime := time.Date(2020, time.June, 28, 18, 56, 05, 0, time.UTC)
+	usage := time.Duration(2 * time.Minute)
+	if ordRts, err := orderRatesOnIntervals(
+		allRts, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
 	}
@@ -78,12 +88,16 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 			},
 		},
 	}
-	if ordRts := orderRatesOnIntervals(
-		allRts, time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC),
-		time.Duration(2*time.Minute), true, 10); !reflect.DeepEqual(expOrdered, ordRts) {
+	sTime = time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
+	usage = time.Duration(2 * time.Minute)
+	if ordRts, err := orderRatesOnIntervals(
+		allRts, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
 	}
+
 	expOrdered = []*engine.RateSInterval{
 		{
 			Increments: []*engine.RateSIncrement{
@@ -110,14 +124,13 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 			},
 		},
 	}
-		fmt.Println("Third test")
-		if ordRts := orderRatesOnIntervals(
-			allRts, time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC),
-			time.Duration(2*time.Minute), true, 10); !reflect.DeepEqual(expOrdered, ordRts) {
-			t.Errorf("expecting: %s\n, received: %s",
-				utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
-		}
-
-
+	sTime = time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
+	usage = time.Duration(25 * time.Hour)
+	if ordRts, err := orderRatesOnIntervals(
+		allRts, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expOrdered, ordRts) {
+		t.Errorf("expecting: %s\n, received: %s",
+			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
+	}
 }
-*/

@@ -68,13 +68,17 @@ func (rs *ratesWithWinner) has(rtID string) (has bool) {
 
 // rateWithTimes keeps the aTime and iTime attached to the rate
 type rateWithTimes struct {
-	rt *engine.Rate
+	uId string
+	rt  *engine.Rate
 	aTime,
 	iTime time.Time
 }
 
 func (rWt *rateWithTimes) id() string {
-	return fmt.Sprintf("%s_%d", rWt.rt.ID, rWt.aTime.Unix())
+	if rWt.uId == "" {
+		rWt.uId = fmt.Sprintf("%s_%d", rWt.rt.ID, rWt.aTime.Unix())
+	}
+	return rWt.uId
 }
 
 // orderRatesOnIntervals will order the rates based on ActivationInterval and intervalStart of each Rate
@@ -86,6 +90,7 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 
 	// index the received rates based on unique times they run
 	rtIdx := make(map[time.Time]*ratesWithWinner) // map[ActivationTimes]*ratesWithWinner
+	allRates := make(map[string]*rateWithTimes)
 	for _, rt := range aRts {
 		var rTimes [][]time.Time
 		if rTimes, err = rt.RunTimes(sTime, endTime, verbosity); err != nil {
@@ -100,6 +105,7 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 			if rTimeSet[0].IsZero() { // the rate will never be active
 				continue
 			}
+			allRates[rIt.id()] = rIt
 			if _, hasKey := rtIdx[rTimeSet[0]]; !hasKey {
 				rtIdx[rTimeSet[0]] = initRatesWithWinner()
 			}
@@ -112,7 +118,20 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 			}
 		}
 	}
-
+	if err != nil && len(rtIdx) != 0 {
+		err = nil // overwrite only if there is at least one rate found
+	}
+	// add the active rates to all time samples
+	for tm, rWw := range rtIdx {
+		for _, rIt := range allRates {
+			if rWw.has(rIt.id()) ||
+				rIt.aTime.After(tm) ||
+				(!rIt.iTime.IsZero() && !rIt.iTime.Before(tm)) {
+				continue
+			}
+			rWw.add(rIt)
+		}
+	}
 	// sort the activation times
 	sortedATimes := make([]time.Time, len(rtIdx))
 	idxATimes := 0
@@ -123,28 +142,28 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 	sort.Slice(sortedATimes, func(i, j int) bool {
 		return sortedATimes[i].Before(sortedATimes[j])
 	})
-
 	// start with most recent activationTime lower or equal to sTime
 	for i, aT := range sortedATimes {
 		if !aT.After(sTime) || i == 0 {
 			continue
 		}
 		sortedATimes = sortedATimes[i-1:]
+		break
 	}
-
 	// get the real list of interesting ordered Rates based on their activationTime
 	var oRts []*rateWithTimes
 	if isDuration {
 		// add all the possible ActivationTimes from cron expressions
-		for i, aTime := range sortedATimes {
+		for _, aTime := range sortedATimes {
+
 			if !endTime.After(aTime) {
 				break // we are not interested about further rates
 			}
-			if rtIdx[aTime] == nil {
+			wnr := rtIdx[aTime].winner()
+			if wnr == nil {
 				continue
 			}
-			wnr := rtIdx[aTime].winner()
-			if i == 0 || wnr.rt.ID != oRts[i-1].rt.ID { // only add the winner if not already active
+			if len(oRts) == 0 || wnr.rt.ID != oRts[len(oRts)-1].rt.ID { // only add the winner if not already active
 				oRts = append(oRts, wnr)
 			}
 		}
