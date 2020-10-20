@@ -218,7 +218,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
-					utils.Cost:         1.26666,
+					utils.Cost:         1.2667,
 					utils.RatingPlanID: "RP_RETAIL1",
 					utils.Weight:       20.0,
 				},
@@ -430,7 +430,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
-					utils.Cost:         1.26666,
+					utils.Cost:         1.2667,
 					utils.RatingPlanID: "RP_RETAIL1",
 					utils.Weight:       20.0,
 				},

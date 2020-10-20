@@ -204,6 +204,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent,
 // returns map[string]interface{} with cost and relevant matching information inside
 func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
+	costData = make(map[string]interface{})
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
 		utils.Destination, utils.SetupTime}); err != nil {
 		return
@@ -234,66 +235,60 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		usage = time.Duration(1 * time.Minute)
 		err = nil
 	}
-	for _, anctID := range acntIDs {
-		cd := &CallDescriptor{
-			Category:      utils.MetaSuppliers,
-			Tenant:        ev.Tenant,
-			Subject:       subj,
-			Account:       anctID,
-			Destination:   dst,
-			TimeStart:     sTime,
-			TimeEnd:       sTime.Add(usage),
-			DurationIndex: usage,
+	var accountMaxUsage time.Duration
+	var acntCost map[string]interface{}
+	var initialUsage time.Duration
+	if len(acntIDs) != 0 {
+		if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
+			&utils.GetMaxSessionTimeOnAccountsArgs{
+				Tenant:      ev.Tenant,
+				Subject:     subj,
+				Destination: dst,
+				SetupTime:   sTime,
+				Usage:       usage,
+				AccountIDs:  acntIDs,
+			}, &acntCost); err != nil {
+			return nil, err
 		}
-		if maxDur, err := cd.GetMaxSessionDuration(); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> ignoring cost for account: %s, err: %s",
-					utils.SupplierS, anctID, err.Error()))
-		} else if maxDur >= usage {
-			return map[string]interface{}{
-				utils.Cost:    0.0,
-				utils.Account: anctID,
-			}, nil
-		}
-	}
-	for _, rp := range rpIDs { // loop through RatingPlans until we find one without errors
-		rPrfl := &RatingProfile{
-			Id: utils.ConcatenatedKey(utils.META_OUT,
-				ev.Tenant, utils.MetaSuppliers, subj),
-			RatingPlanActivations: RatingPlanActivations{
-				&RatingPlanActivation{
-					ActivationTime: sTime,
-					RatingPlanId:   rp,
-				},
-			},
-		}
-		// force cache set so it can be picked by calldescriptor for cost calculation
-		Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
-			true, utils.NonTransactional)
-		cd := &CallDescriptor{
-			Category:      utils.MetaSuppliers,
-			Tenant:        ev.Tenant,
-			Subject:       subj,
-			Account:       acnt,
-			Destination:   dst,
-			TimeStart:     sTime,
-			TimeEnd:       sTime.Add(usage),
-			DurationIndex: usage,
-		}
-		cc, err := cd.GetCost()
-		Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
-			true, utils.NonTransactional) // Remove here so we don't overload memory
-		if err != nil {
-			if err != utils.ErrNotFound {
+		if ifaceMaxUsage, has := acntCost[utils.CapMaxUsage]; has {
+			if accountMaxUsage, err = utils.IfaceAsDuration(ifaceMaxUsage); err != nil {
 				return nil, err
 			}
-			continue
+			if usage > accountMaxUsage {
+				// remain usage needs to be covered by rating plans
+				if len(rpIDs) == 0 {
+					return nil, fmt.Errorf("no rating plans defined for remaining usage")
+				}
+				// update the setup time and the usage
+				sTime = sTime.Add(accountMaxUsage)
+				initialUsage = usage
+				usage = usage - accountMaxUsage
+			}
+			for k, v := range acntCost { // update the costData with the infos from AccountS
+				costData[k] = v
+			}
 		}
-		ec := NewEventCostFromCallCost(cc, "", "")
-		return map[string]interface{}{
-			utils.Cost:         ec.GetCost(),
-			utils.RatingPlanID: rp}, nil
 	}
+
+	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
+		var rpCost map[string]interface{}
+		if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
+			&utils.GetCostOnRatingPlansArgs{
+				Tenant:        ev.Tenant,
+				Account:       acnt,
+				Subject:       subj,
+				Destination:   dst,
+				SetupTime:     sTime,
+				Usage:         usage,
+				RatingPlanIDs: rpIDs,
+			}, &rpCost); err != nil {
+			return nil, err
+		}
+		for k, v := range rpCost { // do not overwrite the return map
+			costData[k] = v
+		}
+	}
+
 	return
 }
 

@@ -446,6 +446,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SupplierS, connID)
 			}
 		}
+		for _, connID := range cfg.supplierSCfg.RALsConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.ralsCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.RALService, utils.SupplierS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SupplierS, connID)
+			}
+		}
 	}
 	// Scheduler check connection with CDR Server
 	if cfg.schedulerCfg.Enabled {
