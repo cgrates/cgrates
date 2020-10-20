@@ -150,11 +150,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
-func (sS *StatService) matchingStatQueuesForEvent(tnt string, args *StatsArgsProcessEvent) (sqs StatQueues, err error) {
-	evNm := utils.MapStorage{
-		utils.MetaReq:  args.Event,
-		utils.MetaOpts: args.Opts,
-	}
+func (sS *StatService) matchingStatQueuesForEvent(tnt string, args *StatsArgsProcessEvent, evNm utils.MapStorage) (sqs StatQueues, err error) {
 	sqIDs := utils.NewStringSet(args.StatIDs)
 	if len(sqIDs) == 0 {
 		sqIDs, err = MatchingItemIDsForEvent(evNm,
@@ -264,7 +260,11 @@ func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
 func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (statQueueIDs []string, err error) {
-	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, args)
+	evNm := utils.MapStorage{
+		utils.MetaReq:  args.Event,
+		utils.MetaOpts: args.Opts,
+	}
+	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, args, evNm)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +281,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 		stsIDs = append(stsIDs, sq.ID)
 		lkID := utils.StatQueuePrefix + sq.TenantID()
 		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
-			err = sq.ProcessEvent(args.CGREvent, sS.filterS)
+			err = sq.ProcessEvent(args.CGREvent, sS.filterS, evNm)
 			return
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
 		if err != nil {
@@ -384,7 +384,10 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var sQs StatQueues
-	if sQs, err = sS.matchingStatQueuesForEvent(tnt, args); err != nil {
+	if sQs, err = sS.matchingStatQueuesForEvent(tnt, args, utils.MapStorage{
+		utils.MetaReq:  args.Event,
+		utils.MetaOpts: args.Opts,
+	}); err != nil {
 		return
 	}
 	ids := make([]string, len(sQs))
