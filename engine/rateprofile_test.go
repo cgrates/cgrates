@@ -221,6 +221,33 @@ func TestRateProfileSort(t *testing.T) {
 	}
 }
 
+func TestRateCompile(t *testing.T) {
+	rt := &RateProfile{
+		Rates: map[string]*Rate{
+			"randomVal1": {
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
+			},
+			"randomVal2": {
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: utils.EmptyString,
+			},
+		},
+	}
+	if err := rt.Compile(); err != nil {
+		t.Error(err)
+	}
+
+	rt.Rates["randomVal1"].ActivationTimes = "* * * *"
+	rt.Rates["randomVal2"].ActivationTimes = "* * * *"
+	expectedErr := "expected exactly 5 fields, found 4: [* * * *]"
+	if err := rt.Compile(); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v ", expectedErr, err)
+	}
+}
+
 func TestRateProfileCompile(t *testing.T) {
 	rt := &Rate{
 		ID:              "RT_CHRISTMAS",

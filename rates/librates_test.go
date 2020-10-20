@@ -134,3 +134,49 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
 	}
 }
+
+func TestOrderRatesOnIntervalsCase1(t *testing.T) {
+	rt0 := &engine.Rate{
+		ID:     "RATE0",
+		Weight: 0,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: time.Duration(0),
+			},
+		},
+	}
+	rt0.Compile()
+	rtChristmas := &engine.Rate{
+		ID:              "RT_CHRISTMAS",
+		ActivationTimes: "* * 24 12 *",
+		Weight:          50,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: time.Duration(0),
+			},
+		},
+	}
+	rtChristmas.Compile()
+	aRts := []*engine.Rate{rt0, rtChristmas}
+	sTime := time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
+	usage := 2 * time.Minute
+	expectedErr := "maximum iterations reached"
+	if _, err := orderRatesOnIntervals(aRts, sTime, usage, true, 0); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestNewRatesWithWinner(t *testing.T) {
+	rt := &rateWithTimes{
+		uId: "randomID",
+	}
+	expected := &ratesWithWinner{
+		rts: map[string]*rateWithTimes{
+			"randomID": rt,
+		},
+		wnr: rt,
+	}
+	if !reflect.DeepEqual(expected, newRatesWithWinner(rt)) {
+		t.Errorf("Expected %+v, received %+v", expected, newRatesWithWinner(rt))
+	}
+}
