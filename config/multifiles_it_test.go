@@ -68,6 +68,7 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		DefaultTimezone:    "Local",
 		ConnectAttempts:    3,
 		Reconnects:         -1,
+		MaxCallDuration:    3 * time.Hour,
 		ConnectTimeout:     time.Duration(1 * time.Second),
 		ReplyTimeout:       time.Duration(2 * time.Second),
 		LockingTimeout:     time.Duration(0),

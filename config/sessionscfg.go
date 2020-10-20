@@ -87,8 +87,6 @@ type SessionSCfg struct {
 	ReplicationConns    []string
 	DebitInterval       time.Duration
 	StoreSCosts         bool
-	MinCallDuration     time.Duration
-	MaxCallDuration     time.Duration
 	SessionTTL          time.Duration
 	SessionTTLMaxDelay  *time.Duration
 	SessionTTLLastUsed  *time.Duration
@@ -220,16 +218,6 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.Store_session_costs != nil {
 		scfg.StoreSCosts = *jsnCfg.Store_session_costs
 	}
-	if jsnCfg.Min_call_duration != nil {
-		if scfg.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Max_call_duration != nil {
-		if scfg.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_call_duration); err != nil {
-			return err
-		}
-	}
 	if jsnCfg.Session_ttl != nil {
 		if scfg.SessionTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl); err != nil {
 			return err
@@ -315,16 +303,6 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		initialMP[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
 	} else if scfg.DebitInterval == 0 {
 		initialMP[utils.DebitIntervalCfg] = "0"
-	}
-	if scfg.MinCallDuration != 0 {
-		initialMP[utils.MinCallDurationCfg] = scfg.MinCallDuration.String()
-	} else if scfg.MinCallDuration == 0 {
-		initialMP[utils.MinCallDurationCfg] = "0"
-	}
-	if scfg.MaxCallDuration != 0 {
-		initialMP[utils.MaxCallDurationCfg] = scfg.MaxCallDuration.String()
-	} else if scfg.MaxCallDuration == 0 {
-		initialMP[utils.MaxCallDurationCfg] = "0"
 	}
 	if scfg.SessionTTL != 0 {
 		initialMP[utils.SessionTTLCfg] = scfg.SessionTTL.String()
