@@ -416,7 +416,6 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				}
 				// check for blocker
 				if dryRun && balance.Blocker {
-					//log.Print("BLOCKER!")
 					return // don't go to next balances
 				}
 			}
@@ -427,24 +426,16 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 			// try every balance multiple times in case one becomes active or ratig changes
 			moneyBalanceChecker = false
 			for _, balance := range usefulMoneyBalances {
-				//utils.Logger.Info(fmt.Sprintf("Money balance: %+v", balance))
-				//utils.Logger.Info(fmt.Sprintf("CD BEFORE MONEY: %+v", cd))
 				partCC, debitErr := balance.debitMoney(cd, balance.account,
 					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
 				if debitErr != nil {
 					return nil, debitErr
 				}
-				//utils.Logger.Info(fmt.Sprintf("CD AFTER MONEY: %+v", cd))
 				if partCC != nil {
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
 					cc.negativeConnectFee = partCC.negativeConnectFee
 
-					/*for i, ts := range cc.Timespans {
-						log.Printf("cc.times[an[%d]: %+v\n", i, ts)
-					}*/
 					cd.TimeStart = cc.GetEndTime()
-					//log.Printf("CD: %+v", cd)
-					//log.Printf("CD: %+v - %+v", cd.TimeStart, cd.TimeEnd)
 					// check if the calldescriptor is covered
 					if cd.GetDuration() <= 0 {
 						goto COMMIT
@@ -458,15 +449,11 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				}
 				// check for blocker
 				if dryRun && balance.Blocker {
-					//log.Print("BLOCKER!")
 					return // don't go to next balances
 				}
 			}
 		}
-		//log.Printf("END CD: %+v", cd)
-		//log.Print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 	}
-	//log.Printf("After balances CD: %+v", cd)
 	if hadBalanceSubj {
 		cd.RatingInfos = nil
 	}
@@ -498,8 +485,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 			// this is the first add, debit the connect fee
 			ok, debitedConnectFeeBalance = acc.DebitConnectionFee(cc, usefulMoneyBalances, count, true)
 		}
-		//log.Printf("Left CC: %+v ", leftCC)
-		// get the default money balanance
+		// get the default money balance
 		// and go negative on it with the amount still unpaid
 		if len(leftCC.Timespans) > 0 && leftCC.Cost > 0 && !acc.AllowNegative && !dryRun {
 			utils.Logger.Warning(fmt.Sprintf("<Rater> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
@@ -530,45 +516,13 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 			}
 
 			for incIndex, increment := range ts.Increments {
-
+				// connect fee was processed and skip it
 				if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && cc.deductConnectFee && ok {
-					// go to nextincrement
 					continue
 				}
-
 				cost := increment.Cost
 				defaultBalance := acc.GetDefaultMoneyBalance()
 				defaultBalance.SubstractValue(cost)
-				//send default balance to thresholdS to be processed
-				if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
-					acntTnt := utils.NewTenantID(acc.ID)
-					thEv := &ThresholdsArgsProcessEvent{
-						CGREventWithOpts: &utils.CGREventWithOpts{
-							CGREvent: &utils.CGREvent{
-								Tenant: acntTnt.Tenant,
-								ID:     utils.GenUUID(),
-								Event: map[string]interface{}{
-									utils.EventType:   utils.BalanceUpdate,
-									utils.EventSource: utils.AccountService,
-									utils.Account:     acntTnt.ID,
-									utils.BalanceID:   defaultBalance.ID,
-									utils.Units:       defaultBalance.Value,
-								},
-							},
-							Opts: map[string]interface{}{
-								utils.MetaEventType: utils.BalanceUpdate,
-							},
-						},
-					}
-					var tIDs []string
-					if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
-						utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
-						err.Error() != utils.ErrNotFound.Error() {
-						utils.Logger.Warning(
-							fmt.Sprintf("<AccountS> error: <%s> processing balance event <%+v> with ThresholdS.",
-								err.Error(), utils.ToJSON(thEv)))
-					}
-				}
 
 				increment.BalanceInfo.Monetary = &MonetaryInfo{
 					UUID:  defaultBalance.Uuid,
@@ -587,6 +541,38 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 							DestinationIDs: utils.NewStringMap(leftCC.Destination),
 						})
 				}
+			}
+		}
+
+		// in case of going to negative we send the default balance to thresholdS to be processed
+		if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
+			defaultBalance := acc.GetDefaultMoneyBalance()
+			acntTnt := utils.NewTenantID(acc.ID)
+			thEv := &ThresholdsArgsProcessEvent{
+				CGREventWithOpts: &utils.CGREventWithOpts{
+					CGREvent: &utils.CGREvent{
+						Tenant: acntTnt.Tenant,
+						ID:     utils.GenUUID(),
+						Event: map[string]interface{}{
+							utils.EventType:   utils.BalanceUpdate,
+							utils.EventSource: utils.AccountService,
+							utils.Account:     acntTnt.ID,
+							utils.BalanceID:   defaultBalance.ID,
+							utils.Units:       defaultBalance.Value,
+						},
+					},
+					Opts: map[string]interface{}{
+						utils.MetaEventType: utils.BalanceUpdate,
+					},
+				},
+			}
+			var tIDs []string
+			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
+				utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				utils.Logger.Warning(
+					fmt.Sprintf("<AccountS> error: <%s> processing balance event <%+v> with ThresholdS.",
+						err.Error(), utils.ToJSON(thEv)))
 			}
 		}
 	}
