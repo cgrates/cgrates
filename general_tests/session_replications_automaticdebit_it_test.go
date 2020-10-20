@@ -242,7 +242,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	}
 
 	//check active session (II)
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(12 * time.Millisecond)
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
@@ -267,7 +267,7 @@ func testSessionSRplInitiate(t *testing.T) {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
-	} else if pSessions[0].Usage < 15*time.Millisecond || pSessions[0].Usage > 25*time.Millisecond {
+	} else if pSessions[0].Usage <= 10*time.Millisecond || pSessions[0].Usage >= 30*time.Millisecond {
 		t.Errorf("Expecting : %+v, received: %+v", 20*time.Millisecond, pSessions[0].Usage)
 	} else if autoDebit2 = pSessions[0].NextAutoDebit; autoDebit2.IsZero() {
 		t.Errorf("unexpected NextAutoDebit: %s", utils.ToIJSON(aSessions[0]))
@@ -289,24 +289,6 @@ func testSessionSRplInitiate(t *testing.T) {
 	}
 }
 
-func testSessionSRplStopMasterEngine(t *testing.T) {
-	//stop the master engine
-	if err := masterEngine.Process.Kill(); err != nil {
-		t.Error(err)
-	}
-	//check if the active session is on slave now
-	var aSessions []*sessions.ExternalSession
-	time.Sleep(10 * time.Millisecond)
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 1 {
-		t.Errorf("Unexpected number of sessions received: %+v", utils.ToIJSON(aSessions))
-		// a tolerance of +/- 5ms is acceptable
-	} else if aSessions[0].Usage < 15*time.Millisecond || aSessions[0].Usage > 25*time.Millisecond {
-		t.Errorf("Expecting : ~%+v, received: %+v", 20*time.Millisecond, aSessions[0].Usage) //here
-	}
-}
-
 func testSessionSRplActivateSlave(t *testing.T) {
 	//stop the master engine
 	if err := masterEngine.Process.Kill(); err != nil {
@@ -317,7 +299,7 @@ func testSessionSRplActivateSlave(t *testing.T) {
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1ActivateSessions, &utils.SessionIDsWithArgsDispatcher{}, &rplActivate); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(5 * time.Millisecond)
+	time.Sleep(7 * time.Millisecond)
 	//check if the active session is on slave now
 	var aSessions []*sessions.ExternalSession
 	var autoDebit1, autoDebit2 time.Time
@@ -331,18 +313,24 @@ func testSessionSRplActivateSlave(t *testing.T) {
 	} else if autoDebit1 = aSessions[0].NextAutoDebit; autoDebit1.IsZero() {
 		t.Errorf("unexpected NextAutoDebit: %s", utils.ToIJSON(aSessions[0]))
 	}
-	time.Sleep(10 * time.Millisecond)
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
+	var aSessions2 []*sessions.ExternalSession
+	// start the initial engine so the replication can happen normally
+	if masterEngine, err = engine.StartEngine(smgRplcMasterCfgPath, 10); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(20 * time.Millisecond)
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions2); err != nil {
 		t.Error(err)
-	} else if len(aSessions) != 1 {
-		t.Errorf("Unexpected number of sessions received: %+v", utils.ToIJSON(aSessions))
+	} else if len(aSessions2) != 1 {
+		t.Errorf("Unexpected number of sessions received: %+v", utils.ToIJSON(aSessions2))
 		// a tolerance of +/- 5ms is acceptable
-	} else if aSessions[0].Usage < 30*time.Millisecond || aSessions[0].Usage > 45*time.Millisecond {
-		t.Errorf("Expecting : ~%+v, received: %+v", 40*time.Millisecond, aSessions[0].Usage) //here
-	} else if autoDebit2 = aSessions[0].NextAutoDebit; autoDebit2.IsZero() {
-		t.Errorf("unexpected NextAutoDebit: %s", utils.ToIJSON(aSessions[0]))
+	} else if aSessions2[0].Usage < 20*time.Millisecond || aSessions2[0].Usage > 40*time.Millisecond {
+		t.Errorf("Expecting : ~%+v, received: %+v", 40*time.Millisecond, aSessions2[0].Usage) //here
+	} else if autoDebit2 = aSessions2[0].NextAutoDebit; autoDebit2.IsZero() {
+		t.Errorf("unexpected NextAutoDebit: %s", utils.ToIJSON(aSessions2[0]))
 	} else if autoDebit1 == autoDebit2 {
 		t.Error("Expecting NextAutoDebit to be different from the previous one")
+		t.Errorf("%+v and %+v", autoDebit1, autoDebit2)
 	}
 }
 
@@ -357,7 +345,7 @@ func testSessionSRplCheckAccount(t *testing.T) {
 	if err := smgRplcSlvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		// a tolerance of +/- 5ms is acceptable
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply < float64(5*time.Second-45*time.Millisecond) || rply > float64(5*time.Second-30*time.Millisecond) {
+	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply < float64(5*time.Second-45*time.Millisecond) || rply > float64(5*time.Second-35*time.Millisecond) {
 		t.Errorf("Expecting: ~%v, received: %v", float64(5*time.Second-40*time.Millisecond), rply)
 	}
 }
