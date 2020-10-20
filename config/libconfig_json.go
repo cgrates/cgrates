@@ -41,6 +41,8 @@ type GeneralJsonCfg struct {
 	Connect_attempts     *int
 	Reconnects           *int
 	Connect_timeout      *string
+	Min_call_duration    *string
+	Max_call_duration    *string
 	Reply_timeout        *string
 	Locking_timeout      *string
 	Digest_separator     *string
@@ -223,8 +225,6 @@ type SessionSJsonCfg struct {
 	Attributes_conns       *[]string
 	Debit_interval         *string
 	Store_session_costs    *bool
-	Min_call_duration      *string
-	Max_call_duration      *string
 	Session_ttl            *string
 	Session_ttl_max_delay  *string
 	Session_ttl_last_used  *string

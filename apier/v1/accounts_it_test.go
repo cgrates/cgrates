@@ -622,6 +622,21 @@ func testAccITGetDisabledAccountsWithoutTenant(t *testing.T) {
 
 func testAccITRemoveAccountWithoutTenant(t *testing.T) {
 	var reply string
+	acnt1 := utils.AttrSetAccount{Account: "randomAccount"}
+	if err := accRPC.Call(utils.APIerSv1SetAccount, acnt1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
+	}
+	var result *engine.Account
+	if err := accRPC.Call(utils.APIerSv2GetAccount,
+		&utils.AttrGetAccount{Account: "randomAccount"},
+		&result); err != nil {
+		t.Fatal(err)
+	} else if result.ID != "cgrates.org:randomAccount" {
+		t.Errorf("Expected %+v, received %+v", "cgrates.org:randomAccount", result.ID)
+	}
+
 	if err := accRPC.Call(utils.APIerSv1RemoveAccount,
 		&utils.AttrRemoveAccount{Account: "randomAccount"},
 		&reply); err != nil {
@@ -629,9 +644,8 @@ func testAccITRemoveAccountWithoutTenant(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.RemoveAccount received: %s", reply)
 	}
-	var result *[]*engine.Account
 	if err := accRPC.Call(utils.APIerSv2GetAccount,
-		&utils.AttrGetAccounts{},
+		&utils.AttrGetAccount{Account: "randomAccount"},
 		&result); err == nil || utils.ErrNotFound.Error() != err.Error() {
 		t.Error(err)
 	}

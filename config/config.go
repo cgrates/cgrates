@@ -136,7 +136,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg = new(CGRConfig)
 	cfg.initChanels()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
-	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
 
 	cfg.rpcConns = make(map[string]*RPCConn)
 	cfg.templates = make(map[string][]*FCTemplate)
@@ -275,10 +274,9 @@ func isHidden(fileName string) bool {
 
 // CGRConfig holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	lks             map[string]*sync.RWMutex
-	MaxCallDuration time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
-	DataFolderPath  string        // Path towards data folder, for tests internal usage, not loading out of .json options
-	ConfigPath      string        // Path towards config
+	lks            map[string]*sync.RWMutex
+	DataFolderPath string // Path towards data folder, for tests internal usage, not loading out of .json options
+	ConfigPath     string // Path towards config
 
 	// Cache defaults loaded from json and needing clones
 	dfltEvRdr *EventReaderCfg   // default event reader

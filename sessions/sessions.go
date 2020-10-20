@@ -1398,7 +1398,7 @@ func (sS *SessionS) authEvent(cgrEv *utils.CGREventWithOpts, forceDuration bool)
 			return
 		}
 		err = nil
-		eventUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
+		eventUsage = sS.cgrCfg.GeneralCfg().MaxCallDuration
 		evStart[utils.Usage] = eventUsage // will be used in CD
 	}
 	var s *Session
@@ -1472,7 +1472,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 			return
 		}
 		err = nil
-		reqMaxUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
+		reqMaxUsage = sS.cgrCfg.GeneralCfg().MaxCallDuration
 		updtEv[utils.Usage] = reqMaxUsage
 	}
 	maxUsage = make(map[string]time.Duration)
@@ -2273,7 +2273,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		isPrepaid := s.debitStop != nil
 		s.RUnlock()
 		if isPrepaid { //active debit
-			rply.MaxUsage = &sS.cgrCfg.SessionSCfg().MaxCallDuration
+			rply.MaxUsage = &sS.cgrCfg.GeneralCfg().MaxCallDuration
 		} else {
 			var sRunsUsage map[string]time.Duration
 			if sRunsUsage, err = sS.updateSession(s, nil, args.Opts, false); err != nil {
@@ -3424,7 +3424,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				s.RUnlock()
 				if isPrepaid { //active debit
 					for _, sr := range s.SRuns {
-						sRunsMaxUsage[sr.CD.RunID] = sS.cgrCfg.SessionSCfg().MaxCallDuration
+						sRunsMaxUsage[sr.CD.RunID] = sS.cgrCfg.GeneralCfg().MaxCallDuration
 					}
 				} else if sRunsMaxUsage, err = sS.updateSession(s, nil, args.Opts, false); err != nil {
 					return utils.NewErrRALs(err)

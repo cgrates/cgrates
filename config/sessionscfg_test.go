@@ -76,8 +76,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Replication_conns:     &[]string{"*conn1"},
 		Debit_interval:        utils.StringPointer("2"),
 		Store_session_costs:   utils.BoolPointer(true),
-		Min_call_duration:     utils.StringPointer("1"),
-		Max_call_duration:     utils.StringPointer("100"),
 		Session_ttl:           utils.StringPointer("0"),
 		Session_indexes:       &[]string{},
 		Client_protocol:       utils.Float64Pointer(2.5),
@@ -108,8 +106,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		ReplicationConns:    []string{"*conn1"},
 		DebitInterval:       time.Duration(2),
 		StoreSCosts:         true,
-		MinCallDuration:     time.Duration(1),
-		MaxCallDuration:     time.Duration(100),
 		SessionTTL:          time.Duration(0),
 		SessionIndexes:      utils.StringMap{},
 		ClientProtocol:      2.5,
@@ -159,33 +155,9 @@ func TestSessionSCfgloadFromJsonCfgCase3(t *testing.T) {
 	}
 }
 
-func TestSessionSCfgloadFromJsonCfgCase4(t *testing.T) {
-	cfgJSON := &SessionSJsonCfg{
-		Max_call_duration: utils.StringPointer("1ss"),
-	}
-	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestSessionSCfgloadFromJsonCfgCase5(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
 		Session_ttl: utils.StringPointer("1ss"),
-	}
-	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestSessionSCfgloadFromJsonCfgCase6(t *testing.T) {
-	cfgJSON := &SessionSJsonCfg{
-		Min_call_duration: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
@@ -276,8 +248,6 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		ReplicationConns:    []string{},
 		DebitInterval:       time.Duration(0),
 		StoreSCosts:         false,
-		MinCallDuration:     time.Duration(0),
-		MaxCallDuration:     time.Duration(10800000000000),
 		SessionTTL:          time.Duration(0),
 		SessionIndexes:      utils.StringMap{},
 		ClientProtocol:      1.0,
@@ -324,7 +294,6 @@ func TestSessionSCfgloadFromJsonCfgCase11(t *testing.T) {
 func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 	"sessions": {
-          "max_call_duration": "0",
           "channel_sync_interval": "1s",
           "session_ttl_max_delay": "3h0m0s",
           "session_ttl_last_used": "0s",
@@ -351,8 +320,6 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ReplicationConnsCfg:    []string{},
 		utils.DebitIntervalCfg:       "0",
 		utils.StoreSCostsCfg:         false,
-		utils.MinCallDurationCfg:     "0",
-		utils.MaxCallDurationCfg:     "0",
 		utils.SessionTTLCfg:          "0",
 		utils.SessionTTLMaxDelayCfg:  "3h0m0s",
 		utils.SessionTTLLastUsedCfg:  "0s",
@@ -395,8 +362,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			"replication_conns": ["*localhost"],
 			"debit_interval": "8s",
 			"store_session_costs": true,
-			"min_call_duration": "1s",
-			"max_call_duration": "1h",
 			"session_ttl": "1s",
             "min_dur_low_balance": "1s",
 			"client_protocol": 2.0,
@@ -425,9 +390,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.ReplicationConnsCfg:    []string{utils.MetaLocalHost},
 		utils.DebitIntervalCfg:       "8s",
 		utils.StoreSCostsCfg:         true,
-		utils.MinCallDurationCfg:     "1s",
 		utils.MinDurLowBalanceCfg:    "1s",
-		utils.MaxCallDurationCfg:     "1h0m0s",
 		utils.SessionTTLCfg:          "1s",
 		utils.SessionIndexesCfg:      []string{},
 		utils.ClientProtocolCfg:      2.0,

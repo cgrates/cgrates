@@ -42,6 +42,8 @@ const CGRATES_CFG_JSON = `
 	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests
 	"default_timezone": "Local",							// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	"default_caching":"*reload",							// default actions to do when caching items
+	"min_call_duration": "0s",				                // only authorize calls with allowed duration higher than this
+	"max_call_duration": "3h",				                // maximum call duration a prepaid call can last
 	"connect_attempts": 5,									// initial server connect attempts
 	"reconnects": -1,										// number of retries in case of connection lost
 	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
@@ -440,8 +442,6 @@ const CGRATES_CFG_JSON = `
 	"replication_conns": [],				// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
 	"store_session_costs": false,			// enable storing of the session costs within CDRs
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
 	//"session_ttl_max_delay": "",			// activates session_ttl randomization and limits the maximum possible delay
 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default

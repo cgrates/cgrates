@@ -474,8 +474,6 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		ReplicationConns:    []string{},
 		DebitInterval:       0 * time.Second,
 		StoreSCosts:         false,
-		MinCallDuration:     0 * time.Second,
-		MaxCallDuration:     3 * time.Hour,
 		SessionTTL:          0 * time.Second,
 		SessionIndexes:      utils.StringMap{},
 		ClientProtocol:      1.0,
