@@ -1,6 +1,8 @@
 cgrates (0.10.3~dev) UNRELEASED; urgency=medium
 
   * Incremented version
+  * [RALs] Send balance update event from rals to threshold ( in case of negative) only once
+  * [SessionS] Use rals_conns when sending refund rounding
 
  -- DanB <danb@cgrates.org>  Thu, 08 Oct 2020 16:23:58 +0300
 
