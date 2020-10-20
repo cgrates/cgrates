@@ -267,12 +267,11 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 		},
 	}
 	var reply string
+	// we expect that the cdr to failed and goes into the failed post directory
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: testCdr1.AsCGREvent()}}, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
+			CGREvent: testCdr1.AsCGREvent()}}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Error("Unexpected error: ", err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	cdrsSlaveRpc, err := rpcclient.NewRPCClient(utils.TCP, "127.0.0.1:12012", false, "", "", "", 1, 1,
@@ -394,10 +393,8 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 			CGREventWithOpts: utils.CGREventWithOpts{
 				CGREvent: testCdr.AsCGREvent(),
 			},
-		}, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
+		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Error("Unexpected error: ", err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	if conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/"); err != nil {

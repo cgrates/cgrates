@@ -56,6 +56,7 @@ func (rp *RateProfile) Compile() (err error) {
 	rp.minCost = utils.NewDecimalFromFloat64(rp.MinCost)
 	rp.minCost = utils.NewDecimalFromFloat64(rp.MaxCost)
 	for _, rtP := range rp.Rates {
+		rtP.uID = utils.ConcatenatedKey(rp.Tenant, rp.ID, rtP.ID)
 		if err = rtP.Compile(); err != nil {
 			return
 		}
@@ -73,6 +74,12 @@ type Rate struct {
 	IntervalRates   []*IntervalRate
 
 	sched cron.Schedule // compiled version of activation time as cron.Schedule interface
+	uID   string
+}
+
+// UID returns system wide unique identifier
+func (rt *Rate) UID() string {
+	return rt.uID
 }
 
 func (rt *Rate) Compile() (err error) {
