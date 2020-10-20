@@ -136,6 +136,28 @@ func TestNavMapAdd2(t *testing.T) {
 	}
 }
 
+func TestCloneMapStorage(t *testing.T) {
+	expected := MapStorage{
+		"FirstLevel": map[string]interface{}{
+			"SecondLevel": map[string]interface{}{
+				"ThirdLevel": map[string]interface{}{
+					"Fld1": "Val1",
+				},
+			},
+		},
+		"FistLever2": map[string]interface{}{
+			"SecondLevel2": map[string]interface{}{
+				"Field2": "Value2",
+			},
+			"Field3": "Value3",
+		},
+		"Field4": "Val4",
+	}
+	if received := expected.Clone(); !reflect.DeepEqual(received, expected) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(expected), ToJSON(received))
+	}
+}
+
 func TestNavMapString(t *testing.T) {
 	myData := map[string]interface{}{
 		"FirstLevel": map[string]interface{}{
