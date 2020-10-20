@@ -112,10 +112,14 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithOpts, reply *CallCost) (err 
 // GetCostOnRatingPlans is used by RouteS to calculate the cost
 // Receive a list of RatingPlans and pick the first without error
 func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = config.CgrConfig().GeneralCfg().DefaultTenant
+	}
 	for _, rp := range arg.RatingPlanIDs { // loop through RatingPlans until we find one without errors
 		rPrfl := &RatingProfile{
 			Id: utils.ConcatenatedKey(utils.META_OUT,
-				arg.Tenant, utils.MetaTmp, arg.Subject),
+				tnt, utils.MetaTmp, arg.Subject),
 			RatingPlanActivations: RatingPlanActivations{
 				&RatingPlanActivation{
 					ActivationTime: arg.SetupTime,
@@ -130,7 +134,7 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 		}
 		cd := &CallDescriptor{
 			Category:      utils.MetaTmp,
-			Tenant:        arg.Tenant,
+			Tenant:        tnt,
 			Subject:       arg.Subject,
 			Account:       arg.Account,
 			Destination:   arg.Destination,
@@ -160,6 +164,9 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 
 func (rs *Responder) Debit(arg *CallDescriptorWithOpts, reply *CallCost) (err error) {
 	// RPC caching
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+	}
 	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderDebit, arg.CgrID)
 		refID := guardian.Guardian.GuardIDs("",
@@ -198,6 +205,9 @@ func (rs *Responder) Debit(arg *CallDescriptorWithOpts, reply *CallCost) (err er
 
 func (rs *Responder) MaxDebit(arg *CallDescriptorWithOpts, reply *CallCost) (err error) {
 	// RPC caching
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+	}
 	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderMaxDebit, arg.CgrID)
 		refID := guardian.Guardian.GuardIDs("",
@@ -235,6 +245,9 @@ func (rs *Responder) MaxDebit(arg *CallDescriptorWithOpts, reply *CallCost) (err
 
 func (rs *Responder) RefundIncrements(arg *CallDescriptorWithOpts, reply *Account) (err error) {
 	// RPC caching
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+	}
 	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderRefundIncrements, arg.CgrID)
 		refID := guardian.Guardian.GuardIDs("",
@@ -273,6 +286,9 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptorWithOpts, reply *Accoun
 
 func (rs *Responder) RefundRounding(arg *CallDescriptorWithOpts, reply *float64) (err error) {
 	// RPC caching
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+	}
 	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderRefundRounding, arg.CgrID)
 		refID := guardian.Guardian.GuardIDs("",
@@ -303,6 +319,9 @@ func (rs *Responder) RefundRounding(arg *CallDescriptorWithOpts, reply *float64)
 }
 
 func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithOpts, reply *time.Duration) (err error) {
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+	}
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
@@ -316,10 +335,14 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithOpts, reply *time.
 func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs,
 	reply *map[string]interface{}) (err error) {
 	var maxDur time.Duration
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = config.CgrConfig().GeneralCfg().DefaultTenant
+	}
 	for _, anctID := range arg.AccountIDs {
 		cd := &CallDescriptor{
 			Category:      utils.MetaRoutes,
-			Tenant:        arg.Tenant,
+			Tenant:        tnt,
 			Subject:       arg.Subject,
 			Account:       anctID,
 			Destination:   arg.Destination,
