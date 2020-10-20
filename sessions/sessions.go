@@ -648,7 +648,7 @@ func (sS *SessionS) roundCost(s *Session, sRunIdx int) (err error) {
 		cd.RunID = runID
 		cd.Increments = roundIncrements
 		var response float64
-		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 			utils.ResponderRefundRounding,
 			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd},
 			&response); err != nil {
