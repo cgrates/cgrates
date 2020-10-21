@@ -23,6 +23,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cron"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -221,7 +223,7 @@ func TestRateProfileSort(t *testing.T) {
 	}
 }
 
-func TestRateCompile(t *testing.T) {
+func TestRateProfileCompile(t *testing.T) {
 	rt := &RateProfile{
 		Rates: map[string]*Rate{
 			"randomVal1": {
@@ -229,51 +231,113 @@ func TestRateCompile(t *testing.T) {
 				Weight:          30,
 				ActivationTimes: "* * 24 12 *",
 			},
-			"randomVal2": {
+		},
+		Tenant: "cgrates.org",
+		ID:     "RTP1",
+	}
+	expectedATime, err := cron.ParseStandard("* * 24 12 *")
+	if err != nil {
+		t.Fatal(err)
+	}
+	expRt := &RateProfile{
+		Rates: map[string]*Rate{
+			"randomVal1": {
 				ID:              "RT_CHRISTMAS",
 				Weight:          30,
-				ActivationTimes: utils.EmptyString,
+				ActivationTimes: "* * 24 12 *",
+				sched:           expectedATime,
+				uID:             utils.ConcatenatedKey(rt.Tenant, rt.ID, "RT_CHRISTMAS"),
 			},
 		},
+		Tenant:  "cgrates.org",
+		ID:      "RTP1",
+		connFee: utils.NewDecimalFromFloat64(rt.ConnectFee),
+		minCost: utils.NewDecimalFromFloat64(rt.MinCost),
+		maxCost: utils.NewDecimalFromFloat64(rt.MaxCost),
 	}
 	if err := rt.Compile(); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(rt, expRt) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRt), utils.ToJSON(rt))
 	}
+}
 
-	rt.Rates["randomVal1"].ActivationTimes = "* * * *"
-	rt.Rates["randomVal2"].ActivationTimes = "* * * *"
+func TestRateUID(t *testing.T) {
+	rt := &RateProfile{
+		Rates: map[string]*Rate{
+			"randomVal1": {
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
+				uID:             "randomID",
+			},
+		},
+	}
+	expected := "randomID"
+	if newID := rt.Rates["randomVal1"].UID(); !reflect.DeepEqual(newID, expected) {
+		t.Errorf("Expected %+v, received %+v", expected, newID)
+	}
+}
+
+func TestRateProfileCompileError(t *testing.T) {
+	rt := &RateProfile{
+		Rates: map[string]*Rate{
+			"randomVal": {
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * * *",
+			},
+		},
+	}
 	expectedErr := "expected exactly 5 fields, found 4: [* * * *]"
 	if err := rt.Compile(); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v ", expectedErr, err)
 	}
 }
 
-func TestRateProfileCompile(t *testing.T) {
+func TestRateCompileChristmasTime(t *testing.T) {
 	rt := &Rate{
 		ID:              "RT_CHRISTMAS",
 		Weight:          30,
 		ActivationTimes: "* * 24 12 *",
 	}
-	if err := rt.Compile(); err != nil {
+	expTime, err := cron.ParseStandard("* * 24 12 *")
+	if err != nil {
 		t.Error(err)
 	}
+	expectedRt := &Rate{
+		ID:              "RT_CHRISTMAS",
+		Weight:          30,
+		ActivationTimes: "* * 24 12 *",
+		sched:           expTime,
+	}
+	if err := rt.Compile(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedRt, rt) {
+		t.Errorf("Expected %+v, received %+v", expectedRt, rt)
+	}
+}
 
-	rt = &Rate{
+func TestRateCompileEmptyActivationTime(t *testing.T) {
+	rt := &Rate{
 		ID:              "RT_CHRISTMAS",
 		Weight:          30,
 		ActivationTimes: utils.EmptyString,
 	}
-	if err := rt.Compile(); err != nil {
+	expTime, err := cron.ParseStandard("* * * * *")
+	if err != nil {
 		t.Error(err)
 	}
-
-	rt = &Rate{
+	expectedRt := &Rate{
 		ID:              "RT_CHRISTMAS",
 		Weight:          30,
-		ActivationTimes: "error",
+		ActivationTimes: utils.EmptyString,
+		sched:           expTime,
 	}
-	if err := rt.Compile(); err == nil || err.Error() != "expected exactly 5 fields, found 1: [error]" {
+	if err := rt.Compile(); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(rt, expectedRt) {
+		t.Errorf("Expected %+v, received %+v", expectedRt, rt)
 	}
 }
 
@@ -353,3 +417,30 @@ func TestRateProfileRunTimes(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eRTimes, rTimes)
 	}
 }
+
+/*
+func TestRateProfileRunTimesCase1(t *testing.T) {
+	rt := &Rate{
+		ID: "RATE0",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: time.Duration(0),
+			},
+		},
+		ActivationTimes: "* * 24 12 *",
+	}
+	rt.Compile()
+	//sTime equal to iTime
+	sTime := time.Date(2020, 12, 24, 23, 30, 0, 0, time.UTC)
+	//eTime := time.Date(2021, 12, 25, 23, 30, 0, 0, time.UTC)
+	//eRTimes := [][]time.Time{}
+	//	if _, err := rt.RunTimes(sTime, eTime, 2); err != nil {
+	//	t.Error(err)
+	//}
+	eTime := time.Date(2020, 12, 24, 12, 59, 58, 0, time.UTC)
+	t1 := rt.sched.NextInactive(sTime)
+	t2 := rt.sched.NextInactive(eTime)
+	fmt.Println(t1)
+	fmt.Println(t2)
+}
+*/
