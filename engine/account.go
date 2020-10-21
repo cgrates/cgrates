@@ -1097,53 +1097,46 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 
 // Publish sends the account to stats and threshold
 func (acc *Account) Publish() {
-	acntTnt := utils.NewTenantID(acc.ID)
+	acntSummary := acc.AsAccountSummary()
 	cgrEv := &utils.CGREventWithOpts{
 		CGREvent: &utils.CGREvent{
-			Tenant: acntTnt.Tenant,
+			Tenant: acntSummary.Tenant,
 			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				utils.EventType:     utils.AccountUpdate,
-				utils.EventSource:   utils.AccountService,
-				utils.Account:       acntTnt.ID,
-				utils.AllowNegative: acc.AllowNegative,
-				utils.Disabled:      acc.Disabled,
-			},
+			Event:  acntSummary.AsMapInterface(),
 		},
 		Opts: map[string]interface{}{
 			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
-	if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
-		go func() {
-			var reply []string
-			if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
-				utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREventWithOpts: cgrEv}, &reply); err != nil &&
-				err.Error() != utils.ErrNotFound.Error() {
-				utils.Logger.Warning(
-					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with StatS.",
-						err.Error(), cgrEv))
-			}
-		}()
-	}
 	if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
-		go func() {
-			var tIDs []string
-			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
-				utils.ThresholdSv1ProcessEvent,
-				&ThresholdsArgsProcessEvent{CGREventWithOpts: cgrEv}, &tIDs); err != nil &&
-				err.Error() != utils.ErrNotFound.Error() {
-				utils.Logger.Warning(
-					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))
-			}
-		}()
+		var tIDs []string
+		if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
+			utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
+				CGREventWithOpts: cgrEv,
+			}, &tIDs); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))
+		}
 	}
+	if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
+		var stsIDs []string
+		if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
+			utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{
+				CGREventWithOpts: cgrEv,
+			}, &stsIDs); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<AccountS> error: %s processing account event %+v with StatS.", err.Error(), cgrEv))
+		}
+	}
+
 }
 
 // NewAccountSummaryFromJSON creates a new AcccountSummary from a json string
 func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err error) {
 	if !utils.SliceHasMember([]string{"", "null"}, jsn) { // Unmarshal only when content
-		json.Unmarshal([]byte(jsn), &acntSummary)
+		err = json.Unmarshal([]byte(jsn), &acntSummary)
 	}
 	return
 }
@@ -1237,4 +1230,15 @@ func (as *AccountSummary) FieldAsInterface(fldPath []string) (val interface{}, e
 		}
 		return as.Disabled, nil
 	}
+}
+
+func (as *AccountSummary) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
+		utils.Tenant:           as.Tenant,
+		utils.ID:               as.ID,
+		utils.AllowNegative:    as.AllowNegative,
+		utils.Disabled:         as.Disabled,
+		utils.BalanceSummaries: as.BalanceSummaries,
+	}
+
 }

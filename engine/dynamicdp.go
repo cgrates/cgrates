@@ -63,7 +63,7 @@ func (dDP *dynamicDP) RemoteHost() net.Addr {
 
 var initialDPPrefixes = utils.NewStringSet([]string{utils.MetaReq, utils.MetaVars,
 	utils.MetaCgreq, utils.MetaCgrep, utils.MetaRep, utils.MetaCGRAReq,
-	utils.MetaAct, utils.MetaEC, utils.MetaUCH, utils.MetaOpts})
+	utils.MetaAct, utils.MetaEC, utils.MetaUCH, utils.MetaOpts, utils.MetaAsm})
 
 func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	if len(fldPath) == 0 {
@@ -130,6 +130,18 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		}
 		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
+	case utils.MetaAsm:
+		// sample of fieldName ~*asm.BalanceSummaries.HolidayBalance.Value
+		stringReq, err := dDP.initialDP.FieldAsString([]string{utils.MetaReq})
+		if err != nil {
+			return nil, err
+		}
+		acntSummary, err := NewAccountSummaryFromJSON(stringReq)
+		if err != nil {
+			return nil, err
+		}
+		dDP.cache.Set(fldPath[:1], acntSummary)
+		return acntSummary.FieldAsInterface(fldPath[2:])
 	default: // in case of constant we give an empty DataProvider ( empty navigable map )
 	}
 	return nil, utils.ErrNotFound
