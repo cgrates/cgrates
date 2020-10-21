@@ -47,7 +47,7 @@ func (self *CmdRemoveRoute) RpcMethod() string {
 
 func (self *CmdRemoveRoute) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithCache{}
+		self.rpcParams = &utils.TenantIDWithCache{Opts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }

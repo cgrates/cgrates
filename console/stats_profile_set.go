@@ -51,7 +51,10 @@ func (self *CmdSetStatQueue) RpcMethod() string {
 
 func (self *CmdSetStatQueue) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.StatQueueWithCache{StatQueueProfile: new(engine.StatQueueProfile)}
+		self.rpcParams = &engine.StatQueueWithCache{
+			StatQueueProfile: new(engine.StatQueueProfile),
+			Opts:             make(map[string]interface{}),
+		}
 	}
 	return self.rpcParams
 }

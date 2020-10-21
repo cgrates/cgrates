@@ -51,7 +51,10 @@ func (self *CmdSetThreshold) RpcMethod() string {
 
 func (self *CmdSetThreshold) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ThresholdWithCache{ThresholdProfile: new(engine.ThresholdProfile)}
+		self.rpcParams = &engine.ThresholdWithCache{
+			ThresholdProfile: new(engine.ThresholdProfile),
+			Opts:             map[string]interface{}{},
+		}
 	}
 	return self.rpcParams
 }

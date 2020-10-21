@@ -52,7 +52,12 @@ func (self *CmdSessionsUpdate) RpcMethod() string {
 
 func (self *CmdSessionsUpdate) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &sessions.V1UpdateSessionArgs{CGREventWithOpts: &utils.CGREventWithOpts{Opts: make(map[string]interface{})}}
+		self.rpcParams = &sessions.V1UpdateSessionArgs{
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: new(utils.CGREvent),
+				Opts:     make(map[string]interface{}),
+			},
+		}
 	}
 	return self.rpcParams
 }

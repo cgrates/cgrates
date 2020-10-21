@@ -50,9 +50,12 @@ func (self *CmdGetAttributeForEvent) RpcMethod() string {
 
 func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.AttrArgsProcessEvent{CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts: make(map[string]interface{}),
-		}}
+		self.rpcParams = &engine.AttrArgsProcessEvent{
+			CGREventWithOpts: &utils.CGREventWithOpts{
+				CGREvent: new(utils.CGREvent),
+				Opts:     make(map[string]interface{}),
+			},
+		}
 	}
 	return self.rpcParams
 }

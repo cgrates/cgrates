@@ -51,7 +51,10 @@ func (self *CmdSetRoute) RpcMethod() string {
 
 func (self *CmdSetRoute) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.RouteWithCache{RouteProfile: new(engine.RouteProfile)}
+		self.rpcParams = &v1.RouteWithCache{
+			RouteProfile: new(engine.RouteProfile),
+			Opts:         map[string]interface{}{},
+		}
 	}
 	return self.rpcParams
 }
