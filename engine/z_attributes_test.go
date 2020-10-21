@@ -248,26 +248,28 @@ func TestAttributeCache(t *testing.T) {
 }
 
 func TestAttributeProfileForEvent(t *testing.T) {
-	atrp, err := attrService.attributeProfileForEvent(attrEvs[0].Tenant, attrEvs[0], utils.MapStorage{
-		utils.MetaReq:  attrEvs[0].CGREvent.Event,
-		utils.MetaOpts: attrEvs[0].Opts,
-		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: utils.NewNMData(0),
-		},
-	}, utils.EmptyString)
+	atrp, err := attrService.attributeProfileForEvent(attrEvs[0].Tenant, attrEvs[0].Context,
+		attrEvs[0].AttributeIDs, attrEvs[0].Time, utils.MapStorage{
+			utils.MetaReq:  attrEvs[0].CGREvent.Event,
+			utils.MetaOpts: attrEvs[0].Opts,
+			utils.MetaVars: utils.MapStorage{
+				utils.ProcessRuns: utils.NewNMData(0),
+			},
+		}, utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(atrPs[0], atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[0]), utils.ToJSON(atrp))
 	}
-	atrp, err = attrService.attributeProfileForEvent(attrEvs[1].Tenant, attrEvs[1], utils.MapStorage{
-		utils.MetaReq:  attrEvs[1].CGREvent.Event,
-		utils.MetaOpts: attrEvs[1].Opts,
-		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: utils.NewNMData(0),
-		},
-	}, utils.EmptyString)
+	atrp, err = attrService.attributeProfileForEvent(attrEvs[1].Tenant, attrEvs[1].Context,
+		attrEvs[1].AttributeIDs, attrEvs[1].Time, utils.MapStorage{
+			utils.MetaReq:  attrEvs[1].CGREvent.Event,
+			utils.MetaOpts: attrEvs[1].Opts,
+			utils.MetaVars: utils.MapStorage{
+				utils.ProcessRuns: utils.NewNMData(0),
+			},
+		}, utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -275,13 +277,14 @@ func TestAttributeProfileForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[1]), utils.ToJSON(atrp))
 	}
 
-	atrp, err = attrService.attributeProfileForEvent(attrEvs[2].Tenant, attrEvs[2], utils.MapStorage{
-		utils.MetaReq:  attrEvs[2].CGREvent.Event,
-		utils.MetaOpts: attrEvs[2].Opts,
-		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: utils.NewNMData(0),
-		},
-	}, utils.EmptyString)
+	atrp, err = attrService.attributeProfileForEvent(attrEvs[2].Tenant, attrEvs[2].Context,
+		attrEvs[2].AttributeIDs, attrEvs[2].Time, utils.MapStorage{
+			utils.MetaReq:  attrEvs[2].CGREvent.Event,
+			utils.MetaOpts: attrEvs[2].Opts,
+			utils.MetaVars: utils.MapStorage{
+				utils.ProcessRuns: utils.NewNMData(0),
+			},
+		}, utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

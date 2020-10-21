@@ -150,8 +150,8 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
-func (sS *StatService) matchingStatQueuesForEvent(tnt string, args *StatsArgsProcessEvent, evNm utils.MapStorage) (sqs StatQueues, err error) {
-	sqIDs := utils.NewStringSet(args.StatIDs)
+func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string, actTime *time.Time, evNm utils.MapStorage) (sqs StatQueues, err error) {
+	sqIDs := utils.NewStringSet(statsIDs)
 	if len(sqIDs) == 0 {
 		sqIDs, err = MatchingItemIDsForEvent(evNm,
 			sS.cgrcfg.StatSCfg().StringIndexedFields,
@@ -174,8 +174,8 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, args *StatsArgsPro
 			}
 			return nil, err
 		}
-		if sqPrfl.ActivationInterval != nil && args.Time != nil &&
-			!sqPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
+		if sqPrfl.ActivationInterval != nil && actTime != nil &&
+			!sqPrfl.ActivationInterval.IsActiveAtTime(*actTime) { // not active
 			continue
 		}
 		if pass, err := sS.filterS.Pass(tnt, sqPrfl.FilterIDs,
@@ -264,7 +264,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.Opts,
 	}
-	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, args, evNm)
+	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, args.StatIDs, args.Time, evNm)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +281,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 		stsIDs = append(stsIDs, sq.ID)
 		lkID := utils.StatQueuePrefix + sq.TenantID()
 		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
-			err = sq.ProcessEvent(args.CGREvent, sS.filterS, evNm)
+			err = sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm)
 			return
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
 		if err != nil {
@@ -384,7 +384,7 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var sQs StatQueues
-	if sQs, err = sS.matchingStatQueuesForEvent(tnt, args, utils.MapStorage{
+	if sQs, err = sS.matchingStatQueuesForEvent(tnt, args.StatIDs, args.Time, utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.Opts,
 	}); err != nil {
