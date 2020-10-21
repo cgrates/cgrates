@@ -20,6 +20,7 @@ package console
 
 import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -51,7 +52,10 @@ func (self *CmdSetResource) RpcMethod() string {
 
 func (self *CmdSetResource) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.ResourceWithCache{}
+		self.rpcParams = &v1.ResourceWithCache{
+			ResourceProfile: new(engine.ResourceProfile),
+			Opts:            make(map[string]interface{}),
+		}
 	}
 	return self.rpcParams
 }

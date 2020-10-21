@@ -51,7 +51,10 @@ func (self *CmdGetResource) RpcMethod() string {
 
 func (self *CmdGetResource) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithOpts{}
+		self.rpcParams = &utils.TenantIDWithOpts{
+			TenantID: new(utils.TenantID),
+			Opts:     map[string]interface{}{},
+		}
 	}
 	return self.rpcParams
 }

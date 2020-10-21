@@ -50,7 +50,9 @@ func (self *CmdGetCDRs) RpcMethod() string {
 
 func (self *CmdGetCDRs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.RPCCDRsFilterWithOpts{}
+		self.rpcParams = &utils.RPCCDRsFilterWithOpts{
+			RPCCDRsFilter: new(utils.RPCCDRsFilter),
+		}
 	}
 	return self.rpcParams
 }

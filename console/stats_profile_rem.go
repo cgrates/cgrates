@@ -48,7 +48,7 @@ func (self *CmdRemoveStatQueue) RpcMethod() string {
 
 func (self *CmdRemoveStatQueue) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithCache{}
+		self.rpcParams = &utils.TenantIDWithCache{Opts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }
