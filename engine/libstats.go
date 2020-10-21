@@ -174,14 +174,14 @@ func (sq *StatQueue) TenantID() string {
 }
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
-func (sq *StatQueue) ProcessEvent(ev *utils.CGREvent, filterS *FilterS, evNm utils.MapStorage) (err error) {
+func (sq *StatQueue) ProcessEvent(tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
 	if err = sq.remExpired(); err != nil {
 		return
 	}
 	if err = sq.remOnQueueLength(); err != nil {
 		return
 	}
-	return sq.addStatEvent(ev, filterS, evNm)
+	return sq.addStatEvent(tnt, evID, filterS, evNm)
 }
 
 // remStatEvent removes an event from metrics
@@ -237,7 +237,7 @@ func (sq *StatQueue) remOnQueueLength() (err error) {
 }
 
 // addStatEvent computes metrics for an event
-func (sq *StatQueue) addStatEvent(ev *utils.CGREvent, filterS *FilterS, evNm utils.MapStorage) (err error) {
+func (sq *StatQueue) addStatEvent(tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
 	var expTime *time.Time
 	if sq.ttl != nil {
 		expTime = utils.TimePointer(time.Now().Add(*sq.ttl))
@@ -246,20 +246,20 @@ func (sq *StatQueue) addStatEvent(ev *utils.CGREvent, filterS *FilterS, evNm uti
 		struct {
 			EventID    string
 			ExpiryTime *time.Time
-		}{ev.ID, expTime})
+		}{evID, expTime})
 	var pass bool
 	// recreate the request without *opts
-	req := utils.MapStorage{utils.MetaReq: ev.Event}
+	req := utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq]}
 	for metricID, metric := range sq.SQMetrics {
-		if pass, err = filterS.Pass(ev.Tenant, metric.GetFilterIDs(),
+		if pass, err = filterS.Pass(tnt, metric.GetFilterIDs(),
 			evNm); err != nil {
 			return
 		} else if !pass {
 			continue
 		}
-		if err = metric.AddEvent(ev.ID, req); err != nil {
+		if err = metric.AddEvent(evID, req); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",
-				metricID, ev.ID, err.Error()))
+				metricID, evID, err.Error()))
 			return
 		}
 	}

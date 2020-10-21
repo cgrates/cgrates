@@ -62,15 +62,15 @@ func (alS *AttributeService) Shutdown() (err error) {
 }
 
 // attributeProfileForEvent returns the matching attribute
-func (alS *AttributeService) attributeProfileForEvent(tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
+func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, attrsIDs []string, actTime *time.Time, evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
 	var attrIDs []string
 	contextVal := utils.MetaDefault
-	if args.Context != nil && *args.Context != "" {
-		contextVal = *args.Context
+	if ctx != nil && *ctx != "" {
+		contextVal = *ctx
 	}
 	attrIdxKey := utils.ConcatenatedKey(tnt, contextVal)
-	if len(args.AttributeIDs) != 0 {
-		attrIDs = args.AttributeIDs
+	if len(attrsIDs) != 0 {
+		attrIDs = attrsIDs
 	} else {
 		aPrflIDs, err := MatchingItemIDsForEvent(evNm,
 			alS.cgrcfg.AttributeSCfg().StringIndexedFields,
@@ -109,8 +109,8 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, args *AttrArgs
 			!utils.IsSliceMember(aPrfl.Contexts, contextVal) {
 			continue
 		}
-		if aPrfl.ActivationInterval != nil && args.Time != nil &&
-			!aPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
+		if aPrfl.ActivationInterval != nil && actTime != nil &&
+			!aPrfl.ActivationInterval.IsActiveAtTime(*actTime) { // not active
 			continue
 		}
 		if pass, err := alS.filterS.Pass(tnt, aPrfl.FilterIDs,
@@ -208,7 +208,7 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider, lastID string) (
 	rply *AttrSProcessEventReply, err error) {
 	var attrPrf *AttributeProfile
-	if attrPrf, err = alS.attributeProfileForEvent(tnt, args, evNm, lastID); err != nil {
+	if attrPrf, err = alS.attributeProfileForEvent(tnt, args.Context, args.AttributeIDs, args.Time, evNm, lastID); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
@@ -435,7 +435,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	if tnt == utils.EmptyString {
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	attrPrf, err := alS.attributeProfileForEvent(tnt, args, utils.MapStorage{
+	attrPrf, err := alS.attributeProfileForEvent(tnt, args.Context, args.AttributeIDs, args.Time, utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.Opts,
 		utils.MetaVars: utils.MapStorage{
