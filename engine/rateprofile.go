@@ -54,7 +54,7 @@ func (rp *RateProfile) TenantID() string {
 func (rp *RateProfile) Compile() (err error) {
 	rp.connFee = utils.NewDecimalFromFloat64(rp.ConnectFee)
 	rp.minCost = utils.NewDecimalFromFloat64(rp.MinCost)
-	rp.minCost = utils.NewDecimalFromFloat64(rp.MaxCost)
+	rp.maxCost = utils.NewDecimalFromFloat64(rp.MaxCost)
 	for _, rtP := range rp.Rates {
 		rtP.uID = utils.ConcatenatedKey(rp.Tenant, rp.ID, rtP.ID)
 		if err = rtP.Compile(); err != nil {
