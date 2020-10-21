@@ -418,8 +418,7 @@ func TestRateProfileRunTimes(t *testing.T) {
 	}
 }
 
-/*
-func TestRateProfileRunTimesCase1(t *testing.T) {
+func TestRateProfileRunTimesMaxIterations(t *testing.T) {
 	rt := &Rate{
 		ID: "RATE0",
 		IntervalRates: []*IntervalRate{
@@ -429,18 +428,40 @@ func TestRateProfileRunTimesCase1(t *testing.T) {
 		},
 		ActivationTimes: "* * 24 12 *",
 	}
-	rt.Compile()
-	//sTime equal to iTime
+	err := rt.Compile()
+	if err != nil {
+		t.Error(err)
+	}
 	sTime := time.Date(2020, 12, 24, 23, 30, 0, 0, time.UTC)
-	//eTime := time.Date(2021, 12, 25, 23, 30, 0, 0, time.UTC)
-	//eRTimes := [][]time.Time{}
-	//	if _, err := rt.RunTimes(sTime, eTime, 2); err != nil {
-	//	t.Error(err)
-	//}
-	eTime := time.Date(2020, 12, 24, 12, 59, 58, 0, time.UTC)
-	t1 := rt.sched.NextInactive(sTime)
-	t2 := rt.sched.NextInactive(eTime)
-	fmt.Println(t1)
-	fmt.Println(t2)
+	eTime := time.Date(2021, 12, 25, 23, 30, 0, 0, time.UTC)
+	expectedErr := "maximum iterations reached"
+	if _, err := rt.RunTimes(sTime, eTime, 2); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
 }
-*/
+
+func TestRateProfileRunTimesPaasinActivationTIme(t *testing.T) {
+	rt := &Rate{
+		ID: "RATE0",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: time.Duration(0),
+			},
+		},
+		ActivationTimes: "* * 24 * *",
+	}
+	err := rt.Compile()
+	if err != nil {
+		t.Error(err)
+	}
+	sTime := time.Date(2020, 12, 23, 0, 0, 0, 0, time.UTC)
+	eTime := time.Date(2020, 12, 27, 0, 0, 0, 0, time.UTC)
+	expectedTime := [][]time.Time{
+		{time.Date(2020, 12, 24, 0, 0, 0, 0, time.UTC), time.Date(2020, 12, 25, 0, 0, 0, 0, time.UTC)},
+	}
+	if rTimes, err := rt.RunTimes(sTime, eTime, 2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedTime, rTimes) {
+		t.Errorf("Expected %+v, received %+v", expectedTime, rTimes)
+	}
+}
