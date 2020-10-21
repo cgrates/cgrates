@@ -708,6 +708,7 @@ const (
 	MetaUrl                  = "*url"
 	MetaXml                  = "*xml"
 	MetaReq                  = "*req"
+	MetaAsm                  = "*asm"
 	MetaVars                 = "*vars"
 	MetaRep                  = "*rep"
 	MetaExp                  = "*exp"

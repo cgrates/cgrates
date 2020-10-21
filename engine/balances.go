@@ -813,77 +813,47 @@ func (bc Balances) HasBalance(balance *Balance) bool {
 func (bc Balances) SaveDirtyBalances(acc *Account) {
 	savedAccounts := make(map[string]*Account)
 	for _, b := range bc {
-		if b.dirty {
-			// publish event
-			if b.account == nil { // only publish modifications for balances with account set
-				continue
-			}
-			acntTnt := utils.NewTenantID(b.account.ID)
-			thEv := &ThresholdsArgsProcessEvent{
-				CGREventWithOpts: &utils.CGREventWithOpts{
-					CGREvent: &utils.CGREvent{
-						Tenant: acntTnt.Tenant,
-						ID:     utils.GenUUID(),
-						Event: map[string]interface{}{
-							utils.EventType:   utils.BalanceUpdate,
-							utils.EventSource: utils.AccountService,
-							utils.Account:     acntTnt.ID,
-							utils.BalanceID:   b.ID,
-							utils.Units:       b.Value,
-						},
-					},
-					Opts: map[string]interface{}{
-						utils.MetaEventType: utils.BalanceUpdate,
-					},
-				},
-			}
-			if !b.ExpirationDate.IsZero() {
-				thEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
-			}
-			if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
-				var tIDs []string
-				if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
-					utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
-					err.Error() != utils.ErrNotFound.Error() {
-					utils.Logger.Warning(
-						fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
-							err.Error(), thEv))
-				}
-			}
-		}
 		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.ID] == nil {
 			dm.SetAccount(b.account)
 			savedAccounts[b.account.ID] = b.account
 		}
 	}
-	if len(savedAccounts) != 0 && len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
+	if len(savedAccounts) != 0 {
 		for _, acnt := range savedAccounts {
-			acntTnt := utils.NewTenantID(acnt.ID)
-			thEv := &ThresholdsArgsProcessEvent{
-				CGREventWithOpts: &utils.CGREventWithOpts{
-					CGREvent: &utils.CGREvent{
-						Tenant: acntTnt.Tenant,
-						ID:     utils.GenUUID(),
-						Event: map[string]interface{}{
-							utils.EventType:     utils.AccountUpdate,
-							utils.EventSource:   utils.AccountService,
-							utils.Account:       acntTnt.ID,
-							utils.AllowNegative: acnt.AllowNegative,
-							utils.Disabled:      acnt.Disabled,
-						},
-					},
-					Opts: map[string]interface{}{
-						utils.MetaEventType: utils.AccountUpdate,
-					},
+			acntSummary := acnt.AsAccountSummary()
+			cgrEv := &utils.CGREventWithOpts{
+				CGREvent: &utils.CGREvent{
+					Tenant: acntSummary.Tenant,
+					ID:     utils.GenUUID(),
+					Event:  acntSummary.AsMapInterface(),
+				},
+				Opts: map[string]interface{}{
+					utils.MetaEventType: utils.AccountUpdate,
 				},
 			}
-			var tIDs []string
-			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
-				utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
-				err.Error() != utils.ErrNotFound.Error() {
-				utils.Logger.Warning(
-					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), thEv))
+			if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
+				var tIDs []string
+				if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
+					utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
+						CGREventWithOpts: cgrEv,
+					}, &tIDs); err != nil &&
+					err.Error() != utils.ErrNotFound.Error() {
+					utils.Logger.Warning(
+						fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))
+				}
 			}
+			if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
+				var stsIDs []string
+				if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
+					utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{
+						CGREventWithOpts: cgrEv,
+					}, &stsIDs); err != nil &&
+					err.Error() != utils.ErrNotFound.Error() {
+					utils.Logger.Warning(
+						fmt.Sprintf("<AccountS> error: %s processing account event %+v with StatS.", err.Error(), cgrEv))
+				}
+			}
+
 		}
 
 	}
