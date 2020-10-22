@@ -81,24 +81,24 @@ func newConcReqsServerCodec(sc rpc.ServerCodec) rpc.ServerCodec {
 	if !ConReqs.IsLimited() {
 		return sc
 	}
-	return &concReqsServerCodec2{sc: sc}
+	return &concReqsServerCodec{sc: sc}
 }
 
-type concReqsServerCodec2 struct {
+type concReqsServerCodec struct {
 	sc rpc.ServerCodec
 }
 
-func (c *concReqsServerCodec2) ReadRequestHeader(r *rpc.Request) error {
+func (c *concReqsServerCodec) ReadRequestHeader(r *rpc.Request) error {
 	return c.sc.ReadRequestHeader(r)
 }
 
-func (c *concReqsServerCodec2) ReadRequestBody(x interface{}) error {
+func (c *concReqsServerCodec) ReadRequestBody(x interface{}) error {
 	if err := ConReqs.Allocate(); err != nil {
 		return err
 	}
 	return c.sc.ReadRequestBody(x)
 }
-func (c *concReqsServerCodec2) WriteResponse(r *rpc.Response, x interface{}) error {
+func (c *concReqsServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
 	if r.Error == ErrMaxConcurentRPCExceededNoCaps.Error() {
 		r.Error = ErrMaxConcurentRPCExceeded.Error()
 	} else {
@@ -106,4 +106,4 @@ func (c *concReqsServerCodec2) WriteResponse(r *rpc.Response, x interface{}) err
 	}
 	return c.sc.WriteResponse(r, x)
 }
-func (c *concReqsServerCodec2) Close() error { return c.sc.Close() }
+func (c *concReqsServerCodec) Close() error { return c.sc.Close() }
