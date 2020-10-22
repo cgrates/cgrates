@@ -98,7 +98,6 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.TopUpZeroNegative:         topupZeroNegativeAction,
 		utils.SetExpiry:                 setExpiryAction,
 		utils.MetaPublishAccount:        publishAccount,
-		utils.MetaPublishBalance:        publishBalance,
 		utils.MetaRemoveSessionCosts:    removeSessionCosts,
 		utils.MetaRemoveExpired:         removeExpired,
 		utils.MetaPostEvent:             postEvent,
@@ -758,30 +757,6 @@ func publishAccount(ub *Account, a *Action, acs Actions, extraData interface{}) 
 		return errors.New("nil account")
 	}
 	ub.Publish()
-	for bType := range ub.BalanceMap {
-		for _, b := range ub.BalanceMap[bType] {
-			if b.account == nil {
-				b.account = ub
-			}
-			b.Publish()
-		}
-	}
-	return nil
-}
-
-// publishAccount will publish the account as well as each balance received to ThresholdS
-func publishBalance(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	if ub == nil {
-		return errors.New("nil account")
-	}
-	for bType := range ub.BalanceMap {
-		for _, b := range ub.BalanceMap[bType] {
-			if b.account == nil {
-				b.account = ub
-			}
-			b.Publish()
-		}
-	}
 	return nil
 }
 

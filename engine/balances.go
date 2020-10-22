@@ -684,59 +684,6 @@ func (b *Balance) AsBalanceSummary(typ string) *BalanceSummary {
 	return bd
 }
 
-func (b *Balance) Publish() {
-	if b.account == nil {
-		return
-	}
-	accountID := b.account.ID
-	acntTnt := utils.NewTenantID(accountID)
-	cgrEv := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: acntTnt.Tenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				utils.EventType:   utils.BalanceUpdate,
-				utils.EventSource: utils.AccountService,
-				utils.Account:     acntTnt.ID,
-				utils.BalanceID:   b.ID,
-				utils.Units:       b.Value,
-			},
-		},
-		Opts: map[string]interface{}{
-			utils.MetaEventType: utils.BalanceUpdate,
-		},
-	}
-	if !b.ExpirationDate.IsZero() {
-		cgrEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
-	}
-	if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
-		go func() {
-			var reply []string
-			if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
-				utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{
-					CGREventWithOpts: cgrEv}, &reply); err != nil &&
-				err.Error() != utils.ErrNotFound.Error() {
-				utils.Logger.Warning(
-					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with StatS.",
-						err.Error(), cgrEv))
-			}
-		}()
-	}
-	if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
-		go func() {
-			var tIDs []string
-			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
-				utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
-					CGREventWithOpts: cgrEv}, &tIDs); err != nil &&
-				err.Error() != utils.ErrNotFound.Error() {
-				utils.Logger.Warning(
-					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
-						err.Error(), cgrEv))
-			}
-		}()
-	}
-}
-
 /*
 Structure to store minute buckets according to weight, precision or price.
 */
@@ -825,6 +772,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				CGREvent: &utils.CGREvent{
 					Tenant: acntSummary.Tenant,
 					ID:     utils.GenUUID(),
+					Time:   utils.TimePointer(time.Now()),
 					Event:  acntSummary.AsMapInterface(),
 				},
 				Opts: map[string]interface{}{

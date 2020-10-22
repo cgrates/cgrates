@@ -93,19 +93,25 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 			t.Hits > t.tPrfl.MaxHits) {
 		return
 	}
-	acnt, _ := args.FieldAsString(utils.Account)
-	var acntID string
-	if acnt != "" {
-		acntID = utils.ConcatenatedKey(args.Tenant, acnt)
+	var tntAcnt string
+	var acnt string
+	if utils.IfaceAsString(args.Opts[utils.MetaEventType]) == utils.AccountUpdate {
+		acnt, _ = args.FieldAsString(utils.ID)
+	} else {
+		acnt, _ = args.FieldAsString(utils.Account)
 	}
+	if acnt != utils.EmptyString {
+		tntAcnt = utils.ConcatenatedKey(args.Tenant, acnt)
+	}
+
 	for _, actionSetID := range t.tPrfl.ActionIDs {
 		at := &ActionTiming{
 			Uuid:      utils.GenUUID(),
 			ActionsID: actionSetID,
 			ExtraData: args.CGREventWithOpts,
 		}
-		if acntID != "" {
-			at.accountIDs = utils.NewStringMap(acntID)
+		if tntAcnt != utils.EmptyString {
+			at.accountIDs = utils.NewStringMap(tntAcnt)
 		}
 		if t.tPrfl.Async {
 			go func() {
@@ -272,6 +278,9 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *Thresho
 		}
 		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, true, true, "")
 		if err != nil {
+			if err == utils.ErrNotFound { // corner case where the threshold was removed due to MaxHits
+				continue
+			}
 			return nil, err
 		}
 		if t.dirty == nil || tPrfl.MaxHits == -1 || t.Hits < tPrfl.MaxHits {
