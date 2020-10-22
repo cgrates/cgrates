@@ -440,7 +440,7 @@ func TestRateProfileRunTimesMaxIterations(t *testing.T) {
 	}
 }
 
-func TestRateProfileRunTimesPaasinActivationTIme(t *testing.T) {
+func TestRateProfileRunTimesPassingActivationTIme(t *testing.T) {
 	rt := &Rate{
 		ID: "RATE0",
 		IntervalRates: []*IntervalRate{

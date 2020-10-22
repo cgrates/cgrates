@@ -108,9 +108,6 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 				aTime: rTimeSet[0],
 				iTime: rTimeSet[1],
 			}
-			if rTimeSet[0].IsZero() { // the rate will never be active
-				continue
-			}
 			allRates[rIt.id()] = rIt
 			if _, hasKey := rtIdx[rTimeSet[0]]; !hasKey {
 				rtIdx[rTimeSet[0]] = initRatesWithWinner()
@@ -123,9 +120,6 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 				rtIdx[rTimeSet[1]] = initRatesWithWinner()
 			}
 		}
-	}
-	if err != nil && len(rtIdx) != 0 {
-		err = nil // overwrite only if there is at least one rate found
 	}
 	// add the active rates to all time samples
 	for tm, rWw := range rtIdx {
@@ -172,8 +166,27 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 			if sTime.Before(aTime) {
 				usageIndx = aTime.Sub(sTime)
 			}
-			if len(ordRts) == 0 || wnr.rt.ID != ordRts[len(ordRts)-1].Rate.ID { // only add the winner if not already active
-				ordRts = append(ordRts, &orderedRate{usageIndx, rtIdx[aTime].winner().rt})
+		}
+	} else { // only first rate is considered for units
+		oRts = []*rateWithTimes{rtIdx[sortedATimes[0]].winner()}
+	}
+	// add the Intervals and Increments
+	var usageSIdx, usageEIdx time.Duration
+	for i, rWt := range oRts {
+		if sTime.Before(rWt.aTime) {
+			usageSIdx = rWt.aTime.Sub(sTime)
+		}
+		if i != len(sortedATimes)-1 { // not the last one
+			usageEIdx = sortedATimes[i+1].Sub(sTime)
+		} else {
+			usageEIdx = usage
+		}
+		// append the valid increments
+		var rtIcmts []*engine.RateSIncrement
+		rt := rtIdx[rWt.aTime].winner().rt
+		for j, ivlRt := range rt.IntervalRates {
+			if ivlRt.IntervalStart > usageEIdx {
+				break
 			}
 		}
 	} else { // only first rate is considered for units
