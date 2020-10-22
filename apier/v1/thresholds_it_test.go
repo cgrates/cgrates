@@ -869,31 +869,33 @@ func testV1TSGetThresholdsWithoutTenant(t *testing.T) {
 
 func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 	var result string
-	tPrfl := &engine.ThresholdWithCache{
+	thAcntUpdate := &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant: tenant,
+			Tenant: "cgrates.org",
 			ID:     "TH_ACNT_UPDATE_EV",
 			FilterIDs: []string{
-				"*string:~*opts.eventType:AccountUpdate",
-				"*gt:~*asm.BalanceSummaries.HolidayBalance.Value:1.0"},
+				"*string:~*opts.*eventType:AccountUpdate",
+				"*string:~*asm.ID:testV1TSProcessAccountUpdateEvent",
+				"*gt:~*asm.BalanceSummaries.HolidayBalance.Value:1.0",
+			},
 			MaxHits:   10,
-			MinSleep:  time.Duration(1 * time.Second),
+			MinSleep:  time.Duration(10 * time.Millisecond),
 			Weight:    20.0,
 			ActionIDs: []string{"LOG_WARNING"},
 			Async:     true,
 		},
 	}
-	if err := tSv1Rpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := tSv1Rpc.Call(utils.APIerSv1SetThresholdProfile, thAcntUpdate, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.ThresholdProfile
 	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfile,
-		&utils.TenantID{Tenant: tenant, ID: "TH_ACNT_UPDATE_EV"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TH_ACNT_UPDATE_EV"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
+	} else if !reflect.DeepEqual(thAcntUpdate.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", thAcntUpdate.ThresholdProfile, reply)
 	}
 
 	attrSetBalance := &utils.AttrSetBalance{
@@ -920,9 +922,9 @@ func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	tEv := &engine.ThresholdsArgsProcessEvent{
+	acntUpdateEv := &engine.ThresholdsArgsProcessEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
+			CGREvent: &utils.CGREvent{ // hitting TH_ACNT_UPDATE_EV
 				Tenant: "cgrates.org",
 				ID:     "SIMULATE_ACNT_UPDATE_EV",
 				Event:  acnt.AsAccountSummary().AsMapInterface(),
@@ -934,8 +936,8 @@ func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 	}
 
 	var ids []string
-	eIDs := []string{"THD_ACNT_BALANCE_1"}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err != nil {
+	eIDs := []string{"TH_ACNT_UPDATE_EV"}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, acntUpdateEv, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)

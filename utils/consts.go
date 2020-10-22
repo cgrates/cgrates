@@ -990,7 +990,6 @@ const (
 	TopUpZeroNegative         = "*topup_zero_negative"
 	SetExpiry                 = "*set_expiry"
 	MetaPublishAccount        = "*publish_account"
-	MetaPublishBalance        = "*publish_balance"
 	MetaRemoveSessionCosts    = "*remove_session_costs"
 	MetaRemoveExpired         = "*remove_expired"
 	MetaPostEvent             = "*post_event"

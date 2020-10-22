@@ -63,7 +63,7 @@ func (dDP *dynamicDP) RemoteHost() net.Addr {
 
 var initialDPPrefixes = utils.NewStringSet([]string{utils.MetaReq, utils.MetaVars,
 	utils.MetaCgreq, utils.MetaCgrep, utils.MetaRep, utils.MetaCGRAReq,
-	utils.MetaAct, utils.MetaEC, utils.MetaUCH, utils.MetaOpts, utils.MetaAsm})
+	utils.MetaAct, utils.MetaEC, utils.MetaUCH, utils.MetaOpts})
 
 func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	if len(fldPath) == 0 {
@@ -141,7 +141,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 			return nil, err
 		}
 		dDP.cache.Set(fldPath[:1], acntSummary)
-		return acntSummary.FieldAsInterface(fldPath[2:])
+		return acntSummary.FieldAsInterface(fldPath[1:])
 	default: // in case of constant we give an empty DataProvider ( empty navigable map )
 	}
 	return nil, utils.ErrNotFound

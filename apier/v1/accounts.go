@@ -507,7 +507,7 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 		Balance:    balance,
 	}
 	publishAction := &engine.Action{
-		ActionType: utils.MetaPublishBalance,
+		ActionType: utils.MetaPublishAccount,
 	}
 	acts := engine.Actions{a, publishAction}
 	if attr.Cdrlog {
@@ -585,7 +585,7 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 		Balance:    balance,
 	}
 	publishAction := &engine.Action{
-		ActionType: utils.MetaPublishBalance,
+		ActionType: utils.MetaPublishAccount,
 	}
 	acts := engine.Actions{a, publishAction}
 	if attr.Cdrlog {
@@ -667,7 +667,7 @@ func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string
 			Balance:    balFltr,
 		}
 		publishAction := &engine.Action{
-			ActionType: utils.MetaPublishBalance,
+			ActionType: utils.MetaPublishAccount,
 		}
 		acts := engine.Actions{a, publishAction}
 		if bal.Cdrlog {

@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -1102,6 +1103,7 @@ func (acc *Account) Publish() {
 		CGREvent: &utils.CGREvent{
 			Tenant: acntSummary.Tenant,
 			ID:     utils.GenUUID(),
+			Time:   utils.TimePointer(time.Now()),
 			Event:  acntSummary.AsMapInterface(),
 		},
 		Opts: map[string]interface{}{
@@ -1232,6 +1234,25 @@ func (as *AccountSummary) FieldAsInterface(fldPath []string) (val interface{}, e
 	}
 }
 
+func (as *AccountSummary) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = as.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface), nil
+}
+
+// String implements utils.DataProvider
+func (as *AccountSummary) String() string {
+	return utils.ToIJSON(as)
+}
+
+// RemoteHost implements utils.DataProvider
+func (ar *AccountSummary) RemoteHost() net.Addr {
+	return utils.LocalAddr()
+}
+
 func (as *AccountSummary) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.Tenant:           as.Tenant,
@@ -1240,5 +1261,4 @@ func (as *AccountSummary) AsMapInterface() map[string]interface{} {
 		utils.Disabled:         as.Disabled,
 		utils.BalanceSummaries: as.BalanceSummaries,
 	}
-
 }
