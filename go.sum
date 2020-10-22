@@ -66,8 +66,8 @@ github.com/cgrates/aringo v0.0.0-20191121125609-d85002bd1667 h1:eNku7bwLtSTpn6FQ
 github.com/cgrates/aringo v0.0.0-20191121125609-d85002bd1667/go.mod h1:l0xi5JUVqxL4P7RZ9YitbSCiOtjMY2j7JBOCJIysRWk=
 github.com/cgrates/baningo v0.0.0-20200925111414-e65b237006c9 h1:WwluddhgQoHkB72AzbC781qtB2xJLt+B9Rc2+NYy0Ts=
 github.com/cgrates/baningo v0.0.0-20200925111414-e65b237006c9/go.mod h1:3SwVROaS1Iml5lqEhj0gRhDRtmbBgypZpKcEkVTSleU=
-github.com/cgrates/cron v0.0.0-20201005140714-2e0bdf04c9a5 h1:zRfZqy+YiSy8WaY1C9BNaVtpLbUCONZGkFfDMLjo8Ic=
-github.com/cgrates/cron v0.0.0-20201005140714-2e0bdf04c9a5/go.mod h1:I9cUDn/uzkakr0hmYTjXkQqf6wagg44L2p01gSYRRz0=
+github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70 h1:/O+Dr12jcizDiCoIG2oK6wyE1pNRVQc62Wz+TfPWDhU=
+github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70/go.mod h1:I9cUDn/uzkakr0hmYTjXkQqf6wagg44L2p01gSYRRz0=
 github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7 h1:dxtBWRAr62vRRKkExmJZ0u1EbCw/y0vOkSfdFND5qXw=
 github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7/go.mod h1:uWcTZ01eKJdWcoYBhsEXKgSlO6Vv8wT9qcR5JeJovBs=
 github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817 h1:1Tdv6H/usqmkQVeQbd+x87L5xo6DFmbYpbI00qfrWGw=
