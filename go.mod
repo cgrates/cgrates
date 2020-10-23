@@ -14,6 +14,7 @@ require (
 	github.com/antchfx/xmlquery v1.2.4
 	github.com/antchfx/xpath v1.1.10 // indirect
 	github.com/aws/aws-sdk-go v1.33.16
+	github.com/blevesearch/bleve v1.0.12
 	github.com/cenk/hub v1.0.1 // indirect
 	github.com/cenkalti/hub v1.0.1 // indirect
 	github.com/cenkalti/rpc2 v0.0.0-20200203073230-5ce2854ce0fd
@@ -26,10 +27,17 @@ require (
 	github.com/cgrates/radigo v0.0.0-20200324152710-35e651804ad1
 	github.com/cgrates/rpcclient v0.0.0-20201001135303-bd71813702b8
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
+	github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60
 	github.com/creack/pty v1.1.11
+	github.com/cznic/b v0.0.0-20181122101859-a26611c4d92d // indirect
+	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
+	github.com/cznic/strutil v0.0.0-20181122101858-275e90344537 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elastic/go-elasticsearch v0.0.0
 	github.com/ericlagergren/decimal v0.0.0-20191206042408-88212e6cfca9
+	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
+	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
+	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
 	github.com/fiorix/go-diameter/v4 v4.0.1
 	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
@@ -38,20 +46,18 @@ require (
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/ishidawataru/sctp v0.0.0-20191218070446-00ab2ac2db07 // indirect
 	github.com/jinzhu/gorm v1.9.15
+	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/lib/pq v1.8.0
-	github.com/mailru/easyjson v0.7.2 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mediocregopher/radix/v3 v3.5.2
 	github.com/miekg/dns v1.1.30
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/nyaruka/phonenumbers v1.0.57
 	github.com/peterh/liner v1.2.0
-	github.com/philhofer/fwd v1.0.0 // indirect
-	github.com/pquerna/ffjson v0.0.0-20190930134022-aa0246cd15f7 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/segmentio/kafka-go v0.3.7
 	github.com/streadway/amqp v1.0.0
-	github.com/tinylib/msgp v1.1.2 // indirect
-	github.com/ugorji/go v0.0.0-20171112025056-5a66da2e74af
+	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c // indirect
 	github.com/xdg/stringprep v1.0.1-0.20180714160509-73f8eece6fdc // indirect
 	go.mongodb.org/mongo-driver v1.4.0
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381

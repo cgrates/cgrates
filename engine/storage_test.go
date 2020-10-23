@@ -59,7 +59,7 @@ func TestMsgpackStructsMissing(t *testing.T) {
 }
 
 func TestMsgpackTime(t *testing.T) {
-	t1 := time.Date(2013, 8, 28, 22, 27, 0, 0, time.UTC)
+	t1 := time.Date(2013, 8, 28, 22, 27, 30, 11, time.UTC)
 	m := NewCodecMsgpackMarshaler()
 	buf, err := m.Marshal(&t1)
 	if err != nil {
