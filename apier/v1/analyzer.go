@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/blevesearch/bleve/document"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -43,4 +44,8 @@ func (aSv1 *AnalyzerSv1) Call(serviceMethod string,
 func (aSv1 *AnalyzerSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
+}
+
+func (aSv1 *AnalyzerSv1) Search(search string, reply *[]*document.Document) error {
+	return aSv1.aS.V1Search(search, reply)
 }

@@ -19,61 +19,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package analyzers
 
 import (
-	"log"
-
-	"github.com/cgrates/cgrates/utils"
+	"time"
 )
 
-var h = new(Handler)
-
-type Handler struct {
+type extraInfo struct {
 	enc  string
 	from string
 	to   string
 }
 
-func (h *Handler) handleTrafic(x interface{}) {
-	log.Println(utils.ToJSON(x))
-}
+type InfoRPC struct {
+	Duration  time.Duration
+	StartTime time.Time
+	EndTime   time.Time
 
-func (h *Handler) handleRequest(id uint64, method string, args interface{}) {
-	h.handleTrafic(&RPCServerRequest{
-		ID:     id,
-		Method: method,
-		Params: []interface{}{args},
-	})
-}
-func (h *Handler) handleResponse(id uint64, x, err interface{}) {
-	var e interface{}
-	switch val := x.(type) {
-	default:
-	case nil:
-	case string:
-		e = val
-	case error:
-		e = val.Error()
-	}
-	h.handleTrafic(&RPCServerResponse{
-		ID:     id,
-		Result: x,
-		Error:  e,
-	})
-}
+	Encoding string
+	From     string
+	To       string
 
-type RPCServerRequest struct {
-	Method string        `json:"method"`
-	Params []interface{} `json:"params"`
-	ID     uint64        `json:"id"`
+	ID     uint64
+	Method string
+	Params interface{}
+	Result interface{}
+	Error  interface{}
 }
-
-func (r *RPCServerRequest) reset() {
-	r.Method = ""
-	r.Params = nil
-	r.ID = 0
-}
-
-type RPCServerResponse struct {
+type rpcAPI struct {
 	ID     uint64      `json:"id"`
-	Result interface{} `json:"result"`
-	Error  interface{} `json:"error"`
+	Method string      `json:"method"`
+	Params interface{} `json:"params"`
+
+	StartTime time.Time
 }

@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -173,7 +172,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 			return sReq.Id, err
 		}
 		var addr string
-		if addr, err = getRemoteIP(req); err != nil {
+		if addr, err = utils.GetRemoteIP(req); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to obtain the remote IP because: %s",
 				utils.DispatcherH, err))
 			return sReq.Id, err
@@ -193,27 +192,6 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		return sReq.Id, utils.ErrPartiallyExecuted
 	}
 	return sReq.Id, nil
-}
-
-func getRemoteIP(r *http.Request) (ip string, err error) {
-	ip = r.Header.Get("X-REAL-IP")
-	if net.ParseIP(ip) != nil {
-		return
-	}
-	for _, ip = range strings.Split(r.Header.Get("X-FORWARDED-FOR"), utils.FIELDS_SEP) {
-		if net.ParseIP(ip) != nil {
-			return
-		}
-	}
-	if ip, _, err = net.SplitHostPort(r.RemoteAddr); err != nil {
-		return
-	}
-	if net.ParseIP(ip) != nil {
-		return
-	}
-	ip = utils.EmptyString
-	err = fmt.Errorf("no valid ip found")
-	return
 }
 
 func getConnPort(cfg *config.CGRConfig, transport string, tls bool) (port string, err error) {

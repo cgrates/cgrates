@@ -568,6 +568,11 @@ func main() {
 		internalLoaderSChan, connManager)
 
 	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
+	if anz.ShouldRun() {
+		if err := anz.Start(); err != nil {
+			return
+		}
+	}
 
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, schS, rals,
 		rals.GetResponder(), apiSv1, apiSv2, cdrS, smg,

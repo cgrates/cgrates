@@ -214,7 +214,9 @@ func (s *Server) ServeGOB(addr string, exitChan chan bool) {
 func handleRequest(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
-	res := NewRPCRequest(r.Body).Call()
+	rmtIP, _ := GetRemoteIP(r)
+	rmtAddr, _ := net.ResolveIPAddr(EmptyString, rmtIP)
+	res := newRPCRequest(r.Body, rmtAddr).Call()
 	io.Copy(w, res)
 }
 
@@ -334,16 +336,22 @@ func (s *Server) StopBiRPC() {
 // rpcRequest represents a RPC request.
 // rpcRequest implements the io.ReadWriteCloser interface.
 type rpcRequest struct {
-	r    io.Reader     // holds the JSON formated RPC request
-	rw   io.ReadWriter // holds the JSON formated RPC response
-	done chan bool     // signals then end of the RPC request
+	r          io.Reader     // holds the JSON formated RPC request
+	rw         io.ReadWriter // holds the JSON formated RPC response
+	done       chan bool     // signals then end of the RPC request
+	remoteAddr net.Addr
 }
 
-// NewRPCRequest returns a new rpcRequest.
-func NewRPCRequest(r io.Reader) *rpcRequest {
+// newRPCRequest returns a new rpcRequest.
+func newRPCRequest(r io.Reader, remoteAddr net.Addr) *rpcRequest {
 	var buf bytes.Buffer
 	done := make(chan bool)
-	return &rpcRequest{r, &buf, done}
+	return &rpcRequest{
+		r:          r,
+		rw:         &buf,
+		done:       done,
+		remoteAddr: remoteAddr,
+	}
 }
 
 func (r *rpcRequest) Read(p []byte) (n int, err error) {
@@ -354,6 +362,13 @@ func (r *rpcRequest) Write(p []byte) (n int, err error) {
 	n, err = r.rw.Write(p)
 	r.done <- true
 	return
+}
+
+func (r *rpcRequest) LocalAddr() net.Addr {
+	return LocalAddr()
+}
+func (r *rpcRequest) RemoteAddr() net.Addr {
+	return r.remoteAddr
 }
 
 func (r *rpcRequest) Close() error {
@@ -547,5 +562,27 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		log.Println(fmt.Sprintf("<HTTPS>Error: %s when listening ", err))
 	}
 	exitChan <- true
+	return
+}
+
+// GetRemoteIP returns the IP from http request
+func GetRemoteIP(r *http.Request) (ip string, err error) {
+	ip = r.Header.Get("X-REAL-IP")
+	if net.ParseIP(ip) != nil {
+		return
+	}
+	for _, ip = range strings.Split(r.Header.Get("X-FORWARDED-FOR"), FIELDS_SEP) {
+		if net.ParseIP(ip) != nil {
+			return
+		}
+	}
+	if ip, _, err = net.SplitHostPort(r.RemoteAddr); err != nil {
+		return
+	}
+	if net.ParseIP(ip) != nil {
+		return
+	}
+	ip = EmptyString
+	err = fmt.Errorf("no valid ip found")
 	return
 }

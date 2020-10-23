@@ -20,6 +20,8 @@ package services
 
 import (
 	"fmt"
+	"net"
+	"net/rpc"
 	"sync"
 
 	"github.com/cgrates/cgrates/analyzers"
@@ -58,7 +60,7 @@ func (anz *AnalyzerService) Start() (err error) {
 	if anz.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	if anz.anz, err = analyzers.NewAnalyzerService(); err != nil {
+	if anz.anz, err = analyzers.NewAnalyzerService(anz.cfg); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		anz.exitChan <- true
 		return
@@ -71,6 +73,17 @@ func (anz *AnalyzerService) Start() (err error) {
 		anz.exitChan <- true
 		return
 	}()
+	utils.AnalizerWraperFunc = func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec {
+		fromstr := ""
+		if from != nil {
+			fromstr = from.String()
+		}
+		tostr := ""
+		if to != nil {
+			tostr = to.String()
+		}
+		return anz.anz.NewServerCodec(conn, enc, fromstr, tostr)
+	}
 	anz.rpc = v1.NewAnalyzerSv1(anz.anz)
 	if !anz.cfg.DispatcherSCfg().Enabled {
 		anz.server.RpcRegister(anz.rpc)

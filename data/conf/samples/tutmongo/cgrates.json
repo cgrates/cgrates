@@ -123,4 +123,9 @@
 	"apiers_conns": ["*internal"],
 },
 
+
+"analyzers":{								// AnalyzerS config
+	"enabled":true							// starts AnalyzerS service: <true|false>.
+},
+
 }

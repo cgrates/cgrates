@@ -20,34 +20,60 @@ package analyzers
 
 import (
 	"net/rpc"
+	"sync"
+	"time"
 )
 
-func NewAnalyzeServerCodec(sc rpc.ServerCodec) rpc.ServerCodec {
-	return &AnalyzeServerCodec{sc: sc, req: new(RPCServerRequest)}
+func (aS *AnalyzerService) NewServerCodec(sc rpc.ServerCodec, enc, from, to string) rpc.ServerCodec {
+	return &AnalyzeServerCodec{
+		sc:   sc,
+		reqs: make(map[uint64]*rpcAPI),
+		aS:   aS,
+		extrainfo: &extraInfo{
+			enc:  enc,
+			from: from,
+			to:   to,
+		},
+	}
 }
 
 type AnalyzeServerCodec struct {
 	sc rpc.ServerCodec
-	// keep the information about the header so we handle this when the body is readed
-	// the ReadRequestHeader and ReadRequestBody are called in pairs
-	req *RPCServerRequest
+
+	// keep the API in memory because the write is async
+	reqs      map[uint64]*rpcAPI
+	reqIdx    uint64
+	reqsLk    sync.RWMutex
+	aS        *AnalyzerService
+	extrainfo *extraInfo
 }
 
 func (c *AnalyzeServerCodec) ReadRequestHeader(r *rpc.Request) (err error) {
-	c.req.reset()
 	err = c.sc.ReadRequestHeader(r)
-	c.req.Method = r.ServiceMethod
-	c.req.ID = r.Seq
+	c.reqsLk.Lock()
+	c.reqIdx = r.Seq
+	c.reqs[c.reqIdx] = &rpcAPI{
+		ID:        r.Seq,
+		Method:    r.ServiceMethod,
+		StartTime: time.Now(),
+	}
+	c.reqsLk.Unlock()
 	return
 }
 
 func (c *AnalyzeServerCodec) ReadRequestBody(x interface{}) (err error) {
 	err = c.sc.ReadRequestBody(x)
-	go h.handleRequest(c.req.ID, c.req.Method, x)
+	c.reqsLk.Lock()
+	c.reqs[c.reqIdx].Params = x
+	c.reqsLk.Unlock()
 	return
 }
 func (c *AnalyzeServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
-	go h.handleResponse(r.Seq, x, r.Error)
+	c.reqsLk.Lock()
+	api := c.reqs[c.reqIdx]
+	delete(c.reqs, c.reqIdx)
+	c.reqsLk.Unlock()
+	go c.aS.logTrafic(api.ID, api.Method, api.Params, x, r.Error, c.extrainfo, api.StartTime, time.Now())
 	return c.sc.WriteResponse(r, x)
 }
 func (c *AnalyzeServerCodec) Close() error { return c.sc.Close() }

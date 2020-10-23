@@ -128,48 +128,6 @@ func TestGetConnPort(t *testing.T) {
 	}
 }
 
-func TestGetRemoteIP(t *testing.T) {
-	req, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(nil))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.RemoteAddr = "127.0.0.1:2356"
-	exp := "127.0.0.1"
-	if rply, err := getRemoteIP(req); err != nil {
-		t.Fatal(err)
-	} else if rply != exp {
-		t.Errorf("Expected: %q ,received: %q", exp, rply)
-	}
-	req.RemoteAddr = "notAnIP"
-	if _, err := getRemoteIP(req); err == nil {
-		t.Fatal("Expected error received nil")
-	}
-	req.RemoteAddr = "127.0.0:2012"
-	if _, err := getRemoteIP(req); err == nil {
-		t.Fatal("Expected error received nil")
-	}
-
-	req.Header.Set("X-FORWARDED-FOR", "127.0.0.2,127.0.0.3")
-	exp = "127.0.0.2"
-	if rply, err := getRemoteIP(req); err != nil {
-		t.Fatal(err)
-	} else if rply != exp {
-		t.Errorf("Expected: %q ,received: %q", exp, rply)
-	}
-	req.Header.Set("X-FORWARDED-FOR", "127.0.0.")
-	if _, err := getRemoteIP(req); err == nil {
-		t.Fatal("Expected error received nil")
-	}
-
-	req.Header.Set("X-REAL-IP", "127.0.0.4")
-	exp = "127.0.0.4"
-	if rply, err := getRemoteIP(req); err != nil {
-		t.Fatal(err)
-	} else if rply != exp {
-		t.Errorf("Expected: %q ,received: %q", exp, rply)
-	}
-}
-
 func TestRegister(t *testing.T) {
 	ra := &RegisterArgs{
 		Tenant: "cgrates.org",
