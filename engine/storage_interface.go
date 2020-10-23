@@ -26,7 +26,7 @@ import (
 	"reflect"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ugorji/go/codec"
+	"github.com/cgrates/ugocodec/codec"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
