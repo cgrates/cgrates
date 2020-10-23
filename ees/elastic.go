@@ -189,9 +189,10 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 
 	var resp *esapi.Response
 	if resp, err = eReq.Do(context.Background(), eEe.eClnt); err != nil {
-		resp.Body.Close()
 		return
-	} else if resp.IsError() {
+	}
+	defer resp.Body.Close()
+	if resp.IsError() {
 		var e map[string]interface{}
 		if err = json.NewDecoder(resp.Body).Decode(&e); err != nil {
 			return
