@@ -90,6 +90,7 @@ var (
 		testV1STSProcessCDRStat,
 		testV1STSOverWriteStats,
 		testV1STSProcessStatWithThreshold2,
+		testV1STSSimulateAccountUpdate,
 		testV1STSStopEngine,
 	}
 )
@@ -1326,5 +1327,126 @@ func testV1STSV1GetStatQueuesForEventWithoutTenant(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(estats, reply) {
 		t.Errorf("expecting: %+v, received reply: %v", estats, reply)
+	}
+}
+
+func testV1STSSimulateAccountUpdate(t *testing.T) {
+	statConfig = &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "StatForAccountUpdate",
+			FilterIDs: []string{
+				"*string:~*opts.*eventType:AccountUpdate",
+				"*string:~*asm.ID:testV1STSSimulateAccountUpdate",
+			},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			QueueLength: 100,
+			TTL:         time.Duration(1) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaSum + utils.HashtagSep + "~*asm.BalanceSummaries.HolidayBalance.Value",
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       50,
+			MinItems:     1,
+		},
+	}
+	//set the custom statProfile
+	var result string
+	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	//verify it
+	var reply *engine.StatQueueProfile
+	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "StatForAccountUpdate"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
+	}
+	//verify metrics
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.MetaSum + utils.HashtagSep + "~*asm.BalanceSummaries.HolidayBalance.Value": utils.NOT_AVAILABLE,
+	}
+
+	var reply2 []string
+	expected := []string{"StatForAccountUpdate"}
+
+	attrSetBalance := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testV1STSSimulateAccountUpdate",
+		BalanceType: "*monetary",
+		Value:       1.5,
+		Balance: map[string]interface{}{
+			utils.ID: "HolidayBalance",
+		},
+	}
+	if err := stsV1Rpc.Call(utils.APIerSv1SetBalance, attrSetBalance, &result); err != nil {
+		t.Error("Got error on APIerSv1.SetBalance: ", err.Error())
+	} else if result != utils.OK {
+		t.Errorf("Calling APIerSv1.SetBalance received: %s", result)
+	}
+
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "testV1STSSimulateAccountUpdate",
+	}
+	if err := stsV1Rpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	}
+
+	acntUpdateEv := &engine.StatsArgsProcessEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{ // hitting TH_ACNT_UPDATE_EV
+				Tenant: "cgrates.org",
+				ID:     "SIMULATE_ACNT_UPDATE_EV",
+				Event:  acnt.AsAccountSummary().AsMapInterface(),
+			},
+			Opts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
+			},
+		},
+	}
+
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &acntUpdateEv, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+	//verify metrics after first process
+	expectedMetrics = map[string]string{
+		utils.MetaSum + utils.HashtagSep + "~*asm.BalanceSummaries.HolidayBalance.Value": "1.5",
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatForAccountUpdate"}}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+	//second process
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &acntUpdateEv, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+	expectedMetrics = map[string]string{
+		utils.MetaSum + utils.HashtagSep + "~*asm.BalanceSummaries.HolidayBalance.Value": "3",
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatForAccountUpdate"}}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 }
