@@ -109,3 +109,113 @@ func TestStartTimeError(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
+
+func TestStartTimeFieldAsTimeErrorAnswerTime(t *testing.T) {
+	cgrEvent := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "randomID",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.AnswerTime: "0s",
+			},
+		},
+	}
+	rateProfileIDs := []string{"randomIDs"}
+	argsCost := &ArgsCostForEvent{
+		rateProfileIDs,
+		cgrEvent,
+	}
+	expectedErr := "Unsupported time format"
+	if _, err := argsCost.StartTime(utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestStartTimeFieldAsTimeErrorSetupTime(t *testing.T) {
+	cgrEvent := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "randomID",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.SetupTime: "1h0m0s",
+			},
+		},
+	}
+	rateProfileIDs := []string{"randomIDs"}
+	argsCost := &ArgsCostForEvent{
+		rateProfileIDs,
+		cgrEvent,
+	}
+	expectedErr := "Unsupported time format"
+	if _, err := argsCost.StartTime(utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestStartTimeFieldAsTimeNilTime(t *testing.T) {
+	cgrEvent := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "randomID",
+			Event: map[string]interface{}{
+				utils.AnswerTime: time.Time{},
+			},
+		},
+	}
+	rateProfileIDs := []string{"randomIDs"}
+	argsCost := &ArgsCostForEvent{
+		rateProfileIDs,
+		cgrEvent,
+	}
+	if _, err := argsCost.StartTime(utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStartTimeFieldAsTimeNow(t *testing.T) {
+	cgrEvent := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "randomID",
+			Event:  map[string]interface{}{},
+		},
+	}
+	rateProfileIDs := []string{"randomIDs"}
+	argsCost := &ArgsCostForEvent{
+		rateProfileIDs,
+		cgrEvent,
+	}
+	if _, err := argsCost.StartTime(utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCallRates(t *testing.T) {
+	newRates := &RateS{}
+	var reply *string
+	expectedErr := "UNSUPPORTED_SERVICE_METHOD"
+	if err := newRates.Call("inexistentMethodCall", nil, reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestV1CostForEvent(t *testing.T) {
+	rts := &RateS{}
+	cgrEvent := &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "randomID",
+			Event:  map[string]interface{}{},
+		},
+	}
+	rateProfileIDs := []string{"randomIDs"}
+	argsCost := &ArgsCostForEvent{
+		rateProfileIDs,
+		cgrEvent,
+	}
+	if err := rts.V1CostForEvent(argsCost, nil); err != nil {
+		t.Error(err)
+	}
+}
