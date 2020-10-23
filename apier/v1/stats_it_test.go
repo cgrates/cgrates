@@ -87,7 +87,7 @@ var (
 		testV1STSV1StatSv1GetQueueStringMetricsWithoutTenant,
 		testV1STSGetStatQueueProfileWithoutTenant,
 		testV1STSRemStatQueueProfileWithoutTenant,
-		//testV1STSProcessCDRStat,
+		testV1STSProcessCDRStat,
 		testV1STSOverWriteStats,
 		testV1STSProcessStatWithThreshold2,
 		testV1STSStopEngine,
@@ -881,7 +881,7 @@ func testV1STSProcessCDRStat(t *testing.T) {
 			ThresholdIDs: []string{"*none"},
 			Blocker:      true,
 			Stored:       true,
-			Weight:       20,
+			Weight:       50,
 			MinItems:     1,
 		},
 	}
@@ -901,7 +901,6 @@ func testV1STSProcessCDRStat(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
 	}
 	//verify metrics
-	expectedIDs := []string{"StatForCDR"}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
 		utils.MetaSum + utils.HashtagSep + "1": utils.NOT_AVAILABLE,
@@ -914,7 +913,7 @@ func testV1STSProcessCDRStat(t *testing.T) {
 		Account:     "1001",
 		Destination: "data",
 		ToR:         "*data",
-		Cost:        0,
+		Cost:        1.01,
 		AccountSummary: &engine.AccountSummary{
 			Tenant: "cgrates.org",
 			ID:     "AccountFromAccountSummary",
@@ -957,6 +956,7 @@ func testV1STSProcessCDRStat(t *testing.T) {
 		CostDetails: engine.NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.MetaDefault),
 	}
 	cdr.CostDetails.Compute()
+	cdr.CostDetails.Usage = utils.DurationPointer(time.Duration(10) * time.Second)
 
 	var reply2 []string
 	expected := []string{"StatForCDR"}
@@ -972,12 +972,11 @@ func testV1STSProcessCDRStat(t *testing.T) {
 	}
 	//verify metrics after first process
 	expectedMetrics = map[string]string{
-		utils.MetaSum + utils.HashtagSep + "1":     "1",
-		utils.MetaAverage + utils.HashtagSep + "2": "2",
+		utils.MetaSum + utils.HashtagSep + "~*req.CostDetails.Usage": "10000000000",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithOpts{
-			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatForCDR"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -989,12 +988,11 @@ func testV1STSProcessCDRStat(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
 	}
 	expectedMetrics = map[string]string{
-		utils.MetaSum + utils.HashtagSep + "1":     "2",
-		utils.MetaAverage + utils.HashtagSep + "2": "2",
+		utils.MetaSum + utils.HashtagSep + "~*req.CostDetails.Usage": "20000000000",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithOpts{
-			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatForCDR"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
