@@ -19,28 +19,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package analyzers
 
 import (
-	"sync"
+	"time"
 
 	"github.com/cgrates/rpcclient"
 )
 
-func NewAnalyzeConnector(sc rpcclient.ClientConnector) rpcclient.ClientConnector {
-	return &AnalyzeConnector{conn: sc}
+func (aS *AnalyzerService) NewAnalyzeConnector(sc rpcclient.ClientConnector, enc, from, to string) rpcclient.ClientConnector {
+	return &AnalyzeConnector{
+		conn: sc,
+		aS:   aS,
+		extrainfo: &extraInfo{
+			enc:  enc,
+			from: from,
+			to:   to,
+		},
+	}
 }
 
 type AnalyzeConnector struct {
-	conn  rpcclient.ClientConnector
-	seq   uint64
-	seqLk sync.Mutex
+	conn rpcclient.ClientConnector
+
+	aS        *AnalyzerService
+	extrainfo *extraInfo
 }
 
 func (c *AnalyzeConnector) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
-	c.seqLk.Lock()
-	id := c.seq
-	c.seq++
-	c.seqLk.Unlock()
-	go h.handleRequest(id, serviceMethod, args)
+	sTime := time.Now()
 	err = c.conn.Call(serviceMethod, args, reply)
-	go h.handleResponse(id, reply, err)
+	go c.aS.logTrafic(0, serviceMethod, args, reply, err, c.extrainfo, sTime, time.Now())
 	return
 }

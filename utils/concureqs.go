@@ -19,12 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"io"
+	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 )
 
 var ConReqs *ConcReqs
+var AnalizerWraperFunc = func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec {
+	return conn
+}
 
 type ConcReqs struct {
 	limit    int
@@ -69,12 +72,20 @@ func (cR *ConcReqs) Deallocate() {
 	return
 }
 
-func newConcReqsGOBCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
-	return newConcReqsServerCodec(newGobServerCodec(conn))
+type conn interface {
+	Read(b []byte) (n int, err error)
+	Write(b []byte) (n int, err error)
+	Close() error
+	LocalAddr() net.Addr
+	RemoteAddr() net.Addr
 }
 
-func newConcReqsJSONCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
-	return newConcReqsServerCodec(jsonrpc.NewServerCodec(conn))
+func newConcReqsGOBCodec(conn conn) rpc.ServerCodec {
+	return AnalizerWraperFunc(newConcReqsServerCodec(newGobServerCodec(conn)), MetaGOB, conn.RemoteAddr(), conn.LocalAddr())
+}
+
+func newConcReqsJSONCodec(conn conn) rpc.ServerCodec {
+	return AnalizerWraperFunc(newConcReqsServerCodec(jsonrpc.NewServerCodec(conn)), MetaJSON, conn.RemoteAddr(), conn.LocalAddr())
 }
 
 func newConcReqsServerCodec(sc rpc.ServerCodec) rpc.ServerCodec {

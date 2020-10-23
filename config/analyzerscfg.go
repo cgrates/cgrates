@@ -18,17 +18,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"path"
+
+	"github.com/blevesearch/bleve/index/store/boltdb"
+	"github.com/blevesearch/bleve/index/upsidedown"
+	"github.com/cgrates/cgrates/utils"
+)
 
 // AttributeSCfg is the configuration of attribute service
 type AnalyzerSCfg struct {
-	Enabled bool
+	Enabled   bool
+	DBPath    string
+	IndexType string
+	StoreType string
 }
 
 func (alS *AnalyzerSCfg) loadFromJsonCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
+	alS.DBPath = path.Join("/home", "trial", "analize")
+	alS.IndexType = upsidedown.Name
+	alS.StoreType = boltdb.Name
 	if jsnCfg.Enabled != nil {
 		alS.Enabled = *jsnCfg.Enabled
 	}
