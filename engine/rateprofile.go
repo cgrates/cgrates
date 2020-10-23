@@ -137,13 +137,18 @@ type RateSInterval struct {
 	UsageStart     time.Duration
 	Increments     []*RateSIncrement
 	CompressFactor int64
+
+	cost *utils.Decimal // unexported total cost
 }
 
 type RateSIncrement struct {
 	Rate              *Rate
-	IntervalRateIndex int
 	Usage             time.Duration
+	IntervalRateIndex int
 	CompressFactor    int64
+
+	Cost float64
+	cost *utils.Decimal // unexported total increment cost
 }
 
 // Sort will sort the IntervalRates from each Rate based on IntervalStart
@@ -153,4 +158,26 @@ func (rpp *RateProfile) Sort() {
 			return rate.IntervalRates[i].IntervalStart < rate.IntervalRates[j].IntervalStart
 		})
 	}
+}
+
+// CompressEquals compares two RateSIntervals for Compress function
+func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
+	return
+}
+
+// CompressEquals compares two RateSIncrement for Compress function
+func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
+	if rIcr.Rate.UID() != rIcr2.Rate.UID() {
+		return
+	}
+	if rIcr.Usage != rIcr2.Usage {
+		return
+	}
+	if rIcr.Cost != rIcr2.Cost {
+		return
+	}
+	if rIcr.CompressFactor != rIcr2.CompressFactor {
+		return
+	}
+	return true
 }

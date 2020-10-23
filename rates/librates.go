@@ -82,10 +82,15 @@ func (rWt *rateWithTimes) id() string {
 	return rWt.uId
 }
 
+type orderedRate struct {
+	time.Duration
+	*engine.Rate
+}
+
 // orderRatesOnIntervals will order the rates based on ActivationInterval and intervalStart of each Rate
 // there can be only one winning Rate for each interval, prioritized by the Weight
 func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Duration,
-	isDuration bool, verbosity int) (ordRts []*engine.RateSInterval, err error) {
+	isDuration bool, verbosity int) (ordRts []*orderedRate, err error) {
 
 	endTime := sTime.Add(usage)
 
@@ -151,12 +156,12 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 		sortedATimes = sortedATimes[i-1:]
 		break
 	}
-	// get the real list of interesting ordered Rates based on their activationTime
-	var oRts []*rateWithTimes
+
+	// compute the list of returned rates together with their index interval
 	if isDuration {
 		// add all the possible ActivationTimes from cron expressions
+		var usageIndx time.Duration // the difference between setup and activation time of the rate
 		for _, aTime := range sortedATimes {
-
 			if !endTime.After(aTime) {
 				break // we are not interested about further rates
 			}
@@ -164,42 +169,15 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 			if wnr == nil {
 				continue
 			}
-			if len(oRts) == 0 || wnr.rt.ID != oRts[len(oRts)-1].rt.ID { // only add the winner if not already active
-				oRts = append(oRts, wnr)
+			if sTime.Before(aTime) {
+				usageIndx = aTime.Sub(sTime)
+			}
+			if len(ordRts) == 0 || wnr.rt.ID != ordRts[len(ordRts)-1].Rate.ID { // only add the winner if not already active
+				ordRts = append(ordRts, &orderedRate{usageIndx, rtIdx[aTime].winner().rt})
 			}
 		}
 	} else { // only first rate is considered for units
-		oRts = []*rateWithTimes{rtIdx[sortedATimes[0]].winner()}
-	}
-
-	// add the Intervals and Increments
-	var usageSIdx, usageEIdx time.Duration
-	for i, rWt := range oRts {
-		if sTime.Before(rWt.aTime) {
-			usageSIdx = rWt.aTime.Sub(sTime)
-		}
-		if i != len(sortedATimes)-1 { // not the last one
-			usageEIdx = sortedATimes[i+1].Sub(sTime)
-		} else {
-			usageEIdx = usage
-		}
-		// append the valid increments
-		var rtIcmts []*engine.RateSIncrement
-		rt := rtIdx[rWt.aTime].winner().rt
-		for j, ivlRt := range rt.IntervalRates {
-			if ivlRt.IntervalStart > usageEIdx {
-				break
-			}
-			if j != len(rt.IntervalRates)-1 &&
-				rt.IntervalRates[j+1].IntervalStart <= usageSIdx { // not the last one
-				// the next intervalStat is still good for usageSIdx, no need of adding the current one
-				continue
-			}
-			// ready to add the increment
-			rtIcmts = append(rtIcmts,
-				&engine.RateSIncrement{Rate: rt, IntervalRateIndex: j})
-		}
-		ordRts = append(ordRts, &engine.RateSInterval{Increments: rtIcmts})
+		ordRts = []*orderedRate{&orderedRate{time.Duration(0), rtIdx[sortedATimes[0]].winner().rt}}
 	}
 	return
 }

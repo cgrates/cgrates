@@ -50,16 +50,13 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 	}
 	rtChristmas.Compile()
 	allRts := []*engine.Rate{rt0, rtChristmas}
-	expOrdered := []*engine.RateSInterval{
+	expOrdered := []*orderedRate{
 		{
-			Increments: []*engine.RateSIncrement{
-				{
-					Rate:              rt0,
-					IntervalRateIndex: 0,
-				},
-			},
+			time.Duration(0),
+			rt0,
 		},
 	}
+
 	sTime := time.Date(2020, time.June, 28, 18, 56, 05, 0, time.UTC)
 	usage := time.Duration(2 * time.Minute)
 	if ordRts, err := orderRatesOnIntervals(
@@ -70,22 +67,14 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
 	}
 
-	expOrdered = []*engine.RateSInterval{
+	expOrdered = []*orderedRate{
 		{
-			Increments: []*engine.RateSIncrement{
-				{
-					Rate:              rt0,
-					IntervalRateIndex: 0,
-				},
-			},
+			time.Duration(0),
+			rt0,
 		},
 		{
-			Increments: []*engine.RateSIncrement{
-				{
-					Rate:              rtChristmas,
-					IntervalRateIndex: 0,
-				},
-			},
+			time.Duration(55 * time.Second),
+			rtChristmas,
 		},
 	}
 	sTime = time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
@@ -98,30 +87,18 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
 	}
 
-	expOrdered = []*engine.RateSInterval{
+	expOrdered = []*orderedRate{
 		{
-			Increments: []*engine.RateSIncrement{
-				{
-					Rate:              rt0,
-					IntervalRateIndex: 0,
-				},
-			},
+			time.Duration(0),
+			rt0,
 		},
 		{
-			Increments: []*engine.RateSIncrement{
-				{
-					Rate:              rtChristmas,
-					IntervalRateIndex: 0,
-				},
-			},
+			time.Duration(55 * time.Second),
+			rtChristmas,
 		},
 		{
-			Increments: []*engine.RateSIncrement{
-				{
-					Rate:              rt0,
-					IntervalRateIndex: 0,
-				},
-			},
+			time.Duration(86455 * time.Second),
+			rt0,
 		},
 	}
 	sTime = time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
@@ -133,8 +110,28 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 		t.Errorf("expecting: %s\n, received: %s",
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
 	}
+	if ordRts, err := orderRatesOnIntervals(
+		allRts, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expOrdered, ordRts) {
+		t.Errorf("expecting: %s\n, received: %s",
+			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
+	}
+
+	rts := []*engine.Rate{rtChristmas}
+	expOrdered = nil
+	sTime = time.Date(2020, time.December, 25, 23, 59, 05, 0, time.UTC)
+	usage = time.Duration(2 * time.Minute)
+	if ordRts, err := orderRatesOnIntervals(
+		rts, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expOrdered, ordRts) {
+		t.Errorf("expecting: %s\n, received: %s",
+			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
+	}
 }
 
+/*
 func TestOrderRatesOnIntervalsCase1(t *testing.T) {
 	rt0 := &engine.Rate{
 		ID:     "RATE0",
@@ -165,7 +162,7 @@ func TestOrderRatesOnIntervalsCase1(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
-
+*/
 func TestNewRatesWithWinner(t *testing.T) {
 	rt := &rateWithTimes{
 		uId: "randomID",
