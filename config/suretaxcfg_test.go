@@ -328,7 +328,7 @@ func TestSureTaxCfgAsMapInterface(t *testing.T) {
     },
 }`
 	eMap := map[string]interface{}{
-		utils.UrlCfg:                  utils.EmptyString,
+		utils.URLCfg:                  utils.EmptyString,
 		utils.ClientNumberCfg:         utils.EmptyString,
 		utils.ValidationKeyCfg:        utils.EmptyString,
 		utils.BusinessUnitCfg:         utils.EmptyString,

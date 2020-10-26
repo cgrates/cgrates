@@ -734,7 +734,7 @@ func (cfg *CGRConfig) loadAnalyzerCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnAnalyzerCgrCfg, err = jsnCfg.AnalyzerCfgJson(); err != nil {
 		return
 	}
-	return cfg.analyzerSCfg.loadFromJsonCfg(jsnAnalyzerCgrCfg)
+	return cfg.analyzerSCfg.loadFromJSONCfg(jsnAnalyzerCgrCfg)
 }
 
 // loadAPIBanCgrCfg loads the Analyzer section of the configuration

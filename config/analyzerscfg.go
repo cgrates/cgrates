@@ -19,30 +19,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"path"
+	"time"
 
-	"github.com/blevesearch/bleve/index/store/boltdb"
-	"github.com/blevesearch/bleve/index/upsidedown"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// AttributeSCfg is the configuration of attribute service
+// AnalyzerSCfg is the configuration of analyzer service
 type AnalyzerSCfg struct {
-	Enabled   bool
-	DBPath    string
-	IndexType string
-	StoreType string
+	Enabled         bool
+	DBPath          string
+	IndexType       string
+	TTL             time.Duration
+	CleanupInterval time.Duration
 }
 
-func (alS *AnalyzerSCfg) loadFromJsonCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
+func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	alS.DBPath = path.Join("/home", "trial", "analize")
-	alS.IndexType = upsidedown.Name
-	alS.StoreType = boltdb.Name
 	if jsnCfg.Enabled != nil {
 		alS.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Db_path != nil {
+		alS.DBPath = *jsnCfg.Db_path
+	}
+	if jsnCfg.Index_type != nil {
+		alS.IndexType = *jsnCfg.Index_type
+	}
+	if jsnCfg.Ttl != nil {
+		if alS.TTL, err = time.ParseDuration(*jsnCfg.Ttl); err != nil {
+			return
+		}
+	}
+	if jsnCfg.Cleanup_interval != nil {
+		if alS.CleanupInterval, err = time.ParseDuration(*jsnCfg.Cleanup_interval); err != nil {
+			return
+		}
 	}
 	return nil
 }
@@ -50,5 +62,10 @@ func (alS *AnalyzerSCfg) loadFromJsonCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 func (alS *AnalyzerSCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.EnabledCfg: alS.Enabled,
+
+		utils.DBPathCfg:          alS.DBPath,
+		utils.IndexTypeCfg:       alS.IndexType,
+		utils.TTLCfg:             alS.TTL.String(),
+		utils.CleanupIntervalCfg: alS.CleanupInterval.String(),
 	}
 }

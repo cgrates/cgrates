@@ -110,7 +110,7 @@ func handleConfigSFile(path string, w http.ResponseWriter) {
 func (cScfg *ConfigSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg: cScfg.Enabled,
-		utils.UrlCfg:     cScfg.Url,
+		utils.URLCfg:     cScfg.Url,
 		utils.RootDirCfg: cScfg.RootDir,
 	}
 	return

@@ -570,6 +570,7 @@ func main() {
 	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
 	if anz.ShouldRun() {
 		if err := anz.Start(); err != nil {
+			fmt.Println(err)
 			return
 		}
 	}

@@ -602,7 +602,11 @@ type FcTemplateJsonCfg struct {
 
 // Analyzer service json config section
 type AnalyzerSJsonCfg struct {
-	Enabled *bool
+	Enabled          *bool
+	Db_path          *string
+	Index_type       *string
+	Ttl              *string
+	Cleanup_interval *string
 }
 
 type ApierJsonCfg struct {
