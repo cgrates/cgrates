@@ -760,6 +760,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		if err != nil {
 			return nil, err
 		}
+		initialAcnt := account.AsAccountSummary()
 		acntIDs, sgerr := account.GetUniqueSharedGroupMembers(cd)
 		if sgerr != nil {
 			return nil, sgerr
@@ -773,7 +774,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
 			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
 			if err == nil {
-				cc.AccountSummary = cd.AccountSummary()
+				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 			}
 			return
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
@@ -793,6 +794,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 		if err != nil {
 			return nil, err
 		}
+		initialAcnt := account.AsAccountSummary()
 		acntIDs, err := account.GetUniqueSharedGroupMembers(cd)
 		if err != nil {
 			return nil, err
@@ -814,7 +816,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 			}
 			if err != nil || remainingDuration == 0 {
 				cc = cd.CreateCallCost()
-				cc.AccountSummary = cd.AccountSummary()
+				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 				if cd.GetDuration() == 0 {
 					// add RatingInfo
 					err = cd.LoadRatingPlans()
@@ -837,7 +839,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 			}
 			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
 			if err == nil {
-				cc.AccountSummary = cd.AccountSummary()
+				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 			}
 			return
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
@@ -998,11 +1000,20 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 }
 
 // AccountSummary returns the AccountSummary for cached account
-func (cd *CallDescriptor) AccountSummary() *AccountSummary {
+func (cd *CallDescriptor) AccountSummary(initialAcnt *AccountSummary) *AccountSummary {
 	if cd.account == nil {
 		return nil
 	}
-	return cd.account.AsAccountSummary()
+	acntSummary := cd.account.AsAccountSummary()
+	for _, initialBal := range initialAcnt.BalanceSummaries {
+		for _, currentBal := range acntSummary.BalanceSummaries {
+			if currentBal.UUID == initialBal.UUID {
+				currentBal.InitialValue = initialBal.Value
+				break
+			}
+		}
+	}
+	return acntSummary
 }
 
 // FieldAsInterface is part of utils.DataProvider
