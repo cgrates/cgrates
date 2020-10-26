@@ -119,7 +119,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] Use rals_conns when sending refund rounding
   * [General] Made tenant optional for all API calls
   * [ConfigS] Moved MinCallDuration,MaxCallDuration from sessions config to general config
-  * [StatS] Added support for nested fields in custom metrics 
+  * [StatS] Added support for nested fields in custom metrics
+  * [AccountS] Add Initial in AccountSummary as initail value before debit operation
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
