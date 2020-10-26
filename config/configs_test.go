@@ -56,7 +56,7 @@ func TestConfigsAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg: true,
-		utils.UrlCfg:     "",
+		utils.URLCfg:     "",
 		utils.RootDirCfg: "/var/spool/cgrates/configs",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgsJSONStr); err != nil {
@@ -72,7 +72,7 @@ func TestConfigsAsMapInterface2(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg: false,
-		utils.UrlCfg:     "/configs/",
+		utils.URLCfg:     "/configs/",
 		utils.RootDirCfg: "/var/spool/cgrates/configs",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgsJSONStr); err != nil {

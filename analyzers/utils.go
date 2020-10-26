@@ -29,20 +29,21 @@ type extraInfo struct {
 }
 
 type InfoRPC struct {
-	Duration  time.Duration
-	StartTime time.Time
-	EndTime   time.Time
+	RequestDuration  time.Duration
+	RequestStartTime time.Time
+	// EndTime          time.Time
 
-	Encoding string
-	From     string
-	To       string
+	RequestEncoding    string
+	RequestSource      string
+	RequestDestination string
 
-	ID     uint64
-	Method string
-	Params interface{}
-	Result interface{}
-	Error  interface{}
+	RequestID     uint64
+	RequestMethod string
+	RequestParams interface{}
+	Reply         interface{}
+	ReplyError    interface{}
 }
+
 type rpcAPI struct {
 	ID     uint64      `json:"id"`
 	Method string      `json:"method"`

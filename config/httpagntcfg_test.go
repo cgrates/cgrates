@@ -534,7 +534,7 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 	eMap := []map[string]interface{}{
 		{
 			utils.IdCfg:             "conecto1",
-			utils.UrlCfg:            "/conecto",
+			utils.URLCfg:            "/conecto",
 			utils.SessionSConnsCfg:  []string{"*localhost"},
 			utils.RequestPayloadCfg: "*url",
 			utils.ReplyPayloadCfg:   "*xml",

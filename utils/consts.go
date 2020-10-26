@@ -2170,6 +2170,11 @@ const (
 	RateStringIndexedFieldsCfg = "rate_string_indexed_fields"
 	RatePrefixIndexedFieldsCfg = "rate_prefix_indexed_fields"
 	RateSuffixIndexedFieldsCfg = "rate_suffix_indexed_fields"
+
+	// AnalyzerSCfg
+	CleanupIntervalCfg = "cleanup_interval"
+	IndexTypeCfg       = "index_type"
+	DBPathCfg          = "db_path"
 )
 
 // FC Template
@@ -2196,7 +2201,7 @@ const (
 // SureTax
 const (
 	RootDirCfg              = "root_dir"
-	UrlCfg                  = "url"
+	URLCfg                  = "url"
 	ClientNumberCfg         = "client_number"
 	ValidationKeyCfg        = "validation_key"
 	BusinessUnitCfg         = "business_unit"
@@ -2479,6 +2484,14 @@ const (
 	SQLDefaultDBName  = "cgrates"
 
 	ProcessedOpt = "Processed"
+)
+
+// Analyzers cpmstants
+const (
+	MetaScorch  = "*scorch"
+	MetaBoltdb  = "*boltdb"
+	MetaLeveldb = "*leveldb"
+	MetaMoss    = "*mossdb"
 )
 
 func buildCacheInstRevPrefixes() {

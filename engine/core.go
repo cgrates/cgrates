@@ -30,8 +30,7 @@ func NewCoreService() *CoreService {
 	return &CoreService{}
 }
 
-type CoreService struct {
-}
+type CoreService struct{}
 
 // ListenAndServe will initialize the service
 func (cS *CoreService) ListenAndServe(exitChan chan bool) (err error) {

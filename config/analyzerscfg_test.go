@@ -33,7 +33,7 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.analyzerSCfg.loadFromJsonCfg(jsonCfg); err != nil {
+	} else if err = jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsnCfg.analyzerSCfg, expected) {
 		t.Errorf("Expected %+v \n, received %+v", expected, jsnCfg.analyzerSCfg)

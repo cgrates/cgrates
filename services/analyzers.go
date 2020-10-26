@@ -62,7 +62,6 @@ func (anz *AnalyzerService) Start() (err error) {
 	}
 	if anz.anz, err = analyzers.NewAnalyzerService(anz.cfg); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
-		anz.exitChan <- true
 		return
 	}
 	go func() {

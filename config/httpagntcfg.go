@@ -130,7 +130,7 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 func (ca *HttpAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.IDCfg:             ca.ID,
-		utils.UrlCfg:            ca.Url,
+		utils.URLCfg:            ca.Url,
 		utils.SessionSConnsCfg:  ca.SessionSConns,
 		utils.RequestPayloadCfg: ca.RequestPayload,
 		utils.ReplyPayloadCfg:   ca.ReplyPayload,

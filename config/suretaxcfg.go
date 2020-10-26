@@ -177,7 +177,7 @@ func (self *SureTaxCfg) loadFromJsonCfg(jsnCfg *SureTaxJsonCfg) (err error) {
 
 func (st *SureTaxCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.UrlCfg:              st.Url,
+		utils.URLCfg:              st.Url,
 		utils.ClientNumberCfg:     st.ClientNumber,
 		utils.ValidationKeyCfg:    st.ValidationKey,
 		utils.BusinessUnitCfg:     st.BusinessUnit,
