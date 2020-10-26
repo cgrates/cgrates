@@ -1008,7 +1008,7 @@ func (cd *CallDescriptor) AccountSummary(initialAcnt *AccountSummary) *AccountSu
 	for _, initialBal := range initialAcnt.BalanceSummaries {
 		for _, currentBal := range acntSummary.BalanceSummaries {
 			if currentBal.UUID == initialBal.UUID {
-				currentBal.InitialValue = initialBal.Value
+				currentBal.Initial = initialBal.Value
 				break
 			}
 		}

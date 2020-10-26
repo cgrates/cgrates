@@ -818,12 +818,12 @@ func (f ValueFactor) GetValue(tor string) float64 {
 
 // BalanceSummary represents compressed information about a balance
 type BalanceSummary struct {
-	UUID         string // Balance UUID
-	ID           string // Balance ID  if not defined
-	Type         string // *voice, *data, etc
-	InitialValue float64
-	Value        float64
-	Disabled     bool
+	UUID     string  // Balance UUID
+	ID       string  // Balance ID  if not defined
+	Type     string  // *voice, *data, etc
+	Initial  float64 // initial value before the debit operation
+	Value    float64
+	Disabled bool
 }
 
 // BalanceSummaries is a list of BalanceSummaries

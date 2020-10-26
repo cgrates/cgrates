@@ -3295,7 +3295,7 @@ func TestEventCostString(t *testing.T) {
 			},
 		},
 	}
-	eOut = `{"CGRID":"","RunID":"","StartTime":"0001-01-01T00:00:00Z","Usage":null,"Cost":null,"Charges":null,"AccountSummary":{"Tenant":"","ID":"","BalanceSummaries":[{"UUID":"","ID":"ID","Type":"","InitialValue":0,"Value":0,"Disabled":false}],"AllowNegative":false,"Disabled":false},"Rating":null,"Accounting":null,"RatingFilters":null,"Rates":null,"Timings":null}`
+	eOut = `{"CGRID":"","RunID":"","StartTime":"0001-01-01T00:00:00Z","Usage":null,"Cost":null,"Charges":null,"AccountSummary":{"Tenant":"","ID":"","BalanceSummaries":[{"UUID":"","ID":"ID","Type":"","Initial":0,"Value":0,"Disabled":false}],"AllowNegative":false,"Disabled":false},"Rating":null,"Accounting":null,"RatingFilters":null,"Rates":null,"Timings":null}`
 	if rcv := eventCost.String(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
