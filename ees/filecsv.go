@@ -102,30 +102,33 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 		fCsv.Unlock()
 	}()
 	fCsv.dc[utils.NumberOfEvents] = fCsv.dc[utils.NumberOfEvents].(int64) + 1
-	fields := fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()
-	if len(fields) == 0 { // use the default fields in case of empty fields for exporter
-		fields = fCsv.cgrCfg.EEsCfg().GetDefaultExporter().ContentFields()
-	}
 
 	var csvRecord []string
-	req := utils.MapStorage(cgrEv.Event)
-	eeReq := NewEventExporterRequest(req, fCsv.dc, cgrEv.Opts,
-		fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
-		fCsv.cgrCfg.GeneralCfg().DefaultTenant,
-		utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
-			fCsv.cgrCfg.GeneralCfg().DefaultTimezone),
-		fCsv.filterS)
+	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()) == 0 {
+		for _, val := range cgrEv.Event {
+			csvRecord = append(csvRecord, utils.IfaceAsString(val))
+		}
+	} else {
+		req := utils.MapStorage(cgrEv.Event)
+		eeReq := NewEventExporterRequest(req, fCsv.dc, cgrEv.Opts,
+			fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
+			fCsv.cgrCfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
+				fCsv.cgrCfg.GeneralCfg().DefaultTimezone),
+			fCsv.filterS)
 
-	if err = eeReq.SetFields(fields); err != nil {
-		return
-	}
-	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
-		var strVal string
-		if strVal, err = eeReq.cnt.FieldAsString(el.Value.Slice()); err != nil {
+		if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		csvRecord = append(csvRecord, strVal)
+		for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+			var strVal string
+			if strVal, err = eeReq.cnt.FieldAsString(el.Value.Slice()); err != nil {
+				return
+			}
+			csvRecord = append(csvRecord, strVal)
+		}
 	}
+
 	updateEEMetrics(fCsv.dc, cgrEv.Event, utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
 		fCsv.cgrCfg.GeneralCfg().DefaultTimezone))
 	return fCsv.csvWriter.Write(csvRecord)

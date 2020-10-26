@@ -1762,94 +1762,6 @@ func TestDfEventReaderCfg(t *testing.T) {
 }
 
 func TestDfEventExporterCfg(t *testing.T) {
-	eContentFlds := []*FcTemplateJsonCfg{
-		{
-			Tag:   utils.StringPointer(utils.CGRID),
-			Path:  utils.StringPointer("*exp.CGRID"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.CGRID),
-		},
-		{
-			Tag:   utils.StringPointer(utils.RunID),
-			Path:  utils.StringPointer("*exp.RunID"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.RunID),
-		},
-		{
-			Tag:   utils.StringPointer(utils.ToR),
-			Path:  utils.StringPointer("*exp.ToR"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR),
-		},
-		{
-			Tag:   utils.StringPointer(utils.OriginID),
-			Path:  utils.StringPointer("*exp.OriginID"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.OriginID),
-		},
-		{
-			Tag:   utils.StringPointer(utils.RequestType),
-			Path:  utils.StringPointer("*exp.RequestType"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.RequestType),
-		},
-		{
-			Tag:   utils.StringPointer(utils.Tenant),
-			Path:  utils.StringPointer("*exp.Tenant"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Tenant),
-		},
-		{
-			Tag:   utils.StringPointer(utils.Category),
-			Path:  utils.StringPointer("*exp.Category"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Category),
-		},
-		{
-			Tag:   utils.StringPointer(utils.Account),
-			Path:  utils.StringPointer("*exp.Account"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account),
-		},
-		{
-			Tag:   utils.StringPointer(utils.Subject),
-			Path:  utils.StringPointer("*exp.Subject"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Subject),
-		},
-		{
-			Tag:   utils.StringPointer(utils.Destination),
-			Path:  utils.StringPointer("*exp.Destination"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination),
-		},
-		{
-			Tag:    utils.StringPointer(utils.SetupTime),
-			Path:   utils.StringPointer("*exp.SetupTime"),
-			Type:   utils.StringPointer(utils.MetaVariable),
-			Value:  utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.SetupTime),
-			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00"),
-		},
-		{
-			Tag:    utils.StringPointer(utils.AnswerTime),
-			Path:   utils.StringPointer("*exp.AnswerTime"),
-			Type:   utils.StringPointer(utils.MetaVariable),
-			Value:  utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AnswerTime),
-			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00"),
-		},
-		{
-			Tag:   utils.StringPointer(utils.Usage),
-			Path:  utils.StringPointer("*exp.Usage"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage),
-		},
-		{
-			Tag:   utils.StringPointer(utils.Cost),
-			Path:  utils.StringPointer("*exp.Cost"),
-			Type:  utils.StringPointer(utils.MetaVariable),
-			Value: utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.COST + "{*round:4}"),
-		},
-	}
 	eCfg := &EEsJsonCfg{
 		Enabled:          utils.BoolPointer(false),
 		Attributes_conns: &[]string{},
@@ -1874,7 +1786,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 				Flags:             &[]string{},
 				Synchronous:       utils.BoolPointer(false),
 				Attempts:          utils.IntPointer(1),
-				Fields:            &eContentFlds,
+				Fields:            &[]*FcTemplateJsonCfg{},
 				Opts:              make(map[string]interface{}),
 			},
 		},
