@@ -94,24 +94,31 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	}()
 	fFwv.dc[utils.NumberOfEvents] = fFwv.dc[utils.NumberOfEvents].(int64) + 1
 	var records []string
-	req := utils.MapStorage(cgrEv.Event)
-	eeReq := NewEventExporterRequest(req, fFwv.dc, cgrEv.Opts,
-		fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
-		fFwv.cgrCfg.GeneralCfg().DefaultTenant,
-		utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
-			fFwv.cgrCfg.GeneralCfg().DefaultTimezone),
-		fFwv.filterS)
+	if len(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ContentFields()) == 0 {
+		for _, val := range cgrEv.Event {
+			records = append(records, utils.IfaceAsString(val))
+		}
+	} else {
+		req := utils.MapStorage(cgrEv.Event)
+		eeReq := NewEventExporterRequest(req, fFwv.dc, cgrEv.Opts,
+			fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
+			fFwv.cgrCfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
+				fFwv.cgrCfg.GeneralCfg().DefaultTimezone),
+			fFwv.filterS)
 
-	if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ContentFields()); err != nil {
-		return
-	}
-	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
-		var strVal string
-		if strVal, err = eeReq.cnt.FieldAsString(el.Value.Slice()); err != nil {
+		if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		records = append(records, strVal)
+		for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+			var strVal string
+			if strVal, err = eeReq.cnt.FieldAsString(el.Value.Slice()); err != nil {
+				return
+			}
+			records = append(records, strVal)
+		}
 	}
+
 	updateEEMetrics(fFwv.dc, cgrEv.Event, utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
 		fFwv.cgrCfg.GeneralCfg().DefaultTimezone))
 	for _, record := range append(records, "\n") {

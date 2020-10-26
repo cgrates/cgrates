@@ -407,22 +407,7 @@ const CGRATES_CFG_JSON = `
 			"synchronous": false,								// block processing until export has a result
 			"attempts": 1,										// export attempts
 			"field_separator": ",",								// separator used in case of csv files
-			"fields":[											// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
-				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
-				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
-				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
-				{"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
-				{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
-				{"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
-				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
-				{"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
-				{"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
-				{"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
-				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
-			],
+			"fields":[],										// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 		},
 	],
 },

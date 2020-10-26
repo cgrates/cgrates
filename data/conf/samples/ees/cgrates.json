@@ -72,7 +72,6 @@
 			"attempts": 1,
 			"field_separator": ",",
 			"filters": ["*string:~*opts.ExporterUsed:CSVExporter"],
-			"fields":[],
 		},
 		{
 			"id": "CSVExporterComposed",
