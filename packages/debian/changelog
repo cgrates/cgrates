@@ -121,6 +121,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [ConfigS] Moved MinCallDuration,MaxCallDuration from sessions config to general config
   * [StatS] Added support for nested fields in custom metrics
   * [AccountS] Add Initial in AccountSummary as initail value before debit operation
+  * [General] For only *asap actions don't save AccountIDs withing ActionPlans
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
