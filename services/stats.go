@@ -92,7 +92,7 @@ func (sts *StatService) Start() (err error) {
 	if !sts.cfg.DispatcherSCfg().Enabled {
 		sts.server.RpcRegister(sts.rpc)
 	}
-	sts.connChan <- sts.rpc
+	sts.connChan <- intAnzConn(sts.rpc, utils.StatS)
 	return
 }
 

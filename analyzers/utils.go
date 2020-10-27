@@ -20,14 +20,46 @@ package analyzers
 
 import (
 	"time"
+
+	"github.com/blevesearch/bleve/index/scorch"
+	"github.com/blevesearch/bleve/index/store/boltdb"
+	"github.com/blevesearch/bleve/index/store/goleveldb"
+	"github.com/blevesearch/bleve/index/store/moss"
+	"github.com/blevesearch/bleve/index/upsidedown"
+	"github.com/cgrates/cgrates/utils"
 )
 
-type extraInfo struct {
-	enc  string
-	from string
-	to   string
+// NewInfoRPC returns a structure to be indexed
+func NewInfoRPC(id uint64, method string,
+	params, result, err interface{},
+	info *extraInfo, sTime, eTime time.Time) *InfoRPC {
+	var e interface{}
+	switch val := err.(type) {
+	default:
+	case nil:
+	case string:
+		e = val
+	case error:
+		e = val.Error()
+	}
+	return &InfoRPC{
+		RequestDuration:  eTime.Sub(sTime),
+		RequestStartTime: sTime,
+		// EndTime:          eTime,
+
+		RequestEncoding:    info.enc,
+		RequestSource:      info.from,
+		RequestDestination: info.to,
+
+		RequestID:     id,
+		RequestMethod: method,
+		RequestParams: utils.ToJSON(params),
+		Reply:         utils.ToJSON(result),
+		ReplyError:    e,
+	}
 }
 
+// InfoRPC the structure to be indexed
 type InfoRPC struct {
 	RequestDuration  time.Duration
 	RequestStartTime time.Time
@@ -44,10 +76,30 @@ type InfoRPC struct {
 	ReplyError    interface{}
 }
 
+type extraInfo struct {
+	enc  string
+	from string
+	to   string
+}
+
 type rpcAPI struct {
 	ID     uint64      `json:"id"`
 	Method string      `json:"method"`
 	Params interface{} `json:"params"`
 
 	StartTime time.Time
+}
+
+func getIndex(indx string) (indxType, storeType string) {
+	switch indx {
+	case utils.MetaScorch:
+		indxType, storeType = scorch.Name, scorch.Name
+	case utils.MetaBoltdb:
+		indxType, storeType = upsidedown.Name, boltdb.Name
+	case utils.MetaLeveldb:
+		indxType, storeType = upsidedown.Name, goleveldb.Name
+	case utils.MetaMoss:
+		indxType, storeType = upsidedown.Name, moss.Name
+	}
+	return
 }

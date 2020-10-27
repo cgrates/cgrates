@@ -27,14 +27,18 @@ import (
 	"github.com/cgrates/cgrates/analyzers"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
+var (
+	// used to build the connector for analyzers
+	intAnzConn = func(c rpcclient.ClientConnector, to string) rpcclient.ClientConnector { return c }
+)
+
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig, server *utils.Server, exitChan chan bool,
-	internalAnalyzerSChan chan rpcclient.ClientConnector) servmanager.Service {
+	internalAnalyzerSChan chan rpcclient.ClientConnector) *AnalyzerService {
 	return &AnalyzerService{
 		connChan: internalAnalyzerSChan,
 		cfg:      cfg,
@@ -72,6 +76,9 @@ func (anz *AnalyzerService) Start() (err error) {
 		anz.exitChan <- true
 		return
 	}()
+	intAnzConn = func(c rpcclient.ClientConnector, to string) rpcclient.ClientConnector {
+		return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)
+	}
 	utils.AnalizerWraperFunc = func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec {
 		fromstr := ""
 		if from != nil {
@@ -123,4 +130,8 @@ func (anz *AnalyzerService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (anz *AnalyzerService) ShouldRun() bool {
 	return anz.cfg.AnalyzerSCfg().Enabled
+}
+
+func (anz *AnalyzerService) GetAnalyzerS() *analyzers.AnalyzerService {
+	return anz.anz
 }

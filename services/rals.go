@@ -91,7 +91,7 @@ func (rals *RalService) Start() (err error) {
 		rals.server.RpcRegister(rals.rals)
 	}
 
-	rals.connChan <- rals.rals
+	rals.connChan <- intAnzConn(rals.rals, utils.RALService)
 	return
 }
 

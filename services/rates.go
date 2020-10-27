@@ -126,18 +126,18 @@ func (rs *RateService) Start() (err error) {
 	rs.rateS = rates.NewRateS(rs.cfg, fltrS, dm)
 	rs.Unlock()
 
-	rs.rpc = v1.NewRateSv1(rs.rateS)
-	if !rs.cfg.DispatcherSCfg().Enabled {
-		rs.server.RpcRegister(rs.rpc)
-	}
-
-	rs.intConnChan <- rs.rpc
-
 	go func(rtS *rates.RateS, exitChan chan bool, rldChan chan struct{}) {
 		if err := rtS.ListenAndServe(exitChan, rldChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.EventExporterS, err.Error()))
 			exitChan <- true
 		}
 	}(rs.rateS, rs.exitChan, rs.rldChan)
+
+	rs.rpc = v1.NewRateSv1(rs.rateS)
+	if !rs.cfg.DispatcherSCfg().Enabled {
+		rs.server.RpcRegister(rs.rpc)
+	}
+
+	rs.intConnChan <- intAnzConn(rs.rpc, utils.RateS)
 	return
 }

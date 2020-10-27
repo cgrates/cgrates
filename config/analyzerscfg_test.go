@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -29,7 +30,11 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 		Enabled: utils.BoolPointer(false),
 	}
 	expected := &AnalyzerSCfg{
-		Enabled: false,
+		Enabled:         false,
+		CleanupInterval: time.Hour,
+		DBPath:          "/var/spool/cgrates/analyzers",
+		IndexType:       utils.MetaScorch,
+		TTL:             24 * time.Hour,
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
@@ -46,7 +51,11 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
     }
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg: false,
+		utils.EnabledCfg:         false,
+		utils.CleanupIntervalCfg: "1h0m0s",
+		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
+		utils.IndexTypeCfg:       utils.MetaScorch,
+		utils.TTLCfg:             "24h0m0s",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -63,11 +72,34 @@ func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
     }
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg: true,
+		utils.EnabledCfg:         true,
+		utils.CleanupIntervalCfg: "1h0m0s",
+		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
+		utils.IndexTypeCfg:       utils.MetaScorch,
+		utils.TTLCfg:             "24h0m0s",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.analyzerSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected: %+v , recived: %+v", eMap, rcv)
+	}
+}
+
+func TestAnalyzerSCfgloadFromJsonCfgErr(t *testing.T) {
+	jsonCfg := &AnalyzerSJsonCfg{
+		Cleanup_interval: utils.StringPointer("24ha"),
+	}
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err == nil {
+		t.Errorf("Expected error received nil")
+	}
+	jsonCfg = &AnalyzerSJsonCfg{
+		Ttl: utils.StringPointer("24ha"),
+	}
+	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err == nil {
+		t.Errorf("Expected error received nil")
 	}
 }

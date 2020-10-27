@@ -87,7 +87,7 @@ func (thrs *ThresholdService) Start() (err error) {
 	if !thrs.cfg.DispatcherSCfg().Enabled {
 		thrs.server.RpcRegister(thrs.rpc)
 	}
-	thrs.connChan <- thrs.rpc
+	thrs.connChan <- intAnzConn(thrs.rpc, utils.ThresholdS)
 	return
 }
 

@@ -119,7 +119,7 @@ func (apiService *APIerSv1Service) Start() (err error) {
 	}
 
 	//backwards compatible
-	apiService.connChan <- apiService.api
+	apiService.connChan <- intAnzConn(apiService.api, utils.APIerSv1)
 
 	apiService.APIerSv1Chan <- apiService.api
 	return

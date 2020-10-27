@@ -73,7 +73,7 @@ func (api *APIerSv2Service) Start() (err error) {
 		api.server.RpcRegisterName(utils.ApierV2, api.api)
 	}
 
-	api.connChan <- api.api
+	api.connChan <- intAnzConn(api.api, utils.APIerSv2)
 	return
 }
 

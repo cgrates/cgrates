@@ -107,7 +107,7 @@ func (cdrService *CDRServer) Start() (err error) {
 		// Make the cdr server available for internal communication
 		cdrService.server.RpcRegister(cdrService.cdrS) // register CdrServer for internal usage (TODO: refactor this)
 	}
-	cdrService.connChan <- cdrService.cdrS // Signal that cdrS is operational
+	cdrService.connChan <- intAnzConn(cdrService.cdrS, utils.CDRServer) // Signal that cdrS is operational
 	return
 }
 

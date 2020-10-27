@@ -25,7 +25,7 @@ import (
 )
 
 func (aS *AnalyzerService) NewServerCodec(sc rpc.ServerCodec, enc, from, to string) rpc.ServerCodec {
-	return &AnalyzeServerCodec{
+	return &AnalyzerServerCodec{
 		sc:   sc,
 		reqs: make(map[uint64]*rpcAPI),
 		aS:   aS,
@@ -37,7 +37,7 @@ func (aS *AnalyzerService) NewServerCodec(sc rpc.ServerCodec, enc, from, to stri
 	}
 }
 
-type AnalyzeServerCodec struct {
+type AnalyzerServerCodec struct {
 	sc rpc.ServerCodec
 
 	// keep the API in memory because the write is async
@@ -48,7 +48,7 @@ type AnalyzeServerCodec struct {
 	extrainfo *extraInfo
 }
 
-func (c *AnalyzeServerCodec) ReadRequestHeader(r *rpc.Request) (err error) {
+func (c *AnalyzerServerCodec) ReadRequestHeader(r *rpc.Request) (err error) {
 	err = c.sc.ReadRequestHeader(r)
 	c.reqsLk.Lock()
 	c.reqIdx = r.Seq
@@ -61,14 +61,14 @@ func (c *AnalyzeServerCodec) ReadRequestHeader(r *rpc.Request) (err error) {
 	return
 }
 
-func (c *AnalyzeServerCodec) ReadRequestBody(x interface{}) (err error) {
+func (c *AnalyzerServerCodec) ReadRequestBody(x interface{}) (err error) {
 	err = c.sc.ReadRequestBody(x)
 	c.reqsLk.Lock()
 	c.reqs[c.reqIdx].Params = x
 	c.reqsLk.Unlock()
 	return
 }
-func (c *AnalyzeServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
+func (c *AnalyzerServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
 	c.reqsLk.Lock()
 	api := c.reqs[c.reqIdx]
 	delete(c.reqs, c.reqIdx)
@@ -76,4 +76,4 @@ func (c *AnalyzeServerCodec) WriteResponse(r *rpc.Response, x interface{}) error
 	go c.aS.logTrafic(api.ID, api.Method, api.Params, x, r.Error, c.extrainfo, api.StartTime, time.Now())
 	return c.sc.WriteResponse(r, x)
 }
-func (c *AnalyzeServerCodec) Close() error { return c.sc.Close() }
+func (c *AnalyzerServerCodec) Close() error { return c.sc.Close() }

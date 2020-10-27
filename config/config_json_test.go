@@ -1680,7 +1680,11 @@ func TestDfTlsCfg(t *testing.T) {
 
 func TestDfAnalyzerCfg(t *testing.T) {
 	eCfg := &AnalyzerSJsonCfg{
-		Enabled: utils.BoolPointer(false),
+		Enabled:          utils.BoolPointer(false),
+		Cleanup_interval: utils.StringPointer("1h"),
+		Db_path:          utils.StringPointer("/var/spool/cgrates/analyzers"),
+		Index_type:       utils.StringPointer(utils.MetaScorch),
+		Ttl:              utils.StringPointer("24h"),
 	}
 	if cfg, err := dfCgrJSONCfg.AnalyzerCfgJson(); err != nil {
 		t.Error(err)

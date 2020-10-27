@@ -85,7 +85,7 @@ func (ldrs *LoaderService) Start() (err error) {
 	if !ldrs.cfg.DispatcherSCfg().Enabled {
 		ldrs.server.RpcRegister(ldrs.rpc)
 	}
-	ldrs.connChan <- ldrs.rpc
+	ldrs.connChan <- intAnzConn(ldrs.rpc, utils.LoaderS)
 	return
 }
 
