@@ -58,7 +58,7 @@ func (aS *AnalyzerService) initDB() (err error) {
 
 func (aS *AnalyzerService) clenaUp() (err error) {
 	t2 := bleve.NewDateRangeQuery(time.Time{}, time.Now().Add(-aS.cfg.AnalyzerSCfg().TTL))
-	t2.SetField("RequestStartTime")
+	t2.SetField(utils.RequestStartTime)
 	searchReq := bleve.NewSearchRequest(t2)
 	var res *bleve.SearchResult
 	if res, err = aS.db.Search(searchReq); err != nil {
@@ -110,12 +110,12 @@ func (aS *AnalyzerService) Shutdown() error {
 
 func (aS *AnalyzerService) logTrafic(id uint64, method string,
 	params, result, err interface{},
-	info *extraInfo, sTime, eTime time.Time) error {
+	enc, from, to string, sTime, eTime time.Time) error {
 	if strings.HasPrefix(method, utils.AnalyzerSv1) {
 		return nil
 	}
 	return aS.db.Index(utils.ConcatenatedKey(method, strconv.FormatInt(sTime.Unix(), 10)),
-		NewInfoRPC(id, method, params, result, err, info, sTime, eTime))
+		NewInfoRPC(id, method, params, result, err, enc, from, to, sTime, eTime))
 }
 
 // V1Search returns a list of API that match the query
@@ -130,11 +130,11 @@ func (aS *AnalyzerService) V1Search(searchstr string, reply *[]map[string]interf
 	for i, obj := range searchResults.Hits {
 		rply[i] = obj.Fields
 		// make sure that the result is corectly marshaled
-		rply[i]["Result"] = json.RawMessage(utils.IfaceAsString(obj.Fields["Result"]))
-		rply[i]["Params"] = json.RawMessage(utils.IfaceAsString(obj.Fields["Params"]))
+		rply[i][utils.Reply] = json.RawMessage(utils.IfaceAsString(obj.Fields[utils.Reply]))
+		rply[i][utils.RequestParams] = json.RawMessage(utils.IfaceAsString(obj.Fields[utils.RequestParams]))
 		// try to pretty print the duration
-		if dur, err := utils.IfaceAsDuration(rply[i]["Duration"]); err == nil {
-			rply[i]["Duration"] = dur.String()
+		if dur, err := utils.IfaceAsDuration(rply[i][utils.RequestDuration]); err == nil {
+			rply[i][utils.RequestDuration] = dur.String()
 		}
 	}
 	*reply = rply

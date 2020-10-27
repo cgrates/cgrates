@@ -28,24 +28,24 @@ func (aS *AnalyzerService) NewAnalyzerConnector(sc rpcclient.ClientConnector, en
 	return &AnalyzerConnector{
 		conn: sc,
 		aS:   aS,
-		extrainfo: &extraInfo{
-			enc:  enc,
-			from: from,
-			to:   to,
-		},
+		enc:  enc,
+		from: from,
+		to:   to,
 	}
 }
 
 type AnalyzerConnector struct {
 	conn rpcclient.ClientConnector
 
-	aS        *AnalyzerService
-	extrainfo *extraInfo
+	aS   *AnalyzerService
+	enc  string
+	from string
+	to   string
 }
 
 func (c *AnalyzerConnector) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
 	sTime := time.Now()
 	err = c.conn.Call(serviceMethod, args, reply)
-	go c.aS.logTrafic(0, serviceMethod, args, reply, err, c.extrainfo, sTime, time.Now())
+	go c.aS.logTrafic(0, serviceMethod, args, reply, err, c.enc, c.from, c.to, sTime, time.Now())
 	return
 }

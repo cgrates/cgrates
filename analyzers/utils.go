@@ -32,7 +32,7 @@ import (
 // NewInfoRPC returns a structure to be indexed
 func NewInfoRPC(id uint64, method string,
 	params, result, err interface{},
-	info *extraInfo, sTime, eTime time.Time) *InfoRPC {
+	enc, from, to string, sTime, eTime time.Time) *InfoRPC {
 	var e interface{}
 	switch val := err.(type) {
 	default:
@@ -47,9 +47,9 @@ func NewInfoRPC(id uint64, method string,
 		RequestStartTime: sTime,
 		// EndTime:          eTime,
 
-		RequestEncoding:    info.enc,
-		RequestSource:      info.from,
-		RequestDestination: info.to,
+		RequestEncoding:    enc,
+		RequestSource:      from,
+		RequestDestination: to,
 
 		RequestID:     id,
 		RequestMethod: method,
@@ -74,12 +74,6 @@ type InfoRPC struct {
 	RequestParams interface{}
 	Reply         interface{}
 	ReplyError    interface{}
-}
-
-type extraInfo struct {
-	enc  string
-	from string
-	to   string
 }
 
 type rpcAPI struct {
