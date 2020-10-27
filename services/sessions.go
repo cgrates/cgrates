@@ -82,7 +82,7 @@ func (smg *SessionService) Start() (err error) {
 	//start sync session in a separate gorutine
 	go smg.sm.ListenAndServe(smg.exitChan)
 	// Pass internal connection via BiRPCClient
-	smg.connChan <- smg.sm
+	smg.connChan <- intAnzConn(smg.sm, utils.SessionS)
 	// Register RPC handler
 	smg.rpc = v1.NewSMGenericV1(smg.sm)
 

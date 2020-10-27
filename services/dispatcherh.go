@@ -66,7 +66,7 @@ func (dspS *DispatcherHostsService) Start() (err error) {
 
 	dspS.dspS = dispatcherh.NewDispatcherHService(dspS.cfg, dspS.connMgr)
 	go dspS.dspS.ListenAndServe()
-	dspS.connChan <- dspS.dspS
+	dspS.connChan <- intAnzConn(dspS.dspS, utils.DispatcherH)
 
 	return
 }

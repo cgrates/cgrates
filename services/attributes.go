@@ -87,7 +87,7 @@ func (attrS *AttributeService) Start() (err error) {
 	if !attrS.cfg.DispatcherSCfg().Enabled {
 		attrS.server.RpcRegister(attrS.rpc)
 	}
-	attrS.connChan <- attrS.rpc
+	attrS.connChan <- intAnzConn(attrS.rpc, utils.AttributeS)
 	return
 }
 

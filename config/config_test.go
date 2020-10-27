@@ -1863,7 +1863,11 @@ func TestCfgTlsCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultAnalyzerSCfg(t *testing.T) {
 	aSCfg := &AnalyzerSCfg{
-		Enabled: false,
+		Enabled:         false,
+		CleanupInterval: time.Hour,
+		DBPath:          "/var/spool/cgrates/analyzers",
+		IndexType:       utils.MetaScorch,
+		TTL:             24 * time.Hour,
 	}
 	if !reflect.DeepEqual(cgrCfg.analyzerSCfg, aSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.analyzerSCfg, aSCfg)

@@ -74,7 +74,8 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 
 // initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
 func initCacheS(internalCacheSChan chan rpcclient.ClientConnector,
-	server *utils.Server, dm *engine.DataManager, exitChan chan bool) (chS *engine.CacheS) {
+	server *utils.Server, dm *engine.DataManager, exitChan chan bool,
+	anz *services.AnalyzerService) (chS *engine.CacheS) {
 	chS = engine.NewCacheS(cfg, dm)
 	go func() {
 		if err := chS.Precache(); err != nil {
@@ -87,32 +88,73 @@ func initCacheS(internalCacheSChan chan rpcclient.ClientConnector,
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(chSv1)
 	}
-	internalCacheSChan <- chS
+	var rpc rpcclient.ClientConnector = chS
+	if anz.IsRunning() {
+		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.CacheS)
+	}
+	internalCacheSChan <- rpc
 	return
 }
 
-func initGuardianSv1(internalGuardianSChan chan rpcclient.ClientConnector, server *utils.Server) {
+func initGuardianSv1(internalGuardianSChan chan rpcclient.ClientConnector, server *utils.Server,
+	anz *services.AnalyzerService) {
 	grdSv1 := v1.NewGuardianSv1()
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(grdSv1)
 	}
-	internalGuardianSChan <- grdSv1
+	var rpc rpcclient.ClientConnector = grdSv1
+	if anz.IsRunning() {
+		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.GuardianS)
+	}
+	internalGuardianSChan <- rpc
 }
 
-func initCoreSv1(internalCoreSv1Chan chan rpcclient.ClientConnector, server *utils.Server) {
+func initCoreSv1(internalCoreSv1Chan chan rpcclient.ClientConnector, server *utils.Server,
+	anz *services.AnalyzerService) {
 	cSv1 := v1.NewCoreSv1(engine.NewCoreService())
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(cSv1)
 	}
-	internalCoreSv1Chan <- cSv1
+	var rpc rpcclient.ClientConnector = cSv1
+	if anz.IsRunning() {
+		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.CoreS)
+	}
+	internalCoreSv1Chan <- rpc
 }
 
 func initServiceManagerV1(internalServiceManagerChan chan rpcclient.ClientConnector,
-	srvMngr *servmanager.ServiceManager, server *utils.Server) {
+	srvMngr *servmanager.ServiceManager, server *utils.Server,
+	anz *services.AnalyzerService) {
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(v1.NewServiceManagerV1(srvMngr))
 	}
-	internalServiceManagerChan <- srvMngr
+	var rpc rpcclient.ClientConnector = srvMngr
+	if anz.IsRunning() {
+		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ServiceManager)
+	}
+	internalServiceManagerChan <- rpc
+}
+
+// initLogger will initialize syslog writter, needs to be called after config init
+func initLogger(cfg *config.CGRConfig) error {
+	sylogger := cfg.GeneralCfg().Logger
+	if *syslogger != "" { // Modify the log level if provided by command arguments
+		sylogger = *syslogger
+	}
+	return utils.Newlogger(sylogger, cfg.GeneralCfg().NodeID)
+}
+
+func initConfigSv1(internalConfigChan chan rpcclient.ClientConnector,
+	server *utils.Server, anz *services.AnalyzerService) {
+	cfgSv1 := v1.NewConfigSv1(cfg)
+	if !cfg.DispatcherSCfg().Enabled {
+		server.RpcRegister(cfgSv1)
+	}
+	var rpc rpcclient.ClientConnector = cfgSv1
+	if anz.IsRunning() {
+		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ConfigSv1)
+	}
+	internalConfigChan <- rpc
 }
 
 func startRPC(server *utils.Server, internalRaterChan,
@@ -236,24 +278,6 @@ func writePid() {
 	if err := f.Close(); err != nil {
 		log.Fatal("Could not write pid file: ", err)
 	}
-}
-
-// initLogger will initialize syslog writter, needs to be called after config init
-func initLogger(cfg *config.CGRConfig) error {
-	sylogger := cfg.GeneralCfg().Logger
-	if *syslogger != "" { // Modify the log level if provided by command arguments
-		sylogger = *syslogger
-	}
-	return utils.Newlogger(sylogger, cfg.GeneralCfg().NodeID)
-}
-
-func initConfigSv1(internalConfigChan chan rpcclient.ClientConnector,
-	server *utils.Server) {
-	cfgSv1 := v1.NewConfigSv1(cfg)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(cfgSv1)
-	}
-	internalConfigChan <- cfgSv1
 }
 
 func memProfFile(memProfPath string) bool {
@@ -522,15 +546,24 @@ func main() {
 	// Define internal connections via channels
 	filterSChan := make(chan *engine.FilterS, 1)
 
+	// init AnalyzerS
+	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
+	if anz.ShouldRun() {
+		if err := anz.Start(); err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+
 	// init CacheS
-	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
+	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan, anz)
 	engine.SetCache(cacheS)
 
 	// init GuardianSv1
-	initGuardianSv1(internalGuardianSChan, server)
+	initGuardianSv1(internalGuardianSChan, server, anz)
 
 	// init CoreSv1
-	initCoreSv1(internalCoreSv1Chan, server)
+	initCoreSv1(internalCoreSv1Chan, server, anz)
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
@@ -567,14 +600,6 @@ func main() {
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, exitChan,
 		internalLoaderSChan, connManager)
 
-	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
-	if anz.ShouldRun() {
-		if err := anz.Start(); err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, schS, rals,
 		rals.GetResponder(), apiSv1, apiSv2, cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager),
@@ -597,7 +622,7 @@ func main() {
 	go startFilterService(filterSChan, cacheS, connManager,
 		cfg, dmService.GetDM(), exitChan)
 
-	initServiceManagerV1(internalServeManagerChan, srvManager, server)
+	initServiceManagerV1(internalServeManagerChan, srvManager, server, anz)
 
 	// init internalRPCSet to share internal connections among the engine
 	engine.IntRPC = engine.NewRPCClientSet()
@@ -627,7 +652,7 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.DispatcherSv1, internalDispatcherSChan)
 	// engine.IntRPC.AddInternalRPCClient(utils.DispatcherHv1, internalDispatcherHChan)
 
-	initConfigSv1(internalConfigChan, server)
+	initConfigSv1(internalConfigChan, server, anz)
 
 	if *preload != utils.EmptyString {
 		runPreload(ldrs, internalLoaderSChan, internalPreloadChan, exitChan)

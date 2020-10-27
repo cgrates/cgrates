@@ -145,7 +145,7 @@ func (dspS *DispatcherService) Start() (err error) {
 	dspS.server.RpcRegisterName(utils.RateSv1,
 		v1.NewDispatcherRateSv1(dspS.dspS))
 
-	dspS.connChan <- dspS.dspS
+	dspS.connChan <- intAnzConn(dspS.dspS, utils.DispatcherS)
 
 	return
 }

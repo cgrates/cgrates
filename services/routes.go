@@ -91,7 +91,7 @@ func (routeS *RouteService) Start() (err error) {
 	if !routeS.cfg.DispatcherSCfg().Enabled {
 		routeS.server.RpcRegister(routeS.rpc)
 	}
-	routeS.connChan <- routeS.rpc
+	routeS.connChan <- intAnzConn(routeS.rpc, utils.RouteS)
 	return
 }
 

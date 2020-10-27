@@ -27,11 +27,7 @@ import (
 	"time"
 
 	"github.com/blevesearch/bleve"
-	"github.com/blevesearch/bleve/index/scorch"
-	"github.com/blevesearch/bleve/index/store/boltdb"
-	"github.com/blevesearch/bleve/index/store/goleveldb"
-	"github.com/blevesearch/bleve/index/store/moss"
-	"github.com/blevesearch/bleve/index/upsidedown"
+	"github.com/blevesearch/bleve/search"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -53,18 +49,7 @@ func (aS *AnalyzerService) initDB() (err error) {
 	if _, err = os.Stat(aS.cfg.AnalyzerSCfg().DBPath); err == nil {
 		aS.db, err = bleve.Open(aS.cfg.AnalyzerSCfg().DBPath)
 	} else if os.IsNotExist(err) {
-		var indxType, storeType string
-		switch aS.cfg.AnalyzerSCfg().IndexType {
-		case utils.MetaScorch:
-			indxType, storeType = scorch.Name, scorch.Name
-		case utils.MetaBoltdb:
-			indxType, storeType = upsidedown.Name, boltdb.Name
-		case utils.MetaLeveldb:
-			indxType, storeType = upsidedown.Name, goleveldb.Name
-		case utils.MetaMoss:
-			indxType, storeType = upsidedown.Name, moss.Name
-		}
-
+		indxType, storeType := getIndex(aS.cfg.AnalyzerSCfg().IndexType)
 		aS.db, err = bleve.NewUsing(aS.cfg.AnalyzerSCfg().DBPath,
 			bleve.NewIndexMapping(), indxType, storeType, nil)
 	}
@@ -72,7 +57,6 @@ func (aS *AnalyzerService) initDB() (err error) {
 }
 
 func (aS *AnalyzerService) clenaUp() (err error) {
-	fmt.Println("clean")
 	t2 := bleve.NewDateRangeQuery(time.Time{}, time.Now().Add(-aS.cfg.AnalyzerSCfg().TTL))
 	t2.SetField("RequestStartTime")
 	searchReq := bleve.NewSearchRequest(t2)
@@ -80,8 +64,13 @@ func (aS *AnalyzerService) clenaUp() (err error) {
 	if res, err = aS.db.Search(searchReq); err != nil {
 		return
 	}
+	return aS.deleteHits(res.Hits)
+}
+
+// extracted as function in order to test this
+func (aS *AnalyzerService) deleteHits(hits search.DocumentMatchCollection) (err error) {
 	hasErr := false
-	for _, hit := range res.Hits {
+	for _, hit := range hits {
 		if err = aS.db.Delete(hit.ID); err != nil {
 			hasErr = true
 		}
@@ -125,33 +114,11 @@ func (aS *AnalyzerService) logTrafic(id uint64, method string,
 	if strings.HasPrefix(method, utils.AnalyzerSv1) {
 		return nil
 	}
-	var e interface{}
-	switch val := err.(type) {
-	default:
-	case nil:
-	case string:
-		e = val
-	case error:
-		e = val.Error()
-	}
 	return aS.db.Index(utils.ConcatenatedKey(method, strconv.FormatInt(sTime.Unix(), 10)),
-		InfoRPC{
-			RequestDuration:  eTime.Sub(sTime),
-			RequestStartTime: sTime,
-			// EndTime:          eTime,
-
-			RequestEncoding:    info.enc,
-			RequestSource:      info.from,
-			RequestDestination: info.to,
-
-			RequestID:     id,
-			RequestMethod: method,
-			RequestParams: utils.ToJSON(params),
-			Reply:         utils.ToJSON(result),
-			ReplyError:    e,
-		})
+		NewInfoRPC(id, method, params, result, err, info, sTime, eTime))
 }
 
+// V1Search returns a list of API that match the query
 func (aS *AnalyzerService) V1Search(searchstr string, reply *[]map[string]interface{}) error {
 	s := bleve.NewSearchRequest(bleve.NewQueryStringQuery(searchstr))
 	s.Fields = []string{utils.Meta} // return all fields

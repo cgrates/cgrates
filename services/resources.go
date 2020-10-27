@@ -90,7 +90,7 @@ func (reS *ResourceService) Start() (err error) {
 	if !reS.cfg.DispatcherSCfg().Enabled {
 		reS.server.RpcRegister(reS.rpc)
 	}
-	reS.connChan <- reS.rpc
+	reS.connChan <- intAnzConn(reS.rpc, utils.ResourceS)
 	return
 }
 

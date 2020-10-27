@@ -68,7 +68,7 @@ func (resp *ResponderService) Start() (err error) {
 		resp.server.RpcRegister(resp.resp)
 	}
 
-	resp.connChan <- resp.resp // Rater done
+	resp.connChan <- intAnzConn(resp.resp, utils.ResponderS) // Rater done
 	return
 }
 

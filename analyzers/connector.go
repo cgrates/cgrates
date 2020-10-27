@@ -24,8 +24,8 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func (aS *AnalyzerService) NewAnalyzeConnector(sc rpcclient.ClientConnector, enc, from, to string) rpcclient.ClientConnector {
-	return &AnalyzeConnector{
+func (aS *AnalyzerService) NewAnalyzerConnector(sc rpcclient.ClientConnector, enc, from, to string) rpcclient.ClientConnector {
+	return &AnalyzerConnector{
 		conn: sc,
 		aS:   aS,
 		extrainfo: &extraInfo{
@@ -36,14 +36,14 @@ func (aS *AnalyzerService) NewAnalyzeConnector(sc rpcclient.ClientConnector, enc
 	}
 }
 
-type AnalyzeConnector struct {
+type AnalyzerConnector struct {
 	conn rpcclient.ClientConnector
 
 	aS        *AnalyzerService
 	extrainfo *extraInfo
 }
 
-func (c *AnalyzeConnector) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (c *AnalyzerConnector) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
 	sTime := time.Now()
 	err = c.conn.Call(serviceMethod, args, reply)
 	go c.aS.logTrafic(0, serviceMethod, args, reply, err, c.extrainfo, sTime, time.Now())

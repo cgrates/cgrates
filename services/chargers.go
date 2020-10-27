@@ -88,7 +88,7 @@ func (chrS *ChargerService) Start() (err error) {
 	if !chrS.cfg.DispatcherSCfg().Enabled {
 		chrS.server.RpcRegister(cSv1)
 	}
-	chrS.connChan <- cSv1
+	chrS.connChan <- intAnzConn(cSv1, utils.ChargerS)
 	return
 }
 

@@ -84,7 +84,7 @@ func (schS *SchedulerService) Start() (err error) {
 	if !schS.cfg.DispatcherSCfg().Enabled {
 		schS.server.RpcRegister(schS.rpc)
 	}
-	schS.connChan <- schS.rpc
+	schS.connChan <- intAnzConn(schS.rpc, utils.SchedulerS)
 
 	return
 }

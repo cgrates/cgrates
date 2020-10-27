@@ -118,17 +118,17 @@ func (es *EventExporterService) Start() (err error) {
 			utils.EventExporterS, err))
 		return
 	}
-
-	es.rpc = v1.NewEventExporterSv1(es.eeS)
-	if !es.cfg.DispatcherSCfg().Enabled {
-		es.server.RpcRegister(es.rpc)
-	}
-	es.intConnChan <- es.eeS
 	go func(eeS *ees.EventExporterS, exitChan chan bool, rldChan chan struct{}) {
 		if err := eeS.ListenAndServe(exitChan, rldChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.EventExporterS, err.Error()))
 			exitChan <- true
 		}
 	}(es.eeS, es.exitChan, es.rldChan)
+
+	es.rpc = v1.NewEventExporterSv1(es.eeS)
+	if !es.cfg.DispatcherSCfg().Enabled {
+		es.server.RpcRegister(es.rpc)
+	}
+	es.intConnChan <- intAnzConn(es.eeS, utils.EventExporterS)
 	return
 }
