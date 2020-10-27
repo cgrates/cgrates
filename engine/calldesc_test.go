@@ -689,9 +689,8 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
-	//log.Print(ap)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:12345": true, "cgrates.org:123456": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -715,7 +714,7 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:max": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -738,7 +737,7 @@ func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 func TestGetMaxSessiontWithBlocker(t *testing.T) {
 	ap, _ := dm.GetActionPlan("BLOCK_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:block": true}
 		at.Execute(nil, nil)
 	}
 	acc, err := dm.GetAccount("cgrates.org:block")
@@ -787,7 +786,7 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 	ap, _ := dm.GetActionPlan("BLOCK_EMPTY_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:block_empty": true}
 		at.Execute(nil, nil)
 	}
 	acc, err := dm.GetAccount("cgrates.org:block_empty")
@@ -836,7 +835,7 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 func TestGetCostWithMaxCost(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:max": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -859,7 +858,7 @@ func TestGetCostWithMaxCost(t *testing.T) {
 func TestGetCostRoundingIssue(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -883,7 +882,7 @@ func TestGetCostRoundingIssue(t *testing.T) {
 func TestGetCostRatingInfoOnZeroTime(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -910,7 +909,7 @@ func TestGetCostRatingInfoOnZeroTime(t *testing.T) {
 func TestDebitRatingInfoOnZeroTime(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -938,7 +937,7 @@ func TestDebitRatingInfoOnZeroTime(t *testing.T) {
 func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -965,7 +964,7 @@ func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
 func TestMaxDebitUnknowDest(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -987,7 +986,7 @@ func TestMaxDebitUnknowDest(t *testing.T) {
 func TestMaxDebitRoundingIssue(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -1021,7 +1020,7 @@ func TestMaxDebitRoundingIssue(t *testing.T) {
 func TestDebitRoundingRefund(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -1055,7 +1054,7 @@ func TestDebitRoundingRefund(t *testing.T) {
 func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:max": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -1078,7 +1077,7 @@ func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
 func TestMaxDebitWithMaxCostFree(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:max": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -1101,7 +1100,7 @@ func TestMaxDebitWithMaxCostFree(t *testing.T) {
 func TestGetCostWithMaxCostFree(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:max": true}
 		at.Execute(nil, nil)
 	}
 	cd := &CallDescriptor{
@@ -1125,12 +1124,12 @@ func TestGetCostWithMaxCostFree(t *testing.T) {
 func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP_SHARED0_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"vdf:empty0": true}
 		at.Execute(nil, nil)
 	}
 	ap, _ = dm.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"vdf:empty10": true}
 		at.Execute(nil, nil)
 	}
 
@@ -1164,12 +1163,12 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 func TestMaxDebitWithAccountShared(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP_SHARED0_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"vdf:empty0": true}
 		at.Execute(nil, nil)
 	}
 	ap, _ = dm.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"vdf:empty10": true}
 		at.Execute(nil, nil)
 	}
 
@@ -1380,7 +1379,7 @@ func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 func TestDebitFromShareAndNormal(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"vdf:empty10": true}
 		at.Execute(nil, nil)
 	}
 
@@ -1408,7 +1407,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 func TestDebitFromEmptyShare(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP_EMPTY_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"vdf:emptyX": true}
 		at.Execute(nil, nil)
 	}
 
@@ -1436,7 +1435,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 func TestDebitNegatve(t *testing.T) {
 	ap, _ := dm.GetActionPlan("POST_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"vdf:post": true}
 		at.Execute(nil, nil)
 	}
 
@@ -1475,7 +1474,7 @@ func TestDebitNegatve(t *testing.T) {
 func TestMaxDebitZeroDefinedRate(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:12345": true}
 		at.Execute(nil, nil)
 	}
 	cd1 := &CallDescriptor{
@@ -1504,7 +1503,7 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 func TestMaxDebitForceDuration(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:12345": true}
 		at.Execute(nil, nil)
 	}
 	cd1 := &CallDescriptor{
@@ -1528,7 +1527,7 @@ func TestMaxDebitForceDuration(t *testing.T) {
 func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:12345": true}
 		at.Execute(nil, nil)
 	}
 	cd1 := &CallDescriptor{
@@ -1556,7 +1555,7 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 func TestMaxDebitConsumesMinutes(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
-		at.accountIDs = ap.AccountIDs
+		at.accountIDs = utils.StringMap{"cgrates.org:12345": true}
 		at.Execute(nil, nil)
 	}
 	cd1 := &CallDescriptor{

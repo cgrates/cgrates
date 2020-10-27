@@ -1066,7 +1066,19 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 		if aa.ActionPlanId != "" {
 			actionPlan, exists := tpr.actionPlans[aa.ActionPlanId]
 			if !exists {
-				return fmt.Errorf("could not get action plan for tag %v", aa.ActionPlanId)
+				if tpr.dm.dataDB != nil {
+					if actionPlan, err = tpr.dm.GetActionPlan(aa.ActionPlanId, true, utils.NonTransactional); err != nil {
+						if err.Error() == utils.ErrNotFound.Error() {
+							return fmt.Errorf("could not get action plan for tag %v", aa.ActionPlanId)
+						}
+						return err
+					}
+					exists = true
+					tpr.actionPlans[aa.ActionPlanId] = actionPlan
+				}
+				if !exists {
+					return fmt.Errorf("could not get action plan for tag %v", aa.ActionPlanId)
+				}
 			}
 			if actionPlan.AccountIDs == nil {
 				actionPlan.AccountIDs = make(utils.StringMap)
@@ -1434,6 +1446,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 		log.Print("Action Plans:")
 	}
 	for k, ap := range tpr.actionPlans {
+		var hasScheduled bool
 		for _, at := range ap.ActionTimings {
 			if at.IsASAP() {
 				for accID := range ap.AccountIDs {
@@ -1461,7 +1474,12 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 						return
 					}
 				}
+			} else {
+				hasScheduled = true
 			}
+		}
+		if !hasScheduled {
+			ap.AccountIDs = utils.StringMap{}
 		}
 		if err = tpr.dm.SetActionPlan(k, ap, false, utils.NonTransactional); err != nil {
 			return
