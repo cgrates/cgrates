@@ -19,9 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package analyzers
 
 import (
+	"encoding/json"
 	"os"
 	"path"
+	"reflect"
 	"runtime"
+	"strconv"
 	"testing"
 	"time"
 
@@ -80,26 +83,17 @@ func TestAnalyzerSLogTraffic(t *testing.T) {
 		t.Fatal(err)
 	}
 	t1 := time.Now().Add(-time.Hour)
-	if err = anz.logTrafic(0, utils.AnalyzerSv1Ping, "status", "result", "error", &extraInfo{
-		enc:  utils.MetaJSON,
-		from: "127.0.0.1:5565",
-		to:   "127.0.0.1:2012",
-	}, t1, t1.Add(time.Second)); err != nil {
+	if err = anz.logTrafic(0, utils.AnalyzerSv1Ping, "status", "result", "error",
+		utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012", t1, t1.Add(time.Second)); err != nil {
 		t.Fatal(err)
 	}
-	if err = anz.logTrafic(0, utils.CoreSv1Status, "status", "result", "error", &extraInfo{
-		enc:  utils.MetaJSON,
-		from: "127.0.0.1:5565",
-		to:   "127.0.0.1:2012",
-	}, t1, t1.Add(time.Second)); err != nil {
+	if err = anz.logTrafic(0, utils.CoreSv1Status, "status", "result", "error",
+		utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012", t1, t1.Add(time.Second)); err != nil {
 		t.Fatal(err)
 	}
 	t1 = time.Now().Add(-10 * time.Minute)
-	if err = anz.logTrafic(0, utils.CoreSv1Status, "status", "result", "error", &extraInfo{
-		enc:  utils.MetaJSON,
-		from: "127.0.0.1:5565",
-		to:   "127.0.0.1:2012",
-	}, t1, t1.Add(time.Second)); err != nil {
+	if err = anz.logTrafic(0, utils.CoreSv1Status, "status", "result", "error",
+		utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012", t1, t1.Add(time.Second)); err != nil {
 		t.Fatal(err)
 	}
 	if cnt, err := anz.db.DocCount(); err != nil {
@@ -179,4 +173,120 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 		anz.db.Close()
 	}()
 	anz.ListenAndServe(make(chan bool))
+}
+
+func TestAnalyzersV1Search(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
+	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.MkdirAll(path.Dir(cfg.AnalyzerSCfg().DBPath), 0700); err != nil {
+		t.Fatal(err)
+	}
+	anz, err := NewAnalyzerService(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// generate trafic
+	t1 := time.Now()
+	if err = anz.logTrafic(0, utils.CoreSv1Ping,
+		&utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.EventSource: utils.MetaCDRs,
+			},
+		}, utils.Pong, nil, utils.MetaJSON, "127.0.0.1:5565",
+		"127.0.0.1:2012", t1, t1.Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = anz.logTrafic(1, utils.CoreSv1Ping,
+		&utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.EventSource: utils.MetaAttributes,
+			},
+		}, utils.Pong, nil,
+
+		utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012",
+		t1.Add(time.Second), t1.Add(20*time.Second)); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = anz.logTrafic(2, utils.CoreSv1Ping,
+		&utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.EventSource: utils.MetaAttributes,
+			},
+		}, utils.Pong, nil,
+
+		utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012",
+		t1.Add(2*time.Second), t1.Add(10*time.Second)); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = anz.logTrafic(3, utils.CoreSv1Ping,
+		&utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.EventSource: utils.MetaAttributes,
+			},
+		}, utils.Pong, nil,
+
+		utils.MetaGOB, "127.0.0.1:5566", "127.0.0.1:2013",
+		t1.Add(-24*time.Hour), t1.Add(-23*time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	reply := []map[string]interface{}{}
+	if err = anz.V1Search(utils.CoreSv1Ping, &reply); err != nil {
+		t.Fatal(err)
+	} else if len(reply) != 4 {
+		t.Errorf("Expected 4 hits received: %v", len(reply))
+	}
+	reply = []map[string]interface{}{}
+	if err = anz.V1Search("RequestMethod:"+utils.CoreSv1Ping, &reply); err != nil {
+		t.Fatal(err)
+	} else if len(reply) != 4 {
+		t.Errorf("Expected 4 hits received: %v", len(reply))
+	}
+
+	expRply := []map[string]interface{}{{
+		"RequestDestination": "127.0.0.1:2013",
+		"RequestDuration":    "1h0m0s",
+		"RequestEncoding":    "*gob",
+		"RequestID":          3.,
+		"RequestMethod":      "CoreSv1.Ping",
+		"RequestParams":      json.RawMessage(`{"Opts":{"EventSource":"*attributes"}}`),
+		"Reply":              json.RawMessage(`"Pong"`),
+		"RequestSource":      "127.0.0.1:5566",
+		"RequestStartTime":   t1.Add(-24 * time.Hour).UTC().Format(time.RFC3339),
+	}}
+	reply = []map[string]interface{}{}
+	if err = anz.V1Search(utils.RequestDuration+":>="+strconv.FormatInt(int64(time.Hour), 10), &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+
+	reply = []map[string]interface{}{}
+	if err = anz.V1Search(utils.RequestStartTime+":<=\""+t1.Add(-23*time.Hour).UTC().Format(time.RFC3339)+"\"", &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+	reply = []map[string]interface{}{}
+	if err = anz.V1Search("RequestEncoding:*gob", &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+
+	if err = anz.db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err = anz.V1Search("RequestEncoding:*gob", &reply); err != bleve.ErrorIndexClosed {
+		t.Errorf("Expected error: %v,received: %+v", bleve.ErrorIndexClosed, err)
+	}
 }

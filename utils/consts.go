@@ -2486,12 +2486,17 @@ const (
 	ProcessedOpt = "Processed"
 )
 
-// Analyzers cpmstants
+// Analyzers constants
 const (
 	MetaScorch  = "*scorch"
 	MetaBoltdb  = "*boltdb"
 	MetaLeveldb = "*leveldb"
 	MetaMoss    = "*mossdb"
+
+	RequestStartTime = "RequestStartTime"
+	RequestDuration  = "RequestDuration"
+	RequestParams    = "RequestParams"
+	Reply            = "Reply"
 )
 
 func buildCacheInstRevPrefixes() {

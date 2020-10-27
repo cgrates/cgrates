@@ -84,19 +84,13 @@ func TestNewInfoRPC(t *testing.T) {
 		Reply:              `"result"`,
 		ReplyError:         "error",
 	}
-	idx := NewInfoRPC(0, utils.CoreSv1Status, "status", "result", "error", &extraInfo{
-		enc:  utils.MetaJSON,
-		from: "127.0.0.1:5565",
-		to:   "127.0.0.1:2012",
-	}, t1, t1.Add(time.Second))
+	idx := NewInfoRPC(0, utils.CoreSv1Status, "status", "result", "error",
+		utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012", t1, t1.Add(time.Second))
 	if !reflect.DeepEqual(expIdx, idx) {
 		t.Errorf("Expected:%s, received:%s", utils.ToJSON(expIdx), utils.ToJSON(idx))
 	}
-	idx = NewInfoRPC(0, utils.CoreSv1Status, "status", "result", errors.New("error"), &extraInfo{
-		enc:  utils.MetaJSON,
-		from: "127.0.0.1:5565",
-		to:   "127.0.0.1:2012",
-	}, t1, t1.Add(time.Second))
+	idx = NewInfoRPC(0, utils.CoreSv1Status, "status", "result", errors.New("error"),
+		utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012", t1, t1.Add(time.Second))
 	if !reflect.DeepEqual(expIdx, idx) {
 		t.Errorf("Expected:%s, received:%s", utils.ToJSON(expIdx), utils.ToJSON(idx))
 	}
