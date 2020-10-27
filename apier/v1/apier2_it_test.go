@@ -63,6 +63,7 @@ var (
 		testAPIerLoadRatingPlan,
 		testAPIerLoadRatingPlan2,
 		testAPIerLoadRatingProfile,
+		testAPIerLoadFromFolderAccountAction,
 		testAPIerKillEngine,
 	}
 )
@@ -634,6 +635,31 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
 	}
 
+}
+
+func testAPIerLoadFromFolderAccountAction(t *testing.T) {
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(500 * time.Millisecond)
+	attrs2 := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "account_action_from_tutorial")}
+	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs2, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(100 * time.Millisecond)
+	var acnt *engine.Account
+	attrAcnt := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "AccountWithAPFromTutorial",
+	}
+	if err := apierRPC.Call(utils.APIerSv2GetAccount, attrAcnt, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10.0 {
+		t.Errorf("Expecting: %v, received: %v",
+			10.0, rply)
+	}
 }
 
 func testAPIerKillEngine(t *testing.T) {
