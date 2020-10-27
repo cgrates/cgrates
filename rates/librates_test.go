@@ -111,13 +111,6 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 		t.Errorf("expecting: %s\n, received: %s",
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
 	}
-	if ordRts, err := orderRatesOnIntervals(
-		allRts, sTime, usage, true, 10); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expOrdered, ordRts) {
-		t.Errorf("expecting: %s\n, received: %s",
-			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
-	}
 
 	rts := []*engine.Rate{rtChristmas}
 	expOrdered = nil
@@ -129,6 +122,695 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 	} else if !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
 			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
+	}
+}
+
+func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID:     "ALWAYS_RATE",
+		Weight: 10,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtCh1 := &engine.Rate{
+		ID:              "CHRISTMAS1",
+		ActivationTimes: "* 0-6 24 12 *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtCh2 := &engine.Rate{
+		ID:              "CHRISTMAS2",
+		ActivationTimes: "* 7-12 24 12 *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtCh3 := &engine.Rate{
+		ID:              "CHRISTMAS3",
+		ActivationTimes: "* 13-19 24 12 *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtCH4 := &engine.Rate{
+		ID:              "CHRISTMAS4",
+		ActivationTimes: "* 20-23 24 12 *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	allRates := []*engine.Rate{rt1, rtCh1, rtCh2, rtCh3, rtCH4}
+	for _, idx := range allRates {
+		if err := idx.Compile(); err != nil {
+			t.Error(err)
+		}
+	}
+	sTime := time.Date(2020, 12, 23, 22, 0, 0, 0, time.UTC)
+	usage := 31 * time.Hour
+	expected := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			2 * time.Hour,
+			rtCh1,
+		},
+		{
+			9 * time.Hour,
+			rtCh2,
+		},
+		{
+			15 * time.Hour,
+			rtCh3,
+		},
+		{
+			22 * time.Hour,
+			rtCH4,
+		},
+		{
+			26 * time.Hour,
+			rt1,
+		},
+	}
+	if ordRts, err := orderRatesOnIntervals(allRates, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ordRts, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
+	}
+}
+
+func TestOrderRatesOnIntervalsDoubleRates1(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID:     "ALWAYS_RATE",
+		Weight: 10,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtCh1 := &engine.Rate{
+		ID:              "CHRISTMAS1",
+		ActivationTimes: "* * 24 12 *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtCh2 := &engine.Rate{
+		ID:              "CHRISTMAS2",
+		ActivationTimes: "* 18-23 24 12 *",
+		Weight:          30,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	allRates := []*engine.Rate{rt1, rtCh1, rtCh2}
+	for _, idx := range allRates {
+		if err := idx.Compile(); err != nil {
+			t.Error(err)
+		}
+	}
+	sTime := time.Date(2020, 12, 23, 21, 28, 12, 0, time.UTC)
+	usage := 31 * time.Hour
+	expected := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			2*time.Hour + 31*time.Minute + 48*time.Second,
+			rtCh1,
+		},
+		{
+			20*time.Hour + 31*time.Minute + 48*time.Second,
+			rtCh2,
+		},
+		{
+			26*time.Hour + 31*time.Minute + 48*time.Second,
+			rt1,
+		},
+	}
+	if ordRts, err := orderRatesOnIntervals(allRates, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ordRts, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
+	}
+}
+
+func TestOrderRateOnIntervalsEvery1Hour30Mins(t *testing.T) {
+	rateEvery1H := &engine.Rate{
+		ID:              "HOUR_RATE",
+		ActivationTimes: "* */1 * * *",
+		Weight:          10,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rateEvery30Mins := &engine.Rate{
+		ID:              "MINUTES_RATE",
+		ActivationTimes: "*/30 * * * *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	allRates := []*engine.Rate{rateEvery1H, rateEvery30Mins}
+	for _, idx := range allRates {
+		if err := idx.Compile(); err != nil {
+			t.Error(err)
+		}
+	}
+	sTime := time.Date(2020, 9, 20, 10, 0, 0, 0, time.UTC)
+	usage := time.Hour + time.Second
+	expected := []*orderedRate{
+		{
+			0,
+			rateEvery30Mins,
+		},
+		{
+			1 * time.Minute,
+			rateEvery1H,
+		},
+		{
+			30 * time.Minute,
+			rateEvery30Mins,
+		},
+		{
+			30*time.Minute + time.Minute,
+			rateEvery1H,
+		},
+		{
+			time.Hour,
+			rateEvery30Mins,
+		},
+	}
+	if ordRts, err := orderRatesOnIntervals(allRates, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ordRts, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
+	}
+}
+
+func TestOrderRatesOnIntervalsOnePrinciapalRate(t *testing.T) {
+	rtPrincipal := &engine.Rate{
+		ID:              "PRINCIPAL_RATE",
+		ActivationTimes: "* 10-22 * * *",
+		Weight:          10,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rt1 := &engine.Rate{
+		ID:              "RT1",
+		ActivationTimes: "* 10-18 * * *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rt2 := &engine.Rate{
+		ID:              "RT2",
+		ActivationTimes: "* 10-16 * * *",
+		Weight:          30,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rt3 := &engine.Rate{
+		ID:              "RT3",
+		ActivationTimes: "* 10-14 * * *",
+		Weight:          40,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	allRates := []*engine.Rate{rtPrincipal, rt1, rt2, rt3}
+	for _, idx := range allRates {
+		if err := idx.Compile(); err != nil {
+			t.Error(err)
+		}
+	}
+	sTime := time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC)
+	usage := 13 * time.Hour
+	expected := []*orderedRate{
+		{
+			0,
+			rt3,
+		},
+		{
+			5 * time.Hour,
+			rt2,
+		},
+		{
+			7 * time.Hour,
+			rt1,
+		},
+		{
+			9 * time.Hour,
+			rtPrincipal,
+		},
+	}
+	if ordRts, err := orderRatesOnIntervals(allRates, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ordRts, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
+	}
+
+}
+
+func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID:     "ALWAYS_RATE",
+		Weight: 10,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtCh1 := &engine.Rate{
+		ID:              "CHRISTMAS1",
+		ActivationTimes: "* * 24 12 *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtCh2 := &engine.Rate{
+		ID:              "CHRISTMAS2",
+		ActivationTimes: "* 10-12 24 12 *",
+		Weight:          30,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtCh3 := &engine.Rate{
+		ID:              "CHRISTMAS3",
+		ActivationTimes: "* 20-22 24 12 *",
+		Weight:          30,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	allRates := []*engine.Rate{rt1, rtCh1, rtCh2, rtCh3}
+	for _, idx := range allRates {
+		if err := idx.Compile(); err != nil {
+			t.Error(err)
+		}
+	}
+	sTime := time.Date(2020, 12, 23, 22, 0, 0, 0, time.UTC)
+	usage := 36 * time.Hour
+	expected := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			2 * time.Hour,
+			rtCh1,
+		},
+		{
+			12 * time.Hour,
+			rtCh2,
+		},
+		{
+			15 * time.Hour,
+			rtCh1,
+		},
+		{
+			22 * time.Hour,
+			rtCh3,
+		},
+		{
+			25 * time.Hour,
+			rtCh1,
+		},
+		{
+			26 * time.Hour,
+			rt1,
+		},
+	}
+	if ordRts, err := orderRatesOnIntervals(allRates, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ordRts, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
+	}
+}
+
+func TestOrderOnRatesIntervalsEveryTwoHours(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID:     "ALWAYS_RATE",
+		Weight: 10,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtEvTwoHours := &engine.Rate{
+		ID:              "EVERY_TWO_HOURS",
+		Weight:          20,
+		ActivationTimes: "* */2 * * *",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	allRates := []*engine.Rate{rt1, rtEvTwoHours}
+	for _, idx := range allRates {
+		if err := idx.Compile(); err != nil {
+			t.Error(err)
+		}
+	}
+	sTime := time.Date(2020, 7, 21, 12, 10, 0, 0, time.UTC)
+	usage := 4 * time.Hour
+	expected := []*orderedRate{
+		{
+			0,
+			rtEvTwoHours,
+		},
+		{
+			50 * time.Minute,
+			rt1,
+		},
+		{
+			1*time.Hour + 50*time.Minute,
+			rtEvTwoHours,
+		},
+		{
+			2*time.Hour + 50*time.Minute,
+			rt1,
+		},
+		{
+			3*time.Hour + 50*time.Minute,
+			rtEvTwoHours,
+		},
+	}
+	if ordRts, err := orderRatesOnIntervals(allRates, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ordRts, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
+	}
+}
+
+func TestOrderRatesOnIntervalsEveryTwoDays(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID:     "ALWAYS_RATE",
+		Weight: 10,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtEveryTwoDays := &engine.Rate{
+		ID:              "RATE_EVERY_DAY",
+		ActivationTimes: "* * */2 * *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	allRates := []*engine.Rate{rt1, rtEveryTwoDays}
+	for _, idx := range allRates {
+		if err := idx.Compile(); err != nil {
+			t.Error(err)
+		}
+	}
+	sTime := time.Date(2020, 7, 21, 23, 59, 59, 0, time.UTC)
+	usage := 25 * time.Hour
+	expected := []*orderedRate{
+		{
+			0,
+			rtEveryTwoDays,
+		},
+		{
+			time.Second,
+			rt1,
+		},
+		{
+			24*time.Hour + time.Second,
+			rtEveryTwoDays,
+		},
+	}
+	if ordRts, err := orderRatesOnIntervals(allRates, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ordRts, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
+	}
+}
+
+func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
+	rtRestricted := &engine.Rate{
+		ID:              "RESTRICTED",
+		ActivationTimes: "* 10-22 * * *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtWayRestricted := &engine.Rate{
+		ID:              "WAY_RESTRICTED",
+		ActivationTimes: "* 12-14 * * *",
+		Weight:          30,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtSpecialHour := &engine.Rate{
+		ID:              "SPECIAL_HOUR",
+		ActivationTimes: "* 13 * * *",
+		Weight:          40,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	allRts := []*engine.Rate{rtRestricted, rtWayRestricted, rtSpecialHour}
+	for _, idx := range allRts {
+		if err := idx.Compile(); err != nil {
+			t.Error(err)
+		}
+	}
+	sTime := time.Date(2020, 7, 21, 9, 0, 0, 0, time.UTC)
+	usage := 11 * time.Hour
+	expected := []*orderedRate{
+		{
+			1 * time.Hour,
+			rtRestricted,
+		},
+		{
+			3 * time.Hour,
+			rtWayRestricted,
+		},
+		{
+			4 * time.Hour,
+			rtSpecialHour,
+		},
+		{
+			5 * time.Hour,
+			rtWayRestricted,
+		},
+		{
+			6 * time.Hour,
+			rtRestricted,
+		},
+	}
+	if ordRts, err := orderRatesOnIntervals(allRts, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ordRts, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
+	}
+}
+
+func TestOrderRateIntervalsRateEveryTenMinutes(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID:              "DAY_RATE",
+		ActivationTimes: "* * 21 7 *",
+		Weight:          10,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtEveryTenMin := &engine.Rate{
+		ID:              "EVERY_TEN_MIN",
+		ActivationTimes: "*/20 * * * *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	allRts := []*engine.Rate{rt1, rtEveryTenMin}
+	for _, idx := range allRts {
+		if err := idx.Compile(); err != nil {
+			t.Error(err)
+		}
+	}
+	sTime := time.Date(2020, 7, 21, 10, 05, 0, 0, time.UTC)
+	usage := 40 * time.Minute
+	expected := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			15 * time.Minute,
+			rtEveryTenMin,
+		},
+		{
+			16 * time.Minute,
+			rt1,
+		},
+		{
+			35 * time.Minute,
+			rtEveryTenMin,
+		},
+		{
+			36 * time.Minute,
+			rt1,
+		},
+	}
+	if ordRts, err := orderRatesOnIntervals(allRts, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ordRts, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
+	}
+}
+
+func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID:     "ALWAYS_RATE",
+		Weight: 10,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtDay := &engine.Rate{
+		ID:              "DAY_RATE",
+		ActivationTimes: "* * 21 7 2",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtDay1 := &engine.Rate{
+		ID:              "DAY_RATE1",
+		ActivationTimes: "* 15 21 7 2",
+		Weight:          30,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	rtDay2 := &engine.Rate{
+		ID:              "DAY_RATE2",
+		ActivationTimes: "* 18 21 7 2",
+		Weight:          30,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+			},
+		},
+	}
+	allRates := []*engine.Rate{rt1, rtDay, rtDay1, rtDay2}
+	for _, idx := range allRates {
+		if err := idx.Compile(); err != nil {
+			t.Error(err)
+		}
+	}
+	sTime := time.Date(2020, 7, 20, 23, 0, 0, 0, time.UTC)
+	usage := 30 * time.Hour
+	expected := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			time.Hour,
+			rtDay,
+		},
+		{
+			16 * time.Hour,
+			rtDay1,
+		},
+		{
+			17 * time.Hour,
+			rtDay,
+		},
+		{
+			19 * time.Hour,
+			rtDay2,
+		},
+		{
+			20 * time.Hour,
+			rtDay,
+		},
+		{
+			25 * time.Hour,
+			rt1,
+		},
+	}
+	if ordRts, err := orderRatesOnIntervals(allRates, sTime, usage, true, 10); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ordRts, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
 
@@ -184,25 +866,13 @@ func TestOrderRatesOnIntervalIsDirectionFalse(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expected := []*engine.RateSInterval{
+	expected := []*orderedRate{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
-				{
-					Rate: &engine.Rate{
-						ID:              "RT_1",
-						ActivationTimes: "* * 27 02 *",
-						IntervalRates: []*engine.IntervalRate{
-							{
-								IntervalStart: time.Duration(0),
-							},
-						},
-					},
-				},
-			},
+			time.Duration(0),
+			rt1,
 		},
 	}
-	err = expected[0].Increments[0].Rate.Compile()
+	err = expected[0].Rate.Compile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -230,25 +900,13 @@ func TestOrderRatesOnIntervalWinnNill(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expected := []*engine.RateSInterval{
+	expected := []*orderedRate{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
-				{
-					Rate: &engine.Rate{
-						ID:              "RT_1",
-						ActivationTimes: "* * 1 * *",
-						IntervalRates: []*engine.IntervalRate{
-							{
-								IntervalStart: time.Duration(0),
-							},
-						},
-					},
-				},
-			},
+			time.Duration(0),
+			rt1,
 		},
 	}
-	err = expected[0].Increments[0].Rate.Compile()
+	err = expected[0].Rate.Compile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -276,26 +934,13 @@ func TestOrderRatesOnIntervalIntervalStartHigherThanEndIdx(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expected := []*engine.RateSInterval{
+	expected := []*orderedRate{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
-				{
-					Rate: &engine.Rate{
-						ID:              "RT_1",
-						ActivationTimes: "* * 1 * *",
-						IntervalRates: []*engine.IntervalRate{
-							{
-								IntervalStart: 48 * time.Hour,
-							},
-						},
-					},
-					IntervalRateIndex: 1,
-				},
-			},
+			time.Duration(0),
+			rt1,
 		},
 	}
-	err = expected[0].Increments[0].Rate.Compile()
+	err = expected[0].Rate.Compile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -324,29 +969,13 @@ func TestOrderRatesOnIntervalStartLowerThanEndIdx(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expected := []*engine.RateSInterval{
+	expected := []*orderedRate{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
-				{
-					Rate: &engine.Rate{
-						ID:              "RT_1",
-						ActivationTimes: "* * 1 * *",
-						IntervalRates: []*engine.IntervalRate{
-							{
-								IntervalStart: 23 * time.Hour,
-							},
-							{
-								IntervalStart: -time.Hour,
-							},
-						},
-					},
-					IntervalRateIndex: 1,
-				},
-			},
+			time.Duration(0),
+			rt1,
 		},
 	}
-	err = expected[0].Increments[0].Rate.Compile()
+	err = expected[0].Rate.Compile()
 	if err != nil {
 		t.Error(err)
 	}
