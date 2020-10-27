@@ -126,7 +126,7 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 		for _, rIt := range allRates {
 			if rWw.has(rIt.id()) ||
 				rIt.aTime.After(tm) ||
-				(!rIt.iTime.IsZero() && !rIt.iTime.Before(tm)) {
+				(!rIt.iTime.IsZero() && !rIt.iTime.After(tm)) {
 				continue
 			}
 			rWw.add(rIt)
@@ -166,27 +166,8 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 			if sTime.Before(aTime) {
 				usageIndx = aTime.Sub(sTime)
 			}
-		}
-	} else { // only first rate is considered for units
-		oRts = []*rateWithTimes{rtIdx[sortedATimes[0]].winner()}
-	}
-	// add the Intervals and Increments
-	var usageSIdx, usageEIdx time.Duration
-	for i, rWt := range oRts {
-		if sTime.Before(rWt.aTime) {
-			usageSIdx = rWt.aTime.Sub(sTime)
-		}
-		if i != len(sortedATimes)-1 { // not the last one
-			usageEIdx = sortedATimes[i+1].Sub(sTime)
-		} else {
-			usageEIdx = usage
-		}
-		// append the valid increments
-		var rtIcmts []*engine.RateSIncrement
-		rt := rtIdx[rWt.aTime].winner().rt
-		for j, ivlRt := range rt.IntervalRates {
-			if ivlRt.IntervalStart > usageEIdx {
-				break
+			if len(ordRts) == 0 || wnr.rt.ID != ordRts[len(ordRts)-1].Rate.ID { // only add the winner if not already active
+				ordRts = append(ordRts, &orderedRate{usageIndx, rtIdx[aTime].winner().rt})
 			}
 		}
 	} else { // only first rate is considered for units
