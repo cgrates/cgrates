@@ -54,6 +54,7 @@ var (
 		testV1FltrPopulateResources,
 		testV1FltrAccounts,
 		testV1FltrAccountsExistsDynamicaly,
+		testV1FltrAttributesPrefix,
 		testV1FltrInitDataDb,
 		testV1FltrChargerSuffix,
 		testV1FltrStopEngine,
@@ -859,6 +860,69 @@ func testV1FltrChargerSuffix(t *testing.T) {
 	} else if !reflect.DeepEqual(result2, processedEv) {
 		t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
 	}
+}
+
+func testV1FltrAttributesPrefix(t *testing.T) {
+	chargerProfile := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.new",
+			ID:        "ATTR_1001",
+			FilterIDs: []string{"*prefix:~*req.CustomField:2007;+2007", "*prefix:~*req.CustomField2:2007;+2007", "FLTR_1"},
+			Contexts:  []string{"prefix"},
+			Attributes: []*engine.Attribute{
+				{
+					FilterIDs: []string{},
+					Path:      utils.MetaReq + utils.NestingSep + "CustomField",
+					Type:      utils.META_CONSTANT,
+					Value:     config.NewRSRParsersMustCompile("2007", utils.INFIELD_SEP),
+				},
+			},
+			Weight: 20.0,
+		},
+	}
+	var result string
+	if err := fltrRpc.Call(utils.APIerSv1SetAttributeProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	processedEv := &engine.AttrSProcessEventReply{
+		AlteredFields:   []string{"*req.CustomField"},
+		MatchedProfiles: []string{"ATTR_1001"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.new",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					"CustomField":     "2007",
+					"CustomField2":    "+2007",
+					utils.Destination: "+1207",
+				},
+			},
+		},
+	}
+	cgrEv := &engine.AttrArgsProcessEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.new",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					"CustomField":     "+2007",
+					"CustomField2":    "+2007",
+					utils.Destination: "+1207",
+				},
+			},
+		},
+		Context: utils.StringPointer("prefix"),
+	}
+	var result2 *engine.AttrSProcessEventReply
+	if err := fltrRpc.Call(utils.AttributeSv1ProcessEvent, cgrEv, &result2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result2, processedEv) {
+		t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
+	}
+
 }
 
 func testV1FltrStopEngine(t *testing.T) {

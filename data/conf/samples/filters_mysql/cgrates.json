@@ -67,6 +67,7 @@
 
 "attributes": {
 	"enabled": true,
+	"prefix_indexed_fields": ["*req.CustomField"],
 },
 
 
