@@ -2499,6 +2499,16 @@ const (
 	Reply            = "Reply"
 )
 
+var (
+	// AnzIndexType are the analyzers possible index types
+	AnzIndexType = StringSet{
+		MetaScorch:  {},
+		MetaBoltdb:  {},
+		MetaLeveldb: {},
+		MetaMoss:    {},
+	}
+)
+
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {
