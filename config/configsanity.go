@@ -21,6 +21,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -725,11 +726,22 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> unsupported transport <%s>", utils.DispatcherH, connID, connCfg.Conns[0].Transport)
 			}
 		}
-
-		/*
-				DispatchersConns  []string
-			RegisterTransport string
-		*/
+	}
+	if cfg.analyzerSCfg.Enabled {
+		dir := path.Dir(cfg.analyzerSCfg.DBPath) // only the base path is mandatory to exist
+		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
+			return fmt.Errorf("<%s> nonexistent DB folder: %q", utils.AnalyzerS, dir)
+		}
+		if !utils.AnzIndexType.Has(cfg.analyzerSCfg.IndexType) {
+			return fmt.Errorf("<%s> unsuported index type: %q", utils.AnalyzerS, cfg.analyzerSCfg.IndexType)
+		}
+		// TTL and CleanupInterval should allways be biger than zero in order to not keep unecesary logs in index
+		if cfg.analyzerSCfg.TTL <= 0 {
+			return fmt.Errorf("<%s> the TTL needs to be bigger than 0", utils.AnalyzerS)
+		}
+		if cfg.analyzerSCfg.CleanupInterval <= 0 {
+			return fmt.Errorf("<%s> the CleanupInterval needs to be bigger than 0", utils.AnalyzerS)
+		}
 	}
 
 	return nil
