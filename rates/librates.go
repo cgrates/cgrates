@@ -126,7 +126,7 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 		for _, rIt := range allRates {
 			if rWw.has(rIt.id()) ||
 				rIt.aTime.After(tm) ||
-				(!rIt.iTime.IsZero() && !rIt.iTime.After(tm)) {
+				(!rIt.iTime.IsZero() && !tm.Before(rIt.iTime)) {
 				continue
 			}
 			rWw.add(rIt)

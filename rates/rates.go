@@ -71,7 +71,7 @@ func (rS *RateS) Call(serviceMethod string, args interface{}, reply interface{})
 }
 
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
-func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent, rPfIDs []string) (rtPfl *engine.RateProfile, err error) {
+func (rS *RateS) matchingRateProfileForEvent(tnt string, args *ArgsCostForEvent, rPfIDs []string) (rtPfl *engine.RateProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.Opts,
@@ -85,7 +85,7 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent, rPfIDs []st
 			rS.cfg.RateSCfg().SuffixIndexedFields,
 			rS.dm,
 			utils.CacheRateProfilesFilterIndexes,
-			args.CGREvent.Tenant,
+			tnt,
 			rS.cfg.RateSCfg().IndexedSelects,
 			rS.cfg.RateSCfg().NestedFields,
 		); err != nil {
@@ -99,7 +99,7 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent, rPfIDs []st
 	}
 	for _, rPfID := range rPfIDs {
 		var rPf *engine.RateProfile
-		if rPf, err = rS.dm.GetRateProfile(args.CGREvent.Tenant, rPfID,
+		if rPf, err = rS.dm.GetRateProfile(tnt, rPfID,
 			true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				err = nil
@@ -112,7 +112,7 @@ func (rS *RateS) matchingRateProfileForEvent(args *ArgsCostForEvent, rPfIDs []st
 			continue
 		}
 		var pass bool
-		if pass, err = rS.filterS.Pass(args.CGREvent.Tenant, rPf.FilterIDs, evNm); err != nil {
+		if pass, err = rS.filterS.Pass(tnt, rPf.FilterIDs, evNm); err != nil {
 			return
 		} else if !pass {
 			continue
