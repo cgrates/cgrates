@@ -57,7 +57,7 @@ func TestUpdateSIPMsgFromNavMap(t *testing.T) {
 		"Contact": "1001",
 	}
 	if !reflect.DeepEqual(m, expected) {
-		t.Errorf("Expected: %s , recived: %s", expected, m)
+		t.Errorf("Expected: %s , received: %s", expected, m)
 	}
 }
 

@@ -286,12 +286,19 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.SourcePathCfg:               er.SourcePath,
 		utils.ProcessedPathCfg:            er.ProcessedPath,
 		utils.TimezoneCfg:                 er.Timezone,
-		utils.FiltersCfg:                  er.Filters,
-		utils.FlagsCfg:                    er.Flags.SliceFlags(),
+		utils.FiltersCfg:                  []string{},
+		utils.FlagsCfg:                    []string{},
 		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
 		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
 		utils.OptsCfg:                     er.Opts,
 	}
+	if flags := er.Flags.SliceFlags(); len(flags) != 0 {
+		initialMP[utils.FlagsCfg] = flags
+	}
+	if len(er.Filters) != 0 {
+		initialMP[utils.FiltersCfg] = er.Filters
+	}
+
 	if er.XmlRootPath != nil {
 		xmlRootPath := make([]string, len(er.XmlRootPath))
 		for i, item := range er.XmlRootPath {

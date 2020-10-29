@@ -888,7 +888,7 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 	resp = ""
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
 		&utils.TenantIDWithCache{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
 

@@ -150,13 +150,13 @@ func testSAitSIPRegister(t *testing.T) {
 	if _, err = saConn.Read(buffer); err != nil {
 		t.Fatal(err)
 	}
-	var recived sipingo.Message
-	if recived, err = sipingo.NewMessage(string(buffer)); err != nil {
+	var received sipingo.Message
+	if received, err = sipingo.NewMessage(string(buffer)); err != nil {
 		t.Fatal(err)
 	}
 
-	if expected := "SIP/2.0 405 Method Not Allowed"; recived["Request"] != expected {
-		t.Errorf("Expected %q, received: %q", expected, recived["Request"])
+	if expected := "SIP/2.0 405 Method Not Allowed"; received["Request"] != expected {
+		t.Errorf("Expected %q, received: %q", expected, received["Request"])
 	}
 }
 

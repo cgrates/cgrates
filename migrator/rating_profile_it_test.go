@@ -220,7 +220,7 @@ func testRtPrfITMigrateAndMove(t *testing.T) {
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		} else if rtprflMigrator.stats[utils.RatingProfile] != 1 {
-			t.Errorf("Expected 1, recived: %v", rtprflMigrator.stats[utils.RatingProfile])
+			t.Errorf("Expected 1, received: %v", rtprflMigrator.stats[utils.RatingProfile])
 		}
 	}
 }

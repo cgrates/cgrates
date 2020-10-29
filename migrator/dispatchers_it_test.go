@@ -248,6 +248,6 @@ func testDspITMigrateAndMove(t *testing.T) {
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	} else if dspMigrator.stats[utils.Dispatchers] != 1 {
-		t.Errorf("Expected 1, recived: %v", dspMigrator.stats[utils.Dispatchers])
+		t.Errorf("Expected 1, received: %v", dspMigrator.stats[utils.Dispatchers])
 	}
 }

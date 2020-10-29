@@ -266,7 +266,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
-		t.Errorf("Expected: %+v \n, recived: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
+		t.Errorf("Expected: %+v \n, received: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
 	}
 }
 
@@ -493,7 +493,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 	if err = initial.appendHttpAgntProcCfgs(proceses, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, initial) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(initial))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(initial))
 	}
 }
 

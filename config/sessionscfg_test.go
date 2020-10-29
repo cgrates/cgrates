@@ -57,7 +57,7 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	if err := fsAgentCfg.loadFromJsonCfg(fsAgentJsnCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eFsAgentConfig, fsAgentCfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(eFsAgentConfig), utils.ToJSON(fsAgentCfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(eFsAgentConfig), utils.ToJSON(fsAgentCfg))
 	}
 }
 
@@ -329,6 +329,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ClientProtocolCfg:      1.0,
 		utils.ChannelSyncIntervalCfg: "1s",
 		utils.TerminateAttemptsCfg:   5,
+		utils.MinDurLowBalanceCfg:    "0",
 		utils.AlterableFieldsCfg:     []string{},
 		utils.STIRCfg: map[string]interface{}{
 			utils.AllowedAtestCfg:       []string{"*any"},
@@ -606,12 +607,12 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 	if err := fscocfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fscocfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fscocfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, fscocfg)
 	}
 	if err := fscocfg.loadFromJsonCfg(new(FsConnJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fscocfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, fscocfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, fscocfg)
 	}
 	json := &FsConnJsonCfg{
 		Address:    utils.StringPointer("127.0.0.1:8448"),
@@ -628,7 +629,7 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 	if err = fscocfg.loadFromJsonCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, fscocfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
 	}
 }
 
@@ -637,12 +638,12 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 	if err := hpoolcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(hpoolcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, hpoolcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, hpoolcfg)
 	}
 	if err := hpoolcfg.loadFromJsonCfg(new(RemoteHostJson)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(hpoolcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, hpoolcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, hpoolcfg)
 	}
 	json := &RemoteHostJson{
 		Address:     utils.StringPointer("127.0.0.1:8448"),
@@ -655,7 +656,7 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 	if err = hpoolcfg.loadFromJsonCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, hpoolcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(hpoolcfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(hpoolcfg))
 	}
 }
 
@@ -712,7 +713,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.asteriskAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -738,7 +739,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.asteriskAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -747,12 +748,12 @@ func TestAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 	if err := asconcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(asconcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, asconcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, asconcfg)
 	}
 	if err := asconcfg.loadFromJsonCfg(new(AstConnJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(asconcfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, asconcfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, asconcfg)
 	}
 	json := &AstConnJsonCfg{
 		Address:          utils.StringPointer("127.0.0.1:8088"),
@@ -771,6 +772,6 @@ func TestAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 	if err = asconcfg.loadFromJsonCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, asconcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(asconcfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(asconcfg))
 	}
 }

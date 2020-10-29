@@ -41,7 +41,7 @@ func TestAccountNewObjectDPFieldAsInterface(t *testing.T) {
 	if data, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[0]", "Value"}); err != nil {
 		t.Error(err)
 	} else if data != 20. {
-		t.Errorf("Expected: %+v ,recived: %+v", 20., data)
+		t.Errorf("Expected: %+v ,received: %+v", 20., data)
 	}
 	if _, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[1]", "Value"}); err == nil ||
 		err.Error() != "index out of range" {
@@ -70,17 +70,17 @@ func TestAccountNewObjectDPFieldAsInterfaceFromCache(t *testing.T) {
 	if data, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[0]", "Value"}); err != nil {
 		t.Error(err)
 	} else if data != 20. {
-		t.Errorf("Expected: %+v ,recived: %+v", 20., data)
+		t.Errorf("Expected: %+v ,received: %+v", 20., data)
 	}
 	// the value should be taken from cache
 	if data, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[0]", "Value"}); err != nil {
 		t.Error(err)
 	} else if data != 20. {
-		t.Errorf("Expected: %+v ,recived: %+v", 20., data)
+		t.Errorf("Expected: %+v ,received: %+v", 20., data)
 	}
 	if data, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[0]"}); err != nil {
 		t.Error(err)
 	} else if data != acc.BalanceMap[utils.MONETARY][0] {
-		t.Errorf("Expected: %+v ,recived: %+v", acc.BalanceMap[utils.MONETARY][0], data)
+		t.Errorf("Expected: %+v ,received: %+v", acc.BalanceMap[utils.MONETARY][0], data)
 	}
 }

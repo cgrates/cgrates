@@ -274,7 +274,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 				"", false, false); err != nil {
 				t.Error(err)
 			} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
-				t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
+				t.Errorf("Expected %v, received: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
 			}
 		}
 	case utils.Move:
@@ -472,7 +472,7 @@ func testFltrITMigratev2(t *testing.T) {
 			"", false, true); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
-			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
+			t.Errorf("Expected %v, received: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
 		}
 	}
 }
@@ -559,6 +559,6 @@ func testFltrITMigratev3(t *testing.T) {
 	if !reflect.DeepEqual(*expFilters, *result) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expFilters), utils.ToJSON(result))
 	} else if fltrMigrator.stats[utils.RQF] != 5 {
-		t.Errorf("Expected 5, recived: %v", fltrMigrator.stats[utils.RQF])
+		t.Errorf("Expected 5, received: %v", fltrMigrator.stats[utils.RQF])
 	}
 }

@@ -177,7 +177,7 @@ func TestSafEventGet(t *testing.T) {
 	}
 	safEv.Remove("test4")
 	if rply, has := safEv.Get("test4"); has {
-		t.Errorf("Expecting 'test4' to not be a field, recived: %+v", rply)
+		t.Errorf("Expecting 'test4' to not be a field, received: %+v", rply)
 	}
 	safEv.Set("test4", false)
 	if rply, has := safEv.Get("test4"); !has {
@@ -210,7 +210,7 @@ func TestSafEventGetIgnoreErrors(t *testing.T) {
 	}
 	safEv.Remove("test4")
 	if rply := safEv.GetIgnoreErrors("test4"); rply != nil {
-		t.Errorf("Expecting: null, recived: %+v", rply)
+		t.Errorf("Expecting: null, received: %+v", rply)
 	}
 	safEv.Set("test4", false)
 	if rply := safEv.GetIgnoreErrors("test4"); rply != false {
@@ -241,7 +241,7 @@ func TestSafEventGetString(t *testing.T) {
 	}
 	safEv.Remove("test2")
 	if _, err := safEv.GetString("test2"); err != utils.ErrNotFound {
-		t.Errorf("Expecting: %+v ,recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v ,received: %+v", utils.ErrNotFound, err)
 	}
 	safEv.Set("test2", 42.3)
 	if rply, err := safEv.GetString("test2"); err != nil {
@@ -274,7 +274,7 @@ func TestSafEventGetStringIgnoreErrors(t *testing.T) {
 	}
 	safEv.Remove("test2")
 	if rply := safEv.GetStringIgnoreErrors("test2"); rply != "" {
-		t.Errorf("Expecting: ,recived: %+v", err)
+		t.Errorf("Expecting: ,received: %+v", err)
 	}
 	safEv.Set("test2", 42.3)
 	if rply := safEv.GetStringIgnoreErrors("test2"); rply != "42.3" {
@@ -305,10 +305,10 @@ func TestSafEventGetDuration(t *testing.T) {
 	}
 	safEv.Remove("test7")
 	if _, err := safEv.GetDuration("test7"); err != utils.ErrNotFound {
-		t.Errorf("Expecting: %+v ,recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v ,received: %+v", utils.ErrNotFound, err)
 	}
 	if rply, err := safEv.GetDuration("test5"); err == nil {
-		t.Errorf("Expecting: error,recived: %+v", rply)
+		t.Errorf("Expecting: error,received: %+v", rply)
 	}
 	safEv.Set("test7", "42s")
 	expected := time.Duration(42 * time.Second)
@@ -343,7 +343,7 @@ func TestSafEventGetDurationIgnoreErrors(t *testing.T) {
 	}
 	safEv.Remove("test7")
 	if rply := safEv.GetDurationIgnoreErrors("test7"); rply != time.Duration(0) {
-		t.Errorf("Expecting: %+v ,recived: %+v", time.Duration(0), rply)
+		t.Errorf("Expecting: %+v ,received: %+v", time.Duration(0), rply)
 	}
 	safEv.Set("test7", "42s")
 	expected := time.Duration(42 * time.Second)
@@ -376,10 +376,10 @@ func TestSafEventGetDurationPtr(t *testing.T) {
 	}
 	safEv.Remove("test7")
 	if _, err := safEv.GetDurationPtr("test7"); err != utils.ErrNotFound {
-		t.Errorf("Expecting: %+v ,recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v ,received: %+v", utils.ErrNotFound, err)
 	}
 	if rply, err := safEv.GetDurationPtr("test5"); err == nil {
-		t.Errorf("Expecting: error,recived: %+v", rply)
+		t.Errorf("Expecting: error,received: %+v", rply)
 	}
 	safEv.Set("test7", "42s")
 	expected := time.Duration(42 * time.Second)
@@ -417,12 +417,12 @@ func TestSafEventGetDurationPtrOrDefault(t *testing.T) {
 	}
 	safEv.Remove("test7")
 	if rply, err := safEv.GetDurationPtrOrDefault("test7", &def); err != nil {
-		t.Errorf("Expecting: %+v ,recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v ,received: %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(&def, rply) {
 		t.Errorf("Expecting %+v, received: %+v", def, rply)
 	}
 	if rply, err := safEv.GetDurationPtrOrDefault("test5", &def); err == nil {
-		t.Errorf("Expecting: error,recived: %+v", rply)
+		t.Errorf("Expecting: error,received: %+v", rply)
 	}
 	safEv.Set("test7", "42s")
 	expected := time.Duration(42 * time.Second)
@@ -459,10 +459,10 @@ func TestSafEventGetTime(t *testing.T) {
 	}
 	safEv.Remove("test9")
 	if _, err := safEv.GetTime("test9", ""); err != utils.ErrNotFound {
-		t.Errorf("Expecting: %+v ,recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v ,received: %+v", utils.ErrNotFound, err)
 	}
 	if rply, err := safEv.GetTime("test5", ""); err == nil {
-		t.Errorf("Expecting: error,recived: %+v", rply)
+		t.Errorf("Expecting: error,received: %+v", rply)
 	}
 	safEv.Set("test9", "2010-11-10T23:00:00Z")
 	expected := time.Date(2010, 11, 10, 23, 0, 0, 0, time.UTC)
@@ -530,7 +530,7 @@ func TestSafEventGetSetString(t *testing.T) {
 	if rply, err := safEv.GetSetString("test2", expected); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expecting: %+v ,recived: %+v", expected, rply)
+		t.Errorf("Expecting: %+v ,received: %+v", expected, rply)
 	}
 	safEv.Set("test2", 42.3)
 	if rply, err := safEv.GetSetString("test2", ""); err != nil {

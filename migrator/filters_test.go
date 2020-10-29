@@ -51,7 +51,7 @@ func TestFiltersInlineMigrate(t *testing.T) {
 	}
 	for _, m := range data {
 		if rply := migrateInlineFilter(m.in); rply != m.exp {
-			t.Errorf("Expected: %s, recived: %s", m.exp, rply)
+			t.Errorf("Expected: %s, received: %s", m.exp, rply)
 		}
 	}
 
@@ -113,7 +113,7 @@ func TestFiltersMigrate(t *testing.T) {
 	}
 	for _, m := range data {
 		if rply := migrateFilterV1(m.in); !reflect.DeepEqual(rply, m.exp) {
-			t.Errorf("Expected: %s, recived: %s", utils.ToJSON(m.exp), utils.ToJSON(rply))
+			t.Errorf("Expected: %s, received: %s", utils.ToJSON(m.exp), utils.ToJSON(rply))
 		}
 	}
 }
@@ -246,7 +246,7 @@ func TestFiltersMigrateV2(t *testing.T) {
 	}
 	for _, m := range data {
 		if rply := migrateFilterV2(m.in); !reflect.DeepEqual(rply, m.exp) {
-			t.Errorf("Expected: %s, recived: %s", utils.ToJSON(m.exp), utils.ToJSON(rply))
+			t.Errorf("Expected: %s, received: %s", utils.ToJSON(m.exp), utils.ToJSON(rply))
 		}
 	}
 }
@@ -276,7 +276,7 @@ func TestFiltersInlineV2Migrate(t *testing.T) {
 	}
 	for _, m := range data {
 		if rply := migrateInlineFilterV2(m.in); rply != m.exp {
-			t.Errorf("Expected: %s, recived: %s", m.exp, rply)
+			t.Errorf("Expected: %s, received: %s", m.exp, rply)
 		}
 	}
 

@@ -311,8 +311,8 @@ func TestOrderedNavigableMapGetSet(t *testing.T) {
 		{{Field: "Account", Index: StringPointer("1")}},
 	}
 
-	if recivedOrder := nm.GetOrder(); !reflect.DeepEqual(expectedOrder, recivedOrder) {
-		t.Errorf("Expected %s ,received: %s", expectedOrder, recivedOrder)
+	if receivedOrder := nm.GetOrder(); !reflect.DeepEqual(expectedOrder, receivedOrder) {
+		t.Errorf("Expected %s ,received: %s", expectedOrder, receivedOrder)
 	}
 	nm = &OrderedNavigableMap{
 		nm: NavigableMap2{

@@ -51,9 +51,9 @@ func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg,
 	return nil
 }
 
-func (hcfgs *HttpAgentCfgs) AsMapInterface(separator string) (mp []map[string]interface{}) {
-	mp = make([]map[string]interface{}, len(*hcfgs))
-	for i, item := range *hcfgs {
+func (hcfgs HttpAgentCfgs) AsMapInterface(separator string) (mp []map[string]interface{}) {
+	mp = make([]map[string]interface{}, len(hcfgs))
+	for i, item := range hcfgs {
 		mp[i] = item.AsMapInterface(separator)
 	}
 	return

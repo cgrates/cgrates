@@ -271,11 +271,11 @@ func testInternalReplicateITAttributeProfile(t *testing.T) {
 	//check again
 	if err := engineOneRPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
 	}
 }
 
@@ -287,10 +287,10 @@ func testInternalReplicateITRatingProfile(t *testing.T) {
 		Category: "call",
 		Subject:  "Subject"}
 	if err := engineOneRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingProfile, &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingProfile, &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
 	}
 	// set
 	var reply string
@@ -1448,12 +1448,12 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetRateProfile,
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v recived: %+v", utils.ErrNotFound, err)
+		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
 	}
 }
 

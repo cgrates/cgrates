@@ -250,7 +250,7 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		} else if ratePrfMigrator.stats[utils.RateProfiles] != 1 {
-			t.Errorf("Expected 1, recived: %v", ratePrfMigrator.stats[utils.RateProfiles])
+			t.Errorf("Expected 1, received: %v", ratePrfMigrator.stats[utils.RateProfiles])
 		}
 	}
 }

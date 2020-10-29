@@ -65,7 +65,7 @@ func TestApierCfgAsMapInterface1(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if newMap := cgrCfg.apier.AsMapInterface(); !reflect.DeepEqual(newMap, eMap) {
-		t.Errorf("Expected %+v, recived %+v", eMap, newMap)
+		t.Errorf("Expected %+v, received %+v", eMap, newMap)
 	}
 }
 
@@ -89,6 +89,6 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
 	} else if newMap := cgrCfg.apier.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
-		t.Errorf("Expected %+v \n, recived %+v", utils.ToJSON(expectedMap), utils.ToJSON(newMap))
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedMap), utils.ToJSON(newMap))
 	}
 }

@@ -271,16 +271,16 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 }`
 	eMap := []map[string]interface{}{
 		{
-			utils.IdCfg:             "*default",
-			utils.EnabledCfg:        false,
-			utils.TenantCfg:         "~*req.Destination1",
-			utils.DryRunCfg:         false,
-			utils.RunDelayCfg:       "0",
-			utils.LockFileNameCfg:   ".cgr.lck",
-			utils.CachesConnsCfg:    []string{utils.MetaInternal},
-			utils.FieldSeparatorCfg: ",",
-			utils.TpInDirCfg:        "/var/spool/cgrates/loader/in",
-			utils.TpOutDirCfg:       "/var/spool/cgrates/loader/out",
+			utils.IdCfg:           "*default",
+			utils.EnabledCfg:      false,
+			utils.TenantCfg:       "~*req.Destination1",
+			utils.DryRunCfg:       false,
+			utils.RunDelayCfg:     "0",
+			utils.LockFileNameCfg: ".cgr.lck",
+			utils.CachesConnsCfg:  []string{utils.MetaInternal},
+			utils.FieldSepCfg:     ",",
+			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
+			utils.TpOutDirCfg:     "/var/spool/cgrates/loader/out",
 			utils.DataCfg: []map[string]interface{}{
 				{
 					utils.TypeCfg:     "*attributes",
@@ -355,16 +355,16 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 }`
 	eMap := []map[string]interface{}{
 		{
-			utils.IdCfg:             "*default",
-			utils.EnabledCfg:        false,
-			utils.TenantCfg:         "~*req.Destination1",
-			utils.DryRunCfg:         false,
-			utils.RunDelayCfg:       "0",
-			utils.LockFileNameCfg:   ".cgr.lck",
-			utils.CachesConnsCfg:    []string{"*conn1"},
-			utils.FieldSeparatorCfg: ",",
-			utils.TpInDirCfg:        "/var/spool/cgrates/loader/in",
-			utils.TpOutDirCfg:       "/var/spool/cgrates/loader/out",
+			utils.IdCfg:           "*default",
+			utils.EnabledCfg:      false,
+			utils.TenantCfg:       "~*req.Destination1",
+			utils.DryRunCfg:       false,
+			utils.RunDelayCfg:     "0",
+			utils.LockFileNameCfg: ".cgr.lck",
+			utils.CachesConnsCfg:  []string{"*conn1"},
+			utils.FieldSepCfg:     ",",
+			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
+			utils.TpOutDirCfg:     "/var/spool/cgrates/loader/out",
 			utils.DataCfg: []map[string]interface{}{
 				{
 					utils.TypeCfg:     "*attributes",

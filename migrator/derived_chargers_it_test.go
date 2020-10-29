@@ -245,7 +245,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		"", true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expDcIdx, dcidx) {
-		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
+		t.Errorf("Expected %v, received: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
 	}
 	expDcIdx = map[string]utils.StringSet{
 		"*string:*req.Account:1003": {
@@ -256,9 +256,9 @@ func testDCITMigrateAndMove(t *testing.T) {
 		utils.CacheChargerFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", utils.MetaChargers),
 		"", true, true); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error %v, recived: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))
+		t.Errorf("Expected error %v, received: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))
 	} else if dcMigrator.stats[utils.DerivedChargersV] != 1 {
-		t.Errorf("Expected 1, recived: %v", dcMigrator.stats[utils.DerivedChargersV])
+		t.Errorf("Expected 1, received: %v", dcMigrator.stats[utils.DerivedChargersV])
 	}
 
 }

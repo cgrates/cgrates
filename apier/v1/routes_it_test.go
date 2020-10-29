@@ -1031,7 +1031,7 @@ func testV1RouteRemRouteProfiles(t *testing.T) {
 	}
 	if err := splSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
 

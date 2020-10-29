@@ -329,7 +329,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedERsCfg, cfg.ersCfg) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cfg.ersCfg))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cfg.ersCfg))
 	}
 
 }
@@ -803,7 +803,7 @@ func TestEventReaderSameID(t *testing.T) {
 	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedERsCfg, cfg.ersCfg) {
-		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cfg.ersCfg))
+		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cfg.ersCfg))
 	}
 
 }
@@ -826,14 +826,13 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 		],
 	}
 }`
-	var filters []string
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
 		utils.ReadersCfg: []map[string]interface{}{
 			{
 				utils.FiltersCfg:                  []string{},
-				utils.FlagsCfg:                    filters,
+				utils.FlagsCfg:                    []string{},
 				utils.IdCfg:                       "*default",
 				utils.PartialRecordCacheCfg:       "0",
 				utils.ProcessedPathCfg:            "/var/spool/cgrates/ers/out",
@@ -848,7 +847,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 				utils.ConcurrentRequestsCfg:       1024,
 				utils.TypeCfg:                     "*none",
 				utils.FailedCallsPrefixCfg:        "",
-				utils.FieldSeparatorCfg:           ",",
+				utils.FieldSepCfg:                 ",",
 				utils.HeaderDefCharCfg:            ":",
 				utils.FieldsCfg: []map[string]interface{}{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
@@ -870,7 +869,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 				utils.ConcurrentRequestsCfg: 1024,
 				utils.TypeCfg:               "*file_csv",
 				utils.FailedCallsPrefixCfg:  "",
-				utils.FieldSeparatorCfg:     ",",
+				utils.FieldSepCfg:           ",",
 				utils.HeaderDefCharCfg:      ":",
 				utils.FieldsCfg: []map[string]interface{}{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
@@ -885,8 +884,8 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.AnswerTime", utils.TagCfg: "AnswerTime", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.12"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.Usage", utils.TagCfg: "Usage", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.13"},
 				},
-				utils.FiltersCfg:                  filters,
-				utils.FlagsCfg:                    filters,
+				utils.FiltersCfg:                  []string{},
+				utils.FlagsCfg:                    []string{},
 				utils.IDCfg:                       "file_reader1",
 				utils.PartialRecordCacheCfg:       "0",
 				utils.ProcessedPathCfg:            "/tmp/ers/out",
@@ -904,7 +903,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cfg.ersCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -929,14 +928,13 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 		],
 	}
 }`
-	var filters []string
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{"conn1", "conn3"},
 		utils.ReadersCfg: []map[string]interface{}{
 			{
 				utils.FiltersCfg:                  []string{},
-				utils.FlagsCfg:                    filters,
+				utils.FlagsCfg:                    []string{},
 				utils.IdCfg:                       "*default",
 				utils.PartialRecordCacheCfg:       "0",
 				utils.ProcessedPathCfg:            "/var/spool/cgrates/ers/out",
@@ -951,7 +949,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.ConcurrentRequestsCfg:       1024,
 				utils.TypeCfg:                     "*none",
 				utils.FailedCallsPrefixCfg:        "",
-				utils.FieldSeparatorCfg:           ",",
+				utils.FieldSepCfg:                 ",",
 				utils.HeaderDefCharCfg:            ":",
 				utils.FieldsCfg: []map[string]interface{}{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
@@ -975,7 +973,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.ConcurrentRequestsCfg: 1024,
 				utils.TypeCfg:               "*file_csv",
 				utils.FailedCallsPrefixCfg:  "",
-				utils.FieldSeparatorCfg:     ",",
+				utils.FieldSepCfg:           ",",
 				utils.HeaderDefCharCfg:      ":",
 				utils.FieldsCfg: []map[string]interface{}{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
@@ -990,8 +988,8 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.AnswerTime", utils.TagCfg: "AnswerTime", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.12"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.Usage", utils.TagCfg: "Usage", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.13"},
 				},
-				utils.FiltersCfg:                  filters,
-				utils.FlagsCfg:                    filters,
+				utils.FiltersCfg:                  []string{},
+				utils.FlagsCfg:                    []string{},
 				utils.IDCfg:                       "file_reader1",
 				utils.ProcessedPathCfg:            "/tmp/ers/out",
 				utils.RowLengthCfg:                0,
@@ -1009,7 +1007,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cfg.ersCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nRecived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 

@@ -245,7 +245,7 @@ func testChrgITMigrateAndMove(t *testing.T) {
 			"CHRG_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
 		} else if chrgMigrator.stats[utils.Chargers] != 2 {
-			t.Errorf("Expected 2, recived: %v", chrgMigrator.stats[utils.Chargers])
+			t.Errorf("Expected 2, received: %v", chrgMigrator.stats[utils.Chargers])
 		}
 	}
 }

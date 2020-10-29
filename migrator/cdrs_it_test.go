@@ -184,6 +184,6 @@ func testCdrITMigrateAndMove(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.CDRs])
 	}
 	//  else if cdrMigrator.stats[utils.CDRs] != 1 {
-	// 	t.Errorf("Expected 1, recived: %v", cdrMigrator.stats[utils.CDRs])
+	// 	t.Errorf("Expected 1, received: %v", cdrMigrator.stats[utils.CDRs])
 	// }
 }

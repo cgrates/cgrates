@@ -298,6 +298,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.TerminateAttemptsCfg: scfg.TerminateAttempts,
 		utils.AlterableFieldsCfg:   scfg.AlterableFields.AsSlice(),
 		utils.STIRCfg:              scfg.STIRCfg.AsMapInterface(),
+		utils.MinDurLowBalanceCfg:  "0",
 	}
 	if scfg.DebitInterval != 0 {
 		initialMP[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
