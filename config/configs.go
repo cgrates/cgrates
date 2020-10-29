@@ -84,8 +84,14 @@ func handleConfigSFolder(path string, w http.ResponseWriter) {
 		fmt.Fprintf(w, err.Error())
 		return
 	}
+	mp, err := cfg.AsMapInterface(cfg.generalCfg.RSRSep)
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
 	// convert the config into a json and send it
-	if _, err := w.Write([]byte(utils.ToJSON(cfg.AsMapInterface(cfg.generalCfg.RSRSep)))); err != nil {
+	if _, err := w.Write([]byte(utils.ToJSON(mp))); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
 			utils.ConfigSv1, err))
 	}

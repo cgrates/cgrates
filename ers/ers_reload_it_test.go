@@ -144,9 +144,9 @@ func testReloadVerifyFirstReload(t *testing.T) {
 		Section: config.ERsJson,
 	}, &reply); err != nil {
 		t.Error(err)
-	} else if reply["Enabled"] != true {
-		t.Errorf("Expecting: <true>, received: <%+v>", reply["Enabled"])
-	} else if readers, canConvert := reply["Readers"].([]interface{}); !canConvert {
+	} else if reply[utils.EnabledCfg] != true {
+		t.Errorf("Expecting: <true>, received: <%+v>", reply[utils.EnabledCfg])
+	} else if readers, canConvert := reply[utils.ReadersCfg].([]interface{}); !canConvert {
 		t.Errorf("Cannot cast Readers to slice")
 	} else if len(readers) != 3 { // 2 active readers and 1 default
 		t.Errorf("Expecting: <2>, received: <%+v>", len(readers))

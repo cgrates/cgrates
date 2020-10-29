@@ -2879,11 +2879,11 @@ func TestASRMarshal(t *testing.T) {
 	if b, err := asr.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
-		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
 	} else if err := nasr.LoadMarshaled(&jMarshaler, b); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(asr, nasr) {
-		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(asr), utils.ToJSON(nasr))
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(asr), utils.ToJSON(nasr))
 	}
 }
 
@@ -2899,11 +2899,11 @@ func TestACDMarshal(t *testing.T) {
 	if b, err := acd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
-		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
 	} else if err := nacd.LoadMarshaled(&jMarshaler, b); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(acd, nacd) {
-		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(acd), utils.ToJSON(nacd))
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(acd), utils.ToJSON(nacd))
 	}
 }
 
@@ -2919,11 +2919,11 @@ func TestTCDMarshal(t *testing.T) {
 	if b, err := tcd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
-		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
 	} else if err := ntcd.LoadMarshaled(&jMarshaler, b); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(tcd, ntcd) {
-		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(tcd), utils.ToJSON(ntcd))
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(tcd), utils.ToJSON(ntcd))
 	}
 }
 
@@ -2939,11 +2939,11 @@ func TestACCMarshal(t *testing.T) {
 	if b, err := acc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
-		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
 	} else if err := nacc.LoadMarshaled(&jMarshaler, b); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(acc, nacc) {
-		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(acc), utils.ToJSON(nacc))
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(acc), utils.ToJSON(nacc))
 	}
 }
 
@@ -2959,11 +2959,11 @@ func TestTCCMarshal(t *testing.T) {
 	if b, err := tcc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
-		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
 	} else if err := ntcc.LoadMarshaled(&jMarshaler, b); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(tcc, ntcc) {
-		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(tcc), utils.ToJSON(ntcc))
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(tcc), utils.ToJSON(ntcc))
 	}
 }
 
@@ -2980,11 +2980,11 @@ func TestPDDMarshal(t *testing.T) {
 	if b, err := pdd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
-		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
 	} else if err := ntdd.LoadMarshaled(&jMarshaler, b); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(pdd, ntdd) {
-		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(pdd), utils.ToJSON(ntdd))
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(pdd), utils.ToJSON(ntdd))
 	}
 }
 
@@ -3002,11 +3002,11 @@ func TestDCCMarshal(t *testing.T) {
 	if b, err := ddc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
-		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
 	} else if err := nddc.LoadMarshaled(&jMarshaler, b); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(ddc, nddc) {
-		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(ddc), utils.ToJSON(nddc))
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(ddc), utils.ToJSON(nddc))
 	}
 }
 
@@ -3025,11 +3025,11 @@ func TestStatSumMarshal(t *testing.T) {
 	if b, err := statSum.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
-		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
 	} else if err := nstatSum.LoadMarshaled(&jMarshaler, b); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(statSum, nstatSum) {
-		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(statSum), utils.ToJSON(nstatSum))
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(statSum), utils.ToJSON(nstatSum))
 	}
 }
 
@@ -3048,11 +3048,11 @@ func TestStatAverageMarshal(t *testing.T) {
 	if b, err := statAvg.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
-		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
 	} else if err := nstatAvg.LoadMarshaled(&jMarshaler, b); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(statAvg, nstatAvg) {
-		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(statAvg), utils.ToJSON(nstatAvg))
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(statAvg), utils.ToJSON(nstatAvg))
 	}
 }
 
@@ -3071,10 +3071,10 @@ func TestStatDistrictMarshal(t *testing.T) {
 	if b, err := statDistinct.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
-		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
 	} else if err := nStatDistinct.LoadMarshaled(&jMarshaler, b); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(statDistinct, nStatDistinct) {
-		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(statDistinct), utils.ToJSON(nStatDistinct))
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(statDistinct), utils.ToJSON(nStatDistinct))
 	}
 }

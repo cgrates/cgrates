@@ -80,15 +80,15 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		ConcurrentStrategy: utils.MetaBusy,
 	}
 	if !reflect.DeepEqual(expected, *mfCgrCfg.generalCfg) {
-		t.Errorf("Expected: %+v\n, recived: %+v", utils.ToJSON(expected), utils.ToJSON(*mfCgrCfg.generalCfg))
+		t.Errorf("Expected: %+v\n, received: %+v", utils.ToJSON(expected), utils.ToJSON(*mfCgrCfg.generalCfg))
 	}
 }
 
 func TestMfHttpAgentMultipleFields(t *testing.T) {
 	if len(mfCgrCfg.HttpAgentCfg()) != 2 {
-		t.Errorf("Expected: 2, recived: %+v", len(mfCgrCfg.HttpAgentCfg()))
+		t.Errorf("Expected: 2, received: %+v", len(mfCgrCfg.HttpAgentCfg()))
 	}
-	expected := []*HttpAgentCfg{
+	expected := HttpAgentCfgs{
 		{
 			ID:             "conecto1",
 			Url:            "/newConecto",
@@ -197,6 +197,6 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(mfCgrCfg.HttpAgentCfg(), expected) {
-		t.Errorf("Expected: %+v\n, recived: %+v", utils.ToJSON(expected), utils.ToJSON(mfCgrCfg.HttpAgentCfg()))
+		t.Errorf("Expected: %+v\n, received: %+v", utils.ToJSON(expected), utils.ToJSON(mfCgrCfg.HttpAgentCfg()))
 	}
 }

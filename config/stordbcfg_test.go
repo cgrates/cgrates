@@ -151,7 +151,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
 	}
 	cfgJSONStr = `{
 "stor_db": {
@@ -171,7 +171,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
 	}
 	cfgJSONStr = `{
 "stor_db": {
@@ -191,7 +191,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
 	}
 }
 

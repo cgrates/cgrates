@@ -311,61 +311,61 @@ func TestCgrCfgJSONDefaultsListen(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
 	if cgrCfg.DataDbCfg().DataDbType != "redis" {
-		t.Errorf("Expecting: redis , recived: %+v", cgrCfg.DataDbCfg().DataDbType)
+		t.Errorf("Expecting: redis , received: %+v", cgrCfg.DataDbCfg().DataDbType)
 	}
 	if cgrCfg.DataDbCfg().DataDbHost != "127.0.0.1" {
-		t.Errorf("Expecting: 127.0.0.1 , recived: %+v", cgrCfg.DataDbCfg().DataDbHost)
+		t.Errorf("Expecting: 127.0.0.1 , received: %+v", cgrCfg.DataDbCfg().DataDbHost)
 	}
 	if cgrCfg.DataDbCfg().DataDbPort != "6379" {
-		t.Errorf("Expecting: 6379 , recived: %+v", cgrCfg.DataDbCfg().DataDbPort)
+		t.Errorf("Expecting: 6379 , received: %+v", cgrCfg.DataDbCfg().DataDbPort)
 	}
 	if cgrCfg.DataDbCfg().DataDbName != "10" {
-		t.Errorf("Expecting: 10 , recived: %+v", cgrCfg.DataDbCfg().DataDbName)
+		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.DataDbCfg().DataDbName)
 	}
 	if cgrCfg.DataDbCfg().DataDbUser != "cgrates" {
-		t.Errorf("Expecting: cgrates , recived: %+v", cgrCfg.DataDbCfg().DataDbUser)
+		t.Errorf("Expecting: cgrates , received: %+v", cgrCfg.DataDbCfg().DataDbUser)
 	}
 	if cgrCfg.DataDbCfg().DataDbPass != "" {
-		t.Errorf("Expecting:  , recived: %+v", cgrCfg.DataDbCfg().DataDbPass)
+		t.Errorf("Expecting:  , received: %+v", cgrCfg.DataDbCfg().DataDbPass)
 	}
 	if len(cgrCfg.DataDbCfg().RmtConns) != 0 {
-		t.Errorf("Expecting:  0, recived: %+v", len(cgrCfg.DataDbCfg().RmtConns))
+		t.Errorf("Expecting:  0, received: %+v", len(cgrCfg.DataDbCfg().RmtConns))
 	}
 	if len(cgrCfg.DataDbCfg().RplConns) != 0 {
-		t.Errorf("Expecting:  0, recived: %+v", len(cgrCfg.DataDbCfg().RplConns))
+		t.Errorf("Expecting:  0, received: %+v", len(cgrCfg.DataDbCfg().RplConns))
 	}
 }
 
 func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 	if cgrCfg.StorDbCfg().Type != "mysql" {
-		t.Errorf("Expecting: mysql , recived: %+v", cgrCfg.StorDbCfg().Type)
+		t.Errorf("Expecting: mysql , received: %+v", cgrCfg.StorDbCfg().Type)
 	}
 	if cgrCfg.StorDbCfg().Host != "127.0.0.1" {
-		t.Errorf("Expecting: 127.0.0.1 , recived: %+v", cgrCfg.StorDbCfg().Host)
+		t.Errorf("Expecting: 127.0.0.1 , received: %+v", cgrCfg.StorDbCfg().Host)
 	}
 	if cgrCfg.StorDbCfg().Port != "3306" {
-		t.Errorf("Expecting: 3306 , recived: %+v", cgrCfg.StorDbCfg().Port)
+		t.Errorf("Expecting: 3306 , received: %+v", cgrCfg.StorDbCfg().Port)
 	}
 	if cgrCfg.StorDbCfg().Name != "cgrates" {
-		t.Errorf("Expecting: cgrates , recived: %+v", cgrCfg.StorDbCfg().Name)
+		t.Errorf("Expecting: cgrates , received: %+v", cgrCfg.StorDbCfg().Name)
 	}
 	if cgrCfg.StorDbCfg().User != "cgrates" {
-		t.Errorf("Expecting: cgrates , recived: %+v", cgrCfg.StorDbCfg().User)
+		t.Errorf("Expecting: cgrates , received: %+v", cgrCfg.StorDbCfg().User)
 	}
 	if cgrCfg.StorDbCfg().Password != "" {
-		t.Errorf("Expecting: , recived: %+v", cgrCfg.StorDbCfg().Password)
+		t.Errorf("Expecting: , received: %+v", cgrCfg.StorDbCfg().Password)
 	}
 	if cgrCfg.StorDbCfg().Opts[utils.MaxOpenConnsCfg] != 100. {
-		t.Errorf("Expecting: 100 , recived: %+v", cgrCfg.StorDbCfg().Opts[utils.MaxOpenConnsCfg])
+		t.Errorf("Expecting: 100 , received: %+v", cgrCfg.StorDbCfg().Opts[utils.MaxOpenConnsCfg])
 	}
 	if cgrCfg.StorDbCfg().Opts[utils.MaxIdleConnsCfg] != 10. {
-		t.Errorf("Expecting: 10 , recived: %+v", cgrCfg.StorDbCfg().Opts[utils.MaxIdleConnsCfg])
+		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.StorDbCfg().Opts[utils.MaxIdleConnsCfg])
 	}
 	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StringIndexedFields, []string{}) {
-		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().StringIndexedFields)
+		t.Errorf("Expecting: %+v , received: %+v", []string{}, cgrCfg.StorDbCfg().StringIndexedFields)
 	}
 	if !reflect.DeepEqual(cgrCfg.StorDbCfg().PrefixIndexedFields, []string{}) {
-		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().PrefixIndexedFields)
+		t.Errorf("Expecting: %+v , received: %+v", []string{}, cgrCfg.StorDbCfg().PrefixIndexedFields)
 	}
 }
 
@@ -1938,12 +1938,12 @@ func TestCgrCfgV1GetConfigSection(t *testing.T) {
 	}
 }`
 	expected := map[string]interface{}{
-		"HTTPListen":       ":2080",
-		"HTTPTLSListen":    "127.0.0.1:2280",
-		"RPCGOBListen":     ":2013",
-		"RPCGOBTLSListen":  "127.0.0.1:2023",
-		"RPCJSONListen":    ":2012",
-		"RPCJSONTLSListen": "127.0.0.1:2022",
+		"http":         ":2080",
+		"http_tls":     "127.0.0.1:2280",
+		"rpc_gob":      ":2013",
+		"rpc_gob_tls":  "127.0.0.1:2023",
+		"rpc_json":     ":2012",
+		"rpc_json_tls": "127.0.0.1:2022",
 	}
 	var rcv map[string]interface{}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
@@ -1951,7 +1951,7 @@ func TestCgrCfgV1GetConfigSection(t *testing.T) {
 	} else if err := cgrCfg.V1GetConfigSection(&SectionWithOpts{Section: LISTEN_JSN}, &rcv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected: %+v, received: %+v", expected, rcv)
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 

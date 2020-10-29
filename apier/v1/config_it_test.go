@@ -135,47 +135,41 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	exp := map[string]interface{}{
-		"Enabled":             true,
-		"ListenBijson":        "127.0.0.1:2014",
-		"ChargerSConns":       []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-		"RALsConns":           []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
-		"ResSConns":           []interface{}{utils.MetaLocalHost},
-		"ThreshSConns":        []interface{}{},
-		"StatSConns":          []interface{}{},
-		"RouteSConns":         []interface{}{utils.MetaLocalHost},
-		"AttrSConns":          []interface{}{utils.MetaLocalHost},
-		"CDRsConns":           []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
-		"ReplicationConns":    []interface{}{},
-		"MinDurLowBalance":    0.,
-		"SessionIndexes":      map[string]interface{}{"OriginID": true},
-		"ClientProtocol":      1.,
-		"TerminateAttempts":   5.,
-		"ChannelSyncInterval": 0.,
-		"DebitInterval":       0.,
-		"SessionTTL":          0.,
-		"SessionTTLLastUsed":  nil,
-		"SessionTTLMaxDelay":  nil,
-		"SessionTTLUsage":     nil,
-		"SessionTTLLastUsage": nil,
-		"StoreSCosts":         false,
-		"AlterableFields":     map[string]interface{}{},
-		"STIRCfg": map[string]interface{}{
-			"AllowedAttest": map[string]interface{}{
-				utils.META_ANY: map[string]interface{}{},
-			},
-			"DefaultAttest":      "A",
-			"PayloadMaxduration": -1.,
-			"PrivateKeyPath":     "",
-			"PublicKeyPath":      "",
+		"enabled":               true,
+		"channel_sync_interval": "0",
+		"alterable_fields":      []interface{}{},
+		"client_protocol":       1.,
+		"debit_interval":        "0",
+		"listen_bijson":         "127.0.0.1:2014",
+		"session_ttl":           "0",
+		"session_indexes":       []interface{}{utils.OriginID},
+		"attributes_conns":      []interface{}{utils.MetaLocalHost},
+		"cdrs_conns":            []interface{}{utils.MetaInternal},
+		"chargers_conns":        []interface{}{utils.MetaInternal},
+		"rals_conns":            []interface{}{utils.MetaInternal},
+		"replication_conns":     []interface{}{},
+		"resources_conns":       []interface{}{utils.MetaLocalHost},
+		"routes_conns":          []interface{}{utils.MetaLocalHost},
+		"scheduler_conns":       []interface{}{},
+		"thresholds_conns":      []interface{}{},
+		"stats_conns":           []interface{}{},
+		"min_dur_low_balance":   "0",
+		"stir": map[string]interface{}{
+			"allowed_attest":      []interface{}{utils.META_ANY},
+			"default_attest":      "A",
+			"payload_maxduration": "-1",
+			"privatekey_path":     "",
+			"publickey_path":      "",
 		},
-		"SchedulerConns": []interface{}{},
+		"store_session_costs": false,
+		"terminate_attempts":  5.,
 	}
 	if *encoding == utils.MetaGOB {
 		var empty []interface{}
-		exp["ReplicationConns"] = empty
-		exp["SchedulerConns"] = empty
-		exp["StatSConns"] = empty
-		exp["ThreshSConns"] = empty
+		exp["replication_conns"] = empty
+		exp["scheduler_conns"] = empty
+		exp["stats_conns"] = empty
+		exp["thresholds_conns"] = empty
 	}
 	var rpl map[string]interface{}
 	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{
@@ -190,40 +184,34 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 
 func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 	exp := map[string]interface{}{
-		"Enabled":             true,
-		"ListenBijson":        "127.0.0.1:2014",
-		"ChargerSConns":       []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-		"RALsConns":           []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
-		"ResSConns":           []interface{}{utils.MetaLocalHost},
-		"ThreshSConns":        []interface{}{},
-		"StatSConns":          []interface{}{},
-		"RouteSConns":         []interface{}{utils.MetaLocalHost},
-		"AttrSConns":          []interface{}{utils.MetaLocalHost},
-		"CDRsConns":           []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
-		"ReplicationConns":    []interface{}{},
-		"MinDurLowBalance":    0.,
-		"SessionIndexes":      map[string]interface{}{"OriginID": true},
-		"ClientProtocol":      1.,
-		"TerminateAttempts":   5.,
-		"ChannelSyncInterval": 0.,
-		"DebitInterval":       0.,
-		"SessionTTL":          0.,
-		"SessionTTLLastUsed":  nil,
-		"SessionTTLMaxDelay":  nil,
-		"SessionTTLUsage":     nil,
-		"SessionTTLLastUsage": nil,
-		"StoreSCosts":         false,
-		"AlterableFields":     map[string]interface{}{},
-		"STIRCfg": map[string]interface{}{
-			"AllowedAttest": map[string]interface{}{
-				utils.META_ANY: map[string]interface{}{},
-			},
-			"DefaultAttest":      "A",
-			"PayloadMaxduration": -1.,
-			"PrivateKeyPath":     "",
-			"PublicKeyPath":      "",
+		"enabled":               true,
+		"listen_bijson":         "127.0.0.1:2014",
+		"chargers_conns":        []interface{}{utils.MetaInternal},
+		"rals_conns":            []interface{}{utils.MetaInternal},
+		"resources_conns":       []interface{}{utils.MetaLocalHost},
+		"thresholds_conns":      []interface{}{},
+		"stats_conns":           []interface{}{},
+		"routes_conns":          []interface{}{utils.MetaLocalHost},
+		"attributes_conns":      []interface{}{utils.MetaLocalHost},
+		"cdrs_conns":            []interface{}{utils.MetaInternal},
+		"replication_conns":     []interface{}{},
+		"scheduler_conns":       []interface{}{},
+		"session_indexes":       []interface{}{"OriginID"},
+		"client_protocol":       1.,
+		"terminate_attempts":    5.,
+		"channel_sync_interval": "0",
+		"debit_interval":        "0",
+		"session_ttl":           "0",
+		"store_session_costs":   false,
+		"min_dur_low_balance":   "0",
+		"alterable_fields":      []interface{}{},
+		"stir": map[string]interface{}{
+			"allowed_attest":      []interface{}{utils.META_ANY},
+			"default_attest":      "A",
+			"payload_maxduration": "-1",
+			"privatekey_path":     "",
+			"publickey_path":      "",
 		},
-		"SchedulerConns": []interface{}{},
 	}
 	var rpl map[string]interface{}
 	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{
@@ -258,26 +246,26 @@ func testConfigSReloadConfigFromJSONEEs(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	eporter := map[string]interface{}{
-		"Attempts":      1.,
-		"AttributeSCtx": "",
-		"AttributeSIDs": []interface{}{},
-		"ExportPath":    "/var/spool/cgrates/ees",
-		"FieldSep":      ",",
-		"Fields":        []interface{}{},
-		"Filters":       []interface{}{},
-		"Flags":         map[string]interface{}{},
-		"ID":            "*default",
-		"Synchronous":   false,
-		"Tenant":        nil,
-		"Timezone":      "",
-		"Type":          "*none",
-		"Opts":          map[string]interface{}{},
+		"attempts":          1.,
+		"attribute_context": "",
+		"attribute_ids":     []interface{}{},
+		"export_path":       "/var/spool/cgrates/ees",
+		"field_separator":   ",",
+		"fields":            []interface{}{},
+		"filters":           []interface{}{},
+		"flags":             []interface{}{},
+		"id":                "*default",
+		"synchronous":       false,
+		"tenant":            "",
+		"timezone":          "",
+		"type":              "*none",
+		"opts":              map[string]interface{}{},
 	}
 	exp := map[string]interface{}{
-		"Enabled":         true,
-		"AttributeSConns": []interface{}{},
-		"Cache":           map[string]interface{}{"*file_csv": map[string]interface{}{"Limit": -1., "Precache": false, "Replicate": false, "StaticTTL": false, "TTL": 5000000000.}},
-		"Exporters":       []interface{}{eporter},
+		"enabled":          true,
+		"attributes_conns": []interface{}{},
+		"cache":            map[string]interface{}{"*file_csv": map[string]interface{}{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "ttl": "5s"}},
+		"exporters":        []interface{}{eporter},
 	}
 	var rpl map[string]interface{}
 	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{

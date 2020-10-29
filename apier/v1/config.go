@@ -43,9 +43,14 @@ func (cSv1 *ConfigSv1) ReloadConfigFromPath(args *config.ConfigReloadWithOpts, r
 	return cSv1.cfg.V1ReloadConfigFromPath(args, reply)
 }
 
-// ReloadConfigFromJSON reloads the sections of configz
+// ReloadConfigFromJSON reloads the sections of config
 func (cSv1 *ConfigSv1) ReloadConfigFromJSON(args *config.JSONReloadWithOpts, reply *string) (err error) {
 	return cSv1.cfg.V1ReloadConfigFromJSON(args, reply)
+}
+
+// ReloadConfigFromString reloads the sections of config
+func (cSv1 *ConfigSv1) ReloadConfigFromString(args *config.JSONStringReloadWithOpts, reply *string) (err error) {
+	return cSv1.cfg.V1ReloadConfigFromString(args, reply)
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC

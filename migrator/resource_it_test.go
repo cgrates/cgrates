@@ -219,7 +219,7 @@ func testResITMigrateAndMove(t *testing.T) {
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		} else if resMigrator.stats[utils.Resource] != 1 {
-			t.Errorf("Expected 1, recived: %v", resMigrator.stats[utils.Resource])
+			t.Errorf("Expected 1, received: %v", resMigrator.stats[utils.Resource])
 		}
 	}
 }

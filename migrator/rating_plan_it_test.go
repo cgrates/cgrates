@@ -222,7 +222,7 @@ func testRtPlITMigrateAndMove(t *testing.T) {
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		} else if rtplMigrator.stats[utils.RatingPlan] != 1 {
-			t.Errorf("Expected 1, recived: %v", rtplMigrator.stats[utils.RatingPlan])
+			t.Errorf("Expected 1, received: %v", rtplMigrator.stats[utils.RatingPlan])
 		}
 	}
 }

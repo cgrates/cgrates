@@ -95,7 +95,7 @@ func testDspThPingFailover(t *testing.T) {
 	}
 	allEngine2.stopEngine(t)
 	if err := dispEngine.RPC.Call(utils.ThresholdSv1Ping, &ev, &reply); err == nil {
-		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
+		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)
@@ -123,7 +123,7 @@ func testDspThProcessEventFailover(t *testing.T) {
 
 	if err := dispEngine.RPC.Call(utils.ThresholdSv1ProcessEvent, args,
 		&ids); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error NOT_FOUND but recived %v and reply %v\n", err, ids)
+		t.Errorf("Expected error NOT_FOUND but received %v and reply %v\n", err, ids)
 	}
 	allEngine2.stopEngine(t)
 	if err := dispEngine.RPC.Call(utils.ThresholdSv1ProcessEvent, args, &ids); err != nil {

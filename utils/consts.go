@@ -2234,7 +2234,6 @@ const (
 	TpIDCfg            = "tpid"
 	DataPathCfg        = "data_path"
 	DisableReverseCfg  = "disable_reverse"
-	FieldSeparatorCfg  = "field_separator"
 	CachesConnsCfg     = "caches_conns"
 	SchedulerConnsCfg  = "scheduler_conns"
 	GapiCredentialsCfg = "gapi_credentials"

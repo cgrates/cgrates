@@ -72,7 +72,7 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 		utils.TpIDCfg:            "",
 		utils.DataPathCfg:        "./",
 		utils.DisableReverseCfg:  false,
-		utils.FieldSeparatorCfg:  ",",
+		utils.FieldSepCfg:        ",",
 		utils.CachesConnsCfg:     []string{"*localhost"},
 		utils.SchedulerConnsCfg:  []string{"*localhost"},
 		utils.GapiCredentialsCfg: json.RawMessage(`".gapi/credentials.json"`),

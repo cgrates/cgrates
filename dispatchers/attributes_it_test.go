@@ -122,7 +122,7 @@ func testDspAttrPingFailover(t *testing.T) {
 	allEngine2.stopEngine(t)
 	reply = ""
 	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err == nil {
-		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
+		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)
@@ -160,7 +160,7 @@ func testDspAttrPingFailoverNotFoundHost(t *testing.T) {
 	}
 	allEngine2.stopEngine(t) // stop the engine and we expect to get error
 	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err == nil {
-		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
+		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine2.startEngine(t)
 	reply = ""
@@ -202,7 +202,7 @@ func testDspAttrPingFailover2(t *testing.T) {
 	allEngine2.stopEngine(t)
 	reply = ""
 	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err == nil {
-		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
+		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)

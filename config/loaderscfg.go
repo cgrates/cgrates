@@ -211,21 +211,19 @@ func (lData *LoaderDataType) AsMapInterface(separator string) (initialMP map[str
 
 func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.IdCfg:             l.Id,
-		utils.EnabledCfg:        l.Enabled,
-		utils.DryRunCfg:         l.DryRun,
-		utils.LockFileNameCfg:   l.LockFileName,
-		utils.FieldSeparatorCfg: l.FieldSeparator,
-		utils.TpInDirCfg:        l.TpInDir,
-		utils.TpOutDirCfg:       l.TpOutDir,
+		utils.IdCfg:           l.Id,
+		utils.EnabledCfg:      l.Enabled,
+		utils.DryRunCfg:       l.DryRun,
+		utils.LockFileNameCfg: l.LockFileName,
+		utils.FieldSepCfg:     l.FieldSeparator,
+		utils.TpInDirCfg:      l.TpInDir,
+		utils.TpOutDirCfg:     l.TpOutDir,
 	}
-	if l.Tenant != nil {
-		tenant := make([]string, len(l.Tenant))
-		for i, item := range l.Tenant {
-			tenant[i] = item.Rules
-		}
-		initialMP[utils.TenantCfg] = strings.Join(tenant, utils.EmptyString)
+	tenant := make([]string, len(l.Tenant))
+	for i, item := range l.Tenant {
+		tenant[i] = item.Rules
 	}
+	initialMP[utils.TenantCfg] = strings.Join(tenant, utils.EmptyString)
 	if l.Data != nil {
 		data := make([]map[string]interface{}, len(l.Data))
 		for i, item := range l.Data {

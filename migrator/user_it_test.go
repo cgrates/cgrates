@@ -204,6 +204,6 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		"", true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expUsrIdx, usridx) {
-		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expUsrIdx), utils.ToJSON(usridx))
+		t.Errorf("Expected %v, received: %v", utils.ToJSON(expUsrIdx), utils.ToJSON(usridx))
 	}
 }

@@ -250,7 +250,7 @@ func testDispatcherSRemDispatcherProfile(t *testing.T) {
 	if err := dispatcherRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "Dsp1"},
 		&result); err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
 
@@ -370,7 +370,7 @@ func testDispatcherSRemDispatcherHost(t *testing.T) {
 	if err := dispatcherRPC.Call(utils.APIerSv1RemoveDispatcherHost,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "DspHst1"},
 		&result); err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
 

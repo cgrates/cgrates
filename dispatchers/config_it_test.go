@@ -61,12 +61,12 @@ func TestDspConfigIT(t *testing.T) {
 
 func testDspConfigSv1GetJSONSection(t *testing.T) {
 	expected := map[string]interface{}{
-		"HTTPListen":       ":6080",
-		"HTTPTLSListen":    "127.0.0.1:2280",
-		"RPCGOBListen":     ":6013",
-		"RPCGOBTLSListen":  "127.0.0.1:2023",
-		"RPCJSONListen":    ":6012",
-		"RPCJSONTLSListen": "127.0.0.1:2022",
+		"http":         ":6080",
+		"http_tls":     "127.0.0.1:2280",
+		"rpc_gob":      ":6013",
+		"rpc_gob_tls":  "127.0.0.1:2023",
+		"rpc_json":     ":6012",
+		"rpc_json_tls": "127.0.0.1:2022",
 	}
 	var reply map[string]interface{}
 	if err := dispEngine.RPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{
@@ -78,6 +78,6 @@ func testDspConfigSv1GetJSONSection(t *testing.T) {
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("Expected: %+v, received: %+v", expected, reply)
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }

@@ -53,6 +53,7 @@ var (
 		testCGRConfigReloadFreeswitchAgent,
 		testCgrCfgV1ReloadConfigSection,
 		testCGRConfigReloadConfigFromJSONSessionS,
+		testCGRConfigReloadConfigFromStringSessionS,
 		testCGRConfigReloadAll,
 		testHttpHandlerConfigSForNotExistFile,
 		testHttpHandlerConfigSForFile,
@@ -585,310 +586,132 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 	}
 	content := []interface{}{
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.ToR",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "ToR",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.2",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.ToR",
+			"mandatory": true,
+			"tag":       "ToR",
+			"type":      "*variable",
+			"value":     "~*req.2",
 		},
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.OriginID",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "OriginID",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.3",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.OriginID",
+			"mandatory": true,
+			"tag":       "OriginID",
+			"type":      "*variable",
+			"value":     "~*req.3",
 		},
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.RequestType",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "RequestType",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.4",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.RequestType",
+			"mandatory": true,
+			"tag":       "RequestType",
+			"type":      "*variable",
+			"value":     "~*req.4",
 		},
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.Tenant",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "Tenant",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.6",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.Tenant",
+			"mandatory": true,
+			"tag":       "Tenant",
+			"type":      "*variable",
+			"value":     "~*req.6",
 		},
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.Category",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "Category",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.7",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.Category",
+			"mandatory": true,
+			"tag":       "Category",
+			"type":      "*variable",
+			"value":     "~*req.7",
 		},
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.Account",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "Account",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.8",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.Account",
+			"mandatory": true,
+			"tag":       "Account",
+			"type":      "*variable",
+			"value":     "~*req.8",
 		},
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.Subject",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "Subject",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.9",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.Subject",
+			"mandatory": true,
+			"tag":       "Subject",
+			"type":      "*variable",
+			"value":     "~*req.9",
 		},
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.Destination",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "Destination",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.10",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.Destination",
+			"mandatory": true,
+			"tag":       "Destination",
+			"type":      "*variable",
+			"value":     "~*req.10",
 		},
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.SetupTime",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "SetupTime",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.11",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.SetupTime",
+			"mandatory": true,
+			"tag":       "SetupTime",
+			"type":      "*variable",
+			"value":     "~*req.11",
 		},
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.AnswerTime",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "AnswerTime",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.12",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.AnswerTime",
+			"mandatory": true,
+			"tag":       "AnswerTime",
+			"type":      "*variable",
+			"value":     "~*req.12",
 		},
 		map[string]interface{}{
-			"AttributeID":      "",
-			"Blocker":          false,
-			"CostShiftDigits":  0,
-			"Path":             "*cgreq.Usage",
-			"Filters":          nil,
-			"Layout":           time.RFC3339,
-			"Mandatory":        true,
-			"MaskDestID":       "",
-			"MaskLen":          0,
-			"NewBranch":        false,
-			"Padding":          "",
-			"RoundingDecimals": nil,
-			"Strip":            "",
-			"Tag":              "Usage",
-			"Timezone":         "",
-			"Type":             "*variable",
-			"Value": []interface{}{
-				map[string]interface{}{
-					"Rules": "~*req.13",
-				}},
-			"Width": 0,
+			"path":      "*cgreq.Usage",
+			"mandatory": true,
+			"tag":       "Usage",
+			"type":      "*variable",
+			"value":     "~*req.13",
 		},
 	}
 	expected := map[string]interface{}{
-		"Enabled": true,
-		"Readers": []interface{}{
+		"enabled": true,
+		"readers": []interface{}{
 			map[string]interface{}{
-				"PartialCacheExpiryAction": "",
-				"PartialRecordCache":       0,
-				"CacheDumpFields":          []interface{}{},
-				"ConcurrentReqs":           1024,
-				"Fields":                   content,
-				"FieldSep":                 ",",
-				"HeaderDefineChar":         ":",
-				"Filters":                  []interface{}{},
-				"Flags":                    map[string]interface{}{},
-				"FailedCallsPrefix":        "",
-				"ID":                       "*default",
-				"ProcessedPath":            "/var/spool/cgrates/ers/out",
-				"RowLength":                0,
-				"RunDelay":                 0,
-				"SourcePath":               "/var/spool/cgrates/ers/in",
-				"Tenant":                   nil,
-				"Timezone":                 "",
-				"Type":                     utils.META_NONE,
-				"XmlRootPath":              []interface{}{utils.EmptyString},
-				"Opts":                     make(map[string]interface{}),
+				"partial_cache_expiry_action": "",
+				"partial_record_cache":        "0",
+				"cache_dump_fields":           []interface{}{},
+				"concurrent_requests":         1024,
+				"fields":                      content,
+				"field_separator":             ",",
+				"header_define_character":     ":",
+				"filters":                     []string{},
+				"flags":                       []string{},
+				"failed_calls_prefix":         "",
+				"id":                          "*default",
+				"processed_path":              "/var/spool/cgrates/ers/out",
+				"row_length":                  0,
+				"run_delay":                   "0",
+				"source_path":                 "/var/spool/cgrates/ers/in",
+				"tenant":                      "",
+				"timezone":                    "",
+				"type":                        utils.META_NONE,
+				"xml_root_path":               []interface{}{utils.EmptyString},
+				"opts":                        make(map[string]interface{}),
 			},
 			map[string]interface{}{
-				"CacheDumpFields":  []interface{}{},
-				"ConcurrentReqs":   1024,
-				"FieldSep":         ",",
-				"HeaderDefineChar": ":",
-				"Filters":          nil,
-				"Flags": map[string]interface{}{
-					"*dryrun": map[string][]interface{}{},
-				},
-				"FailedCallsPrefix":        "",
-				"PartialCacheExpiryAction": "",
-				"PartialRecordCache":       0,
-				"ID":                       "file_reader1",
-				"ProcessedPath":            "/tmp/ers/out",
-				"RowLength":                0,
-				"RunDelay":                 -1.,
-				"SourcePath":               "/tmp/ers/in",
-				"Tenant":                   nil,
-				"Timezone":                 "",
-				"Type":                     "*file_csv",
-				"XmlRootPath":              []interface{}{utils.EmptyString},
-				"Fields":                   content,
-				"Opts":                     make(map[string]interface{}),
+				"cache_dump_fields":           []interface{}{},
+				"concurrent_requests":         1024,
+				"field_separator":             ",",
+				"header_define_character":     ":",
+				"filters":                     []string{},
+				"flags":                       []string{"*dryrun"},
+				"failed_calls_prefix":         "",
+				"partial_cache_expiry_action": "",
+				"partial_record_cache":        "0",
+				"id":                          "file_reader1",
+				"processed_path":              "/tmp/ers/out",
+				"row_length":                  0,
+				"run_delay":                   "-1",
+				"source_path":                 "/tmp/ers/in",
+				"tenant":                      "",
+				"timezone":                    "",
+				"type":                        "*file_csv",
+				"xml_root_path":               []interface{}{utils.EmptyString},
+				"fields":                      content,
+				"opts":                        make(map[string]interface{}),
 			},
 		},
-		"SessionSConns": []string{
+		"sessions_conns": []string{
 			utils.MetaLocalHost,
 		},
 	}
@@ -971,6 +794,66 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
+	}
+}
+
+func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.RalsCfg().Enabled = true
+	cfg.ChargerSCfg().Enabled = true
+	cfg.CdrsCfg().Enabled = true
+	var reply string
+	if err = cfg.V1ReloadConfigFromString(&JSONStringReloadWithOpts{
+		JSON: `{"sessions":{
+				"enabled":          true,
+				"resources_conns":  ["*localhost"],
+				"routes_conns":     ["*localhost"],
+				"attributes_conns": ["*localhost"],
+				"rals_conns":       ["*internal"],
+				"cdrs_conns":       ["*internal"],
+				"chargers_conns":   ["*localhost"]
+				}}`}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	expAttr := &SessionSCfg{
+		Enabled:       true,
+		ListenBijson:  "127.0.0.1:2014",
+		ChargerSConns: []string{utils.MetaLocalHost},
+		RALsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		ResSConns:     []string{utils.MetaLocalHost},
+		ThreshSConns:  []string{},
+		StatSConns:    []string{},
+		RouteSConns:   []string{utils.MetaLocalHost},
+		AttrSConns:    []string{utils.MetaLocalHost},
+		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+
+		ReplicationConns:  []string{},
+		SessionIndexes:    utils.NewStringMap(),
+		ClientProtocol:    1,
+		TerminateAttempts: 5,
+		AlterableFields:   utils.NewStringSet([]string{}),
+		STIRCfg: &STIRcfg{
+			AllowedAttest:      utils.NewStringSet([]string{utils.META_ANY}),
+			PayloadMaxduration: -1,
+			DefaultAttest:      "A",
+		},
+		SchedulerConns: []string{},
+	}
+	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
+	}
+
+	var rcv string
+	expected := `{"alterable_fields":[],"attributes_conns":["*localhost"],"cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":1,"debit_interval":"0","enabled":true,"listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","rals_conns":["*internal"],"replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"scheduler_conns":[],"session_indexes":[],"session_ttl":"0","stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}`
+	if err := cfg.V1GetConfigSectionString(&SectionWithOpts{Section: SessionSJson}, &rcv); err != nil {
+		t.Error(err)
+	} else if expected != rcv {
+		t.Errorf("Expected: %+q, \n received: %+q", expected, rcv)
 	}
 }
 
@@ -1091,7 +974,11 @@ func testHttpHandlerConfigSForFolder(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	str := utils.ToJSON(cfg.AsMapInterface(cfg.generalCfg.RSRSep))
+	mp, err := cfg.AsMapInterface(cfg.generalCfg.RSRSep)
+	if err != nil {
+		t.Fatal(err)
+	}
+	str := utils.ToJSON(mp)
 	// we compare the length of the string because flags is a map and we receive it in different order
 	if len(str) != len(string(body)) {
 		t.Errorf("Expected %s ,\n\n received: %s ", str, string(body))

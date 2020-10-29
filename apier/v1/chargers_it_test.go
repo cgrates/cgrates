@@ -479,7 +479,7 @@ func testChargerSRemChargerProfile(t *testing.T) {
 	}
 	if err := chargerRPC.Call(utils.APIerSv1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &resp); err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
 

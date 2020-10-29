@@ -180,7 +180,7 @@ func testDspSessionPingFailover(t *testing.T) {
 	}
 	allEngine2.stopEngine(t)
 	if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &ev, &reply); err == nil {
-		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
+		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)
@@ -330,7 +330,7 @@ func testDspGetSessions(t *testing.T) {
 		&filtr, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != 3 {
-		t.Errorf("Expected 3 active sessions recived %v", reply)
+		t.Errorf("Expected 3 active sessions received %v", reply)
 	}
 	var rply []*sessions.ExternalSession
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessions,
@@ -344,12 +344,12 @@ func testDspGetSessions(t *testing.T) {
 		&filtr, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != 0 {
-		t.Errorf("Expected no pasive sessions recived %v", reply)
+		t.Errorf("Expected no pasive sessions received %v", reply)
 	}
 	rply = nil
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessions,
 		&filtr, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Expected %v recived %v with reply %s", utils.ErrNotFound, err, utils.ToJSON(rply))
+		t.Fatalf("Expected %v received %v with reply %s", utils.ErrNotFound, err, utils.ToJSON(rply))
 	}
 }
 
@@ -780,7 +780,7 @@ func testDspSessionReplicate(t *testing.T) {
 		new(utils.SessionFilter), &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 3 {
-		t.Errorf("Expected 3 sessions recived %v", repl)
+		t.Errorf("Expected 3 sessions received %v", repl)
 	}
 }
 
@@ -800,13 +800,13 @@ func testDspSessionPassive(t *testing.T) {
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
-		t.Errorf("Expected no passive sessions recived %v", repl)
+		t.Errorf("Expected no passive sessions received %v", repl)
 	}
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 3 {
-		t.Errorf("Expected 3 active sessions recived %v", repl)
+		t.Errorf("Expected 3 active sessions received %v", repl)
 	}
 
 	var rply []*sessions.ExternalSession
@@ -871,13 +871,13 @@ func testDspSessionPassive(t *testing.T) {
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 1 {
-		t.Errorf("Expected 1 passive sessions recived %v", repl)
+		t.Errorf("Expected 1 passive sessions received %v", repl)
 	}
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
-		t.Errorf("Expected no active sessions recived %v", repl)
+		t.Errorf("Expected no active sessions received %v", repl)
 	}
 }
 
@@ -902,13 +902,13 @@ func testDspSessionForceDisconect(t *testing.T) {
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
-		t.Errorf("Expected no passive sessions recived %v", repl)
+		t.Errorf("Expected no passive sessions received %v", repl)
 	}
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 3 {
-		t.Errorf("Expected 3 active sessions recived %v", repl)
+		t.Errorf("Expected 3 active sessions received %v", repl)
 	}
 
 	var rply []*sessions.ExternalSession
@@ -930,13 +930,13 @@ func testDspSessionForceDisconect(t *testing.T) {
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
-		t.Errorf("Expected 1 passive sessions recived %v", repl)
+		t.Errorf("Expected 1 passive sessions received %v", repl)
 	}
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
-		t.Errorf("Expected no active sessions recived %v", repl)
+		t.Errorf("Expected no active sessions received %v", repl)
 	}
 }
 
@@ -982,7 +982,7 @@ func testDspSessionProcessEvent3(t *testing.T) {
 		}, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
-		t.Errorf("Expected no active sessions recived %v", repl)
+		t.Errorf("Expected no active sessions received %v", repl)
 	}
 }
 

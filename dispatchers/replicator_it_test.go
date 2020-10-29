@@ -119,7 +119,7 @@ func testDspRplPingFailover(t *testing.T) {
 	allEngine2.stopEngine(t)
 	reply = utils.EmptyString
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1Ping, &ev, &reply); err == nil {
-		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
+		t.Errorf("Expected error but received %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)

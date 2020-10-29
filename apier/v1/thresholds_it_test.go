@@ -552,11 +552,11 @@ func testV1TSRemoveThresholdProfile(t *testing.T) {
 	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Recived %s and the error:%+v", utils.ToJSON(sqp), err)
+		t.Errorf("Received %s and the error:%+v", utils.ToJSON(sqp), err)
 	}
 	if err := tSv1Rpc.Call(utils.APIerSv1RemoveThresholdProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
 

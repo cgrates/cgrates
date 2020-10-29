@@ -228,7 +228,7 @@ func testSupITMigrateAndMove(t *testing.T) {
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		} else if supMigrator.stats[utils.Routes] != 1 {
-			t.Errorf("Expected 1, recived: %v", supMigrator.stats[utils.Routes])
+			t.Errorf("Expected 1, received: %v", supMigrator.stats[utils.Routes])
 		}
 	}
 }

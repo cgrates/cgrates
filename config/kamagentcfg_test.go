@@ -59,12 +59,12 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 	if err := kamcocfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(kamcocfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, kamcocfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, kamcocfg)
 	}
 	if err := kamcocfg.loadFromJsonCfg(new(KamConnJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(kamcocfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, kamcocfg)
+		t.Errorf("Expected: %+v ,received: %+v", expected, kamcocfg)
 	}
 	json := &KamConnJsonCfg{
 		Address:    utils.StringPointer("127.0.0.1:8448"),
@@ -77,7 +77,7 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 	if err = kamcocfg.loadFromJsonCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, kamcocfg) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(kamcocfg))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(kamcocfg))
 	}
 }
 

@@ -951,12 +951,12 @@ func testAPIerSv1GetRatingProfile(t *testing.T) {
 	}
 	attrGetRatingPlan.Subject = utils.EmptyString
 	if err := rater.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err == nil {
-		t.Errorf("Expected error on APIerSv1.GetRatingProfile, recived : %+v", rpl)
+		t.Errorf("Expected error on APIerSv1.GetRatingProfile, received : %+v", rpl)
 	}
 	attrGetRatingPlan.Subject = "dan"
 	attrGetRatingPlan.Tenant = "other_tenant"
 	if err := rater.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error on APIerSv1.GetRatingProfile, recived : %+v", err)
+		t.Errorf("Expected error on APIerSv1.GetRatingProfile, received : %+v", err)
 	}
 
 	expectedIds := []string{"call:dan", "call:*any"}
@@ -1829,7 +1829,7 @@ func testApierGetCallCostLog(t *testing.T) {
 	if err := rater.Call(utils.APIerSv1GetEventCost, &attrs, &cc); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cc) {
-		t.Errorf("Expecting %s ,recived %s", utils.ToJSON(expected), utils.ToJSON(cc))
+		t.Errorf("Expecting %s ,received %s", utils.ToJSON(expected), utils.ToJSON(cc))
 	}
 }
 

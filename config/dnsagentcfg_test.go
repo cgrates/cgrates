@@ -81,12 +81,12 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	if err := dareq.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
+		t.Errorf("Expected: %+v ,received: %+v", expected, dareq)
 	}
 	if err := dareq.loadFromJsonCfg(new(ReqProcessorJsnCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
+		t.Errorf("Expected: %+v ,received: %+v", expected, dareq)
 	}
 	json := &ReqProcessorJsnCfg{
 		ID:      utils.StringPointer("cgrates"),
@@ -103,7 +103,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	if err = dareq.loadFromJsonCfg(json, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dareq) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dareq))
+		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(dareq))
 	}
 }
 

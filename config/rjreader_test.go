@@ -59,7 +59,7 @@ func TestEnvRawJsonReadByte(t *testing.T) {
 		rply = append(rply, bit)
 	}
 	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 }
 
@@ -80,7 +80,7 @@ a/*comment*/b`))
 	if rply, err := raw.ReadByte(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 	expected = (byte)('b')
 	if r, err := raw.consumeComent('*'); err != nil {
@@ -91,7 +91,7 @@ a/*comment*/b`))
 	if rply, err := raw.ReadByte(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 }
 
@@ -103,12 +103,12 @@ func TestEnvRawJsonReadByteWC(t *testing.T) {
 	if rply, err := raw.ReadByteWC(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 	if rply, err := raw.ReadByteWC(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 }
 
@@ -120,23 +120,23 @@ func TestEnvRawJsonPeekByteWC(t *testing.T) {
 	if rply, err := raw.PeekByteWC(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 	if rply, err := raw.ReadByteWC(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 	expected = (byte)('b')
 	if rply, err := raw.PeekByteWC(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 	if rply, err := raw.ReadByteWC(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 }
 
@@ -148,7 +148,7 @@ func TestEnvRawJsonreadFirstNonWhiteSpace(t *testing.T) {
 	if rply, err := raw.readFirstNonWhiteSpace(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
 }
 
@@ -171,7 +171,7 @@ func TestEnvReaderRead(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %+v\n, recived: %+v", (string(expected)), (string(rply)))
+		t.Errorf("Expected: %+v\n, received: %+v", (string(expected)), (string(rply)))
 	}
 }
 
@@ -195,7 +195,7 @@ func TestEnvReaderRead2(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %+q\n, recived: %+q", (string(expected)), (string(rply)))
+		t.Errorf("Expected: %+q\n, received: %+q", (string(expected)), (string(rply)))
 	}
 }
 
@@ -207,7 +207,7 @@ func TestEnvReaderreadEnvName(t *testing.T) {
 	} else if endindx != 9 {
 		t.Errorf("Wrong endindx returned %v", endindx)
 	} else if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %+v, recived: %+v", (string(expected)), (string(rply)))
+		t.Errorf("Expected: %+v, received: %+v", (string(expected)), (string(rply)))
 	}
 	expected = []byte("Var2_TEST")
 	if rply, endindx, err := envR.readEnvName(12); err != nil {
@@ -215,7 +215,7 @@ func TestEnvReaderreadEnvName(t *testing.T) {
 	} else if endindx != 21 {
 		t.Errorf("Wrong endindx returned %v", endindx)
 	} else if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %+v, recived: %+v", (string(expected)), (string(rply)))
+		t.Errorf("Expected: %+v, received: %+v", (string(expected)), (string(rply)))
 	}
 }
 
@@ -241,14 +241,14 @@ func TestEnvReadercheckMeta(t *testing.T) {
 	envR = NewRjReaderFromBytes([]byte("*enva:Var"))
 	envR.indx = 1
 	if envR.checkMeta() {
-		t.Errorf("Expectiv to get false recived true")
+		t.Errorf("Expectiv to get false received true")
 	}
 }
 
 func TestIsNewLine(t *testing.T) {
 	for char, expected := range map[byte]bool{'a': false, '\n': true, ' ': false, '\t': false, '\r': true} {
 		if rply := isNewLine(char); expected != rply {
-			t.Errorf("Expected: %+v, recived: %+v", expected, rply)
+			t.Errorf("Expected: %+v, received: %+v", expected, rply)
 		}
 	}
 }
@@ -256,7 +256,7 @@ func TestIsNewLine(t *testing.T) {
 func TestIsWhiteSpace(t *testing.T) {
 	for char, expected := range map[byte]bool{'a': false, '\n': true, ' ': true, '\t': true, '\r': true, 0: true, '1': false} {
 		if rply := isWhiteSpace(char); expected != rply {
-			t.Errorf("Expected: %+v, recived: %+v", expected, rply)
+			t.Errorf("Expected: %+v, received: %+v", expected, rply)
 		}
 	}
 }
@@ -264,21 +264,21 @@ func TestIsWhiteSpace(t *testing.T) {
 func TestReadEnv(t *testing.T) {
 	key := "TESTVAR2"
 	if _, err := ReadEnv(key); err == nil || err.Error() != utils.ErrEnvNotFound(key).Error() {
-		t.Errorf("Expected: %+v, recived: %+v", utils.ErrEnvNotFound(key), err)
+		t.Errorf("Expected: %+v, received: %+v", utils.ErrEnvNotFound(key), err)
 	}
 	expected := "cgRates"
 	os.Setenv(key, expected)
 	if rply, err := ReadEnv(key); err != nil {
 		t.Error(err)
 	} else if rply != expected {
-		t.Errorf("Expected: %+v, recived: %+v", expected, rply)
+		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
 }
 
 func TestIsAlfanum(t *testing.T) {
 	for char, expected := range map[byte]bool{'a': true, '\n': false, ' ': false, '\t': false, '\r': false, 0: false, '1': true, 'Q': true, '9': true} {
 		if rply := isAlfanum(char); expected != rply {
-			t.Errorf("Expected: %+v, recived: %+v", expected, rply)
+			t.Errorf("Expected: %+v, received: %+v", expected, rply)
 		}
 	}
 }

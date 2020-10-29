@@ -914,7 +914,7 @@ func (cfg *CGRConfig) AsteriskAgentCfg() *AsteriskAgentCfg {
 }
 
 // HttpAgentCfg returns the config for HttpAgent
-func (cfg *CGRConfig) HttpAgentCfg() []*HttpAgentCfg {
+func (cfg *CGRConfig) HttpAgentCfg() HttpAgentCfgs {
 	cfg.lks[HttpAgentJson].Lock()
 	defer cfg.lks[HttpAgentJson].Unlock()
 	return cfg.httpAgentCfg
@@ -1087,14 +1087,14 @@ func (cfg *CGRConfig) SIPAgentCfg() *SIPAgentCfg {
 }
 
 // RPCConns reads the RPCConns configuration
-func (cfg *CGRConfig) RPCConns() map[string]*RPCConn {
+func (cfg *CGRConfig) RPCConns() RpcConns {
 	cfg.lks[RPCConnsJsonName].RLock()
 	defer cfg.lks[RPCConnsJsonName].RUnlock()
 	return cfg.rpcConns
 }
 
 // TemplatesCfg returns the config for templates
-func (cfg *CGRConfig) TemplatesCfg() map[string][]*FCTemplate {
+func (cfg *CGRConfig) TemplatesCfg() FcTemplates {
 	cfg.lks[TemplatesJson].Lock()
 	defer cfg.lks[TemplatesJson].Unlock()
 	return cfg.templates
@@ -1137,81 +1137,93 @@ func (cfg *CGRConfig) V1GetConfigSection(args *SectionWithOpts, reply *map[strin
 	var jsonString string
 	switch args.Section {
 	case GENERAL_JSN:
-		jsonString = utils.ToJSON(cfg.GeneralCfg())
+		jsonString = utils.ToJSON(cfg.GeneralCfg().AsMapInterface())
 	case DATADB_JSN:
-		jsonString = utils.ToJSON(cfg.DataDbCfg())
+		var datadb map[string]interface{}
+		if datadb, err = cfg.DataDbCfg().AsMapInterface(); err != nil {
+			return
+		}
+		jsonString = utils.ToJSON(datadb)
 	case STORDB_JSN:
-		jsonString = utils.ToJSON(cfg.StorDbCfg())
+		jsonString = utils.ToJSON(cfg.StorDbCfg().AsMapInterface())
 	case TlsCfgJson:
-		jsonString = utils.ToJSON(cfg.TlsCfg())
+		jsonString = utils.ToJSON(cfg.TlsCfg().AsMapInterface())
 	case CACHE_JSN:
-		jsonString = utils.ToJSON(cfg.CacheCfg())
+		jsonString = utils.ToJSON(cfg.CacheCfg().AsMapInterface())
 	case LISTEN_JSN:
-		jsonString = utils.ToJSON(cfg.ListenCfg())
+		jsonString = utils.ToJSON(cfg.ListenCfg().AsMapInterface())
 	case HTTP_JSN:
-		jsonString = utils.ToJSON(cfg.HTTPCfg())
+		jsonString = utils.ToJSON(cfg.HTTPCfg().AsMapInterface())
 	case FilterSjsn:
-		jsonString = utils.ToJSON(cfg.FilterSCfg())
+		jsonString = utils.ToJSON(cfg.FilterSCfg().AsMapInterface())
 	case RALS_JSN:
-		jsonString = utils.ToJSON(cfg.RalsCfg())
+		jsonString = utils.ToJSON(cfg.RalsCfg().AsMapInterface())
 	case SCHEDULER_JSN:
-		jsonString = utils.ToJSON(cfg.SchedulerCfg())
+		jsonString = utils.ToJSON(cfg.SchedulerCfg().AsMapInterface())
 	case CDRS_JSN:
-		jsonString = utils.ToJSON(cfg.CdrsCfg())
+		jsonString = utils.ToJSON(cfg.CdrsCfg().AsMapInterface())
 	case SessionSJson:
-		jsonString = utils.ToJSON(cfg.SessionSCfg())
+		jsonString = utils.ToJSON(cfg.SessionSCfg().AsMapInterface())
 	case FreeSWITCHAgentJSN:
-		jsonString = utils.ToJSON(cfg.FsAgentCfg())
+		jsonString = utils.ToJSON(cfg.FsAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
 	case KamailioAgentJSN:
-		jsonString = utils.ToJSON(cfg.KamAgentCfg())
+		jsonString = utils.ToJSON(cfg.KamAgentCfg().AsMapInterface())
 	case AsteriskAgentJSN:
-		jsonString = utils.ToJSON(cfg.AsteriskAgentCfg())
+		jsonString = utils.ToJSON(cfg.AsteriskAgentCfg().AsMapInterface())
 	case DA_JSN:
-		jsonString = utils.ToJSON(cfg.DiameterAgentCfg())
+		jsonString = utils.ToJSON(cfg.DiameterAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
 	case RA_JSN:
-		jsonString = utils.ToJSON(cfg.RadiusAgentCfg())
+		jsonString = utils.ToJSON(cfg.RadiusAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
 	case DNSAgentJson:
-		jsonString = utils.ToJSON(cfg.DNSAgentCfg())
+		jsonString = utils.ToJSON(cfg.DNSAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
 	case ATTRIBUTE_JSN:
-		jsonString = utils.ToJSON(cfg.AttributeSCfg())
+		jsonString = utils.ToJSON(cfg.AttributeSCfg().AsMapInterface())
 	case ChargerSCfgJson:
-		jsonString = utils.ToJSON(cfg.ChargerSCfg())
+		jsonString = utils.ToJSON(cfg.ChargerSCfg().AsMapInterface())
 	case RESOURCES_JSON:
-		jsonString = utils.ToJSON(cfg.ResourceSCfg())
+		jsonString = utils.ToJSON(cfg.ResourceSCfg().AsMapInterface())
 	case STATS_JSON:
-		jsonString = utils.ToJSON(cfg.StatSCfg())
+		jsonString = utils.ToJSON(cfg.StatSCfg().AsMapInterface())
 	case THRESHOLDS_JSON:
-		jsonString = utils.ToJSON(cfg.ThresholdSCfg())
+		jsonString = utils.ToJSON(cfg.ThresholdSCfg().AsMapInterface())
 	case RouteSJson:
-		jsonString = utils.ToJSON(cfg.RouteSCfg())
+		jsonString = utils.ToJSON(cfg.RouteSCfg().AsMapInterface())
 	case SURETAX_JSON:
-		jsonString = utils.ToJSON(cfg.SureTaxCfg())
+		jsonString = utils.ToJSON(cfg.SureTaxCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
 	case DispatcherSJson:
-		jsonString = utils.ToJSON(cfg.DispatcherSCfg())
+		jsonString = utils.ToJSON(cfg.DispatcherSCfg().AsMapInterface())
 	case DispatcherHJson:
-		jsonString = utils.ToJSON(cfg.DispatcherHCfg())
+		jsonString = utils.ToJSON(cfg.DispatcherHCfg().AsMapInterface())
 	case LoaderJson:
-		jsonString = utils.ToJSON(cfg.LoaderCfg())
+		jsonString = utils.ToJSON(cfg.LoaderCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
 	case CgrLoaderCfgJson:
-		jsonString = utils.ToJSON(cfg.LoaderCgrCfg())
+		jsonString = utils.ToJSON(cfg.LoaderCgrCfg().AsMapInterface())
 	case CgrMigratorCfgJson:
-		jsonString = utils.ToJSON(cfg.MigratorCgrCfg())
+		jsonString = utils.ToJSON(cfg.MigratorCgrCfg().AsMapInterface())
 	case ApierS:
-		jsonString = utils.ToJSON(cfg.ApierCfg())
+		jsonString = utils.ToJSON(cfg.ApierCfg().AsMapInterface())
 	case EEsJson:
-		jsonString = utils.ToJSON(cfg.EEsCfg())
+		jsonString = utils.ToJSON(cfg.EEsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
 	case ERsJson:
-		jsonString = utils.ToJSON(cfg.ERsCfg())
+		jsonString = utils.ToJSON(cfg.ERsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
 	case RPCConnsJsonName:
-		jsonString = utils.ToJSON(cfg.RPCConns())
+		jsonString = utils.ToJSON(cfg.RPCConns().AsMapInterface())
 	case SIPAgentJson:
-		jsonString = utils.ToJSON(cfg.SIPAgentCfg())
+		jsonString = utils.ToJSON(cfg.SIPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
 	case TemplatesJson:
-		jsonString = utils.ToJSON(cfg.TemplatesCfg())
+		jsonString = utils.ToJSON(cfg.TemplatesCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
 	case ConfigSJson:
-		jsonString = utils.ToJSON(cfg.ConfigSCfg())
+		jsonString = utils.ToJSON(cfg.ConfigSCfg().AsMapInterface())
 	case APIBanCfgJson:
-		jsonString = utils.ToJSON(cfg.APIBanCfg())
+		jsonString = utils.ToJSON(cfg.APIBanCfg().AsMapInterface())
+	case HttpAgentJson:
+		jsonString = utils.ToJSON(cfg.HttpAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case MAILER_JSN:
+		jsonString = utils.ToJSON(cfg.MailerCfg().AsMapInterface())
+	case AnalyzerCfgJson:
+		jsonString = utils.ToJSON(cfg.AnalyzerSCfg().AsMapInterface())
+	case RateSJson:
+		jsonString = utils.ToJSON(cfg.RateSCfg().AsMapInterface())
 	default:
 		return errors.New("Invalid section")
 	}
@@ -1482,7 +1494,7 @@ type JSONReloadWithOpts struct {
 	JSON   map[string]interface{}
 }
 
-// V1ReloadConfigFromJSON reloads the sections of configz
+// V1ReloadConfigFromJSON reloads the sections of config
 func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONReloadWithOpts, reply *string) (err error) {
 	if len(args.JSON) == 0 {
 		*reply = utils.OK
@@ -1508,6 +1520,9 @@ func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONReloadWithOpts, reply *st
 	err = cfg.checkConfigSanity()
 
 	cfg.rUnlockSections() // unlock before checking the error
+	if err != nil {
+		return
+	}
 
 	err = cfg.reloadSections(sections...)
 	if err != nil {
@@ -1626,28 +1641,17 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
-	rpcConns := make(map[string]map[string]interface{}, len(cfg.rpcConns))
-	for key, val := range cfg.rpcConns {
-		rpcConns[key] = val.AsMapInterface()
+func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{}, err error) {
+	var datadb map[string]interface{}
+	if datadb, err = cfg.dataDbCfg.AsMapInterface(); err != nil {
+		return
 	}
-
-	loaderCfg := make([]map[string]interface{}, len(cfg.loaderCfg))
-	for i, item := range cfg.loaderCfg {
-		loaderCfg[i] = item.AsMapInterface(separator)
-	}
-
-	httpAgentCfg := make([]map[string]interface{}, len(cfg.httpAgentCfg))
-	for i, item := range cfg.httpAgentCfg {
-		httpAgentCfg[i] = item.AsMapInterface(separator)
-	}
-
 	return map[string]interface{}{
-		LoaderJson:       loaderCfg,
-		HttpAgentJson:    httpAgentCfg,
-		RPCConnsJsonName: rpcConns,
-		GENERAL_JSN:      cfg.generalCfg.AsMapInterface(),
-		//utils.DataDbCfg:        cfg.dataDbCfg.AsMapInterface(),
+		LoaderJson:         cfg.loaderCfg.AsMapInterface(separator),
+		HttpAgentJson:      cfg.httpAgentCfg.AsMapInterface(separator),
+		RPCConnsJsonName:   cfg.rpcConns.AsMapInterface(),
+		GENERAL_JSN:        cfg.generalCfg.AsMapInterface(),
+		DATADB_JSN:         datadb,
 		STORDB_JSN:         cfg.storDbCfg.AsMapInterface(),
 		TlsCfgJson:         cfg.tlsCfg.AsMapInterface(),
 		CACHE_JSN:          cfg.cacheCfg.AsMapInterface(),
@@ -1680,5 +1684,140 @@ func (cfg *CGRConfig) AsMapInterface(separator string) map[string]interface{} {
 		ApierS:             cfg.apier.AsMapInterface(),
 		ERsJson:            cfg.ersCfg.AsMapInterface(separator),
 		APIBanCfgJson:      cfg.apiBanCfg.AsMapInterface(),
+		EEsJson:            cfg.eesCfg.AsMapInterface(separator),
+		RateSJson:          cfg.rateSCfg.AsMapInterface(),
+		SIPAgentJson:       cfg.sipAgentCfg.AsMapInterface(separator),
+		TemplatesJson:      cfg.templates.AsMapInterface(separator),
+		ConfigSJson:        cfg.configSCfg.AsMapInterface(),
+	}, nil
+}
+
+// JSONStringReloadWithOpts the API params for V1ReloadConfigFromString
+type JSONStringReloadWithOpts struct {
+	Opts   map[string]interface{}
+	Tenant string
+	JSON   string
+}
+
+// V1ReloadConfigFromString reloads the sections of config
+func (cfg *CGRConfig) V1ReloadConfigFromString(args *JSONStringReloadWithOpts, reply *string) (err error) {
+	if len(args.JSON) == 0 {
+		*reply = utils.OK
+		return
 	}
+
+	if err = cfg.loadCfgFromJSONWithLocks(bytes.NewBufferString(args.JSON), sortedCfgSections); err != nil {
+		return
+	}
+
+	//  lock all sections
+	cfg.rLockSections()
+	err = cfg.checkConfigSanity()
+	cfg.rUnlockSections() // unlock before checking the error
+	if err != nil {
+		return
+	}
+
+	if err = cfg.reloadSections(sortedCfgSections...); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+//V1GetConfigSectionString will retrieve from CGRConfig a section as a string
+func (cfg *CGRConfig) V1GetConfigSectionString(args *SectionWithOpts, reply *string) (err error) {
+	switch args.Section {
+	case GENERAL_JSN:
+		*reply = utils.ToJSON(cfg.GeneralCfg().AsMapInterface())
+	case DATADB_JSN:
+		var mp map[string]interface{}
+		if mp, err = cfg.DataDbCfg().AsMapInterface(); err != nil {
+			return
+		}
+		*reply = utils.ToJSON(mp)
+	case STORDB_JSN:
+		*reply = utils.ToJSON(cfg.StorDbCfg().AsMapInterface())
+	case TlsCfgJson:
+		*reply = utils.ToJSON(cfg.TlsCfg().AsMapInterface())
+	case CACHE_JSN:
+		*reply = utils.ToJSON(cfg.CacheCfg().AsMapInterface())
+	case LISTEN_JSN:
+		*reply = utils.ToJSON(cfg.ListenCfg().AsMapInterface())
+	case HTTP_JSN:
+		*reply = utils.ToJSON(cfg.HTTPCfg().AsMapInterface())
+	case FilterSjsn:
+		*reply = utils.ToJSON(cfg.FilterSCfg().AsMapInterface())
+	case RALS_JSN:
+		*reply = utils.ToJSON(cfg.RalsCfg().AsMapInterface())
+	case SCHEDULER_JSN:
+		*reply = utils.ToJSON(cfg.SchedulerCfg().AsMapInterface())
+	case CDRS_JSN:
+		*reply = utils.ToJSON(cfg.CdrsCfg().AsMapInterface())
+	case SessionSJson:
+		*reply = utils.ToJSON(cfg.SessionSCfg().AsMapInterface())
+	case FreeSWITCHAgentJSN:
+		*reply = utils.ToJSON(cfg.FsAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case KamailioAgentJSN:
+		*reply = utils.ToJSON(cfg.KamAgentCfg().AsMapInterface())
+	case AsteriskAgentJSN:
+		*reply = utils.ToJSON(cfg.AsteriskAgentCfg().AsMapInterface())
+	case DA_JSN:
+		*reply = utils.ToJSON(cfg.DiameterAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case RA_JSN:
+		*reply = utils.ToJSON(cfg.RadiusAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case DNSAgentJson:
+		*reply = utils.ToJSON(cfg.DNSAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case ATTRIBUTE_JSN:
+		*reply = utils.ToJSON(cfg.AttributeSCfg().AsMapInterface())
+	case ChargerSCfgJson:
+		*reply = utils.ToJSON(cfg.ChargerSCfg().AsMapInterface())
+	case RESOURCES_JSON:
+		*reply = utils.ToJSON(cfg.ResourceSCfg().AsMapInterface())
+	case STATS_JSON:
+		*reply = utils.ToJSON(cfg.StatSCfg().AsMapInterface())
+	case THRESHOLDS_JSON:
+		*reply = utils.ToJSON(cfg.ThresholdSCfg().AsMapInterface())
+	case RouteSJson:
+		*reply = utils.ToJSON(cfg.RouteSCfg().AsMapInterface())
+	case SURETAX_JSON:
+		*reply = utils.ToJSON(cfg.SureTaxCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case DispatcherSJson:
+		*reply = utils.ToJSON(cfg.DispatcherSCfg().AsMapInterface())
+	case DispatcherHJson:
+		*reply = utils.ToJSON(cfg.DispatcherHCfg().AsMapInterface())
+	case LoaderJson:
+		*reply = utils.ToJSON(cfg.LoaderCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case CgrLoaderCfgJson:
+		*reply = utils.ToJSON(cfg.LoaderCgrCfg().AsMapInterface())
+	case CgrMigratorCfgJson:
+		*reply = utils.ToJSON(cfg.MigratorCgrCfg().AsMapInterface())
+	case ApierS:
+		*reply = utils.ToJSON(cfg.ApierCfg().AsMapInterface())
+	case EEsJson:
+		*reply = utils.ToJSON(cfg.EEsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case ERsJson:
+		*reply = utils.ToJSON(cfg.ERsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case SIPAgentJson:
+		*reply = utils.ToJSON(cfg.SIPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case ConfigSJson:
+		*reply = utils.ToJSON(cfg.ConfigSCfg().AsMapInterface())
+	case APIBanCfgJson:
+		*reply = utils.ToJSON(cfg.APIBanCfg().AsMapInterface())
+	case RPCConnsJsonName:
+		*reply = utils.ToJSON(cfg.RPCConns().AsMapInterface())
+	case TemplatesJson:
+		*reply = utils.ToJSON(cfg.TemplatesCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case HttpAgentJson:
+		*reply = utils.ToJSON(cfg.HttpAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep))
+	case MAILER_JSN:
+		*reply = utils.ToJSON(cfg.MailerCfg().AsMapInterface())
+	case AnalyzerCfgJson:
+		*reply = utils.ToJSON(cfg.AnalyzerSCfg().AsMapInterface())
+	case RateSJson:
+		*reply = utils.ToJSON(cfg.RateSCfg().AsMapInterface())
+	default:
+		return errors.New("Invalid section")
+	}
+	return
 }
