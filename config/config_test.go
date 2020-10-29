@@ -987,6 +987,36 @@ func TestDbDefaults(t *testing.T) {
 	}
 }
 
+func TestNewCGRConfigFromJSONStringWithDefaultsError(t *testing.T) {
+	cfgJSONStr := "invalidJSON"
+	expectedErr := "invalid character 'i' looking for beginning of value around line 1 and position 1\n line: \"invalidJSON\""
+	if _, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	cfgJSONStr = `{
+	"suretax": {
+        "tax_exemption_code_list": "a{*"
+    },
+}`
+	expectedErr = "invalid converter terminator in rule: <a{*>"
+	if _, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestIsHidden(t *testing.T) {
+	file := ".newFile"
+	if !isHidden(file) {
+		t.Errorf("File is not hidden")
+	}
+
+	file = "."
+	if isHidden(file) {
+		t.Errorf("Invalid input")
+	}
+}
+
 func TestCgrLoaderCfgITDefaults(t *testing.T) {
 	eCfg := LoaderSCfgs{
 		{
