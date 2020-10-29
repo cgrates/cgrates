@@ -34,7 +34,8 @@ import (
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, server *utils.Server, exitChan chan bool,
-	intConnChan chan rpcclient.ClientConnector) servmanager.Service {
+	intConnChan chan rpcclient.ClientConnector,
+	anz *AnalyzerService) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
@@ -43,6 +44,7 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 		exitChan:    exitChan,
 		intConnChan: intConnChan,
 		rldChan:     make(chan struct{}),
+		anz:         anz,
 	}
 }
 
@@ -60,6 +62,7 @@ type EventExporterService struct {
 
 	eeS *ees.EventExporterS
 	rpc *v1.EventExporterSv1
+	anz *AnalyzerService
 }
 
 // ServiceName returns the service name
@@ -129,6 +132,6 @@ func (es *EventExporterService) Start() (err error) {
 	if !es.cfg.DispatcherSCfg().Enabled {
 		es.server.RpcRegister(es.rpc)
 	}
-	es.intConnChan <- intAnzConn(es.eeS, utils.EventExporterS)
+	es.intConnChan <- es.anz.GetInternalCodec(es.eeS, utils.EventExporterS)
 	return
 }

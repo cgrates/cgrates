@@ -36,7 +36,8 @@ import (
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *utils.Server, internalCDRServerChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager) servmanager.Service {
+	connMgr *engine.ConnManager,
+	anz *AnalyzerService) servmanager.Service {
 	return &CDRServer{
 		connChan:    internalCDRServerChan,
 		cfg:         cfg,
@@ -45,6 +46,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
+		anz:         anz,
 	}
 }
 
@@ -64,6 +66,7 @@ type CDRServer struct {
 	connMgr  *engine.ConnManager
 
 	syncStop chan struct{}
+	anz      *AnalyzerService
 	// storDBChan chan engine.StorDB
 }
 
@@ -107,7 +110,7 @@ func (cdrService *CDRServer) Start() (err error) {
 		// Make the cdr server available for internal communication
 		cdrService.server.RpcRegister(cdrService.cdrS) // register CdrServer for internal usage (TODO: refactor this)
 	}
-	cdrService.connChan <- intAnzConn(cdrService.cdrS, utils.CDRServer) // Signal that cdrS is operational
+	cdrService.connChan <- cdrService.anz.GetInternalCodec(cdrService.cdrS, utils.CDRServer) // Signal that cdrS is operational
 	return
 }
 

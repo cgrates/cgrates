@@ -34,7 +34,8 @@ import (
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server, internalRouteSChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager) servmanager.Service {
+	connMgr *engine.ConnManager,
+	anz *AnalyzerService) servmanager.Service {
 	return &RouteService{
 		connChan:    internalRouteSChan,
 		cfg:         cfg,
@@ -43,6 +44,7 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
+		anz:         anz,
 	}
 }
 
@@ -59,6 +61,7 @@ type RouteService struct {
 	routeS   *engine.RouteService
 	rpc      *v1.RouteSv1
 	connChan chan rpcclient.ClientConnector
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -91,7 +94,7 @@ func (routeS *RouteService) Start() (err error) {
 	if !routeS.cfg.DispatcherSCfg().Enabled {
 		routeS.server.RpcRegister(routeS.rpc)
 	}
-	routeS.connChan <- intAnzConn(routeS.rpc, utils.RouteS)
+	routeS.connChan <- routeS.anz.GetInternalCodec(routeS.rpc, utils.RouteS)
 	return
 }
 

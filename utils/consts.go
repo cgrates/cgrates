@@ -1600,9 +1600,9 @@ const (
 
 // AnalyzerS APIs
 const (
-	AnalyzerSv1       = "AnalyzerSv1"
-	AnalyzerSv1Ping   = "AnalyzerSv1.Ping"
-	AnalyzerSv1Search = "AnalyzerSv1.Search"
+	AnalyzerSv1            = "AnalyzerSv1"
+	AnalyzerSv1Ping        = "AnalyzerSv1.Ping"
+	AnalyzerSv1StringQuery = "AnalyzerSv1.StringQuery"
 )
 
 // LoaderS APIs

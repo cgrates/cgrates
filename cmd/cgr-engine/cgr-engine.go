@@ -567,38 +567,38 @@ func main() {
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
-	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan)
-	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager)
-	dspH := services.NewDispatcherHostsService(cfg, server, internalDispatcherSChan, connManager, exitChan)
+	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, anz)
+	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager, anz)
+	dspH := services.NewDispatcherHostsService(cfg, server, internalDispatcherSChan, connManager, exitChan, anz)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
-		internalChargerSChan, connManager)
-	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan)
+		internalChargerSChan, connManager, anz)
+	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan, anz)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
-		internalStatSChan, connManager)
+		internalStatSChan, connManager, anz)
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
-		internalResourceSChan, connManager)
+		internalResourceSChan, connManager, anz)
 	routeS := services.NewRouteService(cfg, dmService, cacheS, filterSChan, server,
-		internalRouteSChan, connManager)
+		internalRouteSChan, connManager, anz)
 
 	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan,
-		server, internalSchedulerSChan, connManager)
+		server, internalSchedulerSChan, connManager, anz)
 
 	rals := services.NewRalService(cfg, cacheS, server,
 		internalRALsChan, internalResponderChan,
-		exitChan, connManager)
+		exitChan, connManager, anz)
 
 	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponderService(),
-		internalAPIerSv1Chan, connManager)
+		internalAPIerSv1Chan, connManager, anz)
 
-	apiSv2 := services.NewAPIerSv2Service(apiSv1, cfg, server, internalAPIerSv2Chan)
+	apiSv2 := services.NewAPIerSv2Service(apiSv1, cfg, server, internalAPIerSv2Chan, anz)
 
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
-		connManager)
+		connManager, anz)
 
-	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager)
+	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager, anz)
 
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, exitChan,
-		internalLoaderSChan, connManager)
+		internalLoaderSChan, connManager, anz)
 
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, schS, rals,
 		rals.GetResponder(), apiSv1, apiSv2, cdrS, smg,
@@ -612,9 +612,9 @@ func main() {
 		services.NewHTTPAgent(cfg, filterSChan, server, connManager),       // no reload
 		ldrs, anz, dspS, dspH, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
-			connManager, server, exitChan, internalEEsChan),
+			connManager, server, exitChan, internalEEsChan, anz),
 		services.NewRateService(cfg, cacheS, filterSChan, dmService,
-			server, exitChan, internalRateSChan),
+			server, exitChan, internalRateSChan, anz),
 		services.NewSIPAgent(cfg, filterSChan, exitChan, connManager),
 	)
 	srvManager.StartServices()

@@ -33,7 +33,8 @@ import (
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, server *utils.Server,
 	exitChan chan bool, internalLoaderSChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager) *LoaderService {
+	connMgr *engine.ConnManager,
+	anz *AnalyzerService) *LoaderService {
 	return &LoaderService{
 		connChan:    internalLoaderSChan,
 		cfg:         cfg,
@@ -42,6 +43,7 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		exitChan:    exitChan,
 		connMgr:     connMgr,
+		anz:         anz,
 	}
 }
 
@@ -58,6 +60,7 @@ type LoaderService struct {
 	rpc      *v1.LoaderSv1
 	connChan chan rpcclient.ClientConnector
 	connMgr  *engine.ConnManager
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -85,7 +88,7 @@ func (ldrs *LoaderService) Start() (err error) {
 	if !ldrs.cfg.DispatcherSCfg().Enabled {
 		ldrs.server.RpcRegister(ldrs.rpc)
 	}
-	ldrs.connChan <- intAnzConn(ldrs.rpc, utils.LoaderS)
+	ldrs.connChan <- ldrs.anz.GetInternalCodec(ldrs.rpc, utils.LoaderS)
 	return
 }
 

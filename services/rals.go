@@ -32,8 +32,9 @@ import (
 // NewRalService returns the Ral Service
 func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *utils.Server,
 	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, exitChan chan bool,
-	connMgr *engine.ConnManager) *RalService {
-	resp := NewResponderService(cfg, server, internalResponderChan, exitChan)
+	connMgr *engine.ConnManager,
+	anz *AnalyzerService) *RalService {
+	resp := NewResponderService(cfg, server, internalResponderChan, exitChan, anz)
 
 	return &RalService{
 		connChan:  internalRALsChan,
@@ -42,6 +43,7 @@ func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *utils.S
 		server:    server,
 		responder: resp,
 		connMgr:   connMgr,
+		anz:       anz,
 	}
 }
 
@@ -55,6 +57,7 @@ type RalService struct {
 	responder *ResponderService
 	connChan  chan rpcclient.ClientConnector
 	connMgr   *engine.ConnManager
+	anz       *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -91,7 +94,7 @@ func (rals *RalService) Start() (err error) {
 		rals.server.RpcRegister(rals.rals)
 	}
 
-	rals.connChan <- intAnzConn(rals.rals, utils.RALService)
+	rals.connChan <- rals.anz.GetInternalCodec(rals.rals, utils.RALService)
 	return
 }
 

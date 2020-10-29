@@ -33,7 +33,8 @@ import (
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
-	internalChargerSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
+	internalChargerSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager,
+	anz *AnalyzerService) servmanager.Service {
 	return &ChargerService{
 		connChan:    internalChargerSChan,
 		cfg:         cfg,
@@ -42,6 +43,7 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
+		anz:         anz,
 	}
 }
 
@@ -58,6 +60,7 @@ type ChargerService struct {
 	chrS     *engine.ChargerService
 	rpc      *v1.ChargerSv1
 	connChan chan rpcclient.ClientConnector
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -88,7 +91,7 @@ func (chrS *ChargerService) Start() (err error) {
 	if !chrS.cfg.DispatcherSCfg().Enabled {
 		chrS.server.RpcRegister(cSv1)
 	}
-	chrS.connChan <- intAnzConn(cSv1, utils.ChargerS)
+	chrS.connChan <- chrS.anz.GetInternalCodec(cSv1, utils.ChargerS)
 	return
 }
 

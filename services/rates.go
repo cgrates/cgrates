@@ -40,7 +40,8 @@ func NewRateService(
 	filterSChan chan *engine.FilterS,
 	dmS *DataDBService,
 	server *utils.Server, exitChan chan bool,
-	intConnChan chan rpcclient.ClientConnector) servmanager.Service {
+	intConnChan chan rpcclient.ClientConnector,
+	anz *AnalyzerService) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
 		cacheS:      cacheS,
@@ -50,6 +51,7 @@ func NewRateService(
 		exitChan:    exitChan,
 		intConnChan: intConnChan,
 		rldChan:     make(chan struct{}),
+		anz:         anz,
 	}
 }
 
@@ -69,6 +71,7 @@ type RateService struct {
 	rateS       *rates.RateS
 	rpc         *v1.RateSv1
 	intConnChan chan rpcclient.ClientConnector
+	anz         *AnalyzerService
 }
 
 // ServiceName returns the service name
@@ -138,6 +141,6 @@ func (rs *RateService) Start() (err error) {
 		rs.server.RpcRegister(rs.rpc)
 	}
 
-	rs.intConnChan <- intAnzConn(rs.rpc, utils.RateS)
+	rs.intConnChan <- rs.anz.GetInternalCodec(rs.rpc, utils.RateS)
 	return
 }

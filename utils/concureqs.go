@@ -25,9 +25,6 @@ import (
 )
 
 var ConReqs *ConcReqs
-var AnalizerWraperFunc = func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec {
-	return conn
-}
 
 type ConcReqs struct {
 	limit    int
@@ -80,12 +77,12 @@ type conn interface {
 	RemoteAddr() net.Addr
 }
 
-func newConcReqsGOBCodec(conn conn) rpc.ServerCodec {
-	return AnalizerWraperFunc(newConcReqsServerCodec(newGobServerCodec(conn)), MetaGOB, conn.RemoteAddr(), conn.LocalAddr())
+func newConcReqsGOBCodec(conn conn, anz anzWrapFunc) rpc.ServerCodec {
+	return anz(newConcReqsServerCodec(newGobServerCodec(conn)), MetaGOB, conn.RemoteAddr(), conn.LocalAddr())
 }
 
-func newConcReqsJSONCodec(conn conn) rpc.ServerCodec {
-	return AnalizerWraperFunc(newConcReqsServerCodec(jsonrpc.NewServerCodec(conn)), MetaJSON, conn.RemoteAddr(), conn.LocalAddr())
+func newConcReqsJSONCodec(conn conn, anz anzWrapFunc) rpc.ServerCodec {
+	return anz(newConcReqsServerCodec(jsonrpc.NewServerCodec(conn)), MetaJSON, conn.RemoteAddr(), conn.LocalAddr())
 }
 
 func newConcReqsServerCodec(sc rpc.ServerCodec) rpc.ServerCodec {

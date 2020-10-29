@@ -33,7 +33,9 @@ import (
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalStatSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
+	server *utils.Server, internalStatSChan chan rpcclient.ClientConnector,
+	connMgr *engine.ConnManager,
+	anz *AnalyzerService) servmanager.Service {
 	return &StatService{
 		connChan:    internalStatSChan,
 		cfg:         cfg,
@@ -42,6 +44,7 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
+		anz:         anz,
 	}
 }
 
@@ -58,6 +61,7 @@ type StatService struct {
 	sts      *engine.StatService
 	rpc      *v1.StatSv1
 	connChan chan rpcclient.ClientConnector
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -92,7 +96,7 @@ func (sts *StatService) Start() (err error) {
 	if !sts.cfg.DispatcherSCfg().Enabled {
 		sts.server.RpcRegister(sts.rpc)
 	}
-	sts.connChan <- intAnzConn(sts.rpc, utils.StatS)
+	sts.connChan <- sts.anz.GetInternalCodec(sts.rpc, utils.StatS)
 	return
 }
 

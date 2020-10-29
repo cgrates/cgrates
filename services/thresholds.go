@@ -33,7 +33,8 @@ import (
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalThresholdSChan chan rpcclient.ClientConnector) servmanager.Service {
+	server *utils.Server, internalThresholdSChan chan rpcclient.ClientConnector,
+	anz *AnalyzerService) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
 		cfg:         cfg,
@@ -41,6 +42,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		server:      server,
+		anz:         anz,
 	}
 }
 
@@ -56,6 +58,7 @@ type ThresholdService struct {
 	thrs     *engine.ThresholdService
 	rpc      *v1.ThresholdSv1
 	connChan chan rpcclient.ClientConnector
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -87,7 +90,7 @@ func (thrs *ThresholdService) Start() (err error) {
 	if !thrs.cfg.DispatcherSCfg().Enabled {
 		thrs.server.RpcRegister(thrs.rpc)
 	}
-	thrs.connChan <- intAnzConn(thrs.rpc, utils.ThresholdS)
+	thrs.connChan <- thrs.anz.GetInternalCodec(thrs.rpc, utils.ThresholdS)
 	return
 }
 
