@@ -245,7 +245,7 @@ func TestNewErrChargerS(t *testing.T) {
 func TestNewErrStatS(t *testing.T) {
 	expected := "STATS_ERROR:NOT_FOUND"
 	if rcv := NewErrStatS(ErrNotFound); rcv.Error() != expected {
-		t.Errorf("Expecetd %+q, receiveed %+q", expected, rcv.Error())
+		t.Errorf("Expected %+q, receiveed %+q", expected, rcv.Error())
 	}
 }
 

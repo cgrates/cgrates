@@ -314,17 +314,19 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	initialMP = map[string]interface{}{
 		utils.IDCfg:               eeC.ID,
 		utils.TypeCfg:             eeC.Type,
-		utils.ExportPath:          eeC.ExportPath,
-		utils.ExportPathCfg:       eeC.FieldSep,
+		utils.ExportPathCfg:       eeC.ExportPath,
+		utils.FieldSepCfg:         eeC.FieldSep,
 		utils.TimezoneCfg:         eeC.Timezone,
 		utils.FiltersCfg:          eeC.Filters,
-		utils.FlagsCfg:            eeC.Flags.SliceFlags(),
+		utils.FlagsCfg:            []string{},
 		utils.AttributeContextCfg: eeC.AttributeSCtx,
 		utils.AttributeIDsCfg:     eeC.AttributeSIDs,
 		utils.SynchronousCfg:      eeC.Synchronous,
 		utils.AttemptsCfg:         eeC.Attempts,
-		utils.FieldSeparatorCfg:   eeC.FieldSep,
 		utils.OptsCfg:             eeC.Opts,
+	}
+	if flags := eeC.Flags.SliceFlags(); len(flags) != 0 {
+		initialMP[utils.FlagsCfg] = flags
 	}
 	if eeC.Tenant != nil {
 		var tenant string

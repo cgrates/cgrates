@@ -210,7 +210,7 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expecetd %+v, received %+v", eMap, rcv)
+		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
 
@@ -273,6 +273,6 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expecetd %+v \n, received %+v", utils.ToIJSON(eMap), utils.ToIJSON(rcv))
+		t.Errorf("Expected %+v \n, received %+v", utils.ToIJSON(eMap), utils.ToIJSON(rcv))
 	}
 }

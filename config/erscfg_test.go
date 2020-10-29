@@ -1146,7 +1146,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 func TestGetDefaultExporter(t *testing.T) {
 	ees := new(EEsCfg)
 	if dft := ees.GetDefaultExporter(); dft != nil {
-		t.Fatalf("Expeceted no default cfg, received: %s", utils.ToJSON(dft))
+		t.Fatalf("Expected no default cfg, received: %s", utils.ToJSON(dft))
 	}
 	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
