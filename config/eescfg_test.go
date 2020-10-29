@@ -682,12 +682,12 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.TypeCfg:             "*file_csv",
 				utils.ExportPathCfg:       "/tmp/testCSV",
 				utils.OptsCfg:             map[string]interface{}{},
-				utils.TenantCfg:           NewRSRParsersMustCompile("~*req.Destination1", utils.INFIELD_SEP),
+				utils.TenantCfg:           "~*req.Destination1",
 				utils.TimezoneCfg:         "UTC",
 				utils.FiltersCfg:          []string{},
-				utils.FlagsCfg:            utils.FlagsWithParams{},
+				utils.FlagsCfg:            []string{},
 				utils.AttributeIDsCfg:     []string{},
-				utils.AttributeContextCfg: nil,
+				utils.AttributeContextCfg: utils.EmptyString,
 				utils.SynchronousCfg:      false,
 				utils.AttemptsCfg:         1,
 				utils.FieldSepCfg:         ",",
@@ -707,19 +707,23 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 	} else {
 		rcv := cgrCfg.eesCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep)
 		if len(rcv[utils.ExportersCfg].([]map[string]interface{})) != 2 {
-			t.Errorf("Expecetd %+v, received %+v", 2, len(rcv[utils.ExportersCfg].([]map[string]interface{})))
-		} else if !reflect.DeepEqual(eMap[utils.ExportersCfg].([]map[string]interface{})[0][utils.Flags],
-			rcv[utils.ExportersCfg].([]map[string]interface{})[1][utils.Flags]) {
-			t.Errorf("Expecetd %+v, received %+v", eMap[utils.ExportersCfg].([]map[string]interface{})[0][utils.Flags],
-				rcv[utils.ExportersCfg].([]map[string]interface{})[1][utils.Flags])
+			t.Errorf("Expected %+v, received %+v", 2, len(rcv[utils.ExportersCfg].([]map[string]interface{})))
 		} else if !reflect.DeepEqual(eMap[utils.ExportersCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0][utils.ValueCfg],
 			rcv[utils.ExportersCfg].([]map[string]interface{})[1][utils.FieldsCfg].([]map[string]interface{})[0][utils.ValueCfg]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ExportersCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0][utils.ValueCfg],
 				rcv[utils.ExportersCfg].([]map[string]interface{})[1][utils.FieldsCfg].([]map[string]interface{})[0][utils.ValueCfg])
-		} else if !reflect.DeepEqual(eMap[utils.AttributeSConnsCfg], rcv[utils.AttributeSConnsCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.AttributeSConnsCfg], rcv[utils.AttributeSConnsCfg])
-		} else if !reflect.DeepEqual(eMap[utils.CacheCfg].(map[string]interface{})[utils.MetaFileCSV], rcv[utils.CacheCfg].(map[string]interface{})[utils.MetaFileCSV]) {
-			t.Errorf("Expected %+v \n, received %+v", eMap[utils.CacheCfg].(map[string]interface{})[utils.MetaFileCSV], rcv[utils.CacheCfg].(map[string]interface{})[utils.MetaFileCSV])
+		}
+		rcv[utils.ExportersCfg].([]map[string]interface{})[1][utils.FieldsCfg] = nil
+		eMap[utils.ExportersCfg].([]map[string]interface{})[0][utils.FieldsCfg] = nil
+		if !reflect.DeepEqual(rcv[utils.ExportersCfg].([]map[string]interface{})[1],
+			eMap[utils.ExportersCfg].([]map[string]interface{})[0]) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rcv[utils.ExportersCfg].([]map[string]interface{})[1]),
+				utils.ToJSON(eMap[utils.ExportersCfg].([]map[string]interface{})[0]))
+		}
+		rcv[utils.ExportersCfg] = nil
+		eMap[utils.ExportersCfg] = nil
+		if !reflect.DeepEqual(rcv, eMap) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 		}
 	}
 }

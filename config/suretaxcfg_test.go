@@ -92,7 +92,7 @@ func TestSureTaxCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if err = jsonCfg.sureTaxCfg.loadFromJsonCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.sureTaxCfg) {
-		t.Errorf("Expecetd %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sureTaxCfg))
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sureTaxCfg))
 	}
 }
 

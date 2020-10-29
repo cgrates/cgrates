@@ -931,7 +931,7 @@ func TestRadiusAgentCfg(t *testing.T) {
 	}
 }
 
-func TestDbDefaults(t *testing.T) {
+func TestDbDefaultsMetaDynamic(t *testing.T) {
 	dbdf := newDbDefaults()
 	flagInput := utils.MetaDynamic
 	dbs := []string{utils.MONGO, utils.REDIS, utils.MYSQL, utils.INTERNAL}
@@ -955,6 +955,34 @@ func TestDbDefaults(t *testing.T) {
 		pass := dbdf.dbPass(dbtype, flagInput)
 		if pass != dbdf[dbtype]["DbPass"] {
 			t.Errorf("received: %+v, expecting: %+v", pass, dbdf[dbtype]["DbPass"])
+		}
+	}
+}
+
+func TestDbDefaults(t *testing.T) {
+	dbdf := newDbDefaults()
+	flagInput := "NonMetaDynamic"
+	dbs := []string{utils.MONGO, utils.REDIS, utils.MYSQL, utils.INTERNAL, utils.POSTGRES}
+	for _, dbtype := range dbs {
+		host := dbdf.dbHost(dbtype, flagInput)
+		if host != flagInput {
+			t.Errorf("Expected %+v, received %+v", flagInput, host)
+		}
+		user := dbdf.dbUser(dbtype, flagInput)
+		if user != flagInput {
+			t.Errorf("Expected %+v, received %+v", flagInput, user)
+		}
+		port := dbdf.dbPort(dbtype, "1234")
+		if port != "1234" {
+			t.Errorf("Expected %+v, received %+v", "1234", port)
+		}
+		name := dbdf.dbName(dbtype, utils.CGRATES)
+		if name != utils.CGRATES {
+			t.Errorf("Expected %+v, received %+v", utils.CGRATES, name)
+		}
+		pass := dbdf.dbPass(dbtype, utils.EmptyString)
+		if pass != utils.EmptyString {
+			t.Errorf("Expected %+v, received %+v", utils.EmptyString, pass)
 		}
 	}
 }

@@ -137,7 +137,7 @@ func testDsphGetNodeID() (id string, err error) {
 
 func testDsphBeforeDsphStart(t *testing.T) {
 	if _, err := testDsphGetNodeID(); err == nil || err.Error() != utils.ErrHostNotFound.Error() {
-		t.Errorf("Expeceted error: %s received: %v", utils.ErrHostNotFound, err)
+		t.Errorf("Expected error: %s received: %v", utils.ErrHostNotFound, err)
 	}
 }
 
@@ -173,7 +173,7 @@ func testDsphStopEngines(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := testDsphGetNodeID(); err == nil || err.Error() != utils.ErrHostNotFound.Error() {
-		t.Errorf("Expeceted error: %s received: %v", utils.ErrHostNotFound, err)
+		t.Errorf("Expected error: %s received: %v", utils.ErrHostNotFound, err)
 	}
 }
 
