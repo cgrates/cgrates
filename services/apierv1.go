@@ -37,7 +37,8 @@ func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 	schedService *SchedulerService,
 	responderService *ResponderService,
 	internalAPIerSv1Chan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager) *APIerSv1Service {
+	connMgr *engine.ConnManager,
+	anz *AnalyzerService) *APIerSv1Service {
 	return &APIerSv1Service{
 		connChan:         internalAPIerSv1Chan,
 		cfg:              cfg,
@@ -49,6 +50,7 @@ func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 		responderService: responderService,
 		connMgr:          connMgr,
 		APIerSv1Chan:     make(chan *v1.APIerSv1, 1),
+		anz:              anz,
 	}
 }
 
@@ -70,6 +72,7 @@ type APIerSv1Service struct {
 	syncStop chan struct{}
 
 	APIerSv1Chan chan *v1.APIerSv1
+	anz          *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -119,7 +122,7 @@ func (apiService *APIerSv1Service) Start() (err error) {
 	}
 
 	//backwards compatible
-	apiService.connChan <- intAnzConn(apiService.api, utils.APIerSv1)
+	apiService.connChan <- apiService.anz.GetInternalCodec(apiService.api, utils.APIerSv1)
 
 	apiService.APIerSv1Chan <- apiService.api
 	return

@@ -31,11 +31,6 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-var (
-	// used to build the connector for analyzers
-	intAnzConn = func(c rpcclient.ClientConnector, to string) rpcclient.ClientConnector { return c }
-)
-
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig, server *utils.Server, exitChan chan bool,
 	internalAnalyzerSChan chan rpcclient.ClientConnector) *AnalyzerService {
@@ -76,10 +71,7 @@ func (anz *AnalyzerService) Start() (err error) {
 		anz.exitChan <- true
 		return
 	}()
-	intAnzConn = func(c rpcclient.ClientConnector, to string) rpcclient.ClientConnector {
-		return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)
-	}
-	utils.AnalizerWraperFunc = func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec {
+	anz.server.SetAnzWrapperFunc(func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec {
 		fromstr := ""
 		if from != nil {
 			fromstr = from.String()
@@ -89,7 +81,7 @@ func (anz *AnalyzerService) Start() (err error) {
 			tostr = to.String()
 		}
 		return anz.anz.NewServerCodec(conn, enc, fromstr, tostr)
-	}
+	})
 	anz.rpc = v1.NewAnalyzerSv1(anz.anz)
 	if !anz.cfg.DispatcherSCfg().Enabled {
 		anz.server.RpcRegister(anz.rpc)
@@ -132,6 +124,15 @@ func (anz *AnalyzerService) ShouldRun() bool {
 	return anz.cfg.AnalyzerSCfg().Enabled
 }
 
+// GetAnalyzerS returns the analyzer object
 func (anz *AnalyzerService) GetAnalyzerS() *analyzers.AnalyzerService {
 	return anz.anz
+}
+
+// GetInternalCodec returns the connection wrapped in analyzer connector
+func (anz *AnalyzerService) GetInternalCodec(c rpcclient.ClientConnector, to string) rpcclient.ClientConnector {
+	if !anz.IsRunning() {
+		return c
+	}
+	return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)
 }

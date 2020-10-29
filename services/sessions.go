@@ -35,7 +35,8 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *utils.Server, internalChan chan rpcclient.ClientConnector,
-	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
+	exitChan chan bool, connMgr *engine.ConnManager,
+	anz *AnalyzerService) servmanager.Service {
 	return &SessionService{
 		connChan: internalChan,
 		cfg:      cfg,
@@ -43,6 +44,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 		server:   server,
 		exitChan: exitChan,
 		connMgr:  connMgr,
+		anz:      anz,
 	}
 }
 
@@ -62,6 +64,7 @@ type SessionService struct {
 	// in order to stop the bircp server if necesary
 	bircpEnabled bool
 	connMgr      *engine.ConnManager
+	anz          *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -82,7 +85,7 @@ func (smg *SessionService) Start() (err error) {
 	//start sync session in a separate gorutine
 	go smg.sm.ListenAndServe(smg.exitChan)
 	// Pass internal connection via BiRPCClient
-	smg.connChan <- intAnzConn(smg.sm, utils.SessionS)
+	smg.connChan <- smg.anz.GetInternalCodec(smg.sm, utils.SessionS)
 	// Register RPC handler
 	smg.rpc = v1.NewSMGenericV1(smg.sm)
 

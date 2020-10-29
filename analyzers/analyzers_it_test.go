@@ -200,7 +200,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 
 func testAnalyzerSV1Search(t *testing.T) {
 	var result []map[string]interface{}
-	if err := anzRPC.Call(utils.AnalyzerSv1Search, `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`, &result); err != nil {
+	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
@@ -209,7 +209,7 @@ func testAnalyzerSV1Search(t *testing.T) {
 
 func testAnalyzerSV1Search2(t *testing.T) {
 	var result []map[string]interface{}
-	if err := anzRPC.Call(utils.AnalyzerSv1Search, `+RequestEncoding:\*json +RequestMethod:ChargerSv1\.ProcessEvent`, &result); err != nil {
+	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, `+RequestEncoding:\*json +RequestMethod:ChargerSv1\.ProcessEvent`, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))

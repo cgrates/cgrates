@@ -50,12 +50,13 @@ func TestSIPAgentReload(t *testing.T) {
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
+	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
 	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
-		engineShutdown, nil)
+		engineShutdown, nil, anz)
 	srv := NewSIPAgent(cfg, filterSChan, engineShutdown, nil)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)
+		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}

@@ -30,12 +30,13 @@ import (
 // NewResponderService returns the Resonder Service
 func NewResponderService(cfg *config.CGRConfig, server *utils.Server,
 	internalRALsChan chan rpcclient.ClientConnector,
-	exitChan chan bool) *ResponderService {
+	exitChan chan bool, anz *AnalyzerService) *ResponderService {
 	return &ResponderService{
 		connChan: internalRALsChan,
 		cfg:      cfg,
 		server:   server,
 		exitChan: exitChan,
+		anz:      anz,
 	}
 }
 
@@ -48,6 +49,7 @@ type ResponderService struct {
 
 	resp     *engine.Responder
 	connChan chan rpcclient.ClientConnector
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -68,7 +70,7 @@ func (resp *ResponderService) Start() (err error) {
 		resp.server.RpcRegister(resp.resp)
 	}
 
-	resp.connChan <- intAnzConn(resp.resp, utils.ResponderS) // Rater done
+	resp.connChan <- resp.anz.GetInternalCodec(resp.resp, utils.ResponderS) // Rater done
 	return
 }
 

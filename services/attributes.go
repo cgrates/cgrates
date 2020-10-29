@@ -33,7 +33,8 @@ import (
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalChan chan rpcclient.ClientConnector) servmanager.Service {
+	server *utils.Server, internalChan chan rpcclient.ClientConnector,
+	anz *AnalyzerService) servmanager.Service {
 	return &AttributeService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -41,6 +42,7 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		server:      server,
+		anz:         anz,
 	}
 }
 
@@ -56,6 +58,7 @@ type AttributeService struct {
 	attrS    *engine.AttributeService
 	rpc      *v1.AttributeSv1               // useful on restart
 	connChan chan rpcclient.ClientConnector // publish the internal Subsystem when available
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -87,7 +90,7 @@ func (attrS *AttributeService) Start() (err error) {
 	if !attrS.cfg.DispatcherSCfg().Enabled {
 		attrS.server.RpcRegister(attrS.rpc)
 	}
-	attrS.connChan <- intAnzConn(attrS.rpc, utils.AttributeS)
+	attrS.connChan <- attrS.anz.GetInternalCodec(attrS.rpc, utils.AttributeS)
 	return
 }
 

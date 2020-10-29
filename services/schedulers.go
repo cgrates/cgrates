@@ -33,7 +33,8 @@ import (
 func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, fltrSChan chan *engine.FilterS,
 	server *utils.Server, internalSchedulerrSChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager) *SchedulerService {
+	connMgr *engine.ConnManager,
+	anz *AnalyzerService) *SchedulerService {
 	return &SchedulerService{
 		connChan:  internalSchedulerrSChan,
 		cfg:       cfg,
@@ -42,6 +43,7 @@ func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 		fltrSChan: fltrSChan,
 		server:    server,
 		connMgr:   connMgr,
+		anz:       anz,
 	}
 }
 
@@ -58,6 +60,7 @@ type SchedulerService struct {
 	rpc      *v1.SchedulerSv1
 	connChan chan rpcclient.ClientConnector
 	connMgr  *engine.ConnManager
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -84,7 +87,7 @@ func (schS *SchedulerService) Start() (err error) {
 	if !schS.cfg.DispatcherSCfg().Enabled {
 		schS.server.RpcRegister(schS.rpc)
 	}
-	schS.connChan <- intAnzConn(schS.rpc, utils.SchedulerS)
+	schS.connChan <- schS.anz.GetInternalCodec(schS.rpc, utils.SchedulerS)
 
 	return
 }

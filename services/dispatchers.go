@@ -35,7 +35,9 @@ import (
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
+	server *utils.Server, internalChan chan rpcclient.ClientConnector,
+	connMgr *engine.ConnManager,
+	anz *AnalyzerService) servmanager.Service {
 	return &DispatcherService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -44,6 +46,7 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
+		anz:         anz,
 	}
 }
 
@@ -60,6 +63,7 @@ type DispatcherService struct {
 	dspS     *dispatchers.DispatcherService
 	rpc      *v1.DispatcherSv1
 	connChan chan rpcclient.ClientConnector
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -145,7 +149,7 @@ func (dspS *DispatcherService) Start() (err error) {
 	dspS.server.RpcRegisterName(utils.RateSv1,
 		v1.NewDispatcherRateSv1(dspS.dspS))
 
-	dspS.connChan <- intAnzConn(dspS.dspS, utils.DispatcherS)
+	dspS.connChan <- dspS.anz.GetInternalCodec(dspS.dspS, utils.DispatcherS)
 
 	return
 }

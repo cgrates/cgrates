@@ -118,8 +118,9 @@ func (aS *AnalyzerService) logTrafic(id uint64, method string,
 		NewInfoRPC(id, method, params, result, err, enc, from, to, sTime, eTime))
 }
 
-// V1Search returns a list of API that match the query
-func (aS *AnalyzerService) V1Search(searchstr string, reply *[]map[string]interface{}) error {
+// V1StringQuery returns a list of API that match the query
+func (aS *AnalyzerService) V1StringQuery(searchstr string, reply *[]map[string]interface{}) error {
+
 	s := bleve.NewSearchRequest(bleve.NewQueryStringQuery(searchstr))
 	s.Fields = []string{utils.Meta} // return all fields
 	searchResults, err := aS.db.Search(s)

@@ -34,7 +34,8 @@ import (
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server, internalResourceSChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager) servmanager.Service {
+	connMgr *engine.ConnManager,
+	anz *AnalyzerService) servmanager.Service {
 	return &ResourceService{
 		connChan:    internalResourceSChan,
 		cfg:         cfg,
@@ -43,6 +44,7 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
+		anz:         anz,
 	}
 }
 
@@ -59,6 +61,7 @@ type ResourceService struct {
 	rpc      *v1.ResourceSv1
 	connChan chan rpcclient.ClientConnector
 	connMgr  *engine.ConnManager
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -90,7 +93,7 @@ func (reS *ResourceService) Start() (err error) {
 	if !reS.cfg.DispatcherSCfg().Enabled {
 		reS.server.RpcRegister(reS.rpc)
 	}
-	reS.connChan <- intAnzConn(reS.rpc, utils.ResourceS)
+	reS.connChan <- reS.anz.GetInternalCodec(reS.rpc, utils.ResourceS)
 	return
 }
 

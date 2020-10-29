@@ -240,13 +240,13 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Fatal(err)
 	}
 	reply := []map[string]interface{}{}
-	if err = anz.V1Search(utils.CoreSv1Ping, &reply); err != nil {
+	if err = anz.V1StringQuery(utils.CoreSv1Ping, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 4 {
 		t.Errorf("Expected 4 hits received: %v", len(reply))
 	}
 	reply = []map[string]interface{}{}
-	if err = anz.V1Search("RequestMethod:"+utils.CoreSv1Ping, &reply); err != nil {
+	if err = anz.V1StringQuery("RequestMethod:"+utils.CoreSv1Ping, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 4 {
 		t.Errorf("Expected 4 hits received: %v", len(reply))
@@ -264,20 +264,20 @@ func TestAnalyzersV1Search(t *testing.T) {
 		"RequestStartTime":   t1.Add(-24 * time.Hour).UTC().Format(time.RFC3339),
 	}}
 	reply = []map[string]interface{}{}
-	if err = anz.V1Search(utils.RequestDuration+":>="+strconv.FormatInt(int64(time.Hour), 10), &reply); err != nil {
+	if err = anz.V1StringQuery(utils.RequestDuration+":>="+strconv.FormatInt(int64(time.Hour), 10), &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 
 	reply = []map[string]interface{}{}
-	if err = anz.V1Search(utils.RequestStartTime+":<=\""+t1.Add(-23*time.Hour).UTC().Format(time.RFC3339)+"\"", &reply); err != nil {
+	if err = anz.V1StringQuery(utils.RequestStartTime+":<=\""+t1.Add(-23*time.Hour).UTC().Format(time.RFC3339)+"\"", &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 	reply = []map[string]interface{}{}
-	if err = anz.V1Search("RequestEncoding:*gob", &reply); err != nil {
+	if err = anz.V1StringQuery("RequestEncoding:*gob", &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
@@ -286,7 +286,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	if err = anz.db.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if err = anz.V1Search("RequestEncoding:*gob", &reply); err != bleve.ErrorIndexClosed {
+	if err = anz.V1StringQuery("RequestEncoding:*gob", &reply); err != bleve.ErrorIndexClosed {
 		t.Errorf("Expected error: %v,received: %+v", bleve.ErrorIndexClosed, err)
 	}
 }

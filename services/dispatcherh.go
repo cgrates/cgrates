@@ -32,13 +32,15 @@ import (
 // NewDispatcherHostsService returns the Dispatcher Service
 func NewDispatcherHostsService(cfg *config.CGRConfig, server *utils.Server,
 	internalChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager,
-	exitChan chan bool) servmanager.Service {
+	exitChan chan bool,
+	anz *AnalyzerService) servmanager.Service {
 	return &DispatcherHostsService{
 		connChan: internalChan,
 		cfg:      cfg,
 		server:   server,
 		connMgr:  connMgr,
 		exitChan: exitChan,
+		anz:      anz,
 	}
 }
 
@@ -53,6 +55,7 @@ type DispatcherHostsService struct {
 	dspS *dispatcherh.DispatcherHostsService
 	// rpc      *v1.DispatcherHSv1
 	connChan chan rpcclient.ClientConnector
+	anz      *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -66,7 +69,7 @@ func (dspS *DispatcherHostsService) Start() (err error) {
 
 	dspS.dspS = dispatcherh.NewDispatcherHService(dspS.cfg, dspS.connMgr)
 	go dspS.dspS.ListenAndServe()
-	dspS.connChan <- intAnzConn(dspS.dspS, utils.DispatcherH)
+	dspS.connChan <- dspS.anz.GetInternalCodec(dspS.dspS, utils.DispatcherH)
 
 	return
 }
