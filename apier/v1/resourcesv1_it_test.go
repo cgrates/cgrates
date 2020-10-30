@@ -65,6 +65,8 @@ var (
 		testV1RsAllocateUnlimited,
 		testV1RsGetResourceProfileWithoutTenant,
 		testV1RsRemResourceProfileWithoutTenant,
+		testV1RsSetResourceProfileWithOpts,
+		testV1RsAuthorizeResourcesWithOpts,
 		testV1RsStopEngine,
 	}
 )
@@ -984,5 +986,63 @@ func testV1RsRemResourceProfileWithoutTenant(t *testing.T) {
 		&utils.TenantID{ID: rlsConfig.ID},
 		&result); err == nil || utils.ErrNotFound.Error() != err.Error() {
 		t.Error(err)
+	}
+}
+
+func testV1RsSetResourceProfileWithOpts(t *testing.T) {
+	rlsCfg := &ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_WITH_OPTS",
+			FilterIDs: []string{"*string:~*opts.CustomField:1007"},
+			UsageTTL:  time.Duration(1) * time.Nanosecond,
+			Limit:     10,
+			Blocker:   true,
+			Stored:    true,
+			Weight:    20,
+		},
+	}
+	var reply string
+	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, rlsCfg, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var result *engine.ResourceProfile
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_WITH_OPTS"},
+		&result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rlsCfg.ResourceProfile, result) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rlsCfg.ResourceProfile), utils.ToJSON(result))
+	}
+}
+
+func testV1RsAuthorizeResourcesWithOpts(t *testing.T) {
+	var reply string
+	argsRU := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e45",
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TEST_WITH_OPTS",
+				Event: map[string]interface{}{
+					"Subject":     "1001",
+					"Destination": "1002",
+				},
+			},
+			Opts: map[string]interface{}{
+				"CustomField": "1007",
+			},
+		},
+		Units: 6,
+	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources,
+		&argsRU,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != "TEST_WITH_OPTS" {
+		t.Error("Unexpected reply returned", reply)
 	}
 }
