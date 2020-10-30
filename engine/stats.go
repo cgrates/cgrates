@@ -114,7 +114,7 @@ func (sS *StatService) storeStats() {
 				failedSqIDs = append(failedSqIDs, sID) // record failure so we can schedule it for next backup
 			}
 			return
-		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
+		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
 		// randomize the CPU load and give up thread control
 		time.Sleep(time.Duration(rand.Intn(1000)) * time.Nanosecond)
 	}
@@ -189,7 +189,7 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
 			sq, err = sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, true, true, "")
 			return
-		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
+		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
 		if err != nil {
 			return nil, err
 		}
@@ -257,6 +257,33 @@ func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
 	}
 }
 
+func (sS *StatService) removeExpiredWithStore(sq *StatQueue) (err error) {
+	lkID := utils.StatQueuePrefix + sq.TenantID()
+	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		err = sq.remExpired()
+		return
+	}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
+	if err = sq.remExpired(); err != nil {
+		return
+	}
+	sS.storeStatQueue(sq)
+	return
+}
+
+// storeStatQueue will store the sq if needed
+func (sS *StatService) storeStatQueue(sq *StatQueue) {
+	if sS.cgrcfg.StatSCfg().StoreInterval != 0 && sq.dirty != nil { // don't save
+		*sq.dirty = true // mark it to be saved
+		if sS.cgrcfg.StatSCfg().StoreInterval == -1 {
+			sS.StoreStatQueue(sq)
+		} else {
+			sS.ssqMux.Lock()
+			sS.storedStatQueues[sq.TenantID()] = true
+			sS.ssqMux.Unlock()
+		}
+	}
+}
+
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
 func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (statQueueIDs []string, err error) {
@@ -283,24 +310,14 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
 			err = sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm)
 			return
-		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
+		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
 					sq.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
 			withErrors = true
 		}
-		if sS.cgrcfg.StatSCfg().StoreInterval != 0 && sq.dirty != nil { // don't save
-			if sS.cgrcfg.StatSCfg().StoreInterval == -1 {
-				*sq.dirty = true
-				sS.StoreStatQueue(sq)
-			} else {
-				*sq.dirty = true // mark it to be saved
-				sS.ssqMux.Lock()
-				sS.storedStatQueues[sq.TenantID()] = true
-				sS.ssqMux.Unlock()
-			}
-		}
+		sS.storeStatQueue(sq)
 		if len(sS.cgrcfg.StatSCfg().ThresholdSConns) != 0 {
 			var thIDs []string
 			if len(sq.sqPrfl.ThresholdIDs) != 0 {
@@ -400,6 +417,9 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 
 // V1GetStatQueue returns a StatQueue object
 func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithOpts, reply *StatQueue) (err error) {
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
@@ -407,6 +427,9 @@ func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithOpts, reply *StatQ
 	sq, err := sS.dm.GetStatQueue(tnt, args.ID, true, true, "")
 	if err != nil {
 		return err
+	}
+	if err = sS.removeExpiredWithStore(sq); err != nil {
+		return
 	}
 	*reply = *sq
 	return
@@ -427,6 +450,9 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 			err = utils.NewErrServerError(err)
 		}
 		return err
+	}
+	if err = sS.removeExpiredWithStore(sq); err != nil {
+		return
 	}
 	sq.RLock()
 	metrics := make(map[string]string, len(sq.SQMetrics))
@@ -453,6 +479,9 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 			err = utils.NewErrServerError(err)
 		}
 		return err
+	}
+	if err = sS.removeExpiredWithStore(sq); err != nil {
+		return
 	}
 	sq.RLock()
 	metrics := make(map[string]float64, len(sq.SQMetrics))

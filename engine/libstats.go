@@ -79,11 +79,11 @@ func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err 
 		sSQ.SQItems[i] = sqItm
 	}
 	for metricID, metric := range sq.SQMetrics {
-		if marshaled, err := metric.Marshal(ms); err != nil {
+		marshaled, err := metric.Marshal(ms)
+		if err != nil {
 			return nil, err
-		} else {
-			sSQ.SQMetrics[metricID] = marshaled
 		}
+		sSQ.SQMetrics[metricID] = marshaled
 	}
 	return
 }
@@ -242,11 +242,7 @@ func (sq *StatQueue) addStatEvent(tnt, evID string, filterS *FilterS, evNm utils
 	if sq.ttl != nil {
 		expTime = utils.TimePointer(time.Now().Add(*sq.ttl))
 	}
-	sq.SQItems = append(sq.SQItems,
-		struct {
-			EventID    string
-			ExpiryTime *time.Time
-		}{evID, expTime})
+	sq.SQItems = append(sq.SQItems, SQItem{EventID: evID, ExpiryTime: expTime})
 	var pass bool
 	// recreate the request without *opts
 	dDP := newDynamicDP(config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
