@@ -1574,3 +1574,64 @@ func TestOrderRatesOnIntervalStartLowerThanEndIdx(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+
+func TestCostWithRates(t *testing.T) {
+	rt0 := &engine.Rate{
+		ID: "RATE0",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: time.Duration(0),
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Minute),
+				Value:         0.10,
+			},
+			{
+				IntervalStart: time.Duration(60 * time.Second),
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Second),
+				Value:         0.05,
+			},
+		},
+	}
+	rt0.Compile()
+
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+
+				IntervalStart: time.Duration(0),
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Second),
+				Value:         0.20,
+			},
+			{
+
+				IntervalStart: time.Duration(2 * time.Minute),
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Second),
+				Value:         0.15,
+			},
+		},
+	}
+	rt1.Compile()
+
+	rts := []*orderedRate{
+		{
+			time.Duration(0),
+			rt0,
+		},
+		{
+			time.Duration(90 * time.Second),
+			rt1,
+		},
+	}
+
+	//eRtIvls := []*engine.RateSInterval{}
+	var eRtIvls []*engine.RateSInterval
+	if rtIvls, err := costWithRates(rts, time.Duration(130*time.Second)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRtIvls, rtIvls) {
+		t.Errorf("expecting: %+v, received: %+v", eRtIvls, rtIvls)
+	}
+}

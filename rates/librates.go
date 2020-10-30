@@ -132,6 +132,7 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 			rWw.add(rIt)
 		}
 	}
+
 	// sort the activation times
 	sortedATimes := make([]time.Time, len(rtIdx))
 	idxATimes := 0
@@ -172,6 +173,29 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 		}
 	} else { // only first rate is considered for units
 		ordRts = []*orderedRate{&orderedRate{time.Duration(0), rtIdx[sortedATimes[0]].winner().rt}}
+	}
+	return
+}
+
+// costWithRates will give out the cost projection for the given orderedRates and usage
+func costWithRates(rts []*orderedRate, usage time.Duration) (rtIvls []*engine.RateSInterval, err error) {
+	//var usageSIdx time.Duration // usageStart for one rate
+	for i, rt := range rts {
+		var usageEIdx time.Duration
+		if i != len(rts)-1 {
+			usageEIdx = rts[i+1].Duration
+		}
+		var iRts []*engine.IntervalRate
+		for _, iRt := range rt.IntervalRates {
+			if usageEIdx == 0 || iRt.IntervalStart < usageEIdx {
+				iRts = append(iRts, iRt)
+			}
+		}
+		//fmt.Printf("iRts: %+v\n", iRts)
+		if usageEIdx == 0 {
+			break
+		}
+		//usageSIdx = usageEIdx // continue for the next interval
 	}
 	return
 }
