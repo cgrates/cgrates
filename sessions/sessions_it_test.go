@@ -130,7 +130,7 @@ func testSessionsItTerminatUnexist(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	usage := time.Duration(2 * time.Minute)
+	usage := 2 * time.Minute
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -207,7 +207,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	usage := time.Duration(2 * time.Minute)
+	usage := 2 * time.Minute
 	updtArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -417,7 +417,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if initRpl.MaxUsage == nil || *initRpl.MaxUsage != time.Duration(1*time.Second) {
+	if initRpl.MaxUsage == nil || *initRpl.MaxUsage != time.Second {
 		t.Errorf("received: %+v", initRpl.MaxUsage)
 	}
 	updateArgs := &V1UpdateSessionArgs{

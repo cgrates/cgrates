@@ -44,7 +44,7 @@ func main() {
 		log.Fatal("Got config error: ", err.Error())
 	}
 	cdrsMasterRpc, err = rpcclient.NewRPCClient(utils.TCP, cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
+		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false)
 	if err != nil {
 		log.Fatal("Could not connect to rater: ", err.Error())
 	}

@@ -130,7 +130,7 @@ func main() {
 	}
 	var err error
 	client, err = rpcclient.NewRPCClient(utils.TCP, *server, *tls, *keyPath, *certificatePath, *caPath, 3, 3,
-		time.Duration(1*time.Second), time.Duration(*replyTimeOut)*time.Second, *rpcEncoding, nil, false)
+		time.Second, time.Duration(*replyTimeOut)*time.Second, *rpcEncoding, nil, false)
 	if err != nil {
 		cgrConsoleFlags.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)

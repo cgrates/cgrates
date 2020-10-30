@@ -50,7 +50,7 @@ func TestGuardianMultipleKeys(t *testing.T) {
 	sg.Wait()
 	mustExecDur := time.Duration(maxIter*100) * time.Millisecond
 	if execTime := time.Now().Sub(tStart); execTime < mustExecDur ||
-		execTime > mustExecDur+time.Duration(100*time.Millisecond) {
+		execTime > mustExecDur+100*time.Millisecond {
 		t.Errorf("Execution took: %v", execTime)
 	}
 	Guardian.lkMux.Lock()
@@ -71,7 +71,7 @@ func TestGuardianTimeout(t *testing.T) {
 		for _, key := range keys {
 			sg.Add(1)
 			go func(key string) {
-				Guardian.Guard(delayHandler, time.Duration(10*time.Millisecond), key)
+				Guardian.Guard(delayHandler, 10*time.Millisecond, key)
 				sg.Done()
 			}(key)
 		}
@@ -79,7 +79,7 @@ func TestGuardianTimeout(t *testing.T) {
 	sg.Wait()
 	mustExecDur := time.Duration(maxIter*10) * time.Millisecond
 	if execTime := time.Now().Sub(tStart); execTime < mustExecDur ||
-		execTime > mustExecDur+time.Duration(100*time.Millisecond) {
+		execTime > mustExecDur+100*time.Millisecond {
 		t.Errorf("Execution took: %v", execTime)
 	}
 	Guardian.lkMux.Lock()
@@ -116,7 +116,7 @@ func TestGuardianGuardIDs(t *testing.T) {
 		}
 	}
 	Guardian.lkMux.Unlock()
-	secLockDur := time.Duration(1 * time.Millisecond)
+	secLockDur := time.Millisecond
 	// second lock to test counter
 	go Guardian.GuardIDs("", secLockDur, lockIDs[1:]...)
 	time.Sleep(30 * time.Microsecond) // give time for goroutine to lock
@@ -158,7 +158,7 @@ func TestGuardianGuardIDs(t *testing.T) {
 	if totalLockDur := time.Now().Sub(tStart); totalLockDur < lockDur {
 		t.Errorf("Lock duration too small")
 	}
-	time.Sleep(time.Duration(30) * time.Millisecond)
+	time.Sleep(30 * time.Millisecond)
 	// making sure the items stay locked
 	Guardian.lkMux.Lock()
 	if len(Guardian.locks) != 3 {
@@ -220,7 +220,7 @@ func TestGuardianGuardIDsTimeoutConcurrent(t *testing.T) {
 	for i := 0; i < maxIter; i++ {
 		sg.Add(1)
 		go func() {
-			Guardian.GuardIDs(refID, time.Duration(time.Microsecond), keys...)
+			Guardian.GuardIDs(refID, time.Microsecond, keys...)
 			sg.Done()
 		}()
 	}

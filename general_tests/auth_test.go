@@ -150,7 +150,7 @@ func TestAuthPostpaidFallbackDest(t *testing.T) {
 	var maxSessionTime time.Duration
 	if err = rsponder.GetMaxSessionTime(&engine.CallDescriptorWithOpts{CallDescriptor: cd}, &maxSessionTime); err != nil {
 		t.Error(err)
-	} else if maxSessionTime != time.Duration(0) {
+	} else if maxSessionTime != 0 {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
 }
@@ -167,7 +167,7 @@ func TestAuthPostpaidWithDestination(t *testing.T) {
 	var maxSessionTime time.Duration
 	if err := rsponder.GetMaxSessionTime(&engine.CallDescriptorWithOpts{CallDescriptor: cd}, &maxSessionTime); err != nil {
 		t.Error(err)
-	} else if maxSessionTime != time.Duration(0) {
+	} else if maxSessionTime != 0 {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
 }

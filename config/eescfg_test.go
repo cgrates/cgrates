@@ -67,7 +67,7 @@ func TestEESClone(t *testing.T) {
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit:     -2,
-				TTL:       time.Duration(3 * time.Second),
+				TTL:       3 * time.Second,
 				StaticTTL: true,
 				Precache:  false,
 				Replicate: false,
@@ -297,7 +297,7 @@ func TestEventExporterSameID(t *testing.T) {
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit:     -1,
-				TTL:       time.Duration(5 * time.Second),
+				TTL:       5 * time.Second,
 				StaticTTL: false,
 			},
 		},
@@ -421,7 +421,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit:     -2,
-				TTL:       1 * time.Second,
+				TTL:       time.Second,
 				StaticTTL: false,
 			},
 		},
@@ -539,7 +539,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit:     -2,
-				TTL:       1 * time.Second,
+				TTL:       time.Second,
 				StaticTTL: false,
 			},
 		},

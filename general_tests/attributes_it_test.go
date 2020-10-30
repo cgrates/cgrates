@@ -362,7 +362,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:    "1001",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(11 * time.Second),
+					utils.Usage:      11 * time.Second,
 					utils.COST:       10.0,
 				},
 			},
@@ -381,7 +381,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Account:    "1001",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(11 * time.Second),
+			utils.Usage:      11 * time.Second,
 			utils.COST:       10.5,
 		},
 	}
@@ -563,7 +563,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	rlsConfig := &engine.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResTest",
-		UsageTTL:          time.Duration(1) * time.Minute,
+		UsageTTL:          time.Minute,
 		Limit:             10,
 		AllocationMessage: "MessageAllocation",
 		Stored:            true,

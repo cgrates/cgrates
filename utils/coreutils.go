@@ -871,7 +871,7 @@ func GetUrlRawArguments(dialURL string) (out map[string]string) {
 
 // WarnExecTime is used when we need to meassure the execution of specific functions
 // and warn when the total duration is higher than expected
-// should be usually called with defer, ie: defer WarnExecTime(time.Now(), "MyTestFunc", time.Duration(2*time.Second))
+// should be usually called with defer, ie: defer WarnExecTime(time.Now(), "MyTestFunc", 2*time.Second)
 func WarnExecTime(startTime time.Time, logID string, maxDur time.Duration) {
 	totalDur := time.Since(startTime)
 	if totalDur > maxDur {

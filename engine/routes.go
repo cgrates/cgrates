@@ -521,7 +521,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 // for event based on filters and sorting algorithms
 func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	if _, has := args.CGREvent.Event[utils.Usage]; !has {
-		args.CGREvent.Event[utils.Usage] = time.Duration(time.Minute) // make sure we have default set for Usage
+		args.CGREvent.Event[utils.Usage] = time.Minute // make sure we have default set for Usage
 	}
 	var rPrfs []*RouteProfile
 	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args.CGREventWithOpts, true); err != nil {

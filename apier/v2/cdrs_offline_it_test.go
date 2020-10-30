@@ -166,7 +166,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 			ID:        "THD_Test",
 			FilterIDs: []string{"*string:Account:test"},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(time.Second),
+			MinSleep:  time.Second,
 			Blocker:   false,
 			Weight:    20.0,
 			ActionIDs: []string{"ACT_LOG"},
@@ -197,7 +197,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 			utils.Subject:     "test",
 			utils.Destination: "1002",
 			utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-			utils.Usage:       time.Duration(1) * time.Minute,
+			utils.Usage:       time.Minute,
 		},
 	}
 	mapEv := engine.NewMapEvent(cgrEv.Event)
@@ -211,7 +211,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsOfflineExpiryBalance(t *testing.T) {
@@ -286,7 +286,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(0),
+			MinSleep:  0,
 			Blocker:   false,
 			Weight:    20.0,
 			ActionIDs: []string{"ACT_LOG"},
@@ -319,7 +319,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 					utils.Subject:     "test2",
 					utils.Destination: "1002",
 					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1) * time.Minute,
+					utils.Usage:       time.Minute,
 				},
 			},
 		},
@@ -330,7 +330,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsBalancesWithSameWeight(t *testing.T) {
@@ -373,7 +373,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 			utils.Subject:     "specialTest",
 			utils.Destination: "1002",
 			utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-			utils.Usage:       time.Duration(1) * time.Minute,
+			utils.Usage:       time.Minute,
 		},
 	}
 	mapEv := engine.NewMapEvent(cgrEv.Event)
@@ -387,7 +387,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsOfflineKillEngine(t *testing.T) {

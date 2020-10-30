@@ -35,13 +35,13 @@ func TestChargingIntervalPartiallyEquals(t *testing.T) {
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
-				Usage:          time.Duration(2 * time.Second),
+				Usage:          2 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
-				Usage:          time.Duration(5 * time.Second),
+				Usage:          5 * time.Second,
 			},
 		},
 		CompressFactor: 3,
@@ -53,13 +53,13 @@ func TestChargingIntervalPartiallyEquals(t *testing.T) {
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
-				Usage:          time.Duration(2 * time.Second),
+				Usage:          2 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
-				Usage:          time.Duration(5 * time.Second),
+				Usage:          5 * time.Second,
 			},
 		},
 		CompressFactor: 3,
@@ -86,25 +86,25 @@ func TestChargingIntervalUsage(t *testing.T) {
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
-				Usage:          time.Duration(2 * time.Second),
+				Usage:          2 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
-				Usage:          time.Duration(5 * time.Second),
+				Usage:          5 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
-				Usage:          time.Duration(4 * time.Millisecond),
+				Usage:          4 * time.Millisecond,
 			},
 		},
 		CompressFactor: 3,
 	}
 	tCi1 := ci1.Usage()
-	eTCi1 := time.Duration(14*time.Second + 12*time.Millisecond)
+	eTCi1 := 14*time.Second + 12*time.Millisecond
 	if *tCi1 != eTCi1 {
 		t.Errorf("Expecting: %+v, received: %+v", eTCi1, *tCi1)
 	}
@@ -118,25 +118,25 @@ func TestChargingIntervalTotalUsage(t *testing.T) {
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
-				Usage:          time.Duration(2 * time.Second),
+				Usage:          2 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
-				Usage:          time.Duration(5 * time.Second),
+				Usage:          5 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
-				Usage:          time.Duration(4 * time.Millisecond),
+				Usage:          4 * time.Millisecond,
 			},
 		},
 		CompressFactor: 3,
 	}
 	tCi1 := ci1.TotalUsage()
-	eTCi1 := 3 * time.Duration(14*time.Second+12*time.Millisecond)
+	eTCi1 := 3 * (14*time.Second + 12*time.Millisecond)
 	if *tCi1 != eTCi1 {
 		t.Errorf("Expecting: %+v, received: %+v", eTCi1, *tCi1)
 	}
@@ -150,26 +150,26 @@ func TestChargingIntervalEventCostUsageIndex(t *testing.T) {
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
-				Usage:          time.Duration(2 * time.Second),
+				Usage:          2 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
-				Usage:          time.Duration(5 * time.Second),
+				Usage:          5 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
-				Usage:          time.Duration(4 * time.Millisecond),
+				Usage:          4 * time.Millisecond,
 			},
 		},
 		CompressFactor: 3,
 	}
 	ci1.ecUsageIdx = ci1.TotalUsage()
 	tCi1 := ci1.EventCostUsageIndex()
-	eTCi1 := 3 * time.Duration(14*time.Second+12*time.Millisecond)
+	eTCi1 := 3 * (14*time.Second + 12*time.Millisecond)
 	if *tCi1 != eTCi1 {
 		t.Errorf("Expecting: %+v, received: %+v", eTCi1, *tCi1)
 	}
@@ -183,19 +183,19 @@ func TestChargingIntervalStartTime(t *testing.T) {
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
-				Usage:          time.Duration(2 * time.Second),
+				Usage:          2 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
-				Usage:          time.Duration(5 * time.Second),
+				Usage:          5 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
-				Usage:          time.Duration(4 * time.Millisecond),
+				Usage:          4 * time.Millisecond,
 			},
 		},
 		CompressFactor: 3,
@@ -216,19 +216,19 @@ func TestChargingIntervalEndTime(t *testing.T) {
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
-				Usage:          time.Duration(2 * time.Second),
+				Usage:          2 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
-				Usage:          time.Duration(5 * time.Second),
+				Usage:          5 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
-				Usage:          time.Duration(4 * time.Millisecond),
+				Usage:          4 * time.Millisecond,
 			},
 		},
 		CompressFactor: 3,
@@ -249,19 +249,19 @@ func TestChargingIntervalCost(t *testing.T) {
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
-				Usage:          time.Duration(2 * time.Second),
+				Usage:          2 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
-				Usage:          time.Duration(5 * time.Second),
+				Usage:          5 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
-				Usage:          time.Duration(4 * time.Millisecond),
+				Usage:          4 * time.Millisecond,
 			},
 		},
 		CompressFactor: 3,
@@ -281,19 +281,19 @@ func TestChargingIntervalTotalCost(t *testing.T) {
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
-				Usage:          time.Duration(2 * time.Second),
+				Usage:          2 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
-				Usage:          time.Duration(5 * time.Second),
+				Usage:          5 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
-				Usage:          time.Duration(4 * time.Millisecond),
+				Usage:          4 * time.Millisecond,
 			},
 		},
 		CompressFactor: 3,
@@ -313,19 +313,19 @@ func TestChargingIntervalClone(t *testing.T) {
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           2.345,
-				Usage:          time.Duration(2 * time.Second),
+				Usage:          2 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 2,
 				Cost:           1.23,
-				Usage:          time.Duration(5 * time.Second),
+				Usage:          5 * time.Second,
 			},
 			{
 				AccountingID:   "Acc1",
 				CompressFactor: 3,
 				Cost:           1.23,
-				Usage:          time.Duration(4 * time.Millisecond),
+				Usage:          4 * time.Millisecond,
 			},
 		},
 		CompressFactor: 3,
@@ -347,19 +347,19 @@ func TestChargingIncrementEquals(t *testing.T) {
 		AccountingID:   "Acc1",
 		CompressFactor: 2,
 		Cost:           2.345,
-		Usage:          time.Duration(2 * time.Second),
+		Usage:          2 * time.Second,
 	}
 	ch2 := &ChargingIncrement{
 		AccountingID:   "Acc1",
 		CompressFactor: 2,
 		Cost:           2.345,
-		Usage:          time.Duration(2 * time.Second),
+		Usage:          2 * time.Second,
 	}
 	ch3 := &ChargingIncrement{
 		AccountingID:   "Acc2",
 		CompressFactor: 2,
 		Cost:           2.345,
-		Usage:          time.Duration(2 * time.Second),
+		Usage:          2 * time.Second,
 	}
 	if eq := ch1.Equals(ch2); !eq {
 		t.Errorf("Expecting: true, received: %+v", eq)
@@ -374,7 +374,7 @@ func TestChargingIncrementClone(t *testing.T) {
 		AccountingID:   "Acc1",
 		CompressFactor: 2,
 		Cost:           2.345,
-		Usage:          time.Duration(2 * time.Second),
+		Usage:          2 * time.Second,
 	}
 	ch2 := ch1.Clone()
 	if !reflect.DeepEqual(ch1, ch2) {
@@ -391,10 +391,10 @@ func TestChargingIncrementTotalUsage(t *testing.T) {
 		AccountingID:   "Acc1",
 		CompressFactor: 2,
 		Cost:           2.345,
-		Usage:          time.Duration(2 * time.Second),
+		Usage:          2 * time.Second,
 	}
 	tCh1 := ch1.TotalUsage()
-	eTCh1 := time.Duration(4 * time.Second)
+	eTCh1 := 4 * time.Second
 	if tCh1 != eTCh1 {
 		t.Errorf("Expecting: %+v, received: %+v", eTCh1, tCh1)
 	}
@@ -405,7 +405,7 @@ func TestChargingIncrementTotalCost(t *testing.T) {
 		AccountingID:   "Acc1",
 		CompressFactor: 2,
 		Cost:           2.345,
-		Usage:          time.Duration(2 * time.Second),
+		Usage:          2 * time.Second,
 	}
 	tCh1 := ch1.TotalCost()
 	eTCh1 := 4.69

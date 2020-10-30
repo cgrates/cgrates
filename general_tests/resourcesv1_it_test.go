@@ -114,7 +114,7 @@ func testV1RsSetProfile(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			UsageTTL:          time.Duration(-1),
+			UsageTTL:          -1,
 			Limit:             2,
 			AllocationMessage: "Account1Channels",
 			Weight:            20,

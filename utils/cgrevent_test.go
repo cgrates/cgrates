@@ -34,7 +34,7 @@ func TestCGREventHasField(t *testing.T) {
 	//normal check
 	cgrEvent = &CGREvent{
 		Event: map[string]interface{}{
-			Usage: time.Duration(20 * time.Second),
+			Usage: 20 * time.Second,
 		},
 	}
 	rcv = cgrEvent.HasField("Usage")
@@ -53,7 +53,7 @@ func TestCGREventCheckMandatoryFields(t *testing.T) {
 	}
 	cgrEvent = &CGREvent{
 		Event: map[string]interface{}{
-			Usage:   time.Duration(20 * time.Second),
+			Usage:   20 * time.Second,
 			"test1": 1,
 			"test2": 2,
 			"test3": 3,
@@ -84,7 +84,7 @@ func TestCGREventFielAsString(t *testing.T) {
 	//normal check
 	cgrEvent = &CGREvent{
 		Event: map[string]interface{}{
-			Usage:   time.Duration(20 * time.Second),
+			Usage:   20 * time.Second,
 			"test1": 1,
 			"test2": 2,
 			"test3": 3,
@@ -106,7 +106,7 @@ func TestLibRoutesUsage(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
 		Event: map[string]interface{}{
-			Usage: time.Duration(20 * time.Second),
+			Usage: 20 * time.Second,
 		},
 	}
 	seErr := &CGREvent{
@@ -159,7 +159,7 @@ func TestCGREventFieldAsString(t *testing.T) {
 		ID:     "supplierEvent1",
 		Event: map[string]interface{}{
 			"supplierprofile1": "Supplier",
-			"UsageInterval":    time.Duration(1 * time.Second),
+			"UsageInterval":    time.Second,
 			"PddInterval":      "1s",
 			"Weight":           20.0,
 		},

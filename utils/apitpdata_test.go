@@ -748,7 +748,7 @@ func TestArgRSv1ResourceUsageCloneCase2(t *testing.T) {
 			},
 		},
 		UsageID:  "randomID",
-		UsageTTL: DurationPointer(time.Duration(2)),
+		UsageTTL: DurationPointer(2),
 		Units:    1.0,
 	}
 	if replyArgRsv1, err := newArgRSv1.RPCClone(); err != nil {
@@ -768,7 +768,7 @@ func TestArgRSv1ResourceUsageCloneCase3(t *testing.T) {
 			},
 		},
 		UsageID:  "randomID",
-		UsageTTL: DurationPointer(time.Duration(2)),
+		UsageTTL: DurationPointer(2),
 		Units:    1.0,
 		clnb:     true,
 	}

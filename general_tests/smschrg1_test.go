@@ -79,7 +79,7 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 }
 
 func TestSMSGetDataCostSmsChrg1(t *testing.T) {
-	usageDur := time.Duration(1)
+	usageDur := time.Nanosecond
 	timeStart := time.Date(2014, 3, 4, 0, 0, 0, 0, time.Local)
 	cd := &engine.CallDescriptor{
 		Category:      "sms",

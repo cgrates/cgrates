@@ -1184,7 +1184,7 @@ func testOnStorITResourceProfile(t *testing.T) {
 			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC)},
 		Limit:        1,
 		ThresholdIDs: []string{"TEST_ACTIONS"},
-		UsageTTL:     time.Duration(3 * time.Nanosecond),
+		UsageTTL:     3 * time.Nanosecond,
 	}
 	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID,
 		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -1449,7 +1449,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{},
 		FilterIDs:          []string{"FLTR_1"},
 		QueueLength:        2,
-		TTL:                time.Duration(0 * time.Second),
+		TTL:                0,
 		Stored:             true,
 		ThresholdIDs:       []string{"Thresh1"},
 	}
@@ -1595,7 +1595,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{},
 		FilterIDs:          []string{"TestFilter2"},
 		MaxHits:            12,
-		MinSleep:           time.Duration(0 * time.Second),
+		MinSleep:           0,
 		Blocker:            true,
 		Weight:             1.4,
 		ActionIDs:          []string{"Action1"},
@@ -2177,8 +2177,8 @@ func testOnStorITRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						Value:     0.12,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Minute),
+						Unit:      time.Minute,
+						Increment: time.Minute,
 					},
 				},
 				Blocker: false,
@@ -2190,8 +2190,8 @@ func testOnStorITRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						Value:     0.06,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Second),
+						Unit:      time.Minute,
+						Increment: time.Second,
 					},
 				},
 				Blocker: false,

@@ -28,7 +28,7 @@ import (
 
 var (
 	cloneExpTimeStats time.Time
-	expTimeStats      = time.Now().Add(time.Duration(20 * time.Minute))
+	expTimeStats      = time.Now().Add(20 * time.Minute)
 	statService       *StatService
 	dmSTS             *DataManager
 	sqps              = []*StatQueueProfile{
@@ -40,7 +40,7 @@ var (
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 10,
-			TTL:         time.Duration(10) * time.Second,
+			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
 				{
 					MetricID: "*sum#Usage",
@@ -60,7 +60,7 @@ var (
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 10,
-			TTL:         time.Duration(10) * time.Second,
+			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
 				{
 					MetricID: "*sum#Usage",
@@ -80,7 +80,7 @@ var (
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 10,
-			TTL:         time.Duration(10) * time.Second,
+			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
 				{
 					MetricID: "*sum#Usage",
@@ -110,7 +110,7 @@ var (
 						"UsageInterval":  "1s",
 						"PddInterval":    "1s",
 						"Weight":         "9.0",
-						utils.Usage:      time.Duration(135 * time.Second),
+						utils.Usage:      135 * time.Second,
 						utils.COST:       123.0,
 					},
 				},
@@ -127,7 +127,7 @@ var (
 						"UsageInterval":  "1s",
 						"PddInterval":    "1s",
 						"Weight":         "15.0",
-						utils.Usage:      time.Duration(45 * time.Second),
+						utils.Usage:      45 * time.Second,
 					},
 				},
 			},
@@ -139,7 +139,7 @@ var (
 					ID:     "event3",
 					Event: map[string]interface{}{
 						"Stats":     "StatQueueProfilePrefix",
-						utils.Usage: time.Duration(30 * time.Second),
+						utils.Usage: 30 * time.Second,
 					},
 				},
 			},
@@ -175,12 +175,12 @@ func TestStatQueuesAddFilters(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -202,12 +202,12 @@ func TestStatQueuesAddFilters(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -376,7 +376,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		QueueLength: 10,
-		TTL:         time.Duration(10) * time.Second,
+		TTL:         10 * time.Second,
 		Metrics: []*MetricWithFilters{
 			{
 				MetricID: "*sum#Usage",

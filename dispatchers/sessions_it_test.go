@@ -276,7 +276,7 @@ func testDspSessionAuthorize(t *testing.T) {
 }
 
 func testDspSessionInit(t *testing.T) {
-	initUsage := time.Duration(5 * time.Minute)
+	initUsage := 5 * time.Minute
 	argsInit := &sessions.V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,

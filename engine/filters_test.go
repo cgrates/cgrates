@@ -447,7 +447,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 		t.Error(err)
 	}
 	ev = utils.MapStorage{}
-	ev.Set([]string{"ACD"}, time.Duration(2*time.Minute))
+	ev.Set([]string{"ACD"}, 2*time.Minute)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
@@ -455,7 +455,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	}
 	// Second
 	ev = utils.MapStorage{}
-	ev.Set([]string{"ASR"}, time.Duration(20*time.Second))
+	ev.Set([]string{"ASR"}, 20*time.Second)
 	rf, err = NewFilterRule("*gte", "~ASR", []string{"10s"})
 	if err != nil {
 		t.Error(err)
@@ -983,7 +983,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	}
 	//check with max usage -1 should fail
 	passEvent1 := map[string]interface{}{
-		"MaxUsage": time.Duration(-1),
+		"MaxUsage": -1,
 	}
 	pEv := utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent1)
@@ -995,7 +995,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	}
 	//check with max usage 0 should fail
 	passEvent2 := map[string]interface{}{
-		"MaxUsage": time.Duration(0),
+		"MaxUsage": 0,
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent2)
@@ -1007,7 +1007,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	}
 	//check with max usage 123 should pass
 	passEvent3 := map[string]interface{}{
-		"MaxUsage": time.Duration(123),
+		"MaxUsage": 123,
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent3)

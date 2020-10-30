@@ -374,7 +374,7 @@ func TestEventParseStatic(t *testing.T) {
 		ev.GetDestination("^test") != "test" ||
 		setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
 		answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
-		dur != time.Duration(60)*time.Second {
+		dur != 60*time.Second {
 		t.Error("Values out of static not matching",
 			ev.GetReqType("^test") != "test",
 			ev.GetTenant("^test") != "test",
@@ -384,7 +384,7 @@ func TestEventParseStatic(t *testing.T) {
 			ev.GetDestination("^test") != "test",
 			setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 			answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
-			dur != time.Duration(60)*time.Second)
+			dur != 60*time.Second)
 	}
 }
 
@@ -421,7 +421,7 @@ Task-Runtime: 1349437318`
 		ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
 		setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
 		answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
-		dur != time.Duration(65)*time.Second {
+		dur != 65*time.Second {
 		t.Error("Values out of static not matching",
 			ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			ev.GetTenant("FreeSWITCH-Hostname") != "h1.ip-switch.net",
@@ -431,7 +431,7 @@ Task-Runtime: 1349437318`
 			ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
 			answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
-			dur != time.Duration(65)*time.Second)
+			dur != 65*time.Second)
 	}
 }
 
@@ -473,7 +473,7 @@ func TestParseFsHangup(t *testing.T) {
 		ev.GetDestination(utils.MetaDefault) != "1003" ||
 		setupTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC) ||
 		answerTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC) ||
-		dur != time.Duration(66)*time.Second {
+		dur != 66*time.Second {
 		t.Error("Default values not matching",
 			ev.GetReqType(utils.MetaDefault) != utils.META_PREPAID,
 			ev.GetTenant(utils.MetaDefault) != "cgrates.org",
@@ -483,7 +483,7 @@ func TestParseFsHangup(t *testing.T) {
 			ev.GetDestination(utils.MetaDefault) != "1003",
 			setupTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC),
 			answerTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC),
-			dur != time.Duration(66)*time.Second)
+			dur != 66*time.Second)
 	}
 }
 
@@ -589,13 +589,13 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	expectedMap[utils.AnswerTime] = aTime
 	expectedMap[utils.RequestType] = utils.META_PREPAID
 	expectedMap[utils.Destination] = "1003"
-	expectedMap[utils.Usage] = time.Duration(66) * time.Second
+	expectedMap[utils.Usage] = 66 * time.Second
 	expectedMap[utils.Tenant] = "cgrates.org"
 	expectedMap[utils.Account] = "1001"
 	expectedMap[utils.Subject] = "1001"
 	expectedMap[utils.Cost] = -1.0
-	expectedMap[utils.PDD] = time.Duration(28) * time.Millisecond
-	expectedMap[utils.ACD] = time.Duration(30) * time.Second
+	expectedMap[utils.PDD] = 28 * time.Millisecond
+	expectedMap[utils.ACD] = 30 * time.Second
 	expectedMap[utils.DISCONNECT_CAUSE] = "NORMAL_CLEARING"
 	expectedMap[utils.ROUTE] = "supplier1"
 	if storedMap := ev.AsMapStringInterface(""); !reflect.DeepEqual(expectedMap, storedMap) {

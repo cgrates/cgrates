@@ -83,7 +83,7 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 				},
 			},
 		},
-		RegisterInterval: time.Duration(5),
+		RegisterInterval: 5,
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
@@ -194,7 +194,7 @@ func TestDispatcherHCfgAsMapInterface1(t *testing.T) {
 				},
 			},
 		},
-		utils.RegisterIntervalCfg: 1 * time.Minute,
+		utils.RegisterIntervalCfg: time.Minute,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

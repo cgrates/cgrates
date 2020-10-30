@@ -47,7 +47,7 @@ var (
 			Event: map[string]interface{}{
 				utils.Account:    "1001",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(135 * time.Second),
+				utils.Usage:      135 * time.Second,
 				utils.COST:       123.0}},
 		{
 			Tenant: "cgrates.org",
@@ -55,7 +55,7 @@ var (
 			Event: map[string]interface{}{
 				utils.Account:    "1002",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(45 * time.Second)}},
+				utils.Usage:      45 * time.Second}},
 		{
 			Tenant: "cgrates.org",
 			ID:     "event3",
@@ -224,9 +224,9 @@ func testV1STSProcessEvent(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:    "1001",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(135 * time.Second),
+					utils.Usage:      135 * time.Second,
 					utils.COST:       123.0,
-					utils.PDD:        time.Duration(12 * time.Second),
+					utils.PDD:        12 * time.Second,
 				},
 			},
 		},
@@ -282,7 +282,7 @@ func testV1STSProcessEvent(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:    "1002",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(45 * time.Second),
+					utils.Usage:      45 * time.Second,
 					utils.Cost:       12.1,
 				},
 			},
@@ -405,7 +405,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 10,
-			TTL:         time.Duration(10) * time.Second,
+			TTL:         10 * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
@@ -556,7 +556,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 100,
-			TTL:         time.Duration(1) * time.Second,
+			TTL:         time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID:  utils.MetaACD,
@@ -617,7 +617,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 				ID:     "event1",
 				Event: map[string]interface{}{
 					"DistinctVal": "RandomVal",
-					utils.Usage:   time.Duration(6 * time.Second),
+					utils.Usage:   6 * time.Second,
 					"CustomValue": 7.0,
 				},
 			},
@@ -649,7 +649,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 				ID:     "event2",
 				Event: map[string]interface{}{
 					"DistinctVal": "RandomVal",
-					utils.Usage:   time.Duration(12 * time.Second),
+					utils.Usage:   12 * time.Second,
 					"CustomValue": 10.0,
 				},
 			},
@@ -791,7 +791,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 100,
-			TTL:         time.Duration(1) * time.Second,
+			TTL:         time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
@@ -821,7 +821,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(5 * time.Minute),
+			MinSleep:  5 * time.Minute,
 			Weight:    20.0,
 			ActionIDs: []string{"LOG_WARNING"},
 			Async:     true,
@@ -842,7 +842,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 				ID:     "event1",
 				Event: map[string]interface{}{
 					"CustomEvent": "CustomEvent",
-					utils.Usage:   time.Duration(45 * time.Second),
+					utils.Usage:   45 * time.Second,
 				},
 			},
 		},
@@ -873,7 +873,7 @@ func testV1STSProcessCDRStat(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 100,
-			TTL:         time.Duration(1) * time.Second,
+			TTL:         time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaSum + utils.HashtagSep + "~*req.CostDetails.Usage",
@@ -951,13 +951,13 @@ func testV1STSProcessCDRStat(t *testing.T) {
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		RunID:       utils.MetaDefault,
-		Usage:       time.Duration(10) * time.Second,
+		Usage:       10 * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost:        1.01,
 		CostDetails: engine.NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.MetaDefault),
 	}
 	cdr.CostDetails.Compute()
-	cdr.CostDetails.Usage = utils.DurationPointer(time.Duration(10) * time.Second)
+	cdr.CostDetails.Usage = utils.DurationPointer(10 * time.Second)
 
 	var reply2 []string
 	expected := []string{"StatForCDR"}
@@ -1010,7 +1010,7 @@ func testV1STSOverWriteStats(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 100,
-			TTL:         time.Duration(1) * time.Second,
+			TTL:         time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaSum + utils.HashtagSep + "1",
@@ -1060,7 +1060,7 @@ func testV1STSOverWriteStats(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 100,
-			TTL:         time.Duration(1) * time.Second,
+			TTL:         time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaSum + utils.HashtagSep + "~*req.Test",
@@ -1102,7 +1102,7 @@ func testV1STSProcessStatWithThreshold2(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 100,
-			TTL:         time.Duration(1) * time.Second,
+			TTL:         time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaTCD,
@@ -1132,7 +1132,7 @@ func testV1STSProcessStatWithThreshold2(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(5 * time.Minute),
+			MinSleep:  5 * time.Minute,
 			Weight:    20.0,
 			ActionIDs: []string{"LOG_WARNING"},
 			Async:     true,
@@ -1153,7 +1153,7 @@ func testV1STSProcessStatWithThreshold2(t *testing.T) {
 				ID:     "event1",
 				Event: map[string]interface{}{
 					"CustomEvent2": "CustomEvent2",
-					utils.Usage:    time.Duration(45 * time.Second),
+					utils.Usage:    45 * time.Second,
 				},
 			},
 		},
@@ -1226,7 +1226,7 @@ func testV1STSGetStatQueueProfileWithoutTenant(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 10,
-			TTL:         time.Duration(10) * time.Second,
+			TTL:         10 * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaACD,
@@ -1313,7 +1313,7 @@ func testV1STSV1GetStatQueuesForEventWithoutTenant(t *testing.T) {
 					Event: map[string]interface{}{
 						utils.Account:     "1002",
 						utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-						utils.Usage:       time.Duration(45 * time.Second),
+						utils.Usage:       45 * time.Second,
 						utils.RunID:       utils.MetaDefault,
 						utils.COST:        10.0,
 						utils.Destination: "1001",
@@ -1343,7 +1343,7 @@ func testV1STSSimulateAccountUpdate(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 100,
-			TTL:         time.Duration(1) * time.Second,
+			TTL:         time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaSum + utils.HashtagSep + "~*asm.BalanceSummaries.HolidayBalance.Value",

@@ -114,7 +114,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 					utils.EVENT_NAME:  "Event1",
 					utils.Account:     "1001",
 					utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:       time.Duration(135 * time.Second),
+					utils.Usage:       135 * time.Second,
 					utils.COST:        123.0,
 					utils.RunID:       utils.MetaDefault,
 					utils.Destination: "1002"},
@@ -186,9 +186,9 @@ func testDspStsTestAuthKey(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:    "1001",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(135 * time.Second),
+					utils.Usage:      135 * time.Second,
 					utils.COST:       123.0,
-					utils.PDD:        time.Duration(12 * time.Second)},
+					utils.PDD:        12 * time.Second},
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
@@ -229,7 +229,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:     "1001",
 					utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:       time.Duration(135 * time.Second),
+					utils.Usage:       135 * time.Second,
 					utils.COST:        123.0,
 					utils.RunID:       utils.MetaDefault,
 					utils.Destination: "1002"},
@@ -274,7 +274,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:     "1002",
 					utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:       time.Duration(45 * time.Second),
+					utils.Usage:       45 * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.COST:        10.0,
 					utils.Destination: "1001",
@@ -354,7 +354,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 					Event: map[string]interface{}{
 						utils.Account:     "1002",
 						utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-						utils.Usage:       time.Duration(45 * time.Second),
+						utils.Usage:       45 * time.Second,
 						utils.RunID:       utils.MetaDefault,
 						utils.COST:        10.0,
 						utils.Destination: "1001",

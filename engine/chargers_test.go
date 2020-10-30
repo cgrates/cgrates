@@ -127,7 +127,7 @@ func TestChargerAddFilter(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 		},
 	}

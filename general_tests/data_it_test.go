@@ -180,7 +180,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 		&engine.UsageRecordWithOpts{UsageRecord: usageRecord}, &reply); err != nil {
 		t.Error(err)
 	}
-	if time.Now().Sub(tStart) > time.Duration(50*time.Millisecond) {
+	if time.Now().Sub(tStart) > 50*time.Millisecond {
 		t.Error("Take's too long for GetDataCost")
 	}
 
@@ -207,7 +207,7 @@ func testV1DataGetCostWith10Kilo(t *testing.T) {
 	} else if rply.Cost != 25600.000000 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
 	}
-	if time.Now().Sub(tStart) > time.Duration(50*time.Millisecond) {
+	if time.Now().Sub(tStart) > 50*time.Millisecond {
 		t.Error("Take's too long for GetDataCost")
 	}
 }
@@ -254,7 +254,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if time.Now().Sub(tStart) > time.Duration(50*time.Millisecond) {
+	if time.Now().Sub(tStart) > 50*time.Millisecond {
 		t.Error("Take's too long for GetDataCost")
 	}
 
@@ -318,7 +318,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 		&engine.UsageRecordWithOpts{UsageRecord: usageRecord}, &reply); err != nil {
 		t.Error(err)
 	}
-	if time.Now().Sub(tStart) > time.Duration(50*time.Millisecond) {
+	if time.Now().Sub(tStart) > 50*time.Millisecond {
 		t.Errorf("Take's too long for GetDataCost : %+v", time.Now().Sub(tStart))
 	}
 
@@ -345,7 +345,7 @@ func testV1DataGetCost1G0(t *testing.T) {
 	} else if rply.Cost != 100000.000000 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
 	}
-	if time.Now().Sub(tStart) > time.Duration(50*time.Millisecond) {
+	if time.Now().Sub(tStart) > 50*time.Millisecond {
 		t.Error("Take's too long for GetDataCost")
 	}
 }
@@ -392,7 +392,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if time.Now().Sub(tStart) > time.Duration(50*time.Millisecond) {
+	if time.Now().Sub(tStart) > 50*time.Millisecond {
 		t.Error("Take's too long for GetDataCost")
 	}
 

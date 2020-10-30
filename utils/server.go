@@ -172,7 +172,7 @@ func (s *Server) ServeJSON(addr string, exitChan chan bool) {
 		if err != nil {
 			Logger.Err(fmt.Sprintf("<CGRServer> JSON accept error: <%s>", err.Error()))
 			now := time.Now()
-			if now.Sub(lastErrorTime) > time.Duration(5*time.Second) {
+			if now.Sub(lastErrorTime) > 5*time.Second {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
 			}
 			lastErrorTime = time.Now()
@@ -208,7 +208,7 @@ func (s *Server) ServeGOB(addr string, exitChan chan bool) {
 		if err != nil {
 			Logger.Err(fmt.Sprintf("<CGRServer> GOB accept error: <%s>", err.Error()))
 			now := time.Now()
-			if now.Sub(lastErrorTime) > time.Duration(5*time.Second) {
+			if now.Sub(lastErrorTime) > 5*time.Second {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
 			}
 			lastErrorTime = time.Now()
@@ -463,7 +463,7 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 		if err != nil {
 			Logger.Err(fmt.Sprintf("<CGRServer> TLS accept error: <%s>", err.Error()))
 			now := time.Now()
-			if now.Sub(lastErrorTime) > time.Duration(5*time.Second) {
+			if now.Sub(lastErrorTime) > 5*time.Second {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
 			}
 			lastErrorTime = time.Now()
@@ -504,7 +504,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 		if err != nil {
 			Logger.Err(fmt.Sprintf("<CGRServer> TLS accept error: <%s>", err.Error()))
 			now := time.Now()
-			if now.Sub(lastErrorTime) > time.Duration(5*time.Second) {
+			if now.Sub(lastErrorTime) > 5*time.Second {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
 			}
 			lastErrorTime = time.Now()

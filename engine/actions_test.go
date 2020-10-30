@@ -2368,7 +2368,7 @@ func TestActionTopUpZeroNegative(t *testing.T) {
 }
 
 func TestActionSetExpiry(t *testing.T) {
-	timeNowPlus24h := time.Now().Add(time.Duration(24 * time.Hour))
+	timeNowPlus24h := time.Now().Add(24 * time.Hour)
 	account := &Account{
 		ID: "cgrates.org:zeroNegative",
 		BalanceMap: map[string]Balances{

@@ -145,10 +145,10 @@ func testStsITMigrateAndMove(t *testing.T) {
 	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
 	var filters []*engine.FilterRule
 	v1Sts := &v1Stat{
-		Id:              "test",                         // Config id, unique per config instance
-		QueueLength:     10,                             // Number of items in the stats buffer
-		TimeWindow:      time.Duration(1) * time.Second, // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
-		SaveInterval:    time.Duration(1) * time.Second,
+		Id:              "test",      // Config id, unique per config instance
+		QueueLength:     10,          // Number of items in the stats buffer
+		TimeWindow:      time.Second, // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
+		SaveInterval:    time.Second,
 		Metrics:         []string{"ASR", "ACD", "ACC"},
 		SetupInterval:   []time.Time{time.Now()},
 		ToR:             []string{},
@@ -161,8 +161,8 @@ func testStsITMigrateAndMove(t *testing.T) {
 		Account:         []string{},
 		Subject:         []string{},
 		DestinationIds:  []string{},
-		UsageInterval:   []time.Duration{1 * time.Second},
-		PddInterval:     []time.Duration{1 * time.Second},
+		UsageInterval:   []time.Duration{time.Second},
+		PddInterval:     []time.Duration{time.Second},
 		Supplier:        []string{},
 		DisconnectCause: []string{},
 		MediationRunIds: []string{},
@@ -208,15 +208,15 @@ func testStsITMigrateAndMove(t *testing.T) {
 		ID:          "test",
 		FilterIDs:   []string{v1Sts.Id},
 		QueueLength: 10,
-		TTL:         time.Duration(0) * time.Second,
+		TTL:         0,
 		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
+			{
 				MetricID: "*asr",
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: utils.MetaACD,
 			},
-			&engine.MetricWithFilters{
+			{
 				MetricID: "*acc",
 			},
 		},
@@ -332,8 +332,8 @@ func testStsITMigrateFromv1(t *testing.T) {
 	v1Sts := &v1Stat{
 		Id:              "test",
 		QueueLength:     10,
-		TimeWindow:      time.Duration(1) * time.Second,
-		SaveInterval:    time.Duration(1) * time.Second,
+		TimeWindow:      time.Second,
+		SaveInterval:    time.Second,
 		Metrics:         []string{"ASR", "ACD", "ACC"},
 		SetupInterval:   []time.Time{tim},
 		ToR:             []string{},
@@ -346,8 +346,8 @@ func testStsITMigrateFromv1(t *testing.T) {
 		Account:         []string{},
 		Subject:         []string{},
 		DestinationIds:  []string{},
-		UsageInterval:   []time.Duration{1 * time.Second},
-		PddInterval:     []time.Duration{1 * time.Second},
+		UsageInterval:   []time.Duration{time.Second},
+		PddInterval:     []time.Duration{time.Second},
 		Supplier:        []string{},
 		DisconnectCause: []string{},
 		MediationRunIds: []string{},

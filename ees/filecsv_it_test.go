@@ -125,7 +125,7 @@ func testCsvExportEvent(t *testing.T) {
 					utils.Destination: "1002",
 					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(10) * time.Second,
+					utils.Usage:       10 * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        1.01,
 				},
@@ -155,7 +155,7 @@ func testCsvExportEvent(t *testing.T) {
 					utils.Destination: "1002",
 					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(10) * time.Nanosecond,
+					utils.Usage:       10 * time.Nanosecond,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.012,
 				},
@@ -185,7 +185,7 @@ func testCsvExportEvent(t *testing.T) {
 					utils.Destination: "1002",
 					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(1),
+					utils.Usage:       1,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.15,
 				},
@@ -205,7 +205,7 @@ func testCsvExportEvent(t *testing.T) {
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 }
 
 func testCsvVerifyExports(t *testing.T) {
@@ -257,7 +257,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 					utils.Destination:   "1002",
 					utils.SetupTime:     time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:    time.Unix(1383813746, 0).UTC(),
-					utils.Usage:         time.Duration(10) * time.Second,
+					utils.Usage:         10 * time.Second,
 					utils.RunID:         utils.MetaDefault,
 					utils.Cost:          1.016374,
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
@@ -290,7 +290,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 					utils.Destination:   "1002",
 					utils.SetupTime:     time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:    time.Unix(1383813746, 0).UTC(),
-					utils.Usage:         time.Duration(1),
+					utils.Usage:         1,
 					utils.RunID:         utils.MetaDefault,
 					utils.Cost:          0.155462,
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
@@ -309,7 +309,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 }
 
 func testCsvVerifyComposedExports(t *testing.T) {
@@ -366,7 +366,7 @@ func testCsvExportMaskedDestination(t *testing.T) {
 					utils.Destination: "+4986517174963",
 					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(10) * time.Second,
+					utils.Usage:       10 * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        1.01,
 				},
@@ -380,7 +380,7 @@ func testCsvExportMaskedDestination(t *testing.T) {
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &rply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 }
 
 func testCsvVerifyMaskedDestination(t *testing.T) {
@@ -425,7 +425,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 					utils.Destination: "1002",
 					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(10) * time.Second,
+					utils.Usage:       10 * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        1.01,
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
@@ -457,7 +457,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 					utils.Destination: "1002",
 					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(10) * time.Nanosecond,
+					utils.Usage:       10 * time.Nanosecond,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.012,
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
@@ -489,7 +489,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 					utils.Destination: "1002",
 					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(1),
+					utils.Usage:       1,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        0.15,
 					"ExtraFields": map[string]string{"extra1": "val_extra1",
@@ -511,7 +511,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 }
 
 func testCsvVerifyExportsWithInflateTemplate(t *testing.T) {
@@ -561,7 +561,7 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 					utils.Destination: "1002",
 					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(10) * time.Second,
+					utils.Usage:       10 * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        1.01,
 					"ExtraFields": map[string]string{"extra1": "val_extra1",

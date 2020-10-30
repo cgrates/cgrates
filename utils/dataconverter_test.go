@@ -355,13 +355,13 @@ func TestDivideConverterConvert(t *testing.T) {
 
 func TestNewDurationConverter(t *testing.T) {
 	nS := &DurationConverter{}
-	eOut := time.Duration(0 * time.Second)
+	eOut := time.Duration(0)
 	if rcv, err := nS.Convert(EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expected %+v received: %+v", eOut, rcv)
 	}
-	eOut = time.Duration(7 * time.Nanosecond)
+	eOut = 7 * time.Nanosecond
 	if rcv, err := nS.Convert(7); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, rcv) {
@@ -374,7 +374,7 @@ func TestConvertFloatToSeconds(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	a, err := b.Convert(time.Duration(10*time.Second + 300*time.Millisecond))
+	a, err := b.Convert(10*time.Second + 300*time.Millisecond)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -390,7 +390,7 @@ func TestConvertDurNanoseconds(t *testing.T) {
 		t.Error(err.Error())
 	}
 	expVal := int64(102)
-	if i, err := d.Convert(time.Duration(102)); err != nil {
+	if i, err := d.Convert(102); err != nil {
 		t.Error(err.Error())
 	} else if expVal != i {
 		t.Errorf("expecting: %d, received: %d", expVal, i)
@@ -477,7 +477,7 @@ func TestRoundConverterTime(t *testing.T) {
 	if !reflect.DeepEqual(b, expData) {
 		t.Errorf("Expected %+v received: %+v", expData, b)
 	}
-	val, err := b.Convert(time.Duration(123 * time.Nanosecond))
+	val, err := b.Convert(123 * time.Nanosecond)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -496,7 +496,7 @@ func TestMultiplyConverter(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eMpl, m)
 	}
 	expOut := 2048.0
-	if out, err := m.Convert(time.Duration(2)); err != nil {
+	if out, err := m.Convert(2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOut, out) {
 		t.Errorf("expecting: %+v, received: %+v", expOut, out)
@@ -518,7 +518,7 @@ func TestDivideConverter(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eDvd, d)
 	}
 	expOut := 2.0
-	if out, err := d.Convert(time.Duration(2048)); err != nil {
+	if out, err := d.Convert(2048); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOut, out) {
 		t.Errorf("expecting: %+v, received: %+v", expOut, out)
@@ -539,7 +539,7 @@ func TestDurationConverter(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	expVal := time.Duration(10 * time.Second)
+	expVal := 10 * time.Second
 	if i, err := d.Convert(10000000000.0); err != nil {
 		t.Error(err.Error())
 	} else if expVal != i {
@@ -550,7 +550,7 @@ func TestDurationConverter(t *testing.T) {
 	} else if expVal != i {
 		t.Errorf("expecting: %d, received: %d", expVal, i)
 	}
-	if i, err := d.Convert(time.Duration(10 * time.Second)); err != nil {
+	if i, err := d.Convert(10 * time.Second); err != nil {
 		t.Error(err.Error())
 	} else if expVal != i {
 		t.Errorf("expecting: %d, received: %d", expVal, i)

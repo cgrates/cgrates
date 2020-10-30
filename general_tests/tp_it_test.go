@@ -138,7 +138,7 @@ func testTpBalanceCounter(t *testing.T) {
 			Destination:   "+49",
 			DurationIndex: 0,
 			TimeStart:     tStart,
-			TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
+			TimeEnd:       tStart.Add(20 * time.Second),
 		},
 	}
 	var cc engine.CallCost
@@ -223,7 +223,7 @@ func testTpZeroCost(t *testing.T) {
 			Destination:   "+49",
 			DurationIndex: 0,
 			TimeStart:     tStart,
-			TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
+			TimeEnd:       tStart.Add(20 * time.Second),
 		},
 	}
 	var cc engine.CallCost
@@ -250,7 +250,7 @@ func testTpZeroNegativeCost(t *testing.T) {
 			Destination:   "+4915",
 			DurationIndex: 0,
 			TimeStart:     tStart,
-			TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
+			TimeEnd:       tStart.Add(20 * time.Second),
 		},
 	}
 	var cc engine.CallCost

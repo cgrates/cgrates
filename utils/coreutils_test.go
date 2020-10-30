@@ -331,7 +331,7 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	}
 	if nowTm, err := ParseTimeDetectLayout(META_NOW, ""); err != nil {
 		t.Error(err)
-	} else if time.Now().Sub(nowTm) > time.Duration(10)*time.Millisecond {
+	} else if time.Now().Sub(nowTm) > 10*time.Millisecond {
 		t.Errorf("Unexpected time parsed: %v", nowTm)
 	}
 	eamonTmStr := "31/05/2015 14:46:00"
@@ -359,8 +359,8 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", expectedTime, astTMS)
 	}
 	nowTimeStr := "+24h"
-	start := time.Now().Add(time.Duration(23*time.Hour + 59*time.Minute + 58*time.Second))
-	end := start.Add(time.Duration(2 * time.Second))
+	start := time.Now().Add(23*time.Hour + 59*time.Minute + 58*time.Second)
+	end := start.Add(2 * time.Second)
 	parseNowTimeStr, err := ParseTimeDetectLayout(nowTimeStr, "")
 	if err != nil {
 		t.Error(err)
@@ -497,17 +497,17 @@ func TestParseTimeDetectLayout(t *testing.T) {
 
 func TestRoundDuration(t *testing.T) {
 	minute := time.Minute
-	result := RoundDuration(minute, 0*time.Second)
+	result := RoundDuration(minute, 0)
 	expected := 0 * time.Second
 	if result != expected {
 		t.Errorf("Error rounding to minute1: expected %v was %v", expected, result)
 	}
-	result = RoundDuration(time.Second, 1*time.Second+500*time.Millisecond)
+	result = RoundDuration(time.Second, time.Second+500*time.Millisecond)
 	expected = 2 * time.Second
 	if result != expected {
 		t.Errorf("Error rounding to minute1: expected %v was %v", expected, result)
 	}
-	result = RoundDuration(minute, 1*time.Second)
+	result = RoundDuration(minute, time.Second)
 	expected = minute
 	if result != expected {
 		t.Errorf("Error rounding to minute2: expected %v was %v", expected, result)
@@ -535,32 +535,32 @@ func TestRoundDuration(t *testing.T) {
 }
 
 func TestRoundStatDuration(t *testing.T) {
-	result := RoundStatDuration(time.Duration(1*time.Second+14565876*time.Nanosecond), 5)
-	expected := time.Duration(1*time.Second + 14570000*time.Nanosecond)
+	result := RoundStatDuration(time.Second+14565876*time.Nanosecond, 5)
+	expected := time.Second + 14570000*time.Nanosecond
 	if result != expected {
 		t.Errorf("Expected %+v, received %+v", expected, result)
 	}
 
-	result = RoundStatDuration(time.Duration(1*time.Second+14565876*time.Nanosecond), 1)
-	expected = time.Duration(1 * time.Second)
+	result = RoundStatDuration(time.Second+14565876*time.Nanosecond, 1)
+	expected = time.Second
 	if result != expected {
 		t.Errorf("Expected %+v, received %+v", expected, result)
 	}
 
-	result = RoundStatDuration(time.Duration(1*time.Second+14565876*time.Nanosecond), 9)
-	expected = time.Duration(1*time.Second + 14565876*time.Nanosecond)
+	result = RoundStatDuration(time.Second+14565876*time.Nanosecond, 9)
+	expected = time.Second + 14565876*time.Nanosecond
 	if result != expected {
 		t.Errorf("Expected %+v, received %+v", expected, result)
 	}
 
-	result = RoundStatDuration(time.Duration(24*time.Second+14565876*time.Nanosecond), -1)
-	expected = time.Duration(20 * time.Second)
+	result = RoundStatDuration(24*time.Second+14565876*time.Nanosecond, -1)
+	expected = 20 * time.Second
 	if result != expected {
 		t.Errorf("Expected %+v, received %+v", expected, result)
 	}
 
-	result = RoundStatDuration(time.Duration(24*time.Second+14565876*time.Nanosecond), 0)
-	expected = time.Duration(24 * time.Second)
+	result = RoundStatDuration(24*time.Second+14565876*time.Nanosecond, 0)
+	expected = 24 * time.Second
 	if result != expected {
 		t.Errorf("Expected %+v, received %+v", expected, result)
 	}
@@ -620,7 +620,7 @@ func TestParseDurationWithSecs(t *testing.T) {
 		t.Errorf("Expecting: 0s, received: %+v", rcv)
 	}
 	durStr := "2"
-	durExpected = time.Duration(2) * time.Second
+	durExpected = 2 * time.Second
 	if parsed, err := ParseDurationWithSecs(durStr); err != nil {
 		t.Error(err)
 	} else if parsed != durExpected {
@@ -633,21 +633,21 @@ func TestParseDurationWithSecs(t *testing.T) {
 		t.Error("Parsed different than expected")
 	}
 	durStr = "2ms"
-	durExpected = time.Duration(2) * time.Millisecond
+	durExpected = 2 * time.Millisecond
 	if parsed, err := ParseDurationWithSecs(durStr); err != nil {
 		t.Error(err)
 	} else if parsed != durExpected {
 		t.Error("Parsed different than expected")
 	}
 	durStr = "0.002"
-	durExpected = time.Duration(2) * time.Millisecond
+	durExpected = 2 * time.Millisecond
 	if parsed, err := ParseDurationWithSecs(durStr); err != nil {
 		t.Error(err)
 	} else if parsed != durExpected {
 		t.Error("Parsed different than expected")
 	}
 	durStr = "1.002"
-	durExpected = time.Duration(1002) * time.Millisecond
+	durExpected = 1002 * time.Millisecond
 	if parsed, err := ParseDurationWithSecs(durStr); err != nil {
 		t.Error(err)
 	} else if parsed != durExpected {
@@ -688,7 +688,7 @@ func TestMinDuration(t *testing.T) {
 
 func TestParseZeroRatingSubject(t *testing.T) {
 	subj := []string{"", "*zero1024", "*zero1s", "*zero5m", "*zero10h"}
-	dur := []time.Duration{time.Second, time.Duration(1024),
+	dur := []time.Duration{time.Second, 1024,
 		time.Second, 5 * time.Minute, 10 * time.Hour}
 	dfltRatingSubject := map[string]string{
 		ANY:   "*zero1ns",
@@ -1154,7 +1154,7 @@ func TestTimePointer(t *testing.T) {
 }
 
 func TestDurationPointer(t *testing.T) {
-	duration := time.Duration(10)
+	duration := 10 * time.Nanosecond
 	result := DurationPointer(duration)
 	expected := &duration
 	if *expected != *result {
@@ -1402,9 +1402,9 @@ func TestGetUrlRawArguments(t *testing.T) {
 
 func TestWarnExecTime(t *testing.T) {
 	//without Log
-	WarnExecTime(time.Now(), "MyTestFunc", time.Duration(1*time.Second))
+	WarnExecTime(time.Now(), "MyTestFunc", time.Second)
 	//With Log
-	WarnExecTime(time.Now(), "MyTestFunc", time.Duration(1*time.Nanosecond))
+	WarnExecTime(time.Now(), "MyTestFunc", time.Nanosecond)
 }
 
 func TestCastRPCErr(t *testing.T) {

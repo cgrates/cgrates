@@ -21,7 +21,7 @@ package utils
 /*
 func TestJSONMarshalUnmarshal(t *testing.T) {
 	incrmt := &ChargedIncrement{
-		Usage:          time.Duration(1 * time.Hour),
+		Usage:          time.Hour,
 		Cost:           NewDecimalFromFloat64(2.13),
 		AccountingID:   "abbsjweejrmdhfr",
 		CompressFactor: 1,
@@ -38,7 +38,7 @@ func TestJSONMarshalUnmarshal(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", incrmt, uIncrmnt)
 	}
 	incrmt = &ChargedIncrement{
-		Usage:          time.Duration(1 * time.Hour),
+		Usage:          time.Hour,
 		AccountingID:   "abbsjweejrmdhfr",
 		CompressFactor: 1,
 	}

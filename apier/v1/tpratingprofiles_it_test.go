@@ -272,7 +272,7 @@ func testTPRatingProfilesRemoveTPRatingProfile(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	time.Sleep(time.Duration(100 * time.Millisecond))
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testTPRatingProfilesGetTPRatingProfileAfterRemove(t *testing.T) {

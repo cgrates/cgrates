@@ -189,7 +189,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			MaxHits:   1,
-			MinSleep:  time.Duration(5 * time.Minute),
+			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
 			ActionIDs: []string{"ACT_1", "ACT_2"},
@@ -285,7 +285,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			MaxHits:   1,
-			MinSleep:  time.Duration(5 * time.Minute),
+			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
 			ActionIDs: []string{"ACT_1", "ACT_2"},
@@ -449,7 +449,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 10,
-			TTL:         time.Duration(10) * time.Second,
+			TTL:         10 * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: utils.MetaSum,
@@ -552,7 +552,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 10,
-			TTL:         time.Duration(10) * time.Second,
+			TTL:         10 * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: "*sum",
@@ -696,7 +696,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			UsageTTL:          time.Duration(10) * time.Microsecond,
+			UsageTTL:          10 * time.Microsecond,
 			Limit:             10,
 			AllocationMessage: "MessageAllocation",
 			Blocker:           true,
@@ -789,7 +789,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			UsageTTL:          time.Duration(10) * time.Microsecond,
+			UsageTTL:          10 * time.Microsecond,
 			Limit:             10,
 			AllocationMessage: "MessageAllocation",
 			Blocker:           true,

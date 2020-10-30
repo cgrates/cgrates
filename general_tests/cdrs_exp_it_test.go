@@ -274,7 +274,7 @@ func testCDRsExpHTTP(t *testing.T) {
 		if !reflect.DeepEqual(cdrsExpEvExp, rcvCDR) {
 			t.Errorf("Expected %s received %s", utils.ToJSON(cdrsExpEvExp), utils.ToJSON(rcvCDR))
 		}
-	case <-time.After(time.Duration(100 * time.Millisecond)):
+	case <-time.After(100 * time.Millisecond):
 		t.Error("No message received from RabbitMQ")
 	}
 }
@@ -299,7 +299,7 @@ func testCDRsExpAMQP(t *testing.T) {
 		if !reflect.DeepEqual(cdrsExpEvExp, rcvCDR) {
 			t.Errorf("Expected %s received %s", utils.ToJSON(cdrsExpEvExp), utils.ToJSON(rcvCDR))
 		}
-	case <-time.After(time.Duration(100 * time.Millisecond)):
+	case <-time.After(100 * time.Millisecond):
 		t.Error("No message received from RabbitMQ")
 	}
 }

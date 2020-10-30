@@ -33,7 +33,7 @@ var mapEv = MapEvent(map[string]interface{}{
 	"test3": 42.3,
 	"test4": true,
 	"test5": "test",
-	"test6": time.Duration(10 * time.Second),
+	"test6": 10 * time.Second,
 	"test7": "42s",
 	"test8": time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC),
 	"test9": "2009-11-10T23:00:00Z",
@@ -158,22 +158,22 @@ func TestMapEventGetStringIgnoreErrors(t *testing.T) {
 func TestMapEventGetDuration(t *testing.T) {
 	if rply, err := mapEv.GetDuration("test"); err != utils.ErrNotFound {
 		t.Errorf("Expected: %+v, received: %+v", utils.ErrNotFound, err)
-	} else if rply != time.Duration(0) {
-		t.Errorf("Expected: %+v , received duration: %+v", time.Duration(0), rply)
+	} else if rply != 0 {
+		t.Errorf("Expected: %+v , received duration: %+v", 0, rply)
 	}
-	expected := time.Duration(10 * time.Second)
+	expected := 10 * time.Second
 	if rply, err := mapEv.GetDuration("test6"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-	expected = time.Duration(42 * time.Second)
+	expected = 42 * time.Second
 	if rply, err := mapEv.GetDuration("test7"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-	expected = time.Duration(42)
+	expected = 42
 	if rply, err := mapEv.GetDuration("test2"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
@@ -182,18 +182,18 @@ func TestMapEventGetDuration(t *testing.T) {
 }
 
 func TestMapEventGetDurationIgnoreErrors(t *testing.T) {
-	if rply := mapEv.GetDurationIgnoreErrors("test"); rply != time.Duration(0) {
-		t.Errorf("Expected: %+v, received: %+v", time.Duration(0), rply)
+	if rply := mapEv.GetDurationIgnoreErrors("test"); rply != 0 {
+		t.Errorf("Expected: %+v, received: %+v", 0, rply)
 	}
-	expected := time.Duration(10 * time.Second)
+	expected := 10 * time.Second
 	if rply := mapEv.GetDurationIgnoreErrors("test6"); rply != expected {
 		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
-	expected = time.Duration(42 * time.Second)
+	expected = 42 * time.Second
 	if rply := mapEv.GetDurationIgnoreErrors("test7"); rply != expected {
 		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
-	expected = time.Duration(42)
+	expected = 42
 	if rply := mapEv.GetDurationIgnoreErrors("test2"); rply != expected {
 		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
@@ -462,25 +462,25 @@ func TestMapEventAsCDR(t *testing.T) {
 				RatingID: "c1a5ab9",
 				Increments: []*ChargingIncrement{
 					{
-						Usage:          time.Duration(0),
+						Usage:          0,
 						Cost:           0.1,
 						AccountingID:   "9bdad10",
 						CompressFactor: 1,
 					},
 					{
-						Usage:          time.Duration(1 * time.Second),
+						Usage:          time.Second,
 						Cost:           0,
 						AccountingID:   "3455b83",
 						CompressFactor: 10,
 					},
 					{
-						Usage:          time.Duration(10 * time.Second),
+						Usage:          10 * time.Second,
 						Cost:           0.01,
 						AccountingID:   "a012888",
 						CompressFactor: 2,
 					},
 					{
-						Usage:          time.Duration(1 * time.Second),
+						Usage:          time.Second,
 						Cost:           0.005,
 						AccountingID:   "44d6c02",
 						CompressFactor: 30,
@@ -492,7 +492,7 @@ func TestMapEventAsCDR(t *testing.T) {
 				RatingID: "c1a5ab9",
 				Increments: []*ChargingIncrement{
 					{
-						Usage:          time.Duration(1 * time.Second),
+						Usage:          time.Second,
 						Cost:           0.01,
 						AccountingID:   "a012888",
 						CompressFactor: 60,
@@ -504,19 +504,19 @@ func TestMapEventAsCDR(t *testing.T) {
 				RatingID: "c1a5ab9",
 				Increments: []*ChargingIncrement{
 					{
-						Usage:          time.Duration(1 * time.Second),
+						Usage:          time.Second,
 						Cost:           0,
 						AccountingID:   "3455b83",
 						CompressFactor: 10,
 					},
 					{
-						Usage:          time.Duration(10 * time.Second),
+						Usage:          10 * time.Second,
 						Cost:           0.01,
 						AccountingID:   "a012888",
 						CompressFactor: 2,
 					},
 					{
-						Usage:          time.Duration(1 * time.Second),
+						Usage:          time.Second,
 						Cost:           0.005,
 						AccountingID:   "44d6c02",
 						CompressFactor: 30,
@@ -605,22 +605,22 @@ func TestMapEventAsCDR(t *testing.T) {
 		Rates: ChargedRates{
 			"ec1a177": RateGroups{
 				&RGRate{
-					GroupIntervalStart: time.Duration(0),
+					GroupIntervalStart: 0,
 					Value:              0.01,
-					RateIncrement:      time.Duration(1 * time.Minute),
-					RateUnit:           time.Duration(1 * time.Second)},
+					RateIncrement:      time.Minute,
+					RateUnit:           time.Second},
 			},
 			"4910ecf": RateGroups{
 				&RGRate{
-					GroupIntervalStart: time.Duration(0),
+					GroupIntervalStart: 0,
 					Value:              0.005,
-					RateIncrement:      time.Duration(1 * time.Second),
-					RateUnit:           time.Duration(1 * time.Second)},
+					RateIncrement:      time.Second,
+					RateUnit:           time.Second},
 				&RGRate{
-					GroupIntervalStart: time.Duration(60 * time.Second),
+					GroupIntervalStart: 60 * time.Second,
 					Value:              0.005,
-					RateIncrement:      time.Duration(1 * time.Second),
-					RateUnit:           time.Duration(1 * time.Second)},
+					RateIncrement:      time.Second,
+					RateUnit:           time.Second},
 			},
 		},
 		Timings: ChargedTimings{
@@ -648,7 +648,7 @@ func TestMapEventAsCDR(t *testing.T) {
 		Source:     "1001",
 		CostSource: "1002",
 		PreRated:   true,
-		Usage:      time.Duration(42 * time.Second),
+		Usage:      42 * time.Second,
 		SetupTime:  time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC),
 		ExtraFields: map[string]string{
 			"ExtraField1": "5",
@@ -720,19 +720,19 @@ func TestMapEventGetDurationPtr(t *testing.T) {
 	} else if rply != nil {
 		t.Errorf("Expected: %+v , received duration: %+v", nil, rply)
 	}
-	expected := utils.DurationPointer(time.Duration(10 * time.Second))
+	expected := utils.DurationPointer(10 * time.Second)
 	if rply, err := mapEv.GetDurationPtr("test6"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-	expected = utils.DurationPointer(time.Duration(42 * time.Second))
+	expected = utils.DurationPointer(42 * time.Second)
 	if rply, err := mapEv.GetDurationPtr("test7"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-	expected = utils.DurationPointer(time.Duration(42))
+	expected = utils.DurationPointer(42)
 	if rply, err := mapEv.GetDurationPtr("test2"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
@@ -744,15 +744,15 @@ func TestMapEventGetDurationPtrIgnoreErrors(t *testing.T) {
 	if rply := mapEv.GetDurationPtrIgnoreErrors("test"); rply != nil {
 		t.Errorf("Expected: %+v, received: %+v", nil, rply)
 	}
-	expected := utils.DurationPointer(time.Duration(10 * time.Second))
+	expected := utils.DurationPointer(10 * time.Second)
 	if rply := mapEv.GetDurationPtrIgnoreErrors("test6"); *rply != *expected {
 		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
-	expected = utils.DurationPointer(time.Duration(42 * time.Second))
+	expected = utils.DurationPointer(42 * time.Second)
 	if rply := mapEv.GetDurationPtrIgnoreErrors("test7"); *rply != *expected {
 		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
-	expected = utils.DurationPointer(time.Duration(42))
+	expected = utils.DurationPointer(42)
 	if rply := mapEv.GetDurationPtrIgnoreErrors("test2"); *rply != *expected {
 		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
@@ -760,11 +760,11 @@ func TestMapEventGetDurationPtrIgnoreErrors(t *testing.T) {
 
 func TestMapEventGetDurationPtrOrDefault(t *testing.T) {
 	mapEv := NewMapEvent(nil)
-	dflt := time.Duration(1)
+	dflt := time.Nanosecond
 	if ptr, _ := mapEv.GetDurationPtrOrDefault("test7", &dflt); dflt.String() != ptr.String() {
 		t.Errorf("Expected: %+v, received: %+v", dflt, ptr)
 	}
-	newVal := time.Duration(2)
+	newVal := 2 * time.Nanosecond
 	mapEv["test7"] = newVal
 	if ptr, _ := mapEv.GetDurationPtrOrDefault("test7", &dflt); newVal.String() != ptr.String() {
 		t.Errorf("Expected: %+v, received: %+v", newVal, ptr)

@@ -1066,7 +1066,7 @@ func testApierGetRatingPlan(t *testing.T) {
 		t.Error("Unexpected number of items received")
 	}
 	riRate := &engine.RIRate{ConnectFee: 0, RoundingMethod: "*up", RoundingDecimals: 2, Rates: []*engine.RGRate{
-		{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Duration(60) * time.Second, RateUnit: time.Duration(60) * time.Second},
+		{GroupIntervalStart: 0, Value: 0, RateIncrement: 60 * time.Second, RateUnit: 60 * time.Second},
 	}}
 	for _, rating := range reply.Ratings {
 		riRateJson, _ := json.Marshal(rating)
@@ -1575,7 +1575,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	expStats[utils.CacheAccountActionPlans].Items = 13
+	expStats[utils.CacheAccountActionPlans].Items = 3
 	expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActions].Items = 5
 	expStats[utils.CacheDestinations].Items = 3
@@ -1695,7 +1695,7 @@ func testApierMaxDebitInexistentAcnt(t *testing.T) {
 			Account:     "INVALID",
 			Destination: "1002",
 			TimeStart:   time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC),
-			TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(time.Duration(10) * time.Second),
+			TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(10 * time.Second),
 		},
 	}
 	if err := rater.Call(utils.ResponderMaxDebit, cd, cc); err == nil {
@@ -1742,7 +1742,7 @@ func testApierITProcessCdr(t *testing.T) {
 			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 			Destination: "1002",
 			SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.MetaDefault,
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+			Usage: 10 * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
 	}
 	if err := rater.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
@@ -1790,7 +1790,7 @@ func testApierGetCallCostLog(t *testing.T) {
 			SetupTime:   tm,
 			AnswerTime:  tm,
 			RunID:       utils.MetaDefault,
-			Usage:       time.Duration(0),
+			Usage:       0,
 			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 			Cost:        1.01,
 		},
@@ -2146,7 +2146,7 @@ func testApierReplayFldPosts(t *testing.T) {
 		if rcvCDR[utils.CGRID] != "88ed9c38005f07576a1e1af293063833b60edcc6" {
 			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
 		}
-	case <-time.After(time.Duration(100 * time.Millisecond)):
+	case <-time.After(100 * time.Millisecond):
 		t.Error("No message received from RabbitMQ")
 	}
 	for _, dir := range []string{*args.FailedRequestsInDir, *args.FailedRequestsOutDir} {

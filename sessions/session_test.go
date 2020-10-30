@@ -80,22 +80,22 @@ func TestSessionClone(t *testing.T) {
 		ResourceID:    "resourceID",
 		ClientConnID:  "ClientConnID",
 		EventStart:    engine.NewMapEvent(nil),
-		DebitInterval: time.Duration(18),
+		DebitInterval: 18,
 		SRuns: []*SRun{
 			{Event: engine.NewMapEvent(nil),
 				CD:            &engine.CallDescriptor{Category: "test"},
 				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
-				ExtraDuration: time.Duration(1),
-				LastUsage:     time.Duration(2),
-				TotalUsage:    time.Duration(3),
+				ExtraDuration: 1,
+				LastUsage:     2,
+				TotalUsage:    3,
 				NextAutoDebit: &tTime,
 			},
 			{Event: engine.NewMapEvent(nil),
 				CD:            &engine.CallDescriptor{Category: "test2"},
 				EventCost:     &engine.EventCost{CGRID: "testCGRID2"},
-				ExtraDuration: time.Duration(4),
-				LastUsage:     time.Duration(5),
-				TotalUsage:    time.Duration(6),
+				ExtraDuration: 4,
+				LastUsage:     5,
+				TotalUsage:    6,
 				NextAutoDebit: &tTime2,
 			},
 		},
@@ -106,22 +106,22 @@ func TestSessionClone(t *testing.T) {
 		ResourceID:    "resourceID",
 		ClientConnID:  "ClientConnID",
 		EventStart:    engine.NewMapEvent(nil),
-		DebitInterval: time.Duration(18),
+		DebitInterval: 18,
 		SRuns: []*SRun{
 			{Event: engine.NewMapEvent(nil),
 				CD:            &engine.CallDescriptor{Category: "test"},
 				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
-				ExtraDuration: time.Duration(1),
-				LastUsage:     time.Duration(2),
-				TotalUsage:    time.Duration(3),
+				ExtraDuration: 1,
+				LastUsage:     2,
+				TotalUsage:    3,
 				NextAutoDebit: &tTime,
 			},
 			{Event: engine.NewMapEvent(nil),
 				CD:            &engine.CallDescriptor{Category: "test2"},
 				EventCost:     &engine.EventCost{CGRID: "testCGRID2"},
-				ExtraDuration: time.Duration(4),
-				LastUsage:     time.Duration(5),
-				TotalUsage:    time.Duration(6),
+				ExtraDuration: 4,
+				LastUsage:     5,
+				TotalUsage:    6,
 				NextAutoDebit: &tTime2,
 			},
 		},
@@ -136,9 +136,9 @@ func TestSessionClone(t *testing.T) {
 	if session.CGRID == "newCGRID" {
 		t.Errorf("Expecting: CGRID, received: newCGRID")
 	}
-	rcv.SRuns[1].TotalUsage = time.Duration(10)
-	if session.SRuns[1].TotalUsage == time.Duration(10) {
-		t.Errorf("Expecting: %s, received: %s", time.Duration(3), time.Duration(10))
+	rcv.SRuns[1].TotalUsage = 10
+	if session.SRuns[1].TotalUsage == 10 {
+		t.Errorf("Expecting: %s, received: %s", 3*time.Nanosecond, session.SRuns[1].TotalUsage)
 	}
 	tTimeNow := time.Now()
 	*rcv.SRuns[1].NextAutoDebit = tTimeNow
@@ -153,10 +153,10 @@ func TestSessionClone(t *testing.T) {
 
 //Test1 ExtraDuration 0 and LastUsage < initial
 func TestSRunDebitReserve(t *testing.T) {
-	lastUsage := time.Duration(1*time.Minute + 30*time.Second)
-	duration := time.Duration(2 * time.Minute)
+	lastUsage := time.Minute + 30*time.Second
+	duration := 2 * time.Minute
 	sr := &SRun{
-		ExtraDuration: time.Duration(0),
+		ExtraDuration: 0,
 		LastUsage:     duration,
 		TotalUsage:    duration,
 	}
@@ -164,8 +164,8 @@ func TestSRunDebitReserve(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", lastUsage, rDur)
 	}
 	//start with extraDuration 0 and the difference go in rDur
-	if sr.ExtraDuration != time.Duration(0) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(0), sr.ExtraDuration)
+	if sr.ExtraDuration != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, sr.ExtraDuration)
 	}
 	if sr.LastUsage != lastUsage {
 		t.Errorf("Expecting: %+v, received: %+v", lastUsage, sr.LastUsage)
@@ -177,18 +177,18 @@ func TestSRunDebitReserve(t *testing.T) {
 
 //Test2 ExtraDuration 0 and LastUsage > initial
 func TestSRunDebitReserve2(t *testing.T) {
-	lastUsage := time.Duration(2*time.Minute + 30*time.Second)
-	duration := time.Duration(2 * time.Minute)
+	lastUsage := 2*time.Minute + 30*time.Second
+	duration := 2 * time.Minute
 	sr := &SRun{
-		ExtraDuration: time.Duration(0),
+		ExtraDuration: 0,
 		LastUsage:     duration,
 		TotalUsage:    duration,
 	}
 	if rDur := sr.debitReserve(duration, &lastUsage); rDur != lastUsage {
 		t.Errorf("Expecting: %+v, received: %+v", lastUsage, rDur)
 	}
-	if sr.ExtraDuration != time.Duration(0) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(0), sr.ExtraDuration)
+	if sr.ExtraDuration != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, sr.ExtraDuration)
 	}
 	if sr.LastUsage != lastUsage {
 		t.Errorf("Expecting: %+v, received: %+v", lastUsage, sr.LastUsage)
@@ -200,18 +200,18 @@ func TestSRunDebitReserve2(t *testing.T) {
 
 //Test3 ExtraDuration ( 1m < duration) and LastUsage < initial
 func TestSRunDebitReserve3(t *testing.T) {
-	lastUsage := time.Duration(1*time.Minute + 30*time.Second)
-	duration := time.Duration(2 * time.Minute)
+	lastUsage := time.Minute + 30*time.Second
+	duration := 2 * time.Minute
 	sr := &SRun{
-		ExtraDuration: time.Duration(time.Minute),
+		ExtraDuration: time.Minute,
 		LastUsage:     duration,
 		TotalUsage:    duration,
 	}
 	if rDur := sr.debitReserve(duration, &lastUsage); rDur != (duration - lastUsage) {
 		t.Errorf("Expecting: %+v, received: %+v", lastUsage, rDur)
 	}
-	if sr.ExtraDuration != time.Duration(0) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(0), sr.ExtraDuration)
+	if sr.ExtraDuration != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, sr.ExtraDuration)
 	}
 	if sr.LastUsage != lastUsage {
 		t.Errorf("Expecting: %+v, received: %+v", lastUsage, sr.LastUsage)
@@ -223,19 +223,19 @@ func TestSRunDebitReserve3(t *testing.T) {
 
 //Test4 ExtraDuration 1m and LastUsage > initial
 func TestSRunDebitReserve4(t *testing.T) {
-	lastUsage := time.Duration(2*time.Minute + 30*time.Second)
-	duration := time.Duration(2 * time.Minute)
+	lastUsage := 2*time.Minute + 30*time.Second
+	duration := 2 * time.Minute
 	sr := &SRun{
-		ExtraDuration: time.Duration(time.Minute),
+		ExtraDuration: time.Minute,
 		LastUsage:     duration,
 		TotalUsage:    duration,
 	}
 	//We have extraDuration 1 minute and 30s different
-	if rDur := sr.debitReserve(duration, &lastUsage); rDur != time.Duration(1*time.Minute+30*time.Second) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(1*time.Minute+30*time.Second), rDur)
+	if rDur := sr.debitReserve(duration, &lastUsage); rDur != time.Minute+30*time.Second {
+		t.Errorf("Expecting: %+v, received: %+v", time.Minute+30*time.Second, rDur)
 	}
-	if sr.ExtraDuration != time.Duration(0) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(0), sr.ExtraDuration)
+	if sr.ExtraDuration != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, sr.ExtraDuration)
 	}
 	if sr.LastUsage != lastUsage {
 		t.Errorf("Expecting: %+v, received: %+v", lastUsage, sr.LastUsage)
@@ -247,54 +247,54 @@ func TestSRunDebitReserve4(t *testing.T) {
 
 //Test5 ExtraDuration 3m ( > initialDuration) and LastUsage < initial
 func TestSRunDebitReserve5(t *testing.T) {
-	lastUsage := time.Duration(1*time.Minute + 30*time.Second)
-	duration := time.Duration(2 * time.Minute)
+	lastUsage := time.Minute + 30*time.Second
+	duration := 2 * time.Minute
 	sr := &SRun{
-		ExtraDuration: time.Duration(3 * time.Minute),
+		ExtraDuration: 3 * time.Minute,
 		LastUsage:     duration,
 		TotalUsage:    duration,
 	}
 	//in debit reserve we start with an extraDuration 3m
 	//after we add the different dur-lastUsed (+30s)
-	if rDur := sr.debitReserve(duration, &lastUsage); rDur != time.Duration(0) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(0), rDur)
+	if rDur := sr.debitReserve(duration, &lastUsage); rDur != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, rDur)
 	}
 	//ExtraDuration (3m30s - 2m)
-	if sr.ExtraDuration != time.Duration(1*time.Minute+30*time.Second) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(1*time.Minute+30*time.Second), sr.ExtraDuration)
+	if sr.ExtraDuration != time.Minute+30*time.Second {
+		t.Errorf("Expecting: %+v, received: %+v", time.Minute+30*time.Second, sr.ExtraDuration)
 	}
 	if sr.LastUsage != duration {
 		t.Errorf("Expecting: %+v, received: %+v", duration, sr.LastUsage)
 	}
-	if sr.TotalUsage != time.Duration(3*time.Minute+30*time.Second) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(3*time.Minute+30*time.Second), sr.TotalUsage)
+	if sr.TotalUsage != 3*time.Minute+30*time.Second {
+		t.Errorf("Expecting: %+v, received: %+v", 3*time.Minute+30*time.Second, sr.TotalUsage)
 	}
 }
 
 //Test6 ExtraDuration 3m ( > initialDuration) and LastUsage > initial
 func TestSRunDebitReserve6(t *testing.T) {
-	lastUsage := time.Duration(2*time.Minute + 30*time.Second)
-	duration := time.Duration(2 * time.Minute)
+	lastUsage := 2*time.Minute + 30*time.Second
+	duration := 2 * time.Minute
 	sr := &SRun{
-		ExtraDuration: time.Duration(3 * time.Minute),
+		ExtraDuration: 3 * time.Minute,
 		LastUsage:     duration,
 		TotalUsage:    duration,
 	}
 	//in debit reserve we start with an extraDuration 3m
 	//after we add the different dur-lastUsed (-30s)
-	if rDur := sr.debitReserve(duration, &lastUsage); rDur != time.Duration(0) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(0), rDur)
+	if rDur := sr.debitReserve(duration, &lastUsage); rDur != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, rDur)
 	}
 	//ExtraDuration (2m30s - 2m)
-	if sr.ExtraDuration != time.Duration(30*time.Second) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(30*time.Second), sr.ExtraDuration)
+	if sr.ExtraDuration != 30*time.Second {
+		t.Errorf("Expecting: %+v, received: %+v", 30*time.Second, sr.ExtraDuration)
 	}
 	if sr.LastUsage != duration {
 		t.Errorf("Expecting: %+v, received: %+v", duration, sr.LastUsage)
 	}
 	// 2m(initial Total) + 2m30s(correction)
-	if sr.TotalUsage != time.Duration(4*time.Minute+30*time.Second) {
-		t.Errorf("Expecting: %+v, received: %+v", time.Duration(4*time.Minute+30*time.Second), sr.TotalUsage)
+	if sr.TotalUsage != 4*time.Minute+30*time.Second {
+		t.Errorf("Expecting: %+v, received: %+v", 4*time.Minute+30*time.Second, sr.TotalUsage)
 	}
 }
 
@@ -311,7 +311,7 @@ func TestSessionAsCGREventsRawEvent(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.12,
 	}
 	s := &Session{
@@ -338,7 +338,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.12,
 	}
 	ev := map[string]interface{}{
@@ -354,7 +354,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.13,
 	}
 	s := &Session{
@@ -363,7 +363,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 		EventStart: engine.NewMapEvent(startEv),
 		SRuns: []*SRun{{
 			Event:      engine.NewMapEvent(ev),
-			TotalUsage: time.Duration(2 * time.Second),
+			TotalUsage: 2 * time.Second,
 		}},
 	}
 	//check for some fields if populated correct
@@ -393,7 +393,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.12,
 	}
 	ev := map[string]interface{}{
@@ -409,7 +409,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.13,
 	}
 	tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
@@ -420,7 +420,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		DebitInterval: time.Second,
 		SRuns: []*SRun{{
 			Event:         engine.NewMapEvent(ev),
-			TotalUsage:    time.Duration(2 * time.Second),
+			TotalUsage:    2 * time.Second,
 			NextAutoDebit: &tTime,
 		}},
 	}
@@ -439,7 +439,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		Destination: "1004",
 		SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		Usage:       time.Duration(2 * time.Second),
+		Usage:       2 * time.Second,
 		ExtraFields: map[string]string{
 			utils.EVENT_NAME: "TEST_EVENT2",
 		},
@@ -473,7 +473,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.12,
 	}
 	ev := map[string]interface{}{
@@ -489,7 +489,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.13,
 	}
 	s := &Session{
@@ -499,7 +499,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		DebitInterval: time.Second,
 		SRuns: []*SRun{{
 			Event:      engine.NewMapEvent(ev),
-			TotalUsage: time.Duration(2 * time.Second),
+			TotalUsage: 2 * time.Second,
 			CD: &engine.CallDescriptor{
 				LoopIndex:     10,
 				DurationIndex: 3 * time.Second,
@@ -524,7 +524,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		Destination: "1004",
 		SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		Usage:       time.Duration(2 * time.Second),
+		Usage:       2 * time.Second,
 		ExtraFields: map[string]string{
 			utils.EVENT_NAME: "TEST_EVENT2",
 		},
@@ -557,7 +557,7 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.12,
 	}
 	ev := map[string]interface{}{
@@ -573,7 +573,7 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.13,
 	}
 	tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
@@ -585,7 +585,7 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 		DebitInterval: time.Second,
 		SRuns: []*SRun{{
 			Event:      engine.NewMapEvent(ev),
-			TotalUsage: time.Duration(2 * time.Second),
+			TotalUsage: 2 * time.Second,
 			CD: &engine.CallDescriptor{
 				LoopIndex:     10,
 				DurationIndex: 3 * time.Second,
@@ -611,7 +611,7 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 		Destination: "1004",
 		SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		Usage:       time.Duration(2 * time.Second),
+		Usage:       2 * time.Second,
 		ExtraFields: map[string]string{
 			utils.EVENT_NAME: "TEST_EVENT2",
 		},
@@ -649,29 +649,29 @@ func TestSessiontotalUsage(t *testing.T) {
 		ResourceID:    "resourceID",
 		ClientConnID:  "ClientConnID",
 		EventStart:    engine.NewMapEvent(nil),
-		DebitInterval: time.Duration(18),
+		DebitInterval: 18,
 		SRuns: []*SRun{
 			{
 				Event:         engine.NewMapEvent(nil),
 				CD:            &engine.CallDescriptor{Category: "test"},
 				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
-				ExtraDuration: time.Duration(1),
-				LastUsage:     time.Duration(2),
-				TotalUsage:    time.Duration(5),
+				ExtraDuration: 1,
+				LastUsage:     2,
+				TotalUsage:    5,
 				NextAutoDebit: &tTime,
 			},
 			{
 				Event:         engine.NewMapEvent(nil),
 				CD:            &engine.CallDescriptor{Category: "test2"},
 				EventCost:     &engine.EventCost{CGRID: "testCGRID2"},
-				ExtraDuration: time.Duration(4),
-				LastUsage:     time.Duration(5),
-				TotalUsage:    time.Duration(6),
+				ExtraDuration: 4,
+				LastUsage:     5,
+				TotalUsage:    6,
 				NextAutoDebit: &tTime2,
 			},
 		},
 	}
-	eOut = time.Duration(5)
+	eOut = 5
 	rcv = session.totalUsage()
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
@@ -719,7 +719,7 @@ func TestUpdateSRuns(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.12,
 	}
 	ev := map[string]interface{}{
@@ -735,7 +735,7 @@ func TestUpdateSRuns(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Usage:       2 * time.Second,
 		utils.Cost:        12.13,
 	}
 	s := &Session{
@@ -745,7 +745,7 @@ func TestUpdateSRuns(t *testing.T) {
 		DebitInterval: time.Second,
 		SRuns: []*SRun{{
 			Event:      engine.NewMapEvent(ev),
-			TotalUsage: time.Duration(2 * time.Second),
+			TotalUsage: 2 * time.Second,
 			CD: &engine.CallDescriptor{
 				LoopIndex:     10,
 				DurationIndex: 3 * time.Second,

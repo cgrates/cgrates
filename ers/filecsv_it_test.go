@@ -309,7 +309,7 @@ func testCsvITAnalyzeFilteredCDR(t *testing.T) {
 }
 
 func testCsvITProcessedFiles(t *testing.T) {
-	time.Sleep(time.Duration(1 * time.Second))
+	time.Sleep(time.Second)
 	if outContent1, err := ioutil.ReadFile("/tmp/ers/out/file1.csv"); err != nil {
 		t.Error(err)
 	} else if fileContent1 != string(outContent1) {

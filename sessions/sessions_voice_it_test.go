@@ -126,7 +126,7 @@ func testSessionsVoiceTPFromFolder(t *testing.T) {
 }
 
 func testSessionsVoiceMonetaryRefund(t *testing.T) {
-	usage := time.Duration(1*time.Minute + 30*time.Second)
+	usage := time.Minute + 30*time.Second
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -168,7 +168,7 @@ func testSessionsVoiceMonetaryRefund(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	usage = time.Duration(time.Minute)
+	usage = time.Minute
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -207,7 +207,7 @@ func testSessionsVoiceMonetaryRefund(t *testing.T) {
 }
 
 func testSessionsVoiceVoiceRefund(t *testing.T) {
-	usage := time.Duration(1*time.Minute + 30*time.Second)
+	usage := time.Minute + 30*time.Second
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -251,7 +251,7 @@ func testSessionsVoiceVoiceRefund(t *testing.T) {
 			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	usage = time.Duration(time.Minute)
+	usage = time.Minute
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -296,7 +296,7 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 		t.Error(err)
 	}
 
-	usage := time.Duration(1*time.Minute + 30*time.Second)
+	usage := time.Minute + 30*time.Second
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -343,7 +343,7 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 			eMoneyVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	usage = time.Duration(time.Minute)
+	usage = time.Minute
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -397,7 +397,7 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	usage := time.Duration(2 * time.Minute)
+	usage := 2 * time.Minute
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -438,7 +438,7 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	lastUsage := time.Duration(1*time.Minute + 30*time.Second)
+	lastUsage := time.Minute + 30*time.Second
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -477,7 +477,7 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	lastUsage = time.Duration(2*time.Minute + 30*time.Second)
+	lastUsage = 2*time.Minute + 30*time.Second
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -517,7 +517,7 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	usage = time.Duration(1 * time.Minute)
+	usage = time.Minute
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -566,7 +566,7 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	usage := time.Duration(2 * time.Minute)
+	usage := 2 * time.Minute
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -607,7 +607,7 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	lastUsage := time.Duration(30 * time.Second)
+	lastUsage := 30 * time.Second
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -694,7 +694,7 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	usage := time.Duration(2 * time.Minute)
+	usage := 2 * time.Minute
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -736,7 +736,7 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	}
 
 	//Update
-	lastUsage := time.Duration(12 * time.Second)
+	lastUsage := 12 * time.Second
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -823,7 +823,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 			eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	usage := time.Duration(2 * time.Minute)
+	usage := 2 * time.Minute
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -854,7 +854,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 		t.Error(err)
 	}
 
-	time.Sleep(time.Duration(30 * time.Millisecond))
+	time.Sleep(30 * time.Millisecond)
 	if initRpl.MaxUsage == nil || *initRpl.MaxUsage != usage {
 		t.Errorf("Expected: %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
@@ -881,7 +881,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(120)*time.Second {
+	} else if aSessions[0].Usage != 120*time.Second {
 		t.Errorf("Expecting 2m, received usage: %v", aSessions[0].Usage)
 	}
 
@@ -893,7 +893,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 	}
 
 	//Update
-	lastUsage := time.Duration(30 * time.Second)
+	lastUsage := 30 * time.Second
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -921,7 +921,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Duration(10 * time.Millisecond))
+	time.Sleep(10 * time.Millisecond)
 	if updateRpl.MaxUsage == nil || *updateRpl.MaxUsage != usage {
 		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
@@ -936,7 +936,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
+	} else if aSessions[0].Usage != 150*time.Second {
 		t.Errorf("Expecting 2m30s, received usage: %v", aSessions[0].Usage)
 	}
 
@@ -1000,7 +1000,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	usage := time.Duration(2 * time.Minute)
+	usage := 2 * time.Minute
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -1030,7 +1030,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(20 * time.Millisecond))
+	time.Sleep(20 * time.Millisecond)
 	if initRpl.MaxUsage == nil || *initRpl.MaxUsage != usage {
 		t.Errorf("Expected: %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
@@ -1046,7 +1046,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(120)*time.Second {
+	} else if aSessions[0].Usage != 120*time.Second {
 		t.Errorf("Expecting 2m, received usage: %v", aSessions[0].Usage)
 	}
 	eAcntVal = 180.0 * float64(time.Second)
@@ -1058,7 +1058,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	}
 
 	//Update
-	lastUsage := time.Duration(30 * time.Second)
+	lastUsage := 30 * time.Second
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -1094,7 +1094,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
-	time.Sleep(time.Duration(20) * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
@@ -1105,7 +1105,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
+	} else if aSessions[0].Usage != 150*time.Second {
 		t.Errorf("Expecting 2m30s, received usage: %v", aSessions[0].Usage)
 	}
 	eAcntVal = 150.0 * float64(time.Second)
@@ -1177,7 +1177,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 			acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	usage := time.Duration(2 * time.Minute)
+	usage := 2 * time.Minute
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -1211,7 +1211,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
-	time.Sleep(time.Duration(20) * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 	var aSessions []*ExternalSession
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
@@ -1223,7 +1223,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(120)*time.Second {
+	} else if aSessions[0].Usage != 120*time.Second {
 		t.Errorf("Expecting 2m, received usage: %v", aSessions[0].Usage)
 	}
 	eAcntVal = 180.0 * float64(time.Second)
@@ -1235,7 +1235,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	}
 
 	//Update
-	lastUsage := time.Duration(30 * time.Second)
+	lastUsage := 30 * time.Second
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -1271,7 +1271,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
-	time.Sleep(time.Duration(20) * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
@@ -1282,7 +1282,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
+	} else if aSessions[0].Usage != 150*time.Second {
 		t.Errorf("Expecting 2m30s, received usage: %v", aSessions[0].Usage)
 	}
 	eAcntVal = 150.0 * float64(time.Second)
@@ -1311,7 +1311,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 					utils.RequestType: utils.META_PREPAID,
 					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
 					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-					utils.Usage:       time.Duration(time.Minute),
+					utils.Usage:       time.Minute,
 				},
 			},
 		},
@@ -1323,7 +1323,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Error(err)
 	}
 
-	time.Sleep(time.Duration(10) * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{

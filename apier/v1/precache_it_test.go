@@ -155,97 +155,78 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		CacheIDs: []string{},
 	}
 	expectedStats := &map[string]*ltcache.CacheStats{
-		utils.MetaDefault: {},
-		utils.CacheAccountActionPlans: {
-			Items:  5,
-			Groups: 0,
-		},
+		utils.MetaDefault:             {},
+		utils.CacheAccountActionPlans: {},
 		utils.CacheActionPlans: {
-			Items:  4,
-			Groups: 0,
+			Items: 4,
 		},
 		utils.CacheActionTriggers: {
-			Items:  1,
-			Groups: 0,
+			Items: 1,
 		},
 		utils.CacheActions: {
-			Items:  9,
-			Groups: 0,
+			Items: 9,
 		},
 		utils.CacheAttributeFilterIndexes: {
 			Items:  2,
 			Groups: 2,
 		},
 		utils.CacheAttributeProfiles: {
-			Items:  1,
-			Groups: 0,
+			Items: 1,
 		},
 		utils.CacheChargerFilterIndexes:    {},
 		utils.CacheChargerProfiles:         {},
 		utils.CacheDispatcherFilterIndexes: {},
 		utils.CacheDispatcherProfiles: {
-			Items:  6,
-			Groups: 0,
+			Items: 6,
 		},
 		utils.CacheDispatcherHosts: {
-			Items:  1,
-			Groups: 0,
+			Items: 1,
 		},
 		utils.CacheDispatcherRoutes: {},
 		utils.CacheDispatcherLoads:  {},
 		utils.CacheDestinations: {
-			Items:  5,
-			Groups: 0,
+			Items: 5,
 		},
 		utils.CacheDispatchers:    {},
 		utils.CacheEventResources: {},
 		utils.CacheFilters: {
-			Items:  15,
-			Groups: 0,
+			Items: 15,
 		},
 		utils.CacheRateProfilesFilterIndexes: {},
 		utils.CacheRateFilterIndexes:         {},
 		utils.CacheRateProfiles:              {},
 		utils.CacheRatingPlans: {
-			Items:  4,
-			Groups: 0,
+			Items: 4,
 		},
 		utils.CacheRatingProfiles: {
-			Items:  5,
-			Groups: 0,
+			Items: 5,
 		},
 		utils.CacheResourceFilterIndexes: {
 			Items:  6,
 			Groups: 1,
 		},
 		utils.CacheResourceProfiles: {
-			Items:  3,
-			Groups: 0,
+			Items: 3,
 		},
 		utils.CacheResources: {
-			Items:  3,
-			Groups: 0,
+			Items: 3,
 		},
 		utils.CacheReverseDestinations: {
-			Items:  7,
-			Groups: 0,
+			Items: 7,
 		},
 		utils.CacheRPCResponses: {},
 		utils.CacheSharedGroups: {
-			Items:  1,
-			Groups: 0,
+			Items: 1,
 		},
 		utils.CacheStatFilterIndexes: {
 			Items:  2,
 			Groups: 1,
 		},
 		utils.CacheStatQueueProfiles: {
-			Items:  1,
-			Groups: 0,
+			Items: 1,
 		},
 		utils.CacheStatQueues: {
-			Items:  1,
-			Groups: 0,
+			Items: 1,
 		},
 		utils.CacheSTIR:         {},
 		utils.CacheEventCharges: {},
@@ -254,20 +235,17 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 1,
 		},
 		utils.CacheRouteProfiles: {
-			Items:  3,
-			Groups: 0,
+			Items: 3,
 		},
 		utils.CacheThresholdFilterIndexes: {
 			Items:  10,
 			Groups: 1,
 		},
 		utils.CacheThresholdProfiles: {
-			Items:  7,
-			Groups: 0,
+			Items: 7,
 		},
 		utils.CacheThresholds: {
-			Items:  7,
-			Groups: 0,
+			Items: 7,
 		},
 		utils.CacheTimings:               {},
 		utils.CacheDiameterMessages:      {},

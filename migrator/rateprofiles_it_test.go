@@ -197,8 +197,8 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						Value:     0.12,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Minute),
+						Unit:      time.Minute,
+						Increment: time.Minute,
 					},
 				},
 				Blocker: false,
@@ -210,8 +210,8 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						Value:     0.06,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Second),
+						Unit:      time.Minute,
+						Increment: time.Second,
 					},
 				},
 				Blocker: false,

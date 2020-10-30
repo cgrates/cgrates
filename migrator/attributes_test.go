@@ -28,7 +28,7 @@ import (
 )
 
 func TestV1AttributeProfileAsAttributeProfile(t *testing.T) {
-	cloneExpTime := time.Now().Add(time.Duration(20 * time.Minute))
+	cloneExpTime := time.Now().Add(20 * time.Minute)
 	mapSubstitutes := make(map[string]map[string]*v1Attribute)
 	mapSubstitutes["FL1"] = make(map[string]*v1Attribute)
 	mapSubstitutes["FL1"]["In1"] = &v1Attribute{
@@ -76,7 +76,7 @@ func TestV1AttributeProfileAsAttributeProfile(t *testing.T) {
 }
 
 func TestV2AttributeProfileAsAttributeProfile(t *testing.T) {
-	cloneExpTime := time.Now().Add(time.Duration(20 * time.Minute))
+	cloneExpTime := time.Now().Add(20 * time.Minute)
 	v2Attribute := v2AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
@@ -122,7 +122,7 @@ func TestV2AttributeProfileAsAttributeProfile(t *testing.T) {
 }
 
 func TestV2AttributeProfileAsAttributeProfile2(t *testing.T) {
-	cloneExpTime := time.Now().Add(time.Duration(20 * time.Minute))
+	cloneExpTime := time.Now().Add(20 * time.Minute)
 	v2Attribute := v2AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
@@ -168,7 +168,7 @@ func TestV2AttributeProfileAsAttributeProfile2(t *testing.T) {
 }
 
 func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
-	cloneExpTime := time.Now().Add(time.Duration(20 * time.Minute))
+	cloneExpTime := time.Now().Add(20 * time.Minute)
 	v3Attribute := v3AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
@@ -214,7 +214,7 @@ func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
 }
 
 func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
-	cloneExpTime := time.Now().Add(time.Duration(20 * time.Minute))
+	cloneExpTime := time.Now().Add(20 * time.Minute)
 	v4Attribute := v4AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",

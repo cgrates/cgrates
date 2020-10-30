@@ -183,7 +183,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 					utils.RequestType: utils.META_PREPAID,
 					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-					utils.Usage:       time.Duration(200 * time.Millisecond),
+					utils.Usage:       200 * time.Millisecond,
 				},
 			},
 		},
@@ -201,7 +201,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	}
 	// Make sure we are receiving a disconnect event
 	select {
-	case <-time.After(time.Duration(100 * time.Millisecond)):
+	case <-time.After(100 * time.Millisecond):
 		t.Error("Did not receive disconnect event")
 	case disconnectEv := <-disconnectEvChan:
 		if engine.NewMapEvent(disconnectEv.EventStart).GetStringIgnoreErrors(utils.OriginID) != initArgs.CGREvent.Event[utils.OriginID] {
@@ -237,7 +237,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	if err := sessionsBiRPC.Call(utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100 * time.Millisecond)) // Give time for  debits to occur
+	time.Sleep(100 * time.Millisecond) // Give time for  debits to occur
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 0 {
@@ -309,7 +309,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 					utils.RequestType: utils.META_PREPAID,
 					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-					utils.Usage:       time.Duration(200 * time.Millisecond),
+					utils.Usage:       200 * time.Millisecond,
 				},
 			},
 		},
@@ -326,7 +326,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, initRpl.MaxUsage)
 	}
 
-	time.Sleep(time.Duration(10 * time.Millisecond)) // Give time for  debits to occur
+	time.Sleep(10 * time.Millisecond) // Give time for  debits to occur
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
@@ -346,7 +346,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 					utils.RequestType: utils.META_PREPAID,
 					utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-					utils.Usage:       time.Duration(7 * time.Millisecond),
+					utils.Usage:       7 * time.Millisecond,
 				},
 			},
 		},
@@ -357,7 +357,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		t.Error(err)
 	}
 
-	time.Sleep(time.Duration(50 * time.Millisecond)) // Give time for  debits to occur
+	time.Sleep(50 * time.Millisecond) // Give time for  debits to occur
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() > 0.995*float64(time.Second) { // FixMe: should be not 0.93?
@@ -369,7 +369,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received reply: %s", reply)
 	}
-	time.Sleep(time.Duration(10) * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},

@@ -116,7 +116,7 @@ func testA1itLoadTPFromFolder(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(reply)
 	}
-	time.Sleep(time.Duration(100 * time.Millisecond))
+	time.Sleep(100 * time.Millisecond)
 	tStart := time.Date(2017, 3, 3, 10, 39, 33, 0, time.UTC)
 	tEnd := time.Date(2017, 3, 3, 10, 39, 33, 10240, time.UTC)
 	cd := &engine.CallDescriptorWithOpts{
@@ -252,7 +252,7 @@ func testA1itDataSession1(t *testing.T) {
 		},
 	}
 
-	usage = time.Duration(2097152)
+	usage = 2097152
 	var updateRpl *sessions.V1UpdateSessionReply
 	if err := a1rpc.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
@@ -261,7 +261,7 @@ func testA1itDataSession1(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
-	usage = time.Duration(1 * time.Minute)
+	usage = time.Minute
 	termArgs := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -298,7 +298,7 @@ func testA1itDataSession1(t *testing.T) {
 		t.Errorf("Received reply: %s", rpl)
 	}
 
-	time.Sleep(time.Duration(20) * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}

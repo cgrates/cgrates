@@ -54,8 +54,8 @@ func TestResponderGobSMCost(t *testing.T) {
 					Rates: RateGroups{&RGRate{
 						GroupIntervalStart: 0,
 						Value:              0,
-						RateIncrement:      1 * time.Second,
-						RateUnit:           1 * time.Second,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
 					},
 					},
 				},
@@ -63,7 +63,7 @@ func TestResponderGobSMCost(t *testing.T) {
 			},
 			DurationIndex: 0,
 			Increments: Increments{&Increment{
-				Duration: 1 * time.Second,
+				Duration: time.Second,
 				Cost:     0,
 				BalanceInfo: &DebitInfo{
 					Unit: &UnitInfo{
@@ -127,28 +127,28 @@ func TestResponderGobSMCost(t *testing.T) {
 func TestResponderUsageAllow(t *testing.T) {
 	rsp := &Responder{
 		MaxComputedUsage: map[string]time.Duration{
-			utils.ANY:   time.Duration(10 * time.Second),
-			utils.VOICE: time.Duration(20 * time.Second),
+			utils.ANY:   10 * time.Second,
+			utils.VOICE: 20 * time.Second,
 		},
 	}
-	if allow := rsp.usageAllowed(utils.VOICE, time.Duration(17*time.Second)); !allow {
+	if allow := rsp.usageAllowed(utils.VOICE, 17*time.Second); !allow {
 		t.Errorf("Expected true, received : %+v", allow)
 	}
-	if allow := rsp.usageAllowed(utils.VOICE, time.Duration(22*time.Second)); allow {
+	if allow := rsp.usageAllowed(utils.VOICE, 22*time.Second); allow {
 		t.Errorf("Expected false, received : %+v", allow)
 	}
-	if allow := rsp.usageAllowed(utils.DATA, time.Duration(7*time.Second)); !allow {
+	if allow := rsp.usageAllowed(utils.DATA, 7*time.Second); !allow {
 		t.Errorf("Expected true, received : %+v", allow)
 	}
-	if allow := rsp.usageAllowed(utils.DATA, time.Duration(12*time.Second)); allow {
+	if allow := rsp.usageAllowed(utils.DATA, 12*time.Second); allow {
 		t.Errorf("Expected false, received : %+v", allow)
 	}
 }
 
 func TestResponderGetCostMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -174,8 +174,8 @@ func TestResponderGetCostMaxUsageANY(t *testing.T) {
 
 func TestResponderGetCostMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
@@ -201,8 +201,8 @@ func TestResponderGetCostMaxUsageVOICE(t *testing.T) {
 
 func TestResponderDebitMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -228,8 +228,8 @@ func TestResponderDebitMaxUsageANY(t *testing.T) {
 
 func TestResponderDebitMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
@@ -255,8 +255,8 @@ func TestResponderDebitMaxUsageVOICE(t *testing.T) {
 
 func TestResponderMaxDebitMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -282,8 +282,8 @@ func TestResponderMaxDebitMaxUsageANY(t *testing.T) {
 
 func TestResponderMaxDebitMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
@@ -309,8 +309,8 @@ func TestResponderMaxDebitMaxUsageVOICE(t *testing.T) {
 
 func TestResponderRefundIncrementsMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -336,8 +336,8 @@ func TestResponderRefundIncrementsMaxUsageANY(t *testing.T) {
 
 func TestResponderRefundIncrementsMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
@@ -363,8 +363,8 @@ func TestResponderRefundIncrementsMaxUsageVOICE(t *testing.T) {
 
 func TestResponderRefundRoundingMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -390,8 +390,8 @@ func TestResponderRefundRoundingMaxUsageANY(t *testing.T) {
 
 func TestResponderRefundRoundingMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
@@ -417,8 +417,8 @@ func TestResponderRefundRoundingMaxUsageVOICE(t *testing.T) {
 
 func TestResponderGetMaxSessionTimeMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -444,8 +444,8 @@ func TestResponderGetMaxSessionTimeMaxUsageANY(t *testing.T) {
 
 func TestResponderGetMaxSessionTimeMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   time.Duration(10 * time.Second),
-		utils.VOICE: time.Duration(20 * time.Second),
+		utils.ANY:   10 * time.Second,
+		utils.VOICE: 20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")

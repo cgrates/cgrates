@@ -139,7 +139,7 @@ func testSessionSRplInitiate(t *testing.T) {
 		t.Error(err)
 	}
 
-	usage := time.Duration(1*time.Minute + 30*time.Second)
+	usage := time.Minute + 30*time.Second
 	argsInit := &V1InitSessionArgs{
 		InitSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -185,8 +185,8 @@ func testSessionSRplInitiate(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", utils.ToIJSON(aSessions))
-	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
-		t.Errorf("Expecting : %+v, received: %+v", time.Duration(90)*time.Second, aSessions[0].Usage)
+	} else if aSessions[0].Usage != 90*time.Second {
+		t.Errorf("Expecting : %+v, received: %+v", 90*time.Second, aSessions[0].Usage)
 	}
 
 	//check if the session was created as passive session on slave
@@ -200,14 +200,14 @@ func testSessionSRplInitiate(t *testing.T) {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
-	} else if pSessions[0].Usage != time.Duration(90*time.Second) {
-		t.Errorf("Expecting : %+v, received: %+v", time.Duration(90)*time.Second, pSessions[0].Usage)
+	} else if pSessions[0].Usage != 90*time.Second {
+		t.Errorf("Expecting : %+v, received: %+v", 90*time.Second, pSessions[0].Usage)
 	}
 }
 
 func testSessionSRplUpdate(t *testing.T) {
 	//update the session on slave so the session should became active
-	usage := time.Duration(1 * time.Minute)
+	usage := time.Minute
 	argsUpdate := &V1UpdateSessionArgs{
 		UpdateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -251,8 +251,8 @@ func testSessionSRplUpdate(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
-		t.Errorf("Expecting : %+v, received: %+v", time.Duration(150)*time.Second, aSessions[0].Usage)
+	} else if aSessions[0].Usage != 150*time.Second {
+		t.Errorf("Expecting : %+v, received: %+v", 150*time.Second, aSessions[0].Usage)
 	}
 
 	var pSessions []*ExternalSession
@@ -282,8 +282,8 @@ func testSessionSRplUpdate(t *testing.T) {
 		t.Errorf("PassiveSessions: %+v", pSessions)
 	} else if pSessions[0].CGRID != cgrID {
 		t.Errorf("PassiveSession: %+v", pSessions[0])
-	} else if pSessions[0].Usage != time.Duration(150*time.Second) {
-		t.Errorf("Expecting : %+v, received: %+v", time.Duration(150)*time.Second, pSessions[0].Usage)
+	} else if pSessions[0].Usage != 150*time.Second {
+		t.Errorf("Expecting : %+v, received: %+v", 150*time.Second, pSessions[0].Usage)
 	}
 }
 
@@ -306,7 +306,7 @@ func testSessionSRplTerminate(t *testing.T) {
 					utils.Category:    "call",
 					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:       time.Duration(2*time.Minute + 30*time.Second),
+					utils.Usage:       2*time.Minute + 30*time.Second,
 				},
 			},
 		},
@@ -371,7 +371,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 					utils.Category:    "call",
 					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:       1*time.Minute + 30*time.Second,
+					utils.Usage:       time.Minute + 30*time.Second,
 				},
 			},
 		},
@@ -395,7 +395,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 					utils.Category:    "call",
 					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:       1*time.Minute + 30*time.Second,
+					utils.Usage:       time.Minute + 30*time.Second,
 				},
 			},
 		},
@@ -406,7 +406,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 		if err := smgRplcMstrRPC.Call(utils.SessionSv1InitiateSession, args, &initRpl); err != nil {
 			t.Error(err)
 		}
-		if initRpl.MaxUsage == nil || *initRpl.MaxUsage != time.Duration(90*time.Second) {
+		if initRpl.MaxUsage == nil || *initRpl.MaxUsage != 90*time.Second {
 			t.Error("Bad max usage: ", initRpl.MaxUsage)
 		}
 	}
@@ -416,7 +416,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", utils.ToJSON(aSessions))
-	} else if aSessions[0].Usage != time.Duration(90)*time.Second && aSessions[1].Usage != time.Duration(90)*time.Second {
+	} else if aSessions[0].Usage != 90*time.Second && aSessions[1].Usage != 90*time.Second {
 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 	}
 	// Start slave, should not have any active session at beginning
@@ -451,7 +451,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
+	} else if aSessions[0].Usage != 90*time.Second {
 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 	}
 	// kill master
@@ -496,7 +496,7 @@ func testSessionSRplManualReplicate(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
+	} else if aSessions[0].Usage != 90*time.Second {
 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 	}
 }

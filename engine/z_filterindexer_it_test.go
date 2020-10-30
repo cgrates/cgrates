@@ -249,14 +249,13 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	if err := dataManager.SetFilter(fp, true); err != nil {
 		t.Error(err)
 	}
-	timeMinSleep := time.Duration(0 * time.Second)
 	th := &ThresholdProfile{
 		Tenant:             "cgrates.org",
 		ID:                 "THD_Test",
 		ActivationInterval: &utils.ActivationInterval{},
 		FilterIDs:          []string{"Filter1"},
 		MaxHits:            12,
-		MinSleep:           timeMinSleep,
+		MinSleep:           0,
 		Blocker:            true,
 		Weight:             1.4,
 		ActionIDs:          []string{},
@@ -267,7 +266,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{},
 		FilterIDs:          []string{"Filter1"},
 		MaxHits:            12,
-		MinSleep:           timeMinSleep,
+		MinSleep:           0,
 		Blocker:            true,
 		Weight:             1.4,
 		ActionIDs:          []string{},
@@ -825,7 +824,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{},
 		FilterIDs:          []string{"Filter1"},
 		MaxHits:            12,
-		MinSleep:           time.Duration(0 * time.Second),
+		MinSleep:           0,
 		Blocker:            true,
 		Weight:             1.4,
 		ActionIDs:          []string{},
@@ -856,7 +855,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{},
 		FilterIDs:          []string{"Filter1", "*string:~*req.Account:1001"},
 		MaxHits:            12,
-		MinSleep:           time.Duration(0 * time.Second),
+		MinSleep:           0,
 		Blocker:            true,
 		Weight:             1.4,
 		ActionIDs:          []string{},
@@ -1002,7 +1001,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{},
 		FilterIDs:          []string{},
 		MaxHits:            12,
-		MinSleep:           time.Duration(0 * time.Second),
+		MinSleep:           0,
 		Blocker:            true,
 		Weight:             1.4,
 		ActionIDs:          []string{},
@@ -1013,7 +1012,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{},
 		FilterIDs:          []string{},
 		MaxHits:            12,
-		MinSleep:           time.Duration(0 * time.Second),
+		MinSleep:           0,
 		Blocker:            true,
 		Weight:             1.4,
 		ActionIDs:          []string{},
@@ -1283,8 +1282,8 @@ func testITIndexRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						Value:     0.12,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Minute),
+						Unit:      time.Minute,
+						Increment: time.Minute,
 					},
 				},
 				Blocker: false,
@@ -1296,8 +1295,8 @@ func testITIndexRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						Value:     0.06,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Second),
+						Unit:      time.Minute,
+						Increment: time.Second,
 					},
 				},
 				Blocker: false,
@@ -1344,8 +1343,8 @@ func testITIndexRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						Value:     0.12,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Minute),
+						Unit:      time.Minute,
+						Increment: time.Minute,
 					},
 				},
 				Blocker: false,
@@ -1357,8 +1356,8 @@ func testITIndexRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						Value:     0.06,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Second),
+						Unit:      time.Minute,
+						Increment: time.Second,
 					},
 				},
 				Blocker: false,
@@ -1370,8 +1369,8 @@ func testITIndexRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						Value:     0.06,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Second),
+						Unit:      time.Minute,
+						Increment: time.Second,
 					},
 				},
 				Blocker: false,
@@ -1419,8 +1418,8 @@ func testITIndexRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						Value:     0.12,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Minute),
+						Unit:      time.Minute,
+						Increment: time.Minute,
 					},
 				},
 				Blocker: false,
@@ -1432,8 +1431,8 @@ func testITIndexRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						Value:     0.6,
-						Unit:      time.Duration(1 * time.Minute),
-						Increment: time.Duration(1 * time.Second),
+						Unit:      time.Minute,
+						Increment: time.Second,
 					},
 				},
 				Blocker: false,

@@ -39,7 +39,7 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 	expected := &ResourceSConfig{
 		Enabled:             true,
 		IndexedSelects:      true,
-		StoreInterval:       time.Duration(2 * time.Second),
+		StoreInterval:       2 * time.Second,
 		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1"},

@@ -31,7 +31,7 @@ func TestAsTransCacheConfig(t *testing.T) {
 		Partitions: map[string]*CacheParamCfg{
 			"test": {
 				Limit:     50,
-				TTL:       time.Duration(60 * time.Second),
+				TTL:       60 * time.Second,
 				StaticTTL: true,
 				Precache:  true,
 			},
@@ -40,7 +40,7 @@ func TestAsTransCacheConfig(t *testing.T) {
 	expected := map[string]*ltcache.CacheConfig{
 		"test": {
 			MaxItems:  50,
-			TTL:       time.Duration(60 * time.Second),
+			TTL:       60 * time.Second,
 			StaticTTL: true,
 		},
 	}
@@ -65,7 +65,7 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			utils.MetaDestinations: {Limit: 10, TTL: time.Duration(2), StaticTTL: true, Precache: true, Replicate: true},
+			utils.MetaDestinations: {Limit: 10, TTL: 2, StaticTTL: true, Precache: true, Replicate: true},
 		},
 		ReplicationConns: []string{"conn1", "conn2"},
 	}
@@ -106,7 +106,7 @@ func TestCacheParamCfgloadFromJsonCfg1(t *testing.T) {
 	}
 	expected := &CacheParamCfg{
 		Limit:     5,
-		TTL:       time.Duration(time.Second),
+		TTL:       time.Second,
 		StaticTTL: true,
 		Precache:  true,
 	}

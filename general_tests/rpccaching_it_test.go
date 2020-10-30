@@ -170,7 +170,7 @@ func testRPCMethodsAddData(t *testing.T) {
 			ID:        "THD_AccDisableAndLog",
 			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.DisableAction:DisableAction"},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(1 * time.Second),
+			MinSleep:  time.Second,
 			Weight:    30.0,
 			ActionIDs: []string{"DISABLE_LOG"},
 		},
@@ -187,7 +187,7 @@ func testRPCMethodsAddData(t *testing.T) {
 			ID:        "THD_AccEnableAndLog",
 			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.EnableAction:EnableAction"},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(1 * time.Second),
+			MinSleep:  time.Second,
 			Weight:    30.0,
 			ActionIDs: []string{"ENABLE_LOG"},
 		},
@@ -273,7 +273,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	}
 
 	//give time to CGRateS to delete the response from cache
-	time.Sleep(1*time.Second + 500*time.Millisecond)
+	time.Sleep(time.Second + 500*time.Millisecond)
 
 	//authorize again session (this time we expect to receive an error)
 	if err := rpcRpc.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err == nil || err.Error() != "RALS_ERROR:ACCOUNT_DISABLED" {
@@ -372,7 +372,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 	}
 
 	//give time to CGRateS to delete the response from cache
-	time.Sleep(1*time.Second + 500*time.Millisecond)
+	time.Sleep(time.Second + 500*time.Millisecond)
 
 	if err := rpcRpc.Call(utils.SessionSv1InitiateSession,
 		args, &rply); err == nil || !(err.Error() == "RALS_ERROR:ACCOUNT_DISABLED" ||
@@ -472,7 +472,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 	}
 
 	//give time to CGRateS to delete the response from cache
-	time.Sleep(1*time.Second + 500*time.Millisecond)
+	time.Sleep(time.Second + 500*time.Millisecond)
 
 	if err := rpcRpc.Call(utils.SessionSv1UpdateSession,
 		args, &rply); err == nil || err.Error() != "RALS_ERROR:ACCOUNT_DISABLED" {
@@ -537,7 +537,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 	}
 
 	//give time to CGRateS to delete the response from cache
-	time.Sleep(1*time.Second + 500*time.Millisecond)
+	time.Sleep(time.Second + 500*time.Millisecond)
 
 	if err := rpcRpc.Call(utils.SessionSv1TerminateSession,
 		args, &rply); err == nil || err.Error() != "MANDATORY_IE_MISSING: [OriginID]" {
@@ -601,7 +601,7 @@ func testRPCMethodsProcessCDR(t *testing.T) {
 	}
 
 	//give time to CGRateS to delete the response from cache
-	time.Sleep(1*time.Second + 500*time.Millisecond)
+	time.Sleep(time.Second + 500*time.Millisecond)
 
 	//change originID so CGRID be different
 	args.Event[utils.OriginID] = "testRPCMethodsProcessCDR3"
@@ -695,7 +695,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	}
 
 	//give time to CGRateS to delete the response from cache
-	time.Sleep(1*time.Second + 500*time.Millisecond)
+	time.Sleep(time.Second + 500*time.Millisecond)
 
 	if err := rpcRpc.Call(utils.SessionSv1ProcessMessage,
 		args, &rplyFirst); err == nil || err.Error() != "RALS_ERROR:ACCOUNT_DISABLED" {
@@ -744,7 +744,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 	//verify the CDR
 	var cdrs []*engine.CDR
 	argsCDR := utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
@@ -770,7 +770,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	}
 
 	//give time to CGRateS to delete the response from cache
-	time.Sleep(1*time.Second + 500*time.Millisecond)
+	time.Sleep(time.Second + 500*time.Millisecond)
 	//change originID so CGRID be different
 	args.Event[utils.OriginID] = "testRPCMethodsProcessCDR4"
 	if err := rpcRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
@@ -778,7 +778,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 	//verify the CDR
 	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, &argsCDR, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -816,7 +816,7 @@ func testRPCMethodsCdrsStoreSessionCost(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond)
+	time.Sleep(150 * time.Millisecond)
 
 	//change originID so CGRID be different
 	args.Cost.CGRID = "testRPCMethodsCdrsStoreSessionCost"
@@ -828,7 +828,7 @@ func testRPCMethodsCdrsStoreSessionCost(t *testing.T) {
 	}
 
 	//give time to CGRateS to delete the response from cache
-	time.Sleep(1*time.Second + 500*time.Millisecond)
+	time.Sleep(time.Second + 500*time.Millisecond)
 	//change originID so CGRID be different
 	args.Cost.CGRID = "testRPCMethodsCdrsStoreSessionCost"
 	if err := rpcRpc.Call(utils.CDRsV2StoreSessionCost, args,
@@ -857,7 +857,7 @@ func testRPCMethodsResponderDebit(t *testing.T) {
 			Destination:   "+49",
 			DurationIndex: 0,
 			TimeStart:     tStart,
-			TimeEnd:       tStart.Add(time.Duration(15) * time.Second),
+			TimeEnd:       tStart.Add(15 * time.Second),
 		},
 	}
 	var cc engine.CallCost
@@ -885,7 +885,7 @@ func testRPCMethodsResponderDebit(t *testing.T) {
 			utils.ToJSON(cc), utils.ToJSON(ccCache))
 	}
 	//give time to CGRateS to delete the response from cache
-	time.Sleep(1*time.Second + 500*time.Millisecond)
+	time.Sleep(time.Second + 500*time.Millisecond)
 	if err := rpcRpc.Call(utils.ResponderDebit, cd2, &cc); err == nil || err.Error() != "ACCOUNT_NOT_FOUND" {
 		t.Error("Unexpected error returned", err)
 	}
@@ -903,7 +903,7 @@ func testRPCMethodsResponderMaxDebit(t *testing.T) {
 			Destination:   "+49",
 			DurationIndex: 0,
 			TimeStart:     tStart,
-			TimeEnd:       tStart.Add(time.Duration(15) * time.Second),
+			TimeEnd:       tStart.Add(15 * time.Second),
 		},
 	}
 	var cc engine.CallCost
@@ -931,7 +931,7 @@ func testRPCMethodsResponderMaxDebit(t *testing.T) {
 			utils.ToJSON(cc), utils.ToJSON(ccCache))
 	}
 	//give time to CGRateS to delete the response from cache
-	time.Sleep(1*time.Second + 500*time.Millisecond)
+	time.Sleep(time.Second + 500*time.Millisecond)
 	if err := rpcRpc.Call(utils.ResponderMaxDebit, cd2, &cc); err == nil || err.Error() != "ACCOUNT_NOT_FOUND" {
 		t.Error("Unexpected error returned", err)
 	}

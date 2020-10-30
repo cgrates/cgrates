@@ -251,7 +251,7 @@ func testDiamItTPFromFolder(t *testing.T) {
 	if isDispatcherActive {
 		testDiamItTPLoadData(t)
 	}
-	time.Sleep(time.Duration(1 * time.Second)) // Give time for scheduler to execute topups
+	time.Sleep(time.Second) // Give time for scheduler to execute topups
 }
 
 func testDiamItTPLoadData(t *testing.T) {
@@ -972,7 +972,7 @@ func testDiamItCCRSMS(t *testing.T) {
 		t.Error(err)
 	}
 
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	diamClnt.ReceivedMessage(rplyTimeout)
 
 	var cdrs []*engine.CDR
@@ -1051,7 +1051,7 @@ func testDiamItCCRMMS(t *testing.T) {
 		t.Error(err)
 	}
 
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	diamClnt.ReceivedMessage(rplyTimeout)
 
 	var cdrs []*engine.CDR
@@ -1408,7 +1408,7 @@ func testDiamItTemplateErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	msg := diamClnt.ReceivedMessage(rplyTimeout)
 
 	if msg == nil {
