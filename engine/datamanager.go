@@ -547,15 +547,14 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 				if dm.dataDB.GetStorageType() != utils.MetaInternal {
 					// in case of internal we don't marshal
 					if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
-						return
+						return nil, err
 					}
 				}
 				err = dm.dataDB.SetStatQueueDrv(ssq, sq)
 			}
 		}
 		if err != nil {
-			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err = utils.CastRPCErr(err); err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(utils.CacheStatQueues, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
