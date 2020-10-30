@@ -28,7 +28,7 @@ import (
 )
 
 var (
-	expTimeAttributes = time.Now().Add(time.Duration(20 * time.Minute))
+	expTimeAttributes = time.Now().Add(20 * time.Minute)
 	attrService       *AttributeService
 	dmAtr             *DataManager
 	attrEvs           = []*AttrArgsProcessEvent{
@@ -182,7 +182,7 @@ func TestAttributeAddFilters(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,

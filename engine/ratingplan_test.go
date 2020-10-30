@@ -178,13 +178,13 @@ func TestApAddIntervalIfNotPresent(t *testing.T) {
 
 func TestApAddRateIntervalGroups(t *testing.T) {
 	i1 := &RateInterval{
-		Rating: &RIRate{Rates: RateGroups{&RGRate{0, 1, 1 * time.Second, 1 * time.Second}}},
+		Rating: &RIRate{Rates: RateGroups{&RGRate{0, 1, time.Second, time.Second}}},
 	}
 	i2 := &RateInterval{
-		Rating: &RIRate{Rates: RateGroups{&RGRate{30 * time.Second, 2, 1 * time.Second, 1 * time.Second}}},
+		Rating: &RIRate{Rates: RateGroups{&RGRate{30 * time.Second, 2, time.Second, time.Second}}},
 	}
 	i3 := &RateInterval{
-		Rating: &RIRate{Rates: RateGroups{&RGRate{30 * time.Second, 2, 1 * time.Second, 1 * time.Second}}},
+		Rating: &RIRate{Rates: RateGroups{&RGRate{30 * time.Second, 2, time.Second, time.Second}}},
 	}
 	ap := &RatingPlan{}
 	ap.AddRateInterval("NAT", i1)
@@ -331,11 +331,11 @@ func TestRatingPlanSaneRatingsEqual(t *testing.T) {
 				tag: "first",
 				Rates: RateGroups{
 					&RGRate{
-						GroupIntervalStart: 0 * time.Second,
+						GroupIntervalStart: 0,
 						RateIncrement:      30 * time.Second,
 					},
 					&RGRate{
-						GroupIntervalStart: 0 * time.Second,
+						GroupIntervalStart: 0,
 						RateIncrement:      30 * time.Second,
 					},
 				},
@@ -354,7 +354,7 @@ func TestRatingPlanSaneRatingsNotMultiple(t *testing.T) {
 				tag: "first",
 				Rates: RateGroups{
 					&RGRate{
-						GroupIntervalStart: 0 * time.Second,
+						GroupIntervalStart: 0,
 						RateIncrement:      30 * time.Second,
 					},
 					&RGRate{
@@ -379,12 +379,12 @@ func TestRatingPlanSaneRatingsGoot(t *testing.T) {
 					&RGRate{
 						GroupIntervalStart: 60 * time.Second,
 						RateIncrement:      30 * time.Second,
-						RateUnit:           1 * time.Second,
+						RateUnit:           time.Second,
 					},
 					&RGRate{
-						GroupIntervalStart: 0 * time.Second,
+						GroupIntervalStart: 0,
 						RateIncrement:      30 * time.Second,
-						RateUnit:           1 * time.Second,
+						RateUnit:           time.Second,
 					},
 				},
 			},

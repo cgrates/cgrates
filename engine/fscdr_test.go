@@ -423,7 +423,7 @@ func TestFsCdrCDRFields(t *testing.T) {
 		RequestType: utils.META_RATED, Tenant: "cgrates.org",
 		Account: "1001", Subject: "1001",
 		Destination: "1002", SetupTime: setupTime,
-		AnswerTime: answerTime, Usage: time.Duration(68) * time.Second,
+		AnswerTime: answerTime, Usage: 68 * time.Second,
 		Cost:        -1,
 		ExtraFields: map[string]string{"sip_user_agent": "Jitsi2.10.5550Linux"}}
 	if CDR := fsCdr.AsCDR(""); !reflect.DeepEqual(expctCDR, CDR) {

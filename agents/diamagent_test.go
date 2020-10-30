@@ -162,7 +162,7 @@ func TestProcessRequest(t *testing.T) {
 				return nil
 			}
 			*prply = sessions.V1AuthorizeReply{
-				MaxUsage: utils.DurationPointer(time.Duration(-1)),
+				MaxUsage: utils.DurationPointer(-1),
 			}
 			return nil
 		},

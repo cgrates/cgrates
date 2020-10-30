@@ -256,7 +256,7 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 	if err := apierRPC.Call(utils.APIerSv2SetActions, &argActs1, &reply); err != nil {
 		t.Error(err)
 	}
-	tNow := time.Now().Add(time.Duration(time.Minute))
+	tNow := time.Now().Add(time.Minute)
 	argAP1 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAP_AP_1",
 		ActionPlan: []*v1.AttrActionPlan{
 			{ActionsId: argActs1.ActionsId,
@@ -398,7 +398,7 @@ func testAPIerSv2itSetActionWithCategory(t *testing.T) {
 
 func testAPIerSv2itSetActionPlanWithWrongTiming(t *testing.T) {
 	var reply string
-	tNow := time.Now().Add(time.Duration(time.Minute)).String()
+	tNow := time.Now().Add(time.Minute).String()
 	argAP1 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAPWithWrongTiming",
 		ActionPlan: []*v1.AttrActionPlan{
 			&v1.AttrActionPlan{

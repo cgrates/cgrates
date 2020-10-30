@@ -20,7 +20,6 @@ package config
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -40,7 +39,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 	expected := &StatSCfg{
 		Enabled:                true,
 		IndexedSelects:         true,
-		StoreInterval:          time.Duration(2),
+		StoreInterval:          2,
 		StoreUncompressedLimit: 10,
 		ThresholdSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StringIndexedFields:    &[]string{"*req.string"},

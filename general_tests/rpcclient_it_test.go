@@ -119,13 +119,13 @@ func testRPCITLclStartSecondEngine(t *testing.T) {
 func testRPCITLclRpcConnPoolFirst(t *testing.T) {
 	rpcPoolFirst = rpcclient.NewRPCPool(rpcclient.PoolFirst, 0)
 	rpcRAL1, err = rpcclient.NewRPCClient(utils.TCP, rpcITCfg1.ListenCfg().RPCJSONListen, false, "", "", "", 3, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
+		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false)
 	if err == nil {
 		t.Fatal("Should receive cannot connect error here")
 	}
 	rpcPoolFirst.AddClient(rpcRAL1)
 	rpcRAL2, err = rpcclient.NewRPCClient(utils.TCP, rpcITCfg2.ListenCfg().RPCJSONListen, false, "", "", "", 3, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
+		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -228,7 +228,7 @@ func testRPCITLclTDirectedRPC(t *testing.T) {
 
 // Connect rpc client to rater
 func testRPCITLclRpcConnPoolBcast(t *testing.T) {
-	rpcPoolBroadcast = rpcclient.NewRPCPool(rpcclient.PoolBroadcast, time.Duration(2*time.Second))
+	rpcPoolBroadcast = rpcclient.NewRPCPool(rpcclient.PoolBroadcast, 2*time.Second)
 	rpcPoolBroadcast.AddClient(rpcRAL1)
 	rpcPoolBroadcast.AddClient(rpcRAL2)
 }
@@ -353,13 +353,13 @@ func TestRPCITRmtRpcConnPool(t *testing.T) {
 	}
 	rpcPoolFirst = rpcclient.NewRPCPool(rpcclient.PoolFirst, 0)
 	rpcRALRmt, err := rpcclient.NewRPCClient(utils.TCP, RemoteRALsAddr1, false, "", "", "", 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
+		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	rpcPoolFirst.AddClient(rpcRALRmt)
 	rpcRAL1, err = rpcclient.NewRPCClient(utils.TCP, RemoteRALsAddr2, false, "", "", "", 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
+		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -391,7 +391,7 @@ func TestRPCITRmtStatusFirstFailover(t *testing.T) {
 	remaining := 5
 	for i := 0; i < remaining; i++ {
 		fmt.Printf("\n\t%d", remaining-i)
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Second)
 	}
 	fmt.Println("\n\nExecuting query ...")
 	var status map[string]interface{}
@@ -419,7 +419,7 @@ func TestRPCITRmtStatusFirstFailback(t *testing.T) {
 	remaining := 10
 	for i := 0; i < remaining; i++ {
 		fmt.Printf("\n\t%d", remaining-i)
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Second)
 	}
 	fmt.Println("\n\nExecuting query ...")
 	var status map[string]interface{}

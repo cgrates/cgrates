@@ -21,7 +21,6 @@ import (
 	"reflect"
 	"sort"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -104,19 +103,19 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		AttrSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
 		ReplicationConns:    []string{"*conn1"},
-		DebitInterval:       time.Duration(2),
+		DebitInterval:       2,
 		StoreSCosts:         true,
-		SessionTTL:          time.Duration(0),
+		SessionTTL:          0,
 		SessionIndexes:      utils.StringMap{},
 		ClientProtocol:      2.5,
-		ChannelSyncInterval: time.Duration(10),
+		ChannelSyncInterval: 10,
 		TerminateAttempts:   6,
 		AlterableFields:     utils.StringSet{},
-		MinDurLowBalance:    time.Duration(1),
+		MinDurLowBalance:    1,
 		SchedulerConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.META_ANY: {}},
-			PayloadMaxduration: time.Duration(-1),
+			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "randomPath",
 			PublicKeyPath:      "randomPath",
@@ -246,19 +245,19 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		AttrSConns:          []string{},
 		CDRsConns:           []string{},
 		ReplicationConns:    []string{},
-		DebitInterval:       time.Duration(0),
+		DebitInterval:       0,
 		StoreSCosts:         false,
-		SessionTTL:          time.Duration(0),
+		SessionTTL:          0,
 		SessionIndexes:      utils.StringMap{},
 		ClientProtocol:      1.0,
-		ChannelSyncInterval: time.Duration(0),
+		ChannelSyncInterval: 0,
 		TerminateAttempts:   5,
 		AlterableFields:     utils.StringSet{},
-		MinDurLowBalance:    time.Duration(0),
+		MinDurLowBalance:    0,
 		SchedulerConns:      []string{},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.META_ANY: {}},
-			PayloadMaxduration: time.Duration(-1),
+			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "",
 			PublicKeyPath:      "",
@@ -471,7 +470,7 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		LowBalanceAnnFile:   "randomFile",
 		EmptyBalanceAnnFile: "randomEmptyFile",
 		EmptyBalanceContext: "randomEmptyContext",
-		MaxWaitConnection:   time.Duration(2),
+		MaxWaitConnection:   2,
 		ExtraFields:         RSRParsers{},
 		EventSocketConns: []*FsConnCfg{
 			{

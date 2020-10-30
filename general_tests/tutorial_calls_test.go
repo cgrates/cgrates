@@ -376,7 +376,7 @@ func testCallStartPjsuaListener(t *testing.T) {
 func testCallCall1001To1002(t *testing.T) {
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1002@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(67)*time.Second, 5071); err != nil {
+		"sip:1002@127.0.0.1", "sip:127.0.0.1:5080", 67*time.Second, 5071); err != nil {
 		t.Fatal(err)
 	}
 	// give time to session to start so we can check it
@@ -420,7 +420,7 @@ func testCallGetActiveSessions(t *testing.T) {
 func testCallCall1002To1001(t *testing.T) {
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "CGRateS.org", Realm: "*"},
-		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(65)*time.Second, 5072); err != nil {
+		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", 65*time.Second, 5072); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -483,7 +483,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		}
 	}
 	// Allow calls to finish before start querying the results
-	time.Sleep(time.Duration(50) * time.Second)
+	time.Sleep(50 * time.Second)
 }
 
 // Make sure account was debited properly
@@ -710,16 +710,16 @@ func testCallSyncSessions(t *testing.T) {
 	// 1001 call 1002 stop the call after 12 seconds
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1002@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(120)*time.Second, 5076); err != nil {
+		"sip:1002@127.0.0.1", "sip:127.0.0.1:5080", 120*time.Second, 5076); err != nil {
 		t.Fatal(err)
 	}
 	// 1001 call 1003 stop the call after 11 seconds
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1003@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(120)*time.Second, 5077); err != nil {
+		"sip:1003@127.0.0.1", "sip:127.0.0.1:5080", 120*time.Second, 5077); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 	// get active sessions
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
 		nil, &reply); err != nil {
@@ -807,16 +807,16 @@ func testCallSyncSessions(t *testing.T) {
 		t.Fatal("Unexpected number of CDRs returned: ", len(rplCdrs), utils.ToJSON(rplCdrs))
 	} else if time1, err := utils.ParseDurationWithSecs(rplCdrs[0].Usage); err != nil {
 		t.Error(err)
-	} else if time1 > time.Duration(15*time.Second) {
+	} else if time1 > 15*time.Second {
 		t.Error("Unexpected time duration : ", time1)
 	} else if time1, err := utils.ParseDurationWithSecs(rplCdrs[1].Usage); err != nil {
 		t.Error(err)
-	} else if time1 > time.Duration(15*time.Second) {
+	} else if time1 > 15*time.Second {
 		t.Error("Unexpected time duration : ", time1)
 	} else if numberOfCDR == 3 {
 		if time1, err := utils.ParseDurationWithSecs(rplCdrs[2].Usage); err != nil {
 			t.Error(err)
-		} else if time1 > time.Duration(15*time.Second) {
+		} else if time1 > 15*time.Second {
 			t.Error("Unexpected time duration : ", time1)
 		}
 	}

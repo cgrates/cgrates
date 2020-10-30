@@ -150,7 +150,7 @@ func TestStatRemExpired(t *testing.T) {
 		SQItems: []SQItem{
 			{"cgrates.org:TestStatRemExpired_1", utils.TimePointer(time.Now())},
 			{"cgrates.org:TestStatRemExpired_2", utils.TimePointer(time.Now())},
-			{"cgrates.org:TestStatRemExpired_3", utils.TimePointer(time.Now().Add(time.Duration(time.Minute)))},
+			{"cgrates.org:TestStatRemExpired_3", utils.TimePointer(time.Now().Add(time.Minute))},
 		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
@@ -250,7 +250,7 @@ func TestStatRemOnQueueLength2(t *testing.T) {
 			utils.MetaTCD: &StatTCD{
 				FilterIDs: []string{"*string:~*req.Account:1002"},
 				Events: map[string]*DurationWithCompress{
-					"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+					"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
 				},
 			},
 			utils.MetaASR: &StatASR{
@@ -336,7 +336,7 @@ func TestStatCompress2(t *testing.T) {
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
 			"cgrates.org:TestStatRemExpired_3": {Duration: 2 * time.Minute, CompressFactor: 1},
 		},
 	}
@@ -344,7 +344,7 @@ func TestStatCompress2(t *testing.T) {
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Duration: 1*time.Minute + 30*time.Second, CompressFactor: 2},
+			"cgrates.org:TestStatRemExpired_4": {Duration: time.Minute + 30*time.Second, CompressFactor: 2},
 		},
 	}
 	sqItems := []SQItem{
@@ -404,7 +404,7 @@ func TestStatCompress3(t *testing.T) {
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
 			"cgrates.org:TestStatRemExpired_3": {Duration: 2 * time.Minute, CompressFactor: 1},
 		},
 	}
@@ -412,7 +412,7 @@ func TestStatCompress3(t *testing.T) {
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
 			"cgrates.org:TestStatRemExpired_3": {Duration: 2 * time.Minute, CompressFactor: 1},
 		},
 	}
@@ -511,14 +511,14 @@ func TestStatExpand2(t *testing.T) {
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Duration: 1*time.Minute + 30*time.Second, CompressFactor: 2},
+			"cgrates.org:TestStatRemExpired_4": {Duration: time.Minute + 30*time.Second, CompressFactor: 2},
 		},
 	}
 	tcd := &StatTCD{
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Duration: 1*time.Minute + 30*time.Second, CompressFactor: 2},
+			"cgrates.org:TestStatRemExpired_4": {Duration: time.Minute + 30*time.Second, CompressFactor: 2},
 		},
 	}
 	expectedSqItems := []SQItem{
@@ -570,7 +570,7 @@ func TestStatExpand3(t *testing.T) {
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
 			"cgrates.org:TestStatRemExpired_4": {Duration: 2 * time.Minute, CompressFactor: 1},
 		},
 	}
@@ -578,7 +578,7 @@ func TestStatExpand3(t *testing.T) {
 		Sum:   3 * time.Minute,
 		Count: 2,
 		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": {Duration: 1 * time.Minute, CompressFactor: 1},
+			"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
 			"cgrates.org:TestStatRemExpired_4": {Duration: 2 * time.Minute, CompressFactor: 1},
 		},
 	}
@@ -617,7 +617,7 @@ func TestStatExpand3(t *testing.T) {
 
 func TestStatRemoveExpiredTTL(t *testing.T) {
 	sq = &StatQueue{
-		ttl: utils.DurationPointer(time.Duration(100 * time.Millisecond)),
+		ttl: utils.DurationPointer(100 * time.Millisecond),
 		SQMetrics: map[string]StatMetric{
 			utils.MetaASR: &StatASR{
 				Answered: 1,

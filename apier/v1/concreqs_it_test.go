@@ -126,7 +126,7 @@ func testConcReqsBusyAPIs(t *testing.T) {
 		go func() {
 			var resp string
 			if err := concReqsRPC.Call(utils.CoreSv1Sleep,
-				&utils.DurationArgs{DurationTime: time.Duration(10 * time.Millisecond)},
+				&utils.DurationArgs{DurationTime: 10 * time.Millisecond},
 				&resp); err != nil {
 				lock.Lock()
 				failedAPIs++
@@ -153,7 +153,7 @@ func testConcReqsQueueAPIs(t *testing.T) {
 		go func() {
 			var resp string
 			if err := concReqsRPC.Call(utils.CoreSv1Sleep,
-				&utils.DurationArgs{DurationTime: time.Duration(10 * time.Millisecond)},
+				&utils.DurationArgs{DurationTime: 10 * time.Millisecond},
 				&resp); err != nil {
 				wg.Done()
 				t.Error(err)
@@ -236,7 +236,7 @@ func testConcReqsOnBiJSONBusy(t *testing.T) {
 		go func() {
 			var resp string
 			if err := concReqsBiRPC.Call(utils.SessionSv1Sleep,
-				&utils.DurationArgs{DurationTime: time.Duration(10 * time.Millisecond)},
+				&utils.DurationArgs{DurationTime: 10 * time.Millisecond},
 				&resp); err != nil {
 				lock.Lock()
 				failedAPIs++
@@ -263,7 +263,7 @@ func testConcReqsOnBiJSONQueue(t *testing.T) {
 		go func() {
 			var resp string
 			if err := concReqsBiRPC.Call(utils.SessionSv1Sleep,
-				&utils.DurationArgs{DurationTime: time.Duration(10 * time.Millisecond)},
+				&utils.DurationArgs{DurationTime: 10 * time.Millisecond},
 				&resp); err != nil {
 				wg.Done()
 				t.Error(err)

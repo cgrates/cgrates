@@ -200,7 +200,7 @@ func testSesItTerminateSession(t *testing.T) {
 					utils.Destination: "TEST",
 					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:       1 * time.Second,
+					utils.Usage:       time.Second,
 				},
 			},
 		},

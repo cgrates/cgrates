@@ -21,7 +21,6 @@ package ers
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -55,7 +54,7 @@ func TestERsAddReader(t *testing.T) {
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = utils.MetaFileCSV
 	reader.ID = "file_reader"
-	reader.RunDelay = time.Duration(0)
+	reader.RunDelay = 0
 	cfg.ERsCfg().Readers = append(cfg.ERsCfg().Readers, reader)
 	if len(cfg.ERsCfg().Readers) != 2 {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))

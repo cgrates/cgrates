@@ -55,11 +55,11 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 		RpSubjectPrefixMatching: true,
 		RemoveExpired:           true,
 		MaxComputedUsage: map[string]time.Duration{
-			utils.ANY:   time.Duration(189 * time.Hour),
-			utils.VOICE: time.Duration(72 * time.Hour),
-			utils.DATA:  time.Duration(107374182400),
-			utils.SMS:   time.Duration(5000),
-			utils.MMS:   time.Duration(10000),
+			utils.ANY:   189 * time.Hour,
+			utils.VOICE: 72 * time.Hour,
+			utils.DATA:  107374182400,
+			utils.SMS:   5000,
+			utils.MMS:   10000,
 		},
 		MaxIncrements: 1000000,
 		BalanceRatingSubject: map[string]string{

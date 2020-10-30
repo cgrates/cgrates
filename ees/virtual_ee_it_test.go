@@ -118,7 +118,7 @@ func testVirtExportSupplierEvent(t *testing.T) {
 					utils.Destination: "1002",
 					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(10) * time.Second,
+					utils.Usage:       10 * time.Second,
 					utils.RunID:       "SupplierRun",
 					utils.Cost:        1.23,
 				},
@@ -156,7 +156,7 @@ func testVirtExportEvents(t *testing.T) {
 					utils.Destination: "1002",
 					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
 					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-					utils.Usage:       time.Duration(10) * time.Second,
+					utils.Usage:       10 * time.Second,
 					utils.RunID:       "SupplierRun",
 					utils.Cost:        1.01,
 				},
@@ -170,7 +170,7 @@ func testVirtExportEvents(t *testing.T) {
 	if err := virtRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 }
 
 func testVirtVerifyExports(t *testing.T) {

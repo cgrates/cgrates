@@ -141,7 +141,7 @@ func testV1FltrAddStats(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:    "1001",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(11 * time.Second),
+					utils.Usage:      11 * time.Second,
 					utils.COST:       10.0,
 				},
 			},
@@ -160,7 +160,7 @@ func testV1FltrAddStats(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Account:    "1001",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(11 * time.Second),
+			utils.Usage:      11 * time.Second,
 			utils.COST:       10.5,
 		},
 	}
@@ -177,7 +177,7 @@ func testV1FltrAddStats(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Account:    "1002",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(5 * time.Second),
+			utils.Usage:      5 * time.Second,
 			utils.COST:       12.5,
 		},
 	}
@@ -194,7 +194,7 @@ func testV1FltrAddStats(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Account:    "1002",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(6 * time.Second),
+			utils.Usage:      6 * time.Second,
 			utils.COST:       17.5,
 		},
 	}
@@ -211,7 +211,7 @@ func testV1FltrAddStats(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Account:    "1003",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(11 * time.Second),
+			utils.Usage:      11 * time.Second,
 			utils.COST:       12.5,
 		},
 	}
@@ -228,9 +228,9 @@ func testV1FltrAddStats(t *testing.T) {
 		Event: map[string]interface{}{
 			"Stat":           "Stat1_1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(11 * time.Second),
+			utils.Usage:      11 * time.Second,
 			utils.COST:       12.5,
-			utils.PDD:        time.Duration(12 * time.Second),
+			utils.PDD:        12 * time.Second,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -246,9 +246,9 @@ func testV1FltrAddStats(t *testing.T) {
 		Event: map[string]interface{}{
 			"Stat":           "Stat1_1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(15 * time.Second),
+			utils.Usage:      15 * time.Second,
 			utils.COST:       15.5,
-			utils.PDD:        time.Duration(15 * time.Second),
+			utils.PDD:        15 * time.Second,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -303,7 +303,7 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(1 * time.Millisecond),
+			MinSleep:  time.Millisecond,
 			Weight:    10.0,
 			ActionIDs: []string{"LOG"},
 			Async:     true,
@@ -379,7 +379,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(1 * time.Millisecond),
+			MinSleep:  time.Millisecond,
 			Weight:    10.0,
 			ActionIDs: []string{"LOG"},
 		},
@@ -412,7 +412,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	rlsConfig := &engine.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResTest",
-		UsageTTL:          time.Duration(1) * time.Minute,
+		UsageTTL:          time.Minute,
 		Limit:             10,
 		AllocationMessage: "MessageAllocation",
 		Stored:            true,
@@ -482,7 +482,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 			ID:        "TH_ResTest",
 			FilterIDs: []string{"FLTR_TH_Resource", "*string:~*req.Account:2020"},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(1 * time.Millisecond),
+			MinSleep:  time.Millisecond,
 			Weight:    10.0,
 			ActionIDs: []string{"LOG"},
 			Async:     true,
@@ -602,7 +602,7 @@ func testV1FltrAccounts(t *testing.T) {
 			ID:        "TH_Account",
 			FilterIDs: []string{"FLTR_TH_Accounts", "*string:~*req.Account:1001"},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(1 * time.Millisecond),
+			MinSleep:  time.Millisecond,
 			Weight:    90.0,
 			ActionIDs: []string{"LOG"},
 			Async:     true,
@@ -692,7 +692,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 			ID:        "TH_AccountDinamic",
 			FilterIDs: []string{"*exists:~*accounts.<~*req.Account>:"},
 			MaxHits:   -1,
-			MinSleep:  time.Duration(1 * time.Millisecond),
+			MinSleep:  time.Millisecond,
 			Weight:    90.0,
 			ActionIDs: []string{"LOG"},
 			Async:     true,

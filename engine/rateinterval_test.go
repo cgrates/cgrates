@@ -387,13 +387,13 @@ func TestRateIntervalCost(t *testing.T) {
 func TestRateGroupsEquals(t *testing.T) {
 	rg1 := RateGroups{
 		&RGRate{
-			GroupIntervalStart: time.Duration(0),
+			GroupIntervalStart: 0,
 			Value:              0.1,
 			RateIncrement:      time.Minute,
 			RateUnit:           60 * time.Second,
 		},
 		&RGRate{
-			GroupIntervalStart: time.Duration(60 * time.Second),
+			GroupIntervalStart: 60 * time.Second,
 			Value:              0.05,
 			RateIncrement:      time.Second,
 			RateUnit:           time.Second,
@@ -401,13 +401,13 @@ func TestRateGroupsEquals(t *testing.T) {
 	}
 	rg2 := RateGroups{
 		&RGRate{
-			GroupIntervalStart: time.Duration(0),
+			GroupIntervalStart: 0,
 			Value:              0.1,
 			RateIncrement:      time.Minute,
 			RateUnit:           60 * time.Second,
 		},
 		&RGRate{
-			GroupIntervalStart: time.Duration(60 * time.Second),
+			GroupIntervalStart: 60 * time.Second,
 			Value:              0.05,
 			RateIncrement:      time.Second,
 			RateUnit:           time.Second,
@@ -418,13 +418,13 @@ func TestRateGroupsEquals(t *testing.T) {
 	}
 	rg2 = RateGroups{
 		&RGRate{
-			GroupIntervalStart: time.Duration(0),
+			GroupIntervalStart: 0,
 			Value:              0.1,
 			RateIncrement:      time.Minute,
 			RateUnit:           60 * time.Second,
 		},
 		&RGRate{
-			GroupIntervalStart: time.Duration(60 * time.Second),
+			GroupIntervalStart: 60 * time.Second,
 			Value:              0.3,
 			RateIncrement:      time.Second,
 			RateUnit:           time.Second,
@@ -435,7 +435,7 @@ func TestRateGroupsEquals(t *testing.T) {
 	}
 	rg2 = RateGroups{
 		&RGRate{
-			GroupIntervalStart: time.Duration(0),
+			GroupIntervalStart: 0,
 			Value:              0.1,
 			RateIncrement:      time.Minute,
 			RateUnit:           60 * time.Second,
@@ -534,10 +534,10 @@ func TestRIRateClone(t *testing.T) {
 		MaxCostStrategy:  "MaxCostStrategy_test",
 		Rates: RateGroups{
 			&RGRate{
-				GroupIntervalStart: time.Duration(10),
+				GroupIntervalStart: 10,
 				Value:              0.7,
-				RateIncrement:      time.Duration(10),
-				RateUnit:           time.Duration(10),
+				RateIncrement:      10,
+				RateUnit:           10,
 			},
 		},
 	}
@@ -549,10 +549,10 @@ func TestRIRateClone(t *testing.T) {
 		MaxCostStrategy:  "MaxCostStrategy_test",
 		Rates: RateGroups{
 			&RGRate{
-				GroupIntervalStart: time.Duration(10),
+				GroupIntervalStart: 10,
 				Value:              0.7,
-				RateIncrement:      time.Duration(10),
-				RateUnit:           time.Duration(10),
+				RateIncrement:      10,
+				RateUnit:           10,
 			},
 		},
 	}
@@ -560,8 +560,8 @@ func TestRIRateClone(t *testing.T) {
 	if !reflect.DeepEqual(cln, *cloned) {
 		t.Errorf("Expecting: %+v, received: %+v", cln, *cloned)
 	}
-	rit.Rates[0].GroupIntervalStart = time.Duration(7)
-	if cloned.Rates[0].GroupIntervalStart != time.Duration(10) {
+	rit.Rates[0].GroupIntervalStart = 7
+	if cloned.Rates[0].GroupIntervalStart != 10 {
 		t.Errorf("\nExpecting: 10,\n received: %+v", cloned.Rates[0].GroupIntervalStart)
 	}
 }

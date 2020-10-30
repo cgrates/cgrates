@@ -97,7 +97,7 @@ func testDspRALsGetRatingPlanCost(t *testing.T) {
 		t.Error("Unexpected RatingPlanID: ", reply.RatingPlanID)
 	} else if *reply.EventCost.Cost != 6.5118 {
 		t.Error("Unexpected Cost: ", *reply.EventCost.Cost)
-	} else if *reply.EventCost.Usage != time.Duration(time.Hour) {
+	} else if *reply.EventCost.Usage != time.Hour {
 		t.Error("Unexpected Usage: ", *reply.EventCost.Usage)
 	}
 }

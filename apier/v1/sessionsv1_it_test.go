@@ -410,7 +410,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 }
 
 func testSSv1ItInitiateSessionWithDigest(t *testing.T) {
-	initUsage := time.Duration(5 * time.Minute)
+	initUsage := 5 * time.Minute
 	args := &sessions.V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,

@@ -181,7 +181,7 @@ func testSessionCostITMigrate(t *testing.T) {
 		OriginID:    "dsafdsaf",
 		OriginHost:  "192.168.1.1",
 		RunID:       utils.MetaDefault,
-		Usage:       time.Duration(10),
+		Usage:       10,
 		CostSource:  utils.MetaSessionS,
 		CostDetails: cc,
 	}

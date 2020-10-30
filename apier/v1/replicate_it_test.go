@@ -438,7 +438,7 @@ func testInternalReplicateITStatQueueProfile(t *testing.T) {
 				ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 10,
-			TTL:         time.Duration(10) * time.Second,
+			TTL:         10 * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: "*sum",
@@ -784,7 +784,7 @@ func testInternalReplicateITResourceProfile(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			UsageTTL:          time.Duration(1) * time.Nanosecond,
+			UsageTTL:          time.Nanosecond,
 			Limit:             10,
 			AllocationMessage: "MessageAllocation",
 			Blocker:           true,
@@ -1026,7 +1026,7 @@ func testInternalReplicateITThresholdProfile(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			MaxHits:   1,
-			MinSleep:  time.Duration(5 * time.Minute),
+			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
 			ActionIDs: []string{"ACT_1", "ACT_2"},
@@ -1373,16 +1373,16 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 						ActivationTimes: "* * * * 1-5",
 						IntervalRates: []*engine.IntervalRate{
 							{
-								IntervalStart: time.Duration(0 * time.Second),
+								IntervalStart: 0,
 								Value:         0.12,
-								Unit:          time.Duration(1 * time.Minute),
-								Increment:     time.Duration(1 * time.Minute),
+								Unit:          time.Minute,
+								Increment:     time.Minute,
 							},
 							{
-								IntervalStart: time.Duration(1 * time.Minute),
+								IntervalStart: time.Minute,
 								Value:         0.06,
-								Unit:          time.Duration(1 * time.Minute),
-								Increment:     time.Duration(1 * time.Second),
+								Unit:          time.Minute,
+								Increment:     time.Second,
 							},
 						},
 					},
@@ -1392,10 +1392,10 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 						ActivationTimes: "* * * * 0,6",
 						IntervalRates: []*engine.IntervalRate{
 							{
-								IntervalStart: time.Duration(0 * time.Second),
+								IntervalStart: 0,
 								Value:         0.06,
-								Unit:          time.Duration(1 * time.Minute),
-								Increment:     time.Duration(1 * time.Second),
+								Unit:          time.Minute,
+								Increment:     time.Second,
 							},
 						},
 					},
@@ -1405,10 +1405,10 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 						ActivationTimes: "* * 24 12 *",
 						IntervalRates: []*engine.IntervalRate{
 							{
-								IntervalStart: time.Duration(0 * time.Second),
+								IntervalStart: 0,
 								Value:         0.06,
-								Unit:          time.Duration(1 * time.Minute),
-								Increment:     time.Duration(1 * time.Second),
+								Unit:          time.Minute,
+								Increment:     time.Second,
 							},
 						},
 					},

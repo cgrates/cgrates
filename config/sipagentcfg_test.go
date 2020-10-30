@@ -67,7 +67,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		ListenNet:           "udp",
 		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		Timezone:            "local",
-		RetransmissionTimer: time.Duration(1),
+		RetransmissionTimer: 1,
 		Templates: map[string][]*FCTemplate{
 			utils.TemplatesCfg: {
 				{
@@ -311,7 +311,7 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 		utils.ListenNetCfg:           "udp",
 		utils.SessionSConnsCfg:       []string{"*conn1", "*conn2"},
 		utils.TimezoneCfg:            "",
-		utils.RetransmissionTimerCfg: 1 * time.Second,
+		utils.RetransmissionTimerCfg: time.Second,
 		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
 				utils.IdCfg:            "Register",

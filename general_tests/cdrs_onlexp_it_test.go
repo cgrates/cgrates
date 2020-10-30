@@ -166,7 +166,7 @@ func testCDRsOnExpAMQPQueuesCreation(t *testing.T) {
 func testCDRsOnExpInitMasterRPC(t *testing.T) {
 	var err error
 	cdrsMasterRpc, err = rpcclient.NewRPCClient(utils.TCP, cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
+		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -209,7 +209,7 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 		Destination: "1002",
 		SetupTime:   time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage:       time.Duration(10) * time.Second,
+		Usage:       10 * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		RunID:       utils.MetaDefault,
 		Cost:        1.201,
@@ -257,7 +257,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 		Destination: "1002",
 		SetupTime:   time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage:       time.Duration(10) * time.Second,
+		Usage:       10 * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		RunID:       utils.MetaDefault,
 		Cost:        1.201,
@@ -275,7 +275,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	cdrsSlaveRpc, err := rpcclient.NewRPCClient(utils.TCP, "127.0.0.1:12012", false, "", "", "", 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
+		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -337,7 +337,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		if rcvCDR[utils.CGRID] != httpCGRID {
 			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
 		}
-	case <-time.After(time.Duration(100 * time.Millisecond)):
+	case <-time.After(100 * time.Millisecond):
 		t.Error("No message received from RabbitMQ")
 	}
 	if msgs, err = ch.Consume("queue1", "consumer", true, false, false, false, nil); err != nil {
@@ -353,7 +353,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		if rcvCDR[utils.CGRID] != httpCGRID {
 			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
 		}
-	case <-time.After(time.Duration(100 * time.Millisecond)):
+	case <-time.After(100 * time.Millisecond):
 		t.Error("No message received from RabbitMQ")
 	}
 	conn.Close()
@@ -377,7 +377,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		Destination: "1002",
 		SetupTime:   time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage:       time.Duration(10) * time.Second,
+		Usage:       10 * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		RunID:       utils.MetaDefault,
 		Cost:        1.201,
@@ -539,7 +539,7 @@ func testCdrsHttpCdrReplication2(t *testing.T) {
 			ToR: utils.VOICE, OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_PSEUDOPREPAID,
 			Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 			SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
+			Usage: 10 * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 		cdrs = append(cdrs, cdr)
 	}
 	var reply string

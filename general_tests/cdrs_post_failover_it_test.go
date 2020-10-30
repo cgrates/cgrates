@@ -148,7 +148,7 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 					utils.Subject:     "ANY2CNT",
 					utils.Destination: "+4986517174963",
 					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1) * time.Minute,
+					utils.Usage:       time.Minute,
 					"field_extr1":     "val_extr1",
 					"fieldextr2":      "valextr2",
 				},
@@ -179,7 +179,7 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 }
 
 func testCDRsPostFailoverToFile(t *testing.T) {
-	time.Sleep(time.Duration(2 * time.Second))
+	time.Sleep(2 * time.Second)
 	filesInDir, _ := ioutil.ReadDir(cdrsPostFailCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsPostFailCfg.GeneralCfg().FailedPostsDir)

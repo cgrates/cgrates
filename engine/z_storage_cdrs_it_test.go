@@ -92,7 +92,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		Destination: "1007",
 		SetupTime:   time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC),
 		AnswerTime:  time.Date(2015, 12, 12, 14, 52, 20, 0, time.UTC),
-		Usage:       time.Duration(35) * time.Second,
+		Usage:       35 * time.Second,
 		ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "ExtraHeader2": "ExtraVal2"},
 		Cost:        -1,
 	}
@@ -119,7 +119,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		Destination: "1007",
 		SetupTime:   time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC),
 		AnswerTime:  time.Date(2015, 12, 12, 14, 52, 20, 0, time.UTC),
-		Usage:       time.Duration(35) * time.Second,
+		Usage:       35 * time.Second,
 		ExtraFields: map[string]string{"ExtraHeader1": "ExtraVal1", "ExtraHeader2": "ExtraVal2"},
 		CostSource:  "testSetCDRs",
 		Cost:        0.17,

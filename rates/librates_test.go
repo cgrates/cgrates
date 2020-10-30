@@ -34,7 +34,7 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 		Weight: 0,
 		IntervalRates: []*engine.IntervalRate{
 			{
-				IntervalStart: time.Duration(0),
+				IntervalStart: 0,
 			},
 		},
 	}
@@ -45,7 +45,7 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 		Weight:          50,
 		IntervalRates: []*engine.IntervalRate{
 			{
-				IntervalStart: time.Duration(0),
+				IntervalStart: 0,
 			},
 		},
 	}
@@ -53,13 +53,13 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 	allRts := []*engine.Rate{rt0, rtChristmas}
 	expOrdered := []*orderedRate{
 		{
-			time.Duration(0),
+			0,
 			rt0,
 		},
 	}
 
 	sTime := time.Date(2020, time.June, 28, 18, 56, 05, 0, time.UTC)
-	usage := time.Duration(2 * time.Minute)
+	usage := 2 * time.Minute
 	if ordRts, err := orderRatesOnIntervals(
 		allRts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
@@ -70,16 +70,16 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 
 	expOrdered = []*orderedRate{
 		{
-			time.Duration(0),
+			0,
 			rt0,
 		},
 		{
-			time.Duration(55 * time.Second),
+			55 * time.Second,
 			rtChristmas,
 		},
 	}
 	sTime = time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
-	usage = time.Duration(2 * time.Minute)
+	usage = 2 * time.Minute
 	if ordRts, err := orderRatesOnIntervals(
 		allRts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
@@ -90,20 +90,20 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 
 	expOrdered = []*orderedRate{
 		{
-			time.Duration(0),
+			0,
 			rt0,
 		},
 		{
-			time.Duration(55 * time.Second),
+			55 * time.Second,
 			rtChristmas,
 		},
 		{
-			time.Duration(86455 * time.Second),
+			86455 * time.Second,
 			rt0,
 		},
 	}
 	sTime = time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
-	usage = time.Duration(25 * time.Hour)
+	usage = 25 * time.Hour
 	if ordRts, err := orderRatesOnIntervals(
 		allRts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
@@ -115,7 +115,7 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 	rts := []*engine.Rate{rtChristmas}
 	expOrdered = nil
 	sTime = time.Date(2020, time.December, 25, 23, 59, 05, 0, time.UTC)
-	usage = time.Duration(2 * time.Minute)
+	usage = 2 * time.Minute
 	if ordRts, err := orderRatesOnIntervals(
 		rts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
@@ -307,14 +307,14 @@ func TestOrderRatesOnIntervalsEveryTwentyFiveMins(t *testing.T) {
 		}
 	}
 	sTime := time.Date(2020, 10, 28, 20, 0, 0, 0, time.UTC)
-	usage := 1 * time.Hour
+	usage := time.Hour
 	expected := []*orderedRate{
 		{
 			0,
 			rtTwentyFiveMins,
 		},
 		{
-			1 * time.Minute,
+			time.Minute,
 			rt1,
 		},
 		{
@@ -379,7 +379,7 @@ func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
 		}
 	}
 	sTime := time.Date(2020, 10, 28, 20, 0, 0, 0, time.UTC)
-	usage := 1 * time.Hour
+	usage := time.Hour
 	expected := []*orderedRate{
 		{
 			0,
@@ -695,7 +695,7 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 	usage := 25 * time.Hour
 	expected := []*orderedRate{
 		{
-			1 * time.Hour,
+			time.Hour,
 			rtHalfDay1,
 		},
 		{
@@ -753,7 +753,7 @@ func TestOrderRateOnIntervalsEvery1Hour30Mins(t *testing.T) {
 			rateEvery30Mins,
 		},
 		{
-			1 * time.Minute,
+			time.Minute,
 			rateEvery1H,
 		},
 		{
@@ -952,14 +952,14 @@ func TestOrderRatesOnIntervalsEvenOddMinutes(t *testing.T) {
 		}
 	}
 	sTime := time.Date(2020, 12, 23, 22, 0, 0, 0, time.UTC)
-	usage := 5*time.Minute + 1*time.Second
+	usage := 5*time.Minute + time.Second
 	expected := []*orderedRate{
 		{
 			0,
 			rtEvenMinutes,
 		},
 		{
-			1 * time.Minute,
+			time.Minute,
 			rtOddMInutes,
 		},
 		{
@@ -1109,7 +1109,7 @@ func TestOrderOnRatesIntervalsEveryTwoHours(t *testing.T) {
 			rt1,
 		},
 		{
-			1*time.Hour + 50*time.Minute,
+			time.Hour + 50*time.Minute,
 			rtEvTwoHours,
 		},
 		{
@@ -1230,7 +1230,7 @@ func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
 	usage := 11 * time.Hour
 	expected := []*orderedRate{
 		{
-			1 * time.Hour,
+			time.Hour,
 			rtRestricted,
 		},
 		{
@@ -1421,7 +1421,7 @@ func TestOrderRatesOnIntervalCaseMaxIterations(t *testing.T) {
 		ActivationTimes: "1 * * * *",
 		IntervalRates: []*engine.IntervalRate{
 			{
-				IntervalStart: time.Duration(0),
+				IntervalStart: 0,
 			},
 		},
 	}
@@ -1444,7 +1444,7 @@ func TestOrderRatesOnIntervalIsDirectionFalse(t *testing.T) {
 		ActivationTimes: "* * 27 02 *",
 		IntervalRates: []*engine.IntervalRate{
 			{
-				IntervalStart: time.Duration(0),
+				IntervalStart: 0,
 			},
 		},
 	}
@@ -1454,7 +1454,7 @@ func TestOrderRatesOnIntervalIsDirectionFalse(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			time.Duration(0),
+			0,
 			rt1,
 		},
 	}
@@ -1478,7 +1478,7 @@ func TestOrderRatesOnIntervalWinnNill(t *testing.T) {
 		ActivationTimes: "* * 1 * *",
 		IntervalRates: []*engine.IntervalRate{
 			{
-				IntervalStart: time.Duration(0),
+				IntervalStart: 0,
 			},
 		},
 	}
@@ -1488,7 +1488,7 @@ func TestOrderRatesOnIntervalWinnNill(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			time.Duration(0),
+			0,
 			rt1,
 		},
 	}
@@ -1522,7 +1522,7 @@ func TestOrderRatesOnIntervalIntervalStartHigherThanEndIdx(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			time.Duration(0),
+			0,
 			rt1,
 		},
 	}
@@ -1557,7 +1557,7 @@ func TestOrderRatesOnIntervalStartLowerThanEndIdx(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			time.Duration(0),
+			0,
 			rt1,
 		},
 	}

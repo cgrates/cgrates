@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	expTimeRoutes = time.Now().Add(time.Duration(20 * time.Minute))
+	expTimeRoutes = time.Now().Add(20 * time.Minute)
 	routeService  *RouteService
 	dmSPP         *DataManager
 	sppTest       = RouteProfiles{
@@ -321,7 +321,7 @@ func TestRoutesAddFilters(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -343,7 +343,7 @@ func TestRoutesAddFilters(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,

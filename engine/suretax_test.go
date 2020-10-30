@@ -37,7 +37,7 @@ func TestNewSureTaxRequest(t *testing.T) {
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		RunID:       utils.MetaDefault,
-		Usage:       time.Duration(12) * time.Second,
+		Usage:       12 * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost:        1.01, PreRated: true,
 	}

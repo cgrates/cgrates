@@ -132,7 +132,7 @@ func testDspCDRsProcessEvent(t *testing.T) {
 					utils.Subject:     "1001",
 					utils.Destination: "1002",
 					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1) * time.Minute,
+					utils.Usage:       time.Minute,
 					"field_extr1":     "val_extr1",
 					"fieldextr2":      "valextr2",
 				},
@@ -227,7 +227,7 @@ func testDspCDRsProcessCDR(t *testing.T) {
 			Subject:     "1001",
 			Destination: "1002",
 			AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-			Usage:       time.Duration(2) * time.Minute,
+			Usage:       2 * time.Minute,
 		},
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
@@ -334,7 +334,7 @@ func testDspCDRsV2ProcessEvent(t *testing.T) {
 					utils.Subject:     "1001",
 					utils.Destination: "1002",
 					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1) * time.Minute,
+					utils.Usage:       time.Minute,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -386,7 +386,7 @@ func testDspCDRsV2StoreSessionCost(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond)
+	time.Sleep(150 * time.Millisecond)
 	if err := dispEngine.RPC.Call(utils.CDRsV2StoreSessionCost, args,
 		&reply); err == nil || err.Error() != "SERVER_ERROR: EXISTS" {
 		t.Error("Unexpected error: ", err)
@@ -426,7 +426,7 @@ func testDspCDRsProcessEventNoAuth(t *testing.T) {
 					utils.Subject:     "1001",
 					utils.Destination: "1002",
 					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1) * time.Minute,
+					utils.Usage:       time.Minute,
 					"field_extr1":     "val_extr1",
 					"fieldextr2":      "valextr2",
 				},
@@ -509,7 +509,7 @@ func testDspCDRsProcessCDRNoAuth(t *testing.T) {
 			Subject:     "1001",
 			Destination: "1002",
 			AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-			Usage:       time.Duration(2) * time.Minute,
+			Usage:       2 * time.Minute,
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CDRsV1ProcessCDR, args, &reply); err != nil {
@@ -604,7 +604,7 @@ func testDspCDRsV2ProcessEventNoAuth(t *testing.T) {
 					utils.Subject:     "1001",
 					utils.Destination: "1002",
 					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1) * time.Minute,
+					utils.Usage:       time.Minute,
 				},
 			},
 		},
@@ -650,7 +650,7 @@ func testDspCDRsV2StoreSessionCostNoAuth(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond)
+	time.Sleep(150 * time.Millisecond)
 	if err := dispEngine.RPC.Call(utils.CDRsV2StoreSessionCost, args,
 		&reply); err == nil || err.Error() != "SERVER_ERROR: EXISTS" {
 		t.Error("Unexpected error: ", err)

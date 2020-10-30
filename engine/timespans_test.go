@@ -92,7 +92,7 @@ func TestRightHourMargin(t *testing.T) {
 		t.Error("RateInterval not attached correctly")
 	}
 
-	if ts.GetDuration() != 29*time.Minute || nts.GetDuration() != 1*time.Minute {
+	if ts.GetDuration() != 29*time.Minute || nts.GetDuration() != time.Minute {
 		t.Error("Wrong durations.for RateIntervals", ts.GetDuration(), nts.GetDuration())
 	}
 	if ts.GetDuration().Seconds()+nts.GetDuration().Seconds() != oldDuration.Seconds() {
@@ -220,14 +220,14 @@ func TestTimespanGetCost(t *testing.T) {
 	ts1.SetRateInterval(
 		&RateInterval{
 			Timing: &RITiming{},
-			Rating: &RIRate{Rates: RateGroups{&RGRate{0, 1.0, 1 * time.Second, 1 * time.Second}}},
+			Rating: &RIRate{Rates: RateGroups{&RGRate{0, 1.0, time.Second, time.Second}}},
 		},
 	)
 	if ts1.CalculateCost() != 600 {
 		t.Error("Expected 10 got ", ts1.Cost)
 	}
 	ts1.RateInterval = nil
-	ts1.SetRateInterval(&RateInterval{Rating: &RIRate{Rates: RateGroups{&RGRate{0, 1.0, 1 * time.Second, 60 * time.Second}}}})
+	ts1.SetRateInterval(&RateInterval{Rating: &RIRate{Rates: RateGroups{&RGRate{0, 1.0, time.Second, 60 * time.Second}}}})
 	if ts1.CalculateCost() != 10 {
 		t.Error("Expected 6000 got ", ts1.Cost)
 	}
@@ -247,12 +247,12 @@ func TestTimespanGetCostIntervals(t *testing.T) {
 func TestSetRateInterval(t *testing.T) {
 	i1 := &RateInterval{
 		Timing: &RITiming{},
-		Rating: &RIRate{Rates: RateGroups{&RGRate{0, 1.0, 1 * time.Second, 1 * time.Second}}},
+		Rating: &RIRate{Rates: RateGroups{&RGRate{0, 1.0, time.Second, time.Second}}},
 	}
 	ts1 := TimeSpan{RateInterval: i1}
 	i2 := &RateInterval{
 		Timing: &RITiming{},
-		Rating: &RIRate{Rates: RateGroups{&RGRate{0, 2.0, 1 * time.Second, 1 * time.Second}}},
+		Rating: &RIRate{Rates: RateGroups{&RGRate{0, 2.0, time.Second, time.Second}}},
 	}
 	if !ts1.hasBetterRateIntervalThan(i2) {
 		ts1.SetRateInterval(i2)
@@ -273,7 +273,7 @@ func TestTimespanSplitGroupedRates(t *testing.T) {
 			EndTime: "17:59:00",
 		},
 		Rating: &RIRate{
-			Rates: RateGroups{&RGRate{0, 2, 1 * time.Second, 1 * time.Second}, &RGRate{900 * time.Second, 1, 1 * time.Second, 1 * time.Second}},
+			Rates: RateGroups{&RGRate{0, 2, time.Second, time.Second}, &RGRate{900 * time.Second, 1, time.Second, time.Second}},
 		},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
@@ -353,7 +353,7 @@ func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 		t.Error("Wrong costs: ", c1, c2)
 	}
 
-	if ts.GetDuration().Seconds() != 0.5*60 || nts.GetDuration().Seconds() != 1*60 {
+	if ts.GetDuration().Seconds() != 0.5*60 || nts.GetDuration().Seconds() != 60 {
 		t.Error("Wrong durations.for RateIntervals", ts.GetDuration().Seconds(), nts.GetDuration().Seconds())
 	}
 	if ts.GetDuration()+nts.GetDuration() != oldDuration+30*time.Second {
@@ -367,7 +367,7 @@ func TestTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
 			EndTime: "17:00:30",
 		},
 		Rating: &RIRate{
-			Rates: RateGroups{&RGRate{0, 2, 1 * time.Second, 1 * time.Second}, &RGRate{60 * time.Second, 1, 60 * time.Second, 1 * time.Second}},
+			Rates: RateGroups{&RGRate{0, 2, time.Second, time.Second}, &RGRate{60 * time.Second, 1, 60 * time.Second, time.Second}},
 		},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
@@ -404,7 +404,7 @@ func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 			EndTime: "17:03:30",
 		},
 		Rating: &RIRate{
-			Rates: RateGroups{&RGRate{0, 2, 1 * time.Second, 1 * time.Second}, &RGRate{60 * time.Second, 1, 1 * time.Second, 1 * time.Second}}},
+			Rates: RateGroups{&RGRate{0, 2, time.Second, time.Second}, &RGRate{60 * time.Second, 1, time.Second, time.Second}}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
@@ -481,7 +481,7 @@ func TestTimespanSplitMultipleGroup(t *testing.T) {
 			EndTime: "17:05:00",
 		},
 		Rating: &RIRate{
-			Rates: RateGroups{&RGRate{0, 2, 1 * time.Second, 1 * time.Second}, &RGRate{60 * time.Second, 1, 1 * time.Second, 1 * time.Second}, &RGRate{180 * time.Second, 1, 1 * time.Second, 1 * time.Second}}},
+			Rates: RateGroups{&RGRate{0, 2, time.Second, time.Second}, &RGRate{60 * time.Second, 1, time.Second, time.Second}, &RGRate{180 * time.Second, 1, time.Second, time.Second}}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
@@ -1709,7 +1709,7 @@ func TestCompressDecompress(t *testing.T) {
 			TimeStart:     time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC),
 			TimeEnd:       time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
 			Cost:          1.2,
-			DurationIndex: 1 * time.Minute,
+			DurationIndex: time.Minute,
 		},
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
@@ -1746,7 +1746,7 @@ func TestCompressDecompress(t *testing.T) {
 	if len(tss) != 4 ||
 		!tss[0].TimeStart.Equal(time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC)) ||
 		!tss[0].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
-		tss[0].DurationIndex != 1*time.Minute ||
+		tss[0].DurationIndex != time.Minute ||
 		tss[0].CompressFactor != 1 ||
 		tss[0].Cost != 1.2 ||
 		!tss[1].TimeStart.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
@@ -1778,7 +1778,7 @@ func TestDifferentCompressDecompress(t *testing.T) {
 			TimeEnd:       time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
 			RateInterval:  &RateInterval{Weight: 1},
 			Cost:          1.2,
-			DurationIndex: 1 * time.Minute,
+			DurationIndex: time.Minute,
 		},
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
@@ -1806,7 +1806,7 @@ func TestDifferentCompressDecompress(t *testing.T) {
 	if len(tss) != 3 ||
 		!tss[0].TimeStart.Equal(time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC)) ||
 		!tss[0].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
-		tss[0].DurationIndex != 1*time.Minute ||
+		tss[0].DurationIndex != time.Minute ||
 		tss[0].Cost != 1.2 ||
 		!tss[1].TimeStart.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
 		!tss[1].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC)) ||
@@ -1825,7 +1825,7 @@ func TestDifferentCompressDecompress(t *testing.T) {
 	if len(tss) != 4 ||
 		!tss[0].TimeStart.Equal(time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC)) ||
 		!tss[0].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
-		tss[0].DurationIndex != 1*time.Minute ||
+		tss[0].DurationIndex != time.Minute ||
 		tss[0].CompressFactor != 1 ||
 		tss[0].Cost != 1.2 ||
 		!tss[1].TimeStart.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
@@ -1867,7 +1867,7 @@ func TestMerge(t *testing.T) {
 			},
 		},
 		Cost:          3,
-		DurationIndex: 1 * time.Minute,
+		DurationIndex: time.Minute,
 		Increments: Increments{
 			&Increment{
 				Duration: time.Minute,
@@ -1978,13 +1978,13 @@ func TestIncrementClone(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(clone))
 	}
 	incr = &Increment{
-		Duration:       time.Duration(10),
+		Duration:       10,
 		Cost:           0.7,
 		CompressFactor: 10,
 		BalanceInfo:    &DebitInfo{AccountID: "AccountID_test"},
 	}
 	eOut = &Increment{
-		Duration:       time.Duration(10),
+		Duration:       10,
 		Cost:           0.7,
 		CompressFactor: 10,
 		BalanceInfo:    &DebitInfo{AccountID: "AccountID_test"},

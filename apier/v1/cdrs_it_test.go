@@ -178,7 +178,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 					utils.Account:     "testV1CDRsProcessEventWithRefund",
 					utils.Destination: "+4986517174963",
 					utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(3) * time.Minute,
+					utils.Usage:       3 * time.Minute,
 				},
 			},
 		},
@@ -228,7 +228,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 					utils.Account:     "testV1CDRsProcessEventWithRefund",
 					utils.Destination: "+4986517174963",
 					utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1) * time.Minute,
+					utils.Usage:       time.Minute,
 				},
 			},
 		},
@@ -285,25 +285,25 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 			RunID:      utils.MetaDefault,
 			OriginID:   "testV1CDRsRefundOutOfSessionCost",
 			CostSource: utils.MetaSessionS,
-			Usage:      time.Duration(3 * time.Minute),
+			Usage:      3 * time.Minute,
 			CostDetails: &engine.EventCost{
 				CGRID:     "test1",
 				RunID:     utils.MetaDefault,
 				StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
-				Usage:     utils.DurationPointer(time.Duration(3 * time.Minute)),
+				Usage:     utils.DurationPointer(3 * time.Minute),
 				Cost:      utils.Float64Pointer(2.3),
 				Charges: []*engine.ChargingInterval{
 					{
 						RatingID: "c1a5ab9",
 						Increments: []*engine.ChargingIncrement{
 							{
-								Usage:          time.Duration(2 * time.Minute),
+								Usage:          2 * time.Minute,
 								Cost:           2.0,
 								AccountingID:   "a012888",
 								CompressFactor: 1,
 							},
 							{
-								Usage:          time.Duration(1 * time.Second),
+								Usage:          time.Second,
 								Cost:           0.005,
 								AccountingID:   "44d6c02",
 								CompressFactor: 60,
@@ -349,10 +349,10 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 				Rates: engine.ChargedRates{
 					"ec1a177": engine.RateGroups{
 						&engine.RGRate{
-							GroupIntervalStart: time.Duration(0),
+							GroupIntervalStart: 0,
 							Value:              0.01,
-							RateIncrement:      time.Duration(1 * time.Minute),
-							RateUnit:           time.Duration(1 * time.Second)},
+							RateIncrement:      time.Minute,
+							RateUnit:           time.Second},
 					},
 				},
 			},
@@ -378,7 +378,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 					utils.Account:     "testV1CDRsRefundOutOfSessionCost",
 					utils.Destination: "+4986517174963",
 					utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(123) * time.Minute,
+					utils.Usage:       123 * time.Minute,
 				},
 			},
 		},
@@ -443,25 +443,25 @@ func testV1CDRsRefundCDR(t *testing.T) {
 					utils.Account:     "testV1CDRsRefundCDR",
 					utils.Destination: "+4986517174963",
 					utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(10) * time.Minute,
+					utils.Usage:       10 * time.Minute,
 					utils.CostDetails: &engine.EventCost{
 						CGRID:     "test1",
 						RunID:     utils.MetaDefault,
 						StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
-						Usage:     utils.DurationPointer(time.Duration(3 * time.Minute)),
+						Usage:     utils.DurationPointer(3 * time.Minute),
 						Cost:      utils.Float64Pointer(2.3),
 						Charges: []*engine.ChargingInterval{
 							{
 								RatingID: "c1a5ab9",
 								Increments: []*engine.ChargingIncrement{
 									{
-										Usage:          time.Duration(2 * time.Minute),
+										Usage:          2 * time.Minute,
 										Cost:           2.0,
 										AccountingID:   "a012888",
 										CompressFactor: 1,
 									},
 									{
-										Usage:          time.Duration(1 * time.Second),
+										Usage:          time.Second,
 										Cost:           0.005,
 										AccountingID:   "44d6c02",
 										CompressFactor: 60,
@@ -507,10 +507,10 @@ func testV1CDRsRefundCDR(t *testing.T) {
 						Rates: engine.ChargedRates{
 							"ec1a177": engine.RateGroups{
 								&engine.RGRate{
-									GroupIntervalStart: time.Duration(0),
+									GroupIntervalStart: 0,
 									Value:              0.01,
-									RateIncrement:      time.Duration(1 * time.Minute),
-									RateUnit:           time.Duration(1 * time.Second)},
+									RateIncrement:      time.Minute,
+									RateUnit:           time.Second},
 							},
 						},
 					},
@@ -603,7 +603,7 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 					utils.Account:     "testV1CDRsAddBalanceForSMS",
 					utils.Destination: "+4986517174963",
 					utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1),
+					utils.Usage:       1,
 				},
 			},
 		},

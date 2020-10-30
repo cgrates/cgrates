@@ -186,8 +186,8 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		UniqueID:       "testUUID",           // individual id
 		ThresholdType:  "*min_event_counter", //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *balance_expired
 		ThresholdValue: 5.32,
-		Recurrent:      false,                          // reset excuted flag each run
-		MinSleep:       time.Duration(5) * time.Second, // Minimum duration between two executions in case of recurrent triggers
+		Recurrent:      false,           // reset excuted flag each run
+		MinSleep:       5 * time.Second, // Minimum duration between two executions in case of recurrent triggers
 		ExpirationDate: tim,
 		ActivationDate: tim,
 		Balance: &engine.BalanceFilter{
@@ -220,7 +220,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		},
 		Recurrent: true,
 		MinHits:   0,
-		MinSleep:  time.Duration(5 * time.Minute),
+		MinSleep:  5 * time.Minute,
 		Blocker:   false,
 		Weight:    20.0,
 		ActionIDs: []string{},
@@ -236,7 +236,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		},
 		MaxHits:   -1,
 		MinHits:   0,
-		MinSleep:  time.Duration(5 * time.Minute),
+		MinSleep:  5 * time.Minute,
 		Blocker:   false,
 		Weight:    20.0,
 		ActionIDs: []string{},
@@ -252,7 +252,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		},
 		Recurrent: false,
 		MinHits:   0,
-		MinSleep:  time.Duration(5 * time.Minute),
+		MinSleep:  5 * time.Minute,
 		Blocker:   false,
 		Weight:    20.0,
 		ActionIDs: []string{},
@@ -268,7 +268,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		},
 		MaxHits:   1,
 		MinHits:   0,
-		MinSleep:  time.Duration(5 * time.Minute),
+		MinSleep:  5 * time.Minute,
 		Blocker:   false,
 		Weight:    20.0,
 		ActionIDs: []string{},

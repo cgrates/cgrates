@@ -244,7 +244,7 @@ func testExpVerifyThresholds(t *testing.T) {
 			},
 			MaxHits:   1,
 			MinHits:   1,
-			MinSleep:  time.Duration(1 * time.Second),
+			MinSleep:  time.Second,
 			Blocker:   false,
 			Weight:    10.0,
 			ActionIDs: []string{"ACT_LOG_WARNING"},
@@ -268,7 +268,7 @@ func testExpVerifyResources(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
-		UsageTTL:     time.Duration(-1),
+		UsageTTL:     -1,
 		Limit:        7,
 		Blocker:      false,
 		Stored:       true,
@@ -293,7 +293,7 @@ func testExpVerifyStats(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
 		QueueLength: 100,
-		TTL:         time.Duration(-1),
+		TTL:         -1,
 		Metrics: []*engine.MetricWithFilters{
 			{
 				MetricID: utils.MetaTCC,
@@ -317,7 +317,7 @@ func testExpVerifyStats(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
 		QueueLength: 100,
-		TTL:         time.Duration(-1),
+		TTL:         -1,
 		Metrics: []*engine.MetricWithFilters{
 			{
 				MetricID: utils.MetaTCD,

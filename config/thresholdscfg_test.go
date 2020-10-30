@@ -20,7 +20,6 @@ package config
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -38,7 +37,7 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 	expected := &ThresholdSCfg{
 		Enabled:             true,
 		IndexedSelects:      true,
-		StoreInterval:       time.Duration(2),
+		StoreInterval:       2,
 		StringIndexedFields: &[]string{"*req.prefix"},
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},

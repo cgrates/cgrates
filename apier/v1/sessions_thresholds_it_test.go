@@ -156,7 +156,7 @@ func testSessionSv1ItGetThreshold(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
 		MaxHits:   -1,
-		MinSleep:  time.Duration(0),
+		MinSleep:  0,
 		Blocker:   false,
 		Weight:    10.0,
 		ActionIDs: []string{"TOPUP_MONETARY_10"},
@@ -454,9 +454,9 @@ func testSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if rply.MaxUsage == nil || *rply.MaxUsage != time.Duration(1024) {
+	if rply.MaxUsage == nil || *rply.MaxUsage != 1024 {
 		t.Errorf("Expecting: %+v, received: %+v",
-			time.Duration(1024), rply.MaxUsage)
+			1024, rply.MaxUsage)
 	}
 	if rply.ThresholdIDs != nil {
 		t.Errorf("Expecting: nil, received: %s",
@@ -593,9 +593,9 @@ func testSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if rply.MaxUsage == nil || *rply.MaxUsage != time.Duration(1024) {
+	if rply.MaxUsage == nil || *rply.MaxUsage != 1024 {
 		t.Errorf("Expecting: %+v, received: %+v",
-			time.Duration(1024), rply.MaxUsage)
+			1024, rply.MaxUsage)
 	}
 	if rply.ThresholdIDs != nil {
 		t.Errorf("Expecting: nil, received: %s",

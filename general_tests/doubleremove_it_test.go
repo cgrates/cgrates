@@ -119,7 +119,7 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 				ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
 			},
 			QueueLength: 10,
-			TTL:         time.Duration(10) * time.Second,
+			TTL:         10 * time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
 					MetricID: "*sum",

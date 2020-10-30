@@ -63,11 +63,11 @@ type TestContent struct {
 }
 
 func TestHttpJsonPoster(t *testing.T) {
-	SetFailedPostCacheTTL(1 * time.Millisecond)
+	SetFailedPostCacheTTL(time.Millisecond)
 	config.CgrConfig().GeneralCfg().FailedPostsDir = "/tmp"
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
-	pstr, err := NewHTTPPoster(time.Duration(2*time.Second), "http://localhost:8080/invalid", utils.CONTENT_JSON, 3)
+	pstr, err := NewHTTPPoster(2*time.Second, "http://localhost:8080/invalid", utils.CONTENT_JSON, 3)
 	if err != nil {
 		t.Error(err)
 	}
@@ -95,12 +95,12 @@ func TestHttpJsonPoster(t *testing.T) {
 }
 
 func TestHttpBytesPoster(t *testing.T) {
-	SetFailedPostCacheTTL(1 * time.Millisecond)
+	SetFailedPostCacheTTL(time.Millisecond)
 	config.CgrConfig().GeneralCfg().FailedPostsDir = "/tmp"
 	content := []byte(`Test
 		Test2
 		`)
-	pstr, err := NewHTTPPoster(time.Duration(2*time.Second), "http://localhost:8080/invalid", utils.CONTENT_TEXT, 3)
+	pstr, err := NewHTTPPoster(2*time.Second, "http://localhost:8080/invalid", utils.CONTENT_TEXT, 3)
 	if err != nil {
 		t.Error(err)
 	}
@@ -309,7 +309,7 @@ func TestAMQPv1Poster(t *testing.T) {
 		t.Fatal("Creating AMQP session:", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 
 	// Create a receiver
 	receiver, err := session.NewReceiver(
@@ -319,7 +319,7 @@ func TestAMQPv1Poster(t *testing.T) {
 		t.Fatal("Creating receiver link:", err)
 	}
 	defer func() {
-		ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+		ctx, cancel := context.WithTimeout(ctx, time.Second)
 		receiver.Close(ctx)
 		cancel()
 	}()

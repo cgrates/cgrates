@@ -597,7 +597,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 		t.Error("Error debiting balance: ", err)
 	}
 	if cc.Timespans[0].Increments[0].BalanceInfo.Unit.UUID != "testb" ||
-		cc.Timespans[0].Increments[0].Duration != 1*time.Second {
+		cc.Timespans[0].Increments[0].Duration != time.Second {
 		t.Error("Error setting balance id to increment: ",
 			cc.Timespans[0].Increments[0].Duration)
 	}
@@ -1550,7 +1550,7 @@ func TestMaxDurationShared(t *testing.T) {
 	if err != nil {
 		t.Error("Error getting max session duration from shared group: ", err)
 	}
-	if duration != 1*time.Minute {
+	if duration != time.Minute {
 		t.Error("Wrong max session from shared group: ", duration)
 	}
 
@@ -1708,7 +1708,7 @@ func TestDebitGenericBalance(t *testing.T) {
 						Rates: RateGroups{
 							&RGRate{GroupIntervalStart: 0,
 								Value:         100,
-								RateIncrement: 1 * time.Second,
+								RateIncrement: time.Second,
 								RateUnit:      time.Second}}}},
 			},
 		},

@@ -52,13 +52,13 @@ func TestAgReqSetFields(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: utils.PathItems{{Field: utils.Usage}}}, utils.NewNMData(time.Duration(3*time.Minute)))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: utils.PathItems{{Field: utils.Usage}}}, utils.NewNMData(3*time.Minute))
 
 	cgrRply := utils.NavigableMap2{
 		utils.CapAttributes: utils.NavigableMap2{
 			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
-		utils.CapMaxUsage: utils.NewNMData(time.Duration(120 * time.Second)),
+		utils.CapMaxUsage: utils.NewNMData(120 * time.Second),
 		utils.Error:       utils.NewNMData(""),
 	}
 	agReq.CGRReply = &cgrRply
@@ -499,7 +499,7 @@ func TestAgReqMaxCost(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CapMaxUsage, PathItems: utils.PathItems{{Field: utils.CapMaxUsage}}}, utils.NewNMData("120s"))
 
 	cgrRply := utils.NavigableMap2{
-		utils.CapMaxUsage: utils.NewNMData(time.Duration(120 * time.Second)),
+		utils.CapMaxUsage: utils.NewNMData(120 * time.Second),
 	}
 	agReq.CGRReply = &cgrRply
 
@@ -1013,7 +1013,7 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 		utils.CapAttributes: utils.NavigableMap2{
 			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
-		utils.CapMaxUsage: utils.NewNMData(time.Duration(120 * time.Second)),
+		utils.CapMaxUsage: utils.NewNMData(120 * time.Second),
 		utils.Error:       utils.NewNMData(""),
 	}
 
@@ -1107,7 +1107,7 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 		utils.CapAttributes: utils.NavigableMap2{
 			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
-		utils.CapMaxUsage: utils.NewNMData(time.Duration(120 * time.Second)),
+		utils.CapMaxUsage: utils.NewNMData(120 * time.Second),
 		utils.Error:       utils.NewNMData(""),
 	}
 
@@ -1218,7 +1218,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	}
 	tplFlds[0].ComputePath()
 	//5s*2 + 10s
-	expected := time.Duration(20 * time.Second)
+	expected := 20 * time.Second
 	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(out, expected) {
@@ -1734,13 +1734,13 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: utils.PathItems{{Field: utils.Usage}}}, utils.NewNMData(time.Duration(3*time.Minute)))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: utils.PathItems{{Field: utils.Usage}}}, utils.NewNMData(3*time.Minute))
 
 	agReq.CGRReply = &utils.NavigableMap2{
 		utils.CapAttributes: utils.NavigableMap2{
 			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
-		utils.CapMaxUsage: utils.NewNMData(time.Duration(120 * time.Second)),
+		utils.CapMaxUsage: utils.NewNMData(120 * time.Second),
 		utils.Error:       utils.NewNMData(""),
 	}
 
@@ -1904,7 +1904,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
-	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = 1 * time.Second
+	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = time.Second
 	engine.Cache = engine.NewCacheS(cfg, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))

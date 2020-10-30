@@ -28,7 +28,7 @@ import (
 
 func TestSetFldPostCacheTTL(t *testing.T) {
 	var1 := failedPostCache
-	SetFailedPostCacheTTL(time.Duration(50 * time.Millisecond))
+	SetFailedPostCacheTTL(50 * time.Millisecond)
 	var2 := failedPostCache
 	if reflect.DeepEqual(var1, var2) {
 		t.Error("Expecting to be different")
@@ -36,7 +36,7 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 }
 
 func TestAddFldPost(t *testing.T) {
-	SetFailedPostCacheTTL(time.Duration(5 * time.Second))
+	SetFailedPostCacheTTL(5 * time.Second)
 	AddFailedPost("path1", "format1", "module1", "1", make(map[string]interface{}))
 	x, ok := failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))
 	if !ok {

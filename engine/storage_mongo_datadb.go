@@ -483,10 +483,8 @@ func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) error {
 		col := ms.getCol(colName)
 
-		if dr, err := col.DeleteMany(sctx, bson.M{}); err != nil {
+		if _, err := col.DeleteMany(sctx, bson.M{}); err != nil {
 			return err
-		} else if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
 		}
 
 		var keys []string

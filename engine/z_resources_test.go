@@ -30,7 +30,7 @@ var (
 	r1, r2              *Resource
 	ru1, ru2            *ResourceUsage
 	rs                  Resources
-	timeDurationExample = time.Duration(10) * time.Second
+	timeDurationExample = 10 * time.Second
 	resService          *ResourceService
 	dmRES               *DataManager
 	resprf              = []*ResourceProfile{
@@ -41,7 +41,7 @@ var (
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			UsageTTL:          time.Duration(10) * time.Second,
+			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
 			Weight:            20.00,
@@ -54,7 +54,7 @@ var (
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			UsageTTL:          time.Duration(10) * time.Second,
+			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
 			Weight:            20.00,
@@ -67,7 +67,7 @@ var (
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			UsageTTL:          time.Duration(10) * time.Second,
+			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
 			Weight:            20.00,
@@ -108,7 +108,7 @@ var (
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
 					utils.Weight:     "20.0",
-					utils.Usage:      time.Duration(135 * time.Second),
+					utils.Usage:      135 * time.Second,
 					utils.COST:       123.0,
 				},
 			},
@@ -123,7 +123,7 @@ var (
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
 					utils.Weight:     "15.0",
-					utils.Usage:      time.Duration(45 * time.Second),
+					utils.Usage:      45 * time.Second,
 				},
 			},
 		},
@@ -133,7 +133,7 @@ var (
 				ID:     "event3",
 				Event: map[string]interface{}{
 					"Resources": "ResourceProfilePrefix",
-					utils.Usage: time.Duration(30 * time.Second),
+					utils.Usage: 30 * time.Second,
 				},
 			},
 		},
@@ -164,13 +164,13 @@ func TestResourceRecordUsage1(t *testing.T) {
 			FilterIDs: []string{"FLTR_RES_RL1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Duration(1 * time.Millisecond)),
+				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Millisecond),
 			},
 			Weight:       100,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
 
-			UsageTTL:          time.Duration(1 * time.Millisecond),
+			UsageTTL:          time.Millisecond,
 			AllocationMessage: "ALLOC",
 		},
 		Usages: map[string]*ResourceUsage{
@@ -239,7 +239,7 @@ func TestResourceSort(t *testing.T) {
 			Weight:       50,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
-			UsageTTL:     time.Duration(1 * time.Millisecond),
+			UsageTTL:     time.Millisecond,
 		},
 		// AllocationMessage: "ALLOC2",
 		Usages: map[string]*ResourceUsage{
@@ -290,8 +290,8 @@ func TestResourceRecordUsages(t *testing.T) {
 func TestResourceAllocateResource(t *testing.T) {
 	rs.clearUsage(ru1.ID)
 	rs.clearUsage(ru2.ID)
-	ru1.ExpiryTime = time.Now().Add(time.Duration(1 * time.Second))
-	ru2.ExpiryTime = time.Now().Add(time.Duration(1 * time.Second))
+	ru1.ExpiryTime = time.Now().Add(time.Second)
+	ru2.ExpiryTime = time.Now().Add(time.Second)
 	if alcMessage, err := rs.allocateResource(ru1, false); err != nil {
 		t.Error(err.Error())
 	} else {
@@ -343,7 +343,7 @@ func TestRSCacheSetGet(t *testing.T) {
 			Weight:            50,
 			Limit:             2,
 			ThresholdIDs:      []string{"TEST_ACTIONS"},
-			UsageTTL:          time.Duration(1 * time.Millisecond),
+			UsageTTL:          time.Millisecond,
 		},
 		Usages: map[string]*ResourceUsage{
 			"RU2": {
@@ -425,12 +425,12 @@ func TestResourceAddFilters(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.UsageInterval",
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -452,12 +452,12 @@ func TestResourceAddFilters(t *testing.T) {
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: "~*req.PddInterval",
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:  []string{(1 * time.Second).String()},
+				Values:  []string{(time.Second).String()},
 			},
 			{
 				Type:    utils.MetaGreaterOrEqual,
@@ -542,7 +542,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 
 //UsageTTL 0 in ResourceProfile and give 10s duration
 func TestResourceUsageTTLCase1(t *testing.T) {
-	resprf[0].UsageTTL = time.Duration(0)
+	resprf[0].UsageTTL = 0
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &timeDurationExample
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
@@ -569,7 +569,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 
 //UsageTTL 5s in ResourceProfile and give nil duration
 func TestResourceUsageTTLCase2(t *testing.T) {
-	resprf[0].UsageTTL = time.Duration(0)
+	resprf[0].UsageTTL = 0
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &resprf[0].UsageTTL
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
@@ -596,7 +596,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 
 //UsageTTL 5s in ResourceProfile and give 0 duration
 func TestResourceUsageTTLCase3(t *testing.T) {
-	resprf[0].UsageTTL = time.Duration(0)
+	resprf[0].UsageTTL = 0
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = nil
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
@@ -606,7 +606,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 		t.Error(err)
 	}
 	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
-		"TestResourceUsageTTLCase3", utils.DurationPointer(time.Duration(0)))
+		"TestResourceUsageTTLCase3", utils.DurationPointer(0))
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -623,7 +623,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 
 //UsageTTL 5s in ResourceProfile and give 10s duration
 func TestResourceUsageTTLCase4(t *testing.T) {
-	resprf[0].UsageTTL = time.Duration(5)
+	resprf[0].UsageTTL = 5
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &timeDurationExample
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
@@ -747,7 +747,7 @@ func TestResourceCaching(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
-		UsageTTL:          time.Duration(-1),
+		UsageTTL:          -1,
 		Limit:             10.00,
 		AllocationMessage: "AllocationMessage",
 		Weight:            20.00,

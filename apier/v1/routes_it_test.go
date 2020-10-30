@@ -534,7 +534,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:    "1001",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(11 * time.Second),
+					utils.Usage:      11 * time.Second,
 					utils.COST:       10.0,
 				},
 			},
@@ -555,7 +555,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:    "1001",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(11 * time.Second),
+					utils.Usage:      11 * time.Second,
 					utils.COST:       10.5,
 				},
 			},
@@ -576,7 +576,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:    "1002",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(5 * time.Second),
+					utils.Usage:      5 * time.Second,
 					utils.COST:       12.5,
 				},
 			},
@@ -597,7 +597,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:    "1002",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(6 * time.Second),
+					utils.Usage:      6 * time.Second,
 					utils.COST:       17.5,
 				},
 			},
@@ -618,7 +618,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account:    "1003",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(11 * time.Second),
+					utils.Usage:      11 * time.Second,
 					utils.COST:       12.5,
 				},
 			},
@@ -639,9 +639,9 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 				Event: map[string]interface{}{
 					"Stat":           "Stat1_1",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(11 * time.Second),
+					utils.Usage:      11 * time.Second,
 					utils.COST:       12.5,
-					utils.PDD:        time.Duration(12 * time.Second),
+					utils.PDD:        12 * time.Second,
 				},
 			},
 		},
@@ -661,9 +661,9 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 				Event: map[string]interface{}{
 					"Stat":           "Stat1_1",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(15 * time.Second),
+					utils.Usage:      15 * time.Second,
 					utils.COST:       15.5,
-					utils.PDD:        time.Duration(15 * time.Second),
+					utils.PDD:        15 * time.Second,
 				},
 			},
 		},

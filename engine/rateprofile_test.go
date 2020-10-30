@@ -39,16 +39,16 @@ func TestRateProfileSort(t *testing.T) {
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
-						IntervalStart: time.Duration(0 * time.Second),
+						IntervalStart: 0,
 						Value:         0.12,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Minute),
+						Unit:          time.Minute,
+						Increment:     time.Minute,
 					},
 					{
-						IntervalStart: time.Duration(1 * time.Minute),
+						IntervalStart: time.Minute,
 						Value:         0.06,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 				},
 			},
@@ -58,28 +58,28 @@ func TestRateProfileSort(t *testing.T) {
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
-						IntervalStart: time.Duration(1 * time.Second),
+						IntervalStart: time.Second,
 						Value:         0.12,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Minute),
+						Unit:          time.Minute,
+						Increment:     time.Minute,
 					},
 					{
-						IntervalStart: time.Duration(1 * time.Second),
+						IntervalStart: time.Second,
 						Value:         0.19,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 					{
-						IntervalStart: time.Duration(15 * time.Second),
+						IntervalStart: 15 * time.Second,
 						Value:         0.4,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 					{
-						IntervalStart: time.Duration(10 * time.Second),
+						IntervalStart: 10 * time.Second,
 						Value:         0.27,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 				},
 			},
@@ -89,22 +89,22 @@ func TestRateProfileSort(t *testing.T) {
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
 					{
-						IntervalStart: time.Duration(10 * time.Second),
+						IntervalStart: 10 * time.Second,
 						Value:         0.06,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 					{
-						IntervalStart: time.Duration(1 * time.Minute),
+						IntervalStart: time.Minute,
 						Value:         0.18,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 					{
-						IntervalStart: time.Duration(18 * time.Second),
+						IntervalStart: 18 * time.Second,
 						Value:         0.12,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 				},
 			},
@@ -114,10 +114,10 @@ func TestRateProfileSort(t *testing.T) {
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
 					{
-						IntervalStart: time.Duration(0 * time.Second),
+						IntervalStart: 0,
 						Value:         0.06,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 				},
 			},
@@ -133,16 +133,16 @@ func TestRateProfileSort(t *testing.T) {
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
-						IntervalStart: time.Duration(0 * time.Second),
+						IntervalStart: 0,
 						Value:         0.12,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Minute),
+						Unit:          time.Minute,
+						Increment:     time.Minute,
 					},
 					{
-						IntervalStart: time.Duration(1 * time.Minute),
+						IntervalStart: time.Minute,
 						Value:         0.06,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 				},
 			},
@@ -152,22 +152,22 @@ func TestRateProfileSort(t *testing.T) {
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
 					{
-						IntervalStart: time.Duration(10 * time.Second),
+						IntervalStart: 10 * time.Second,
 						Value:         0.06,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 					{
-						IntervalStart: time.Duration(18 * time.Second),
+						IntervalStart: 18 * time.Second,
 						Value:         0.12,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 					{
-						IntervalStart: time.Duration(1 * time.Minute),
+						IntervalStart: time.Minute,
 						Value:         0.18,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 				},
 			},
@@ -177,28 +177,28 @@ func TestRateProfileSort(t *testing.T) {
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
-						IntervalStart: time.Duration(1 * time.Second),
+						IntervalStart: time.Second,
 						Value:         0.12,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Minute),
+						Unit:          time.Minute,
+						Increment:     time.Minute,
 					},
 					{
-						IntervalStart: time.Duration(1 * time.Second),
+						IntervalStart: time.Second,
 						Value:         0.19,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 					{
-						IntervalStart: time.Duration(10 * time.Second),
+						IntervalStart: 10 * time.Second,
 						Value:         0.27,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 					{
-						IntervalStart: time.Duration(15 * time.Second),
+						IntervalStart: 15 * time.Second,
 						Value:         0.4,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 				},
 			},
@@ -208,10 +208,10 @@ func TestRateProfileSort(t *testing.T) {
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
 					{
-						IntervalStart: time.Duration(0 * time.Second),
+						IntervalStart: 0,
 						Value:         0.06,
-						Unit:          time.Duration(1 * time.Minute),
-						Increment:     time.Duration(1 * time.Second),
+						Unit:          time.Minute,
+						Increment:     time.Second,
 					},
 				},
 			},
@@ -346,14 +346,14 @@ func TestRateProfileRunTimes(t *testing.T) {
 		ID: "RATE0",
 		IntervalRates: []*IntervalRate{
 			{
-				IntervalStart: time.Duration(0),
+				IntervalStart: 0,
 			},
 		},
 	}
 	rt.Compile()
 
 	sTime := time.Date(2020, time.June, 28, 18, 56, 05, 0, time.UTC)
-	eTime := sTime.Add(time.Duration(2 * time.Minute))
+	eTime := sTime.Add(2 * time.Minute)
 	eRTimes := [][]time.Time{
 		{time.Date(2020, time.June, 28, 18, 56, 0, 0, time.UTC),
 			time.Time{}},
@@ -374,7 +374,7 @@ func TestRateProfileRunTimes(t *testing.T) {
 
 	// sTime and eTime inside the activation interval
 	sTime = time.Date(2020, 12, 24, 12, 0, 0, 0, time.UTC)
-	eTime = sTime.Add(time.Duration(time.Hour))
+	eTime = sTime.Add(time.Hour)
 	eRTimes = [][]time.Time{
 		{time.Date(2020, 12, 24, 12, 0, 0, 0, time.UTC), time.Date(2020, 12, 25, 0, 0, 0, 0, time.UTC)},
 	}
@@ -385,7 +385,7 @@ func TestRateProfileRunTimes(t *testing.T) {
 	}
 	// sTime smaller than activation time, eTime equals aTime
 	sTime = time.Date(2020, 12, 23, 23, 0, 0, 0, time.UTC)
-	eTime = sTime.Add(time.Duration(time.Hour))
+	eTime = sTime.Add(time.Hour)
 	eRTimes = nil // cannot cover full interval
 	if rTimes, err := rt.RunTimes(sTime, eTime, 10); err != nil {
 		t.Error(err)
@@ -395,7 +395,7 @@ func TestRateProfileRunTimes(t *testing.T) {
 
 	// sTime smaller than activation time but first aTime inside, eTime inside activation interval
 	sTime = time.Date(2020, 12, 23, 23, 59, 59, 0, time.UTC)
-	eTime = sTime.Add(time.Duration(time.Hour))
+	eTime = sTime.Add(time.Hour)
 	eRTimes = [][]time.Time{
 		{time.Date(2020, 12, 24, 0, 0, 0, 0, time.UTC), time.Date(2020, 12, 25, 0, 0, 0, 0, time.UTC)},
 	}
@@ -423,7 +423,7 @@ func TestRateProfileRunTimesMaxIterations(t *testing.T) {
 		ID: "RATE0",
 		IntervalRates: []*IntervalRate{
 			{
-				IntervalStart: time.Duration(0),
+				IntervalStart: 0,
 			},
 		},
 		ActivationTimes: "* * 24 12 *",
@@ -445,7 +445,7 @@ func TestRateProfileRunTimesPassingActivationTIme(t *testing.T) {
 		ID: "RATE0",
 		IntervalRates: []*IntervalRate{
 			{
-				IntervalStart: time.Duration(0),
+				IntervalStart: 0,
 			},
 		},
 		ActivationTimes: "* * 24 * *",

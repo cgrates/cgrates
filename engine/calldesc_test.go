@@ -199,7 +199,7 @@ func TestParallelDebit(t *testing.T) {
 		go debitTest(t, &wg)
 	}
 	wg.Wait()
-	time.Sleep(time.Duration(10 * time.Millisecond))
+	time.Sleep(10 * time.Millisecond)
 	t1 := time.Date(2017, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2017, time.February, 2, 17, 30, 59, 0, time.UTC)
 	cd := &CallDescriptor{
@@ -263,7 +263,7 @@ func TestSplitSpansWeekend(t *testing.T) {
 							RoundingMethod:   "*up",
 							RoundingDecimals: 6,
 							Rates: RateGroups{
-								&RGRate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
+								&RGRate{Value: 1, RateIncrement: time.Second, RateUnit: time.Second},
 							},
 						},
 					},
@@ -277,7 +277,7 @@ func TestSplitSpansWeekend(t *testing.T) {
 							RoundingMethod:   "*up",
 							RoundingDecimals: 6,
 							Rates: RateGroups{
-								&RGRate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
+								&RGRate{Value: 1, RateIncrement: time.Second, RateUnit: time.Second},
 							},
 						},
 					},
@@ -291,7 +291,7 @@ func TestSplitSpansWeekend(t *testing.T) {
 							RoundingMethod:   "*up",
 							RoundingDecimals: 6,
 							Rates: RateGroups{
-								&RGRate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
+								&RGRate{Value: 1, RateIncrement: time.Second, RateUnit: time.Second},
 							},
 						},
 					},
@@ -1857,7 +1857,7 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 			"Subject":     "acc1",
 			"Tenant":      "cgrates.org",
 			"ToR":         "",
-			"Usage":       time.Duration(30) * time.Minute,
+			"Usage":       30 * time.Minute,
 		},
 	}
 	cd := &CallDescriptor{
@@ -1898,7 +1898,7 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 			"Subject":     "acc1",
 			"Tenant":      "cgrates.org",
 			"ToR":         "",
-			"Usage":       time.Duration(40) * time.Minute,
+			"Usage":       40 * time.Minute,
 		},
 	}
 	if err := cd.UpdateFromCGREvent(cgrEv, []string{utils.Account, utils.Subject}); err != nil {
@@ -1932,7 +1932,7 @@ func TestCallDescriptorAsCGREvent(t *testing.T) {
 			"Subject":     "max",
 			"Tenant":      "cgrates.org",
 			"ToR":         "",
-			"Usage":       time.Duration(30) * time.Minute,
+			"Usage":       30 * time.Minute,
 		},
 	}
 	cgrEvent := cd.AsCGREvent()

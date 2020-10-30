@@ -265,7 +265,7 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.GeneralCfg().Reconnects != -1 {
 		t.Errorf("Expected: -1, received: %+v", cgrCfg.GeneralCfg().Reconnects)
 	}
-	if cgrCfg.GeneralCfg().ConnectTimeout != 1*time.Second {
+	if cgrCfg.GeneralCfg().ConnectTimeout != time.Second {
 		t.Errorf("Expected: 1s, received: %+v", cgrCfg.GeneralCfg().ConnectTimeout)
 	}
 	if cgrCfg.GeneralCfg().ReplyTimeout != 2*time.Second {
@@ -382,11 +382,11 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RpSubjectPrefixMatching)
 	}
 	eMaxCU := map[string]time.Duration{
-		utils.ANY:   time.Duration(189 * time.Hour),
-		utils.VOICE: time.Duration(72 * time.Hour),
-		utils.DATA:  time.Duration(107374182400),
-		utils.SMS:   time.Duration(10000),
-		utils.MMS:   time.Duration(10000),
+		utils.ANY:   189 * time.Hour,
+		utils.VOICE: 72 * time.Hour,
+		utils.DATA:  107374182400,
+		utils.SMS:   10000,
+		utils.MMS:   10000,
 	}
 	if !reflect.DeepEqual(eMaxCU, cgrCfg.RalsCfg().MaxComputedUsage) {
 		t.Errorf("Expecting: %+v , received: %+v", eMaxCU, cgrCfg.RalsCfg().MaxComputedUsage)
@@ -472,9 +472,9 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		RouteSConns:         []string{},
 		AttrSConns:          []string{},
 		ReplicationConns:    []string{},
-		DebitInterval:       0 * time.Second,
+		DebitInterval:       0,
 		StoreSCosts:         false,
-		SessionTTL:          0 * time.Second,
+		SessionTTL:          0,
 		SessionIndexes:      utils.StringMap{},
 		ClientProtocol:      1.0,
 		ChannelSyncInterval: 0,
@@ -571,23 +571,23 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			utils.CacheDispatchers: {Limit: -1,
 				TTL: 0, StaticTTL: false, Precache: false},
 			utils.CacheDiameterMessages: {Limit: -1,
-				TTL: time.Duration(3 * time.Hour), StaticTTL: false},
+				TTL: 3 * time.Hour, StaticTTL: false},
 			utils.CacheRPCResponses: {Limit: 0,
-				TTL: time.Duration(2 * time.Second), StaticTTL: false},
+				TTL: 2 * time.Second, StaticTTL: false},
 			utils.CacheClosedSessions: {Limit: -1,
-				TTL: time.Duration(10 * time.Second), StaticTTL: false},
+				TTL: 10 * time.Second, StaticTTL: false},
 			utils.CacheEventCharges: {Limit: -1,
-				TTL: time.Duration(10 * time.Second), StaticTTL: false},
+				TTL: 10 * time.Second, StaticTTL: false},
 			utils.CacheCDRIDs: {Limit: -1,
-				TTL: time.Duration(10 * time.Minute), StaticTTL: false},
+				TTL: 10 * time.Minute, StaticTTL: false},
 			utils.CacheLoadIDs: {Limit: -1,
 				TTL: 0, StaticTTL: false, Precache: false},
 			utils.CacheRPCConnections: {Limit: -1,
 				TTL: 0, StaticTTL: false},
 			utils.CacheUCH: {Limit: -1,
-				TTL: time.Duration(3 * time.Hour), StaticTTL: false},
+				TTL: 3 * time.Hour, StaticTTL: false},
 			utils.CacheSTIR: {Limit: -1,
-				TTL: time.Duration(3 * time.Hour), StaticTTL: false},
+				TTL: 3 * time.Hour, StaticTTL: false},
 
 			utils.CacheVersions: {Limit: -1,
 				TTL: 0, StaticTTL: false, Precache: false},
@@ -2020,7 +2020,7 @@ func TestCgrCdfEventExporter(t *testing.T) {
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit:     -1,
-				TTL:       time.Duration(5 * time.Second),
+				TTL:       5 * time.Second,
 				StaticTTL: false,
 			},
 		},

@@ -141,7 +141,7 @@ func testSessionsDataLastUsedData(t *testing.T) {
 		Account:     "1001",
 		Destination: utils.DATA,
 		TimeStart:   tStart,
-		TimeEnd:     tStart.Add(time.Duration(1024)),
+		TimeEnd:     tStart.Add(1024),
 	}
 	var cc engine.CallCost
 	// Make sure the cost is what we expect to be for 1MB of data
@@ -339,7 +339,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
-		aSessions[0].Usage != time.Duration(6144) {
+		aSessions[0].Usage != 6144 {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
 	}
 
@@ -387,7 +387,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
-		aSessions[0].Usage != time.Duration(15360) {
+		aSessions[0].Usage != 15360 {
 		t.Errorf("wrong active sessions: %v", aSessions[0].Usage)
 	} else if aSessions[0].ExtraFields["Extra1"] != "other" {
 		t.Errorf("Expected: \"other\", received: %v", aSessions[0].ExtraFields["Extra1"])
@@ -437,7 +437,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
-		aSessions[0].Usage != time.Duration(13312) { // 14MB in used, 2MB extra reserved
+		aSessions[0].Usage != 13312 { // 14MB in used, 2MB extra reserved
 		t.Errorf("wrong active sessions: %+v", aSessions[0].Usage)
 	} else if aSessions[0].ExtraFields["Extra1"] != "other2" {
 		t.Errorf("Expected: \"other2\", received: %v", aSessions[0].ExtraFields["Extra1"])
@@ -486,7 +486,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
-		aSessions[0].Usage != time.Duration(14336) { // 14MB in use
+		aSessions[0].Usage != 14336 { // 14MB in use
 		t.Errorf("wrong active sessions: %v", aSessions[0].Usage)
 	}
 
@@ -536,7 +536,7 @@ func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		t.Errorf("Received reply: %s", reply)
 	}
 
-	time.Sleep(time.Duration(20) * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},

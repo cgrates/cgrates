@@ -117,7 +117,7 @@ func testFwvExportEvent(t *testing.T) {
 					utils.Destination: "1002",
 					utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 					utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(10) * time.Second,
+					utils.Usage:       10 * time.Second,
 					utils.RunID:       utils.MetaDefault,
 					utils.Cost:        2.34567,
 					"ExtraFields":     map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -132,7 +132,7 @@ func testFwvExportEvent(t *testing.T) {
 	if err := fwvRpc.Call(utils.EventExporterSv1ProcessEvent, event, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 }
 
 func testFwvVerifyExports(t *testing.T) {

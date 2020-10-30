@@ -149,7 +149,7 @@ func testSCncrLoadTP(t *testing.T) {
 
 func testSCncrRunSessions(t *testing.T) {
 	acntIDsSet := utils.NewStringSet(nil)
-	bufferTopup := time.Duration(8760) * time.Hour
+	bufferTopup := 8760 * time.Hour
 	for i := 0; i < *sCncrSessions; i++ {
 		acntID := fmt.Sprintf("100%d", utils.RandomInteger(100, 200))
 		if !acntIDsSet.Has(acntID) {
@@ -197,13 +197,13 @@ func testRunSession(t *testing.T) {
 	defer wg.Done()       // decrease group counter one out from test
 	cpsPool <- struct{}{} // push here up to cps
 	go func() {           // allow more requests after a second
-		time.Sleep(time.Duration(time.Second))
+		time.Sleep(time.Second)
 		<-cpsPool
 	}()
 	acntID := <-acntIDs
 	originID := utils.GenUUID() // each test with it's own OriginID
 	// topup as much as we know we need for one session
-	mainTopup := time.Duration(90) * time.Second
+	mainTopup := 90 * time.Second
 	var addBlcRply string
 	argsAddBalance := &v1.AttrAddBalance{
 		Tenant:      "cgrates.org",
@@ -249,7 +249,7 @@ func testRunSession(t *testing.T) {
 		utils.RandomInteger(0, 100)) * time.Millisecond)
 
 	// Init the session
-	initUsage := 1 * time.Minute
+	initUsage := time.Minute
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession:   true,
 		GetAttributes: true,
@@ -279,7 +279,7 @@ func testRunSession(t *testing.T) {
 	// Update the session with relocate
 	initOriginID := originID
 	originID = utils.GenUUID()
-	updtUsage := 1 * time.Minute
+	updtUsage := time.Minute
 	updtArgs := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
@@ -311,7 +311,7 @@ func testRunSession(t *testing.T) {
 			ID:     fmt.Sprintf("TestSCncrTerminate%s", originID),
 			Event: map[string]interface{}{
 				utils.OriginID: originID,
-				utils.Usage:    time.Duration(90 * time.Second),
+				utils.Usage:    90 * time.Second,
 			},
 		},
 	}
@@ -342,7 +342,7 @@ func testRunSession(t *testing.T) {
 	} else if rplyCDR != utils.OK {
 		t.Errorf("received: <%s> to ProcessCDR", rplyCDR)
 	}
-	time.Sleep(time.Duration(20) * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	argCDRs := utils.RPCCDRsFilter{OriginIDs: []string{originID}}
 	if err := sCncrRPC.Call(utils.APIerSv2GetCDRs, &argCDRs, &cdrs); err != nil {

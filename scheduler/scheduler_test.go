@@ -26,7 +26,7 @@ import (
 )
 
 func TestSchedulerUpdateActStats(t *testing.T) {
-	sched := &Scheduler{actStatsInterval: 1 * time.Millisecond, actSuccessStats: make(map[string]map[time.Time]bool)}
+	sched := &Scheduler{actStatsInterval: time.Millisecond, actSuccessStats: make(map[string]map[time.Time]bool)}
 	sched.updateActStats(&engine.Action{Id: "REMOVE_1", ActionType: utils.REMOVE_ACCOUNT}, false)
 	if len(sched.actSuccessStats[utils.REMOVE_ACCOUNT]) != 1 {
 		t.Errorf("Wrong stats: %+v", sched.actSuccessStats[utils.REMOVE_ACCOUNT])

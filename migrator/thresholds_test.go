@@ -34,8 +34,8 @@ func Testv2ActionTriggerAsThreshold(t *testing.T) {
 		UniqueID:          "testUUID",           // individual id
 		ThresholdType:     "*min_event_counter", //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *balance_expired
 		ThresholdValue:    5.32,
-		Recurrent:         false,                          // reset excuted flag each run
-		MinSleep:          time.Duration(5) * time.Second, // Minimum duration between two executions in case of recurrent triggers
+		Recurrent:         false,           // reset excuted flag each run
+		MinSleep:          5 * time.Second, // Minimum duration between two executions in case of recurrent triggers
 		ExpirationDate:    time.Now(),
 		ActivationDate:    time.Now(),
 		Balance:           new(engine.BalanceFilter),

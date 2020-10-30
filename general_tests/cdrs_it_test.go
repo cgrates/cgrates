@@ -173,7 +173,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 					utils.Subject:     "ANY2CNT",
 					utils.Destination: "+4986517174963",
 					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1) * time.Minute,
+					utils.Usage:       time.Minute,
 					"field_extr1":     "val_extr1",
 					"fieldextr2":      "valextr2",
 				},
@@ -187,7 +187,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs(t *testing.T) {
@@ -246,7 +246,7 @@ func testV2CDRsProcessCDR2(t *testing.T) {
 					utils.Subject:     "ANY2CNT",
 					utils.Destination: "+4986517174963",
 					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1) * time.Minute,
+					utils.Usage:       time.Minute,
 					"field_extr1":     "val_extr1",
 					"fieldextr2":      "valextr2",
 				},
@@ -260,7 +260,7 @@ func testV2CDRsProcessCDR2(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs2(t *testing.T) {
@@ -321,7 +321,7 @@ func testV2CDRsProcessCDR3(t *testing.T) {
 					utils.Subject:     "ANY2CNT",
 					utils.Destination: "+4986517174963",
 					utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:       time.Duration(1) * time.Minute,
+					utils.Usage:       time.Minute,
 					"field_extr1":     "val_extr1",
 					"fieldextr2":      "valextr2",
 				},
@@ -335,7 +335,7 @@ func testV2CDRsProcessCDR3(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs3(t *testing.T) {
@@ -399,7 +399,7 @@ func testV2CDRsProcessCDR4(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs4(t *testing.T) {
@@ -591,7 +591,7 @@ func testV2CDRsProcessCDR5(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetStats1(t *testing.T) {
@@ -660,7 +660,7 @@ func testV2CDRsProcessCDR6(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetStats2(t *testing.T) {
@@ -721,7 +721,7 @@ func testV2CDRsProcessCDR7(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs7(t *testing.T) {

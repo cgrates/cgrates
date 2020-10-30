@@ -97,7 +97,6 @@ func testDspChcPing(t *testing.T) {
 func testDspChcLoadAfterFolder(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	expStats[utils.CacheAccountActionPlans].Items = 3
 	expStats[utils.CacheActionPlans].Items = 1
 	expStats[utils.CacheActions].Items = 1
 	expStats[utils.CacheDestinations].Items = 4

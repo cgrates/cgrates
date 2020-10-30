@@ -69,7 +69,7 @@ func loadTP() {
 		attrs, &tpLoadInst); err != nil {
 		log.Fatal(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(100 * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func addBalance(sBenchRPC *rpc.Client, sraccount string) {

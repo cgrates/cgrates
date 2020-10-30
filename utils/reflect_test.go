@@ -184,32 +184,32 @@ func TestGreaterThan(t *testing.T) {
 	} else if !gte {
 		t.Error("should be greater than")
 	}
-	if gte, err := GreaterThan(time.Duration(2*time.Second),
-		time.Duration(1*time.Second), false); err != nil {
+	if gte, err := GreaterThan(2*time.Second,
+		time.Second, false); err != nil {
 		t.Error(err)
 	} else if !gte {
 		t.Error("should be greater than")
 	}
-	if gte, err := GreaterThan(time.Duration(2*time.Second),
+	if gte, err := GreaterThan(2*time.Second,
 		20, false); err != nil {
 		t.Error(err)
 	} else if !gte {
 		t.Error("should be greater than")
 	}
-	if gte, err := GreaterThan(time.Duration(2*time.Second),
-		float64(1*time.Second), false); err != nil {
+	if gte, err := GreaterThan(2*time.Second,
+		float64(time.Second), false); err != nil {
 		t.Error(err)
 	} else if !gte {
 		t.Error("should be greater than")
 	}
-	if gte, err := GreaterThan(time.Duration(1*time.Second),
-		time.Duration(2*time.Second), false); err != nil {
+	if gte, err := GreaterThan(time.Second,
+		2*time.Second, false); err != nil {
 		t.Error(err)
 	} else if gte {
 		t.Error("should be less than")
 	}
-	if gte, err := GreaterThan(time.Duration(2*time.Second),
-		time.Duration(1*time.Second), false); err != nil {
+	if gte, err := GreaterThan(2*time.Second,
+		time.Second, false); err != nil {
 		t.Error(err)
 	} else if !gte {
 		t.Error("should be greater than")
@@ -243,7 +243,7 @@ func TestStringToInterface(t *testing.T) {
 	if res := StringToInterface("1.2"); res != 1.2 {
 		t.Error("not parsing float64")
 	}
-	if res := StringToInterface("45s"); res != time.Duration(45*time.Second) {
+	if res := StringToInterface("45s"); res != 45*time.Second {
 		t.Error("not parsing time.Duration")
 	}
 	res := StringToInterface("+24h")
@@ -271,7 +271,7 @@ func TestIfaceAsString(t *testing.T) {
 	if rply := IfaceAsString(val); rply != "true" {
 		t.Errorf("Expected true ,received %+v", rply)
 	}
-	if rply := IfaceAsString(time.Duration(1 * time.Second)); rply != "1s" {
+	if rply := IfaceAsString(time.Second); rply != "1s" {
 		t.Errorf("Expected 1s ,received %+v", rply)
 	}
 	if rply := IfaceAsString(nil); rply != "" {
@@ -312,8 +312,8 @@ func TestIfaceAsTime(t *testing.T) {
 }
 
 func TestIfaceAsDuration(t *testing.T) {
-	eItm := time.Duration(time.Second)
-	if itmConvert, err := IfaceAsDuration(interface{}(time.Duration(time.Second))); err != nil {
+	eItm := time.Second
+	if itmConvert, err := IfaceAsDuration(interface{}(time.Second)); err != nil {
 		t.Error(err)
 	} else if eItm != itmConvert {
 		t.Errorf("received: %+v", itmConvert)
@@ -351,7 +351,7 @@ func TestIfaceAsFloat64(t *testing.T) {
 	} else if itmConvert != eFloat {
 		t.Errorf("received: %+v", itmConvert)
 	}
-	val = interface{}(time.Duration(6))
+	val = interface{}(6)
 	if itmConvert, err := IfaceAsFloat64(val); err != nil {
 		t.Error(err)
 	} else if itmConvert != eFloat {
@@ -383,7 +383,7 @@ func TestIfaceAsInt64(t *testing.T) {
 	} else if itmConvert != eInt {
 		t.Errorf("received: %+v", itmConvert)
 	}
-	val = interface{}(time.Duration(3))
+	val = interface{}(3)
 	if itmConvert, err := IfaceAsInt64(val); err != nil {
 		t.Error(err)
 	} else if itmConvert != eInt {
@@ -415,7 +415,7 @@ func TestIfaceAsTInt64(t *testing.T) {
 	} else if itmConvert != eInt {
 		t.Errorf("received: %+v", itmConvert)
 	}
-	val = interface{}(time.Duration(3))
+	val = interface{}(3)
 	if itmConvert, err := IfaceAsTInt64(val); err != nil {
 		t.Error(err)
 	} else if itmConvert != eInt {
@@ -522,16 +522,16 @@ func TestSum(t *testing.T) {
 	} else if sum != 17.069999999999997 {
 		t.Errorf("Expecting: 17.069999999999997, received: %+v", sum)
 	}
-	if sum, err := Sum(2*time.Second, 1*time.Second, 2*time.Second,
+	if sum, err := Sum(2*time.Second, time.Second, 2*time.Second,
 		5*time.Second, 4*time.Millisecond); err != nil {
 		t.Error(err)
 	} else if sum != 10*time.Second+4*time.Millisecond {
 		t.Errorf("Expecting: 10.004s, received: %+v", sum)
 	}
-	if sum, err := Sum(time.Duration(2*time.Second),
-		time.Duration(10*time.Millisecond)); err != nil {
+	if sum, err := Sum(2*time.Second,
+		10*time.Millisecond); err != nil {
 		t.Error(err)
-	} else if sum != time.Duration(2*time.Second+10*time.Millisecond) {
+	} else if sum != 2*time.Second+10*time.Millisecond {
 		t.Errorf("Expecting: 2s10ms, received: %+v", sum)
 	}
 }
@@ -615,28 +615,28 @@ func TestDifference(t *testing.T) {
 	} else if diff != 3.0 {
 		t.Errorf("Expecting: 3.0, received: %+v", diff)
 	}
-	if diff, err := Difference(10*time.Second, 1*time.Second, 2*time.Second,
+	if diff, err := Difference(10*time.Second, time.Second, 2*time.Second,
 		4*time.Millisecond); err != nil {
 		t.Error(err)
-	} else if diff != time.Duration(6*time.Second+996*time.Millisecond) {
+	} else if diff != 6*time.Second+996*time.Millisecond {
 		t.Errorf("Expecting: 6.996ms, received: %+v", diff)
 	}
-	if diff, err := Difference(time.Duration(2*time.Second),
-		time.Duration(10*time.Millisecond)); err != nil {
+	if diff, err := Difference(2*time.Second,
+		10*time.Millisecond); err != nil {
 		t.Error(err)
-	} else if diff != time.Duration(1*time.Second+990*time.Millisecond) {
+	} else if diff != time.Second+990*time.Millisecond {
 		t.Errorf("Expecting: 1.99s, received: %+v", diff)
 	}
 
 	if diff, err := Difference(time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC),
-		time.Duration(10*time.Second)); err != nil {
+		10*time.Second); err != nil {
 		t.Error(err)
 	} else if diff != time.Date(2009, 11, 10, 22, 59, 50, 0, time.UTC) {
 		t.Errorf("Expecting: %+v, received: %+v", time.Date(2009, 11, 10, 22, 59, 50, 0, time.UTC), diff)
 	}
 
 	if diff, err := Difference(time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC),
-		time.Duration(10*time.Second), 10000000000); err != nil {
+		10*time.Second, 10000000000); err != nil {
 		t.Error(err)
 	} else if diff != time.Date(2009, 11, 10, 22, 59, 40, 0, time.UTC) {
 		t.Errorf("Expecting: %+v, received: %+v", time.Date(2009, 11, 10, 22, 59, 40, 0, time.UTC), diff)
@@ -730,8 +730,8 @@ func TestEqualTo(t *testing.T) {
 	} else if !gte {
 		t.Error("should be equal")
 	}
-	if gte, err := EqualTo(time.Duration(2*time.Second),
-		time.Duration(2*time.Second)); err != nil {
+	if gte, err := EqualTo(2*time.Second,
+		2*time.Second); err != nil {
 		t.Error(err)
 	} else if !gte {
 		t.Error("should be equal")
