@@ -21,9 +21,12 @@ package utils
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/gob"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -945,4 +948,48 @@ type DurationArgs struct {
 	DurationTime time.Duration
 	Opts         map[string]interface{}
 	Tenant       string
+}
+
+// AESEncrypt will encrypt the provided txt using the encKey and AES algorithm
+func AESEncrypt(txt, encKey string) (encrypted string, err error) {
+	key, _ := hex.DecodeString(encKey)
+	var blk cipher.Block
+	if blk, err = aes.NewCipher(key); err != nil {
+		return
+	}
+	var aesGCM cipher.AEAD
+	if aesGCM, err = cipher.NewGCM(blk); err != nil {
+		return
+	}
+	nonce := make([]byte, aesGCM.NonceSize())
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		return
+	}
+	return fmt.Sprintf("%x", aesGCM.Seal(nonce, nonce, []byte(txt), nil)), nil
+}
+
+// AESDecrypt will decrypt the provided encrypted txt using the encKey and AES algorithm
+func AESDecrypt(encrypted string, encKey string) (txt string, err error) {
+
+	key, _ := hex.DecodeString(encKey)
+	enc, _ := hex.DecodeString(encrypted)
+
+	var blk cipher.Block
+	if blk, err = aes.NewCipher(key); err != nil {
+		return
+	}
+
+	var aesGCM cipher.AEAD
+	if aesGCM, err = cipher.NewGCM(blk); err != nil {
+		return
+	}
+
+	nonceSize := aesGCM.NonceSize()
+	nonce, ciphertext := enc[:nonceSize], enc[nonceSize:]
+	var plaintext []byte
+	if plaintext, err = aesGCM.Open(nil, nonce, ciphertext, nil); err != nil {
+		return
+	}
+
+	return fmt.Sprintf("%s", plaintext), nil
 }
