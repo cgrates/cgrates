@@ -46,7 +46,7 @@ func NewConReqs(reqs int, strategy string) *ConcReqs {
 
 // IsLimited returns true if the limit is not 0
 func (cR *ConcReqs) IsLimited() bool {
-	return ConReqs.limit != 0
+	return cR.limit != 0
 }
 
 // Allocate will reserve a channel for the API call

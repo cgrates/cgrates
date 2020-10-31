@@ -871,6 +871,8 @@ const (
 	ProcessRuns              = "ProcessRuns"
 	HashtagSep               = "#"
 	MetaRounding             = "*rounding"
+	ConcurrentReqsLimit      = 0
+	ConcurrentReqsStrategy   = ""
 )
 
 // Migrator Action

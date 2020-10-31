@@ -450,7 +450,15 @@ func main() {
 	}
 	utils.Logger.SetLogLevel(lgLevel)
 	// init the concurrentRequests
-	utils.ConReqs = utils.NewConReqs(cfg.GeneralCfg().ConcurrentRequests, cfg.GeneralCfg().ConcurrentStrategy)
+	cncReqsLimit := cfg.GeneralCfg().ConcurrentRequests
+	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
+		cncReqsLimit = utils.ConcurrentReqsLimit
+	}
+	cncReqsStrategy := cfg.GeneralCfg().ConcurrentStrategy
+	if utils.ConcurrentReqsStrategy != "" {
+		cncReqsStrategy = utils.ConcurrentReqsStrategy
+	}
+	utils.ConReqs = utils.NewConReqs(cncReqsLimit, cncReqsStrategy)
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
 	cfg.LazySanityCheck()
 
