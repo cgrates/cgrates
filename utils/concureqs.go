@@ -27,45 +27,45 @@ import (
 var ConReqs *ConcReqs
 
 type ConcReqs struct {
-	limit    int
 	strategy string
 	aReqs    chan struct{}
 }
 
 func NewConReqs(reqs int, strategy string) *ConcReqs {
 	cR := &ConcReqs{
-		limit:    reqs,
 		strategy: strategy,
 		aReqs:    make(chan struct{}, reqs),
-	}
-	for i := 0; i < reqs; i++ {
-		cR.aReqs <- struct{}{}
 	}
 	return cR
 }
 
 // IsLimited returns true if the limit is not 0
 func (cR *ConcReqs) IsLimited() bool {
-	return cR.limit != 0
+	return len(cR.aReqs) != 0
+}
+
+// Allocated returns the number of requests actively serviced
+func (cR *ConcReqs) Allocated() int {
+	return len(cR.aReqs)
 }
 
 // Allocate will reserve a channel for the API call
 func (cR *ConcReqs) Allocate() (err error) {
 	switch cR.strategy {
 	case MetaBusy:
-		if len(cR.aReqs) == 0 {
+		if len(cR.aReqs) == cap(cR.aReqs) {
 			return ErrMaxConcurentRPCExceededNoCaps
 		}
 		fallthrough
 	case MetaQueue:
-		<-cR.aReqs // get from channel
+		cR.aReqs <- struct{}{}
 	}
 	return
 }
 
 // Deallocate will free a channel for the API call
 func (cR *ConcReqs) Deallocate() {
-	cR.aReqs <- struct{}{}
+	<-cR.aReqs
 	return
 }
 
