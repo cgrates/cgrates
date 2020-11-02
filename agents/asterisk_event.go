@@ -21,6 +21,7 @@ package agents
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
@@ -29,10 +30,11 @@ import (
 
 func NewSMAsteriskEvent(ariEv map[string]interface{}, asteriskIP, asteriskAlias string) *SMAsteriskEvent {
 	smsmaEv := &SMAsteriskEvent{
-		ariEv:        ariEv,
-		asteriskIP:   asteriskIP,
-		cachedFields: make(map[string]string),
-		opts:         make(map[string]interface{}),
+		ariEv:         ariEv,
+		asteriskIP:    asteriskIP,
+		asteriskAlias: asteriskAlias,
+		cachedFields:  make(map[string]string),
+		opts:          make(map[string]interface{}),
 	}
 	smsmaEv.parseStasisArgs() // Populate appArgs
 	return smsmaEv
@@ -178,6 +180,9 @@ func (smaEv *SMAsteriskEvent) DisconnectCause() string {
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
 		cachedVal, _ = smaEv.ariEv["cause_txt"].(string)
+		if len(cachedVal) == 0 {
+			cachedVal = utils.IfaceAsString(smaEv.ariEv["cause"])
+		}
 		smaEv.cachedFields[cachedKey] = cachedVal
 	}
 	return cachedVal
@@ -266,9 +271,9 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 
 // AsCGREvent converts AsteriskEvent into CGREvent
 func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
-	setupTime, err := utils.ParseTimeDetectLayout(
-		smaEv.Timestamp(), timezone)
-	if err != nil {
+	var setupTime time.Time
+	if setupTime, err = utils.ParseTimeDetectLayout(
+		smaEv.Timestamp(), timezone); err != nil {
 		return
 	}
 	cgrEv = &utils.CGREvent{
@@ -278,7 +283,7 @@ func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent
 		Time:  &setupTime,
 		Event: smaEv.AsMapStringInterface(),
 	}
-	return cgrEv, nil
+	return
 }
 
 func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
