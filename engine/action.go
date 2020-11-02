@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"html/template"
 	"net"
+	"net/http"
 	"net/smtp"
 	"reflect"
 	"sort"
@@ -389,7 +390,7 @@ func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = pstr.PostValues(body)
+	err = pstr.PostValues(body, make(http.Header))
 	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
 		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
 		err = nil
@@ -409,7 +410,7 @@ func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) er
 		return err
 	}
 	go func() {
-		err := pstr.PostValues(body)
+		err := pstr.PostValues(body, make(http.Header))
 		if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
 			AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
 		}
@@ -952,7 +953,7 @@ func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	if err != nil {
 		return err
 	}
-	err = pstr.PostValues(body)
+	err = pstr.PostValues(body, make(http.Header))
 	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
 		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
 		err = nil
