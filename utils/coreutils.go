@@ -44,6 +44,7 @@ import (
 	"time"
 
 	"github.com/cgrates/rpcclient"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -995,7 +996,7 @@ func AESDecrypt(encrypted string, encKey string) (txt string, err error) {
 }
 
 // Hash generates the hash text
-func Hash(dataKeys ...string) (lns string, err error) {
+func ComputeHash(dataKeys ...string) (lns string, err error) {
 	var hashByts []byte
 	if hashByts, err = bcrypt.GenerateFromPassword(
 		[]byte(ConcatenatedKey(dataKeys...)),
@@ -1007,6 +1008,7 @@ func Hash(dataKeys ...string) (lns string, err error) {
 
 // VerifyHash matches the data hash with the dataKeys ha
 func VerifyHash(hash string, dataKeys ...string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(ConcatenatedKey(dataKeys...)))
+	err := bcrypt.CompareHashAndPassword([]byte(hash),
+		[]byte(ConcatenatedKey(dataKeys...)))
 	return err == nil
 }
