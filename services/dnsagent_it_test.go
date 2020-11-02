@@ -47,12 +47,12 @@ func TestDNSAgentReload(t *testing.T) {
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
 	cacheSChan <- chS
 
-	server := utils.NewServer()
+	server := utils.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
 	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
 	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
-		engineShutdown, nil, anz)
+		engineShutdown, nil, utils.NewConReqs(0, ""), anz)
 	srv := NewDNSAgent(cfg, filterSChan, engineShutdown, nil)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,

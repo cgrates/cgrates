@@ -24,13 +24,13 @@ import (
 	"net/rpc/jsonrpc"
 )
 
-var ConReqs *ConcReqs
-
+// ConcReqs the structure that allocs requests for API
 type ConcReqs struct {
 	strategy string
 	aReqs    chan struct{}
 }
 
+// NewConReqs creates a new ConcReqs
 func NewConReqs(reqs int, strategy string) *ConcReqs {
 	cR := &ConcReqs{
 		strategy: strategy,
@@ -41,7 +41,7 @@ func NewConReqs(reqs int, strategy string) *ConcReqs {
 
 // IsLimited returns true if the limit is not 0
 func (cR *ConcReqs) IsLimited() bool {
-	return len(cR.aReqs) != 0
+	return cap(cR.aReqs) != 0
 }
 
 // Allocated returns the number of requests actively serviced
@@ -77,23 +77,27 @@ type conn interface {
 	RemoteAddr() net.Addr
 }
 
-func newConcReqsGOBCodec(conn conn, anz anzWrapFunc) rpc.ServerCodec {
-	return anz(newConcReqsServerCodec(newGobServerCodec(conn)), MetaGOB, conn.RemoteAddr(), conn.LocalAddr())
+func newConcReqsGOBCodec(conn conn, conReqs *ConcReqs, anz anzWrapFunc) rpc.ServerCodec {
+	return anz(newConcReqsServerCodec(newGobServerCodec(conn), conReqs), MetaGOB, conn.RemoteAddr(), conn.LocalAddr())
 }
 
-func newConcReqsJSONCodec(conn conn, anz anzWrapFunc) rpc.ServerCodec {
-	return anz(newConcReqsServerCodec(jsonrpc.NewServerCodec(conn)), MetaJSON, conn.RemoteAddr(), conn.LocalAddr())
+func newConcReqsJSONCodec(conn conn, conReqs *ConcReqs, anz anzWrapFunc) rpc.ServerCodec {
+	return anz(newConcReqsServerCodec(jsonrpc.NewServerCodec(conn), conReqs), MetaJSON, conn.RemoteAddr(), conn.LocalAddr())
 }
 
-func newConcReqsServerCodec(sc rpc.ServerCodec) rpc.ServerCodec {
-	if !ConReqs.IsLimited() {
+func newConcReqsServerCodec(sc rpc.ServerCodec, conReqs *ConcReqs) rpc.ServerCodec {
+	if !conReqs.IsLimited() {
 		return sc
 	}
-	return &concReqsServerCodec{sc: sc}
+	return &concReqsServerCodec{
+		sc:      sc,
+		conReqs: conReqs,
+	}
 }
 
 type concReqsServerCodec struct {
-	sc rpc.ServerCodec
+	sc      rpc.ServerCodec
+	conReqs *ConcReqs
 }
 
 func (c *concReqsServerCodec) ReadRequestHeader(r *rpc.Request) error {
@@ -101,7 +105,7 @@ func (c *concReqsServerCodec) ReadRequestHeader(r *rpc.Request) error {
 }
 
 func (c *concReqsServerCodec) ReadRequestBody(x interface{}) error {
-	if err := ConReqs.Allocate(); err != nil {
+	if err := c.conReqs.Allocate(); err != nil {
 		return err
 	}
 	return c.sc.ReadRequestBody(x)
@@ -110,7 +114,7 @@ func (c *concReqsServerCodec) WriteResponse(r *rpc.Response, x interface{}) erro
 	if r.Error == ErrMaxConcurentRPCExceededNoCaps.Error() {
 		r.Error = ErrMaxConcurentRPCExceeded.Error()
 	} else {
-		defer ConReqs.Deallocate()
+		defer c.conReqs.Deallocate()
 	}
 	return c.sc.WriteResponse(r, x)
 }

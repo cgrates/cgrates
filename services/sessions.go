@@ -36,6 +36,7 @@ import (
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *utils.Server, internalChan chan rpcclient.ClientConnector,
 	exitChan chan bool, connMgr *engine.ConnManager,
+	concReq *utils.ConcReqs,
 	anz *AnalyzerService) servmanager.Service {
 	return &SessionService{
 		connChan: internalChan,
@@ -44,6 +45,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 		server:   server,
 		exitChan: exitChan,
 		connMgr:  connMgr,
+		concReq:  concReq,
 		anz:      anz,
 	}
 }
@@ -64,6 +66,7 @@ type SessionService struct {
 	// in order to stop the bircp server if necesary
 	bircpEnabled bool
 	connMgr      *engine.ConnManager
+	concReq      *utils.ConcReqs
 	anz          *AnalyzerService
 }
 
@@ -87,9 +90,9 @@ func (smg *SessionService) Start() (err error) {
 	// Pass internal connection via BiRPCClient
 	smg.connChan <- smg.anz.GetInternalCodec(smg.sm, utils.SessionS)
 	// Register RPC handler
-	smg.rpc = v1.NewSMGenericV1(smg.sm)
+	smg.rpc = v1.NewSMGenericV1(smg.sm, smg.concReq)
 
-	smg.rpcv1 = v1.NewSessionSv1(smg.sm) // methods with multiple options
+	smg.rpcv1 = v1.NewSessionSv1(smg.sm, smg.concReq) // methods with multiple options
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		smg.server.RpcRegister(smg.rpc)
 		smg.server.RpcRegister(smg.rpcv1)

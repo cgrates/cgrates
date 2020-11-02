@@ -58,7 +58,7 @@ func TestCdrsReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
 	cfg.ChargerSCfg().Enabled = true
-	server := utils.NewServer()
+	server := utils.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
 	cfg.StorDbCfg().Type = utils.INTERNAL
