@@ -392,10 +392,6 @@ var body = []byte(`{
 
 var fsCdrCfg *config.CGRConfig
 
-func TestFsCdrInterfaces(t *testing.T) {
-	var _ RawCdr = new(FSCdr)
-}
-
 func TestFsCdrFirstNonEmpty(t *testing.T) {
 	fsCdrCfg, _ = config.NewDefaultCGRConfig()
 	fsCdr, err := NewFSCdr(body, fsCdrCfg)
