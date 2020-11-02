@@ -19,13 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCgrCdrFromHttpReq(req *http.Request, timezone string) (CgrCdr, error) {
+func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 	if req.Form == nil {
 		if err := req.ParseForm(); err != nil {
 			return nil, err
@@ -41,7 +42,7 @@ func NewCgrCdrFromHttpReq(req *http.Request, timezone string) (CgrCdr, error) {
 
 type CgrCdr map[string]string
 
-func (cgrCdr CgrCdr) getCGRID(timezone string) string {
+func (cgrCdr CgrCdr) getCGRID() string {
 	if CGRID, hasIt := cgrCdr[utils.CGRID]; hasIt {
 		return CGRID
 	}
@@ -58,29 +59,61 @@ func (cgrCdr CgrCdr) getExtraFields() map[string]string {
 	return extraFields
 }
 
-func (cgrCdr CgrCdr) AsCDR(timezone string) *CDR {
-	storCdr := new(CDR)
-	storCdr.CGRID = cgrCdr.getCGRID(timezone)
-	storCdr.ToR = cgrCdr[utils.ToR]
-	storCdr.OriginID = cgrCdr[utils.OriginID]
-	storCdr.OriginHost = cgrCdr[utils.OriginHost]
-	storCdr.Source = cgrCdr[utils.Source]
-	storCdr.RequestType = cgrCdr[utils.RequestType]
-	storCdr.Tenant = cgrCdr[utils.Tenant]
-	storCdr.Category = cgrCdr[utils.Category]
-	storCdr.Account = cgrCdr[utils.Account]
-	storCdr.Subject = cgrCdr[utils.Subject]
-	storCdr.Destination = cgrCdr[utils.Destination]
-	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.SetupTime], timezone) // Not interested to process errors, should do them if necessary in a previous step
-	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.AnswerTime], timezone)
-	storCdr.Usage, _ = utils.ParseDurationWithNanosecs(cgrCdr[utils.Usage])
-	storCdr.ExtraFields = cgrCdr.getExtraFields()
+func (cgrCdr CgrCdr) AsCDR(timezone string) (storCdr *CDR, err error) {
+	storCdr = &CDR{
+		CGRID:       cgrCdr.getCGRID(),
+		RunID:       cgrCdr[utils.RunID],
+		OriginHost:  cgrCdr[utils.OriginHost],
+		Source:      cgrCdr[utils.Source],
+		OriginID:    cgrCdr[utils.OriginID],
+		ToR:         cgrCdr[utils.ToR],
+		RequestType: cgrCdr[utils.RequestType],
+		Tenant:      cgrCdr[utils.Tenant],
+		Category:    cgrCdr[utils.Category],
+		Account:     cgrCdr[utils.Account],
+		Subject:     cgrCdr[utils.Subject],
+		Destination: cgrCdr[utils.Destination],
+		ExtraFields: cgrCdr.getExtraFields(),
+		ExtraInfo:   cgrCdr[utils.ExtraInfo],
+		CostSource:  cgrCdr[utils.CostSource],
+	}
+	if orderID, hasIt := cgrCdr[utils.OrderID]; hasIt {
+		if storCdr.OrderID, err = strconv.ParseInt(orderID, 10, 64); err != nil {
+			return nil, err
+		}
+	}
+	storCdr.SetupTime, err = utils.ParseTimeDetectLayout(cgrCdr[utils.SetupTime], timezone) // Not interested to process errors, should do them if necessary in a previous step
+	if err != nil {
+		return nil, err
+	}
+	storCdr.AnswerTime, err = utils.ParseTimeDetectLayout(cgrCdr[utils.AnswerTime], timezone)
+	if err != nil {
+		return nil, err
+	}
+	storCdr.Usage, err = utils.ParseDurationWithNanosecs(cgrCdr[utils.Usage])
+	if err != nil {
+		return nil, err
+	}
+	if partial, hasIt := cgrCdr[utils.Partial]; hasIt {
+		if storCdr.Partial, err = strconv.ParseBool(partial); err != nil {
+			return nil, err
+		}
+	}
+	if ratedStr, hasIt := cgrCdr[utils.PreRated]; hasIt {
+		if storCdr.PreRated, err = strconv.ParseBool(ratedStr); err != nil {
+			return nil, err
+		}
+	}
 	storCdr.Cost = -1
 	if costStr, hasIt := cgrCdr[utils.COST]; hasIt {
-		storCdr.Cost, _ = strconv.ParseFloat(costStr, 64)
+		if storCdr.Cost, err = strconv.ParseFloat(costStr, 64); err != nil {
+			return nil, err
+		}
 	}
-	if ratedStr, hasIt := cgrCdr[utils.RATED]; hasIt {
-		storCdr.PreRated, _ = strconv.ParseBool(ratedStr)
+	if costDetails, hasIt := cgrCdr[utils.CostDetails]; hasIt {
+		if err = json.Unmarshal([]byte(costDetails), &storCdr.CostDetails); err != nil {
+			return nil, err
+		}
 	}
-	return storCdr
+	return
 }

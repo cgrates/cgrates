@@ -33,15 +33,20 @@ var cdrServer *CDRServer // Share the server so we can use it in http handlers
 
 // cgrCdrHandler handles CDRs received over HTTP REST
 func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
-	cgrCdr, err := NewCgrCdrFromHttpReq(r,
-		cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)
+	cgrCdr, err := NewCgrCdrFromHttpReq(r)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> could not create CDR entry from http: %+v, err <%s>",
 				utils.CDRs, r.Form, err.Error()))
 		return
 	}
-	cdr := cgrCdr.AsCDR(cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)
+	cdr, err := cgrCdr.AsCDR(cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> could not create CDR entry from rawCDR: %+v, err <%s>",
+				utils.CDRs, cgrCdr, err.Error()))
+		return
+	}
 	var ignored string
 	if err := cdrServer.V1ProcessCDR(&CDRWithOpts{CDR: cdr}, &ignored); err != nil {
 		utils.Logger.Warning(
