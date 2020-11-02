@@ -20,16 +20,21 @@ package v1
 
 import (
 	"github.com/cgrates/cgrates/sessions"
+	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSMGenericV1(sS *sessions.SessionS) *SMGenericV1 {
-	return &SMGenericV1{Ss: sS}
+func NewSMGenericV1(sS *sessions.SessionS, concReqs *utils.ConcReqs) *SMGenericV1 {
+	return &SMGenericV1{
+		Ss:       sS,
+		concReqs: concReqs,
+	}
 }
 
 // Exports RPC from SMGeneric
 // DEPRECATED, use SessionSv1 instead
 type SMGenericV1 struct {
-	Ss *sessions.SessionS
+	Ss       *sessions.SessionS
+	concReqs *utils.ConcReqs
 }
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit

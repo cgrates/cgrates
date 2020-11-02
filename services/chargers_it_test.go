@@ -48,7 +48,7 @@ func TestChargerSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := utils.NewServer()
+	server := utils.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
 	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))

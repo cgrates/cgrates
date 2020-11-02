@@ -24,13 +24,17 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSessionSv1(sS *sessions.SessionS) *SessionSv1 {
-	return &SessionSv1{Ss: sS}
+func NewSessionSv1(sS *sessions.SessionS, concReqs *utils.ConcReqs) *SessionSv1 {
+	return &SessionSv1{
+		Ss:       sS,
+		concReqs: concReqs,
+	}
 }
 
 // SessionSv1 exports RPC from SessionSv1
 type SessionSv1 struct {
-	Ss *sessions.SessionS
+	Ss       *sessions.SessionS
+	concReqs *utils.ConcReqs
 }
 
 func (ssv1 *SessionSv1) AuthorizeEvent(args *sessions.V1AuthorizeArgs,

@@ -455,10 +455,10 @@ func main() {
 		cncReqsLimit = utils.ConcurrentReqsLimit
 	}
 	cncReqsStrategy := cfg.GeneralCfg().ConcurrentStrategy
-	if utils.ConcurrentReqsStrategy != "" {
+	if len(utils.ConcurrentReqsStrategy) != 0 {
 		cncReqsStrategy = utils.ConcurrentReqsStrategy
 	}
-	utils.ConReqs = utils.NewConReqs(cncReqsLimit, cncReqsStrategy)
+	conReqs := utils.NewConReqs(cncReqsLimit, cncReqsStrategy)
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
 	cfg.LazySanityCheck()
 
@@ -539,7 +539,7 @@ func main() {
 	engine.SetFailedPostCacheTTL(cfg.GeneralCfg().FailedPostsTTL)
 
 	// Rpc/http server
-	server := utils.NewServer()
+	server := utils.NewServer(conReqs)
 	if len(cfg.HTTPCfg().DispatchersRegistrarURL) != 0 {
 		server.RegisterHttpFunc(cfg.HTTPCfg().DispatchersRegistrarURL, dispatcherh.Registar)
 	}
@@ -603,7 +603,7 @@ func main() {
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
 		connManager, anz)
 
-	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager, anz)
+	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager, conReqs, anz)
 
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, exitChan,
 		internalLoaderSChan, connManager, anz)

@@ -47,7 +47,7 @@ func TestDataDBReload(t *testing.T) {
 	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
-	server := utils.NewServer()
+	server := utils.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM)

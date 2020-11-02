@@ -53,11 +53,12 @@ func init() {
 
 type anzWrapFunc func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec
 
-func NewServer() (s *Server) {
+func NewServer(concReqs *ConcReqs) (s *Server) {
 	return &Server{
 		httpMux:         http.NewServeMux(),
 		httpsMux:        http.NewServeMux(),
 		stopbiRPCServer: make(chan struct{}, 1),
+		concReqs:        concReqs,
 		anzWrapper: func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec {
 			return conn
 		},
@@ -73,6 +74,7 @@ type Server struct {
 	httpsMux        *http.ServeMux
 	httpMux         *http.ServeMux
 	anzWrapper      anzWrapFunc
+	concReqs        *ConcReqs
 }
 
 func (s *Server) SetAnzWrapperFunc(anz anzWrapFunc) {
@@ -182,7 +184,7 @@ func (s *Server) ServeJSON(addr string, exitChan chan bool) {
 			}
 			continue
 		}
-		go rpc.ServeCodec(newConcReqsJSONCodec(conn, s.anzWrapper))
+		go rpc.ServeCodec(newConcReqsJSONCodec(conn, s.concReqs, s.anzWrapper))
 	}
 
 }
@@ -218,7 +220,7 @@ func (s *Server) ServeGOB(addr string, exitChan chan bool) {
 			}
 			continue
 		}
-		go rpc.ServeCodec(newConcReqsGOBCodec(conn, s.anzWrapper))
+		go rpc.ServeCodec(newConcReqsGOBCodec(conn, s.concReqs, s.anzWrapper))
 	}
 }
 
@@ -227,7 +229,7 @@ func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	rmtIP, _ := GetRemoteIP(r)
 	rmtAddr, _ := net.ResolveIPAddr(EmptyString, rmtIP)
-	res := newRPCRequest(r.Body, rmtAddr, s.anzWrapper).Call()
+	res := newRPCRequest(r.Body, rmtAddr, s.concReqs, s.anzWrapper).Call()
 	io.Copy(w, res)
 }
 
@@ -280,7 +282,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 		s.Unlock()
 		Logger.Info("<HTTP> enabling handler for WebSocket connections")
 		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
-			rpc.ServeCodec(newConcReqsJSONCodec(ws, s.anzWrapper))
+			rpc.ServeCodec(newConcReqsJSONCodec(ws, s.concReqs, s.anzWrapper))
 		})
 		if useBasicAuth {
 			s.httpMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
@@ -351,11 +353,12 @@ type rpcRequest struct {
 	rw         io.ReadWriter // holds the JSON formated RPC response
 	done       chan bool     // signals then end of the RPC request
 	remoteAddr net.Addr
+	concReqs   *ConcReqs
 	anzWarpper anzWrapFunc
 }
 
 // newRPCRequest returns a new rpcRequest.
-func newRPCRequest(r io.Reader, remoteAddr net.Addr, anz anzWrapFunc) *rpcRequest {
+func newRPCRequest(r io.Reader, remoteAddr net.Addr, concReqs *ConcReqs, anz anzWrapFunc) *rpcRequest {
 	var buf bytes.Buffer
 	done := make(chan bool)
 	return &rpcRequest{
@@ -363,6 +366,7 @@ func newRPCRequest(r io.Reader, remoteAddr net.Addr, anz anzWrapFunc) *rpcReques
 		rw:         &buf,
 		done:       done,
 		remoteAddr: remoteAddr,
+		concReqs:   concReqs,
 		anzWarpper: anz,
 	}
 }
@@ -391,7 +395,7 @@ func (r *rpcRequest) Close() error {
 
 // Call invokes the RPC request, waits for it to complete, and returns the results.
 func (r *rpcRequest) Call() io.Reader {
-	go rpc.ServeCodec(newConcReqsJSONCodec(r, r.anzWarpper))
+	go rpc.ServeCodec(newConcReqsJSONCodec(r, r.concReqs, r.anzWarpper))
 	<-r.done
 	return r.rw
 }
@@ -473,7 +477,7 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 			}
 			continue
 		}
-		go rpc.ServeCodec(newConcReqsGOBCodec(conn, s.anzWrapper))
+		go rpc.ServeCodec(newConcReqsGOBCodec(conn, s.concReqs, s.anzWrapper))
 	}
 }
 
@@ -514,7 +518,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 			}
 			continue
 		}
-		go rpc.ServeCodec(newConcReqsJSONCodec(conn, s.anzWrapper))
+		go rpc.ServeCodec(newConcReqsJSONCodec(conn, s.concReqs, s.anzWrapper))
 	}
 }
 
@@ -545,7 +549,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		s.Unlock()
 		Logger.Info("<HTTPS> enabling handler for WebSocket connections")
 		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
-			rpc.ServeCodec(newConcReqsJSONCodec(ws, s.anzWrapper))
+			rpc.ServeCodec(newConcReqsJSONCodec(ws, s.concReqs, s.anzWrapper))
 		})
 		if useBasicAuth {
 			s.httpsMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {

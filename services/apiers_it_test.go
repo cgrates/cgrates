@@ -49,7 +49,7 @@ func TestApiersReload(t *testing.T) {
 
 	cfg.ThresholdSCfg().Enabled = true
 	cfg.SchedulerCfg().Enabled = true
-	server := utils.NewServer()
+	server := utils.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
 	cfg.StorDbCfg().Type = utils.INTERNAL
