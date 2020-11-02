@@ -73,7 +73,7 @@ func (ssv1 *SessionSv1) BiRPCv1AuthorizeEvent(clnt *rpc2.Client, args *sessions.
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1AuthorizeEvent(clnt, args, rply)
+	return ssv1.sS.BiRPCv1AuthorizeEvent(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
@@ -84,7 +84,7 @@ func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(clnt *rpc2.Client, args 
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1AuthorizeEventWithDigest(clnt, args, rply)
+	return ssv1.sS.BiRPCv1AuthorizeEventWithDigest(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1InitiateSession(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
@@ -95,7 +95,7 @@ func (ssv1 *SessionSv1) BiRPCv1InitiateSession(clnt *rpc2.Client, args *sessions
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1InitiateSession(clnt, args, rply)
+	return ssv1.sS.BiRPCv1InitiateSession(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
@@ -106,7 +106,7 @@ func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(clnt *rpc2.Client, args
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1InitiateSessionWithDigest(clnt, args, rply)
+	return ssv1.sS.BiRPCv1InitiateSessionWithDigest(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V1UpdateSessionArgs,
@@ -117,7 +117,7 @@ func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1UpdateSession(clnt, args, rply)
+	return ssv1.sS.BiRPCv1UpdateSession(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.TenantWithOpts,
@@ -128,7 +128,7 @@ func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.Tenan
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1SyncSessions(clnt, &utils.TenantWithOpts{}, rply)
+	return ssv1.sS.BiRPCv1SyncSessions(clnt, &utils.TenantWithOpts{}, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *sessions.V1TerminateSessionArgs,
@@ -139,7 +139,7 @@ func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *session
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1TerminateSession(clnt, args, rply)
+	return ssv1.sS.BiRPCv1TerminateSession(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREventWithOpts,
@@ -150,7 +150,7 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREve
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1ProcessCDR(clnt, cgrEv, rply)
+	return ssv1.sS.BiRPCv1ProcessCDR(clnt, cgrEv, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt *rpc2.Client, args *sessions.V1ProcessMessageArgs,
@@ -161,7 +161,7 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt *rpc2.Client, args *sessions.
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1ProcessMessage(clnt, args, rply)
+	return ssv1.sS.BiRPCv1ProcessMessage(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1ProcessEventArgs,
@@ -172,7 +172,7 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1ProcessEvent(clnt, args, rply)
+	return ssv1.sS.BiRPCv1ProcessEvent(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetCost(clnt *rpc2.Client, args *sessions.V1ProcessEventArgs,
@@ -183,7 +183,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetCost(clnt *rpc2.Client, args *sessions.V1Proce
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1GetCost(clnt, args, rply)
+	return ssv1.sS.BiRPCv1GetCost(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
@@ -194,7 +194,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1GetActiveSessions(clnt, args, rply)
+	return ssv1.sS.BiRPCv1GetActiveSessions(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
@@ -205,7 +205,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *u
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1GetActiveSessionsCount(clnt, args, rply)
+	return ssv1.sS.BiRPCv1GetActiveSessionsCount(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
@@ -216,7 +216,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1GetPassiveSessions(clnt, args, rply)
+	return ssv1.sS.BiRPCv1GetPassiveSessions(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
@@ -227,7 +227,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args *
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(clnt, args, rply)
+	return ssv1.sS.BiRPCv1GetPassiveSessionsCount(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args *utils.SessionFilter,
@@ -238,7 +238,7 @@ func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args *utils.Se
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1ForceDisconnect(clnt, args, rply)
+	return ssv1.sS.BiRPCv1ForceDisconnect(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, args string,
@@ -249,7 +249,7 @@ func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, arg
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
+	return ssv1.sS.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREventWithOpts,
@@ -282,7 +282,7 @@ func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt *rpc2.Client,
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1SetPassiveSession(clnt, args, reply)
+	return ssv1.sS.BiRPCv1SetPassiveSession(clnt, args, reply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
@@ -293,7 +293,7 @@ func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1ActivateSessions(clnt, args, reply)
+	return ssv1.sS.BiRPCv1ActivateSessions(clnt, args, reply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
@@ -304,7 +304,7 @@ func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1DeactivateSessions(clnt, args, reply)
+	return ssv1.sS.BiRPCv1DeactivateSessions(clnt, args, reply)
 }
 
 // BiRPCV1ReAuthorize sends the RAR for filterd sessions
@@ -316,7 +316,7 @@ func (ssv1 *SessionSv1) BiRPCV1ReAuthorize(clnt *rpc2.Client,
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1ReAuthorize(clnt, args, reply)
+	return ssv1.sS.BiRPCv1ReAuthorize(clnt, args, reply)
 }
 
 // BiRPCV1DisconnectPeer sends the DPR for the OriginHost and OriginRealm
@@ -328,7 +328,7 @@ func (ssv1 *SessionSv1) BiRPCV1DisconnectPeer(clnt *rpc2.Client,
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1DisconnectPeer(clnt, args, reply)
+	return ssv1.sS.BiRPCv1DisconnectPeer(clnt, args, reply)
 }
 
 // BiRPCV1STIRAuthenticate checks the identity using STIR/SHAKEN
@@ -340,7 +340,7 @@ func (ssv1 *SessionSv1) BiRPCV1STIRAuthenticate(clnt *rpc2.Client,
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1STIRAuthenticate(clnt, args, reply)
+	return ssv1.sS.BiRPCv1STIRAuthenticate(clnt, args, reply)
 }
 
 // BiRPCV1STIRIdentity creates the identity for STIR/SHAKEN
@@ -352,7 +352,7 @@ func (ssv1 *SessionSv1) BiRPCV1STIRIdentity(clnt *rpc2.Client,
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	return ssv1.Ss.BiRPCv1STIRIdentity(nil, args, reply)
+	return ssv1.sS.BiRPCv1STIRIdentity(nil, args, reply)
 }
 
 func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, arg *utils.DurationArgs,
@@ -363,7 +363,7 @@ func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, arg *utils.DurationArgs,
 		}
 		defer ssv1.concReqs.Deallocate()
 	}
-	time.Sleep(arg.DurationTime)
+	time.Sleep(arg.Duration)
 	*reply = utils.OK
 	return nil
 }

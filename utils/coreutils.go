@@ -946,9 +946,9 @@ type SetIndexesArg struct {
 }
 
 type DurationArgs struct {
-	DurationTime time.Duration
-	Opts         map[string]interface{}
-	Tenant       string
+	Duration time.Duration
+	Opts     map[string]interface{}
+	Tenant   string
 }
 
 // AESEncrypt will encrypt the provided txt using the encKey and AES algorithm

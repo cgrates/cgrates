@@ -76,8 +76,8 @@ func testDspCoreLoad(t *testing.T) {
 		expNodeID = "ALL2"
 	}
 	dur := &utils.DurationArgs{
-		DurationTime: 500 * time.Millisecond,
-		Tenant:       "cgrates.org",
+		Duration: 500 * time.Millisecond,
+		Tenant:   "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey:  "core12345",
 			utils.OptsRouteID: "core1",
