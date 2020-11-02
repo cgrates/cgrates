@@ -1807,6 +1807,786 @@ func TestLoadTemplateSCfgError(t *testing.T) {
 	} else if err := cgrConfig.loadTemplateSCfg(cgrCfgJson); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+
+	cfgJSONStr = `{
+     "templates": {
+           "custom_template": [
+              {
+                "value": "a{*",
+            },
+           ],
+     }
+}`
+	expected = "invalid converter terminator in rule: <a{*>"
+	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err := cgrConfig.loadTemplateSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestLoadConfigsCfgError(t *testing.T) {
+	cfgJSONStr := `{
+      "configs": {
+          "url": 123,
+      },
+}`
+	expected := "json: cannot unmarshal number into Go struct field ConfigSCfgJson.Url of type string"
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err := cgrConfig.loadConfigSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestSuretaxConfig(t *testing.T) {
+	tLocal, err := time.LoadLocation("Local")
+	if err != nil {
+		t.Error(err)
+	}
+	expected := &SureTaxCfg{
+		Url:                  "",
+		ClientNumber:         "",
+		ValidationKey:        "",
+		BusinessUnit:         "",
+		Timezone:             tLocal,
+		IncludeLocalCost:     false,
+		ReturnFileCode:       "0",
+		ResponseGroup:        "03",
+		ResponseType:         "D4",
+		RegulatoryCode:       "03",
+		ClientTracking:       NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+		CustomerNumber:       NewRSRParsersMustCompile("~*req.Subject", utils.INFIELD_SEP),
+		OrigNumber:           NewRSRParsersMustCompile("~*req.Subject", utils.INFIELD_SEP),
+		TermNumber:           NewRSRParsersMustCompile("~*req.Destination", utils.INFIELD_SEP),
+		BillToNumber:         NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
+		Zipcode:              NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
+		Plus4:                NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
+		P2PZipcode:           NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
+		P2PPlus4:             NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
+		Units:                NewRSRParsersMustCompile("1", utils.INFIELD_SEP),
+		UnitType:             NewRSRParsersMustCompile("00", utils.INFIELD_SEP),
+		TaxIncluded:          NewRSRParsersMustCompile("0", utils.INFIELD_SEP),
+		TaxSitusRule:         NewRSRParsersMustCompile("04", utils.INFIELD_SEP),
+		TransTypeCode:        NewRSRParsersMustCompile("010101", utils.INFIELD_SEP),
+		SalesTypeCode:        NewRSRParsersMustCompile("R", utils.INFIELD_SEP),
+		TaxExemptionCodeList: NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.SureTaxCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestDiameterAgentConfig(t *testing.T) {
+	expected := &DiameterAgentCfg{
+		Enabled:           false,
+		ListenNet:         "tcp",
+		Listen:            "127.0.0.1:3868",
+		DictionariesPath:  "/usr/share/cgrates/diameter/dict/",
+		SessionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		OriginHost:        "CGR-DA",
+		OriginRealm:       "cgrates.org",
+		VendorId:          0,
+		ProductName:       "CGRateS",
+		ConcurrentReqs:    -1,
+		SyncedConnReqs:    false,
+		ASRTemplate:       "",
+		RARTemplate:       "",
+		ForcedDisconnect:  "*none",
+		RequestProcessors: nil,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.DiameterAgentCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestRadiusAgentConfig(t *testing.T) {
+	expected := &RadiusAgentCfg{
+		Enabled:            false,
+		ListenNet:          "udp",
+		ListenAuth:         "127.0.0.1:1812",
+		ListenAcct:         "127.0.0.1:1813",
+		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
+		ClientDictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
+		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		RequestProcessors:  nil,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.RadiusAgentCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestDNSAgentConfig(t *testing.T) {
+	expected := &DNSAgentCfg{
+		Enabled:           false,
+		Listen:            "127.0.0.1:2053",
+		ListenNet:         "udp",
+		SessionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		Timezone:          "",
+		RequestProcessors: nil,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.DNSAgentCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestAttributeSConfig(t *testing.T) {
+	expected := &AttributeSCfg{
+		Enabled:             false,
+		ApierSConns:         []string{},
+		StatSConns:          []string{},
+		ResourceSConns:      []string{},
+		IndexedSelects:      true,
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		ProcessRuns:         1,
+		NestedFields:        false,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.AttributeSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestChargersConfig(t *testing.T) {
+	expected := &ChargerSCfg{
+		Enabled:             false,
+		IndexedSelects:      true,
+		AttributeSConns:     []string{},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        false,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.ChargerSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestResourceSConfig(t *testing.T) {
+	expected := &ResourceSConfig{
+		Enabled:             false,
+		IndexedSelects:      true,
+		StoreInterval:       0,
+		ThresholdSConns:     []string{},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        false,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.ResourceSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestStatSConfig(t *testing.T) {
+	expected := &StatSCfg{
+		Enabled:                false,
+		IndexedSelects:         true,
+		StoreInterval:          0,
+		StoreUncompressedLimit: 0,
+		ThresholdSConns:        []string{},
+		PrefixIndexedFields:    &[]string{},
+		SuffixIndexedFields:    &[]string{},
+		NestedFields:           false,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.StatSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestThresholdSConfig(t *testing.T) {
+	expected := &ThresholdSCfg{
+		Enabled:             false,
+		IndexedSelects:      true,
+		StoreInterval:       0,
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        false,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.ThresholdSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestRouteSConfig(t *testing.T) {
+	expected := &RouteSCfg{
+		Enabled:             false,
+		IndexedSelects:      true,
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		AttributeSConns:     []string{},
+		ResourceSConns:      []string{},
+		StatSConns:          []string{},
+		RALsConns:           []string{},
+		DefaultRatio:        1,
+		NestedFields:        false,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.RouteSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestSessionSConfig(t *testing.T) {
+	expected := &SessionSCfg{
+		Enabled:             false,
+		ListenBijson:        "127.0.0.1:2014",
+		ChargerSConns:       []string{},
+		RALsConns:           []string{},
+		ResSConns:           []string{},
+		ThreshSConns:        []string{},
+		StatSConns:          []string{},
+		RouteSConns:         []string{},
+		AttrSConns:          []string{},
+		CDRsConns:           []string{},
+		ReplicationConns:    []string{},
+		DebitInterval:       0,
+		StoreSCosts:         false,
+		SessionTTL:          0,
+		SessionIndexes:      utils.StringMap{},
+		ClientProtocol:      1.0,
+		ChannelSyncInterval: 0,
+		TerminateAttempts:   5,
+		AlterableFields:     utils.StringSet{},
+		SchedulerConns:      []string{},
+		STIRCfg: &STIRcfg{
+			AllowedAttest:      utils.StringSet{utils.META_ANY: {}},
+			PayloadMaxduration: -1,
+			DefaultAttest:      "A",
+			PrivateKeyPath:     "",
+			PublicKeyPath:      "",
+		},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.SessionSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestFsAgentConfig(t *testing.T) {
+	expected := &FsAgentCfg{
+		Enabled:             false,
+		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		SubscribePark:       true,
+		CreateCdr:           false,
+		LowBalanceAnnFile:   "",
+		EmptyBalanceAnnFile: "",
+		EmptyBalanceContext: "",
+		MaxWaitConnection:   2000000000,
+		ExtraFields:         RSRParsers{},
+		EventSocketConns: []*FsConnCfg{
+			{
+				Address:    "127.0.0.1:8021",
+				Password:   "ClueCon",
+				Reconnects: 5,
+				Alias:      "127.0.0.1:8021",
+			},
+		},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.FsAgentCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestKamAgentConfig(t *testing.T) {
+	expected := &KamAgentCfg{
+		Enabled:       false,
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		CreateCdr:     false,
+		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 5, Alias: ""}},
+		Timezone:      "",
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.KamAgentCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestAsteriskAgentConfig(t *testing.T) {
+	expected := &AsteriskAgentCfg{
+		Enabled:       false,
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		CreateCDR:     false,
+		AsteriskConns: []*AsteriskConnCfg{{
+			Alias:           "",
+			Address:         "127.0.0.1:8088",
+			User:            "cgrates",
+			Password:        "CGRateS.org",
+			ConnectAttempts: 3,
+			Reconnects:      5,
+		}},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.AsteriskAgentCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestFilterSConfig(t *testing.T) {
+	expected := &FilterSCfg{
+		StatSConns:     []string{},
+		ResourceSConns: []string{},
+		ApierSConns:    []string{},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.FilterSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestLoaderConfig(t *testing.T) {
+	ten, err := NewRSRParsers("", utils.INFIELD_SEP)
+	if err != nil {
+		t.Error(err)
+	}
+	expected := LoaderSCfgs{
+		{
+			Enabled:        false,
+			Id:             utils.MetaDefault,
+			Tenant:         ten,
+			LockFileName:   ".cgr.lck",
+			CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+			FieldSeparator: ",",
+			TpInDir:        "/var/spool/cgrates/loader/in",
+			TpOutDir:       "/var/spool/cgrates/loader/out",
+			Data:           nil,
+		},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.LoaderCfg()
+	newConfig[0].Data = nil
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestDispatcherSConfig(t *testing.T) {
+	expected := &DispatcherSCfg{
+		Enabled:             false,
+		IndexedSelects:      true,
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		AttributeSConns:     []string{},
+		NestedFields:        false,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.DispatcherSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestDispatcherHConfig(t *testing.T) {
+	expected := &DispatcherHCfg{
+		Enabled:          false,
+		DispatchersConns: []string{},
+		Hosts:            map[string][]*DispatcherHRegistarCfg{},
+		RegisterInterval: 300000000000,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.DispatcherHCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestSchedulerConfig(t *testing.T) {
+	expected := &SchedulerCfg{
+		Enabled:   false,
+		CDRsConns: []string{},
+		Filters:   []string{},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.SchedulerCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestAnalyzerConfig(t *testing.T) {
+	expected := &AnalyzerSCfg{
+		Enabled:         false,
+		CleanupInterval: time.Hour,
+		DBPath:          "/var/spool/cgrates/analyzers",
+		IndexType:       utils.MetaScorch,
+		TTL:             24 * time.Hour,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.AnalyzerSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestApierConfig(t *testing.T) {
+	expected := &ApierCfg{
+		Enabled:         false,
+		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		SchedulerConns:  []string{},
+		AttributeSConns: []string{},
+		EEsConns:        []string{},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.ApierCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestERSConfig(t *testing.T) {
+	expected := &ERsCfg{
+		Enabled:       false,
+		SessionSConns: []string{"*internal:*sessions"},
+		Readers: []*EventReaderCfg{
+			{
+				ID:               utils.MetaDefault,
+				Type:             utils.META_NONE,
+				RowLength:        0,
+				FieldSep:         ",",
+				HeaderDefineChar: ":",
+				RunDelay:         0,
+				ConcurrentReqs:   1024,
+				SourcePath:       "/var/spool/cgrates/ers/in",
+				ProcessedPath:    "/var/spool/cgrates/ers/out",
+				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				Tenant:           nil,
+				Timezone:         utils.EmptyString,
+				Filters:          []string{},
+				Flags:            utils.FlagsWithParams{},
+				Fields:           nil,
+				CacheDumpFields:  make([]*FCTemplate, 0),
+				Opts:             make(map[string]interface{}),
+			},
+		},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.ERsCfg()
+	newConfig.Readers[0].Fields = nil
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestEEsNoLksConfig(t *testing.T) {
+	expected := &EEsCfg{
+		Enabled:         false,
+		AttributeSConns: []string{},
+		Cache: map[string]*CacheParamCfg{
+			utils.MetaFileCSV: {
+				Limit:     -1,
+				TTL:       5 * time.Second,
+				StaticTTL: false,
+			},
+		},
+		Exporters: []*EventExporterCfg{
+			{
+				ID:            utils.MetaDefault,
+				Type:          utils.META_NONE,
+				FieldSep:      ",",
+				Tenant:        nil,
+				ExportPath:    "/var/spool/cgrates/ees",
+				Attempts:      1,
+				Timezone:      utils.EmptyString,
+				Filters:       []string{},
+				AttributeSIDs: []string{},
+				Flags:         utils.FlagsWithParams{},
+				contentFields: []*FCTemplate{},
+				Fields:        []*FCTemplate{},
+				headerFields:  []*FCTemplate{},
+				trailerFields: []*FCTemplate{},
+				Opts:          make(map[string]interface{}),
+			},
+		},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.EEsNoLksCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestRateSConfig(t *testing.T) {
+	expected := &RateSCfg{
+		Enabled:                 false,
+		IndexedSelects:          true,
+		PrefixIndexedFields:     &[]string{},
+		SuffixIndexedFields:     &[]string{},
+		NestedFields:            false,
+		RateIndexedSelects:      true,
+		RatePrefixIndexedFields: &[]string{},
+		RateSuffixIndexedFields: &[]string{},
+		RateNestedFields:        false,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.RateSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestSIPAgentConfig(t *testing.T) {
+	expected := &SIPAgentCfg{
+		Enabled:             false,
+		Listen:              "127.0.0.1:5060",
+		ListenNet:           "udp",
+		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		Timezone:            "",
+		RetransmissionTimer: 1000000000,
+		RequestProcessors:   nil,
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.SIPAgentCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestRPCConnsConfig(t *testing.T) {
+	expected := RpcConns{
+		utils.MetaInternal: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+		utils.MetaLocalHost: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					Address:     "127.0.0.1:2012",
+					Transport:   "*json",
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.RPCConns()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestTemplatesConfig(t *testing.T) {
+	expected := FcTemplates{
+		"*err": {
+			{
+				Tag:       "SessionId",
+				Type:      "*variable",
+				Path:      "*rep.Session-Id",
+				Layout:    "2006-01-02T15:04:05Z07:00",
+				Value:     NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+			{
+				Tag:       "OriginHost",
+				Type:      "*variable",
+				Path:      "*rep.Origin-Host",
+				Layout:    "2006-01-02T15:04:05Z07:00",
+				Value:     NewRSRParsersMustCompile("~*vars.OriginHost", utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+			{
+				Tag:       "OriginRealm",
+				Type:      "*variable",
+				Path:      "*rep.Origin-Realm",
+				Layout:    "2006-01-02T15:04:05Z07:00",
+				Value:     NewRSRParsersMustCompile("~*vars.OriginRealm", utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+		},
+		"*errSip": {
+			{
+				Tag:       "Request",
+				Type:      "*constant",
+				Path:      "*rep.Request",
+				Layout:    "2006-01-02T15:04:05Z07:00",
+				Value:     NewRSRParsersMustCompile("SIP/2.0 500 Internal Server Error", utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+		},
+		"*cca": nil,
+		"*asr": nil,
+		"*rar": nil,
+	}
+	for _, value := range expected {
+		for _, elem := range value {
+			elem.ComputePath()
+		}
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.TemplatesCfg()
+	newConfig["*cca"] = nil
+	newConfig["*asr"] = nil
+	newConfig["*rar"] = nil
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestConfigsConfig(t *testing.T) {
+	expected := &ConfigSCfg{
+		Enabled: false,
+		Url:     "/configs/",
+		RootDir: "/var/spool/cgrates/configs",
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.ConfigSCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestAPIBanConfig(t *testing.T) {
+	expected := &APIBanCfg{
+		Enabled: false,
+		Keys:    []string{},
+	}
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newConfig := cgrConfig.APIBanCfg()
+	if !reflect.DeepEqual(expected, newConfig) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
+	}
+}
+
+func TestRLockSections(t *testing.T) {
+	cgrCfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cgrCfg.rLockSections()
+	cgrCfg.rUnlockSections()
+}
+
+func TestLockSections(t *testing.T) {
+	cgrCfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cgrCfg.lockSections()
+	cgrCfg.unlockSections()
 }
 
 func TestCgrLoaderCfgITDefaults(t *testing.T) {
