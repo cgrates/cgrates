@@ -23,6 +23,7 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"net/http"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -71,7 +72,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err = pstr.PostValues(jsn); err == nil {
+	if err = pstr.PostValues(jsn, make(http.Header)); err == nil {
 		t.Error("Expected error")
 	}
 	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test1", jsn, make(map[string]interface{}))
@@ -104,7 +105,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err = pstr.PostValues(content); err == nil {
+	if err = pstr.PostValues(content, make(http.Header)); err == nil {
 		t.Error("Expected error")
 	}
 	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test2", content, make(map[string]interface{}))

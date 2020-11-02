@@ -20,6 +20,7 @@ package ees
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"sync"
@@ -75,6 +76,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error)
 	httpPost.dc[utils.NumberOfEvents] = httpPost.dc[utils.NumberOfEvents].(int64) + 1
 
 	urlVals := url.Values{}
+	hdr := http.Header{}
 	if len(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ContentFields()) == 0 {
 		for k, v := range cgrEv.Event {
 			urlVals.Set(k, utils.IfaceAsString(v))
@@ -104,17 +106,48 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error)
 			}
 			urlVals.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
 		}
+		if hdr, err = httpPost.composeHeader(); err != nil {
+			return
+		}
 	}
 	updateEEMetrics(httpPost.dc, cgrEv.Event, httpPost.cgrCfg.GeneralCfg().DefaultTimezone)
-	if err = httpPost.httpPoster.PostValues(urlVals); err != nil &&
+	if err = httpPost.httpPoster.PostValues(urlVals, hdr); err != nil &&
 		httpPost.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
 		engine.AddFailedPost(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ExportPath,
-			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Type, utils.EventExporterS, urlVals,
-			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Opts)
+			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Type, utils.EventExporterS,
+			engine.HTTPPosterRequest{
+				Header: hdr,
+				Body:   urlVals,
+			}, httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Opts)
 	}
 	return
 }
 
 func (httpPost *HTTPPost) GetMetrics() utils.MapStorage {
 	return httpPost.dc.Clone()
+}
+
+// Compose and cache the header
+func (httpPost *HTTPPost) composeHeader() (hdr http.Header, err error) {
+	hdr = make(http.Header)
+	if len(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].HeaderFields()) == 0 {
+		return
+	}
+	eeReq := NewEventExporterRequest(nil, httpPost.dc, nil,
+		httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
+		httpPost.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
+			httpPost.cgrCfg.GeneralCfg().DefaultTimezone),
+		httpPost.filterS)
+	if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].HeaderFields()); err != nil {
+		return
+	}
+	for el := eeReq.hdr.GetFirstElement(); el != nil; el = el.Next() {
+		var strVal string
+		if strVal, err = eeReq.hdr.FieldAsString(el.Value.Slice()); err != nil {
+			return
+		}
+		hdr.Set(strings.TrimPrefix(el.Value.String(), utils.MetaHdr), strVal)
+	}
+	return
 }

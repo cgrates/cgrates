@@ -21,13 +21,20 @@ package engine
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
+
+type HTTPPosterRequest struct {
+	Header http.Header
+	Body   interface{}
+}
 
 // HTTPPostJSON posts without automatic failover
 func HTTPPostJSON(url string, content []byte) (respBody []byte, err error) {
@@ -70,14 +77,14 @@ type HTTPPoster struct {
 }
 
 // PostValues will post the event
-func (pstr *HTTPPoster) PostValues(content interface{}) (err error) {
-	_, err = pstr.GetResponse(content)
+func (pstr *HTTPPoster) PostValues(content interface{}, hdr http.Header) (err error) {
+	_, err = pstr.GetResponse(content, hdr)
 	return
 }
 
 // Post will post the event
 func (pstr *HTTPPoster) Post(content []byte, _ string) (err error) {
-	_, err = pstr.GetResponse(content)
+	_, err = pstr.GetResponse(content, make(http.Header))
 	return
 }
 
@@ -85,51 +92,59 @@ func (pstr *HTTPPoster) Post(content []byte, _ string) (err error) {
 func (*HTTPPoster) Close() {}
 
 // GetResponse will post the event and return the response
-func (pstr *HTTPPoster) GetResponse(content interface{}) (respBody []byte, err error) {
-	var body []byte        // Used to write in file and send over http
-	var urlVals url.Values // Used when posting form
-	if pstr.contentType == utils.CONTENT_FORM {
-		urlVals = content.(url.Values)
-	} else {
-		body = content.([]byte)
-	}
+func (pstr *HTTPPoster) GetResponse(content interface{}, hdr http.Header) (respBody []byte, err error) {
 	fib := utils.Fib()
-	bodyType := "application/x-www-form-urlencoded"
-	if pstr.contentType == utils.CONTENT_JSON {
-		bodyType = "application/json"
-	}
 	for i := 0; i < pstr.attempts; i++ {
-		var resp *http.Response
-		if pstr.contentType == utils.CONTENT_FORM {
-			resp, err = pstr.httpClient.PostForm(pstr.addr, urlVals)
-		} else {
-			resp, err = pstr.httpClient.Post(pstr.addr, bodyType, bytes.NewBuffer(body))
+		var req *http.Request
+		if req, err = pstr.getRequest(content, hdr); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error creating request: <%s>", pstr.addr, err.Error()))
+			return
 		}
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", pstr.addr, err.Error()))
+		if respBody, err = pstr.do(req); err != nil {
 			if i+1 < pstr.attempts {
 				time.Sleep(time.Duration(fib()) * time.Second)
 			}
 			continue
 		}
-		respBody, err = ioutil.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", pstr.addr, err.Error()))
-			if i+1 < pstr.attempts {
-				time.Sleep(time.Duration(fib()) * time.Second)
-			}
-			continue
-		}
-		if resp.StatusCode > 299 {
-			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, unexpected status code received: <%d>", pstr.addr, resp.StatusCode))
-			err = utils.ErrServerError
-			if i+1 < pstr.attempts {
-				time.Sleep(time.Duration(fib()) * time.Second)
-			}
-			continue
-		}
-		return respBody, nil
+		return
 	}
+	return
+}
+
+func (pstr *HTTPPoster) do(req *http.Request) (respBody []byte, err error) {
+	var resp *http.Response
+	if resp, err = pstr.httpClient.Do(req); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", pstr.addr, err.Error()))
+		return
+	}
+	respBody, err = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", pstr.addr, err.Error()))
+		return
+	}
+	if resp.StatusCode > 299 {
+		utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, unexpected status code received: <%d>", pstr.addr, resp.StatusCode))
+		return
+	}
+	return
+}
+
+func (pstr *HTTPPoster) getRequest(content interface{}, hdr http.Header) (req *http.Request, err error) {
+	var body io.Reader
+	if pstr.contentType == utils.CONTENT_FORM {
+		body = strings.NewReader(content.(url.Values).Encode())
+	} else {
+		body = bytes.NewBuffer(content.([]byte))
+	}
+	contentType := "application/x-www-form-urlencoded"
+	if pstr.contentType == utils.CONTENT_JSON {
+		contentType = "application/json"
+	}
+	hdr.Set("Content-Type", contentType)
+	if req, err = http.NewRequest(http.MethodPost, pstr.addr, body); err != nil {
+		return
+	}
+	req.Header = hdr
 	return
 }
