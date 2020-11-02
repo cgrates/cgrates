@@ -993,3 +993,20 @@ func AESDecrypt(encrypted string, encKey string) (txt string, err error) {
 
 	return fmt.Sprintf("%s", plaintext), nil
 }
+
+// Hash generates the hash text
+func Hash(dataKeys ...string) (lns string, err error) {
+	var hashByts []byte
+	if hashByts, err = bcrypt.GenerateFromPassword(
+		[]byte(ConcatenatedKey(dataKeys...)),
+		bcrypt.MinCost); err != nil {
+		return
+	}
+	return string(hashByts), nil
+}
+
+// VerifyHash matches the data hash with the dataKeys ha
+func VerifyHash(hash string, dataKeys ...string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(ConcatenatedKey(dataKeys...)))
+	return err == nil
+}
