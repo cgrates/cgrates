@@ -52,7 +52,7 @@ func (cS *CoreSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 
 // Sleep is used to test the concurrent requests mechanism
 func (cS *CoreSv1) Sleep(arg *utils.DurationArgs, reply *string) error {
-	time.Sleep(arg.DurationTime)
+	time.Sleep(arg.Duration)
 	*reply = utils.OK
 	return nil
 }
