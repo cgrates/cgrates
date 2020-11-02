@@ -310,6 +310,17 @@ func TestSMAEventDisconnectCause(t *testing.T) {
 	if smaEv.DisconnectCause() != "NORMAL_DISCONNECT" {
 		t.Error("Received:", smaEv.DisconnectCause())
 	}
+
+	ev = map[string]interface{}{"cause": 16} // Clear previous data
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
+	if smaEv.DisconnectCause() != "16" {
+		t.Error("Received:", smaEv.DisconnectCause())
+	}
+	ev = map[string]interface{}{"cause_txt": "NORMAL_DISCONNECT"} // Clear previous data
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
+	if smaEv.DisconnectCause() != "NORMAL_DISCONNECT" {
+		t.Error("Received:", smaEv.DisconnectCause())
+	}
 }
 
 func TestSMAEventExtraParameters(t *testing.T) {
