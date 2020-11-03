@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"reflect"
 	"testing"
 	"time"
@@ -394,7 +395,8 @@ var fsCdrCfg *config.CGRConfig
 
 func TestFsCdrFirstNonEmpty(t *testing.T) {
 	fsCdrCfg, _ = config.NewDefaultCGRConfig()
-	fsCdr, err := NewFSCdr(body, fsCdrCfg)
+	reader := bytes.NewReader(body)
+	fsCdr, err := NewFSCdr(reader, fsCdrCfg)
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err)
 	}
@@ -406,7 +408,8 @@ func TestFsCdrFirstNonEmpty(t *testing.T) {
 
 func TestFsCdrCDRFields(t *testing.T) {
 	fsCdrCfg.CdrsCfg().ExtraFields = []*utils.RSRField{{Id: "sip_user_agent"}}
-	fsCdr, err := NewFSCdr(body, fsCdrCfg)
+	reader := bytes.NewReader(body)
+	fsCdr, err := NewFSCdr(reader, fsCdrCfg)
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err)
 	}
@@ -422,13 +425,19 @@ func TestFsCdrCDRFields(t *testing.T) {
 		AnswerTime: answerTime, Usage: 68 * time.Second,
 		Cost:        -1,
 		ExtraFields: map[string]string{"sip_user_agent": "Jitsi2.10.5550Linux"}}
-	if CDR := fsCdr.AsCDR(""); !reflect.DeepEqual(expctCDR, CDR) {
+	if CDR, err := fsCdr.AsCDR(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expctCDR, CDR) {
 		t.Errorf("Expecting: %+v, received: %+v", expctCDR, CDR)
 	}
 }
 
 func TestFsCdrSearchExtraFieldLast(t *testing.T) {
-	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
+	newReader := bytes.NewReader(body)
+	fsCdr, err := NewFSCdr(newReader, fsCdrCfg)
+	if err != nil {
+		t.Error(err)
+	}
 	value := fsCdr.searchExtraField("progress_media_time", fsCdr.body)
 	if value != "1515666347954373" {
 		t.Error("Error finding extra field: ", value)
@@ -436,7 +445,11 @@ func TestFsCdrSearchExtraFieldLast(t *testing.T) {
 }
 
 func TestFsCdrSearchExtraField(t *testing.T) {
-	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
+	newReader := bytes.NewReader(body)
+	fsCdr, err := NewFSCdr(newReader, fsCdrCfg)
+	if err != nil {
+		t.Error(err)
+	}
 	rsrSt1, _ := utils.NewRSRField("^injected_value")
 	rsrSt2, _ := utils.NewRSRField("^injected_hdr::injected_value/")
 	fsCdrCfg.CdrsCfg().ExtraFields = []*utils.RSRField{{Id: "caller_id_name"}, rsrSt1, rsrSt2}
@@ -450,15 +463,21 @@ func TestFsCdrSearchExtraField(t *testing.T) {
 }
 
 func TestFsCdrSearchExtraFieldInSlice(t *testing.T) {
-	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
-	if value := fsCdr.searchExtraField("floatfld1", map[string]interface{}{"floatfld1": 6.4}); value != "6.4" {
+	newReader := bytes.NewReader(body)
+	if fsCdr, err := NewFSCdr(newReader, fsCdrCfg); err != nil {
+		t.Error(err)
+	} else if value := fsCdr.searchExtraField("floatfld1", map[string]interface{}{"floatfld1": 6.4}); value != "6.4" {
 		t.Errorf("Expecting: 6.4, received: %s", value)
 	}
 }
 
 func TestFsCdrSearchReplaceInExtraFields(t *testing.T) {
 	fsCdrCfg.CdrsCfg().ExtraFields = utils.ParseRSRFieldsMustCompile(`read_codec;~sip_user_agent:s/([A-Za-z]*).+/$1/;write_codec`, utils.INFIELD_SEP)
-	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
+	newReader := bytes.NewReader(body)
+	fsCdr, err := NewFSCdr(newReader, fsCdrCfg)
+	if err != nil {
+		t.Error(err)
+	}
 	extraFields := fsCdr.getExtraFields()
 	if len(extraFields) != 3 {
 		t.Error("Error parsing extra fields: ", extraFields)
@@ -509,7 +528,8 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
 	} else if !reflect.DeepEqual(expCdrExtra[0], fsCdrCfg.CdrsCfg().ExtraFields[0]) { // Kinda deepEqual bug since without index does not match
 		t.Errorf("Expecting: %+v, received: %+v", expCdrExtra, fsCdrCfg.CdrsCfg().ExtraFields)
 	}
-	fsCdr, err := NewFSCdr(simpleJsonCdr, fsCdrCfg)
+	newReader := bytes.NewReader(simpleJsonCdr)
+	fsCdr, err := NewFSCdr(newReader, fsCdrCfg)
 	if err != nil {
 		t.Error("Could not parse cdr", err.Error())
 	}
@@ -520,7 +540,8 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
 }
 
 func TestFsCdrFirstDefined(t *testing.T) {
-	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
+	newReader := bytes.NewReader(body)
+	fsCdr, _ := NewFSCdr(newReader, fsCdrCfg)
 	value := fsCdr.firstDefined([]string{utils.CGR_SUBJECT, utils.CGR_ACCOUNT, FS_USERNAME}, FsUsername)
 	if value != "1001" {
 		t.Errorf("Expecting: 1001, received: %s", value)
@@ -529,4 +550,240 @@ func TestFsCdrFirstDefined(t *testing.T) {
 	if value != "1001" {
 		t.Errorf("Expecting: 1001, received: %s", value)
 	}
+}
+
+func TestFscdrAsCDR(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cgrCfg.CdrsCfg().ExtraFields, err = utils.ParseRSRFieldsFromSlice([]string{"PayPalAccount"})
+	if err != nil {
+		t.Error(err)
+	}
+	fsCdrByte := []byte(` {
+      "variables": { 
+          "cgr_orderid": "123",
+          "cgr_partial": "true",
+          "cgr_prerated": "false"
+      }
+}`)
+	expectedCdr := &CDR{
+		OrderID: 123,
+		ToR:     utils.META_VOICE,
+		Source:  FS_CDR_SOURCE, Category: cgrCfg.GeneralCfg().DefaultCategory,
+		Tenant:      cgrCfg.GeneralCfg().DefaultTenant,
+		RequestType: cgrCfg.GeneralCfg().DefaultReqType,
+		Partial:     true,
+		PreRated:    false,
+		ExtraFields: map[string]string{
+			"PayPalAccount": "",
+		},
+		Cost: -1,
+	}
+	newReader := bytes.NewReader(fsCdrByte)
+	if fsCdr, err := NewFSCdr(newReader, cgrCfg); err != nil {
+		t.Error(err)
+	} else {
+		expectedCdr.CGRID = fsCdr.getCGRID()
+		if cdr, err := fsCdr.AsCDR(""); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(expectedCdr, cdr) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedCdr), utils.ToJSON(cdr))
+		}
+	}
+}
+
+func TestFscdrAsCdrOrderId(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	fsCdrByte := []byte(` {
+      "variables": { 
+          "cgr_orderid": "123s"
+      }
+}`)
+	expectedErr := "strconv.ParseInt: parsing \"123s\": invalid syntax"
+	newReader := bytes.NewReader(fsCdrByte)
+	if fsCdr, err := NewFSCdr(newReader, cgrCfg); err != nil {
+		t.Error(err)
+	} else if _, err := fsCdr.AsCDR(""); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v \n, received %+v", expectedErr, err)
+	}
+}
+
+func TestFscdrAsCdrSetupTime(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	fsCdrByte := []byte(` {
+      "variables": { 
+         "start_epoch": "123ss"
+      }
+}`)
+	expectedErr := "Unsupported time format"
+	newReader := bytes.NewReader(fsCdrByte)
+	if fsCdr, err := NewFSCdr(newReader, cgrCfg); err != nil {
+		t.Error(err)
+	} else if _, err := fsCdr.AsCDR(""); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v \n, received %+v", expectedErr, err)
+	}
+}
+
+func TestFscdrAsCdrAnswerTime(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	fsCdrByte := []byte(` {
+      "variables": { 
+         "answer_epoch": "123ss"
+      }
+}`)
+	expectedErr := "Unsupported time format"
+	newReader := bytes.NewReader(fsCdrByte)
+	if fsCdr, err := NewFSCdr(newReader, cgrCfg); err != nil {
+		t.Error(err)
+	} else if _, err := fsCdr.AsCDR(""); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v \n, received %+v", expectedErr, err)
+	}
+}
+
+func TestFscdrAsCdrUsage(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	fsCdrByte := []byte(` {
+      "variables": { 
+         "billsec": "1ss"
+      }
+}`)
+	expectedErr := "time: unknown unit \"ss\" in duration \"1ss\""
+	newReader := bytes.NewReader(fsCdrByte)
+	if fsCdr, err := NewFSCdr(newReader, cgrCfg); err != nil {
+		t.Error(err)
+	} else if _, err := fsCdr.AsCDR(""); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v \n, received %+v", expectedErr, err)
+	}
+}
+
+func TestFscdrAsCdrPartial(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	fsCdrByte := []byte(` {
+      "variables": { 
+         "cgr_partial": "InvalidBoolFormat"
+      }
+}`)
+	expectedErr := "strconv.ParseBool: parsing \"InvalidBoolFormat\": invalid syntax"
+	newReader := bytes.NewReader(fsCdrByte)
+	if fsCdr, err := NewFSCdr(newReader, cgrCfg); err != nil {
+		t.Error(err)
+	} else if _, err := fsCdr.AsCDR(""); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v \n, received %+v", expectedErr, err)
+	}
+}
+
+func TestFscdrAsCdrPreRated(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	fsCdrByte := []byte(` {
+      "variables": { 
+         "cgr_prerated": "InvalidBoolFormat"
+      }
+}`)
+	expectedErr := "strconv.ParseBool: parsing \"InvalidBoolFormat\": invalid syntax"
+	newReader := bytes.NewReader(fsCdrByte)
+	if fsCdr, err := NewFSCdr(newReader, cgrCfg); err != nil {
+		t.Error(err)
+	} else if _, err := fsCdr.AsCDR(""); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v \n, received %+v", expectedErr, err)
+	}
+}
+
+func TestFscdrAsCdrFirstDefined(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	fsCdrByte := []byte(` {
+      "variables": { 
+         "cgr_account": "randomAccount"
+      }
+}`)
+	expectedCdr := &CDR{
+		ToR:    utils.META_VOICE,
+		Source: FS_CDR_SOURCE, Category: cgrCfg.GeneralCfg().DefaultCategory,
+		Tenant:      cgrCfg.GeneralCfg().DefaultTenant,
+		RequestType: cgrCfg.GeneralCfg().DefaultReqType,
+		Account:     "randomAccount",
+		Subject:     "randomAccount",
+		ExtraFields: map[string]string{},
+		Cost:        -1,
+	}
+	newReader := bytes.NewReader(fsCdrByte)
+	if fsCdr, err := NewFSCdr(newReader, cgrCfg); err != nil {
+		t.Error(err)
+	} else {
+		expectedCdr.CGRID = fsCdr.getCGRID()
+		if cdr, err := fsCdr.AsCDR(""); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(expectedCdr, cdr) {
+			t.Errorf("Expected %+v \n, redceived %+v", utils.ToJSON(expectedCdr), utils.ToJSON(cdr))
+		}
+	}
+}
+func TestNewFSCdrDecodeError(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	expectedErr := "EOF"
+	newReader := bytes.NewReader(nil)
+	if _, err := NewFSCdr(newReader, cgrCfg); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestSearchExtraFieldDefaultType(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newMap := map[string]interface{}{
+		"variables": map[string]string{
+			"cgr_orderid": "123",
+		},
+	}
+	fsCdr := FSCdr{
+		cgrCfg: cgrCfg,
+		body:   newMap,
+	}
+	fsCdr.searchExtraField(utils.EmptyString, newMap)
+}
+
+func TestSearchExtraFieldInterface(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	newMap := map[string]interface{}{ //There is a slice with no maps
+		"variables": []interface{}{
+			2,
+			"randomValue",
+			true,
+		},
+	}
+	fsCdr := FSCdr{
+		cgrCfg: cgrCfg,
+		body:   newMap,
+	}
+	fsCdr.searchExtraField(utils.EmptyString, newMap)
 }

@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"bytes"
 	"reflect"
 	"testing"
 	"time"
@@ -953,15 +954,20 @@ variable_rtp_audio_rtcp_octet_count: 0`
 	var fsCdrCfg *config.CGRConfig
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	fsCdrCfg, _ = config.NewDefaultCGRConfig()
-	fsCdr, _ := engine.NewFSCdr(body, fsCdrCfg)
+	newReader := bytes.NewReader(body)
+	fsCdr, err := engine.NewFSCdr(newReader, fsCdrCfg)
+	if err != nil {
+		t.Error(err)
+	}
 	smGev := engine.NewMapEvent(NewFSEvent(hangUp).AsMapStringInterface(timezone))
 	sessions.GetSetCGRID(smGev)
 	smCDR, err := smGev.AsCDR(fsCdrCfg, utils.EmptyString, timezone)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsCDR := fsCdr.AsCDR(timezone)
-	if fsCDR.CGRID != smCDR.CGRID {
+	if fsCDR, err := fsCdr.AsCDR(timezone); err != nil {
+		t.Error(err)
+	} else if fsCDR.CGRID != smCDR.CGRID {
 		t.Errorf("Expecting: %s, received: %s", fsCDR.CGRID, smCDR.CGRID)
 	}
 }
