@@ -17,7 +17,6 @@ package engine
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strings"
@@ -29,10 +28,8 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-var cdrServer *CDRServer // Share the server so we can use it in http handlers
-
 // cgrCdrHandler handles CDRs received over HTTP REST
-func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
+func (cdrS *CDRServer) cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 	cgrCdr, err := NewCgrCdrFromHttpReq(r)
 	if err != nil {
 		utils.Logger.Warning(
@@ -40,7 +37,7 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 				utils.CDRs, r.Form, err.Error()))
 		return
 	}
-	cdr, err := cgrCdr.AsCDR(cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)
+	cdr, err := cgrCdr.AsCDR(cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> could not create CDR entry from rawCDR: %+v, err <%s>",
@@ -48,7 +45,7 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var ignored string
-	if err := cdrServer.V1ProcessCDR(&CDRWithOpts{CDR: cdr}, &ignored); err != nil {
+	if err := cdrS.V1ProcessCDR(&CDRWithOpts{CDR: cdr}, &ignored); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> processing CDR: %s, err: <%s>",
 				utils.CDRs, cdr, err.Error()))
@@ -56,16 +53,20 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // fsCdrHandler will handle CDRs received from FreeSWITCH over HTTP-JSON
-func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
-	fsCdr, err := NewFSCdr(body, cdrServer.cgrCfg)
+func (cdrS *CDRServer) fsCdrHandler(w http.ResponseWriter, r *http.Request) {
+	fsCdr, err := NewFSCdr(r.Body, cdrS.cgrCfg)
+	r.Body.Close()
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
 		return
 	}
-	cdr := fsCdr.AsCDR(cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)
+	cdr, err := fsCdr.AsCDR(cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<CDRS> Could not create AsCDR entry: %s", err.Error()))
+		return
+	}
 	var ignored string
-	if err := cdrServer.V1ProcessCDR(&CDRWithOpts{CDR: cdr}, &ignored); err != nil {
+	if err := cdrS.V1ProcessCDR(&CDRWithOpts{CDR: cdr}, &ignored); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> processing CDR: %s, err: <%s>",
 				utils.CDRs, cdr, err.Error()))
@@ -115,9 +116,8 @@ func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) (err error) {
 
 // RegisterHandlersToServer is called by cgr-engine to register HTTP URL handlers
 func (cdrS *CDRServer) RegisterHandlersToServer(server *utils.Server) {
-	cdrServer = cdrS // Share the server object for handlers
-	server.RegisterHttpFunc(cdrS.cgrCfg.HTTPCfg().HTTPCDRsURL, cgrCdrHandler)
-	server.RegisterHttpFunc(cdrS.cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL, fsCdrHandler)
+	server.RegisterHttpFunc(cdrS.cgrCfg.HTTPCfg().HTTPCDRsURL, cdrS.cgrCdrHandler)
+	server.RegisterHttpFunc(cdrS.cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL, cdrS.fsCdrHandler)
 }
 
 // storeSMCost will store a SMCost
