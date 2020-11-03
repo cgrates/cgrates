@@ -2059,7 +2059,7 @@ func testApierReplayFldPosts(t *testing.T) {
 	ev := &engine.ExportEvents{
 		Path:   "http://localhost:2081",
 		Format: utils.MetaHTTPjson,
-		Events: []interface{}{bev},
+		Events: []interface{}{&engine.HTTPPosterRequest{Body: bev, Header: http.Header{"Content-Type": []string{"application/json"}}}},
 	}
 	fileName := "act>*http_post|63bed4ea-615e-4096-b1f4-499f64f29b28.json"
 
