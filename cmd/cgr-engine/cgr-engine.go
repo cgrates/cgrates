@@ -458,7 +458,7 @@ func main() {
 	if len(utils.ConcurrentReqsStrategy) != 0 {
 		cncReqsStrategy = utils.ConcurrentReqsStrategy
 	}
-	conReqs := utils.NewConReqs(cncReqsLimit, cncReqsStrategy)
+	conReqs := utils.NewConReqs(cncReqsLimit, cncReqsStrategy, 0, 0, exitChan)
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
 	cfg.LazySanityCheck()
 
