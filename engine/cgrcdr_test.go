@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"net/http"
+	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -182,9 +185,9 @@ func TestCgrCdrAsCDRPreRatedError(t *testing.T) {
 
 func TestCgrCdrAsCDRCostError(t *testing.T) {
 	cgrCdr := CgrCdr{
-		utils.Cost: "InvalidFlaotFormat",
+		utils.Cost: "InvalidFloatFormat",
 	}
-	expected := "strconv.ParseFloat: parsing \"InvalidFlaotFormat\": invalid syntax"
+	expected := "strconv.ParseFloat: parsing \"InvalidFloatFormat\": invalid syntax"
 	if _, err := cgrCdr.AsCDR(""); err == nil || err.Error() != expected {
 		t.Errorf("Expecting %v, received: %v", expected, err)
 	}
@@ -197,5 +200,50 @@ func TestCgrCdrAsCDRCostDetailsError(t *testing.T) {
 	expected := "json: cannot unmarshal number into Go struct field EventCost.RunID of type string"
 	if _, err := cgrCdr.AsCDR(""); err == nil || err.Error() != expected {
 		t.Errorf("Expecting %v, received: %v", expected, err)
+	}
+}
+
+func TestNewCgrCdrFromHttpReq(t *testing.T) {
+	cgrCdr := CgrCdr{
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "dsafdsaf",
+		utils.OriginHost:  "192.168.1.1",
+		utils.Source:      "internal_test",
+		utils.OrderID:     "23",
+		utils.RequestType: utils.META_RATED,
+		utils.Tenant:      "cgrates.org",
+		utils.Category:    "call",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1002",
+		utils.Partial:     "true",
+		utils.SetupTime:   "2013-11-07T08:42:20Z",
+		utils.AnswerTime:  "2013-11-07T08:42:26Z",
+		utils.Usage:       "10s", "field_extr1": "val_extr1", "fieldextr2": "valextr2",
+		utils.CostDetails: `{ "CGRID": "randomID", "RunID": "thisID"}`,
+	}
+	r, err := http.NewRequest(http.MethodPost, "cgrates.org", strings.NewReader(""))
+	if err != nil {
+		t.Error(err)
+	}
+	r.Form = url.Values{}
+	for key, value := range cgrCdr {
+		r.Form.Set(key, value)
+	}
+	if newCgrCdr, err := NewCgrCdrFromHttpReq(r); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(newCgrCdr, cgrCdr) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(cgrCdr), utils.ToJSON(newCgrCdr))
+	}
+}
+
+func TestNewCgrCdrFromHttpReqNilForm(t *testing.T) {
+	r, err := http.NewRequest(http.MethodPost, "cgrates.org", nil)
+	if err != nil {
+		t.Error(err)
+	}
+	expected := "missing form body"
+	if _, err := NewCgrCdrFromHttpReq(r); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
