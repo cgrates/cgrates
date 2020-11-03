@@ -240,7 +240,19 @@ func TestRegister(t *testing.T) {
 	}
 	engine.NewConnManager(errCfg, map[string]chan rpcclient.ClientConnector{})
 	errCfg.CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
-	errCfg.CacheCfg().ReplicationConns = []string{"*localhost"}
+	errCfg.RPCConns()["errCon"] = &config.RPCConn{
+		Strategy: utils.MetaFirst,
+		PoolSize: 1,
+		Conns: []*config.RemoteHost{
+			{
+				Address:     "127.0.0.1:5612",
+				Transport:   "*json",
+				Synchronous: false,
+				TLS:         false,
+			},
+		},
+	}
+	errCfg.CacheCfg().ReplicationConns = []string{"errCon"}
 	engine.SetCache(engine.NewCacheS(errCfg, nil))
 	req.Body = ioutil.NopCloser(bytes.NewBuffer(uargsJSON))
 	if _, err := register(req); err != utils.ErrPartiallyExecuted {

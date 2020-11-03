@@ -164,7 +164,7 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 			return expEv, err
 		}
 		for _, ev := range expEv.Events {
-			req := ev.(HTTPPosterRequest)
+			req := ev.(*HTTPPosterRequest)
 			err = pstr.PostValues(req.Body, req.Header)
 			if err != nil {
 				failedEvents.AddEvent(req)

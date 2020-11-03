@@ -52,10 +52,10 @@ var (
 		testDsphInitDB,
 		testDsphStartEngine,
 		testDsphLoadData,
-		// testDsphBeforeDsphStart,
-		// testDsphStartAll2,
-		// testDsphStartAll,
-		// testDsphStopEngines,
+		testDsphBeforeDsphStart,
+		testDsphStartAll2,
+		testDsphStartAll,
+		testDsphStopEngines,
 		testDsphStopDispatcher,
 	}
 )

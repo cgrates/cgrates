@@ -79,7 +79,7 @@ func TestSessionSReload(t *testing.T) {
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1),
 		nil, anz)
-	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), engineShutdown, nil, utils.NewConReqs(0, ""), anz)
+	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), engineShutdown, nil, nil, anz)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, chrS, schS, ralS, cdrS,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db, stordb)

@@ -115,7 +115,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error)
 		httpPost.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
 		engine.AddFailedPost(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ExportPath,
 			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Type, utils.EventExporterS,
-			engine.HTTPPosterRequest{
+			&engine.HTTPPosterRequest{
 				Header: hdr,
 				Body:   urlVals,
 			}, httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Opts)

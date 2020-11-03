@@ -78,6 +78,8 @@ func init() {
 	gob.Register(new(StatSum))
 	gob.Register(new(StatAverage))
 	gob.Register(new(StatDistinct))
+
+	gob.Register(new(HTTPPosterRequest))
 }
 
 //SetCache shared the cache from other subsystems

@@ -63,6 +63,9 @@ func TestNewAnalyzerService(t *testing.T) {
 		t.Fatal(err)
 	}
 	anz.db.Close()
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestAnalyzerSLogTraffic(t *testing.T) {
@@ -116,6 +119,9 @@ func TestAnalyzerSLogTraffic(t *testing.T) {
 	if err = anz.clenaUp(); err != bleve.ErrorIndexClosed {
 		t.Errorf("Expected error: %v,received: %+v", bleve.ErrorIndexClosed, err)
 	}
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestAnalyzersDeleteHits(t *testing.T) {
@@ -137,6 +143,9 @@ func TestAnalyzersDeleteHits(t *testing.T) {
 	}
 	if err = anz.deleteHits(search.DocumentMatchCollection{&search.DocumentMatch{}}); err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected error: %v,received: %+v", utils.ErrPartiallyExecuted, err)
+	}
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -173,6 +182,9 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 		anz.db.Close()
 	}()
 	anz.ListenAndServe(make(chan bool))
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestAnalyzersV1Search(t *testing.T) {
@@ -288,5 +300,8 @@ func TestAnalyzersV1Search(t *testing.T) {
 	}
 	if err = anz.V1StringQuery("RequestEncoding:*gob", &reply); err != bleve.ErrorIndexClosed {
 		t.Errorf("Expected error: %v,received: %+v", bleve.ErrorIndexClosed, err)
+	}
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
 	}
 }

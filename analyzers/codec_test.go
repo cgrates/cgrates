@@ -97,4 +97,7 @@ func TestNewServerCodec(t *testing.T) {
 	} else if cnt != 1 {
 		t.Errorf("Expected only one document received:%v", cnt)
 	}
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
 }
