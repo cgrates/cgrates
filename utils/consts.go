@@ -873,6 +873,7 @@ const (
 	ProcessRuns              = "ProcessRuns"
 	HashtagSep               = "#"
 	MetaRounding             = "*rounding"
+	StatsNA                  = -1.0
 )
 
 // Migrator Action

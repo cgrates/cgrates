@@ -22,20 +22,26 @@ import (
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"time"
 )
 
 // ConcReqs the structure that allocs requests for API
 type ConcReqs struct {
 	strategy string
 	aReqs    chan struct{}
+	// st       *concReqStats
 }
 
 // NewConReqs creates a new ConcReqs
-func NewConReqs(reqs int, strategy string) *ConcReqs {
+func NewConReqs(reqs int, strategy string, ttl, sampleinterval time.Duration, exitChan chan bool) *ConcReqs {
 	cR := &ConcReqs{
 		strategy: strategy,
 		aReqs:    make(chan struct{}, reqs),
 	}
+	/*
+		if ttl != 0 {
+			cR.st = newConcReqStatS(ttl, sampleinterval, exitChan, cR.aReqs)
+		}*/
 	return cR
 }
 
@@ -119,3 +125,60 @@ func (c *concReqsServerCodec) WriteResponse(r *rpc.Response, x interface{}) erro
 	return c.sc.WriteResponse(r, x)
 }
 func (c *concReqsServerCodec) Close() error { return c.sc.Close() }
+
+/*
+func newConcReqStatS(ttl, sampleinterval time.Duration, exitChan chan bool, concReq chan struct{}) (cs *concReqStats) {
+	cs = &concReqStats{
+		st: NewStatAverage(2),
+	}
+	cs.cache = ltcache.NewCache(-1, ttl, true, cs.onEvict)
+	go cs.loop(sampleinterval, exitChan, concReq)
+	return
+}
+
+type concReqStats struct {
+	sync.RWMutex
+	cache *ltcache.Cache
+	st    *StatAverage
+	peak  int
+}
+
+func (cs *concReqStats) onEvict(itmID string, value interface{}) {
+	cs.st.RemEvent(itmID)
+}
+
+func (cs *concReqStats) loop(intr time.Duration, exitChan chan bool, concReq chan struct{}) {
+	for {
+		select {
+		case v := <-exitChan:
+			exitChan <- v
+			return
+		case <-time.After(intr):
+			evID := time.Now().String()
+			val := len(concReq)
+
+			cs.Lock()
+			cs.cache.Set(evID, val, nil)
+			cs.st.AddStat(evID, float64(val))
+			if val > cs.peak {
+				cs.peak = val
+			}
+			cs.Unlock()
+		}
+	}
+}
+
+func (cs *concReqStats) GetPeak() (peak int) {
+	cs.RLock()
+	peak = cs.peak
+	cs.RUnlock()
+	return
+}
+
+func (cs *concReqStats) GetAverage(roundingDecimals int) (avg float64) {
+	cs.RLock()
+	avg = cs.st.GetFloat64Value(roundingDecimals)
+	cs.RUnlock()
+	return
+}
+*/

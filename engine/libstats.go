@@ -68,12 +68,13 @@ type MetricWithFilters struct {
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
 func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
 	sSQ = &StoredStatQueue{
-		Tenant:     sq.Tenant,
-		ID:         sq.ID,
-		Compressed: sq.Compress(int64(config.CgrConfig().StatSCfg().StoreUncompressedLimit)),
-		SQItems:    make([]SQItem, len(sq.SQItems)),
-		SQMetrics:  make(map[string][]byte, len(sq.SQMetrics)),
-		MinItems:   sq.MinItems,
+		Tenant: sq.Tenant,
+		ID:     sq.ID,
+		Compressed: sq.Compress(int64(config.CgrConfig().StatSCfg().StoreUncompressedLimit),
+			config.CgrConfig().GeneralCfg().RoundingDecimals),
+		SQItems:   make([]SQItem, len(sq.SQItems)),
+		SQMetrics: make(map[string][]byte, len(sq.SQMetrics)),
+		MinItems:  sq.MinItems,
 	}
 	for i, sqItm := range sq.SQItems {
 		sSQ.SQItems[i] = sqItm
@@ -263,7 +264,7 @@ func (sq *StatQueue) addStatEvent(tnt, evID string, filterS *FilterS, evNm utils
 	return
 }
 
-func (sq *StatQueue) Compress(maxQL int64) bool {
+func (sq *StatQueue) Compress(maxQL int64, roundDec int) bool {
 	if int64(len(sq.SQItems)) < maxQL || maxQL == 0 {
 		return false
 	}
@@ -278,7 +279,7 @@ func (sq *StatQueue) Compress(maxQL int64) bool {
 	}
 
 	for _, m := range sq.SQMetrics {
-		for _, id := range m.Compress(maxQL, defaultCompressID) {
+		for _, id := range m.Compress(maxQL, defaultCompressID, roundDec) {
 			idMap[id] = struct{}{}
 		}
 	}

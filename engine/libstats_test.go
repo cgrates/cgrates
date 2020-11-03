@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -60,29 +61,29 @@ func TestStatRemEventWithID(t *testing.T) {
 		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asr := asrMetric.GetFloat64Value(); asr != 50 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_1")
-	if asr := asrMetric.GetFloat64Value(); asr != 0 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 1 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_5") // non existent
-	if asr := asrMetric.GetFloat64Value(); asr != 0 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 1 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetFloat64Value(); asr != -1 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != -1 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetFloat64Value(); asr != -1 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != -1 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
@@ -103,31 +104,31 @@ func TestStatRemEventWithID2(t *testing.T) {
 		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asr := asrMetric.GetFloat64Value(); asr != 50 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_1")
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetFloat64Value(); asr != 50 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 2 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_5") // non existent
-	if asr := asrMetric.GetFloat64Value(); asr != 50 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 2 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_1")
-	if asr := asrMetric.GetFloat64Value(); asr != -1 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != -1 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetFloat64Value(); asr != -1 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != -1 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
@@ -154,11 +155,11 @@ func TestStatRemExpired(t *testing.T) {
 		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asr := asrMetric.GetFloat64Value(); asr != 66.66667 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 66.66667 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	}
 	sq.remExpired()
-	if asr := asrMetric.GetFloat64Value(); asr != 100 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 100 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 1 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
@@ -216,12 +217,12 @@ func TestStatAddStatEvent(t *testing.T) {
 		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asr := asrMetric.GetFloat64Value(); asr != 100 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 100 {
 		t.Errorf("received ASR: %v", asr)
 	}
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
 	sq.addStatEvent(ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
-	if asr := asrMetric.GetFloat64Value(); asr != 50 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
 		t.Errorf("received ASR: %v", asr)
 	} else if asrMetric.Answered != 1 || asrMetric.Count != 2 {
 		t.Errorf("ASR: %v", asrMetric)
@@ -229,7 +230,7 @@ func TestStatAddStatEvent(t *testing.T) {
 	ev1.Event = map[string]interface{}{
 		utils.AnswerTime: time.Now()}
 	sq.addStatEvent(ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
-	if asr := asrMetric.GetFloat64Value(); asr != 66.66667 {
+	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 66.66667 {
 		t.Errorf("received ASR: %v", asr)
 	} else if asrMetric.Answered != 2 || asrMetric.Count != 3 {
 		t.Errorf("ASR: %v", asrMetric)
@@ -300,10 +301,10 @@ func TestStatCompress(t *testing.T) {
 			utils.MetaASR: asr,
 		},
 	}
-	if sq.Compress(int64(100)) {
+	if sq.Compress(int64(100), config.CgrConfig().GeneralCfg().RoundingDecimals) {
 		t.Errorf("StatQueue compressed: %s", utils.ToJSON(sq))
 	}
-	if !sq.Compress(int64(2)) {
+	if !sq.Compress(int64(2), config.CgrConfig().GeneralCfg().RoundingDecimals) {
 		t.Errorf("StatQueue not compressed: %s", utils.ToJSON(sq))
 	}
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
@@ -364,10 +365,10 @@ func TestStatCompress2(t *testing.T) {
 			utils.MetaTCD: tcd,
 		},
 	}
-	if sq.Compress(int64(100)) {
+	if sq.Compress(int64(100), config.CgrConfig().GeneralCfg().RoundingDecimals) {
 		t.Errorf("StatQueue compressed: %s", utils.ToJSON(sq))
 	}
-	if !sq.Compress(int64(2)) {
+	if !sq.Compress(int64(2), config.CgrConfig().GeneralCfg().RoundingDecimals) {
 		t.Errorf("StatQueue not compressed: %s", utils.ToJSON(sq))
 	}
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
@@ -435,10 +436,10 @@ func TestStatCompress3(t *testing.T) {
 			utils.MetaTCD: tcd,
 		},
 	}
-	if sq.Compress(int64(100)) {
+	if sq.Compress(int64(100), config.CgrConfig().GeneralCfg().RoundingDecimals) {
 		t.Errorf("StatQueue compressed: %s", utils.ToJSON(sq))
 	}
-	if !sq.Compress(int64(3)) {
+	if !sq.Compress(int64(3), config.CgrConfig().GeneralCfg().RoundingDecimals) {
 		t.Errorf("StatQueue not compressed: %s", utils.ToJSON(sq))
 	}
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {

@@ -341,7 +341,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 				},
 			}
 			for metricID, metric := range sq.SQMetrics {
-				thEv.Event[metricID] = metric.GetValue()
+				thEv.Event[metricID] = metric.GetValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)
 			}
 			var tIDs []string
 			if err := sS.connMgr.Call(sS.cgrcfg.StatSCfg().ThresholdSConns, nil,
@@ -457,7 +457,7 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 	sq.RLock()
 	metrics := make(map[string]string, len(sq.SQMetrics))
 	for metricID, metric := range sq.SQMetrics {
-		metrics[metricID] = metric.GetStringValue("")
+		metrics[metricID] = metric.GetStringValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)
 	}
 	sq.RUnlock()
 	*reply = metrics
@@ -486,7 +486,7 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 	sq.RLock()
 	metrics := make(map[string]float64, len(sq.SQMetrics))
 	for metricID, metric := range sq.SQMetrics {
-		metrics[metricID] = metric.GetFloat64Value()
+		metrics[metricID] = metric.GetFloat64Value(sS.cgrcfg.GeneralCfg().RoundingDecimals)
 	}
 	sq.RUnlock()
 	*reply = metrics
