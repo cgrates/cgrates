@@ -161,10 +161,10 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		utils.RARTemplateCfg:        "",
 		utils.SessionSConnsCfg:      []string{utils.MetaInternal, "*conn1"},
 		utils.SyncedConnReqsCfg:     true,
-		utils.VendorIdCfg:           0,
+		utils.VendorIDCfg:           0,
 		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
-				utils.IdCfg:       utils.CGRATES,
+				utils.IDCfg:       utils.CGRATES,
 				utils.TenantCfg:   "1",
 				utils.FiltersCfg:  []string{},
 				utils.FlagsCfg:    []string{"1"},
@@ -224,7 +224,7 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		utils.RARTemplateCfg:        "",
 		utils.SessionSConnsCfg:      []string{"*internal"},
 		utils.SyncedConnReqsCfg:     false,
-		utils.VendorIdCfg:           0,
+		utils.VendorIDCfg:           0,
 		utils.RequestProcessorsCfg:  []map[string]interface{}{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

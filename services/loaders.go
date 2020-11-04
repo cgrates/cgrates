@@ -23,6 +23,7 @@ import (
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
@@ -31,7 +32,7 @@ import (
 
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
-	filterSChan chan *engine.FilterS, server *utils.Server,
+	filterSChan chan *engine.FilterS, server *cores.Server,
 	exitChan chan bool, internalLoaderSChan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager,
 	anz *AnalyzerService) *LoaderService {
@@ -53,7 +54,7 @@ type LoaderService struct {
 	cfg         *config.CGRConfig
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
-	server      *utils.Server
+	server      *cores.Server
 	exitChan    chan bool
 
 	ldrs     *loaders.LoaderService

@@ -24,6 +24,7 @@ import (
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -32,7 +33,7 @@ import (
 
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
+	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *cores.Server,
 	internalChargerSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager,
 	anz *AnalyzerService) servmanager.Service {
 	return &ChargerService{
@@ -54,7 +55,7 @@ type ChargerService struct {
 	dm          *DataDBService
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
-	server      *utils.Server
+	server      *cores.Server
 	connMgr     *engine.ConnManager
 
 	chrS     *engine.ChargerService

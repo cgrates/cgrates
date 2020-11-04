@@ -32,6 +32,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/dispatcherh"
 	"github.com/cgrates/cgrates/loaders"
 
@@ -74,7 +75,7 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 
 // initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
 func initCacheS(internalCacheSChan chan rpcclient.ClientConnector,
-	server *utils.Server, dm *engine.DataManager, exitChan chan bool,
+	server *cores.Server, dm *engine.DataManager, exitChan chan bool,
 	anz *services.AnalyzerService) (chS *engine.CacheS) {
 	chS = engine.NewCacheS(cfg, dm)
 	go func() {
@@ -96,7 +97,7 @@ func initCacheS(internalCacheSChan chan rpcclient.ClientConnector,
 	return
 }
 
-func initGuardianSv1(internalGuardianSChan chan rpcclient.ClientConnector, server *utils.Server,
+func initGuardianSv1(internalGuardianSChan chan rpcclient.ClientConnector, server *cores.Server,
 	anz *services.AnalyzerService) {
 	grdSv1 := v1.NewGuardianSv1()
 	if !cfg.DispatcherSCfg().Enabled {
@@ -109,9 +110,9 @@ func initGuardianSv1(internalGuardianSChan chan rpcclient.ClientConnector, serve
 	internalGuardianSChan <- rpc
 }
 
-func initCoreSv1(internalCoreSv1Chan chan rpcclient.ClientConnector, server *utils.Server,
-	anz *services.AnalyzerService) {
-	cSv1 := v1.NewCoreSv1(engine.NewCoreService())
+func initCoreSv1(internalCoreSv1Chan chan rpcclient.ClientConnector, server *cores.Server,
+	anz *services.AnalyzerService, cfg *config.CGRConfig, caps *cores.Caps, exitChan chan bool) {
+	cSv1 := v1.NewCoreSv1(cores.NewCoreService(cfg, caps, exitChan))
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(cSv1)
 	}
@@ -123,7 +124,7 @@ func initCoreSv1(internalCoreSv1Chan chan rpcclient.ClientConnector, server *uti
 }
 
 func initServiceManagerV1(internalServiceManagerChan chan rpcclient.ClientConnector,
-	srvMngr *servmanager.ServiceManager, server *utils.Server,
+	srvMngr *servmanager.ServiceManager, server *cores.Server,
 	anz *services.AnalyzerService) {
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(v1.NewServiceManagerV1(srvMngr))
@@ -145,7 +146,7 @@ func initLogger(cfg *config.CGRConfig) error {
 }
 
 func initConfigSv1(internalConfigChan chan rpcclient.ClientConnector,
-	server *utils.Server, anz *services.AnalyzerService) {
+	server *cores.Server, anz *services.AnalyzerService) {
 	cfgSv1 := v1.NewConfigSv1(cfg)
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(cfgSv1)
@@ -157,7 +158,7 @@ func initConfigSv1(internalConfigChan chan rpcclient.ClientConnector,
 	internalConfigChan <- rpc
 }
 
-func startRPC(server *utils.Server, internalRaterChan,
+func startRPC(server *cores.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
@@ -450,15 +451,15 @@ func main() {
 	}
 	utils.Logger.SetLogLevel(lgLevel)
 	// init the concurrentRequests
-	cncReqsLimit := cfg.GeneralCfg().ConcurrentRequests
+	cncReqsLimit := cfg.CoreSCfg().Caps
 	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
 		cncReqsLimit = utils.ConcurrentReqsLimit
 	}
-	cncReqsStrategy := cfg.GeneralCfg().ConcurrentStrategy
+	cncReqsStrategy := cfg.CoreSCfg().CapsStrategy
 	if len(utils.ConcurrentReqsStrategy) != 0 {
 		cncReqsStrategy = utils.ConcurrentReqsStrategy
 	}
-	conReqs := utils.NewConReqs(cncReqsLimit, cncReqsStrategy, 0, 0, exitChan)
+	caps := cores.NewCaps(cncReqsLimit, cncReqsStrategy)
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
 	cfg.LazySanityCheck()
 
@@ -539,7 +540,7 @@ func main() {
 	engine.SetFailedPostCacheTTL(cfg.GeneralCfg().FailedPostsTTL)
 
 	// Rpc/http server
-	server := utils.NewServer(conReqs)
+	server := cores.NewServer(caps)
 	if len(cfg.HTTPCfg().DispatchersRegistrarURL) != 0 {
 		server.RegisterHttpFunc(cfg.HTTPCfg().DispatchersRegistrarURL, dispatcherh.Registar)
 	}
@@ -571,7 +572,7 @@ func main() {
 	initGuardianSv1(internalGuardianSChan, server, anz)
 
 	// init CoreSv1
-	initCoreSv1(internalCoreSv1Chan, server, anz)
+	initCoreSv1(internalCoreSv1Chan, server, anz, cfg, caps, exitChan)
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
@@ -603,7 +604,7 @@ func main() {
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
 		connManager, anz)
 
-	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager, conReqs, anz)
+	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager, caps, anz)
 
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, exitChan,
 		internalLoaderSChan, connManager, anz)

@@ -229,6 +229,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items: 1,
 		},
 		utils.CacheSTIR:         {},
+		utils.CacheCapsEvents:   {},
 		utils.CacheEventCharges: {},
 		utils.CacheRouteFilterIndexes: {
 			Items:  6,

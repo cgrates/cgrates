@@ -49,8 +49,6 @@ type GeneralJsonCfg struct {
 	Digest_equal         *string
 	Rsr_separator        *string
 	Max_parallel_conns   *int
-	Concurrent_requests  *int
-	Concurrent_strategy  *string
 }
 
 // Listen config section
@@ -660,4 +658,10 @@ type ConfigSCfgJson struct {
 type APIBanJsonCfg struct {
 	Enabled *bool
 	Keys    *[]string
+}
+
+type CoreSJsonCfg struct {
+	Caps                *int
+	Caps_strategy       *string
+	Caps_stats_interval *string
 }

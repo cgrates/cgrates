@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package cores
 
 import (
 	"fmt"
@@ -26,11 +26,21 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCoreService() *CoreService {
-	return &CoreService{}
+func NewCoreService(cfg *config.CGRConfig, caps *Caps, exitChan chan bool) *CoreService {
+	var st *CapsStats
+	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
+		st = NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, exitChan)
+	}
+	return &CoreService{
+		cfg:       cfg,
+		capsStats: st,
+	}
 }
 
-type CoreService struct{}
+type CoreService struct {
+	cfg       *config.CGRConfig
+	capsStats *CapsStats
+}
 
 // ListenAndServe will initialize the service
 func (cS *CoreService) ListenAndServe(exitChan chan bool) (err error) {
@@ -51,7 +61,7 @@ func (cS *CoreService) Status(arg *utils.TenantWithOpts, reply *map[string]inter
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]interface{})
-	response[utils.NodeID] = config.CgrConfig().GeneralCfg().NodeID
+	response[utils.NodeID] = cS.cfg.GeneralCfg().NodeID
 	response[utils.MemoryUsage] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
 	response[utils.ActiveGoroutines] = runtime.NumGoroutine()
 	if response[utils.Version], err = utils.GetCGRVersion(); err != nil {

@@ -21,17 +21,17 @@ package v1
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCoreSv1(cS *engine.CoreService) *CoreSv1 {
+func NewCoreSv1(cS *cores.CoreService) *CoreSv1 {
 	return &CoreSv1{cS: cS}
 }
 
 // CoreSv1 exports RPC from RLs
 type CoreSv1 struct {
-	cS *engine.CoreService
+	cS *cores.CoreService
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC

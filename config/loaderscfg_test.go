@@ -271,7 +271,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 }`
 	eMap := []map[string]interface{}{
 		{
-			utils.IdCfg:           "*default",
+			utils.IDCfg:           "*default",
 			utils.EnabledCfg:      false,
 			utils.TenantCfg:       "~*req.Destination1",
 			utils.DryRunCfg:       false,
@@ -355,7 +355,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 }`
 	eMap := []map[string]interface{}{
 		{
-			utils.IdCfg:           "*default",
+			utils.IDCfg:           "*default",
 			utils.EnabledCfg:      false,
 			utils.TenantCfg:       "~*req.Destination1",
 			utils.DryRunCfg:       false,

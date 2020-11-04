@@ -506,8 +506,8 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		utils.RemoteConnsCfg:      []string{},
 		utils.ReplicationConnsCfg: []string{},
 		utils.ItemsCfg: map[string]interface{}{
-			utils.MetaAccounts:            map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.ApiKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
-			utils.MetaReverseDestinations: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.ApiKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
+			utils.MetaAccounts:            map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
+			utils.MetaReverseDestinations: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

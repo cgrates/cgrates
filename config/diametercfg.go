@@ -120,19 +120,19 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 
 func (ds *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:          ds.Enabled,
-		utils.ListenNetCfg:        ds.ListenNet,
-		utils.ListenCfg:           ds.Listen,
-		utils.DictionariesPathCfg: ds.DictionariesPath,
-		utils.OriginHostCfg:       ds.OriginHost,
-		utils.OriginRealmCfg:      ds.OriginRealm,
-		utils.VendorIdCfg:         ds.VendorId,
-		utils.ProductNameCfg:      ds.ProductName,
-		utils.ConcurrentReqsCfg:   ds.ConcurrentReqs,
-		utils.SyncedConnReqsCfg:   ds.SyncedConnReqs,
-		utils.ASRTemplateCfg:      ds.ASRTemplate,
-		utils.RARTemplateCfg:      ds.RARTemplate,
-		utils.ForcedDisconnectCfg: ds.ForcedDisconnect,
+		utils.EnabledCfg:            ds.Enabled,
+		utils.ListenNetCfg:          ds.ListenNet,
+		utils.ListenCfg:             ds.Listen,
+		utils.DictionariesPathCfg:   ds.DictionariesPath,
+		utils.OriginHostCfg:         ds.OriginHost,
+		utils.OriginRealmCfg:        ds.OriginRealm,
+		utils.VendorIDCfg:           ds.VendorId,
+		utils.ProductNameCfg:        ds.ProductName,
+		utils.ConcurrentRequestsCfg: ds.ConcurrentReqs,
+		utils.SyncedConnReqsCfg:     ds.SyncedConnReqs,
+		utils.ASRTemplateCfg:        ds.ASRTemplate,
+		utils.RARTemplateCfg:        ds.RARTemplate,
+		utils.ForcedDisconnectCfg:   ds.ForcedDisconnect,
 	}
 
 	requestProcessors := make([]map[string]interface{}, len(ds.RequestProcessors))

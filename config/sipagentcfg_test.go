@@ -260,7 +260,7 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 		utils.RetransmissionTimerCfg: 5 * time.Second,
 		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
-				utils.IdCfg:            "OutboundAUTHDryRun",
+				utils.IDCfg:            "OutboundAUTHDryRun",
 				utils.FiltersCfg:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				utils.TenantCfg:        "cgrates.org",
 				utils.FlagsCfg:         []string{"*dryrun"},
@@ -314,7 +314,7 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 		utils.RetransmissionTimerCfg: time.Second,
 		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
-				utils.IdCfg:            "Register",
+				utils.IDCfg:            "Register",
 				utils.FiltersCfg:       []string{"*notstring:~*vars.Method:INVITE"},
 				utils.TenantCfg:        "cgrates.org",
 				utils.FlagsCfg:         []string{"*none"},

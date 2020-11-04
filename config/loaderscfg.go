@@ -211,7 +211,7 @@ func (lData *LoaderDataType) AsMapInterface(separator string) (initialMP map[str
 
 func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.IdCfg:           l.Id,
+		utils.IDCfg:           l.Id,
 		utils.EnabledCfg:      l.Enabled,
 		utils.DryRunCfg:       l.DryRun,
 		utils.LockFileNameCfg: l.LockFileName,

@@ -63,10 +63,20 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Digest_equal:         utils.StringPointer(":"),
 		Rsr_separator:        utils.StringPointer(";"),
 		Max_parallel_conns:   utils.IntPointer(100),
-		Concurrent_requests:  utils.IntPointer(0),
-		Concurrent_strategy:  utils.StringPointer(utils.MetaBusy),
 	}
 	if gCfg, err := dfCgrJSONCfg.GeneralJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, gCfg) {
+		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(gCfg))
+	}
+}
+func TestDfCoreSJsonCfg(t *testing.T) {
+	eCfg := &CoreSJsonCfg{
+		Caps:                utils.IntPointer(0),
+		Caps_strategy:       utils.StringPointer(utils.MetaBusy),
+		Caps_stats_interval: utils.StringPointer("0"),
+	}
+	if gCfg, err := dfCgrJSONCfg.CoreSCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(gCfg))
@@ -214,6 +224,10 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheSTIR: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer("3h"), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
+			utils.CacheCapsEvents: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false),
+			},
 
 			utils.CacheVersions: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),

@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func (aS *AnalyzerService) NewServerCodec(sc rpc.ServerCodec, enc, from, to string) rpc.ServerCodec {
+func NewServerCodec(sc rpc.ServerCodec, aS *AnalyzerService, enc, from, to string) rpc.ServerCodec {
 	return &AnalyzerServerCodec{
 		sc:   sc,
 		reqs: make(map[uint64]*rpcAPI),

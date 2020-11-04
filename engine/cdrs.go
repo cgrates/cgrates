@@ -116,7 +116,7 @@ func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) (err error) {
 }
 
 // RegisterHandlersToServer is called by cgr-engine to register HTTP URL handlers
-func (cdrS *CDRServer) RegisterHandlersToServer(server *utils.Server) {
+func (cdrS *CDRServer) RegisterHandlersToServer(server utils.Server) {
 	server.RegisterHttpFunc(cdrS.cgrCfg.HTTPCfg().HTTPCDRsURL, cdrS.cgrCdrHandler)
 	server.RegisterHttpFunc(cdrS.cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL, cdrS.fsCdrHandler)
 }

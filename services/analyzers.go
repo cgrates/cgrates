@@ -20,19 +20,18 @@ package services
 
 import (
 	"fmt"
-	"net"
-	"net/rpc"
 	"sync"
 
 	"github.com/cgrates/cgrates/analyzers"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewAnalyzerService returns the Analyzer Service
-func NewAnalyzerService(cfg *config.CGRConfig, server *utils.Server, exitChan chan bool,
+func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server, exitChan chan bool,
 	internalAnalyzerSChan chan rpcclient.ClientConnector) *AnalyzerService {
 	return &AnalyzerService{
 		connChan: internalAnalyzerSChan,
@@ -46,7 +45,7 @@ func NewAnalyzerService(cfg *config.CGRConfig, server *utils.Server, exitChan ch
 type AnalyzerService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
-	server   *utils.Server
+	server   *cores.Server
 	exitChan chan bool
 
 	anz      *analyzers.AnalyzerService
@@ -71,17 +70,7 @@ func (anz *AnalyzerService) Start() (err error) {
 		anz.exitChan <- true
 		return
 	}()
-	anz.server.SetAnzWrapperFunc(func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec {
-		fromstr := ""
-		if from != nil {
-			fromstr = from.String()
-		}
-		tostr := ""
-		if to != nil {
-			tostr = to.String()
-		}
-		return anz.anz.NewServerCodec(conn, enc, fromstr, tostr)
-	})
+	anz.server.SetAnalyzer(anz.anz)
 	anz.rpc = v1.NewAnalyzerSv1(anz.anz)
 	if !anz.cfg.DispatcherSCfg().Enabled {
 		anz.server.RpcRegister(anz.rpc)
@@ -99,6 +88,7 @@ func (anz *AnalyzerService) Reload() (err error) {
 // Shutdown stops the service
 func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.Lock()
+	anz.server.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
 	anz.rpc = nil

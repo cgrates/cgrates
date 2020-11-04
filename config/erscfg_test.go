@@ -833,7 +833,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 			{
 				utils.FiltersCfg:                  []string{},
 				utils.FlagsCfg:                    []string{},
-				utils.IdCfg:                       "*default",
+				utils.IDCfg:                       "*default",
 				utils.PartialRecordCacheCfg:       "0",
 				utils.ProcessedPathCfg:            "/var/spool/cgrates/ers/out",
 				utils.RowLengthCfg:                0,
@@ -937,7 +937,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 			{
 				utils.FiltersCfg:                  []string{},
 				utils.FlagsCfg:                    []string{},
-				utils.IdCfg:                       "*default",
+				utils.IDCfg:                       "*default",
 				utils.PartialRecordCacheCfg:       "0",
 				utils.ProcessedPathCfg:            "/var/spool/cgrates/ers/out",
 				utils.RowLengthCfg:                0,

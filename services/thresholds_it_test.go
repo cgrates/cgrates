@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -46,7 +47,7 @@ func TestThresholdSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheThresholds))
 	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
-	server := utils.NewServer(nil)
+	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
 	db := NewDataDBService(cfg, nil)

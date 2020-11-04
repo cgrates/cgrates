@@ -65,7 +65,7 @@ func TestNewServerCodec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	codec := anz.NewServerCodec(new(mockServerCodec), utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012")
+	codec := NewServerCodec(new(mockServerCodec), anz, utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012")
 	r := new(rpc.Request)
 	expR := &rpc.Request{
 		Seq:           0,

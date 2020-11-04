@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -65,7 +66,7 @@ func TestSessionSReload(t *testing.T) {
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
 	cacheSChan <- chS
 
-	server := utils.NewServer(nil)
+	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
 	cfg.StorDbCfg().Type = utils.INTERNAL

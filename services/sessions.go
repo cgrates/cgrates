@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -34,9 +35,9 @@ import (
 
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
-	server *utils.Server, internalChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalChan chan rpcclient.ClientConnector,
 	exitChan chan bool, connMgr *engine.ConnManager,
-	concReq *utils.ConcReqs,
+	caps *cores.Caps,
 	anz *AnalyzerService) servmanager.Service {
 	return &SessionService{
 		connChan: internalChan,
@@ -45,7 +46,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 		server:   server,
 		exitChan: exitChan,
 		connMgr:  connMgr,
-		concReq:  concReq,
+		caps:     caps,
 		anz:      anz,
 	}
 }
@@ -55,7 +56,7 @@ type SessionService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
 	dm       *DataDBService
-	server   *utils.Server
+	server   *cores.Server
 	exitChan chan bool
 
 	sm       *sessions.SessionS
@@ -66,7 +67,7 @@ type SessionService struct {
 	// in order to stop the bircp server if necesary
 	bircpEnabled bool
 	connMgr      *engine.ConnManager
-	concReq      *utils.ConcReqs
+	caps         *cores.Caps
 	anz          *AnalyzerService
 }
 
@@ -90,9 +91,9 @@ func (smg *SessionService) Start() (err error) {
 	// Pass internal connection via BiRPCClient
 	smg.connChan <- smg.anz.GetInternalCodec(smg.sm, utils.SessionS)
 	// Register RPC handler
-	smg.rpc = v1.NewSMGenericV1(smg.sm, smg.concReq)
+	smg.rpc = v1.NewSMGenericV1(smg.sm, smg.caps)
 
-	smg.rpcv1 = v1.NewSessionSv1(smg.sm, smg.concReq) // methods with multiple options
+	smg.rpcv1 = v1.NewSessionSv1(smg.sm, smg.caps) // methods with multiple options
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		smg.server.RpcRegister(smg.rpc)
 		smg.server.RpcRegister(smg.rpcv1)

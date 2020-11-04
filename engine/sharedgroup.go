@@ -70,7 +70,7 @@ func (sg *SharedGroup) Clone() (sharedGroup *SharedGroup) {
 	if sg.MemberIds != nil {
 		sharedGroup.MemberIds = sg.MemberIds.Clone()
 	}
-	for id, _ := range sg.AccountParameters {
+	for id := range sg.AccountParameters {
 		sharedGroup.AccountParameters[id] = sg.AccountParameters[id].Clone()
 	}
 	return

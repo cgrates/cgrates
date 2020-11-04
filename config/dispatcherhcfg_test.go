@@ -122,12 +122,12 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 		utils.HostsCfg: map[string][]map[string]interface{}{
 			utils.MetaDefault: {
 				{
-					utils.IdCfg:                "Host1",
+					utils.IDCfg:                "Host1",
 					utils.RegisterTransportCfg: "*json",
 					utils.RegisterTLSCfg:       false,
 				},
 				{
-					utils.IdCfg:                "Host2",
+					utils.IDCfg:                "Host2",
 					utils.RegisterTransportCfg: "*gob",
 					utils.RegisterTLSCfg:       false,
 				},
@@ -200,10 +200,10 @@ func TestDispatcherHCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else {
 		rcv := cgrCfg.dispatcherHCfg.AsMapInterface()
-		if !reflect.DeepEqual(eMap[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IdCfg],
-			rcv[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IdCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IdCfg],
-				rcv[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IdCfg])
+		if !reflect.DeepEqual(eMap[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IDCfg],
+			rcv[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IDCfg]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IDCfg],
+				rcv[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IDCfg])
 		} else if !reflect.DeepEqual(eMap[utils.HostsCfg], rcv[utils.HostsCfg]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.HostsCfg], rcv[utils.HostsCfg])
 		} else if !reflect.DeepEqual(eMap, rcv) {

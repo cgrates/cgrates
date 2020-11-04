@@ -23,6 +23,7 @@ import (
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
@@ -32,7 +33,7 @@ import (
 // NewSchedulerService returns the Scheduler Service
 func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, fltrSChan chan *engine.FilterS,
-	server *utils.Server, internalSchedulerrSChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalSchedulerrSChan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager,
 	anz *AnalyzerService) *SchedulerService {
 	return &SchedulerService{
@@ -54,7 +55,7 @@ type SchedulerService struct {
 	dm        *DataDBService
 	cacheS    *engine.CacheS
 	fltrSChan chan *engine.FilterS
-	server    *utils.Server
+	server    *cores.Server
 
 	schS     *scheduler.Scheduler
 	rpc      *v1.SchedulerSv1

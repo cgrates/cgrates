@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -53,7 +54,7 @@ func TestEventExporterSReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	engineShutdown := make(chan bool, 1)
-	server := utils.NewServer(nil)
+	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
 	chS := engine.NewCacheS(cfg, nil)

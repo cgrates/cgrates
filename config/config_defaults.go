@@ -53,8 +53,13 @@ const CGRATES_CFG_JSON = `
 	"digest_equal": ":",									// equal symbol used in case of digests
 	"rsr_separator": ";",									// separator used within RSR fields
 	"max_parallel_conns": 100,								// the maximum number of connection used by the *parallel strategy
-	"concurrent_requests": 0,								// maximum concurrent request allowed ( 0 to disabled )
-	"concurrent_strategy": "*busy",							// strategy in case in case of concurrent requests reached
+},
+
+
+"cores": {
+	"caps": 0,							// maximum concurrent request allowed ( 0 to disabled )
+	"caps_strategy": "*busy",			// strategy in case in case of concurrent requests reached	
+	"caps_stats_interval": "0"			// the interval we sample for caps stats ( 0 to disabled )
 },
 
 
@@ -267,6 +272,7 @@ const CGRATES_CFG_JSON = `
 		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// User cache
 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// stirShaken cache keys
 		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "replicate": false}, 
+		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},								// caps cached samples
 		
 		// only for *internal database
 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for version storing

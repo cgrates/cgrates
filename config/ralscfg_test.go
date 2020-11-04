@@ -124,7 +124,7 @@ func TestRalsCfgAsMapInterfaceCase1(t *testing.T) {
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
 		},
-		utils.Dynaprepaid_actionplansCfg: []string{},
+		utils.DynaprepaidActionplansCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -159,7 +159,7 @@ func TestRalsCfgAsMapInterfaceCase2(t *testing.T) {
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
 		},
-		utils.Dynaprepaid_actionplansCfg: []string{},
+		utils.DynaprepaidActionplansCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

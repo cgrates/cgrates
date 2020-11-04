@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/cores"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -39,7 +40,7 @@ func NewRateService(
 	cfg *config.CGRConfig, cacheS *engine.CacheS,
 	filterSChan chan *engine.FilterS,
 	dmS *DataDBService,
-	server *utils.Server, exitChan chan bool,
+	server *cores.Server, exitChan chan bool,
 	intConnChan chan rpcclient.ClientConnector,
 	anz *AnalyzerService) servmanager.Service {
 	return &RateService{
@@ -63,7 +64,7 @@ type RateService struct {
 	filterSChan chan *engine.FilterS
 	dmS         *DataDBService
 	cacheS      *engine.CacheS
-	server      *utils.Server
+	server      *cores.Server
 	exitChan    chan bool
 
 	rldChan chan struct{}

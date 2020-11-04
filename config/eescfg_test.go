@@ -678,7 +678,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 		},
 		utils.ExportersCfg: []map[string]interface{}{
 			{
-				utils.IdCfg:               "CSVExporter",
+				utils.IDCfg:               "CSVExporter",
 				utils.TypeCfg:             "*file_csv",
 				utils.ExportPathCfg:       "/tmp/testCSV",
 				utils.OptsCfg:             map[string]interface{}{},

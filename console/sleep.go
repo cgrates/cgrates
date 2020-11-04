@@ -54,7 +54,7 @@ func (cmd *CmdSleep) RpcParams(reset bool) interface{} {
 func (cmd *CmdSleep) PostprocessRpcParams() (err error) {
 	params := new(utils.DurationArgs)
 	if val, can := cmd.rpcParams.(*StringWrapper); can {
-		params.DurationTime, err = utils.ParseDurationWithNanosecs(val.Item)
+		params.Duration, err = utils.ParseDurationWithNanosecs(val.Item)
 		if err != nil {
 			return
 		}
