@@ -787,3 +787,23 @@ func TestSearchExtraFieldInterface(t *testing.T) {
 	}
 	fsCdr.searchExtraField(utils.EmptyString, newMap)
 }
+
+func TestGetExtraFields(t *testing.T) {
+	cgrCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cgrCfg.CdrsCfg().ExtraFields, err = utils.ParseRSRFieldsFromSlice([]string{"^^PayPalAccount"})
+	if err != nil {
+		t.Error(err)
+	}
+	fsCdr := FSCdr{
+		cgrCfg: cgrCfg,
+	}
+	expected := map[string]string{
+		"^PayPalAccount": "^PayPalAccount",
+	}
+	if reply := fsCdr.getExtraFields(); !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}

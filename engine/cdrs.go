@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -30,18 +31,18 @@ import (
 
 // cgrCdrHandler handles CDRs received over HTTP REST
 func (cdrS *CDRServer) cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
-	cgrCdr, err := NewCgrCdrFromHttpReq(r)
-	if err != nil {
+	cgrCDR := MapEvent{}
+	if err := json.NewDecoder(r.Body).Decode(&cgrCDR); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> could not create CDR entry from http: %+v, err <%s>",
 				utils.CDRs, r.Form, err.Error()))
 		return
 	}
-	cdr, err := cgrCdr.AsCDR(cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
+	cdr, err := cgrCDR.AsCDR(cdrS.cgrCfg, cdrS.cgrCfg.GeneralCfg().DefaultTenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> could not create CDR entry from rawCDR: %+v, err <%s>",
-				utils.CDRs, cgrCdr, err.Error()))
+				utils.CDRs, cgrCDR, err.Error()))
 		return
 	}
 	var ignored string
