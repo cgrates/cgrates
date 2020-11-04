@@ -168,14 +168,6 @@ func (sm StringMap) GetOne() string {
 	return EmptyString
 }
 
-func (sm StringMap) Join(mps ...StringMap) {
-	for _, mp := range mps {
-		for k, v := range mp {
-			sm[k] = v
-		}
-	}
-}
-
 func (sm StringMap) HasKey(key string) (has bool) {
 	_, has = sm[key]
 	return
@@ -192,18 +184,6 @@ func MergeMapsStringIface(mps ...map[string]interface{}) (outMp map[string]inter
 		for k, v := range mp {
 			outMp[k] = v
 		}
-	}
-	return
-}
-
-// FieldMultiplyFactor defines multiply factors for different field values
-// original defined for CDRE component
-type FieldMultiplyFactor map[string]float64
-
-func (fmp FieldMultiplyFactor) Clone() (cln FieldMultiplyFactor) {
-	cln = make(FieldMultiplyFactor, len(fmp))
-	for k, v := range fmp {
-		cln[k] = v
 	}
 	return
 }

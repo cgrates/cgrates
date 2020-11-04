@@ -102,7 +102,7 @@ func TestMapKeys(t *testing.T) {
 	}
 }
 
-func MapKeysStringMapParse(t *testing.T) {
+func TestMapKeysStringMapParse(t *testing.T) {
 	if sm := ParseStringMap(EmptyString); len(sm) != 0 {
 		t.Errorf("Expecting %+v, received %+v", 0, len(sm))
 	}
@@ -344,5 +344,118 @@ func TestFlagsToSlice2(t *testing.T) {
 	sort.Strings(flgSls)
 	if !reflect.DeepEqual(flgSls, sls) {
 		t.Errorf("Expecting: %+v, received: %+v", sls, flgSls)
+	}
+}
+
+func TestNewStringMap(t *testing.T) {
+	expected := StringMap{"item1": true, "item2": true, "negitem1": false}
+	received := NewStringMap("item1", "item2", "!negitem1")
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestNewStringMap2(t *testing.T) {
+	expected := StringMap{"test": true, "test!": true, "t!est": true}
+	received := NewStringMap("test", "test!", "t!est")
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestStringMapEqual1(t *testing.T) {
+	expected := false
+	received := new(StringMap).Equal(StringMap{"test": true})
+	if expected != received {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestStringMapEqual2(t *testing.T) {
+	expected := false
+	received := StringMap{"test": true, "test2": true}.Equal(StringMap{"test": true})
+	if expected != received {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestStringMapEqual3(t *testing.T) {
+	expected := true
+	received := StringMap{"test": true, "test2": true}.Equal(StringMap{"test": true, "test2": true})
+	if expected != received {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestStringMapIncludes1(t *testing.T) {
+	expected := false
+	received := StringMap{"test": true}.Includes(StringMap{"test": true, "test2": true})
+	if expected != received {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestStringMapIncludes2(t *testing.T) {
+	expected := false
+	received := StringMap{"test": true, "test2": true}.Includes(StringMap{"test3": true})
+	if expected != received {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestStringMapIncludes3(t *testing.T) {
+	expected := true
+	received := StringMap{"test": true, "test2": true}.Includes(StringMap{"test": true, "test2": true})
+	if expected != received {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestStringMapSlice(t *testing.T) {
+	expected := []string{"test", "test2"}
+	received := StringMap{"test": true, "test2": true}.Slice()
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestStringMapClone(t *testing.T) {
+	expected := StringMap{"test": true, "test2": true}
+	received := StringMap{"test": true, "test2": true}.Clone()
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestStringMapString(t *testing.T) {
+	expected := "test;test2"
+	received := StringMap{"test": true, "test2": true}.String()
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+
+}
+
+func TestStringMapGetOneEmpty(t *testing.T) {
+	expected := EmptyString
+	received := StringMap{}.GetOne()
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestStringMapGetOneNotEmpty(t *testing.T) {
+	expected := "test"
+	received := StringMap{"test": true, "test2": true}.GetOne()
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestMapStringToInt64Err(t *testing.T) {
+	t2 := map[string]string{"test": "a"}
+	_, err := MapStringToInt64(t2)
+	if err == nil {
+		t.Error("Got Error: ", err)
 	}
 }
