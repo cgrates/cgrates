@@ -40,57 +40,57 @@ import (
 )
 
 var (
-	concReqsCfgPath   string
-	concReqsCfg       *config.CGRConfig
-	concReqsRPC       *rpc.Client
-	concReqsBiRPC     *rpc2.Client
-	concReqsConfigDIR string //run tests for specific configuration
+	capsCfgPath   string
+	capsCfg       *config.CGRConfig
+	capsRPC       *rpc.Client
+	capsBiRPC     *rpc2.Client
+	capsConfigDIR string //run tests for specific configuration
 
-	sTestsConcReqs = []func(t *testing.T){
-		testConcReqsInitCfg,
-		testConcReqsStartEngine,
-		testConcReqsRPCConn,
-		testConcReqsBusyAPIs,
-		testConcReqsQueueAPIs,
-		testConcReqsOnHTTPBusy,
-		testConcReqsOnHTTPQueue,
-		testConcReqsOnBiJSONBusy,
-		testConcReqsOnBiJSONQueue,
-		testConcReqsKillEngine,
+	sTestsCaps = []func(t *testing.T){
+		testCapsInitCfg,
+		testCapsStartEngine,
+		testCapsRPCConn,
+		testCapsBusyAPIs,
+		testCapsQueueAPIs,
+		testCapsOnHTTPBusy,
+		testCapsOnHTTPQueue,
+		testCapsOnBiJSONBusy,
+		testCapsOnBiJSONQueue,
+		testCapsKillEngine,
 	}
 
 	// used by benchmarks
-	concReqsOnce      sync.Once
-	concReqLastCfgDir string
+	capsOnce       sync.Once
+	capsLastCfgDir string
 )
 
 //Test start here
-func TestConcReqsBusyJSON(t *testing.T) {
-	concReqsConfigDIR = "conc_reqs_busy"
-	for _, stest := range sTestsConcReqs {
-		t.Run(concReqsConfigDIR, stest)
+func TestCapsBusyJSON(t *testing.T) {
+	capsConfigDIR = "conc_reqs_busy"
+	for _, stest := range sTestsCaps {
+		t.Run(capsConfigDIR, stest)
 	}
 }
 
-func TestConcReqsQueueJSON(t *testing.T) {
-	concReqsConfigDIR = "conc_reqs_queue"
-	for _, stest := range sTestsConcReqs {
-		t.Run(concReqsConfigDIR, stest)
+func TestCapsQueueJSON(t *testing.T) {
+	capsConfigDIR = "conc_reqs_queue"
+	for _, stest := range sTestsCaps {
+		t.Run(capsConfigDIR, stest)
 	}
 }
 
-func testConcReqsInitCfg(t *testing.T) {
+func testCapsInitCfg(t *testing.T) {
 	var err error
-	concReqsCfgPath = path.Join(*dataDir, "conf", "samples", concReqsConfigDIR)
-	concReqsCfg, err = config.NewCGRConfigFromPath(concReqsCfgPath)
+	capsCfgPath = path.Join(*dataDir, "conf", "samples", capsConfigDIR)
+	capsCfg, err = config.NewCGRConfigFromPath(capsCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 // Start CGR Engine
-func testConcReqsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(concReqsCfgPath, *waitRater); err != nil {
+func testCapsStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(capsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -102,20 +102,20 @@ func handlePing(clnt *rpc2.Client, arg *utils.DurationArgs, reply *string) error
 }
 
 // Connect rpc client to rater
-func testConcReqsRPCConn(t *testing.T) {
+func testCapsRPCConn(t *testing.T) {
 	var err error
-	concReqsRPC, err = newRPCClient(concReqsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	capsRPC, err = newRPCClient(capsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
-	if concReqsBiRPC, err = utils.NewBiJSONrpcClient(concReqsCfg.SessionSCfg().ListenBijson,
+	if capsBiRPC, err = utils.NewBiJSONrpcClient(capsCfg.SessionSCfg().ListenBijson,
 		nil); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testConcReqsBusyAPIs(t *testing.T) {
-	if concReqsConfigDIR != "conc_reqs_busy" {
+func testCapsBusyAPIs(t *testing.T) {
+	if capsConfigDIR != "conc_reqs_busy" {
 		t.SkipNow()
 	}
 	var failedAPIs int
@@ -125,7 +125,7 @@ func testConcReqsBusyAPIs(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			var resp string
-			if err := concReqsRPC.Call(utils.CoreSv1Sleep,
+			if err := capsRPC.Call(utils.CoreSv1Sleep,
 				&utils.DurationArgs{Duration: 10 * time.Millisecond},
 				&resp); err != nil {
 				lock.Lock()
@@ -143,8 +143,8 @@ func testConcReqsBusyAPIs(t *testing.T) {
 	}
 }
 
-func testConcReqsQueueAPIs(t *testing.T) {
-	if concReqsConfigDIR != "conc_reqs_queue" {
+func testCapsQueueAPIs(t *testing.T) {
+	if capsConfigDIR != "conc_reqs_queue" {
 		t.SkipNow()
 	}
 	wg := new(sync.WaitGroup)
@@ -152,7 +152,7 @@ func testConcReqsQueueAPIs(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			var resp string
-			if err := concReqsRPC.Call(utils.CoreSv1Sleep,
+			if err := capsRPC.Call(utils.CoreSv1Sleep,
 				&utils.DurationArgs{Duration: 10 * time.Millisecond},
 				&resp); err != nil {
 				wg.Done()
@@ -165,8 +165,8 @@ func testConcReqsQueueAPIs(t *testing.T) {
 	wg.Wait()
 }
 
-func testConcReqsOnHTTPBusy(t *testing.T) {
-	if concReqsConfigDIR != "conc_reqs_busy" {
+func testCapsOnHTTPBusy(t *testing.T) {
+	if capsConfigDIR != "conc_reqs_busy" {
 		t.SkipNow()
 	}
 	var fldAPIs int64
@@ -203,8 +203,8 @@ func testConcReqsOnHTTPBusy(t *testing.T) {
 	}
 }
 
-func testConcReqsOnHTTPQueue(t *testing.T) {
-	if concReqsConfigDIR != "conc_reqs_queue" {
+func testCapsOnHTTPQueue(t *testing.T) {
+	if capsConfigDIR != "conc_reqs_queue" {
 		t.SkipNow()
 	}
 	wg := new(sync.WaitGroup)
@@ -224,8 +224,8 @@ func testConcReqsOnHTTPQueue(t *testing.T) {
 	wg.Wait()
 }
 
-func testConcReqsOnBiJSONBusy(t *testing.T) {
-	if concReqsConfigDIR != "conc_reqs_busy" {
+func testCapsOnBiJSONBusy(t *testing.T) {
+	if capsConfigDIR != "conc_reqs_busy" {
 		t.SkipNow()
 	}
 	var failedAPIs int
@@ -235,7 +235,7 @@ func testConcReqsOnBiJSONBusy(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			var resp string
-			if err := concReqsBiRPC.Call(utils.SessionSv1Sleep,
+			if err := capsBiRPC.Call(utils.SessionSv1Sleep,
 				&utils.DurationArgs{Duration: 10 * time.Millisecond},
 				&resp); err != nil {
 				lock.Lock()
@@ -253,8 +253,8 @@ func testConcReqsOnBiJSONBusy(t *testing.T) {
 	}
 }
 
-func testConcReqsOnBiJSONQueue(t *testing.T) {
-	if concReqsConfigDIR != "conc_reqs_queue" {
+func testCapsOnBiJSONQueue(t *testing.T) {
+	if capsConfigDIR != "conc_reqs_queue" {
 		t.SkipNow()
 	}
 	wg := new(sync.WaitGroup)
@@ -262,7 +262,7 @@ func testConcReqsOnBiJSONQueue(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			var resp string
-			if err := concReqsBiRPC.Call(utils.SessionSv1Sleep,
+			if err := capsBiRPC.Call(utils.SessionSv1Sleep,
 				&utils.DurationArgs{Duration: 10 * time.Millisecond},
 				&resp); err != nil {
 				wg.Done()
@@ -275,7 +275,7 @@ func testConcReqsOnBiJSONQueue(t *testing.T) {
 	wg.Wait()
 }
 
-func testConcReqsKillEngine(t *testing.T) {
+func testCapsKillEngine(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
@@ -285,20 +285,20 @@ func testConcReqsKillEngine(t *testing.T) {
 func benchmarkInit(b *testing.B, cfgDir string) {
 	b.StopTimer()
 	// restart cgrates only if needed
-	if cfgDir != concReqLastCfgDir {
-		concReqsOnce = sync.Once{}
+	if cfgDir != capsLastCfgDir {
+		capsOnce = sync.Once{}
 	}
-	concReqsOnce.Do(func() {
-		concReqLastCfgDir = cfgDir
+	capsOnce.Do(func() {
+		capsLastCfgDir = cfgDir
 		var err error
-		concReqsCfgPath = path.Join(*dataDir, "conf", "samples", cfgDir)
-		if concReqsCfg, err = config.NewCGRConfigFromPath(concReqsCfgPath); err != nil {
+		capsCfgPath = path.Join(*dataDir, "conf", "samples", cfgDir)
+		if capsCfg, err = config.NewCGRConfigFromPath(capsCfgPath); err != nil {
 			b.Fatal(err)
 		}
-		if _, err := engine.StopStartEngine(concReqsCfgPath, *waitRater); err != nil {
+		if _, err := engine.StopStartEngine(capsCfgPath, *waitRater); err != nil {
 			b.Fatal(err)
 		}
-		if concReqsRPC, err = newRPCClient(concReqsCfg.ListenCfg()); err != nil {
+		if capsRPC, err = newRPCClient(capsCfg.ListenCfg()); err != nil {
 			b.Fatal(err)
 		}
 		// b.Logf("Preparation done for %s", cfgDir)
@@ -309,18 +309,18 @@ func benchmarkInit(b *testing.B, cfgDir string) {
 func benchmarkCall(b *testing.B) {
 	var rply map[string]interface{}
 	for i := 0; i < b.N; i++ {
-		if err := concReqsRPC.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
+		if err := capsRPC.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
 			b.Error(err)
 		}
 	}
 }
 
-func BenchmarkConcReqWithLimit(b *testing.B) {
+func BenchmarkcapsWithLimit(b *testing.B) {
 	benchmarkInit(b, "conc_reqs_queue_bench")
 	benchmarkCall(b)
 }
 
-func BenchmarkConcReqWithoutLimit(b *testing.B) {
+func BenchmarkcapsWithoutLimit(b *testing.B) {
 	benchmarkInit(b, "tutmysql")
 	benchmarkCall(b)
 }

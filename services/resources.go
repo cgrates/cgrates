@@ -24,6 +24,7 @@ import (
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -33,7 +34,7 @@ import (
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalResourceSChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalResourceSChan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager,
 	anz *AnalyzerService) servmanager.Service {
 	return &ResourceService{
@@ -55,7 +56,7 @@ type ResourceService struct {
 	dm          *DataDBService
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
-	server      *utils.Server
+	server      *cores.Server
 
 	reS      *engine.ResourceService
 	rpc      *v1.ResourceSv1

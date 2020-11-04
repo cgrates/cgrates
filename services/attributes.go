@@ -24,6 +24,7 @@ import (
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -33,7 +34,7 @@ import (
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalChan chan rpcclient.ClientConnector,
 	anz *AnalyzerService) servmanager.Service {
 	return &AttributeService{
 		connChan:    internalChan,
@@ -53,7 +54,7 @@ type AttributeService struct {
 	dm          *DataDBService
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
-	server      *utils.Server
+	server      *cores.Server
 
 	attrS    *engine.AttributeService
 	rpc      *v1.AttributeSv1               // useful on restart

@@ -533,14 +533,14 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := []map[string]interface{}{
 		{
-			utils.IdCfg:             "conecto1",
+			utils.IDCfg:             "conecto1",
 			utils.URLCfg:            "/conecto",
 			utils.SessionSConnsCfg:  []string{"*localhost"},
 			utils.RequestPayloadCfg: "*url",
 			utils.ReplyPayloadCfg:   "*xml",
 			utils.RequestProcessorsCfg: []map[string]interface{}{
 				{
-					utils.IdCfg:            "OutboundAUTHDryRun",
+					utils.IDCfg:            "OutboundAUTHDryRun",
 					utils.FiltersCfg:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 					utils.TenantCfg:        "cgrates.org",
 					utils.FlagsCfg:         []string{"*dryrun"},

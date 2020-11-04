@@ -213,6 +213,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheDispatchers:               utils.MetaReady,
 		utils.CacheEventCharges:              utils.MetaReady,
 		utils.CacheReverseFilterIndexes:      utils.MetaReady,
+		utils.CacheCapsEvents:                utils.MetaReady,
 
 		utils.CacheAccounts:              utils.MetaReady,
 		utils.CacheVersions:              utils.MetaReady,

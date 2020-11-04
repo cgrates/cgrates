@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -47,7 +48,7 @@ func TestDataDBReload(t *testing.T) {
 	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
-	server := utils.NewServer(nil)
+	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM)

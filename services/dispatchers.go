@@ -25,6 +25,7 @@ import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -35,7 +36,7 @@ import (
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalChan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager,
 	anz *AnalyzerService) servmanager.Service {
 	return &DispatcherService{
@@ -57,7 +58,7 @@ type DispatcherService struct {
 	dm          *DataDBService
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
-	server      *utils.Server
+	server      *cores.Server
 	connMgr     *engine.ConnManager
 
 	dspS     *dispatchers.DispatcherService

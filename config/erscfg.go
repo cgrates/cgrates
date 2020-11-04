@@ -282,7 +282,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.RowLengthCfg:                er.RowLength,
 		utils.FieldSepCfg:                 er.FieldSep,
 		utils.HeaderDefCharCfg:            er.HeaderDefineChar,
-		utils.ConcurrentReqsCfg:           er.ConcurrentReqs,
+		utils.ConcurrentRequestsCfg:       er.ConcurrentReqs,
 		utils.SourcePathCfg:               er.SourcePath,
 		utils.ProcessedPathCfg:            er.ProcessedPath,
 		utils.TimezoneCfg:                 er.Timezone,

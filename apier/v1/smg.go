@@ -19,22 +19,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/sessions"
-	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSMGenericV1(sS *sessions.SessionS, concReqs *utils.ConcReqs) *SMGenericV1 {
+func NewSMGenericV1(sS *sessions.SessionS, caps *cores.Caps) *SMGenericV1 {
 	return &SMGenericV1{
-		Ss:       sS,
-		concReqs: concReqs,
+		Ss:   sS,
+		caps: caps,
 	}
 }
 
 // Exports RPC from SMGeneric
 // DEPRECATED, use SessionSv1 instead
 type SMGenericV1 struct {
-	Ss       *sessions.SessionS
-	concReqs *utils.ConcReqs
+	Ss   *sessions.SessionS
+	caps *cores.Caps
 }
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit

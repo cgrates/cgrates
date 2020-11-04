@@ -22,13 +22,14 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewResponderService returns the Resonder Service
-func NewResponderService(cfg *config.CGRConfig, server *utils.Server,
+func NewResponderService(cfg *config.CGRConfig, server *cores.Server,
 	internalRALsChan chan rpcclient.ClientConnector,
 	exitChan chan bool, anz *AnalyzerService) *ResponderService {
 	return &ResponderService{
@@ -44,7 +45,7 @@ func NewResponderService(cfg *config.CGRConfig, server *utils.Server,
 type ResponderService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
-	server   *utils.Server
+	server   *cores.Server
 	exitChan chan bool
 
 	resp     *engine.Responder

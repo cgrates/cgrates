@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/dispatcherh"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -30,7 +31,7 @@ import (
 )
 
 // NewDispatcherHostsService returns the Dispatcher Service
-func NewDispatcherHostsService(cfg *config.CGRConfig, server *utils.Server,
+func NewDispatcherHostsService(cfg *config.CGRConfig, server *cores.Server,
 	internalChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager,
 	exitChan chan bool,
 	anz *AnalyzerService) servmanager.Service {
@@ -48,7 +49,7 @@ func NewDispatcherHostsService(cfg *config.CGRConfig, server *utils.Server,
 type DispatcherHostsService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
-	server   *utils.Server
+	server   *cores.Server
 	connMgr  *engine.ConnManager
 	exitChan chan bool
 

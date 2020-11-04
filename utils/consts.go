@@ -53,7 +53,7 @@ var (
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses,
 		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
 		CacheUCH, CacheSTIR, CacheEventCharges, CacheRateProfiles, CacheRateProfilesFilterIndexes,
-		CacheRateFilterIndexes, CacheReverseFilterIndexes, MetaAPIBan,
+		CacheRateFilterIndexes, CacheReverseFilterIndexes, MetaAPIBan, CacheCapsEvents,
 		// only internalDB
 		CacheVersions, CacheAccounts,
 		CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
@@ -718,6 +718,7 @@ const (
 	MetaTrl                  = "*trl"
 	MetaTmp                  = "*tmp"
 	MetaOpts                 = "*opts"
+	MetaDynReq               = "~*req"
 	MetaScPrefix             = "~*sc." // used for SMCostFilter
 	CGROriginHost            = "cgr_originhost"
 	MetaInitiate             = "*initiate"
@@ -1801,6 +1802,7 @@ const (
 	CacheReverseFilterIndexes      = "*reverse_filter_indexes"
 	CacheAccounts                  = "*accounts"
 	CacheVersions                  = "*versions"
+	CacheCapsEvents                = "*caps_events"
 
 	// storDB
 	CacheTBLTPTimings          = "*tp_timings"
@@ -1874,32 +1876,30 @@ var (
 
 // GeneralCfg
 const (
-	NodeIDCfg             = "node_id"
-	LoggerCfg             = "logger"
-	LogLevelCfg           = "log_level"
-	RoundingDecimalsCfg   = "rounding_decimals"
-	DBDataEncodingCfg     = "dbdata_encoding"
-	TpExportPathCfg       = "tpexport_dir"
-	PosterAttemptsCfg     = "poster_attempts"
-	FailedPostsDirCfg     = "failed_posts_dir"
-	FailedPostsTTLCfg     = "failed_posts_ttl"
-	DefaultReqTypeCfg     = "default_request_type"
-	DefaultCategoryCfg    = "default_category"
-	DefaultTenantCfg      = "default_tenant"
-	DefaultTimezoneCfg    = "default_timezone"
-	DefaultCachingCfg     = "default_caching"
-	ConnectAttemptsCfg    = "connect_attempts"
-	ReconnectsCfg         = "reconnects"
-	ConnectTimeoutCfg     = "connect_timeout"
-	ReplyTimeoutCfg       = "reply_timeout"
-	LockingTimeoutCfg     = "locking_timeout"
-	DigestSeparatorCfg    = "digest_separator"
-	DigestEqualCfg        = "digest_equal"
-	RSRSepCfg             = "rsr_separator"
-	MaxParallelConnsCfg   = "max_parallel_conns"
-	ConcurrentRequestsCfg = "concurrent_requests"
-	ConcurrentStrategyCfg = "concurrent_strategy"
-	EEsConnsCfg           = "ees_conns"
+	NodeIDCfg           = "node_id"
+	LoggerCfg           = "logger"
+	LogLevelCfg         = "log_level"
+	RoundingDecimalsCfg = "rounding_decimals"
+	DBDataEncodingCfg   = "dbdata_encoding"
+	TpExportPathCfg     = "tpexport_dir"
+	PosterAttemptsCfg   = "poster_attempts"
+	FailedPostsDirCfg   = "failed_posts_dir"
+	FailedPostsTTLCfg   = "failed_posts_ttl"
+	DefaultReqTypeCfg   = "default_request_type"
+	DefaultCategoryCfg  = "default_category"
+	DefaultTenantCfg    = "default_tenant"
+	DefaultTimezoneCfg  = "default_timezone"
+	DefaultCachingCfg   = "default_caching"
+	ConnectAttemptsCfg  = "connect_attempts"
+	ReconnectsCfg       = "reconnects"
+	ConnectTimeoutCfg   = "connect_timeout"
+	ReplyTimeoutCfg     = "reply_timeout"
+	LockingTimeoutCfg   = "locking_timeout"
+	DigestSeparatorCfg  = "digest_separator"
+	DigestEqualCfg      = "digest_equal"
+	RSRSepCfg           = "rsr_separator"
+	MaxParallelConnsCfg = "max_parallel_conns"
+	EEsConnsCfg         = "ees_conns"
 )
 
 // StorDbCfg
@@ -1939,7 +1939,7 @@ const (
 
 // ItemOpt
 const (
-	ApiKeyCfg    = "api_key"
+	APIKeyCfg    = "api_key"
 	RouteIDCfg   = "route_id"
 	RemoteCfg    = "remote"
 	ReplicateCfg = "replicate"
@@ -2100,20 +2100,20 @@ const (
 	AsteriskConnsCfg = "asterisk_conns"
 
 	// DiameterAgentCfg
-	ListenNetCfg         = "listen_net"
-	ListenCfg            = "listen"
-	DictionariesPathCfg  = "dictionaries_path"
-	OriginHostCfg        = "origin_host"
-	OriginRealmCfg       = "origin_realm"
-	VendorIdCfg          = "vendor_id"
-	ProductNameCfg       = "product_name"
-	ConcurrentReqsCfg    = "concurrent_requests"
-	SyncedConnReqsCfg    = "synced_conn_requests"
-	ASRTemplateCfg       = "asr_template"
-	RARTemplateCfg       = "rar_template"
-	ForcedDisconnectCfg  = "forced_disconnect"
-	TemplatesCfg         = "templates"
-	RequestProcessorsCfg = "request_processors"
+	ListenNetCfg          = "listen_net"
+	ConcurrentRequestsCfg = "concurrent_requests"
+	ListenCfg             = "listen"
+	DictionariesPathCfg   = "dictionaries_path"
+	OriginHostCfg         = "origin_host"
+	OriginRealmCfg        = "origin_realm"
+	VendorIDCfg           = "vendor_id"
+	ProductNameCfg        = "product_name"
+	SyncedConnReqsCfg     = "synced_conn_requests"
+	ASRTemplateCfg        = "asr_template"
+	RARTemplateCfg        = "rar_template"
+	ForcedDisconnectCfg   = "forced_disconnect"
+	TemplatesCfg          = "templates"
+	RequestProcessorsCfg  = "request_processors"
 
 	// RequestProcessor
 	RequestFieldsCfg = "request_fields"
@@ -2149,24 +2149,23 @@ const (
 	AttributeIDsCfg      = "attribute_ids"
 
 	//LoaderSCfg
-	IdCfg           = "id"
 	DryRunCfg       = "dry_run"
 	LockFileNameCfg = "lock_filename"
 	TpInDirCfg      = "tp_in_dir"
 	TpOutDirCfg     = "tp_out_dir"
 	DataCfg         = "data"
 
-	DefaultRatioCfg            = "default_ratio"
-	ReadersCfg                 = "readers"
-	ExportersCfg               = "exporters"
-	PoolSize                   = "poolSize"
-	Conns                      = "conns"
-	FilenameCfg                = "file_name"
-	RequestPayloadCfg          = "request_payload"
-	ReplyPayloadCfg            = "reply_payload"
-	TransportCfg               = "transport"
-	StrategyCfg                = "strategy"
-	Dynaprepaid_actionplansCfg = "dynaprepaid_actionplans"
+	DefaultRatioCfg           = "default_ratio"
+	ReadersCfg                = "readers"
+	ExportersCfg              = "exporters"
+	PoolSize                  = "poolSize"
+	Conns                     = "conns"
+	FilenameCfg               = "file_name"
+	RequestPayloadCfg         = "request_payload"
+	ReplyPayloadCfg           = "reply_payload"
+	TransportCfg              = "transport"
+	StrategyCfg               = "strategy"
+	DynaprepaidActionplansCfg = "dynaprepaid_actionplans"
 
 	//RateSCfg
 	RateIndexedSelectsCfg      = "rate_indexed_selects"
@@ -2179,6 +2178,11 @@ const (
 	CleanupIntervalCfg = "cleanup_interval"
 	IndexTypeCfg       = "index_type"
 	DBPathCfg          = "db_path"
+
+	// CoreSCfg
+	CapsCfg              = "caps"
+	CapsStrategyCfg      = "caps_strategy"
+	CapsStatsIntervalCfg = "caps_stats_interval"
 )
 
 // FC Template
@@ -2195,7 +2199,7 @@ const (
 	NewBranchCfg       = "new_branch"
 	BlockerCfg         = "blocker"
 	BreakOnSuccessCfg  = "break_on_success"
-	Handler_id         = "handler_id"
+	HandlerIDCfg       = "handler_id"
 	LayoutCfg          = "layout"
 	CostShiftDigitsCfg = "cost_shift_digits"
 	MaskDestIDCfg      = "mask_destinationd_id"

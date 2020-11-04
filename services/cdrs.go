@@ -26,6 +26,7 @@ import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -35,7 +36,7 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalCDRServerChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalCDRServerChan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager,
 	anz *AnalyzerService) servmanager.Service {
 	return &CDRServer{
@@ -57,7 +58,7 @@ type CDRServer struct {
 	dm          *DataDBService
 	storDB      *StorDBService
 	filterSChan chan *engine.FilterS
-	server      *utils.Server
+	server      *cores.Server
 
 	cdrS     *engine.CDRServer
 	rpcv1    *v1.CDRsV1

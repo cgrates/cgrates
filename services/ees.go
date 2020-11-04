@@ -24,6 +24,7 @@ import (
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -33,7 +34,7 @@ import (
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, server *utils.Server, exitChan chan bool,
+	connMgr *engine.ConnManager, server *cores.Server, exitChan chan bool,
 	intConnChan chan rpcclient.ClientConnector,
 	anz *AnalyzerService) servmanager.Service {
 	return &EventExporterService{
@@ -55,7 +56,7 @@ type EventExporterService struct {
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
 	connMgr     *engine.ConnManager
-	server      *utils.Server
+	server      *cores.Server
 	exitChan    chan bool
 	intConnChan chan rpcclient.ClientConnector
 	rldChan     chan struct{}

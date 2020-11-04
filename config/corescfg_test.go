@@ -1,0 +1,104 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package config
+
+import (
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
+func TestCoreSloadFromJsonCfg(t *testing.T) {
+	var alS, expected CoreSCfg
+	if err := alS.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(alS, expected) {
+		t.Errorf("Expected: %+v ,received: %+v", expected, alS)
+	}
+	if err := alS.loadFromJSONCfg(new(CoreSJsonCfg)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(alS, expected) {
+		t.Errorf("Expected: %+v ,received: %+v", expected, alS)
+	}
+	cfgJSONStr := `{
+		"cores": {
+			"caps": 0,							// maximum concurrent request allowed ( 0 to disabled )
+			"caps_strategy": "*busy",			// strategy in case in case of concurrent requests reached	
+			"caps_stats_interval": "0"			// the interval we sample for caps stats ( 0 to disabled )
+		},
+}`
+	expected = CoreSCfg{
+		Caps:              0,
+		CapsStrategy:      utils.MetaBusy,
+		CapsStatsInterval: 0,
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnalS, err := jsnCfg.CoreSCfgJson(); err != nil {
+		t.Error(err)
+	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, alS) {
+		t.Errorf("Expected: %+v , received: %+v", expected, alS)
+	}
+
+	expErr := "time: unknown unit \"ss\" in duration \"1ss\""
+	coresJSONCfg := &CoreSJsonCfg{
+		Caps_stats_interval: utils.StringPointer("1ss"),
+	}
+	if err = alS.loadFromJSONCfg(coresJSONCfg); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error: %s,received: %v", expErr, err)
+	}
+}
+
+func TestCoreSAsMapInterface(t *testing.T) {
+	var alS CoreSCfg
+	cfgJSONStr := `{
+		"cores": {
+			"caps": 0,							// maximum concurrent request allowed ( 0 to disabled )
+			"caps_strategy": "*busy",			// strategy in case in case of concurrent requests reached	
+			"caps_stats_interval": "0s"			// the interval we sample for caps stats ( 0 to disabled )
+		},
+}`
+	eMap := map[string]interface{}{
+		utils.CapsCfg:              0,
+		utils.CapsStrategyCfg:      utils.MetaBusy,
+		utils.CapsStatsIntervalCfg: "0",
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnalS, err := jsnCfg.CoreSCfgJson(); err != nil {
+		t.Error(err)
+	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
+		t.Error(err)
+	} else if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+	eMap[utils.CapsStatsIntervalCfg] = "1s"
+	alS = CoreSCfg{
+		Caps:              0,
+		CapsStatsInterval: time.Second,
+		CapsStrategy:      utils.MetaBusy,
+	}
+	if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}

@@ -27,33 +27,31 @@ import (
 
 // General config section
 type GeneralCfg struct {
-	NodeID             string        // Identifier for this engine instance
-	Logger             string        // dictates the way logs are displayed/stored
-	LogLevel           int           // system wide log level, nothing higher than this will be logged
-	RoundingDecimals   int           // Number of decimals to round end prices at
-	DBDataEncoding     string        // The encoding used to store object data in strings: <msgpack|json>
-	TpExportPath       string        // Path towards export folder for offline Tariff Plans
-	PosterAttempts     int           // Time to wait before writing the failed posts in a single file
-	FailedPostsDir     string        // Directory path where we store failed http requests
-	FailedPostsTTL     time.Duration // Directory path where we store failed http requests
-	DefaultReqType     string        // Use this request type if not defined on top
-	DefaultCategory    string        // set default type of record
-	DefaultTenant      string        // set default tenant
-	DefaultTimezone    string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	DefaultCaching     string
-	ConnectAttempts    int           // number of initial connection attempts before giving up
-	Reconnects         int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
-	ConnectTimeout     time.Duration // timeout for RPC connection attempts
-	ReplyTimeout       time.Duration // timeout replies if not reaching back
-	LockingTimeout     time.Duration // locking mechanism timeout to avoid deadlocks
-	MinCallDuration    time.Duration
-	MaxCallDuration    time.Duration
-	DigestSeparator    string //
-	DigestEqual        string //
-	RSRSep             string // separator used to split RSRParser (by default is used ";")
-	MaxParallelConns   int    // the maximum number of connection used by the *parallel strategy
-	ConcurrentRequests int
-	ConcurrentStrategy string
+	NodeID           string        // Identifier for this engine instance
+	Logger           string        // dictates the way logs are displayed/stored
+	LogLevel         int           // system wide log level, nothing higher than this will be logged
+	RoundingDecimals int           // Number of decimals to round end prices at
+	DBDataEncoding   string        // The encoding used to store object data in strings: <msgpack|json>
+	TpExportPath     string        // Path towards export folder for offline Tariff Plans
+	PosterAttempts   int           // Time to wait before writing the failed posts in a single file
+	FailedPostsDir   string        // Directory path where we store failed http requests
+	FailedPostsTTL   time.Duration // Directory path where we store failed http requests
+	DefaultReqType   string        // Use this request type if not defined on top
+	DefaultCategory  string        // set default type of record
+	DefaultTenant    string        // set default tenant
+	DefaultTimezone  string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	DefaultCaching   string
+	ConnectAttempts  int           // number of initial connection attempts before giving up
+	Reconnects       int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
+	ConnectTimeout   time.Duration // timeout for RPC connection attempts
+	ReplyTimeout     time.Duration // timeout replies if not reaching back
+	LockingTimeout   time.Duration // locking mechanism timeout to avoid deadlocks
+	MinCallDuration  time.Duration
+	MaxCallDuration  time.Duration
+	DigestSeparator  string //
+	DigestEqual      string //
+	RSRSep           string // separator used to split RSRParser (by default is used ";")
+	MaxParallelConns int    // the maximum number of connection used by the *parallel strategy
 }
 
 //loadFromJsonCfg loads General config from JsonCfg
@@ -149,39 +147,31 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Max_parallel_conns != nil {
 		gencfg.MaxParallelConns = *jsnGeneralCfg.Max_parallel_conns
 	}
-	if jsnGeneralCfg.Concurrent_requests != nil {
-		gencfg.ConcurrentRequests = *jsnGeneralCfg.Concurrent_requests
-	}
-	if jsnGeneralCfg.Concurrent_strategy != nil {
-		gencfg.ConcurrentStrategy = *jsnGeneralCfg.Concurrent_strategy
-	}
 
 	return nil
 }
 
 func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.NodeIDCfg:             gencfg.NodeID,
-		utils.LoggerCfg:             gencfg.Logger,
-		utils.LogLevelCfg:           gencfg.LogLevel,
-		utils.RoundingDecimalsCfg:   gencfg.RoundingDecimals,
-		utils.DBDataEncodingCfg:     utils.Meta + gencfg.DBDataEncoding,
-		utils.TpExportPathCfg:       gencfg.TpExportPath,
-		utils.PosterAttemptsCfg:     gencfg.PosterAttempts,
-		utils.FailedPostsDirCfg:     gencfg.FailedPostsDir,
-		utils.DefaultReqTypeCfg:     gencfg.DefaultReqType,
-		utils.DefaultCategoryCfg:    gencfg.DefaultCategory,
-		utils.DefaultTenantCfg:      gencfg.DefaultTenant,
-		utils.DefaultTimezoneCfg:    gencfg.DefaultTimezone,
-		utils.DefaultCachingCfg:     gencfg.DefaultCaching,
-		utils.ConnectAttemptsCfg:    gencfg.ConnectAttempts,
-		utils.ReconnectsCfg:         gencfg.Reconnects,
-		utils.DigestSeparatorCfg:    gencfg.DigestSeparator,
-		utils.DigestEqualCfg:        gencfg.DigestEqual,
-		utils.RSRSepCfg:             gencfg.RSRSep,
-		utils.MaxParallelConnsCfg:   gencfg.MaxParallelConns,
-		utils.ConcurrentRequestsCfg: gencfg.ConcurrentRequests,
-		utils.ConcurrentStrategyCfg: gencfg.ConcurrentStrategy,
+		utils.NodeIDCfg:           gencfg.NodeID,
+		utils.LoggerCfg:           gencfg.Logger,
+		utils.LogLevelCfg:         gencfg.LogLevel,
+		utils.RoundingDecimalsCfg: gencfg.RoundingDecimals,
+		utils.DBDataEncodingCfg:   utils.Meta + gencfg.DBDataEncoding,
+		utils.TpExportPathCfg:     gencfg.TpExportPath,
+		utils.PosterAttemptsCfg:   gencfg.PosterAttempts,
+		utils.FailedPostsDirCfg:   gencfg.FailedPostsDir,
+		utils.DefaultReqTypeCfg:   gencfg.DefaultReqType,
+		utils.DefaultCategoryCfg:  gencfg.DefaultCategory,
+		utils.DefaultTenantCfg:    gencfg.DefaultTenant,
+		utils.DefaultTimezoneCfg:  gencfg.DefaultTimezone,
+		utils.DefaultCachingCfg:   gencfg.DefaultCaching,
+		utils.ConnectAttemptsCfg:  gencfg.ConnectAttempts,
+		utils.ReconnectsCfg:       gencfg.Reconnects,
+		utils.DigestSeparatorCfg:  gencfg.DigestSeparator,
+		utils.DigestEqualCfg:      gencfg.DigestEqual,
+		utils.RSRSepCfg:           gencfg.RSRSep,
+		utils.MaxParallelConnsCfg: gencfg.MaxParallelConns,
 	}
 
 	if gencfg.LockingTimeout != 0 {

@@ -16,13 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package cores
 
 import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // use provides a cleaner interface for chaining middleware for single routes.
@@ -52,28 +54,28 @@ func basicAuth(userList map[string]string) basicAuthMiddleware {
 
 			authHeader := strings.SplitN(r.Header.Get("Authorization"), " ", 2)
 			if len(authHeader) != 2 {
-				Logger.Warning("<BasicAuth> Missing authorization header value")
+				utils.Logger.Warning("<BasicAuth> Missing authorization header value")
 				http.Error(w, "Not authorized", 401)
 				return
 			}
 
 			authHeaderDecoded, err := base64.StdEncoding.DecodeString(authHeader[1])
 			if err != nil {
-				Logger.Warning("<BasicAuth> Unable to decode authorization header")
+				utils.Logger.Warning("<BasicAuth> Unable to decode authorization header")
 				http.Error(w, err.Error(), 401)
 				return
 			}
 
 			userPass := strings.SplitN(string(authHeaderDecoded), ":", 2)
 			if len(userPass) != 2 {
-				Logger.Warning("<BasicAuth> Unauthorized API access. Missing or extra credential components")
+				utils.Logger.Warning("<BasicAuth> Unauthorized API access. Missing or extra credential components")
 				http.Error(w, "Not authorized", 401)
 				return
 			}
 
 			valid := verifyCredential(userPass[0], userPass[1], userList)
 			if !valid {
-				Logger.Warning(fmt.Sprintf("<BasicAuth> Unauthorized API access by user '%s'", userPass[0]))
+				utils.Logger.Warning(fmt.Sprintf("<BasicAuth> Unauthorized API access by user '%s'", userPass[0]))
 				http.Error(w, "Not authorized", 401)
 				return
 			}

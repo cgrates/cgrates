@@ -604,14 +604,14 @@ func (attr *ArgsGetRoutes) Clone() *ArgsGetRoutes {
 	}
 }
 
-func (args *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
-	opts = &optsGetRoutes{ignoreErrors: args.IgnoreErrors}
-	if args.MaxCost == utils.MetaEventCost { // dynamic cost needs to be calculated from event
-		if err = args.CGREvent.CheckMandatoryFields([]string{utils.Account,
+func (attr *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
+	opts = &optsGetRoutes{ignoreErrors: attr.IgnoreErrors}
+	if attr.MaxCost == utils.MetaEventCost { // dynamic cost needs to be calculated from event
+		if err = attr.CGREvent.CheckMandatoryFields([]string{utils.Account,
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
 			return
 		}
-		cd, err := NewCallDescriptorFromCGREvent(args.CGREvent,
+		cd, err := NewCallDescriptorFromCGREvent(attr.CGREvent,
 			config.CgrConfig().GeneralCfg().DefaultTimezone)
 		if err != nil {
 			return nil, err
@@ -621,8 +621,8 @@ func (args *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
 			return nil, err
 		}
 		opts.maxCost = cc.Cost
-	} else if args.MaxCost != "" {
-		if opts.maxCost, err = strconv.ParseFloat(args.MaxCost,
+	} else if attr.MaxCost != "" {
+		if opts.maxCost, err = strconv.ParseFloat(attr.MaxCost,
 			64); err != nil {
 			return nil, err
 		}

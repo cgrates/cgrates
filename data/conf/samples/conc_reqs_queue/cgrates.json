@@ -4,8 +4,12 @@
 	"log_level": 7,
 	"node_id": "ConcurrentQueueEngine",
 	"reply_timeout": "50s",
-	"concurrent_requests": 2,
-	"concurrent_strategy": "*queue",
+},
+
+
+"cores": {
+	"caps": 2,							
+	"caps_strategy": "*queue",			
 },
 
 

@@ -118,7 +118,7 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.RpSubjectPrefixMatchingCfg: ralsCfg.RpSubjectPrefixMatching,
 		utils.RemoveExpiredCfg:           ralsCfg.RemoveExpired,
 		utils.MaxIncrementsCfg:           ralsCfg.MaxIncrements,
-		utils.Dynaprepaid_actionplansCfg: ralsCfg.DynaprepaidActionPlans,
+		utils.DynaprepaidActionplansCfg:  ralsCfg.DynaprepaidActionPlans,
 	}
 	if ralsCfg.ThresholdSConns != nil {
 		threSholds := make([]string, len(ralsCfg.ThresholdSConns))

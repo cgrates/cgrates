@@ -192,6 +192,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.sipAgentCfg = new(SIPAgentCfg)
 	cfg.configSCfg = new(ConfigSCfg)
 	cfg.apiBanCfg = new(APIBanCfg)
+	cfg.coreSCfg = new(CoreSCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 
@@ -328,8 +329,9 @@ type CGRConfig struct {
 	eesCfg           *EEsCfg           // EventExporter config
 	rateSCfg         *RateSCfg         // RateS config
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
-	configSCfg       *ConfigSCfg       //ConfigS config
+	configSCfg       *ConfigSCfg       // ConfigS config
 	apiBanCfg        *APIBanCfg        // APIBan config
+	coreSCfg         *CoreSCfg         // CoreS config
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -739,11 +741,11 @@ func (cfg *CGRConfig) loadAnalyzerCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 
 // loadAPIBanCgrCfg loads the Analyzer section of the configuration
 func (cfg *CGRConfig) loadAPIBanCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnAnalyzerCgrCfg *APIBanJsonCfg
-	if jsnAnalyzerCgrCfg, err = jsnCfg.ApiBanCfgJson(); err != nil {
+	var jsnAPIBanCfg *APIBanJsonCfg
+	if jsnAPIBanCfg, err = jsnCfg.ApiBanCfgJson(); err != nil {
 		return
 	}
-	return cfg.apiBanCfg.loadFromJsonCfg(jsnAnalyzerCgrCfg)
+	return cfg.apiBanCfg.loadFromJsonCfg(jsnAPIBanCfg)
 }
 
 // loadApierCfg loads the Apier section of the configuration
@@ -753,6 +755,15 @@ func (cfg *CGRConfig) loadApierCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.apier.loadFromJsonCfg(jsnApierCfg)
+}
+
+// loadCoreSCfg loads the CoreS section of the configuration
+func (cfg *CGRConfig) loadCoreSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnCoreCfg *CoreSJsonCfg
+	if jsnCoreCfg, err = jsnCfg.CoreSCfgJson(); err != nil {
+		return
+	}
+	return cfg.coreSCfg.loadFromJSONCfg(jsnCoreCfg)
 }
 
 // loadErsCfg loads the Ers section of the configuration
@@ -1107,11 +1118,18 @@ func (cfg *CGRConfig) ConfigSCfg() *ConfigSCfg {
 	return cfg.configSCfg
 }
 
-// APIBanCfg reads the Apier configuration
+// APIBanCfg reads the ApiBan configuration
 func (cfg *CGRConfig) APIBanCfg() *APIBanCfg {
 	cfg.lks[APIBanCfgJson].Lock()
 	defer cfg.lks[APIBanCfgJson].Unlock()
 	return cfg.apiBanCfg
+}
+
+// CoreSCfg reads the CoreS configuration
+func (cfg *CGRConfig) CoreSCfg() *CoreSCfg {
+	cfg.lks[CoreSCfgJson].Lock()
+	defer cfg.lks[CoreSCfgJson].Unlock()
+	return cfg.coreSCfg
 }
 
 // GetReloadChan returns the reload chanel for the given section
@@ -1224,6 +1242,8 @@ func (cfg *CGRConfig) V1GetConfigSection(args *SectionWithOpts, reply *map[strin
 		jsonString = utils.ToJSON(cfg.AnalyzerSCfg().AsMapInterface())
 	case RateSJson:
 		jsonString = utils.ToJSON(cfg.RateSCfg().AsMapInterface())
+	case CoreSCfgJson:
+		jsonString = utils.ToJSON(cfg.CoreSCfg().AsMapInterface())
 	default:
 		return errors.New("Invalid section")
 	}
@@ -1353,6 +1373,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		TemplatesJson:      cfg.loadTemplateSCfg,
 		ConfigSJson:        cfg.loadConfigSCfg,
 		APIBanCfgJson:      cfg.loadAPIBanCgrCfg,
+		CoreSCfgJson:       cfg.loadCoreSCfg,
 	}
 }
 
@@ -1581,6 +1602,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		case LISTEN_JSN:
 		case TlsCfgJson: // nothing to reload
 		case APIBanCfgJson: // nothing to reload
+		case CoreSCfgJson: // nothing to reload
 		case HTTP_JSN:
 			cfg.rldChans[HTTP_JSN] <- struct{}{}
 		case SCHEDULER_JSN:
@@ -1689,6 +1711,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		SIPAgentJson:       cfg.sipAgentCfg.AsMapInterface(separator),
 		TemplatesJson:      cfg.templates.AsMapInterface(separator),
 		ConfigSJson:        cfg.configSCfg.AsMapInterface(),
+		CoreSCfgJson:       cfg.coreSCfg.AsMapInterface(),
 	}, nil
 }
 
@@ -1816,6 +1839,8 @@ func (cfg *CGRConfig) V1GetConfigSectionString(args *SectionWithOpts, reply *str
 		*reply = utils.ToJSON(cfg.AnalyzerSCfg().AsMapInterface())
 	case RateSJson:
 		*reply = utils.ToJSON(cfg.RateSCfg().AsMapInterface())
+	case CoreSCfgJson:
+		*reply = utils.ToJSON(cfg.CoreSCfg().AsMapInterface())
 	default:
 		return errors.New("Invalid section")
 	}

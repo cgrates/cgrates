@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package cores
 
 import (
 	"bytes"
@@ -38,6 +38,8 @@ import (
 	"time"
 
 	rpc2_jsonrpc "github.com/cenkalti/rpc2/jsonrpc"
+	"github.com/cgrates/cgrates/analyzers"
+	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cenkalti/rpc2"
 	"golang.org/x/net/websocket"
@@ -51,17 +53,12 @@ func init() {
 	gob.Register(url.Values{})
 }
 
-type anzWrapFunc func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec
-
-func NewServer(concReqs *ConcReqs) (s *Server) {
+func NewServer(caps *Caps) (s *Server) {
 	return &Server{
 		httpMux:         http.NewServeMux(),
 		httpsMux:        http.NewServeMux(),
 		stopbiRPCServer: make(chan struct{}, 1),
-		concReqs:        concReqs,
-		anzWrapper: func(conn rpc.ServerCodec, enc string, from, to net.Addr) rpc.ServerCodec {
-			return conn
-		},
+		caps:            caps,
 	}
 }
 
@@ -73,16 +70,16 @@ type Server struct {
 	stopbiRPCServer chan struct{} // used in order to fully stop the biRPC
 	httpsMux        *http.ServeMux
 	httpMux         *http.ServeMux
-	anzWrapper      anzWrapFunc
-	concReqs        *ConcReqs
+	caps            *Caps
+	anz             *analyzers.AnalyzerService
 }
 
-func (s *Server) SetAnzWrapperFunc(anz anzWrapFunc) {
-	s.anzWrapper = anz
+func (s *Server) SetAnalyzer(anz *analyzers.AnalyzerService) {
+	s.anz = anz
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
-	RegisterRpcParams(EmptyString, rcvr)
+	utils.RegisterRpcParams(utils.EmptyString, rcvr)
 	rpc.Register(rcvr)
 	s.Lock()
 	s.rpcEnabled = true
@@ -90,7 +87,7 @@ func (s *Server) RpcRegister(rcvr interface{}) {
 }
 
 func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
-	RegisterRpcParams(name, rcvr)
+	utils.RegisterRpcParams(name, rcvr)
 	rpc.RegisterName(name, rcvr)
 	s.Lock()
 	s.rpcEnabled = true
@@ -160,19 +157,19 @@ func (s *Server) ServeJSON(addr string, exitChan chan bool) {
 		return
 	}
 
-	lJSON, e := net.Listen(TCP, addr)
+	lJSON, e := net.Listen(utils.TCP, addr)
 	if e != nil {
 		log.Println("ServeJSON listen error:", e)
 		exitChan <- true
 		return
 	}
-	Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at <%s>.", addr))
+	utils.Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at <%s>.", addr))
 	errCnt := 0
 	var lastErrorTime time.Time
 	for {
 		conn, err := lJSON.Accept()
 		if err != nil {
-			Logger.Err(fmt.Sprintf("<CGRServer> JSON accept error: <%s>", err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CGRServer> JSON accept error: <%s>", err.Error()))
 			now := time.Now()
 			if now.Sub(lastErrorTime) > 5*time.Second {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
@@ -184,7 +181,7 @@ func (s *Server) ServeJSON(addr string, exitChan chan bool) {
 			}
 			continue
 		}
-		go rpc.ServeCodec(newConcReqsJSONCodec(conn, s.concReqs, s.anzWrapper))
+		go rpc.ServeCodec(newCapsJSONCodec(conn, s.caps, s.anz))
 	}
 
 }
@@ -196,19 +193,19 @@ func (s *Server) ServeGOB(addr string, exitChan chan bool) {
 	if !enabled {
 		return
 	}
-	lGOB, e := net.Listen(TCP, addr)
+	lGOB, e := net.Listen(utils.TCP, addr)
 	if e != nil {
 		log.Println("ServeGOB listen error:", e)
 		exitChan <- true
 		return
 	}
-	Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at <%s>.", addr))
+	utils.Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at <%s>.", addr))
 	errCnt := 0
 	var lastErrorTime time.Time
 	for {
 		conn, err := lGOB.Accept()
 		if err != nil {
-			Logger.Err(fmt.Sprintf("<CGRServer> GOB accept error: <%s>", err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CGRServer> GOB accept error: <%s>", err.Error()))
 			now := time.Now()
 			if now.Sub(lastErrorTime) > 5*time.Second {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
@@ -220,16 +217,16 @@ func (s *Server) ServeGOB(addr string, exitChan chan bool) {
 			}
 			continue
 		}
-		go rpc.ServeCodec(newConcReqsGOBCodec(conn, s.concReqs, s.anzWrapper))
+		go rpc.ServeCodec(newCapsGOBCodec(conn, s.caps, s.anz))
 	}
 }
 
 func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
-	rmtIP, _ := GetRemoteIP(r)
-	rmtAddr, _ := net.ResolveIPAddr(EmptyString, rmtIP)
-	res := newRPCRequest(r.Body, rmtAddr, s.concReqs, s.anzWrapper).Call()
+	rmtIP, _ := utils.GetRemoteIP(r)
+	rmtAddr, _ := net.ResolveIPAddr(utils.EmptyString, rmtIP)
+	res := newRPCRequest(r.Body, rmtAddr, s.caps, s.anz).Call()
 	io.Copy(w, res)
 }
 
@@ -269,7 +266,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 		s.httpEnabled = true
 		s.Unlock()
 
-		Logger.Info("<HTTP> enabling handler for JSON-RPC")
+		utils.Logger.Info("<HTTP> enabling handler for JSON-RPC")
 		if useBasicAuth {
 			s.httpMux.HandleFunc(jsonRPCURL, use(s.handleRequest, basicAuth(userList)))
 		} else {
@@ -280,9 +277,9 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
-		Logger.Info("<HTTP> enabling handler for WebSocket connections")
+		utils.Logger.Info("<HTTP> enabling handler for WebSocket connections")
 		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
-			rpc.ServeCodec(newConcReqsJSONCodec(ws, s.concReqs, s.anzWrapper))
+			rpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
 		})
 		if useBasicAuth {
 			s.httpMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
@@ -296,9 +293,9 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 		return
 	}
 	if useBasicAuth {
-		Logger.Info("<HTTP> enabling basic auth")
+		utils.Logger.Info("<HTTP> enabling basic auth")
 	}
-	Logger.Info(fmt.Sprintf("<HTTP> start listening at <%s>", addr))
+	utils.Logger.Info(fmt.Sprintf("<HTTP> start listening at <%s>", addr))
 	if err := http.ListenAndServe(addr, s.httpMux); err != nil {
 		log.Println(fmt.Sprintf("<HTTP>Error: %s when listening ", err))
 	}
@@ -314,14 +311,14 @@ func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(
 		return fmt.Errorf("BiRPCServer should not be nil")
 	}
 	var lBiJSON net.Listener
-	lBiJSON, err = net.Listen(TCP, addr)
+	lBiJSON, err = net.Listen(utils.TCP, addr)
 	if err != nil {
 		log.Println("ServeBiJSON listen error:", err)
 		return
 	}
 	s.birpcSrv.OnConnect(onConn)
 	s.birpcSrv.OnDisconnect(onDis)
-	Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at <%s>", addr))
+	utils.Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at <%s>", addr))
 	go func(l net.Listener) {
 		for {
 			conn, err := l.Accept()
@@ -353,12 +350,12 @@ type rpcRequest struct {
 	rw         io.ReadWriter // holds the JSON formated RPC response
 	done       chan bool     // signals then end of the RPC request
 	remoteAddr net.Addr
-	concReqs   *ConcReqs
-	anzWarpper anzWrapFunc
+	caps       *Caps
+	anzWarpper *analyzers.AnalyzerService
 }
 
 // newRPCRequest returns a new rpcRequest.
-func newRPCRequest(r io.Reader, remoteAddr net.Addr, concReqs *ConcReqs, anz anzWrapFunc) *rpcRequest {
+func newRPCRequest(r io.Reader, remoteAddr net.Addr, caps *Caps, anz *analyzers.AnalyzerService) *rpcRequest {
 	var buf bytes.Buffer
 	done := make(chan bool)
 	return &rpcRequest{
@@ -366,7 +363,7 @@ func newRPCRequest(r io.Reader, remoteAddr net.Addr, concReqs *ConcReqs, anz anz
 		rw:         &buf,
 		done:       done,
 		remoteAddr: remoteAddr,
-		concReqs:   concReqs,
+		caps:       caps,
 		anzWarpper: anz,
 	}
 }
@@ -382,7 +379,7 @@ func (r *rpcRequest) Write(p []byte) (n int, err error) {
 }
 
 func (r *rpcRequest) LocalAddr() net.Addr {
-	return LocalAddr()
+	return utils.LocalAddr()
 }
 func (r *rpcRequest) RemoteAddr() net.Addr {
 	return r.remoteAddr
@@ -395,7 +392,7 @@ func (r *rpcRequest) Close() error {
 
 // Call invokes the RPC request, waits for it to complete, and returns the results.
 func (r *rpcRequest) Call() io.Reader {
-	go rpc.ServeCodec(newConcReqsJSONCodec(r, r.concReqs, r.anzWarpper))
+	go rpc.ServeCodec(newCapsJSONCodec(r, r.caps, r.anzWarpper))
 	<-r.done
 	return r.rw
 }
@@ -451,21 +448,21 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 	if err != nil {
 		return
 	}
-	listener, err := tls.Listen(TCP, addr, config)
+	listener, err := tls.Listen(utils.TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
 		exitChan <- true
 		return
 	}
 
-	Logger.Info(fmt.Sprintf("Starting CGRateS GOB TLS server at <%s>.", addr))
+	utils.Logger.Info(fmt.Sprintf("Starting CGRateS GOB TLS server at <%s>.", addr))
 	errCnt := 0
 	var lastErrorTime time.Time
 	for {
 		conn, err := listener.Accept()
 		defer conn.Close()
 		if err != nil {
-			Logger.Err(fmt.Sprintf("<CGRServer> TLS accept error: <%s>", err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CGRServer> TLS accept error: <%s>", err.Error()))
 			now := time.Now()
 			if now.Sub(lastErrorTime) > 5*time.Second {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
@@ -477,7 +474,7 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 			}
 			continue
 		}
-		go rpc.ServeCodec(newConcReqsGOBCodec(conn, s.concReqs, s.anzWrapper))
+		go rpc.ServeCodec(newCapsGOBCodec(conn, s.caps, s.anz))
 	}
 }
 
@@ -493,20 +490,20 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 	if err != nil {
 		return
 	}
-	listener, err := tls.Listen(TCP, addr, config)
+	listener, err := tls.Listen(utils.TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
 		exitChan <- true
 		return
 	}
-	Logger.Info(fmt.Sprintf("Starting CGRateS JSON TLS server at <%s>.", addr))
+	utils.Logger.Info(fmt.Sprintf("Starting CGRateS JSON TLS server at <%s>.", addr))
 	errCnt := 0
 	var lastErrorTime time.Time
 	for {
 		conn, err := listener.Accept()
 		defer conn.Close()
 		if err != nil {
-			Logger.Err(fmt.Sprintf("<CGRServer> TLS accept error: <%s>", err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CGRServer> TLS accept error: <%s>", err.Error()))
 			now := time.Now()
 			if now.Sub(lastErrorTime) > 5*time.Second {
 				errCnt = 0 // reset error count if last error was more than 5 seconds ago
@@ -518,7 +515,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 			}
 			continue
 		}
-		go rpc.ServeCodec(newConcReqsJSONCodec(conn, s.concReqs, s.anzWrapper))
+		go rpc.ServeCodec(newCapsJSONCodec(conn, s.caps, s.anz))
 	}
 }
 
@@ -536,7 +533,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
-		Logger.Info("<HTTPS> enabling handler for JSON-RPC")
+		utils.Logger.Info("<HTTPS> enabling handler for JSON-RPC")
 		if useBasicAuth {
 			s.httpsMux.HandleFunc(jsonRPCURL, use(s.handleRequest, basicAuth(userList)))
 		} else {
@@ -547,9 +544,9 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
-		Logger.Info("<HTTPS> enabling handler for WebSocket connections")
+		utils.Logger.Info("<HTTPS> enabling handler for WebSocket connections")
 		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
-			rpc.ServeCodec(newConcReqsJSONCodec(ws, s.concReqs, s.anzWrapper))
+			rpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
 		})
 		if useBasicAuth {
 			s.httpsMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
@@ -563,7 +560,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		return
 	}
 	if useBasicAuth {
-		Logger.Info("<HTTPS> enabling basic auth")
+		utils.Logger.Info("<HTTPS> enabling basic auth")
 	}
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
@@ -574,32 +571,10 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		Handler:   s.httpsMux,
 		TLSConfig: config,
 	}
-	Logger.Info(fmt.Sprintf("<HTTPS> start listening at <%s>", addr))
+	utils.Logger.Info(fmt.Sprintf("<HTTPS> start listening at <%s>", addr))
 	if err := httpSrv.ListenAndServeTLS(serverCrt, serverKey); err != nil {
 		log.Println(fmt.Sprintf("<HTTPS>Error: %s when listening ", err))
 	}
 	exitChan <- true
-	return
-}
-
-// GetRemoteIP returns the IP from http request
-func GetRemoteIP(r *http.Request) (ip string, err error) {
-	ip = r.Header.Get("X-REAL-IP")
-	if net.ParseIP(ip) != nil {
-		return
-	}
-	for _, ip = range strings.Split(r.Header.Get("X-FORWARDED-FOR"), FIELDS_SEP) {
-		if net.ParseIP(ip) != nil {
-			return
-		}
-	}
-	if ip, _, err = net.SplitHostPort(r.RemoteAddr); err != nil {
-		return
-	}
-	if net.ParseIP(ip) != nil {
-		return
-	}
-	ip = EmptyString
-	err = fmt.Errorf("no valid ip found")
 	return
 }

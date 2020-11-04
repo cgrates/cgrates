@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -33,7 +34,7 @@ import (
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
-	server *utils.Server,
+	server *cores.Server,
 	schedService *SchedulerService,
 	responderService *ResponderService,
 	internalAPIerSv1Chan chan rpcclient.ClientConnector,
@@ -61,7 +62,7 @@ type APIerSv1Service struct {
 	dm               *DataDBService
 	storDB           *StorDBService
 	filterSChan      chan *engine.FilterS
-	server           *utils.Server
+	server           *cores.Server
 	schedService     *SchedulerService
 	responderService *ResponderService
 	connMgr          *engine.ConnManager

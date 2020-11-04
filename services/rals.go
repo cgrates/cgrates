@@ -23,6 +23,7 @@ import (
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -30,7 +31,7 @@ import (
 )
 
 // NewRalService returns the Ral Service
-func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *utils.Server,
+func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *cores.Server,
 	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, exitChan chan bool,
 	connMgr *engine.ConnManager,
 	anz *AnalyzerService) *RalService {
@@ -52,7 +53,7 @@ type RalService struct {
 	sync.RWMutex
 	cfg       *config.CGRConfig
 	cacheS    *engine.CacheS
-	server    *utils.Server
+	server    *cores.Server
 	rals      *v1.RALsV1
 	responder *ResponderService
 	connChan  chan rpcclient.ClientConnector

@@ -23,13 +23,14 @@ import (
 
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewAPIerSv2Service returns the APIerSv2 Service
 func NewAPIerSv2Service(apiv1 *APIerSv1Service, cfg *config.CGRConfig,
-	server *utils.Server,
+	server *cores.Server,
 	internalAPIerSv2Chan chan rpcclient.ClientConnector,
 	anz *AnalyzerService) *APIerSv2Service {
 	return &APIerSv2Service{
@@ -45,7 +46,7 @@ func NewAPIerSv2Service(apiv1 *APIerSv1Service, cfg *config.CGRConfig,
 type APIerSv2Service struct {
 	sync.RWMutex
 	cfg    *config.CGRConfig
-	server *utils.Server
+	server *cores.Server
 
 	apiv1    *APIerSv1Service
 	api      *v2.APIerSv2
