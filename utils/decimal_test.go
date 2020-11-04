@@ -57,30 +57,18 @@ func TestDecimalFloat64Negative(t *testing.T) {
 	}
 }
 
-/*
-func TestDecimalMarshalJSON(t *testing.T) {
-	expected := []byte("3.27")
+func TestDecimalMarshalUnmarshalJSON(t *testing.T) {
 	a := NewDecimal()
 	received, err := NewDecimalFromFloat64(3.27).MarshalJSON()
 	if err != nil {
 		t.Errorf("Expecting: nil, received: %+v", received)
 	}
-	fmt.Println(string(expected))
-	fmt.Println(string(received))
-	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	if err := a.UnmarshalJSON(received); err != nil {
+		t.Error(err)
 	}
-	a.UnmarshalJSON(received)
-	fmt.Println(a.Float64())
-}
-
-
-func TestDecimalUnmarshalJSON(t *testing.T) {
-	expected :=
-	received :=
-
-	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	rcv := a.Float64()
+	expected := 3.27
+	if expected != rcv {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 }
-*/

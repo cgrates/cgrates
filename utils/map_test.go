@@ -414,6 +414,8 @@ func TestStringMapIncludes3(t *testing.T) {
 func TestStringMapSlice(t *testing.T) {
 	expected := []string{"test", "test2"}
 	received := StringMap{"test": true, "test2": true}.Slice()
+	sort.Strings(received)
+	sort.Strings(expected)
 	if !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, received)
 	}
@@ -428,12 +430,10 @@ func TestStringMapClone(t *testing.T) {
 }
 
 func TestStringMapString(t *testing.T) {
-	expected := "test;test2"
 	received := StringMap{"test": true, "test2": true}.String()
-	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	if received != "test;test2" && received != "test2;test" {
+		t.Errorf("Expecting: test or test2, received: %+v", received)
 	}
-
 }
 
 func TestStringMapGetOneEmpty(t *testing.T) {
@@ -445,10 +445,9 @@ func TestStringMapGetOneEmpty(t *testing.T) {
 }
 
 func TestStringMapGetOneNotEmpty(t *testing.T) {
-	expected := "test"
 	received := StringMap{"test": true, "test2": true}.GetOne()
-	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	if received != "test" && received != "test2" {
+		t.Errorf("Expecting: test or test2, received: %+v", received)
 	}
 }
 
