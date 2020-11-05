@@ -729,7 +729,10 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		t.Errorf("Expected: %s \n,received: %s", utils.OK, reply)
 	}
 
-	if err := cfg.V1GetConfigSection(&SectionWithOpts{Section: ERsJson}, &rcv); err != nil {
+	expected = map[string]interface{}{
+		ERsJson: expected,
+	}
+	if err := cfg.V1GetConfig(&SectionWithOpts{Section: ERsJson}, &rcv); err != nil {
 		t.Error(err)
 	} else if utils.ToJSON(expected) != utils.ToJSON(rcv) {
 		t.Errorf("Expected: %+v, \n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
@@ -751,8 +754,8 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
-	if err = cfg.V1ReloadConfigFromJSON(&JSONReloadWithOpts{
-		JSON: map[string]interface{}{
+	if err = cfg.V1ReloadConfig(&ArgsReloadWithOpts{
+		Config: map[string]interface{}{
 			"sessions": map[string]interface{}{
 				"enabled":          true,
 				"resources_conns":  []string{"*localhost"},
@@ -806,8 +809,8 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
-	if err = cfg.V1ReloadConfigFromString(&JSONStringReloadWithOpts{
-		JSON: `{"sessions":{
+	if err = cfg.V1ReloadConfigFromJSON(&JSONStringReloadWithOpts{
+		Config: `{"sessions":{
 				"enabled":          true,
 				"resources_conns":  ["*localhost"],
 				"routes_conns":     ["*localhost"],
@@ -849,8 +852,8 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	}
 
 	var rcv string
-	expected := `{"alterable_fields":[],"attributes_conns":["*localhost"],"cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":1,"debit_interval":"0","enabled":true,"listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","rals_conns":["*internal"],"replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"scheduler_conns":[],"session_indexes":[],"session_ttl":"0","stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}`
-	if err := cfg.V1GetConfigSectionString(&SectionWithOpts{Section: SessionSJson}, &rcv); err != nil {
+	expected := `{"sessions":{"alterable_fields":[],"attributes_conns":["*localhost"],"cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":1,"debit_interval":"0","enabled":true,"listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","rals_conns":["*internal"],"replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"scheduler_conns":[],"session_indexes":[],"session_ttl":"0","stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
+	if err := cfg.V1GetConfigAsJSON(&SectionWithOpts{Section: SessionSJson}, &rcv); err != nil {
 		t.Error(err)
 	} else if expected != rcv {
 		t.Errorf("Expected: %+q, \n received: %+q", expected, rcv)

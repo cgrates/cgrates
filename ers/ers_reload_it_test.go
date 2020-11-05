@@ -140,13 +140,15 @@ func testReloadReloadConfigFromPath(t *testing.T) {
 
 func testReloadVerifyFirstReload(t *testing.T) {
 	var reply map[string]interface{}
-	if err := reloadRPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{
+	if err := reloadRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
 		Section: config.ERsJson,
 	}, &reply); err != nil {
 		t.Error(err)
-	} else if reply[utils.EnabledCfg] != true {
-		t.Errorf("Expecting: <true>, received: <%+v>", reply[utils.EnabledCfg])
-	} else if readers, canConvert := reply[utils.ReadersCfg].([]interface{}); !canConvert {
+	} else if mp, can := reply[config.ERsJson].(map[string]interface{}); !can {
+		t.Errorf("expected a map received: %T", reply[config.ERsJson])
+	} else if mp[utils.EnabledCfg] != true {
+		t.Errorf("Expecting: <true>, received: <%+v>", mp[utils.EnabledCfg])
+	} else if readers, canConvert := mp[utils.ReadersCfg].([]interface{}); !canConvert {
 		t.Errorf("Cannot cast Readers to slice")
 	} else if len(readers) != 3 { // 2 active readers and 1 default
 		t.Errorf("Expecting: <2>, received: <%+v>", len(readers))

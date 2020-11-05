@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetJSONConfig{
 		name:      "get_json_section",
-		rpcMethod: utils.ConfigSv1GetJSONSection,
+		rpcMethod: utils.ConfigSv1GetConfig,
 		rpcParams: &config.SectionWithOpts{},
 	}
 	commands[c.Name()] = c

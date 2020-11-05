@@ -62,7 +62,10 @@ func (dps *DispatcherHCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:          dps.Enabled,
 		utils.DispatchersConnsCfg: dps.DispatchersConns,
-		utils.RegisterIntervalCfg: dps.RegisterInterval,
+		utils.RegisterIntervalCfg: dps.RegisterInterval.String(),
+	}
+	if dps.RegisterInterval == 0 {
+		initialMP[utils.RegisterIntervalCfg] = "0"
 	}
 	if dps.Hosts != nil {
 		hosts := make(map[string][]map[string]interface{})

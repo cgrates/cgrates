@@ -25,13 +25,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.SectionWithOpts, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherService) ConfigSv1GetConfig(args *config.SectionWithOpts, reply *map[string]interface{}) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ConfigSv1GetJSONSection, tnt,
+		if err = dS.authorize(utils.ConfigSv1GetConfig, tnt,
 			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -41,7 +41,7 @@ func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.SectionWithOpt
 			Tenant: tnt,
 		},
 		Opts: args.Opts,
-	}, utils.MetaConfig, utils.ConfigSv1GetJSONSection, args, reply)
+	}, utils.MetaConfig, utils.ConfigSv1GetConfig, args, reply)
 }
 
 func (dS *DispatcherService) ConfigSv1ReloadConfigFromPath(args *config.ConfigReloadWithOpts, reply *string) (err error) {
@@ -63,7 +63,26 @@ func (dS *DispatcherService) ConfigSv1ReloadConfigFromPath(args *config.ConfigRe
 	}, utils.MetaConfig, utils.ConfigSv1ReloadConfigFromPath, args, reply)
 }
 
-func (dS *DispatcherService) ConfigSv1ReloadConfigFromJSON(args *config.JSONReloadWithOpts, reply *string) (err error) {
+func (dS *DispatcherService) ConfigSv1ReloadConfig(args *config.ArgsReloadWithOpts, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ConfigSv1ReloadConfig, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaConfig, utils.ConfigSv1ReloadConfig, args, reply)
+}
+
+func (dS *DispatcherService) ConfigSv1ReloadConfigFromJSON(args *config.JSONStringReloadWithOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -80,4 +99,23 @@ func (dS *DispatcherService) ConfigSv1ReloadConfigFromJSON(args *config.JSONRelo
 		},
 		Opts: args.Opts,
 	}, utils.MetaConfig, utils.ConfigSv1ReloadConfigFromJSON, args, reply)
+}
+
+func (dS *DispatcherService) ConfigSv1GetConfigAsJSON(args *config.SectionWithOpts, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ConfigSv1GetConfigAsJSON, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+		},
+		Opts: args.Opts,
+	}, utils.MetaConfig, utils.ConfigSv1GetConfigAsJSON, args, reply)
 }
