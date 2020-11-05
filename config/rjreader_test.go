@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -63,6 +66,28 @@ func TestEnvRawJsonReadByte(t *testing.T) {
 	}
 }
 
+func TestNewRjReaderError(t *testing.T) {
+	expectedErrFile := "open randomfile.go: no such file or directory"
+	file, err := os.Open("randomfile.go")
+	if err == nil || err.Error() != expectedErrFile {
+		t.Errorf("Expected %+v, receivewd %+v", expectedErrFile, err)
+	}
+	expectedErrReader := "invalid argument"
+	if _, err := NewRjReader(file); err == nil || err.Error() != expectedErrReader {
+		t.Errorf("Expected %+v, received %+v", expectedErrReader, err)
+	}
+}
+
+func TestUnreadByte(t *testing.T) {
+	reader := rjReader{
+		indx: -1,
+	}
+	expected := "bufio: invalid use of UnreadByte"
+	if err := reader.UnreadByte(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
 func TestEnvRawJsonconsumeComent(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(`//comment
 a/*comment*/b`))
@@ -95,16 +120,20 @@ a/*comment*/b`))
 	}
 }
 
+func TestConsumeComent(t *testing.T) {
+	rjreader := new(rjReader)
+	var pkbit byte = '*'
+	expectedErr := "JSON_INCOMPLETE_COMMENT"
+	if _, err := rjreader.consumeComent(pkbit); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
 func TestEnvRawJsonReadByteWC(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(`c/*first comment*///another comment    
 
 		cgrates`))
 	expected := (byte)('c')
-	if rply, err := raw.ReadByteWC(); err != nil {
-		t.Error(err)
-	} else if rply != expected {
-		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
-	}
 	if rply, err := raw.ReadByteWC(); err != nil {
 		t.Error(err)
 	} else if rply != expected {
@@ -127,6 +156,7 @@ func TestEnvRawJsonPeekByteWC(t *testing.T) {
 	} else if rply != expected {
 		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
 	}
+
 	expected = (byte)('b')
 	if rply, err := raw.PeekByteWC(); err != nil {
 		t.Error(err)
@@ -137,6 +167,30 @@ func TestEnvRawJsonPeekByteWC(t *testing.T) {
 		t.Error(err)
 	} else if rply != expected {
 		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
+	}
+}
+
+func TestEnvRawJsonReadByteWCError(t *testing.T) {
+	raw := NewRjReaderFromBytes([]byte(`/*`))
+	expected := "JSON_INCOMPLETE_COMMENT"
+	if _, err := raw.ReadByteWC(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestEnvRawJsonPeekByteWCError(t *testing.T) {
+	raw := NewRjReaderFromBytes([]byte(`/*`))
+	expected := "JSON_INCOMPLETE_COMMENT"
+	if _, err := raw.PeekByteWC(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	raw = NewRjReaderFromBytes([]byte(`/ce faci`))
+	expectedByte := (byte)('/')
+	if rply, err := raw.PeekByteWC(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedByte, rply) {
+		t.Errorf("Expected %+v, received %+v", expectedByte, rply)
 	}
 }
 
@@ -216,6 +270,14 @@ func TestEnvReaderreadEnvName(t *testing.T) {
 		t.Errorf("Wrong endindx returned %v", endindx)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %+v, received: %+v", (string(expected)), (string(rply)))
+	}
+}
+
+func TestEnvReaderreadEnvNameError(t *testing.T) {
+	envR := NewRjReaderFromBytes([]byte(``))
+	expectedErr := "EOF"
+	if _, _, err := envR.readEnvName(1); err == nil && err.Error() != expectedErr {
+		t.Errorf("Expected %+v ,received %+v", expectedErr, err)
 	}
 }
 
