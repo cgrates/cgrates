@@ -72,7 +72,7 @@ func (dspS *DispatcherService) Start() (err error) {
 	if dspS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	utils.Logger.Info("Starting CGRateS Dispatcher service.")
+	utils.Logger.Info("Starting CGRateS DispatcherS service.")
 	fltrS := <-dspS.filterSChan
 	dspS.filterSChan <- fltrS
 	<-dspS.cacheS.GetPrecacheChannel(utils.CacheDispatcherProfiles)

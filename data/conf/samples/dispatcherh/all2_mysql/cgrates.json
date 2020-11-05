@@ -34,7 +34,7 @@
         },
         "dispConn": {
             "strategy": "*first",
-            "conns": [{"address": "127.0.0.1:2012/registar", "transport":"*http_jsonrpc"}]
+            "conns": [{"address": "http://127.0.0.1:2080/dispatchers_registrar", "transport":"*http_jsonrpc"}]
         }
     },
     
@@ -104,7 +104,7 @@
     
 
     "dispatcherh":{
-        "enabled": false,
+        "enabled": true,
         "dispatchers_conns": ["dispConn"],
         "hosts": {
             "*default":[{"ID":"ALL2", "register_transport": "*json", "register_tls": false}]

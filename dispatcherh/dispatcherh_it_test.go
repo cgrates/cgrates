@@ -26,6 +26,7 @@ import (
 	"os/exec"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -172,6 +173,7 @@ func testDsphStopEngines(t *testing.T) {
 	if err := all2Cmd.Process.Kill(); err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(2 * time.Second)
 	if _, err := testDsphGetNodeID(); err == nil || err.Error() != utils.ErrHostNotFound.Error() {
 		t.Errorf("Expected error: %s received: %v", utils.ErrHostNotFound, err)
 	}

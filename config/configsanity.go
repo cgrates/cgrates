@@ -719,7 +719,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			if !has {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DispatcherH, connID)
 			}
-			if len(connCfg.Conns) != 0 {
+			if len(connCfg.Conns) != 1 {
 				return fmt.Errorf("<%s> connection with id: <%s> needs to have only one host", utils.DispatcherH, connID)
 			}
 			if connCfg.Conns[0].Transport != rpcclient.HTTPjson {
