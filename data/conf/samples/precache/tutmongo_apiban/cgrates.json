@@ -1,10 +1,10 @@
 {
 // CGRateS Configuration file
-//
 
 
 "general": {
 	"log_level": 7,
+	"reply_timeout": "30s",
 },
 
 
@@ -14,14 +14,18 @@
 	"http": ":2080",
 },
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
 },
 
+
 "stor_db": {
-	"db_password": "CGRateS.org",
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
 },
 
 
@@ -54,6 +58,7 @@
 		"*dispatcher_profiles" : {"limit": 10000, "ttl":"0s", "precache": true},
 		"*dispatcher_hosts" : {"limit": 10000, "ttl":"0s", "precache": true},
 		"*dispatcher_routes" : {"limit": 10000, "ttl":"0s", "precache": false},
+		"*apiban" : {"limit": 254, "ttl":"0s", "precache": true}
 	},
 },
 
@@ -68,8 +73,13 @@
 },
 
 
-"migrator":{
-	"out_stordb_password": "CGRateS.org",
+"migrator": {
+	"out_datadb_type": "mongo",
+	"out_datadb_port": "27017",
+	"out_datadb_name": "10",
+	"out_stordb_type": "mongo",
+	"out_stordb_port": "27017",
+	"out_stordb_name": "cgrates",
 	"users_filters":["Account"],
 },
 
@@ -77,6 +87,11 @@
 "apiers": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
+},
+
+
+"apiban": {
+	"keys": ["8b0622b2d29a1f1e43c648ac45737204","2efdcd5d3d1b3a3ab4d71636b7b6d847","4c8140a0d7ec506e03ac59283eea8a9a","559bbfa6808558b3197bf4960bbc1635"],
 },
 
 
