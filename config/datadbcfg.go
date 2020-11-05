@@ -143,7 +143,7 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}, err 
 		utils.OptsCfg:       dbcfg.Opts,
 	}
 	if dbcfg.Items != nil {
-		items := make(map[string]interface{}, len(dbcfg.Items))
+		items := make(map[string]interface{})
 		for key, item := range dbcfg.Items {
 			items[key] = item.AsMapInterface()
 		}

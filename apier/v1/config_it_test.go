@@ -116,9 +116,9 @@ func testConfigSRPCConn(t *testing.T) {
 
 func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1ReloadConfigFromJSON, &config.JSONReloadWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1ReloadConfig, &config.ArgsReloadWithOpts{
 		Tenant: "cgrates.org",
-		JSON: map[string]interface{}{
+		Config: map[string]interface{}{
 			"sessions": map[string]interface{}{
 				"enabled":          true,
 				"resources_conns":  []string{"*localhost"},
@@ -171,8 +171,11 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		exp["stats_conns"] = empty
 		exp["thresholds_conns"] = empty
 	}
+	exp = map[string]interface{}{
+		config.SessionSJson: exp,
+	}
 	var rpl map[string]interface{}
-	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
 		Tenant:  "cgrates.org",
 		Section: config.SessionSJson,
 	}, &rpl); err != nil {
@@ -213,8 +216,11 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 			"publickey_path":      "",
 		},
 	}
+	exp = map[string]interface{}{
+		config.SessionSJson: exp,
+	}
 	var rpl map[string]interface{}
-	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
 		Section: config.SessionSJson,
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -228,8 +234,8 @@ func testConfigSReloadConfigFromJSONEEs(t *testing.T) {
 		t.SkipNow()
 	}
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1ReloadConfigFromJSON, &config.JSONReloadWithOpts{
-		JSON: map[string]interface{}{
+	if err := configRPC.Call(utils.ConfigSv1ReloadConfig, &config.ArgsReloadWithOpts{
+		Config: map[string]interface{}{
 			"ees": map[string]interface{}{
 				"enabled":          true,
 				"attributes_conns": []string{},
@@ -267,8 +273,11 @@ func testConfigSReloadConfigFromJSONEEs(t *testing.T) {
 		"cache":            map[string]interface{}{"*file_csv": map[string]interface{}{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "ttl": "5s"}},
 		"exporters":        []interface{}{eporter},
 	}
+	exp = map[string]interface{}{
+		config.EEsJson: exp,
+	}
 	var rpl map[string]interface{}
-	if err := configRPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
 		Section: config.EEsJson,
 	}, &rpl); err != nil {
 		t.Error(err)

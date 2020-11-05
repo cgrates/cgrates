@@ -68,8 +68,11 @@ func testDspConfigSv1GetJSONSection(t *testing.T) {
 		"rpc_json":     ":6012",
 		"rpc_json_tls": "127.0.0.1:2022",
 	}
+	expected = map[string]interface{}{
+		"listen": expected,
+	}
 	var reply map[string]interface{}
-	if err := dispEngine.RPC.Call(utils.ConfigSv1GetJSONSection, &config.SectionWithOpts{
+	if err := dispEngine.RPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
 		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "cfg12345",

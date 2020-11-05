@@ -21,7 +21,6 @@ package config
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -133,7 +132,7 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 				},
 			},
 		},
-		utils.RegisterIntervalCfg: 5 * time.Minute,
+		utils.RegisterIntervalCfg: "5m0s",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -194,7 +193,7 @@ func TestDispatcherHCfgAsMapInterface1(t *testing.T) {
 				},
 			},
 		},
-		utils.RegisterIntervalCfg: time.Minute,
+		utils.RegisterIntervalCfg: "1m0s",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -220,7 +219,7 @@ func TestDispatcherHCfgAsMapInterface2(t *testing.T) {
 		utils.EnabledCfg:          false,
 		utils.DispatchersConnsCfg: []string{},
 		utils.HostsCfg:            map[string][]map[string]interface{}{},
-		utils.RegisterIntervalCfg: 5 * time.Minute,
+		utils.RegisterIntervalCfg: "5m0s",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

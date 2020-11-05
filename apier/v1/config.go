@@ -33,9 +33,9 @@ type ConfigSv1 struct {
 	cfg *config.CGRConfig
 }
 
-// GetJSONSection will retrieve from CGRConfig a section
-func (cSv1 *ConfigSv1) GetJSONSection(section *config.SectionWithOpts, reply *map[string]interface{}) (err error) {
-	return cSv1.cfg.V1GetConfigSection(section, reply)
+// GetConfig will retrieve from CGRConfig a section
+func (cSv1 *ConfigSv1) GetConfig(section *config.SectionWithOpts, reply *map[string]interface{}) (err error) {
+	return cSv1.cfg.V1GetConfig(section, reply)
 }
 
 // ReloadConfigFromPath reloads the configuration
@@ -43,14 +43,19 @@ func (cSv1 *ConfigSv1) ReloadConfigFromPath(args *config.ConfigReloadWithOpts, r
 	return cSv1.cfg.V1ReloadConfigFromPath(args, reply)
 }
 
+// ReloadConfig reloads the sections of config
+func (cSv1 *ConfigSv1) ReloadConfig(args *config.ArgsReloadWithOpts, reply *string) (err error) {
+	return cSv1.cfg.V1ReloadConfig(args, reply)
+}
+
 // ReloadConfigFromJSON reloads the sections of config
-func (cSv1 *ConfigSv1) ReloadConfigFromJSON(args *config.JSONReloadWithOpts, reply *string) (err error) {
+func (cSv1 *ConfigSv1) ReloadConfigFromJSON(args *config.JSONStringReloadWithOpts, reply *string) (err error) {
 	return cSv1.cfg.V1ReloadConfigFromJSON(args, reply)
 }
 
-// ReloadConfigFromString reloads the sections of config
-func (cSv1 *ConfigSv1) ReloadConfigFromString(args *config.JSONStringReloadWithOpts, reply *string) (err error) {
-	return cSv1.cfg.V1ReloadConfigFromString(args, reply)
+// GetConfigAsJSON will retrieve from CGRConfig a section
+func (cSv1 *ConfigSv1) GetConfigAsJSON(args *config.SectionWithOpts, reply *string) (err error) {
+	return cSv1.cfg.V1GetConfigAsJSON(args, reply)
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
