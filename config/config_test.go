@@ -2255,23 +2255,6 @@ func TestDispatcherSConfig(t *testing.T) {
 	}
 }
 
-func TestDispatcherHConfig(t *testing.T) {
-	expected := &DispatcherHCfg{
-		Enabled:          false,
-		DispatchersConns: []string{},
-		Hosts:            map[string][]*DispatcherHRegistarCfg{},
-		RegisterInterval: 300000000000,
-	}
-	cgrConfig, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
-	newConfig := cgrConfig.DispatcherHCfg()
-	if !reflect.DeepEqual(expected, newConfig) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
-	}
-}
-
 func TestSchedulerConfig(t *testing.T) {
 	expected := &SchedulerCfg{
 		Enabled:   false,
@@ -4148,7 +4131,7 @@ func TestV1GetConfigSectionSuretax(t *testing.T) {
 		utils.ClientNumberCfg:         utils.EmptyString,
 		utils.ValidationKeyCfg:        utils.EmptyString,
 		utils.BusinessUnitCfg:         utils.EmptyString,
-		utils.TimezoneCfg:             "Local",
+		utils.TimezoneCfg:             "UTC",
 		utils.IncludeLocalCostCfg:     false,
 		utils.ReturnFileCodeCfg:       "0",
 		utils.ResponseGroupCfg:        "03",
@@ -4172,11 +4155,14 @@ func TestV1GetConfigSectionSuretax(t *testing.T) {
 		utils.TaxExemptionCodeListCfg: utils.EmptyString,
 	}
 	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: SURETAX_JSON}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		t.Fatal(err)
+	} else {
+		cfgCgr.SureTaxCfg().Timezone = time.UTC
+		if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: SURETAX_JSON}, &reply); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(reply, expected) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		}
 	}
 }
 
@@ -4213,6 +4199,372 @@ func TestV1GetConfigSectionDispatcherH(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionLoader(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.TpIDCfg:            "",
+		utils.DataPathCfg:        "./",
+		utils.DisableReverseCfg:  false,
+		utils.FieldSepCfg:        ",",
+		utils.CachesConnsCfg:     []interface{}{"*localhost"},
+		utils.SchedulerConnsCfg:  []interface{}{"*localhost"},
+		utils.GapiCredentialsCfg: ".gapi/credentials.json",
+		utils.GapiTokenCfg:       ".gapi/token.json",
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: CgrLoaderCfgJson}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionMigrator(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.OutDataDBTypeCfg:     "redis",
+		utils.OutDataDBHostCfg:     "127.0.0.1",
+		utils.OutDataDBPortCfg:     "6379",
+		utils.OutDataDBNameCfg:     "10",
+		utils.OutDataDBUserCfg:     "cgrates",
+		utils.OutDataDBPasswordCfg: "",
+		utils.OutDataDBEncodingCfg: "msgpack",
+		utils.OutStorDBTypeCfg:     "mysql",
+		utils.OutStorDBHostCfg:     "127.0.0.1",
+		utils.OutStorDBPortCfg:     "3306",
+		utils.OutStorDBNameCfg:     "cgrates",
+		utils.OutStorDBUserCfg:     "cgrates",
+		utils.OutStorDBPasswordCfg: "",
+		utils.UsersFiltersCfg:      []interface{}{},
+		utils.OutStorDBOptsCfg:     map[string]interface{}{},
+		utils.OutDataDBOptsCfg: map[string]interface{}{
+			utils.RedisSentinelNameCfg:       "",
+			utils.RedisClusterCfg:            false,
+			utils.RedisClusterSyncCfg:        "5s",
+			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
+		},
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: CgrMigratorCfgJson}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionApierS(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.EnabledCfg:         false,
+		utils.CachesConnsCfg:     []interface{}{utils.MetaInternal},
+		utils.SchedulerConnsCfg:  []interface{}{},
+		utils.AttributeSConnsCfg: []interface{}{},
+		utils.EEsConnsCfg:        []interface{}{},
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: ApierS}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionEES(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.EnabledCfg:         false,
+		utils.AttributeSConnsCfg: []interface{}{},
+		utils.CacheCfg: map[string]interface{}{
+			utils.MetaFileCSV: map[string]interface{}{
+				utils.LimitCfg:     float64(-1),
+				utils.PrecacheCfg:  false,
+				utils.ReplicateCfg: false,
+				utils.TTLCfg:       "5s",
+				utils.StaticTTLCfg: false,
+			},
+		},
+		utils.ExportersCfg: []interface{}{
+			map[string]interface{}{
+				utils.IdCfg:               utils.MetaDefault,
+				utils.TypeCfg:             utils.META_NONE,
+				utils.ExportPathCfg:       "/var/spool/cgrates/ees",
+				utils.OptsCfg:             map[string]interface{}{},
+				utils.TenantCfg:           utils.EmptyString,
+				utils.TimezoneCfg:         utils.EmptyString,
+				utils.FiltersCfg:          []interface{}{},
+				utils.FlagsCfg:            []interface{}{},
+				utils.AttributeIDsCfg:     []interface{}{},
+				utils.AttributeContextCfg: utils.EmptyString,
+				utils.SynchronousCfg:      false,
+				utils.AttemptsCfg:         float64(1),
+				utils.FieldSepCfg:         ",",
+				utils.FieldsCfg:           []interface{}{},
+			},
+		},
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: EEsJson}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionERS(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.EnabledCfg:       false,
+		utils.SessionSConnsCfg: []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		utils.ReadersCfg: []interface{}{
+			map[string]interface{}{
+				utils.FiltersCfg:                  []interface{}{},
+				utils.FlagsCfg:                    []interface{}{},
+				utils.IdCfg:                       "*default",
+				utils.PartialRecordCacheCfg:       "0",
+				utils.ProcessedPathCfg:            "/var/spool/cgrates/ers/out",
+				utils.RowLengthCfg:                float64(0),
+				utils.RunDelayCfg:                 "0",
+				utils.PartialCacheExpiryActionCfg: utils.EmptyString,
+				utils.SourcePathCfg:               "/var/spool/cgrates/ers/in",
+				utils.TenantCfg:                   utils.EmptyString,
+				utils.TimezoneCfg:                 utils.EmptyString,
+				utils.XMLRootPathCfg:              []interface{}{utils.EmptyString},
+				utils.CacheDumpFieldsCfg:          []interface{}{},
+				utils.ConcurrentRequestsCfg:       float64(1024),
+				utils.TypeCfg:                     utils.META_NONE,
+				utils.FailedCallsPrefixCfg:        utils.EmptyString,
+				utils.FieldSepCfg:                 ",",
+				utils.HeaderDefCharCfg:            ":",
+				utils.FieldsCfg:                   []interface{}{},
+				utils.OptsCfg:                     make(map[string]interface{}),
+			},
+		},
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: ERsJson}, &reply); err != nil {
+		t.Error(err)
+	} else {
+		reply[utils.ReadersCfg].([]interface{})[0].(map[string]interface{})[utils.FieldsCfg] = []interface{}{}
+		if !reflect.DeepEqual(reply, expected) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		}
+	}
+}
+
+func TestV1GetConfigSectionRPConns(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.MetaLocalHost: map[string]interface{}{
+			utils.PoolSize:    float64(0),
+			utils.StrategyCfg: utils.MetaFirst,
+			utils.Conns: []interface{}{
+				map[string]interface{}{
+					utils.AddressCfg:     "127.0.0.1:2012",
+					utils.TransportCfg:   "*json",
+					utils.SynchronousCfg: false,
+					utils.TLS:            false,
+				},
+			},
+		},
+		utils.MetaInternal: map[string]interface{}{
+			utils.StrategyCfg: utils.MetaFirst,
+			utils.PoolSize:    float64(0),
+			utils.Conns: []interface{}{
+				map[string]interface{}{
+					utils.AddressCfg:     utils.MetaInternal,
+					utils.TransportCfg:   utils.EmptyString,
+					utils.SynchronousCfg: false,
+					utils.TLS:            false,
+				},
+			},
+		},
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: RPCConnsJsonName}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionSIPAgent(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.EnabledCfg:             false,
+		utils.ListenCfg:              "127.0.0.1:5060",
+		utils.ListenNetCfg:           "udp",
+		utils.SessionSConnsCfg:       []interface{}{utils.MetaInternal},
+		utils.TimezoneCfg:            utils.EmptyString,
+		utils.RetransmissionTimerCfg: float64(time.Second),
+		utils.RequestProcessorsCfg:   []interface{}{},
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: SIPAgentJson}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionTemplates(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.MetaErr: []interface{}{
+			map[string]interface{}{utils.TagCfg: "SessionId", utils.PathCfg: "*rep.Session-Id", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Session-Id", utils.MandatoryCfg: true},
+			map[string]interface{}{utils.TagCfg: "OriginHost", utils.PathCfg: "*rep.Origin-Host", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*vars.OriginHost", utils.MandatoryCfg: true},
+			map[string]interface{}{utils.TagCfg: "OriginRealm", utils.PathCfg: "*rep.Origin-Realm", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*vars.OriginRealm", utils.MandatoryCfg: true},
+		},
+		utils.MetaASR: []interface{}{
+			map[string]interface{}{utils.TagCfg: "SessionId", utils.PathCfg: "*diamreq.Session-Id", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Session-Id", utils.MandatoryCfg: true},
+			map[string]interface{}{utils.TagCfg: "OriginHost", utils.PathCfg: "*diamreq.Origin-Host", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Destination-Host", utils.MandatoryCfg: true},
+			map[string]interface{}{utils.TagCfg: "OriginRealm", utils.PathCfg: "*diamreq.Origin-Realm", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Destination-Realm", utils.MandatoryCfg: true},
+			map[string]interface{}{utils.TagCfg: "DestinationRealm", utils.PathCfg: "*diamreq.Destination-Realm", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Origin-Realm", utils.MandatoryCfg: true},
+			map[string]interface{}{utils.TagCfg: "DestinationHost", utils.PathCfg: "*diamreq.Destination-Host", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*req.Origin-Host", utils.MandatoryCfg: true},
+			map[string]interface{}{utils.TagCfg: "AuthApplicationId", utils.PathCfg: "*diamreq.Auth-Application-Id", utils.TypeCfg: "*variable",
+				utils.ValueCfg: "~*vars.*appid", utils.MandatoryCfg: true},
+		},
+		utils.MetaCCA: []interface{}{},
+		utils.MetaRAR: []interface{}{},
+		"*errSip":     []interface{}{},
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: TemplatesJson}, &reply); err != nil {
+		t.Error(err)
+	} else {
+		reply[utils.MetaCCA] = []interface{}{}
+		reply[utils.MetaRAR] = []interface{}{}
+		reply["*errSip"] = []interface{}{}
+		if !reflect.DeepEqual(reply, expected) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		}
+	}
+}
+
+func TestV1GetConfigSectionConfigs(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.EnabledCfg: false,
+		utils.URLCfg:     "/configs/",
+		utils.RootDirCfg: "/var/spool/cgrates/configs",
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: ConfigSJson}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionAPIBans(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		"enabled": false,
+		"keys":    []interface{}{},
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: APIBanCfgJson}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionMailer(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.MailerServerCfg:   "localhost",
+		utils.MailerAuthUserCfg: "cgrates",
+		utils.MailerAuthPassCfg: "CGRateS.org",
+		utils.MailerFromAddrCfg: "cgr-mailer@localhost.localdomain",
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: MAILER_JSN}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionAnalyzer(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.EnabledCfg:         false,
+		utils.CleanupIntervalCfg: "1h0m0s",
+		utils.DBPathCfg:          "/var/spool/cgrates/analyzers",
+		utils.IndexTypeCfg:       utils.MetaScorch,
+		utils.TTLCfg:             "24h0m0s",
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: AnalyzerCfgJson}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionRateS(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		utils.EnabledCfg:                 false,
+		utils.IndexedSelectsCfg:          true,
+		utils.PrefixIndexedFieldsCfg:     []interface{}{},
+		utils.SuffixIndexedFieldsCfg:     []interface{}{},
+		utils.NestedFieldsCfg:            false,
+		utils.RateIndexedSelectsCfg:      true,
+		utils.RatePrefixIndexedFieldsCfg: []interface{}{},
+		utils.RateSuffixIndexedFieldsCfg: []interface{}{},
+		utils.RateNestedFieldsCfg:        false,
+	}
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: RateSJson}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func TestV1GetConfigSectionInvalidSection(t *testing.T) {
+	var reply map[string]interface{}
+	expected := "Invalid section"
+	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfgCgr.V1GetConfigSection(&SectionWithOpts{Section: "invalidSection"}, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestNewCGRConfigFromPathError(t *testing.T) {
+	expected := "file </usr/share/cgrates/conf/samples/multifiles/d.json>:NOT_FOUND:ENV_VAR:LOGGER"
+	if _, err := NewCGRConfigFromPath("/usr/share/cgrates/conf/samples/multifiles"); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
