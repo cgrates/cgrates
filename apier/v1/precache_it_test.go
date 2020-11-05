@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"flag"
 	"net/rpc"
 	"path"
 	"reflect"
@@ -39,6 +40,9 @@ var (
 	precacheRPC       *rpc.Client
 	precacheDataDir   = "/usr/share/cgrates"
 	precacheConfigDIR string //run tests for specific configuration
+
+	// use this flag to test the APIBan implemnentation for precache
+	apiBan = flag.Bool("apiban", true, "used to control if we run the apiban tests")
 
 	sTestsPrecache = []func(t *testing.T){
 		testPrecacheInitCfg,
@@ -68,6 +72,9 @@ func TestPrecacheIT(t *testing.T) {
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
+	}
+	if *apiBan {
+		precacheConfigDIR += "_apiban"
 	}
 	for _, stest := range sTestsPrecache {
 		t.Run(precacheConfigDIR, stest)
@@ -157,97 +164,59 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 	expectedStats := &map[string]*ltcache.CacheStats{
 		utils.MetaDefault:             {},
 		utils.CacheAccountActionPlans: {},
-		utils.CacheActionPlans: {
-			Items: 4,
-		},
-		utils.CacheActionTriggers: {
-			Items: 1,
-		},
-		utils.CacheActions: {
-			Items: 9,
-		},
+		utils.CacheActionPlans:        {Items: 4},
+		utils.CacheActionTriggers:     {Items: 1},
+		utils.CacheActions:            {Items: 9},
 		utils.CacheAttributeFilterIndexes: {
 			Items:  2,
 			Groups: 2,
 		},
-		utils.CacheAttributeProfiles: {
-			Items: 1,
-		},
-		utils.CacheChargerFilterIndexes:    {},
-		utils.CacheChargerProfiles:         {},
-		utils.CacheDispatcherFilterIndexes: {},
-		utils.CacheDispatcherProfiles: {
-			Items: 6,
-		},
-		utils.CacheDispatcherHosts: {
-			Items: 1,
-		},
-		utils.CacheDispatcherRoutes: {},
-		utils.CacheDispatcherLoads:  {},
-		utils.CacheDestinations: {
-			Items: 5,
-		},
-		utils.CacheDispatchers:    {},
-		utils.CacheEventResources: {},
-		utils.CacheFilters: {
-			Items: 15,
-		},
+		utils.CacheAttributeProfiles:         {Items: 1},
+		utils.CacheChargerFilterIndexes:      {},
+		utils.CacheChargerProfiles:           {},
+		utils.CacheDispatcherFilterIndexes:   {},
+		utils.CacheDispatcherProfiles:        {Items: 6},
+		utils.CacheDispatcherHosts:           {Items: 1},
+		utils.CacheDispatcherRoutes:          {},
+		utils.CacheDispatcherLoads:           {},
+		utils.CacheDestinations:              {Items: 5},
+		utils.CacheDispatchers:               {},
+		utils.CacheEventResources:            {},
+		utils.CacheFilters:                   {Items: 15},
 		utils.CacheRateProfilesFilterIndexes: {},
 		utils.CacheRateFilterIndexes:         {},
 		utils.CacheRateProfiles:              {},
-		utils.CacheRatingPlans: {
-			Items: 4,
-		},
-		utils.CacheRatingProfiles: {
-			Items: 5,
-		},
+		utils.CacheRatingPlans:               {Items: 4},
+		utils.CacheRatingProfiles:            {Items: 5},
 		utils.CacheResourceFilterIndexes: {
 			Items:  6,
 			Groups: 1,
 		},
-		utils.CacheResourceProfiles: {
-			Items: 3,
-		},
-		utils.CacheResources: {
-			Items: 3,
-		},
-		utils.CacheReverseDestinations: {
-			Items: 7,
-		},
-		utils.CacheRPCResponses: {},
-		utils.CacheSharedGroups: {
-			Items: 1,
-		},
+		utils.CacheResourceProfiles:    {Items: 3},
+		utils.CacheResources:           {Items: 3},
+		utils.CacheReverseDestinations: {Items: 7},
+		utils.CacheRPCResponses:        {},
+		utils.CacheSharedGroups:        {Items: 1},
 		utils.CacheStatFilterIndexes: {
 			Items:  2,
 			Groups: 1,
 		},
-		utils.CacheStatQueueProfiles: {
-			Items: 1,
-		},
-		utils.CacheStatQueues: {
-			Items: 1,
-		},
-		utils.CacheSTIR:         {},
-		utils.CacheCapsEvents:   {},
-		utils.CacheEventCharges: {},
+		utils.CacheStatQueueProfiles: {Items: 1},
+		utils.CacheStatQueues:        {Items: 1},
+		utils.CacheSTIR:              {},
+		utils.CacheCapsEvents:        {},
+		utils.CacheEventCharges:      {},
 		utils.CacheRouteFilterIndexes: {
 			Items:  6,
 			Groups: 1,
 		},
-		utils.CacheRouteProfiles: {
-			Items: 3,
-		},
+		utils.CacheRouteProfiles: {Items: 3},
 		utils.CacheThresholdFilterIndexes: {
 			Items:  10,
 			Groups: 1,
 		},
-		utils.CacheThresholdProfiles: {
-			Items: 7,
-		},
-		utils.CacheThresholds: {
-			Items: 7,
-		},
+		utils.CacheThresholdProfiles:     {Items: 7},
+		utils.CacheThresholds:            {Items: 7},
 		utils.CacheTimings:               {},
 		utils.CacheDiameterMessages:      {},
 		utils.CacheClosedSessions:        {},
@@ -282,7 +251,10 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		utils.CacheTBLTPDispatchers:      {},
 		utils.CacheTBLTPDispatcherHosts:  {},
 		utils.CacheTBLTPRateProfiles:     {},
-		utils.MetaAPIBan:                 {Items: 254},
+		utils.MetaAPIBan:                 {},
+	}
+	if *apiBan {
+		(*expectedStats)[utils.MetaAPIBan] = &ltcache.CacheStats{Items: 254}
 	}
 	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())
