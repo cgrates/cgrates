@@ -399,7 +399,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadDispatcherHCfg,
-		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg} {
+		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
