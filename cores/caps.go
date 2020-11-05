@@ -39,11 +39,10 @@ type Caps struct {
 
 // NewCaps creates a new caps
 func NewCaps(reqs int, strategy string) *Caps {
-	cR := &Caps{
+	return &Caps{
 		strategy: strategy,
 		aReqs:    make(chan struct{}, reqs),
 	}
-	return cR
 }
 
 // IsLimited returns true if the limit is not 0

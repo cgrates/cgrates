@@ -66,14 +66,14 @@ var (
 
 //Test start here
 func TestCapsBusyJSON(t *testing.T) {
-	capsConfigDIR = "conc_reqs_busy"
+	capsConfigDIR = "caps_busy"
 	for _, stest := range sTestsCaps {
 		t.Run(capsConfigDIR, stest)
 	}
 }
 
 func TestCapsQueueJSON(t *testing.T) {
-	capsConfigDIR = "conc_reqs_queue"
+	capsConfigDIR = "caps_queue"
 	for _, stest := range sTestsCaps {
 		t.Run(capsConfigDIR, stest)
 	}
@@ -115,7 +115,7 @@ func testCapsRPCConn(t *testing.T) {
 }
 
 func testCapsBusyAPIs(t *testing.T) {
-	if capsConfigDIR != "conc_reqs_busy" {
+	if capsConfigDIR != "caps_busy" {
 		t.SkipNow()
 	}
 	var failedAPIs int
@@ -144,7 +144,7 @@ func testCapsBusyAPIs(t *testing.T) {
 }
 
 func testCapsQueueAPIs(t *testing.T) {
-	if capsConfigDIR != "conc_reqs_queue" {
+	if capsConfigDIR != "caps_queue" {
 		t.SkipNow()
 	}
 	wg := new(sync.WaitGroup)
@@ -166,7 +166,7 @@ func testCapsQueueAPIs(t *testing.T) {
 }
 
 func testCapsOnHTTPBusy(t *testing.T) {
-	if capsConfigDIR != "conc_reqs_busy" {
+	if capsConfigDIR != "caps_busy" {
 		t.SkipNow()
 	}
 	var fldAPIs int64
@@ -175,7 +175,7 @@ func testCapsOnHTTPBusy(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func(index int) {
-			resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "CoreSv1.Sleep", "params": [{"DurationTime":10000000}], "id":%d}`, index))))
+			resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "CoreSv1.Sleep", "params": [{"Duration":10000000}], "id":%d}`, index))))
 			if err != nil {
 				wg.Done()
 				t.Error(err)
@@ -204,14 +204,14 @@ func testCapsOnHTTPBusy(t *testing.T) {
 }
 
 func testCapsOnHTTPQueue(t *testing.T) {
-	if capsConfigDIR != "conc_reqs_queue" {
+	if capsConfigDIR != "caps_queue" {
 		t.SkipNow()
 	}
 	wg := new(sync.WaitGroup)
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func(index int) {
-			_, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "CoreSv1.Sleep", "params": [{"DurationTime":10000000}], "id":%d}`, index))))
+			_, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "CoreSv1.Sleep", "params": [{"Duration":10000000}], "id":%d}`, index))))
 			if err != nil {
 				wg.Done()
 				t.Error(err)
@@ -225,7 +225,7 @@ func testCapsOnHTTPQueue(t *testing.T) {
 }
 
 func testCapsOnBiJSONBusy(t *testing.T) {
-	if capsConfigDIR != "conc_reqs_busy" {
+	if capsConfigDIR != "caps_busy" {
 		t.SkipNow()
 	}
 	var failedAPIs int
@@ -254,7 +254,7 @@ func testCapsOnBiJSONBusy(t *testing.T) {
 }
 
 func testCapsOnBiJSONQueue(t *testing.T) {
-	if capsConfigDIR != "conc_reqs_queue" {
+	if capsConfigDIR != "caps_queue" {
 		t.SkipNow()
 	}
 	wg := new(sync.WaitGroup)
@@ -316,7 +316,7 @@ func benchmarkCall(b *testing.B) {
 }
 
 func BenchmarkcapsWithLimit(b *testing.B) {
-	benchmarkInit(b, "conc_reqs_queue_bench")
+	benchmarkInit(b, "caps_queue_bench")
 	benchmarkCall(b)
 }
 

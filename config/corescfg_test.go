@@ -40,13 +40,13 @@ func TestCoreSloadFromJsonCfg(t *testing.T) {
 	}
 	cfgJSONStr := `{
 		"cores": {
-			"caps": 0,							// maximum concurrent request allowed ( 0 to disabled )
+			"caps": 10,							// maximum concurrent request allowed ( 0 to disabled )
 			"caps_strategy": "*busy",			// strategy in case in case of concurrent requests reached	
 			"caps_stats_interval": "0"			// the interval we sample for caps stats ( 0 to disabled )
 		},
 }`
 	expected = CoreSCfg{
-		Caps:              0,
+		Caps:              10,
 		CapsStrategy:      utils.MetaBusy,
 		CapsStatsInterval: 0,
 	}
