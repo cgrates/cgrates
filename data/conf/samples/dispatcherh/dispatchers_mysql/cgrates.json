@@ -25,7 +25,8 @@
 
 "caches":{
 	"partitions": {
-		"*dispatcher_routes": {"limit": -1, "ttl": "2s"}
+		"*dispatcher_routes": {"limit": -1, "ttl": "2s"},
+		"*dispatcher_hosts": {"limit": -1, "ttl": "2s"}
 	},
 },
 
