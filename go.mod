@@ -19,7 +19,7 @@ require (
 	github.com/cenkalti/hub v1.0.1 // indirect
 	github.com/cenkalti/rpc2 v0.0.0-20200203073230-5ce2854ce0fd
 	github.com/cgrates/aringo v0.0.0-20191121125609-d85002bd1667
-	github.com/cgrates/baningo v0.0.0-20200925111414-e65b237006c9
+	github.com/cgrates/baningo v0.0.0-20201105145354-6e3173f6a91b
 	github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70
 	github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7
 	github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817
