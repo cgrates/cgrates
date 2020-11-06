@@ -67,4 +67,5 @@ func TestPathItemListNext(t *testing.T) {
 	fmt.Println(list.Back().Prev().Value.String())
 
 }
+
 */
