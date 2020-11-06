@@ -101,9 +101,7 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Items != nil {
 		for kJsn, vJsn := range *jsnDbCfg.Items {
 			val := new(ItemOpt)
-			if err := val.loadFromJsonCfg(vJsn); err != nil {
-				return err
-			}
+			val.loadFromJsonCfg(vJsn) //To review if the function signature changes
 			dbcfg.Items[kJsn] = val
 		}
 	}

@@ -93,9 +93,7 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			if val == nil || !has {
 				val = new(ItemOpt)
 			}
-			if err := val.loadFromJsonCfg(vJsn); err != nil {
-				return err
-			}
+			val.loadFromJsonCfg(vJsn) //To review if the function signature changes
 			dbcfg.Items[kJsn] = val
 		}
 	}
@@ -181,7 +179,7 @@ func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
-func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) (err error) {
+func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) {
 	if jsonItm == nil {
 		return
 	}
