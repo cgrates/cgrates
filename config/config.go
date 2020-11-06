@@ -1403,6 +1403,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		switch section {
 		default:
 			return fmt.Errorf("Invalid section: <%s>", section)
+		case ConfigSJson:
 		case GENERAL_JSN: // nothing to reload
 		case RPCConnsJsonName: // nothing to reload
 			cfg.rldChans[RPCConnsJsonName] <- struct{}{}
@@ -1541,7 +1542,7 @@ func (cfg *CGRConfig) V1ReloadConfigFromPath(args *ConfigReloadWithOpts, reply *
 	}
 	//  lock all sections
 	cfg.rLockSections()
-
+	fmt.Println(cfg.ralsCfg.Enabled, 12)
 	err = cfg.checkConfigSanity()
 
 	cfg.rUnlockSections() // unlock before checking the error
@@ -1689,16 +1690,13 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ArgsReloadWithOpts, reply *string) (e
 	for section := range args.Config {
 		sections = append(sections, section)
 	}
-
 	var b []byte
 	if b, err = json.Marshal(args.Config); err != nil {
 		return
 	}
-
 	if err = cfg.loadCfgFromJSONWithLocks(bytes.NewBuffer(b), sections); err != nil {
 		return
 	}
-
 	//  lock all sections
 	cfg.rLockSections()
 

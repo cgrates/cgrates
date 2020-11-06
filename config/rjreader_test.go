@@ -19,7 +19,6 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"reflect"
@@ -291,6 +290,54 @@ func TestEnvReaderreplaceEnv(t *testing.T) {
 	}
 	if err := envR.replaceEnv(15); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestHandleJSONErrorNil(t *testing.T) {
+	os.Setenv("Test_VAR1", "5")
+	os.Setenv("Test_VAR2", "aVeryLongEnviormentalVariable")
+	envR := NewRjReaderFromBytes([]byte(`*env:Test_VAR1,/*comment*/ }*env:Test_VAR2"`))
+	var expected error = nil
+	if err := envR.replaceEnv(0); err != nil {
+		t.Error(err)
+	} else if newErr := envR.HandleJSONError(err); newErr != expected {
+		t.Errorf("Expected %+v, received %+v", expected, newErr)
+	}
+}
+
+func TestHandleJSONErrorInvalidUTF8(t *testing.T) {
+	rjr := NewRjReaderFromBytes([]byte("{}"))
+	expectedErr := new(json.InvalidUTF8Error)
+	if err := rjr.HandleJSONError(expectedErr); err == nil || err.Error() != expectedErr.Error() {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestHandleJSONErrorInvalidUnmarshalError(t *testing.T) {
+	rjr := NewRjReaderFromBytes([]byte("{}"))
+	err := json.NewDecoder(rjr).Decode(nil)
+	if err == nil {
+		t.Fatal(err)
+	}
+	err = rjr.HandleJSONError(err)
+	expectedErr := &json.InvalidUnmarshalError{Type: reflect.TypeOf(nil)}
+	if err == nil || err.Error() != expectedErr.Error() {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestHandleJSONErrorUnmarshalTypeError(t *testing.T) {
+	rjr := NewRjReaderFromBytes([]byte("{}"))
+	err := &json.UnmarshalTypeError{
+		Offset: 0,
+		Value:  "2",
+		Type:   reflect.TypeOf(""),
+		Struct: "configs",
+		Field:  "field",
+	}
+	expMessage := fmt.Sprintf("%s at line 0 around position 0", err.Error())
+	if err := rjr.HandleJSONError(err); err == nil || err.Error() != expMessage {
+		t.Errorf("Expected %+v, received %+v", expMessage, err)
 	}
 }
 
