@@ -39,7 +39,7 @@ func TestAuthSetStorage(t *testing.T) {
 	engine.Cache.Clear(nil)
 }
 
-func TestAuthLoadCsvFail(t *testing.T) {
+func TestAuthLoadCsvError(t *testing.T) {
 	timings := ``
 	destinations := ``
 	rates := ``

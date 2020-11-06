@@ -22,7 +22,6 @@ package ees
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"net/rpc"
 	"path"
@@ -41,6 +40,7 @@ var (
 	httpJSONMapCfg       *config.CGRConfig
 	httpJSONMapRpc       *rpc.Client
 	httpJsonMap          map[string]string
+	httpJsonHdr          http.Header
 
 	sTestsHTTPJsonMap = []func(t *testing.T){
 		testCreateDirectory,
@@ -98,15 +98,13 @@ func testHTTPJsonMapRPCConn(t *testing.T) {
 }
 
 func testHTTPJsonMapStartHTTPServer(t *testing.T) {
-	http.HandleFunc("/event_json_map_http", func(writer http.ResponseWriter, request *http.Request) {
-		b, err := ioutil.ReadAll(request.Body)
-		request.Body.Close()
+	http.HandleFunc("/event_json_map_http", func(writer http.ResponseWriter, r *http.Request) {
+		err := json.NewDecoder(r.Body).Decode(&httpJsonMap)
+		r.Body.Close()
 		if err != nil {
 			t.Error(err)
 		}
-		if err = json.Unmarshal(b, &httpJsonMap); err != nil {
-			t.Error(err)
-		}
+		httpJsonHdr = r.Header.Clone()
 	})
 
 	go http.ListenAndServe(":12081", nil)
@@ -254,6 +252,10 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
 		}
 	}
+	expHeader := "http://www.cgrates.org"
+	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
+		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
+	}
 	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
@@ -273,6 +275,10 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
 		}
 	}
+	expHeader = "http://www.cgrates.org"
+	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
+		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
+	}
 	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
@@ -291,6 +297,10 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		if rcv := httpJsonMap[key]; rcv != strVal {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
 		}
+	}
+	expHeader = "http://www.cgrates.org"
+	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
+		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
 
 	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {

@@ -98,9 +98,9 @@ func testHTTPPostRPCConn(t *testing.T) {
 }
 
 func testHTTPStartHTTPServer(t *testing.T) {
-	http.HandleFunc("/event_http", func(writer http.ResponseWriter, request *http.Request) {
-		b, err := ioutil.ReadAll(request.Body)
-		request.Body.Close()
+	http.HandleFunc("/event_http", func(writer http.ResponseWriter, r *http.Request) {
+		b, err := ioutil.ReadAll(r.Body)
+		r.Body.Close()
 		if err != nil {
 			t.Error(err)
 		}
@@ -108,6 +108,7 @@ func testHTTPStartHTTPServer(t *testing.T) {
 		if err != nil {
 			t.Errorf("Cannot parse body: %s", string(b))
 		}
+		httpJsonHdr = r.Header.Clone()
 	})
 	go http.ListenAndServe(":12080", nil)
 }
@@ -249,6 +250,11 @@ func testHTTPExportEvent(t *testing.T) {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
 		}
 	}
+	expHeader := "http://www.cgrates.org"
+	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
+		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
+	}
+
 	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
@@ -267,6 +273,11 @@ func testHTTPExportEvent(t *testing.T) {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
 		}
 	}
+	expHeader = "http://www.cgrates.org"
+	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
+		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
+	}
+
 	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
@@ -284,6 +295,10 @@ func testHTTPExportEvent(t *testing.T) {
 		if rcv := httpValues.Get(key); rcv != strVal {
 			t.Errorf("Expected %+v, received: %+v", strVal, rcv)
 		}
+	}
+	expHeader = "http://www.cgrates.org"
+	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
+		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
 	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
 		t.Error(err)
