@@ -130,11 +130,9 @@ func TestItemCfgloadFromJson(t *testing.T) {
 		RouteID:   "randomID",
 	}
 	rcv := new(ItemOpt)
-	if err := rcv.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if err = rcv.loadFromJsonCfg(jsonCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, expected) {
+	rcv.loadFromJsonCfg(nil)
+	rcv.loadFromJsonCfg(jsonCfg)
+	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
