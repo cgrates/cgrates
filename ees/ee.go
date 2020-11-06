@@ -48,7 +48,9 @@ func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 		return NewFileFWVee(cgrCfg, cfgIdx, filterS, dc)
 	case utils.MetaHTTPPost:
 		return NewHTTPPostEe(cgrCfg, cfgIdx, filterS, dc)
-	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaKafkajsonMap, utils.MetaS3jsonMap:
+	case utils.MetaHTTPjsonMap:
+		return NewHTTPjsonMapEE(cgrCfg, cfgIdx, filterS, dc)
+	case utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaKafkajsonMap, utils.MetaS3jsonMap:
 		return NewPosterJSONMapEE(cgrCfg, cfgIdx, filterS, dc)
 	case utils.MetaVirt:
 		return NewVirtualExporter(cgrCfg, cfgIdx, filterS, dc)

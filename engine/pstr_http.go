@@ -82,15 +82,6 @@ func (pstr *HTTPPoster) PostValues(content interface{}, hdr http.Header) (err er
 	return
 }
 
-// Post will post the event
-func (pstr *HTTPPoster) Post(content []byte, _ string) (err error) {
-	_, err = pstr.GetResponse(content, make(http.Header))
-	return
-}
-
-// Close only yo implement the Poster interface
-func (*HTTPPoster) Close() {}
-
 // GetResponse will post the event and return the response
 func (pstr *HTTPPoster) GetResponse(content interface{}, hdr http.Header) (respBody []byte, err error) {
 	fib := utils.Fib()

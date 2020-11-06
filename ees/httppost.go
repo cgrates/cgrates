@@ -143,11 +143,19 @@ func (httpPost *HTTPPost) composeHeader() (hdr http.Header, err error) {
 		return
 	}
 	for el := eeReq.hdr.GetFirstElement(); el != nil; el = el.Next() {
-		var strVal string
-		if strVal, err = eeReq.hdr.FieldAsString(el.Value.Slice()); err != nil {
+		var nmIt utils.NMInterface
+		if nmIt, err = eeReq.hdr.Field(el.Value); err != nil {
 			return
 		}
-		hdr.Set(strings.TrimPrefix(el.Value.String(), utils.MetaHdr), strVal)
+		itm, isNMItem := nmIt.(*config.NMItem)
+		if !isNMItem {
+			err = fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
+			return
+		}
+		if itm == nil {
+			continue // all attributes, not writable to diameter packet
+		}
+		hdr.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
 	}
 	return
 }

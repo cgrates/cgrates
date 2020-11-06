@@ -222,6 +222,7 @@
 				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime"},
 				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
 				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
+				{"tag": "HTTPHeader", "path": "*hdr.Origin", "type": "*constant", "value": "http://www.cgrates.org"},
 			],
 		},
 		{
@@ -249,6 +250,7 @@
 				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
 				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
 				{"tag": "EvenType", "path": "*exp.EventType", "type": "*variable", "value": "~*opts.*eventType"},
+				{"tag": "HTTPHeader", "path": "*hdr.Origin", "type": "*constant", "value": "http://www.cgrates.org"},
 			],
 		},
 		{

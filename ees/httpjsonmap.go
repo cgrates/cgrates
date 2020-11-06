@@ -21,6 +21,7 @@ package ees
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 	"sync"
 
@@ -29,87 +30,70 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewPosterJSONMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (pstrJSON *PosterJSONMapEE, err error) {
-	pstrJSON = &PosterJSONMapEE{
+func NewHTTPjsonMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
+	dc utils.MapStorage) (pstrJSON *HTTPjsonMapEE, err error) {
+	pstrJSON = &HTTPjsonMapEE{
 		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg:  cgrCfg,
 		cfgIdx:  cfgIdx,
 		filterS: filterS,
 		dc:      dc,
 	}
-	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
-	case utils.MetaHTTPjsonMap:
-		pstrJSON.poster, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
-			cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
-			utils.PosterTransportContentTypes[cgrCfg.EEsCfg().Exporters[cfgIdx].Type],
-			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts)
-	case utils.MetaAMQPjsonMap:
-		pstrJSON.poster = engine.NewAMQPPoster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
-			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
-	case utils.MetaAMQPV1jsonMap:
-		pstrJSON.poster = engine.NewAMQPv1Poster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
-			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
-	case utils.MetaSQSjsonMap:
-		pstrJSON.poster = engine.NewSQSPoster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
-			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
-	case utils.MetaKafkajsonMap:
-		pstrJSON.poster = engine.NewKafkaPoster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
-			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
-	case utils.MetaS3jsonMap:
-		pstrJSON.poster = engine.NewS3Poster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
-			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
-	}
+
+	pstrJSON.pstr, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
+		cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
+		utils.PosterTransportContentTypes[cgrCfg.EEsCfg().Exporters[cfgIdx].Type],
+		cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts)
 	return
 }
 
-// PosterJSONMapEE implements EventExporter interface for .csv files
-type PosterJSONMapEE struct {
+// HTTPjsonMapEE implements EventExporter interface for .csv files
+type HTTPjsonMapEE struct {
 	id      string
 	cgrCfg  *config.CGRConfig
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
-	poster  engine.Poster
+	pstr    *engine.HTTPPoster
 	dc      utils.MapStorage
 	sync.RWMutex
 }
 
 // ID returns the identificator of this exporter
-func (pstrEE *PosterJSONMapEE) ID() string {
-	return pstrEE.id
+func (httpEE *HTTPjsonMapEE) ID() string {
+	return httpEE.id
 }
 
 // OnEvicted implements EventExporter, doing the cleanup before exit
-func (pstrEE *PosterJSONMapEE) OnEvicted(string, interface{}) {
-	pstrEE.poster.Close()
+func (httpEE *HTTPjsonMapEE) OnEvicted(string, interface{}) {
 	return
 }
 
 // ExportEvent implements EventExporter
-func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
-	pstrEE.Lock()
+func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+	httpEE.Lock()
 	defer func() {
 		if err != nil {
-			pstrEE.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
+			httpEE.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
 		} else {
-			pstrEE.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
+			httpEE.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
 		}
-		pstrEE.Unlock()
+		httpEE.Unlock()
 	}()
 
-	pstrEE.dc[utils.NumberOfEvents] = pstrEE.dc[utils.NumberOfEvents].(int64) + 1
+	httpEE.dc[utils.NumberOfEvents] = httpEE.dc[utils.NumberOfEvents].(int64) + 1
 
 	valMp := make(map[string]interface{})
-	if len(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ContentFields()) == 0 {
+	hdr := http.Header{}
+	if len(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].ContentFields()) == 0 {
 		valMp = cgrEv.Event
 	} else {
-		eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), pstrEE.dc, cgrEv.Opts,
-			pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Tenant,
-			pstrEE.cgrCfg.GeneralCfg().DefaultTenant,
-			utils.FirstNonEmpty(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Timezone,
-				pstrEE.cgrCfg.GeneralCfg().DefaultTimezone), pstrEE.filterS)
+		eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), httpEE.dc, cgrEv.Opts,
+			httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Tenant,
+			httpEE.cgrCfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Timezone,
+				httpEE.cgrCfg.GeneralCfg().DefaultTimezone), httpEE.filterS)
 
-		if err = eeReq.SetFields(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ContentFields()); err != nil {
+		if err = eeReq.SetFields(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].ContentFields()); err != nil {
 			return
 		}
 		for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
@@ -127,23 +111,58 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREventWithOpts) (err e
 			}
 			valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 		}
+		if hdr, err = httpEE.composeHeader(); err != nil {
+			return
+		}
 	}
-	updateEEMetrics(pstrEE.dc, cgrEv.Event, pstrEE.cgrCfg.GeneralCfg().DefaultTimezone)
-	cgrID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID())
-	runID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RunID), utils.MetaDefault)
+	updateEEMetrics(httpEE.dc, cgrEv.Event, httpEE.cgrCfg.GeneralCfg().DefaultTimezone)
 	var body []byte
 	if body, err = json.Marshal(valMp); err != nil {
 		return
 	}
-	if err = pstrEE.poster.Post(body, utils.ConcatenatedKey(cgrID, runID)); err != nil &&
-		pstrEE.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
-		engine.AddFailedPost(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ExportPath,
-			pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Type, utils.EventExporterS, body,
-			pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Opts)
+	if err = httpEE.pstr.PostValues(body, hdr); err != nil &&
+		httpEE.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
+		engine.AddFailedPost(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].ExportPath,
+			httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Type, utils.EventExporterS,
+			&engine.HTTPPosterRequest{Header: hdr, Body: body},
+			httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Opts)
 	}
 	return
 }
 
-func (pstrEE *PosterJSONMapEE) GetMetrics() utils.MapStorage {
-	return pstrEE.dc.Clone()
+func (httpEE *HTTPjsonMapEE) GetMetrics() utils.MapStorage {
+	return httpEE.dc.Clone()
+}
+
+// Compose and cache the header
+func (httpEE *HTTPjsonMapEE) composeHeader() (hdr http.Header, err error) {
+	hdr = make(http.Header)
+	if len(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].HeaderFields()) == 0 {
+		return
+	}
+	eeReq := NewEventExporterRequest(nil, httpEE.dc, nil,
+		httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Tenant,
+		httpEE.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Timezone,
+			httpEE.cgrCfg.GeneralCfg().DefaultTimezone),
+		httpEE.filterS)
+	if err = eeReq.SetFields(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].HeaderFields()); err != nil {
+		return
+	}
+	for el := eeReq.hdr.GetFirstElement(); el != nil; el = el.Next() {
+		var nmIt utils.NMInterface
+		if nmIt, err = eeReq.hdr.Field(el.Value); err != nil {
+			return
+		}
+		itm, isNMItem := nmIt.(*config.NMItem)
+		if !isNMItem {
+			err = fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
+			return
+		}
+		if itm == nil {
+			continue // all attributes, not writable to diameter packet
+		}
+		hdr.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
+	}
+	return
 }
