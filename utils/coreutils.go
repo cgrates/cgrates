@@ -504,10 +504,6 @@ func ToJSON(v interface{}) string {
 	return string(b)
 }
 
-func LogFull(v interface{}) {
-	log.Print(ToIJSON(v))
-}
-
 // Simple object cloner, b should be a pointer towards a value into which we want to decode
 func Clone(a, b interface{}) error {
 	buff := new(bytes.Buffer)

@@ -613,7 +613,6 @@ func TestSpansMultipleRatingPlans(t *testing.T) {
 		Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
 	cc, _ := cd.GetCost()
 	if cc.Cost != 2100 || cc.GetConnectFee() != 0 {
-		utils.LogFull(cc)
 		t.Errorf("Expected %v was %v (%v)", 2100, cc, cc.GetConnectFee())
 	}
 }

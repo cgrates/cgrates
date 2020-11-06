@@ -21,7 +21,6 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"strconv"
 	"time"
 )
@@ -73,7 +72,6 @@ func incrementalFormula(params map[string]interface{}) float64 {
 	}
 	units, ok := unitsInterface.(float64)
 	if !ok {
-		log.Print("units")
 		return 0.0
 	}
 	var interval string

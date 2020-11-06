@@ -72,3 +72,17 @@ func TestDecimalMarshalUnmarshalJSON(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 }
+
+func TestDecimalMarshalUnmarshalJSONNil(t *testing.T) {
+	var a Decimal
+	var b Decimal
+	marshA, err := a.MarshalJSON()
+	if err != nil {
+		t.Errorf("Expecting: nil, received: %+v", marshA)
+	}
+	unmarshB := b.UnmarshalJSON(marshA)
+	if unmarshB != nil {
+		t.Errorf("Expecting: nil, received: %+v", unmarshB)
+	}
+
+}
