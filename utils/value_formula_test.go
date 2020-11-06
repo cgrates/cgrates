@@ -25,9 +25,10 @@ import (
 )
 
 func TestValueFormulaDayWeek(t *testing.T) {
-	params := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(`{"Units":10, "Interval":"week", "Increment":"day"}`), &params); err != nil {
-		t.Error("error unmarshalling params: ", err)
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  "week",
+		"Increment": "day",
 	}
 	if x := incrementalFormula(params); x != 10/7.0 {
 		t.Error("error caclulating value using formula: ", x)
@@ -35,9 +36,10 @@ func TestValueFormulaDayWeek(t *testing.T) {
 }
 
 func TestValueFormulaDayMonth(t *testing.T) {
-	params := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(`{"Units":10, "Interval":"month", "Increment":"day"}`), &params); err != nil {
-		t.Error("error unmarshalling params: ", err)
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  "month",
+		"Increment": "day",
 	}
 	now := time.Now()
 	if x := incrementalFormula(params); x != 10/DaysInMonth(now.Year(), now.Month()) {
@@ -46,10 +48,12 @@ func TestValueFormulaDayMonth(t *testing.T) {
 }
 
 func TestValueFormulaDayYear(t *testing.T) {
-	params := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(`{"Units":10, "Interval":"year", "Increment":"day"}`), &params); err != nil {
-		t.Error("error unmarshalling params: ", err)
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  "year",
+		"Increment": "day",
 	}
+
 	now := time.Now()
 	if x := incrementalFormula(params); x != 10/DaysInYear(now.Year()) {
 		t.Error("error caclulating value using formula: ", x)
@@ -129,5 +133,159 @@ func TestParseBalanceFilterValue(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
 	} else if err.Error() != "Invalid value: not really a json" {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestValueFormulaEmptyFields(t *testing.T) {
+	params := map[string]interface{}{}
+	expected := 0.0
+	received := incrementalFormula(params)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestValueFormulaConvertFloat64(t *testing.T) {
+	params := map[string]interface{}{
+		"Units":     50,
+		"Interval":  "day",
+		"Increment": "hour",
+	}
+	expected := 0.0
+	received := incrementalFormula(params)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestValueFormulaIntervalByte(t *testing.T) {
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  []byte("week"),
+		"Increment": "day",
+	}
+
+	expected := 10.0 / 7.0
+	received := incrementalFormula(params)
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestValueFormulaIntervalDefault(t *testing.T) {
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  5,
+		"Increment": "day",
+	}
+
+	expected := 0.0
+	received := incrementalFormula(params)
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestValueFormulaIncrementDefault(t *testing.T) {
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  "week",
+		"Increment": 5,
+	}
+
+	expected := 0.0
+	received := incrementalFormula(params)
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestValueFormulaIncrementByte(t *testing.T) {
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  "week",
+		"Increment": []byte("day"),
+	}
+
+	expected := 10.0 / 7.0
+	received := incrementalFormula(params)
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestValueFormulaIncrementHourDay(t *testing.T) {
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  "day",
+		"Increment": "hour",
+	}
+
+	expected := 10.0 / 24.0
+	received := incrementalFormula(params)
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestValueFormulaIncrementHourMonth(t *testing.T) {
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  "month",
+		"Increment": "hour",
+	}
+	now := time.Now()
+	expected := 10.0 / (DaysInMonth(now.Year(), now.Month()) * 24)
+	received := incrementalFormula(params)
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestValueFormulaIncrementHourYear(t *testing.T) {
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  "year",
+		"Increment": "hour",
+	}
+	now := time.Now()
+	expected := 10.0 / (DaysInYear(now.Year()) * 24)
+	received := incrementalFormula(params)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestValueFormulaIncrementMinute(t *testing.T) {
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  "hour",
+		"Increment": "minute",
+	}
+
+	expected := 10.0 / 60
+	received := incrementalFormula(params)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
+
+func TestValueFormulaCover(t *testing.T) {
+	params := map[string]interface{}{
+		"Units":     10.0,
+		"Interval":  "cat",
+		"Increment": "cat",
+	}
+
+	expected := 0.0
+	received := incrementalFormula(params)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
 	}
 }

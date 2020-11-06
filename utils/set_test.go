@@ -196,3 +196,25 @@ func TestIntersect(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, s1)
 	}
 }
+
+func TestSetClone(t *testing.T) {
+	a := StringSet{"test1": struct{}{}, "test2": struct{}{}}
+	initA := StringSet{"test1": struct{}{}, "test2": struct{}{}}
+	received := a.Clone()
+	if !reflect.DeepEqual(initA, received) {
+		t.Errorf("Expecting: %+v, received: %+v", initA, received)
+	}
+	a["test3"] = struct{}{}
+	if !reflect.DeepEqual(initA, received) {
+		t.Errorf("Expecting: %+v, received: %+v", initA, received)
+	}
+}
+
+func TestSetCloneEmpty(t *testing.T) {
+	var a StringSet
+	var expected StringSet
+	received := a.Clone()
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
