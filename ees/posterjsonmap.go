@@ -123,7 +123,8 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREventWithOpts) (err e
 			valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 		}
 	}
-	updateEEMetrics(pstrEE.dc, cgrEv.Event, pstrEE.cgrCfg.GeneralCfg().DefaultTimezone)
+	updateEEMetrics(pstrEE.dc, cgrEv.Event, utils.FirstNonEmpty(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Timezone,
+		pstrEE.cgrCfg.GeneralCfg().DefaultTimezone))
 	cgrID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID())
 	runID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RunID), utils.MetaDefault)
 	var body []byte
