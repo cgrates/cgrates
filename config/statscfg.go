@@ -133,7 +133,7 @@ func (st *StatSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		thresholdSConns := make([]string, len(st.ThresholdSConns))
 		for i, item := range st.ThresholdSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
-				thresholdSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+				thresholdSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds)
 			} else {
 				thresholdSConns[i] = item
 			}

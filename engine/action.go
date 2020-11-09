@@ -104,6 +104,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.MetaPostEvent:             postEvent,
 		utils.MetaCDRAccount:            resetAccountCDR,
 		utils.MetaExport:                export,
+		utils.MetaResetThreshold:        resetThreshold,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -1047,4 +1048,13 @@ func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err err
 	var rply map[string]map[string]interface{}
 	return connMgr.Call(config.CgrConfig().ApierCfg().EEsConns, nil,
 		utils.EventExporterSv1ProcessEvent, args, &rply)
+}
+
+func resetThreshold(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+	args := &utils.TenantIDWithOpts{
+		TenantID: utils.NewTenantID(a.ExtraParameters),
+	}
+	var rply string
+	return connMgr.Call(config.CgrConfig().SchedulerCfg().ThreshSConns, nil,
+		utils.ThresholdSv1ResetThreshold, args, &rply)
 }

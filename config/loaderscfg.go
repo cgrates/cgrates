@@ -240,7 +240,7 @@ func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]inte
 		cacheSConns := make([]string, len(l.CacheSConns))
 		for i, item := range l.CacheSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
-				cacheSConns[i] = strings.ReplaceAll(item, ":*caches", utils.EmptyString)
+				cacheSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaCaches)
 			} else {
 				cacheSConns[i] = item
 			}

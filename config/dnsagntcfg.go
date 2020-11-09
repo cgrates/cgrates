@@ -100,7 +100,7 @@ func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]in
 		sessionSConns := make([]string, len(da.SessionSConns))
 		for i, item := range da.SessionSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
 			} else {
 				sessionSConns[i] = item
 			}

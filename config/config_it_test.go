@@ -302,9 +302,10 @@ func testCGRConfigReloadSchedulerS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &SchedulerCfg{
-		Enabled:   true,
-		CDRsConns: []string{utils.MetaLocalHost},
-		Filters:   []string{},
+		Enabled:      true,
+		CDRsConns:    []string{utils.MetaLocalHost},
+		ThreshSConns: []string{},
+		Filters:      []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SchedulerCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SchedulerCfg()))

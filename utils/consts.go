@@ -998,6 +998,7 @@ const (
 	MetaRemoveExpired         = "*remove_expired"
 	MetaPostEvent             = "*post_event"
 	MetaCDRAccount            = "*reset_account_cdr"
+	MetaResetThreshold        = "*reset_threshold"
 	ActionID                  = "ActionID"
 	ActionType                = "ActionType"
 	ActionValue               = "ActionValue"
@@ -1489,6 +1490,7 @@ const (
 const (
 	ThresholdSv1ProcessEvent            = "ThresholdSv1.ProcessEvent"
 	ThresholdSv1GetThreshold            = "ThresholdSv1.GetThreshold"
+	ThresholdSv1ResetThreshold          = "ThresholdSv1.ResetThreshold"
 	ThresholdSv1GetThresholdIDs         = "ThresholdSv1.GetThresholdIDs"
 	ThresholdSv1Ping                    = "ThresholdSv1.Ping"
 	ThresholdSv1GetThresholdsForEvent   = "ThresholdSv1.GetThresholdsForEvent"

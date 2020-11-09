@@ -64,6 +64,7 @@ var (
 		testV2CDRsSetThreshold,
 		testV2CDRsProcessCDRWithThreshold,
 		testV2CDRsGetThreshold,
+		testV2CDRsResetThresholdAction,
 
 		testv2CDRsGetCDRsDest,
 
@@ -1165,5 +1166,28 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 func testV2CDRsKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
+	}
+}
+
+func testV2CDRsResetThresholdAction(t *testing.T) {
+	var reply string
+	if err := cdrsRpc.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
+		ActionsId: "ACT_RESET_THD",
+		Actions:   []*utils.TPAction{{Identifier: utils.MetaResetThreshold, ExtraParameters: "cgrates.org:THD_Test"}},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+	attrs := utils.AttrExecuteAction{Tenant: "cgrates.org", ActionsId: "ACT_RESET_THD"}
+	if err := cdrsRpc.Call(utils.APIerSv1ExecuteAction, attrs, &reply); err != nil {
+		t.Error(err)
+	}
+	var td engine.Threshold
+	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &td); err != nil {
+		t.Error(err)
+	} else if td.Hits != 0 {
+		t.Errorf("Expecting threshold to be reset received: %v", td.Hits)
 	}
 }

@@ -481,3 +481,31 @@ func (tS *ThresholdService) Reload() {
 func (tS *ThresholdService) StartLoop() {
 	go tS.runBackup()
 }
+
+// V1ResetThreshold resets the threshold hits
+func (tS *ThresholdService) V1ResetThreshold(tntID *utils.TenantID, rply *string) (err error) {
+	var thd *Threshold
+	tnt := tntID.Tenant
+	if tnt == utils.EmptyString {
+		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	if thd, err = tS.dm.GetThreshold(tnt, tntID.ID, true, true, ""); err != nil {
+		return
+	}
+	if thd.Hits != 0 {
+		thd.Hits = 0
+		thd.Snooze = time.Time{}
+		thd.dirty = utils.BoolPointer(true) // mark it to be saved
+		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
+			if err = tS.StoreThreshold(thd); err != nil {
+				return
+			}
+		} else {
+			tS.stMux.Lock()
+			tS.storedTdIDs[thd.TenantID()] = true
+			tS.stMux.Unlock()
+		}
+	}
+	*rply = utils.OK
+	return
+}

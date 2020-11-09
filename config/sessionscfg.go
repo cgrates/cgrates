@@ -334,7 +334,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		chargerSConns := make([]string, len(scfg.ChargerSConns))
 		for i, item := range scfg.ChargerSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers) {
-				chargerSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers, utils.EmptyString)
+				chargerSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers)
 			} else {
 				chargerSConns[i] = item
 			}
@@ -345,7 +345,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		RALsConns := make([]string, len(scfg.RALsConns))
 		for i, item := range scfg.RALsConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
-				RALsConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
+				RALsConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder)
 			} else {
 				RALsConns[i] = item
 			}
@@ -357,7 +357,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		for i, item := range scfg.ResSConns {
 			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
 			if item == buf {
-				resSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
+				resSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources)
 			} else {
 				resSConns[i] = item
 			}
@@ -369,7 +369,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		for i, item := range scfg.ThreshSConns {
 			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
 			if item == buf {
-				threshSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+				threshSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds)
 			} else {
 				threshSConns[i] = item
 			}
@@ -381,7 +381,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		for i, item := range scfg.StatSConns {
 			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
 			if item == buf {
-				statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+				statSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS)
 			} else {
 				statSConns[i] = item
 			}
@@ -393,7 +393,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		for i, item := range scfg.RouteSConns {
 			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)
 			if item == buf {
-				routesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaRoutes, utils.EmptyString)
+				routesConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaRoutes)
 			} else {
 				routesConns[i] = item
 			}
@@ -405,7 +405,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		for i, item := range scfg.AttrSConns {
 			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
 			if item == buf {
-				attrSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+				attrSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes)
 			} else {
 				attrSConns[i] = item
 			}
@@ -417,7 +417,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		for i, item := range scfg.CDRsConns {
 			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
 			if item == buf {
-				CDRsConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaCDRs, utils.EmptyString)
+				CDRsConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaCDRs)
 			} else {
 				CDRsConns[i] = item
 			}
@@ -429,7 +429,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		for i, item := range scfg.SchedulerConns {
 			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
 			if item == buf {
-				schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
+				schedulerConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler)
 			} else {
 				schedulerConns[i] = item
 			}
@@ -521,7 +521,7 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 		for i, item := range fscfg.SessionSConns {
 			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			if item == buf {
-				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
 			} else {
 				sessionSConns[i] = item
 			}
@@ -669,7 +669,7 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}
 		sessionSConns := make([]string, len(aCfg.SessionSConns))
 		for i, item := range aCfg.SessionSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
 			} else {
 				sessionSConns[i] = item
 			}

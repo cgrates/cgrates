@@ -219,6 +219,7 @@ const CGRATES_CFG_JSON = `
 "schedulers": {
 	"enabled": false,				// start Scheduler service: <true|false>
 	"cdrs_conns": [],				// connections to CDRs for *cdrlog actions <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],			// connections to ThresholdS for *reset_threshold action <""|*internal|$rpc_conns_id>
 	"filters": [],					// only execute actions matching these filters
 },
 

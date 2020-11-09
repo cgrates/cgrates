@@ -93,7 +93,7 @@ func (cS *ChargerSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		attributeSConns := make([]string, len(cS.AttributeSConns))
 		for i, item := range cS.AttributeSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+				attributeSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes)
 			} else {
 				attributeSConns[i] = item
 			}

@@ -95,7 +95,7 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 		cachesConns := make([]string, len(aCfg.CachesConns))
 		for i, item := range aCfg.CachesConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
-				cachesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaCaches, utils.EmptyString)
+				cachesConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaCaches)
 			} else {
 				cachesConns[i] = item
 			}
@@ -106,7 +106,7 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 		schedulerConns := make([]string, len(aCfg.SchedulerConns))
 		for i, item := range aCfg.SchedulerConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
-				schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
+				schedulerConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler)
 			} else {
 				schedulerConns[i] = item
 			}
@@ -117,7 +117,7 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 		attributeSConns := make([]string, len(aCfg.AttributeSConns))
 		for i, item := range aCfg.AttributeSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+				attributeSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes)
 			} else {
 				attributeSConns[i] = item
 			}
@@ -128,7 +128,7 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 		eesConns := make([]string, len(aCfg.EEsConns))
 		for i, item := range aCfg.EEsConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
-				eesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaEEs, utils.EmptyString)
+				eesConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaEEs)
 			} else {
 				eesConns[i] = item
 			}

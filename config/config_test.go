@@ -406,9 +406,10 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 	eSchedulerCfg := &SchedulerCfg{
-		Enabled:   false,
-		CDRsConns: []string{},
-		Filters:   []string{},
+		Enabled:      false,
+		CDRsConns:    []string{},
+		ThreshSConns: []string{},
+		Filters:      []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.schedulerCfg, eSchedulerCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.schedulerCfg, eSchedulerCfg)
@@ -2275,9 +2276,10 @@ func TestDispatcherHConfig(t *testing.T) {
 
 func TestSchedulerConfig(t *testing.T) {
 	expected := &SchedulerCfg{
-		Enabled:   false,
-		CDRsConns: []string{},
-		Filters:   []string{},
+		Enabled:      false,
+		CDRsConns:    []string{},
+		ThreshSConns: []string{},
+		Filters:      []string{},
 	}
 	cgrConfig, err := NewDefaultCGRConfig()
 	if err != nil {
@@ -3812,9 +3814,10 @@ func TestV1GetConfigScheduler(t *testing.T) {
 	var reply map[string]interface{}
 	expected := map[string]interface{}{
 		SCHEDULER_JSN: map[string]interface{}{
-			utils.EnabledCfg:   false,
-			utils.CDRsConnsCfg: []string{},
-			utils.FiltersCfg:   []string{},
+			utils.EnabledCfg:      false,
+			utils.CDRsConnsCfg:    []string{},
+			utils.ThreshSConnsCfg: []string{},
+			utils.FiltersCfg:      []string{},
 		},
 	}
 	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {

@@ -114,7 +114,7 @@ func (dps *DispatcherSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		attributeSConns := make([]string, len(dps.AttributeSConns))
 		for i, item := range dps.AttributeSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+				attributeSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes)
 			} else {
 				attributeSConns[i] = item
 			}
