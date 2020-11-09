@@ -26,16 +26,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var dfCgrJSONCfg *CgrJsonCfg
-
-// Loads up the default configuration and  tests it's sections one by one
-func TestDfNewdfCgrJsonCfgFromReader(t *testing.T) {
-	var err error
-	if dfCgrJSONCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestDfGeneralJsonCfg(t *testing.T) {
 	eCfg := &GeneralJsonCfg{
 		Node_id:              utils.StringPointer(""),
@@ -64,17 +54,26 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Rsr_separator:        utils.StringPointer(";"),
 		Max_parallel_conns:   utils.IntPointer(100),
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if gCfg, err := dfCgrJSONCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(gCfg))
 	}
 }
+
 func TestDfCoreSJsonCfg(t *testing.T) {
 	eCfg := &CoreSJsonCfg{
 		Caps:                utils.IntPointer(0),
 		Caps_strategy:       utils.StringPointer(utils.MetaBusy),
 		Caps_stats_interval: utils.StringPointer("0"),
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if gCfg, err := dfCgrJSONCfg.CoreSCfgJson(); err != nil {
 		t.Error(err)
@@ -311,6 +310,10 @@ func TestCacheJsonCfg(t *testing.T) {
 		},
 		Replication_conns: &[]string{},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 
 	if gCfg, err := dfCgrJSONCfg.CacheJsonCfg(); err != nil {
 		t.Error(err)
@@ -327,6 +330,10 @@ func TestDfListenJsonCfg(t *testing.T) {
 		Rpc_json_tls: utils.StringPointer("127.0.0.1:2022"),
 		Rpc_gob_tls:  utils.StringPointer("127.0.0.1:2023"),
 		Http_tls:     utils.StringPointer("127.0.0.1:2280"),
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.ListenJsonCfg(); err != nil {
 		t.Error(err)
@@ -463,6 +470,10 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			},
 		},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -586,6 +597,10 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 			},
 		},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -615,6 +630,10 @@ func TestDfRalsJsonCfg(t *testing.T) {
 		},
 		Dynaprepaid_actionplans: &[]string{},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.RalsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -629,6 +648,10 @@ func TestDfSchedulerJsonCfg(t *testing.T) {
 		Thresholds_conns: &[]string{},
 		Stats_conns:      &[]string{},
 		Filters:          &[]string{},
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.SchedulerJsonCfg(); err != nil {
 		t.Error(err)
@@ -651,6 +674,10 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Online_cdr_exports:   &[]string{},
 		Scheduler_conns:      &[]string{},
 		Ees_conns:            &[]string{},
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)
@@ -689,6 +716,10 @@ func TestSmgJsonCfg(t *testing.T) {
 		},
 		Scheduler_conns: &[]string{},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -715,6 +746,10 @@ func TestFsAgentJsonCfg(t *testing.T) {
 				Alias:      utils.StringPointer(""),
 			}},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.FreeswitchAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -734,6 +769,10 @@ func TestKamAgentJsonCfg(t *testing.T) {
 			},
 		},
 		Timezone: utils.StringPointer(utils.EmptyString),
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.KamAgentJsonCfg(); err != nil {
 		t.Error(err)
@@ -757,6 +796,10 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 				Reconnects:       utils.IntPointer(5),
 			},
 		},
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.AsteriskAgentJsonCfg(); err != nil {
 		t.Error(err)
@@ -783,6 +826,10 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Forced_disconnect:    utils.StringPointer(utils.META_NONE),
 		Request_processors:   &[]*ReqProcessorJsnCfg{},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -805,6 +852,10 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Sessions_conns:     &[]string{utils.MetaInternal},
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.RadiusAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -815,6 +866,10 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 
 func TestHttpAgentJsonCfg(t *testing.T) {
 	eCfg := &[]*HttpAgentJsonCfg{}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.HttpAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -830,6 +885,10 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 		Sessions_conns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
 		Timezone:           utils.StringPointer(""),
 		Request_processors: &[]*ReqProcessorJsnCfg{},
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.DNSAgentJsonCfg(); err != nil {
 		t.Error(err)
@@ -851,6 +910,10 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Nested_fields:         utils.BoolPointer(false),
 		Process_runs:          utils.IntPointer(1),
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -868,6 +931,10 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.ChargerServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -880,6 +947,10 @@ func TestDfFilterSJsonCfg(t *testing.T) {
 		Stats_conns:     &[]string{},
 		Resources_conns: &[]string{},
 		Apiers_conns:    &[]string{},
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.FilterSJsonCfg(); err != nil {
 		t.Error(err)
@@ -898,6 +969,10 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.ResourceSJsonCfg(); err != nil {
 		t.Error(err)
@@ -918,6 +993,10 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:    &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.StatSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -934,6 +1013,10 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.ThresholdSJsonCfg(); err != nil {
 		t.Error(err)
@@ -955,6 +1038,10 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Rals_conns:            &[]string{},
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.RouteSJsonCfg(); err != nil {
 		t.Error(err)
@@ -1513,6 +1600,10 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 			},
 		},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.LoaderJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -1527,6 +1618,10 @@ func TestDfMailerJsonCfg(t *testing.T) {
 		Auth_user:     utils.StringPointer("cgrates"),
 		Auth_password: utils.StringPointer("CGRateS.org"),
 		From_address:  utils.StringPointer("cgr-mailer@localhost.localdomain"),
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.MailerJsonCfg(); err != nil {
 		t.Error(err)
@@ -1564,6 +1659,10 @@ func TestDfSureTaxJsonCfg(t *testing.T) {
 		Sales_type_code:         utils.StringPointer("R"),
 		Tax_exemption_code_list: utils.StringPointer(""),
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.SureTaxJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -1597,6 +1696,10 @@ func TestDfHttpJsonCfg(t *testing.T) {
 			utils.HTTPClientDialKeepAliveCfg:         "30s",
 		},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.HttpJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -1613,6 +1716,10 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Attributes_conns:      &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.DispatcherSJsonCfg(); err != nil {
 		t.Error(err)
@@ -1633,6 +1740,10 @@ func TestDfLoaderCfg(t *testing.T) {
 		Scheduler_conns:  &[]string{utils.MetaLocalHost},
 		Gapi_credentials: &cred,
 		Gapi_token:       &tok,
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.LoaderCfgJson(); err != nil {
 		t.Error(err)
@@ -1670,6 +1781,10 @@ func TestDfMigratorCfg(t *testing.T) {
 			utils.RedisCACertificate:         "",
 		},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.MigratorCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -1687,6 +1802,10 @@ func TestDfTlsCfg(t *testing.T) {
 		Server_name:        utils.StringPointer(""),
 		Server_policy:      utils.IntPointer(4),
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.TlsCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -1702,6 +1821,10 @@ func TestDfAnalyzerCfg(t *testing.T) {
 		Index_type:       utils.StringPointer(utils.MetaScorch),
 		Ttl:              utils.StringPointer("24h"),
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.AnalyzerCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -1716,6 +1839,10 @@ func TestDfApierCfg(t *testing.T) {
 		Scheduler_conns:  &[]string{},
 		Attributes_conns: &[]string{},
 		Ees_conns:        &[]string{},
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.ApierCfgJson(); err != nil {
 		t.Error(err)
@@ -1774,6 +1901,10 @@ func TestDfEventReaderCfg(t *testing.T) {
 			},
 		},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.ERsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -1811,6 +1942,10 @@ func TestDfEventExporterCfg(t *testing.T) {
 			},
 		},
 	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
+	}
 	if cfg, err := dfCgrJSONCfg.EEsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -1831,6 +1966,10 @@ func TestDfRateSJsonCfg(t *testing.T) {
 		Rate_prefix_indexed_fields: &[]string{},
 		Rate_suffix_indexed_fields: &[]string{},
 		Rate_nested_fields:         utils.BoolPointer(false),
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.RateCfgJson(); err != nil {
 		t.Error(err)
@@ -1993,6 +2132,10 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Type:  utils.StringPointer(utils.META_CONSTANT),
 				Value: utils.StringPointer("0")},
 		},
+	}
+	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
+	if err != nil {
+		t.Error(err)
 	}
 	if cfg, err := dfCgrJSONCfg.TemplateSJsonCfg(); err != nil {
 		t.Error(err)

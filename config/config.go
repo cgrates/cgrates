@@ -1412,6 +1412,13 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		case DATADB_JSN: // reloaded before
 		case STORDB_JSN: // reloaded before
 		case LISTEN_JSN:
+		case CACHE_JSN:
+		case FilterSjsn:
+		case MAILER_JSN:
+		case SURETAX_JSON:
+		case CgrLoaderCfgJson:
+		case CgrMigratorCfgJson:
+		case TemplatesJson:
 		case TlsCfgJson: // nothing to reload
 		case APIBanCfgJson: // nothing to reload
 		case CoreSCfgJson: // nothing to reload
@@ -1470,7 +1477,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		case DispatcherHJson:
 			cfg.rldChans[DispatcherHJson] <- struct{}{}
 		}
-		return
 	}
 	return
 }
@@ -1710,11 +1716,9 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ArgsReloadWithOpts, reply *string) (e
 		return
 	}
 
-	err = cfg.reloadSections(sections...)
-	if err != nil {
-		return
+	if err = cfg.reloadSections(sections...); err == nil {
+		*reply = utils.OK
 	}
-	*reply = utils.OK
 	return
 }
 
@@ -1849,9 +1853,8 @@ func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONStringReloadWithOpts, rep
 		return
 	}
 
-	if err = cfg.reloadSections(sortedCfgSections...); err != nil {
-		return
+	if err = cfg.reloadSections(sortedCfgSections...); err == nil {
+		*reply = utils.OK
 	}
-	*reply = utils.OK
 	return
 }
