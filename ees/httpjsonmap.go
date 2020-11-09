@@ -115,7 +115,8 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREventWithOpts) (err err
 			return
 		}
 	}
-	updateEEMetrics(httpEE.dc, cgrEv.Event, httpEE.cgrCfg.GeneralCfg().DefaultTimezone)
+	updateEEMetrics(httpEE.dc, cgrEv.Event, utils.FirstNonEmpty(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Timezone,
+		httpEE.cgrCfg.GeneralCfg().DefaultTimezone))
 	var body []byte
 	if body, err = json.Marshal(valMp); err != nil {
 		return
