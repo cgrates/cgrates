@@ -176,7 +176,7 @@ func (sq *StatQueue) TenantID() string {
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
 func (sq *StatQueue) ProcessEvent(tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
-	if err = sq.remExpired(); err != nil {
+	if _, err = sq.remExpired(); err != nil {
 		return
 	}
 	if err = sq.remOnQueueLength(); err != nil {
@@ -201,7 +201,7 @@ func (sq *StatQueue) remEventWithID(evID string) (err error) {
 }
 
 // remExpired expires items in queue
-func (sq *StatQueue) remExpired() (err error) {
+func (sq *StatQueue) remExpired() (removed int, err error) {
 	var expIdx *int // index of last item to be expired
 	for i, item := range sq.SQItems {
 		if item.ExpiryTime == nil {
@@ -218,7 +218,8 @@ func (sq *StatQueue) remExpired() (err error) {
 	if expIdx == nil {
 		return
 	}
-	sq.SQItems = sq.SQItems[*expIdx+1:]
+	removed = *expIdx + 1
+	sq.SQItems = sq.SQItems[removed:]
 	return
 }
 
