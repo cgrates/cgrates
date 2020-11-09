@@ -25,12 +25,13 @@ import (
 )
 
 type SchedulerCfg struct {
-	Enabled   bool
-	CDRsConns []string
-	Filters   []string
+	Enabled      bool
+	CDRsConns    []string
+	ThreshSConns []string
+	Filters      []string
 }
 
-func (schdcfg *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
+func (schdcfg *SchedulerCfg) loadFromJSONCfg(jsnCfg *SchedulerJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -54,6 +55,17 @@ func (schdcfg *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
 			schdcfg.Filters[i] = fltr
 		}
 	}
+	if jsnCfg.Thresholds_conns != nil {
+		schdcfg.ThreshSConns = make([]string, len(*jsnCfg.Thresholds_conns))
+		for idx, connID := range *jsnCfg.Thresholds_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				schdcfg.ThreshSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+			} else {
+				schdcfg.ThreshSConns[idx] = connID
+			}
+		}
+	}
 	return nil
 }
 
@@ -66,12 +78,23 @@ func (schdcfg *SchedulerCfg) AsMapInterface() (initialMP map[string]interface{})
 		cdrsConns := make([]string, len(schdcfg.CDRsConns))
 		for i, item := range schdcfg.CDRsConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
-				cdrsConns[i] = strings.ReplaceAll(item, ":*cdrs", utils.EmptyString)
+				cdrsConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaCDRs)
 			} else {
 				cdrsConns[i] = item
 			}
 		}
 		initialMP[utils.CDRsConnsCfg] = cdrsConns
+	}
+	if schdcfg.ThreshSConns != nil {
+		thrsConns := make([]string, len(schdcfg.ThreshSConns))
+		for i, item := range schdcfg.ThreshSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+				thrsConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds)
+			} else {
+				thrsConns[i] = item
+			}
+		}
+		initialMP[utils.ThreshSConnsCfg] = thrsConns
 	}
 	return
 }

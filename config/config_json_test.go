@@ -624,9 +624,10 @@ func TestDfRalsJsonCfg(t *testing.T) {
 
 func TestDfSchedulerJsonCfg(t *testing.T) {
 	eCfg := &SchedulerJsonCfg{
-		Enabled:    utils.BoolPointer(false),
-		Cdrs_conns: &[]string{},
-		Filters:    &[]string{},
+		Enabled:          utils.BoolPointer(false),
+		Cdrs_conns:       &[]string{},
+		Thresholds_conns: &[]string{},
+		Filters:          &[]string{},
 	}
 	if cfg, err := dfCgrJSONCfg.SchedulerJsonCfg(); err != nil {
 		t.Error(err)

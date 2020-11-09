@@ -133,7 +133,7 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string
 		sessionSConns := make([]string, len(ra.SessionSConns))
 		for i, item := range ra.SessionSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
 			} else {
 				sessionSConns[i] = item
 			}

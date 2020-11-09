@@ -76,7 +76,7 @@ func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		statSConns := make([]string, len(fSCfg.StatSConns))
 		for i, item := range fSCfg.StatSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
-				statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+				statSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS)
 			} else {
 				statSConns[i] = item
 			}
@@ -87,7 +87,7 @@ func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		resourceSConns := make([]string, len(fSCfg.ResourceSConns))
 		for i, item := range fSCfg.ResourceSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources) {
-				resourceSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
+				resourceSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources)
 			} else {
 				resourceSConns[i] = item
 			}
@@ -98,7 +98,7 @@ func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		apierConns := make([]string, len(fSCfg.ApierSConns))
 		for i, item := range fSCfg.ApierSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier) {
-				apierConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaApier, utils.EmptyString)
+				apierConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaApier)
 			} else {
 				apierConns[i] = item
 			}

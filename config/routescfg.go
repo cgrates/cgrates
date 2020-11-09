@@ -155,7 +155,7 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		attributeSConns := make([]string, len(rts.AttributeSConns))
 		for i, item := range rts.AttributeSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+				attributeSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes)
 			} else {
 				attributeSConns[i] = item
 			}
@@ -166,7 +166,7 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		ralSConns := make([]string, len(rts.RALsConns))
 		for i, item := range rts.RALsConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
-				ralSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
+				ralSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder)
 			} else {
 				ralSConns[i] = item
 			}
@@ -177,7 +177,7 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		resourceSConns := make([]string, len(rts.ResourceSConns))
 		for i, item := range rts.ResourceSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources) {
-				resourceSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources, utils.EmptyString)
+				resourceSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources)
 			} else {
 				resourceSConns[i] = item
 			}
@@ -188,7 +188,7 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		statSConns := make([]string, len(rts.StatSConns))
 		for i, item := range rts.StatSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
-				statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+				statSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS)
 			} else {
 				statSConns[i] = item
 			}

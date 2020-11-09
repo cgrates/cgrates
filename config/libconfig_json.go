@@ -130,9 +130,10 @@ type RalsJsonCfg struct {
 
 // Scheduler config section
 type SchedulerJsonCfg struct {
-	Enabled    *bool
-	Cdrs_conns *[]string
-	Filters    *[]string
+	Enabled          *bool
+	Cdrs_conns       *[]string
+	Thresholds_conns *[]string
+	Filters          *[]string
 }
 
 // Cdrs config section

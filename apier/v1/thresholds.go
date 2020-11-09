@@ -25,12 +25,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewThresholdSV1 initializes ThresholdSV1
+// NewThresholdSv1 initializes ThresholdSV1
 func NewThresholdSv1(tS *engine.ThresholdService) *ThresholdSv1 {
 	return &ThresholdSv1{tS: tS}
 }
 
-// Exports RPC from RLs
+// ThresholdSv1 exports RPC from RLs
 type ThresholdSv1 struct {
 	tS *engine.ThresholdService
 }
@@ -60,6 +60,11 @@ func (tSv1 *ThresholdSv1) ProcessEvent(args *engine.ThresholdsArgsProcessEvent, 
 	return tSv1.tS.V1ProcessEvent(args, tIDs)
 }
 
+// ResetThreshold resets the threshold hits
+func (tSv1 *ThresholdSv1) ResetThreshold(tntID *utils.TenantIDWithOpts, reply *string) error {
+	return tSv1.tS.V1ResetThreshold(tntID.TenantID, reply)
+}
+
 // GetThresholdProfile returns a Threshold Profile
 func (apierSv1 *APIerSv1) GetThresholdProfile(arg *utils.TenantID, reply *engine.ThresholdProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
@@ -69,11 +74,11 @@ func (apierSv1 *APIerSv1) GetThresholdProfile(arg *utils.TenantID, reply *engine
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if th, err := apierSv1.DataManager.GetThresholdProfile(tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
+	th, err := apierSv1.DataManager.GetThresholdProfile(tnt, arg.ID, true, true, utils.NonTransactional)
+	if err != nil {
 		return utils.APIErrorHandler(err)
-	} else {
-		*reply = *th
 	}
+	*reply = *th
 	return
 }
 
@@ -153,7 +158,7 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, r
 	return nil
 }
 
-// Remove a specific Threshold Profile
+// RemoveThresholdProfile removes a specific Threshold Profile
 func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -188,6 +193,7 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithCache, 
 	return nil
 }
 
+// Ping .
 func (tSv1 *ThresholdSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil

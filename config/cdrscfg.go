@@ -167,7 +167,7 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		chargerSConns := make([]string, len(cdrscfg.ChargerSConns))
 		for i, item := range cdrscfg.ChargerSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers) {
-				chargerSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers, utils.EmptyString)
+				chargerSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers)
 			} else {
 				chargerSConns[i] = item
 			}
@@ -178,7 +178,7 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		raterConns := make([]string, len(cdrscfg.RaterConns))
 		for i, item := range cdrscfg.RaterConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
-				raterConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder, utils.EmptyString)
+				raterConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder)
 			} else {
 				raterConns[i] = item
 			}
@@ -189,7 +189,7 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		attributeSConns := make([]string, len(cdrscfg.AttributeSConns))
 		for i, item := range cdrscfg.AttributeSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes, utils.EmptyString)
+				attributeSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes)
 			} else {
 				attributeSConns[i] = item
 			}
@@ -200,7 +200,7 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		thresholdSConns := make([]string, len(cdrscfg.ThresholdSConns))
 		for i, item := range cdrscfg.ThresholdSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
-				thresholdSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+				thresholdSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds)
 			} else {
 				thresholdSConns[i] = item
 			}
@@ -211,7 +211,7 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		statSConns := make([]string, len(cdrscfg.StatSConns))
 		for i, item := range cdrscfg.StatSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
-				statSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS, utils.EmptyString)
+				statSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS)
 			} else {
 				statSConns[i] = item
 			}
@@ -222,7 +222,7 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		schedulerConns := make([]string, len(cdrscfg.SchedulerConns))
 		for i, item := range cdrscfg.SchedulerConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
-				schedulerConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler, utils.EmptyString)
+				schedulerConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler)
 			} else {
 				schedulerConns[i] = item
 			}
@@ -233,7 +233,7 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		eesConns := make([]string, len(cdrscfg.EEsConns))
 		for i, item := range cdrscfg.EEsConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
-				eesConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaEEs, utils.EmptyString)
+				eesConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaEEs)
 			} else {
 				eesConns[i] = item
 			}

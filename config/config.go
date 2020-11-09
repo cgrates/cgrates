@@ -512,7 +512,7 @@ func (cfg *CGRConfig) loadSchedulerCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnSchedCfg, err = jsnCfg.SchedulerJsonCfg(); err != nil {
 		return
 	}
-	return cfg.schedulerCfg.loadFromJsonCfg(jsnSchedCfg)
+	return cfg.schedulerCfg.loadFromJSONCfg(jsnSchedCfg)
 }
 
 // loadCdrsCfg loads the Cdrs section of the configuration

@@ -99,7 +99,7 @@ func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]interface{}
 		thresholdSConns := make([]string, len(rlcfg.ThresholdSConns))
 		for i, item := range rlcfg.ThresholdSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
-				thresholdSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds, utils.EmptyString)
+				thresholdSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds)
 			} else {
 				thresholdSConns[i] = item
 			}

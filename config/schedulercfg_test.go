@@ -26,18 +26,20 @@ import (
 
 func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONS := &SchedulerJsonCfg{
-		Enabled:    utils.BoolPointer(true),
-		Cdrs_conns: &[]string{utils.MetaInternal, "*conn1"},
-		Filters:    &[]string{"randomFilter"},
+		Enabled:          utils.BoolPointer(true),
+		Cdrs_conns:       &[]string{utils.MetaInternal, "*conn1"},
+		Thresholds_conns: &[]string{utils.MetaInternal, "*conn1"},
+		Filters:          &[]string{"randomFilter"},
 	}
 	expected := &SchedulerCfg{
-		Enabled:   true,
-		CDRsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
-		Filters:   []string{"randomFilter"},
+		Enabled:      true,
+		CDRsConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
+		ThreshSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		Filters:      []string{"randomFilter"},
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.schedulerCfg.loadFromJsonCfg(cfgJSONS); err != nil {
+	} else if err = jsonCfg.schedulerCfg.loadFromJSONCfg(cfgJSONS); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.schedulerCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.schedulerCfg))
@@ -49,9 +51,10 @@ func TestSchedulerCfgAsMapInterface(t *testing.T) {
 	"schedulers": {},
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:   false,
-		utils.CDRsConnsCfg: []string{},
-		utils.FiltersCfg:   []string{},
+		utils.EnabledCfg:      false,
+		utils.CDRsConnsCfg:    []string{},
+		utils.ThreshSConnsCfg: []string{},
+		utils.FiltersCfg:      []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -65,14 +68,16 @@ func TestSchedulerCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"schedulers": {
        "enabled": true,
-       "cdrs_conns": ["*internal:*cdrs", "*conn1"],
+	   "cdrs_conns": ["*internal", "*conn1"],
+	   "thresholds_conns": ["*internal", "*conn1"],
        "filters": ["randomFilter"],
     },
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:   true,
-		utils.CDRsConnsCfg: []string{utils.MetaInternal, "*conn1"},
-		utils.FiltersCfg:   []string{"randomFilter"},
+		utils.EnabledCfg:      true,
+		utils.CDRsConnsCfg:    []string{utils.MetaInternal, "*conn1"},
+		utils.ThreshSConnsCfg: []string{utils.MetaInternal, "*conn1"},
+		utils.FiltersCfg:      []string{"randomFilter"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

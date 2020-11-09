@@ -30,6 +30,7 @@
 
 "schedulers": {
 	"enabled": true,
+	"thresholds_conns": ["*localhost"],
 },
 
 "cdrs": {

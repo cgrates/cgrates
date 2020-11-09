@@ -124,7 +124,7 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		threSholds := make([]string, len(ralsCfg.ThresholdSConns))
 		for i, item := range ralsCfg.ThresholdSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
-				threSholds[i] = strings.ReplaceAll(item, ":*thresholds", utils.EmptyString)
+				threSholds[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds)
 			} else {
 				threSholds[i] = item
 			}
@@ -135,7 +135,7 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		statS := make([]string, len(ralsCfg.StatSConns))
 		for i, item := range ralsCfg.StatSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
-				statS[i] = strings.ReplaceAll(item, ":*stats", utils.EmptyString)
+				statS[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS)
 			} else {
 				statS[i] = item
 			}
@@ -157,7 +157,7 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		cacheSConns := make([]string, len(ralsCfg.CacheSConns))
 		for i, item := range ralsCfg.CacheSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
-				cacheSConns[i] = strings.ReplaceAll(item, ":*caches", utils.EmptyString)
+				cacheSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaCaches)
 			} else {
 				cacheSConns[i] = item
 			}

@@ -146,7 +146,7 @@ func (ds *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 		for i, item := range ds.SessionSConns {
 			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			if item == buf {
-				sessionSConns[i] = strings.ReplaceAll(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS, utils.EmptyString)
+				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
 			} else {
 				sessionSConns[i] = item
 			}

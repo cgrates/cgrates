@@ -245,6 +245,7 @@ var (
 		testV1TSProcessEventWithoutTenant,
 		testV1TSGetThresholdsWithoutTenant,
 		testV1TSProcessAccountUpdateEvent,
+		testV1TSResetThresholdsWithoutTenant,
 		testV1TSStopEngine,
 	}
 )
@@ -943,4 +944,40 @@ func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 
+}
+
+func testV1TSResetThresholdsWithoutTenant(t *testing.T) {
+	expectedThreshold := &engine.Threshold{
+		Tenant: "cgrates.org",
+		ID:     "THD_ACNT_BALANCE_1",
+		Hits:   1,
+	}
+	var reply *engine.Threshold
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "THD_ACNT_BALANCE_1"}},
+		&reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Snooze = expectedThreshold.Snooze
+	if !reflect.DeepEqual(expectedThreshold, reply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedThreshold), utils.ToJSON(reply))
+	}
+	var result string
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ResetThreshold,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "THD_ACNT_BALANCE_1"}},
+		&result); err != nil {
+		t.Fatal(err)
+	} else if result != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, result)
+	}
+	expectedThreshold.Hits = 0
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "THD_ACNT_BALANCE_1"}},
+		&reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Snooze = expectedThreshold.Snooze
+	if !reflect.DeepEqual(expectedThreshold, reply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedThreshold), utils.ToJSON(reply))
+	}
 }
