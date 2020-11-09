@@ -298,6 +298,8 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 }
 
 func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
+	tmz := utils.FirstNonEmpty(rdr.Config().Timezone,
+		rdr.cgrCfg.GeneralCfg().DefaultTimezone)
 	origCgrEvs := value.([]*cgrEventWithOpts)
 	for _, origCgrEv := range origCgrEvs {
 		// complete CDR are handling in processFile function
@@ -306,7 +308,7 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 		}
 	}
 	// Need to process the first event separate to take the name for the file
-	cdr, err := engine.NewMapEvent(origCgrEvs[0].Event).AsCDR(rdr.cgrCfg, origCgrEvs[0].Tenant, rdr.Config().Timezone)
+	cdr, err := engine.NewMapEvent(origCgrEvs[0].Event).AsCDR(rdr.cgrCfg, origCgrEvs[0].Tenant, tmz)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> Converting Event : <%s> to cdr , ignoring due to error: <%s>",
@@ -338,7 +340,7 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 	if len(origCgrEvs) > 1 {
 		for _, origCgrEv := range origCgrEvs[1:] {
 			// Need to process the first event separate to take the name for the file
-			cdr, err = engine.NewMapEvent(origCgrEv.Event).AsCDR(rdr.cgrCfg, origCgrEv.Tenant, rdr.Config().Timezone)
+			cdr, err = engine.NewMapEvent(origCgrEv.Event).AsCDR(rdr.cgrCfg, origCgrEv.Tenant, tmz)
 			if err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> Converting Event : <%s> to cdr , ignoring due to error: <%s>",
@@ -364,6 +366,8 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 }
 
 func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
+	tmz := utils.FirstNonEmpty(rdr.Config().Timezone,
+		rdr.cgrCfg.GeneralCfg().DefaultTimezone)
 	origCgrEvs := value.([]*cgrEventWithOpts)
 	for _, origCgrEv := range origCgrEvs {
 		// complete CDR are handling in processFile function
@@ -375,13 +379,13 @@ func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
 	// how to post incomplete CDR
 	//sort CGREvents based on AnswertTime and SetupTime
 	sort.Slice(origCgrEvs, func(i, j int) bool {
-		aTime, err := origCgrEvs[i].FieldAsTime(utils.AnswerTime, rdr.Config().Timezone)
+		aTime, err := origCgrEvs[i].FieldAsTime(utils.AnswerTime, tmz)
 		if err != nil && err == utils.ErrNotFound {
-			sTime, _ := origCgrEvs[i].FieldAsTime(utils.SetupTime, rdr.Config().Timezone)
-			sTime2, _ := origCgrEvs[j].FieldAsTime(utils.SetupTime, rdr.Config().Timezone)
+			sTime, _ := origCgrEvs[i].FieldAsTime(utils.SetupTime, tmz)
+			sTime2, _ := origCgrEvs[j].FieldAsTime(utils.SetupTime, tmz)
 			return sTime.Before(sTime2)
 		}
-		aTime2, _ := origCgrEvs[j].FieldAsTime(utils.AnswerTime, rdr.Config().Timezone)
+		aTime2, _ := origCgrEvs[j].FieldAsTime(utils.AnswerTime, tmz)
 		return aTime.Before(aTime2)
 	})
 	// compose the CGREvent from slice

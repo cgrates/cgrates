@@ -158,7 +158,8 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		if strings.HasPrefix(fName, rdr.Config().FailedCallsPrefix) { // Use the first index since they should be the same in all configs
 			record = append(record, "0") // Append duration 0 for failed calls flatstore CDR
 		} else {
-			pr, err := NewUnpairedRecord(record, rdr.Config().Timezone, fName)
+			pr, err := NewUnpairedRecord(record, utils.FirstNonEmpty(rdr.Config().Timezone,
+				rdr.cgrCfg.GeneralCfg().DefaultTimezone), fName)
 			if err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> Converting row : <%s> to unpairedRecord , ignoring due to error: <%s>",
