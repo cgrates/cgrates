@@ -32,7 +32,7 @@ func TestPathItemListNext(t *testing.T) {
 	list.PushFront(node2)
 	list.PushFront(node1)
 	if !reflect.DeepEqual("path2", list.Front().Next().Value.String()) {
-		t.Errorf("Expecting: <path1>, received: <%+v>", list.Front().Value.String())
+		t.Errorf("Expecting: <path2>, received: <%+v>", list.Front().Next().Value.String())
 	}
 
 }
@@ -54,7 +54,7 @@ func TestPathItemListPrev(t *testing.T) {
 	list.PushFront(node2)
 	list.PushFront(node1)
 	if !reflect.DeepEqual("path2", list.Back().Prev().Value.String()) {
-		t.Errorf("Expecting: <path1>, received: <%+v>", list.Front().Value.String())
+		t.Errorf("Expecting: <path2>, received: <%+v>", list.Back().Prev().Value.String())
 	}
 
 }
@@ -98,7 +98,7 @@ func TestPathItemListLen(t *testing.T) {
 	list.PushFront(node2)
 	list.PushFront(node1)
 	if !reflect.DeepEqual(3, list.Len()) {
-		t.Errorf("Expecting: <3>, received: <%+v>", list.Init())
+		t.Errorf("Expecting: <3>, received: <%+v>", list.Len())
 	}
 }
 
@@ -162,4 +162,153 @@ func TestPathItemListInsert(t *testing.T) {
 	if !reflect.DeepEqual("path1", list.Back().Value.String()) {
 		t.Errorf("Expecting: <path1>, received: <%+v>", list.Back().Value.String())
 	}
+}
+
+func TestPathItemListInsertValue(t *testing.T) {
+	list := NewPathItemList()
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	list.PushBack(node1)
+	list.PushBack(node2)
+	list.insertValue(PathItems{{Field: "path3"}}, list.Back())
+	if !reflect.DeepEqual("path3", list.Back().Value.String()) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", list.Back().Value.String())
+	}
+}
+
+func TestPathItemListRemoveLowerCase(t *testing.T) {
+	list := NewPathItemList()
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	node3 := NewPathItems([]string{"path3"})
+	list.PushBack(node1)
+	list.PushBack(node2)
+	list.PushBack(node3)
+	list.remove(list.Back())
+	if !reflect.DeepEqual("path2", list.Back().Value.String()) {
+		t.Errorf("Expecting: <path2>, received: <%+v>", list.Back().Value.String())
+	}
+}
+
+func TestPathItemListRemoveUpperCase1(t *testing.T) {
+	list := NewPathItemList()
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	node3 := NewPathItems([]string{"path3"})
+	list.PushBack(node1)
+	list.PushBack(node2)
+	list.PushBack(node3)
+	list.Remove(list.Front().Next())
+	if !reflect.DeepEqual("path3", list.Front().Next().Value.String()) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", list.Front().Next().Value.String())
+	}
+}
+
+/*
+func TestPathItemListRemoveUpperCase2(t *testing.T) {
+	list := NewPathItemList()
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	node3 := NewPathItems([]string{"path3"})
+	list.PushBack(node1)
+	list.PushBack(node2)
+	list.PushBack(node3)
+	list.Remove(list.Front().Next())
+	if !reflect.DeepEqual("path3", list.Front().Next().Value.String()) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", list.Front().Next().Value.String())
+	}
+}
+
+*/
+
+func TestPathItemListMoveEqual(t *testing.T) {
+	list := NewPathItemList()
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	node3 := NewPathItems([]string{"path3"})
+	list.PushBack(node1)
+	list.PushBack(node2)
+	list.PushBack(node3)
+	list.move(list.Back(), list.Back())
+	if !reflect.DeepEqual("path3", list.Back().Value.String()) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", list.Back().Value.String())
+	}
+}
+
+func TestPathItemListMove(t *testing.T) {
+	list := NewPathItemList()
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	node3 := NewPathItems([]string{"path3"})
+	list.PushBack(node1)
+	list.PushBack(node2)
+	list.PushBack(node3)
+	list.move(list.Front(), list.Back())
+	if !reflect.DeepEqual("path3", list.Front().next.Value.String()) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", list.Front().next.Value.String())
+	}
+	if !reflect.DeepEqual("path1", list.Back().Value.String()) {
+		t.Errorf("Expecting: <path1>, received: <%+v>", list.Back().Value.String())
+	}
+	if !reflect.DeepEqual("path2", list.Front().Value.String()) {
+		t.Errorf("Expecting: <path2>, received: <%+v>", list.Front().Value.String())
+	}
+}
+
+func TestPathItemListPushFront(t *testing.T) {
+	list := NewPathItemList()
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	node3 := NewPathItems([]string{"path3"})
+	list.PushBack(node1)
+	list.PushBack(node2)
+	list.PushBack(node3)
+	list.PushFront(PathItems{{Field: "path4"}})
+	if !reflect.DeepEqual("path4", list.Front().Value.String()) {
+		t.Errorf("Expecting: <path4>, received: <%+v>", list.Front().Value.String())
+	}
+}
+
+func TestPathItemListPushBack(t *testing.T) {
+	list := NewPathItemList()
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	node3 := NewPathItems([]string{"path3"})
+	list.PushBack(node1)
+	list.PushBack(node2)
+	list.PushBack(node3)
+	list.PushBack(PathItems{{Field: "path4"}})
+	if !reflect.DeepEqual("path4", list.Back().Value.String()) {
+		t.Errorf("Expecting: <path4>, received: <%+v>", list.Back().Value.String())
+	}
+}
+
+func TestPathItemListInsertBefore(t *testing.T) {
+	list := NewPathItemList()
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	node3 := NewPathItems([]string{"path3"})
+	list.PushBack(node1)
+	list.PushBack(node2)
+	list.PushBack(node3)
+	list.InsertBefore(PathItems{{Field: "path4"}}, list.Back())
+	if !reflect.DeepEqual("path4", list.Back().Prev().Value.String()) {
+		t.Errorf("Expecting: <path4>, received: <%+v>", list.Back().Prev().Value.String())
+	}
+
+}
+
+func TestPathItemListInsertAfter(t *testing.T) {
+	list := NewPathItemList()
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	node3 := NewPathItems([]string{"path3"})
+	list.PushBack(node1)
+	list.PushBack(node2)
+	list.PushBack(node3)
+	list.InsertAfter(PathItems{{Field: "path4"}}, list.Front())
+	if !reflect.DeepEqual("path4", list.Front().Next().Value.String()) {
+		t.Errorf("Expecting: <path4>, received: <%+v>", list.Front().Next().Value.String())
+	}
+
 }
