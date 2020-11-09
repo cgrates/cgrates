@@ -298,6 +298,21 @@ func TestPathItemListInsertBefore(t *testing.T) {
 
 }
 
+func TestPathItemListInsertBeforeNil(t *testing.T) {
+	list1 := NewPathItemList()
+	list2 := NewPathItemList()
+	var received *PathItemElement
+	node1 := NewPathItems([]string{"path1"})
+	node2 := NewPathItems([]string{"path2"})
+	list1.PushBack(node1)
+	list2.PushBack(node2)
+	received = list1.InsertBefore(PathItems{{Field: "path4"}}, list2.Back())
+	if received != nil {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", nil, received)
+	}
+
+}
+
 func TestPathItemListInsertAfter(t *testing.T) {
 	list := NewPathItemList()
 	node1 := NewPathItems([]string{"path1"})
