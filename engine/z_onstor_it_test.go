@@ -1378,7 +1378,6 @@ func testOnStorITCRUDHistory(t *testing.T) {
 
 func testOnStorITCRUDStructVersion(t *testing.T) {
 	if vrst, err := onStor.DataDB().GetVersions(utils.Accounts); err != utils.ErrNotFound {
-		fmt.Println(vrst)
 		t.Error(err)
 	}
 	vrs := Versions{
