@@ -257,13 +257,17 @@ func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
 	}
 }
 
-func (sS *StatService) removeExpiredWithStore(sq *StatQueue) (err error) {
+func (sS *StatService) getStatQueue(tnt, id string) (sq *StatQueue, err error) {
+	if sq, err = sS.dm.GetStatQueue(tnt, id, true, true, utils.EmptyString); err != nil {
+		return
+	}
 	lkID := utils.StatQueuePrefix + sq.TenantID()
+	var removed int
 	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
-		err = sq.remExpired()
+		removed, err = sq.remExpired()
 		return
 	}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
-	if err = sq.remExpired(); err != nil {
+	if err != nil || removed == 0 {
 		return
 	}
 	sS.storeStatQueue(sq)
@@ -424,12 +428,9 @@ func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithOpts, reply *StatQ
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	sq, err := sS.dm.GetStatQueue(tnt, args.ID, true, true, "")
+	sq, err := sS.getStatQueue(tnt, args.ID)
 	if err != nil {
 		return err
-	}
-	if err = sS.removeExpiredWithStore(sq); err != nil {
-		return
 	}
 	*reply = *sq
 	return
@@ -444,15 +445,12 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	sq, err := sS.dm.GetStatQueue(tnt, args.ID, true, true, "")
+	sq, err := sS.getStatQueue(tnt, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	}
-	if err = sS.removeExpiredWithStore(sq); err != nil {
-		return
 	}
 	sq.RLock()
 	metrics := make(map[string]string, len(sq.SQMetrics))
@@ -473,15 +471,12 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	sq, err := sS.dm.GetStatQueue(tnt, args.ID, true, true, "")
+	sq, err := sS.getStatQueue(tnt, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	}
-	if err = sS.removeExpiredWithStore(sq); err != nil {
-		return
 	}
 	sq.RLock()
 	metrics := make(map[string]float64, len(sq.SQMetrics))

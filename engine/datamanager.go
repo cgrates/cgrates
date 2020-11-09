@@ -626,7 +626,7 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
 			}
 			// if the user define a statQueue with an existing metric check if we need to update it based on queue length
 			sq.ttl = ttl
-			if err = sq.remExpired(); err != nil {
+			if _, err = sq.remExpired(); err != nil {
 				return
 			}
 			if len(sq.SQItems) > queueLength {
