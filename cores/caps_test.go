@@ -22,6 +22,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"reflect"
+	"runtime"
 	"testing"
 	"time"
 
@@ -73,7 +74,9 @@ func TestCapsStats(t *testing.T) {
 		t.Errorf("Expected: %v ,received: %v", exp, cs)
 	}
 	<-exitChan
+	exitChan = make(chan bool, 1)
 	go func() {
+		runtime.Gosched()
 		time.Sleep(100)
 		exitChan <- true
 	}()
@@ -87,6 +90,7 @@ func TestCapsStats(t *testing.T) {
 	if pk := cs.GetPeak(); pk != 2 {
 		t.Errorf("Expected the peak to be 2 received: %v", pk)
 	}
+	<-exitChan
 }
 
 func TestCapsStatsGetAverage(t *testing.T) {

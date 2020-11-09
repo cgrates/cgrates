@@ -4947,7 +4947,7 @@ func TestV1GetConfigAsJSONRals(t *testing.T) {
 
 func TestV1GetConfigAsJSONScheduler(t *testing.T) {
 	var reply string
-	expected := `{"schedulers":{"cdrs_conns":[],"enabled":false,"filters":[]}}`
+	expected := `{"schedulers":{"cdrs_conns":[],"enabled":false,"filters":[],"thresholds_conns":[]}}`
 	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
 	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: SCHEDULER_JSN}, &reply); err != nil {
@@ -4959,7 +4959,7 @@ func TestV1GetConfigAsJSONScheduler(t *testing.T) {
 
 func TestV1GetConfigAsJSONCdrs(t *testing.T) {
 	var reply string
-	expected := `{"schedulers":{"cdrs_conns":[],"enabled":false,"filters":[]}}`
+	expected := `{"schedulers":{"cdrs_conns":[],"enabled":false,"filters":[],"thresholds_conns":[]}}`
 	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
 	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: SCHEDULER_JSN}, &reply); err != nil {
@@ -5050,13 +5050,6 @@ func TestV1GetConfigAsJSONDNSAgent(t *testing.T) {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
-	}
-}
-
-func TestNewCGRConfigFromPathError(t *testing.T) {
-	expected := "file </usr/share/cgrates/conf/samples/multifiles/d.json>:NOT_FOUND:ENV_VAR:LOGGER"
-	if _, err := NewCGRConfigFromPath("/usr/share/cgrates/conf/samples/multifiles"); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
