@@ -90,38 +90,6 @@ func MissingMapFields(s map[string]interface{}, mandatories []string) []string {
 	return missing
 }
 
-// Converts a struct to map
-/*func StrucToMap(s interface{}) map[string]interface{} {
-	mp := make(map[string]interface{})
-	for i := 0; i < reflect.ValueOf(s).Elem().NumField(); i++ {
-		fld := reflect.ValueOf(s).Elem().Field(i)
-		switch fld.Kind() {
-		case reflect.Bool:
-			mp[reflect.TypeOf(s).Elem().Field(i).Name] = fld.Bool()
-		case reflect.Int:
-			mp[reflect.TypeOf(s).Elem().Field(i).Name] = fld.Int()
-		case reflect.String:
-			mp[reflect.TypeOf(s).Elem().Field(i).Name] = fld.String()
-		}
-	}
-	return mp
-}*/
-
-// Converts a struct to map[string]interface{}
-func ToMapMapStringInterface(in interface{}) map[string]interface{} { // Got error and it is not used anywhere
-	out := make(map[string]interface{})
-
-	v := reflect.ValueOf(in)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	typ := reflect.TypeOf(in)
-	for i := 0; i < v.NumField(); i++ {
-		out[typ.Field(i).Name] = v.Field(i).Interface()
-	}
-	return out
-}
-
 // Converts a struct to map[string]string
 func ToMapStringString(in interface{}) map[string]string {
 	out := make(map[string]string)
