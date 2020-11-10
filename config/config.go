@@ -423,9 +423,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 	}
 	for key, val := range jsnRPCConns {
 		cfg.rpcConns[key] = NewDfltRPCConn()
-		if err = cfg.rpcConns[key].loadFromJsonCfg(val); err != nil {
-			return
-		}
+		cfg.rpcConns[key].loadFromJsonCfg(val)
 	}
 	return
 }

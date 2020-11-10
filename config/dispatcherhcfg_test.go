@@ -112,7 +112,7 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 					}
 				]
 			},
-			"register_interval": "5m",
+			"register_interval": "0",
 		},		
 }`
 	eMap := map[string]interface{}{
@@ -132,12 +132,12 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 				},
 			},
 		},
-		utils.RegisterIntervalCfg: "5m0s",
+		utils.RegisterIntervalCfg: "0",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.dispatcherHCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 

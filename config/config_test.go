@@ -22,6 +22,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -1147,7 +1148,7 @@ func TestLoadHTTPCfgError(t *testing.T) {
 	}
 }
 
-func TestLoadDataDBCfgError(t *testing.T) {
+func TestLoadDataDBCfgErrorCase1(t *testing.T) {
 	cfgJSONStr := `{
 "data_db": {
 	"db_host": 127.0,
@@ -1162,6 +1163,27 @@ func TestLoadDataDBCfgError(t *testing.T) {
 		t.Error(err)
 	} else if err := cgrConfig.loadDataDBCfg(cgrCfgJson); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestLoadDataDBCfgErrorCase2(t *testing.T) {
+	cfgJSONStr := `{
+"data_db": {
+	"remote_conns":["*internal"],
+	}
+}`
+	expected := "Remote connection ID needs to be different than *internal"
+	cgrConfig, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else {
+		cgrConfig.dataDbCfg.RmtConns = []string{utils.MetaInternal}
+		if err := cgrConfig.loadDataDBCfg(cgrCfgJson); err == nil || err.Error() != expected {
+			t.Errorf("Expected %+v, received %+v", expected, err)
+		}
 	}
 }
 
@@ -5765,6 +5787,22 @@ func TestLoadConfigFromReaderError(t *testing.T) {
 		t.Error(err)
 	} else if err := cgrCfg.loadConfigFromReader(file, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, true); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadConfigFromReaderLoadFunctionsError(t *testing.T) {
+	cfgJSONStr := `{
+     "data_db": {								
+	    "db_type": 123		
+     }
+}`
+	expected := `json: cannot unmarshal number into Go struct field DbJsonCfg.Db_type of type string`
+	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cgrCfg.loadConfigFromReader(strings.NewReader(cfgJSONStr),
+		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadDataDBCfg},
+		true); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
