@@ -147,11 +147,9 @@ func remakeQueue(sq *engine.StatQueue) (out *engine.StatQueue) {
 		ID:        sq.ID,
 		SQItems:   sq.SQItems,
 		SQMetrics: make(map[string]engine.StatMetric),
-		MinItems:  sq.MinItems,
 	}
 	for mID, metric := range sq.SQMetrics {
-		id := utils.ConcatenatedKey(utils.SplitConcatenatedKey(mID)...)
-		out.SQMetrics[id] = metric
+		out.SQMetrics[mID] = metric
 	}
 	return
 }

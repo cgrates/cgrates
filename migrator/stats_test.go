@@ -162,7 +162,6 @@ func TestRemakeQueue(t *testing.T) {
 			"*sum#~*req.Usage":    nil,
 			"*average#~*req.Cost": nil,
 		},
-		MinItems: 2,
 	}
 	expected := &engine.StatQueue{
 		Tenant:  sq.Tenant,
@@ -173,7 +172,6 @@ func TestRemakeQueue(t *testing.T) {
 			"*sum#~*req.Usage":    nil,
 			"*average#~*req.Cost": nil,
 		},
-		MinItems: sq.MinItems,
 	}
 
 	if rply := remakeQueue(sq); !reflect.DeepEqual(expected, rply) {

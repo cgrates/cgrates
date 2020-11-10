@@ -74,7 +74,6 @@ func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err 
 			config.CgrConfig().GeneralCfg().RoundingDecimals),
 		SQItems:   make([]SQItem, len(sq.SQItems)),
 		SQMetrics: make(map[string][]byte, len(sq.SQMetrics)),
-		MinItems:  sq.MinItems,
 	}
 	for i, sqItm := range sq.SQItems {
 		sSQ.SQItems[i] = sqItm
@@ -95,7 +94,6 @@ type StoredStatQueue struct {
 	ID         string
 	SQItems    []SQItem
 	SQMetrics  map[string][]byte
-	MinItems   int
 	Compressed bool
 }
 
@@ -119,13 +117,12 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 		ID:        ssq.ID,
 		SQItems:   make([]SQItem, len(ssq.SQItems)),
 		SQMetrics: make(map[string]StatMetric, len(ssq.SQMetrics)),
-		MinItems:  ssq.MinItems,
 	}
 	for i, sqItm := range ssq.SQItems {
 		sq.SQItems[i] = sqItm
 	}
 	for metricID, marshaled := range ssq.SQMetrics {
-		if metric, err := NewStatMetric(metricID, ssq.MinItems, []string{}); err != nil {
+		if metric, err := NewStatMetric(metricID, 0, []string{}); err != nil {
 			return nil, err
 		} else if err := metric.LoadMarshaled(ms, marshaled); err != nil {
 			return nil, err
@@ -151,7 +148,6 @@ type StatQueue struct {
 	ID        string
 	SQItems   []SQItem
 	SQMetrics map[string]StatMetric
-	MinItems  int
 	sqPrfl    *StatQueueProfile
 	dirty     *bool          // needs save
 	ttl       *time.Duration // timeToLeave, picked on each init
