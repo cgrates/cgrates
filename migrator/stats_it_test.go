@@ -464,8 +464,6 @@ func testStsITMigrateFromv1(t *testing.T) {
 	var statQueue *engine.StatQueue
 	if statQueue, err = stsMigrator.dmOut.DataManager().GetStatQueue("cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if statQueue.MinItems != 0 {
-		t.Errorf("Expecting: '0', received: %+v", statQueue.MinItems)
 	} else if statQueue.ID != "test" {
 		t.Errorf("Expecting: 'test', received: %+v", statQueue.ID)
 	} else if statQueue.Tenant != "cgrates.org" {

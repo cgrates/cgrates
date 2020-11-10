@@ -526,6 +526,8 @@ func (sS *StatService) V1ResetStatQueue(tntID *utils.TenantID, rply *string) (er
 		true, false, utils.NonTransactional); err != nil {
 		return
 	}
+	sq.Lock()
+	defer sq.Unlock()
 	sq.SQItems = make([]SQItem, 0)
 	metrics := sq.SQMetrics
 	sq.SQMetrics = make(map[string]StatMetric)
