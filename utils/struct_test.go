@@ -256,26 +256,6 @@ func TestNonemptyStructFields(t *testing.T) {
 	}
 }
 
-/*
-func TestToMapMapStringInterface(t *testing.T) {
-	var attr = struct {
-		Tenant    string
-		Direction bool
-		Account   string
-		Type      string
-	}{"bevoip.eu", true, "testaccount", META_PREPAID}
-	mapStruct := ToMapMapStringInterface(&attr)
-	expMapStruct := map[string]interface{}{
-		"Tenant":    "bevoip.eu",
-		"Direction": true,
-		"Account":   "testaccount",
-		"Type":      META_PREPAID,
-	}
-	if !reflect.DeepEqual(expMapStruct, mapStruct) {
-		t.Errorf("expecting: %+v, received: %+v", expMapStruct, mapStruct)
-	}
-}*/
-
 func TestMissingMapFields(t *testing.T) {
 	var attr = map[string]interface{}{
 		Tenant:            "cgrates.org",
