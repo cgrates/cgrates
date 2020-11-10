@@ -66,18 +66,48 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJsonCfg(cfgJSON); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(jsonCfg.rpcConns, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rpcConns))
+	} else {
+		jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJsonCfg(cfgJSON)
+		if !reflect.DeepEqual(jsonCfg.rpcConns, expected) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rpcConns))
+		}
 	}
 }
 
 func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
+	expected := RpcConns{
+		utils.MetaInternal: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+		utils.MetaLocalHost: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					Address:     "127.0.0.1:2012",
+					Transport:   "*json",
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+	}
+	jsonCfg, err := NewDefaultCGRConfig()
+	if err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
+	}
+	jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJsonCfg(nil)
+	if !reflect.DeepEqual(expected, jsonCfg.rpcConns) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rpcConns))
 	}
 }
 

@@ -42,7 +42,7 @@ type RPCConn struct {
 	Conns    []*RemoteHost
 }
 
-func (rC *RPCConn) loadFromJsonCfg(jsnCfg *RPCConnsJson) (err error) {
+func (rC *RPCConn) loadFromJsonCfg(jsnCfg *RPCConnsJson) {
 	if jsnCfg == nil {
 		return
 	}
@@ -56,7 +56,7 @@ func (rC *RPCConn) loadFromJsonCfg(jsnCfg *RPCConnsJson) (err error) {
 		rC.Conns = make([]*RemoteHost, len(*jsnCfg.Conns))
 		for idx, jsnHaCfg := range *jsnCfg.Conns {
 			rC.Conns[idx] = NewDfltRemoteHost()
-			rC.Conns[idx].loadFromJsonCfg(jsnHaCfg)
+			rC.Conns[idx].loadFromJsonCfg(jsnHaCfg) //To review if the function signature changes
 		}
 	}
 	return
@@ -95,9 +95,9 @@ type RemoteHost struct {
 	TLS         bool
 }
 
-func (self *RemoteHost) loadFromJsonCfg(jsnCfg *RemoteHostJson) error {
+func (self *RemoteHost) loadFromJsonCfg(jsnCfg *RemoteHostJson) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Address != nil {
 		self.Address = *jsnCfg.Address
@@ -111,7 +111,7 @@ func (self *RemoteHost) loadFromJsonCfg(jsnCfg *RemoteHostJson) error {
 	if jsnCfg.Tls != nil {
 		self.TLS = *jsnCfg.Tls
 	}
-	return nil
+	return
 }
 
 func (rh *RemoteHost) AsMapInterface() map[string]interface{} {

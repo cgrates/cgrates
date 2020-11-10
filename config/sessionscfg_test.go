@@ -634,14 +634,12 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 
 func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 	var hpoolcfg, expected RemoteHost
-	if err := hpoolcfg.loadFromJsonCfg(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(hpoolcfg, expected) {
+	hpoolcfg.loadFromJsonCfg(nil)
+	if !reflect.DeepEqual(hpoolcfg, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, hpoolcfg)
 	}
-	if err := hpoolcfg.loadFromJsonCfg(new(RemoteHostJson)); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(hpoolcfg, expected) {
+	hpoolcfg.loadFromJsonCfg(new(RemoteHostJson))
+	if !reflect.DeepEqual(hpoolcfg, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, hpoolcfg)
 	}
 	json := &RemoteHostJson{
@@ -652,9 +650,8 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 		Address:     "127.0.0.1:8448",
 		Synchronous: true,
 	}
-	if err = hpoolcfg.loadFromJsonCfg(json); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, hpoolcfg) {
+	hpoolcfg.loadFromJsonCfg(json)
+	if !reflect.DeepEqual(expected, hpoolcfg) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(hpoolcfg))
 	}
 }
