@@ -260,17 +260,14 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 			return time.Unix(0, tmstmp).In(loc), nil
 		}
 	case unixTimestampRule.MatchString(tmStr):
-		if tmstmp, err := strconv.ParseInt(tmStr, 10, 64); err != nil {
-			return nilTime, err
-		} else {
-			return time.Unix(tmstmp, 0).In(loc), nil
-		}
+		//error never happens because of regex
+		tmstmp, _ := strconv.ParseInt(tmStr, 10, 64)
+		return time.Unix(tmstmp, 0).In(loc), nil
 	case unixTimestampMilisecondsRule.MatchString(tmStr):
-		if tmstmp, err := strconv.ParseInt(tmStr, 10, 64); err != nil {
-			return nilTime, err
-		} else {
-			return time.Unix(0, tmstmp*int64(time.Millisecond)).In(loc), nil
-		}
+		//error never happens because of regex
+		tmstmp, _ := strconv.ParseInt(tmStr, 10, 64)
+		return time.Unix(0, tmstmp*int64(time.Millisecond)).In(loc), nil
+
 	case unixTimestampNanosecondsRule.MatchString(tmStr):
 		if tmstmp, err := strconv.ParseInt(tmStr, 10, 64); err != nil {
 			return nilTime, err
