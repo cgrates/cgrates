@@ -30,16 +30,19 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var sTestsDspSup = []func(t *testing.T){
-	testDspSupPingFailover,
-	testDspSupGetSupFailover,
-	testDspSupGetSupRoundRobin,
+var (
+	sTestsDspSup = []func(t *testing.T){
+		testDspSupPingFailover,
+		testDspSupGetSupFailover,
+		testDspSupGetSupRoundRobin,
 
-	testDspSupPing,
-	testDspSupTestAuthKey,
-	testDspSupTestAuthKey2,
-	testDspSupGetSupplierForEvent,
-}
+		testDspSupPing,
+		testDspSupTestAuthKey,
+		testDspSupTestAuthKey2,
+		testDspSupGetSupplierForEvent,
+	}
+	nowTime = time.Now()
+)
 
 //Test start here
 func TestDspSupplierS(t *testing.T) {

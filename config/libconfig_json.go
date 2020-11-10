@@ -133,6 +133,7 @@ type SchedulerJsonCfg struct {
 	Enabled          *bool
 	Cdrs_conns       *[]string
 	Thresholds_conns *[]string
+	Stats_conns      *[]string
 	Filters          *[]string
 }
 

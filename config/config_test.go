@@ -408,6 +408,7 @@ func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 		Enabled:      false,
 		CDRsConns:    []string{},
 		ThreshSConns: []string{},
+		StatSConns:   []string{},
 		Filters:      []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.schedulerCfg, eSchedulerCfg) {
@@ -2261,6 +2262,7 @@ func TestSchedulerConfig(t *testing.T) {
 		Enabled:      false,
 		CDRsConns:    []string{},
 		ThreshSConns: []string{},
+		StatSConns:   []string{},
 		Filters:      []string{},
 	}
 	cgrConfig, err := NewDefaultCGRConfig()
@@ -3883,6 +3885,7 @@ func TestV1GetConfigScheduler(t *testing.T) {
 			utils.EnabledCfg:      false,
 			utils.CDRsConnsCfg:    []string{},
 			utils.ThreshSConnsCfg: []string{},
+			utils.StatSConnsCfg:   []string{},
 			utils.FiltersCfg:      []string{},
 		},
 	}
@@ -4947,7 +4950,7 @@ func TestV1GetConfigAsJSONRals(t *testing.T) {
 
 func TestV1GetConfigAsJSONScheduler(t *testing.T) {
 	var reply string
-	expected := `{"schedulers":{"cdrs_conns":[],"enabled":false,"filters":[],"thresholds_conns":[]}}`
+	expected := `{"schedulers":{"cdrs_conns":[],"enabled":false,"filters":[],"stats_conns":[],"thresholds_conns":[]}}`
 	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
 	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: SCHEDULER_JSN}, &reply); err != nil {
@@ -4959,10 +4962,10 @@ func TestV1GetConfigAsJSONScheduler(t *testing.T) {
 
 func TestV1GetConfigAsJSONCdrs(t *testing.T) {
 	var reply string
-	expected := `{"schedulers":{"cdrs_conns":[],"enabled":false,"filters":[],"thresholds_conns":[]}}`
+	expected := `{"cdrs":{"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":[],"rals_conns":[],"scheduler_conns":[],"session_cost_retries":5,"stats_conns":[],"store_cdrs":true,"thresholds_conns":[]}}`
 	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: SCHEDULER_JSN}, &reply); err != nil {
+	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: CDRS_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)

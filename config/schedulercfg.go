@@ -28,6 +28,7 @@ type SchedulerCfg struct {
 	Enabled      bool
 	CDRsConns    []string
 	ThreshSConns []string
+	StatSConns   []string
 	Filters      []string
 }
 
@@ -66,6 +67,17 @@ func (schdcfg *SchedulerCfg) loadFromJSONCfg(jsnCfg *SchedulerJsonCfg) error {
 			}
 		}
 	}
+	if jsnCfg.Stats_conns != nil {
+		schdcfg.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
+		for idx, connID := range *jsnCfg.Stats_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				schdcfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
+			} else {
+				schdcfg.StatSConns[idx] = connID
+			}
+		}
+	}
 	return nil
 }
 
@@ -95,6 +107,17 @@ func (schdcfg *SchedulerCfg) AsMapInterface() (initialMP map[string]interface{})
 			}
 		}
 		initialMP[utils.ThreshSConnsCfg] = thrsConns
+	}
+	if schdcfg.StatSConns != nil {
+		stsConns := make([]string, len(schdcfg.StatSConns))
+		for i, item := range schdcfg.StatSConns {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
+				stsConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaStats)
+			} else {
+				stsConns[i] = item
+			}
+		}
+		initialMP[utils.StatSConnsCfg] = stsConns
 	}
 	return
 }

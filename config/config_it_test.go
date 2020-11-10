@@ -305,6 +305,7 @@ func testCGRConfigReloadSchedulerS(t *testing.T) {
 		Enabled:      true,
 		CDRsConns:    []string{utils.MetaLocalHost},
 		ThreshSConns: []string{},
+		StatSConns:   []string{},
 		Filters:      []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SchedulerCfg()) {

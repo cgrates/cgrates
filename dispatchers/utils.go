@@ -20,7 +20,6 @@ package dispatchers
 
 import (
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -32,7 +31,6 @@ import (
 var ( //var used in all tests
 	dspDelay   = 1000
 	dspDataDir = "/usr/share/cgrates"
-	nowTime    = time.Now()
 )
 
 type ArgsReplicateSessionsWithOpts struct {

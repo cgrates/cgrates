@@ -34,12 +34,12 @@ func (apierSv1 *APIerSv1) GetStatQueueProfile(arg *utils.TenantID, reply *engine
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if sCfg, err := apierSv1.DataManager.GetStatQueueProfile(tnt, arg.ID,
-		true, true, utils.NonTransactional); err != nil {
+	sCfg, err := apierSv1.DataManager.GetStatQueueProfile(tnt, arg.ID,
+		true, true, utils.NonTransactional)
+	if err != nil {
 		return utils.APIErrorHandler(err)
-	} else {
-		*reply = *sCfg
 	}
+	*reply = *sCfg
 	return
 }
 
@@ -105,7 +105,7 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 	return nil
 }
 
-// Remove a specific stat configuration
+// RemoveStatQueueProfile remove a specific stat configuration
 func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -140,12 +140,12 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, 
 	return nil
 }
 
-// NewStatSV1 initializes StatSV1
+// NewStatSv1 initializes StatSV1
 func NewStatSv1(sS *engine.StatService) *StatSv1 {
 	return &StatSv1{sS: sS}
 }
 
-// Exports RPC from RLs
+// StatSv1 exports RPC from RLs
 type StatSv1 struct {
 	sS *engine.StatService
 }
@@ -165,7 +165,7 @@ func (stsv1 *StatSv1) ProcessEvent(args *engine.StatsArgsProcessEvent, reply *[]
 	return stsv1.sS.V1ProcessEvent(args, reply)
 }
 
-// GetQueueIDs returns the list of queues IDs in the system
+// GetStatQueuesForEvent returns the list of queues IDs in the system
 func (stsv1 *StatSv1) GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, reply *[]string) (err error) {
 	return stsv1.sS.V1GetStatQueuesForEvent(args, reply)
 }
@@ -175,7 +175,7 @@ func (stsv1 *StatSv1) GetStatQueue(args *utils.TenantIDWithOpts, reply *engine.S
 	return stsv1.sS.V1GetStatQueue(args, reply)
 }
 
-// GetStringMetrics returns the string metrics for a Queue
+// GetQueueStringMetrics returns the string metrics for a Queue
 func (stsv1 *StatSv1) GetQueueStringMetrics(args *utils.TenantIDWithOpts, reply *map[string]string) (err error) {
 	return stsv1.sS.V1GetQueueStringMetrics(args.TenantID, reply)
 }
@@ -185,7 +185,13 @@ func (stsv1 *StatSv1) GetQueueFloatMetrics(args *utils.TenantIDWithOpts, reply *
 	return stsv1.sS.V1GetQueueFloatMetrics(args.TenantID, reply)
 }
 
-func (stSv1 *StatSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+// ResetStatQueue resets the stat queue
+func (stsv1 *StatSv1) ResetStatQueue(tntID *utils.TenantIDWithOpts, reply *string) error {
+	return stsv1.sS.V1ResetStatQueue(tntID.TenantID, reply)
+}
+
+// Ping .
+func (stsv1 *StatSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
