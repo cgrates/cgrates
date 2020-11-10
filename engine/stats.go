@@ -518,3 +518,27 @@ func (sS *StatService) Reload() {
 func (sS *StatService) StartLoop() {
 	go sS.runBackup()
 }
+
+// V1ResetStatQueue resets the stat queue
+func (sS *StatService) V1ResetStatQueue(tntID *utils.TenantID, rply *string) (err error) {
+	var sq *StatQueue
+	if sq, err = sS.dm.GetStatQueue(tntID.Tenant, tntID.ID,
+		true, false, utils.NonTransactional); err != nil {
+		return
+	}
+	sq.SQItems = make([]SQItem, 0)
+	metrics := sq.SQMetrics
+	sq.SQMetrics = make(map[string]StatMetric)
+	for id, m := range metrics {
+		var metric StatMetric
+		if metric, err = NewStatMetric(id,
+			m.GetMinItems(), m.GetFilterIDs()); err != nil {
+			return
+		}
+		sq.SQMetrics[id] = metric
+	}
+	sq.dirty = utils.BoolPointer(true)
+	sS.storeStatQueue(sq)
+	*rply = utils.OK
+	return
+}

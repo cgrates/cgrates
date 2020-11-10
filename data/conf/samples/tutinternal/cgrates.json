@@ -36,6 +36,7 @@
 "schedulers": {
 	"enabled": true,
 	"cdrs_conns": ["*internal"],
+	"stats_conns": ["*localhost"],
 },
 
 

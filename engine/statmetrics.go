@@ -78,6 +78,7 @@ type StatMetric interface {
 	Marshal(ms Marshaler) (marshaled []byte, err error)
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
 	GetFilterIDs() (filterIDs []string)
+	GetMinItems() (minIts int)
 	Compress(queueLen int64, defaultID string, roundingDec int) (eventIDs []string)
 	GetCompressFactor(events map[string]int) map[string]int
 }
@@ -192,6 +193,9 @@ func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 func (asr *StatASR) GetFilterIDs() []string {
 	return asr.FilterIDs
 }
+
+// GetMinItems returns the minim items for the metric
+func (asr *StatASR) GetMinItems() (minIts int) { return asr.MinItems }
 
 // Compress is part of StatMetric interface
 func (asr *StatASR) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
@@ -325,6 +329,9 @@ func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 func (acd *StatACD) GetFilterIDs() []string {
 	return acd.FilterIDs
 }
+
+// GetMinItems returns the minim items for the metric
+func (acd *StatACD) GetMinItems() (minIts int) { return acd.MinItems }
 
 // Compress is part of StatMetric interface
 func (acd *StatACD) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
@@ -461,6 +468,9 @@ func (tcd *StatTCD) GetFilterIDs() []string {
 	return tcd.FilterIDs
 }
 
+// GetMinItems returns the minim items for the metric
+func (tcd *StatTCD) GetMinItems() (minIts int) { return tcd.MinItems }
+
 // Compress is part of StatMetric interface
 func (tcd *StatTCD) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
 	if tcd.Count < queueLen {
@@ -587,6 +597,9 @@ func (acc *StatACC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 func (acc *StatACC) GetFilterIDs() []string {
 	return acc.FilterIDs
 }
+
+// GetMinItems returns the minim items for the metric
+func (acc *StatACC) GetMinItems() (minIts int) { return acc.MinItems }
 
 // Compress is part of StatMetric interface
 func (acc *StatACC) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
@@ -716,6 +729,9 @@ func (tcc *StatTCC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 func (tcc *StatTCC) GetFilterIDs() []string {
 	return tcc.FilterIDs
 }
+
+// GetMinItems returns the minim items for the metric
+func (tcc *StatTCC) GetMinItems() (minIts int) { return tcc.MinItems }
 
 // Compress is part of StatMetric interface
 func (tcc *StatTCC) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
@@ -849,6 +865,9 @@ func (pdd *StatPDD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 func (pdd *StatPDD) GetFilterIDs() []string {
 	return pdd.FilterIDs
 }
+
+// GetMinItems returns the minim items for the metric
+func (pdd *StatPDD) GetMinItems() (minIts int) { return pdd.MinItems }
 
 // Compress is part of StatMetric interface
 func (pdd *StatPDD) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
@@ -993,12 +1012,17 @@ func (ddc *StatDDC) GetFilterIDs() []string {
 	return ddc.FilterIDs
 }
 
+// GetMinItems returns the minim items for the metric
+func (ddc *StatDDC) GetMinItems() (minIts int) { return ddc.MinItems }
+
 func (ddc *StatDDC) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
 	for id := range ddc.Events {
 		eventIDs = append(eventIDs, id)
 	}
 	return
 }
+
+////////////////////
 
 // Compress is part of StatMetric interface
 func (ddc *StatDDC) GetCompressFactor(events map[string]int) map[string]int {
@@ -1116,6 +1140,9 @@ func (sum *StatSum) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 func (sum *StatSum) GetFilterIDs() []string {
 	return sum.FilterIDs
 }
+
+// GetMinItems returns the minim items for the metric
+func (sum *StatSum) GetMinItems() (minIts int) { return sum.MinItems }
 
 // Compress is part of StatMetric interface
 func (sum *StatSum) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
@@ -1247,6 +1274,9 @@ func (avg *StatAverage) LoadMarshaled(ms Marshaler, marshaled []byte) (err error
 func (avg *StatAverage) GetFilterIDs() []string {
 	return avg.FilterIDs
 }
+
+// GetMinItems returns the minim items for the metric
+func (avg *StatAverage) GetMinItems() (minIts int) { return avg.MinItems }
 
 // Compress is part of StatMetric interface
 func (avg *StatAverage) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
@@ -1396,6 +1426,9 @@ func (dst *StatDistinct) LoadMarshaled(ms Marshaler, marshaled []byte) (err erro
 func (dst *StatDistinct) GetFilterIDs() []string {
 	return dst.FilterIDs
 }
+
+// GetMinItems returns the minim items for the metric
+func (dst *StatDistinct) GetMinItems() (minIts int) { return dst.MinItems }
 
 func (dst *StatDistinct) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
 	for id := range dst.Events {

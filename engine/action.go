@@ -105,6 +105,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.MetaCDRAccount:            resetAccountCDR,
 		utils.MetaExport:                export,
 		utils.MetaResetThreshold:        resetThreshold,
+		utils.MetaResetStatQueue:        resetStatQueue,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -166,9 +167,10 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		}
 		cdrLogProvider := newCdrLogProvider(acc, action)
 		cdr := &CDR{
-			RunID:     action.ActionType,
-			Source:    utils.CDRLOG,
-			SetupTime: time.Now(), AnswerTime: time.Now(),
+			RunID:       action.ActionType,
+			Source:      utils.CDRLOG,
+			SetupTime:   time.Now(),
+			AnswerTime:  time.Now(),
 			OriginID:    utils.GenUUID(),
 			ExtraFields: make(map[string]string),
 			PreRated:    true,
@@ -1057,4 +1059,13 @@ func resetThreshold(ub *Account, a *Action, acs Actions, extraData interface{}) 
 	var rply string
 	return connMgr.Call(config.CgrConfig().SchedulerCfg().ThreshSConns, nil,
 		utils.ThresholdSv1ResetThreshold, args, &rply)
+}
+
+func resetStatQueue(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+	args := &utils.TenantIDWithOpts{
+		TenantID: utils.NewTenantID(a.ExtraParameters),
+	}
+	var rply string
+	return connMgr.Call(config.CgrConfig().SchedulerCfg().StatSConns, nil,
+		utils.StatSv1ResetStatQueue, args, &rply)
 }

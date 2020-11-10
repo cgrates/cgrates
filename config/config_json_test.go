@@ -627,12 +627,13 @@ func TestDfSchedulerJsonCfg(t *testing.T) {
 		Enabled:          utils.BoolPointer(false),
 		Cdrs_conns:       &[]string{},
 		Thresholds_conns: &[]string{},
+		Stats_conns:      &[]string{},
 		Filters:          &[]string{},
 	}
 	if cfg, err := dfCgrJSONCfg.SchedulerJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 

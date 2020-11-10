@@ -1456,6 +1456,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 		case DispatcherSJson:
 			cfg.rldChans[DispatcherSJson] <- struct{}{}
 		case AnalyzerCfgJson:
+			cfg.rldChans[AnalyzerCfgJson] <- struct{}{}
 		case ApierS:
 			cfg.rldChans[ApierS] <- struct{}{}
 		case EEsJson:
@@ -1542,7 +1543,7 @@ func (cfg *CGRConfig) V1ReloadConfigFromPath(args *ConfigReloadWithOpts, reply *
 	}
 	//  lock all sections
 	cfg.rLockSections()
-	fmt.Println(cfg.ralsCfg.Enabled, 12)
+
 	err = cfg.checkConfigSanity()
 
 	cfg.rUnlockSections() // unlock before checking the error

@@ -515,6 +515,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SchedulerS, connID)
 			}
 		}
+		for _, connID := range cfg.schedulerCfg.StatSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.StatS, utils.SchedulerS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SchedulerS, connID)
+			}
+		}
 	}
 	// EventReader sanity checks
 	if cfg.ersCfg.Enabled {
