@@ -741,3 +741,10 @@ func TestGetPathFromInterface(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", ToJSON(expKeys), ToJSON(keys))
 	}
 }
+
+func TestMapStorageCloneNil(t *testing.T) {
+	var test MapStorage
+	if !reflect.DeepEqual(test, test.Clone()) {
+		t.Errorf("Expecting: <nil>, received: %+v", test.Clone())
+	}
+}

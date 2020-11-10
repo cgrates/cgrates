@@ -20,7 +20,10 @@ package utils
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
+	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -63,5 +66,31 @@ func TestGetRemoteIP(t *testing.T) {
 		t.Fatal(err)
 	} else if rply != exp {
 		t.Errorf("Expected: %q ,received: %q", exp, rply)
+	}
+}
+
+func TestNewServerRequest(t *testing.T) {
+	test := &serverRequest{
+		Method: "1",
+		Params: &json.RawMessage{'2'},
+		Id:     &json.RawMessage{'3'},
+	}
+	a := NewServerRequest("1", json.RawMessage{'2'}, json.RawMessage{'3'})
+	if !reflect.DeepEqual(a, test) {
+		t.Errorf("Expecting: %+v, received: %+v", test, a)
+	}
+}
+
+func TestDecodeServerRequest(t *testing.T) {
+	test := strings.NewReader("{\"method\":\"APIerSv1.LoadTariffPlanFromFolder\",\"params\":[{\"FolderPath\":\"/usr/share/cgrates/tariffplans/tutorial\",\"DryRun\":false,\"Validate\":false,\"Opts\":null,\"Caching\":null}],\"id\":0}")
+	test2 := strings.NewReader("{\"method\":\"APIerSv1.LoadTariffPlanFromFolder\",\"params\":[{\"FolderPath\":\"/usr/share/cgrates/tariffplans/tutorial\",\"DryRun\":false,\"Validate\":false,\"Opts\":null,\"Caching\":null}],\"id\":0}")
+	req := new(serverRequest)
+	err := json.NewDecoder(test).Decode(req)
+	rcvReq, rcvErr := DecodeServerRequest(test2)
+	if !reflect.DeepEqual(req, rcvReq) {
+		t.Errorf("Expecting: %+v, received: %+v", req, rcvReq)
+	}
+	if !reflect.DeepEqual(err, rcvErr) {
+		t.Errorf("Expecting: %+v, received: %+v", err, rcvErr)
 	}
 }
