@@ -40,7 +40,7 @@ type openedCSVFile struct {
 }
 
 func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
-	timezone string, exitChan chan bool, filterS *engine.FilterS,
+	timezone string, filterS *engine.FilterS,
 	connMgr *engine.ConnManager, cacheConns []string) (ldr *Loader) {
 	ldr = &Loader{
 		enabled:       cfg.Enabled,
@@ -51,6 +51,7 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 		tpOutDir:      cfg.TpOutDir,
 		lockFilename:  cfg.LockFileName,
 		fieldSep:      cfg.FieldSeparator,
+		runDelay:      cfg.RunDelay,
 		dataTpls:      make(map[string][]*config.FCTemplate),
 		flagsTpls:     make(map[string]utils.FlagsWithParams),
 		rdrs:          make(map[string]map[string]*openedCSVFile),
@@ -93,6 +94,7 @@ type Loader struct {
 	tpOutDir      string
 	lockFilename  string
 	fieldSep      string
+	runDelay      time.Duration
 	dataTpls      map[string][]*config.FCTemplate      // map[loaderType]*config.FCTemplate
 	flagsTpls     map[string]utils.FlagsWithParams     //map[loaderType]utils.FlagsWithParams
 	rdrs          map[string]map[string]*openedCSVFile // map[loaderType]map[fileName]*openedCSVFile for common incremental read
@@ -107,9 +109,7 @@ type Loader struct {
 
 func (ldr *Loader) ListenAndServe(exitChan chan struct{}) (err error) {
 	utils.Logger.Info(fmt.Sprintf("Starting <%s-%s>", utils.LoaderS, ldr.ldrID))
-	e := <-exitChan
-	exitChan <- e // put back for the others listening for shutdown request
-	return
+	return ldr.serve(exitChan)
 }
 
 // ProcessFolder will process the content in the folder with locking
@@ -187,20 +187,21 @@ func (ldr *Loader) processFiles(loaderType, caching, loadOption string) (err err
 			return err
 		}
 		csvReader := csv.NewReader(rdr)
+		csvReader.Comma = rune(ldr.fieldSep[0])
 		csvReader.Comment = '#'
 		ldr.rdrs[loaderType][fName] = &openedCSVFile{
 			fileName: fName, rdr: rdr, csvRdr: csvReader}
 		defer ldr.unreferenceFile(loaderType, fName)
-		// based on load option will store or remove the content
-		switch loadOption {
-		case utils.MetaStore:
-			if err = ldr.processContent(loaderType, caching); err != nil {
-				return
-			}
-		case utils.MetaRemove:
-			if err = ldr.removeContent(loaderType, caching); err != nil {
-				return
-			}
+	}
+	// based on load option will store or remove the content
+	switch loadOption {
+	case utils.MetaStore:
+		if err = ldr.processContent(loaderType, caching); err != nil {
+			return
+		}
+	case utils.MetaRemove:
+		if err = ldr.removeContent(loaderType, caching); err != nil {
+			return
 		}
 	}
 	return
@@ -966,6 +967,97 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 
+	}
+	return
+}
+
+func (ldr *Loader) serve(exitChan chan struct{}) (err error) {
+	fmt.Println(ldr.runDelay)
+	switch ldr.runDelay {
+	case time.Duration(0): // 0 disables the automatic read, maybe done per API
+		return
+	case time.Duration(-1):
+		return utils.WatchDir(ldr.tpInDir, ldr.processFile,
+			utils.LoaderS+"-"+ldr.ldrID, exitChan)
+	default:
+		go ldr.handleFolder(exitChan)
+	}
+	return
+}
+
+func (ldr *Loader) handleFolder(exitChan chan struct{}) {
+	for {
+		go ldr.ProcessFolder(config.CgrConfig().GeneralCfg().DefaultCaching, utils.MetaStore, false)
+		timer := time.NewTimer(ldr.runDelay)
+		select {
+		case <-exitChan:
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> stop monitoring path <%s>",
+					utils.LoaderS, ldr.ldrID, ldr.tpInDir))
+			timer.Stop()
+			return
+		case <-timer.C:
+		}
+	}
+}
+func (ldr *Loader) processFile(_, itmID string) (err error) {
+	fmt.Println(itmID)
+	loaderType := ldr.getLdrType(itmID)
+	if len(loaderType) == 0 {
+		return
+	}
+	if err = ldr.lockFolder(); err != nil {
+		return
+	}
+	defer ldr.unlockFolder()
+	if ldr.rdrs[loaderType][itmID] != nil {
+		ldr.unreferenceFile(loaderType, itmID)
+	}
+	var rdr *os.File
+	if rdr, err = os.Open(path.Join(ldr.tpInDir, itmID)); err != nil {
+		return
+	}
+	csvReader := csv.NewReader(rdr)
+	csvReader.Comma = rune(ldr.fieldSep[0])
+	csvReader.Comment = '#'
+	ldr.rdrs[loaderType][itmID] = &openedCSVFile{
+		fileName: itmID, rdr: rdr, csvRdr: csvReader}
+	if !ldr.allFilesPresent(loaderType) {
+		return
+	}
+	for fName := range ldr.rdrs[loaderType] {
+		defer ldr.unreferenceFile(loaderType, fName)
+	}
+
+	err = ldr.processContent(loaderType, config.CgrConfig().GeneralCfg().DefaultCaching)
+
+	if ldr.tpOutDir == utils.EmptyString {
+		return
+	}
+	for fName := range ldr.rdrs[loaderType] {
+		oldPath := path.Join(ldr.tpInDir, fName)
+		newPath := path.Join(ldr.tpOutDir, fName)
+		if nerr := os.Rename(oldPath, newPath); nerr != nil {
+			return nerr
+		}
+	}
+	return
+}
+
+func (ldr *Loader) allFilesPresent(ldrType string) bool {
+	for _, rdr := range ldr.rdrs[ldrType] {
+		if rdr == nil {
+			return false
+		}
+	}
+	return true
+}
+
+func (ldr *Loader) getLdrType(fName string) (ldrType string) {
+	for ldr, rdrs := range ldr.rdrs {
+		if _, has := rdrs[fName]; has {
+			return ldr
+		}
 	}
 	return
 }

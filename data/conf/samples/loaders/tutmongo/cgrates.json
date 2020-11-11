@@ -86,19 +86,19 @@
 
 "loaders": [
 	{
-		"id": "CustomLoader",									// identifier of the Loader
-		"enabled": true,									// starts as service: <true|false>.
-		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
-		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-		"lock_filename": ".cgr.lock",						// Filename containing concurrency lock in case of delayed processing
+		"id": "CustomLoader",									
+		"enabled": true,									
+		"dry_run": false,									
+		"run_delay": "0",										
+		"lock_filename": ".cgr.lock",						
 		"caches_conns": ["*internal"],
-		"field_separator": ",",								// separator used in case of csv files
-		"tp_in_dir": "/tmp/In",		// absolute path towards the directory where the CDRs are stored
-		"tp_out_dir": "/tmp/Out",	// absolute path towards the directory where processed CDRs will be moved
+		"field_separator": ",",								
+		"tp_in_dir": "/tmp/In",		
+		"tp_out_dir": "/tmp/Out",	
 		"data":[	
 			{
-				"type": "*attributes",						// data source type
-				"file_name": "Attributes.csv",				// file name in the tp_in_dir
+				"type": "*attributes",						
+				"file_name": "Attributes.csv",				
 				"fields": [
 					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -120,7 +120,7 @@
 		"enabled": true,
 		"dry_run": false,
 		"tenant": "cgrates.org",
-		"run_delay": 0,
+		"run_delay": "0",
 		"lock_filename": ".cgr.lock",
 		"caches_conns": ["*internal"],
 		"field_separator": ",",
@@ -151,7 +151,7 @@
 		"enabled": true,
 		"dry_run": false,
 		"tenant": "cgrates.org",
-		"run_delay": 0,
+		"run_delay": "0",
 		"lock_filename": ".cgr.lock",
 		"caches_conns": ["*internal"],
 		"field_separator": ",",
@@ -182,7 +182,7 @@
 		"enabled": true,
 		"dry_run": false,
 		"tenant": "cgrates.org",
-		"run_delay": 0,
+		"run_delay": "0",
 		"lock_filename": ".cgr.lock",
 		"caches_conns": ["*internal"],
 		"field_separator": ",",
@@ -209,22 +209,49 @@
 		],
 	},
 	{
-		"id": "LoaderWithTemplate",									// identifier of the Loader
-		"enabled": true,									// starts as service: <true|false>.
-		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+		"id": "LoaderWithTemplate",									
+		"enabled": true,									
+		"dry_run": false,									
 		"tenant": "cgrates.org",
-		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-		"lock_filename": ".cgr.lock",						// Filename containing concurrency lock in case of delayed processing
+		"run_delay": "0",										
+		"lock_filename": ".cgr.lock",						
 		"caches_conns": ["*internal"],
-		"field_separator": ",",								// separator used in case of csv files
-		"tp_in_dir": "/tmp/templateLoaderIn",		// absolute path towards the directory where the CDRs are stored
-		"tp_out_dir": "/tmp/templateLoaderOut",	// absolute path towards the directory where processed CDRs will be moved
+		"field_separator": ",",								
+		"tp_in_dir": "/tmp/templateLoaderIn",		
+		"tp_out_dir": "/tmp/templateLoaderOut",	
 		"data":[
 			{
-				"type": "*attributes",						// data source type
-				"file_name": "Attributes.csv",				// file name in the tp_in_dir
+				"type": "*attributes",						
+				"file_name": "Attributes.csv",				
 				"fields": [
 					{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
+				],
+			},
+		],
+	},
+	{
+		"id": "CustomSep",								
+		"enabled": true,									
+		"dry_run": false,									
+		"tenant": "cgrates.org",
+		"run_delay": "-1",										
+		"lock_filename": ".cgr.lock",						
+		"caches_conns": ["*internal"],
+		"field_separator": "\t",							
+		"tp_in_dir": "/tmp/customSepLoaderIn",				
+		"tp_out_dir": "/tmp/customSepLoaderOut",									
+		"data":[	
+			{
+				"type": "*attributes",				
+				"file_name": "Attributes",			
+				"fields": [
+					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "cgrates.org", "mandatory": true},
+					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "ATTR_;~*req.0", "mandatory": true},
+					{"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "*any"},
+					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "`*string:~*req.Destination:`;~*req.0"},
+					{"tag": "Path", "path": "Path", "type": "*variable", "value": "*req.Destination"},
+					{"tag": "Type", "path": "Type", "type": "*variable", "value": "*constant"},
+					{"tag": "Value", "path": "Value", "type": "*variable", "value": "~*req.1"},
 				],
 			},
 		],

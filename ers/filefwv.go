@@ -87,7 +87,7 @@ func (rdr *FWVFileER) Serve() (err error) {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
 	case time.Duration(-1):
-		return watchDir(rdr.rdrDir, rdr.processFile,
+		return utils.WatchDir(rdr.rdrDir, rdr.processFile,
 			utils.ERs, rdr.rdrExit)
 	default:
 		go func() {

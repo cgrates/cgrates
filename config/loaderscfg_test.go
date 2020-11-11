@@ -242,6 +242,21 @@ func TestEnabledCase2(t *testing.T) {
 	}
 }
 
+func TestLoaderCfgloadFromJsonCfg(t *testing.T) {
+	cfgJSONStr := `{
+			"loaders": [												
+	{
+		"enabled": true,
+		"run_delay": "1sa",										
+	},
+	],	
+}`
+	expected := "time: unknown unit \"sa\" in duration \"1sa\""
+	if _, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err == nil || err.Error() != expected {
+		t.Errorf("Expected error: %s ,received: %v", expected, err)
+	}
+}
+
 func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 			"loaders": [												
@@ -250,7 +265,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 		"enabled": false,									
 		"tenant": "~*req.Destination1",										
 		"dry_run": false,									
-		"run_delay": 0,										
+		"run_delay": "0",										
 		"lock_filename": ".cgr.lck",						
 		"caches_conns": ["*internal:*caches"],
 		"field_separator": ",",								
@@ -334,7 +349,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 		"enabled": false,									
 		"tenant": "~*req.Destination1",										
 		"dry_run": false,									
-		"run_delay": 1,										
+		"run_delay": "1",										
 		"lock_filename": ".cgr.lck",						
 		"caches_conns": ["*conn1"],
 		"field_separator": ",",								

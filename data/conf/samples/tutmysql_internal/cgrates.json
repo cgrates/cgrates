@@ -45,19 +45,19 @@
 
 "loaders": [
 	{
-		"id": "TeoLoader",									// identifier of the Loader
-		"enabled": false,									// starts as service: <true|false>.
-		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
-		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-		"lock_filename": ".cgr.lock",						// Filename containing concurrency lock in case of delayed processing
+		"id": "TeoLoader",									
+		"enabled": false,									
+		"dry_run": false,									
+		"run_delay": "0",										
+		"lock_filename": ".cgr.lock",						
 		"caches_conns": ["*internal"],
-		"field_separator": ",",								// separator used in case of csv files
-		"tp_in_dir": "/tmp/In",		// absolute path towards the directory where the CDRs are stored
-		"tp_out_dir": "/tmp/Out",	// absolute path towards the directory where processed CDRs will be moved
+		"field_separator": ",",								
+		"tp_in_dir": "/tmp/In",		
+		"tp_out_dir": "/tmp/Out",	
 		"data":[	
 			{
-				"type": "*resources",						// data source type
-				"file_name": "Resources.csv",				// file name in the tp_in_dir
+				"type": "*resources",						
+				"file_name": "Resources.csv",				
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
@@ -73,8 +73,8 @@
 				],
 			},
 			{
-				"type": "*stats",						// data source type
-				"file_name": "Stats.csv",				// file name in the tp_in_dir
+				"type": "*stats",						
+				"file_name": "Stats.csv",				
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
@@ -92,8 +92,8 @@
 				],
 			},
 			{
-				"type": "*thresholds",						// data source type
-				"file_name": "Thresholds.csv",				// file name in the tp_in_dir
+				"type": "*thresholds",						
+				"file_name": "Thresholds.csv",				
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
@@ -109,8 +109,8 @@
 				],
 			},
 			{
-				"type": "*routes",						// data source type
-				"file_name": "Routes.csv",				// file name in the tp_in_dir
+				"type": "*routes",						
+				"file_name": "Routes.csv",				
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
@@ -133,19 +133,19 @@
 		],
 	},
 	{
-		"id": "FilterLoader",									// identifier of the Loader
-		"enabled": false,									// starts as service: <true|false>.
-		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
-		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-		"lock_filename": ".cgr.lock",						// Filename containing concurrency lock in case of delayed processing
+		"id": "FilterLoader",									
+		"enabled": false,									
+		"dry_run": false,									
+		"run_delay": "0",										
+		"lock_filename": ".cgr.lock",						
 		"caches_conns": ["*internal"],
-		"field_separator": ",",								// separator used in case of csv files
-		"tp_in_dir": "/tmp/FilterIn",		// absolute path towards the directory where the CDRs are stored
-		"tp_out_dir": "/tmp/FilterOut",	// absolute path towards the directory where processed CDRs will be moved
+		"field_separator": ",",								
+		"tp_in_dir": "/tmp/FilterIn",		
+		"tp_out_dir": "/tmp/FilterOut",	
 		"data":[	
 			{
-				"type": "*filters",						// data source type
-				"file_name": "Filters.csv",				// file name in the tp_in_dir
+				"type": "*filters",						
+				"file_name": "Filters.csv",				
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},

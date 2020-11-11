@@ -193,9 +193,10 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 		t.Error(err)
 	}
 	eAP := &engine.AttributeProfile{
-		Tenant:   "cgrates.org",
-		ID:       "TestLoader2",
-		Contexts: []string{utils.ANY},
+		Tenant:    "cgrates.org",
+		ID:        "TestLoader2",
+		FilterIDs: []string{},
+		Contexts:  []string{utils.ANY},
 		Attributes: []*engine.Attribute{
 			{
 				Path:      utils.MetaReq + utils.NestingSep + "Subject",
@@ -210,7 +211,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 	if ap, err := ldr.dm.GetAttributeProfile("cgrates.org", "TestLoader2",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
+	} else if !reflect.DeepEqual(eAP, ap) {
 		t.Errorf("expecting: %s, \n received: %s",
 			utils.ToJSON(eAP), utils.ToJSON(ap))
 	}
@@ -1996,7 +1997,7 @@ func TestNewLoaderWithMultiFiles(t *testing.T) {
 			Type:  utils.MetaString,
 			Value: config.NewRSRParsersMustCompile("10", utils.INFIELD_SEP)},
 	}
-	ldr := NewLoader(engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil), ldrCfg, "", make(chan bool), nil, nil, nil)
+	ldr := NewLoader(engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil), ldrCfg, "", nil, nil, nil)
 
 	openRdrs := make(utils.StringSet)
 	for _, rdr := range ldr.rdrs {
