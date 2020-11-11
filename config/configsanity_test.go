@@ -1021,7 +1021,96 @@ func TestConfigSanityEventExporter(t *testing.T) {
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+}
 
+func TestConfigSanityCache(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.cacheCfg = &CacheCfg{
+		ReplicationConns: []string{"test"},
+	}
+	expected := "<CacheS> connection with id: <test> not defined"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.cacheCfg.ReplicationConns = []string{utils.MetaLocalHost}
+	expected = "<CacheS> unsuported transport <*json> for connection with ID: <*localhost>"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+}
+
+func TestConfigSanityDispatcherH(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.dispatcherHCfg = &DispatcherHCfg{
+		Enabled: true,
+		Hosts: map[string][]*DispatcherHRegistarCfg{
+			"hosts": {},
+		},
+	}
+
+	expected := "<DispatcherH> the register imterval needs to be bigger than 0"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.dispatcherHCfg.Hosts = nil
+	expected = "<DispatcherH> missing dispatcher host IDs"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.dispatcherHCfg.RegisterInterval = 2
+	cfg.dispatcherHCfg.Hosts = map[string][]*DispatcherHRegistarCfg{
+		"hosts": {
+			{
+				ID: "randomID",
+			},
+		},
+	}
+	expected = "<DispatcherH> unsupported transport <> for host <hosts:randomID>"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.dispatcherHCfg.Hosts["hosts"][0].RegisterTransport = utils.MetaJSON
+	expected = "<DispatcherH> missing dispatcher connection IDs"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.dispatcherHCfg.DispatchersConns = []string{utils.MetaInternal}
+	expected = "<DispatcherH> internal connection IDs are not supported"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.dispatcherHCfg.DispatchersConns = []string{utils.MetaLocalHost}
+	expected = "<DispatcherH> connection with id: <*localhost> unsupported transport <*json>"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.dispatcherHCfg.DispatchersConns = []string{"*conn1"}
+	expected = "<DispatcherH> connection with id: <*conn1> not defined"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.rpcConns = RpcConns{
+		utils.MetaLocalHost: {},
+		"*conn1":            {},
+	}
+	expected = "<DispatcherH> connection with id: <*conn1> needs to have only one host"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 }
 
 func TestConfigSanityStorDB(t *testing.T) {
@@ -1033,6 +1122,41 @@ func TestConfigSanityStorDB(t *testing.T) {
 		},
 	}
 	expected := "<stor_db> unsuported sslmode for storDB"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+}
+
+func TestConfigSanityAnalyzer(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.analyzerSCfg = &AnalyzerSCfg{
+		Enabled: true,
+		DBPath:  "/",
+	}
+
+	expected := "<AnalyzerS> unsuported index type: \"\""
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.analyzerSCfg.DBPath = "/inexistent/Path"
+	expected = "<AnalyzerS> nonexistent DB folder: \"/inexistent\""
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.analyzerSCfg.DBPath = utils.EmptyString
+
+	cfg.analyzerSCfg.IndexType = utils.MetaScorch
+	expected = "<AnalyzerS> the TTL needs to be bigger than 0"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.analyzerSCfg.TTL = 1
+	expected = "<AnalyzerS> the CleanupInterval needs to be bigger than 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
