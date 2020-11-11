@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
@@ -42,30 +40,6 @@ func MissingStructFields(s interface{}, mandatories []string) []string {
 		}
 	}
 	return missing
-}
-
-// Detects nonempty struct fields, s should be a pointer to a struct
-// Useful to not overwrite db fields with non defined params in api
-func NonemptyStructFields(s interface{}) map[string]interface{} {
-	fields := make(map[string]interface{})
-	for i := 0; i < reflect.ValueOf(s).Elem().NumField(); i++ {
-		fld := reflect.ValueOf(s).Elem().Field(i)
-		switch fld.Kind() {
-		case reflect.Bool:
-			fields[reflect.TypeOf(s).Elem().Field(i).Name] = fld.Bool()
-		case reflect.Int:
-			fieldVal := fld.Int()
-			if fieldVal != 0 {
-				fields[reflect.TypeOf(s).Elem().Field(i).Name] = fieldVal
-			}
-		case reflect.String:
-			fieldVal := fld.String()
-			if fieldVal != "" {
-				fields[reflect.TypeOf(s).Elem().Field(i).Name] = fieldVal
-			}
-		}
-	}
-	return fields
 }
 
 // MissingMapFields detects missing field values based on mandatory field names from a map[string]interface{}
@@ -88,158 +62,6 @@ func MissingMapFields(s map[string]interface{}, mandatories []string) []string {
 		}
 	}
 	return missing
-}
-
-// Converts a struct to map[string]string
-func ToMapStringString(in interface{}) map[string]string {
-	out := make(map[string]string)
-
-	v := reflect.ValueOf(in)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-		in = v.Interface()
-	}
-	typ := reflect.TypeOf(in)
-	for i := 0; i < v.NumField(); i++ {
-		// gets us a StructField
-		typField := typ.Field(i)
-		field := v.Field(i)
-		if field.Kind() == reflect.String {
-			out[typField.Name] = field.String()
-		}
-	}
-	return out
-}
-
-func GetMapExtraFields(in interface{}, extraFields string) map[string]string {
-	out := make(map[string]string)
-	v := reflect.ValueOf(in)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	field := v.FieldByName(extraFields)
-	if field.Kind() == reflect.Map {
-		keys := field.MapKeys()
-		for _, key := range keys {
-			out[key.String()] = field.MapIndex(key).String()
-		}
-	}
-	return out
-}
-
-func SetMapExtraFields(in interface{}, values map[string]string, extraFields string) {
-	v := reflect.ValueOf(in)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	efField := v.FieldByName(extraFields)
-	if efField.IsValid() && efField.Kind() == reflect.Map {
-		keys := efField.MapKeys()
-		for _, key := range keys {
-			if efField.MapIndex(key).String() != "" {
-				if val, found := values[key.String()]; found {
-					efField.SetMapIndex(key, reflect.ValueOf(val))
-				}
-			}
-		}
-	}
-	return
-}
-
-func FromMapStringString(m map[string]string, in interface{}) {
-	v := reflect.ValueOf(in)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	for fieldName, fieldValue := range m {
-		field := v.FieldByName(fieldName)
-		if field.IsValid() {
-			if field.Kind() == reflect.String {
-				if field.String() != "" && field.CanSet() {
-					field.SetString(fieldValue)
-				}
-			}
-		}
-	}
-	return
-}
-
-func FromMapStringInterface(m map[string]interface{}, in interface{}) error {
-	v := reflect.ValueOf(in)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	for fieldName, fieldValue := range m {
-		field := v.FieldByName(fieldName)
-		if field.IsValid() {
-			if !field.IsValid() || !field.CanSet() {
-				continue
-			}
-			structFieldType := field.Type()
-			val := reflect.ValueOf(fieldValue)
-			if structFieldType != val.Type() {
-				return errors.New("Provided value type didn't match obj field type")
-			}
-			field.Set(val)
-		}
-	}
-	return nil
-}
-
-// initial intent was to use it with *cgr_rpc but does not handle slice and structure fields
-func FromMapStringInterfaceValue(m map[string]interface{}, v reflect.Value) (interface{}, error) {
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	for fieldName, fieldValue := range m {
-		field := v.FieldByName(fieldName)
-		if field.IsValid() {
-			if !field.IsValid() || !field.CanSet() {
-				continue
-			}
-			val := reflect.ValueOf(fieldValue)
-			structFieldType := field.Type()
-			if structFieldType.Kind() == reflect.Ptr {
-				field.Set(reflect.New(field.Type().Elem()))
-				field = field.Elem()
-			}
-			structFieldType = field.Type()
-			if structFieldType != val.Type() {
-				return nil, fmt.Errorf("provided value type didn't match obj field type: %v vs %v (%v vs %v)", structFieldType, val.Type(), structFieldType.Kind(), val.Type().Kind())
-			}
-			field.Set(val)
-		}
-	}
-	return v.Interface(), nil
-}
-
-// Update struct with map fields, returns not matching map keys, s is a struct to be updated
-func UpdateStructWithStrMap(s interface{}, m map[string]string) []string { // Not tested and declared and used only here
-	notMatched := []string{}
-	for key, val := range m {
-		fld := reflect.ValueOf(s).Elem().FieldByName(key)
-		if fld.IsValid() {
-			switch fld.Kind() {
-			case reflect.Bool:
-				if valBool, err := strconv.ParseBool(val); err != nil {
-					notMatched = append(notMatched, key)
-				} else {
-					fld.SetBool(valBool)
-				}
-			case reflect.Int:
-				if valInt, err := strconv.ParseInt(val, 10, 64); err != nil {
-					notMatched = append(notMatched, key)
-				} else {
-					fld.SetInt(valInt)
-				}
-			case reflect.String:
-				fld.SetString(val)
-			}
-		} else {
-			notMatched = append(notMatched, key)
-		}
-	}
-	return notMatched
 }
 
 // UpdateStructWithIfaceMap will update struct fields with values coming from map

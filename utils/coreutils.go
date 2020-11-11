@@ -31,7 +31,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"math"
 	math_rand "math/rand"
 	"os"
@@ -134,10 +133,7 @@ func Sha1(attrs ...string) string {
 // helper function for uuid generation
 func GenUUID() string {
 	b := make([]byte, 16)
-	_, err := io.ReadFull(rand.Reader, b)
-	if err != nil {
-		log.Fatal(err)
-	}
+	io.ReadFull(rand.Reader, b)
 	b[6] = (b[6] & 0x0F) | 0x40
 	b[8] = (b[8] &^ 0x40) | 0x80
 	return fmt.Sprintf("%x-%x-%x-%x-%x", b[:4], b[4:6], b[6:8], b[8:10],
@@ -565,35 +561,6 @@ func FmtFieldWidth(fieldID, source string, width int, strip, padding string, man
 	return source, nil
 }
 
-// Returns the string representation of iface or error if not convertible
-func CastIfToString(iface interface{}) (strVal string, casts bool) {
-	switch iface.(type) {
-	case string:
-		strVal = iface.(string)
-		casts = true
-	case int:
-		strVal = strconv.Itoa(iface.(int))
-		casts = true
-	case int64:
-		strVal = strconv.FormatInt(iface.(int64), 10)
-		casts = true
-	case float64:
-		strVal = strconv.FormatFloat(iface.(float64), 'f', -1, 64)
-		casts = true
-	case bool:
-		strVal = strconv.FormatBool(iface.(bool))
-		casts = true
-	case []uint8:
-		var byteVal []byte
-		if byteVal, casts = iface.([]byte); casts {
-			strVal = string(byteVal)
-		}
-	default: // Maybe we are lucky and the value converts to string
-		strVal, casts = iface.(string)
-	}
-	return strVal, casts
-}
-
 func GetEndOfMonth(ref time.Time) time.Time {
 	if ref.IsZero() {
 		return time.Now()
@@ -686,13 +653,6 @@ func (slc Int64Slice) Swap(i, j int) {
 }
 func (slc Int64Slice) Less(i, j int) bool {
 	return slc[i] < slc[j]
-}
-
-// CapitalizeErrorMessage returns the capitalized version of an error, useful in APIs
-func CapitalizedMessage(errMessage string) (capStr string) {
-	capStr = strings.ToUpper(errMessage)
-	capStr = strings.Replace(capStr, " ", "_", -1)
-	return
 }
 
 func GetCGRVersion() (vers string, err error) {

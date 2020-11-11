@@ -852,51 +852,6 @@ func TestFmtFieldWidth(t *testing.T) {
 	}
 }
 
-func TestCastIfToString(t *testing.T) {
-	v := interface{}("somestr")
-	if sOut, casts := CastIfToString(v); !casts {
-		t.Error("Does not cast")
-	} else if sOut != "somestr" {
-		t.Errorf("Received: %+v", sOut)
-	}
-	v = interface{}(1)
-	if sOut, casts := CastIfToString(v); !casts {
-		t.Error("Does not cast")
-	} else if sOut != "1" {
-		t.Errorf("Received: %+v", sOut)
-	}
-	v = interface{}((int64)(1))
-	if sOut, casts := CastIfToString(v); !casts {
-		t.Error("Does not cast")
-	} else if sOut != "1" {
-		t.Errorf("Received: %+v", sOut)
-	}
-	v = interface{}(true)
-	if sOut, casts := CastIfToString(v); !casts {
-		t.Error("Does not cast")
-	} else if sOut != "true" {
-		t.Errorf("Received: %+v", sOut)
-	}
-	v = interface{}([]byte("test"))
-	if sOut, casts := CastIfToString(v); !casts {
-		t.Error("Does not cast")
-	} else if sOut != "test" {
-		t.Errorf("Received: %+v", sOut)
-	}
-	v = interface{}(1.2)
-	if sOut, casts := CastIfToString(v); !casts {
-		t.Error("Does not cast")
-	} else if sOut != "1.2" {
-		t.Errorf("Received: %+v", sOut)
-	}
-	//default
-	v = interface{}([]string{"test"})
-	if _, casts := CastIfToString(v); casts {
-		t.Error("Does cast")
-	}
-
-}
-
 func TestEndOfMonth(t *testing.T) {
 	eom := GetEndOfMonth(time.Date(2016, time.February, 5, 10, 1, 2, 3, time.UTC))
 	expected := time.Date(2016, time.February, 29, 23, 59, 59, 0, time.UTC)
@@ -1194,12 +1149,6 @@ func TestLess(t *testing.T) {
 	expected := false
 	if t1.Less(0, 1) != expected {
 		t.Error("Expected:", expected, ", received:", t1.Less(1, 2))
-	}
-}
-
-func TestCapitalizedMessage(t *testing.T) {
-	if capMsg := CapitalizedMessage(ServiceAlreadyRunning); capMsg != "SERVICE_ALREADY_RUNNING" {
-		t.Errorf("Received: <%s>", capMsg)
 	}
 }
 

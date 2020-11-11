@@ -49,29 +49,6 @@ func TestFlaot64SliceHasMember(t *testing.T) {
 		t.Error("Expecting: true, received: false")
 	}
 }
-func TestSliceWithoutMember(t *testing.T) {
-	rcv := SliceWithoutMember([]string{"1", "2", "3", "4", "5"}, "5")
-	sort.Strings(rcv)
-	eOut := []string{"1", "2", "3", "4"}
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-	rcv = SliceWithoutMember([]string{"1", "2", "3", "4", "5"}, "6")
-	sort.Strings(rcv)
-	eOut = []string{"1", "2", "3", "4", "5"}
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-}
-
-func TestSliceMemberHasPrefix(t *testing.T) {
-	if !SliceMemberHasPrefix([]string{"1", "*2", "3", "4", "5"}, "*") {
-		t.Error("Expecting: true, received: false")
-	}
-	if SliceMemberHasPrefix([]string{"1", "2", "3", "4", "5"}, "*") {
-		t.Error("Expecting: true, received: false")
-	}
-}
 
 func TestHasPrefixSlice(t *testing.T) {
 	if !HasPrefixSlice([]string{"1", "2", "3", "4", "5"}, "123") {
@@ -82,51 +59,12 @@ func TestHasPrefixSlice(t *testing.T) {
 	}
 }
 
-func TestAvg(t *testing.T) {
-	if rcv := Avg([]float64{}); rcv != 0 {
-		t.Errorf("Expecting: 0, received: %+v", rcv)
-	}
-	if rcv := Avg([]float64{1, 2, 3}); rcv != 2 {
-		t.Errorf("Expecting: 2, received: %+v", rcv)
-	}
-	if rcv := Avg([]float64{1.5, 2.75, 3.25}); rcv != 2.5 {
-		t.Errorf("Expecting: 2.5, received: %+v", rcv)
-	}
-}
-
-func TestAvgNegative(t *testing.T) {
-	if rcv := AvgNegative([]float64{}); rcv != -1 {
-		t.Errorf("Expecting: -1, received: %+v", rcv)
-	}
-	if rcv := AvgNegative([]float64{1, 2, 3}); rcv != 2 {
-		t.Errorf("Expecting: 2, received: %+v", rcv)
-	}
-	if rcv := Avg([]float64{1.5, 2.75, 3.25}); rcv != 2.5 {
-		t.Errorf("Expecting: 2.5, received: %+v", rcv)
-	}
-}
-
 func TestPrefixSliceItems(t *testing.T) {
 	rcv := PrefixSliceItems([]string{"1", "2", "3", "4", "5"}, "*")
 	sort.Strings(rcv)
 	eOut := []string{"*1", "*2", "*3", "*4", "*5"}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-}
-
-func TestStripSlicePrefix(t *testing.T) {
-	eSlc := make([]string, 0)
-	if retSlc := StripSlicePrefix([]string{}, 2); !reflect.DeepEqual(eSlc, retSlc) {
-		t.Errorf("expecting: %+v, received: %+v", eSlc, retSlc)
-	}
-	eSlc = []string{"1", "2"}
-	if retSlc := StripSlicePrefix([]string{"0", "1", "2"}, 1); !reflect.DeepEqual(eSlc, retSlc) {
-		t.Errorf("expecting: %+v, received: %+v", eSlc, retSlc)
-	}
-	eSlc = []string{}
-	if retSlc := StripSlicePrefix([]string{"0", "1", "2"}, 3); !reflect.DeepEqual(eSlc, retSlc) {
-		t.Errorf("expecting: %+v, received: %+v", eSlc, retSlc)
 	}
 }
 
