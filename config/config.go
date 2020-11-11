@@ -660,7 +660,9 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
 		for _, profile := range jsnLoaderCfg {
 			loadSCfgp := NewDfltLoaderSCfg()
-			loadSCfgp.loadFromJsonCfg(profile, cfg.templates, cfg.generalCfg.RSRSep)
+			if err = loadSCfgp.loadFromJsonCfg(profile, cfg.templates, cfg.generalCfg.RSRSep); err != nil {
+				return
+			}
 			cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use apend so the loaderS profile to be loaded from multiple files
 		}
 	}

@@ -970,7 +970,7 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 			Enabled:         utils.BoolPointer(false),
 			Tenant:          utils.StringPointer(""),
 			Dry_run:         utils.BoolPointer(false),
-			Run_delay:       utils.IntPointer(0),
+			Run_delay:       utils.StringPointer("0"),
 			Lock_filename:   utils.StringPointer(".cgr.lck"),
 			Caches_conns:    &[]string{utils.MetaInternal},
 			Field_separator: utils.StringPointer(","),

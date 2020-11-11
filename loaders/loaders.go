@@ -33,41 +33,30 @@ func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
 	connMgr *engine.ConnManager) (ldrS *LoaderService) {
 	ldrS = &LoaderService{ldrs: make(map[string]*Loader)}
 	for _, ldrCfg := range ldrsCfg {
-		if !ldrCfg.Enabled {
-			continue
+		if ldrCfg.Enabled {
+			ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, filterS, connMgr, ldrCfg.CacheSConns)
 		}
-		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, exitChan, filterS, connMgr, ldrCfg.CacheSConns)
 	}
 	return
 }
 
-// LoaderS is the Loader service handling independent Loaders
+// LoaderService is the Loader service handling independent Loaders
 type LoaderService struct {
 	sync.RWMutex
 	ldrs map[string]*Loader
 }
 
-// IsEnabled returns true if at least one loader is enabled
+// Enabled returns true if at least one loader is enabled
 func (ldrS *LoaderService) Enabled() bool {
-	for _, ldr := range ldrS.ldrs {
-		if ldr.enabled {
-			return true
-		}
-	}
-	return false
+	return len(ldrS.ldrs) != 0
 }
 
-func (ldrS *LoaderService) ListenAndServe(exitChan chan bool) (err error) {
-	ldrExitChan := make(chan struct{})
+func (ldrS *LoaderService) ListenAndServe(exitChan chan struct{}) (err error) {
 	for _, ldr := range ldrS.ldrs {
-		go ldr.ListenAndServe(ldrExitChan)
-	}
-	select { // exit on errors coming from server or any loader
-	case e := <-exitChan:
-		close(ldrExitChan)
-		exitChan <- e // put back for the others listening for shutdown request
-	case <-ldrExitChan:
-		exitChan <- true
+		if err = ldr.ListenAndServe(exitChan); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s-%s> error: <%s>", utils.LoaderS, ldr.ldrID, err.Error()))
+			return
+		}
 	}
 	return
 }
@@ -147,14 +136,13 @@ func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
 
 // Reload recreates the loaders map thread safe
 func (ldrS *LoaderService) Reload(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
-	timezone string, exitChan chan bool, filterS *engine.FilterS, connMgr *engine.ConnManager) {
+	timezone string, filterS *engine.FilterS, connMgr *engine.ConnManager) {
 	ldrS.Lock()
 	ldrS.ldrs = make(map[string]*Loader)
 	for _, ldrCfg := range ldrsCfg {
-		if !ldrCfg.Enabled {
-			continue
+		if ldrCfg.Enabled {
+			ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, filterS, connMgr, ldrCfg.CacheSConns)
 		}
-		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, exitChan, filterS, connMgr, ldrCfg.CacheSConns)
 	}
 	ldrS.Unlock()
 }

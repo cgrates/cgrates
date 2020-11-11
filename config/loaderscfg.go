@@ -120,7 +120,9 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[
 		self.DryRun = *jsnCfg.Dry_run
 	}
 	if jsnCfg.Run_delay != nil {
-		self.RunDelay = time.Duration(*jsnCfg.Run_delay) * time.Second
+		if self.RunDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Run_delay); err != nil {
+			return
+		}
 	}
 	if jsnCfg.Lock_filename != nil {
 		self.LockFileName = *jsnCfg.Lock_filename
@@ -218,6 +220,7 @@ func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]inte
 		utils.FieldSepCfg:     l.FieldSeparator,
 		utils.TpInDirCfg:      l.TpInDir,
 		utils.TpOutDirCfg:     l.TpOutDir,
+		utils.RunDelayCfg:     "0",
 	}
 	tenant := make([]string, len(l.Tenant))
 	for i, item := range l.Tenant {
@@ -233,8 +236,6 @@ func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]inte
 	}
 	if l.RunDelay != 0 {
 		initialMP[utils.RunDelayCfg] = l.RunDelay.String()
-	} else {
-		initialMP[utils.RunDelayCfg] = "0"
 	}
 	if l.CacheSConns != nil {
 		cacheSConns := make([]string, len(l.CacheSConns))

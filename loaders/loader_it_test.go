@@ -35,10 +35,11 @@ import (
 )
 
 var (
-	loaderCfgPath string
-	loaderCfgDIR  string //run tests for specific configuration
-	loaderCfg     *config.CGRConfig
-	loaderRPC     *rpc.Client
+	loaderCfgPath    string
+	loaderCfgDIR     string //run tests for specific configuration
+	loaderCfg        *config.CGRConfig
+	loaderRPC        *rpc.Client
+	customAttributes = "12012000001\t12018209998\n12012000002\t15512580598\n12012000007\t19085199998\n12012000008\t18622784999\n12012000010\t17329440866\n12012000011\t18623689800\n12012000012\t19082050951\n12012000014\t17329440866\n12012000015\t12018209999\n12012000031\t12018209999\n12012000032\t19082050951\n12012000033\t12018209998\n12012000034\t12018209998\n"
 
 	sTestsLoader = []func(t *testing.T){
 		testLoaderMakeFolders,
@@ -70,6 +71,10 @@ var (
 		testLoaderLoadAttributesForTemplateLoader,
 		testLoaderVerifyOutDirForTemplateLoader,
 		testLoaderCheckAttributes,
+		testLoaderResetDataDB,
+		testLoaderPopulateDataForCustomSep,
+		testLoaderCheckForCustomSep,
+		testLoaderVerifyOutDirForCustomSep,
 		testLoaderKillEngine,
 	}
 )
@@ -336,5 +341,61 @@ func testLoaderVerifyOutDirForTemplateLoader(t *testing.T) {
 func testLoaderKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func testLoaderPopulateDataForCustomSep(t *testing.T) {
+	fileName := utils.Attributes
+	tmpFilePath := path.Join("/tmp/", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(customAttributes), 0777); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.MkdirAll("/tmp/customSepLoaderIn", 0755); err != nil {
+		t.Fatal("Error creating folder: /tmp/customSepLoaderIn", err)
+	}
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/customSepLoaderIn", fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+func testLoaderCheckForCustomSep(t *testing.T) {
+	eAttrPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_12012000001",
+		Contexts:  []string{"*any"},
+		FilterIDs: []string{"*string:~*req.Destination:12012000001"},
+		Attributes: []*engine.Attribute{
+			{
+				FilterIDs: []string{},
+				Path:      "*req.Destination",
+				Type:      utils.META_CONSTANT,
+				Value:     config.NewRSRParsersMustCompile("12018209998", utils.INFIELD_SEP),
+			},
+		},
+	}
+	if *encoding == utils.MetaGOB { // gob threats empty slices as nil values
+		eAttrPrf.Attributes[0].FilterIDs = nil
+	}
+	var reply *engine.AttributeProfile
+	if err := loaderRPC.Call(utils.APIerSv1GetAttributeProfile,
+		&utils.TenantIDWithOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_12012000001"},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	eAttrPrf.Compile()
+	reply.Compile()
+	if !reflect.DeepEqual(eAttrPrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(reply))
+	}
+}
+
+func testLoaderVerifyOutDirForCustomSep(t *testing.T) {
+	time.Sleep(100 * time.Millisecond)
+	if outContent1, err := ioutil.ReadFile(path.Join("/tmp/customSepLoaderOut", utils.Attributes)); err != nil {
+		t.Error(err)
+	} else if customAttributes != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", customAttributes, string(outContent1))
 	}
 }

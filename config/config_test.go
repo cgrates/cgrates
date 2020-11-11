@@ -1499,18 +1499,18 @@ func TestLoadLoaderSCfgError(t *testing.T) {
 	cfgJSONStr := `{
 			"loaders": [												
 	{
-		"run_delay": "0",
+		"run_delay": 0,
 		},
 	],	
 }`
-	expected := "json: cannot unmarshal string into Go struct field LoaderJsonCfg.Run_delay of type int"
+	expected := "json: cannot unmarshal number into Go struct field LoaderJsonCfg.Run_delay of type string"
 	cgrConfig, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadLoaderSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadLoaderSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

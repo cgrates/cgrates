@@ -44,6 +44,7 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		exitChan:    exitChan,
 		connMgr:     connMgr,
+		stopChan:    make(chan struct{}),
 		anz:         anz,
 	}
 }
@@ -56,6 +57,7 @@ type LoaderService struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 	exitChan    chan bool
+	stopChan    chan struct{}
 
 	ldrs     *loaders.LoaderService
 	rpc      *v1.LoaderSv1
@@ -85,6 +87,9 @@ func (ldrs *LoaderService) Start() (err error) {
 	if !ldrs.ldrs.Enabled() {
 		return
 	}
+	if err = ldrs.ldrs.ListenAndServe(ldrs.stopChan); err != nil {
+		return
+	}
 	ldrs.rpc = v1.NewLoaderSv1(ldrs.ldrs)
 	if !ldrs.cfg.DispatcherSCfg().Enabled {
 		ldrs.server.RpcRegister(ldrs.rpc)
@@ -100,11 +105,16 @@ func (ldrs *LoaderService) Reload() (err error) {
 	dbchan := ldrs.dm.GetDMChan()
 	datadb := <-dbchan
 	dbchan <- datadb
+	close(ldrs.stopChan)
+	ldrs.stopChan = make(chan struct{})
 
 	ldrs.RLock()
 
 	ldrs.ldrs.Reload(datadb, ldrs.cfg.LoaderCfg(), ldrs.cfg.GeneralCfg().DefaultTimezone,
-		ldrs.exitChan, filterS, ldrs.connMgr)
+		filterS, ldrs.connMgr)
+	if err = ldrs.ldrs.ListenAndServe(ldrs.stopChan); err != nil {
+		return
+	}
 	ldrs.RUnlock()
 	return
 }
@@ -114,6 +124,7 @@ func (ldrs *LoaderService) Shutdown() (err error) {
 	ldrs.Lock()
 	ldrs.ldrs = nil
 	ldrs.rpc = nil
+	close(ldrs.stopChan)
 	<-ldrs.connChan
 	ldrs.Unlock()
 	return

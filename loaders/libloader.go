@@ -32,16 +32,8 @@ import (
 type LoaderData map[string]interface{}
 
 func (ld LoaderData) TenantID() string {
-	tnt := ld[utils.Tenant].(string)
-	prflID := ld[utils.ID].(string)
-	return utils.ConcatenatedKey(tnt, prflID)
-}
-
-func (ld LoaderData) TenantIDStruct() utils.TenantID {
-	return utils.TenantID{
-		Tenant: ld[utils.Tenant].(string),
-		ID:     ld[utils.ID].(string),
-	}
+	return utils.ConcatenatedKey(utils.IfaceAsString(ld[utils.Tenant]),
+		utils.IfaceAsString(ld[utils.ID]))
 }
 
 func (ld LoaderData) GetRateIDs() ([]string, error) {
@@ -145,7 +137,7 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	}
 	var cfgFieldIdx int
 	if cfgFieldIdx, err = strconv.Atoi(fldPath[len(fldPath)-1]); err != nil || len(cP.req) <= cfgFieldIdx {
-		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
+		return nil, fmt.Errorf("Ignoring record: %q with error : %+v", cP.req, err)
 	}
 	data = cP.req[cfgFieldIdx]
 
