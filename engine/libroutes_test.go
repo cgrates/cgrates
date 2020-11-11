@@ -19,6 +19,7 @@ package engine
 
 import (
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -669,6 +670,146 @@ func TestLibRoutesSortLoadDistribution(t *testing.T) {
 	if !reflect.DeepEqual(eIds, rcv) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
 			eIds, rcv)
+	}
+}
+
+func TestLibRoutesLCSameWeight(t *testing.T) {
+	sSpls := &SortedRoutes{}
+	sortedSlice := &SortedRoutes{}
+	for i := 0; i <= 100; i++ {
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+			utils.Cost:   0.1,
+			utils.Weight: 10.0,
+		}}
+		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
+		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+	}
+	sSpls.SortLeastCost()
+	// we expect to receive this in a random order
+	// the comparison logic is the following if the slice is the same as sorted slice we return error
+	if reflect.DeepEqual(sortedSlice, sSpls) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			sortedSlice, sSpls)
+	}
+}
+
+func TestLibRoutesHCSameWeight(t *testing.T) {
+	sSpls := &SortedRoutes{}
+	sortedSlice := &SortedRoutes{}
+	for i := 0; i <= 100; i++ {
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+			utils.Cost:   0.1,
+			utils.Weight: 10.0,
+		}}
+		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
+		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+	}
+	sSpls.SortHighestCost()
+	// we expect to receive this in a random order
+	// the comparison logic is the following if the slice is the same as sorted slice we return error
+	if reflect.DeepEqual(sortedSlice, sSpls) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			sortedSlice, sSpls)
+	}
+}
+
+func TestLibRoutesResAscSameWeight(t *testing.T) {
+	sSpls := &SortedRoutes{}
+	sortedSlice := &SortedRoutes{}
+	for i := 0; i <= 100; i++ {
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+			utils.ResourceUsage: 5.0,
+			utils.Weight:        10.0,
+		}}
+		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
+		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+	}
+	sSpls.SortResourceAscendent()
+	// we expect to receive this in a random order
+	// the comparison logic is the following if the slice is the same as sorted slice we return error
+	if reflect.DeepEqual(sortedSlice, sSpls) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			sortedSlice, sSpls)
+	}
+}
+
+func TestLibRoutesResDescSameWeight(t *testing.T) {
+	sSpls := &SortedRoutes{}
+	sortedSlice := &SortedRoutes{}
+	for i := 0; i <= 100; i++ {
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+			utils.ResourceUsage: 5.0,
+			utils.Weight:        10.0,
+		}}
+		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
+		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+	}
+	sSpls.SortResourceDescendent()
+	// we expect to receive this in a random order
+	// the comparison logic is the following if the slice is the same as sorted slice we return error
+	if reflect.DeepEqual(sortedSlice, sSpls) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			sortedSlice, sSpls)
+	}
+}
+
+func TestLibRoutesLoadDistSameWeight(t *testing.T) {
+	sSpls := &SortedRoutes{}
+	sortedSlice := &SortedRoutes{}
+	for i := 0; i <= 100; i++ {
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+			utils.Ratio:  4.0,
+			utils.Load:   3.0,
+			utils.Weight: 10.0,
+		}}
+		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
+		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+	}
+	sSpls.SortLoadDistribution()
+	// we expect to receive this in a random order
+	// the comparison logic is the following if the slice is the same as sorted slice we return error
+	if reflect.DeepEqual(sortedSlice, sSpls) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			sortedSlice, sSpls)
+	}
+}
+
+func TestLibRoutesQOSSameWeight(t *testing.T) {
+	sSpls := &SortedRoutes{}
+	sortedSlice := &SortedRoutes{}
+	for i := 0; i <= 100; i++ {
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+			utils.Weight:  10.0,
+			utils.MetaACD: -1.0,
+		}}
+		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
+		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+	}
+	sSpls.SortQOS([]string{utils.MetaACD})
+	// we expect to receive this in a random order
+	// the comparison logic is the following if the slice is the same as sorted slice we return error
+	if reflect.DeepEqual(sortedSlice, sSpls) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			sortedSlice, sSpls)
+	}
+}
+
+func TestLibRoutesSameWeight(t *testing.T) {
+	sSpls := &SortedRoutes{}
+	sortedSlice := &SortedRoutes{}
+	for i := 0; i <= 100; i++ {
+		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
+			utils.Weight: 10.0,
+		}}
+		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
+		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+	}
+	sSpls.SortWeight()
+	// we expect to receive this in a random order
+	// the comparison logic is the following if the slice is the same as sorted slice we return error
+	if reflect.DeepEqual(sortedSlice, sSpls) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			sortedSlice, sSpls)
 	}
 }
 
