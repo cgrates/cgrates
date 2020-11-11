@@ -45,7 +45,7 @@ type SliceDP struct {
 // String is part of engine.utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (cP *SliceDP) String() string {
-	return utils.ToJSON(cP)
+	return utils.ToJSON(cP.req)
 }
 
 // FieldAsInterface is part of engine.utils.DataProvider interface
