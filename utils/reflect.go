@@ -360,23 +360,6 @@ func IfaceAsSliceString(fld interface{}) (out []string, err error) {
 	return
 }
 
-// AsMapStringIface converts an item (mostly struct) as map[string]interface{}
-func AsMapStringIface(item interface{}) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
-	v := reflect.ValueOf(item)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	if v.Kind() != reflect.Struct { // Only structs for now
-		return nil, fmt.Errorf("AsMapStringIface only accepts structs; got %T", v)
-	}
-	typ := v.Type()
-	for i := 0; i < v.NumField(); i++ {
-		out[typ.Field(i).Name] = v.Field(i).Interface()
-	}
-	return out, nil
-}
-
 func GetUniformType(item interface{}) (interface{}, error) {
 	valItm := reflect.ValueOf(item)
 	switch valItm.Kind() { // convert evreting to float64

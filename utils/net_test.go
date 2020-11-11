@@ -94,3 +94,19 @@ func TestDecodeServerRequest(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", err, rcvErr)
 	}
 }
+
+func TestWriteServerResponse(t *testing.T) {
+	writer := bytes.NewBufferString(EmptyString)
+	var id *json.RawMessage
+	var result interface{} = "OK"
+	var errMessage interface{}
+	slsByte := []byte("10")
+	id = (*json.RawMessage)(&slsByte)
+
+	if err := WriteServerResponse(writer, id, result, errMessage); err != nil {
+		t.Errorf("Expecting: <nil>, received: <%+v>", err)
+	}
+	if writer.String() != "{\"id\":10,\"result\":\"OK\",\"error\":null}\n" {
+		t.Errorf("Expecting: <{\"id\":10,\"result\":\"OK\",\"error\":null}>, received: <%+v>", writer.String())
+	}
+}

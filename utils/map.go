@@ -23,46 +23,6 @@ import (
 	"strings"
 )
 
-// Converts map[string]string into map[string]interface{}
-func ConvertMapValStrIf(inMap map[string]string) map[string]interface{} {
-	outMap := make(map[string]interface{})
-	for field, val := range inMap {
-		outMap[field] = val
-	}
-	return outMap
-}
-
-// Mirrors key/val
-func MirrorMap(mapIn map[string]string) map[string]string {
-	mapOut := make(map[string]string, len(mapIn))
-	for key, val := range mapIn {
-		mapOut[val] = key
-	}
-	return mapOut
-}
-
-// Returns mising keys in a map
-func MissingMapKeys(inMap map[string]string, requiredKeys []string) []string {
-	missingKeys := []string{}
-	for _, reqKey := range requiredKeys {
-		if val, hasKey := inMap[reqKey]; !hasKey || val == EmptyString {
-			missingKeys = append(missingKeys, reqKey)
-		}
-	}
-	return missingKeys
-}
-
-// Return map keys
-func MapKeys(m map[string]string) []string {
-	n := make([]string, len(m))
-	i := 0
-	for k := range m {
-		n[i] = k
-		i++
-	}
-	return n
-}
-
 type StringMap map[string]bool
 
 func NewStringMap(s ...string) StringMap {
@@ -170,21 +130,6 @@ func (sm StringMap) GetOne() string {
 
 func (sm StringMap) HasKey(key string) (has bool) {
 	_, has = sm[key]
-	return
-}
-
-// Used to merge multiple maps (eg: output of struct having ExtraFields)
-func MergeMapsStringIface(mps ...map[string]interface{}) (outMp map[string]interface{}) {
-	outMp = make(map[string]interface{})
-	for i, mp := range mps {
-		if i == 0 {
-			outMp = mp
-			continue
-		}
-		for k, v := range mp {
-			outMp[k] = v
-		}
-	}
 	return
 }
 
