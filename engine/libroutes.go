@@ -65,6 +65,9 @@ func (sRoutes *SortedRoutes) RoutesWithParams() (sPs []string) {
 // SortWeight is part of sort interface, sort based on Weight
 func (sRoutes *SortedRoutes) SortWeight() {
 	sort.Slice(sRoutes.SortedRoutes, func(i, j int) bool {
+		if sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+			return utils.BoolGenerator().RandomBool()
+		}
 		return sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) > sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64)
 	})
 }
@@ -74,6 +77,9 @@ func (sRoutes *SortedRoutes) SortWeight() {
 func (sSpls *SortedRoutes) SortLeastCost() {
 	sort.Slice(sSpls.SortedRoutes, func(i, j int) bool {
 		if sSpls.SortedRoutes[i].SortingData[utils.Cost].(float64) == sSpls.SortedRoutes[j].SortingData[utils.Cost].(float64) {
+			if sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) == sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+				return utils.BoolGenerator().RandomBool()
+			}
 			return sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) > sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64)
 		}
 		return sSpls.SortedRoutes[i].SortingData[utils.Cost].(float64) < sSpls.SortedRoutes[j].SortingData[utils.Cost].(float64)
@@ -85,6 +91,9 @@ func (sSpls *SortedRoutes) SortLeastCost() {
 func (sSpls *SortedRoutes) SortHighestCost() {
 	sort.Slice(sSpls.SortedRoutes, func(i, j int) bool {
 		if sSpls.SortedRoutes[i].SortingData[utils.Cost].(float64) == sSpls.SortedRoutes[j].SortingData[utils.Cost].(float64) {
+			if sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) == sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+				return utils.BoolGenerator().RandomBool()
+			}
 			return sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) > sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64)
 		}
 		return sSpls.SortedRoutes[i].SortingData[utils.Cost].(float64) > sSpls.SortedRoutes[j].SortingData[utils.Cost].(float64)
@@ -116,6 +125,9 @@ func (sSpls *SortedRoutes) SortQOS(params []string) {
 
 		}
 		//in case that we have the same value for all params we sort base on weight
+		if sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) == sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+			return utils.BoolGenerator().RandomBool()
+		}
 		return sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) > sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64)
 	})
 }
@@ -125,6 +137,9 @@ func (sSpls *SortedRoutes) SortQOS(params []string) {
 func (sSpls *SortedRoutes) SortResourceAscendent() {
 	sort.Slice(sSpls.SortedRoutes, func(i, j int) bool {
 		if sSpls.SortedRoutes[i].SortingData[utils.ResourceUsage].(float64) == sSpls.SortedRoutes[j].SortingData[utils.ResourceUsage].(float64) {
+			if sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) == sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+				return utils.BoolGenerator().RandomBool()
+			}
 			return sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) > sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64)
 		}
 		return sSpls.SortedRoutes[i].SortingData[utils.ResourceUsage].(float64) < sSpls.SortedRoutes[j].SortingData[utils.ResourceUsage].(float64)
@@ -136,6 +151,9 @@ func (sSpls *SortedRoutes) SortResourceAscendent() {
 func (sSpls *SortedRoutes) SortResourceDescendent() {
 	sort.Slice(sSpls.SortedRoutes, func(i, j int) bool {
 		if sSpls.SortedRoutes[i].SortingData[utils.ResourceUsage].(float64) == sSpls.SortedRoutes[j].SortingData[utils.ResourceUsage].(float64) {
+			if sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) == sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+				return utils.BoolGenerator().RandomBool()
+			}
 			return sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) > sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64)
 		}
 		return sSpls.SortedRoutes[i].SortingData[utils.ResourceUsage].(float64) > sSpls.SortedRoutes[j].SortingData[utils.ResourceUsage].(float64)
@@ -149,6 +167,9 @@ func (sSpls *SortedRoutes) SortLoadDistribution() {
 		splIVal := ((sSpls.SortedRoutes[i].SortingData[utils.Ratio].(float64)+sSpls.SortedRoutes[i].SortingData[utils.Load].(float64))/sSpls.SortedRoutes[i].SortingData[utils.Ratio].(float64) - 1.0)
 		splJVal := ((sSpls.SortedRoutes[j].SortingData[utils.Ratio].(float64)+sSpls.SortedRoutes[j].SortingData[utils.Load].(float64))/sSpls.SortedRoutes[j].SortingData[utils.Ratio].(float64) - 1.0)
 		if splIVal == splJVal {
+			if sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) == sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+				return utils.BoolGenerator().RandomBool()
+			}
 			return sSpls.SortedRoutes[i].SortingData[utils.Weight].(float64) > sSpls.SortedRoutes[j].SortingData[utils.Weight].(float64)
 		}
 		return splIVal < splJVal

@@ -49,6 +49,7 @@ import (
 
 var (
 	startCGRateSTime time.Time
+	boolGenerator    *boolGen
 
 	rfc3339Rule                  = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+$`)
 	sqlRule                      = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
@@ -69,11 +70,17 @@ var (
 func init() {
 	startCGRateSTime = time.Now()
 	math_rand.Seed(startCGRateSTime.UnixNano())
+	boolGenerator = newBoolGen()
 }
 
 // GetStartTime return the Start time of engine (in UNIX format)
 func GetStartTime() string {
 	return startCGRateSTime.Format(time.UnixDate)
+}
+
+// BoolGenerator return the boolean generator
+func BoolGenerator() *boolGen {
+	return boolGenerator
 }
 
 func NewCounter(start, limit int64) *Counter {
@@ -1001,4 +1008,27 @@ func VerifyHash(hash string, dataKeys ...string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash),
 		[]byte(ConcatenatedKey(dataKeys...)))
 	return err == nil
+}
+
+//newBoolGen initialize an efficient boolean generator
+func newBoolGen() *boolGen {
+	return &boolGen{src: math_rand.NewSource(time.Now().UnixNano())}
+}
+
+//boolGen is an efficient boolean generator
+type boolGen struct {
+	src       math_rand.Source
+	cache     int64
+	remaining int
+}
+
+//RandomBool generate a random boolean
+func (b *boolGen) RandomBool() bool {
+	if b.remaining == 0 {
+		b.cache, b.remaining = b.src.Int63(), 63
+	}
+	result := b.cache&0x01 == 1
+	b.cache >>= 1
+	b.remaining--
+	return result
 }
