@@ -671,3 +671,39 @@ func TestLibRoutesSortLoadDistribution(t *testing.T) {
 			eIds, rcv)
 	}
 }
+
+func BenchmarkRouteSortCost(b *testing.B) {
+	sSpls := &SortedRoutes{
+		SortedRoutes: []*SortedRoute{
+			{
+				RouteID: "route1",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+				RouteParameters: "param1",
+			},
+			{
+				RouteID: "route2",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+				RouteParameters: "param2",
+			},
+			{
+				RouteID: "route3",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+				RouteParameters: "param3",
+			},
+		},
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		sSpls.SortLeastCost()
+	}
+
+}
