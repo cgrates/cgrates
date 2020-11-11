@@ -174,19 +174,20 @@ func (ldr *Loader) processFiles(loaderType, caching, loadOption string) (err err
 		}
 		csvReader := csv.NewReader(rdr)
 		csvReader.Comment = '#'
+		csvReader.Comma = rune(ldr.fieldSep[0])
 		ldr.rdrs[loaderType][fName] = &openedCSVFile{
 			fileName: fName, rdr: rdr, csvRdr: csvReader}
 		defer ldr.unreferenceFile(loaderType, fName)
-		// based on load option will store or remove the content
-		switch loadOption {
-		case utils.MetaStore:
-			if err = ldr.processContent(loaderType, caching); err != nil {
-				return
-			}
-		case utils.MetaRemove:
-			if err = ldr.removeContent(loaderType, caching); err != nil {
-				return
-			}
+	}
+	// based on load option will store or remove the content
+	switch loadOption {
+	case utils.MetaStore:
+		if err = ldr.processContent(loaderType, caching); err != nil {
+			return
+		}
+	case utils.MetaRemove:
+		if err = ldr.removeContent(loaderType, caching); err != nil {
+			return
 		}
 	}
 	return
