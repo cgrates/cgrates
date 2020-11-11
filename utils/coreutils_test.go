@@ -1511,3 +1511,10 @@ func TestIsURL(t *testing.T) {
 		}
 	}
 }
+
+func TestComputeHash(t *testing.T) {
+	_, err := ComputeHash("test1;test2;test3")
+	if err != nil {
+		t.Errorf("Expecting: <nil>, received: %+v", err)
+	}
+}
