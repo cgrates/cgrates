@@ -103,7 +103,7 @@ func TestGetIndexValueKey(t *testing.T) {
 	}
 }
 
-func TestRemoteHost(t *testing.T) {
+func TestRemoteHostSliceDP(t *testing.T) {
 	expected := utils.LocalAddr()
 	sliceDP := new(SliceDP)
 	if received := sliceDP.RemoteHost(); !reflect.DeepEqual(expected, received) {
@@ -111,7 +111,7 @@ func TestRemoteHost(t *testing.T) {
 	}
 }
 
-func TestStringReq(t *testing.T) {
+func TestStringReqSliceDP(t *testing.T) {
 	record := []string{"cgrates.org", "ATTR_1", "*sessions;*cdrs", "*string:~*req.Account:1007", "2014-01-14T00:00:00Z", "*req.Account", "*constant", "1001", "false", "10"}
 	sliceDP := &SliceDP{
 		req:   record,
@@ -123,7 +123,7 @@ func TestStringReq(t *testing.T) {
 	}
 }
 
-func TestFieldAsInterface(t *testing.T) {
+func TestFieldAsInterfaceSliceDP(t *testing.T) {
 	pth := []string{"Tenant"}
 	slicedp := SliceDP{
 		req:   []string{"cgrates.org"},

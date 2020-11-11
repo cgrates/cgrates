@@ -29,7 +29,10 @@ import (
 
 // NewfwvProvider constructs a utils.DataProvider
 func NewFWVProvider(record string) (dP utils.DataProvider) {
-	dP = &FWVProvider{req: record, cache: utils.MapStorage{}}
+	dP = &FWVProvider{
+		req:   record,
+		cache: utils.MapStorage{},
+	}
 	return
 }
 
@@ -42,7 +45,7 @@ type FWVProvider struct {
 // String is part of engine.utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (fP *FWVProvider) String() string {
-	return utils.ToJSON(fP)
+	return utils.ToJSON(fP.req)
 }
 
 // FieldAsInterface is part of engine.utils.DataProvider interface
