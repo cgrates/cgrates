@@ -20,6 +20,7 @@ package config
 
 import (
 	"path"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -434,5 +435,88 @@ func TestXMLIndexes(t *testing.T) {
 		t.Error(err)
 	} else if data != "37" {
 		t.Errorf("expecting: 37, received: <%s>", data)
+	}
+}
+
+func TestFieldAsStringXMLEmptyPath(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
+	if err != nil {
+		t.Error(err)
+	}
+	dP := &XmlProvider{
+		req:     doc,
+		cdrPath: []string{},
+		cache:   utils.MapStorage{},
+	}
+	if _, err := dP.FieldAsString(dP.cdrPath); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound, err)
+	}
+}
+
+func TestRemoteHostXML(t *testing.T) {
+	expected := utils.LocalAddr()
+	dp := new(XmlProvider)
+	if received := dp.RemoteHost(); !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expected %+v, received %+v", expected, received)
+	}
+}
+
+func TestStringXML(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
+	if err != nil {
+		t.Error(err)
+	}
+	dP := &XmlProvider{
+		req:     doc,
+		cdrPath: []string{},
+		cache:   utils.MapStorage{},
+	}
+	expected := utils.EmptyString
+	if received := dP.String(); !reflect.DeepEqual(received, expected) {
+		t.Errorf("Expected %+v, received %+v", expected, received)
+	}
+}
+
+func TestFieldAsInterfaceCache(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
+	if err != nil {
+		t.Error(err)
+	}
+	dP := &XmlProvider{
+		req:     doc,
+		cdrPath: []string{},
+		cache: utils.MapStorage{
+			"complete-success-notification": "randomValue",
+		},
+	}
+	expected := "randomValue"
+	if received, err := dP.FieldAsString([]string{"complete-success-notification"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(received, expected) {
+		t.Errorf("Expected %+v, received %+v", expected, received)
+	}
+}
+
+func TestFieldAsInterfaceInvalidSyntax(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
+	if err != nil {
+		t.Error(err)
+	}
+	dP := NewXmlProvider(doc, utils.HierarchyPath([]string{}))
+	expected := "strconv.Atoi: parsing \"09]\": invalid syntax"
+	if _, err := dP.FieldAsString([]string{"complete-success-notification[09]]"}); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, err)
+	}
+}
+
+func TestFieldAsInterfaceInvalidSyntax1(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
+	if err != nil {
+		t.Error(err)
+	}
+	dP := NewXmlProvider(doc, utils.HierarchyPath([]string{}))
+	expected := "filter rule <[0> needs to end in ]"
+	if _, err := dP.FieldAsString([]string{"complete-success-notification[0"}); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, err)
 	}
 }
