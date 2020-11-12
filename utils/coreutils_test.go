@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/cgrates/rpcclient"
 )
 
@@ -1512,9 +1514,74 @@ func TestIsURL(t *testing.T) {
 	}
 }
 
-func TestComputeHash(t *testing.T) {
+func TestComputeHashError(t *testing.T) {
 	_, err := ComputeHash("test1;test2;test3")
 	if err != nil {
 		t.Errorf("Expecting: <nil>, received: %+v", err)
+	}
+}
+
+func TestComputeHashMatch(t *testing.T) {
+	lns, _ := ComputeHash("test1;test2;test3")
+	if err := VerifyHash(lns, "test1;test2;test3"); err != true {
+		t.Errorf("Expected <true> received: <%v>", err)
+	}
+}
+
+func TestVerifyHash(t *testing.T) {
+	lns, _ := ComputeHash("test1;test2;test3")
+	lns2, _ := ComputeHash("test1;test2;test3")
+	verify1 := VerifyHash(lns, "test1;test2;test3")
+	verify2 := bcrypt.CompareHashAndPassword([]byte(lns2), []byte(ConcatenatedKey("test1;test2;test3")))
+	verify3 := false
+	if verify2 == nil {
+		verify3 = true
+	}
+	if !reflect.DeepEqual(verify3, verify1) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", verify3, verify1)
+	}
+
+}
+
+func TestAESEncryptErrorNil(t *testing.T) {
+	encKey := "6368616e676520746869732070617373776f726420746f206120736563726574"
+	_, err := AESEncrypt("exampleText", encKey)
+	if err != nil {
+		t.Errorf("Expecting: <nil>, received: <%+v>", err)
+	}
+}
+
+func TestAESEncryptError1(t *testing.T) {
+	encKey := "1"
+	_, err := AESEncrypt("exampleText", encKey)
+	if err == nil || err.Error() != "crypto/aes: invalid key size 0" {
+		t.Errorf("Expecting error: <crypto/aes: invalid key size 0>, received: <%+v>", err)
+	}
+}
+
+func TestAESDecryptErrorNil(t *testing.T) {
+	encKey := "6368616e676520746869732070617373776f726420746f206120736563726574"
+	eString, _ := AESEncrypt("exampleText", encKey)
+	_, err := AESDecrypt(eString, encKey)
+	if err != nil {
+		t.Errorf("Expecting: <nil>, received: <%+v>", err)
+	}
+}
+
+func TestAESDecryptError1(t *testing.T) {
+	encKey := "1"
+	eString, _ := AESEncrypt("exampleText", encKey)
+	_, err := AESDecrypt(eString, encKey)
+	if err == nil || err.Error() != "crypto/aes: invalid key size 0" {
+		t.Errorf("Expecting: <crypto/aes: invalid key size 0>, received: <%+v>", err)
+	}
+}
+
+func TestAESEncryptDecrypt(t *testing.T) {
+	encKey := "6368616e676520746869732070617373776f726420746f206120736563726574"
+	eString, _ := AESEncrypt("exampleText", encKey)
+	dString, _ := AESDecrypt(eString, encKey)
+	if !reflect.DeepEqual("exampleText", dString) {
+		t.Errorf("Expecting: <exampleText>, received: <%+v>", dString)
 	}
 }

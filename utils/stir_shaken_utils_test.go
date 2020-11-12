@@ -23,6 +23,7 @@ import (
 	"math"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestRemoveWhiteSpaces(t *testing.T) {
@@ -89,5 +90,26 @@ func TestNewECDSAPubKeyFromReader(t *testing.T) {
 	r := bytes.NewBuffer([]byte("invalid certificate"))
 	if _, err := NewECDSAPubKeyFromReader(r); err == nil {
 		t.Errorf("Expected error")
+	}
+}
+
+func TestNewECDSAPrvKeyError(t *testing.T) {
+	_, err := NewECDSAPrvKey("string", time.Duration(10))
+	if err == nil || err.Error() != "open string: no such file or directory" {
+		t.Errorf("Expected <open string: no such file or directory>, received <%v>", err)
+	}
+}
+
+func TestNewECDSAPubKeyError(t *testing.T) {
+	_, err := NewECDSAPubKey("string", time.Duration(10))
+	if err == nil || err.Error() != "open string: no such file or directory" {
+		t.Errorf("Expected <open string: no such file or directory>, received <%v>", err)
+	}
+}
+
+func TestGetReaderFromPathError(t *testing.T) {
+	_, err := GetReaderFromPath("string", time.Duration(10))
+	if err == nil || err.Error() != "open string: no such file or directory" {
+		t.Errorf("Expected <open string: no such file or directory>, received <%v>", err)
 	}
 }

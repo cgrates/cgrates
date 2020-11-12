@@ -69,3 +69,10 @@ func TestRPCObjectPointer(t *testing.T) {
 		}
 	*/
 }
+
+func TestGetRpcParamsError(t *testing.T) {
+	_, err := GetRpcParams("exampleTest")
+	if err == nil || err.Error() != "NOT_FOUND" {
+		t.Errorf("Expected <NOT_FOUND>, received <%+v>", err)
+	}
+}
