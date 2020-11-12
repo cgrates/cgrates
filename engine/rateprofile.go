@@ -73,7 +73,7 @@ type Rate struct {
 	Blocker         bool     // RateBlocker will make this rate recurrent, deactivating further intervals
 	IntervalRates   []*IntervalRate
 
-	sched cron.Schedule // compiled version of activation time as cron.Schedule interface
+	sched cron.Schedule // compiled version of activation times as cron.Schedule interface
 	uID   string
 }
 
@@ -88,7 +88,9 @@ type IntervalRate struct {
 	Increment     time.Duration // RateIncrement
 	Value         float64       // RateValue
 
-	val *utils.Decimal // cached version of the Decimal
+	decVal  *utils.Decimal // cached version of the Value converted to Decimal for operations
+	decUnit *utils.Decimal // cached version of the Unit converted to Decimal for operations
+	decIcrm *utils.Decimal // cached version of the Increment converted to Decimal for operations
 }
 
 func (rt *Rate) Compile() (err error) {
@@ -98,6 +100,11 @@ func (rt *Rate) Compile() (err error) {
 	}
 	if rt.sched, err = cron.ParseStandard(aTime); err != nil {
 		return
+	}
+	for _, iRt := range rt.IntervalRates {
+		iRt.decVal = utils.NewDecimalFromFloat64(iRt.Value)
+		iRt.decUnit = utils.NewDecimalFromUint64(uint64(iRt.Unit))
+		iRt.decIcrm = utils.NewDecimalFromUint64(uint64(iRt.Increment))
 	}
 	return
 }
@@ -126,6 +133,21 @@ func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time
 	return nil, utils.ErrMaxIterationsReached
 }
 
+// DecimalValue exports the decVal variable
+func (rIt *IntervalRate) DecimalValue() *utils.Decimal {
+	return rIt.decVal
+}
+
+// DecimalUnit exports the decUnit variable
+func (rIt *IntervalRate) DecimalUnit() *utils.Decimal {
+	return rIt.decUnit
+}
+
+// DecimalIncrement exports the decUnit variable
+func (rIt *IntervalRate) DecimalIncrement() *utils.Decimal {
+	return rIt.decIcrm
+}
+
 // RateProfileWithOpts is used in replicatorV1 for dispatcher
 type RateProfileWithOpts struct {
 	*RateProfile
@@ -138,16 +160,16 @@ type RateSInterval struct {
 	Increments     []*RateSIncrement
 	CompressFactor int64
 
-	cost *utils.Decimal // unexported total cost
+	cost *utils.Decimal // unexported total interval cost
 }
 
 type RateSIncrement struct {
-	Rate              *Rate
+	UsageStart        time.Duration
 	Usage             time.Duration
+	Rate              *Rate
 	IntervalRateIndex int
 	CompressFactor    int64
 
-	Cost float64
 	cost *utils.Decimal // unexported total increment cost
 }
 
@@ -165,6 +187,15 @@ func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
 	return
 }
 
+func (rIv *RateSInterval) Cost() *utils.Decimal {
+	if rIv.cost == nil {
+		for _, incrm := range rIv.Increments {
+			rIv.cost = utils.NewDecimal().Add(rIv.cost, incrm.Cost())
+		}
+	}
+	return rIv.cost
+}
+
 // CompressEquals compares two RateSIncrement for Compress function
 func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
 	if rIcr.Rate.UID() != rIcr2.Rate.UID() {
@@ -173,11 +204,33 @@ func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
 	if rIcr.Usage != rIcr2.Usage {
 		return
 	}
-	if rIcr.Cost != rIcr2.Cost {
-		return
-	}
 	if rIcr.CompressFactor != rIcr2.CompressFactor {
 		return
 	}
 	return true
+}
+
+// Cost computes the Cost on RateSIncrement
+func (rIcr *RateSIncrement) Cost() *utils.Decimal {
+	if rIcr.cost == nil {
+		icrRt := rIcr.Rate.IntervalRates[rIcr.IntervalRateIndex]
+		icrCost := icrRt.DecimalValue()
+		if icrRt.Unit != icrRt.Increment {
+			icrCost = utils.NewDecimal().Divide(
+				utils.NewDecimal().Multiply(icrCost, icrRt.DecimalIncrement()),
+				icrRt.DecimalUnit())
+		}
+		rIcr.cost = utils.NewDecimal().Multiply(
+			icrCost,
+			utils.NewDecimalFromUint64(uint64(rIcr.CompressFactor)))
+	}
+	return rIcr.cost
+}
+
+// CostForIntervals sums the costs for all intervals
+func CostForIntervals(rtIvls []*RateSInterval) (cost *utils.Decimal) {
+	for _, rtIvl := range rtIvls {
+		cost = utils.NewDecimal().Add(cost, rtIvl.Cost())
+	}
+	return
 }

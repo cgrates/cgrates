@@ -3091,6 +3091,9 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 			return nil, err
 		}
 	}
+	if err = rpp.Compile(); err != nil {
+		return nil, err
+	}
 	if cacheWrite {
 		if errCh := Cache.Set(utils.CacheRateProfiles, tntID, rpp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {

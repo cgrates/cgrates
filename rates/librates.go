@@ -177,25 +177,72 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 	return
 }
 
-// costWithRates will give out the cost projection for the given orderedRates and usage
-func costWithRates(rts []*orderedRate, usage time.Duration) (rtIvls []*engine.RateSInterval, err error) {
-	//var usageSIdx time.Duration // usageStart for one rate
+// computeRateSIntervals will give out the cost projection for the given orderedRates and usage
+func computeRateSIntervals(rts []*orderedRate, usage time.Duration) (rtIvls []*engine.RateSInterval, err error) {
+	var rtUsageSIdx time.Duration // rtUsageSIdx for one rate
 	for i, rt := range rts {
-		var usageEIdx time.Duration
-		if i != len(rts)-1 {
-			usageEIdx = rts[i+1].Duration
+		isLastRt := i == len(rts)-1
+		var rtUsageEIdx time.Duration
+		if !isLastRt {
+			rtUsageEIdx = rts[i+1].Duration
+		} else {
+			rtUsageEIdx = usage
 		}
-		var iRts []*engine.IntervalRate
-		for _, iRt := range rt.IntervalRates {
-			if usageEIdx == 0 || iRt.IntervalStart < usageEIdx {
-				iRts = append(iRts, iRt)
+		var rIcmts []*engine.RateSIncrement
+		iRtUsageSIdx := rtUsageSIdx
+		iRtUsageEIdx := rtUsageEIdx
+		for j, iRt := range rt.IntervalRates {
+			if iRtUsageSIdx >= rtUsageEIdx { // charged enough for interval
+				break
 			}
+			// make sure we bill from start
+			if j == 0 && iRt.IntervalStart > iRtUsageSIdx {
+				return nil, fmt.Errorf("intervalStart for rate: <%s> higher than usage: %v",
+					rt.UID(), iRtUsageSIdx)
+			}
+			isLastIRt := j == len(rt.IntervalRates)-1
+			if iRt.IntervalStart > iRtUsageSIdx ||
+				(!isLastIRt && rt.IntervalRates[j+1].IntervalStart <= iRtUsageSIdx) {
+				break // the rates should be already ordered, break here
+			}
+			if !isLastIRt {
+				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart
+			} else {
+				iRtUsageEIdx = rtUsageEIdx
+			}
+			iRtUsage := iRtUsageEIdx - iRtUsageSIdx
+			if iRtUsageEIdx == time.Duration(0) {
+				return nil, fmt.Errorf("zero usage to be charged with rate: <%s>", rt.UID())
+			}
+			if iRt.Increment == time.Duration(0) {
+				return nil, fmt.Errorf("zero increment to be charged within rate: <%s>", rt.UID())
+			}
+			intUsage := int64(iRtUsage)
+			intIncrm := int64(iRt.Increment)
+			cmpFactor := intUsage / intIncrm
+			if intUsage%intIncrm != 0 {
+				cmpFactor += 1 // int division has used math.Floor, need Ceil
+			}
+			rIcrm := &engine.RateSIncrement{
+				UsageStart:        iRtUsageSIdx,
+				Usage:             iRtUsage,
+				Rate:              rt.Rate,
+				IntervalRateIndex: j,
+				CompressFactor:    cmpFactor,
+			}
+			rIcmts = append(rIcmts, rIcrm)
+			iRtUsageSIdx += iRtUsage
+
 		}
-		//fmt.Printf("iRts: %+v\n", iRts)
-		if usageEIdx == 0 {
+		rtIvls = append(rtIvls,
+			&engine.RateSInterval{
+				UsageStart:     rtUsageSIdx,
+				Increments:     rIcmts,
+				CompressFactor: 1})
+		if iRtUsageSIdx >= usage { // charged enough for the usage
 			break
 		}
-		//usageSIdx = usageEIdx // continue for the next interval
+		rtUsageSIdx = rtUsageEIdx // continue for the next interval
 	}
 	return
 }

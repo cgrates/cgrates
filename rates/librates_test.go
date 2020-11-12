@@ -1575,7 +1575,7 @@ func TestOrderRatesOnIntervalStartLowerThanEndIdx(t *testing.T) {
 	}
 }
 
-func TestCostWithRates(t *testing.T) {
+func TestComputeRateSIntervals(t *testing.T) {
 	rt0 := &engine.Rate{
 		ID: "RATE0",
 		IntervalRates: []*engine.IntervalRate{
@@ -1627,9 +1627,49 @@ func TestCostWithRates(t *testing.T) {
 		},
 	}
 
-	//eRtIvls := []*engine.RateSInterval{}
-	var eRtIvls []*engine.RateSInterval
-	if rtIvls, err := costWithRates(rts, time.Duration(130*time.Second)); err != nil {
+	eRtIvls := []*engine.RateSInterval{
+		{
+			UsageStart: time.Duration(0),
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Duration(0),
+					Usage:             time.Duration(time.Minute),
+					Rate:              rt0,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+				},
+				{
+					UsageStart:        time.Duration(time.Minute),
+					Usage:             time.Duration(30 * time.Second),
+					Rate:              rt0,
+					IntervalRateIndex: 1,
+					CompressFactor:    30,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Duration(90 * time.Second),
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Duration(90 * time.Second),
+					Usage:             time.Duration(30 * time.Second),
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    30,
+				},
+				{
+					UsageStart:        time.Duration(2 * time.Minute),
+					Usage:             time.Duration(10 * time.Second),
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					CompressFactor:    10,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+	if rtIvls, err := computeRateSIntervals(rts, time.Duration(130*time.Second)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRtIvls, rtIvls) {
 		t.Errorf("expecting: %+v, received: %+v", eRtIvls, rtIvls)

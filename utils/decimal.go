@@ -26,6 +26,10 @@ func NewDecimalFromFloat64(x float64) *Decimal {
 	return &Decimal{new(decimal.Big).SetFloat64(x)}
 }
 
+func NewDecimalFromUint64(x uint64) *Decimal {
+	return &Decimal{new(decimal.Big).SetUint64(x)}
+}
+
 func NewDecimal() *Decimal {
 	return &Decimal{new(decimal.Big)}
 }
@@ -41,15 +45,24 @@ func (d *Decimal) Float64() (f float64) {
 }
 
 func (d *Decimal) MarshalJSON() ([]byte, error) {
-	if d.Big == nil {
-		d.Big = new(decimal.Big)
-	}
 	return d.Big.MarshalText()
 }
 
 func (d *Decimal) UnmarshalJSON(data []byte) error {
-	if d.Big == nil {
-		d.Big = new(decimal.Big)
-	}
 	return d.Big.UnmarshalJSON(data)
+}
+
+func (d *Decimal) Divide(x, y *Decimal) *Decimal {
+	d.Big.Quo(x.Big, y.Big)
+	return d
+}
+
+func (d *Decimal) Multiply(x, y *Decimal) *Decimal {
+	d.Big.Mul(x.Big, y.Big)
+	return d
+}
+
+func (d *Decimal) Add(x, y *Decimal) *Decimal {
+	d.Big.Add(x.Big, y.Big)
+	return d
 }
