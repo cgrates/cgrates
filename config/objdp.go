@@ -28,7 +28,10 @@ import (
 
 //NewObjectDP constructs a utils.DataProvider
 func NewObjectDP(obj interface{}) (dP utils.DataProvider) {
-	dP = &ObjectDP{obj: obj, cache: make(map[string]interface{})}
+	dP = &ObjectDP{
+		obj:   obj,
+		cache: make(map[string]interface{}),
+	}
 	return
 }
 
