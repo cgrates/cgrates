@@ -94,9 +94,7 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
 		var nmIt utils.NMInterface
-		if nmIt, err = nm.Field(path); err != nil {
-			return
-		}
+		nmIt, _ = nm.Field(path) // this should never return error cause we get the path from the order
 		nmItm, isNMItem := nmIt.(*NMItem)
 		if !isNMItem {
 			return nil, fmt.Errorf("value: %+v is not []*NMItem", path)
