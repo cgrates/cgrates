@@ -465,3 +465,90 @@ func TestRateProfileRunTimesPassingActivationTIme(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedTime, rTimes)
 	}
 }
+
+func TestCostForIntervals(t *testing.T) {
+	rt0 := &Rate{
+		ID: "RATE0",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: time.Duration(0),
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Minute),
+				Value:         2.4,
+			},
+			{
+				IntervalStart: time.Duration(60 * time.Second),
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Second),
+				Value:         2.4,
+			},
+		},
+	}
+	rt0.Compile()
+	rt1 := &Rate{
+		ID: "RATE1",
+		IntervalRates: []*IntervalRate{
+			{
+
+				IntervalStart: time.Duration(0),
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Second),
+				Value:         1.2,
+			},
+			{
+
+				IntervalStart: time.Duration(2 * time.Minute),
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Second),
+				Value:         0.6,
+			},
+		},
+	}
+	rt1.Compile()
+	rtIvls := []*RateSInterval{
+		{
+			UsageStart: time.Duration(0),
+			Increments: []*RateSIncrement{
+				{
+					UsageStart:        time.Duration(0),
+					Usage:             time.Duration(time.Minute),
+					Rate:              rt0,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+				},
+				{
+					UsageStart:        time.Duration(time.Minute),
+					Usage:             time.Duration(30 * time.Second),
+					Rate:              rt0,
+					IntervalRateIndex: 1,
+					CompressFactor:    30,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Duration(90 * time.Second),
+			Increments: []*RateSIncrement{
+				{
+					UsageStart:        time.Duration(90 * time.Second),
+					Usage:             time.Duration(30 * time.Second),
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    30,
+				},
+				{
+					UsageStart:        time.Duration(2 * time.Minute),
+					Usage:             time.Duration(10 * time.Second),
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					CompressFactor:    10,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+	eDcml := utils.NewDecimalFromFloat64(4.3)
+	if cost := CostForIntervals(rtIvls); cost.Float64() != eDcml.Float64() {
+		t.Errorf("eDcml: %f, received: %f\n", eDcml.Float64(), cost.Float64())
+	}
+}

@@ -189,6 +189,7 @@ func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
 
 func (rIv *RateSInterval) Cost() *utils.Decimal {
 	if rIv.cost == nil {
+		rIv.cost = utils.NewDecimal()
 		for _, incrm := range rIv.Increments {
 			rIv.cost = utils.NewDecimal().Add(rIv.cost, incrm.Cost())
 		}
@@ -229,6 +230,7 @@ func (rIcr *RateSIncrement) Cost() *utils.Decimal {
 
 // CostForIntervals sums the costs for all intervals
 func CostForIntervals(rtIvls []*RateSInterval) (cost *utils.Decimal) {
+	cost = utils.NewDecimal()
 	for _, rtIvl := range rtIvls {
 		cost = utils.NewDecimal().Add(cost, rtIvl.Cost())
 	}

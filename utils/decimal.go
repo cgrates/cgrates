@@ -66,3 +66,7 @@ func (d *Decimal) Add(x, y *Decimal) *Decimal {
 	d.Big.Add(x.Big, y.Big)
 	return d
 }
+
+func (d *Decimal) Compare(y *Decimal) int {
+	return d.Big.Cmp(y.Big)
+}
