@@ -421,3 +421,91 @@ func BenchmarkOrderdNavigableMapSet2(b *testing.B) {
 // 		}
 // 	}
 // }
+
+func TestNMAsMapInterface(t *testing.T) {
+	nM := utils.NewOrderedNavigableMap()
+	if cgrEv := NMAsMapInterface(nM, utils.NestingSep); !reflect.DeepEqual(cgrEv, map[string]interface{}{}) {
+		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(map[string]interface{}{}), utils.ToJSON(cgrEv))
+	}
+
+	path := utils.PathItems{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "ThirdLevel"}, {Field: "Fld1"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Val1",
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "SecondLevel2"}, {Field: "Field2"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "attrVal1",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute1"},
+	}, &NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Value2",
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "Field3"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Value3",
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "Field5"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Value5",
+	}, &NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "attrVal5",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute5"},
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = utils.PathItems{{Field: "FirstLevel2"}, {Field: "Field6"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Value6",
+		Config: &FCTemplate{Tag: "NewBranchTest",
+			NewBranch: true},
+	}, &NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "attrVal6",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute6"},
+	}}); err != nil {
+		t.Error(err)
+	}
+
+	path = utils.PathItems{{Field: "Field4"}}
+	if _, err := nM.Set(&utils.FullPath{Path: path.String(), PathItems: path}, &utils.NMSlice{&NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "Val4",
+	}, &NMItem{
+		Path: strings.Split(path.String(), utils.NestingSep),
+		Data: "attrVal2",
+		Config: &FCTemplate{Tag: "AttributeTest",
+			AttributeID: "attribute2"},
+	}}); err != nil {
+		t.Error(err)
+	}
+	eEv := map[string]interface{}{
+		"FirstLevel2.SecondLevel2.Field2":        "Value2",
+		"FirstLevel.SecondLevel.ThirdLevel.Fld1": "Val1",
+		"FirstLevel2.Field3":                     "Value3",
+		"FirstLevel2.Field5":                     "Value5",
+		"FirstLevel2.Field6":                     "Value6",
+		"Field4":                                 "Val4",
+	}
+	if cgrEv := NMAsMapInterface(nM, utils.NestingSep); !reflect.DeepEqual(eEv, cgrEv) {
+		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(eEv), utils.ToJSON(cgrEv))
+	}
+}

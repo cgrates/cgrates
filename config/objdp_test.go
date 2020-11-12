@@ -176,17 +176,31 @@ func TestFieldAsInterfaceObjDPMultiplePaths(t *testing.T) {
 		Field1 int
 		Field2 int
 	}
+	type pNewStruct struct {
+		Field3 aNewStruct
+		Field4 int
+		Field5 []string
+	}
 	objDp := &ObjectDP{
-		obj: []aNewStruct{
-			{
-				Field1: 1,
-				Field2: 2,
+		obj: pNewStruct{
+			Field3: aNewStruct{
+				Field1: 2,
+				Field2: 4,
 			},
+			Field4: 2,
+			Field5: []string{"1", "2"},
 		},
 		cache: map[string]interface{}{},
 	}
-	expected := "unsupported field kind: int"
-	if _, err := objDp.FieldAsString([]string{"0[Field1]", "a[Field2]"}); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
+	if rcv, err := objDp.FieldAsInterface([]string{"Field3", "Field2"}); err != nil {
+		t.Error(err)
+	} else if rcv != 4 {
+		t.Errorf("Expected %+v, received %+v", 4, rcv)
+	}
+
+	if rcv, err := objDp.FieldAsInterface([]string{"Field5[0]"}); err != nil {
+		t.Error(err)
+	} else if rcv != "1" {
+		t.Errorf("Expected %+v, received %+v", "1", rcv)
 	}
 }
