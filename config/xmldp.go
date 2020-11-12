@@ -30,7 +30,11 @@ import (
 
 // NewXmlProvider constructs a utils.DataProvider
 func NewXmlProvider(req *xmlquery.Node, cdrPath utils.HierarchyPath) (dP utils.DataProvider) {
-	dP = &XmlProvider{req: req, cdrPath: cdrPath, cache: utils.MapStorage{}}
+	dP = &XmlProvider{
+		req:     req,
+		cdrPath: cdrPath,
+		cache:   utils.MapStorage{},
+	}
 	return
 }
 
@@ -44,7 +48,7 @@ type XmlProvider struct {
 // String is part of engine.utils.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (xP *XmlProvider) String() string {
-	return utils.ToJSON(xP)
+	return utils.ToJSON(xP.req)
 }
 
 // FieldAsInterface is part of engine.utils.DataProvider interface
