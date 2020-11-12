@@ -26,10 +26,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCoreService(cfg *config.CGRConfig, caps *Caps, exitChan chan bool) *CoreService {
+func NewCoreService(cfg *config.CGRConfig, caps *Caps, stopChan chan struct{}) *CoreService {
 	var st *CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
-		st = NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, exitChan)
+		st = NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
 	}
 	return &CoreService{
 		cfg:       cfg,
@@ -42,16 +42,8 @@ type CoreService struct {
 	capsStats *CapsStats
 }
 
-// ListenAndServe will initialize the service
-func (cS *CoreService) ListenAndServe(exitChan chan bool) (err error) {
-	utils.Logger.Info("Starting Core service")
-	e := <-exitChan
-	exitChan <- e // put back for the others listening for shutdown request
-	return
-}
-
 // Shutdown is called to shutdown the service
-func (cS *CoreService) Shutdown() (err error) {
+func (cS *CoreService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.CoreS))
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.CoreS))
 	return

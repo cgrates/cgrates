@@ -41,7 +41,7 @@ func TestApiersReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan bool, 2)
+	engineShutdown := make(chan struct{}, 2)
 	chS := engine.NewCacheS(cfg, nil)
 	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheThresholds))
@@ -63,7 +63,7 @@ func TestApiersReload(t *testing.T) {
 
 	apiSv2 := NewAPIerSv2Service(apiSv1, cfg, server, make(chan rpcclient.ClientConnector, 1), anz)
 	srvMngr.AddServices(apiSv1, apiSv2, schS, tS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db, stordb)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -110,5 +110,6 @@ func TestApiersReload(t *testing.T) {
 	if apiSv2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	engineShutdown <- true
+	close(engineShutdown)
+	srvMngr.ShutdownServices(10 * time.Millisecond)
 }

@@ -32,7 +32,7 @@ import (
 
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig,
-	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
+	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
 	return &AsteriskAgent{
 		cfg:      cfg,
 		exitChan: exitChan,
@@ -44,7 +44,8 @@ func NewAsteriskAgent(cfg *config.CGRConfig,
 type AsteriskAgent struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
-	exitChan chan bool
+	exitChan chan<- struct{}
+	stopChan chan struct{}
 
 	smas    []*agents.AsteriskAgent
 	connMgr *engine.ConnManager
@@ -59,19 +60,20 @@ func (ast *AsteriskAgent) Start() (err error) {
 	ast.Lock()
 	defer ast.Unlock()
 
-	listenAndServe := func(sma *agents.AsteriskAgent, exitChan chan bool) {
-		if err := sma.ListenAndServe(); err != nil {
+	listenAndServe := func(sma *agents.AsteriskAgent, stopChan chan struct{}, exitChan chan<- struct{}) {
+		if err := sma.ListenAndServe(stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> runtime error: %s!", utils.AsteriskAgent, err))
+			close(exitChan)
 		}
-		exitChan <- true
 	}
+	ast.stopChan = make(chan struct{})
 	ast.smas = make([]*agents.AsteriskAgent, len(ast.cfg.AsteriskAgentCfg().AsteriskConns))
 	for connIdx := range ast.cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
 		if ast.smas[connIdx], err = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.AsteriskAgent, err))
 			return
 		}
-		go listenAndServe(ast.smas[connIdx], ast.exitChan)
+		go listenAndServe(ast.smas[connIdx], ast.stopChan, ast.exitChan)
 	}
 	return
 }
@@ -83,6 +85,8 @@ func (ast *AsteriskAgent) Reload() (err error) {
 
 // Shutdown stops the service
 func (ast *AsteriskAgent) Shutdown() (err error) {
+	close(ast.stopChan)
+	ast.smas = nil
 	return // no shutdown for the momment
 }
 

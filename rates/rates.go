@@ -44,14 +44,12 @@ type RateS struct {
 }
 
 // ListenAndServe keeps the service alive
-func (rS *RateS) ListenAndServe(exitChan chan bool, cfgRld chan struct{}) (err error) {
+func (rS *RateS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s>",
 		utils.CoreS, utils.RateS))
 	for {
 		select {
-		case e := <-exitChan: // global exit
-			rS.Shutdown()
-			exitChan <- e // put back for the others listening for shutdown request
+		case <-stopChan: // global exit
 			return
 		case rld := <-cfgRld: // configuration was reloaded
 			cfgRld <- rld

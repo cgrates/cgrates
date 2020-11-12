@@ -33,7 +33,7 @@ import (
 
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig,
-	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
+	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
 	return &KamailioAgent{
 		cfg:      cfg,
 		exitChan: exitChan,
@@ -45,7 +45,7 @@ func NewKamailioAgent(cfg *config.CGRConfig,
 type KamailioAgent struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
-	exitChan chan bool
+	exitChan chan<- struct{}
 
 	kam     *agents.KamailioAgent
 	connMgr *engine.ConnManager
@@ -69,7 +69,7 @@ func (kam *KamailioAgent) Start() (err error) {
 				return
 			}
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
-			kam.exitChan <- true
+			close(kam.exitChan)
 		}
 	}()
 	return
@@ -90,7 +90,7 @@ func (kam *KamailioAgent) Reload() (err error) {
 				return
 			}
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
-			kam.exitChan <- true
+			close(kam.exitChan)
 		}
 	}()
 	return

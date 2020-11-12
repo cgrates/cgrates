@@ -31,7 +31,7 @@ import (
 )
 
 // NewAnalyzerService returns the Analyzer Service
-func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server, exitChan chan bool,
+func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server, exitChan chan<- struct{},
 	internalAnalyzerSChan chan rpcclient.ClientConnector) *AnalyzerService {
 	return &AnalyzerService{
 		connChan: internalAnalyzerSChan,
@@ -46,7 +46,8 @@ type AnalyzerService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
 	server   *cores.Server
-	exitChan chan bool
+	stopChan chan struct{}
+	exitChan chan<- struct{}
 
 	anz      *analyzers.AnalyzerService
 	rpc      *v1.AnalyzerSv1
@@ -62,12 +63,12 @@ func (anz *AnalyzerService) Start() (err error) {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		return
 	}
+	anz.stopChan = make(chan struct{})
 	go func() {
-		if err := anz.anz.ListenAndServe(anz.exitChan); err != nil {
+		if err := anz.anz.ListenAndServe(anz.stopChan); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
+			close(anz.exitChan)
 		}
-		anz.anz.Shutdown()
-		anz.exitChan <- true
 		return
 	}()
 	anz.server.SetAnalyzer(anz.anz)
@@ -76,7 +77,6 @@ func (anz *AnalyzerService) Start() (err error) {
 		anz.server.RpcRegister(anz.rpc)
 	}
 	anz.connChan <- anz.rpc
-
 	return
 }
 
@@ -88,6 +88,7 @@ func (anz *AnalyzerService) Reload() (err error) {
 // Shutdown stops the service
 func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.Lock()
+	close(anz.stopChan)
 	anz.server.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil

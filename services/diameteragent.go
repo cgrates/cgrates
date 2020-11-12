@@ -31,7 +31,7 @@ import (
 
 // NewDiameterAgent returns the Diameter Agent
 func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
+	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
 	return &DiameterAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
@@ -45,7 +45,7 @@ type DiameterAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	exitChan    chan bool
+	exitChan    chan<- struct{}
 
 	da      *agents.DiameterAgent
 	connMgr *engine.ConnManager
@@ -75,7 +75,7 @@ func (da *DiameterAgent) Start() (err error) {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 				utils.DiameterAgent, err))
 		}
-		da.exitChan <- true
+		close(da.exitChan)
 	}()
 	return
 }

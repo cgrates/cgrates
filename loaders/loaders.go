@@ -29,7 +29,7 @@ import (
 )
 
 func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
-	timezone string, exitChan chan bool, filterS *engine.FilterS,
+	timezone string, filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (ldrS *LoaderService) {
 	ldrS = &LoaderService{ldrs: make(map[string]*Loader)}
 	for _, ldrCfg := range ldrsCfg {

@@ -25,14 +25,13 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewRalService returns the Ral Service
 func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *cores.Server,
-	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, exitChan chan bool,
+	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, exitChan chan<- struct{},
 	connMgr *engine.ConnManager,
 	anz *AnalyzerService) *RalService {
 	resp := NewResponderService(cfg, server, internalResponderChan, exitChan, anz)
@@ -138,11 +137,6 @@ func (rals *RalService) ShouldRun() bool {
 }
 
 // GetResponder returns the responder service
-func (rals *RalService) GetResponder() servmanager.Service {
-	return rals.responder
-}
-
-// GetResponderService returns the responder service
-func (rals *RalService) GetResponderService() *ResponderService {
+func (rals *RalService) GetResponder() *ResponderService {
 	return rals.responder
 }

@@ -66,7 +66,7 @@ type CDRServer struct {
 	connChan chan rpcclient.ClientConnector
 	connMgr  *engine.ConnManager
 
-	syncStop chan struct{}
+	stopChan chan struct{}
 	anz      *AnalyzerService
 	// storDBChan chan engine.StorDB
 }
@@ -86,19 +86,14 @@ func (cdrService *CDRServer) Start() (err error) {
 	dbchan <- datadb
 
 	storDBChan := make(chan engine.StorDB, 1)
-	cdrService.syncStop = make(chan struct{})
+	cdrService.stopChan = make(chan struct{})
 	cdrService.storDB.RegisterSyncChan(storDBChan)
 
 	cdrService.Lock()
 	defer cdrService.Unlock()
 
 	cdrService.cdrS = engine.NewCDRServer(cdrService.cfg, storDBChan, datadb, filterS, cdrService.connMgr)
-	go func(cdrS *engine.CDRServer, stopChan chan struct{}) {
-		if err := cdrS.ListenAndServe(stopChan); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.CDRServer, err.Error()))
-			// erS.exitChan <- true
-		}
-	}(cdrService.cdrS, cdrService.syncStop)
+	go cdrService.cdrS.ListenAndServe(cdrService.stopChan)
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrService.cdrS.RegisterHandlersToServer(cdrService.server)
@@ -123,7 +118,7 @@ func (cdrService *CDRServer) Reload() (err error) {
 // Shutdown stops the service
 func (cdrService *CDRServer) Shutdown() (err error) {
 	cdrService.Lock()
-	close(cdrService.syncStop)
+	close(cdrService.stopChan)
 	cdrService.cdrS = nil
 	cdrService.rpcv1 = nil
 	cdrService.rpcv2 = nil

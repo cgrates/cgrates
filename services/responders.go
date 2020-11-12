@@ -31,7 +31,7 @@ import (
 // NewResponderService returns the Resonder Service
 func NewResponderService(cfg *config.CGRConfig, server *cores.Server,
 	internalRALsChan chan rpcclient.ClientConnector,
-	exitChan chan bool, anz *AnalyzerService) *ResponderService {
+	exitChan chan<- struct{}, anz *AnalyzerService) *ResponderService {
 	return &ResponderService{
 		connChan: internalRALsChan,
 		cfg:      cfg,
@@ -42,11 +42,12 @@ func NewResponderService(cfg *config.CGRConfig, server *cores.Server,
 }
 
 // ResponderService implements Service interface
+// this service is manged by the RALs as a component
 type ResponderService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
 	server   *cores.Server
-	exitChan chan bool
+	exitChan chan<- struct{}
 
 	resp     *engine.Responder
 	connChan chan rpcclient.ClientConnector

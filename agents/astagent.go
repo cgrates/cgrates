@@ -89,7 +89,7 @@ func (sma *AsteriskAgent) connectAsterisk() (err error) {
 }
 
 // ListenAndServe is called to start the service
-func (sma *AsteriskAgent) ListenAndServe() (err error) {
+func (sma *AsteriskAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 	if err = sma.connectAsterisk(); err != nil {
 		return
 	}
@@ -97,6 +97,7 @@ func (sma *AsteriskAgent) ListenAndServe() (err error) {
 		utils.AsteriskAgent, sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address))
 	for {
 		select {
+		case <-stopChan:
 		case err = <-sma.astErrChan:
 			return
 		case astRawEv := <-sma.astEvChan:

@@ -40,14 +40,6 @@ type ChargerService struct {
 	connMgr *ConnManager
 }
 
-// ListenAndServe will initialize the service
-func (cS *ChargerService) ListenAndServe(exitChan chan bool) (err error) {
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
-	e := <-exitChan
-	exitChan <- e
-	return
-}
-
 // Shutdown is called to shutdown the service
 func (cS *ChargerService) Shutdown() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.ChargerS))

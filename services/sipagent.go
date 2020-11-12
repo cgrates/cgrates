@@ -31,7 +31,7 @@ import (
 
 // NewSIPAgent returns the sip Agent
 func NewSIPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
+	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
 	return &SIPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
@@ -45,7 +45,7 @@ type SIPAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	exitChan    chan bool
+	exitChan    chan<- struct{}
 
 	sip     *agents.SIPAgent
 	connMgr *engine.ConnManager
@@ -74,7 +74,7 @@ func (sip *SIPAgent) Start() (err error) {
 	go func() {
 		if err = sip.sip.ListenAndServe(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))
-			sip.exitChan <- true // stop the engine here
+			close(sip.exitChan) // stop the engine here
 		}
 	}()
 	return
@@ -94,7 +94,7 @@ func (sip *SIPAgent) Reload() (err error) {
 	go func() {
 		if err := sip.sip.ListenAndServe(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))
-			sip.exitChan <- true // stop the engine here
+			close(sip.exitChan) // stop the engine here
 		}
 	}()
 	return

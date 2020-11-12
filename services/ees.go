@@ -34,7 +34,7 @@ import (
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, server *cores.Server, exitChan chan bool,
+	connMgr *engine.ConnManager, server *cores.Server,
 	intConnChan chan rpcclient.ClientConnector,
 	anz *AnalyzerService) servmanager.Service {
 	return &EventExporterService{
@@ -42,7 +42,6 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		server:      server,
-		exitChan:    exitChan,
 		intConnChan: intConnChan,
 		rldChan:     make(chan struct{}),
 		anz:         anz,
@@ -57,9 +56,9 @@ type EventExporterService struct {
 	filterSChan chan *engine.FilterS
 	connMgr     *engine.ConnManager
 	server      *cores.Server
-	exitChan    chan bool
 	intConnChan chan rpcclient.ClientConnector
 	rldChan     chan struct{}
+	stopChan    chan struct{}
 
 	eeS *ees.EventExporterS
 	rpc *v1.EventExporterSv1
@@ -92,8 +91,8 @@ func (es *EventExporterService) Reload() (err error) {
 // Shutdown stops the service
 func (es *EventExporterService) Shutdown() (err error) {
 	es.Lock()
-
 	defer es.Unlock()
+	close(es.stopChan)
 	if err = es.eeS.Shutdown(); err != nil {
 		return
 	}
@@ -122,12 +121,8 @@ func (es *EventExporterService) Start() (err error) {
 			utils.EventExporterS, err))
 		return
 	}
-	go func(eeS *ees.EventExporterS, exitChan chan bool, rldChan chan struct{}) {
-		if err := eeS.ListenAndServe(exitChan, rldChan); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.EventExporterS, err.Error()))
-			exitChan <- true
-		}
-	}(es.eeS, es.exitChan, es.rldChan)
+	es.stopChan = make(chan struct{})
+	go es.eeS.ListenAndServe(es.stopChan, es.rldChan)
 
 	es.rpc = v1.NewEventExporterSv1(es.eeS)
 	if !es.cfg.DispatcherSCfg().Enabled {

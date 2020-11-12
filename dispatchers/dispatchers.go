@@ -51,19 +51,10 @@ type DispatcherService struct {
 	connMgr *engine.ConnManager
 }
 
-// ListenAndServe will initialize the service
-func (dS *DispatcherService) ListenAndServe(exitChan chan bool) error {
-	utils.Logger.Info("Starting Dispatcher service")
-	e := <-exitChan
-	exitChan <- e // put back for the others listening for shutdown request
-	return nil
-}
-
 // Shutdown is called to shutdown the service
-func (dS *DispatcherService) Shutdown() error {
+func (dS *DispatcherService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.DispatcherS))
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.DispatcherS))
-	return nil
 }
 
 func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,

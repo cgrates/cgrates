@@ -156,15 +156,6 @@ type ThresholdService struct {
 	stMux       sync.RWMutex    // protects storedTdIDs
 }
 
-// ListenAndServe is called to start the service
-func (tS *ThresholdService) ListenAndServe(exitChan chan bool) error {
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
-	go tS.runBackup() // start backup loop
-	e := <-exitChan
-	exitChan <- e // put back for the others listening for shutdown request
-	return nil
-}
-
 // Shutdown is called to shutdown the service
 func (tS *ThresholdService) Shutdown() error {
 	utils.Logger.Info("<ThresholdS> shutdown initialized")

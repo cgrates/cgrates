@@ -33,7 +33,6 @@ func NewDispatcherHService(cfg *config.CGRConfig,
 	return &DispatcherHostsService{
 		cfg:     cfg,
 		connMgr: connMgr,
-		stop:    make(chan struct{}),
 	}
 }
 
@@ -42,16 +41,15 @@ func NewDispatcherHService(cfg *config.CGRConfig,
 type DispatcherHostsService struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
-	stop    chan struct{}
 }
 
 // ListenAndServe will initialize the service
-func (dhS *DispatcherHostsService) ListenAndServe() {
+func (dhS *DispatcherHostsService) ListenAndServe(stopChan chan struct{}) {
 	utils.Logger.Info("Starting DispatcherH service")
 	for {
 		dhS.registerHosts()
 		select {
-		case <-dhS.stop:
+		case <-stopChan:
 			return
 		case <-time.After(dhS.cfg.DispatcherHCfg().RegisterInterval):
 		}
@@ -62,7 +60,6 @@ func (dhS *DispatcherHostsService) ListenAndServe() {
 func (dhS *DispatcherHostsService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.DispatcherH))
 	dhS.unregisterHosts()
-	close(dhS.stop)
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.DispatcherH))
 	return
 }
@@ -102,9 +99,4 @@ func (dhS *DispatcherHostsService) unregisterHosts() {
 			}
 		}
 	}
-}
-
-// Call only to implement rpcclient.ClientConnector interface
-func (*DispatcherHostsService) Call(_ string, _, _ interface{}) error {
-	return utils.ErrNotImplemented
 }

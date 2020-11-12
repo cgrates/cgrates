@@ -137,14 +137,6 @@ type RouteService struct {
 	connMgr *ConnManager
 }
 
-// ListenAndServe will initialize the service
-func (rpS *RouteService) ListenAndServe(exitChan chan bool) error {
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
-	e := <-exitChan
-	exitChan <- e // put back for the others listening for shutdown request
-	return nil
-}
-
 // Shutdown is called to shutdown the service
 func (rpS *RouteService) Shutdown() error {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.RouteS))

@@ -36,7 +36,7 @@ type erEvent struct {
 }
 
 // NewERService instantiates the ERService
-func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS, stopChan chan struct{}, connMgr *engine.ConnManager) *ERService {
+func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS, connMgr *engine.ConnManager) *ERService {
 	return &ERService{
 		cfg:       cfg,
 		rdrs:      make(map[string]EventReader),
@@ -45,7 +45,6 @@ func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS, stopChan chan 
 		rdrEvents: make(chan *erEvent),
 		rdrErr:    make(chan error),
 		filterS:   filterS,
-		stopChan:  stopChan,
 		connMgr:   connMgr,
 	}
 }
@@ -60,13 +59,12 @@ type ERService struct {
 	rdrEvents chan *erEvent            // receive here the events from readers
 	rdrErr    chan error               // receive here errors which should stop the app
 
-	filterS  *engine.FilterS
-	stopChan chan struct{}
-	connMgr  *engine.ConnManager
+	filterS *engine.FilterS
+	connMgr *engine.ConnManager
 }
 
 // ListenAndServe keeps the service alive
-func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
+func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err error) {
 	for cfgIdx, rdrCfg := range erS.cfg.ERsCfg().Readers {
 		if rdrCfg.Type == utils.META_NONE { // ignore *default reader
 			continue
@@ -86,7 +84,7 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 				fmt.Sprintf("<%s> running reader got error: <%s>",
 					utils.ERs, err.Error()))
 			return
-		case <-erS.stopChan:
+		case <-stopChan:
 			erS.closeAllRdrs()
 			return
 		case erEv := <-erS.rdrEvents:

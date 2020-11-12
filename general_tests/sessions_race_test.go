@@ -95,7 +95,7 @@ func TestSessionSRace(t *testing.T) {
 
 	// resp
 	resp = &engine.Responder{
-		ExitChan:         make(chan bool, 1),
+		ExitChan:         make(chan struct{}, 1),
 		MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage,
 	}
 	respChan <- resp

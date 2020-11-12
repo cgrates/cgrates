@@ -1439,7 +1439,7 @@ func (apierSv1 *APIerSv1) GetRatingPlanIDs(args *utils.PaginatorWithTenant, attr
 }
 
 // ListenAndServe listen for storbd reload
-func (apierSv1 *APIerSv1) ListenAndServe(stopChan chan struct{}) (err error) {
+func (apierSv1 *APIerSv1) ListenAndServe(stopChan chan struct{}) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ApierS))
 	for {
 		select {

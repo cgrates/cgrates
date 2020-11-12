@@ -68,20 +68,20 @@ var (
 
 // startFilterService fires up the FilterS
 func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS, connMgr *engine.ConnManager, cfg *config.CGRConfig,
-	dm *engine.DataManager, exitChan chan bool) {
+	dm *engine.DataManager) {
 	<-cacheS.GetPrecacheChannel(utils.CacheFilters)
 	filterSChan <- engine.NewFilterS(cfg, connMgr, dm)
 }
 
 // initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
 func initCacheS(internalCacheSChan chan rpcclient.ClientConnector,
-	server *cores.Server, dm *engine.DataManager, exitChan chan bool,
+	server *cores.Server, dm *engine.DataManager, exitChan chan<- struct{},
 	anz *services.AnalyzerService) (chS *engine.CacheS) {
 	chS = engine.NewCacheS(cfg, dm)
 	go func() {
 		if err := chS.Precache(); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> could not init, error: %s", utils.CacheS, err.Error()))
-			exitChan <- true
+			close(exitChan)
 		}
 	}()
 
@@ -110,19 +110,6 @@ func initGuardianSv1(internalGuardianSChan chan rpcclient.ClientConnector, serve
 	internalGuardianSChan <- rpc
 }
 
-func initCoreSv1(internalCoreSv1Chan chan rpcclient.ClientConnector, server *cores.Server,
-	anz *services.AnalyzerService, cfg *config.CGRConfig, caps *cores.Caps, exitChan chan bool) {
-	cSv1 := v1.NewCoreSv1(cores.NewCoreService(cfg, caps, exitChan))
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(cSv1)
-	}
-	var rpc rpcclient.ClientConnector = cSv1
-	if anz.IsRunning() {
-		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.CoreS)
-	}
-	internalCoreSv1Chan <- rpc
-}
-
 func initServiceManagerV1(internalServiceManagerChan chan rpcclient.ClientConnector,
 	srvMngr *servmanager.ServiceManager, server *cores.Server,
 	anz *services.AnalyzerService) {
@@ -134,15 +121,6 @@ func initServiceManagerV1(internalServiceManagerChan chan rpcclient.ClientConnec
 		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ServiceManager)
 	}
 	internalServiceManagerChan <- rpc
-}
-
-// initLogger will initialize syslog writter, needs to be called after config init
-func initLogger(cfg *config.CGRConfig) error {
-	sylogger := cfg.GeneralCfg().Logger
-	if *syslogger != "" { // Modify the log level if provided by command arguments
-		sylogger = *syslogger
-	}
-	return utils.Newlogger(sylogger, cfg.GeneralCfg().NodeID)
 }
 
 func initConfigSv1(internalConfigChan chan rpcclient.ClientConnector,
@@ -164,8 +142,7 @@ func startRPC(server *cores.Server, internalRaterChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
 	internalEEsChan, internalRateSChan chan rpcclient.ClientConnector,
-	internalPreloadChan chan struct{},
-	exitChan chan bool) {
+	stopChan <-chan struct{}, exitChan chan<- struct{}) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
 		case resp := <-internalRaterChan:
@@ -198,13 +175,15 @@ func startRPC(server *cores.Server, internalRaterChan,
 			internalEEsChan <- eeS
 		case rateS := <-internalRateSChan:
 			internalRateSChan <- rateS
-		case preload := <-internalPreloadChan:
-			internalPreloadChan <- preload
+		case <-stopChan:
+			return
 		}
 	} else {
 		select {
 		case dispatcherS := <-internalDispatcherSChan:
 			internalDispatcherSChan <- dispatcherS
+		case <-stopChan:
+			return
 		}
 	}
 
@@ -218,54 +197,50 @@ func startRPC(server *cores.Server, internalRaterChan,
 		cfg.HTTPCfg().HTTPAuthUsers,
 		exitChan,
 	)
+	if (len(cfg.ListenCfg().RPCGOBTLSListen) != 0 ||
+		len(cfg.ListenCfg().RPCJSONTLSListen) != 0 ||
+		len(cfg.ListenCfg().HTTPTLSListen) != 0) &&
+		(len(cfg.TlsCfg().ServerCerificate) == 0 ||
+			len(cfg.TlsCfg().ServerKey) == 0) {
+		utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
+		return
+	}
 	if cfg.ListenCfg().RPCGOBTLSListen != "" {
-		if cfg.TlsCfg().ServerCerificate == "" || cfg.TlsCfg().ServerKey == "" {
-			utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
-		} else {
-			go server.ServeGOBTLS(
-				cfg.ListenCfg().RPCGOBTLSListen,
-				cfg.TlsCfg().ServerCerificate,
-				cfg.TlsCfg().ServerKey,
-				cfg.TlsCfg().CaCertificate,
-				cfg.TlsCfg().ServerPolicy,
-				cfg.TlsCfg().ServerName,
-				exitChan,
-			)
-		}
+		go server.ServeGOBTLS(
+			cfg.ListenCfg().RPCGOBTLSListen,
+			cfg.TlsCfg().ServerCerificate,
+			cfg.TlsCfg().ServerKey,
+			cfg.TlsCfg().CaCertificate,
+			cfg.TlsCfg().ServerPolicy,
+			cfg.TlsCfg().ServerName,
+			exitChan,
+		)
 	}
 	if cfg.ListenCfg().RPCJSONTLSListen != "" {
-		if cfg.TlsCfg().ServerCerificate == "" || cfg.TlsCfg().ServerKey == "" {
-			utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
-		} else {
-			go server.ServeJSONTLS(
-				cfg.ListenCfg().RPCJSONTLSListen,
-				cfg.TlsCfg().ServerCerificate,
-				cfg.TlsCfg().ServerKey,
-				cfg.TlsCfg().CaCertificate,
-				cfg.TlsCfg().ServerPolicy,
-				cfg.TlsCfg().ServerName,
-				exitChan,
-			)
-		}
+		go server.ServeJSONTLS(
+			cfg.ListenCfg().RPCJSONTLSListen,
+			cfg.TlsCfg().ServerCerificate,
+			cfg.TlsCfg().ServerKey,
+			cfg.TlsCfg().CaCertificate,
+			cfg.TlsCfg().ServerPolicy,
+			cfg.TlsCfg().ServerName,
+			exitChan,
+		)
 	}
 	if cfg.ListenCfg().HTTPTLSListen != "" {
-		if cfg.TlsCfg().ServerCerificate == "" || cfg.TlsCfg().ServerKey == "" {
-			utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
-		} else {
-			go server.ServeHTTPTLS(
-				cfg.ListenCfg().HTTPTLSListen,
-				cfg.TlsCfg().ServerCerificate,
-				cfg.TlsCfg().ServerKey,
-				cfg.TlsCfg().CaCertificate,
-				cfg.TlsCfg().ServerPolicy,
-				cfg.TlsCfg().ServerName,
-				cfg.HTTPCfg().HTTPJsonRPCURL,
-				cfg.HTTPCfg().HTTPWSURL,
-				cfg.HTTPCfg().HTTPUseBasicAuth,
-				cfg.HTTPCfg().HTTPAuthUsers,
-				exitChan,
-			)
-		}
+		go server.ServeHTTPTLS(
+			cfg.ListenCfg().HTTPTLSListen,
+			cfg.TlsCfg().ServerCerificate,
+			cfg.TlsCfg().ServerKey,
+			cfg.TlsCfg().CaCertificate,
+			cfg.TlsCfg().ServerPolicy,
+			cfg.TlsCfg().ServerName,
+			cfg.HTTPCfg().HTTPJsonRPCURL,
+			cfg.HTTPCfg().HTTPWSURL,
+			cfg.HTTPCfg().HTTPUseBasicAuth,
+			cfg.HTTPCfg().HTTPAuthUsers,
+			exitChan,
+		)
 	}
 }
 
@@ -297,12 +272,12 @@ func memProfFile(memProfPath string) bool {
 	return true
 }
 
-func memProfiling(memProfDir string, interval time.Duration, nrFiles int, exitChan chan bool) {
+func memProfiling(memProfDir string, interval time.Duration, nrFiles int, exitChan chan<- struct{}) {
 	for i := 1; ; i++ {
 		time.Sleep(interval)
 		memPath := path.Join(memProfDir, fmt.Sprintf("mem%v.prof", i))
 		if !memProfFile(memPath) {
-			exitChan <- true
+			close(exitChan)
 		}
 		if i%nrFiles == 0 {
 			i = 0 // reset the counting
@@ -310,22 +285,23 @@ func memProfiling(memProfDir string, interval time.Duration, nrFiles int, exitCh
 	}
 }
 
-func cpuProfiling(cpuProfDir string, stopChan, doneChan chan struct{}, exitChan chan bool) {
+func cpuProfiling(cpuProfDir string, stopChan, doneChan chan struct{}, exitChan chan<- struct{}) {
 	cpuPath := path.Join(cpuProfDir, "cpu.prof")
 	f, err := os.Create(cpuPath)
+	defer func() { close(doneChan) }()
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<cpuProfiling>could not create cpu profile file: %s", err))
-		exitChan <- true
+		close(exitChan)
 		return
 	}
 	pprof.StartCPUProfile(f)
 	<-stopChan
 	pprof.StopCPUProfile()
 	f.Close()
-	doneChan <- struct{}{}
+
 }
 
-func singnalHandler(exitChan chan bool) {
+func singnalHandler(stopChan <-chan struct{}, exitChan chan<- struct{}) {
 	shutdownSignal := make(chan os.Signal)
 	reloadSignal := make(chan os.Signal)
 	signal.Notify(shutdownSignal, os.Interrupt,
@@ -333,8 +309,11 @@ func singnalHandler(exitChan chan bool) {
 	signal.Notify(reloadSignal, syscall.SIGHUP)
 	for {
 		select {
+		case <-stopChan:
+			return
 		case <-shutdownSignal:
-			exitChan <- true
+			close(exitChan)
+			return
 		case <-reloadSignal:
 			//  do it in it's own gorutine in order to not block the signal handler with the reload functionality
 			go func() {
@@ -353,16 +332,14 @@ func singnalHandler(exitChan chan bool) {
 }
 
 func runPreload(loader *services.LoaderService, internalLoaderSChan chan rpcclient.ClientConnector,
-	internalPreloadChan chan struct{}, exitChan chan bool) {
-
+	exitChan chan<- struct{}) {
 	if !cfg.LoaderCfg().Enabled() {
 		utils.Logger.Err(fmt.Sprintf("<%s> not enabled but required by preload mechanism", utils.LoaderS))
-		exitChan <- true
+		close(exitChan)
 		return
 	}
 
-	ldr := <-internalLoaderSChan
-	internalLoaderSChan <- ldr
+	internalLoaderSChan <- <-internalLoaderSChan
 
 	var reply string
 	for _, loaderID := range strings.Split(*preload, utils.FIELDS_SEP) {
@@ -372,11 +349,10 @@ func runPreload(loader *services.LoaderService, internalLoaderSChan chan rpcclie
 			StopOnError: true,
 		}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> preload failed on loadID <%s> , err: <%s>", utils.LoaderS, loaderID, err.Error()))
-			exitChan <- true
+			close(exitChan)
 			return
 		}
 	}
-	internalPreloadChan <- struct{}{}
 }
 
 func main() {
@@ -400,8 +376,10 @@ func main() {
 		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
 	}
 
-	exitChan := make(chan bool)
-	go singnalHandler(exitChan)
+	exitChan := make(chan struct{})
+	signStop := make(chan struct{})
+	rpcStop := make(chan struct{})
+	go singnalHandler(signStop, exitChan)
 
 	if *memProfDir != utils.EmptyString {
 		go memProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, exitChan)
@@ -419,7 +397,7 @@ func main() {
 		}
 		go func() { // Schedule shutdown
 			time.Sleep(shutdownDur)
-			exitChan <- true
+			close(exitChan)
 			return
 		}()
 	}
@@ -441,7 +419,8 @@ func main() {
 	config.SetCgrConfig(cfg) // Share the config object
 
 	// init syslog
-	if err = initLogger(cfg); err != nil {
+	if err = utils.Newlogger(utils.FirstNonEmpty(*syslogger,
+		cfg.GeneralCfg().Logger), cfg.GeneralCfg().NodeID); err != nil {
 		log.Fatalf("Could not initialize syslog connection, err: <%s>", err.Error())
 		return
 	}
@@ -473,7 +452,6 @@ func main() {
 	internalCDRServerChan := make(chan rpcclient.ClientConnector, 1)
 	internalAttributeSChan := make(chan rpcclient.ClientConnector, 1)
 	internalDispatcherSChan := make(chan rpcclient.ClientConnector, 1)
-	internalDispatcherHChan := make(chan rpcclient.ClientConnector, 1)
 	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)
 	internalChargerSChan := make(chan rpcclient.ClientConnector, 1)
 	internalThresholdSChan := make(chan rpcclient.ClientConnector, 1)
@@ -488,7 +466,6 @@ func main() {
 	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
 	internalEEsChan := make(chan rpcclient.ClientConnector, 1)
 	internalRateSChan := make(chan rpcclient.ClientConnector, 1)
-	internalPreloadChan := make(chan struct{}, 1)
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
@@ -515,7 +492,6 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):            internalEEsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          internalRateSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatcherh):    internalDispatcherHChan,
 	})
 	gvService := services.NewGlobalVarS(cfg)
 	if err = gvService.Start(); err != nil {
@@ -572,13 +548,17 @@ func main() {
 	initGuardianSv1(internalGuardianSChan, server, anz)
 
 	// init CoreSv1
-	initCoreSv1(internalCoreSv1Chan, server, anz, cfg, caps, exitChan)
+	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz)
+	if err := coreS.Start(); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, anz)
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager, anz)
-	dspH := services.NewDispatcherHostsService(cfg, server, internalDispatcherSChan, connManager, exitChan, anz)
+	dspH := services.NewDispatcherHostsService(cfg, server, connManager, anz)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
 		internalChargerSChan, connManager, anz)
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan, anz)
@@ -596,7 +576,7 @@ func main() {
 		internalRALsChan, internalResponderChan,
 		exitChan, connManager, anz)
 
-	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponderService(),
+	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponder(),
 		internalAPIerSv1Chan, connManager, anz)
 
 	apiSv2 := services.NewAPIerSv2Service(apiSv1, cfg, server, internalAPIerSv2Chan, anz)
@@ -606,11 +586,11 @@ func main() {
 
 	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager, caps, anz)
 
-	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, exitChan,
+	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
 		internalLoaderSChan, connManager, anz)
 
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, schS, rals,
-		rals.GetResponder(), apiSv1, apiSv2, cdrS, smg,
+		apiSv1, apiSv2, cdrS, smg, coreS,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager),
 		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager),
 		services.NewFreeswitchAgent(cfg, exitChan, connManager),
@@ -621,15 +601,15 @@ func main() {
 		services.NewHTTPAgent(cfg, filterSChan, server, connManager),       // no reload
 		ldrs, anz, dspS, dspH, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
-			connManager, server, exitChan, internalEEsChan, anz),
+			connManager, server, internalEEsChan, anz),
 		services.NewRateService(cfg, cacheS, filterSChan, dmService,
-			server, exitChan, internalRateSChan, anz),
+			server, internalRateSChan, anz),
 		services.NewSIPAgent(cfg, filterSChan, exitChan, connManager),
 	)
 	srvManager.StartServices()
 	// Start FilterS
 	go startFilterService(filterSChan, cacheS, connManager,
-		cfg, dmService.GetDM(), exitChan)
+		cfg, dmService.GetDM())
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server, anz)
 
@@ -659,12 +639,11 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.RateSv1, internalRateSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.EventExporterSv1, internalEEsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.DispatcherSv1, internalDispatcherSChan)
-	// engine.IntRPC.AddInternalRPCClient(utils.DispatcherHv1, internalDispatcherHChan)
 
 	initConfigSv1(internalConfigChan, server, anz)
 
 	if *preload != utils.EmptyString {
-		runPreload(ldrs, internalLoaderSChan, internalPreloadChan, exitChan)
+		runPreload(ldrs, internalLoaderSChan, exitChan)
 	}
 
 	// Serve rpc connections
@@ -673,11 +652,14 @@ func main() {
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
 		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,
-		internalCacheSChan, internalEEsChan, internalRateSChan, internalPreloadChan, exitChan)
+		internalCacheSChan, internalEEsChan, internalRateSChan, rpcStop, exitChan)
 	<-exitChan
+	close(rpcStop)
+	close(signStop)
+	srvManager.ShutdownServices(time.Second)
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling
-		cpuProfChanStop <- struct{}{}
+		close(cpuProfChanStop)
 		<-cpuProfChanDone
 	}
 	if *memProfDir != "" { // write last memory profiling

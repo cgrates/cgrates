@@ -41,7 +41,7 @@ func TestCdrsReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan bool, 1)
+	engineShutdown := make(chan struct{}, 1)
 	chS := engine.NewCacheS(cfg, nil)
 
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
@@ -75,7 +75,7 @@ func TestCdrsReload(t *testing.T) {
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		cdrsRPC, nil, anz)
 	srvMngr.AddServices(cdrS, ralS, schS, chrS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown,
+		NewLoaderService(cfg, db, filterSChan, server,
 			make(chan rpcclient.ClientConnector, 1), nil, anz), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
@@ -120,5 +120,6 @@ func TestCdrsReload(t *testing.T) {
 	if cdrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	engineShutdown <- true
+	close(engineShutdown)
+	srvMngr.ShutdownServices(10 * time.Millisecond)
 }

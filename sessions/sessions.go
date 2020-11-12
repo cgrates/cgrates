@@ -95,24 +95,18 @@ type SessionS struct {
 }
 
 // ListenAndServe starts the service and binds it to the listen loop
-func (sS *SessionS) ListenAndServe(exitChan chan bool) (err error) {
+func (sS *SessionS) ListenAndServe(stopChan chan struct{}) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.SessionS))
 	if sS.cgrCfg.SessionSCfg().ChannelSyncInterval != 0 {
-		go func() {
-			for { // Schedule sync channels to run repeately
-				select {
-				case e := <-exitChan:
-					exitChan <- e
-					break
-				case <-time.After(sS.cgrCfg.SessionSCfg().ChannelSyncInterval):
-					sS.syncSessions()
-				}
+		for { // Schedule sync channels to run repeately
+			select {
+			case <-stopChan:
+				return
+			case <-time.After(sS.cgrCfg.SessionSCfg().ChannelSyncInterval):
+				sS.syncSessions()
 			}
-
-		}()
+		}
 	}
-	e := <-exitChan // block here until shutdown request
-	exitChan <- e   // put back for the others listening for shutdown request
 	return
 }
 
