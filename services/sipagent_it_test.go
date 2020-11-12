@@ -42,7 +42,7 @@ func TestSIPAgentReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan bool, 1)
+	engineShutdown := make(chan struct{}, 1)
 	chS := engine.NewCacheS(cfg, nil)
 
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
@@ -57,7 +57,7 @@ func TestSIPAgentReload(t *testing.T) {
 	srv := NewSIPAgent(cfg, filterSChan, engineShutdown, nil)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
@@ -83,6 +83,6 @@ func TestSIPAgentReload(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	engineShutdown <- true
-	time.Sleep(10 * time.Millisecond) // wait to stop session bijsonrpc server
+	close(engineShutdown)
+	srvMngr.ShutdownServices(10 * time.Millisecond)
 }

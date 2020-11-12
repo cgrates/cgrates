@@ -41,7 +41,7 @@ func TestDispatcherSReload(t *testing.T) {
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	cfg.AttributeSCfg().Enabled = true
-	engineShutdown := make(chan bool, 1)
+	engineShutdown := make(chan struct{}, 1)
 	chS := engine.NewCacheS(cfg, nil)
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
@@ -60,7 +60,7 @@ func TestDispatcherSReload(t *testing.T) {
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS, srv,
 		NewLoaderService(cfg, db, filterSChan, server,
-			engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
+			make(chan rpcclient.ClientConnector, 1), nil, anz), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -93,5 +93,6 @@ func TestDispatcherSReload(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	engineShutdown <- true
+	close(engineShutdown)
+	srvMngr.ShutdownServices(10 * time.Millisecond)
 }

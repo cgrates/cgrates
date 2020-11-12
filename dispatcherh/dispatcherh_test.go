@@ -31,12 +31,6 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestDispatcherHostsServiceCall(t *testing.T) {
-	if err := new(DispatcherHostsService).Call("", nil, nil); err != utils.ErrNotImplemented {
-		t.Errorf("Expected error: %s ,received: %v", utils.ErrNotImplemented, err)
-	}
-}
-
 func TestDispatcherHostsService(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(Registar))
 	defer ts.Close()
@@ -128,5 +122,7 @@ func TestDispatcherHostsService(t *testing.T) {
 
 	ds = NewDispatcherHService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
 	ds.Shutdown()
-	ds.ListenAndServe()
+	stopChan := make(chan struct{})
+	close(stopChan)
+	ds.ListenAndServe(stopChan)
 }

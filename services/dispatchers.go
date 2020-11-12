@@ -164,9 +164,7 @@ func (dspS *DispatcherService) Reload() (err error) {
 func (dspS *DispatcherService) Shutdown() (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
-	if err = dspS.dspS.Shutdown(); err != nil {
-		return
-	}
+	dspS.dspS.Shutdown()
 	dspS.dspS = nil
 	dspS.rpc = nil
 	<-dspS.connChan

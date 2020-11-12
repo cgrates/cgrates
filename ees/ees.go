@@ -59,14 +59,12 @@ type EventExporterS struct {
 }
 
 // ListenAndServe keeps the service alive
-func (eeS *EventExporterS) ListenAndServe(exitChan chan bool, cfgRld chan struct{}) (err error) {
+func (eeS *EventExporterS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s>",
 		utils.CoreS, utils.EventExporterS))
 	for {
 		select {
-		case e := <-exitChan: // global exit
-			eeS.Shutdown()
-			exitChan <- e // put back for the others listening for shutdown request
+		case <-stopChan: // global exit
 			return
 		case rld := <-cfgRld: // configuration was reloaded, destroy the cache
 			cfgRld <- rld

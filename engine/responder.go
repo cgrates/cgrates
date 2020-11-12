@@ -31,7 +31,7 @@ import (
 )
 
 type Responder struct {
-	ExitChan              chan bool
+	ExitChan              chan<- struct{}
 	Timeout               time.Duration
 	Timezone              string
 	MaxComputedUsage      map[string]time.Duration
@@ -369,7 +369,7 @@ func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnA
 func (rs *Responder) Shutdown(arg *utils.TenantWithOpts, reply *string) (err error) {
 	dm.DataDB().Close()
 	cdrStorage.Close()
-	defer func() { rs.ExitChan <- true }()
+	defer func() { close(rs.ExitChan) }()
 	*reply = "Done!"
 	return
 }

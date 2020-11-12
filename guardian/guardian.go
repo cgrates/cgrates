@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// global package variable
+// Guardian is the global package variable
 var Guardian = &GuardianLocker{
 	locks: make(map[string]*itemLock),
 	refs:  make(map[string][]string)}

@@ -32,7 +32,7 @@ import (
 
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
-	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
+	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
 	return &FreeswitchAgent{
 		cfg:      cfg,
 		exitChan: exitChan,
@@ -44,7 +44,7 @@ func NewFreeswitchAgent(cfg *config.CGRConfig,
 type FreeswitchAgent struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
-	exitChan chan bool
+	exitChan chan<- struct{}
 
 	fS      *agents.FSsessions
 	connMgr *engine.ConnManager
@@ -64,7 +64,7 @@ func (fS *FreeswitchAgent) Start() (err error) {
 	go func() {
 		if err := fS.fS.Connect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-			fS.exitChan <- true // stop the engine here
+			close(fS.exitChan) // stop the engine here
 		}
 	}()
 	return
@@ -81,7 +81,7 @@ func (fS *FreeswitchAgent) Reload() (err error) {
 	go func() {
 		if err := fS.fS.Connect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-			fS.exitChan <- true // stop the engine here
+			close(fS.exitChan) // stop the engine here
 		}
 	}()
 	return

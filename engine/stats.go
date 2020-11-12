@@ -55,15 +55,6 @@ type StatService struct {
 	ssqMux           sync.RWMutex    // protects storedStatQueues
 }
 
-// ListenAndServe loops keeps the service alive
-func (sS *StatService) ListenAndServe(exitChan chan bool) error {
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.StatS))
-	go sS.runBackup() // start backup loop
-	e := <-exitChan
-	exitChan <- e // put back for the others listening for shutdown request
-	return nil
-}
-
 // Shutdown is called to shutdown the service
 func (sS *StatService) Shutdown() error {
 	utils.Logger.Info("<StatS> service shutdown initialized")

@@ -42,7 +42,7 @@ func TestRateSReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan bool, 1)
+	engineShutdown := make(chan struct{}, 1)
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
@@ -51,9 +51,9 @@ func TestRateSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheRateProfilesFilterIndexes))
 	close(chS.GetPrecacheChannel(utils.CacheRateFilterIndexes))
 	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
-	rS := NewRateService(cfg, chS, filterSChan, db, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), anz)
+	rS := NewRateService(cfg, chS, filterSChan, db, server, make(chan rpcclient.ClientConnector, 1), anz)
 	srvMngr.AddServices(rS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -79,5 +79,6 @@ func TestRateSReload(t *testing.T) {
 	if rS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	engineShutdown <- true
+	close(engineShutdown)
+	srvMngr.ShutdownServices(10 * time.Millisecond)
 }

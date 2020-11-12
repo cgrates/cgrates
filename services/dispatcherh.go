@@ -27,21 +27,16 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewDispatcherHostsService returns the Dispatcher Service
 func NewDispatcherHostsService(cfg *config.CGRConfig, server *cores.Server,
-	internalChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager,
-	exitChan chan bool,
-	anz *AnalyzerService) servmanager.Service {
+	connMgr *engine.ConnManager, anz *AnalyzerService) servmanager.Service {
 	return &DispatcherHostsService{
-		connChan: internalChan,
-		cfg:      cfg,
-		server:   server,
-		connMgr:  connMgr,
-		exitChan: exitChan,
-		anz:      anz,
+		cfg:     cfg,
+		server:  server,
+		connMgr: connMgr,
+		anz:     anz,
 	}
 }
 
@@ -51,12 +46,10 @@ type DispatcherHostsService struct {
 	cfg      *config.CGRConfig
 	server   *cores.Server
 	connMgr  *engine.ConnManager
-	exitChan chan bool
+	stopChan chan struct{}
 
 	dspS *dispatcherh.DispatcherHostsService
-	// rpc      *v1.DispatcherHSv1
-	connChan chan rpcclient.ClientConnector
-	anz      *AnalyzerService
+	anz  *AnalyzerService
 }
 
 // Start should handle the sercive start
@@ -68,9 +61,9 @@ func (dspS *DispatcherHostsService) Start() (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
 
+	dspS.stopChan = make(chan struct{})
 	dspS.dspS = dispatcherh.NewDispatcherHService(dspS.cfg, dspS.connMgr)
-	go dspS.dspS.ListenAndServe()
-	dspS.connChan <- dspS.anz.GetInternalCodec(dspS.dspS, utils.DispatcherH)
+	go dspS.dspS.ListenAndServe(dspS.stopChan)
 
 	return
 }
@@ -83,10 +76,9 @@ func (dspS *DispatcherHostsService) Reload() (err error) {
 // Shutdown stops the service
 func (dspS *DispatcherHostsService) Shutdown() (err error) {
 	dspS.Lock()
+	close(dspS.stopChan)
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
-	// dspS.rpc = nil
-	<-dspS.connChan
 	dspS.Unlock()
 	return
 }

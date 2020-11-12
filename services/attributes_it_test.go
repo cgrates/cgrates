@@ -41,7 +41,7 @@ func TestAttributeSReload(t *testing.T) {
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
-	engineShutdown := make(chan bool, 1)
+	engineShutdown := make(chan struct{}, 1)
 	chS := engine.NewCacheS(cfg, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
@@ -57,7 +57,7 @@ func TestAttributeSReload(t *testing.T) {
 		anz)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -95,5 +95,6 @@ func TestAttributeSReload(t *testing.T) {
 	if attrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	engineShutdown <- true
+	close(engineShutdown)
+	srvMngr.ShutdownServices(10 * time.Millisecond)
 }

@@ -155,10 +155,10 @@ func (c *capsServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
 func (c *capsServerCodec) Close() error { return c.sc.Close() }
 
 // NewCapsStats returns the stats for the caps
-func NewCapsStats(sampleinterval time.Duration, caps *Caps, exitChan chan bool) (cs *CapsStats) {
+func NewCapsStats(sampleinterval time.Duration, caps *Caps, stopChan chan struct{}) (cs *CapsStats) {
 	st, _ := engine.NewStatAverage(1, utils.MetaDynReq, nil)
 	cs = &CapsStats{st: st}
-	go cs.loop(sampleinterval, exitChan, caps)
+	go cs.loop(sampleinterval, stopChan, caps)
 	return
 }
 
@@ -174,11 +174,10 @@ func (cs *CapsStats) OnEvict(itmID string, value interface{}) {
 	cs.st.RemEvent(itmID)
 }
 
-func (cs *CapsStats) loop(intr time.Duration, exitChan chan bool, caps *Caps) {
+func (cs *CapsStats) loop(intr time.Duration, stopChan chan struct{}, caps *Caps) {
 	for {
 		select {
-		case v := <-exitChan:
-			exitChan <- v
+		case <-stopChan:
 			return
 		case <-time.After(intr):
 			evID := time.Now().String()

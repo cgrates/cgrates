@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"runtime"
 	"sync"
 
@@ -70,7 +69,7 @@ type APIerSv1Service struct {
 	api      *v1.APIerSv1
 	connChan chan rpcclient.ClientConnector
 
-	syncStop chan struct{}
+	stopChan chan struct{}
 
 	APIerSv1Chan chan *v1.APIerSv1
 	anz          *AnalyzerService
@@ -90,7 +89,7 @@ func (apiService *APIerSv1Service) Start() (err error) {
 	dbchan <- datadb
 
 	storDBChan := make(chan engine.StorDB, 1)
-	apiService.syncStop = make(chan struct{})
+	apiService.stopChan = make(chan struct{})
 	apiService.storDB.RegisterSyncChan(storDBChan)
 	stordb := <-storDBChan
 	apiService.Lock()
@@ -108,12 +107,7 @@ func (apiService *APIerSv1Service) Start() (err error) {
 		StorDBChan:       storDBChan,
 	}
 
-	go func(api *v1.APIerSv1, stopChan chan struct{}) {
-		if err := api.ListenAndServe(stopChan); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.CDRServer, err.Error()))
-			// erS.exitChan <- true
-		}
-	}(apiService.api, apiService.syncStop)
+	go apiService.api.ListenAndServe(apiService.stopChan)
 	runtime.Gosched()
 
 	if !apiService.cfg.DispatcherSCfg().Enabled {
@@ -137,7 +131,7 @@ func (apiService *APIerSv1Service) Reload() (err error) {
 // Shutdown stops the service
 func (apiService *APIerSv1Service) Shutdown() (err error) {
 	apiService.Lock()
-	close(apiService.syncStop)
+	close(apiService.stopChan)
 	apiService.api = nil
 	<-apiService.connChan
 	apiService.Unlock()

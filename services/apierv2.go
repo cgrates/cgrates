@@ -89,9 +89,9 @@ func (api *APIerSv2Service) Reload() (err error) {
 // Shutdown stops the service
 func (api *APIerSv2Service) Shutdown() (err error) {
 	api.Lock()
-	defer api.Unlock()
 	api.api = nil
 	<-api.connChan
+	api.Unlock()
 	return
 }
 

@@ -36,7 +36,7 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server, internalChan chan rpcclient.ClientConnector,
-	exitChan chan bool, connMgr *engine.ConnManager,
+	exitChan chan<- struct{}, connMgr *engine.ConnManager,
 	caps *cores.Caps,
 	anz *AnalyzerService) servmanager.Service {
 	return &SessionService{
@@ -57,7 +57,8 @@ type SessionService struct {
 	cfg      *config.CGRConfig
 	dm       *DataDBService
 	server   *cores.Server
-	exitChan chan bool
+	exitChan chan<- struct{}
+	stopChan chan struct{}
 
 	sm       *sessions.SessionS
 	rpc      *v1.SMGenericV1
@@ -87,7 +88,8 @@ func (smg *SessionService) Start() (err error) {
 
 	smg.sm = sessions.NewSessionS(smg.cfg, datadb, smg.connMgr)
 	//start sync session in a separate gorutine
-	go smg.sm.ListenAndServe(smg.exitChan)
+	smg.stopChan = make(chan struct{})
+	go smg.sm.ListenAndServe(smg.stopChan)
 	// Pass internal connection via BiRPCClient
 	smg.connChan <- smg.anz.GetInternalCodec(smg.sm, utils.SessionS)
 	// Register RPC handler
@@ -114,7 +116,7 @@ func (smg *SessionService) Start() (err error) {
 				smg.Lock()
 				smg.bircpEnabled = false
 				smg.Unlock()
-				smg.exitChan <- true
+				close(smg.exitChan)
 			}
 		}()
 	}
@@ -130,6 +132,7 @@ func (smg *SessionService) Reload() (err error) {
 func (smg *SessionService) Shutdown() (err error) {
 	smg.Lock()
 	defer smg.Unlock()
+	close(smg.stopChan)
 	if err = smg.sm.Shutdown(); err != nil {
 		return
 	}

@@ -42,7 +42,7 @@ func TestThresholdSReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan bool, 1)
+	engineShutdown := make(chan struct{}, 1)
 	chS := engine.NewCacheS(cfg, nil)
 	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheThresholds))
@@ -54,7 +54,7 @@ func TestThresholdSReload(t *testing.T) {
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(tS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -86,5 +86,6 @@ func TestThresholdSReload(t *testing.T) {
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	engineShutdown <- true
+	close(engineShutdown)
+	srvMngr.ShutdownServices(10 * time.Millisecond)
 }

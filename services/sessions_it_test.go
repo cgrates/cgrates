@@ -44,7 +44,7 @@ func TestSessionSReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan bool, 1)
+	engineShutdown := make(chan struct{}, 1)
 	chS := engine.NewCacheS(cfg, nil)
 
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
@@ -83,7 +83,7 @@ func TestSessionSReload(t *testing.T) {
 	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), engineShutdown, nil, nil, anz)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, chrS, schS, ralS, cdrS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db, stordb)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -118,5 +118,6 @@ func TestSessionSReload(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	engineShutdown <- true
+	close(engineShutdown)
+	srvMngr.ShutdownServices(10 * time.Millisecond)
 }

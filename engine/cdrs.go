@@ -113,7 +113,7 @@ type CDRServer struct {
 }
 
 // ListenAndServe listen for storbd reload
-func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) (err error) {
+func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) {
 	for {
 		select {
 		case <-stopChan:

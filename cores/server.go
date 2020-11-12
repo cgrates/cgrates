@@ -149,7 +149,7 @@ func (s *Server) BiRPCRegister(rcvr interface{}) {
 	}
 }
 
-func (s *Server) ServeJSON(addr string, exitChan chan bool) {
+func (s *Server) ServeJSON(addr string, exitChan chan<- struct{}) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
@@ -157,10 +157,10 @@ func (s *Server) ServeJSON(addr string, exitChan chan bool) {
 		return
 	}
 
+	defer func() { close(exitChan) }()
 	lJSON, e := net.Listen(utils.TCP, addr)
 	if e != nil {
 		log.Println("ServeJSON listen error:", e)
-		exitChan <- true
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at <%s>.", addr))
@@ -186,17 +186,17 @@ func (s *Server) ServeJSON(addr string, exitChan chan bool) {
 
 }
 
-func (s *Server) ServeGOB(addr string, exitChan chan bool) {
+func (s *Server) ServeGOB(addr string, exitChan chan<- struct{}) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
+	defer func() { close(exitChan) }()
 	lGOB, e := net.Listen(utils.TCP, addr)
 	if e != nil {
 		log.Println("ServeGOB listen error:", e)
-		exitChan <- true
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at <%s>.", addr))
@@ -253,7 +253,7 @@ func (s *Server) RegisterProfiler(addr string) {
 }
 
 func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
-	useBasicAuth bool, userList map[string]string, exitChan chan bool) {
+	useBasicAuth bool, userList map[string]string, exitChan chan<- struct{}) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
@@ -261,7 +261,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 		return
 	}
 	// s.httpMux = http.NewServeMux()
-	if enabled && jsonRPCURL != "" {
+	if jsonRPCURL != "" {
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
@@ -273,7 +273,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 			s.httpMux.HandleFunc(jsonRPCURL, s.handleRequest)
 		}
 	}
-	if enabled && wsRPCURL != "" {
+	if wsRPCURL != "" {
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
@@ -282,9 +282,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 			rpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
 		})
 		if useBasicAuth {
-			s.httpMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
-				wsHandler.ServeHTTP(w, r)
-			}, basicAuth(userList)))
+			s.httpMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpMux.Handle(wsRPCURL, wsHandler)
 		}
@@ -299,7 +297,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	if err := http.ListenAndServe(addr, s.httpMux); err != nil {
 		log.Println(fmt.Sprintf("<HTTP>Error: %s when listening ", err))
 	}
-	exitChan <- true
+	close(exitChan)
 }
 
 // ServeBiJSON create a gorutine to listen and serve as BiRPC server
@@ -346,22 +344,18 @@ func (s *Server) StopBiRPC() {
 // rpcRequest represents a RPC request.
 // rpcRequest implements the io.ReadWriteCloser interface.
 type rpcRequest struct {
-	r          io.Reader     // holds the JSON formated RPC request
+	r          io.ReadCloser // holds the JSON formated RPC request
 	rw         io.ReadWriter // holds the JSON formated RPC response
-	done       chan bool     // signals then end of the RPC request
 	remoteAddr net.Addr
 	caps       *Caps
 	anzWarpper *analyzers.AnalyzerService
 }
 
 // newRPCRequest returns a new rpcRequest.
-func newRPCRequest(r io.Reader, remoteAddr net.Addr, caps *Caps, anz *analyzers.AnalyzerService) *rpcRequest {
-	var buf bytes.Buffer
-	done := make(chan bool)
+func newRPCRequest(r io.ReadCloser, remoteAddr net.Addr, caps *Caps, anz *analyzers.AnalyzerService) *rpcRequest {
 	return &rpcRequest{
 		r:          r,
-		rw:         &buf,
-		done:       done,
+		rw:         new(bytes.Buffer),
 		remoteAddr: remoteAddr,
 		caps:       caps,
 		anzWarpper: anz,
@@ -373,9 +367,7 @@ func (r *rpcRequest) Read(p []byte) (n int, err error) {
 }
 
 func (r *rpcRequest) Write(p []byte) (n int, err error) {
-	n, err = r.rw.Write(p)
-	r.done <- true
-	return
+	return r.rw.Write(p)
 }
 
 func (r *rpcRequest) LocalAddr() net.Addr {
@@ -386,14 +378,12 @@ func (r *rpcRequest) RemoteAddr() net.Addr {
 }
 
 func (r *rpcRequest) Close() error {
-	//r.done <- true // seem to be called sometimes before the write command finishes!
-	return nil
+	return r.r.Close()
 }
 
 // Call invokes the RPC request, waits for it to complete, and returns the results.
 func (r *rpcRequest) Call() io.Reader {
-	go rpc.ServeCodec(newCapsJSONCodec(r, r.caps, r.anzWarpper))
-	<-r.done
+	rpc.ServeCodec(newCapsJSONCodec(r, r.caps, r.anzWarpper))
 	return r.rw
 }
 
@@ -437,13 +427,14 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 }
 
 func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
-	serverPolicy int, serverName string, exitChan chan bool) {
+	serverPolicy int, serverName string, exitChan chan<- struct{}) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
+	defer func() { close(exitChan) }()
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
 		return
@@ -451,7 +442,6 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 	listener, err := tls.Listen(utils.TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
-		exitChan <- true
 		return
 	}
 
@@ -479,13 +469,14 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 }
 
 func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
-	serverPolicy int, serverName string, exitChan chan bool) {
+	serverPolicy int, serverName string, exitChan chan<- struct{}) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
+	defer func() { close(exitChan) }()
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
 		return
@@ -493,7 +484,6 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 	listener, err := tls.Listen(utils.TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
-		exitChan <- true
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS JSON TLS server at <%s>.", addr))
@@ -521,15 +511,14 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 
 func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,
 	serverName string, jsonRPCURL string, wsRPCURL string,
-	useBasicAuth bool, userList map[string]string, exitChan chan bool) {
+	useBasicAuth bool, userList map[string]string, exitChan chan<- struct{}) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
-	// s.httpsMux = http.NewServeMux()
-	if enabled && jsonRPCURL != "" {
+	if jsonRPCURL != "" {
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
@@ -540,7 +529,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 			s.httpsMux.HandleFunc(jsonRPCURL, s.handleRequest)
 		}
 	}
-	if enabled && wsRPCURL != "" {
+	if wsRPCURL != "" {
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
@@ -549,9 +538,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 			rpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
 		})
 		if useBasicAuth {
-			s.httpsMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
-				wsHandler.ServeHTTP(w, r)
-			}, basicAuth(userList)))
+			s.httpsMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpsMux.Handle(wsRPCURL, wsHandler)
 		}
@@ -562,6 +549,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 	if useBasicAuth {
 		utils.Logger.Info("<HTTPS> enabling basic auth")
 	}
+	defer func() { close(exitChan) }()
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
 		return
@@ -575,6 +563,5 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 	if err := httpSrv.ListenAndServeTLS(serverCrt, serverKey); err != nil {
 		log.Println(fmt.Sprintf("<HTTPS>Error: %s when listening ", err))
 	}
-	exitChan <- true
 	return
 }

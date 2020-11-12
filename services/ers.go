@@ -31,7 +31,7 @@ import (
 
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
+	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
 	return &EventReaderService{
 		rldChan:     make(chan struct{}, 1),
 		cfg:         cfg,
@@ -46,7 +46,7 @@ type EventReaderService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	exitChan    chan bool
+	exitChan    chan<- struct{}
 
 	ers      *ers.ERService
 	rldChan  chan struct{}
@@ -66,19 +66,19 @@ func (erS *EventReaderService) Start() (err error) {
 	filterS := <-erS.filterSChan
 	erS.filterSChan <- filterS
 
-	// remake tht stop chan
-	erS.stopChan = make(chan struct{}, 1)
+	// remake the stop chan
+	erS.stopChan = make(chan struct{})
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ERs))
 
 	// build the service
-	erS.ers = ers.NewERService(erS.cfg, filterS, erS.stopChan, erS.connMgr)
-	go func(ers *ers.ERService, rldChan chan struct{}) {
-		if err := ers.ListenAndServe(rldChan); err != nil {
+	erS.ers = ers.NewERService(erS.cfg, filterS, erS.connMgr)
+	go func(ers *ers.ERService, stopChan, rldChan chan struct{}) {
+		if err := ers.ListenAndServe(stopChan, rldChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
-			erS.exitChan <- true
+			close(erS.exitChan)
 		}
-	}(erS.ers, erS.rldChan)
+	}(erS.ers, erS.stopChan, erS.rldChan)
 	return
 }
 

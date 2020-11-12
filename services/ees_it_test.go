@@ -53,7 +53,7 @@ func TestEventExporterSReload(t *testing.T) {
 	cfg.AttributeSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan bool, 1)
+	engineShutdown := make(chan struct{}, 1)
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
@@ -64,9 +64,9 @@ func TestEventExporterSReload(t *testing.T) {
 	attrS := NewAttributeService(cfg, db,
 		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1),
 		anz)
-	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil), server, engineShutdown, make(chan rpcclient.ClientConnector, 1), anz)
+	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil), server, make(chan rpcclient.ClientConnector, 1), anz)
 	srvMngr.AddServices(ees, attrS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -101,5 +101,6 @@ func TestEventExporterSReload(t *testing.T) {
 	if ees.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	engineShutdown <- true
+	close(engineShutdown)
+	srvMngr.ShutdownServices(10 * time.Millisecond)
 }

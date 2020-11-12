@@ -52,7 +52,7 @@ func TestEventReaderSReload(t *testing.T) {
 	cfg.SessionSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan bool, 1)
+	engineShutdown := make(chan struct{}, 1)
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
@@ -61,7 +61,7 @@ func TestEventReaderSReload(t *testing.T) {
 	attrS := NewEventReaderService(cfg, filterSChan, engineShutdown, nil)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS, sS,
-		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -87,5 +87,6 @@ func TestEventReaderSReload(t *testing.T) {
 	if attrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	engineShutdown <- true
+	close(engineShutdown)
+	srvMngr.ShutdownServices(10 * time.Millisecond)
 }

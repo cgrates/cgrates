@@ -34,7 +34,7 @@ type Scheduler struct {
 	sync.RWMutex
 	queue                           engine.ActionTimingPriorityList
 	timer                           *time.Timer
-	restartLoop                     chan bool
+	restartLoop                     chan struct{}
 	dm                              *engine.DataManager
 	cfg                             *config.CGRConfig
 	fltrS                           *engine.FilterS
@@ -48,7 +48,7 @@ type Scheduler struct {
 func NewScheduler(dm *engine.DataManager, cfg *config.CGRConfig,
 	fltrS *engine.FilterS) (s *Scheduler) {
 	s = &Scheduler{
-		restartLoop: make(chan bool),
+		restartLoop: make(chan struct{}),
 		dm:          dm,
 		cfg:         cfg,
 		fltrS:       fltrS,
@@ -141,7 +141,7 @@ func (s *Scheduler) loadActionPlans() {
 	s.Lock()
 	defer s.Unlock()
 	// limit the number of concurrent tasks
-	limit := make(chan bool, 10)
+	limit := make(chan struct{}, 10)
 	// execute existing tasks
 	for {
 		task, err := s.dm.DataDB().PopTask()
@@ -167,7 +167,7 @@ func (s *Scheduler) loadActionPlans() {
 			}
 			continue
 		}
-		limit <- true
+		limit <- struct{}{}
 		go func() {
 			utils.Logger.Info(fmt.Sprintf("<%s> executing task %s on account %s",
 				utils.SchedulerS, task.ActionsID, task.AccountID))
@@ -222,7 +222,7 @@ func (s *Scheduler) loadActionPlans() {
 
 func (s *Scheduler) restart() {
 	if s.schedulerStarted {
-		s.restartLoop <- true
+		s.restartLoop <- struct{}{}
 	}
 	if s.timer != nil {
 		s.timer.Stop()
@@ -290,8 +290,8 @@ func (s *Scheduler) GetScheduledActions(fltr ArgsGetScheduledActions) (schedActi
 }
 
 func (s *Scheduler) Shutdown() {
-	s.schedulerStarted = false // disable loop on next run
-	s.restartLoop <- true      // cancel waiting tasks
+	s.schedulerStarted = false  // disable loop on next run
+	s.restartLoop <- struct{}{} // cancel waiting tasks
 	if s.timer != nil {
 		s.timer.Stop()
 	}

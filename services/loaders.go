@@ -33,7 +33,7 @@ import (
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, server *cores.Server,
-	exitChan chan bool, internalLoaderSChan chan rpcclient.ClientConnector,
+	internalLoaderSChan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager,
 	anz *AnalyzerService) *LoaderService {
 	return &LoaderService{
@@ -42,7 +42,6 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		filterSChan: filterSChan,
 		server:      server,
-		exitChan:    exitChan,
 		connMgr:     connMgr,
 		stopChan:    make(chan struct{}),
 		anz:         anz,
@@ -56,7 +55,6 @@ type LoaderService struct {
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
-	exitChan    chan bool
 	stopChan    chan struct{}
 
 	ldrs     *loaders.LoaderService
@@ -82,7 +80,7 @@ func (ldrs *LoaderService) Start() (err error) {
 	defer ldrs.Unlock()
 
 	ldrs.ldrs = loaders.NewLoaderService(datadb, ldrs.cfg.LoaderCfg(),
-		ldrs.cfg.GeneralCfg().DefaultTimezone, ldrs.exitChan, filterS, ldrs.connMgr)
+		ldrs.cfg.GeneralCfg().DefaultTimezone, filterS, ldrs.connMgr)
 
 	if !ldrs.ldrs.Enabled() {
 		return
@@ -147,6 +145,7 @@ func (ldrs *LoaderService) ShouldRun() bool {
 	return ldrs.cfg.LoaderCfg().Enabled()
 }
 
+// GetLoaderS returns the initialized LoaderService
 func (ldrs *LoaderService) GetLoaderS() *loaders.LoaderService {
 	return ldrs.ldrs
 }

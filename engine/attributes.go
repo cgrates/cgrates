@@ -46,14 +46,6 @@ type AttributeService struct {
 	cgrcfg  *config.CGRConfig
 }
 
-// ListenAndServe will initialize the service
-func (alS *AttributeService) ListenAndServe(exitChan chan bool) (err error) {
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
-	e := <-exitChan
-	exitChan <- e // put back for the others listening for shutdown request
-	return
-}
-
 // Shutdown is called to shutdown the service
 func (alS *AttributeService) Shutdown() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.AttributeS))

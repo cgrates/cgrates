@@ -67,18 +67,18 @@ func TestCapsStats(t *testing.T) {
 	}
 	exp := &CapsStats{st: st}
 	cr := NewCaps(0, utils.MetaBusy)
-	exitChan := make(chan bool, 1)
-	exitChan <- true
+	exitChan := make(chan struct{}, 1)
+	close(exitChan)
 	cs := NewCapsStats(1, cr, exitChan)
 	if !reflect.DeepEqual(exp, cs) {
 		t.Errorf("Expected: %v ,received: %v", exp, cs)
 	}
 	<-exitChan
-	exitChan = make(chan bool, 1)
+	exitChan = make(chan struct{}, 1)
 	go func() {
 		runtime.Gosched()
 		time.Sleep(100)
-		exitChan <- true
+		close(exitChan)
 	}()
 	cr = NewCaps(10, utils.MetaBusy)
 	cr.Allocate()

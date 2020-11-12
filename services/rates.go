@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -40,7 +39,7 @@ func NewRateService(
 	cfg *config.CGRConfig, cacheS *engine.CacheS,
 	filterSChan chan *engine.FilterS,
 	dmS *DataDBService,
-	server *cores.Server, exitChan chan bool,
+	server *cores.Server,
 	intConnChan chan rpcclient.ClientConnector,
 	anz *AnalyzerService) servmanager.Service {
 	return &RateService{
@@ -49,7 +48,6 @@ func NewRateService(
 		filterSChan: filterSChan,
 		dmS:         dmS,
 		server:      server,
-		exitChan:    exitChan,
 		intConnChan: intConnChan,
 		rldChan:     make(chan struct{}),
 		anz:         anz,
@@ -65,9 +63,9 @@ type RateService struct {
 	dmS         *DataDBService
 	cacheS      *engine.CacheS
 	server      *cores.Server
-	exitChan    chan bool
 
-	rldChan chan struct{}
+	rldChan  chan struct{}
+	stopChan chan struct{}
 
 	rateS       *rates.RateS
 	rpc         *v1.RateSv1
@@ -102,6 +100,7 @@ func (rs *RateService) Reload() (err error) {
 func (rs *RateService) Shutdown() (err error) {
 	rs.Lock()
 	defer rs.Unlock()
+	close(rs.stopChan)
 	if err = rs.rateS.Shutdown(); err != nil {
 		return
 	}
@@ -130,12 +129,8 @@ func (rs *RateService) Start() (err error) {
 	rs.rateS = rates.NewRateS(rs.cfg, fltrS, dm)
 	rs.Unlock()
 
-	go func(rtS *rates.RateS, exitChan chan bool, rldChan chan struct{}) {
-		if err := rtS.ListenAndServe(exitChan, rldChan); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.EventExporterS, err.Error()))
-			exitChan <- true
-		}
-	}(rs.rateS, rs.exitChan, rs.rldChan)
+	rs.stopChan = make(chan struct{})
+	go rs.rateS.ListenAndServe(rs.stopChan, rs.rldChan)
 
 	rs.rpc = v1.NewRateSv1(rs.rateS)
 	if !rs.cfg.DispatcherSCfg().Enabled {

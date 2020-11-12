@@ -37,8 +37,8 @@ func TestERsNewERService(t *testing.T) {
 		stopLsn:   make(map[string]chan struct{}),
 		rdrEvents: make(chan *erEvent),
 		rdrErr:    make(chan error),
-		stopChan:  nil}
-	rcv := NewERService(cfg, fltrS, nil, nil)
+	}
+	rcv := NewERService(cfg, fltrS, nil)
 
 	if !reflect.DeepEqual(expected.cfg, rcv.cfg) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.cfg, rcv.cfg)
@@ -50,7 +50,7 @@ func TestERsNewERService(t *testing.T) {
 func TestERsAddReader(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	fltrS := &engine.FilterS{}
-	erS := NewERService(cfg, fltrS, nil, nil)
+	erS := NewERService(cfg, fltrS, nil)
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = utils.MetaFileCSV
 	reader.ID = "file_reader"
