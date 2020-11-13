@@ -897,3 +897,10 @@ func TestIfaceAsSliceString(t *testing.T) {
 		t.Errorf("Expected error %s ,received: %v", expError, err)
 	}
 }
+
+func TestReflectFieldInterfaceBadType(t *testing.T) {
+	_, err := ReflectFieldInterface(22, "22", "22")
+	if err == nil || err.Error() != "Unsupported field kind: int" {
+		t.Errorf("Expected <Unsupported field kind: int> ,received: <%+v>", err)
+	}
+}
