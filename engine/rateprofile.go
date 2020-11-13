@@ -184,6 +184,17 @@ func (rpp *RateProfile) Sort() {
 
 // CompressEquals compares two RateSIntervals for Compress function
 func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
+	if rIv.UsageStart != rIv2.UsageStart {
+		return
+	}
+	if len(rIv.Increments) != len(rIv2.Increments) {
+		return
+	}
+	for i, rIcr := range rIv.Increments {
+		if !rIcr.CompressEquals(rIv2.Increments[i], true) {
+			return
+		}
+	}
 	return
 }
 
@@ -198,14 +209,17 @@ func (rIv *RateSInterval) Cost() *utils.Decimal {
 }
 
 // CompressEquals compares two RateSIncrement for Compress function
-func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
-	if rIcr.Rate.UID() != rIcr2.Rate.UID() {
+func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement, full bool) (eq bool) {
+	if rIcr.UsageStart != rIcr2.UsageStart {
 		return
 	}
 	if rIcr.Usage != rIcr2.Usage {
 		return
 	}
-	if rIcr.CompressFactor != rIcr2.CompressFactor {
+	if rIcr.Rate.UID() != rIcr2.Rate.UID() {
+		return
+	}
+	if full && rIcr.IntervalRateIndex != rIcr2.IntervalRateIndex {
 		return
 	}
 	return true
