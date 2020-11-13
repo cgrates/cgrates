@@ -904,3 +904,211 @@ func TestReflectFieldInterfaceBadType(t *testing.T) {
 		t.Errorf("Expected <Unsupported field kind: int> ,received: <%+v>", err)
 	}
 }
+
+func TestReflectFieldInterfaceFieldNotValid(t *testing.T) {
+	var intf = map[string]int{
+		"field1": 22,
+		"field2": 35,
+	}
+	_, err := ReflectFieldInterface(intf, "", "")
+	if err == nil || err.Error() != "NOT_FOUND" {
+		t.Errorf("NOT_FOUND> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectFieldInterfaceStructCase1(t *testing.T) {
+	type vStruct struct {
+		X int
+		Y int
+	}
+	intf := vStruct{22, 35}
+	_, err := ReflectFieldInterface(intf, "x", "")
+	if err == nil || err.Error() != "NOT_FOUND" {
+		t.Errorf("<NOT_FOUND> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectFieldInterfaceStructCase2(t *testing.T) {
+	type v struct {
+		X int
+		Y int
+	}
+	intf := v{22, 35}
+	_, err := ReflectFieldInterface(intf, "x", "y")
+	if err == nil || err.Error() != "NOT_FOUND" {
+		t.Errorf("<NOT_FOUND> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectFieldInterfaceStruct(t *testing.T) {
+	type Test struct {
+		StrField  string
+		StrField2 string
+	}
+	structTest := Test{
+		StrField:  "TestStructField",
+		StrField2: "TestStructField2",
+	}
+	result, _ := ReflectFieldInterface(structTest, "StrField", "StrField2")
+	if !reflect.DeepEqual(result, "TestStructField") {
+		t.Errorf("Expected <TestStructField> ,received: <%+v>", result)
+	}
+}
+
+func TestReflectFieldInterfaceStructError3(t *testing.T) {
+	type Test struct {
+		StrField  string
+		StrField2 string
+		StrField3 map[string]string
+	}
+	structTest := Test{
+		StrField:  "TestStructField",
+		StrField2: "TestStructField2",
+	}
+	_, err := ReflectFieldInterface(structTest, "StrField4", "StrField3")
+	if err != ErrNotFound {
+		t.Errorf("<NOT_FOUND> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectFieldAsStringError(t *testing.T) {
+	var test bool
+	_, err := IfaceAsTime(test, "")
+	if err == nil || err.Error() != "cannot convert field: false to time.Time" {
+		t.Errorf("Expecting <cannot convert field: false to time.Time> ,received: <%+v>", err)
+	}
+}
+
+func TestIfaceAsDurationDefaultError(t *testing.T) {
+	var test bool
+	_, err := IfaceAsDuration(test)
+	if err == nil || err.Error() != "cannot convert field: false to time.Duration" {
+		t.Errorf("Expecting <cannot convert field: false to time.Duration> ,received: <%+v>", err)
+	}
+}
+
+func TestIfaceAsDurationCaseUInt(t *testing.T) {
+	var test uint
+	test = 127
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "127ns") {
+		t.Errorf("Expected <127ns> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseInt8(t *testing.T) {
+	var test int8
+	test = 127
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "127ns") {
+		t.Errorf("Expected <127ns> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseNegInt8(t *testing.T) {
+	var test int8
+	test = -127
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "-127ns") {
+		t.Errorf("Expected <-127ns> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseUInt8(t *testing.T) {
+	var test uint8
+	test = 127
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "127ns") {
+		t.Errorf("Expected <127ns> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseInt16(t *testing.T) {
+	var test int16
+	test = 32767
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "32.767µs") {
+		t.Errorf("Expected <32.767µs> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseNegInt16(t *testing.T) {
+	var test int16
+	test = -32767
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "-32.767µs") {
+		t.Errorf("Expected <-32.767µs> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseUInt16(t *testing.T) {
+	var test uint16
+	test = 32767
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "32.767µs") {
+		t.Errorf("Expected <32.767µs> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseInt32(t *testing.T) {
+	var test int32
+	test = 2147483647
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "2.147483647s") {
+		t.Errorf("Expected <2.147483647s> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseNegInt32(t *testing.T) {
+	var test int32
+	test = -2147483647
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "-2.147483647s") {
+		t.Errorf("Expected <-2.147483647s> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseUInt32(t *testing.T) {
+	var test uint32
+	test = 2147483647
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "2.147483647s") {
+		t.Errorf("Expected <2.147483647s> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseInt64(t *testing.T) {
+	var test int64
+	test = 9223372036854775807
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "2562047h47m16.854775807s") {
+		t.Errorf("Expected <2562047h47m16.854775807s> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseNegInt64(t *testing.T) {
+	var test int64
+	test = -9223372036854775807
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "-2562047h47m16.854775807s") {
+		t.Errorf("Expected <-2562047h47m16.854775807s> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseUInt64(t *testing.T) {
+	var test uint64
+	test = 9223372036854775807
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "2562047h47m16.854775807s") {
+		t.Errorf("Expected <2562047h47m16.854775807s> ,received: <%+v>", response)
+	}
+}
+
+func TestIfaceAsDurationCaseFloat32(t *testing.T) {
+	var test float32
+	test = 9.5555555
+	response, _ := IfaceAsDuration(test)
+	if !reflect.DeepEqual(response.String(), "9ns") {
+		t.Errorf("Expected <9ns> ,received: <%+v>", response)
+	}
+}
