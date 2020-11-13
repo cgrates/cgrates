@@ -77,20 +77,20 @@ type AsteriskAgent struct {
 	evCacheMux  sync.RWMutex                       // Protect eventsCache
 }
 
-func (sma *AsteriskAgent) connectAsterisk() (err error) {
+func (sma *AsteriskAgent) connectAsterisk(stopChan <-chan struct{}) (err error) {
 	connCfg := sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx]
 	sma.astEvChan = make(chan map[string]interface{})
 	sma.astErrChan = make(chan error)
 	sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
 		connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
 		connCfg.User, connCfg.Password, fmt.Sprintf("%s@%s", utils.CGRateS, utils.VERSION),
-		sma.astEvChan, sma.astErrChan, connCfg.ConnectAttempts, connCfg.Reconnects)
+		sma.astEvChan, sma.astErrChan, stopChan, connCfg.ConnectAttempts, connCfg.Reconnects)
 	return
 }
 
 // ListenAndServe is called to start the service
 func (sma *AsteriskAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
-	if err = sma.connectAsterisk(); err != nil {
+	if err = sma.connectAsterisk(stopChan); err != nil {
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("<%s> successfully connected to Asterisk at: <%s>",

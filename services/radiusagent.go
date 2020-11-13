@@ -46,9 +46,14 @@ type RadiusAgent struct {
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
 	exitChan    chan<- struct{}
+	stopChan    chan struct{}
 
 	rad     *agents.RadiusAgent
 	connMgr *engine.ConnManager
+
+	lnet  string
+	lauth string
+	lacct string
 }
 
 // Start should handle the sercive start
@@ -63,27 +68,44 @@ func (rad *RadiusAgent) Start() (err error) {
 	rad.Lock()
 	defer rad.Unlock()
 
+	rad.lnet = rad.cfg.RadiusAgentCfg().ListenNet
+	rad.lauth = rad.cfg.RadiusAgentCfg().ListenAuth
+	rad.lacct = rad.cfg.RadiusAgentCfg().ListenAcct
+
 	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, filterS, rad.connMgr); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 		return
 	}
-
+	rad.stopChan = make(chan struct{})
 	go func() {
-		if err = rad.rad.ListenAndServe(); err != nil {
+		if err = rad.rad.ListenAndServe(rad.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
+			close(rad.exitChan)
 		}
-		close(rad.exitChan)
 	}()
 	return
 }
 
 // Reload handles the change of config
 func (rad *RadiusAgent) Reload() (err error) {
-	return
+	if rad.lnet == rad.cfg.RadiusAgentCfg().ListenNet &&
+		rad.lauth == rad.cfg.RadiusAgentCfg().ListenAuth &&
+		rad.lacct == rad.cfg.RadiusAgentCfg().ListenAcct {
+		return
+	}
+
+	if err = rad.Shutdown(); err != nil {
+		return
+	}
+	return rad.Start()
 }
 
 // Shutdown stops the service
 func (rad *RadiusAgent) Shutdown() (err error) {
+	rad.Lock()
+	close(rad.stopChan)
+	rad.rad = nil
+	rad.Unlock()
 	return // no shutdown for the momment
 }
 

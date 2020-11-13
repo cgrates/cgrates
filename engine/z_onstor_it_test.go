@@ -2204,6 +2204,9 @@ func testOnStorITRateProfile(t *testing.T) {
 	if err := onStor.SetRateProfile(rPrf, false); err != nil {
 		t.Error(err)
 	}
+	if err = rPrf.Compile(); err != nil {
+		t.Fatal(err)
+	}
 	//get from database
 	if rcv, err := onStor.GetRateProfile("cgrates.org", "RP1",
 		false, false, utils.NonTransactional); err != nil {

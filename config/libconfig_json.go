@@ -666,4 +666,5 @@ type CoreSJsonCfg struct {
 	Caps                *int
 	Caps_strategy       *string
 	Caps_stats_interval *string
+	Shutdown_timeout    *string
 }

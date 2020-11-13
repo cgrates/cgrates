@@ -18,13 +18,13 @@ require (
 	github.com/cenk/hub v1.0.1 // indirect
 	github.com/cenkalti/hub v1.0.1 // indirect
 	github.com/cenkalti/rpc2 v0.0.0-20200203073230-5ce2854ce0fd
-	github.com/cgrates/aringo v0.0.0-20191121125609-d85002bd1667
+	github.com/cgrates/aringo v0.0.0-20201113143849-3b299e4e636d
 	github.com/cgrates/baningo v0.0.0-20201105145354-6e3173f6a91b
 	github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70
 	github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7
 	github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
-	github.com/cgrates/radigo v0.0.0-20200324152710-35e651804ad1
+	github.com/cgrates/radigo v0.0.0-20201113143731-162035428d72
 	github.com/cgrates/rpcclient v0.0.0-20201106122207-1023f17a2b43
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60
@@ -60,9 +60,10 @@ require (
 	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c // indirect
 	github.com/xdg/stringprep v1.0.1-0.20180714160509-73f8eece6fdc // indirect
 	go.mongodb.org/mongo-driver v1.4.0
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/net v0.0.0-20200707034311-ab3426394381
+	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9
+	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/text v0.3.4 // indirect
 	google.golang.org/api v0.29.0
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7

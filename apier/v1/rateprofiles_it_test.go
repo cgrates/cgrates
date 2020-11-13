@@ -243,6 +243,9 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 			},
 		},
 	}
+	if err := rPrf.Compile(); err != nil {
+		t.Fatal(err)
+	}
 	var reply string
 	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:RP1"
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile,
