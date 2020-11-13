@@ -1112,3 +1112,14 @@ func TestIfaceAsDurationCaseFloat32(t *testing.T) {
 		t.Errorf("Expected <9ns> ,received: <%+v>", response)
 	}
 }
+
+func TestIfaceAsStringInt32(t *testing.T) {
+	var test int32
+	var expected int64
+	test = 2147483647
+	expected = 2147483647
+	response, _ := IfaceAsInt64(test)
+	if !reflect.DeepEqual(response, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
+	}
+}
