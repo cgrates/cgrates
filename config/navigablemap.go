@@ -110,8 +110,7 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 				continue
 			}
 			if i == len(nmItm.Path) { // lastElmnt, overwrite value or add attribute
-				if nmItm.Config != nil &&
-					nmItm.Config.AttributeID != "" {
+				if nmItm.Config != nil && nmItm.Config.AttributeID != "" {
 					cachedElm.Attributes = append(cachedElm.Attributes,
 						&xml.Attr{
 							Name:  xml.Name{Local: nmItm.Config.AttributeID},
