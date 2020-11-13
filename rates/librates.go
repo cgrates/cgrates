@@ -178,8 +178,7 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 }
 
 // computeRateSIntervals will give out the cost projection for the given orderedRates and usage
-func computeRateSIntervals(rts []*orderedRate, usage time.Duration) (rtIvls []*engine.RateSInterval, err error) {
-	var rtUsageSIdx time.Duration // rtUsageSIdx for one rate
+func computeRateSIntervals(rts []*orderedRate, usageStart, usage time.Duration) (rtIvls []*engine.RateSInterval, err error) {
 	for i, rt := range rts {
 		isLastRt := i == len(rts)-1
 		var rtUsageEIdx time.Duration
@@ -189,7 +188,7 @@ func computeRateSIntervals(rts []*orderedRate, usage time.Duration) (rtIvls []*e
 			rtUsageEIdx = usage
 		}
 		var rIcmts []*engine.RateSIncrement
-		iRtUsageSIdx := rtUsageSIdx
+		iRtUsageSIdx := usageStart
 		iRtUsageEIdx := rtUsageEIdx
 		for j, iRt := range rt.IntervalRates {
 			if iRtUsageSIdx >= rtUsageEIdx { // charged enough for interval
@@ -201,9 +200,10 @@ func computeRateSIntervals(rts []*orderedRate, usage time.Duration) (rtIvls []*e
 					rt.UID(), iRtUsageSIdx)
 			}
 			isLastIRt := j == len(rt.IntervalRates)-1
-			if iRt.IntervalStart > iRtUsageSIdx ||
-				(!isLastIRt && rt.IntervalRates[j+1].IntervalStart <= iRtUsageSIdx) {
-				break // the rates should be already ordered, break here
+			if iRt.IntervalStart > iRtUsageSIdx {
+				break
+			} else if !isLastIRt && rt.IntervalRates[j+1].IntervalStart <= iRtUsageSIdx {
+				continue // the rates should be already ordered, break here
 			}
 			if !isLastIRt {
 				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart
@@ -236,13 +236,13 @@ func computeRateSIntervals(rts []*orderedRate, usage time.Duration) (rtIvls []*e
 		}
 		rtIvls = append(rtIvls,
 			&engine.RateSInterval{
-				UsageStart:     rtUsageSIdx,
+				UsageStart:     usageStart,
 				Increments:     rIcmts,
 				CompressFactor: 1})
 		if iRtUsageSIdx >= usage { // charged enough for the usage
 			break
 		}
-		rtUsageSIdx = rtUsageEIdx // continue for the next interval
+		usageStart = rtUsageEIdx // continue for the next interval
 	}
 	return
 }

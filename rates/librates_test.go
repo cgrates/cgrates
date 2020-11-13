@@ -1669,9 +1669,63 @@ func TestComputeRateSIntervals(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-	if rtIvls, err := computeRateSIntervals(rts, time.Duration(130*time.Second)); err != nil {
+	if rtIvls, err := computeRateSIntervals(rts,
+		time.Duration(0), time.Duration(130*time.Second)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRtIvls, rtIvls) {
 		t.Errorf("expecting: %+v, received: %+v", eRtIvls, rtIvls)
+	}
+
+	rts = []*orderedRate{
+		{
+			time.Duration(0),
+			rt0,
+		},
+		{
+			time.Duration(90 * time.Second),
+			rt1,
+		},
+	}
+
+	eRtIvls = []*engine.RateSInterval{
+		{
+			UsageStart: time.Duration(time.Minute),
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Duration(time.Minute),
+					Usage:             time.Duration(30 * time.Second),
+					Rate:              rt0,
+					IntervalRateIndex: 1,
+					CompressFactor:    30,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Duration(90 * time.Second),
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Duration(90 * time.Second),
+					Usage:             time.Duration(30 * time.Second),
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    30,
+				},
+				{
+					UsageStart:        time.Duration(2 * time.Minute),
+					Usage:             time.Duration(10 * time.Second),
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					CompressFactor:    10,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+	if rtIvls, err := computeRateSIntervals(rts,
+		time.Duration(time.Minute), time.Duration(130*time.Second)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRtIvls, rtIvls) {
+		t.Errorf("expecting: %+v, received: %+v", utils.ToIJSON(eRtIvls), utils.ToIJSON(rtIvls))
 	}
 }

@@ -133,30 +133,43 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, args *ArgsCostForEvent,
 func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *ArgsCostForEvent) (rts []*engine.RateSInterval, err error) {
 	var rtIDs utils.StringSet
 	if rtIDs, err = engine.MatchingItemIDsForEvent(
-		args.CGRevent.Event,
+		args.CGREventWithOpts.CGREvent.Event,
 		rS.cfg.RateSCfg().RateStringIndexedFields,
 		rS.cfg.RateSCfg().RatePrefixIndexedFields,
+		rS.cfg.RateSCfg().RateSuffixIndexedFields,
 		rS.dm,
 		utils.CacheRateFilterIndexes,
-		utils.ConcatenatedKey(args.CGRevent.Tenant, rtPfl.ID),
+		utils.ConcatenatedKey(args.CGREventWithOpts.CGREvent.Tenant, rtPfl.ID),
 		rS.cfg.RateSCfg().RateIndexedSelects,
 		rS.cfg.RateSCfg().RateNestedFields,
 	); err != nil {
 		return
 	}
 	aRates := make([]*engine.Rate, len(rtIDs))
-	evNm := utils.MapStorage{utils.MetaReq: cgrEv.Event}
+	evNm := utils.MapStorage{utils.MetaReq: args.CGREventWithOpts.CGREvent.Event}
 	for rtID := range rtIDs {
 		rt := rtPfl.Rates[rtID] // pick the rate directly from map based on matched ID
 		var pass bool
-		if pass, err = rS.filterS.Pass(cgrEv.Tenant, rt.FilterIDs, evNm); err != nil {
+		if pass, err = rS.filterS.Pass(args.CGREventWithOpts.CGREvent.Tenant, rt.FilterIDs, evNm); err != nil {
 			return
 		} else if !pass {
 			continue
 		}
 		aRates = append(aRates, rt)
 	}
-	ordRts := orderRatesOnIntervals(aRates)
+	var sTime time.Time
+	if sTime, err = args.StartTime(rS.cfg.GeneralCfg().DefaultTimezone); err != nil {
+		return
+	}
+	var usage time.Duration
+	if usage, err = args.Usage(); err != nil {
+		return
+	}
+	var ordRts []*orderedRate
+	if ordRts, err = orderRatesOnIntervals(aRates, sTime, usage, true, 1000000); err != nil {
+		return
+	}
+
 	return
 }
 */
@@ -189,6 +202,19 @@ func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error)
 		return *args.CGREvent.Time, nil
 	}
 	return time.Now(), nil
+}
+
+// usage returns the event time used to check active rate profiles
+func (args *ArgsCostForEvent) Usage() (usage time.Duration, err error) {
+	if uIface, has := args.Opts[utils.OptsRatesUsage]; has {
+		return utils.IfaceAsDuration(uIface)
+	}
+	if usage, err = args.CGREvent.FieldAsDuration(utils.Usage); err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+	}
+	return time.Duration(time.Minute), nil
 }
 
 // V1CostForEvent will be called to calculate the cost for an event

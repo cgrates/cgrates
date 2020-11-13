@@ -236,3 +236,7 @@ func CostForIntervals(rtIvls []*RateSInterval) (cost *utils.Decimal) {
 	}
 	return
 }
+
+// CompressIntervals will compress intervals which equal
+func CompressIntervals(rtIvls []*RateSInterval) {
+}

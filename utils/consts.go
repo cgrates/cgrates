@@ -2343,7 +2343,7 @@ var (
 )
 
 // CGROptionsSet the possible cgr options
-var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsSessionTTL, OptsSessionTTLMaxDelay,
+var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSessionTTL, OptsSessionTTLMaxDelay,
 	OptsSessionTTLLastUsed, OptsSessionTTLLastUsage, OptsSessionTTLUsage, OptsDebitInterval, OptsStirATest,
 	OptsStirPayloadMaxDuration, OptsStirIdentity, OptsStirOriginatorTn, OptsStirOriginatorURI,
 	OptsStirDestinationTn, OptsStirDestinationURI, OptsStirPublicKeyPath, OptsStirPrivateKeyPath,
@@ -2372,6 +2372,7 @@ const (
 	OptsRoutesLimit         = "*routes_limit"
 	OptsRoutesOffset        = "*routes_offset"
 	OptsRatesStartTime      = "*ratesStartTime"
+	OptsRatesUsage          = "*ratesUsage"
 	OptsSessionTTL          = "*sessionTTL"
 	OptsSessionTTLMaxDelay  = "*sessionTTLMaxDelay"
 	OptsSessionTTLLastUsed  = "*sessionTTLLastUsed"
