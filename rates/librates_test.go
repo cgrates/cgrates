@@ -1723,7 +1723,7 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 	}
 	if rtIvls, err := computeRateSIntervals(rts,
-		time.Duration(time.Minute), time.Duration(130*time.Second)); err != nil {
+		time.Duration(time.Minute), time.Duration(70*time.Second)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRtIvls, rtIvls) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToIJSON(eRtIvls), utils.ToIJSON(rtIvls))

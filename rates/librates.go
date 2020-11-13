@@ -179,13 +179,17 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 
 // computeRateSIntervals will give out the cost projection for the given orderedRates and usage
 func computeRateSIntervals(rts []*orderedRate, usageStart, usage time.Duration) (rtIvls []*engine.RateSInterval, err error) {
+	totalUsage := usage
+	if usageStart != 0 {
+		totalUsage = usage + usageStart
+	}
 	for i, rt := range rts {
 		isLastRt := i == len(rts)-1
 		var rtUsageEIdx time.Duration
 		if !isLastRt {
 			rtUsageEIdx = rts[i+1].Duration
 		} else {
-			rtUsageEIdx = usage
+			rtUsageEIdx = totalUsage
 		}
 		var rIcmts []*engine.RateSIncrement
 		iRtUsageSIdx := usageStart
@@ -239,7 +243,7 @@ func computeRateSIntervals(rts []*orderedRate, usageStart, usage time.Duration) 
 				UsageStart:     usageStart,
 				Increments:     rIcmts,
 				CompressFactor: 1})
-		if iRtUsageSIdx >= usage { // charged enough for the usage
+		if iRtUsageSIdx >= totalUsage { // charged enough for the usage
 			break
 		}
 		usageStart = rtUsageEIdx // continue for the next interval
