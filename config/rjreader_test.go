@@ -184,7 +184,7 @@ func TestEnvRawJsonPeekByteWCError(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	raw = NewRjReaderFromBytes([]byte(`/ce faci`))
+	raw = NewRjReaderFromBytes([]byte(`/rand val`))
 	expectedByte := (byte)('/')
 	if rply, err := raw.PeekByteWC(); err != nil {
 		t.Error(err)
@@ -255,17 +255,16 @@ func TestEnvReaderRead2(t *testing.T) {
 func TestEnvReaderreadEnvName(t *testing.T) {
 	envR := NewRjReaderFromBytes([]byte(`Test_VAR1 } Var2_TEST'`))
 	expected := []byte("Test_VAR1")
-	if rply, endindx, err := envR.readEnvName(0); err != nil {
-		t.Error(err)
-	} else if endindx != 9 {
+	rply, endindx := envR.readEnvName(0)
+	if endindx != 9 {
 		t.Errorf("Wrong endindx returned %v", endindx)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %+v, received: %+v", (string(expected)), (string(rply)))
 	}
+
 	expected = []byte("Var2_TEST")
-	if rply, endindx, err := envR.readEnvName(12); err != nil {
-		t.Error(err)
-	} else if endindx != 21 {
+	rply, endindx = envR.readEnvName(12)
+	if endindx != 21 {
 		t.Errorf("Wrong endindx returned %v", endindx)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %+v, received: %+v", (string(expected)), (string(rply)))
@@ -274,9 +273,8 @@ func TestEnvReaderreadEnvName(t *testing.T) {
 
 func TestEnvReaderreadEnvNameError(t *testing.T) {
 	envR := NewRjReaderFromBytes([]byte(``))
-	expectedErr := "EOF"
-	if _, _, err := envR.readEnvName(1); err == nil && err.Error() != expectedErr {
-		t.Errorf("Expected %+v ,received %+v", expectedErr, err)
+	if name, index := envR.readEnvName(1); name != nil || index != 1 {
+		t.Errorf("Expected nil, received %+v", name)
 	}
 }
 
@@ -367,6 +365,18 @@ func TestIsWhiteSpace(t *testing.T) {
 		if rply := isWhiteSpace(char); expected != rply {
 			t.Errorf("Expected: %+v, received: %+v", expected, rply)
 		}
+	}
+}
+
+func TestReadRJReader(t *testing.T) {
+	os.Setenv("TESTVARNoZero", utils.EmptyString)
+	rjr := NewRjReaderFromBytes([]byte(`{"origin_host": "*env:TESTVARNoZero",
+        "origin_realm": "*env:TESTVARNoZero",}`))
+	expected := "NOT_FOUND:ENV_VAR:TESTVARNoZero"
+	buf := make([]byte, 20)
+	rjr.indx = 1
+	if _, err := rjr.Read(buf); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 

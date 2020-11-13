@@ -22,6 +22,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -5716,6 +5717,7 @@ func TestReloadSections(t *testing.T) {
 		if err := cfgCgr.reloadSections(section); err != nil {
 			t.Error(err)
 		} else {
+			runtime.Gosched()
 			select {
 			case <-time.After(10):
 				t.Fatal("timeout", section)

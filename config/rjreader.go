@@ -240,25 +240,22 @@ func (rjr *rjReader) checkMeta() bool {
 }
 
 //readEnvName reads the enviorment key
-func (rjr *rjReader) readEnvName(indx int) (name []byte, endindx int, err error) { //0 if not set
+func (rjr *rjReader) readEnvName(indx int) (name []byte, endindx int) { //0 if not set
 	for indx < len(rjr.buf) { //read byte by byte
 		bit := rjr.buf[indx]
 		if !isAlfanum(bit) && bit != '_' { //[a-zA-Z_]+[a-zA-Z0-9_]*
-			return name, indx, nil
+			return name, indx
 		}
 		name = append(name, bit)
 		indx++
 	}
-	return name, indx, io.EOF
+	return name, indx
 }
 
 //replaceEnv replaces the EnvMeta and enviorment key with  enviorment variable value in specific buffer
 func (rjr *rjReader) replaceEnv(startEnv int) error {
 	midEnv := len(utils.MetaEnv)
-	key, endEnv, err := rjr.readEnvName(startEnv + midEnv)
-	if err != nil && err != io.EOF {
-		return err
-	}
+	key, endEnv := rjr.readEnvName(startEnv + midEnv)
 	value, err := ReadEnv(string(key))
 	if err != nil {
 		return err
