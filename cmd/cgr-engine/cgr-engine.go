@@ -656,7 +656,7 @@ func main() {
 	<-exitChan
 	close(rpcStop)
 	close(signStop)
-	srvManager.ShutdownServices(time.Second)
+	srvManager.ShutdownServices(cfg.CoreSCfg().ShutdownTimeout)
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling
 		close(cpuProfChanStop)

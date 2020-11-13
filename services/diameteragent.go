@@ -46,9 +46,13 @@ type DiameterAgent struct {
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
 	exitChan    chan<- struct{}
+	stopChan    chan struct{}
 
 	da      *agents.DiameterAgent
 	connMgr *engine.ConnManager
+
+	lnet  string
+	laddr string
 }
 
 // Start should handle the sercive start
@@ -69,24 +73,39 @@ func (da *DiameterAgent) Start() (err error) {
 			utils.DiameterAgent, err))
 		return
 	}
-
+	da.lnet = da.cfg.DiameterAgentCfg().ListenNet
+	da.laddr = da.cfg.DiameterAgentCfg().Listen
+	da.stopChan = make(chan struct{})
 	go func() {
-		if err = da.da.ListenAndServe(); err != nil {
+		if err = da.da.ListenAndServe(da.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 				utils.DiameterAgent, err))
+			close(da.exitChan)
 		}
-		close(da.exitChan)
 	}()
 	return
 }
 
 // Reload handles the change of config
 func (da *DiameterAgent) Reload() (err error) {
-	return
+	da.Lock()
+	defer da.Unlock()
+	if da.lnet == da.cfg.DiameterAgentCfg().ListenNet &&
+		da.laddr == da.cfg.DiameterAgentCfg().Listen {
+		return
+	}
+	if err = da.Shutdown(); err != nil {
+		return
+	}
+	return da.Start()
 }
 
 // Shutdown stops the service
 func (da *DiameterAgent) Shutdown() (err error) {
+	da.Lock()
+	close(da.stopChan)
+	da.da = nil
+	da.Unlock()
 	return // no shutdown for the momment
 }
 

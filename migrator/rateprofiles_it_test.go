@@ -218,6 +218,9 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 			},
 		},
 	}
+	if err := rPrf.Compile(); err != nil {
+		t.Fatal(err)
+	}
 	switch ratePrfAction {
 	case utils.Migrate: // for the moment only one version of rate profiles exists
 	case utils.Move:

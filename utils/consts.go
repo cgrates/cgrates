@@ -2190,6 +2190,7 @@ const (
 	CapsCfg              = "caps"
 	CapsStrategyCfg      = "caps_strategy"
 	CapsStatsIntervalCfg = "caps_stats_interval"
+	ShutdownTimeoutCfg   = "shutdown_timeout"
 )
 
 // FC Template

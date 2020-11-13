@@ -44,6 +44,7 @@ const (
 	dpa = "DPA"
 )
 
+// NewDiameterAgent initializes a new DiameterAgent
 func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (*DiameterAgent, error) {
 	da := &DiameterAgent{
@@ -77,6 +78,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	return da, nil
 }
 
+// DiameterAgent describes the diameter server
 type DiameterAgent struct {
 	cgrCfg   *config.CGRConfig
 	filterS  *engine.FilterS
@@ -93,9 +95,30 @@ type DiameterAgent struct {
 }
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
-func (da *DiameterAgent) ListenAndServe() error {
+func (da *DiameterAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> Start listening on <%s>", utils.DiameterAgent, da.cgrCfg.DiameterAgentCfg().Listen))
-	return diam.ListenAndServeNetwork(da.cgrCfg.DiameterAgentCfg().ListenNet, da.cgrCfg.DiameterAgentCfg().Listen, da.handlers(), nil)
+	srv := &diam.Server{
+		Network: da.cgrCfg.DiameterAgentCfg().ListenNet,
+		Addr:    da.cgrCfg.DiameterAgentCfg().Listen,
+		Handler: da.handlers(),
+		Dict:    nil,
+	}
+	// used to control the server state
+	var lsn net.Listener
+	if lsn, err = diam.MultistreamListen(utils.FirstNonEmpty(srv.Network, utils.TCP),
+		utils.FirstNonEmpty(srv.Addr, ":3868")); err != nil {
+		return
+	}
+	errChan := make(chan error)
+	go func() {
+		errChan <- srv.Serve(lsn)
+	}()
+	select {
+	case err = <-errChan:
+		return
+	case <-stopChan:
+		return lsn.Close()
+	}
 }
 
 // Creates the message handlers

@@ -70,6 +70,7 @@ func TestDfCoreSJsonCfg(t *testing.T) {
 		Caps:                utils.IntPointer(0),
 		Caps_strategy:       utils.StringPointer(utils.MetaBusy),
 		Caps_stats_interval: utils.StringPointer("0"),
+		Shutdown_timeout:    utils.StringPointer("1s"),
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

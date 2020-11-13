@@ -29,6 +29,7 @@ type CoreSCfg struct {
 	Caps              int
 	CapsStrategy      string
 	CapsStatsInterval time.Duration
+	ShutdownTimeout   time.Duration
 }
 
 func (cS *CoreSCfg) loadFromJSONCfg(jsnCfg *CoreSJsonCfg) (err error) {
@@ -46,6 +47,11 @@ func (cS *CoreSCfg) loadFromJSONCfg(jsnCfg *CoreSJsonCfg) (err error) {
 			return
 		}
 	}
+	if jsnCfg.Shutdown_timeout != nil {
+		if cS.ShutdownTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Shutdown_timeout); err != nil {
+			return
+		}
+	}
 	return
 }
 
@@ -55,9 +61,13 @@ func (cS *CoreSCfg) AsMapInterface() map[string]interface{} {
 		utils.CapsCfg:              cS.Caps,
 		utils.CapsStrategyCfg:      cS.CapsStrategy,
 		utils.CapsStatsIntervalCfg: cS.CapsStatsInterval.String(),
+		utils.ShutdownTimeoutCfg:   cS.ShutdownTimeout.String(),
 	}
 	if cS.CapsStatsInterval == 0 {
 		mp[utils.CapsStatsIntervalCfg] = "0"
+	}
+	if cS.ShutdownTimeout == 0 {
+		mp[utils.ShutdownTimeoutCfg] = "0"
 	}
 	return mp
 }

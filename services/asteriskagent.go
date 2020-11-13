@@ -80,13 +80,18 @@ func (ast *AsteriskAgent) Start() (err error) {
 
 // Reload handles the change of config
 func (ast *AsteriskAgent) Reload() (err error) {
-	return
+	if err = ast.Shutdown(); err != nil {
+		return
+	}
+	return ast.Start()
 }
 
 // Shutdown stops the service
 func (ast *AsteriskAgent) Shutdown() (err error) {
+	ast.Lock()
 	close(ast.stopChan)
 	ast.smas = nil
+	ast.Unlock()
 	return // no shutdown for the momment
 }
 
