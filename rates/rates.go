@@ -128,9 +128,15 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, args *ArgsCostForEvent,
 	return
 }
 
-/*
+type RateProfileCost struct {
+	Tenant         string
+	ID             string
+	Cost           float64
+	RateSIntervals []*engine.RateSInterval
+}
+
 // costForEvent computes the cost for an event based on a preselected rating profile
-func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *ArgsCostForEvent) (rts []*engine.RateSInterval, err error) {
+func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *ArgsCostForEvent) (rpCost *RateProfileCost, err error) {
 	var rtIDs utils.StringSet
 	if rtIDs, err = engine.MatchingItemIDsForEvent(
 		args.CGREventWithOpts.CGREvent.Event,
@@ -169,10 +175,13 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *ArgsCo
 	if ordRts, err = orderRatesOnIntervals(aRates, sTime, usage, true, 1000000); err != nil {
 		return
 	}
-
+	rpCost = &RateProfileCost{Tenant: rtPfl.Tenant, ID: rtPfl.ID}
+	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, 0, usage); err != nil {
+		return nil, err
+	}
+	rpCost.Cost = engine.CostForIntervals(rpCost.RateSIntervals).Float64()
 	return
 }
-*/
 
 // ArgsCostForEvent arguments used for proccess event
 type ArgsCostForEvent struct {
