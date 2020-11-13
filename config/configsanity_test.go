@@ -853,6 +853,18 @@ func TestConfigSanityScheduler(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.schedulerCfg.ThreshSConns = []string{}
+
+	cfg.schedulerCfg.StatSConns = []string{utils.MetaInternal}
+	expected = "<Stats> not enabled but requested by <SchedulerS> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.schedulerCfg.StatSConns = []string{"test"}
+	expected = "<SchedulerS> connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.schedulerCfg.StatSConns = []string{}
 }
 
 func TestConfigSanityEventReader(t *testing.T) {
