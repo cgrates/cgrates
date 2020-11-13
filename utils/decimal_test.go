@@ -69,6 +69,74 @@ func TestDecimalMarshalUnmarshalJSON(t *testing.T) {
 	rcv := a.Float64()
 	expected := 3.27
 	if expected != rcv {
-		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
+	}
+}
+
+func TestNewDecimalFromUint64(t *testing.T) {
+	expected := &Decimal{new(decimal.Big).SetUint64(18446744073709551615)}
+	received := NewDecimalFromUint64(18446744073709551615)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
+	}
+}
+
+func TestNewDecimalDivide(t *testing.T) {
+	a := NewDecimal()
+	x := NewDecimalFromUint64(10)
+	y := NewDecimalFromUint64(5)
+	expected := NewDecimalFromUint64(2)
+	received := a.Divide(x, y)
+	if !reflect.DeepEqual(expected.Float64(), received.Float64()) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.Float64(), received.Float64())
+	}
+}
+
+func TestNewDecimalMultiply(t *testing.T) {
+	a := NewDecimal()
+	x := NewDecimalFromUint64(10)
+	y := NewDecimalFromUint64(5)
+	expected := NewDecimalFromUint64(50)
+	received := a.Multiply(x, y)
+	if !reflect.DeepEqual(expected.Float64(), received.Float64()) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.Float64(), received.Float64())
+	}
+}
+
+func TestNewDecimalAdd(t *testing.T) {
+	a := NewDecimal()
+	x := NewDecimalFromUint64(10)
+	y := NewDecimalFromUint64(5)
+	expected := NewDecimalFromUint64(15)
+	received := a.Add(x, y)
+	if !reflect.DeepEqual(expected.Float64(), received.Float64()) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.Float64(), received.Float64())
+	}
+}
+
+func TestNewDecimalCompareEqual(t *testing.T) {
+	a := NewDecimalFromUint64(5)
+	y := NewDecimalFromUint64(5)
+	received := a.Compare(y)
+	if !reflect.DeepEqual(0, received) {
+		t.Errorf("Expecting: <0>, received: <%+v>", received)
+	}
+}
+
+func TestNewDecimalCompareGreaterThan(t *testing.T) {
+	a := NewDecimalFromUint64(5)
+	y := NewDecimalFromUint64(4)
+	received := a.Compare(y)
+	if !reflect.DeepEqual(1, received) {
+		t.Errorf("Expecting: <1>, received: <%+v>", received)
+	}
+}
+
+func TestNewDecimalCompareSmallerThan(t *testing.T) {
+	a := NewDecimalFromUint64(4)
+	y := NewDecimalFromUint64(5)
+	received := a.Compare(y)
+	if !reflect.DeepEqual(-1, received) {
+		t.Errorf("Expecting: <-1>, received: <%+v>", received)
 	}
 }
