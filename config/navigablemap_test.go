@@ -27,6 +27,54 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestNMAsXMLElementsNilNMSlice(t *testing.T) {
+	nM := utils.NewOrderedNavigableMap()
+	order := []utils.PathItems{
+		{{Field: "Field4"}},
+	}
+	if _, err := nM.Set(&utils.FullPath{
+		Path:      order[0].String(),
+		PathItems: order[0]},
+		&utils.NMSlice{nil}); err != nil {
+		t.Error(err)
+	}
+	expected := "value: Field4[0] is not []*NMItem"
+	if _, err := NMAsXMLElements(nM); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestNMAsXMLElementsConfigEmptyID(t *testing.T) {
+	nM := utils.NewOrderedNavigableMap()
+	order := []utils.PathItems{
+		{{Field: "FirstLevel"}, {Field: "SecondLevel"}, {Field: "ThirdLevel"}, {Field: "Fld1"}},
+		{{Field: "FirstLevel2"}, {Field: "FirestLevel3"}, {Field: "Field3"}},
+		{{Field: "FirstLevel2"}, {Field: "FirestLevel3"}, {Field: "Field5"}},
+	}
+	if _, err := nM.Set(&utils.FullPath{Path: order[0].String(), PathItems: order[0]}, &utils.NMSlice{
+		&NMItem{Path: strings.Split(order[0].String(), utils.NestingSep),
+			Data: "Val1"}}); err != nil {
+		t.Error(err)
+	}
+	if _, err := nM.Set(&utils.FullPath{Path: order[1].String(), PathItems: order[1]}, &utils.NMSlice{
+		&NMItem{Path: strings.Split(order[1].String(), utils.NestingSep),
+			Data: "Value3"}}); err != nil {
+		t.Error(err)
+	}
+	if _, err := nM.Set(&utils.FullPath{Path: order[2].String(), PathItems: order[2]}, &utils.NMSlice{
+		&NMItem{Path: strings.Split(order[2].String(), utils.NestingSep),
+			Data:   "Value5",
+			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute5"}},
+		&NMItem{Path: strings.Split(order[2].String(), utils.NestingSep),
+			Data:   "attrVal5",
+			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute5"}}}); err != nil {
+		t.Error(err)
+	}
+	if _, err := NMAsXMLElements(nM); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestNMAsXMLElements(t *testing.T) {
 	nM := utils.NewOrderedNavigableMap()
 	order := []utils.PathItems{
@@ -80,6 +128,7 @@ func TestNMAsXMLElements(t *testing.T) {
 			Config: &FCTemplate{Tag: "AttributeTest", AttributeID: "attribute6"}}}); err != nil {
 		t.Error(err)
 	}
+
 	eXMLElmnts := []*XMLElement{
 		{
 			XMLName: xml.Name{Local: order[0][0].String()},
