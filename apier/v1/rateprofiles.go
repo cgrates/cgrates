@@ -211,8 +211,8 @@ func (rSv1 *RateSv1) Call(serviceMethod string,
 	return utils.APIerRPCCall(rSv1, serviceMethod, args, reply)
 }
 
-func (rSv1 *RateSv1) CostForEvent(args *rates.ArgsCostForEvent, cC *utils.ChargedCost) (err error) {
-	return rSv1.rS.V1CostForEvent(args, cC)
+func (rSv1 *RateSv1) CostForEvent(args *rates.ArgsCostForEvent, rpCost *engine.RateProfileCost) (err error) {
+	return rSv1.rS.V1CostForEvent(args, rpCost)
 }
 
 func (rSv1 *RateSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
