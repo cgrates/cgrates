@@ -61,162 +61,12 @@ func TestNewRateS(t *testing.T) {
 	}
 }
 
-func TestStartTime(t *testing.T) {
-	cgrEvent := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "randomID",
-			Time:   utils.TimePointer(time.Date(2020, 12, 24, 0, 0, 0, 0, time.UTC)),
-			Event: map[string]interface{}{
-				utils.ToR: utils.SMS,
-			},
-		},
-	}
-	rateProfileIDs := []string{"randomIDs"}
-	argsCost := &ArgsCostForEvent{
-		rateProfileIDs,
-		cgrEvent,
-	}
-	expectedTime := time.Date(2020, 12, 24, 0, 0, 0, 0, time.UTC)
-	if sTime, err := argsCost.StartTime(utils.EmptyString); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expectedTime, sTime) {
-		t.Errorf("Expected %+v, received %+v", expectedTime, sTime)
-	}
-}
-
-func TestStartTimeError(t *testing.T) {
-	cgrEvent := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "randomID",
-			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
-				utils.ToR: utils.SMS,
-			},
-		},
-		Opts: map[string]interface{}{
-			utils.OptsRatesStartTime: "invalidStartTime",
-		},
-	}
-	rateProfileIDs := []string{"randomIDs"}
-	argsCost := &ArgsCostForEvent{
-		rateProfileIDs,
-		cgrEvent,
-	}
-	expectedErr := "Unsupported time format"
-	if _, err := argsCost.StartTime(utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestStartTimeFieldAsTimeErrorAnswerTime(t *testing.T) {
-	cgrEvent := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "randomID",
-			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
-				utils.AnswerTime: "0s",
-			},
-		},
-	}
-	rateProfileIDs := []string{"randomIDs"}
-	argsCost := &ArgsCostForEvent{
-		rateProfileIDs,
-		cgrEvent,
-	}
-	expectedErr := "Unsupported time format"
-	if _, err := argsCost.StartTime(utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestStartTimeFieldAsTimeErrorSetupTime(t *testing.T) {
-	cgrEvent := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "randomID",
-			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
-				utils.SetupTime: "1h0m0s",
-			},
-		},
-	}
-	rateProfileIDs := []string{"randomIDs"}
-	argsCost := &ArgsCostForEvent{
-		rateProfileIDs,
-		cgrEvent,
-	}
-	expectedErr := "Unsupported time format"
-	if _, err := argsCost.StartTime(utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestStartTimeFieldAsTimeNilTime(t *testing.T) {
-	cgrEvent := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "randomID",
-			Event: map[string]interface{}{
-				utils.AnswerTime: time.Time{},
-			},
-		},
-	}
-	rateProfileIDs := []string{"randomIDs"}
-	argsCost := &ArgsCostForEvent{
-		rateProfileIDs,
-		cgrEvent,
-	}
-	if _, err := argsCost.StartTime(utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestStartTimeFieldAsTimeNow(t *testing.T) {
-	cgrEvent := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "randomID",
-			Event:  map[string]interface{}{},
-		},
-	}
-	rateProfileIDs := []string{"randomIDs"}
-	argsCost := &ArgsCostForEvent{
-		rateProfileIDs,
-		cgrEvent,
-	}
-	if _, err := argsCost.StartTime(utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestCallRates(t *testing.T) {
 	newRates := &RateS{}
 	var reply *string
 	expectedErr := "UNSUPPORTED_SERVICE_METHOD"
 	if err := newRates.Call("inexistentMethodCall", nil, reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestV1CostForEvent(t *testing.T) {
-	rts := &RateS{}
-	cgrEvent := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "randomID",
-			Event:  map[string]interface{}{},
-		},
-	}
-	rateProfileIDs := []string{"randomIDs"}
-	argsCost := &ArgsCostForEvent{
-		rateProfileIDs,
-		cgrEvent,
-	}
-	if err := rts.V1CostForEvent(argsCost, nil); err != nil {
-		t.Error(err)
 	}
 }
 
@@ -247,7 +97,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if rtPRf, err := rate.matchingRateProfileForEvent("cgrates.org",
+	if rtPRf, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
 		&ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
@@ -260,14 +110,13 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 					},
 				},
 			},
-		},
-		[]string{}); err != nil {
+		}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rtPRf, rpp) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rpp), utils.ToJSON(rtPRf))
 	}
 
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org",
+	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
 		&ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
@@ -280,11 +129,10 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 					},
 				},
 			},
-		},
-		[]string{}); err != utils.ErrNotFound {
+		}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org",
+	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
 		&ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
@@ -297,11 +145,10 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 					},
 				},
 			},
-		},
-		[]string{}); err != utils.ErrNotFound {
+		}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org",
+	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
 		&ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
@@ -314,12 +161,11 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 					},
 				},
 			},
-		},
-		[]string{}); err != utils.ErrNotFound {
+		}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org",
+	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{"rp2"},
 		&ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
@@ -332,30 +178,12 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 					},
 				},
 			},
-		},
-		[]string{"rp2"}); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org",
-		&ArgsCostForEvent{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "CACHE1",
-					Event:  map[string]interface{}{},
-				},
-				Opts: map[string]interface{}{
-					utils.OptsRatesStartTime: 0,
-				},
-			},
-		},
-		[]string{"randomProfileID"}); err.Error() != "cannot convert field: 0 to time.Time" {
+		}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
 	rpp.FilterIDs = []string{"*string:~*req.Account:1001;1002;1003", "*gt:~*req.Cost{*:10"}
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org",
+	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
 		&ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
@@ -368,13 +196,12 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 					},
 				},
 			},
-		},
-		[]string{}); err.Error() != "invalid converter terminator in rule: <~*req.Cost{*>" {
+		}); err.Error() != "invalid converter terminator in rule: <~*req.Cost{*>" {
 		t.Error(err)
 	}
 
 	rate.dm = nil
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org",
+	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{"rp3"},
 		&ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
@@ -387,8 +214,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 					},
 				},
 			},
-		},
-		[]string{"rp3"}); err != utils.ErrNoDatabaseConn {
+		}); err != utils.ErrNoDatabaseConn {
 		t.Error(err)
 	}
 }

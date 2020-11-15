@@ -173,6 +173,12 @@ type RateSIncrement struct {
 	cost *utils.Decimal // unexported total increment cost
 }
 
+type RateProfileCost struct {
+	ID             string // RateProfileID
+	Cost           float64
+	RateSIntervals []*RateSInterval
+}
+
 // Sort will sort the IntervalRates from each Rate based on IntervalStart
 func (rpp *RateProfile) Sort() {
 	for _, rate := range rpp.Rates {

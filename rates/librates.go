@@ -205,9 +205,10 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 			}
 			isLastIRt := j == len(rt.IntervalRates)-1
 			if iRt.IntervalStart > iRtUsageSIdx {
-				break
-			} else if !isLastIRt && rt.IntervalRates[j+1].IntervalStart <= iRtUsageSIdx {
-				continue // the rates should be already ordered, break here
+				break // we are past the start
+			}
+			if !isLastIRt && rt.IntervalRates[j+1].IntervalStart <= iRtUsageSIdx {
+				continue // the next interval changes the rating
 			}
 			if !isLastIRt {
 				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart
