@@ -138,7 +138,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *ArgsCo
 	); err != nil {
 		return
 	}
-	aRates := make([]*engine.Rate, len(rtIDs))
+	aRates := make([]*engine.Rate, 0, len(rtIDs))
 	evNm := utils.MapStorage{utils.MetaReq: args.CGREventWithOpts.CGREvent.Event}
 	for rtID := range rtIDs {
 		rt := rtPfl.Rates[rtID] // pick the rate directly from map based on matched ID

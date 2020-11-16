@@ -1441,7 +1441,7 @@ const (
 
 const (
 	RateSv1             = "RateSv1"
-	RateSv1CostForEvent = "RALsV1.CostForEvent"
+	RateSv1CostForEvent = "RateSv1.CostForEvent"
 	RateSv1Ping         = "RateSv1.Ping"
 )
 
