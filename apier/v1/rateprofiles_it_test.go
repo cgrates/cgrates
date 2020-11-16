@@ -29,6 +29,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -58,6 +59,14 @@ var (
 		testV1RatePrfRemoveRateProfileWithoutTenant,
 		testV1RatePrfGetRateProfileRatesWithoutTenant,
 		testV1RatePrfRemoveRateProfileRatesWithoutTenant,
+		testV1RateCostForEventWithDefault,
+		testV1RateCostForEventWithUsage,
+		testV1RateCostForEventWithWrongUsage,
+		testV1RateCostForEventWithStartTime,
+		testV1RateCostForEventWithWrongStartTime,
+		testV1RateCostForEventWithOpts,
+		testV1RateCostForEventSpecial,
+		testV1RateCostForEventThreeRates,
 		testV1RatePrfStopEngine,
 	}
 )
@@ -775,5 +784,715 @@ func testV1RatePrfRemoveRateProfileRatesWithoutTenant(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func testV1RateCostForEventWithDefault(t *testing.T) {
+	rate1 := &engine.Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Value:         0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				Value:         0.06,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	rPrf := &engine.RateProfile{
+		ID:        "DefaultRate",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weight:    10,
+		Rates: map[string]*engine.Rate{
+			"RATE1": rate1,
+		},
+	}
+	var reply string
+	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile, rPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var rply *engine.RateProfileCost
+	argsRt := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	exp := &engine.RateProfileCost{
+		ID:   "DefaultRate",
+		Cost: 0.12,
+		RateSIntervals: []*engine.RateSInterval{
+			&engine.RateSInterval{
+				UsageStart: 0,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        0,
+						Usage:             time.Minute,
+						Rate:              rate1,
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+	}
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+
+	}
+}
+
+func testV1RateCostForEventWithUsage(t *testing.T) {
+	var rply *engine.RateProfileCost
+	argsRt := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesUsage: "2m10s",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	rate1 := &engine.Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Value:         0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				Value:         0.06,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	exp := &engine.RateProfileCost{
+		ID:   "DefaultRate",
+		Cost: 0.19,
+		RateSIntervals: []*engine.RateSInterval{
+			&engine.RateSInterval{
+				UsageStart: 0,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        0,
+						Usage:             time.Minute,
+						Rate:              rate1,
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+					&engine.RateSIncrement{
+						UsageStart:        time.Minute,
+						Usage:             time.Minute + 10*time.Second,
+						Rate:              rate1,
+						IntervalRateIndex: 1,
+						CompressFactor:    70,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+	}
+
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+	argsRt2 := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesUsage: "4h10m15s",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	exp2 := &engine.RateProfileCost{
+		ID:   "DefaultRate",
+		Cost: 15.075,
+		RateSIntervals: []*engine.RateSInterval{
+			&engine.RateSInterval{
+				UsageStart: 0,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        0,
+						Usage:             time.Minute,
+						Rate:              rate1,
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+					&engine.RateSIncrement{
+						UsageStart:        time.Minute,
+						Usage:             4*time.Hour + 9*time.Minute + 15*time.Second,
+						Rate:              rate1,
+						IntervalRateIndex: 1,
+						CompressFactor:    14955,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+	}
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt2, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp2, rply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp2), utils.ToJSON(rply))
+	}
+}
+
+func testV1RateCostForEventWithWrongUsage(t *testing.T) {
+	var rply *engine.RateProfileCost
+	argsRt := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesUsage: "wrongUsage",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err == nil ||
+		err.Error() != "SERVER_ERROR: time: invalid duration \"wrongUsage\"" {
+		t.Errorf("Expected %+v \n, received %+v", "SERVER_ERROR: time: invalid duration \"wrongUsage\"", err)
+	}
+}
+
+func testV1RateCostForEventWithStartTime(t *testing.T) {
+	rate1 := &engine.Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Value:         0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				Value:         0.06,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+
+	var rply *engine.RateProfileCost
+	argsRt := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	exp := &engine.RateProfileCost{
+		ID:   "DefaultRate",
+		Cost: 0.12,
+		RateSIntervals: []*engine.RateSInterval{
+			&engine.RateSInterval{
+				UsageStart: 0,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        0,
+						Usage:             time.Minute,
+						Rate:              rate1,
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+	}
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+	argsRt2 := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC).String(),
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt2, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
+
+func testV1RateCostForEventWithWrongStartTime(t *testing.T) {
+	var rply *engine.RateProfileCost
+	argsRt := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesStartTime: "wrongTime",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err == nil ||
+		err.Error() != "SERVER_ERROR: Unsupported time format" {
+		t.Errorf("Expected %+v \n, received %+v", "SERVER_ERROR: Unsupported time format", err)
+	}
+}
+
+func testV1RateCostForEventWithOpts(t *testing.T) {
+	var rply *engine.RateProfileCost
+	argsRt := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.OptsRatesUsage:     "2m10s",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	rate1 := &engine.Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Value:         0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				Value:         0.06,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	exp := &engine.RateProfileCost{
+		ID:   "DefaultRate",
+		Cost: 0.19,
+		RateSIntervals: []*engine.RateSInterval{
+			&engine.RateSInterval{
+				UsageStart: 0,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        0,
+						Usage:             time.Minute,
+						Rate:              rate1,
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+					&engine.RateSIncrement{
+						UsageStart:        time.Minute,
+						Usage:             time.Minute + 10*time.Second,
+						Rate:              rate1,
+						IntervalRateIndex: 1,
+						CompressFactor:    70,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+	}
+
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+	argsRt2 := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.OptsRatesUsage:     "4h10m15s",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	exp2 := &engine.RateProfileCost{
+		ID:   "DefaultRate",
+		Cost: 15.075,
+		RateSIntervals: []*engine.RateSInterval{
+			&engine.RateSInterval{
+				UsageStart: 0,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        0,
+						Usage:             time.Minute,
+						Rate:              rate1,
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+					&engine.RateSIncrement{
+						UsageStart:        time.Minute,
+						Usage:             4*time.Hour + 9*time.Minute + 15*time.Second,
+						Rate:              rate1,
+						IntervalRateIndex: 1,
+						CompressFactor:    14955,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+	}
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt2, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp2, rply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp2), utils.ToJSON(rply))
+	}
+}
+
+func testV1RateCostForEventSpecial(t *testing.T) {
+	rate1 := &engine.Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Value:         0.20,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				Value:         0.10,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	rtChristmas := &engine.Rate{
+		ID:              "RT_CHRISTMAS",
+		Weight:          30,
+		ActivationTimes: "* * 24 12 *",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Value:         0.06,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	rPrf := &engine.RateProfile{
+		ID:        "RateChristmas",
+		FilterIDs: []string{"*string:~*req.Subject:1002"},
+		Weight:    50,
+		Rates: map[string]*engine.Rate{
+			"RATE1":          rate1,
+			"RATE_CHRISTMAS": rtChristmas,
+		},
+	}
+	var reply string
+	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile, rPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var rply *engine.RateProfileCost
+	argsRt := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesStartTime: time.Date(2020, 12, 23, 23, 0, 0, 0, time.UTC),
+				utils.OptsRatesUsage:     "25h12m15s",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1002",
+				},
+			},
+		},
+	}
+	exp := &engine.RateProfileCost{
+		ID:   "RateChristmas",
+		Cost: 93.725,
+		RateSIntervals: []*engine.RateSInterval{
+			&engine.RateSInterval{
+				UsageStart: 0,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        0,
+						Usage:             time.Minute,
+						Rate:              rate1,
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+					&engine.RateSIncrement{
+						UsageStart:        1 * time.Minute,
+						Usage:             59 * time.Minute,
+						Rate:              rate1,
+						IntervalRateIndex: 1,
+						CompressFactor:    3540,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&engine.RateSInterval{
+				UsageStart: time.Hour,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        time.Hour,
+						Usage:             24 * time.Hour,
+						Rate:              rtChristmas,
+						IntervalRateIndex: 0,
+						CompressFactor:    86400,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&engine.RateSInterval{
+				UsageStart: 25 * time.Hour,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        25 * time.Hour,
+						Usage:             735 * time.Second,
+						Rate:              rate1,
+						IntervalRateIndex: 1,
+						CompressFactor:    735,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+	}
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+
+	}
+}
+
+func testV1RateCostForEventThreeRates(t *testing.T) {
+	rate1 := &engine.Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Value:         0.20,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				Value:         0.10,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+
+	rtNewYear1 := &engine.Rate{
+		ID:              "NEW_YEAR1",
+		ActivationTimes: "* 12-23 31 12 *",
+		Weight:          20,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Value:         0.08,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	rtNewYear2 := &engine.Rate{
+		ID:              "NEW_YEAR2",
+		ActivationTimes: "* 0-12 1 1 *",
+		Weight:          30,
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Value:         0.05,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	rPrf := &engine.RateProfile{
+		ID:        "RateNewYear",
+		FilterIDs: []string{"*string:~*req.Subject:1003"},
+		Weight:    50,
+		Rates: map[string]*engine.Rate{
+			"RATE1":     rate1,
+			"NEW_YEAR1": rtNewYear1,
+			"NEW_YEAR2": rtNewYear2,
+		},
+	}
+	var reply string
+	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile, rPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var rply *engine.RateProfileCost
+	argsRt := &rates.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesStartTime: time.Date(2020, 12, 31, 10, 0, 0, 0, time.UTC),
+				utils.OptsRatesUsage:     "35h12m15s",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1003",
+				},
+			},
+		},
+	}
+	exp := &engine.RateProfileCost{
+		ID:   "RateNewYear",
+		Cost: 157.925,
+		RateSIntervals: []*engine.RateSInterval{
+			&engine.RateSInterval{
+				UsageStart: 0,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        0,
+						Usage:             time.Minute,
+						Rate:              rate1,
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+					&engine.RateSIncrement{
+						UsageStart:        1 * time.Minute,
+						Usage:             119 * time.Minute,
+						Rate:              rate1,
+						IntervalRateIndex: 1,
+						CompressFactor:    7140,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&engine.RateSInterval{
+				UsageStart: 2 * time.Hour,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        2 * time.Hour,
+						Usage:             12 * time.Hour,
+						Rate:              rtNewYear1,
+						IntervalRateIndex: 0,
+						CompressFactor:    43200,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&engine.RateSInterval{
+				UsageStart: 14 * time.Hour,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        14 * time.Hour,
+						Usage:             46800 * time.Second,
+						Rate:              rtNewYear2,
+						IntervalRateIndex: 0,
+						CompressFactor:    46800,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&engine.RateSInterval{
+				UsageStart: 27 * time.Hour,
+				Increments: []*engine.RateSIncrement{
+					&engine.RateSIncrement{
+						UsageStart:        27 * time.Hour,
+						Usage:             29535 * time.Second,
+						Rate:              rate1,
+						IntervalRateIndex: 1,
+						CompressFactor:    29535,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+	}
+	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+
 	}
 }

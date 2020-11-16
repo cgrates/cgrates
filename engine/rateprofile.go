@@ -64,7 +64,7 @@ func (rp *RateProfile) Compile() (err error) {
 	return
 }
 
-// Route defines rate related information used within a RateProfile
+// Rate defines rate related information used within a RateProfile
 type Rate struct {
 	ID              string   // RateID
 	FilterIDs       []string // RateFilterIDs
