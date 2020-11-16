@@ -61,12 +61,12 @@ func (fS *FreeswitchAgent) Start() (err error) {
 
 	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
 
-	go func() {
-		if err := fS.fS.Connect(); err != nil {
+	go func(f *agents.FSsessions) {
+		if err := f.Connect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
 			close(fS.exitChan) // stop the engine here
 		}
-	}()
+	}(fS.fS)
 	return
 }
 
@@ -78,12 +78,12 @@ func (fS *FreeswitchAgent) Reload() (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 	fS.fS.Reload()
-	go func() {
+	go func(f *agents.FSsessions) {
 		if err := fS.fS.Connect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
 			close(fS.exitChan) // stop the engine here
 		}
-	}()
+	}(fS.fS)
 	return
 }
 

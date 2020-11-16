@@ -358,7 +358,8 @@ func (fsa *FSsessions) disconnectSession(connIdx int, uuid, redirectNr, notify s
 // Shutdown stops all connected fsock connections
 func (fsa *FSsessions) Shutdown() (err error) {
 	for connIdx, fSock := range fsa.conns {
-		if !fSock.Connected() {
+		if fSock == nil ||
+			!fSock.Connected() {
 			utils.Logger.Err(fmt.Sprintf("<%s> Cannot shutdown sessions, fsock not connected for connection index: %v", utils.FreeSWITCHAgent, connIdx))
 			continue
 		}

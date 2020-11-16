@@ -76,13 +76,13 @@ func (da *DiameterAgent) Start() (err error) {
 	da.lnet = da.cfg.DiameterAgentCfg().ListenNet
 	da.laddr = da.cfg.DiameterAgentCfg().Listen
 	da.stopChan = make(chan struct{})
-	go func() {
-		if err = da.da.ListenAndServe(da.stopChan); err != nil {
+	go func(d *agents.DiameterAgent) {
+		if err = d.ListenAndServe(da.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 				utils.DiameterAgent, err))
 			close(da.exitChan)
 		}
-	}()
+	}(da.da)
 	return
 }
 

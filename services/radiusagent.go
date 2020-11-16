@@ -77,12 +77,12 @@ func (rad *RadiusAgent) Start() (err error) {
 		return
 	}
 	rad.stopChan = make(chan struct{})
-	go func() {
-		if err = rad.rad.ListenAndServe(rad.stopChan); err != nil {
+	go func(r *agents.RadiusAgent) {
+		if err = r.ListenAndServe(rad.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 			close(rad.exitChan)
 		}
-	}()
+	}(rad.rad)
 	return
 }
 
