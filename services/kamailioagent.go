@@ -63,15 +63,15 @@ func (kam *KamailioAgent) Start() (err error) {
 	kam.kam = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), kam.connMgr,
 		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
 
-	go func() {
-		if err = kam.kam.Connect(); err != nil {
+	go func(k *agents.KamailioAgent) {
+		if err = k.Connect(); err != nil {
 			if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
 				return
 			}
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
 			close(kam.exitChan)
 		}
-	}()
+	}(kam.kam)
 	return
 }
 
@@ -84,15 +84,15 @@ func (kam *KamailioAgent) Reload() (err error) {
 	kam.Lock()
 	defer kam.Unlock()
 	kam.kam.Reload()
-	go func() {
-		if err = kam.kam.Connect(); err != nil {
+	go func(k *agents.KamailioAgent) {
+		if err = k.Connect(); err != nil {
 			if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
 				return
 			}
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
 			close(kam.exitChan)
 		}
-	}()
+	}(kam.kam)
 	return
 }
 

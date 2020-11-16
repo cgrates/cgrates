@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -97,11 +96,11 @@ func testPreloadITStartEngine(t *testing.T) {
 	}
 	fib := utils.Fib()
 	var connected bool
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 25; i++ {
 		time.Sleep(time.Duration(fib()) * time.Millisecond)
 		if _, err := jsonrpc.Dial(utils.TCP, preloadCfg.ListenCfg().RPCJSONListen); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("Error <%s> when opening test connection to: <%s>",
-				err.Error(), preloadCfg.ListenCfg().RPCJSONListen))
+			t.Logf("Error <%s> when opening test connection to: <%s>",
+				err.Error(), preloadCfg.ListenCfg().RPCJSONListen)
 		} else {
 			connected = true
 			break
