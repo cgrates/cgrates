@@ -194,8 +194,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.apiBanCfg = new(APIBanCfg)
 	cfg.coreSCfg = new(CoreSCfg)
 
-	cfg.ConfigReloads = make(map[string]chan struct{})
-
 	var cgrJSONCfg *CgrJsonCfg
 	if cgrJSONCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
 		return
@@ -286,8 +284,7 @@ type CGRConfig struct {
 	loaderCfg    LoaderSCfgs   // LoaderS configs
 	httpAgentCfg HttpAgentCfgs // HttpAgent configs
 
-	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
-	rldChans      map[string]chan struct{} // index here the channels used for reloads
+	rldChans map[string]chan struct{} // index here the channels used for reloads
 
 	rpcConns RpcConns
 
