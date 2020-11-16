@@ -1113,7 +1113,7 @@ func TestIfaceAsDurationCaseFloat32(t *testing.T) {
 	}
 }
 
-func TestIfaceAsStringInt32(t *testing.T) {
+func TestIfaceAsInt6432to64(t *testing.T) {
 	var test int32
 	var expected int64
 	test = 2147483647
@@ -1121,5 +1121,200 @@ func TestIfaceAsStringInt32(t *testing.T) {
 	response, _ := IfaceAsInt64(test)
 	if !reflect.DeepEqual(response, expected) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
+	}
+}
+
+func TestIfaceAsInt64Default(t *testing.T) {
+	var test bool
+	test = true
+	_, err := IfaceAsInt64(test)
+	if err == nil || err.Error() != "cannot convert field: true to int" {
+		t.Errorf("Expecting <cannot convert field: true to int> ,received: <%+v>", err)
+	}
+}
+
+func TestIfaceAsInt64Nanosecs(t *testing.T) {
+	var test time.Duration
+	test = 2147483647
+	response, _ := IfaceAsInt64(test)
+	if !reflect.DeepEqual(response, test.Nanoseconds()) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", test.Nanoseconds(), response)
+	}
+}
+
+func TestIfaceAsTInt64Default(t *testing.T) {
+	var test bool
+	test = true
+	_, err := IfaceAsTInt64(test)
+	if err == nil || err.Error() != "cannot convert field<bool>: true to int" {
+		t.Errorf("Expecting <cannot convert field<bool>: true to int> ,received: <%+v>", err)
+	}
+}
+
+func TestIfaceAsTInt64Nanosecs(t *testing.T) {
+	var test time.Duration
+	test = 2147483647
+	response, _ := IfaceAsTInt64(test)
+	if !reflect.DeepEqual(response, test.Nanoseconds()) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", test.Nanoseconds(), response)
+	}
+}
+
+func TestIfaceAsBoolInt64(t *testing.T) {
+	var test int64
+	test = 2147483647
+	response, _ := IfaceAsBool(test)
+	if !reflect.DeepEqual(response, true) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", true, response)
+	}
+}
+
+func TestIfaceAsBoolDefault(t *testing.T) {
+	var test uint64
+	test = 2147483647
+	_, err := IfaceAsBool(test)
+	if err == nil || err.Error() != "cannot convert field: 2147483647 to bool" {
+		t.Errorf("Expecting <cannot convert field: 2147483647 to bool> ,received: <%+v>", err)
+	}
+}
+
+func TestIfaceAsStringInt32(t *testing.T) {
+	var test int32
+	var expected string
+	test = 2147483647
+	expected = "2147483647"
+	response := IfaceAsString(test)
+	if !reflect.DeepEqual(response, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
+	}
+}
+
+func TestIfaceAsStringInt32Neg(t *testing.T) {
+	var test int32
+	var expected string
+	test = -2147483647
+	expected = "-2147483647"
+	response := IfaceAsString(test)
+	if !reflect.DeepEqual(response, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
+	}
+}
+
+func TestIfaceAsStringInt64Neg(t *testing.T) {
+	var test int64
+	var expected string
+	test = -9223372036854775807
+	expected = "-9223372036854775807"
+	response := IfaceAsString(test)
+	if !reflect.DeepEqual(response, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
+	}
+}
+
+func TestIfaceAsStringUInt32(t *testing.T) {
+	var test uint32
+	var expected string
+	test = 2147483647
+	expected = "2147483647"
+	response := IfaceAsString(test)
+	if !reflect.DeepEqual(response, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
+	}
+}
+
+func TestIfaceAsStringUInt64(t *testing.T) {
+	var test uint64
+	var expected string
+	test = 9223372036854775807
+	expected = "9223372036854775807"
+	response := IfaceAsString(test)
+	if !reflect.DeepEqual(response, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
+	}
+}
+
+func TestIfaceAsStringFloat32(t *testing.T) {
+	var test float32
+	var expected string
+	test = 2.5
+	expected = "2.5"
+	response := IfaceAsString(test)
+	if !reflect.DeepEqual(response, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
+	}
+}
+
+func TestIfaceAsStringFloat32Neg(t *testing.T) {
+	var test float32
+	var expected string
+	test = -2.5
+	expected = "-2.5"
+	response := IfaceAsString(test)
+	if !reflect.DeepEqual(response, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
+	}
+}
+
+func TestIfaceAsStringNMInterface(t *testing.T) {
+	var test NMInterface = NewNMData("1001")
+	response := IfaceAsString(test)
+	if !reflect.DeepEqual(response, "1001") {
+		t.Errorf("Expected <1001> ,received: <%+v>", response)
+	}
+}
+
+func TestGetBasicTypeUint(t *testing.T) {
+	var test interface{}
+	test = uint8(123)
+	valItm := reflect.ValueOf(test)
+	response := GetBasicType(test)
+	if !reflect.DeepEqual(valItm.Uint(), response) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", valItm.Uint(), response)
+	}
+}
+
+func TestReflectFieldInterfacePointer(t *testing.T) {
+	type Test struct {
+		StrField  string
+		StrField2 string
+	}
+	structTest := Test{
+		StrField:  "TestStructField",
+		StrField2: "TestStructField2",
+	}
+	result, _ := ReflectFieldInterface(&structTest, "StrField", "StrField2")
+	if !reflect.DeepEqual(result, "TestStructField") {
+		t.Errorf("Expected <TestStructField> ,received: <%+v>", result)
+	}
+}
+
+func TestReflectFieldAsStringErrorCase(t *testing.T) {
+	type Test struct {
+		StrField  string
+		StrField2 string
+		StrField3 map[string]string
+	}
+	structTest := Test{
+		StrField:  "TestStructField",
+		StrField2: "TestStructField2",
+	}
+	_, err := ReflectFieldAsString(structTest, "StrField4", "StrField3")
+	if err != ErrNotFound {
+		t.Errorf("<NOT_FOUND> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectFieldAsStringDefaultError(t *testing.T) {
+	type Test struct {
+		StrField  bool
+		StrField2 bool
+	}
+	structTest := Test{
+		StrField:  true,
+		StrField2: true,
+	}
+	_, err := ReflectFieldAsString(structTest, "StrField", "StrField2")
+	if err == nil || err.Error() != "Cannot convert to string field type: bool" {
+		t.Errorf("Expected <Cannot convert to string field type: bool> ,received: <%+v>", err)
 	}
 }
