@@ -57,7 +57,7 @@ type AnalyzerService struct {
 }
 
 func (aS *AnalyzerService) initDB() (err error) {
-	dbPath := path.Join(aS.cfg.AnalyzerSCfg().DBPath, "db")
+	dbPath := path.Join(aS.cfg.AnalyzerSCfg().DBPath, utils.AnzDBDir)
 	if _, err = os.Stat(dbPath); err == nil {
 		aS.db, err = bleve.Open(dbPath)
 	} else if os.IsNotExist(err) {
@@ -166,20 +166,12 @@ func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]in
 			obj.Fields[utils.ReplyError] = nil
 		}
 		if lCntFltrs != 0 {
-			repDP, err := unmarshalJSON(rep)
-			if err != nil {
-				return err
-			}
-			reqDP, err := unmarshalJSON(req)
+			dp, err := getDPFromSearchresult(req, rep, obj.Fields)
 			if err != nil {
 				return err
 			}
 			if pass, err := aS.filterS.Pass(aS.cfg.GeneralCfg().DefaultTenant,
-				args.ContentFilters, utils.MapStorage{
-					utils.MetaReq: reqDP,
-					utils.MetaRep: repDP,
-					utils.MetaHdr: utils.MapStorage(obj.Fields),
-				}); err != nil {
+				args.ContentFilters, dp); err != nil {
 				return err
 			} else if !pass {
 				continue

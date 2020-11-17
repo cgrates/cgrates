@@ -2516,6 +2516,8 @@ const (
 	RequestParams    = "RequestParams"
 	Reply            = "Reply"
 	ReplyError       = "ReplyError"
+	AnzDBDir         = "db"
+	Opts             = "Opts"
 )
 
 var (

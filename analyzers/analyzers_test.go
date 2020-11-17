@@ -318,9 +318,19 @@ func TestAnalyzersV1Search(t *testing.T) {
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
+	reply = []map[string]interface{}{}
 	if err = anz.V1StringQuery(&QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
 		ContentFilters: []string{"*gt:~*hdr.RequestDuration:1m"},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+	reply = []map[string]interface{}{}
+	if err = anz.V1StringQuery(&QueryArgs{
+		HeaderFilters:  "RequestEncoding:*gob",
+		ContentFilters: []string{"*string:~*opts.EventSource:*attributes"},
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {

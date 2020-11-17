@@ -144,7 +144,7 @@ func TestUnmarshalJSON(t *testing.T) {
 		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 
-	exp = map[string]interface{}{}
+	exp = nil
 	if val, err := unmarshalJSON(json.RawMessage(`null`)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, exp) {

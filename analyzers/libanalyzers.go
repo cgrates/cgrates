@@ -102,13 +102,12 @@ func getIndex(indx string) (indxType, storeType string) {
 
 // unmarshalJSON will transform the message in a map[string]interface{} of []interface{}
 // depending of the first character
-// used for filters purposes so the nil is replaced with empty map
 func unmarshalJSON(jsn json.RawMessage) (interface{}, error) {
 	switch {
 	case string(jsn) == "null" ||
 		len(jsn) == 0: // nil or empty response
 		// by default consider nil as an empty map for filtering purposes
-		return map[string]interface{}{}, nil
+		return nil, nil
 	case string(jsn) == "true": // booleans
 		return true, nil
 	case string(jsn) == "false":
@@ -128,4 +127,27 @@ func unmarshalJSON(jsn json.RawMessage) (interface{}, error) {
 	default:
 		return nil, new(json.SyntaxError)
 	}
+}
+
+// getDPFromSearchresult will unmarshal the request and reply and populate a DataProvider
+// if the req is a map[string]interface{} we will try to put in *opts prefix the Opts field from req
+func getDPFromSearchresult(req, rep json.RawMessage, hdr utils.MapStorage) (utils.MapStorage, error) {
+	repDP, err := unmarshalJSON(rep)
+	if err != nil {
+		return nil, err
+	}
+	reqDP, err := unmarshalJSON(req)
+	if err != nil {
+		return nil, err
+	}
+	var opts interface{}
+	if reqMp, canCast := reqDP.(map[string]interface{}); canCast {
+		opts = reqMp[utils.Opts]
+	}
+	return utils.MapStorage{
+		utils.MetaReq:  reqDP,
+		utils.MetaOpts: opts,
+		utils.MetaRep:  repDP,
+		utils.MetaHdr:  hdr,
+	}, nil
 }
