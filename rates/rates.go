@@ -166,7 +166,8 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, 0, usage); err != nil {
 		return nil, err
 	}
-	rpCost.Cost = engine.CostForIntervals(rpCost.RateSIntervals).Float64()
+	rpCost.Cost, _ = engine.CostForIntervals(rpCost.RateSIntervals).Float64()
+
 	return
 }
 

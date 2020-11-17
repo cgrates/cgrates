@@ -18,55 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import (
-	"github.com/ericlagergren/decimal"
-)
+import "github.com/ericlagergren/decimal"
 
-func NewDecimalFromFloat64(x float64) *Decimal {
-	return &Decimal{new(decimal.Big).SetFloat64(x)}
+func DivideBig(x, y *decimal.Big) *decimal.Big {
+	return new(decimal.Big).Quo(x, y)
 }
 
-func NewDecimalFromUint64(x uint64) *Decimal {
-	return &Decimal{new(decimal.Big).SetUint64(x)}
+func MultiplyBig(x, y *decimal.Big) *decimal.Big {
+	return new(decimal.Big).Mul(x, y)
 }
 
-func NewDecimal() *Decimal {
-	return &Decimal{new(decimal.Big)}
-}
-
-// Decimal extends the decimal.Big with additional methods
-type Decimal struct {
-	*decimal.Big
-}
-
-func (d *Decimal) Float64() (f float64) {
-	f, _ = d.Big.Float64()
-	return
-}
-
-func (d *Decimal) MarshalJSON() ([]byte, error) {
-	return d.Big.MarshalText()
-}
-
-func (d *Decimal) UnmarshalJSON(data []byte) error {
-	return d.Big.UnmarshalJSON(data)
-}
-
-func (d *Decimal) Divide(x, y *Decimal) *Decimal {
-	d.Big.Quo(x.Big, y.Big)
-	return d
-}
-
-func (d *Decimal) Multiply(x, y *Decimal) *Decimal {
-	d.Big.Mul(x.Big, y.Big)
-	return d
-}
-
-func (d *Decimal) Add(x, y *Decimal) *Decimal {
-	d.Big.Add(x.Big, y.Big)
-	return d
-}
-
-func (d *Decimal) Compare(y *Decimal) int {
-	return d.Big.Cmp(y.Big)
+func AddBig(x, y *decimal.Big) *decimal.Big {
+	return new(decimal.Big).Add(x, y)
 }

@@ -25,118 +25,32 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
-func TestNewDecimalFromFloat64(t *testing.T) {
-	expected := &Decimal{new(decimal.Big).SetFloat64(1.25)}
-	received := NewDecimalFromFloat64(1.25)
-	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, received)
-	}
-}
-
-func TestNewDecimal(t *testing.T) {
-	expected := &Decimal{new(decimal.Big)}
-	received := NewDecimal()
-	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, received)
-	}
-}
-
-func TestDecimalFloat64(t *testing.T) {
-	expected := 3.2795784983858396
-	received := NewDecimalFromFloat64(3.2795784983858396).Float64()
-	if expected != received {
-		t.Errorf("Expecting: %+v, received: %+v", expected, received)
-	}
-}
-
-func TestDecimalFloat64Negative(t *testing.T) {
-	expected := -3.2795784983858396
-	received := NewDecimalFromFloat64(-3.2795784983858396).Float64()
-	if expected != received {
-		t.Errorf("Expecting: %+v, received: %+v", expected, received)
-	}
-}
-
-func TestDecimalMarshalUnmarshalJSON(t *testing.T) {
-	a := NewDecimal()
-	received, err := NewDecimalFromFloat64(3.27).MarshalJSON()
-	if err != nil {
-		t.Errorf("Expecting: nil, received: %+v", received)
-	}
-	if err := a.UnmarshalJSON(received); err != nil {
-		t.Error(err)
-	}
-	rcv := a.Float64()
-	expected := 3.27
-	if expected != rcv {
-		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
-	}
-}
-
-func TestNewDecimalFromUint64(t *testing.T) {
-	expected := &Decimal{new(decimal.Big).SetUint64(18446744073709551615)}
-	received := NewDecimalFromUint64(18446744073709551615)
+func TestNewDecimalDivide(t *testing.T) {
+	x := new(decimal.Big).SetUint64(10)
+	y := new(decimal.Big).SetUint64(5)
+	expected, _ := new(decimal.Big).SetUint64(2).Float64()
+	received, _ := DivideBig(x, y).Float64()
 	if !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
 	}
 }
 
-func TestNewDecimalDivide(t *testing.T) {
-	a := NewDecimal()
-	x := NewDecimalFromUint64(10)
-	y := NewDecimalFromUint64(5)
-	expected := NewDecimalFromUint64(2)
-	received := a.Divide(x, y)
-	if !reflect.DeepEqual(expected.Float64(), received.Float64()) {
-		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.Float64(), received.Float64())
-	}
-}
-
 func TestNewDecimalMultiply(t *testing.T) {
-	a := NewDecimal()
-	x := NewDecimalFromUint64(10)
-	y := NewDecimalFromUint64(5)
-	expected := NewDecimalFromUint64(50)
-	received := a.Multiply(x, y)
-	if !reflect.DeepEqual(expected.Float64(), received.Float64()) {
-		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.Float64(), received.Float64())
+	x := new(decimal.Big).SetUint64(10)
+	y := new(decimal.Big).SetUint64(5)
+	expected, _ := new(decimal.Big).SetUint64(50).Float64()
+	received, _ := MultiplyBig(x, y).Float64()
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
 	}
 }
 
 func TestNewDecimalAdd(t *testing.T) {
-	a := NewDecimal()
-	x := NewDecimalFromUint64(10)
-	y := NewDecimalFromUint64(5)
-	expected := NewDecimalFromUint64(15)
-	received := a.Add(x, y)
-	if !reflect.DeepEqual(expected.Float64(), received.Float64()) {
-		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.Float64(), received.Float64())
-	}
-}
-
-func TestNewDecimalCompareEqual(t *testing.T) {
-	a := NewDecimalFromUint64(5)
-	y := NewDecimalFromUint64(5)
-	received := a.Compare(y)
-	if !reflect.DeepEqual(0, received) {
-		t.Errorf("Expecting: <0>, received: <%+v>", received)
-	}
-}
-
-func TestNewDecimalCompareGreaterThan(t *testing.T) {
-	a := NewDecimalFromUint64(5)
-	y := NewDecimalFromUint64(4)
-	received := a.Compare(y)
-	if !reflect.DeepEqual(1, received) {
-		t.Errorf("Expecting: <1>, received: <%+v>", received)
-	}
-}
-
-func TestNewDecimalCompareSmallerThan(t *testing.T) {
-	a := NewDecimalFromUint64(4)
-	y := NewDecimalFromUint64(5)
-	received := a.Compare(y)
-	if !reflect.DeepEqual(-1, received) {
-		t.Errorf("Expecting: <-1>, received: <%+v>", received)
+	x := new(decimal.Big).SetUint64(10)
+	y := new(decimal.Big).SetUint64(5)
+	expected, _ := new(decimal.Big).SetUint64(15).Float64()
+	received, _ := AddBig(x, y).Float64()
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
 	}
 }

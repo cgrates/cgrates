@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "time"
+import (
+	"time"
+
+	"github.com/ericlagergren/decimal"
+)
 
 // ChargedIncrement represents one unit charged inside an interval
 type ChargedIncrement struct {
@@ -27,5 +31,5 @@ type ChargedIncrement struct {
 	AccountingID   string // Accounting charged information
 	CompressFactor int
 
-	cost *Decimal // cached version of the Decimal
+	cost *decimal.Big // cached version of the Decimal
 }
