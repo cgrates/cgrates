@@ -53,7 +53,7 @@ func TestDispatcherSReload(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
-	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
 	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz)
 	srv := NewDispatcherService(cfg, db, chS, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1), nil, anz)

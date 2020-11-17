@@ -339,7 +339,8 @@ func runPreload(loader *services.LoaderService, internalLoaderSChan chan rpcclie
 		return
 	}
 
-	internalLoaderSChan <- <-internalLoaderSChan
+	ldrs := <-internalLoaderSChan
+	internalLoaderSChan <- ldrs
 
 	var reply string
 	for _, loaderID := range strings.Split(*preload, utils.FIELDS_SEP) {
@@ -532,7 +533,7 @@ func main() {
 	filterSChan := make(chan *engine.FilterS, 1)
 
 	// init AnalyzerS
-	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
+	anz := services.NewAnalyzerService(cfg, server, filterSChan, exitChan, internalAnalyzerSChan)
 	if anz.ShouldRun() {
 		if err := anz.Start(); err != nil {
 			fmt.Println(err)

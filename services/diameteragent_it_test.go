@@ -51,7 +51,7 @@ func TestDiameterAgentReload(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
-	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
 	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
 		engineShutdown, nil, nil, anz)
 	srv := NewDiameterAgent(cfg, filterSChan, engineShutdown, nil)

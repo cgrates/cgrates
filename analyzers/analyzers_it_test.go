@@ -82,17 +82,16 @@ func TestAnalyzerSIT(t *testing.T) {
 
 func testAnalyzerSInitCfg(t *testing.T) {
 	var err error
+	if err := os.RemoveAll("/tmp/analyzers/"); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.MkdirAll("/tmp/analyzers/", 0700); err != nil {
+		t.Fatal(err)
+	}
 	anzCfgPath = path.Join(*dataDir, "conf", "samples", "analyzers")
 	anzCfg, err = config.NewCGRConfigFromPath(anzCfgPath)
 	if err != nil {
 		t.Error(err)
-	}
-
-	if err := os.RemoveAll(anzCfg.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
-	}
-	if err = os.MkdirAll(path.Dir(anzCfg.AnalyzerSCfg().DBPath), 0700); err != nil {
-		t.Fatal(err)
 	}
 }
 
@@ -199,7 +198,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 
 func testAnalyzerSV1Search(t *testing.T) {
 	var result []map[string]interface{}
-	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`, &result); err != nil {
+	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
@@ -208,7 +207,7 @@ func testAnalyzerSV1Search(t *testing.T) {
 
 func testAnalyzerSV1Search2(t *testing.T) {
 	var result []map[string]interface{}
-	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, `+RequestEncoding:\*json +RequestMethod:ChargerSv1\.ProcessEvent`, &result); err != nil {
+	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*json +RequestMethod:ChargerSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))

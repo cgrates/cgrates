@@ -26,28 +26,32 @@ import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewAnalyzerService returns the Analyzer Service
-func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server, exitChan chan<- struct{},
+func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server,
+	filterSChan chan *engine.FilterS, exitChan chan<- struct{},
 	internalAnalyzerSChan chan rpcclient.ClientConnector) *AnalyzerService {
 	return &AnalyzerService{
-		connChan: internalAnalyzerSChan,
-		cfg:      cfg,
-		server:   server,
-		exitChan: exitChan,
+		connChan:    internalAnalyzerSChan,
+		cfg:         cfg,
+		server:      server,
+		filterSChan: filterSChan,
+		exitChan:    exitChan,
 	}
 }
 
 // AnalyzerService implements Service interface
 type AnalyzerService struct {
 	sync.RWMutex
-	cfg      *config.CGRConfig
-	server   *cores.Server
-	stopChan chan struct{}
-	exitChan chan<- struct{}
+	cfg         *config.CGRConfig
+	server      *cores.Server
+	filterSChan chan *engine.FilterS
+	stopChan    chan struct{}
+	exitChan    chan<- struct{}
 
 	anz      *analyzers.AnalyzerService
 	rpc      *v1.AnalyzerSv1
@@ -59,7 +63,10 @@ func (anz *AnalyzerService) Start() (err error) {
 	if anz.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	if anz.anz, err = analyzers.NewAnalyzerService(anz.cfg); err != nil {
+
+	anz.Lock()
+	defer anz.Unlock()
+	if anz.anz, err = analyzers.NewAnalyzerService(anz.cfg, anz.filterSChan); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		return
 	}

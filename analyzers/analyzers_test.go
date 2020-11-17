@@ -21,7 +21,6 @@ package analyzers
 import (
 	"encoding/json"
 	"os"
-	"path"
 	"reflect"
 	"runtime"
 	"strconv"
@@ -43,10 +42,10 @@ func TestNewAnalyzerService(t *testing.T) {
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(path.Dir(cfg.AnalyzerSCfg().DBPath), 0700); err != nil {
+	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerService(cfg, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,10 +77,10 @@ func TestAnalyzerSLogTraffic(t *testing.T) {
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(path.Dir(cfg.AnalyzerSCfg().DBPath), 0700); err != nil {
+	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerService(cfg, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,10 +133,10 @@ func TestAnalyzersDeleteHits(t *testing.T) {
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(path.Dir(cfg.AnalyzerSCfg().DBPath), 0700); err != nil {
+	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerService(cfg, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,10 +158,10 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(path.Dir(cfg.AnalyzerSCfg().DBPath), 0700); err != nil {
+	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerService(cfg, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -172,7 +171,7 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 	anz.ListenAndServe(make(chan struct{}))
 
 	cfg.AnalyzerSCfg().CleanupInterval = 1
-	anz, err = NewAnalyzerService(cfg)
+	anz, err = NewAnalyzerService(cfg, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,10 +196,10 @@ func TestAnalyzersV1Search(t *testing.T) {
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(path.Dir(cfg.AnalyzerSCfg().DBPath), 0700); err != nil {
+	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerService(cfg, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -252,13 +251,13 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Fatal(err)
 	}
 	reply := []map[string]interface{}{}
-	if err = anz.V1StringQuery(utils.CoreSv1Ping, &reply); err != nil {
+	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: utils.CoreSv1Ping}, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 4 {
 		t.Errorf("Expected 4 hits received: %v", len(reply))
 	}
 	reply = []map[string]interface{}{}
-	if err = anz.V1StringQuery("RequestMethod:"+utils.CoreSv1Ping, &reply); err != nil {
+	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: "RequestMethod:" + utils.CoreSv1Ping}, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 4 {
 		t.Errorf("Expected 4 hits received: %v", len(reply))
@@ -276,20 +275,20 @@ func TestAnalyzersV1Search(t *testing.T) {
 		"RequestStartTime":   t1.Add(-24 * time.Hour).UTC().Format(time.RFC3339),
 	}}
 	reply = []map[string]interface{}{}
-	if err = anz.V1StringQuery(utils.RequestDuration+":>="+strconv.FormatInt(int64(time.Hour), 10), &reply); err != nil {
+	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: utils.RequestDuration + ":>=" + strconv.FormatInt(int64(time.Hour), 10)}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 
 	reply = []map[string]interface{}{}
-	if err = anz.V1StringQuery(utils.RequestStartTime+":<=\""+t1.Add(-23*time.Hour).UTC().Format(time.RFC3339)+"\"", &reply); err != nil {
+	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: utils.RequestStartTime + ":<=\"" + t1.Add(-23*time.Hour).UTC().Format(time.RFC3339) + "\""}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
 	reply = []map[string]interface{}{}
-	if err = anz.V1StringQuery("RequestEncoding:*gob", &reply); err != nil {
+	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: "RequestEncoding:*gob"}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
@@ -298,7 +297,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	if err = anz.db.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if err = anz.V1StringQuery("RequestEncoding:*gob", &reply); err != bleve.ErrorIndexClosed {
+	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: "RequestEncoding:*gob"}, &reply); err != bleve.ErrorIndexClosed {
 		t.Errorf("Expected error: %v,received: %+v", bleve.ErrorIndexClosed, err)
 	}
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {

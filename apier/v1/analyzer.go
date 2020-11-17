@@ -46,6 +46,6 @@ func (aSv1 *AnalyzerSv1) Ping(ign *utils.CGREvent, reply *string) error {
 }
 
 // StringQuery returns a list of API that match the query
-func (aSv1 *AnalyzerSv1) StringQuery(search string, reply *[]map[string]interface{}) error {
+func (aSv1 *AnalyzerSv1) StringQuery(search *analyzers.QueryArgs, reply *[]map[string]interface{}) error {
 	return aSv1.aS.V1StringQuery(search, reply)
 }

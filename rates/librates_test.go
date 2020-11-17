@@ -1599,14 +1599,12 @@ func TestComputeRateSIntervals(t *testing.T) {
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
-
 				IntervalStart: time.Duration(0),
 				Unit:          time.Duration(1 * time.Minute),
 				Increment:     time.Duration(1 * time.Second),
 				Value:         0.20,
 			},
 			{
-
 				IntervalStart: time.Duration(2 * time.Minute),
 				Unit:          time.Duration(1 * time.Minute),
 				Increment:     time.Duration(1 * time.Second),

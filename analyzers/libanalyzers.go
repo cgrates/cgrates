@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package analyzers
 
 import (
+	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/blevesearch/bleve/index/scorch"
@@ -96,4 +98,34 @@ func getIndex(indx string) (indxType, storeType string) {
 		indxType, storeType = upsidedown.Name, moss.Name
 	}
 	return
+}
+
+// unmarshalJSON will transform the message in a map[string]interface{} of []interface{}
+// depending of the first character
+// used for filters purposes so the nil is replaced with empty map
+func unmarshalJSON(jsn json.RawMessage) (interface{}, error) {
+	switch {
+	case string(jsn) == "null" ||
+		len(jsn) == 0: // nil or empty response
+		// by default consider nil as an empty map for filtering purposes
+		return map[string]interface{}{}, nil
+	case string(jsn) == "true": // booleans
+		return true, nil
+	case string(jsn) == "false":
+		return false, nil
+	case jsn[0] == '"': // string
+		return string(jsn[1 : len(jsn)-1]), nil
+	case jsn[0] >= '0' && jsn[0] <= '9': // float64
+		return strconv.ParseFloat(string(jsn), 64)
+	case jsn[0] == '[': // slice
+		var val []interface{}
+		err := json.Unmarshal(jsn, &val)
+		return val, err
+	case jsn[0] == '{': // map
+		var val map[string]interface{}
+		err := json.Unmarshal(jsn, &val)
+		return val, err
+	default:
+		return nil, new(json.SyntaxError)
+	}
 }
