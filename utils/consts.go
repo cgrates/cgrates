@@ -2039,6 +2039,7 @@ const (
 	RetransmissionTimerCfg = "retransmission_timer"
 	OnlineCDRExportsCfg    = "online_cdr_exports"
 	SessionCostRetires     = "session_cost_retries"
+	RateSConnsCfg          = "rates_conns"
 )
 
 // SessionSCfg
