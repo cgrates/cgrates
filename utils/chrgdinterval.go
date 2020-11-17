@@ -18,12 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "time"
+import (
+	"time"
+
+	"github.com/ericlagergren/decimal"
+)
 
 type ChargedInterval struct {
 	Increments     []*ChargedIncrement // specific increments applied to this interval
 	CompressFactor int
 	ccUsageIdx     *time.Duration // computed value of totalUsage at the starting of the interval
 	usage          *time.Duration // cache usage computation for this interval
-	cost           *Decimal       // cache cost calculation on this interval // #ToDo: replace here with decimal.Big
+	cost           *decimal.Big   // cache cost calculation on this interval
 }

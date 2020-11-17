@@ -23,6 +23,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ericlagergren/decimal"
+
 	"github.com/cgrates/cron"
 
 	"github.com/cgrates/cgrates/utils"
@@ -251,9 +253,9 @@ func TestRateProfileCompile(t *testing.T) {
 		},
 		Tenant:  "cgrates.org",
 		ID:      "RTP1",
-		connFee: utils.NewDecimalFromFloat64(rt.ConnectFee),
-		minCost: utils.NewDecimalFromFloat64(rt.MinCost),
-		maxCost: utils.NewDecimalFromFloat64(rt.MaxCost),
+		connFee: new(decimal.Big).SetFloat64(rt.ConnectFee),
+		minCost: new(decimal.Big).SetFloat64(rt.MinCost),
+		maxCost: new(decimal.Big).SetFloat64(rt.MaxCost),
 	}
 	if err := rt.Compile(); err != nil {
 		t.Error(err)
@@ -547,8 +549,8 @@ func TestCostForIntervals(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-	eDcml := utils.NewDecimalFromFloat64(4.3)
-	if cost := CostForIntervals(rtIvls); cost.Float64() != eDcml.Float64() {
-		t.Errorf("eDcml: %f, received: %f\n", eDcml.Float64(), cost.Float64())
+	eDcml, _ := new(decimal.Big).SetFloat64(4.3).Float64()
+	if cost, _ := CostForIntervals(rtIvls).Float64(); cost != eDcml {
+		t.Errorf("eDcml: %f, received: %+v", eDcml, cost)
 	}
 }

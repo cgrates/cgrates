@@ -23,6 +23,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/ericlagergren/decimal"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cron"
 )
@@ -42,9 +44,9 @@ type RateProfile struct {
 	MaxCostStrategy    string
 	Rates              map[string]*Rate
 
-	connFee *utils.Decimal // cached version of the Decimal
-	minCost *utils.Decimal
-	maxCost *utils.Decimal
+	connFee *decimal.Big // cached version of the Decimal
+	minCost *decimal.Big
+	maxCost *decimal.Big
 }
 
 func (rp *RateProfile) TenantID() string {
@@ -52,9 +54,9 @@ func (rp *RateProfile) TenantID() string {
 }
 
 func (rp *RateProfile) Compile() (err error) {
-	rp.connFee = utils.NewDecimalFromFloat64(rp.ConnectFee)
-	rp.minCost = utils.NewDecimalFromFloat64(rp.MinCost)
-	rp.maxCost = utils.NewDecimalFromFloat64(rp.MaxCost)
+	rp.connFee = new(decimal.Big).SetFloat64(rp.ConnectFee)
+	rp.minCost = new(decimal.Big).SetFloat64(rp.MinCost)
+	rp.maxCost = new(decimal.Big).SetFloat64(rp.MaxCost)
 	for _, rtP := range rp.Rates {
 		rtP.uID = utils.ConcatenatedKey(rp.Tenant, rp.ID, rtP.ID)
 		if err = rtP.Compile(); err != nil {
@@ -88,9 +90,9 @@ type IntervalRate struct {
 	Increment     time.Duration // RateIncrement
 	Value         float64       // RateValue
 
-	decVal  *utils.Decimal // cached version of the Value converted to Decimal for operations
-	decUnit *utils.Decimal // cached version of the Unit converted to Decimal for operations
-	decIcrm *utils.Decimal // cached version of the Increment converted to Decimal for operations
+	decVal  *decimal.Big // cached version of the Value converted to Decimal for operations
+	decUnit *decimal.Big // cached version of the Unit converted to Decimal for operations
+	decIcrm *decimal.Big // cached version of the Increment converted to Decimal for operations
 }
 
 func (rt *Rate) Compile() (err error) {
@@ -102,9 +104,9 @@ func (rt *Rate) Compile() (err error) {
 		return
 	}
 	for _, iRt := range rt.IntervalRates {
-		iRt.decVal = utils.NewDecimalFromFloat64(iRt.Value)
-		iRt.decUnit = utils.NewDecimalFromUint64(uint64(iRt.Unit))
-		iRt.decIcrm = utils.NewDecimalFromUint64(uint64(iRt.Increment))
+		iRt.decVal = new(decimal.Big).SetFloat64(iRt.Value)
+		iRt.decUnit = new(decimal.Big).SetUint64(uint64(iRt.Unit))
+		iRt.decIcrm = new(decimal.Big).SetUint64(uint64(iRt.Increment))
 	}
 	return
 }
@@ -134,17 +136,17 @@ func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time
 }
 
 // DecimalValue exports the decVal variable
-func (rIt *IntervalRate) DecimalValue() *utils.Decimal {
+func (rIt *IntervalRate) DecimalValue() *decimal.Big {
 	return rIt.decVal
 }
 
 // DecimalUnit exports the decUnit variable
-func (rIt *IntervalRate) DecimalUnit() *utils.Decimal {
+func (rIt *IntervalRate) DecimalUnit() *decimal.Big {
 	return rIt.decUnit
 }
 
 // DecimalIncrement exports the decUnit variable
-func (rIt *IntervalRate) DecimalIncrement() *utils.Decimal {
+func (rIt *IntervalRate) DecimalIncrement() *decimal.Big {
 	return rIt.decIcrm
 }
 
@@ -160,7 +162,7 @@ type RateSInterval struct {
 	Increments     []*RateSIncrement
 	CompressFactor int64
 
-	cost *utils.Decimal // unexported total interval cost
+	cost *decimal.Big // unexported total interval cost
 }
 
 type RateSIncrement struct {
@@ -170,7 +172,7 @@ type RateSIncrement struct {
 	IntervalRateIndex int
 	CompressFactor    int64
 
-	cost *utils.Decimal // unexported total increment cost
+	cost *decimal.Big // unexported total increment cost
 }
 
 type RateProfileCost struct {
@@ -204,11 +206,11 @@ func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
 	return
 }
 
-func (rIv *RateSInterval) Cost() *utils.Decimal {
+func (rIv *RateSInterval) Cost() *decimal.Big {
 	if rIv.cost == nil {
-		rIv.cost = utils.NewDecimal()
+		rIv.cost = new(decimal.Big)
 		for _, incrm := range rIv.Increments {
-			rIv.cost = utils.NewDecimal().Add(rIv.cost, incrm.Cost())
+			rIv.cost = utils.AddBig(rIv.cost, incrm.Cost())
 		}
 	}
 	return rIv.cost
@@ -232,27 +234,27 @@ func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement, full bool) (eq
 }
 
 // Cost computes the Cost on RateSIncrement
-func (rIcr *RateSIncrement) Cost() *utils.Decimal {
+func (rIcr *RateSIncrement) Cost() *decimal.Big {
 	if rIcr.cost == nil {
 		icrRt := rIcr.Rate.IntervalRates[rIcr.IntervalRateIndex]
 		icrCost := icrRt.DecimalValue()
 		if icrRt.Unit != icrRt.Increment {
-			icrCost = utils.NewDecimal().Divide(
-				utils.NewDecimal().Multiply(icrCost, icrRt.DecimalIncrement()),
+			icrCost = utils.DivideBig(
+				utils.MultiplyBig(icrCost, icrRt.DecimalIncrement()),
 				icrRt.DecimalUnit())
 		}
-		rIcr.cost = utils.NewDecimal().Multiply(
+		rIcr.cost = utils.MultiplyBig(
 			icrCost,
-			utils.NewDecimalFromUint64(uint64(rIcr.CompressFactor)))
+			new(decimal.Big).SetUint64(uint64(rIcr.CompressFactor)))
 	}
 	return rIcr.cost
 }
 
 // CostForIntervals sums the costs for all intervals
-func CostForIntervals(rtIvls []*RateSInterval) (cost *utils.Decimal) {
-	cost = utils.NewDecimal()
+func CostForIntervals(rtIvls []*RateSInterval) (cost *decimal.Big) {
+	cost = new(decimal.Big)
 	for _, rtIvl := range rtIvls {
-		cost = utils.NewDecimal().Add(cost, rtIvl.Cost())
+		cost = utils.AddBig(cost, rtIvl.Cost())
 	}
 	return
 }
