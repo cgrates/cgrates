@@ -1485,3 +1485,25 @@ type ArgExportCDRs struct {
 	Verbose     bool     // verbose is used to inform the user about the positive and negative exported cdrs
 	RPCCDRsFilter
 }
+
+// ArgsCostForEvent arguments used for process event
+type ArgsCostForEvent struct {
+	RateProfileIDs []string
+	*CGREventWithOpts
+}
+
+// StartTime returns the event time used to check active rate profiles
+func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error) {
+	if tIface, has := args.Opts[OptsRatesStartTime]; has {
+		return IfaceAsTime(tIface, tmz)
+	}
+	return time.Now(), nil
+}
+
+// usage returns the event time used to check active rate profiles
+func (args *ArgsCostForEvent) Usage() (usage time.Duration, err error) {
+	if uIface, has := args.Opts[OptsRatesUsage]; has {
+		return IfaceAsDuration(uIface)
+	}
+	return time.Duration(time.Minute), nil
+}

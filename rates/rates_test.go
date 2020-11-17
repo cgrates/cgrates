@@ -96,7 +96,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 	if rtPRf, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
-		&ArgsCostForEvent{
+		&utils.ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
@@ -115,7 +115,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 	}
 
 	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
-		&ArgsCostForEvent{
+		&utils.ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
@@ -131,7 +131,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
-		&ArgsCostForEvent{
+		&utils.ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
@@ -147,7 +147,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
-		&ArgsCostForEvent{
+		&utils.ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
@@ -164,7 +164,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 	}
 
 	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{"rp2"},
-		&ArgsCostForEvent{
+		&utils.ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
@@ -182,7 +182,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 
 	rpp.FilterIDs = []string{"*string:~*req.Account:1001;1002;1003", "*gt:~*req.Cost{*:10"}
 	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
-		&ArgsCostForEvent{
+		&utils.ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
@@ -200,7 +200,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 
 	rate.dm = nil
 	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{"rp3"},
-		&ArgsCostForEvent{
+		&utils.ArgsCostForEvent{
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",

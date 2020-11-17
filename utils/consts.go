@@ -875,6 +875,7 @@ const (
 	HashtagSep               = "#"
 	MetaRounding             = "*rounding"
 	StatsNA                  = -1.0
+	RateProfileMatched       = "RateProfileMatched"
 )
 
 // Migrator Action

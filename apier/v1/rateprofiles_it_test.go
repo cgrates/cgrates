@@ -29,7 +29,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -823,7 +822,7 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 	}
 
 	var rply *engine.RateProfileCost
-	argsRt := &rates.ArgsCostForEvent{
+	argsRt := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -863,7 +862,7 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 
 func testV1RateCostForEventWithUsage(t *testing.T) {
 	var rply *engine.RateProfileCost
-	argsRt := &rates.ArgsCostForEvent{
+	argsRt := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsRatesUsage: "2m10s",
@@ -929,7 +928,7 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 
-	argsRt2 := &rates.ArgsCostForEvent{
+	argsRt2 := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsRatesUsage: "4h10m15s",
@@ -978,7 +977,7 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 
 func testV1RateCostForEventWithWrongUsage(t *testing.T) {
 	var rply *engine.RateProfileCost
-	argsRt := &rates.ArgsCostForEvent{
+	argsRt := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsRatesUsage: "wrongUsage",
@@ -1020,7 +1019,7 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 	}
 
 	var rply *engine.RateProfileCost
-	argsRt := &rates.ArgsCostForEvent{
+	argsRt := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
@@ -1059,7 +1058,7 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 
-	argsRt2 := &rates.ArgsCostForEvent{
+	argsRt2 := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC).String(),
@@ -1082,7 +1081,7 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 
 func testV1RateCostForEventWithWrongStartTime(t *testing.T) {
 	var rply *engine.RateProfileCost
-	argsRt := &rates.ArgsCostForEvent{
+	argsRt := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: "wrongTime",
@@ -1104,7 +1103,7 @@ func testV1RateCostForEventWithWrongStartTime(t *testing.T) {
 
 func testV1RateCostForEventWithOpts(t *testing.T) {
 	var rply *engine.RateProfileCost
-	argsRt := &rates.ArgsCostForEvent{
+	argsRt := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
@@ -1171,7 +1170,7 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 
-	argsRt2 := &rates.ArgsCostForEvent{
+	argsRt2 := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
@@ -1269,7 +1268,7 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 	}
 
 	var rply *engine.RateProfileCost
-	argsRt := &rates.ArgsCostForEvent{
+	argsRt := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2020, 12, 23, 23, 0, 0, 0, time.UTC),
@@ -1409,7 +1408,7 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 	}
 
 	var rply *engine.RateProfileCost
-	argsRt := &rates.ArgsCostForEvent{
+	argsRt := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2020, 12, 31, 10, 0, 0, 0, time.UTC),
