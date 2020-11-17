@@ -162,6 +162,9 @@ func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]in
 		if dur, err := utils.IfaceAsDuration(obj.Fields[utils.RequestDuration]); err == nil {
 			obj.Fields[utils.RequestDuration] = dur.String()
 		}
+		if val, has := obj.Fields[utils.ReplyError]; !has || len(utils.IfaceAsString(val)) == 0 {
+			obj.Fields[utils.ReplyError] = nil
+		}
 		if lCntFltrs != 0 {
 			repDP, err := unmarshalJSON(rep)
 			if err != nil {

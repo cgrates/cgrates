@@ -2515,6 +2515,7 @@ const (
 	RequestDuration  = "RequestDuration"
 	RequestParams    = "RequestParams"
 	Reply            = "Reply"
+	ReplyError       = "ReplyError"
 )
 
 var (

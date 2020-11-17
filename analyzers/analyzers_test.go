@@ -278,6 +278,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 		"Reply":              json.RawMessage(`"Pong"`),
 		"RequestSource":      "127.0.0.1:5566",
 		"RequestStartTime":   t1.Add(-24 * time.Hour).UTC().Format(time.RFC3339),
+		"ReplyError":         nil,
 	}}
 	reply = []map[string]interface{}{}
 	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: utils.RequestDuration + ":>=" + strconv.FormatInt(int64(time.Hour), 10)}, &reply); err != nil {
