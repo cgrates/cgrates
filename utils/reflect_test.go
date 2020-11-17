@@ -1318,3 +1318,163 @@ func TestReflectFieldAsStringDefaultError(t *testing.T) {
 		t.Errorf("Expected <Cannot convert to string field type: bool> ,received: <%+v>", err)
 	}
 }
+func TestGreaterThanUint64(t *testing.T) {
+	var firstUint64 uint64
+	var secondUint64 uint64
+	firstUint64 = 1
+	secondUint64 = 2
+	if gte, err := GreaterThan(firstUint64, secondUint64, false); err != nil {
+		t.Error(err)
+	} else if gte {
+		t.Error("should be not greater than")
+	}
+}
+
+func TestGreaterThanUint64Equal(t *testing.T) {
+	var firstUint64 uint64
+	var secondUint64 uint64
+	firstUint64 = 2
+	secondUint64 = 2
+	if gte, err := GreaterThan(firstUint64, secondUint64, true); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+}
+
+func TestGreaterThanDefaultError(t *testing.T) {
+	var firstUint64 bool
+	var secondUint64 bool
+	firstUint64 = true
+	secondUint64 = false
+	_, err := GreaterThan(firstUint64, secondUint64, true)
+	if err == nil || err.Error() != "unsupported comparison type: bool, kind: bool" {
+		t.Errorf("Expected <unsupported comparison type: bool, kind: bool> ,received: <%+v>", err)
+	}
+}
+
+func TestEqualToUint64(t *testing.T) {
+	var firstUint64 uint64
+	var secondUint64 uint64
+	firstUint64 = 2
+	secondUint64 = 2
+	if gte, err := EqualTo(firstUint64, secondUint64); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+}
+
+func TestEqualToString(t *testing.T) {
+	var firstUint64 string
+	var secondUint64 string
+	firstUint64 = "2"
+	secondUint64 = "2"
+	if gte, err := EqualTo(firstUint64, secondUint64); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+}
+
+func TestEqualToError(t *testing.T) {
+	var firstUint64 bool
+	var secondUint64 bool
+	firstUint64 = true
+	secondUint64 = true
+	_, err := EqualTo(firstUint64, secondUint64)
+	if err == nil || err.Error() != "unsupported comparison type: bool, kind: bool" {
+		t.Errorf("Expected <unsupported comparison type: bool, kind: bool> ,received: <%+v>", err)
+	}
+}
+
+func TestIfaceAsStringDefault(t *testing.T) {
+	var test int8
+	test = 2
+	response := IfaceAsString(test)
+	if !reflect.DeepEqual(response, "2") {
+		t.Errorf("Expected <2> ,received: <%+v>", response)
+	}
+
+}
+
+func TestReflectSumTimeDurationError(t *testing.T) {
+	var time1 time.Duration
+	var time2 bool
+	time1 = 2
+	time2 = true
+	_, err := Sum(time1, time2)
+	if err == nil || err.Error() != "cannot convert field: true to time.Duration" {
+		t.Errorf("Expected <cannot convert field: true to time.Duration> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectSumInt64(t *testing.T) {
+	var testInt64 int64
+	var test2Int64 int64
+	var expected int64
+	testInt64 = 2
+	test2Int64 = 3
+	expected = 5
+	sum, _ := Sum(testInt64, test2Int64)
+	if !reflect.DeepEqual(sum, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, sum)
+	}
+}
+
+func TestReflectSumFloat64Error(t *testing.T) {
+	var testFloat64 float64
+	var test2Float64 bool
+	testFloat64 = 2.56
+	test2Float64 = true
+	_, err := Sum(testFloat64, test2Float64)
+	if err == nil || err.Error() != "cannot convert field: true to float64" {
+		t.Errorf("Expected <cannot convert field: true to float64> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectSumInt64Error(t *testing.T) {
+	var testVar int64
+	var test2Var bool
+	testVar = 25354
+	test2Var = true
+	_, err := Sum(testVar, test2Var)
+	if err == nil || err.Error() != "cannot convert field: true to int" {
+		t.Errorf("Expected <cannot convert field: true to int> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectDifferenceTimeDurationError(t *testing.T) {
+	var testVar time.Duration
+	var test2Var bool
+	testVar = 25354
+	test2Var = true
+	_, err := Difference(testVar, test2Var)
+	if err == nil || err.Error() != "cannot convert field: true to time.Duration" {
+		t.Errorf("Expected <cannot convert field: true to time.Duration> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectDifferenceFloat64Error(t *testing.T) {
+	var testVar float64
+	var test2Var bool
+	testVar = 2.5
+	test2Var = true
+	_, err := Difference(testVar, test2Var)
+	if err == nil || err.Error() != "cannot convert field: true to float64" {
+		t.Errorf("Expected <cannot convert field: true to float64> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectDifferenceInt64Error(t *testing.T) {
+	var testVar int64
+	var test2Var int64
+	var expected int64
+	testVar = 6
+	test2Var = 5
+	expected = 1
+	dif, _ := Difference(testVar, test2Var)
+	if !reflect.DeepEqual(dif, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, dif)
+	}
+}
