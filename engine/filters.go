@@ -516,11 +516,8 @@ func (fltr *FilterRule) passGreaterThan(dDP utils.DataProvider) (bool, error) {
 	if fldStr, castStr := fldIf.(string); castStr { // attempt converting string since deserialization fails here (ie: time.Time fields)
 		fldIf = utils.StringToInterface(fldStr)
 	}
-	orEqual := false
-	if fltr.Type == utils.MetaGreaterOrEqual ||
-		fltr.Type == utils.MetaLessThan {
-		orEqual = true
-	}
+	orEqual := fltr.Type == utils.MetaGreaterOrEqual ||
+		fltr.Type == utils.MetaLessThan
 	for _, val := range fltr.rsrValues {
 		valPath, err := val.CompileDynRule(dDP)
 		if err != nil {
@@ -532,9 +529,9 @@ func (fltr *FilterRule) passGreaterThan(dDP utils.DataProvider) (bool, error) {
 		}
 		if gte, err := utils.GreaterThan(fldIf, sval, orEqual); err != nil {
 			return false, err
-		} else if utils.SliceHasMember([]string{utils.MetaGreaterThan, utils.MetaGreaterOrEqual}, fltr.Type) && gte {
+		} else if (utils.MetaGreaterThan == fltr.Type || utils.MetaGreaterOrEqual == fltr.Type) && gte {
 			return true, nil
-		} else if utils.SliceHasMember([]string{utils.MetaLessThan, utils.MetaLessOrEqual}, fltr.Type) && !gte {
+		} else if (utils.MetaLessThan == fltr.Type || utils.MetaLessOrEqual == fltr.Type) && !gte {
 			return true, nil
 		}
 	}
