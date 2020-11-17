@@ -20,6 +20,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"testing"
@@ -321,6 +322,16 @@ func TestHandleJSONErrorInvalidUnmarshalError(t *testing.T) {
 	expectedErr := &json.InvalidUnmarshalError{Type: reflect.TypeOf(nil)}
 	if err == nil || err.Error() != expectedErr.Error() {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestHandleJSONErrorDefaultError(t *testing.T) {
+	rjr := NewRjReaderFromBytes([]byte("{}"))
+	rjr.indx = 10
+	if _, err := rjr.ReadByteWC(); err == nil || err != io.EOF {
+		t.Errorf("Expected %+v, received %+v", io.EOF, err)
+	} else if newErr := rjr.HandleJSONError(err); newErr == nil || newErr != io.EOF {
+		t.Errorf("Expected %+v, received %+v", io.EOF, err)
 	}
 }
 
