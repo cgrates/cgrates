@@ -276,24 +276,49 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	}
 
 	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
-		var rpCost map[string]interface{}
-		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
-			&utils.GetCostOnRatingPlansArgs{
-				Tenant:        ev.Tenant,
-				Account:       acnt,
-				Subject:       subj,
-				Destination:   dst,
-				SetupTime:     sTime,
-				Usage:         usage,
-				RatingPlanIDs: rpIDs,
-			}, &rpCost); err != nil {
-			return nil, err
-		}
-		for k, v := range rpCost { // do not overwrite the return map
-			costData[k] = v
+		var rateRply *RateProfileCost
+		if len(rpS.cgrcfg.RouteSCfg().RateSConns) != 0 {
+			if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RateSConns, nil, utils.RateSv1CostForEvent,
+				&utils.ArgsCostForEvent{
+					CGREventWithOpts: &utils.CGREventWithOpts{
+						Opts: map[string]interface{}{ // add the setup time and usage in opts
+							utils.OptsRatesStartTime: sTime,
+							utils.OptsRatesUsage:     usage,
+						},
+						CGREvent: &utils.CGREvent{ // add the rest of the field in event
+							Tenant: ev.Tenant,
+							ID:     utils.UUIDSha1Prefix(),
+							Event: map[string]interface{}{
+								utils.Account:     acnt,
+								utils.Subject:     subj,
+								utils.Destination: dst,
+							},
+						},
+					},
+				}, &rateRply); err != nil {
+				return nil, err
+			}
+			costData[utils.Cost] = rateRply.Cost
+			costData[utils.RateProfileMatched] = rateRply.ID
+		} else {
+			var rpCost map[string]interface{}
+			if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
+				&utils.GetCostOnRatingPlansArgs{
+					Tenant:        ev.Tenant,
+					Account:       acnt,
+					Subject:       subj,
+					Destination:   dst,
+					SetupTime:     sTime,
+					Usage:         usage,
+					RatingPlanIDs: rpIDs,
+				}, &rpCost); err != nil {
+				return nil, err
+			}
+			for k, v := range rpCost { // do not overwrite the return map
+				costData[k] = v
+			}
 		}
 	}
-
 	return
 }
 

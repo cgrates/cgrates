@@ -211,7 +211,7 @@ func (rSv1 *RateSv1) Call(serviceMethod string,
 	return utils.APIerRPCCall(rSv1, serviceMethod, args, reply)
 }
 
-func (rSv1 *RateSv1) CostForEvent(args *rates.ArgsCostForEvent, rpCost *engine.RateProfileCost) (err error) {
+func (rSv1 *RateSv1) CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) (err error) {
 	return rSv1.rS.V1CostForEvent(args, rpCost)
 }
 
