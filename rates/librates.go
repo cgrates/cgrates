@@ -203,10 +203,10 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 				return nil, fmt.Errorf("intervalStart for rate: <%s> higher than usage: %v",
 					rt.UID(), iRtUsageSIdx)
 			}
-			isLastIRt := j == len(rt.IntervalRates)-1
 			if iRt.IntervalStart > iRtUsageSIdx {
 				break // we are past the start
 			}
+			isLastIRt := j == len(rt.IntervalRates)-1
 			if !isLastIRt && rt.IntervalRates[j+1].IntervalStart <= iRtUsageSIdx {
 				continue // the next interval changes the rating
 			}
@@ -215,13 +215,13 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 			} else {
 				iRtUsageEIdx = rtUsageEIdx
 			}
-			iRtUsage := iRtUsageEIdx - iRtUsageSIdx
 			if iRtUsageEIdx == time.Duration(0) {
 				return nil, fmt.Errorf("zero usage to be charged with rate: <%s>", rt.UID())
 			}
 			if iRt.Increment == time.Duration(0) {
 				return nil, fmt.Errorf("zero increment to be charged within rate: <%s>", rt.UID())
 			}
+			iRtUsage := iRtUsageEIdx - iRtUsageSIdx
 			intUsage := int64(iRtUsage)
 			intIncrm := int64(iRt.Increment)
 			cmpFactor := intUsage / intIncrm
