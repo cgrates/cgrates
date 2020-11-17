@@ -55,7 +55,7 @@ func TestEventReaderSReload(t *testing.T) {
 	engineShutdown := make(chan struct{}, 1)
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
 	db := NewDataDBService(cfg, nil)
 	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), engineShutdown, nil, nil, anz)
 	attrS := NewEventReaderService(cfg, filterSChan, engineShutdown, nil)

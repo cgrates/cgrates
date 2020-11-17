@@ -60,7 +60,7 @@ func TestEventExporterSReload(t *testing.T) {
 	chS := engine.NewCacheS(cfg, nil)
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
-	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
 	attrS := NewAttributeService(cfg, db,
 		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1),
 		anz)

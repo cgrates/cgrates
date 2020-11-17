@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package analyzers
 
 import (
+	"encoding/json"
 	"errors"
 	"reflect"
 	"testing"
@@ -95,4 +96,63 @@ func TestNewInfoRPC(t *testing.T) {
 		t.Errorf("Expected:%s, received:%s", utils.ToJSON(expIdx), utils.ToJSON(idx))
 	}
 
+}
+
+func TestUnmarshalJSON(t *testing.T) {
+	expErr := new(json.SyntaxError)
+	if _, err := unmarshalJSON(json.RawMessage(`a`)); errors.Is(err, expErr) {
+		t.Errorf("Expected error: %s,received %+v", expErr, err)
+	}
+	var exp interface{} = true
+	if val, err := unmarshalJSON(json.RawMessage(`true`)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	exp = false
+	if val, err := unmarshalJSON(json.RawMessage(`false`)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	exp = "string"
+	if val, err := unmarshalJSON(json.RawMessage(`"string"`)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	exp = 94.
+	if val, err := unmarshalJSON(json.RawMessage(`94`)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	exp = []interface{}{"1", "2", "3"}
+	if val, err := unmarshalJSON(json.RawMessage(`["1","2","3"]`)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	exp = map[string]interface{}{"1": "A", "2": "B", "3": "C"}
+	if val, err := unmarshalJSON(json.RawMessage(`{"1":"A","2":"B","3":"C"}`)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	exp = map[string]interface{}{}
+	if val, err := unmarshalJSON(json.RawMessage(`null`)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := unmarshalJSON(json.RawMessage(``)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected: %s,received %s", utils.ToJSON(exp), utils.ToJSON(val))
+	}
 }

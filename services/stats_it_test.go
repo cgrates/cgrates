@@ -54,7 +54,7 @@ func TestStatSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheStatFilterIndexes))
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	anz := NewAnalyzerService(cfg, server, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
 	db := NewDataDBService(cfg, nil)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz)
 	sS := NewStatService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz)

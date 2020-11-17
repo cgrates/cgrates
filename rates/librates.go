@@ -172,7 +172,7 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 			}
 		}
 	} else { // only first rate is considered for units
-		ordRts = []*orderedRate{&orderedRate{time.Duration(0), rtIdx[sortedATimes[0]].winner().rt}}
+		ordRts = []*orderedRate{{time.Duration(0), rtIdx[sortedATimes[0]].winner().rt}}
 	}
 	return
 }
@@ -226,7 +226,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 			intIncrm := int64(iRt.Increment)
 			cmpFactor := intUsage / intIncrm
 			if intUsage%intIncrm != 0 {
-				cmpFactor += 1 // int division has used math.Floor, need Ceil
+				cmpFactor++ // int division has used math.Floor, need Ceil
 			}
 			rIcrm := &engine.RateSIncrement{
 				UsageStart:        iRtUsageSIdx,

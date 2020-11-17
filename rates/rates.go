@@ -49,7 +49,7 @@ func (rS *RateS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 		utils.CoreS, utils.RateS))
 	for {
 		select {
-		case <-stopChan: // global exit
+		case <-stopChan:
 			return
 		case rld := <-cfgRld: // configuration was reloaded
 			cfgRld <- rld
@@ -168,6 +168,28 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 	}
 	rpCost.Cost = engine.CostForIntervals(rpCost.RateSIntervals).Float64()
 	return
+}
+
+// ArgsCostForEvent arguments used for proccess event
+type ArgsCostForEvent struct {
+	RateProfileIDs []string
+	*utils.CGREventWithOpts
+}
+
+// StartTime returns the event time used to check active rate profiles
+func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error) {
+	if tIface, has := args.Opts[utils.OptsRatesStartTime]; has {
+		return utils.IfaceAsTime(tIface, tmz)
+	}
+	return time.Now(), nil
+}
+
+// Usage returns the event time used to check active rate profiles
+func (args *ArgsCostForEvent) Usage() (usage time.Duration, err error) {
+	if uIface, has := args.Opts[utils.OptsRatesUsage]; has {
+		return utils.IfaceAsDuration(uIface)
+	}
+	return time.Duration(time.Minute), nil
 }
 
 // V1CostForEvent will be called to calculate the cost for an event

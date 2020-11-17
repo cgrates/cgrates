@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -29,12 +30,16 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/search"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewAnalyzerService initializes a AnalyzerService
-func NewAnalyzerService(cfg *config.CGRConfig) (aS *AnalyzerService, err error) {
-	aS = &AnalyzerService{cfg: cfg}
+func NewAnalyzerService(cfg *config.CGRConfig, filterS chan *engine.FilterS) (aS *AnalyzerService, err error) {
+	aS = &AnalyzerService{
+		cfg:         cfg,
+		filterSChan: filterS,
+	}
 	err = aS.initDB()
 	return
 }
@@ -43,14 +48,21 @@ func NewAnalyzerService(cfg *config.CGRConfig) (aS *AnalyzerService, err error) 
 type AnalyzerService struct {
 	db  bleve.Index
 	cfg *config.CGRConfig
+
+	// because we do not use the filters only for API
+	// start the service without them
+	// and populate them on the first API call
+	filterSChan chan *engine.FilterS
+	filterS     *engine.FilterS
 }
 
 func (aS *AnalyzerService) initDB() (err error) {
-	if _, err = os.Stat(aS.cfg.AnalyzerSCfg().DBPath); err == nil {
-		aS.db, err = bleve.Open(aS.cfg.AnalyzerSCfg().DBPath)
+	dbPath := path.Join(aS.cfg.AnalyzerSCfg().DBPath, "db")
+	if _, err = os.Stat(dbPath); err == nil {
+		aS.db, err = bleve.Open(dbPath)
 	} else if os.IsNotExist(err) {
 		indxType, storeType := getIndex(aS.cfg.AnalyzerSCfg().IndexType)
-		aS.db, err = bleve.NewUsing(aS.cfg.AnalyzerSCfg().DBPath,
+		aS.db, err = bleve.NewUsing(dbPath,
 			bleve.NewIndexMapping(), indxType, storeType, nil)
 	}
 	return
@@ -117,25 +129,59 @@ func (aS *AnalyzerService) logTrafic(id uint64, method string,
 		NewInfoRPC(id, method, params, result, err, enc, from, to, sTime, eTime))
 }
 
-// V1StringQuery returns a list of API that match the query
-func (aS *AnalyzerService) V1StringQuery(searchstr string, reply *[]map[string]interface{}) error {
+// QueryArgs the structure that we use to filter the API calls
+type QueryArgs struct {
+	// a string based on the query language(https://blevesearch.com/docs/Query-String-Query/) that we send to bleve
+	HeaderFilters string
+	// a list of filters that we use to filter the call similar to how we filter the events
+	ContentFilters []string
+}
 
-	s := bleve.NewSearchRequest(bleve.NewQueryStringQuery(searchstr))
+// V1StringQuery returns a list of API that match the query
+func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]interface{}) error {
+	s := bleve.NewSearchRequest(bleve.NewQueryStringQuery(args.HeaderFilters))
 	s.Fields = []string{utils.Meta} // return all fields
 	searchResults, err := aS.db.Search(s)
 	if err != nil {
 		return err
 	}
-	rply := make([]map[string]interface{}, searchResults.Hits.Len())
-	for i, obj := range searchResults.Hits {
-		rply[i] = obj.Fields
+	rply := make([]map[string]interface{}, 0, searchResults.Hits.Len())
+	lCntFltrs := len(args.ContentFilters)
+	if lCntFltrs != 0 &&
+		aS.filterS == nil { // populate the filter on the first API that requeres them
+		aS.filterS = <-aS.filterSChan
+		aS.filterSChan <- aS.filterS
+	}
+	for _, obj := range searchResults.Hits {
 		// make sure that the result is corectly marshaled
-		rply[i][utils.Reply] = json.RawMessage(utils.IfaceAsString(obj.Fields[utils.Reply]))
-		rply[i][utils.RequestParams] = json.RawMessage(utils.IfaceAsString(obj.Fields[utils.RequestParams]))
+		rep := json.RawMessage(utils.IfaceAsString(obj.Fields[utils.Reply]))
+		req := json.RawMessage(utils.IfaceAsString(obj.Fields[utils.RequestParams]))
+		obj.Fields[utils.Reply] = rep
+		obj.Fields[utils.RequestParams] = req
 		// try to pretty print the duration
-		if dur, err := utils.IfaceAsDuration(rply[i][utils.RequestDuration]); err == nil {
-			rply[i][utils.RequestDuration] = dur.String()
+		if dur, err := utils.IfaceAsDuration(obj.Fields[utils.RequestDuration]); err == nil {
+			obj.Fields[utils.RequestDuration] = dur.String()
 		}
+		if lCntFltrs != 0 {
+			repDP, err := unmarshalJSON(rep)
+			if err != nil {
+				return err
+			}
+			reqDP, err := unmarshalJSON(req)
+			if err != nil {
+				return err
+			}
+			if pass, err := aS.filterS.Pass(aS.cfg.GeneralCfg().DefaultTenant,
+				args.ContentFilters, utils.MapStorage{
+					utils.MetaReq: reqDP,
+					utils.MetaRep: repDP,
+				}); err != nil {
+				return err
+			} else if !pass {
+				continue
+			}
+		}
+		rply = append(rply, obj.Fields)
 	}
 	*reply = rply
 	return nil

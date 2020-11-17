@@ -21,7 +21,6 @@ package analyzers
 import (
 	"net/rpc"
 	"os"
-	"path"
 	"reflect"
 	"runtime"
 	"testing"
@@ -57,10 +56,10 @@ func TestNewServerCodec(t *testing.T) {
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(path.Dir(cfg.AnalyzerSCfg().DBPath), 0700); err != nil {
+	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerService(cfg, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
