@@ -1478,3 +1478,93 @@ func TestReflectDifferenceInt64Error(t *testing.T) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, dif)
 	}
 }
+
+func TestReflectDifferenceDefault(t *testing.T) {
+	var testVar bool
+	var test2Var bool
+	testVar = true
+	test2Var = true
+	_, err := Difference(testVar, test2Var)
+	if err == nil || err.Error() != "unsupported type" {
+		t.Errorf("Expected <unsupported type> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectMultiplyDefault(t *testing.T) {
+	var testVar bool
+	var test2Var bool
+	testVar = true
+	test2Var = true
+	_, err := Multiply(testVar, test2Var)
+	if err == nil || err.Error() != "unsupported type" {
+		t.Errorf("Expected <unsupported type> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectMultiplyFloat64Error(t *testing.T) {
+	var testVar float64
+	var test2Var bool
+	testVar = 2.5
+	test2Var = true
+	_, err := Multiply(testVar, test2Var)
+	if err == nil || err.Error() != "cannot convert field: true to float64" {
+		t.Errorf("Expected <cannot convert field: true to float64> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectMultiplyInt64(t *testing.T) {
+	var testInt64 int64
+	var test2Int64 int64
+	var expected int64
+	testInt64 = 2
+	test2Int64 = 3
+	expected = 6
+	mul, _ := Multiply(testInt64, test2Int64)
+	if !reflect.DeepEqual(mul, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, mul)
+	}
+}
+
+func TestReflectDivideInt64(t *testing.T) {
+	var testInt64 int64
+	var test2Int64 int64
+	var expected int64
+	testInt64 = 4
+	test2Int64 = 2
+	expected = 2
+	div, _ := Divide(testInt64, test2Int64)
+	if !reflect.DeepEqual(div, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, div)
+	}
+}
+
+func TestReflectDivideDefault(t *testing.T) {
+	var testVar bool
+	var test2Var bool
+	testVar = true
+	test2Var = true
+	_, err := Divide(testVar, test2Var)
+	if err == nil || err.Error() != "unsupported type" {
+		t.Errorf("Expected <unsupported type> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectDivideFloat64Error(t *testing.T) {
+	var testVar float64
+	var test2Var bool
+	testVar = 2.5
+	test2Var = true
+	_, err := Divide(testVar, test2Var)
+	if err == nil || err.Error() != "cannot convert field: true to float64" {
+		t.Errorf("Expected <cannot convert field: true to float64> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectFieldMethodInterfaceMap(t *testing.T) {
+	obj := []int{2, 3, 5, 7, 11, 13}
+	fldName := "0"
+	result, _ := ReflectFieldMethodInterface(obj, fldName)
+	if !reflect.DeepEqual(result, 2) {
+		t.Errorf("Expected <2> ,received: <%+v>", result)
+	}
+}
