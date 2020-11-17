@@ -30,6 +30,7 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/search"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -199,7 +200,11 @@ func TestAnalyzersV1Search(t *testing.T) {
 	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg, nil)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	fs := engine.NewFilterS(cfg, nil, dm)
+	fsChan := make(chan *engine.FilterS, 1)
+	fsChan <- fs
+	anz, err := NewAnalyzerService(cfg, fsChan)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -292,6 +297,100 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+
+	reply = []map[string]interface{}{}
+	if err = anz.V1StringQuery(&QueryArgs{
+		HeaderFilters:  "RequestEncoding:*gob",
+		ContentFilters: []string{"*string:~*rep:Pong"},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+	reply = []map[string]interface{}{}
+	if err = anz.V1StringQuery(&QueryArgs{
+		HeaderFilters:  "RequestEncoding:*gob",
+		ContentFilters: []string{"*string:~*req.Opts.EventSource:*attributes"},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+	if err = anz.V1StringQuery(&QueryArgs{
+		HeaderFilters:  "RequestEncoding:*gob",
+		ContentFilters: []string{"*gt:~*hdr.RequestDuration:1m"},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+
+	expRply = []map[string]interface{}{}
+	reply = []map[string]interface{}{}
+	if err = anz.V1StringQuery(&QueryArgs{
+		HeaderFilters:  "RequestEncoding:*gob",
+		ContentFilters: []string{"*string:~*req.Opts.EventSource:*cdrs"},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+	if err = anz.V1StringQuery(&QueryArgs{
+		HeaderFilters:  "RequestEncoding:*gob",
+		ContentFilters: []string{"*notstring:~*req.Opts.EventSource:*attributes"},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+
+	expErr := utils.ErrPrefixNotErrNotImplemented("*type")
+	if err = anz.V1StringQuery(&QueryArgs{
+		HeaderFilters:  "RequestEncoding:*gob",
+		ContentFilters: []string{"*type:~*opts.EventSource:*cdrs"},
+	}, &reply); err == nil || err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s,received:%v", expErr, err)
+	}
+
+	sTime := time.Now()
+	if err = anz.db.Index(utils.ConcatenatedKey(utils.AttributeSv1Ping, strconv.FormatInt(sTime.Unix(), 10)),
+		&InfoRPC{
+			RequestDuration:  time.Second,
+			RequestStartTime: sTime,
+			RequestEncoding:  utils.MetaJSON,
+			RequestID:        0,
+			RequestMethod:    utils.AttributeSv1Ping,
+			RequestParams:    `a`,
+			Reply:            `{}`,
+		}); err != nil {
+		t.Fatal(err)
+	}
+
+	expErr = new(json.SyntaxError)
+	if err = anz.V1StringQuery(&QueryArgs{
+		HeaderFilters:  "RequestMethod:" + utils.AttributeSv1Ping,
+		ContentFilters: []string{"*type:~*opts.EventSource:*cdrs"},
+	}, &reply); err == nil || err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s,received:%v", expErr, err)
+	}
+	if err = anz.db.Index(utils.ConcatenatedKey(utils.AttributeSv1Ping, strconv.FormatInt(sTime.Unix(), 10)),
+		&InfoRPC{
+			RequestDuration:  time.Second,
+			RequestStartTime: sTime,
+			RequestEncoding:  utils.MetaJSON,
+			RequestID:        0,
+			RequestMethod:    utils.AttributeSv1Ping,
+			RequestParams:    `{}`,
+			Reply:            `a`,
+		}); err != nil {
+		t.Fatal(err)
+	}
+	if err = anz.V1StringQuery(&QueryArgs{
+		HeaderFilters:  "RequestMethod:" + utils.AttributeSv1Ping,
+		ContentFilters: []string{"*type:~*opts.EventSource:*cdrs"},
+	}, &reply); err == nil || err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s,received:%v", expErr, err)
 	}
 
 	if err = anz.db.Close(); err != nil {

@@ -175,6 +175,7 @@ func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]in
 				args.ContentFilters, utils.MapStorage{
 					utils.MetaReq: reqDP,
 					utils.MetaRep: repDP,
+					utils.MetaHdr: utils.MapStorage(obj.Fields),
 				}); err != nil {
 				return err
 			} else if !pass {

@@ -100,7 +100,7 @@ func TestNewInfoRPC(t *testing.T) {
 
 func TestUnmarshalJSON(t *testing.T) {
 	expErr := new(json.SyntaxError)
-	if _, err := unmarshalJSON(json.RawMessage(`a`)); errors.Is(err, expErr) {
+	if _, err := unmarshalJSON(json.RawMessage(`a`)); err == nil || err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s,received %+v", expErr, err)
 	}
 	var exp interface{} = true
