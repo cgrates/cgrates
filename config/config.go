@@ -1529,15 +1529,16 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 	}, nil
 }
 
-type ConfigReloadWithOpts struct {
+// ConfigReloadArgs the API params for V1ReloadConfig
+type ConfigReloadArgs struct {
 	Opts    map[string]interface{}
 	Tenant  string
 	Path    string
 	Section string
 }
 
-// V1ReloadConfigFromPath reloads the configuration
-func (cfg *CGRConfig) V1ReloadConfigFromPath(args *ConfigReloadWithOpts, reply *string) (err error) {
+// V1ReloadConfig reloads the configuration
+func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadArgs, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -1567,6 +1568,7 @@ func (cfg *CGRConfig) V1ReloadConfigFromPath(args *ConfigReloadWithOpts, reply *
 	return
 }
 
+// SectionWithOpts the API params for GetConfig
 type SectionWithOpts struct {
 	Opts    map[string]interface{}
 	Tenant  string
@@ -1677,15 +1679,15 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithOpts, reply *map[string]inter
 	return
 }
 
-// ArgsReloadWithOpts the API params for V1ReloadConfigFromJSON
-type ArgsReloadWithOpts struct {
+// SetConfigArgs the API params for V1SetConfig
+type SetConfigArgs struct {
 	Opts   map[string]interface{}
 	Tenant string
 	Config map[string]interface{}
 }
 
-// V1ReloadConfig reloads the sections of config
-func (cfg *CGRConfig) V1ReloadConfig(args *ArgsReloadWithOpts, reply *string) (err error) {
+// V1SetConfig reloads the sections of config
+func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error) {
 	if len(args.Config) == 0 {
 		*reply = utils.OK
 		return
@@ -1822,15 +1824,15 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithOpts, reply *string) (e
 	return
 }
 
-// JSONStringReloadWithOpts the API params for V1ReloadConfigFromString
-type JSONStringReloadWithOpts struct {
+// SetConfigFromJSONArgs the API params for V1SetConfigFromJSON
+type SetConfigFromJSONArgs struct {
 	Opts   map[string]interface{}
 	Tenant string
 	Config string
 }
 
-// V1ReloadConfigFromJSON reloads the sections of config
-func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONStringReloadWithOpts, reply *string) (err error) {
+// V1SetConfigFromJSON reloads the sections of config
+func (cfg *CGRConfig) V1SetConfigFromJSON(args *SetConfigFromJSONArgs, reply *string) (err error) {
 	if len(args.Config) == 0 {
 		*reply = utils.OK
 		return

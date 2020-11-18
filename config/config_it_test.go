@@ -125,7 +125,7 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		t.Fatal(err)
 	}
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: ATTRIBUTE_JSN,
 	}, &reply); err != nil {
@@ -155,7 +155,7 @@ func testCGRConfigReloadChargerS(t *testing.T) {
 		t.Fatal(err)
 	}
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: ChargerSCfgJson,
 	}, &reply); err != nil {
@@ -182,7 +182,7 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 		t.Fatal(err)
 	}
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: THRESHOLDS_JSON,
 	}, &reply); err != nil {
@@ -208,7 +208,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		t.Fatal(err)
 	}
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: STATS_JSON,
 	}, &reply); err != nil {
@@ -235,7 +235,7 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		t.Fatal(err)
 	}
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: RESOURCES_JSON,
 	}, &reply); err != nil {
@@ -262,7 +262,7 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		t.Fatal(err)
 	}
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: RouteSJson,
 	}, &reply); err != nil {
@@ -293,7 +293,7 @@ func testCGRConfigReloadSchedulerS(t *testing.T) {
 		t.Fatal(err)
 	}
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: SCHEDULER_JSN,
 	}, &reply); err != nil {
@@ -320,7 +320,7 @@ func testCGRConfigReloadCDRs(t *testing.T) {
 	}
 	cfg.RalsCfg().Enabled = true
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: CDRS_JSN,
 	}, &reply); err != nil {
@@ -358,7 +358,7 @@ func testCGRConfigReloadRALs(t *testing.T) {
 	blMap := cfg.RalsCfg().BalanceRatingSubject
 	maxComp := cfg.RalsCfg().MaxComputedUsage
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: RALS_JSN,
 	}, &reply); err != nil {
@@ -392,7 +392,7 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: SessionSJson,
 	}, &reply); err != nil {
@@ -445,7 +445,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 	}
 	cfg.SessionSCfg().Enabled = true
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_example"),
 		Section: ERsJson,
 	}, &reply); err != nil {
@@ -521,7 +521,7 @@ func testCGRConfigReloadDNSAgent(t *testing.T) {
 	}
 	cfg.SessionSCfg().Enabled = true
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload"),
 		Section: DNSAgentJson,
 	}, &reply); err != nil {
@@ -549,7 +549,7 @@ func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 	}
 	cfg.SessionSCfg().Enabled = true
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "freeswitch_reload"),
 		Section: FreeSWITCHAgentJSN,
 	}, &reply); err != nil {
@@ -722,7 +722,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 	var reply string
 	var rcv map[string]interface{}
 
-	if err := cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err := cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    "/usr/share/cgrates/conf/samples/ers_example",
 		Section: ERsJson,
 	}, &reply); err != nil {
@@ -756,7 +756,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
-	if err = cfg.V1ReloadConfig(&ArgsReloadWithOpts{
+	if err = cfg.V1SetConfig(&SetConfigArgs{
 		Config: map[string]interface{}{
 			"sessions": map[string]interface{}{
 				"enabled":          true,
@@ -811,7 +811,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
-	if err = cfg.V1ReloadConfigFromJSON(&JSONStringReloadWithOpts{
+	if err = cfg.V1SetConfigFromJSON(&SetConfigFromJSONArgs{
 		Config: `{"sessions":{
 				"enabled":          true,
 				"resources_conns":  ["*localhost"],
@@ -871,7 +871,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
-	if err = cfg.V1ReloadConfigFromPath(&ConfigReloadWithOpts{
+	if err = cfg.V1ReloadConfig(&ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: utils.MetaAll,
 	}, &reply); err != nil {

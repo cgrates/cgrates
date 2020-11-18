@@ -38,19 +38,19 @@ func (cSv1 *ConfigSv1) GetConfig(section *config.SectionWithOpts, reply *map[str
 	return cSv1.cfg.V1GetConfig(section, reply)
 }
 
-// ReloadConfigFromPath reloads the configuration
-func (cSv1 *ConfigSv1) ReloadConfigFromPath(args *config.ConfigReloadWithOpts, reply *string) (err error) {
-	return cSv1.cfg.V1ReloadConfigFromPath(args, reply)
-}
-
-// ReloadConfig reloads the sections of config
-func (cSv1 *ConfigSv1) ReloadConfig(args *config.ArgsReloadWithOpts, reply *string) (err error) {
+// ReloadConfig reloads the configuration
+func (cSv1 *ConfigSv1) ReloadConfig(args *config.ConfigReloadArgs, reply *string) (err error) {
 	return cSv1.cfg.V1ReloadConfig(args, reply)
 }
 
-// ReloadConfigFromJSON reloads the sections of config
-func (cSv1 *ConfigSv1) ReloadConfigFromJSON(args *config.JSONStringReloadWithOpts, reply *string) (err error) {
-	return cSv1.cfg.V1ReloadConfigFromJSON(args, reply)
+// SetConfig reloads the sections of config
+func (cSv1 *ConfigSv1) SetConfig(args *config.SetConfigArgs, reply *string) (err error) {
+	return cSv1.cfg.V1SetConfig(args, reply)
+}
+
+// SetConfigFromJSON reloads the sections of config
+func (cSv1 *ConfigSv1) SetConfigFromJSON(args *config.SetConfigFromJSONArgs, reply *string) (err error) {
+	return cSv1.cfg.V1SetConfigFromJSON(args, reply)
 }
 
 // GetConfigAsJSON will retrieve from CGRConfig a section

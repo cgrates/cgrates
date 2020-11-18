@@ -69,7 +69,7 @@ func TestAttributeSReload(t *testing.T) {
 	}
 
 	var reply string
-	if err := cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithOpts{
+	if err := cfg.V1ReloadConfig(&config.ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.ATTRIBUTE_JSN,
 	}, &reply); err != nil {
