@@ -1901,7 +1901,7 @@ type TPRoutes []*TpRoute
 func (tps TPRoutes) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
 		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
-		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteResourceIDs,
+		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteRateProfileIDs, utils.RouteResourceIDs,
 		utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
 		utils.RouteParameters, utils.Weight,
 	}
@@ -1948,6 +1948,10 @@ func (tps TPRoutes) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 			if tp.RouteRatingplanIDs != utils.EmptyString {
 				ratingPlanSplit := strings.Split(tp.RouteRatingplanIDs, utils.INFIELD_SEP)
 				sup.RatingPlanIDs = append(sup.RatingPlanIDs, ratingPlanSplit...)
+			}
+			if tp.RouteRateProfileIDs != utils.EmptyString {
+				rateProfileSplit := strings.Split(tp.RouteRateProfileIDs, utils.INFIELD_SEP)
+				sup.RateProfileIDs = append(sup.RateProfileIDs, rateProfileSplit...)
 			}
 			if tp.RouteResourceIDs != utils.EmptyString {
 				resSplit := strings.Split(tp.RouteResourceIDs, utils.INFIELD_SEP)
@@ -2064,6 +2068,12 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls TPRoutes) {
 			}
 			mdl.RouteRatingplanIDs += val
 		}
+		for i, val := range supl.RateProfileIDs {
+			if i != 0 {
+				mdl.RouteRateProfileIDs += utils.INFIELD_SEP
+			}
+			mdl.RouteRateProfileIDs += val
+		}
 		for i, val := range supl.FilterIDs {
 			if i != 0 {
 				mdl.RouteFilterIDs += utils.INFIELD_SEP
@@ -2117,6 +2127,7 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 			Weight:          route.Weight,
 			Blocker:         route.Blocker,
 			RatingPlanIDs:   route.RatingPlanIDs,
+			RateProfileIDs:  route.RateProfileIDs,
 			AccountIDs:      route.AccountIDs,
 			FilterIDs:       route.FilterIDs,
 			ResourceIDs:     route.ResourceIDs,
@@ -2145,6 +2156,7 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 			FilterIDs:       route.FilterIDs,
 			AccountIDs:      route.AccountIDs,
 			RatingPlanIDs:   route.RatingPlanIDs,
+			RateProfileIDs:  route.RateProfileIDs,
 			ResourceIDs:     route.ResourceIDs,
 			StatIDs:         route.StatIDs,
 			Weight:          route.Weight,

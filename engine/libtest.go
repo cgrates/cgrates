@@ -256,11 +256,11 @@ cgrates.org,FLTR_DST_DE,*destinations,~*req.Destination,DST_DE,2014-07-29T15:00:
 cgrates.org,FLTR_DST_NL,*destinations,~*req.Destination,DST_NL,2014-07-29T15:00:00Z
 `
 	RoutesCSVContent = `
-#Tenant[0],ID[1],FilterIDs[2],ActivationInterval[3],Sorting[4],SortingParameters[5],RouteID[6],RouteFilterIDs[7],RouteAccountIDs[8],RouteRatingPlanIDs[9],RouteResourceIDs[10],RouteStatIDs[11],RouteWeight[12],RouteBlocker[13],RouteParameters[14],Weight[15]
-cgrates.org,RoutePrf1,*string:~*req.Account:dan,2014-07-29T15:00:00Z,*lc,,route1,FLTR_ACNT_dan,Account1;Account1_1,RPL_1,ResGroup1,Stat1,10,true,param1,20
-cgrates.org,RoutePrf1,,,,,route1,,,RPL_2,ResGroup2,,10,,,
-cgrates.org,RoutePrf1,,,,,route1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,,
-cgrates.org,RoutePrf1,,,,,route1,,,,ResGroup4,Stat3,10,,,
+#Tenant[0],ID[1],FilterIDs[2],ActivationInterval[3],Sorting[4],SortingParameters[5],RouteID[6],RouteFilterIDs[7],RouteAccountIDs[8],RouteRatingPlanIDs[9],RouteRateProfileIDs[10],RouteResourceIDs[11],RouteStatIDs[12],RouteWeight[13],RouteBlocker[14],RouteParameters[15],Weight[16]
+cgrates.org,RoutePrf1,*string:~*req.Account:dan,2014-07-29T15:00:00Z,*lc,,route1,FLTR_ACNT_dan,Account1;Account1_1,RPL_1,,ResGroup1,Stat1,10,true,param1,20
+cgrates.org,RoutePrf1,,,,,route1,,,RPL_2,,ResGroup2,,10,,,
+cgrates.org,RoutePrf1,,,,,route1,FLTR_DST_DE,Account2,RPL_3,RT_ALWAYS,ResGroup3,Stat2,10,,,
+cgrates.org,RoutePrf1,,,,,route1,,,,,ResGroup4,Stat3,10,,,
 `
 	AttributesCSVContent = `
 #Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight

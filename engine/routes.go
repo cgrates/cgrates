@@ -35,6 +35,7 @@ type Route struct {
 	FilterIDs       []string
 	AccountIDs      []string
 	RatingPlanIDs   []string // used when computing price
+	RateProfileIDs  []string // used when computing price
 	ResourceIDs     []string // queried in some strategies
 	StatIDs         []string // queried in some strategies
 	Weight          float64
@@ -285,15 +286,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 							utils.OptsRatesStartTime: sTime,
 							utils.OptsRatesUsage:     usage,
 						},
-						CGREvent: &utils.CGREvent{ // add the rest of the field in event
-							Tenant: ev.Tenant,
-							ID:     utils.UUIDSha1Prefix(),
-							Event: map[string]interface{}{
-								utils.Account:     acnt,
-								utils.Subject:     subj,
-								utils.Destination: dst,
-							},
-						},
+						CGREvent: ev,
 					},
 				}, &rateRply); err != nil {
 				return nil, err
