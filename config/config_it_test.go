@@ -328,13 +328,13 @@ func testCGRConfigReloadCDRs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
+	rsr, err := NewRSRParsersFromSlice([]string{"~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"})
+	if err != nil {
+		t.Fatal(err)
+	}
 	expAttr := &CdrsCfg{
-		Enabled: true,
-		ExtraFields: utils.RSRFields{
-			utils.NewRSRFieldMustCompile("PayPalAccount"),
-			utils.NewRSRFieldMustCompile("LCRProfile"),
-			utils.NewRSRFieldMustCompile("ResourceID"),
-		},
+		Enabled:         true,
+		ExtraFields:     rsr,
 		ChargerSConns:   []string{utils.MetaLocalHost},
 		RaterConns:      []string{},
 		AttributeSConns: []string{},

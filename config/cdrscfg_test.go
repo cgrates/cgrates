@@ -50,6 +50,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		OnlineCDRExports: []string{"randomVal"},
 		SchedulerConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
+		ExtraFields:      RSRParsers{},
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
@@ -64,7 +65,7 @@ func TestExtraFieldsinloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &CdrsJsonCfg{
 		Extra_fields: &[]string{utils.EmptyString},
 	}
-	expectedErrMessage := "Empty RSRField in rule: "
+	expectedErrMessage := "emtpy RSRParser in rule: <>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
 	} else if err = jsonCfg.cdrsCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expectedErrMessage {
@@ -76,7 +77,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"cdrs": {
 		"enabled": true,						
-		"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
+		"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
 		"store_cdrs": true,						
 		"session_cost_retries": 5,				
 		"chargers_conns":["*internal:*chargers","*conn1"],			
@@ -91,7 +92,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:          true,
-		utils.ExtraFieldsCfg:      []string{"PayPalAccount", "LCRProfile", "ResourceID"},
+		utils.ExtraFieldsCfg:      []string{"~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"},
 		utils.StoreCdrsCfg:        true,
 		utils.SessionCostRetires:  5,
 		utils.ChargerSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
@@ -111,7 +112,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 }
 
 func TestCdrsCfgAsMapInterface2(t *testing.T) {
-	cfgJsonStr := `{
+	cfgJSONStr := `{
        "cdrs": {
           "enabled":true,
           "chargers_conns": ["conn1", "conn2"],
@@ -133,7 +134,7 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.SchedulerConnsCfg:   []string{},
 		utils.EEsConnsCfg:         []string{"conn1"},
 	}
-	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJsonStr); err != nil {
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.cdrsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, recieved %+v", eMap, rcv)

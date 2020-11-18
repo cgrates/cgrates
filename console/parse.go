@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/config"
+)
 
 func init() {
 	c := &CmdParse{
@@ -71,9 +73,9 @@ func (self *CmdParse) LocalExecute() string {
 	if self.rpcParams.Value == "" {
 		return "Empty value error"
 	}
-	if rsrField, err := utils.NewRSRField(self.rpcParams.Expression); err != nil {
+	if rsrField, err := config.NewRSRParser(self.rpcParams.Expression); err != nil {
 		return err.Error()
-	} else if parsed, err := rsrField.Parse(self.rpcParams.Value); err != nil {
+	} else if parsed, err := rsrField.ParseValue(self.rpcParams.Value); err != nil {
 		return err.Error()
 	} else {
 		return parsed

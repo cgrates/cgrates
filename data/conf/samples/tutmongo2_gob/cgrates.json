@@ -51,7 +51,7 @@
 
 "cdrs": {
 	"enabled": true,
-	"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
+	"extra_fields": ["~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"],
 	"chargers_conns":["conn1"],
 	"store_cdrs": true,
 	"online_cdr_exports": [],

@@ -407,7 +407,7 @@ func TestFsCdrFirstNonEmpty(t *testing.T) {
 }
 
 func TestFsCdrCDRFields(t *testing.T) {
-	fsCdrCfg.CdrsCfg().ExtraFields = []*utils.RSRField{{Id: "sip_user_agent"}}
+	fsCdrCfg.CdrsCfg().ExtraFields = config.NewRSRParsersMustCompile("~*req.sip_user_agent", utils.FIELDS_SEP)
 	reader := bytes.NewReader(body)
 	fsCdr, err := NewFSCdr(reader, fsCdrCfg)
 	if err != nil {
@@ -416,15 +416,23 @@ func TestFsCdrCDRFields(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1515666344", "")
 	answerTime, _ := utils.ParseTimeDetectLayout("1515666347", "")
 	expctCDR := &CDR{
-		CGRID: "24b5766be325fa751fab5a0a06373e106f33a257",
-		ToR:   utils.VOICE, OriginID: "3da8bf84-c133-4959-9e24-e72875cb33a1",
-		OriginHost: "", Source: "freeswitch_json", Category: "call",
-		RequestType: utils.META_RATED, Tenant: "cgrates.org",
-		Account: "1001", Subject: "1001",
-		Destination: "1002", SetupTime: setupTime,
-		AnswerTime: answerTime, Usage: 68 * time.Second,
+		CGRID:       "24b5766be325fa751fab5a0a06373e106f33a257",
+		ToR:         utils.VOICE,
+		OriginID:    "3da8bf84-c133-4959-9e24-e72875cb33a1",
+		OriginHost:  "",
+		Source:      "freeswitch_json",
+		Category:    "call",
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1002",
+		SetupTime:   setupTime,
+		AnswerTime:  answerTime,
+		Usage:       68 * time.Second,
 		Cost:        -1,
-		ExtraFields: map[string]string{"sip_user_agent": "Jitsi2.10.5550Linux"}}
+		ExtraFields: map[string]string{"sip_user_agent": "Jitsi2.10.5550Linux"},
+	}
 	if CDR, err := fsCdr.AsCDR(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expctCDR, CDR) {
@@ -450,14 +458,13 @@ func TestFsCdrSearchExtraField(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rsrSt1, _ := utils.NewRSRField("^injected_value")
-	rsrSt2, _ := utils.NewRSRField("^injected_hdr::injected_value/")
-	fsCdrCfg.CdrsCfg().ExtraFields = []*utils.RSRField{{Id: "caller_id_name"}, rsrSt1, rsrSt2}
+	fsCdrCfg.CdrsCfg().ExtraFields, err = config.NewRSRParsersFromSlice([]string{"~*req.caller_id_name"})
+	if err != nil {
+		t.Fatal(err)
+	}
 	extraFields := fsCdr.getExtraFields()
-	if len(extraFields) != 3 || extraFields["caller_id_name"] != "1001" ||
-		extraFields["injected_value"] != "injected_value" ||
-		extraFields["injected_hdr"] != "injected_value" {
-		t.Error("Error parsing extra fields: ", extraFields)
+	if len(extraFields) != 1 || extraFields["caller_id_name"] != "1001" {
+		t.Error("Error parsing extra fields: ", utils.ToJSON(extraFields))
 	}
 
 }
@@ -472,7 +479,7 @@ func TestFsCdrSearchExtraFieldInSlice(t *testing.T) {
 }
 
 func TestFsCdrSearchReplaceInExtraFields(t *testing.T) {
-	fsCdrCfg.CdrsCfg().ExtraFields = utils.ParseRSRFieldsMustCompile(`read_codec;~sip_user_agent:s/([A-Za-z]*).+/$1/;write_codec`, utils.INFIELD_SEP)
+	fsCdrCfg.CdrsCfg().ExtraFields = config.NewRSRParsersMustCompile(`~*req.read_codec;~*req.sip_user_agent:s/([A-Za-z]*).+/$1/;~*req.write_codec`, utils.INFIELD_SEP)
 	newReader := bytes.NewReader(body)
 	fsCdr, err := NewFSCdr(newReader, fsCdrCfg)
 	if err != nil {
@@ -483,15 +490,15 @@ func TestFsCdrSearchReplaceInExtraFields(t *testing.T) {
 		t.Error("Error parsing extra fields: ", extraFields)
 	}
 	if extraFields["sip_user_agent"] != "Jitsi" {
-		t.Error("Error parsing extra fields: ", extraFields)
+		t.Error("Error parsing extra fields: ", utils.ToJSON(extraFields))
 	}
 }
 
 func TestFsCdrDDazRSRExtraFields(t *testing.T) {
 	eFieldsCfg := `{"cdrs": {
-	"extra_fields": ["~effective_caller_id_number:s/(\\d+)/+$1/"],
+	"extra_fields": ["~*req.effective_caller_id_number:s/(\\d+)/+$1/"],
 },}`
-	simpleJsonCdr := []byte(`{
+	simpleJSONCdr := []byte(`{
     "core-uuid": "feef0b51-7fdf-4c4a-878e-aff233752de2",
     "channel_data": {
         "state": "CS_REPORTING",
@@ -522,13 +529,13 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
 }`)
 	var err error
 	fsCdrCfg, err = config.NewCGRConfigFromJSONStringWithDefaults(eFieldsCfg)
-	expCdrExtra := utils.ParseRSRFieldsMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, utils.INFIELD_SEP)
+	expCdrExtra := config.NewRSRParsersMustCompile(`~*req.effective_caller_id_number:s/(\d+)/+$1/`, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error("Could not parse the config", err.Error())
 	} else if !reflect.DeepEqual(expCdrExtra[0], fsCdrCfg.CdrsCfg().ExtraFields[0]) { // Kinda deepEqual bug since without index does not match
-		t.Errorf("Expecting: %+v, received: %+v", expCdrExtra, fsCdrCfg.CdrsCfg().ExtraFields)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expCdrExtra), utils.ToJSON(fsCdrCfg.CdrsCfg().ExtraFields))
 	}
-	newReader := bytes.NewReader(simpleJsonCdr)
+	newReader := bytes.NewReader(simpleJSONCdr)
 	fsCdr, err := NewFSCdr(newReader, fsCdrCfg)
 	if err != nil {
 		t.Error("Could not parse cdr", err.Error())
@@ -557,7 +564,7 @@ func TestFscdrAsCDR(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	cgrCfg.CdrsCfg().ExtraFields, err = utils.ParseRSRFieldsFromSlice([]string{"PayPalAccount"})
+	cgrCfg.CdrsCfg().ExtraFields, err = config.NewRSRParsersFromSlice([]string{"~*req.PayPalAccount"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -793,16 +800,14 @@ func TestGetExtraFields(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	cgrCfg.CdrsCfg().ExtraFields, err = utils.ParseRSRFieldsFromSlice([]string{"^^PayPalAccount"})
+	cgrCfg.CdrsCfg().ExtraFields, err = config.NewRSRParsersFromSlice([]string{"PayPalAccount"})
 	if err != nil {
 		t.Error(err)
 	}
 	fsCdr := FSCdr{
 		cgrCfg: cgrCfg,
 	}
-	expected := map[string]string{
-		"^PayPalAccount": "^PayPalAccount",
-	}
+	expected := map[string]string{}
 	if reply := fsCdr.getExtraFields(); !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}

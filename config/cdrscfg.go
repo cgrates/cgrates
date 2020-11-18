@@ -25,9 +25,9 @@ import (
 )
 
 type CdrsCfg struct {
-	Enabled          bool              // Enable CDR Server service
-	ExtraFields      []*utils.RSRField // Extra fields to store in CDRs
-	StoreCdrs        bool              // store cdrs in storDb
+	Enabled          bool       // Enable CDR Server service
+	ExtraFields      RSRParsers // Extra fields to store in CDRs
+	StoreCdrs        bool       // store cdrs in storDb
 	SMCostRetries    int
 	ChargerSConns    []string
 	RaterConns       []string
@@ -48,7 +48,7 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		cdrscfg.Enabled = *jsnCdrsCfg.Enabled
 	}
 	if jsnCdrsCfg.Extra_fields != nil {
-		if cdrscfg.ExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCdrsCfg.Extra_fields); err != nil {
+		if cdrscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCdrsCfg.Extra_fields); err != nil {
 			return err
 		}
 	}
