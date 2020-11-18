@@ -1560,11 +1560,30 @@ func TestReflectDivideFloat64Error(t *testing.T) {
 	}
 }
 
-func TestReflectFieldMethodInterfaceMap(t *testing.T) {
+func TestReflectFieldMethodInterfaceArray(t *testing.T) {
 	obj := []int{2, 3, 5, 7, 11, 13}
 	fldName := "0"
 	result, _ := ReflectFieldMethodInterface(obj, fldName)
 	if !reflect.DeepEqual(result, 2) {
 		t.Errorf("Expected <2> ,received: <%+v>", result)
 	}
+}
+
+func TestReflectFieldMethodInterfaceArrayError1(t *testing.T) {
+	obj := []int{2, 3, 5, 7, 11, 13}
+	fldName := "0"
+	result, _ := ReflectFieldMethodInterface(obj, fldName)
+	if !reflect.DeepEqual(result, 2) {
+		t.Errorf("Expected <2> ,received: <%+v>", result)
+	}
+}
+
+func TestReflectFieldMethodInterfaceMap(t *testing.T) {
+	var obj = map[string]string{"field1": "val1", "field2": "val2"}
+	fldName := "field1"
+	result, _ := ReflectFieldMethodInterface(obj, fldName)
+	if !reflect.DeepEqual(result, "val1") {
+		t.Errorf("Expected <val1> ,received: <%+v>", result)
+	}
+
 }
