@@ -1411,10 +1411,14 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 			},
 		},
 	}
-	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
-		true, false, utils.NonTransactional); err != nil {
+	rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional)
+	if err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, eRatePrf) {
+	}
+	rcv.Compile()
+	eRatePrf.Compile()
+	if !reflect.DeepEqual(rcv, eRatePrf) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
 	}
 
@@ -1572,10 +1576,14 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 			},
 		},
 	}
-	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
-		true, false, utils.NonTransactional); err != nil {
+	rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional)
+	if err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, eRatePrf) {
+	}
+	rcv.Compile()
+	eRatePrf.Compile()
+	if !reflect.DeepEqual(rcv, eRatePrf) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
 	}
 
@@ -1653,10 +1661,14 @@ cgrates.org,RP1,,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.06,1m,1s
 			},
 		},
 	}
-	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
-		true, false, utils.NonTransactional); err != nil {
+	rcv, err = ldr.dm.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional)
+	if err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, eRatePrf) {
+	}
+	rcv.Compile()
+	eRatePrf.Compile()
+	if !reflect.DeepEqual(rcv, eRatePrf) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
 	}
 
@@ -1886,10 +1898,14 @@ cgrates.org,RP1,
 			},
 		},
 	}
-	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
-		true, false, utils.NonTransactional); err != nil {
+	rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional)
+	if err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, eRatePrf) {
+	}
+	rcv.Compile()
+	eRatePrf.Compile()
+	if !reflect.DeepEqual(rcv, eRatePrf) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
 	}
 
@@ -1942,10 +1958,14 @@ cgrates.org,RP1,
 			},
 		},
 	}
-	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP2",
-		true, false, utils.NonTransactional); err != nil {
+	rcv, err = ldr.dm.GetRateProfile("cgrates.org", "RP2",
+		true, false, utils.NonTransactional)
+	if err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, eRatePrf2) {
+	}
+	rcv.Compile()
+	eRatePrf2.Compile()
+	if !reflect.DeepEqual(rcv, eRatePrf2) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf2), utils.ToJSON(rcv))
 	}
 
@@ -1962,10 +1982,14 @@ cgrates.org,RP1,
 		MaxCostStrategy:  "*free",
 		Rates:            map[string]*engine.Rate{},
 	}
-	if rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
-		true, false, utils.NonTransactional); err != nil {
+	rcv, err = ldr.dm.GetRateProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional)
+	if err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, eRatePrf3) {
+	}
+	rcv.Compile()
+	eRatePrf3.Compile()
+	if !reflect.DeepEqual(rcv, eRatePrf3) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf3), utils.ToJSON(rcv))
 	}
 }

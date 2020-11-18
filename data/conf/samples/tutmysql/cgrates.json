@@ -85,7 +85,6 @@
 	"stats_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"rals_conns": ["*internal"],
-	"rates_conns": ["*localhost"],
 },
 
 

@@ -41,11 +41,11 @@ func (hcs *HightCostSorter) SortRoutes(prflID string, routes []*Route,
 		Sorting:      hcs.sorting,
 		SortedRoutes: make([]*SortedRoute, 0)}
 	for _, route := range routes {
-		if len(route.RatingPlanIDs) == 0 && len(route.AccountIDs) == 0 {
+		if len(route.RatingPlanIDs) == 0 && len(route.AccountIDs) == 0 && len(route.RateProfileIDs) == 0 {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> supplier: <%s> - empty RatingPlanIDs or AccountIDs",
+				fmt.Sprintf("<%s> supplier: <%s> - empty RatingPlanIDs or AccountIDs or RateProfileIDs",
 					utils.RouteS, route.ID))
-			return nil, utils.NewErrMandatoryIeMissing("RatingPlanIDs or AccountIDs")
+			return nil, utils.NewErrMandatoryIeMissing("RatingPlanIDs or AccountIDs or RateProfileIDs")
 		}
 		if srtSpl, pass, err := hcs.rS.populateSortingData(ev, route, extraOpts); err != nil {
 			return nil, err
