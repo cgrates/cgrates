@@ -305,8 +305,8 @@ func (srvMngr *ServiceManager) ShutdownServices(timeout time.Duration) {
 	}
 	c := make(chan struct{})
 	go func() {
-		defer close(c)
 		wg.Wait()
+		close(c)
 	}()
 	select {
 	case <-c:
