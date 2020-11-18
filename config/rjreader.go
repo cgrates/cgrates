@@ -356,10 +356,9 @@ func (rjr *rjReader) getJSONOffsetLine(offset int64) (line, character int64) {
 					character++
 					return nil
 				}
-				rerr := rjr.UnreadByte()
-				if rerr != nil {
-					return rerr
-				}
+				// Unread byte return error only if rjr.indx is small or equal to 0
+				// The value is greater than 0 so it's safe to not check the error
+				rjr.UnreadByte()
 			}
 		}
 		return nil
@@ -410,10 +409,9 @@ func (rjr *rjReader) getJSONOffsetLine(offset int64) (line, character int64) {
 					break
 				}
 			} else {
-				rerr := rjr.UnreadByte()
-				if rerr != nil {
-					break
-				}
+				// Unread byte return error only if rjr.indx is small or equal to 0
+				// The value is greater than 0 so it's safe to not check the error
+				rjr.UnreadByte()
 			}
 		}
 	}
