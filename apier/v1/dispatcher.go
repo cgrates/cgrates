@@ -831,16 +831,16 @@ func (dS *DispatcherConfigSv1) GetConfig(args *config.SectionWithOpts, reply *ma
 	return dS.dS.ConfigSv1GetConfig(args, reply)
 }
 
-func (dS *DispatcherConfigSv1) ReloadConfigFromPath(args *config.ConfigReloadWithOpts, reply *string) (err error) {
-	return dS.dS.ConfigSv1ReloadConfigFromPath(args, reply)
-}
-
-func (dS *DispatcherConfigSv1) ReloadConfig(args *config.ArgsReloadWithOpts, reply *string) (err error) {
+func (dS *DispatcherConfigSv1) ReloadConfig(args *config.ConfigReloadArgs, reply *string) (err error) {
 	return dS.dS.ConfigSv1ReloadConfig(args, reply)
 }
 
-func (dS *DispatcherConfigSv1) ReloadConfigFromJSON(args *config.JSONStringReloadWithOpts, reply *string) (err error) {
-	return dS.dS.ConfigSv1ReloadConfigFromJSON(args, reply)
+func (dS *DispatcherConfigSv1) SetConfig(args *config.SetConfigArgs, reply *string) (err error) {
+	return dS.dS.ConfigSv1SetConfig(args, reply)
+}
+
+func (dS *DispatcherConfigSv1) SetConfigFromJSON(args *config.SetConfigFromJSONArgs, reply *string) (err error) {
+	return dS.dS.ConfigSv1SetConfigFromJSON(args, reply)
 }
 func (dS *DispatcherConfigSv1) GetConfigAsJSON(args *config.SectionWithOpts, reply *string) (err error) {
 	return dS.dS.ConfigSv1GetConfigAsJSON(args, reply)

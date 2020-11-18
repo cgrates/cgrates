@@ -4700,7 +4700,7 @@ func TestV1GetConfigSectionConfigs(t *testing.T) {
 	var result string
 	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = cfgCgr2.V1ReloadConfig(&ArgsReloadWithOpts{Config: reply}, &result); err != nil {
+	} else if err = cfgCgr2.V1SetConfig(&SetConfigArgs{Config: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected result")
@@ -4803,7 +4803,7 @@ func TestV1ReloadConfigEmptyConfig(t *testing.T) {
 	var reply string
 	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := cgrCfg.V1ReloadConfig(&ArgsReloadWithOpts{}, &reply); err != nil {
+	} else if err := cgrCfg.V1SetConfig(&SetConfigArgs{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected output: %+v", reply)
@@ -4815,7 +4815,7 @@ func TestV1ReloadConfigUnmarshalError(t *testing.T) {
 	expected := "json: unsupported type: chan int"
 	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := cgrCfg.V1ReloadConfig(&ArgsReloadWithOpts{
+	} else if err := cgrCfg.V1SetConfig(&SetConfigArgs{
 		Config: map[string]interface{}{
 			"randomValue": make(chan int),
 		},
@@ -4833,7 +4833,7 @@ func TestV1ReloadConfigJSONWithLocks(t *testing.T) {
 	expected := "Invalid section: <inexistentSection>"
 	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := cfgCgr.V1ReloadConfig(&ArgsReloadWithOpts{Config: section}, &reply); err == nil || err.Error() != expected {
+	} else if err := cfgCgr.V1SetConfig(&SetConfigArgs{Config: section}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -4855,7 +4855,7 @@ func TestV1ReloadConfigCheckingSanity(t *testing.T) {
 	expected := `<StatS> not enabled but requested by <RALs> component.`
 	if cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err := cfgCgr.V1ReloadConfig(&ArgsReloadWithOpts{Config: ralsMap}, &reply); err == nil || err.Error() != expected {
+	} else if err := cfgCgr.V1SetConfig(&SetConfigArgs{Config: ralsMap}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -5402,7 +5402,7 @@ func TestV1GetConfigAsJSONCoreS(t *testing.T) {
 	var result string
 	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = cfgCgr2.V1ReloadConfigFromJSON(&JSONStringReloadWithOpts{Config: reply}, &result); err != nil {
+	} else if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected result")
@@ -5422,7 +5422,7 @@ func TestV1GetConfigAsJSONCheckConfigSanity(t *testing.T) {
 	expected := `<AttributeS> not enabled but requested by <ChargerS> component.`
 	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = cfgCgr2.V1ReloadConfigFromJSON(&JSONStringReloadWithOpts{Config: args}, &result); err == nil || err.Error() != expected {
+	} else if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: args}, &result); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -5474,7 +5474,7 @@ func TestV1ReloadConfigFromJSONEmptyConfig(t *testing.T) {
 	var reply string
 	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := cgrCfg.V1ReloadConfigFromJSON(&JSONStringReloadWithOpts{Config: utils.EmptyString}, &reply); err != nil {
+	} else if err := cgrCfg.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: utils.EmptyString}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply")
@@ -5486,7 +5486,7 @@ func TestV1ReloadConfigFromJSONInvalidSection(t *testing.T) {
 	expected := "invalid character 'I' looking for beginning of value around line 1 and position 1\n line: \"InvalidSection\""
 	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := cgrCfg.V1ReloadConfigFromJSON(&JSONStringReloadWithOpts{Config: "InvalidSection"}, &reply); err == nil || err.Error() != expected {
+	} else if err := cgrCfg.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: "InvalidSection"}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

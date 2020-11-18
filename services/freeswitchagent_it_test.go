@@ -65,7 +65,7 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithOpts{
+	if err := cfg.V1ReloadConfig(&config.ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "fs_evsock", "cgrates", "etc", "cgrates"),
 		Section: config.FreeSWITCHAgentJSN,
 	}, &reply); err != nil {

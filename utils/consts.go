@@ -1426,12 +1426,12 @@ const (
 
 // ConfigSv1 APIs
 const (
-	ConfigSv1                     = "ConfigSv1"
-	ConfigSv1GetConfig            = "ConfigSv1.GetConfig"
-	ConfigSv1ReloadConfigFromPath = "ConfigSv1.ReloadConfigFromPath"
-	ConfigSv1ReloadConfig         = "ConfigSv1.ReloadConfig"
-	ConfigSv1ReloadConfigFromJSON = "ConfigSv1.ReloadConfigFromJSON"
-	ConfigSv1GetConfigAsJSON      = "ConfigSv1.GetConfigAsJSON"
+	ConfigSv1                  = "ConfigSv1"
+	ConfigSv1ReloadConfig      = "ConfigSv1.ReloadConfig"
+	ConfigSv1GetConfig         = "ConfigSv1.GetConfig"
+	ConfigSv1SetConfig         = "ConfigSv1.SetConfig"
+	ConfigSv1GetConfigAsJSON   = "ConfigSv1.GetConfigAsJSON"
+	ConfigSv1SetConfigFromJSON = "ConfigSv1.SetConfigFromJSON"
 )
 
 const (

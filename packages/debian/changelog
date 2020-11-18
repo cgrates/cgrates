@@ -125,6 +125,9 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [AnalyzerS] Added AnalyzerSv1.StringQuery API to search over the recorded RPC calls
   * [CoreS] Moved the server implementation in the new cores package
   * [RouteS] In case of same weight sort random
+  * [ConfigS] Renamed ReloadConfigFromPath API to ReloadConfig
+  * [ConfigS] Renamed ReloadConfig API to SetConfig
+  * [ConfigS] Renamed ReloadConfigFromJSON API to SetConfigFromJSON
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

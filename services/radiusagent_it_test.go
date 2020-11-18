@@ -65,7 +65,7 @@ func TestRadiusAgentReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithOpts{
+	if err := cfg.V1ReloadConfig(&config.ConfigReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql"),
 		Section: config.RA_JSN,
 	}, &reply); err != nil {

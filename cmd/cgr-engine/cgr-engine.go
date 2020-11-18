@@ -318,8 +318,8 @@ func singnalHandler(stopChan <-chan struct{}, exitChan chan<- struct{}) {
 			//  do it in it's own gorutine in order to not block the signal handler with the reload functionality
 			go func() {
 				var reply string
-				if err := config.CgrConfig().V1ReloadConfigFromPath(
-					&config.ConfigReloadWithOpts{
+				if err := config.CgrConfig().V1ReloadConfig(
+					&config.ConfigReloadArgs{
 						Section: utils.EmptyString,
 						Path:    config.CgrConfig().ConfigPath, // use the same path
 					}, &reply); err != nil {

@@ -47,9 +47,11 @@ var (
 		testConfigSResetStorDb,
 		testConfigSStartEngine,
 		testConfigSRPCConn,
-		testConfigSReloadConfigFromJSONSessionS,
-		testConfigSReloadConfigFromJSONEEs,
+		testConfigSSetConfigSessionS,
+		testConfigSSetConfigEEs,
 		testConfigSv1GetJSONSectionWithoutTenant,
+		testConfigSSetConfigFromJSONCoreS,
+		testConfigSReloadConfigCoreS,
 		testConfigSKillEngine,
 		testConfigStartEngineWithConfigs,
 		testConfigStartEngineFromHTTP,
@@ -114,9 +116,9 @@ func testConfigSRPCConn(t *testing.T) {
 	}
 }
 
-func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
+func testConfigSSetConfigSessionS(t *testing.T) {
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1ReloadConfig, &config.ArgsReloadWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1SetConfig, &config.SetConfigArgs{
 		Tenant: "cgrates.org",
 		Config: map[string]interface{}{
 			"sessions": map[string]interface{}{
@@ -229,12 +231,12 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 	}
 }
 
-func testConfigSReloadConfigFromJSONEEs(t *testing.T) {
+func testConfigSSetConfigEEs(t *testing.T) {
 	if *encoding == utils.MetaGOB {
 		t.SkipNow()
 	}
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1ReloadConfig, &config.ArgsReloadWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1SetConfig, &config.SetConfigArgs{
 		Config: map[string]interface{}{
 			"ees": map[string]interface{}{
 				"enabled":          true,
@@ -343,5 +345,52 @@ func testConfigStartEngineFromHTTP(t *testing.T) {
 	var rply map[string]interface{}
 	if err := jsonClnt.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
 		t.Error(err)
+	}
+}
+
+func testConfigSSetConfigFromJSONCoreS(t *testing.T) {
+	cfgStr := `{"cores":{"caps":0,"caps_stats_interval":"0","caps_strategy":"*queue","shutdown_timeout":"1s"}}`
+	var reply string
+	if err := configRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
+		Tenant: "cgrates.org",
+		Config: cfgStr,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+
+	var rpl string
+	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithOpts{
+		Tenant:  "cgrates.org",
+		Section: config.CoreSCfgJson,
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if cfgStr != rpl {
+		t.Errorf("Expected %q , received: %q", cfgStr, rpl)
+	}
+}
+
+func testConfigSReloadConfigCoreS(t *testing.T) {
+	cfgStr := `{"cores":{"caps":2,"caps_stats_interval":"0","caps_strategy":"*busy","shutdown_timeout":"1s"}}`
+	var reply string
+	if err := configRPC.Call(utils.ConfigSv1ReloadConfig, &config.ConfigReloadArgs{
+		Tenant:  "cgrates.org",
+		Path:    path.Join(*dataDir, "conf", "samples", "caps_busy"),
+		Section: config.CoreSCfgJson,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+
+	var rpl string
+	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithOpts{
+		Tenant:  "cgrates.org",
+		Section: config.CoreSCfgJson,
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if cfgStr != rpl {
+		t.Errorf("Expected %q , received: %q", cfgStr, rpl)
 	}
 }
