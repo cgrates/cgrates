@@ -411,7 +411,7 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 
 func testInternalRemoteITGetRoute(t *testing.T) {
 	var reply *engine.RouteProfile
-	splPrf := &engine.RouteProfile{
+	routePrf := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ROUTE_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACNT_1001"},
@@ -433,7 +433,7 @@ func testInternalRemoteITGetRoute(t *testing.T) {
 		Weight: 20,
 	}
 	// routeProfile in reverse order
-	splPrf2 := &engine.RouteProfile{
+	routePrf2 := &engine.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ROUTE_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACNT_1001"},
@@ -455,15 +455,15 @@ func testInternalRemoteITGetRoute(t *testing.T) {
 		Weight: 20,
 	}
 	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
-		splPrf.SortingParameters = nil
-		splPrf2.SortingParameters = nil
+		routePrf.SortingParameters = nil
+		routePrf2.SortingParameters = nil
 	}
 
 	if err := internalRPC.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf, reply) && !reflect.DeepEqual(splPrf2, reply) {
-		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(splPrf), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(routePrf, reply) && !reflect.DeepEqual(routePrf2, reply) {
+		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(routePrf), utils.ToJSON(reply))
 	}
 }
 

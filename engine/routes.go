@@ -209,7 +209,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 // costForEvent will compute cost out of accounts and rating plans for event
 // returns map[string]interface{} with cost and relevant matching information inside
 func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
-	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
+	acntIDs, rpIDs, rtPrfIDs []string) (costData map[string]interface{}, err error) {
 	costData = make(map[string]interface{})
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
 		utils.Destination, utils.SetupTime}); err != nil {
@@ -277,10 +277,11 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	}
 
 	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
-		var rateRply *RateProfileCost
-		if len(rpS.cgrcfg.RouteSCfg().RateSConns) != 0 {
+		var rateRply RateProfileCost
+		if len(rpS.cgrcfg.RouteSCfg().RateSConns) != 0 && len(rtPrfIDs) != 0 {
 			if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RateSConns, nil, utils.RateSv1CostForEvent,
 				&utils.ArgsCostForEvent{
+					RateProfileIDs: rtPrfIDs,
 					CGREventWithOpts: &utils.CGREventWithOpts{
 						Opts: map[string]interface{}{ // add the setup time and usage in opts
 							utils.OptsRatesStartTime: sTime,
@@ -419,8 +420,8 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 		RouteParameters: route.RouteParameters,
 	}
 	//calculate costData if we have fields
-	if len(route.AccountIDs) != 0 || len(route.RatingPlanIDs) != 0 {
-		costData, err := rpS.costForEvent(ev, route.AccountIDs, route.RatingPlanIDs)
+	if len(route.AccountIDs) != 0 || len(route.RatingPlanIDs) != 0 || len(route.RateProfileIDs) != 0 {
+		costData, err := rpS.costForEvent(ev, route.AccountIDs, route.RatingPlanIDs, route.RateProfileIDs)
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(

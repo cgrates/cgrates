@@ -946,6 +946,9 @@ func (iDB *InternalDB) GetRateProfileDrv(tenant, id string) (rpp *RateProfile, e
 }
 
 func (iDB *InternalDB) SetRateProfileDrv(rpp *RateProfile) (err error) {
+	if err = rpp.Compile(); err != nil {
+		return
+	}
 	Cache.SetWithoutReplicate(utils.CacheRateProfiles, rpp.TenantID(), rpp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

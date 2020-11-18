@@ -33,11 +33,11 @@ import (
 )
 
 var (
-	splSv1CfgPath string
-	splSv1Cfg     *config.CGRConfig
-	splSv1Rpc     *rpc.Client
-	splPrf        *RouteWithCache
-	splSv1ConfDIR string //run tests for specific configuration
+	routeSv1CfgPath string
+	routeSv1Cfg     *config.CGRConfig
+	routeSv1Rpc     *rpc.Client
+	routePrf        *RouteWithCache
+	routeSv1ConfDIR string //run tests for specific configuration
 
 	sTestsRouteSV1 = []func(t *testing.T){
 		testV1RouteLoadConfig,
@@ -49,33 +49,33 @@ var (
 		testV1RouteFromFolder,
 		testV1RouteGetWeightRoutes,
 		testV1RouteGetLeastCostRoutes,
-		//testV1RouteGetLeastCostRoutesWithoutUsage,
-		//testV1RouteGetLeastCostRoutesWithMaxCost,
-		//testV1RouteGetLeastCostRoutesWithMaxCost2,
-		//testV1RouteGetLeastCostRoutesWithMaxCostNotFound,
-		//testV1RouteGetHighestCostRoutes,
-		//testV1RouteGetLeastCostRoutesErr,
-		//testV1RoutePolulateStatsForQOS,
-		//testV1RouteGetQOSRoutes,
-		//testV1RouteGetQOSRoutes2,
-		//testV1RouteGetQOSRoutes3,
-		//testV1RouteGetQOSRoutesFiltred,
-		//testV1RouteGetQOSRoutesFiltred2,
-		//testV1RouteGetRouteWithoutFilter,
-		//testV1RouteSetRouteProfiles,
-		//testV1RouteGetRouteProfileIDs,
-		//testV1RouteUpdateRouteProfiles,
-		//testV1RouteRemRouteProfiles,
-		//testV1RouteGetRouteForEvent,
-		//testV1RouteSetRouteProfilesWithoutTenant,
-		//testV1RouteRemRouteProfilesWithoutTenant,
-		//// reset the database and load the TP again
-		//testV1RouteInitDataDb,
-		//testV1RouteFromFolder,
-		//testV1RoutesOneRouteWithoutDestination,
-		//testV1RouteRoutePing,
-		//testV1RouteMultipleRouteSameID,
-		//testV1RouteAccountWithRatingPlan,
+		testV1RouteGetLeastCostRoutesWithoutUsage,
+		testV1RouteGetLeastCostRoutesWithMaxCost,
+		testV1RouteGetLeastCostRoutesWithMaxCost2,
+		testV1RouteGetLeastCostRoutesWithMaxCostNotFound,
+		testV1RouteGetHighestCostRoutes,
+		testV1RouteGetLeastCostRoutesErr,
+		testV1RoutePolulateStatsForQOS,
+		testV1RouteGetQOSRoutes,
+		testV1RouteGetQOSRoutes2,
+		testV1RouteGetQOSRoutes3,
+		testV1RouteGetQOSRoutesFiltred,
+		testV1RouteGetQOSRoutesFiltred2,
+		testV1RouteGetRouteWithoutFilter,
+		testV1RouteSetRouteProfiles,
+		testV1RouteGetRouteProfileIDs,
+		testV1RouteUpdateRouteProfiles,
+		testV1RouteRemRouteProfiles,
+		testV1RouteGetRouteForEvent,
+		testV1RouteSetRouteProfilesWithoutTenant,
+		testV1RouteRemRouteProfilesWithoutTenant,
+		// reset the database and load the TP again
+		testV1RouteInitDataDb,
+		testV1RouteFromFolder,
+		testV1RoutesOneRouteWithoutDestination,
+		testV1RouteRoutePing,
+		testV1RouteMultipleRouteSameID,
+		testV1RouteAccountWithRatingPlan,
 		testV1RouteStopEngine,
 	}
 )
@@ -84,51 +84,51 @@ var (
 func TestRouteSV1IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		splSv1ConfDIR = "tutinternal"
+		routeSv1ConfDIR = "tutinternal"
 	case utils.MetaMySQL:
-		splSv1ConfDIR = "tutmysql"
+		routeSv1ConfDIR = "tutmysql"
 	case utils.MetaMongo:
-		splSv1ConfDIR = "tutmongo"
+		routeSv1ConfDIR = "tutmongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
 	for _, stest := range sTestsRouteSV1 {
-		t.Run(splSv1ConfDIR, stest)
+		t.Run(routeSv1ConfDIR, stest)
 	}
 }
 
 func testV1RouteLoadConfig(t *testing.T) {
 	var err error
-	splSv1CfgPath = path.Join(*dataDir, "conf", "samples", splSv1ConfDIR)
-	if splSv1Cfg, err = config.NewCGRConfigFromPath(splSv1CfgPath); err != nil {
+	routeSv1CfgPath = path.Join(*dataDir, "conf", "samples", routeSv1ConfDIR)
+	if routeSv1Cfg, err = config.NewCGRConfigFromPath(routeSv1CfgPath); err != nil {
 		t.Error(err)
 	}
 }
 
 func testV1RouteInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(splSv1Cfg); err != nil {
+	if err := engine.InitDataDb(routeSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testV1RouteResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(splSv1Cfg); err != nil {
+	if err := engine.InitStorDb(routeSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testV1RouteStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(splSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(routeSv1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testV1RouteRpcConn(t *testing.T) {
 	var err error
-	splSv1Rpc, err = newRPCClient(splSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	routeSv1Rpc, err = newRPCClient(routeSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -136,7 +136,7 @@ func testV1RouteRpcConn(t *testing.T) {
 
 func testV1RouteGetBeforeDataLoad(t *testing.T) {
 	var suplsReply *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_WEIGHT_1",
@@ -148,7 +148,7 @@ func testV1RouteGetBeforeDataLoad(t *testing.T) {
 func testV1RouteFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := splSv1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -187,7 +187,7 @@ func testV1RouteGetWeightRoutes(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -196,7 +196,7 @@ func testV1RouteGetWeightRoutes(t *testing.T) {
 	}
 
 	ev.CGREvent.Tenant = utils.EmptyString
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -253,7 +253,7 @@ func testV1RouteGetLeastCostRoutes(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -309,7 +309,7 @@ func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -359,7 +359,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -386,7 +386,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCostNotFound(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -434,7 +434,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -491,7 +491,7 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -517,7 +517,7 @@ func testV1RouteGetLeastCostRoutesErr(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -540,7 +540,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -561,7 +561,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -582,7 +582,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -603,7 +603,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -624,7 +624,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -646,7 +646,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -668,7 +668,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -689,7 +689,7 @@ func testV1RouteGetQOSRoutes(t *testing.T) {
 	}
 	expRouteIDs := []string{"route1", "route3", "route2"}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
@@ -722,7 +722,7 @@ func testV1RouteGetQOSRoutes2(t *testing.T) {
 	}
 	expRouteIDs := []string{"route3", "route2", "route1"}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
@@ -755,7 +755,7 @@ func testV1RouteGetQOSRoutes3(t *testing.T) {
 	}
 	expRouteIDs := []string{"route1", "route3", "route2"}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
@@ -788,7 +788,7 @@ func testV1RouteGetQOSRoutesFiltred(t *testing.T) {
 	}
 	expRouteIDs := []string{"route1", "route3"}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
@@ -825,7 +825,7 @@ func testV1RouteGetQOSRoutesFiltred2(t *testing.T) {
 	}
 	expRouteIDs := []string{"route3", "route2"}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
@@ -871,7 +871,7 @@ func testV1RouteGetRouteWithoutFilter(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -881,7 +881,7 @@ func testV1RouteGetRouteWithoutFilter(t *testing.T) {
 }
 
 func testV1RouteSetRouteProfiles(t *testing.T) {
-	splPrf = &RouteWithCache{
+	routePrf = &RouteWithCache{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "TEST_PROFILE1",
@@ -907,27 +907,27 @@ func testV1RouteSetRouteProfiles(t *testing.T) {
 
 	var result string
 	expErr := "SERVER_ERROR: broken reference to filter: FLTR_NotFound for item with ID: cgrates.org:TEST_PROFILE1"
-	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err == nil || err.Error() != expErr {
+	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &result); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
 	}
 
 	var reply *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf.FilterIDs = []string{"FLTR_1"}
-	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+	routePrf.FilterIDs = []string{"FLTR_1"}
+	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
+	} else if !reflect.DeepEqual(routePrf.RouteProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", routePrf.RouteProfile, reply)
 	}
 }
 
@@ -936,14 +936,14 @@ func testV1RouteGetRouteProfileIDs(t *testing.T) {
 		"ROUTE_ACNT_1001", "ROUTE_LEASTCOST_1", "ROUTE_WEIGHT_2", "ROUTE_WEIGHT_1", "ROUTE_QOS_3",
 		"TEST_PROFILE1", "ROUTE_LOAD_DIST", "ROUTE_LCR"}
 	var result []string
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfileIDs,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfileIDs,
 		&utils.PaginatorWithTenant{}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfileIDs,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfileIDs,
 		&utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
@@ -952,7 +952,7 @@ func testV1RouteGetRouteProfileIDs(t *testing.T) {
 }
 
 func testV1RouteUpdateRouteProfiles(t *testing.T) {
-	splPrf.Routes = []*engine.Route{
+	routePrf.Routes = []*engine.Route{
 		{
 			ID:              "ROUTE1",
 			RatingPlanIDs:   []string{"RP1"},
@@ -1001,35 +1001,35 @@ func testV1RouteUpdateRouteProfiles(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf.Routes, reply.Routes) && !reflect.DeepEqual(reverseRoutes, reply.Routes) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(splPrf), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(routePrf.Routes, reply.Routes) && !reflect.DeepEqual(reverseRoutes, reply.Routes) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(routePrf), utils.ToJSON(reply))
 	}
 }
 
 func testV1RouteRemRouteProfiles(t *testing.T) {
 	var resp string
-	if err := splSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
@@ -1037,7 +1037,7 @@ func testV1RouteRemRouteProfiles(t *testing.T) {
 
 func testV1RouteRoutePing(t *testing.T) {
 	var resp string
-	if err := splSv1Rpc.Call(utils.RouteSv1Ping, new(utils.CGREvent), &resp); err != nil {
+	if err := routeSv1Rpc.Call(utils.RouteSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
@@ -1096,7 +1096,7 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 		expected.SortingParameters = nil
 	}
 	var supProf []*engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRouteProfilesForEvent,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRouteProfilesForEvent,
 		ev, &supProf); err != nil {
 		t.Fatal(err)
 	}
@@ -1111,7 +1111,7 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 	}
 
 	ev.CGREvent.Tenant = utils.EmptyString
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRouteProfilesForEvent,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRouteProfilesForEvent,
 		ev, &supProf); err != nil {
 		t.Fatal(err)
 	}
@@ -1133,12 +1133,12 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 // route1 have attached RP_LOCAL and route2 have attach RP_MOBILE
 func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 	var reply *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_DESTINATION"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &RouteWithCache{
+	routePrf = &RouteWithCache{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ROUTE_DESTINATION",
@@ -1162,7 +1162,7 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 	}
 
 	var result string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1198,7 +1198,7 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -1209,12 +1209,12 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 
 func testV1RouteMultipleRouteSameID(t *testing.T) {
 	var reply *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "MULTIPLE_ROUTES"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &RouteWithCache{
+	routePrf = &RouteWithCache{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "MULTIPLE_ROUTES",
@@ -1239,7 +1239,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 	}
 
 	var result string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1277,7 +1277,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 		},
 	}
 	var suplsReply engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -1316,7 +1316,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -1326,7 +1326,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 }
 
 func testV1RouteAccountWithRatingPlan(t *testing.T) {
-	splPrf = &RouteWithCache{
+	routePrf = &RouteWithCache{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RouteWithAccAndRP",
@@ -1350,7 +1350,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 	}
 
 	var result string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1366,7 +1366,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := splSv1Rpc.Call(utils.APIerSv2SetBalance, &attrSetBalance, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.APIerSv2SetBalance, &attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -1376,7 +1376,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "AccWithVoice",
 	}
-	if err := splSv1Rpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+	if err := routeSv1Rpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 30*float64(time.Second) {
 		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -1426,7 +1426,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 		},
 	}
 	var suplsReply *engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
@@ -1478,7 +1478,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 		},
 	}
 	var routeRply *engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &routeRply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, routeRply) {
@@ -1530,7 +1530,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 		},
 	}
 	var routeRply2 *engine.SortedRoutes
-	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &routeRply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSpls, routeRply2) {
@@ -1547,7 +1547,7 @@ func testV1RouteStopEngine(t *testing.T) {
 }
 
 func testV1RouteSetRouteProfilesWithoutTenant(t *testing.T) {
-	splPrf = &RouteWithCache{
+	routePrf = &RouteWithCache{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "TEST_PROFILE10",
@@ -1571,31 +1571,31 @@ func testV1RouteSetRouteProfilesWithoutTenant(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	splPrf.Tenant = "cgrates.org"
+	routePrf.Tenant = "cgrates.org"
 	var result *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{ID: "TEST_PROFILE10"},
 		&result); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result, splPrf.RouteProfile) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(splPrf.RouteProfile), utils.ToJSON(result))
+	} else if !reflect.DeepEqual(result, routePrf.RouteProfile) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(routePrf.RouteProfile), utils.ToJSON(result))
 	}
 }
 
 func testV1RouteRemRouteProfilesWithoutTenant(t *testing.T) {
 	var reply string
-	if err := splSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
 		&utils.TenantIDWithCache{ID: "TEST_PROFILE10"},
 		&reply); err != nil {
 		t.Error(err)
 	}
 	var result *engine.RouteProfile
-	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{ID: "TEST_PROFILE10"},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

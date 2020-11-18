@@ -1,7 +1,7 @@
-#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters,Weight
-cgrates.org,ROUTE_ACNT_1001,*string:~*req.Account:1001,2017-11-27T00:00:00Z,*weight,,route1,,1001,RP_10CNT,,,20,,cgrates.org,20
-cgrates.org,ROUTE_ACNT_1001,,,,,route2,,1001,RP_20CNT,,,10,,cgrates.net,10
-cgrates.org,ROUTE_ACNT_1001,,,,,route3,,1001,RP_1CNT,,,5,,cgrates.com,5
-cgrates.org,ROUTE_ACNT_1002,*string:~*req.Account:1002,2017-11-27T00:00:00Z,*weight,,route1,,1002,RP_10CNT,,,20,,1003@192.168.56.203,20
-cgrates.org,ROUTE_ACNT_1002,,,,,route2,,1002,RP_20CNT,,,10,,1004@192.168.57.203,10
-cgrates.org,ROUTE_ACNT_1002,,,,,route3,,1002,RP_1CNT,,,5,,1005@192.168.58.203,5
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters,Weight
+cgrates.org,ROUTE_ACNT_1001,*string:~*req.Account:1001,2017-11-27T00:00:00Z,*weight,,route1,,1001,RP_10CNT,,,,20,,cgrates.org,20
+cgrates.org,ROUTE_ACNT_1001,,,,,route2,,1001,RP_20CNT,,,,10,,cgrates.net,10
+cgrates.org,ROUTE_ACNT_1001,,,,,route3,,1001,RP_1CNT,,,,5,,cgrates.com,5
+cgrates.org,ROUTE_ACNT_1002,*string:~*req.Account:1002,2017-11-27T00:00:00Z,*weight,,route1,,1002,RP_10CNT,,,,20,,1003@192.168.56.203,20
+cgrates.org,ROUTE_ACNT_1002,,,,,route2,,1002,RP_20CNT,,,,10,,1004@192.168.57.203,10
+cgrates.org,ROUTE_ACNT_1002,,,,,route3,,1002,RP_1CNT,,,,5,,1005@192.168.58.203,5
