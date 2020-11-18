@@ -35,10 +35,9 @@ import (
 )
 
 // NewAnalyzerService initializes a AnalyzerService
-func NewAnalyzerService(cfg *config.CGRConfig, filterS chan *engine.FilterS) (aS *AnalyzerService, err error) {
+func NewAnalyzerService(cfg *config.CGRConfig) (aS *AnalyzerService, err error) {
 	aS = &AnalyzerService{
-		cfg:         cfg,
-		filterSChan: filterS,
+		cfg: cfg,
 	}
 	err = aS.initDB()
 	return
@@ -49,11 +48,13 @@ type AnalyzerService struct {
 	db  bleve.Index
 	cfg *config.CGRConfig
 
-	// because we do not use the filters only for API
-	// start the service without them
-	// and populate them on the first API call
-	filterSChan chan *engine.FilterS
-	filterS     *engine.FilterS
+	filterS *engine.FilterS
+}
+
+// SetFilterS will set the filterS used in APIs
+// this function is called before the API is registerd
+func (aS *AnalyzerService) SetFilterS(fS *engine.FilterS) {
+	aS.filterS = fS
 }
 
 func (aS *AnalyzerService) initDB() (err error) {
@@ -146,12 +147,7 @@ func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]in
 		return err
 	}
 	rply := make([]map[string]interface{}, 0, searchResults.Hits.Len())
-	lCntFltrs := len(args.ContentFilters)
-	if lCntFltrs != 0 &&
-		aS.filterS == nil { // populate the filter on the first API that requeres them
-		aS.filterS = <-aS.filterSChan
-		aS.filterSChan <- aS.filterS
-	}
+	lenContentFltrs := len(args.ContentFilters)
 	for _, obj := range searchResults.Hits {
 		// make sure that the result is corectly marshaled
 		rep := json.RawMessage(utils.IfaceAsString(obj.Fields[utils.Reply]))
@@ -165,7 +161,7 @@ func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]in
 		if val, has := obj.Fields[utils.ReplyError]; !has || len(utils.IfaceAsString(val)) == 0 {
 			obj.Fields[utils.ReplyError] = nil
 		}
-		if lCntFltrs != 0 {
+		if lenContentFltrs != 0 {
 			dp, err := getDPFromSearchresult(req, rep, obj.Fields)
 			if err != nil {
 				return err

@@ -46,7 +46,7 @@ func TestNewAnalyzeConnector(t *testing.T) {
 	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg, nil)
+	anz, err := NewAnalyzerService(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
