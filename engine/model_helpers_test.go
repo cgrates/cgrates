@@ -2831,7 +2831,7 @@ func TestCsvHeader(t *testing.T) {
 	eOut := []string{
 		"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
 		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
-		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteResourceIDs,
+		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteRateProfileIDs, utils.RouteResourceIDs,
 		utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
 		utils.RouteParameters, utils.Weight,
 	}
