@@ -66,7 +66,7 @@ func (anz *AnalyzerService) Start() (err error) {
 
 	anz.Lock()
 	defer anz.Unlock()
-	if anz.anz, err = analyzers.NewAnalyzerService(anz.cfg, anz.filterSChan); err != nil {
+	if anz.anz, err = analyzers.NewAnalyzerService(anz.cfg); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		return
 	}
@@ -80,10 +80,20 @@ func (anz *AnalyzerService) Start() (err error) {
 	}()
 	anz.server.SetAnalyzer(anz.anz)
 	anz.rpc = v1.NewAnalyzerSv1(anz.anz)
-	if !anz.cfg.DispatcherSCfg().Enabled {
-		anz.server.RpcRegister(anz.rpc)
-	}
-	anz.connChan <- anz.rpc
+	go func() {
+		var fS *engine.FilterS
+		select {
+		case <-anz.stopChan:
+			return
+		case fS = <-anz.filterSChan:
+			anz.filterSChan <- fS
+			anz.anz.SetFilterS(fS)
+		}
+		if !anz.cfg.DispatcherSCfg().Enabled {
+			anz.server.RpcRegister(anz.rpc)
+		}
+		anz.connChan <- anz.rpc
+	}()
 	return
 }
 
