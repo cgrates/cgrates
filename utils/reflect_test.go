@@ -1569,15 +1569,6 @@ func TestReflectFieldMethodInterfaceArray(t *testing.T) {
 	}
 }
 
-func TestReflectFieldMethodInterfaceArrayError1(t *testing.T) {
-	obj := []int{2, 3, 5, 7, 11, 13}
-	fldName := "0"
-	result, _ := ReflectFieldMethodInterface(obj, fldName)
-	if !reflect.DeepEqual(result, 2) {
-		t.Errorf("Expected <2> ,received: <%+v>", result)
-	}
-}
-
 func TestReflectFieldMethodInterfaceMap(t *testing.T) {
 	var obj = map[string]string{"field1": "val1", "field2": "val2"}
 	fldName := "field1"
@@ -1586,4 +1577,63 @@ func TestReflectFieldMethodInterfaceMap(t *testing.T) {
 		t.Errorf("Expected <val1> ,received: <%+v>", result)
 	}
 
+}
+
+func TestReflectFieldMethodInterfaceArrayError(t *testing.T) {
+	obj := []int{2, 3, 5, 7, 11, 13}
+	fldName := "test"
+	_, err := ReflectFieldMethodInterface(obj, fldName)
+	if err == nil || err.Error() != "strconv.Atoi: parsing \"test\": invalid syntax" {
+		t.Errorf("Expected <strconv.Atoi: parsing \"test\": invalid syntax> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectFieldMethodInterfaceArrayError2(t *testing.T) {
+	obj := []int{2, 3, 5, 7, 11, 13}
+	fldName := "6"
+	_, err := ReflectFieldMethodInterface(obj, fldName)
+	if err == nil || err.Error() != "index out of range" {
+		t.Errorf("Expected <index out of range> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectFieldMethodInterfaceArrayDefault(t *testing.T) {
+	obj := "test"
+	fldName := "test2"
+	_, err := ReflectFieldMethodInterface(obj, fldName)
+	if err == nil || err.Error() != "unsupported field kind: string" {
+		t.Errorf("Expected <unsupported field kind: string> ,received: <%+v>", err)
+	}
+}
+
+func (_ *TestA) TestFuncWithParamError2() (string, string, string) {
+	return "Invalid", "invalid2", "invalid3"
+}
+
+func TestReflectFieldMethodInterfaceElseError1(t *testing.T) {
+	a := &TestA{StrField: "TestStructField"}
+	_, err := ReflectFieldMethodInterface(a, "TestFuncWithParam")
+	if err == nil || err.Error() != "invalid function called" {
+		t.Errorf("Expected <invalid function called> ,received: <%+v>", err)
+	}
+}
+
+func TestReflectFieldMethodInterfaceElseError2(t *testing.T) {
+	a := &TestA{StrField: "TestStructField"}
+	_, err := ReflectFieldMethodInterface(a, "TestFuncWithParamError2")
+	if err == nil || err.Error() != "invalid function called" {
+		t.Errorf("Expected <invalid function called> ,received: <%+v>", err)
+	}
+}
+
+func (_ *TestA) TestFuncWithParamError3() (string, string) {
+	return "Invalid", "invalid2"
+}
+
+func TestReflectFieldMethodInterfaceElseError3(t *testing.T) {
+	a := &TestA{StrField: "TestStructField"}
+	_, err := ReflectFieldMethodInterface(a, "TestFuncWithParamError3")
+	if err == nil || err.Error() != "invalid function called" {
+		t.Errorf("Expected <invalid function called> ,received: <%+v>", err)
+	}
 }
