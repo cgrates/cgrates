@@ -168,7 +168,7 @@ xml_root_path
 	Used in case of XML content and will specify the prefix path applied to each xml element read.
 
 tenant
-	Will auto-populate the Tenant within the API calls sent to CGRateS. It has the form of a RSRField. If undefined, default one from *general* section will be used.
+	Will auto-populate the Tenant within the API calls sent to CGRateS. It has the form of a RSRParser. If undefined, default one from *general* section will be used.
 
 timezone
 	Defines the timezone for source content which does not carry that information. If undefined, default one from *general* section will be used.

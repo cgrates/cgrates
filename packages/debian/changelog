@@ -128,6 +128,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [ConfigS] Renamed ReloadConfigFromPath API to ReloadConfig
   * [ConfigS] Renamed ReloadConfig API to SetConfig
   * [ConfigS] Renamed ReloadConfigFromJSON API to SetConfigFromJSON
+  * [CDRs] Replaced RSRField with RSRParser
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

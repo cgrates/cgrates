@@ -20,9 +20,7 @@ package engine
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
-	"reflect"
 	"strconv"
 	"strings"
 
@@ -78,16 +76,18 @@ func (fsCdr FSCdr) getCGRID() string {
 
 func (fsCdr FSCdr) getExtraFields() map[string]string {
 	extraFields := make(map[string]string, len(fsCdr.cgrCfg.CdrsCfg().ExtraFields))
+	const dynprefix string = utils.MetaDynReq + utils.NestingSep
 	for _, field := range fsCdr.cgrCfg.CdrsCfg().ExtraFields {
-		origFieldVal, foundInVars := fsCdr.vars[field.Id]
-		if strings.HasPrefix(field.Id, utils.STATIC_VALUE_PREFIX) { // Support for static values injected in the CDRS. it will show up as {^value:value}
-			foundInVars = true
+		if !strings.HasPrefix(field.Rules, dynprefix) {
+			continue
 		}
+		attrName := field.AttrName()[5:]
+		origFieldVal, foundInVars := fsCdr.vars[attrName]
 		if !foundInVars {
-			origFieldVal = fsCdr.searchExtraField(field.Id, fsCdr.body)
+			origFieldVal = fsCdr.searchExtraField(attrName, fsCdr.body)
 		}
-		if parsed, err := field.Parse(origFieldVal); err == nil {
-			extraFields[field.Id] = parsed
+		if parsed, err := field.ParseValue(origFieldVal); err == nil {
+			extraFields[attrName] = parsed
 		}
 	}
 	return extraFields
@@ -95,31 +95,22 @@ func (fsCdr FSCdr) getExtraFields() map[string]string {
 
 func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (result string) {
 	for key, value := range body {
+		if key == field {
+			return utils.IfaceAsString(value)
+		}
 		switch v := value.(type) {
-		case string:
-			if key == field {
-				return v
-			}
-		case float64:
-			if key == field {
-				return strconv.FormatFloat(v, 'f', -1, 64)
-			}
 		case map[string]interface{}:
-			if result = fsCdr.searchExtraField(field, v); result != "" {
+			if result = fsCdr.searchExtraField(field, v); len(result) != 0 {
 				return
 			}
 		case []interface{}:
 			for _, item := range v {
 				if otherMap, ok := item.(map[string]interface{}); ok {
-					if result = fsCdr.searchExtraField(field, otherMap); result != "" {
+					if result = fsCdr.searchExtraField(field, otherMap); len(result) != 0 {
 						return
 					}
-				} else {
-					utils.Logger.Warning(fmt.Sprintf("Slice with no maps: %v", reflect.TypeOf(item)))
 				}
 			}
-		default:
-			utils.Logger.Warning(fmt.Sprintf("Unexpected type: %v", reflect.TypeOf(v)))
 		}
 	}
 	return
@@ -155,8 +146,8 @@ func (fsCdr FSCdr) AsCDR(timezone string) (storCdr *CDR, err error) {
 		CostSource:  fsCdr.vars["cgr_costsource"],
 		Cost:        -1,
 	}
-	if orderId, hasIt := fsCdr.vars["cgr_orderid"]; hasIt {
-		if storCdr.OrderID, err = strconv.ParseInt(orderId, 10, 64); err != nil {
+	if orderID, hasIt := fsCdr.vars["cgr_orderid"]; hasIt {
+		if storCdr.OrderID, err = strconv.ParseInt(orderID, 10, 64); err != nil {
 			return nil, err
 		}
 	}
