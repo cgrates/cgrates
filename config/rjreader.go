@@ -317,10 +317,7 @@ func (rjr *rjReader) getJSONOffsetLine(offset int64) (line, character int64) {
 		return nil
 	}
 	readLineComment := func() error {
-		for i < offset {
-			if rjr.isEndOfFile() {
-				return io.EOF
-			}
+		for !rjr.isEndOfFile() {
 			b := rjr.buf[rjr.indx]
 			rjr.indx++
 			if isNewLine(b) {
@@ -330,14 +327,11 @@ func (rjr *rjReader) getJSONOffsetLine(offset int64) (line, character int64) {
 			}
 			character++
 		}
-		return nil
+		return io.EOF
 	}
 
 	readComment := func() error {
-		for i < offset {
-			if rjr.isEndOfFile() {
-				return io.EOF
-			}
+		for !rjr.isEndOfFile() {
 			b := rjr.buf[rjr.indx]
 			rjr.indx++
 			if isNewLine(b) {
@@ -361,9 +355,8 @@ func (rjr *rjReader) getJSONOffsetLine(offset int64) (line, character int64) {
 				rjr.UnreadByte()
 			}
 		}
-		return nil
+		return io.EOF
 	}
-
 	for i < offset { // handle the parsing
 		if rjr.isEndOfFile() {
 			return

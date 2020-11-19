@@ -483,65 +483,65 @@ func TestGetErrorLine2(t *testing.T) {
 func TestGetJSONOffsetLineFuncError(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte("{}"))
 	rjr.indx = 7
-	var eLine, eCharachter int64 = 1, 0
-	if line, character := rjr.getJSONOffsetLine(int64(3)); line != eLine && character != eCharachter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharachter, line, character)
+	var eLine, eCharacter int64 = 1, 0
+	if line, character := rjr.getJSONOffsetLine(int64(3)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
 func TestGetJSONOffsetLineReadStringEOF(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte(`{","}`))
 	rjr.indx = 3
-	var eLine, eCharachter int64 = 1, 0
-	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharachter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharachter, line, character)
+	var eLine, eCharacter int64 = 1, 0
+	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
 func TestGetJSONOffsetLineReadString1(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte(`{,}, {val1, val2}`))
 	rjr.indx = 0
-	var eLine, eCharachter int64 = 1, 0
-	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharachter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharachter, line, character)
+	var eLine, eCharacter int64 = 1, 0
+	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
-func TestGetJSONOffsetLineReadStringNilError1(t *testing.T) {
+func TestGetJSONOffsetLineReadStringNilError(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte(`"
 
 ", {,}, {val1, val2}`))
 	rjr.indx = 0
-	var eLine, eCharachter int64 = 1, 0
-	if line, character := rjr.getJSONOffsetLine(int64(3)); line != eLine && character != eCharachter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharachter, line, character)
+	var eLine, eCharacter int64 = 1, 0
+	if line, character := rjr.getJSONOffsetLine(int64(3)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
-func TestGetJSONOffsetLineReadLineCommentEOF(t *testing.T) {
+func TestGetJSONOffsetLineReadLineCommentEOFInvalid(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte(`random/`))
 	rjr.indx = 6
-	var eLine, eCharachter int64 = 1, 0
-	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharachter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharachter, line, character)
+	var eLine, eCharacter int64 = 1, 0
+	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
 func TestGetJSONOffsetLineReadLineCommentEOF1(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte(`random//`))
 	rjr.indx = 6
-	var eLine, eCharachter int64 = 1, 0
-	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharachter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharachter, line, character)
+	var eLine, eCharacter int64 = 1, 0
+	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
 func TestGetJSONOffsetLineReadCommentEOF(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte(`random/*`))
 	rjr.indx = 5
-	var eLine, eCharachter int64 = 1, 0
-	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharachter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharachter, line, character)
+	var eLine, eCharacter int64 = 1, 0
+	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -550,27 +550,37 @@ func TestGetJSONOffsetLineReadCommentInvalidEnding(t *testing.T) {
 
 **`))
 	rjr.indx = 5
-	var eLine, eCharachter int64 = 3, 2
-	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharachter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharachter, line, character)
+	var eLine, eCharacter int64 = 3, 2
+	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
-func TestGetJSONOffsetLineReadComment1(t *testing.T) {
+func TestGetJSONOffsetLineReadComment(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte(`/*
 **`))
 	rjr.indx = 0
-	var eLine, eCharachter int64 = 3, 2
-	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharachter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharachter, line, character)
+	var eLine, eCharacter int64 = 3, 2
+	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
-func TestGetJSONOffsetLineInvalidComment2(t *testing.T) {
+func TestGetJSONOffsetLineInvalidComment(t *testing.T) {
 	rjr := NewRjReaderFromBytes([]byte(`/noComm`))
 	rjr.indx = 0
-	var eLine, eCharachter int64 = 1, 5
-	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharachter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharachter, line, character)
+	var eLine, eCharacter int64 = 1, 5
+	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
+}
+
+func TestGetJSONOffsetLineReadCommentOffset(t *testing.T) {
+	rjr := NewRjReaderFromBytes([]byte(`//noCOmment`))
+	rjr.indx = 0
+	var eLine, eCharacter int64 = 1, 5
+	if line, character := rjr.getJSONOffsetLine(int64(3)); line != eLine && character != eCharacter {
+		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+	}
+
 }
