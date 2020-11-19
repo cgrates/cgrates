@@ -39,6 +39,7 @@
 
 "routes": {
 	"enabled": true,
+	"rals_conns": ["*internal"],
 	"rates_conns": ["*internal"],
 },
 

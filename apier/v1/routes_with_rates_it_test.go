@@ -39,6 +39,7 @@ var (
 		testV1RouteSWithRateSRpcConn,
 		testV1RouteSWithRateSFromFolder,
 		testV1RouteSWithRateSGetRoutes,
+		//testV1RouteSWithRateSAccountWithRateProfile, //need to be discussed
 		testV1RouteSWithRateSStopEngine,
 	}
 )
@@ -163,6 +164,223 @@ func testV1RouteSWithRateSGetRoutes(t *testing.T) {
 			utils.ToJSON(expRoutes), utils.ToJSON(routesReply))
 	}
 }
+
+/*
+func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
+	routePrf = &RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RouteWithAccAndRatePrf",
+			FilterIDs: []string{"*string:~*req.EventType:testV1RouteSWithRateSAccountWithRateProfile"},
+			Sorting:   utils.MetaLC,
+			Routes: []*engine.Route{
+				{
+					ID:             "RouteWithAccAndRatePrf",
+					AccountIDs:     []string{"AccWithVoice"},
+					RateProfileIDs: []string{"RT_ANY2CNT_SEC"},
+					Weight:         20,
+				},
+				{
+					ID:             "RouteWithRP",
+					RateProfileIDs: []string{"RT_ANY1CNT_SEC"},
+					Weight:         10,
+				},
+			},
+			Weight: 100,
+		},
+	}
+
+	var result string
+	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "AccWithVoice",
+		BalanceType: utils.VOICE,
+		Value:       30 * float64(time.Second),
+		Balance: map[string]interface{}{
+			utils.ID: "VoiceBalance",
+		},
+	}
+	var reply string
+	if err := routeSv1Rpc.Call(utils.APIerSv2SetBalance, &attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	var acnt *engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "AccWithVoice",
+	}
+	if err := routeSv1Rpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 30*float64(time.Second) {
+		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
+
+	// test for 30 seconds usage
+	// we expect that the route with account to have cost 0
+	tNow := time.Now()
+	ev := &engine.ArgsGetRoutes{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Time:   &tNow,
+				ID:     "testV1RouteAccountWithRatingPlan",
+				Event: map[string]interface{}{
+					utils.Account:     "RandomAccount",
+					utils.Destination: "+135876",
+					utils.SetupTime:   utils.MetaNow,
+					utils.Usage:       "30s",
+					"EventType":       "testV1RouteSWithRateSAccountWithRateProfile",
+				},
+			},
+		},
+	}
+	eSpls := &engine.SortedRoutes{
+		ProfileID: "RouteWithAccAndRatePrf",
+		Sorting:   utils.MetaLC,
+		Count:     2,
+		SortedRoutes: []*engine.SortedRoute{
+			{
+				RouteID: "RouteWithAccAndRatePrf",
+				SortingData: map[string]interface{}{
+					utils.Account: "AccWithVoice",
+					"Cost":        0.0,
+					"MaxUsage":    30000000000.0,
+					utils.Weight:  20.0,
+				},
+			},
+			{
+				RouteID: "RouteWithRP",
+				SortingData: map[string]interface{}{
+					utils.Cost:               0.3,
+					utils.RateProfileMatched: "RT_ANY1CNT_SEC",
+					utils.Weight:             10.0,
+				},
+			},
+		},
+	}
+	var suplsReply *engine.SortedRoutes
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s \n received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+
+	// test for 60 seconds usage
+	// 30 seconds are covered by account and the remaining will be calculated
+	ev = &engine.ArgsGetRoutes{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Time:   &tNow,
+				ID:     "testV1RouteAccountWithRatingPlan",
+				Event: map[string]interface{}{
+					utils.Account:     "RandomAccount",
+					utils.Destination: "+135876",
+					utils.SetupTime:   utils.MetaNow,
+					utils.Usage:       "60s",
+					"EventType":       "testV1RouteSWithRateSAccountWithRateProfile",
+				},
+			},
+		},
+	}
+	eSpls = &engine.SortedRoutes{
+		ProfileID: "RouteWithAccAndRatePrf",
+		Sorting:   utils.MetaLC,
+		Count:     2,
+		SortedRoutes: []*engine.SortedRoute{
+			{
+				RouteID: "RouteWithAccAndRatePrf",
+				SortingData: map[string]interface{}{
+					utils.Account:            "AccWithVoice",
+					"Cost":                   0.6,
+					"MaxUsage":               30000000000.0,
+					utils.RateProfileMatched: "RT_ANY2CNT_SEC",
+					utils.Weight:             20.0,
+				},
+			},
+			{
+				RouteID: "RouteWithRP",
+				SortingData: map[string]interface{}{
+					"Cost":                   0.6,
+					utils.RateProfileMatched: "RT_ANY1CNT_SEC",
+					utils.Weight:             10.0,
+				},
+			},
+		},
+	}
+	var routeRply *engine.SortedRoutes
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
+		ev, &routeRply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, routeRply) {
+		t.Errorf("Expecting: %s \n received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(routeRply))
+	}
+
+	// test for 61 seconds usage
+	// 30 seconds are covered by account and the remaining will be calculated
+	ev = &engine.ArgsGetRoutes{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Time:   &tNow,
+				ID:     "testV1RouteAccountWithRatingPlan",
+				Event: map[string]interface{}{
+					utils.Account:     "RandomAccount",
+					utils.Destination: "+135876",
+					utils.SetupTime:   utils.MetaNow,
+					utils.Usage:       "1m1s",
+					"EventType":       "testV1RouteSWithRateSAccountWithRateProfile",
+				},
+			},
+		},
+	}
+	eSpls = &engine.SortedRoutes{
+		ProfileID: "RouteWithAccAndRatePrf",
+		Sorting:   utils.MetaLC,
+		Count:     2,
+		SortedRoutes: []*engine.SortedRoute{
+			{
+				RouteID: "RouteWithRP",
+				SortingData: map[string]interface{}{
+					utils.Cost:               0.61,
+					utils.RateProfileMatched: "RT_ANY1CNT_SEC",
+					utils.Weight:             10.0,
+				},
+			},
+			{
+				RouteID: "RouteWithAccAndRatePrf",
+				SortingData: map[string]interface{}{
+					utils.Account:            "AccWithVoice",
+					utils.Cost:               0.62,
+					"MaxUsage":               30000000000.0,
+					utils.RateProfileMatched: "RT_ANY2CNT_SEC",
+					utils.Weight:             20.0,
+				},
+			},
+		},
+	}
+	var routeRply2 *engine.SortedRoutes
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
+		ev, &routeRply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, routeRply2) {
+		t.Errorf("Expecting: %s \n received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(routeRply2))
+	}
+
+}
+*/
 
 func testV1RouteSWithRateSStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
