@@ -67,10 +67,10 @@ func TestDispatcherHostsService(t *testing.T) {
 	host1 := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
 		ID:     "Host1",
-		Conns: []*config.RemoteHost{{
+		Conn: &config.RemoteHost{
 			Address:   "127.0.0.1:2012",
 			Transport: utils.MetaJSON,
-		}},
+		},
 	}
 
 	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); !ok {

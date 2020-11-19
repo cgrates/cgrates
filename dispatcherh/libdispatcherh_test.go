@@ -57,20 +57,20 @@ func TestRegisterArgsAsDispatcherHosts(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "Host1",
-			Conns: []*config.RemoteHost{{
+			Conn: &config.RemoteHost{
 				Address:   "127.0.0.1:2012",
 				TLS:       true,
 				Transport: utils.MetaJSON,
-			}},
+			},
 		},
 		{
 			Tenant: "cgrates.org",
 			ID:     "Host2",
-			Conns: []*config.RemoteHost{{
+			Conn: &config.RemoteHost{
 				Address:   "127.0.0.1:2013",
 				TLS:       false,
 				Transport: utils.MetaGOB,
-			}},
+			},
 		},
 	}
 	if rply := args.AsDispatcherHosts("127.0.0.1"); !reflect.DeepEqual(exp, rply) {
@@ -172,20 +172,20 @@ func TestRegister(t *testing.T) {
 	host1 := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
 		ID:     "Host1",
-		Conns: []*config.RemoteHost{{
+		Conn: &config.RemoteHost{
 			Address:   "127.0.0.1:2012",
 			TLS:       true,
 			Transport: utils.MetaJSON,
-		}},
+		},
 	}
 	host2 := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
 		ID:     "Host2",
-		Conns: []*config.RemoteHost{{
+		Conn: &config.RemoteHost{
 			Address:   "127.0.0.1:2013",
 			TLS:       false,
 			Transport: utils.MetaGOB,
-		}},
+		},
 	}
 
 	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); !ok {

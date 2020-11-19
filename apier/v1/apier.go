@@ -1616,13 +1616,11 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 				if err != nil {
 					return err
 				}
-				for _, model := range engine.APItoModelTPDispatcherHost(
-					engine.DispatcherHostToAPI(dpsPrf)) {
-					if record, err := engine.CsvDump(model); err != nil {
-						return err
-					} else if err := csvWriter.Write(record); err != nil {
-						return err
-					}
+				if record, err := engine.CsvDump(engine.APItoModelTPDispatcherHost(
+					engine.DispatcherHostToAPI(dpsPrf))); err != nil {
+					return err
+				} else if err := csvWriter.Write(record); err != nil {
+					return err
 				}
 			}
 			csvWriter.Flush()

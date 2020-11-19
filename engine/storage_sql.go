@@ -716,11 +716,9 @@ func (self *SQLStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) e
 			tx.Rollback()
 			return err
 		}
-		for _, mst := range APItoModelTPDispatcherHost(dpp) {
-			if err := tx.Save(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
+		if err := tx.Save(APItoModelTPDispatcherHost(dpp)).Error; err != nil {
+			tx.Rollback()
+			return err
 		}
 	}
 	tx.Commit()

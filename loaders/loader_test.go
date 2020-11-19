@@ -1137,16 +1137,10 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 	eDispHost := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
 		ID:     "ALL1",
-		Conns: []*config.RemoteHost{
-			{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-				TLS:       true,
-			},
-			{
-				Address:   "127.0.0.1:3012",
-				Transport: utils.MetaJSON,
-			},
+		Conn: &config.RemoteHost{
+			Address:   "127.0.0.1:2012",
+			Transport: utils.MetaJSON,
+			TLS:       true,
 		},
 	}
 
