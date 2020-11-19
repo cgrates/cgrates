@@ -32,18 +32,13 @@ import (
 func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
 	internalConnChan chan rpcclient.ClientConnector, lazyConnect bool) (rpcPool *rpcclient.RPCPool, err error) {
-	var rpcClient *rpcclient.RPCClient
+	var rpcClient rpcclient.ClientConnector
 	var atLestOneConnected bool // If one connected we don't longer return errors
 	rpcPool = rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
 	for _, rpcConnCfg := range rpcConnCfgs {
-		if rpcConnCfg.Address == utils.MetaInternal {
-			rpcClient, err = rpcclient.NewRPCClient("", "", rpcConnCfg.TLS, keyPath, certPath, caPath, connAttempts,
-				reconnects, connectTimeout, replyTimeout, rpcclient.InternalRPC, internalConnChan, lazyConnect)
-		} else if utils.SliceHasMember([]string{utils.EmptyString, utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON}, rpcConnCfg.Transport) {
-			codec := utils.FirstNonEmpty(rpcConnCfg.Transport, rpcclient.GOBrpc)
-			rpcClient, err = rpcclient.NewRPCClient(utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS, keyPath, certPath, caPath,
-				connAttempts, reconnects, connectTimeout, replyTimeout, codec, nil, lazyConnect)
-		} else {
+		rpcClient, err = NewRPCConnection(rpcConnCfg, keyPath, certPath, caPath, connAttempts, reconnects,
+			connectTimeout, replyTimeout, internalConnChan, lazyConnect)
+		if err == rpcclient.ErrUnsupportedCodec {
 			return nil, fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
 		}
 		if err == nil {
@@ -54,6 +49,19 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 	if atLestOneConnected {
 		err = nil
 	}
+	return
+}
+
+// NewRPCConnection creates a new connection based on the RemoteHost structure
+func NewRPCConnection(cfg *config.RemoteHost, keyPath, certPath, caPath string, connAttempts, reconnects int,
+	connectTimeout, replyTimeout time.Duration, internalConnChan chan rpcclient.ClientConnector, lazyConnect bool) (client rpcclient.ClientConnector, err error) {
+	if cfg.Address == utils.MetaInternal {
+		return rpcclient.NewRPCClient("", "", cfg.TLS, keyPath, certPath, caPath, connAttempts,
+			reconnects, connectTimeout, replyTimeout, rpcclient.InternalRPC, internalConnChan, lazyConnect)
+	}
+	return rpcclient.NewRPCClient(utils.TCP, cfg.Address, cfg.TLS, keyPath, certPath, caPath,
+		connAttempts, reconnects, connectTimeout, replyTimeout,
+		utils.FirstNonEmpty(cfg.Transport, rpcclient.GOBrpc), nil, lazyConnect)
 	return
 }
 

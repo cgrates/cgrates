@@ -2950,27 +2950,17 @@ func (tps TPDispatcherHosts) AsTPDispatcherHosts() (result []*utils.TPDispatcher
 		if len(tp.Transport) == 0 {
 			tp.Transport = utils.MetaJSON
 		}
-		tenantID := utils.ConcatenatedKey(tp.Tenant, tp.ID)
-		if th, has := hostsMap[tenantID]; !has || th == nil {
-			hostsMap[tenantID] = &utils.TPDispatcherHost{
-				TPid:   tp.Tpid,
-				Tenant: tp.Tenant,
-				ID:     tp.ID,
-				Conns: []*utils.TPDispatcherHostConn{
-					{
-						Address:   tp.Address,
-						Transport: tp.Transport,
-						TLS:       tp.TLS,
-					},
-				},
-			}
-			continue
+		hostsMap[utils.ConcatenatedKey(tp.Tenant, tp.ID)] = &utils.TPDispatcherHost{
+			TPid:   tp.Tpid,
+			Tenant: tp.Tenant,
+			ID:     tp.ID,
+			Conn: &utils.TPDispatcherHostConn{
+				Address:   tp.Address,
+				Transport: tp.Transport,
+				TLS:       tp.TLS,
+			},
 		}
-		hostsMap[tenantID].Conns = append(hostsMap[tenantID].Conns, &utils.TPDispatcherHostConn{
-			Address:   tp.Address,
-			Transport: tp.Transport,
-			TLS:       tp.TLS,
-		})
+		continue
 	}
 	for _, host := range hostsMap {
 		result = append(result, host)
@@ -2978,58 +2968,45 @@ func (tps TPDispatcherHosts) AsTPDispatcherHosts() (result []*utils.TPDispatcher
 	return
 }
 
-func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls TPDispatcherHosts) {
+func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls *TPDispatcherHost) {
 	if tpDPH == nil {
 		return
 	}
-	mdls = make(TPDispatcherHosts, len(tpDPH.Conns))
-	for i, conn := range tpDPH.Conns {
-		mdls[i] = &TPDispatcherHost{
-			Tpid:      tpDPH.TPid,
-			Tenant:    tpDPH.Tenant,
-			ID:        tpDPH.ID,
-			Address:   conn.Address,
-			Transport: conn.Transport,
-			TLS:       conn.TLS,
-		}
+	return &TPDispatcherHost{
+		Tpid:      tpDPH.TPid,
+		Tenant:    tpDPH.Tenant,
+		ID:        tpDPH.ID,
+		Address:   tpDPH.Conn.Address,
+		Transport: tpDPH.Conn.Transport,
+		TLS:       tpDPH.Conn.TLS,
 	}
-	return
 }
 
 func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
 	if tpDPH == nil {
 		return
 	}
-	dpp = &DispatcherHost{
+	return &DispatcherHost{
 		Tenant: tpDPH.Tenant,
 		ID:     tpDPH.ID,
-		Conns:  make([]*config.RemoteHost, len(tpDPH.Conns)),
+		Conn: &config.RemoteHost{
+			Address:   tpDPH.Conn.Address,
+			Transport: tpDPH.Conn.Transport,
+			TLS:       tpDPH.Conn.TLS,
+		},
 	}
-	for i, conn := range tpDPH.Conns {
-		dpp.Conns[i] = &config.RemoteHost{
-			Address:   conn.Address,
-			Transport: conn.Transport,
-			TLS:       conn.TLS,
-		}
-	}
-	return
 }
 
 func DispatcherHostToAPI(dph *DispatcherHost) (tpDPH *utils.TPDispatcherHost) {
-	tpDPH = &utils.TPDispatcherHost{
+	return &utils.TPDispatcherHost{
 		Tenant: dph.Tenant,
 		ID:     dph.ID,
-		Conns:  make([]*utils.TPDispatcherHostConn, len(dph.Conns)),
+		Conn: &utils.TPDispatcherHostConn{
+			Address:   dph.Conn.Address,
+			Transport: dph.Conn.Transport,
+			TLS:       dph.Conn.TLS,
+		},
 	}
-
-	for i, conn := range dph.Conns {
-		tpDPH.Conns[i] = &utils.TPDispatcherHostConn{
-			Address:   conn.Address,
-			Transport: conn.Transport,
-			TLS:       conn.TLS,
-		}
-	}
-	return
 }
 
 // RateProfileMdls is used

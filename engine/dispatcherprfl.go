@@ -135,7 +135,7 @@ func (dps DispatcherProfiles) Sort() {
 type DispatcherHost struct {
 	Tenant  string
 	ID      string
-	Conns   []*config.RemoteHost
+	Conn    *config.RemoteHost
 	rpcConn rpcclient.ClientConnector
 }
 
@@ -145,22 +145,22 @@ type DispatcherHostWithOpts struct {
 	Opts map[string]interface{}
 }
 
+// TenantID returns the tenant concatenated with the ID
 func (dH *DispatcherHost) TenantID() string {
 	return utils.ConcatenatedKey(dH.Tenant, dH.ID)
 }
 
-// GetRPCConnection builds or returns the cached connection
+// Call will build and cache the connection if it is not defined yet then will execute the method on conn
 func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
 	if dH.rpcConn == nil {
 		// connect the rpcConn
 		cfg := config.CgrConfig()
-		if dH.rpcConn, err = NewRPCPool(
-			rpcclient.PoolFirst,
+		if dH.rpcConn, err = NewRPCConnection(dH.Conn,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			dH.Conns, IntRPC.GetInternalChanel(), false); err != nil {
+			IntRPC.GetInternalChanel(), false); err != nil {
 			return
 		}
 

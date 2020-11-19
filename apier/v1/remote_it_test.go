@@ -650,15 +650,8 @@ func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			ID:     "DspHst1",
-			Conns: []*config.RemoteHost{
-				{
-					Address: "*internal",
-				},
-				{
-					Address:   ":2012",
-					Transport: utils.MetaJSON,
-					TLS:       true,
-				},
+			Conn: &config.RemoteHost{
+				Address: "*internal",
 			},
 		},
 	}

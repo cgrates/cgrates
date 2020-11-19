@@ -1135,7 +1135,7 @@ type TPDispatcherHost struct {
 	TPid   string
 	Tenant string
 	ID     string
-	Conns  []*TPDispatcherHostConn
+	Conn   *TPDispatcherHostConn
 }
 
 // TPDispatcherHostConn is used in TPDispatcherHost

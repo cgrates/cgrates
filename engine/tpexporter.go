@@ -296,10 +296,7 @@ func (self *TPExporter) Run() error {
 		return err
 	}
 	for _, sd := range storDataDispatcherHosts {
-		sdModels := APItoModelTPDispatcherHost(sd)
-		for _, sdModel := range sdModels {
-			toExportMap[utils.DispatcherHostsCsv] = append(toExportMap[utils.DispatcherHostsCsv], sdModel)
-		}
+		toExportMap[utils.DispatcherHostsCsv] = append(toExportMap[utils.DispatcherHostsCsv], APItoModelTPDispatcherHost(sd))
 	}
 
 	for fileName, storData := range toExportMap {

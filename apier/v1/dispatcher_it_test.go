@@ -266,15 +266,8 @@ func testDispatcherSSetDispatcherHost(t *testing.T) {
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			ID:     "DspHst1",
-			Conns: []*config.RemoteHost{
-				{
-					Address: "*internal",
-				},
-				{
-					Address:   ":2012",
-					Transport: utils.MetaJSON,
-					TLS:       true,
-				},
+			Conn: &config.RemoteHost{
+				Address: "*internal",
 			},
 		},
 	}
@@ -316,11 +309,11 @@ func testDispatcherSGetDispatcherHostIDs(t *testing.T) {
 
 func testDispatcherSUpdateDispatcherHost(t *testing.T) {
 	var result string
-	dispatcherHost.Conns = append(dispatcherHost.Conns, &config.RemoteHost{
+	dispatcherHost.Conn = &config.RemoteHost{
 		Address:   ":4012",
 		Transport: utils.MetaGOB,
 		TLS:       false,
-	})
+	}
 	if err := dispatcherRPC.Call(utils.APIerSv1SetDispatcherHost,
 		dispatcherHost, &result); err != nil {
 		t.Error(err)
@@ -427,15 +420,8 @@ func testDispatcherSSetDispatcherHostWithoutTenant(t *testing.T) {
 	dispatcherHost = &DispatcherHostWithCache{
 		DispatcherHost: &engine.DispatcherHost{
 			ID: "DspHst7",
-			Conns: []*config.RemoteHost{
-				{
-					Address: "*internal",
-				},
-				{
-					Address:   ":2012",
-					Transport: utils.MetaJSON,
-					TLS:       true,
-				},
+			Conn: &config.RemoteHost{
+				Address: "*internal",
 			},
 		},
 	}

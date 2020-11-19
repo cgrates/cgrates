@@ -1501,27 +1501,17 @@ func TestLoadDispatcherHosts(t *testing.T) {
 		TPid:   testTPID,
 		Tenant: "cgrates.org",
 		ID:     "ALL1",
-		Conns: []*utils.TPDispatcherHostConn{
-			{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-				TLS:       true,
-			},
-			{
-				Address:   "127.0.0.1:3012",
-				Transport: utils.MetaJSON,
-				TLS:       false,
-			},
+		Conn: &utils.TPDispatcherHostConn{
+			Address:   "127.0.0.1:2012",
+			Transport: utils.MetaJSON,
+			TLS:       true,
 		},
 	}
 
 	dphKey := utils.TenantID{Tenant: "cgrates.org", ID: "ALL1"}
 	if len(csvr.dispatcherHosts) != 1 {
-		t.Fatalf("Failed to load chargerProfiles: %s", utils.ToIJSON(csvr.chargerProfiles))
+		t.Fatalf("Failed to load DispatcherHosts: %v", len(csvr.dispatcherHosts))
 	}
-	sort.Slice(csvr.dispatcherHosts[dphKey].Conns, func(i, j int) bool {
-		return strings.Compare(csvr.dispatcherHosts[dphKey].Conns[i].Address, csvr.dispatcherHosts[dphKey].Conns[j].Address) == -1
-	})
 	if !reflect.DeepEqual(eDispatcherHosts, csvr.dispatcherHosts[dphKey]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eDispatcherHosts), utils.ToJSON(csvr.dispatcherHosts[dphKey]))
 	}

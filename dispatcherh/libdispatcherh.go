@@ -86,11 +86,11 @@ func (rhc *RegisterHostCfg) AsDispatcherHost(tnt, ip string) *engine.DispatcherH
 	return &engine.DispatcherHost{
 		Tenant: tnt,
 		ID:     rhc.ID,
-		Conns: []*config.RemoteHost{{
+		Conn: &config.RemoteHost{
 			Address:   ip + ":" + rhc.Port,
 			Transport: rhc.Transport,
 			TLS:       rhc.TLS,
-		}},
+		},
 	}
 }
 
