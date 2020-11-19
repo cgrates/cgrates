@@ -25,6 +25,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -59,6 +60,10 @@ var (
 		testHttpHandlerConfigSForFile,
 		testHttpHandlerConfigSForNotExistFolder,
 		testHttpHandlerConfigSForFolder,
+		testLoadConfigFromPathInvalidArgument,
+		testLoadConfigFromPathValidPath,
+		testLoadConfigFromFolderFileNotFound,
+		testLoadConfigFromFolderNoConfigFound,
 	}
 )
 
@@ -987,5 +992,70 @@ func testHttpHandlerConfigSForFolder(t *testing.T) {
 	// we compare the length of the string because flags is a map and we receive it in different order
 	if len(str) != len(string(body)) {
 		t.Errorf("Expected %s ,\n\n received: %s ", str, string(body))
+	}
+}
+
+func testLoadConfigFromFolderFileNotFound(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := "file </usr/share/cgrates/conf/samples/docker/cgrates.json>:NOT_FOUND:ENV_VAR:DOCKER_IP"
+	if err = cfg.loadConfigFromFolder("/usr/share/cgrates/conf/samples/",
+		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
+		false); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func testLoadConfigFromFolderNoConfigFound(t *testing.T) {
+	newDir := "/tmp/[]"
+	if err = os.MkdirAll(newDir, 755); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = cfg.loadConfigFromFolder(newDir,
+		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
+		false); err == nil || err != filepath.ErrBadPattern {
+		t.Errorf("Expected %+v, received %+v", filepath.ErrBadPattern, err)
+	}
+	if err = os.RemoveAll(newDir); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testLoadConfigFromPathInvalidArgument(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := "stat /\x00: invalid argument"
+	if err = cfg.loadConfigFromPath("/\x00",
+		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
+		false); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func testLoadConfigFromPathValidPath(t *testing.T) {
+	newDir := "/usr/share/cgrates/conf/samples/diamagent_internal/randomDir"
+	if err = os.MkdirAll(newDir, 755); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := "No config file found on path /usr/share/cgrates/conf/samples/diamagent_internal/randomDir"
+	if err = cfg.loadConfigFromPath("/usr/share/cgrates/conf/samples/diamagent_internal/randomDir",
+		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
+		false); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	if err = os.RemoveAll(newDir); err != nil {
+		t.Fatal(err)
 	}
 }
