@@ -39,7 +39,7 @@ var (
 		testV1RouteSWithRateSRpcConn,
 		testV1RouteSWithRateSFromFolder,
 		testV1RouteSWithRateSGetRoutes,
-		//testV1RouteSWithRateSAccountWithRateProfile, //need to be discussed
+		testV1RouteSWithRateSAccountWithRateProfile, //need to be discussed
 		testV1RouteSWithRateSStopEngine,
 	}
 )
@@ -165,7 +165,6 @@ func testV1RouteSWithRateSGetRoutes(t *testing.T) {
 	}
 }
 
-/*
 func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 	routePrf = &RouteWithCache{
 		RouteProfile: &engine.RouteProfile{
@@ -250,10 +249,10 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 			{
 				RouteID: "RouteWithAccAndRatePrf",
 				SortingData: map[string]interface{}{
-					utils.Account: "AccWithVoice",
-					"Cost":        0.0,
-					"MaxUsage":    30000000000.0,
-					utils.Weight:  20.0,
+					utils.Account:     "AccWithVoice",
+					utils.Cost:        0.0,
+					utils.CapMaxUsage: 30000000000.0,
+					utils.Weight:      20.0,
 				},
 			},
 			{
@@ -302,8 +301,8 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 				RouteID: "RouteWithAccAndRatePrf",
 				SortingData: map[string]interface{}{
 					utils.Account:            "AccWithVoice",
-					"Cost":                   0.6,
-					"MaxUsage":               30000000000.0,
+					utils.Cost:               0.6,
+					utils.CapMaxUsage:        30000000000.0,
 					utils.RateProfileMatched: "RT_ANY2CNT_SEC",
 					utils.Weight:             20.0,
 				},
@@ -311,7 +310,7 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 			{
 				RouteID: "RouteWithRP",
 				SortingData: map[string]interface{}{
-					"Cost":                   0.6,
+					utils.Cost:               0.6,
 					utils.RateProfileMatched: "RT_ANY1CNT_SEC",
 					utils.Weight:             10.0,
 				},
@@ -363,7 +362,7 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 				SortingData: map[string]interface{}{
 					utils.Account:            "AccWithVoice",
 					utils.Cost:               0.62,
-					"MaxUsage":               30000000000.0,
+					utils.CapMaxUsage:        30000000000.0,
 					utils.RateProfileMatched: "RT_ANY2CNT_SEC",
 					utils.Weight:             20.0,
 				},
@@ -380,7 +379,6 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 	}
 
 }
-*/
 
 func testV1RouteSWithRateSStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {

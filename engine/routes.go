@@ -262,8 +262,8 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 			}
 			if usage > accountMaxUsage {
 				// remain usage needs to be covered by rating plans
-				if len(rpIDs) == 0 {
-					return nil, fmt.Errorf("no rating plans defined for remaining usage")
+				if len(rpIDs) == 0 && len(rtPrfIDs) == 0 {
+					return nil, fmt.Errorf("no rating plans or rate profiles defined for remaining usage")
 				}
 				// update the setup time and the usage
 				sTime = sTime.Add(accountMaxUsage)
@@ -278,7 +278,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 
 	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
 		var rateRply RateProfileCost
-		if len(rpS.cgrcfg.RouteSCfg().RateSConns) != 0 && len(rtPrfIDs) != 0 {
+		if len(rpS.cgrcfg.RouteSCfg().RateSConns) != 0 {
 			if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RateSConns, nil, utils.RateSv1CostForEvent,
 				&utils.ArgsCostForEvent{
 					RateProfileIDs: rtPrfIDs,
