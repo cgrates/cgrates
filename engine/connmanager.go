@@ -136,7 +136,7 @@ func (cM *ConnManager) Call(connIDs []string, biRPCClient rpcclient.ClientConnec
 		if conn, err = cM.getConn(connID, biRPCClient); err != nil {
 			continue
 		}
-		if err = conn.Call(method, arg, reply); utils.IsNetworkError(err) {
+		if err = conn.Call(method, arg, reply); rpcclient.IsNetworkError(err) {
 			continue
 		} else {
 			return

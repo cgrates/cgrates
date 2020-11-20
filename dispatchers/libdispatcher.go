@@ -24,8 +24,10 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func init() {
@@ -93,12 +95,14 @@ func newDispatcher(dm *engine.DataManager, pfl *engine.DispatcherProfile) (d Dis
 			hosts:    hosts,
 			strategy: strDsp,
 		}
-	case utils.MetaBroadcast:
+	case rpcclient.PoolBroadcast,
+		rpcclient.PoolBroadcastSync,
+		rpcclient.PoolBroadcastAsync:
 		d = &WeightDispatcher{
 			dm:       dm,
 			tnt:      pfl.Tenant,
 			hosts:    hosts,
-			strategy: new(brodcastStrategyDispatcher),
+			strategy: &broadcastStrategyDispatcher{strategy: pfl.Strategy},
 		}
 	default:
 		err = fmt.Errorf("unsupported dispatch strategy: <%s>", pfl.Strategy)
@@ -223,7 +227,7 @@ func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID 
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
 			routeID); ok && x != nil {
 			dH = x.(*engine.DispatcherHost)
-			if err = dH.Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
+			if err = dH.Call(serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
 				return
 			}
 		}
@@ -241,7 +245,7 @@ func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID 
 			return
 		}
 		called = true
-		if err = dH.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
+		if err = dH.Call(serviceMethod, args, reply); rpcclient.IsNetworkError(err) {
 			continue
 		}
 		if routeID != utils.EmptyString { // cache the discovered route
@@ -259,12 +263,14 @@ func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID 
 	return
 }
 
-type brodcastStrategyDispatcher struct{}
+type broadcastStrategyDispatcher struct {
+	strategy string
+}
 
-func (*brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string, hostIDs []string,
+func (b *broadcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string, hostIDs []string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
-	var hasErrors bool
-	var called bool
+	var hasHosts bool
+	pool := rpcclient.NewRPCPool(b.strategy, config.CgrConfig().GeneralCfg().ReplyTimeout)
 	for _, hostID := range hostIDs {
 		var dH *engine.DispatcherHost
 		if dH, err = dm.GetDispatcherHost(tnt, hostID, true, true, utils.NonTransactional); err != nil {
@@ -274,27 +280,15 @@ func (*brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID stri
 				err = nil
 				continue
 			}
-			err = utils.NewErrDispatcherS(err)
-			return
+			return utils.NewErrDispatcherS(err)
 		}
-		called = true
-		if err = dH.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
-			utils.Logger.Err(fmt.Sprintf("<%s> network error: <%s> at %s strategy for hostID %q",
-				utils.DispatcherS, err.Error(), utils.MetaBroadcast, hostID))
-			hasErrors = true
-		} else if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s> at %s strategy for hostID %q",
-				utils.DispatcherS, err.Error(), utils.MetaBroadcast, hostID))
-			hasErrors = true
-		}
+		hasHosts = true
+		pool.AddClient(dH)
 	}
-	if hasErrors { // rewrite err if not all call were succesfull
-		return utils.ErrPartiallyExecuted
-	} else if !called { // in case we do not match any host
-		err = utils.ErrHostNotFound
-		return
+	if !hasHosts { // in case we do not match any host
+		return utils.ErrHostNotFound
 	}
-	return
+	return pool.Call(serviceMethod, args, reply)
 }
 
 func newSingleStrategyDispatcher(hosts engine.DispatcherHostProfiles, params map[string]interface{}, tntID string) (ls strategyDispatcher, err error) {
@@ -374,7 +368,7 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID strin
 			lM.incrementLoad(dH.ID, ld.tntID)
 			err = dH.Call(serviceMethod, args, reply)
 			lM.decrementLoad(dH.ID, ld.tntID) // call ended
-			if !utils.IsNetworkError(err) {
+			if !rpcclient.IsNetworkError(err) {
 				return
 			}
 		}
@@ -395,7 +389,7 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID strin
 		lM.incrementLoad(hostID, ld.tntID)
 		err = dH.Call(serviceMethod, args, reply)
 		lM.decrementLoad(hostID, ld.tntID) // call ended
-		if utils.IsNetworkError(err) {
+		if rpcclient.IsNetworkError(err) {
 			continue
 		}
 		if routeID != utils.EmptyString { // cache the discovered route

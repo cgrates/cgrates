@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var sTestsDspRsp = []func(t *testing.T){
@@ -193,7 +194,7 @@ func testDspResponderBroadcast(t *testing.T) {
 	allEngine.stopEngine(t)
 	pingReply = ""
 	if err := dispEngine.RPC.Call(utils.ResponderPing, pingEv, &pingReply); err == nil ||
-		err.Error() != utils.ErrPartiallyExecuted.Error() {
+		!rpcclient.IsNetworkError(err) {
 		t.Errorf("Expected error: %s received error: %v	 and reply %q", utils.ErrPartiallyExecuted.Error(), err, pingReply)
 	}
 	allEngine.startEngine(t)

@@ -21,8 +21,6 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"net"
-	"net/rpc"
 	"strings"
 )
 
@@ -249,26 +247,6 @@ func ErrPrefixNotErrNotImplemented(reason string) error {
 
 func ErrEnvNotFound(key string) error {
 	return ErrPrefix(ErrNotFound, "ENV_VAR:"+key)
-}
-
-// IsNetworkError will decide if an error is network generated or RPC one
-// used by Dispatcher to figure out whether it should try another connection
-func IsNetworkError(err error) bool {
-	if err == nil {
-		return false
-	}
-	if _, isNetError := err.(*net.OpError); isNetError { // connection reset
-		return true
-	}
-	if _, isDNSError := err.(*net.DNSError); isDNSError {
-		return true
-	}
-	return err.Error() == rpc.ErrShutdown.Error() ||
-		err.Error() == ErrReqUnsynchronized.Error() ||
-		err.Error() == ErrDisconnected.Error() ||
-		err.Error() == ErrReplyTimeout.Error() ||
-		err.Error() == ErrSessionNotFound.Error() ||
-		strings.HasPrefix(err.Error(), "rpc: can't find service")
 }
 
 func ErrPathNotReachable(path string) error {

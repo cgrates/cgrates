@@ -131,6 +131,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [CDRs] Replaced RSRField with RSRParser
   * [RouteS] Add new field RouteRateProfileIDs in RateProfiles.csv
   * [DispatcherS] Removed connection pool from DispatcherHost structure
+  * [DispatcherS] Updated *broadcast, *broadcast_sync and *broadcast_async to behave similar to RPCPool
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
