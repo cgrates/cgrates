@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"net/rpc"
 	"path"
 	"reflect"
@@ -53,6 +56,7 @@ var (
 		testActionsitThresholdPostEvent,
 		testActionsitSetSDestinations,
 		testActionsitresetAccountCDR,
+		testActionsitremoteSetAccount,
 		testActionsitStopCgrEngine,
 	}
 )
@@ -923,5 +927,67 @@ func testActionsitresetAccountCDR(t *testing.T) {
 func testActionsitStopCgrEngine(t *testing.T) {
 	if err := KillEngine(*waitRater); err != nil {
 		t.Error(err)
+	}
+}
+
+func testActionsitremoteSetAccount(t *testing.T) {
+	var reply string
+	account := "remote1234"
+	accID := utils.ConcatenatedKey("cgrates.org", account)
+	acc := &Account{
+		ID: accID,
+	}
+	exp := &Account{
+		ID: accID,
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: []*Balance{{
+				Value:  20,
+				Weight: 10,
+			}},
+		},
+	}
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		accStr := utils.ToJSON(acc) + "\n"
+		val, err := ioutil.ReadAll(r.Body)
+		r.Body.Close()
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if string(val) != accStr {
+			t.Errorf("Expected %q,received: %q", accStr, string(val))
+			return
+		}
+		rw.Write([]byte(utils.ToJSON(exp)))
+	}))
+
+	defer ts.Close()
+	attrsAA := &utils.AttrSetActions{
+		ActionsId: "remoteSetAccountCDR",
+		Actions: []*utils.TPAction{
+			{Identifier: utils.MetaRemoteSetAccount, ExtraParameters: ts.URL, Weight: 20.0},
+		},
+	}
+	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
+	}
+
+	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: account, ActionsId: attrsAA.ActionsId}
+	if err := actsLclRpc.Call(utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+		t.Error("Got error on APIerSv1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
+	}
+
+	var acc2 Account
+	attrs2 := &utils.AttrGetAccount{Account: account}
+	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc2); err != nil {
+		t.Fatal("Got error on APIerSv1.GetAccount: ", err.Error())
+	}
+	acc2.UpdateTime = exp.UpdateTime
+	if utils.ToJSON(exp) != utils.ToJSON(acc2) {
+		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(acc2))
 	}
 }

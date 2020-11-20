@@ -19,6 +19,9 @@ package engine
 
 import (
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
@@ -2625,13 +2628,13 @@ func TestCdrLogAction(t *testing.T) {
 	acc := &Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 20},
 			},
 		},
 		UnitCounters: UnitCounters{
 			utils.MONETARY: []*UnitCounter{
-				&UnitCounter{
+				{
 					Counters: CounterFilters{
 						&CounterFilter{Value: 1},
 					},
@@ -2699,6 +2702,71 @@ func TestCdrLogAction(t *testing.T) {
 	if !reflect.DeepEqual(expCgrEv, mock.args.CGREvent) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expCgrEv), utils.ToJSON(mock.args.CGREvent))
 	}
+}
+
+func TestRemoteSetAccountAction(t *testing.T) {
+	expError := `Post "127.1.0.11//": unsupported protocol scheme ""`
+	if err = remoteSetAccount(nil, &Action{ExtraParameters: "127.1.0.11//"}, nil, nil); err == nil ||
+		err.Error() != expError {
+		t.Fatalf("Expected error: %s, received: %v", expError, err)
+	}
+	expError = `json: unsupported type: func()`
+	if err = remoteSetAccount(&Account{
+		ActionTriggers: ActionTriggers{{
+			Balance: &BalanceFilter{
+				Value: &utils.ValueFormula{
+					Params: map[string]interface{}{utils.VOICE: func() {}},
+				},
+			},
+		}},
+	}, &Action{ExtraParameters: "127.1.0.11//"}, nil, nil); err == nil ||
+		err.Error() != expError {
+		t.Fatalf("Expected error: %s, received: %v", expError, err)
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { rw.Write([]byte("5")) }))
+	acc := &Account{ID: "1001"}
+	expError = `json: cannot unmarshal number into Go value of type engine.Account`
+	if err = remoteSetAccount(acc, &Action{ExtraParameters: ts.URL}, nil, nil); err == nil ||
+		err.Error() != expError {
+		t.Fatalf("Expected error: %s, received: %v", expError, err)
+	}
+	exp := &Account{ID: "1001"}
+	if !reflect.DeepEqual(exp, acc) {
+		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(acc))
+	}
+	ts.Close()
+
+	acc = &Account{ID: "1001"}
+	exp = &Account{
+		ID: "1001",
+		BalanceMap: map[string]Balances{
+			utils.META_VOICE: {{
+				ID:    "money",
+				Value: 15,
+			}},
+		},
+	}
+	ts = httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		accStr := utils.ToJSON(acc) + "\n"
+		val, err := ioutil.ReadAll(r.Body)
+		r.Body.Close()
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if string(val) != accStr {
+			t.Errorf("Expected %q,received: %q", accStr, string(val))
+			return
+		}
+		rw.Write([]byte(utils.ToJSON(exp)))
+	}))
+	if err = remoteSetAccount(acc, &Action{ExtraParameters: ts.URL}, nil, nil); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, acc) {
+		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(acc))
+	}
+	ts.Close()
 }
 
 /**************** Benchmarks ********************************/

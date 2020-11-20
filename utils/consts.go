@@ -1002,6 +1002,7 @@ const (
 	MetaCDRAccount            = "*reset_account_cdr"
 	MetaResetThreshold        = "*reset_threshold"
 	MetaResetStatQueue        = "*reset_stat_queue"
+	MetaRemoteSetAccount      = "*remote_set_account"
 	ActionID                  = "ActionID"
 	ActionType                = "ActionType"
 	ActionValue               = "ActionValue"

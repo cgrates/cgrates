@@ -106,6 +106,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.MetaExport:                export,
 		utils.MetaResetThreshold:        resetThreshold,
 		utils.MetaResetStatQueue:        resetStatQueue,
+		utils.MetaRemoteSetAccount:      remoteSetAccount,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -1068,4 +1069,25 @@ func resetStatQueue(ub *Account, a *Action, acs Actions, extraData interface{}) 
 	var rply string
 	return connMgr.Call(config.CgrConfig().SchedulerCfg().StatSConns, nil,
 		utils.StatSv1ResetStatQueue, args, &rply)
+}
+
+func remoteSetAccount(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+	client := &http.Client{Transport: httpPstrTransport}
+	var resp *http.Response
+	req := new(bytes.Buffer)
+	if err = json.NewEncoder(req).Encode(ub); err != nil {
+		return
+	}
+	if resp, err = client.Post(a.ExtraParameters, "application/json", req); err != nil {
+		return
+	}
+	acc := new(Account)
+	err = json.NewDecoder(resp.Body).Decode(acc)
+	if err != nil {
+		return
+	}
+	if len(acc.BalanceMap) != 0 {
+		*ub = *acc
+	}
+	return
 }
