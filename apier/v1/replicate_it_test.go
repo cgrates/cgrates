@@ -718,8 +718,8 @@ func testInternalReplicateITFilter(t *testing.T) {
 			ID:     "Filter1",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.MetaString,
-					Type:    "~Account",
+					Element: "~*req.Account",
+					Type:    utils.MetaString,
 					Values:  []string{"1001", "1002"},
 				},
 			},

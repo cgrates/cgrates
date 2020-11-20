@@ -125,8 +125,8 @@ func testFilterSetFilter(t *testing.T) {
 			ID:     "Filter1",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.MetaString,
-					Type:    "~Account",
+					Element: "~*req.Account",
+					Type:    utils.MetaString,
 					Values:  []string{"1001", "1002"},
 				},
 			},
@@ -172,13 +172,13 @@ func testFilterGetFilterAfterSet(t *testing.T) {
 func testFilterUpdateFilter(t *testing.T) {
 	filter.Rules = []*engine.FilterRule{
 		{
-			Element: utils.MetaString,
-			Type:    "~Account",
+			Element: "~*req.Account",
+			Type:    utils.MetaString,
 			Values:  []string{"1001", "1002"},
 		},
 		{
-			Element: utils.MetaPrefix,
-			Type:    "~Destination",
+			Element: "~*req.Destination",
+			Type:    utils.MetaPrefix,
 			Values:  []string{"10", "20"},
 		},
 	}
@@ -231,8 +231,8 @@ func testFilterSetFilterWithoutTenant(t *testing.T) {
 			ID: "FilterWithoutTenant",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.MetaString,
-					Type:    "~Account",
+					Element: "~*req.Account",
+					Type:    utils.MetaString,
 					Values:  []string{"1001", "1002"},
 				},
 			},
