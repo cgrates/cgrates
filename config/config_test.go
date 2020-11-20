@@ -5415,9 +5415,9 @@ func TestV1GetConfigAsJSONCoreS(t *testing.T) {
 func TestV1GetConfigAsJSONCheckConfigSanity(t *testing.T) {
 	var result string
 	args := `{
-		"chargers": {								
-	        "enabled": true,						
-            "attributes_conns": ["*internal"]				
+		"chargers": {
+	        "enabled": true,
+            "attributes_conns": ["*internal"]
     }
 }`
 	expected := `<AttributeS> not enabled but requested by <ChargerS> component.`

@@ -1561,10 +1561,9 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadArgs, reply *string) (err
 	} else {
 		err = cfg.reloadSections(args.Section)
 	}
-	if err != nil {
-		return
+	if err == nil {
+		*reply = utils.OK
 	}
-	*reply = utils.OK
 	return
 }
 
