@@ -204,9 +204,15 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 	for accID := range at.accountIDs {
 		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 			acc, err := dm.GetAccount(accID)
-			if err != nil {
-				utils.Logger.Warning(fmt.Sprintf("Could not get account id: %s. Skipping!", accID))
-				return 0, err
+			if err != nil { // create account
+				if err != utils.ErrNotFound {
+					utils.Logger.Warning(fmt.Sprintf("Could not get account id: %s. Skipping!", accID))
+					return 0, err
+				}
+				err = nil
+				acc = &Account{
+					ID: accID,
+				}
 			}
 			transactionFailed := false
 			removeAccountActionFound := false
