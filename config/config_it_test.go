@@ -53,6 +53,9 @@ var (
 		testCGRConfigReloadDNSAgent,
 		testCGRConfigReloadFreeswitchAgent,
 		testCgrCfgV1ReloadConfigSection,
+		testCGRConfigV1ReloadConfigFromPathInvalidSection,
+		testV1ReloadConfigFromPathConfigSanity,
+		testLoadConfigFromHTTPValidURL,
 		testCGRConfigReloadConfigFromJSONSessionS,
 		testCGRConfigReloadConfigFromStringSessionS,
 		testCGRConfigReloadAll,
@@ -62,6 +65,7 @@ var (
 		testHttpHandlerConfigSForFolder,
 		testLoadConfigFromPathInvalidArgument,
 		testLoadConfigFromPathValidPath,
+		testLoadConfigFromPathFile,
 		testLoadConfigFromFolderFileNotFound,
 		testLoadConfigFromFolderNoConfigFound,
 	}
@@ -283,12 +287,58 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
 		AttributeSConns:     []string{},
+		RateSConns:          []string{},
 		RALsConns:           []string{},
 		IndexedSelects:      true,
 		DefaultRatio:        1,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RouteSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RouteSCfg()))
+	}
+}
+
+func testCGRConfigV1ReloadConfigFromPathInvalidSection(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	expectedErr := "Invalid section: <InvalidSection>"
+	var reply string
+	if err := cfg.V1ReloadConfig(&ConfigReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
+		Section: "InvalidSection",
+	}, &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v. received %+v", expectedErr, err)
+	}
+
+	expectedErr = utils.NewErrMandatoryIeMissing("Path").Error()
+	if err := cfg.V1ReloadConfig(&ConfigReloadArgs{
+		Section: "InvalidSection",
+	}, &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v. received %+v", expectedErr, err)
+	}
+}
+
+func testV1ReloadConfigFromPathConfigSanity(t *testing.T) {
+	expectedErr := "<AttributeS> not enabled but requested by <ChargerS> component."
+	var reply string
+	if cfg, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err := cfg.V1ReloadConfig(&ConfigReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutinternal"),
+		Section: ChargerSCfgJson}, &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func testLoadConfigFromHTTPValidURL(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	url := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json"
+	if err := cfg.loadConfigFromHTTP(url, nil); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -1041,6 +1091,26 @@ func testLoadConfigFromPathInvalidArgument(t *testing.T) {
 }
 
 func testLoadConfigFromPathValidPath(t *testing.T) {
+	newDir := "/usr/share/cgrates/conf/samples/diamagent_internal/randomDir"
+	if err = os.MkdirAll(newDir, 755); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := "No config file found on path /usr/share/cgrates/conf/samples/diamagent_internal/randomDir"
+	if err = cfg.loadConfigFromPath("/usr/share/cgrates/conf/samples/diamagent_internal/randomDir",
+		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
+		false); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	if err = os.RemoveAll(newDir); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testLoadConfigFromPathFile(t *testing.T) {
 	newDir := "/usr/share/cgrates/conf/samples/diamagent_internal/randomDir"
 	if err = os.MkdirAll(newDir, 755); err != nil {
 		t.Fatal(err)
