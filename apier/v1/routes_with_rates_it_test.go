@@ -39,7 +39,8 @@ var (
 		testV1RouteSWithRateSRpcConn,
 		testV1RouteSWithRateSFromFolder,
 		testV1RouteSWithRateSGetRoutes,
-		testV1RouteSWithRateSAccountWithRateProfile, //need to be discussed
+		testV1RouteSWithRateSAccountWithRateProfile,
+		testV1RouteSWithRateSWithEmptyRateProfileIDs,
 		testV1RouteSWithRateSStopEngine,
 	}
 )
@@ -380,6 +381,86 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 
 }
 
+func testV1RouteSWithRateSWithEmptyRateProfileIDs(t *testing.T) {
+	routePrf = &RouteWithCache{
+		RouteProfile: &engine.RouteProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RouteWithEmptyRatePRofileIDs",
+			FilterIDs: []string{"*string:~*req.EventName:testV1RouteSWithRateSWithEmptyRateProfileIDs"},
+			Sorting:   utils.MetaLC,
+			Routes: []*engine.Route{
+				{
+					ID:             "Route1",
+					RateProfileIDs: []string{"RT_ANY2CNT_SEC"},
+					Weight:         20,
+				},
+				{
+					ID:             "RouteWithEmptyRP",
+					RateProfileIDs: []string{}, // we send empty RateProfileIDs and expected to match RT_DEFAULT
+					Weight:         10,
+				},
+			},
+			Weight: 100,
+		},
+	}
+
+	var result string
+	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	ev := &engine.ArgsGetRoutes{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testV1RouteSWithRateSGetRoutes",
+				Event: map[string]interface{}{
+					utils.Account:     "1003",
+					utils.Subject:     "1003",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+					utils.Usage:       "1m20s",
+					"EventName":       "testV1RouteSWithRateSWithEmptyRateProfileIDs",
+				},
+			},
+		},
+	}
+
+	expRoutes := engine.SortedRoutes{
+		ProfileID: "RouteWithEmptyRatePRofileIDs",
+		Sorting:   utils.MetaLC,
+		Count:     2,
+		SortedRoutes: []*engine.SortedRoute{
+			{
+				RouteID: "RouteWithEmptyRP",
+				SortingData: map[string]interface{}{
+					utils.Cost:               0.1333333333333334,
+					utils.RateProfileMatched: "RT_DEFAULT",
+					utils.Weight:             10.0,
+				},
+			},
+			{
+				RouteID: "Route1",
+				SortingData: map[string]interface{}{
+					utils.Cost:               1.6,
+					utils.RateProfileMatched: "RT_ANY2CNT_SEC",
+					utils.Weight:             20.0,
+				},
+			},
+		},
+	}
+	var routesReply engine.SortedRoutes
+	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
+		ev, &routesReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expRoutes, routesReply) {
+		t.Errorf("Expecting: %s, \n received: %s",
+			utils.ToJSON(expRoutes), utils.ToJSON(routesReply))
+	}
+
+}
 func testV1RouteSWithRateSStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)

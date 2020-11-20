@@ -4,4 +4,5 @@ cgrates.org,RT_RETAIL1,,,0,0,*up,4,0,0,*free,RT_ALWAYS,,"* * * * *",0,false,0s,0
 cgrates.org,RT_RETAIL1,,,,,,,,,,RT_ALWAYS,,"* * * * *",0,false,1m,0.2,1m,10s
 cgrates.org,RT_ANY2CNT_SEC,,,0,0,*up,4,0,0,*free,RT_ALWAYS,,"* * * * *",0,false,0s,0.02,1s,1s
 cgrates.org,RT_ANY1CNT_SEC,,,0,0,*up,4,0,0,*free,RT_ALWAYS,,"* * * * *",0,false,0s,0.01,1s,1s
+cgrates.org,RT_DEFAULT,,,20,0,*up,4,0,0,*free,RT_ALWAYS,,"* * * * *",0,false,0s,0.10,1m,10s
 
