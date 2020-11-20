@@ -262,8 +262,8 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 			}
 			if usage > accountMaxUsage {
 				// remain usage needs to be covered by rating plans
-				if len(rpIDs) == 0 && len(rtPrfIDs) == 0 {
-					return nil, fmt.Errorf("no rating plans or rate profiles defined for remaining usage")
+				if len(rpIDs) == 0 && len(rpS.cgrcfg.RouteSCfg().RateSConns) == 0 {
+					return nil, fmt.Errorf("no rating plans or no connection to RateS defined for remaining usage")
 				}
 				// update the setup time and the usage
 				sTime = sTime.Add(accountMaxUsage)
@@ -420,7 +420,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 		RouteParameters: route.RouteParameters,
 	}
 	//calculate costData if we have fields
-	if len(route.AccountIDs) != 0 || len(route.RatingPlanIDs) != 0 || len(route.RateProfileIDs) != 0 {
+	if len(route.AccountIDs) != 0 || len(route.RatingPlanIDs) != 0 || len(rpS.cgrcfg.RouteSCfg().RateSConns) != 0 {
 		costData, err := rpS.costForEvent(ev, route.AccountIDs, route.RatingPlanIDs, route.RateProfileIDs)
 		if err != nil {
 			if extraOpts.ignoreErrors {
