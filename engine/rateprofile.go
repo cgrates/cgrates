@@ -167,10 +167,10 @@ type RateSInterval struct {
 
 type RateSIncrement struct {
 	UsageStart        time.Duration
-	Usage             time.Duration
 	Rate              *Rate
 	IntervalRateIndex int
 	CompressFactor    int64
+	Usage             time.Duration
 
 	cost *decimal.Big // unexported total increment cost
 }

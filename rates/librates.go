@@ -195,25 +195,29 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 		iRtUsageSIdx := intervalStart
 		iRtUsageEIdx := rtUsageEIdx
 		for j, iRt := range rt.IntervalRates {
+			//fmt.Printf("ivalStart: %v, ivalEnd: %v, rtID: %s, increment idx: %d, iRtUsageSIdx: %+v, iRtUsageEIdx: %+v, iRt: %s\n",
+			//	intervalStart, rtUsageEIdx, rt.ID, j, iRtUsageSIdx, iRtUsageEIdx, utils.ToIJSON(iRt))
 			if iRtUsageSIdx >= rtUsageEIdx { // charged enough for interval
 				break
 			}
 			// make sure we bill from start
-			if j == 0 && iRt.IntervalStart > iRtUsageSIdx {
-				return nil, fmt.Errorf("intervalStart for rate: <%s> higher than usage: %v",
-					rt.UID(), iRtUsageSIdx)
-			}
 			if iRt.IntervalStart > iRtUsageSIdx {
-				break // we are past the start
+				if j == 0 {
+					return nil, fmt.Errorf("intervalStart for rate: <%s> higher than usage: %v",
+						rt.UID(), iRtUsageSIdx)
+				}
+				break // we are pass the start
 			}
 			isLastIRt := j == len(rt.IntervalRates)-1
 			if !isLastIRt && rt.IntervalRates[j+1].IntervalStart <= iRtUsageSIdx {
 				continue // the next interval changes the rating
 			}
-			if !isLastIRt {
-				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart
-			} else {
+			if isLastIRt {
 				iRtUsageEIdx = rtUsageEIdx
+			} else if rt.IntervalRates[j+1].IntervalStart > rtUsageEIdx {
+				iRtUsageEIdx = rtUsageEIdx
+			} else {
+				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart
 			}
 			if iRtUsageEIdx == time.Duration(0) {
 				return nil, fmt.Errorf("zero usage to be charged with rate: <%s>", rt.UID())
@@ -243,8 +247,13 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 			iRtUsageSIdx += iRtUsage
 
 		}
+		usageStart := intervalStart
+		intervalStart = rtUsageEIdx // continue for the next interval
+		if len(rIcmts) == 0 {       // no match found
+			continue
+		}
 		rIvl := &engine.RateSInterval{
-			UsageStart:     intervalStart,
+			UsageStart:     usageStart,
 			Increments:     rIcmts,
 			CompressFactor: 1}
 		if len(rtIvls) != 0 && rIvl.CompressEquals(rtIvls[len(rtIvls)-1]) {
@@ -255,7 +264,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 		if iRtUsageSIdx >= totalUsage { // charged enough for the usage
 			break
 		}
-		intervalStart = rtUsageEIdx // continue for the next interval
+
 	}
 	return
 }

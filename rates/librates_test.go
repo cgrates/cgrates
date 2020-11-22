@@ -1822,7 +1822,6 @@ func TestComputeRateSIntervals1(t *testing.T) {
 	}
 }
 
-/*
 func TestComputeRateSIntervals2(t *testing.T) {
 	rt0 := &engine.Rate{
 		ID:              "RATE0",
@@ -1886,10 +1885,10 @@ func TestComputeRateSIntervals2(t *testing.T) {
 			Increments: []*engine.RateSIncrement{
 				{
 					UsageStart:        0,
-					Usage:             time.Minute,
 					Rate:              rt0,
 					IntervalRateIndex: 0,
 					CompressFactor:    45,
+					Usage:             45 * time.Minute,
 				},
 			},
 			CompressFactor: 1,
@@ -1899,10 +1898,10 @@ func TestComputeRateSIntervals2(t *testing.T) {
 			Increments: []*engine.RateSIncrement{
 				{
 					UsageStart:        45 * time.Minute,
-					Usage:             time.Minute,
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    5,
+					Usage:             5 * time.Minute,
 				},
 			},
 			CompressFactor: 1,
@@ -1912,10 +1911,10 @@ func TestComputeRateSIntervals2(t *testing.T) {
 			Increments: []*engine.RateSIncrement{
 				{
 					UsageStart:        50 * time.Minute,
-					Usage:             time.Minute,
 					Rate:              rt0,
 					IntervalRateIndex: 1,
 					CompressFactor:    10,
+					Usage:             10 * time.Minute,
 				},
 			},
 			CompressFactor: 1,
@@ -1933,4 +1932,3 @@ func TestComputeRateSIntervals2(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rcveRtIvls))
 	}
 }
-*/
