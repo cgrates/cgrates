@@ -340,11 +340,11 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfileV1To4() (attrPrf *v4Attrib
 			filterIDs := make([]string, 0)
 			//append false translate to  if FieldName exist do stuff
 			if attr.Append == false {
-				filterIDs = append(filterIDs, utils.MetaExists+":"+attr.FieldName+":")
+				filterIDs = append(filterIDs, utils.MetaExists+utils.CONCATENATED_KEY_SEP+attr.FieldName+utils.CONCATENATED_KEY_SEP)
 			}
 			//Initial not *any translate to if value of fieldName = initial do stuff
 			if attr.Initial != utils.META_ANY {
-				filterIDs = append(filterIDs, utils.MetaString+":"+attr.FieldName+":"+attr.Initial)
+				filterIDs = append(filterIDs, utils.MetaString+utils.CONCATENATED_KEY_SEP+attr.FieldName+utils.CONCATENATED_KEY_SEP+attr.Initial)
 			}
 			// create RSRParser
 			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, config.CgrConfig().GeneralCfg().RSRSep)

@@ -2575,7 +2575,7 @@ func TestTemplatesConfig(t *testing.T) {
 func TestConfigsConfig(t *testing.T) {
 	expected := &ConfigSCfg{
 		Enabled: false,
-		Url:     "/configs/",
+		URL:     "/configs/",
 		RootDir: "/var/spool/cgrates/configs",
 	}
 	cgrConfig, err := NewDefaultCGRConfig()
@@ -5690,7 +5690,7 @@ func TestRpcConnsDefaults(t *testing.T) {
 func TestCgrCfgJSONDefaultsConfigS(t *testing.T) {
 	eCfg := &ConfigSCfg{
 		Enabled: false,
-		Url:     "/configs/",
+		URL:     "/configs/",
 		RootDir: "/var/spool/cgrates/configs",
 	}
 	if !reflect.DeepEqual(cgrCfg.configSCfg, eCfg) {

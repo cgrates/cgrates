@@ -71,3 +71,13 @@ func (cS *CoreSCfg) AsMapInterface() map[string]interface{} {
 	}
 	return mp
 }
+
+// Clone returns a deep copy of CoreSCfg
+func (cS CoreSCfg) Clone() *CoreSCfg {
+	return &CoreSCfg{
+		Caps:              cS.Caps,
+		CapsStrategy:      cS.CapsStrategy,
+		CapsStatsInterval: cS.CapsStatsInterval,
+		ShutdownTimeout:   cS.ShutdownTimeout,
+	}
+}

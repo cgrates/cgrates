@@ -84,7 +84,7 @@ func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separ
 				}
 			}
 		}
-		if err = rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
+		if err = rp.loadFromJSONCfg(reqProcJsn, separator); err != nil {
 			return
 		}
 		if !haveID {

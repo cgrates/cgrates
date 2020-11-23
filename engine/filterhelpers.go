@@ -46,7 +46,7 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 			}
 			var sliceIDs []string
 			for _, id := range keysWithID {
-				sliceIDs = append(sliceIDs, strings.Split(id, ":")[1])
+				sliceIDs = append(sliceIDs, utils.SplitConcatenatedKey(id)[1])
 			}
 			itemIDs = utils.NewStringSet(sliceIDs)
 			return

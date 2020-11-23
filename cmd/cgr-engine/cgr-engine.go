@@ -522,7 +522,7 @@ func main() {
 		server.RegisterHttpFunc(cfg.HTTPCfg().DispatchersRegistrarURL, dispatcherh.Registar)
 	}
 	if cfg.ConfigSCfg().Enabled {
-		server.RegisterHttpFunc(cfg.ConfigSCfg().Url, config.HandlerConfigS)
+		server.RegisterHttpFunc(cfg.ConfigSCfg().URL, config.HandlerConfigS)
 	}
 	if *httpPprofPath != "" {
 		go server.RegisterProfiler(*httpPprofPath)

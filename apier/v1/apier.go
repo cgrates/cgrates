@@ -467,7 +467,7 @@ func (apierSv1 *APIerSv1) GetRatingProfileIDs(args *utils.PaginatorWithTenant, r
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.RATING_PROFILE_PREFIX + "*out:" + tnt + ":"
+	prfx := utils.RATING_PROFILE_PREFIX + "*out:" + tnt + utils.CONCATENATED_KEY_SEP
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err

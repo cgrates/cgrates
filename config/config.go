@@ -742,7 +742,7 @@ func (cfg *CGRConfig) loadAPIBanCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnAPIBanCfg, err = jsnCfg.ApiBanCfgJson(); err != nil {
 		return
 	}
-	return cfg.apiBanCfg.loadFromJsonCfg(jsnAPIBanCfg)
+	return cfg.apiBanCfg.loadFromJSONCfg(jsnAPIBanCfg)
 }
 
 // loadApierCfg loads the Apier section of the configuration
@@ -796,7 +796,7 @@ func (cfg *CGRConfig) loadSIPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnSIPAgentCfg, err = jsnCfg.SIPAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.sipAgentCfg.loadFromJsonCfg(jsnSIPAgentCfg, cfg.generalCfg.RSRSep)
+	return cfg.sipAgentCfg.loadFromJSONCfg(jsnSIPAgentCfg, cfg.generalCfg.RSRSep)
 }
 
 // loadTemplateSCfg loads the Template section of the configuration
@@ -820,7 +820,7 @@ func (cfg *CGRConfig) loadConfigSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnConfigSCfg, err = jsnCfg.ConfigSJsonCfg(); err != nil {
 		return
 	}
-	return cfg.configSCfg.loadFromJsonCfg(jsnConfigSCfg)
+	return cfg.configSCfg.loadFromJSONCfg(jsnConfigSCfg)
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload

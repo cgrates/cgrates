@@ -107,7 +107,7 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 					break
 				}
 			}
-			if err = rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
+			if err = rp.loadFromJSONCfg(reqProcJsn, separator); err != nil {
 				return
 			}
 			if !haveID {

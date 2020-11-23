@@ -275,16 +275,6 @@ func (prsr *RSRParser) Compile() (err error) {
 	return
 }
 
-// RegexpMatched will investigate whether we had at least one regexp match through the rules
-func (prsr *RSRParser) RegexpMatched() bool {
-	for _, rsrule := range prsr.rsrRules {
-		if rsrule.Matched {
-			return true
-		}
-	}
-	return false
-}
-
 // parseValue the field value from a string
 func (prsr *RSRParser) parseValue(value string) (out string, err error) {
 	for _, rsRule := range prsr.rsrRules {

@@ -52,7 +52,7 @@ func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.PaginatorWith
 	if tenant == utils.EmptyString {
 		tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.DispatcherProfilePrefix + tenant + ":"
+	prfx := utils.DispatcherProfilePrefix + tenant + utils.CONCATENATED_KEY_SEP
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -147,7 +147,7 @@ func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.PaginatorWithTen
 	if tenant == utils.EmptyString {
 		tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.DispatcherHostPrefix + tenant + ":"
+	prfx := utils.DispatcherHostPrefix + tenant + utils.CONCATENATED_KEY_SEP
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err

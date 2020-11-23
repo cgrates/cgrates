@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
+// SIPAgentCfg the config for the SIPAgent
 type SIPAgentCfg struct {
 	Enabled             bool
 	Listen              string
@@ -32,11 +32,10 @@ type SIPAgentCfg struct {
 	SessionSConns       []string
 	Timezone            string
 	RetransmissionTimer time.Duration // timeout replies if not reaching back
-	Templates           map[string][]*FCTemplate
 	RequestProcessors   []*RequestProcessor
 }
 
-func (da *SIPAgentCfg) loadFromJsonCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err error) {
+func (da *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -68,16 +67,6 @@ func (da *SIPAgentCfg) loadFromJsonCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 			return err
 		}
 	}
-	if jsnCfg.Templates != nil {
-		if da.Templates == nil {
-			da.Templates = make(map[string][]*FCTemplate)
-		}
-		for k, jsnTpls := range jsnCfg.Templates {
-			if da.Templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(jsnTpls, sep); err != nil {
-				return
-			}
-		}
-	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
 			rp := new(RequestProcessor)
@@ -89,7 +78,7 @@ func (da *SIPAgentCfg) loadFromJsonCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 					break
 				}
 			}
-			if err = rp.loadFromJsonCfg(reqProcJsn, sep); err != nil {
+			if err = rp.loadFromJSONCfg(reqProcJsn, sep); err != nil {
 				return
 			}
 			if !haveID {
@@ -100,6 +89,7 @@ func (da *SIPAgentCfg) loadFromJsonCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (da *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:             da.Enabled,
@@ -118,10 +108,9 @@ func (da *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]in
 	if da.SessionSConns != nil {
 		sessionSConns := make([]string, len(da.SessionSConns))
 		for i, item := range da.SessionSConns {
+			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
-			} else {
-				sessionSConns[i] = item
+				sessionSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns

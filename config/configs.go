@@ -29,12 +29,12 @@ import (
 // ConfigSCfg config for listening over http
 type ConfigSCfg struct {
 	Enabled bool
-	Url     string
+	URL     string
 	RootDir string
 }
 
-//loadFromJsonCfg loads Database config from JsonCfg
-func (cScfg *ConfigSCfg) loadFromJsonCfg(jsnCfg *ConfigSCfgJson) (err error) {
+// loadFromJSONCfg loads Database config from JsonCfg
+func (cScfg *ConfigSCfg) loadFromJSONCfg(jsnCfg *ConfigSCfgJson) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -42,7 +42,7 @@ func (cScfg *ConfigSCfg) loadFromJsonCfg(jsnCfg *ConfigSCfgJson) (err error) {
 		cScfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Url != nil {
-		cScfg.Url = *jsnCfg.Url
+		cScfg.URL = *jsnCfg.Url
 	}
 	if jsnCfg.Root_dir != nil {
 		cScfg.RootDir = *jsnCfg.Root_dir
@@ -50,7 +50,7 @@ func (cScfg *ConfigSCfg) loadFromJsonCfg(jsnCfg *ConfigSCfgJson) (err error) {
 	return
 }
 
-// RegisterConfigs handler for httpServer to register the configs
+// HandlerConfigS handler for httpServer to register the configs
 func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
@@ -113,11 +113,21 @@ func handleConfigSFile(path string, w http.ResponseWriter) {
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (cScfg *ConfigSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg: cScfg.Enabled,
-		utils.URLCfg:     cScfg.Url,
+		utils.URLCfg:     cScfg.URL,
 		utils.RootDirCfg: cScfg.RootDir,
 	}
 	return
+}
+
+// Clone returns a deep copy of ConfigSCfg
+func (cScfg *ConfigSCfg) Clone() *ConfigSCfg {
+	return &ConfigSCfg{
+		Enabled: cScfg.Enabled,
+		URL:     cScfg.URL,
+		RootDir: cScfg.RootDir,
+	}
 }
