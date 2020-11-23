@@ -1588,7 +1588,7 @@ func TestComputeRateSIntervals(t *testing.T) {
 			{
 				IntervalStart: 60 * time.Second,
 				Unit:          1 * time.Minute,
-				Increment:     1 * time.Second,
+				Increment:     1 * time.Second, // 0.00083
 				Value:         0.05,
 			},
 		},
@@ -1673,7 +1673,7 @@ func TestComputeRateSIntervals(t *testing.T) {
 		0, 130*time.Second); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRtIvls, rtIvls) {
-		t.Errorf("expecting: %+v, received: %+v", eRtIvls, rtIvls)
+		t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
 	}
 
 	rts = []*orderedRate{

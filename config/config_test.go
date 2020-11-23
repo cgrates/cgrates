@@ -5724,28 +5724,25 @@ func TestReloadSections(t *testing.T) {
 		SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson,
 		DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON, RouteSJson,
 		LoaderJson, DispatcherSJson, ApierS, EEsJson, SIPAgentJson, RateSJson, DispatcherHJson, AnalyzerCfgJson} {
-		if err := cfgCgr.reloadSections(section); err != nil {
-			t.Error(err)
-		} else {
+		cfgCgr.reloadSections(section)
+		// the chan should be populated
+		if len(cfgCgr.GetReloadChan(section)) != 1 {
+			t.Fatalf("Section <%s> reload didn't happen", section)
+		}
+		<-cfgCgr.GetReloadChan(section)
+		if subsystemsThatNeedDataDB.Has(section) {
 			// the chan should be populated
-			if len(cfgCgr.GetReloadChan(section)) != 1 {
-				t.Fatalf("Section <%s> reload didn't happen", section)
+			if len(cfgCgr.GetReloadChan(DATADB_JSN)) != 1 {
+				t.Fatalf("Section <%s> didn't reload the %s", section, DATADB_JSN)
 			}
-			<-cfgCgr.GetReloadChan(section)
-			if subsystemsThatNeedDataDB.Has(section) {
-				// the chan should be populated
-				if len(cfgCgr.GetReloadChan(DATADB_JSN)) != 1 {
-					t.Fatalf("Section <%s> didn't reload the %s", section, DATADB_JSN)
-				}
-				<-cfgCgr.GetReloadChan(DATADB_JSN)
+			<-cfgCgr.GetReloadChan(DATADB_JSN)
+		}
+		if subsystemsThatNeedStorDB.Has(section) {
+			// the chan should be populated
+			if len(cfgCgr.GetReloadChan(STORDB_JSN)) != 1 {
+				t.Fatalf("Section <%s> didn't reload the %s", section, STORDB_JSN)
 			}
-			if subsystemsThatNeedStorDB.Has(section) {
-				// the chan should be populated
-				if len(cfgCgr.GetReloadChan(STORDB_JSN)) != 1 {
-					t.Fatalf("Section <%s> didn't reload the %s", section, STORDB_JSN)
-				}
-				<-cfgCgr.GetReloadChan(STORDB_JSN)
-			}
+			<-cfgCgr.GetReloadChan(STORDB_JSN)
 		}
 	}
 }
@@ -5753,9 +5750,9 @@ func TestReloadSections(t *testing.T) {
 func TestReloadSectionsSpecialCase(t *testing.T) {
 	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := cgrCfg.reloadSections(RPCConnsJsonName, RALS_JSN); err != nil {
-		t.Error(err)
 	} else {
+		cgrCfg.reloadSections(RPCConnsJsonName, RALS_JSN)
+
 		// the chan should be populated
 		if len(cgrCfg.GetReloadChan(RPCConnsJsonName)) != 1 {
 			t.Fatalf("Section <%s> reload didn't happen", RPCConnsJsonName)
@@ -5777,15 +5774,6 @@ func TestReloadSectionsSpecialCase(t *testing.T) {
 			t.Fatalf("Section <%s> didn't reload the %s", RALS_JSN, STORDB_JSN)
 		}
 		<-cgrCfg.GetReloadChan(STORDB_JSN)
-	}
-}
-
-func TestReloadSectionsError(t *testing.T) {
-	expected := "Invalid section: <inexistentSection>"
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfgCgr.reloadSections("inexistentSection"); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 

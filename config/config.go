@@ -1280,10 +1280,9 @@ func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *C
 	} else if !fi.IsDir() && path != utils.CONFIG_PATH { // If config dir defined, needs to exist, not checking for default
 		return fmt.Errorf("path: %s not a directory", path)
 	}
-	if fi.IsDir() {
-		return cfg.loadConfigFromFolder(path, loadFuncs, envOff)
-	}
-	return
+
+	// safe to assume that path is a directory
+	return cfg.loadConfigFromFolder(path, loadFuncs, envOff)
 }
 
 func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCfg *CgrJsonCfg) error, envOff bool) (err error) {
@@ -1303,16 +1302,7 @@ func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCf
 			jsonFilesFound = true
 		}
 		for _, jsonFilePath := range cfgFiles {
-			var cfgFile *os.File
-			cfgFile, werr = os.Open(jsonFilePath)
-			if werr != nil {
-				return
-			}
-
-			werr = cfg.loadConfigFromReader(cfgFile, loadFuncs, envOff)
-			cfgFile.Close()
-			if werr != nil {
-				werr = fmt.Errorf("file <%s>:%s", jsonFilePath, werr.Error())
+			if werr = cfg.loadConfigFromFile(jsonFilePath, loadFuncs, envOff); werr != nil {
 				return
 			}
 		}
@@ -1322,6 +1312,22 @@ func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCf
 	}
 	if !jsonFilesFound {
 		return fmt.Errorf("No config file found on path %s", cfgDir)
+	}
+	return
+}
+
+// loadConfigFromFile loads the config from a file
+// extracted from a loadConfigFromFolder in order to test all cases
+func (cfg *CGRConfig) loadConfigFromFile(jsonFilePath string, loadFuncs []func(jsnCfg *CgrJsonCfg) error, envOff bool) (err error) {
+	var cfgFile *os.File
+	cfgFile, err = os.Open(jsonFilePath)
+	if err != nil {
+		return
+	}
+	err = cfg.loadConfigFromReader(cfgFile, loadFuncs, envOff)
+	cfgFile.Close()
+	if err != nil {
+		err = fmt.Errorf("file <%s>:%s", jsonFilePath, err.Error())
 	}
 	return
 }
@@ -1374,7 +1380,9 @@ func (cfg *CGRConfig) loadCfgFromJSONWithLocks(rdr io.Reader, sections []string)
 	return cfg.loadConfigFromReader(rdr, loadFuncs, false)
 }
 
-func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
+// reloadSections sends a signal to the reload channel for the needed sections
+// the list of sections should be always valid because we load the config first with this list
+func (cfg *CGRConfig) reloadSections(sections ...string) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
@@ -1398,8 +1406,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 	runtime.Gosched()
 	for _, section := range sections {
 		switch section {
-		default:
-			return fmt.Errorf("Invalid section: <%s>", section)
 		case ConfigSJson:
 		case GENERAL_JSN: // nothing to reload
 		case RPCConnsJsonName: // nothing to reload
@@ -1557,13 +1563,11 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadArgs, reply *string) (err
 	}
 
 	if args.Section == utils.EmptyString || args.Section == utils.MetaAll {
-		err = cfg.reloadSections(sortedCfgSections...)
+		cfg.reloadSections(sortedCfgSections...)
 	} else {
-		err = cfg.reloadSections(args.Section)
+		cfg.reloadSections(args.Section)
 	}
-	if err == nil {
-		*reply = utils.OK
-	}
+	*reply = utils.OK
 	return
 }
 
@@ -1712,9 +1716,8 @@ func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error
 		return
 	}
 
-	if err = cfg.reloadSections(sections...); err == nil {
-		*reply = utils.OK
-	}
+	cfg.reloadSections(sections...)
+	*reply = utils.OK
 	return
 }
 
@@ -1849,8 +1852,7 @@ func (cfg *CGRConfig) V1SetConfigFromJSON(args *SetConfigFromJSONArgs, reply *st
 		return
 	}
 
-	if err = cfg.reloadSections(sortedCfgSections...); err == nil {
-		*reply = utils.OK
-	}
+	cfg.reloadSections(sortedCfgSections...)
+	*reply = utils.OK
 	return
 }
