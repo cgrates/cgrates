@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -398,22 +397,29 @@ func (ka *KamailioAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 
 // V1GetActiveSessionIDs returns a list of CGRIDs based on active sessions from agent
 func (ka *KamailioAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*sessions.SessionID) (err error) {
-	for _, evapi := range ka.conns {
-		kamEv, _ := json.Marshal(map[string]string{utils.Event: CGR_DLG_LIST})
-		if err = evapi.Send(string(kamEv)); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed sending event, error %s",
-				utils.KamailioAgent, err.Error()))
-			return
+	kamEv := utils.ToJSON(map[string]string{utils.Event: CGR_DLG_LIST})
+	var sentDLG int
+	for i, evapi := range ka.conns {
+		if err := evapi.Send(kamEv); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> failed sending event to connIdx<%v>, error %s",
+				utils.KamailioAgent, i, err.Error()))
+			continue
 		}
+		sentDLG++
 	}
-	for range ka.conns {
+	if sentDLG == 0 {
+		return
+	}
+	tm := time.NewTimer(config.CgrConfig().GeneralCfg().ReplyTimeout)
+	for i := 0; i < sentDLG; i++ {
 		select {
 		case sIDs := <-ka.activeSessionIDs:
 			*sessionIDs = append(*sessionIDs, sIDs...)
-		case <-time.After(5 * time.Second):
+		case <-tm.C:
 			return errors.New("timeout executing dialog list")
 		}
 	}
+	tm.Stop()
 	return
 }
 

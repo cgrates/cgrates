@@ -423,12 +423,11 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(_ string,
 				utils.FreeSWITCHAgent, err.Error(), connIdx))
 			continue
 		}
-		aChans := fsock.MapChanData(activeChanStr)
-		for _, fsAChan := range aChans {
+		for _, fsAChan := range fsock.MapChanData(activeChanStr) {
 			sIDs = append(sIDs, &sessions.SessionID{
 				OriginHost: fsa.cfg.EventSocketConns[connIdx].Alias,
-				OriginID:   fsAChan["uuid"]},
-			)
+				OriginID:   fsAChan["uuid"],
+			})
 		}
 	}
 	*sessionIDs = sIDs
