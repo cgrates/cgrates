@@ -221,9 +221,6 @@ func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement, full bool) (eq
 	if rIcr.UsageStart != rIcr2.UsageStart {
 		return
 	}
-	if rIcr.Usage != rIcr2.Usage {
-		return
-	}
 	if rIcr.Rate.UID() != rIcr2.Rate.UID() {
 		return
 	}

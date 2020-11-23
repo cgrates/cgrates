@@ -82,21 +82,24 @@ type TPExporter struct {
 
 func (self *TPExporter) Run() error {
 	self.removeFiles() // Make sure we clean the folder before starting with new one
+	var withError bool
 	toExportMap := make(map[string][]interface{})
 
 	storDataTimings, err := self.storDb.GetTPTimings(self.tpID, "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpTiming))
+		withError = true
+
 	}
 	storDataModelTimings := APItoModelTimings(storDataTimings)
-	toExportMap[utils.TimingsCsv] = make([]interface{}, len(storDataTimings))
 	for i, sd := range storDataModelTimings {
 		toExportMap[utils.TimingsCsv][i] = sd
 	}
 
 	storDataDestinations, err := self.storDb.GetTPDestinations(self.tpID, "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpDestinations))
+		withError = true
 	}
 	for _, sd := range storDataDestinations {
 		sdModels := APItoModelDestination(sd)
@@ -107,7 +110,8 @@ func (self *TPExporter) Run() error {
 
 	storDataRates, err := self.storDb.GetTPRates(self.tpID, "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpRates))
+		withError = true
 	}
 	for _, sd := range storDataRates {
 		sdModels := APItoModelRate(sd)
@@ -118,7 +122,8 @@ func (self *TPExporter) Run() error {
 
 	storDataDestinationRates, err := self.storDb.GetTPDestinationRates(self.tpID, "", nil)
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpDestinationRates))
+		withError = true
 	}
 	for _, sd := range storDataDestinationRates {
 		sdModels := APItoModelDestinationRate(sd)
@@ -129,7 +134,8 @@ func (self *TPExporter) Run() error {
 
 	storDataRatingPlans, err := self.storDb.GetTPRatingPlans(self.tpID, "", nil)
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpRatingPlans))
+		withError = true
 	}
 	for _, sd := range storDataRatingPlans {
 		sdModels := APItoModelRatingPlan(sd)
@@ -140,7 +146,8 @@ func (self *TPExporter) Run() error {
 
 	storDataRatingProfiles, err := self.storDb.GetTPRatingProfiles(&utils.TPRatingProfile{TPid: self.tpID})
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpRatingProfiles))
+		withError = true
 	}
 	for _, sd := range storDataRatingProfiles {
 		sdModels := APItoModelRatingProfile(sd)
@@ -151,7 +158,8 @@ func (self *TPExporter) Run() error {
 
 	storDataSharedGroups, err := self.storDb.GetTPSharedGroups(self.tpID, "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpSharedGroups))
+		withError = true
 	}
 
 	for _, sd := range storDataSharedGroups {
@@ -163,7 +171,8 @@ func (self *TPExporter) Run() error {
 
 	storDataActions, err := self.storDb.GetTPActions(self.tpID, "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpActions))
+		withError = true
 	}
 	for _, sd := range storDataActions {
 		sdModels := APItoModelAction(sd)
@@ -174,7 +183,8 @@ func (self *TPExporter) Run() error {
 
 	storDataActionPlans, err := self.storDb.GetTPActionPlans(self.tpID, "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpActionPlans))
+		withError = true
 	}
 	for _, sd := range storDataActionPlans {
 		sdModels := APItoModelActionPlan(sd)
@@ -185,7 +195,8 @@ func (self *TPExporter) Run() error {
 
 	storDataActionTriggers, err := self.storDb.GetTPActionTriggers(self.tpID, "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpActionTriggers))
+		withError = true
 	}
 	for _, sd := range storDataActionTriggers {
 		sdModels := APItoModelActionTrigger(sd)
@@ -196,7 +207,8 @@ func (self *TPExporter) Run() error {
 
 	storDataAccountActions, err := self.storDb.GetTPAccountActions(&utils.TPAccountActions{TPid: self.tpID})
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpAccountActionsV))
+		withError = true
 	}
 	for _, sd := range storDataAccountActions {
 		sdModel := APItoModelAccountAction(sd)
@@ -205,7 +217,8 @@ func (self *TPExporter) Run() error {
 
 	storDataResources, err := self.storDb.GetTPResources(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpResources))
+		withError = true
 	}
 	for _, sd := range storDataResources {
 		sdModels := APItoModelResource(sd)
@@ -216,7 +229,8 @@ func (self *TPExporter) Run() error {
 
 	storDataStats, err := self.storDb.GetTPStats(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpStats))
+		withError = true
 	}
 	for _, sd := range storDataStats {
 		sdModels := APItoModelStats(sd)
@@ -227,7 +241,8 @@ func (self *TPExporter) Run() error {
 
 	storDataThresholds, err := self.storDb.GetTPThresholds(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpThresholds))
+		withError = true
 	}
 	for _, sd := range storDataThresholds {
 		sdModels := APItoModelTPThreshold(sd)
@@ -238,7 +253,8 @@ func (self *TPExporter) Run() error {
 
 	storDataFilters, err := self.storDb.GetTPFilters(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpFilters))
+		withError = true
 	}
 	for _, sd := range storDataFilters {
 		sdModels := APItoModelTPFilter(sd)
@@ -249,7 +265,8 @@ func (self *TPExporter) Run() error {
 
 	storDataRoutes, err := self.storDb.GetTPRoutes(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpRoutes))
+		withError = true
 	}
 	for _, sd := range storDataRoutes {
 		sdModels := APItoModelTPRoutes(sd)
@@ -260,7 +277,8 @@ func (self *TPExporter) Run() error {
 
 	storeDataAttributes, err := self.storDb.GetTPAttributes(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpAttributes))
+		withError = true
 	}
 	for _, sd := range storeDataAttributes {
 		sdModels := APItoModelTPAttribute(sd)
@@ -271,7 +289,8 @@ func (self *TPExporter) Run() error {
 
 	storDataChargers, err := self.storDb.GetTPChargers(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpChargers))
+		withError = true
 	}
 	for _, sd := range storDataChargers {
 		sdModels := APItoModelTPCharger(sd)
@@ -282,7 +301,8 @@ func (self *TPExporter) Run() error {
 
 	storDataDispatcherProfiles, err := self.storDb.GetTPDispatcherProfiles(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpDispatcherProfiles))
+		withError = true
 	}
 	for _, sd := range storDataDispatcherProfiles {
 		sdModels := APItoModelTPDispatcherProfile(sd)
@@ -293,10 +313,27 @@ func (self *TPExporter) Run() error {
 
 	storDataDispatcherHosts, err := self.storDb.GetTPDispatcherHosts(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpDispatcherHosts))
+		withError = true
 	}
 	for _, sd := range storDataDispatcherHosts {
 		toExportMap[utils.DispatcherHostsCsv] = append(toExportMap[utils.DispatcherHostsCsv], APItoModelTPDispatcherHost(sd))
+	}
+
+	storDataRateProfiles, err := self.storDb.GetTPRateProfiles(self.tpID, "", "")
+	if err != nil && err.Error() != utils.ErrNotFound.Error() {
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpRateProfiles))
+		withError = true
+	}
+	for _, sd := range storDataRateProfiles {
+		sdModels := APItoModelTPRateProfile(sd)
+		for _, sdModel := range sdModels {
+			toExportMap[utils.RateProfilesCsv] = append(toExportMap[utils.RateProfilesCsv], sdModel)
+		}
+	}
+
+	if len(toExportMap) == 0 { // if we don't have anything to export we return not found error
+		return utils.ErrNotFound
 	}
 
 	for fileName, storData := range toExportMap {
@@ -311,6 +348,9 @@ func (self *TPExporter) Run() error {
 		if err := self.zipWritter.Close(); err != nil {
 			return err
 		}
+	}
+	if withError { // if we export something but have error we return partially executed
+		return utils.ErrPartiallyExecuted
 	}
 	return nil
 }
