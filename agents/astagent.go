@@ -362,8 +362,8 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 	for _, mpIface := range slMpIface {
 		sIDs = append(sIDs, &sessions.SessionID{
 			OriginHost: strings.Split(sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0],
-			OriginID:   mpIface["id"].(string)},
-		)
+			OriginID:   utils.IfaceAsString(mpIface["id"]),
+		})
 	}
 	*sessionIDs = sIDs
 	return nil
