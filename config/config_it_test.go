@@ -63,11 +63,14 @@ var (
 		testHttpHandlerConfigSForFile,
 		testHttpHandlerConfigSForNotExistFolder,
 		testHttpHandlerConfigSForFolder,
+		testHttpHandlerConfigSInvalidPath,
 		testLoadConfigFromPathInvalidArgument,
 		testLoadConfigFromPathValidPath,
 		testLoadConfigFromPathFile,
 		testLoadConfigFromFolderFileNotFound,
 		testLoadConfigFromFolderNoConfigFound,
+		testLoadConfigFromFolderOpenError,
+		testHandleConfigSFolderError,
 	}
 )
 
@@ -981,6 +984,38 @@ func testHttpHandlerConfigSForNotExistFile(t *testing.T) {
 	}
 }
 
+func testHandleConfigSFolderError(t *testing.T) {
+	flPath := "/usr/share/cgrates/conf/samples/NotExists/cgrates.json"
+	w := httptest.NewRecorder()
+	handleConfigSFolder(flPath, w)
+
+	resp := w.Result()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	expected := "path:\"/usr/share/cgrates/conf/samples/NotExists/cgrates.json\" is not reachable"
+	if expected != string(body) {
+		t.Errorf("Expected %s , received: %s ", expected, string(body))
+	}
+}
+
+func testHttpHandlerConfigSInvalidPath(t *testing.T) {
+	cgrCfg.configSCfg.RootDir = "/usr/share/\x00/"
+	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/tutmysql/cgrates.json", nil)
+	w := httptest.NewRecorder()
+	HandlerConfigS(w, req)
+
+	resp := w.Result()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	if resp.Status != "500 Internal Server Error" {
+		t.Errorf("Expected:%+v, received:%+v", "200 OK", resp.Status)
+	}
+	httpBodyMsgError := "stat /usr/share/\x00/conf/samples/tutmysql/cgrates.json: invalid argument"
+	if httpBodyMsgError != string(body) {
+		t.Errorf("Received:%q, expected:%q", string(body), httpBodyMsgError)
+	}
+}
+
 func testHttpHandlerConfigSForFile(t *testing.T) {
 	cgrCfg.configSCfg.RootDir = "/usr/share/cgrates/"
 	req := httptest.NewRequest("GET", "http://127.0.0.1/conf/samples/tutmysql/cgrates.json", nil)
@@ -1058,6 +1093,26 @@ func testLoadConfigFromFolderFileNotFound(t *testing.T) {
 	}
 }
 
+func testLoadConfigFromFolderOpenError(t *testing.T) {
+	newDir := "/tmp/testLoadConfigFromFolderOpenError"
+	if err = os.MkdirAll(newDir, 755); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := "open /tmp/testLoadConfigFromFolderOpenError/notes.json: no such file or directory"
+	if err = cfg.loadConfigFromFile(path.Join(newDir, "notes.json"),
+		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
+		false); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	if err = os.RemoveAll(newDir); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func testLoadConfigFromFolderNoConfigFound(t *testing.T) {
 	newDir := "/tmp/[]"
 	if err = os.MkdirAll(newDir, 755); err != nil {
@@ -1091,7 +1146,7 @@ func testLoadConfigFromPathInvalidArgument(t *testing.T) {
 }
 
 func testLoadConfigFromPathValidPath(t *testing.T) {
-	newDir := "/usr/share/cgrates/conf/samples/diamagent_internal/randomDir"
+	newDir := "/tmp/randomDir"
 	if err = os.MkdirAll(newDir, 755); err != nil {
 		t.Fatal(err)
 	}
@@ -1099,8 +1154,8 @@ func testLoadConfigFromPathValidPath(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expected := "No config file found on path /usr/share/cgrates/conf/samples/diamagent_internal/randomDir"
-	if err = cfg.loadConfigFromPath("/usr/share/cgrates/conf/samples/diamagent_internal/randomDir",
+	expected := "No config file found on path /tmp/randomDir"
+	if err = cfg.loadConfigFromPath(newDir,
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
 		false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -1111,7 +1166,7 @@ func testLoadConfigFromPathValidPath(t *testing.T) {
 }
 
 func testLoadConfigFromPathFile(t *testing.T) {
-	newDir := "/usr/share/cgrates/conf/samples/diamagent_internal/randomDir"
+	newDir := "/tmp/randomDir"
 	if err = os.MkdirAll(newDir, 755); err != nil {
 		t.Fatal(err)
 	}
@@ -1119,8 +1174,8 @@ func testLoadConfigFromPathFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expected := "No config file found on path /usr/share/cgrates/conf/samples/diamagent_internal/randomDir"
-	if err = cfg.loadConfigFromPath("/usr/share/cgrates/conf/samples/diamagent_internal/randomDir",
+	expected := "No config file found on path /tmp/randomDir"
+	if err = cfg.loadConfigFromPath(newDir,
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
 		false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
