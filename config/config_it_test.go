@@ -289,7 +289,6 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		AttributeSConns:     []string{},
 		RateSConns:          []string{},
 		RALsConns:           []string{},
-		RateSConns:          []string{},
 		IndexedSelects:      true,
 		DefaultRatio:        1,
 	}

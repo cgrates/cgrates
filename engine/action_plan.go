@@ -246,6 +246,9 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 					utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 					partialyExecuted = true
 					transactionFailed = true
+					if failedActions != nil {
+						go func(a *Action) { failedActions <- a }(a)
+					}
 					break
 				}
 				if err := actionFunction(acc, a, aac, at.ExtraData); err != nil {
@@ -253,12 +256,12 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 					partialyExecuted = true
 					transactionFailed = true
 					if failedActions != nil {
-						go func() { failedActions <- a }()
+						go func(a *Action) { failedActions <- a }(a)
 					}
 					break
 				}
 				if successActions != nil {
-					go func() { successActions <- a }()
+					go func(a *Action) { successActions <- a }(a)
 				}
 				if a.ActionType == utils.REMOVE_ACCOUNT {
 					removeAccountActionFound = true
@@ -288,7 +291,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 				utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 				partialyExecuted = true
 				if failedActions != nil {
-					go func() { failedActions <- a }()
+					go func(a *Action) { failedActions <- a }(a)
 				}
 				break
 			}
@@ -296,12 +299,12 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
 				partialyExecuted = true
 				if failedActions != nil {
-					go func() { failedActions <- a }()
+					go func(a *Action) { failedActions <- a }(a)
 				}
 				break
 			}
 			if successActions != nil {
-				go func() { successActions <- a }()
+				go func(a *Action) { successActions <- a }(a)
 			}
 		}
 	}
