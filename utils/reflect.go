@@ -530,12 +530,7 @@ func Sum(items ...interface{}) (sum interface{}, err error) {
 			}
 		}
 	case int:
-		// need explicit conversion for int
-		if firstItmVal, err := IfaceAsInt64(dt); err != nil {
-			return nil, err
-		} else {
-			sum = firstItmVal
-		}
+		sum = int64(dt)
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
@@ -592,12 +587,7 @@ func Difference(items ...interface{}) (diff interface{}, err error) {
 			}
 		}
 	case int:
-		// need explicit conversion for int
-		if firstItmVal, err := IfaceAsInt64(dt); err != nil {
-			return nil, err
-		} else {
-			diff = firstItmVal
-		}
+		diff = int64(dt)
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
@@ -638,12 +628,7 @@ func Multiply(items ...interface{}) (mlt interface{}, err error) {
 			}
 		}
 	case int:
-		// need explicit conversion for int
-		if firstItmVal, err := IfaceAsInt64(dt); err != nil {
-			return nil, err
-		} else {
-			mlt = firstItmVal
-		}
+		mlt = int64(dt)
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
@@ -684,12 +669,7 @@ func Divide(items ...interface{}) (mlt interface{}, err error) {
 			}
 		}
 	case int:
-		// need explicit conversion for int
-		if firstItmVal, err := IfaceAsInt64(dt); err != nil {
-			return nil, err
-		} else {
-			mlt = firstItmVal
-		}
+		mlt = int64(dt)
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err

@@ -1637,3 +1637,51 @@ func TestReflectFieldMethodInterfaceElseError3(t *testing.T) {
 		t.Errorf("Expected <invalid function called> ,received: <%+v>", err)
 	}
 }
+
+func TestSumTimeTimeError(t *testing.T) {
+	day1 := time.Now()
+	day2 := "testValue"
+	_, err := Sum(day1, day2)
+	if err == nil || err.Error() != "time: invalid duration \"testValue\"" {
+		t.Errorf("Expected <time: invalid duration testValue> ,received: <%+v>", err)
+	}
+
+}
+
+func TestSumTimeTime(t *testing.T) {
+	day1 := time.Now()
+	day2 := time.Hour
+	expected := day1.Add(day2)
+	sum, _ := Sum(day1, day2)
+	if !reflect.DeepEqual(sum, expected) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, sum)
+	}
+}
+
+func TestDifferenceTimeTimeError(t *testing.T) {
+	_, err := Difference(time.Now(), "cat")
+	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
+		t.Errorf("Expected <time: invalid duration \"cat\"> ,received: <%+v>", err)
+	}
+}
+
+func TestDifferenceInt64Error(t *testing.T) {
+	_, err := Difference(int64(2), "cat")
+	if err == nil || err.Error() != "strconv.ParseInt: parsing \"cat\": invalid syntax" {
+		t.Errorf("Expected <strconv.ParseInt: parsing \"cat\": invalid syntax> ,received: <%+v>", err)
+	}
+}
+
+func TestDivideInt64Error(t *testing.T) {
+	_, err := Divide(int64(2), "cat")
+	if err == nil || err.Error() != "strconv.ParseInt: parsing \"cat\": invalid syntax" {
+		t.Errorf("Expected <strconv.ParseInt: parsing \"cat\": invalid syntax> ,received: <%+v>", err)
+	}
+}
+
+func TestMultiplyInt64Error(t *testing.T) {
+	_, err := Multiply(int64(2), "cat")
+	if err == nil || err.Error() != "strconv.ParseInt: parsing \"cat\": invalid syntax" {
+		t.Errorf("Expected <strconv.ParseInt: parsing \"cat\": invalid syntax> ,received: <%+v>", err)
+	}
+}
