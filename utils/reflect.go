@@ -108,8 +108,6 @@ func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (s
 		return strconv.FormatInt(vOf.Int(), 10), nil
 	case reflect.Float64:
 		return strconv.FormatFloat(vOf.Float(), 'f', -1, 64), nil
-	case reflect.Interface:
-		return IfaceAsString(field), nil
 	default:
 		return "", fmt.Errorf("Cannot convert to string field type: %s", vOf.Kind().String())
 	}
