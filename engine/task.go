@@ -33,11 +33,14 @@ type Task struct {
 }
 
 func (t *Task) Execute() error {
-	return (&ActionTiming{
-		Uuid:       t.Uuid,
-		ActionsID:  t.ActionsID,
-		accountIDs: utils.StringMap{t.AccountID: true},
-	}).Execute(nil, nil)
+	at := &ActionTiming{
+		Uuid:      t.Uuid,
+		ActionsID: t.ActionsID,
+	}
+	if len(t.AccountID) != 0 {
+		at.accountIDs = utils.StringMap{t.AccountID: true}
+	}
+	return at.Execute(nil, nil)
 }
 
 // String implements utils.DataProvider
@@ -51,7 +54,7 @@ func (t *Task) FieldAsInterface(fldPath []string) (iface interface{}, err error)
 	return t.FieldAsString(fldPath)
 }
 
-// FieldAsInterface implements utils.DataProvider
+// FieldAsString implements utils.DataProvider
 // ToDo: support Action fields
 func (t *Task) FieldAsString(fldPath []string) (s string, err error) {
 	if len(fldPath) == 0 {
