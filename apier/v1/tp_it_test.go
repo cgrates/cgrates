@@ -47,6 +47,7 @@ var (
 		testTPRpcConn,
 		testTPImportTPFromFolderPath,
 		testTPExportTPToFolder,
+		testTPExportTPToFolderWithError,
 		testTPKillEngine,
 	}
 )
@@ -121,7 +122,7 @@ func testTPExportTPToFolder(t *testing.T) {
 		Compressed: true,
 		ExportPath: "/tmp/",
 		ExportedFiles: []string{utils.RatingProfilesCsv, utils.RatingPlansCsv, utils.ActionsCsv, utils.AccountActionsCsv,
-			utils.ChargersCsv, utils.TimingsCsv, utils.ActionPlansCsv, utils.ResourcesCsv, utils.StatsCsv, utils.ThresholdsCsv,
+			utils.ChargersCsv, utils.ActionPlansCsv, utils.ResourcesCsv, utils.StatsCsv, utils.ThresholdsCsv,
 			utils.DestinationsCsv, utils.RatesCsv, utils.DestinationRatesCsv, utils.FiltersCsv, utils.RoutesCsv, utils.AttributesCsv},
 	}
 	sort.Strings(expectedTPStas.ExportedFiles)
@@ -137,7 +138,17 @@ func testTPExportTPToFolder(t *testing.T) {
 	} else if sort.Strings(reply.ExportedFiles); !reflect.DeepEqual(expectedTPStas.ExportedFiles, reply.ExportedFiles) {
 		t.Errorf("Expecting : %+v, received: %+v", expectedTPStas.ExportedFiles, reply.ExportedFiles)
 	}
-	time.Sleep(500 * time.Millisecond)
+}
+
+func testTPExportTPToFolderWithError(t *testing.T) {
+	var reply *utils.ExportedTPStats
+	tpid := "UnexistedTP"
+	compress := true
+	exportPath := "/tmp/"
+	if err := tpRPC.Call(utils.APIerSv1ExportTPToFolder,
+		&utils.AttrDirExportTP{TPid: &tpid, ExportPath: &exportPath, Compress: &compress}, &reply); err == nil || err.Error() != utils.NewErrServerError(utils.ErrNotFound).Error() {
+		t.Error("Expecting error, received: ", err)
+	}
 
 }
 
