@@ -26,7 +26,7 @@ type APIBanCfg struct {
 	Keys    []string
 }
 
-func (ban *APIBanCfg) loadFromJsonCfg(jsnCfg *APIBanJsonCfg) (err error) {
+func (ban *APIBanCfg) loadFromJSONCfg(jsnCfg *APIBanJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -42,9 +42,22 @@ func (ban *APIBanCfg) loadFromJsonCfg(jsnCfg *APIBanJsonCfg) (err error) {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (ban *APIBanCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.EnabledCfg: ban.Enabled,
 		utils.KeysCfg:    ban.Keys,
 	}
+}
+
+// Clone returns a deep copy of APIBanCfg
+func (ban APIBanCfg) Clone() (cln *APIBanCfg) {
+	cln = &APIBanCfg{
+		Enabled: ban.Enabled,
+		Keys:    make([]string, len(ban.Keys)),
+	}
+	for i, k := range ban.Keys {
+		cln.Keys[i] = k
+	}
+	return
 }

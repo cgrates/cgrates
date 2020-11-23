@@ -358,3 +358,31 @@ func TestMapStringToInt64Err(t *testing.T) {
 		t.Error("Got Error: ", err)
 	}
 }
+
+func TestFlagsWithParamsClone(t *testing.T) {
+	fWp := FlagsWithParams{
+		MetaEvent:      {},
+		MetaRoutes:     nil,
+		MetaThresholds: {MetaIDs: {"ID1", "ID2", "ID3"}, MetaDerivedReply: {}},
+		MetaAttributes: {"*disabled": {}},
+		MetaStatS:      {MetaIDs: {"ID"}},
+	}
+
+	cln := fWp.Clone()
+	if !reflect.DeepEqual(cln, fWp) {
+		t.Errorf("Expecting: %+v, received: %+v", ToJSON(fWp), ToJSON(cln))
+	}
+	cln[MetaDispatchers] = FlagParams{}
+	if _, has := fWp[MetaDispatchers]; has {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	cln[MetaThresholds][MetaIDs][0] = ""
+	if fWp[MetaThresholds][MetaIDs][0] != "ID1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	fWp = nil
+	cln = fWp.Clone()
+	if !reflect.DeepEqual(cln, fWp) {
+		t.Errorf("Expecting: %+v, received: %+v", ToJSON(fWp), ToJSON(cln))
+	}
+}

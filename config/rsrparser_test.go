@@ -298,29 +298,6 @@ func TestRSRParserAttrName(t *testing.T) {
 	}
 }
 
-func TestRSRParserRegexpMatched(t *testing.T) {
-	rsr := NewRSRParserMustCompile("~*req.Time:s/(.*)/${1}s/")
-	expected := "1ss"
-	if val, err := rsr.parseValue("1s"); err != nil {
-		t.Error(err)
-	} else if val != expected {
-		t.Errorf("Expected: %q received: %q", expected, val)
-	}
-	if !rsr.RegexpMatched() {
-		t.Error("Expected the regex to match")
-	}
-	rsr = NewRSRParserMustCompile("~*req.Time:s/(a+)/${1}s/")
-	expected = "1s"
-	if val, err := rsr.parseValue("1s"); err != nil {
-		t.Error(err)
-	} else if val != expected {
-		t.Errorf("Expected: %q received: %q", expected, val)
-	}
-	if rsr.RegexpMatched() {
-		t.Error("Expected the regex to not match")
-	}
-}
-
 func TestRSRParserCompile3(t *testing.T) {
 	rsr := &RSRParser{Rules: "~*req.Account:s/(a+)/${1}s"}
 	if err := rsr.Compile(); err == nil {

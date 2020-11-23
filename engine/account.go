@@ -988,7 +988,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 
 	result := &Account{
-		Id:             utils.META_OUT + ":" + acc.ID,
+		Id:             utils.META_OUT + utils.CONCATENATED_KEY_SEP + acc.ID,
 		BalanceMap:     make(map[string]Balances, len(acc.BalanceMap)),
 		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
 		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),

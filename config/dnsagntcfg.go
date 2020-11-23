@@ -71,7 +71,7 @@ func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 					break
 				}
 			}
-			if err = rp.loadFromJsonCfg(reqProcJsn, sep); err != nil {
+			if err = rp.loadFromJSONCfg(reqProcJsn, sep); err != nil {
 				return
 			}
 			if !haveID {
@@ -121,7 +121,7 @@ type RequestProcessor struct {
 	ReplyFields   []*FCTemplate
 }
 
-func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep string) (err error) {
+func (rp *RequestProcessor) loadFromJSONCfg(jsnCfg *ReqProcessorJsnCfg, sep string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -158,6 +158,7 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.IDCfg:       rp.ID,

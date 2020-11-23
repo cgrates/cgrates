@@ -26,12 +26,12 @@ import (
 
 func TestAPIBanCfgloadFromJsonCfg(t *testing.T) {
 	var alS, expected APIBanCfg
-	if err := alS.loadFromJsonCfg(nil); err != nil {
+	if err := alS.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alS, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, alS)
 	}
-	if err := alS.loadFromJsonCfg(new(APIBanJsonCfg)); err != nil {
+	if err := alS.loadFromJSONCfg(new(APIBanJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alS, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, alS)
@@ -51,7 +51,7 @@ func TestAPIBanCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnalS, err := jsnCfg.ApiBanCfgJson(); err != nil {
 		t.Error(err)
-	} else if err = alS.loadFromJsonCfg(jsnalS); err != nil {
+	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, alS) {
 		t.Errorf("Expected: %+v , received: %+v", expected, alS)
@@ -75,9 +75,23 @@ func TestAPIBanCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if jsnalS, err := jsnCfg.ApiBanCfgJson(); err != nil {
 		t.Error(err)
-	} else if err = alS.loadFromJsonCfg(jsnalS); err != nil {
+	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
 		t.Error(err)
 	} else if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPIBanCfgClone(t *testing.T) {
+	ban := &APIBanCfg{
+		Enabled: false,
+		Keys:    []string{"key1", "key2"},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.Keys[0] = ""; ban.Keys[0] != "key1" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

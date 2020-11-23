@@ -953,7 +953,7 @@ const CGRATES_CFG_JSON = `
 	"listen_net": "udp",				// network to listen on <udp|tcp|tcp-tls>
 	"sessions_conns": ["*internal"],
 	"timezone": "",						// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
-	"retransmission_timer": "1s",				// the duration to wait to receive an ACK before resending the reply
+	"retransmission_timer": "1s",		// the duration to wait to receive an ACK before resending the reply
 	"request_processors": [				// request processors to be applied to SIP messages
 	],
 },

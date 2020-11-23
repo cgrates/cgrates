@@ -34,12 +34,12 @@ func TestConfigsloadFromJsonCfg(t *testing.T) {
 	}
 	expectedCfg := &ConfigSCfg{
 		Enabled: true,
-		Url:     "/randomURL/",
+		URL:     "/randomURL/",
 		RootDir: "/randomPath/",
 	}
 	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := cgrCfg.configSCfg.loadFromJsonCfg(jsonCfgs); err != nil {
+	} else if err := cgrCfg.configSCfg.loadFromJSONCfg(jsonCfgs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cgrCfg.configSCfg, expectedCfg) {
 		t.Errorf("Expected %+v, received %+v", expectedCfg, cgrCfg.configSCfg)
@@ -98,5 +98,20 @@ func TestNewCGRConfigFromPathWithoutEnv(t *testing.T) {
 	exp := "*env:NODE_ID"
 	if cfg.GeneralCfg().NodeID != exp {
 		t.Errorf("Expected %+v, received %+v", exp, cfg.GeneralCfg().NodeID)
+	}
+}
+
+func TestConfigSCfgClone(t *testing.T) {
+	cS := &ConfigSCfg{
+		Enabled: true,
+		URL:     "/randomURL/",
+		RootDir: "/randomPath/",
+	}
+	rcv := cS.Clone()
+	if !reflect.DeepEqual(cS, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
+	}
+	if rcv.URL = ""; cS.URL != "/randomURL/" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

@@ -89,7 +89,7 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separato
 					break
 				}
 			}
-			if err = rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
+			if err = rp.loadFromJSONCfg(reqProcJsn, separator); err != nil {
 				return
 			}
 			if !haveID {

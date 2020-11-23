@@ -112,3 +112,19 @@ func TestCoreSAsMapInterface(t *testing.T) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
+
+func TestCoreSCfgClone(t *testing.T) {
+	cS := &CoreSCfg{
+		Caps:              0,
+		CapsStatsInterval: time.Second,
+		ShutdownTimeout:   time.Second,
+		CapsStrategy:      utils.MetaBusy,
+	}
+	rcv := cS.Clone()
+	if !reflect.DeepEqual(cS, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
+	}
+	if rcv.Caps = 1; cS.Caps != 0 {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+}

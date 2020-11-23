@@ -87,7 +87,7 @@ func (apierSv1 *APIerSv1) GetResourceProfileIDs(args utils.PaginatorWithTenant, 
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ResourceProfilesPrefix + tnt + ":"
+	prfx := utils.ResourceProfilesPrefix + tnt + utils.CONCATENATED_KEY_SEP
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err

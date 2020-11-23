@@ -198,6 +198,25 @@ func (fWp FlagParams) SliceFlags() (sls []string) {
 	return
 }
 
+// Clone returns a deep copy of FlagParams
+func (fWp FlagParams) Clone() (cln FlagParams) {
+	if fWp == nil {
+		return
+	}
+	cln = make(FlagParams)
+	for flg, params := range fWp {
+		var cprm []string
+		if params != nil {
+			cprm = make([]string, len(params))
+			for i, p := range params {
+				cprm[i] = p
+			}
+		}
+		cln[flg] = cprm
+	}
+	return
+}
+
 // FlagsWithParams should store a list of flags for each subsystem
 type FlagsWithParams map[string]FlagParams
 
@@ -243,4 +262,16 @@ func (fWp FlagsWithParams) GetBool(key string) (b bool) {
 		return true // empty map
 	}
 	return v.Has(TrueStr) || !v.Has(FalseStr)
+}
+
+// Clone returns a deep copy of FlagsWithParams
+func (fWp FlagsWithParams) Clone() (cln FlagsWithParams) {
+	if fWp == nil {
+		return
+	}
+	cln = make(FlagsWithParams)
+	for flg, p := range fWp {
+		cln[flg] = p.Clone()
+	}
+	return
 }

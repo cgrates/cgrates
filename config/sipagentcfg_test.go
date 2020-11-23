@@ -33,16 +33,6 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		Sessions_conns:       &[]string{utils.MetaInternal},
 		Timezone:             utils.StringPointer("local"),
 		Retransmission_timer: utils.StringPointer("1"),
-		Templates: map[string][]*FcTemplateJsonCfg{
-			utils.TemplatesCfg: {
-				{
-					Tag:       utils.StringPointer("SessionId"),
-					Path:      utils.StringPointer("*rep.Session-Id"),
-					Type:      utils.StringPointer(utils.MetaVariable),
-					Mandatory: utils.BoolPointer(true),
-				},
-			},
-		},
 		Request_processors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:             utils.StringPointer("OutboundAUTHDryRun"),
@@ -68,17 +58,6 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		Timezone:            "local",
 		RetransmissionTimer: 1,
-		Templates: map[string][]*FCTemplate{
-			utils.TemplatesCfg: {
-				{
-					Tag:       "SessionId",
-					Path:      "*rep.Session-Id",
-					Type:      utils.MetaVariable,
-					Mandatory: true,
-					Layout:    time.RFC3339,
-				},
-			},
-		},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
@@ -98,15 +77,12 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 			},
 		},
 	}
-	for _, r := range expected.Templates[utils.TemplatesCfg] {
-		r.ComputePath()
-	}
 	for _, r := range expected.RequestProcessors[0].ReplyFields {
 		r.ComputePath()
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sipAgentCfg.loadFromJsonCfg(cfgJSONS, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSONS, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.sipAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sipAgentCfg))
@@ -120,25 +96,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sipAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestSIPAgentCfgloadFromJsonCfgCase3(t *testing.T) {
-	cfgJSON := &SIPAgentJsonCfg{
-		Templates: map[string][]*FcTemplateJsonCfg{
-			utils.TemplatesCfg: {
-				{
-					Value: utils.StringPointer("a{*"),
-				},
-			},
-		},
-	}
-	expected := "invalid converter terminator in rule: <a{*>"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sipAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -153,7 +111,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 		],
 	},
 }`
-	sipAgentJson := &SIPAgentJsonCfg{
+	sipAgent := &SIPAgentJsonCfg{
 		Request_processors: &[]*ReqProcessorJsnCfg{{
 			ID: utils.StringPointer("randomID"),
 		}},
@@ -167,7 +125,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sipAgentCfg.loadFromJsonCfg(sipAgentJson, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(sipAgent, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected.RequestProcessors[0].ID, jsonCfg.sipAgentCfg.RequestProcessors[0].ID) {
 		t.Errorf("Expected %+v, received %+v", expected.RequestProcessors[0].ID, jsonCfg.sipAgentCfg.RequestProcessors[0].ID)
@@ -175,7 +133,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 }
 
 func TestSIPAgentCfgloadFromJsonCfgCase5(t *testing.T) {
-	sipAgentJson := &SIPAgentJsonCfg{
+	sipAgent := &SIPAgentJsonCfg{
 		Request_processors: &[]*ReqProcessorJsnCfg{{
 			Tenant: utils.StringPointer("a{*"),
 		}},
@@ -183,7 +141,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase5(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sipAgentCfg.loadFromJsonCfg(sipAgentJson, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(sipAgent, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

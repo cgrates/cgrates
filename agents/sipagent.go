@@ -57,7 +57,7 @@ func NewSIPAgent(connMgr *engine.ConnManager, cfg *config.CGRConfig,
 		cfg:     cfg,
 		ackMap:  make(map[string]chan struct{}),
 	}
-	msgTemplates := sa.cfg.SIPAgentCfg().Templates
+	msgTemplates := sa.cfg.TemplatesCfg()
 	// Inflate *template field types
 	for _, procsr := range sa.cfg.SIPAgentCfg().RequestProcessors {
 		if tpls, err := config.InflateTemplates(procsr.RequestFields, msgTemplates); err != nil {
@@ -310,7 +310,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 	// build the negative error answer
 	sErr, err := sipErr(
 		dp, sipMessage.Clone(), reqVars,
-		sa.cfg.SIPAgentCfg().Templates[utils.MetaErr],
+		sa.cfg.TemplatesCfg()[utils.MetaErr],
 		sa.cfg.GeneralCfg().DefaultTenant,
 		sa.cfg.GeneralCfg().DefaultTimezone,
 		sa.filterS)
