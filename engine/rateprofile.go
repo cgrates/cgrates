@@ -36,7 +36,6 @@ type RateProfile struct {
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval
 	Weight             float64
-	ConnectFee         float64
 	RoundingMethod     string
 	RoundingDecimals   int
 	MinCost            float64
@@ -44,7 +43,6 @@ type RateProfile struct {
 	MaxCostStrategy    string
 	Rates              map[string]*Rate
 
-	connFee *decimal.Big // cached version of the Decimal
 	minCost *decimal.Big
 	maxCost *decimal.Big
 }
@@ -54,7 +52,6 @@ func (rp *RateProfile) TenantID() string {
 }
 
 func (rp *RateProfile) Compile() (err error) {
-	rp.connFee = new(decimal.Big).SetFloat64(rp.ConnectFee)
 	rp.minCost = new(decimal.Big).SetFloat64(rp.MinCost)
 	rp.maxCost = new(decimal.Big).SetFloat64(rp.MaxCost)
 	for _, rtP := range rp.Rates {
@@ -86,13 +83,15 @@ func (rt *Rate) UID() string {
 
 type IntervalRate struct {
 	IntervalStart time.Duration // Starting point when the Rate kicks in
+	FixedFee      float64
 	Unit          time.Duration // RateUnit
 	Increment     time.Duration // RateIncrement
-	Value         float64       // RateValue
+	RecurrentFee  float64
 
-	decVal  *decimal.Big // cached version of the Value converted to Decimal for operations
-	decUnit *decimal.Big // cached version of the Unit converted to Decimal for operations
-	decIcrm *decimal.Big // cached version of the Increment converted to Decimal for operations
+	decFixedFee *decimal.Big // cached version of the FixedFee converted to Decimal for operations
+	decRecFee   *decimal.Big // cached version of the RecurrentFee converted to Decimal for operations
+	decUnit     *decimal.Big // cached version of the Unit converted to Decimal for operations
+	decIcrm     *decimal.Big // cached version of the Increment converted to Decimal for operations
 }
 
 func (rt *Rate) Compile() (err error) {
@@ -104,7 +103,8 @@ func (rt *Rate) Compile() (err error) {
 		return
 	}
 	for _, iRt := range rt.IntervalRates {
-		iRt.decVal = new(decimal.Big).SetFloat64(iRt.Value)
+		iRt.decFixedFee = new(decimal.Big).SetFloat64(iRt.FixedFee)
+		iRt.decRecFee = new(decimal.Big).SetFloat64(iRt.RecurrentFee)
 		iRt.decUnit = new(decimal.Big).SetUint64(uint64(iRt.Unit))
 		iRt.decIcrm = new(decimal.Big).SetUint64(uint64(iRt.Increment))
 	}
@@ -135,9 +135,14 @@ func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time
 	return nil, utils.ErrMaxIterationsReached
 }
 
-// DecimalValue exports the decVal variable
-func (rIt *IntervalRate) DecimalValue() *decimal.Big {
-	return rIt.decVal
+// DecimalRecurrentFee exports the decRecFee variable
+func (rIt *IntervalRate) DecimalRecurrentFee() *decimal.Big {
+	return rIt.decRecFee
+}
+
+// DecimalFixedFee exports the decFixedFee variable
+func (rIt *IntervalRate) DecimalFixedFee() *decimal.Big {
+	return rIt.decFixedFee
 }
 
 // DecimalUnit exports the decUnit variable
@@ -234,7 +239,7 @@ func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement, full bool) (eq
 func (rIcr *RateSIncrement) Cost() *decimal.Big {
 	if rIcr.cost == nil {
 		icrRt := rIcr.Rate.IntervalRates[rIcr.IntervalRateIndex]
-		icrCost := icrRt.DecimalValue()
+		icrCost := icrRt.DecimalRecurrentFee()
 		if icrRt.Unit != icrRt.Increment {
 			icrCost = utils.DivideBig(
 				utils.MultiplyBig(icrCost, icrRt.DecimalIncrement()),

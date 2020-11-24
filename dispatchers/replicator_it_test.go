@@ -1475,7 +1475,6 @@ func testDspRplRateProfile(t *testing.T) {
 			ID:               "RP1",
 			FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
 			Weight:           0,
-			ConnectFee:       0.1,
 			RoundingMethod:   "*up",
 			RoundingDecimals: 4,
 			MinCost:          0.1,

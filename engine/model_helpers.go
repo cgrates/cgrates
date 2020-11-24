@@ -3018,7 +3018,7 @@ func (tps RateProfileMdls) CSVHeader() (result []string) {
 		utils.ActivationIntervalString, utils.Weight, utils.ConnectFee, utils.RoundingMethod,
 		utils.RoundingDecimals, utils.MinCost, utils.MaxCost, utils.MaxCostStrategy, utils.RateID,
 		utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeight, utils.RateBlocker,
-		utils.RateIntervalStart, utils.RateValue, utils.RateUnit, utils.RateIncrement,
+		utils.RateIntervalStart, utils.RateFixedFee, utils.RateRecurrentFee, utils.RateUnit, utils.RateIncrement,
 	}
 }
 
@@ -3063,8 +3063,11 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 			if tp.RateIntervalStart != utils.EmptyString {
 				intervalRate.IntervalStart = tp.RateIntervalStart
 			}
-			if tp.RateValue != 0 {
-				intervalRate.Value = tp.RateValue
+			if tp.RateFixedFee != 0 {
+				intervalRate.FixedFee = tp.RateFixedFee
+			}
+			if tp.RateRecurrentFee != 0 {
+				intervalRate.RecurrentFee = tp.RateRecurrentFee
 			}
 			if tp.RateIncrement != utils.EmptyString {
 				intervalRate.Increment = tp.RateIncrement
@@ -3078,9 +3081,6 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 
 		if tp.Weight != 0 {
 			rPrf.Weight = tp.Weight
-		}
-		if tp.ConnectFee != 0 {
-			rPrf.ConnectFee = tp.ConnectFee
 		}
 		if tp.RoundingMethod != utils.EmptyString {
 			rPrf.RoundingMethod = tp.RoundingMethod
@@ -3160,7 +3160,6 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 					}
 				}
 				mdl.Weight = tPrf.Weight
-				mdl.ConnectFee = tPrf.ConnectFee
 				mdl.RoundingMethod = tPrf.RoundingMethod
 				mdl.RoundingDecimals = tPrf.RoundingDecimals
 				mdl.MinCost = tPrf.MinCost
@@ -3180,7 +3179,8 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 				mdl.RateBlocker = rate.Blocker
 
 			}
-			mdl.RateValue = intervalRate.Value
+			mdl.RateRecurrentFee = intervalRate.RecurrentFee
+			mdl.RateFixedFee = intervalRate.FixedFee
 			mdl.RateUnit = intervalRate.Unit
 			mdl.RateIncrement = intervalRate.Increment
 			mdl.RateIntervalStart = intervalRate.IntervalStart
@@ -3198,7 +3198,6 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 		ID:               tpRp.ID,
 		FilterIDs:        make([]string, len(tpRp.FilterIDs)),
 		Weight:           tpRp.Weight,
-		ConnectFee:       tpRp.ConnectFee,
 		RoundingMethod:   tpRp.RoundingMethod,
 		RoundingDecimals: tpRp.RoundingDecimals,
 		MinCost:          tpRp.MinCost,
@@ -3228,7 +3227,8 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 			if rp.Rates[key].IntervalRates[i].IntervalStart, err = utils.ParseDurationWithNanosecs(iRate.IntervalStart); err != nil {
 				return nil, err
 			}
-			rp.Rates[key].IntervalRates[i].Value = iRate.Value
+			rp.Rates[key].IntervalRates[i].FixedFee = iRate.FixedFee
+			rp.Rates[key].IntervalRates[i].RecurrentFee = iRate.RecurrentFee
 			if rp.Rates[key].IntervalRates[i].Unit, err = utils.ParseDurationWithNanosecs(iRate.Unit); err != nil {
 				return nil, err
 			}
@@ -3247,7 +3247,6 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 		FilterIDs:          make([]string, len(rp.FilterIDs)),
 		ActivationInterval: new(utils.TPActivationInterval),
 		Weight:             rp.Weight,
-		ConnectFee:         rp.ConnectFee,
 		RoundingMethod:     rp.RoundingMethod,
 		RoundingDecimals:   rp.RoundingDecimals,
 		MinCost:            rp.MinCost,
@@ -3268,7 +3267,8 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 		for i, iRate := range rate.IntervalRates {
 			tpRp.Rates[key].IntervalRates[i] = &utils.TPIntervalRate{
 				IntervalStart: iRate.IntervalStart.String(),
-				Value:         iRate.Value,
+				FixedFee:      iRate.FixedFee,
+				RecurrentFee:  iRate.RecurrentFee,
 				Unit:          iRate.Unit.String(),
 				Increment:     iRate.Increment.String(),
 			}

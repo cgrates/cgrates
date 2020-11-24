@@ -4044,7 +4044,6 @@ func TestRateProfileToAPI(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -4058,13 +4057,14 @@ func TestRateProfileToAPI(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.06,
+						FixedFee:      0.00234,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -4077,7 +4077,7 @@ func TestRateProfileToAPI(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -4090,7 +4090,7 @@ func TestRateProfileToAPI(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -4104,7 +4104,6 @@ func TestRateProfileToAPI(t *testing.T) {
 		FilterIDs:          []string{"*string:~*req.Subject:1001"},
 		Weight:             0,
 		ActivationInterval: new(utils.TPActivationInterval),
-		ConnectFee:         0.1,
 		RoundingMethod:     "*up",
 		RoundingDecimals:   4,
 		MinCost:            0.1,
@@ -4118,13 +4117,14 @@ func TestRateProfileToAPI(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          "1m0s",
 						Increment:     "1m0s",
 					},
 					{
 						IntervalStart: "1m0s",
-						Value:         0.06,
+						FixedFee:      0.00234,
+						RecurrentFee:  0.06,
 						Unit:          "1m0s",
 						Increment:     "1s",
 					},
@@ -4137,7 +4137,7 @@ func TestRateProfileToAPI(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          "1m0s",
 						Increment:     "1s",
 					},
@@ -4150,7 +4150,7 @@ func TestRateProfileToAPI(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          "1m0s",
 						Increment:     "1s",
 					},
@@ -4169,7 +4169,6 @@ func TestAPIToRateProfile(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -4183,13 +4182,14 @@ func TestAPIToRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						FixedFee:      2.3451,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -4202,7 +4202,7 @@ func TestAPIToRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -4215,7 +4215,7 @@ func TestAPIToRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -4229,7 +4229,6 @@ func TestAPIToRateProfile(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -4243,13 +4242,14 @@ func TestAPIToRateProfile(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
-						Value:         0.12,
+						FixedFee:      2.3451,
+						RecurrentFee:  0.12,
 						Unit:          "1m0s",
 						Increment:     "1m0s",
 					},
 					{
 						IntervalStart: "1m0s",
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          "1m0s",
 						Increment:     "1s",
 					},
@@ -4262,7 +4262,7 @@ func TestAPIToRateProfile(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          "1m0s",
 						Increment:     "1s",
 					},
@@ -4275,7 +4275,7 @@ func TestAPIToRateProfile(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          "1m0s",
 						Increment:     "1s",
 					},
@@ -4297,7 +4297,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -4311,13 +4310,13 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          "1m0s",
 						Increment:     "1m0s",
 					},
 					{
 						IntervalStart: "1m",
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          "1m0s",
 						Increment:     "1s",
 					},
@@ -4335,7 +4334,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			FilterIDs:           "*string:~*req.Subject:1001",
 			ActivationInterval:  "",
 			Weight:              0,
-			ConnectFee:          0.1,
 			RoundingMethod:      "*up",
 			RoundingDecimals:    4,
 			MinCost:             0.1,
@@ -4347,7 +4345,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "1m",
-			RateValue:           0.06,
+			RateRecurrentFee:    0.06,
 			RateUnit:            "1m0s",
 			RateIncrement:       "1s",
 			CreatedAt:           time.Time{},
@@ -4360,7 +4358,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			FilterIDs:           "",
 			ActivationInterval:  "",
 			Weight:              0,
-			ConnectFee:          0,
 			RoundingMethod:      "",
 			RoundingDecimals:    0,
 			MinCost:             0,
@@ -4372,7 +4369,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "0s",
-			RateValue:           0.12,
+			RateRecurrentFee:    0.12,
 			RateUnit:            "1m0s",
 			RateIncrement:       "1m0s",
 			CreatedAt:           time.Time{},
@@ -4387,7 +4384,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			FilterIDs:           "*string:~*req.Subject:1001",
 			ActivationInterval:  "",
 			Weight:              0,
-			ConnectFee:          0.1,
 			RoundingMethod:      "*up",
 			RoundingDecimals:    4,
 			MinCost:             0.1,
@@ -4399,7 +4395,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "0s",
-			RateValue:           0.12,
+			RateRecurrentFee:    0.12,
 			RateUnit:            "1m0s",
 			RateIncrement:       "1m0s",
 			CreatedAt:           time.Time{},
@@ -4412,7 +4408,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			FilterIDs:           "",
 			ActivationInterval:  "",
 			Weight:              0,
-			ConnectFee:          0,
 			RoundingMethod:      "",
 			RoundingDecimals:    0,
 			MinCost:             0,
@@ -4424,7 +4419,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "1m",
-			RateValue:           0.06,
+			RateRecurrentFee:    0.06,
 			RateUnit:            "1m0s",
 			RateIncrement:       "1s",
 			CreatedAt:           time.Time{},
@@ -4446,7 +4441,6 @@ func TestAsTPRateProfile(t *testing.T) {
 			FilterIDs:           "*string:~*req.Subject:1001",
 			ActivationInterval:  "",
 			Weight:              0,
-			ConnectFee:          0.1,
 			RoundingMethod:      "*up",
 			RoundingDecimals:    4,
 			MinCost:             0.1,
@@ -4458,7 +4452,7 @@ func TestAsTPRateProfile(t *testing.T) {
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "1m",
-			RateValue:           0.06,
+			RateRecurrentFee:    0.06,
 			RateUnit:            "1m",
 			RateIncrement:       "1s",
 			CreatedAt:           time.Time{},
@@ -4471,7 +4465,6 @@ func TestAsTPRateProfile(t *testing.T) {
 			FilterIDs:           "",
 			ActivationInterval:  "",
 			Weight:              0,
-			ConnectFee:          0,
 			RoundingMethod:      "",
 			RoundingDecimals:    0,
 			MinCost:             0,
@@ -4483,7 +4476,7 @@ func TestAsTPRateProfile(t *testing.T) {
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "0s",
-			RateValue:           0.12,
+			RateRecurrentFee:    0.12,
 			RateUnit:            "1m",
 			RateIncrement:       "1m",
 			CreatedAt:           time.Time{},
@@ -4496,7 +4489,6 @@ func TestAsTPRateProfile(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -4510,13 +4502,13 @@ func TestAsTPRateProfile(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "1m",
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          "1m",
 						Increment:     "1s",
 					},
 					{
 						IntervalStart: "0s",
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          "1m",
 						Increment:     "1m",
 					},

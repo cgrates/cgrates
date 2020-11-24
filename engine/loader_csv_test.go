@@ -1428,7 +1428,6 @@ func TestLoadRateProfiles(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -1442,13 +1441,14 @@ func TestLoadRateProfiles(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          "1m",
 						Increment:     "1m",
 					},
 					{
 						IntervalStart: "1m",
-						Value:         0.06,
+						FixedFee:      1.234,
+						RecurrentFee:  0.06,
 						Unit:          "1m",
 						Increment:     "1s",
 					},
@@ -1461,7 +1461,8 @@ func TestLoadRateProfiles(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
-						Value:         0.06,
+						FixedFee:      0.089,
+						RecurrentFee:  0.06,
 						Unit:          "1m",
 						Increment:     "1s",
 					},
@@ -1474,7 +1475,8 @@ func TestLoadRateProfiles(t *testing.T) {
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
-						Value:         0.06,
+						FixedFee:      0.0564,
+						RecurrentFee:  0.06,
 						Unit:          "1m",
 						Increment:     "1s",
 					},
