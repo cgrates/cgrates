@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -350,4 +351,64 @@ func TestRSRFiltersPass(t *testing.T) {
 	if fltrs.Pass("teS", false) {
 		t.Error("Passing")
 	}
+}
+
+func TestNewRSRFilterError(t *testing.T) {
+	filterString := "~(^_^"
+	_, err := NewRSRFilter(filterString)
+	if err == nil || err.Error() != "error parsing regexp: missing closing ): `(^_^`" {
+		t.Errorf("Expected <error parsing regexp: missing closing ): `(^_^`> ,received: <%+v>", err)
+	}
+}
+
+func TestNewRSRFilterMustCompile(t *testing.T) {
+	filterString := "~works"
+	filterNew := NewRSRFilterMustCompile(filterString)
+	expected, _ := NewRSRFilter(filterString)
+	if !reflect.DeepEqual(expected, filterNew) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", expected, filterNew)
+	}
+}
+
+func TestNewRSRFilterMustCompilePanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Expected panic on wrong rule")
+		}
+	}()
+	filterString := "~(^_^"
+	err := NewRSRFilterMustCompile(filterString)
+	if err != nil {
+		t.Errorf("Expected <%+v> ,received: <%+v>", nil, err)
+	}
+}
+
+func TestFilterRuleTest(t *testing.T) {
+	newRSRFilter, err := NewRSRFilter("^cat$")
+	if err != nil {
+		t.Errorf("Expected <nil> ,received: <%+v>", err)
+	}
+	rule := newRSRFilter.FilterRule()
+	if !reflect.DeepEqual("^cat$", rule) {
+		t.Errorf("Expected <^cat$> ,received: <%+v>", rule)
+	}
+}
+
+func TestParseRSRFiltersNil(t *testing.T) {
+	testFilter, err := ParseRSRFilters("", "notnil")
+	if testFilter != nil {
+		t.Errorf("Expected <nil> ,received: <%+v>", testFilter)
+	}
+	if err != nil {
+		t.Errorf("Expected <nil> ,received: <%+v>", err)
+	}
+
+}
+
+func TestParseRSRFilterssPass(t *testing.T) {
+	err := new(RSRFilters).Pass("", false)
+	if !reflect.DeepEqual(err, true) {
+		t.Errorf("Expected <true> ,received: <%+v>", err)
+	}
+
 }
