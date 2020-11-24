@@ -553,3 +553,106 @@ func TestCostForIntervals(t *testing.T) {
 		t.Errorf("eDcml: %f, received: %+v", eDcml, cost)
 	}
 }
+
+func TestCostForIntervalsWIthFixedFee(t *testing.T) {
+	rt0 := &Rate{
+		ID: "RATE0",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: time.Duration(0),
+				FixedFee:      0.4,
+				RecurrentFee:  2.4,
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Minute),
+			},
+			{
+				IntervalStart: time.Duration(60 * time.Second),
+				RecurrentFee:  2.4,
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Second),
+			},
+		},
+	}
+	rt0.Compile()
+	rt1 := &Rate{
+		ID: "RATE1",
+		IntervalRates: []*IntervalRate{
+			{
+
+				IntervalStart: time.Duration(0),
+				FixedFee:      0.2,
+				RecurrentFee:  1.2,
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Second),
+			},
+			{
+
+				IntervalStart: time.Duration(2 * time.Minute),
+				RecurrentFee:  0.6,
+				Unit:          time.Duration(1 * time.Minute),
+				Increment:     time.Duration(1 * time.Second),
+			},
+		},
+	}
+	rt1.Compile()
+	rtIvls := []*RateSInterval{
+		{
+			UsageStart: time.Duration(0),
+			Increments: []*RateSIncrement{
+				{ // cost 0,4
+					UsageStart:        time.Duration(0),
+					Rate:              rt0,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+					Usage:             utils.InvalidDuration,
+				},
+				{ // cost 2,4
+					UsageStart:        time.Duration(0),
+					Rate:              rt0,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+					Usage:             time.Duration(time.Minute),
+				},
+				{ // cost 1,2
+					UsageStart:        time.Duration(time.Minute),
+					Rate:              rt0,
+					IntervalRateIndex: 1,
+					CompressFactor:    30,
+					Usage:             time.Duration(30 * time.Second),
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Duration(90 * time.Second),
+			Increments: []*RateSIncrement{
+				{ // cost 0,2
+					UsageStart:        time.Duration(90 * time.Second),
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+					Usage:             utils.InvalidDuration,
+				},
+				{ // cost 0,6
+					UsageStart:        time.Duration(90 * time.Second),
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    30,
+					Usage:             time.Duration(30 * time.Second),
+				},
+				{ // cost 0,1
+					UsageStart:        time.Duration(2 * time.Minute),
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					CompressFactor:    10,
+					Usage:             time.Duration(10 * time.Second),
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+	eDcml, _ := new(decimal.Big).SetFloat64(4.9).Float64()
+	if cost, _ := CostForIntervals(rtIvls).Float64(); cost != eDcml {
+		t.Errorf("eDcml: %f, received: %+v", eDcml, cost)
+	}
+}

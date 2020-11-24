@@ -1822,6 +1822,121 @@ func TestComputeRateSIntervals1(t *testing.T) {
 	}
 }
 
+func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
+	rt0 := &engine.Rate{
+		ID: "RATE0",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				FixedFee:      0.123,
+				RecurrentFee:  0.20,
+				Unit:          30 * time.Second,
+				Increment:     30 * time.Second,
+			},
+			{
+				IntervalStart: 30 * time.Second,
+				RecurrentFee:  0.15,
+				Unit:          1 * time.Minute,
+				Increment:     1 * time.Second,
+			},
+		},
+	}
+	rt0.Compile()
+
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				FixedFee:      0.567,
+				RecurrentFee:  0.20,
+				Unit:          1 * time.Minute,
+				Increment:     1 * time.Second,
+			},
+			{
+				IntervalStart: 2 * time.Minute,
+				RecurrentFee:  0.15,
+				Unit:          time.Minute,
+				Increment:     1 * time.Second,
+			},
+		},
+	}
+	rt1.Compile()
+
+	ordRts := []*orderedRate{
+		{
+			0,
+			rt0,
+		},
+		{
+			time.Minute + 10*time.Second,
+			rt1,
+		},
+	}
+
+	eRtIvls := []*engine.RateSInterval{
+		{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        0,
+					Rate:              rt0,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+					Usage:             -1,
+				},
+				{
+					UsageStart:        0,
+					Rate:              rt0,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+					Usage:             30 * time.Second,
+				},
+				{
+					UsageStart:        30 * time.Second,
+					Rate:              rt0,
+					IntervalRateIndex: 1,
+					CompressFactor:    40,
+					Usage:             40 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Minute + 10*time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Minute + 10*time.Second,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+					Usage:             -1,
+				},
+				{
+					UsageStart:        time.Minute + 10*time.Second,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    50,
+					Usage:             50 * time.Second,
+				},
+				{
+					UsageStart:        2 * time.Minute,
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					CompressFactor:    60,
+					Usage:             60 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+	if rtIvls, err := computeRateSIntervals(ordRts, 0, 3*time.Minute); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rtIvls, eRtIvls) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+	}
+}
+
 func TestComputeRateSIntervals2(t *testing.T) {
 	rt0 := &engine.Rate{
 		ID:              "RATE0",

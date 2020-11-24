@@ -84,9 +84,9 @@ func (rt *Rate) UID() string {
 type IntervalRate struct {
 	IntervalStart time.Duration // Starting point when the Rate kicks in
 	FixedFee      float64
+	RecurrentFee  float64
 	Unit          time.Duration // RateUnit
 	Increment     time.Duration // RateIncrement
-	RecurrentFee  float64
 
 	decFixedFee *decimal.Big // cached version of the FixedFee converted to Decimal for operations
 	decRecFee   *decimal.Big // cached version of the RecurrentFee converted to Decimal for operations
@@ -263,6 +263,9 @@ func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement, full bool) (eq
 	if full && rIcr.IntervalRateIndex != rIcr2.IntervalRateIndex {
 		return
 	}
+	if rIcr.Usage != rIcr2.Usage {
+		return
+	}
 	return true
 }
 
@@ -272,6 +275,7 @@ func (rIcr *RateSIncrement) Cost() *decimal.Big {
 		icrRt := rIcr.Rate.IntervalRates[rIcr.IntervalRateIndex]
 		if rIcr.Usage == utils.InvalidDuration { // FixedFee
 			rIcr.cost = icrRt.DecimalFixedFee()
+			return rIcr.cost
 		} else {
 			rIcr.cost = icrRt.DecimalRecurrentFee()
 		}
