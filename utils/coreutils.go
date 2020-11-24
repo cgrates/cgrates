@@ -627,6 +627,18 @@ func (h HierarchyPath) AsString(sep string, prefix bool) string {
 	return retStr
 }
 
+// Clone returns a deep copy of HierarchyPath
+func (h HierarchyPath) Clone() (cln HierarchyPath) {
+	if h == nil {
+		return
+	}
+	cln = make(HierarchyPath, len(h))
+	for i, p := range h {
+		cln[i] = p
+	}
+	return
+}
+
 // Mask a number of characters in the suffix of the destination
 func MaskSuffix(dest string, maskLen int) string {
 	destLen := len(dest)

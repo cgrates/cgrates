@@ -440,7 +440,7 @@ func (cfg *CGRConfig) loadCacheCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnCacheCfg, err = jsnCfg.CacheJsonCfg(); err != nil {
 		return
 	}
-	return cfg.cacheCfg.loadFromJsonCfg(jsnCacheCfg)
+	return cfg.cacheCfg.loadFromJSONCfg(jsnCacheCfg)
 }
 
 // loadListenCfg loads the Listen section of the configuration
@@ -670,7 +670,7 @@ func (cfg *CGRConfig) loadMailerCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnMailerCfg, err = jsnCfg.MailerJsonCfg(); err != nil {
 		return
 	}
-	return cfg.mailerCfg.loadFromJsonCfg(jsnMailerCfg)
+	return cfg.mailerCfg.loadFromJSONCfg(jsnMailerCfg)
 }
 
 // loadSureTaxCfg loads the SureTax section of the configuration
@@ -706,7 +706,7 @@ func (cfg *CGRConfig) loadLoaderCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnLoaderCgrCfg, err = jsnCfg.LoaderCfgJson(); err != nil {
 		return
 	}
-	return cfg.loaderCgrCfg.loadFromJsonCfg(jsnLoaderCgrCfg)
+	return cfg.loaderCgrCfg.loadFromJSONCfg(jsnLoaderCgrCfg)
 }
 
 // loadMigratorCgrCfg loads the Migrator section of the configuration
@@ -715,7 +715,7 @@ func (cfg *CGRConfig) loadMigratorCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnMigratorCgrCfg, err = jsnCfg.MigratorCfgJson(); err != nil {
 		return
 	}
-	return cfg.migratorCgrCfg.loadFromJsonCfg(jsnMigratorCgrCfg)
+	return cfg.migratorCgrCfg.loadFromJSONCfg(jsnMigratorCgrCfg)
 }
 
 // loadTlsCgrCfg loads the Tls section of the configuration
@@ -751,7 +751,7 @@ func (cfg *CGRConfig) loadApierCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnApierCfg, err = jsnCfg.ApierCfgJson(); err != nil {
 		return
 	}
-	return cfg.apier.loadFromJsonCfg(jsnApierCfg)
+	return cfg.apier.loadFromJSONCfg(jsnApierCfg)
 }
 
 // loadCoreSCfg loads the CoreS section of the configuration
@@ -769,7 +769,7 @@ func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnERsCfg, err = jsnCfg.ERsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvRdr, cfg.generalCfg.RSRSep)
+	return cfg.ersCfg.loadFromJSONCfg(jsnERsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvRdr, cfg.generalCfg.RSRSep)
 }
 
 // loadEesCfg loads the Ees section of the configuration
@@ -778,7 +778,7 @@ func (cfg *CGRConfig) loadEesCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnEEsCfg, err = jsnCfg.EEsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.eesCfg.loadFromJsonCfg(jsnEEsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvExp)
+	return cfg.eesCfg.loadFromJSONCfg(jsnEEsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvExp)
 }
 
 // loadRateSCfg loads the rates section of the configuration
@@ -787,7 +787,7 @@ func (cfg *CGRConfig) loadRateSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnRateCfg, err = jsnCfg.RateCfgJson(); err != nil {
 		return
 	}
-	return cfg.rateSCfg.loadFromJsonCfg(jsnRateCfg)
+	return cfg.rateSCfg.loadFromJSONCfg(jsnRateCfg)
 }
 
 // loadSIPAgentCfg loads the sip_agent section of the configuration

@@ -107,9 +107,10 @@ func NewRSRParsersMustCompile(parsersRules string, rsrSeparator string) (prsrs R
 // RSRParsers is a set of RSRParser
 type RSRParsers []*RSRParser
 
-func (prsrs RSRParsers) GetRule() (out string) {
+// GetRule returns the original string from which the rules were composed
+func (prsrs RSRParsers) GetRule(sep string) (out string) {
 	for _, prsr := range prsrs {
-		out += utils.INFIELD_SEP + prsr.Rules
+		out += sep + prsr.Rules
 	}
 	if len(out) != 0 {
 		out = out[1:]
@@ -170,6 +171,18 @@ func (prsrs RSRParsers) GetIfaceFromValues(evNm utils.DataProvider) (iFaceVals [
 			return
 		}
 		iFaceVals[i] = utils.StringToInterface(strVal)
+	}
+	return
+}
+
+// Clone returns a deep copy of RSRParsers
+func (prsrs RSRParsers) Clone() (cln RSRParsers) {
+	if prsrs == nil {
+		return nil
+	}
+	cln = make(RSRParsers, len(prsrs))
+	for i, prsr := range prsrs {
+		cln[i] = prsr.Clone()
 	}
 	return
 }
@@ -340,4 +353,30 @@ func (prsr *RSRParser) CompileDynRule(dP utils.DataProvider) (p string, err erro
 		return
 	}
 	return prsr.Rules[:prsr.dynIdxStart] + dynPath + prsr.Rules[prsr.dynIdxEnd:], nil
+}
+
+// Clone returns a deep copy of RSRParser
+func (prsr RSRParser) Clone() (cln *RSRParser) {
+	cln = &RSRParser{
+		Rules:       prsr.Rules,
+		path:        prsr.path,
+		dynIdxStart: prsr.dynIdxStart,
+		dynIdxEnd:   prsr.dynIdxEnd,
+		dynRules:    prsr.dynRules.Clone(),
+	}
+	if prsr.rsrRules != nil {
+		cln.rsrRules = make([]*utils.ReSearchReplace, len(prsr.rsrRules))
+		for i, rsr := range prsr.rsrRules {
+			cln.rsrRules[i] = rsr.Clone()
+		}
+	}
+	if prsr.converters != nil {
+		cln.converters = make(utils.DataConverters, len(prsr.converters))
+		for i, cnv := range prsr.converters {
+			// we can't modify the convertor only overwirte it
+			// safe to coppy it's value
+			cln.converters[i] = cnv
+		}
+	}
+	return
 }

@@ -199,7 +199,6 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 	},
 }`
 	eMap := map[string]interface{}{
-
 		utils.EnabledCfg:           false,
 		utils.ListenCfg:            "127.0.0.1:2053",
 		utils.ListenNetCfg:         "udp",
@@ -274,5 +273,29 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToIJSON(eMap), utils.ToIJSON(rcv))
+	}
+}
+
+func TestRequestProcessorClone(t *testing.T) {
+	rp := &RequestProcessor{
+		ID:            "cgrates",
+		Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+		Filters:       []string{"*string:~req.Account:1001"},
+		Flags:         utils.FlagsWithParams{utils.MetaAttributes: {}},
+		Timezone:      "UTC",
+		ReplyFields:   []*FCTemplate{{}},
+		RequestFields: []*FCTemplate{{}},
+	}
+	rcv := rp.Clone()
+	if !reflect.DeepEqual(rp, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(rp), utils.ToJSON(rcv))
+	}
+	rcv.Filters[0] = "*string:~req.Account:1002"
+	if rp.Filters[0] != "*string:~req.Account:1001" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	rcv.ReplyFields[0].Tag = "new"
+	if rp.ReplyFields[0].Tag != "" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

@@ -35,7 +35,7 @@ type LoaderCgrCfg struct {
 	GapiToken       json.RawMessage
 }
 
-func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
+func (ld *LoaderCgrCfg) loadFromJSONCfg(jsnCfg *LoaderCfgJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -56,10 +56,9 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 		ld.CachesConns = make([]string, len(*jsnCfg.Caches_conns))
 		for idx, conn := range *jsnCfg.Caches_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			ld.CachesConns[idx] = conn
 			if conn == utils.MetaInternal {
 				ld.CachesConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-			} else {
-				ld.CachesConns[idx] = conn
 			}
 		}
 	}
@@ -67,10 +66,9 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 		ld.SchedulerConns = make([]string, len(*jsnCfg.Caches_conns))
 		for idx, conn := range *jsnCfg.Caches_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			ld.SchedulerConns[idx] = conn
 			if conn == utils.MetaInternal {
 				ld.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
-			} else {
-				ld.SchedulerConns[idx] = conn
 			}
 		}
 	}
@@ -83,20 +81,65 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (ld *LoaderCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.TpIDCfg:           ld.TpID,
 		utils.DataPathCfg:       ld.DataPath,
 		utils.DisableReverseCfg: ld.DisableReverse,
 		utils.FieldSepCfg:       string(ld.FieldSeparator),
-		utils.CachesConnsCfg:    ld.CachesConns,
-		utils.SchedulerConnsCfg: ld.SchedulerConns,
+	}
+	if ld.CachesConns != nil {
+		cacheSConns := make([]string, len(ld.CachesConns))
+		for i, item := range ld.CachesConns {
+			cacheSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
+				cacheSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.CachesConnsCfg] = cacheSConns
+	}
+	if ld.SchedulerConns != nil {
+		schedulerSConns := make([]string, len(ld.SchedulerConns))
+		for i, item := range ld.SchedulerConns {
+			schedulerSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
+				schedulerSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.SchedulerConnsCfg] = schedulerSConns
 	}
 	if ld.GapiCredentials != nil {
 		initialMP[utils.GapiCredentialsCfg] = ld.GapiCredentials
 	}
 	if ld.GapiToken != nil {
 		initialMP[utils.GapiTokenCfg] = ld.GapiToken
+	}
+	return
+}
+
+// Clone returns a deep copy of LoaderCgrCfg
+func (ld LoaderCgrCfg) Clone() (cln *LoaderCgrCfg) {
+	cln = &LoaderCgrCfg{
+		TpID:            ld.TpID,
+		DataPath:        ld.DataPath,
+		DisableReverse:  ld.DisableReverse,
+		FieldSeparator:  ld.FieldSeparator,
+		GapiCredentials: json.RawMessage(string([]byte(ld.GapiCredentials))),
+		GapiToken:       json.RawMessage(string([]byte(ld.GapiToken))),
+	}
+
+	if ld.CachesConns != nil {
+		cln.CachesConns = make([]string, len(ld.CachesConns))
+		for i, k := range ld.CachesConns {
+			cln.CachesConns[i] = k
+		}
+	}
+	if ld.SchedulerConns != nil {
+		cln.SchedulerConns = make([]string, len(ld.SchedulerConns))
+		for i, k := range ld.SchedulerConns {
+			cln.SchedulerConns[i] = k
+		}
 	}
 	return
 }

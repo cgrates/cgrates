@@ -167,15 +167,7 @@ func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[stri
 		utils.TimezoneCfg: rp.Timezone,
 	}
 	if rp.Tenant != nil {
-		var tenant string
-		if rp.Tenant != nil {
-			values := make([]string, len(rp.Tenant))
-			for i, item := range rp.Tenant {
-				values[i] = item.Rules
-			}
-			tenant = strings.Join(values, separator)
-		}
-		initialMP[utils.TenantCfg] = tenant
+		initialMP[utils.TenantCfg] = rp.Tenant.GetRule(separator)
 	}
 	if rp.RequestFields != nil {
 		requestFields := make([]map[string]interface{}, len(rp.RequestFields))
@@ -190,6 +182,35 @@ func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[stri
 			replyFields[i] = item.AsMapInterface(separator)
 		}
 		initialMP[utils.ReplyFieldsCfg] = replyFields
+	}
+	return
+}
+
+// Clone returns a deep copy of APIBanCfg
+func (rp RequestProcessor) Clone() (cln *RequestProcessor) {
+	cln = &RequestProcessor{
+		ID:       rp.ID,
+		Tenant:   rp.Tenant.Clone(),
+		Flags:    rp.Flags.Clone(),
+		Timezone: rp.Timezone,
+	}
+	if rp.Filters != nil {
+		cln.Filters = make([]string, len(rp.Filters))
+		for i, fltr := range rp.Filters {
+			cln.Filters[i] = fltr
+		}
+	}
+	if rp.RequestFields != nil {
+		cln.RequestFields = make([]*FCTemplate, len(rp.RequestFields))
+		for i, rf := range rp.RequestFields {
+			cln.RequestFields[i] = rf.Clone()
+		}
+	}
+	if rp.ReplyFields != nil {
+		cln.ReplyFields = make([]*FCTemplate, len(rp.ReplyFields))
+		for i, rf := range rp.ReplyFields {
+			cln.ReplyFields[i] = rf.Clone()
+		}
 	}
 	return
 }

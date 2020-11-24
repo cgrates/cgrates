@@ -54,7 +54,7 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.rateSCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsonCfg.rateSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.rateSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rateSCfg))
@@ -116,5 +116,50 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.rateSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
+	}
+}
+
+func TestRateSCfgClone(t *testing.T) {
+	sa := &RateSCfg{
+		Enabled:                 true,
+		IndexedSelects:          true,
+		StringIndexedFields:     &[]string{"*req.index1"},
+		PrefixIndexedFields:     &[]string{"*req.index1"},
+		SuffixIndexedFields:     &[]string{"*req.index1"},
+		NestedFields:            true,
+		RateIndexedSelects:      true,
+		RateStringIndexedFields: &[]string{"*req.index1"},
+		RatePrefixIndexedFields: &[]string{"*req.index1"},
+		RateSuffixIndexedFields: &[]string{"*req.index1"},
+		RateNestedFields:        true,
+	}
+	rcv := sa.Clone()
+	if !reflect.DeepEqual(sa, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
+	}
+	(*rcv.StringIndexedFields)[0] = ""
+	if (*sa.StringIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	(*rcv.PrefixIndexedFields)[0] = ""
+	if (*sa.PrefixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	(*rcv.SuffixIndexedFields)[0] = ""
+	if (*sa.SuffixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	(*rcv.RateStringIndexedFields)[0] = ""
+	if (*sa.RateStringIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	(*rcv.RatePrefixIndexedFields)[0] = ""
+	if (*sa.RatePrefixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	(*rcv.RateSuffixIndexedFields)[0] = ""
+	if (*sa.RateSuffixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -33,7 +31,7 @@ type ApierCfg struct {
 	EEsConns        []string // connections towards EEs
 }
 
-func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
+func (aCfg *ApierCfg) loadFromJSONCfg(jsnCfg *ApierJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -44,10 +42,9 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 		aCfg.CachesConns = make([]string, len(*jsnCfg.Caches_conns))
 		for idx, conn := range *jsnCfg.Caches_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			aCfg.CachesConns[idx] = conn
 			if conn == utils.MetaInternal {
 				aCfg.CachesConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-			} else {
-				aCfg.CachesConns[idx] = conn
 			}
 		}
 	}
@@ -55,10 +52,9 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 		aCfg.SchedulerConns = make([]string, len(*jsnCfg.Scheduler_conns))
 		for idx, conn := range *jsnCfg.Scheduler_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			aCfg.SchedulerConns[idx] = conn
 			if conn == utils.MetaInternal {
 				aCfg.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
-			} else {
-				aCfg.SchedulerConns[idx] = conn
 			}
 		}
 	}
@@ -66,10 +62,9 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 		aCfg.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
 		for idx, conn := range *jsnCfg.Attributes_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			aCfg.AttributeSConns[idx] = conn
 			if conn == utils.MetaInternal {
 				aCfg.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			} else {
-				aCfg.AttributeSConns[idx] = conn
 			}
 		}
 	}
@@ -77,16 +72,16 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 		aCfg.EEsConns = make([]string, len(*jsnCfg.Ees_conns))
 		for idx, connID := range *jsnCfg.Ees_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			aCfg.EEsConns[idx] = connID
 			if connID == utils.MetaInternal {
 				aCfg.EEsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
-			} else {
-				aCfg.EEsConns[idx] = connID
 			}
 		}
 	}
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 	initialMap = map[string]interface{}{
 		utils.EnabledCfg: aCfg.Enabled,
@@ -94,10 +89,9 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 	if aCfg.CachesConns != nil {
 		cachesConns := make([]string, len(aCfg.CachesConns))
 		for i, item := range aCfg.CachesConns {
+			cachesConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
-				cachesConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaCaches)
-			} else {
-				cachesConns[i] = item
+				cachesConns[i] = utils.MetaInternal
 			}
 		}
 		initialMap[utils.CachesConnsCfg] = cachesConns
@@ -105,10 +99,9 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 	if aCfg.SchedulerConns != nil {
 		schedulerConns := make([]string, len(aCfg.SchedulerConns))
 		for i, item := range aCfg.SchedulerConns {
+			schedulerConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
-				schedulerConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler)
-			} else {
-				schedulerConns[i] = item
+				schedulerConns[i] = utils.MetaInternal
 			}
 		}
 		initialMap[utils.SchedulerConnsCfg] = schedulerConns
@@ -116,10 +109,9 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 	if aCfg.AttributeSConns != nil {
 		attributeSConns := make([]string, len(aCfg.AttributeSConns))
 		for i, item := range aCfg.AttributeSConns {
+			attributeSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes)
-			} else {
-				attributeSConns[i] = item
+				attributeSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMap[utils.AttributeSConnsCfg] = attributeSConns
@@ -127,13 +119,44 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 	if aCfg.EEsConns != nil {
 		eesConns := make([]string, len(aCfg.EEsConns))
 		for i, item := range aCfg.EEsConns {
+			eesConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
-				eesConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaEEs)
-			} else {
-				eesConns[i] = item
+				eesConns[i] = utils.MetaInternal
 			}
 		}
 		initialMap[utils.EEsConnsCfg] = eesConns
+	}
+	return
+}
+
+// Clone returns a deep copy of ApierCfg
+func (aCfg ApierCfg) Clone() (cln *ApierCfg) {
+	cln = &ApierCfg{
+		Enabled: aCfg.Enabled,
+	}
+	if aCfg.CachesConns != nil {
+		cln.CachesConns = make([]string, len(aCfg.CachesConns))
+		for i, k := range aCfg.CachesConns {
+			cln.CachesConns[i] = k
+		}
+	}
+	if aCfg.SchedulerConns != nil {
+		cln.SchedulerConns = make([]string, len(aCfg.SchedulerConns))
+		for i, k := range aCfg.SchedulerConns {
+			cln.SchedulerConns[i] = k
+		}
+	}
+	if aCfg.AttributeSConns != nil {
+		cln.AttributeSConns = make([]string, len(aCfg.AttributeSConns))
+		for i, k := range aCfg.AttributeSConns {
+			cln.AttributeSConns[i] = k
+		}
+	}
+	if aCfg.EEsConns != nil {
+		cln.EEsConns = make([]string, len(aCfg.EEsConns))
+		for i, k := range aCfg.EEsConns {
+			cln.EEsConns[i] = k
+		}
 	}
 	return
 }

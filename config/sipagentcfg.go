@@ -35,35 +35,34 @@ type SIPAgentCfg struct {
 	RequestProcessors   []*RequestProcessor
 }
 
-func (da *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err error) {
+func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Enabled != nil {
-		da.Enabled = *jsnCfg.Enabled
+		sa.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Listen_net != nil {
-		da.ListenNet = *jsnCfg.Listen_net
+		sa.ListenNet = *jsnCfg.Listen_net
 	}
 	if jsnCfg.Listen != nil {
-		da.Listen = *jsnCfg.Listen
+		sa.Listen = *jsnCfg.Listen
 	}
 	if jsnCfg.Timezone != nil {
-		da.Timezone = *jsnCfg.Timezone
+		sa.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Sessions_conns != nil {
-		da.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		sa.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for idx, connID := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			sa.SessionSConns[idx] = connID
 			if connID == utils.MetaInternal {
-				da.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			} else {
-				da.SessionSConns[idx] = connID
+				sa.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			}
 		}
 	}
 	if jsnCfg.Retransmission_timer != nil {
-		if da.RetransmissionTimer, err = utils.ParseDurationWithNanosecs(*jsnCfg.Retransmission_timer); err != nil {
+		if sa.RetransmissionTimer, err = utils.ParseDurationWithNanosecs(*jsnCfg.Retransmission_timer); err != nil {
 			return err
 		}
 	}
@@ -71,7 +70,7 @@ func (da *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
 			rp := new(RequestProcessor)
 			var haveID bool
-			for _, rpSet := range da.RequestProcessors {
+			for _, rpSet := range sa.RequestProcessors {
 				if reqProcJsn.ID != nil && rpSet.ID == *reqProcJsn.ID {
 					rp = rpSet // Will load data into the one set
 					haveID = true
@@ -82,7 +81,7 @@ func (da *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 				return
 			}
 			if !haveID {
-				da.RequestProcessors = append(da.RequestProcessors, rp)
+				sa.RequestProcessors = append(sa.RequestProcessors, rp)
 			}
 		}
 	}
@@ -90,30 +89,54 @@ func (da *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (da *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+func (sa *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:             da.Enabled,
-		utils.ListenCfg:              da.Listen,
-		utils.ListenNetCfg:           da.ListenNet,
-		utils.TimezoneCfg:            da.Timezone,
-		utils.RetransmissionTimerCfg: da.RetransmissionTimer,
+		utils.EnabledCfg:             sa.Enabled,
+		utils.ListenCfg:              sa.Listen,
+		utils.ListenNetCfg:           sa.ListenNet,
+		utils.TimezoneCfg:            sa.Timezone,
+		utils.RetransmissionTimerCfg: sa.RetransmissionTimer,
 	}
 
-	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
-	for i, item := range da.RequestProcessors {
+	requestProcessors := make([]map[string]interface{}, len(sa.RequestProcessors))
+	for i, item := range sa.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
 	initialMP[utils.RequestProcessorsCfg] = requestProcessors
 
-	if da.SessionSConns != nil {
-		sessionSConns := make([]string, len(da.SessionSConns))
-		for i, item := range da.SessionSConns {
+	if sa.SessionSConns != nil {
+		sessionSConns := make([]string, len(sa.SessionSConns))
+		for i, item := range sa.SessionSConns {
 			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 				sessionSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
+	}
+	return
+}
+
+// Clone returns a deep copy of SIPAgentCfg
+func (sa SIPAgentCfg) Clone() (cln *SIPAgentCfg) {
+	cln = &SIPAgentCfg{
+		Enabled:             sa.Enabled,
+		Listen:              sa.Listen,
+		ListenNet:           sa.ListenNet,
+		Timezone:            sa.Timezone,
+		RetransmissionTimer: sa.RetransmissionTimer,
+	}
+	if sa.SessionSConns != nil {
+		cln.SessionSConns = make([]string, len(sa.SessionSConns))
+		for i, c := range sa.SessionSConns {
+			cln.SessionSConns[i] = c
+		}
+	}
+	if sa.RequestProcessors != nil {
+		cln.RequestProcessors = make([]*RequestProcessor, len(sa.RequestProcessors))
+		for i, rp := range sa.RequestProcessors {
+			cln.RequestProcessors[i] = rp.Clone()
+		}
 	}
 	return
 }

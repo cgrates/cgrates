@@ -35,7 +35,7 @@ type CacheParamCfg struct {
 	Replicate bool
 }
 
-func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
+func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -60,20 +60,30 @@ func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.LimitCfg:     cParam.Limit,
 		utils.StaticTTLCfg: cParam.StaticTTL,
 		utils.PrecacheCfg:  cParam.Precache,
 		utils.ReplicateCfg: cParam.Replicate,
+		utils.TTLCfg:       utils.EmptyString,
 	}
-
-	var TTL string = utils.EmptyString
 	if cParam.TTL != 0 {
-		TTL = cParam.TTL.String()
+		initialMP[utils.TTLCfg] = cParam.TTL.String()
 	}
-	initialMP[utils.TTLCfg] = TTL
 	return
+}
+
+// Clone returns a deep copy of CacheParamCfg
+func (cParam CacheParamCfg) Clone() (cln *CacheParamCfg) {
+	return &CacheParamCfg{
+		Limit:     cParam.Limit,
+		TTL:       cParam.TTL,
+		StaticTTL: cParam.StaticTTL,
+		Precache:  cParam.Precache,
+		Replicate: cParam.Replicate,
+	}
 }
 
 // CacheCfg used to store the cache config
@@ -82,14 +92,14 @@ type CacheCfg struct {
 	ReplicationConns []string
 }
 
-func (cCfg *CacheCfg) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
+func (cCfg *CacheCfg) loadFromJSONCfg(jsnCfg *CacheJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
 	if jsnCfg.Partitions != nil {
 		for kJsn, vJsn := range *jsnCfg.Partitions {
 			val := new(CacheParamCfg)
-			if err := val.loadFromJsonCfg(vJsn); err != nil {
+			if err := val.loadFromJSONCfg(vJsn); err != nil {
 				return err
 			}
 			cCfg.Partitions[kJsn] = val
@@ -128,6 +138,7 @@ func (cCfg *CacheCfg) AddTmpCaches() {
 	}
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (cCfg *CacheCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = make(map[string]interface{})
 	if cCfg.Partitions != nil {
@@ -143,6 +154,24 @@ func (cCfg *CacheCfg) AsMapInterface() (initialMP map[string]interface{}) {
 			replicationConns[i] = item
 		}
 		initialMP[utils.RplConnsCfg] = replicationConns
+	}
+	return
+}
+
+// Clone returns a deep copy of CacheCfg
+func (cCfg CacheCfg) Clone() (cln *CacheCfg) {
+	cln = new(CacheCfg)
+	if cCfg.Partitions != nil {
+		cln.Partitions = make(map[string]*CacheParamCfg)
+		for key, par := range cCfg.Partitions {
+			cln.Partitions[key] = par.Clone()
+		}
+	}
+	if cCfg.ReplicationConns != nil {
+		cln.ReplicationConns = make([]string, len(cCfg.ReplicationConns))
+		for i, c := range cCfg.ReplicationConns {
+			cln.ReplicationConns[i] = c
+		}
 	}
 	return
 }

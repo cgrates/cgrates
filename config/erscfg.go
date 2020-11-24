@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -31,7 +30,7 @@ type ERsCfg struct {
 	Readers       []*EventReaderCfg
 }
 
-func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg, separator string) (err error) {
+func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -42,17 +41,16 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 		erS.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for i, fID := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			erS.SessionSConns[i] = fID
 			if fID == utils.MetaInternal {
 				erS.SessionSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			} else {
-				erS.SessionSConns[i] = fID
 			}
 		}
 	}
 	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates, sep, dfltRdrCfg)
 }
 
-func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string,
+func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string,
 	dfltRdrCfg *EventReaderCfg) (err error) {
 	if jsnReaders == nil {
 		return
@@ -60,7 +58,7 @@ func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 	for _, jsnReader := range *jsnReaders {
 		var rdr *EventReaderCfg
 		if jsnReader.Id != nil {
-			for _, reader := range ers.Readers {
+			for _, reader := range erS.Readers {
 				if reader.ID == *jsnReader.Id {
 					rdr = reader
 					break
@@ -74,9 +72,9 @@ func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 				rdr = new(EventReaderCfg)
 				rdr.Opts = make(map[string]interface{})
 			}
-			ers.Readers = append(ers.Readers, rdr)
+			erS.Readers = append(erS.Readers, rdr)
 		}
-		if err := rdr.loadFromJsonCfg(jsnReader, msgTemplates, sep); err != nil {
+		if err := rdr.loadFromJSONCfg(jsnReader, msgTemplates, sep); err != nil {
 			return err
 		}
 
@@ -84,25 +82,36 @@ func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 	return nil
 }
 
-// Clone itself into a new ERsCfg
+// Clone returns a deep copy of ERsCfg
 func (erS *ERsCfg) Clone() (cln *ERsCfg) {
-	cln = new(ERsCfg)
-	cln.Enabled = erS.Enabled
-	cln.SessionSConns = make([]string, len(erS.SessionSConns))
+	cln = &ERsCfg{
+		Enabled:       erS.Enabled,
+		SessionSConns: make([]string, len(erS.SessionSConns)),
+		Readers:       make([]*EventReaderCfg, len(erS.Readers)),
+	}
 	for idx, sConn := range erS.SessionSConns {
 		cln.SessionSConns[idx] = sConn
 	}
-	cln.Readers = make([]*EventReaderCfg, len(erS.Readers))
 	for idx, rdr := range erS.Readers {
 		cln.Readers[idx] = rdr.Clone()
 	}
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:       erS.Enabled,
-		utils.SessionSConnsCfg: erS.SessionSConns,
+		utils.EnabledCfg: erS.Enabled,
+	}
+	if erS.SessionSConns != nil {
+		sessionSConns := make([]string, len(erS.SessionSConns))
+		for i, item := range erS.SessionSConns {
+			sessionSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
 	if erS.Readers != nil {
 		readers := make([]map[string]interface{}, len(erS.Readers))
@@ -125,7 +134,7 @@ type EventReaderCfg struct {
 	SourcePath               string
 	ProcessedPath            string
 	Opts                     map[string]interface{}
-	XmlRootPath              utils.HierarchyPath
+	XMLRootPath              utils.HierarchyPath
 	Tenant                   RSRParsers
 	Timezone                 string
 	Filters                  []string
@@ -137,7 +146,7 @@ type EventReaderCfg struct {
 	CacheDumpFields          []*FCTemplate
 }
 
-func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
+func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -171,7 +180,7 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		er.ProcessedPath = *jsnCfg.Processed_path
 	}
 	if jsnCfg.Xml_root_path != nil {
-		er.XmlRootPath = utils.ParseHierarchyPath(*jsnCfg.Xml_root_path, utils.EmptyString)
+		er.XMLRootPath = utils.ParseHierarchyPath(*jsnCfg.Xml_root_path, utils.EmptyString)
 	}
 	if jsnCfg.Tenant != nil {
 		if er.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, sep); err != nil {
@@ -229,8 +238,8 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	return
 }
 
-//Clone itself into a new EventReaderCfg
-func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
+// Clone returns a deep copy of EventReaderCfg
+func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln = &EventReaderCfg{
 		ID:                       er.ID,
 		Type:                     er.Type,
@@ -240,34 +249,32 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		ConcurrentReqs:           er.ConcurrentReqs,
 		SourcePath:               er.SourcePath,
 		ProcessedPath:            er.ProcessedPath,
-		XmlRootPath:              er.XmlRootPath,
+		XMLRootPath:              er.XMLRootPath.Clone(),
+		Tenant:                   er.Tenant.Clone(),
+		Timezone:                 er.Timezone,
+		Flags:                    er.Flags.Clone(),
+		FailedCallsPrefix:        er.FailedCallsPrefix,
 		PartialCacheExpiryAction: er.PartialCacheExpiryAction,
 		PartialRecordCache:       er.PartialRecordCache,
 		Opts:                     make(map[string]interface{}),
 	}
-	if len(er.Tenant) != 0 {
-		cln.Tenant = make(RSRParsers, len(er.Tenant))
-		for idx, val := range er.Tenant {
-			clnVal := *val
-			cln.Tenant[idx] = &clnVal
-		}
-	}
-	cln.Timezone = er.Timezone
-	if len(er.Filters) != 0 {
+	if er.Filters != nil {
 		cln.Filters = make([]string, len(er.Filters))
 		for idx, val := range er.Filters {
 			cln.Filters[idx] = val
 		}
 	}
-	cln.Flags = er.Flags
-	cln.FailedCallsPrefix = er.FailedCallsPrefix
-	cln.Fields = make([]*FCTemplate, len(er.Fields))
-	for idx, fld := range er.Fields {
-		cln.Fields[idx] = fld.Clone()
+	if er.Fields != nil {
+		cln.Fields = make([]*FCTemplate, len(er.Fields))
+		for idx, fld := range er.Fields {
+			cln.Fields[idx] = fld.Clone()
+		}
 	}
-	cln.CacheDumpFields = make([]*FCTemplate, len(er.CacheDumpFields))
-	for idx, fld := range er.CacheDumpFields {
-		cln.CacheDumpFields[idx] = fld.Clone()
+	if er.CacheDumpFields != nil {
+		cln.CacheDumpFields = make([]*FCTemplate, len(er.CacheDumpFields))
+		for idx, fld := range er.CacheDumpFields {
+			cln.CacheDumpFields[idx] = fld.Clone()
+		}
 	}
 	for k, v := range er.Opts {
 		cln.Opts[k] = v
@@ -275,6 +282,7 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.IDCfg:                       er.ID,
@@ -285,34 +293,20 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.ConcurrentRequestsCfg:       er.ConcurrentReqs,
 		utils.SourcePathCfg:               er.SourcePath,
 		utils.ProcessedPathCfg:            er.ProcessedPath,
+		utils.TenantCfg:                   er.Tenant.GetRule(separator),
+		utils.XMLRootPathCfg:              []string(er.XMLRootPath),
 		utils.TimezoneCfg:                 er.Timezone,
-		utils.FiltersCfg:                  []string{},
+		utils.FiltersCfg:                  er.Filters,
 		utils.FlagsCfg:                    []string{},
 		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
 		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
 		utils.OptsCfg:                     er.Opts,
+		utils.PartialRecordCacheCfg:       "0",
+		utils.RunDelayCfg:                 "0",
 	}
-	if flags := er.Flags.SliceFlags(); len(flags) != 0 {
+	if flags := er.Flags.SliceFlags(); flags != nil {
 		initialMP[utils.FlagsCfg] = flags
 	}
-	if len(er.Filters) != 0 {
-		initialMP[utils.FiltersCfg] = er.Filters
-	}
-
-	if er.XmlRootPath != nil {
-		xmlRootPath := make([]string, len(er.XmlRootPath))
-		for i, item := range er.XmlRootPath {
-			xmlRootPath[i] = item
-		}
-		initialMP[utils.XMLRootPathCfg] = xmlRootPath
-	}
-	var tenant string
-	values := make([]string, len(er.Tenant))
-	for i, item := range er.Tenant {
-		values[i] = item.Rules
-	}
-	tenant = strings.Join(values, separator)
-	initialMP[utils.TenantCfg] = tenant
 
 	if er.Fields != nil {
 		fields := make([]map[string]interface{}, len(er.Fields))
@@ -329,20 +323,14 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		initialMP[utils.CacheDumpFieldsCfg] = cacheDumpFields
 	}
 
-	var runDelay string
 	if er.RunDelay > 0 {
-		runDelay = er.RunDelay.String()
-	} else if er.RunDelay == 0 {
-		runDelay = "0"
-	} else {
-		runDelay = "-1"
+		initialMP[utils.RunDelayCfg] = er.RunDelay.String()
+	} else if er.RunDelay < 0 {
+		initialMP[utils.RunDelayCfg] = "-1"
 	}
-	initialMP[utils.RunDelayCfg] = runDelay
 
 	if er.PartialRecordCache != 0 {
 		initialMP[utils.PartialRecordCacheCfg] = er.PartialRecordCache.String()
-	} else {
-		initialMP[utils.PartialRecordCacheCfg] = "0"
 	}
 	return
 }

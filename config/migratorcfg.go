@@ -43,7 +43,7 @@ type MigratorCgrCfg struct {
 	OutStorDBOpts     map[string]interface{}
 }
 
-func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
+func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -106,8 +106,13 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+	fltrs := []string{}
+	if mg.UsersFilters != nil {
+		fltrs = mg.UsersFilters
+	}
+	return map[string]interface{}{
 		utils.OutDataDBTypeCfg:     mg.OutDataDBType,
 		utils.OutDataDBHostCfg:     mg.OutDataDBHost,
 		utils.OutDataDBPortCfg:     mg.OutDataDBPort,
@@ -123,13 +128,40 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.OutStorDBPasswordCfg: mg.OutStorDBPassword,
 		utils.OutDataDBOptsCfg:     mg.OutDataDBOpts,
 		utils.OutStorDBOptsCfg:     mg.OutStorDBOpts,
+		utils.UsersFiltersCfg:      fltrs,
 	}
+}
 
-	userFilters := make([]string, len(mg.UsersFilters))
-	for i, item := range mg.UsersFilters {
-		userFilters[i] = item
+// Clone returns a deep copy of MigratorCgrCfg
+func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
+	cln = &MigratorCgrCfg{
+		OutDataDBType:     mg.OutDataDBType,
+		OutDataDBHost:     mg.OutDataDBHost,
+		OutDataDBPort:     mg.OutDataDBPort,
+		OutDataDBName:     mg.OutDataDBName,
+		OutDataDBUser:     mg.OutDataDBUser,
+		OutDataDBPassword: mg.OutDataDBPassword,
+		OutDataDBEncoding: mg.OutDataDBEncoding,
+		OutStorDBType:     mg.OutStorDBType,
+		OutStorDBHost:     mg.OutStorDBHost,
+		OutStorDBPort:     mg.OutStorDBPort,
+		OutStorDBName:     mg.OutStorDBName,
+		OutStorDBUser:     mg.OutStorDBUser,
+		OutStorDBPassword: mg.OutStorDBPassword,
+		OutDataDBOpts:     make(map[string]interface{}),
+		OutStorDBOpts:     make(map[string]interface{}),
 	}
-	initialMP[utils.UsersFiltersCfg] = userFilters
-
+	if mg.UsersFilters != nil {
+		cln.UsersFilters = make([]string, len(mg.UsersFilters))
+		for i, f := range mg.UsersFilters {
+			cln.UsersFilters[i] = f
+		}
+	}
+	for k, v := range mg.OutDataDBOpts {
+		cln.OutDataDBOpts[k] = v
+	}
+	for k, v := range mg.OutStorDBOpts {
+		cln.OutStorDBOpts[k] = v
+	}
 	return
 }

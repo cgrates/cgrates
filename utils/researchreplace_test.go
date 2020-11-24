@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"reflect"
 	"regexp"
 	"testing"
 )
@@ -79,5 +80,20 @@ func TestProcessReSearchReplace6(t *testing.T) {
 	rsr := &ReSearchReplace{SearchRegexp: regexp.MustCompile(`(.*)`), ReplaceTemplate: "${1}_suffix"}
 	if outStr := rsr.Process("call"); outStr != "call_suffix" {
 		t.Error("Unexpected output from SearchReplace: ", outStr)
+	}
+}
+
+func TestReSearchReplaceClone(t *testing.T) {
+	rsr := &ReSearchReplace{
+		SearchRegexp:    regexp.MustCompile(`(\d+)`),
+		ReplaceTemplate: EmptyString,
+	}
+	rcv := rsr.Clone()
+	if !reflect.DeepEqual(rsr, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", ToJSON(rsr), ToJSON(rcv))
+	}
+	*rcv.SearchRegexp = regexp.Regexp{}
+	if reflect.DeepEqual(rsr.SearchRegexp, rcv.SearchRegexp) {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

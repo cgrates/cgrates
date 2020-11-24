@@ -59,13 +59,24 @@ func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (alS *AnalyzerSCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
-		utils.EnabledCfg: alS.Enabled,
-
+		utils.EnabledCfg:         alS.Enabled,
 		utils.DBPathCfg:          alS.DBPath,
 		utils.IndexTypeCfg:       alS.IndexType,
 		utils.TTLCfg:             alS.TTL.String(),
 		utils.CleanupIntervalCfg: alS.CleanupInterval.String(),
+	}
+}
+
+// Clone returns a deep copy of AnalyzerSCfg
+func (alS AnalyzerSCfg) Clone() *AnalyzerSCfg {
+	return &AnalyzerSCfg{
+		Enabled:         alS.Enabled,
+		DBPath:          alS.DBPath,
+		IndexType:       alS.IndexType,
+		TTL:             alS.TTL,
+		CleanupInterval: alS.CleanupInterval,
 	}
 }

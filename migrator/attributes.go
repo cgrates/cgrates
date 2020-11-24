@@ -394,7 +394,7 @@ func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 		ActivationInterval: v4AttrPrf.ActivationInterval,
 	}
 	for _, attr := range v4AttrPrf.Attributes { // ToDo:redo this
-		val := attr.Value.GetRule()
+		val := attr.Value.GetRule(utils.INFIELD_SEP)
 		rsrVal := attr.Value
 		if strings.HasPrefix(val, utils.DynamicDataPrefix) {
 			val = val[1:] // remove the DynamicDataPrefix

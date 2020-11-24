@@ -952,7 +952,22 @@ func TestHierarchyPathAsString(t *testing.T) {
 	if hpStr := hp.AsString(EmptyString, true); hpStr != EmptyString {
 		t.Errorf("Expecting: %q, received: %q", EmptyString, hpStr)
 	}
+}
 
+func TestParseHierarchyClone(t *testing.T) {
+	eHP := HierarchyPath([]string{"Root", "CGRateS"})
+	rcv := eHP.Clone()
+	if !reflect.DeepEqual(eHP, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", ToJSON(eHP), ToJSON(rcv))
+	}
+	if rcv[0] = ""; eHP[0] != "Root" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	eHP = nil
+	rcv = eHP.Clone()
+	if !reflect.DeepEqual(eHP, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", ToJSON(eHP), ToJSON(rcv))
+	}
 }
 
 func TestMaskSuffix(t *testing.T) {
