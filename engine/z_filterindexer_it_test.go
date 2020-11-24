@@ -1268,7 +1268,6 @@ func testITIndexRateProfile(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -1281,9 +1280,9 @@ func testITIndexRateProfile(t *testing.T) {
 				Weight:    0,
 				IntervalRates: []*IntervalRate{
 					{
-						Value:     0.12,
-						Unit:      time.Minute,
-						Increment: time.Minute,
+						RecurrentFee: 0.12,
+						Unit:         time.Minute,
+						Increment:    time.Minute,
 					},
 				},
 				Blocker: false,
@@ -1294,9 +1293,9 @@ func testITIndexRateProfile(t *testing.T) {
 				Weight:    10,
 				IntervalRates: []*IntervalRate{
 					{
-						Value:     0.06,
-						Unit:      time.Minute,
-						Increment: time.Second,
+						RecurrentFee: 0.06,
+						Unit:         time.Minute,
+						Increment:    time.Second,
 					},
 				},
 				Blocker: false,
@@ -1329,7 +1328,6 @@ func testITIndexRateProfile(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -1342,9 +1340,9 @@ func testITIndexRateProfile(t *testing.T) {
 				Weight:    0,
 				IntervalRates: []*IntervalRate{
 					{
-						Value:     0.12,
-						Unit:      time.Minute,
-						Increment: time.Minute,
+						RecurrentFee: 0.12,
+						Unit:         time.Minute,
+						Increment:    time.Minute,
 					},
 				},
 				Blocker: false,
@@ -1355,9 +1353,9 @@ func testITIndexRateProfile(t *testing.T) {
 				Weight:    10,
 				IntervalRates: []*IntervalRate{
 					{
-						Value:     0.06,
-						Unit:      time.Minute,
-						Increment: time.Second,
+						RecurrentFee: 0.06,
+						Unit:         time.Minute,
+						Increment:    time.Second,
 					},
 				},
 				Blocker: false,
@@ -1368,9 +1366,9 @@ func testITIndexRateProfile(t *testing.T) {
 				Weight:    20,
 				IntervalRates: []*IntervalRate{
 					{
-						Value:     0.06,
-						Unit:      time.Minute,
-						Increment: time.Second,
+						RecurrentFee: 0.06,
+						Unit:         time.Minute,
+						Increment:    time.Second,
 					},
 				},
 				Blocker: false,
@@ -1404,7 +1402,6 @@ func testITIndexRateProfile(t *testing.T) {
 		Tenant:           "cgrates.org",
 		ID:               "RP2",
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -1417,9 +1414,9 @@ func testITIndexRateProfile(t *testing.T) {
 				Weight:    0,
 				IntervalRates: []*IntervalRate{
 					{
-						Value:     0.12,
-						Unit:      time.Minute,
-						Increment: time.Minute,
+						RecurrentFee: 0.12,
+						Unit:         time.Minute,
+						Increment:    time.Minute,
 					},
 				},
 				Blocker: false,
@@ -1430,9 +1427,9 @@ func testITIndexRateProfile(t *testing.T) {
 				Weight:    10,
 				IntervalRates: []*IntervalRate{
 					{
-						Value:     0.6,
-						Unit:      time.Minute,
-						Increment: time.Second,
+						RecurrentFee: 0.6,
+						Unit:         time.Minute,
+						Increment:    time.Second,
 					},
 				},
 				Blocker: false,

@@ -1583,13 +1583,13 @@ func TestComputeRateSIntervals(t *testing.T) {
 				IntervalStart: 0,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Minute,
-				Value:         0.10,
+				RecurrentFee:  0.10,
 			},
 			{
 				IntervalStart: 60 * time.Second,
 				Unit:          1 * time.Minute,
-				Increment:     1 * time.Second, // 0.00083
-				Value:         0.05,
+				Increment:     1 * time.Second,
+				RecurrentFee:  0.05,
 			},
 		},
 	}
@@ -1603,14 +1603,14 @@ func TestComputeRateSIntervals(t *testing.T) {
 				IntervalStart: 0,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Second,
-				Value:         0.20,
+				RecurrentFee:  0.20,
 			},
 			{
 
 				IntervalStart: 2 * time.Minute,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Second,
-				Value:         0.15,
+				RecurrentFee:  0.15,
 			},
 		},
 	}
@@ -1738,13 +1738,13 @@ func TestComputeRateSIntervals1(t *testing.T) {
 				IntervalStart: 0,
 				Unit:          30 * time.Second,
 				Increment:     30 * time.Second,
-				Value:         0.20,
+				RecurrentFee:  0.20,
 			},
 			{
 				IntervalStart: 30 * time.Second,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Second,
-				Value:         0.15,
+				RecurrentFee:  0.15,
 			},
 		},
 	}
@@ -1757,13 +1757,13 @@ func TestComputeRateSIntervals1(t *testing.T) {
 				IntervalStart: 0,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Second,
-				Value:         0.20,
+				RecurrentFee:  0.20,
 			},
 			{
 				IntervalStart: 2 * time.Minute,
 				Unit:          time.Minute,
 				Increment:     1 * time.Second,
-				Value:         0.15,
+				RecurrentFee:  0.15,
 			},
 		},
 	}
@@ -1831,13 +1831,13 @@ func TestComputeRateSIntervals2(t *testing.T) {
 				IntervalStart: 0,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
-				Value:         1.00,
+				RecurrentFee:  1.00,
 			},
 			{
 				IntervalStart: 50 * time.Minute,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
-				Value:         0.50,
+				RecurrentFee:  0.50,
 			},
 		},
 	}
@@ -1851,13 +1851,13 @@ func TestComputeRateSIntervals2(t *testing.T) {
 				IntervalStart: 0,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
-				Value:         0.15,
+				RecurrentFee:  0.15,
 			},
 			{
 				IntervalStart: 45 * time.Minute,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
-				Value:         0.20,
+				RecurrentFee:  0.20,
 			},
 		},
 	}

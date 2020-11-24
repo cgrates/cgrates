@@ -153,7 +153,6 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -167,13 +166,13 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -186,7 +185,7 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -199,7 +198,7 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -229,7 +228,6 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*wrong:inline"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -243,7 +241,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
@@ -285,13 +283,13 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -304,7 +302,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -317,7 +315,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -352,7 +350,6 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -366,13 +363,13 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -385,7 +382,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -398,7 +395,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -422,7 +419,6 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 		ID:               "SpecialRate",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -436,13 +432,13 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -455,7 +451,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -468,7 +464,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -503,7 +499,6 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 		ID:               "SpecialRate",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -517,13 +512,13 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -536,7 +531,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -568,7 +563,6 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 		ID:               "SpecialRate",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -606,7 +600,6 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 		ID:               "RPWithoutTenant",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -620,7 +613,7 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
@@ -704,7 +697,6 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 		ID:               "SpecialRate",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -718,13 +710,13 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -737,7 +729,7 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -750,7 +742,7 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -794,13 +786,13 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				Value:         0.12,
+				RecurrentFee:  0.12,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
 			},
 			{
 				IntervalStart: time.Minute,
-				Value:         0.06,
+				RecurrentFee:  0.06,
 				Unit:          time.Minute,
 				Increment:     time.Second,
 			},
@@ -883,13 +875,13 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				Value:         0.12,
+				RecurrentFee:  0.12,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
 			},
 			{
 				IntervalStart: time.Minute,
-				Value:         0.06,
+				RecurrentFee:  0.06,
 				Unit:          time.Minute,
 				Increment:     time.Second,
 			},
@@ -1005,13 +997,13 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				Value:         0.12,
+				RecurrentFee:  0.12,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
 			},
 			{
 				IntervalStart: time.Minute,
-				Value:         0.06,
+				RecurrentFee:  0.06,
 				Unit:          time.Minute,
 				Increment:     time.Second,
 			},
@@ -1125,13 +1117,13 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				Value:         0.12,
+				RecurrentFee:  0.12,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
 			},
 			{
 				IntervalStart: time.Minute,
-				Value:         0.06,
+				RecurrentFee:  0.06,
 				Unit:          time.Minute,
 				Increment:     time.Second,
 			},
@@ -1226,13 +1218,13 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				Value:         0.20,
+				RecurrentFee:  0.20,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
 			},
 			{
 				IntervalStart: time.Minute,
-				Value:         0.10,
+				RecurrentFee:  0.10,
 				Unit:          time.Minute,
 				Increment:     time.Second,
 			},
@@ -1245,7 +1237,7 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				Value:         0.06,
+				RecurrentFee:  0.06,
 				Unit:          time.Minute,
 				Increment:     time.Second,
 			},
@@ -1351,13 +1343,13 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				Value:         0.20,
+				RecurrentFee:  0.20,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
 			},
 			{
 				IntervalStart: time.Minute,
-				Value:         0.10,
+				RecurrentFee:  0.10,
 				Unit:          time.Minute,
 				Increment:     time.Second,
 			},
@@ -1371,7 +1363,7 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				Value:         0.08,
+				RecurrentFee:  0.08,
 				Unit:          time.Minute,
 				Increment:     time.Second,
 			},
@@ -1384,7 +1376,7 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				Value:         0.05,
+				RecurrentFee:  0.05,
 				Unit:          time.Minute,
 				Increment:     time.Second,
 			},

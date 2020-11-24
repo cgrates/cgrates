@@ -689,7 +689,6 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 				ID:               "RP1",
 				FilterIDs:        []string{"*string:~*req.Subject:1001"},
 				Weight:           0,
-				ConnectFee:       0.1,
 				RoundingMethod:   "*up",
 				RoundingDecimals: 4,
 				MinCost:          0.1,
@@ -703,13 +702,13 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: 0,
-								Value:         0.12,
+								RecurrentFee:  0.12,
 								Unit:          time.Minute,
 								Increment:     time.Minute,
 							},
 							{
 								IntervalStart: time.Minute,
-								Value:         0.06,
+								RecurrentFee:  0.06,
 								Unit:          time.Minute,
 								Increment:     time.Second,
 							},
@@ -722,7 +721,7 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: 0,
-								Value:         0.06,
+								RecurrentFee:  0.06,
 								Unit:          time.Minute,
 								Increment:     time.Second,
 							},
@@ -735,7 +734,7 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: 0,
-								Value:         0.06,
+								RecurrentFee:  0.06,
 								Unit:          time.Minute,
 								Increment:     time.Second,
 							},

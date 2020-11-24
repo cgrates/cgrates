@@ -42,13 +42,13 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -61,25 +61,25 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Second,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Second,
-						Value:         0.19,
+						RecurrentFee:  0.19,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
 					{
 						IntervalStart: 15 * time.Second,
-						Value:         0.4,
+						RecurrentFee:  0.4,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
 					{
 						IntervalStart: 10 * time.Second,
-						Value:         0.27,
+						RecurrentFee:  0.27,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -92,19 +92,19 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 10 * time.Second,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.18,
+						RecurrentFee:  0.18,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
 					{
 						IntervalStart: 18 * time.Second,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -117,7 +117,7 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -136,13 +136,13 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -155,19 +155,19 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 10 * time.Second,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
 					{
 						IntervalStart: 18 * time.Second,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
 					{
 						IntervalStart: time.Minute,
-						Value:         0.18,
+						RecurrentFee:  0.18,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -180,25 +180,25 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Second,
-						Value:         0.12,
+						RecurrentFee:  0.12,
 						Unit:          time.Minute,
 						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Second,
-						Value:         0.19,
+						RecurrentFee:  0.19,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
 					{
 						IntervalStart: 10 * time.Second,
-						Value:         0.27,
+						RecurrentFee:  0.27,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
 					{
 						IntervalStart: 15 * time.Second,
-						Value:         0.4,
+						RecurrentFee:  0.4,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -211,7 +211,7 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						Value:         0.06,
+						RecurrentFee:  0.06,
 						Unit:          time.Minute,
 						Increment:     time.Second,
 					},
@@ -253,7 +253,6 @@ func TestRateProfileCompile(t *testing.T) {
 		},
 		Tenant:  "cgrates.org",
 		ID:      "RTP1",
-		connFee: new(decimal.Big).SetFloat64(rt.ConnectFee),
 		minCost: new(decimal.Big).SetFloat64(rt.MinCost),
 		maxCost: new(decimal.Big).SetFloat64(rt.MaxCost),
 	}
@@ -476,13 +475,13 @@ func TestCostForIntervals(t *testing.T) {
 				IntervalStart: time.Duration(0),
 				Unit:          time.Duration(1 * time.Minute),
 				Increment:     time.Duration(1 * time.Minute),
-				Value:         2.4,
+				RecurrentFee:  2.4,
 			},
 			{
 				IntervalStart: time.Duration(60 * time.Second),
 				Unit:          time.Duration(1 * time.Minute),
 				Increment:     time.Duration(1 * time.Second),
-				Value:         2.4,
+				RecurrentFee:  2.4,
 			},
 		},
 	}
@@ -495,14 +494,14 @@ func TestCostForIntervals(t *testing.T) {
 				IntervalStart: time.Duration(0),
 				Unit:          time.Duration(1 * time.Minute),
 				Increment:     time.Duration(1 * time.Second),
-				Value:         1.2,
+				RecurrentFee:  1.2,
 			},
 			{
 
 				IntervalStart: time.Duration(2 * time.Minute),
 				Unit:          time.Duration(1 * time.Minute),
 				Increment:     time.Duration(1 * time.Second),
-				Value:         0.6,
+				RecurrentFee:  0.6,
 			},
 		},
 	}
