@@ -405,10 +405,27 @@ func TestParseRSRFiltersNil(t *testing.T) {
 
 }
 
-func TestParseRSRFilterssPass(t *testing.T) {
+func TestParseRSRFilterssPassZeroLength(t *testing.T) {
 	err := new(RSRFilters).Pass("", false)
 	if !reflect.DeepEqual(err, true) {
 		t.Errorf("Expected <true> ,received: <%+v>", err)
 	}
+}
 
+func TestParseRSRFilterRules(t *testing.T) {
+	filter1, _ := NewRSRFilter("^rule1$")
+	filter2, _ := NewRSRFilter("^rule2$")
+	filters := RSRFilters{filter1, filter2}
+	result := filters.FilterRules()
+	if !reflect.DeepEqual(result, "^rule1$^rule2$") {
+		t.Errorf("Expected <^rule1$^rule2$> ,received: <%+v>", result)
+	}
+}
+
+func TestParseRSRFiltersFromSliceError(t *testing.T) {
+	stringSlice := []string{"~(^_^", "^rule2$"}
+	_, err := ParseRSRFiltersFromSlice(stringSlice)
+	if err == nil || err.Error() != "error parsing regexp: missing closing ): `(^_^`" {
+		t.Errorf("Expected <error parsing regexp: missing closing ): `(^_^`> ,received: <%+v>", err)
+	}
 }
