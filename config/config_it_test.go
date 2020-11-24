@@ -547,7 +547,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 				Flags:            flagsDefault,
 				Fields:           content,
 				CacheDumpFields:  []*FCTemplate{},
-				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
 				Opts:             make(map[string]interface{}),
 			},
 			{
@@ -562,7 +562,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 				Flags:            flags,
 				Fields:           content,
 				CacheDumpFields:  []*FCTemplate{},
-				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
 				Opts:             make(map[string]interface{}),
 			},
 		},

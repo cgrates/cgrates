@@ -73,10 +73,10 @@ func TestERSClone(t *testing.T) {
 				ConcurrentReqs:   1024,
 				SourcePath:       "/var/spool/cgrates/ers/in",
 				ProcessedPath:    "/var/spool/cgrates/ers/out",
-				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
 				Tenant:           nil,
 				Timezone:         utils.EmptyString,
-				Filters:          nil,
+				Filters:          []string{},
 				Flags:            utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
@@ -114,7 +114,7 @@ func TestERSClone(t *testing.T) {
 				ConcurrentReqs:           1024,
 				SourcePath:               "/tmp/ers/in",
 				ProcessedPath:            "/tmp/ers/out",
-				XmlRootPath:              utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:              utils.HierarchyPath{utils.EmptyString},
 				Tenant:                   NewRSRParsersMustCompile("~*req.Destination1", utils.INFIELD_SEP),
 				Timezone:                 utils.EmptyString,
 				Filters:                  []string{"randomFiletrs"},
@@ -162,7 +162,7 @@ func TestEventReaderloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	}
 	eventReader := new(EventReaderCfg)
-	if err = eventReader.loadFromJsonCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err = eventReader.loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }
@@ -178,7 +178,7 @@ func TestEventReaderloadFromJsonCase1(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsoncfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsoncfg.ersCfg.loadFromJsonCfg(cfgJSON, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr, jsoncfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsoncfg.ersCfg.loadFromJSONCfg(cfgJSON, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr, jsoncfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -194,7 +194,7 @@ func TestEventReaderloadFromJsonCase2(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsoncfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsoncfg.ersCfg.loadFromJsonCfg(cfgJSON, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr, jsoncfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsoncfg.ersCfg.loadFromJSONCfg(cfgJSON, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr, jsoncfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -210,7 +210,7 @@ func TestEventReaderloadFromJsonCase3(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsoncfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsoncfg.ersCfg.loadFromJsonCfg(cfgJSON, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr, jsoncfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsoncfg.ersCfg.loadFromJSONCfg(cfgJSON, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr, jsoncfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -229,7 +229,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				ConcurrentReqs:   1024,
 				SourcePath:       "/var/spool/cgrates/ers/in",
 				ProcessedPath:    "/var/spool/cgrates/ers/out",
-				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
 				Tenant:           nil,
 				Timezone:         utils.EmptyString,
 				Filters:          []string{},
@@ -270,10 +270,10 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				ConcurrentReqs:   1024,
 				SourcePath:       "/tmp/ers/in",
 				ProcessedPath:    "/tmp/ers/out",
-				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
 				Tenant:           nil,
 				Timezone:         utils.EmptyString,
-				Filters:          nil,
+				Filters:          []string{},
 				Flags:            utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
@@ -340,7 +340,7 @@ func TestERSloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }
@@ -360,7 +360,7 @@ func TestEventReaderFieldsloadFromJsonCfg(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -381,7 +381,7 @@ func TestERSloadFromJsonCase1(t *testing.T) {
 	expected := "no template with id: <>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -401,7 +401,7 @@ func TestERSloadFromJsonCase2(t *testing.T) {
 	expected := "no template with id: <>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -454,7 +454,7 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				ConcurrentReqs:   1024,
 				SourcePath:       "/var/spool/cgrates/ers/in",
 				ProcessedPath:    "/var/spool/cgrates/ers/out",
-				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
 				Tenant:           nil,
 				Timezone:         utils.EmptyString,
 				Filters:          []string{},
@@ -496,10 +496,10 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				ConcurrentReqs:           1024,
 				SourcePath:               "/tmp/ers/in",
 				ProcessedPath:            "/tmp/ers/out",
-				XmlRootPath:              utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:              utils.HierarchyPath{utils.EmptyString},
 				Tenant:                   nil,
 				Timezone:                 utils.EmptyString,
-				Filters:                  nil,
+				Filters:                  []string{},
 				Flags:                    utils.FlagsWithParams{},
 				PartialCacheExpiryAction: "",
 				PartialRecordCache:       0,
@@ -531,7 +531,7 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, msgTemplates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, msgTemplates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedERsCfg, jsonCfg.ersCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(jsonCfg.ersCfg))
@@ -586,7 +586,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				ConcurrentReqs:   1024,
 				SourcePath:       "/var/spool/cgrates/ers/in",
 				ProcessedPath:    "/var/spool/cgrates/ers/out",
-				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
 				Tenant:           nil,
 				Timezone:         utils.EmptyString,
 				Filters:          []string{},
@@ -628,10 +628,10 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				ConcurrentReqs:           1024,
 				SourcePath:               "/tmp/ers/in",
 				ProcessedPath:            "/tmp/ers/out",
-				XmlRootPath:              utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:              utils.HierarchyPath{utils.EmptyString},
 				Tenant:                   nil,
 				Timezone:                 utils.EmptyString,
-				Filters:                  nil,
+				Filters:                  []string{},
 				Flags:                    utils.FlagsWithParams{},
 				PartialCacheExpiryAction: "",
 				PartialRecordCache:       0,
@@ -666,7 +666,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, msgTemplates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, msgTemplates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedERsCfg, jsonCfg.ersCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(jsonCfg.ersCfg))
@@ -688,7 +688,7 @@ func TestEventReaderCacheDumpFieldsloadFromJsonCfg(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.ersCfg.loadFromJsonCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -707,7 +707,7 @@ func TestEventReaderSameID(t *testing.T) {
 				ConcurrentReqs:   1024,
 				SourcePath:       "/var/spool/cgrates/ers/in",
 				ProcessedPath:    "/var/spool/cgrates/ers/out",
-				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
 				Tenant:           nil,
 				Timezone:         utils.EmptyString,
 				Filters:          []string{},
@@ -749,10 +749,10 @@ func TestEventReaderSameID(t *testing.T) {
 				ConcurrentReqs:   1024,
 				SourcePath:       "/tmp/ers/in",
 				ProcessedPath:    "/tmp/ers/out",
-				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
 				Tenant:           nil,
 				Timezone:         utils.EmptyString,
-				Filters:          nil,
+				Filters:          []string{},
 				Flags:            utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{Tag: "CustomTag2", Path: "CustomPath2", Type: utils.MetaVariable,
@@ -902,7 +902,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 	}
 	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cfg.ersCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cfg.ersCfg.AsMapInterface(utils.INFIELD_SEP); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -1008,7 +1008,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	}
 	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cfg.ersCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cfg.ersCfg.AsMapInterface(utils.INFIELD_SEP); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -1062,7 +1062,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				ConcurrentReqs:   1024,
 				SourcePath:       "/var/spool/cgrates/ers/in",
 				ProcessedPath:    "/var/spool/cgrates/ers/out",
-				XmlRootPath:      utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
 				Tenant:           nil,
 				Timezone:         utils.EmptyString,
 				Filters:          []string{},
@@ -1104,10 +1104,10 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				ConcurrentReqs:           1024,
 				SourcePath:               "/tmp/ers/in",
 				ProcessedPath:            "/tmp/ers/out",
-				XmlRootPath:              utils.HierarchyPath{utils.EmptyString},
+				XMLRootPath:              utils.HierarchyPath{utils.EmptyString},
 				Tenant:                   nil,
 				Timezone:                 utils.EmptyString,
-				Filters:                  nil,
+				Filters:                  []string{},
 				Flags:                    utils.FlagsWithParams{},
 				PartialCacheExpiryAction: "",
 				PartialRecordCache:       0,
@@ -1136,7 +1136,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 	}
 	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := cfgCgr.ersCfg.loadFromJsonCfg(cfgJSON, cfgCgr.templates, cfgCgr.generalCfg.RSRSep, cfgCgr.dfltEvRdr, cfgCgr.generalCfg.RSRSep); err != nil {
+	} else if err := cfgCgr.ersCfg.loadFromJSONCfg(cfgJSON, cfgCgr.templates, cfgCgr.generalCfg.RSRSep, cfgCgr.dfltEvRdr, cfgCgr.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cfgCgr.ersCfg, expectedERsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cgrCfg.ersCfg))

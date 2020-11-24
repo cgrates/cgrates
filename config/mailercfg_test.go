@@ -39,7 +39,7 @@ func TestMailerCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.mailerCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsnCfg.mailerCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.mailerCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.mailerCfg))
@@ -82,5 +82,21 @@ func TestMailerCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.mailerCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
+
+func TestMailerCfgClone(t *testing.T) {
+	cS := &MailerCfg{
+		MailerServer:   "localhost",
+		MailerAuthUser: "cgrates",
+		MailerAuthPass: "CGRateS.org",
+		MailerFromAddr: "cgr-mailer@localhost.localdomain",
+	}
+	rcv := cS.Clone()
+	if !reflect.DeepEqual(cS, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
+	}
+	if rcv.MailerServer = ""; cS.MailerServer != "localhost" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

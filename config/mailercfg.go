@@ -20,7 +20,7 @@ package config
 
 import "github.com/cgrates/cgrates/utils"
 
-// Mailer config section
+// MailerCfg stores Mailer config section
 type MailerCfg struct {
 	MailerServer   string // The server to use when sending emails out
 	MailerAuthUser string // Authenticate to email server using this user
@@ -28,8 +28,8 @@ type MailerCfg struct {
 	MailerFromAddr string // From address used when sending emails out
 }
 
-//loadFromJsonCfg loads Database config from JsonCfg
-func (mailcfg *MailerCfg) loadFromJsonCfg(jsnMailerCfg *MailerJsonCfg) (err error) {
+// loadFromJSONCfg loads Database config from JsonCfg
+func (mailcfg *MailerCfg) loadFromJSONCfg(jsnMailerCfg *MailerJsonCfg) (err error) {
 	if jsnMailerCfg == nil {
 		return nil
 	}
@@ -48,12 +48,22 @@ func (mailcfg *MailerCfg) loadFromJsonCfg(jsnMailerCfg *MailerJsonCfg) (err erro
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (mailcfg *MailerCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+	return map[string]interface{}{
 		utils.MailerServerCfg:   mailcfg.MailerServer,
 		utils.MailerAuthUserCfg: mailcfg.MailerAuthUser,
 		utils.MailerAuthPassCfg: mailcfg.MailerAuthPass,
 		utils.MailerFromAddrCfg: mailcfg.MailerFromAddr,
 	}
-	return
+}
+
+// Clone returns a deep copy of MailerCfg
+func (mailcfg MailerCfg) Clone() *MailerCfg {
+	return &MailerCfg{
+		MailerServer:   mailcfg.MailerServer,
+		MailerAuthUser: mailcfg.MailerAuthUser,
+		MailerAuthPass: mailcfg.MailerAuthPass,
+		MailerFromAddr: mailcfg.MailerFromAddr,
+	}
 }

@@ -103,3 +103,20 @@ func TestAnalyzerSCfgloadFromJsonCfgErr(t *testing.T) {
 		t.Errorf("Expected error received nil")
 	}
 }
+
+func TestAnalyzerSCfgClone(t *testing.T) {
+	cS := &AnalyzerSCfg{
+		Enabled:         false,
+		CleanupInterval: time.Hour,
+		DBPath:          "/var/spool/cgrates/analyzers",
+		IndexType:       utils.MetaScorch,
+		TTL:             24 * time.Hour,
+	}
+	rcv := cS.Clone()
+	if !reflect.DeepEqual(cS, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
+	}
+	if rcv.DBPath = ""; cS.DBPath != "/var/spool/cgrates/analyzers" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+}

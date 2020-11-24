@@ -71,9 +71,9 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.cacheCfg.loadFromJsonCfg(nil); err != nil {
+	} else if err = jsnCfg.cacheCfg.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.cacheCfg.loadFromJsonCfg(jsonCfg); err != nil {
+	} else if err = jsnCfg.cacheCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(expected.Partitions[utils.MetaDestinations], jsnCfg.cacheCfg.Partitions[utils.MetaDestinations]) {
@@ -92,7 +92,7 @@ func TestReplicationConnsLoadFromJsonCfg(t *testing.T) {
 	expErrMessage := "replication connection ID needs to be different than *internal"
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.cacheCfg.loadFromJsonCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
+	} else if err = jsnCfg.cacheCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
 		t.Errorf("Expected %+v , recevied %+v", expErrMessage, err)
 	}
 }
@@ -111,9 +111,9 @@ func TestCacheParamCfgloadFromJsonCfg1(t *testing.T) {
 		Precache:  true,
 	}
 	rcv := new(CacheParamCfg)
-	if err := rcv.loadFromJsonCfg(nil); err != nil {
+	if err := rcv.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
-	} else if err := rcv.loadFromJsonCfg(json); err != nil {
+	} else if err := rcv.loadFromJSONCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
@@ -131,7 +131,7 @@ func TestCacheParamCfgloadFromJsonCfg2(t *testing.T) {
 	expErrMessage := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.cacheCfg.loadFromJsonCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
+	} else if err = jsnCfg.cacheCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
 		t.Errorf("Expected %+v \n, recevied %+v", expErrMessage, err)
 	}
 }
@@ -151,7 +151,7 @@ func TestAddTmpCaches(t *testing.T) {
 	expected.AddTmpCaches()
 	if json, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = json.cacheCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = json.cacheCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected.Partitions[utils.CacheRatingProfilesTmp],
 		json.cacheCfg.Partitions[utils.CacheRatingProfilesTmp]) {
@@ -213,5 +213,24 @@ func TestCachesCfgAsMapInterface2(t *testing.T) {
 		if !reflect.DeepEqual(newMap[utils.ReplicationConnsCfg], eMap[utils.ReplicationConnsCfg]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ReplicationConnsCfg], newMap[utils.ReplicationConnsCfg])
 		}
+	}
+}
+
+func TestCacheCfgClone(t *testing.T) {
+	cs := &CacheCfg{
+		Partitions: map[string]*CacheParamCfg{
+			utils.MetaDestinations: {Limit: 10, TTL: 2, StaticTTL: true, Precache: true, Replicate: true},
+		},
+		ReplicationConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+	}
+	rcv := cs.Clone()
+	if !reflect.DeepEqual(cs, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(cs), utils.ToJSON(rcv))
+	}
+	if rcv.Partitions[utils.MetaDestinations].Limit = 0; cs.Partitions[utils.MetaDestinations].Limit != 10 {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ReplicationConns[0] = ""; cs.ReplicationConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

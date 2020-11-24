@@ -120,15 +120,14 @@ type FCTemplate struct {
 	pathSlice        []string        // Used when we set a NMItem to not recreate this slice for every itemsc
 }
 
-func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg, separator string) ([]*FCTemplate, error) {
-	retFields := make([]*FCTemplate, len(jsnCfgFlds))
-	var err error
+func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg, separator string) (retFields []*FCTemplate, err error) {
+	retFields = make([]*FCTemplate, len(jsnCfgFlds))
 	for i, jsnFld := range jsnCfgFlds {
 		if retFields[i], err = NewFCTemplateFromFCTemplateJsonCfg(jsnFld, separator); err != nil {
 			return nil, err
 		}
 	}
-	return retFields, nil
+	return
 }
 
 // InflateTemplates will replace the *template fields with template content out msgTpls
@@ -163,45 +162,48 @@ func InflateTemplates(fcts []*FCTemplate, msgTpls map[string][]*FCTemplate) ([]*
 	return fcts, nil
 }
 
-func (fc *FCTemplate) Clone() *FCTemplate {
-	cln := new(FCTemplate)
-	cln.Tag = fc.Tag
-	cln.Type = fc.Type
-	cln.Path = fc.Path
-	cln.pathItems = fc.pathItems.Clone()
-	cln.pathSlice = make([]string, len(fc.pathSlice))
-	for i, v := range fc.pathSlice {
-		cln.pathSlice[i] = v
+// Clone returns a deep copy of FCTemplate
+func (fc FCTemplate) Clone() (cln *FCTemplate) {
+	cln = &FCTemplate{
+		Tag:             fc.Tag,
+		Type:            fc.Type,
+		Path:            fc.Path,
+		pathItems:       fc.pathItems.Clone(),
+		Value:           fc.Value.Clone(),
+		Width:           fc.Width,
+		Strip:           fc.Strip,
+		Padding:         fc.Padding,
+		Mandatory:       fc.Mandatory,
+		AttributeID:     fc.AttributeID,
+		NewBranch:       fc.NewBranch,
+		Timezone:        fc.Timezone,
+		Blocker:         fc.Blocker,
+		Layout:          fc.Layout,
+		CostShiftDigits: fc.CostShiftDigits,
+		MaskDestID:      fc.MaskDestID,
+		MaskLen:         fc.MaskLen,
 	}
-	if len(fc.Filters) != 0 {
+	if fc.RoundingDecimals != nil {
+		cln.RoundingDecimals = utils.IntPointer(*fc.RoundingDecimals)
+	}
+	if fc.pathSlice != nil {
+		cln.pathSlice = make([]string, len(fc.pathSlice))
+		for i, v := range fc.pathSlice {
+			cln.pathSlice[i] = v
+		}
+	}
+	if fc.Filters != nil {
 		cln.Filters = make([]string, len(fc.Filters))
 		for idx, val := range fc.Filters {
 			cln.Filters[idx] = val
 		}
 	}
-	cln.Value = make(RSRParsers, len(fc.Value))
-	for idx, val := range fc.Value {
-		clnVal := *val
-		cln.Value[idx] = &clnVal
-	}
-	cln.Width = fc.Width
-	cln.Strip = fc.Strip
-	cln.Padding = fc.Padding
-	cln.Mandatory = fc.Mandatory
-	cln.AttributeID = fc.AttributeID
-	cln.NewBranch = fc.NewBranch
-	cln.Timezone = fc.Timezone
-	cln.Blocker = fc.Blocker
-	cln.Layout = fc.Layout
-	cln.CostShiftDigits = fc.CostShiftDigits
-	cln.RoundingDecimals = fc.RoundingDecimals
-	cln.MaskDestID = fc.MaskDestID
-	cln.MaskLen = fc.MaskLen
-	return cln
+	return
 }
 
 type FcTemplates map[string][]*FCTemplate
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (sCft FcTemplates) AsMapInterface(separator string) (initialMP map[string][]map[string]interface{}) {
 	initialMP = make(map[string][]map[string]interface{})
 	for key, value := range sCft {
@@ -213,6 +215,7 @@ func (sCft FcTemplates) AsMapInterface(separator string) (initialMP map[string][
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{}) {
 	mp = make(map[string]interface{})
 	if fc.Tag != utils.EmptyString {
@@ -228,16 +231,7 @@ func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{
 		mp[utils.FiltersCfg] = fc.Filters
 	}
 	if fc.Value != nil {
-		for i, item := range fc.Value {
-			if i != 0 {
-				mp[utils.ValueCfg] = mp[utils.ValueCfg].(string) + separator
-			}
-			if mp[utils.ValueCfg] == nil {
-				mp[utils.ValueCfg] = item.Rules
-			} else {
-				mp[utils.ValueCfg] = mp[utils.ValueCfg].(string) + item.Rules
-			}
-		}
+		mp[utils.ValueCfg] = fc.Value.GetRule(separator)
 	}
 	if fc.Width != 0 {
 		mp[utils.WidthCfg] = fc.Width
@@ -295,4 +289,20 @@ func (fc *FCTemplate) GetPathItems() utils.PathItems {
 func (fc *FCTemplate) ComputePath() {
 	fc.pathSlice = strings.Split(fc.Path, utils.NestingSep)
 	fc.pathItems = utils.NewPathItems(fc.pathSlice)
+}
+
+// Clone returns a deep copy of FcTemplates
+func (sCft FcTemplates) Clone() (cln FcTemplates) {
+	if sCft == nil {
+		return
+	}
+	cln = make(FcTemplates)
+	for k, fcs := range sCft {
+		fcln := make([]*FCTemplate, len(fcs))
+		for i, fc := range fcs {
+			fcln[i] = fc.Clone()
+		}
+		cln[k] = fcln
+	}
+	return
 }

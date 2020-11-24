@@ -290,3 +290,42 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
 	}
 }
+
+func TestSIPAgentCfgClone(t *testing.T) {
+	sa := &SIPAgentCfg{
+		Enabled:             true,
+		Listen:              "127.0.0.1:5060",
+		ListenNet:           "udp",
+		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		Timezone:            "UTC",
+		RetransmissionTimer: 1,
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID:            "OutboundAUTHDryRun",
+				Filters:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
+				Timezone:      "UTC",
+				RequestFields: []*FCTemplate{},
+				ReplyFields: []*FCTemplate{
+					{
+						Tag:       "SessionId",
+						Path:      "*rep.Session-Id",
+						Type:      utils.MetaVariable,
+						Mandatory: true,
+						Layout:    time.RFC3339,
+					},
+				},
+			},
+		},
+	}
+	rcv := sa.Clone()
+	if !reflect.DeepEqual(sa, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
+	}
+	if rcv.RequestProcessors[0].ID = ""; sa.RequestProcessors[0].ID != "OutboundAUTHDryRun" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.SessionSConns[0] = ""; sa.SessionSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+}

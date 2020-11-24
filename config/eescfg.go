@@ -40,7 +40,7 @@ func (eeS *EEsCfg) GetDefaultExporter() *EventExporterCfg {
 	return nil
 }
 
-func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltExpCfg *EventExporterCfg) (err error) {
+func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltExpCfg *EventExporterCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -50,7 +50,7 @@ func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][
 	if jsnCfg.Cache != nil {
 		for kJsn, vJsn := range *jsnCfg.Cache {
 			val := new(CacheParamCfg)
-			if err := val.loadFromJsonCfg(vJsn); err != nil {
+			if err := val.loadFromJSONCfg(vJsn); err != nil {
 				return err
 			}
 			eeS.Cache[kJsn] = val
@@ -60,10 +60,9 @@ func (eeS *EEsCfg) loadFromJsonCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][
 		eeS.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
 		for i, fID := range *jsnCfg.Attributes_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			eeS.AttributeSConns[i] = fID
 			if fID == utils.MetaInternal {
 				eeS.AttributeSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			} else {
-				eeS.AttributeSConns[i] = fID
 			}
 		}
 	}
@@ -93,36 +92,47 @@ func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTem
 			}
 			eeS.Exporters = append(eeS.Exporters, exp)
 		}
-		if err = exp.loadFromJsonCfg(jsnExp, msgTemplates, separator); err != nil {
+		if err = exp.loadFromJSONCfg(jsnExp, msgTemplates, separator); err != nil {
 			return
 		}
 	}
 	return
 }
 
-// Clone itself into a new EEsCfg
+// Clone returns a deep copy of EEsCfg
 func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
-	cln = new(EEsCfg)
-	cln.Enabled = eeS.Enabled
-	cln.AttributeSConns = make([]string, len(eeS.AttributeSConns))
+	cln = &EEsCfg{
+		Enabled:         eeS.Enabled,
+		AttributeSConns: make([]string, len(eeS.AttributeSConns)),
+		Cache:           make(map[string]*CacheParamCfg),
+		Exporters:       make([]*EventExporterCfg, len(eeS.Exporters)),
+	}
 	for idx, sConn := range eeS.AttributeSConns {
 		cln.AttributeSConns[idx] = sConn
 	}
-	cln.Cache = make(map[string]*CacheParamCfg)
 	for key, value := range eeS.Cache {
-		cln.Cache[key] = value
+		cln.Cache[key] = value.Clone()
 	}
-	cln.Exporters = make([]*EventExporterCfg, len(eeS.Exporters))
 	for idx, exp := range eeS.Exporters {
 		cln.Exporters[idx] = exp.Clone()
 	}
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:         eeS.Enabled,
-		utils.AttributeSConnsCfg: eeS.AttributeSConns,
+		utils.EnabledCfg: eeS.Enabled,
+	}
+	if eeS.AttributeSConns != nil {
+		attributeSConns := make([]string, len(eeS.AttributeSConns))
+		for i, item := range eeS.AttributeSConns {
+			attributeSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
+				attributeSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.AttributeSConnsCfg] = attributeSConns
 	}
 	if eeS.Cache != nil {
 		cache := make(map[string]interface{}, len(eeS.Cache))
@@ -161,7 +171,7 @@ type EventExporterCfg struct {
 	trailerFields []*FCTemplate
 }
 
-func (eeC *EventExporterCfg) loadFromJsonCfg(jsnEec *EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
+func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
 	if jsnEec == nil {
 		return
 	}
@@ -256,83 +266,78 @@ func (eeC *EventExporterCfg) TrailerFields() []*FCTemplate {
 	return eeC.trailerFields
 }
 
-func (eeC *EventExporterCfg) Clone() (cln *EventExporterCfg) {
-	cln = new(EventExporterCfg)
-	cln.ID = eeC.ID
-	cln.Type = eeC.Type
-	cln.ExportPath = eeC.ExportPath
-	if len(eeC.Tenant) != 0 {
-		cln.Tenant = make(RSRParsers, len(eeC.Tenant))
-		for idx, val := range eeC.Tenant {
-			clnVal := *val
-			cln.Tenant[idx] = &clnVal
-		}
+// Clone returns a deep copy of EventExporterCfg
+func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
+	cln = &EventExporterCfg{
+		ID:            eeC.ID,
+		Type:          eeC.Type,
+		ExportPath:    eeC.ExportPath,
+		Tenant:        eeC.Tenant.Clone(),
+		Timezone:      eeC.Timezone,
+		Flags:         eeC.Flags.Clone(),
+		AttributeSCtx: eeC.AttributeSCtx,
+		Synchronous:   eeC.Synchronous,
+		Attempts:      eeC.Attempts,
+		FieldSep:      eeC.FieldSep,
+		Fields:        make([]*FCTemplate, len(eeC.Fields)),
+		headerFields:  make([]*FCTemplate, len(eeC.headerFields)),
+		contentFields: make([]*FCTemplate, len(eeC.contentFields)),
+		trailerFields: make([]*FCTemplate, len(eeC.trailerFields)),
+		Opts:          make(map[string]interface{}),
 	}
-	cln.Timezone = eeC.Timezone
+
 	if len(eeC.Filters) != 0 {
 		cln.Filters = make([]string, len(eeC.Filters))
 		for idx, val := range eeC.Filters {
 			cln.Filters[idx] = val
 		}
 	}
-	cln.Flags = eeC.Flags
-	cln.AttributeSCtx = eeC.AttributeSCtx
 	if len(eeC.AttributeSIDs) != 0 {
 		cln.AttributeSIDs = make([]string, len(eeC.AttributeSIDs))
 		for idx, val := range eeC.AttributeSIDs {
 			cln.AttributeSIDs[idx] = val
 		}
 	}
-	cln.Synchronous = eeC.Synchronous
-	cln.Attempts = eeC.Attempts
-	cln.FieldSep = eeC.FieldSep
 
-	cln.Fields = make([]*FCTemplate, len(eeC.Fields))
 	for idx, fld := range eeC.Fields {
 		cln.Fields[idx] = fld.Clone()
 	}
-	cln.headerFields = make([]*FCTemplate, len(eeC.headerFields))
 	for idx, fld := range eeC.headerFields {
 		cln.headerFields[idx] = fld.Clone()
 	}
-	cln.contentFields = make([]*FCTemplate, len(eeC.contentFields))
 	for idx, fld := range eeC.contentFields {
 		cln.contentFields[idx] = fld.Clone()
 	}
-	cln.trailerFields = make([]*FCTemplate, len(eeC.trailerFields))
 	for idx, fld := range eeC.trailerFields {
 		cln.trailerFields[idx] = fld.Clone()
 	}
-	cln.Opts = make(map[string]interface{})
 	for k, v := range eeC.Opts {
 		cln.Opts[k] = v
 	}
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	flgs := eeC.Flags.SliceFlags()
+	if flgs == nil {
+		flgs = []string{}
+	}
 	initialMP = map[string]interface{}{
 		utils.IDCfg:               eeC.ID,
 		utils.TypeCfg:             eeC.Type,
 		utils.ExportPathCfg:       eeC.ExportPath,
+		utils.TenantCfg:           eeC.Tenant.GetRule(separator),
 		utils.FieldSepCfg:         eeC.FieldSep,
 		utils.TimezoneCfg:         eeC.Timezone,
 		utils.FiltersCfg:          eeC.Filters,
-		utils.FlagsCfg:            []string{},
+		utils.FlagsCfg:            flgs,
 		utils.AttributeContextCfg: eeC.AttributeSCtx,
 		utils.AttributeIDsCfg:     eeC.AttributeSIDs,
 		utils.SynchronousCfg:      eeC.Synchronous,
 		utils.AttemptsCfg:         eeC.Attempts,
 		utils.OptsCfg:             eeC.Opts,
 	}
-	if flags := eeC.Flags.SliceFlags(); len(flags) != 0 {
-		initialMP[utils.FlagsCfg] = flags
-	}
-	values := make([]string, len(eeC.Tenant))
-	for i, item := range eeC.Tenant {
-		values[i] = item.Rules
-	}
-	initialMP[utils.TenantCfg] = strings.Join(values, separator)
 
 	if eeC.Fields != nil {
 		fields := make([]map[string]interface{}, 0, len(eeC.Fields))

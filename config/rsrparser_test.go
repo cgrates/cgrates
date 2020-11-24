@@ -235,7 +235,7 @@ func TestRSRParserGetRule(t *testing.T) {
 	ruleStr := "constant;~*req.Account"
 	if rsrParsers, err := NewRSRParsers(ruleStr, utils.INFIELD_SEP); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if rule := rsrParsers.GetRule(); rule != ruleStr {
+	} else if rule := rsrParsers.GetRule(utils.INFIELD_SEP); rule != ruleStr {
 		t.Errorf("Expected: %q received: %q", ruleStr, rule)
 	}
 }
@@ -860,5 +860,20 @@ func TestRSRFldParse(t *testing.T) {
 		t.Error(err)
 	} else if out != eOut {
 		t.Errorf("expecting: %s, received: %s", eOut, out)
+	}
+}
+
+func TestRSRParsersClone(t *testing.T) {
+	rsrs, err := NewRSRParsers(`~subject:s/^0\d{9}$//{*duration}`, utils.INFIELD_SEP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cln := rsrs.Clone()
+	if !reflect.DeepEqual(rsrs, cln) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(rsrs), utils.ToJSON(cln))
+	}
+	cln[0].converters[0] = utils.NewDataConverterMustCompile(utils.MetaIP2Hex)
+	if reflect.DeepEqual(cln[0].converters[0], rsrs[0].converters[0]) {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

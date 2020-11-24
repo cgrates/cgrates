@@ -48,7 +48,7 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.loaderCgrCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsnCfg.loaderCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.loaderCgrCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.loaderCgrCfg))
@@ -62,8 +62,8 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 		"data_path": "./",
 		"disable_reverse": false,
 		"field_separator": ",",
-		"caches_conns":["*localhost"],
-		"scheduler_conns": ["*localhost"],
+		"caches_conns":["*internal","*localhost"],
+		"scheduler_conns": ["*internal","*localhost"],
 		"gapi_credentials": ".gapi/credentials.json",
 		"gapi_token": ".gapi/token.json"
 	},
@@ -73,8 +73,8 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 		utils.DataPathCfg:        "./",
 		utils.DisableReverseCfg:  false,
 		utils.FieldSepCfg:        ",",
-		utils.CachesConnsCfg:     []string{"*localhost"},
-		utils.SchedulerConnsCfg:  []string{"*localhost"},
+		utils.CachesConnsCfg:     []string{"*internal", "*localhost"},
+		utils.SchedulerConnsCfg:  []string{"*internal", "*localhost"},
 		utils.GapiCredentialsCfg: json.RawMessage(`".gapi/credentials.json"`),
 		utils.GapiTokenCfg:       json.RawMessage(`".gapi/token.json"`),
 	}
@@ -82,5 +82,34 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.loaderCgrCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestLoaderCgrCfgClone(t *testing.T) {
+	ban := &LoaderCgrCfg{
+		TpID:            "randomID",
+		DataPath:        "./",
+		DisableReverse:  true,
+		FieldSeparator:  rune(';'),
+		CachesConns:     []string{"*internal:*caches"},
+		SchedulerConns:  []string{"*internal:*scheduler"},
+		GapiCredentials: json.RawMessage{12, 13, 60},
+		GapiToken:       json.RawMessage{13, 16},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.CachesConns[0] = ""; ban.CachesConns[0] != "*internal:*caches" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.SchedulerConns[0] = ""; ban.SchedulerConns[0] != "*internal:*scheduler" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.GapiCredentials[0] = 0; ban.GapiCredentials[0] != 12 {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.GapiToken[0] = 0; ban.GapiToken[0] != 13 {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

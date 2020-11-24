@@ -133,7 +133,7 @@ func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
 	if err != nil {
 		return err
 	}
-	xmlElmts := xmlquery.Find(doc, rdr.Config().XmlRootPath.AsString("/", true))
+	xmlElmts := xmlquery.Find(doc, rdr.Config().XMLRootPath.AsString("/", true))
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
@@ -141,7 +141,7 @@ func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
 	for _, xmlElmt := range xmlElmts {
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
-			config.NewXmlProvider(xmlElmt, rdr.Config().XmlRootPath), reqVars,
+			config.NewXmlProvider(xmlElmt, rdr.Config().XMLRootPath), reqVars,
 			nil, nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,

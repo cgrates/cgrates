@@ -2379,7 +2379,7 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 			FilterIDs: attr.FilterIDs,
 			Path:      attr.Path,
 			Type:      attr.Type,
-			Value:     attr.Value.GetRule(),
+			Value:     attr.Value.GetRule(utils.INFIELD_SEP),
 		}
 	}
 	if attrPrf.ActivationInterval != nil {

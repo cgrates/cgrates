@@ -36,7 +36,7 @@ type RateSCfg struct {
 	RateNestedFields        bool
 }
 
-func (rCfg *RateSCfg) loadFromJsonCfg(jsnCfg *RateSJsonCfg) (err error) {
+func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -101,6 +101,7 @@ func (rCfg *RateSCfg) loadFromJsonCfg(jsnCfg *RateSJsonCfg) (err error) {
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (rCfg *RateSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:            rCfg.Enabled,
@@ -150,6 +151,61 @@ func (rCfg *RateSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 			rateSufixIndexedFields[i] = item
 		}
 		initialMP[utils.RateSuffixIndexedFieldsCfg] = rateSufixIndexedFields
+	}
+	return
+}
+
+// Clone returns a deep copy of RateSCfg
+func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
+	cln = &RateSCfg{
+		Enabled:            rCfg.Enabled,
+		IndexedSelects:     rCfg.IndexedSelects,
+		NestedFields:       rCfg.NestedFields,
+		RateIndexedSelects: rCfg.RateIndexedSelects,
+		RateNestedFields:   rCfg.RateNestedFields,
+	}
+	if rCfg.StringIndexedFields != nil {
+		idx := make([]string, len(*rCfg.StringIndexedFields))
+		for i, dx := range *rCfg.StringIndexedFields {
+			idx[i] = dx
+		}
+		cln.StringIndexedFields = &idx
+	}
+	if rCfg.PrefixIndexedFields != nil {
+		idx := make([]string, len(*rCfg.PrefixIndexedFields))
+		for i, dx := range *rCfg.PrefixIndexedFields {
+			idx[i] = dx
+		}
+		cln.PrefixIndexedFields = &idx
+	}
+	if rCfg.SuffixIndexedFields != nil {
+		idx := make([]string, len(*rCfg.SuffixIndexedFields))
+		for i, dx := range *rCfg.SuffixIndexedFields {
+			idx[i] = dx
+		}
+		cln.SuffixIndexedFields = &idx
+	}
+
+	if rCfg.RateStringIndexedFields != nil {
+		idx := make([]string, len(*rCfg.RateStringIndexedFields))
+		for i, dx := range *rCfg.RateStringIndexedFields {
+			idx[i] = dx
+		}
+		cln.RateStringIndexedFields = &idx
+	}
+	if rCfg.RatePrefixIndexedFields != nil {
+		idx := make([]string, len(*rCfg.RatePrefixIndexedFields))
+		for i, dx := range *rCfg.RatePrefixIndexedFields {
+			idx[i] = dx
+		}
+		cln.RatePrefixIndexedFields = &idx
+	}
+	if rCfg.RateSuffixIndexedFields != nil {
+		idx := make([]string, len(*rCfg.RateSuffixIndexedFields))
+		for i, dx := range *rCfg.RateSuffixIndexedFields {
+			idx[i] = dx
+		}
+		cln.RateSuffixIndexedFields = &idx
 	}
 	return
 }

@@ -351,11 +351,12 @@ func TestFCTemplateInflate3(t *testing.T) {
 
 func TestFCTemplateClone(t *testing.T) {
 	smpl := &FCTemplate{
-		Tag:     "Tenant",
-		Type:    "*composed",
-		Path:    "Tenant",
-		Filters: []string{"Filter1", "Filter2"},
-		Value:   NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+		Tag:              "Tenant",
+		Type:             "*composed",
+		Path:             "Tenant",
+		Filters:          []string{"Filter1", "Filter2"},
+		Value:            NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+		RoundingDecimals: utils.IntPointer(2),
 	}
 	smpl.ComputePath()
 	cloned := smpl.Clone()
@@ -363,11 +364,12 @@ func TestFCTemplateClone(t *testing.T) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(smpl), utils.ToJSON(cloned))
 	}
 	initialSmpl := &FCTemplate{
-		Tag:     "Tenant",
-		Type:    "*composed",
-		Path:    "Tenant",
-		Filters: []string{"Filter1", "Filter2"},
-		Value:   NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+		Tag:              "Tenant",
+		Type:             "*composed",
+		Path:             "Tenant",
+		Filters:          []string{"Filter1", "Filter2"},
+		Value:            NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+		RoundingDecimals: utils.IntPointer(2),
 	}
 	initialSmpl.ComputePath()
 	smpl.Filters = []string{"SingleFilter"}
@@ -495,5 +497,44 @@ func TestFCTemplateAsMapInterface1(t *testing.T) {
 		} else if !reflect.DeepEqual(eMap[utils.MetaASR], rcv[utils.MetaASR]) {
 			t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(eMap[utils.MetaASR]), utils.ToJSON(rcv[utils.MetaASR]))
 		}
+	}
+}
+
+func TestFCTemplatesClone(t *testing.T) {
+	smpl := FcTemplates{
+		utils.MetaErr: {{
+			Tag:              "Tenant",
+			Type:             "*composed",
+			Path:             "Tenant",
+			Filters:          []string{"Filter1", "Filter2"},
+			Value:            NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			RoundingDecimals: utils.IntPointer(2),
+		}},
+	}
+	smpl[utils.MetaErr][0].ComputePath()
+	cloned := smpl.Clone()
+	if !reflect.DeepEqual(cloned, smpl) {
+		t.Errorf("expected: %s ,received: %s", utils.ToJSON(smpl), utils.ToJSON(cloned))
+	}
+	initialSmpl := FcTemplates{
+		utils.MetaErr: {{
+			Tag:              "Tenant",
+			Type:             "*composed",
+			Path:             "Tenant",
+			Filters:          []string{"Filter1", "Filter2"},
+			Value:            NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			RoundingDecimals: utils.IntPointer(2),
+		}},
+	}
+	initialSmpl[utils.MetaErr][0].ComputePath()
+	smpl[utils.MetaErr] = nil
+	if !reflect.DeepEqual(cloned, initialSmpl) {
+		t.Errorf("expected: %s ,received: %s", utils.ToJSON(initialSmpl), utils.ToJSON(cloned))
+	}
+
+	smpl = nil
+	cloned = smpl.Clone()
+	if !reflect.DeepEqual(cloned, smpl) {
+		t.Errorf("expected: %s ,received: %s", utils.ToJSON(smpl), utils.ToJSON(cloned))
 	}
 }

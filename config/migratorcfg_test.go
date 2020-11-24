@@ -77,7 +77,7 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if cfgJson, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = cfgJson.migratorCgrCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = cfgJson.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfgJson.migratorCgrCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJson.migratorCgrCfg))
@@ -214,4 +214,49 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 
+}
+
+func TestMigratorCgrCfgClone(t *testing.T) {
+	sa := &MigratorCgrCfg{
+		OutDataDBType:     utils.REDIS,
+		OutDataDBHost:     "127.0.0.1",
+		OutDataDBPort:     "6379",
+		OutDataDBName:     "10",
+		OutDataDBUser:     utils.CGRATES,
+		OutDataDBPassword: utils.EmptyString,
+		OutDataDBEncoding: utils.MSGPACK,
+		OutStorDBType:     utils.MYSQL,
+		OutStorDBHost:     "127.0.0.1",
+		OutStorDBPort:     "3306",
+		OutStorDBName:     utils.CGRATES,
+		OutStorDBUser:     utils.CGRATES,
+		OutStorDBPassword: utils.EmptyString,
+		UsersFilters:      []string{utils.Account},
+		OutDataDBOpts: map[string]interface{}{
+			utils.RedisSentinelNameCfg:       utils.EmptyString,
+			utils.RedisClusterCfg:            true,
+			utils.RedisClusterSyncCfg:        "10s",
+			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
+		},
+		OutStorDBOpts: map[string]interface{}{
+			utils.RedisSentinelNameCfg: utils.EmptyString,
+		},
+	}
+	rcv := sa.Clone()
+	if !reflect.DeepEqual(sa, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
+	}
+	if rcv.UsersFilters[0] = ""; sa.UsersFilters[0] != utils.Account {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.OutDataDBOpts[utils.RedisSentinelNameCfg] = "1"; sa.OutDataDBOpts[utils.RedisSentinelNameCfg] != "" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.OutStorDBOpts[utils.RedisSentinelNameCfg] = "1"; sa.OutStorDBOpts[utils.RedisSentinelNameCfg] != "" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
 }
