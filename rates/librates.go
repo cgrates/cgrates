@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func newRatesWithWinner(rIt *rateWithTimes) *ratesWithWinner {
@@ -225,6 +226,15 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 			if iRt.Increment == time.Duration(0) {
 				return nil, fmt.Errorf("zero increment to be charged within rate: <%s>", rt.UID())
 			}
+			if j == 0 && rt.IntervalRates[j].FixedFee != 0 { // Add FixedFee
+				rIcmts = append(rIcmts, &engine.RateSIncrement{
+					UsageStart:        iRtUsageSIdx,
+					Rate:              rt.Rate,
+					IntervalRateIndex: j,
+					CompressFactor:    1,
+					Usage:             utils.InvalidDuration,
+				})
+			}
 			iRtUsage := iRtUsageEIdx - iRtUsageSIdx
 			intUsage := int64(iRtUsage)
 			intIncrm := int64(iRt.Increment)
@@ -234,10 +244,10 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 			}
 			rIcrm := &engine.RateSIncrement{
 				UsageStart:        iRtUsageSIdx,
-				Usage:             iRtUsage,
 				Rate:              rt.Rate,
 				IntervalRateIndex: j,
 				CompressFactor:    cmpFactor,
+				Usage:             iRtUsage,
 			}
 			if len(rIcmts) != 0 && rIcrm.CompressEquals(rIcmts[len(rIcmts)-1], false) {
 				rIcmts[len(rIcmts)-1].CompressFactor += rIcrm.CompressFactor

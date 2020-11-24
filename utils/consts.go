@@ -878,6 +878,7 @@ const (
 	MetaRounding             = "*rounding"
 	StatsNA                  = -1.0
 	RateProfileMatched       = "RateProfileMatched"
+	InvalidDuration          = time.Duration(-1)
 )
 
 // Migrator Action

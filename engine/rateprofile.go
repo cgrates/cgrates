@@ -239,15 +239,21 @@ func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement, full bool) (eq
 func (rIcr *RateSIncrement) Cost() *decimal.Big {
 	if rIcr.cost == nil {
 		icrRt := rIcr.Rate.IntervalRates[rIcr.IntervalRateIndex]
-		icrCost := icrRt.DecimalRecurrentFee()
+		if rIcr.Usage == utils.InvalidDuration { // FixedFee
+			rIcr.cost = icrRt.DecimalFixedFee()
+		} else {
+			rIcr.cost = icrRt.DecimalRecurrentFee()
+		}
 		if icrRt.Unit != icrRt.Increment {
-			icrCost = utils.DivideBig(
-				utils.MultiplyBig(icrCost, icrRt.DecimalIncrement()),
+			rIcr.cost = utils.DivideBig(
+				utils.MultiplyBig(rIcr.cost, icrRt.DecimalIncrement()),
 				icrRt.DecimalUnit())
 		}
-		rIcr.cost = utils.MultiplyBig(
-			icrCost,
-			new(decimal.Big).SetUint64(uint64(rIcr.CompressFactor)))
+		if rIcr.CompressFactor != 1 {
+			rIcr.cost = utils.MultiplyBig(
+				rIcr.cost,
+				new(decimal.Big).SetUint64(uint64(rIcr.CompressFactor)))
+		}
 	}
 	return rIcr.cost
 }
