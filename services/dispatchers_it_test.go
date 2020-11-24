@@ -71,7 +71,7 @@ func TestDispatcherSReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err = cfg.V1ReloadConfig(&config.ConfigReloadArgs{
+	if err = cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path: path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatchers", "dispatchers_mysql"),
 
 		Section: config.DispatcherSJson,

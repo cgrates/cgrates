@@ -958,7 +958,7 @@ func TestParseHierarchyClone(t *testing.T) {
 	eHP := HierarchyPath([]string{"Root", "CGRateS"})
 	rcv := eHP.Clone()
 	if !reflect.DeepEqual(eHP, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", ToJSON(eHP), ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", ToJSON(eHP), ToJSON(rcv))
 	}
 	if rcv[0] = ""; eHP[0] != "Root" {
 		t.Errorf("Expected clone to not modify the cloned")
@@ -966,7 +966,7 @@ func TestParseHierarchyClone(t *testing.T) {
 	eHP = nil
 	rcv = eHP.Clone()
 	if !reflect.DeepEqual(eHP, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", ToJSON(eHP), ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", ToJSON(eHP), ToJSON(rcv))
 	}
 }
 

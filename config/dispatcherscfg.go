@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,7 +33,7 @@ type DispatcherSCfg struct {
 	NestedFields        bool
 }
 
-func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
+func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -70,10 +68,9 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 		dps.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
 		for idx, connID := range *jsnCfg.Attributes_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			dps.AttributeSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				dps.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			} else {
-				dps.AttributeSConns[idx] = connID
 			}
 		}
 	}
@@ -83,6 +80,7 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (dps *DispatcherSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        dps.Enabled,
@@ -113,13 +111,50 @@ func (dps *DispatcherSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if dps.AttributeSConns != nil {
 		attributeSConns := make([]string, len(dps.AttributeSConns))
 		for i, item := range dps.AttributeSConns {
+			attributeSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes)
-			} else {
-				attributeSConns[i] = item
+				attributeSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.AttributeSConnsCfg] = attributeSConns
+	}
+	return
+}
+
+// Clone returns a deep copy of DispatcherSCfg
+func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
+	cln = &DispatcherSCfg{
+		Enabled:        dps.Enabled,
+		IndexedSelects: dps.IndexedSelects,
+		NestedFields:   dps.NestedFields,
+	}
+
+	if dps.AttributeSConns != nil {
+		cln.AttributeSConns = make([]string, len(dps.AttributeSConns))
+		for i, conn := range dps.AttributeSConns {
+			cln.AttributeSConns[i] = conn
+		}
+	}
+	if dps.StringIndexedFields != nil {
+		idx := make([]string, len(*dps.StringIndexedFields))
+		for i, dx := range *dps.StringIndexedFields {
+			idx[i] = dx
+		}
+		cln.StringIndexedFields = &idx
+	}
+	if dps.PrefixIndexedFields != nil {
+		idx := make([]string, len(*dps.PrefixIndexedFields))
+		for i, dx := range *dps.PrefixIndexedFields {
+			idx[i] = dx
+		}
+		cln.PrefixIndexedFields = &idx
+	}
+	if dps.SuffixIndexedFields != nil {
+		idx := make([]string, len(*dps.SuffixIndexedFields))
+		for i, dx := range *dps.SuffixIndexedFields {
+			idx[i] = dx
+		}
+		cln.SuffixIndexedFields = &idx
 	}
 	return
 }

@@ -2853,7 +2853,7 @@ func TestEventCostfieldAsInterface(t *testing.T) {
 	if rcv, err := eventCost.fieldAsInterface([]string{utils.Accounting, "test1"}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eBalanceCharge, rcv) {
-		t.Errorf("\nExpecting: %+v, \nreceived: %+v", utils.ToJSON(eBalanceCharge), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v, \nreceived: %+v", utils.ToJSON(eBalanceCharge), utils.ToJSON(rcv))
 	}
 	// case utils.Rating:
 	eventCost = &EventCost{

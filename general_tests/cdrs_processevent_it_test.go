@@ -318,7 +318,7 @@ func testV1CDRsProcessEventRalS(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Errorf("Expecting: 1, received: %+v", len(cdrs))
 	} else if !reflect.DeepEqual(cdrs[0].Cost, 0.0204) {
-		t.Errorf("\nExpected: %+v,\nreceived: %+v", 0.0204, utils.ToJSON(cdrs[0]))
+		t.Errorf("Expected: %+v,\nreceived: %+v", 0.0204, utils.ToJSON(cdrs[0]))
 	}
 }
 
@@ -391,7 +391,7 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 	cdrs[0].SetupTime = cdrs[0].SetupTime.UTC()
 	cdrs[0].AnswerTime = cdrs[0].AnswerTime.UTC()
 	if !reflect.DeepEqual(eOut[0], cdrs[0]) {
-		t.Errorf("\nExpected: %+v,\nreceived: %+v", utils.ToJSON(eOut[0]), utils.ToJSON(cdrs[0]))
+		t.Errorf("Expected: %+v,\nreceived: %+v", utils.ToJSON(eOut[0]), utils.ToJSON(cdrs[0]))
 	}
 	var metrics map[string]string
 	statMetrics := map[string]string{
@@ -685,7 +685,7 @@ func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Errorf("Expecting: 1, received: %+v", len(cdrs))
 	} else if !reflect.DeepEqual(cdrs[0].Cost, 0.0204) {
-		t.Errorf("\nExpected: %+v,\nreceived: %+v", 0.0204, utils.ToJSON(cdrs[0]))
+		t.Errorf("Expected: %+v,\nreceived: %+v", 0.0204, utils.ToJSON(cdrs[0]))
 	}
 
 	argsEv.Flags = append(argsEv.Flags, utils.MetaRerate)

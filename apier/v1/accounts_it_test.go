@@ -271,7 +271,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
 		if value.ID == "testBalanceID" {
 			if !reflect.DeepEqual(eOut, value.Timings) {
-				t.Errorf("\nExpecting %+v, \nreceived: %+v", utils.ToJSON(eOut), utils.ToJSON(value.Timings))
+				t.Errorf("Expecting %+v, \nreceived: %+v", utils.ToJSON(eOut), utils.ToJSON(value.Timings))
 			}
 			break
 		}

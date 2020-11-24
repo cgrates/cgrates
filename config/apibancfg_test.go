@@ -78,7 +78,7 @@ func TestAPIBanCfgAsMapInterface(t *testing.T) {
 	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
 		t.Error(err)
 	} else if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -89,7 +89,7 @@ func TestAPIBanCfgClone(t *testing.T) {
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
 	if rcv.Keys[0] = ""; ban.Keys[0] != "key1" {
 		t.Errorf("Expected clone to not modify the cloned")

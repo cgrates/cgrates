@@ -55,7 +55,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.routeSCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.routeSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.routeSCfg))
@@ -121,5 +121,50 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.routeSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestRouteSCfgClone(t *testing.T) {
+	ban := &RouteSCfg{
+		Enabled:             true,
+		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index1", "*req.index2"},
+		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "conn1"},
+		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"},
+		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS), "conn1"},
+		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "conn1"},
+		RateSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), "conn1"},
+		DefaultRatio:        10,
+		NestedFields:        true,
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.AttributeSConns[1] = ""; ban.AttributeSConns[1] != "conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ResourceSConns[1] = ""; ban.ResourceSConns[1] != "conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.RALsConns[1] = ""; ban.RALsConns[1] != "conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.RateSConns[1] = ""; ban.RateSConns[1] != "conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.PrefixIndexedFields)[0] = ""; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

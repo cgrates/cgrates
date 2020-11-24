@@ -42,7 +42,7 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 		Layout:  time.RFC3339,
 	}
 	expected.ComputePath()
-	if rcv, err := NewFCTemplateFromFCTemplateJsonCfg(jsonCfg, utils.INFIELD_SEP); err != nil {
+	if rcv, err := NewFCTemplateFromFCTemplateJSONCfg(jsonCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))
@@ -130,7 +130,7 @@ func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 	for _, v := range expected {
 		v.ComputePath()
 	}
-	if rcv, err := FCTemplatesFromFCTemplatesJsonCfg(jsnCfgs, utils.INFIELD_SEP); err != nil {
+	if rcv, err := FCTemplatesFromFCTemplatesJSONCfg(jsnCfgs, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))

@@ -451,7 +451,7 @@ func TestAttributeIndexer(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -516,7 +516,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -633,7 +633,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -746,7 +746,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -859,7 +859,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -954,7 +954,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 		return
 	}
 	attrPrf1 := &AttributeProfile{
@@ -1070,7 +1070,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1182,7 +1182,7 @@ func TestAttributeProcessValue(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1256,7 +1256,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1341,7 +1341,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1416,7 +1416,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1498,7 +1498,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1585,7 +1585,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1664,7 +1664,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1745,7 +1745,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1834,7 +1834,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		b.Error(err)
 	} else if test != true {
-		b.Errorf("\nExpecting: true got :%+v", test)
+		b.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1897,7 +1897,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		b.Error(err)
 	} else if test != true {
-		b.Errorf("\nExpecting: true got :%+v", test)
+		b.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1952,7 +1952,7 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrID := "*sum:*req.Field2:10|~*req.NumField|20"
 	expAttrPrf1 := &AttributeProfile{
@@ -2772,7 +2772,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 	attrPrf := &AttributeProfile{
 		Tenant:    "cgrates.org",

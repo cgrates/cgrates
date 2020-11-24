@@ -109,7 +109,7 @@ func TestActionPlanClone(t *testing.T) {
 	}
 	at1Cloned := clned.(*ActionPlan)
 	if !reflect.DeepEqual(at1, at1Cloned) {
-		t.Errorf("\nExpecting: %+v,\n received: %+v", at1, at1Cloned)
+		t.Errorf("Expecting: %+v,\n received: %+v", at1, at1Cloned)
 	}
 }
 
@@ -120,7 +120,7 @@ func TestActionTimingClone(t *testing.T) {
 		Weight:    0.7,
 	}
 	if cloned := at.Clone(); !reflect.DeepEqual(at, cloned) {
-		t.Errorf("\nExpecting: %+v,\n received: %+v", at, cloned)
+		t.Errorf("Expecting: %+v,\n received: %+v", at, cloned)
 	}
 }
 

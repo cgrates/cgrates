@@ -84,8 +84,8 @@ func TestMfEnvReaderITRead(t *testing.T) {
 }
 
 func TestMfHttpAgentMultipleFields(t *testing.T) {
-	if len(mfCgrCfg.HttpAgentCfg()) != 2 {
-		t.Errorf("Expected: 2, received: %+v", len(mfCgrCfg.HttpAgentCfg()))
+	if len(mfCgrCfg.HTTPAgentCfg()) != 2 {
+		t.Errorf("Expected: 2, received: %+v", len(mfCgrCfg.HTTPAgentCfg()))
 	}
 	expected := HttpAgentCfgs{
 		{
@@ -195,7 +195,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 		}
 	}
 
-	if !reflect.DeepEqual(mfCgrCfg.HttpAgentCfg(), expected) {
-		t.Errorf("Expected: %+v\n, received: %+v", utils.ToJSON(expected), utils.ToJSON(mfCgrCfg.HttpAgentCfg()))
+	if !reflect.DeepEqual(mfCgrCfg.HTTPAgentCfg(), expected) {
+		t.Errorf("Expected: %+v\n, received: %+v", utils.ToJSON(expected), utils.ToJSON(mfCgrCfg.HTTPAgentCfg()))
 	}
 }

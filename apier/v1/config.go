@@ -39,7 +39,7 @@ func (cSv1 *ConfigSv1) GetConfig(section *config.SectionWithOpts, reply *map[str
 }
 
 // ReloadConfig reloads the configuration
-func (cSv1 *ConfigSv1) ReloadConfig(args *config.ConfigReloadArgs, reply *string) (err error) {
+func (cSv1 *ConfigSv1) ReloadConfig(args *config.ReloadArgs, reply *string) (err error) {
 	return cSv1.cfg.V1ReloadConfig(args, reply)
 }
 

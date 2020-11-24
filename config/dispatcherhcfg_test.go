@@ -86,7 +86,7 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.dispatcherHCfg.loadFromJsonCfg(jsonCfg); err != nil {
+	} else if err = jsnCfg.dispatcherHCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.dispatcherHCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.dispatcherHCfg))
@@ -148,7 +148,7 @@ func TestDispatcherCfgParseWithNanoSec(t *testing.T) {
 	expErrMessage := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.dispatcherHCfg.loadFromJsonCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
+	} else if err = jsnCfg.dispatcherHCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
 		t.Errorf("Expected %+v \n, recevied %+v", expErrMessage, err)
 	}
 }
@@ -225,5 +225,47 @@ func TestDispatcherHCfgAsMapInterface2(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.dispatcherHCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
+
+func TestDispatcherHCfgClone(t *testing.T) {
+	ban := &DispatcherHCfg{
+		Enabled:          true,
+		DispatchersConns: []string{"*conn1", "*conn2"},
+		Hosts: map[string][]*DispatcherHRegistarCfg{
+			utils.MetaDefault: {
+				{
+					ID:                "Host1",
+					RegisterTransport: utils.MetaJSON,
+				},
+				{
+					ID:                "Host2",
+					RegisterTransport: utils.MetaGOB,
+				},
+			},
+			"cgrates.net": {
+				{
+					ID:                "Host1",
+					RegisterTransport: utils.MetaJSON,
+					RegisterTLS:       true,
+				},
+				{
+					ID:                "Host2",
+					RegisterTransport: utils.MetaGOB,
+					RegisterTLS:       true,
+				},
+			},
+		},
+		RegisterInterval: 5,
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.DispatchersConns[0] = ""; ban.DispatchersConns[0] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.Hosts[utils.MetaDefault][0].ID = ""; ban.Hosts[utils.MetaDefault][0].ID != "Host1" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

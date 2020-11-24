@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//NewObjectDP constructs a utils.DataProvider
+// NewObjectDP constructs a utils.DataProvider
 func NewObjectDP(obj interface{}) (dP utils.DataProvider) {
 	dP = &ObjectDP{
 		obj:   obj,
@@ -35,6 +35,7 @@ func NewObjectDP(obj interface{}) (dP utils.DataProvider) {
 	return
 }
 
+// ObjectDP implements the DataProvider for any interface{}
 type ObjectDP struct {
 	obj   interface{}
 	cache map[string]interface{}

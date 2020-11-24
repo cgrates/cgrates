@@ -24,6 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// EEsCfg the config for Event Exporters
 type EEsCfg struct {
 	Enabled         bool
 	AttributeSConns []string
@@ -31,6 +32,7 @@ type EEsCfg struct {
 	Exporters       []*EventExporterCfg
 }
 
+// GetDefaultExporter returns the exporter with the *default id
 func (eeS *EEsCfg) GetDefaultExporter() *EventExporterCfg {
 	for _, es := range eeS.Exporters {
 		if es.ID == utils.MetaDefault {
@@ -151,6 +153,7 @@ func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]interf
 	return
 }
 
+// EventExporterCfg the config for a Event Exporter
 type EventExporterCfg struct {
 	ID            string
 	Type          string
@@ -223,7 +226,7 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		eeC.headerFields = make([]*FCTemplate, 0)
 		eeC.contentFields = make([]*FCTemplate, 0)
 		eeC.trailerFields = make([]*FCTemplate, 0)
-		eeC.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnEec.Fields, separator)
+		eeC.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnEec.Fields, separator)
 		if err != nil {
 			return
 		}
@@ -254,14 +257,17 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 	return
 }
 
+// HeaderFields returns the fields that have *hdr prefix
 func (eeC *EventExporterCfg) HeaderFields() []*FCTemplate {
 	return eeC.headerFields
 }
 
+// ContentFields returns the fields that do not have *hdr or *trl prefix
 func (eeC *EventExporterCfg) ContentFields() []*FCTemplate {
 	return eeC.contentFields
 }
 
+// TrailerFields returns the fields that have *trl prefix
 func (eeC *EventExporterCfg) TrailerFields() []*FCTemplate {
 	return eeC.trailerFields
 }

@@ -34,7 +34,7 @@ type AttributeSCfg struct {
 	NestedFields        bool
 }
 
-func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error) {
+func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -45,10 +45,9 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 		alS.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
 		for idx, connID := range *jsnCfg.Stats_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			alS.StatSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				alS.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
-			} else {
-				alS.StatSConns[idx] = connID
 			}
 		}
 	}
@@ -56,10 +55,9 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 		alS.ResourceSConns = make([]string, len(*jsnCfg.Resources_conns))
 		for idx, connID := range *jsnCfg.Resources_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			alS.ResourceSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				alS.ResourceSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
-			} else {
-				alS.ResourceSConns[idx] = connID
 			}
 		}
 	}
@@ -67,10 +65,9 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 		alS.ApierSConns = make([]string, len(*jsnCfg.Apiers_conns))
 		for idx, connID := range *jsnCfg.Apiers_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			alS.ApierSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				alS.ApierSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
-			} else {
-				alS.ApierSConns[idx] = connID
 			}
 		}
 	}
@@ -107,12 +104,10 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        alS.Enabled,
-		utils.StatSConnsCfg:     alS.StatSConns,
-		utils.ResourceSConnsCfg: alS.ResourceSConns,
-		utils.ApierSConnsCfg:    alS.ApierSConns,
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.ProcessRunsCfg:    alS.ProcessRuns,
 		utils.NestedFieldsCfg:   alS.NestedFields,
@@ -137,6 +132,88 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 			suffixIndexedFields[i] = item
 		}
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
+	}
+	if alS.StatSConns != nil {
+		statSConns := make([]string, len(alS.StatSConns))
+		for i, item := range alS.StatSConns {
+			statSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+				statSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.StatSConnsCfg] = statSConns
+	}
+
+	if alS.ResourceSConns != nil {
+		resourceSConns := make([]string, len(alS.ResourceSConns))
+		for i, item := range alS.ResourceSConns {
+			resourceSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources) {
+				resourceSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.ResourceSConnsCfg] = resourceSConns
+	}
+	if alS.ApierSConns != nil {
+		apierSConns := make([]string, len(alS.ApierSConns))
+		for i, item := range alS.ApierSConns {
+			apierSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier) {
+				apierSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.ApierSConnsCfg] = apierSConns
+	}
+	return
+}
+
+// Clone returns a deep copy of AttributeSCfg
+func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
+	cln = &AttributeSCfg{
+		Enabled:        alS.Enabled,
+		IndexedSelects: alS.IndexedSelects,
+		NestedFields:   alS.NestedFields,
+		ProcessRuns:    alS.ProcessRuns,
+	}
+	if alS.ResourceSConns != nil {
+		cln.ResourceSConns = make([]string, len(alS.ResourceSConns))
+		for i, con := range alS.ResourceSConns {
+			cln.ResourceSConns[i] = con
+		}
+	}
+	if alS.StatSConns != nil {
+		cln.StatSConns = make([]string, len(alS.StatSConns))
+		for i, con := range alS.StatSConns {
+			cln.StatSConns[i] = con
+		}
+	}
+	if alS.ApierSConns != nil {
+		cln.ApierSConns = make([]string, len(alS.ApierSConns))
+		for i, con := range alS.ApierSConns {
+			cln.ApierSConns[i] = con
+		}
+	}
+
+	if alS.StringIndexedFields != nil {
+		idx := make([]string, len(*alS.StringIndexedFields))
+		for i, dx := range *alS.StringIndexedFields {
+			idx[i] = dx
+		}
+		cln.StringIndexedFields = &idx
+	}
+	if alS.PrefixIndexedFields != nil {
+		idx := make([]string, len(*alS.PrefixIndexedFields))
+		for i, dx := range *alS.PrefixIndexedFields {
+			idx[i] = dx
+		}
+		cln.PrefixIndexedFields = &idx
+	}
+	if alS.SuffixIndexedFields != nil {
+		idx := make([]string, len(*alS.SuffixIndexedFields))
+		for i, dx := range *alS.SuffixIndexedFields {
+			idx[i] = dx
+		}
+		cln.SuffixIndexedFields = &idx
 	}
 	return
 }

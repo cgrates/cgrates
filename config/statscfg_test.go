@@ -49,7 +49,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.statsCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsonCfg.statsCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.statsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.statsCfg))
@@ -57,13 +57,13 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 }
 
 func TestStatSCfgloadFromJsonCfgCase2(t *testing.T) {
-	statscfgJson := &StatServJsonCfg{
+	statscfgJSON := &StatServJsonCfg{
 		Store_interval: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.statsCfg.loadFromJsonCfg(statscfgJson); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.statsCfg.loadFromJSONCfg(statscfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -118,5 +118,34 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.statsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
+	}
+}
+func TestStatSCfgClone(t *testing.T) {
+	ban := &StatSCfg{
+		Enabled:                true,
+		IndexedSelects:         true,
+		StoreInterval:          2,
+		StoreUncompressedLimit: 10,
+		ThresholdSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StringIndexedFields:    &[]string{"*req.index1"},
+		PrefixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+		NestedFields:           true,
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.PrefixIndexedFields)[0] = ""; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

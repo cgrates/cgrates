@@ -524,7 +524,7 @@ func TestRITimingClone2(t *testing.T) {
 func TestRIRateClone(t *testing.T) {
 	var rit, cln RIRate
 	if cloned := rit.Clone(); !reflect.DeepEqual(cln, *cloned) {
-		t.Errorf("\nExpecting: %+v,\n received: %+v", cln, *cloned)
+		t.Errorf("Expecting: %+v,\n received: %+v", cln, *cloned)
 	}
 	rit = RIRate{
 		ConnectFee:       0.7,
@@ -562,7 +562,7 @@ func TestRIRateClone(t *testing.T) {
 	}
 	rit.Rates[0].GroupIntervalStart = 7
 	if cloned.Rates[0].GroupIntervalStart != 10 {
-		t.Errorf("\nExpecting: 10,\n received: %+v", cloned.Rates[0].GroupIntervalStart)
+		t.Errorf("Expecting: 10,\n received: %+v", cloned.Rates[0].GroupIntervalStart)
 	}
 }
 

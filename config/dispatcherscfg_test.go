@@ -46,7 +46,7 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.dispatcherSCfg.loadFromJsonCfg(jsonCfg); err != nil {
+	} else if err = jsnCfg.dispatcherSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.dispatcherSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.dispatcherSCfg))
@@ -125,5 +125,34 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.dispatcherSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
+func TestDispatcherSCfgClone(t *testing.T) {
+	ban := &DispatcherSCfg{
+		Enabled:             true,
+		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"*req.prefix", "*req.indexed"},
+		PrefixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		SuffixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		NestedFields:        true,
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.AttributeSConns[1] = ""; ban.AttributeSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.prefix" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	if (*rcv.PrefixIndexedFields)[0] = ""; (*ban.PrefixIndexedFields)[0] != "*req.prefix" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.prefix" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

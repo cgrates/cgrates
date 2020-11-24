@@ -27,7 +27,7 @@ func init() {
 	c := &CmdRelaodConfigSection{
 		name:      "reload_config",
 		rpcMethod: utils.ConfigSv1ReloadConfig,
-		rpcParams: &config.ConfigReloadArgs{},
+		rpcParams: &config.ReloadArgs{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdRelaodConfigSection struct {
 	name      string
 	rpcMethod string
-	rpcParams *config.ConfigReloadArgs
+	rpcParams *config.ReloadArgs
 	*CommandExecuter
 }
 
@@ -51,7 +51,7 @@ func (self *CmdRelaodConfigSection) RpcMethod() string {
 
 func (self *CmdRelaodConfigSection) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &config.ConfigReloadArgs{Opts: make(map[string]interface{})}
+		self.rpcParams = &config.ReloadArgs{Opts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }

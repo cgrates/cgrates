@@ -91,7 +91,7 @@ func TestCdrsReload(t *testing.T) {
 	}
 	cfg.RalsCfg().Enabled = true
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ConfigReloadArgs{
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.CDRS_JSN,
 	}, &reply); err != nil {

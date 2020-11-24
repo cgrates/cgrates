@@ -87,12 +87,12 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	for _, r := range expected.RequestProcessors[0].ReplyFields {
 		r.ComputePath()
 	}
-	if cfgJson, err := NewDefaultCGRConfig(); err != nil {
+	if cfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = cfgJson.radiusAgentCfg.loadFromJsonCfg(cfgJSON, cfgJson.generalCfg.RSRSep); err != nil {
+	} else if err = cfg.radiusAgentCfg.loadFromJsonCfg(cfgJSON, cfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, cfgJson.radiusAgentCfg) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJson.radiusAgentCfg))
+	} else if !reflect.DeepEqual(expected, cfg.radiusAgentCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.radiusAgentCfg))
 	}
 }
 

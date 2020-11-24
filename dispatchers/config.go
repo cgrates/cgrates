@@ -44,7 +44,7 @@ func (dS *DispatcherService) ConfigSv1GetConfig(args *config.SectionWithOpts, re
 	}, utils.MetaConfig, utils.ConfigSv1GetConfig, args, reply)
 }
 
-func (dS *DispatcherService) ConfigSv1ReloadConfig(args *config.ConfigReloadArgs, reply *string) (err error) {
+func (dS *DispatcherService) ConfigSv1ReloadConfig(args *config.ReloadArgs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant

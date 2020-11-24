@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
+// StatSCfg the stats config section
 type StatSCfg struct {
 	Enabled                bool
 	IndexedSelects         bool
@@ -37,7 +37,7 @@ type StatSCfg struct {
 	NestedFields           bool
 }
 
-func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
+func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -59,10 +59,9 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 		st.ThresholdSConns = make([]string, len(*jsnCfg.Thresholds_conns))
 		for idx, conn := range *jsnCfg.Thresholds_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			st.ThresholdSConns[idx] = conn
 			if conn == utils.MetaInternal {
 				st.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
-			} else {
-				st.ThresholdSConns[idx] = conn
 			}
 		}
 	}
@@ -93,17 +92,17 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (st *StatSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:                st.Enabled,
 		utils.IndexedSelectsCfg:         st.IndexedSelects,
 		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
 		utils.NestedFieldsCfg:           st.NestedFields,
+		utils.StoreIntervalCfg:          utils.EmptyString,
 	}
 	if st.StoreInterval != 0 {
 		initialMP[utils.StoreIntervalCfg] = st.StoreInterval.String()
-	} else {
-		initialMP[utils.StoreIntervalCfg] = utils.EmptyString
 	}
 	if st.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*st.StringIndexedFields))
@@ -132,13 +131,52 @@ func (st *StatSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if st.ThresholdSConns != nil {
 		thresholdSConns := make([]string, len(st.ThresholdSConns))
 		for i, item := range st.ThresholdSConns {
+			thresholdSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
-				thresholdSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds)
-			} else {
-				thresholdSConns[i] = item
+				thresholdSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.ThresholdSConnsCfg] = thresholdSConns
+	}
+	return
+}
+
+// Clone returns a deep copy of StatSCfg
+func (st StatSCfg) Clone() (cln *StatSCfg) {
+	cln = &StatSCfg{
+		Enabled:                st.Enabled,
+		IndexedSelects:         st.IndexedSelects,
+		StoreInterval:          st.StoreInterval,
+		StoreUncompressedLimit: st.StoreUncompressedLimit,
+		NestedFields:           st.NestedFields,
+	}
+	if st.ThresholdSConns != nil {
+		cln.ThresholdSConns = make([]string, len(st.ThresholdSConns))
+		for i, con := range st.ThresholdSConns {
+			cln.ThresholdSConns[i] = con
+		}
+	}
+
+	if st.StringIndexedFields != nil {
+		idx := make([]string, len(*st.StringIndexedFields))
+		for i, dx := range *st.StringIndexedFields {
+			idx[i] = dx
+		}
+		cln.StringIndexedFields = &idx
+	}
+	if st.PrefixIndexedFields != nil {
+		idx := make([]string, len(*st.PrefixIndexedFields))
+		for i, dx := range *st.PrefixIndexedFields {
+			idx[i] = dx
+		}
+		cln.PrefixIndexedFields = &idx
+	}
+	if st.SuffixIndexedFields != nil {
+		idx := make([]string, len(*st.SuffixIndexedFields))
+		for i, dx := range *st.SuffixIndexedFields {
+			idx[i] = dx
+		}
+		cln.SuffixIndexedFields = &idx
 	}
 	return
 }

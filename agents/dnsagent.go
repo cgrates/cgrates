@@ -53,7 +53,7 @@ func (da *DNSAgent) initDNSServer() (err error) {
 	})
 
 	if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().ListenNet, utils.TLSNoCaps) {
-		cert, err := tls.LoadX509KeyPair(da.cgrCfg.TlsCfg().ServerCerificate, da.cgrCfg.TlsCfg().ServerKey)
+		cert, err := tls.LoadX509KeyPair(da.cgrCfg.TLSCfg().ServerCerificate, da.cgrCfg.TLSCfg().ServerKey)
 		if err != nil {
 			return err
 		}

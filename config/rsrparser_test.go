@@ -870,7 +870,7 @@ func TestRSRParsersClone(t *testing.T) {
 	}
 	cln := rsrs.Clone()
 	if !reflect.DeepEqual(rsrs, cln) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(rsrs), utils.ToJSON(cln))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(rsrs), utils.ToJSON(cln))
 	}
 	cln[0].converters[0] = utils.NewDataConverterMustCompile(utils.MetaIP2Hex)
 	if reflect.DeepEqual(cln[0].converters[0], rsrs[0].converters[0]) {

@@ -24,6 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// ERsCfg the config for ERs
 type ERsCfg struct {
 	Enabled       bool
 	SessionSConns []string
@@ -123,6 +124,7 @@ func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interf
 	return
 }
 
+// EventReaderCfg the event for the Event Reader
 type EventReaderCfg struct {
 	ID                       string
 	Type                     string
@@ -211,7 +213,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		er.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
 	}
 	if jsnCfg.Fields != nil {
-		if er.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, sep); err != nil {
+		if er.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Fields, sep); err != nil {
 			return err
 		}
 		if tpls, err := InflateTemplates(er.Fields, msgTemplates); err != nil {
@@ -221,7 +223,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		}
 	}
 	if jsnCfg.Cache_dump_fields != nil {
-		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Cache_dump_fields, sep); err != nil {
+		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Cache_dump_fields, sep); err != nil {
 			return err
 		}
 		if tpls, err := InflateTemplates(er.CacheDumpFields, msgTemplates); err != nil {

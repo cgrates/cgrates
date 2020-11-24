@@ -374,7 +374,7 @@ func testConfigSSetConfigFromJSONCoreS(t *testing.T) {
 func testConfigSReloadConfigCoreS(t *testing.T) {
 	cfgStr := `{"cores":{"caps":2,"caps_stats_interval":"0","caps_strategy":"*busy","shutdown_timeout":"1s"}}`
 	var reply string
-	if err := configRPC.Call(utils.ConfigSv1ReloadConfig, &config.ConfigReloadArgs{
+	if err := configRPC.Call(utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		Tenant:  "cgrates.org",
 		Path:    path.Join(*dataDir, "conf", "samples", "caps_busy"),
 		Section: config.CoreSCfgJson,

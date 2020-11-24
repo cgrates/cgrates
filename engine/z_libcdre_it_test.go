@@ -74,7 +74,7 @@ func TestWriteToFile(t *testing.T) {
 		t.Errorf("Error deconding the file content: %+v", err)
 	}
 	if !reflect.DeepEqual(rcv, exportEvent) {
-		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(exportEvent), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(exportEvent), utils.ToJSON(rcv))
 	}
 	//populate the exportEvent struct
 	exportEvent = &ExportEvents{
@@ -96,13 +96,13 @@ func TestWriteToFile(t *testing.T) {
 		t.Errorf("Error deconding the file content: %+v", err)
 	}
 	if !reflect.DeepEqual(rcv, exportEvent) {
-		t.Errorf("\nExpected: %+v,\nReceived: %+v", utils.ToJSON(exportEvent), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v,\nReceived: %+v", utils.ToJSON(exportEvent), utils.ToJSON(rcv))
 	}
 	//wrong path *reading
 	exportEvent = &ExportEvents{}
 	filePath = "/tmp/engine/libcdre_test/wrongpath.txt"
 	if rcv, err = NewExportEventsFromFile(filePath); err == nil || err.Error() != "open /tmp/engine/libcdre_test/wrongpath.txt: no such file or directory" {
-		t.Errorf("\nExpecting: 'open /tmp/engine/libcdre_test/wrongpath.txt: no such file or directory',\nReceived: '%+v'", err)
+		t.Errorf("Expecting: 'open /tmp/engine/libcdre_test/wrongpath.txt: no such file or directory',\nReceived: '%+v'", err)
 	}
 	//wrong path *writing
 	filePath = utils.EmptyString

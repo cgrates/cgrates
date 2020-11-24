@@ -51,7 +51,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.attributeSCfg.loadFromJsonCfg(jsonCfg); err != nil {
+	} else if err = jsnCfg.attributeSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.attributeSCfg) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.attributeSCfg))
@@ -61,7 +61,10 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 "attributes": {								
-	"enabled": true,									
+	"enabled": true,	
+	"stats_conns": ["*internal"],			
+	"resources_conns": ["*internal"],		
+	"apiers_conns": ["*internal"],			
 	"prefix_indexed_fields": ["*req.index1","*req.index2"],		
     "string_indexed_fields": ["*req.index1"],
 	"process_runs": 3,						
@@ -69,9 +72,9 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
-		utils.StatSConnsCfg:          []string{},
-		utils.ResourceSConnsCfg:      []string{},
-		utils.ApierSConnsCfg:         []string{},
+		utils.StatSConnsCfg:          []string{utils.MetaInternal},
+		utils.ResourceSConnsCfg:      []string{utils.MetaInternal},
+		utils.ApierSConnsCfg:         []string{utils.MetaInternal},
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.ProcessRunsCfg:         3,
@@ -82,7 +85,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.attributeSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\n Received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\n Received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -134,5 +137,42 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		t.Error(err)
 	} else if newMap := conv.attributeSCfg.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
 		t.Errorf("Expected %+v, receieved %+v", expectedMap, newMap)
+	}
+}
+
+func TestAttributeSCfgClone(t *testing.T) {
+	ban := &AttributeSCfg{
+		Enabled:             true,
+		ApierSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier), "*conn1"},
+		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index1"},
+		ProcessRuns:         1,
+		NestedFields:        true,
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.ApierSConns[1] = ""; ban.ApierSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ResourceSConns[1] = ""; ban.ResourceSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.PrefixIndexedFields)[0] = ""; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

@@ -69,7 +69,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.dnsAgentCfg.loadFromJsonCfg(jsnCfg, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.dnsAgentCfg.loadFromJSONCfg(jsnCfg, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.dnsAgentCfg, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.dnsAgentCfg))
@@ -118,7 +118,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := jsonCfg.dnsAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -142,7 +142,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg1(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.dnsAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }
@@ -162,7 +162,7 @@ func TestRequestProcessorReplyFieldsloadFromJsonCfg(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := jsonCfg.dnsAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -182,7 +182,7 @@ func TestRequestProcessorRequestFieldsloadFromJsonCfg(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := jsonCfg.dnsAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -288,7 +288,7 @@ func TestRequestProcessorClone(t *testing.T) {
 	}
 	rcv := rp.Clone()
 	if !reflect.DeepEqual(rp, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(rp), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(rp), utils.ToJSON(rcv))
 	}
 	rcv.Filters[0] = "*string:~req.Account:1002"
 	if rp.Filters[0] != "*string:~req.Account:1001" {

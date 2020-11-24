@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,7 +33,7 @@ type ChargerSCfg struct {
 	NestedFields        bool
 }
 
-func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
+func (cS *ChargerSCfg) loadFromJSONCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -49,10 +47,9 @@ func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 		cS.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
 		for idx, attrConn := range *jsnCfg.Attributes_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			cS.AttributeSConns[idx] = attrConn
 			if attrConn == utils.MetaInternal {
 				cS.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			} else {
-				cS.AttributeSConns[idx] = attrConn
 			}
 		}
 	}
@@ -83,6 +80,7 @@ func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (cS *ChargerSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        cS.Enabled,
@@ -92,10 +90,9 @@ func (cS *ChargerSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if cS.AttributeSConns != nil {
 		attributeSConns := make([]string, len(cS.AttributeSConns))
 		for i, item := range cS.AttributeSConns {
+			attributeSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes)
-			} else {
-				attributeSConns[i] = item
+				attributeSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.AttributeSConnsCfg] = attributeSConns
@@ -120,6 +117,44 @@ func (cS *ChargerSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 			sufixIndexedFields[i] = item
 		}
 		initialMP[utils.SuffixIndexedFieldsCfg] = sufixIndexedFields
+	}
+	return
+}
+
+// Clone returns a deep copy of ChargerSCfg
+func (cS ChargerSCfg) Clone() (cln *ChargerSCfg) {
+	cln = &ChargerSCfg{
+		Enabled:        cS.Enabled,
+		IndexedSelects: cS.IndexedSelects,
+		NestedFields:   cS.NestedFields,
+	}
+	if cS.AttributeSConns != nil {
+		cln.AttributeSConns = make([]string, len(cS.AttributeSConns))
+		for i, con := range cS.AttributeSConns {
+			cln.AttributeSConns[i] = con
+		}
+	}
+
+	if cS.StringIndexedFields != nil {
+		idx := make([]string, len(*cS.StringIndexedFields))
+		for i, dx := range *cS.StringIndexedFields {
+			idx[i] = dx
+		}
+		cln.StringIndexedFields = &idx
+	}
+	if cS.PrefixIndexedFields != nil {
+		idx := make([]string, len(*cS.PrefixIndexedFields))
+		for i, dx := range *cS.PrefixIndexedFields {
+			idx[i] = dx
+		}
+		cln.PrefixIndexedFields = &idx
+	}
+	if cS.SuffixIndexedFields != nil {
+		idx := make([]string, len(*cS.SuffixIndexedFields))
+		for i, dx := range *cS.SuffixIndexedFields {
+			idx[i] = dx
+		}
+		cln.SuffixIndexedFields = &idx
 	}
 	return
 }

@@ -63,7 +63,7 @@ func (ha *HTTPAgent) Start() (err error) {
 
 	ha.Lock()
 	utils.Logger.Info(fmt.Sprintf("<%s> successfully started HTTPAgent", utils.HTTPAgent))
-	for _, agntCfg := range ha.cfg.HttpAgentCfg() {
+	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
 		ha.server.RegisterHttpHandler(agntCfg.Url,
 			agents.NewHTTPAgent(ha.connMgr, agntCfg.SessionSConns, filterS,
 				ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
@@ -97,5 +97,5 @@ func (ha *HTTPAgent) ServiceName() string {
 
 // ShouldRun returns if the service should be running
 func (ha *HTTPAgent) ShouldRun() bool {
-	return len(ha.cfg.HttpAgentCfg()) != 0
+	return len(ha.cfg.HTTPAgentCfg()) != 0
 }

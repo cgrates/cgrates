@@ -24,6 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// LoaderCgrCfg the config for cgr-loader
 type LoaderCgrCfg struct {
 	TpID            string
 	DataPath        string

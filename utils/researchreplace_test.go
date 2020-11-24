@@ -90,7 +90,7 @@ func TestReSearchReplaceClone(t *testing.T) {
 	}
 	rcv := rsr.Clone()
 	if !reflect.DeepEqual(rsr, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", ToJSON(rsr), ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", ToJSON(rsr), ToJSON(rcv))
 	}
 	*rcv.SearchRegexp = regexp.Regexp{}
 	if reflect.DeepEqual(rsr.SearchRegexp, rcv.SearchRegexp) {
