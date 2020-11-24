@@ -51,11 +51,16 @@ func MissingMapFields(s map[string]interface{}, mandatories []string) []string {
 		} else {
 			fld := reflect.ValueOf(fldval)
 			// sanitize the string fields before checking
-			if fld.Kind() == reflect.String && fld.CanSet() {
-				fld.SetString(strings.TrimSpace(fld.String()))
+			if fld.Kind() == reflect.String {
+				str := strings.TrimSpace(fld.String())
+				s[fieldName] = str
+				if len(str) == 0 {
+					missing = append(missing, fieldName)
+				}
+				continue
+				//fld.SetString(strings.TrimSpace(fld.String()))
 			}
-			if (fld.Kind() == reflect.String && fld.String() == "") ||
-				((fld.Kind() == reflect.Slice || fld.Kind() == reflect.Map) && fld.Len() == 0) ||
+			if ((fld.Kind() == reflect.Slice || fld.Kind() == reflect.Map) && fld.Len() == 0) ||
 				(fld.Kind() == reflect.Int && fld.Int() == 0) {
 				missing = append(missing, fieldName)
 			}
