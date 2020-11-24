@@ -226,7 +226,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 			if iRt.Increment == time.Duration(0) {
 				return nil, fmt.Errorf("zero increment to be charged within rate: <%s>", rt.UID())
 			}
-			if j == 0 && rt.IntervalRates[j].FixedFee != 0 { // Add FixedFee
+			if rt.IntervalRates[j].FixedFee != 0 { // Add FixedFee
 				rIcmts = append(rIcmts, &engine.RateSIncrement{
 					UsageStart:        iRtUsageSIdx,
 					Rate:              rt.Rate,
