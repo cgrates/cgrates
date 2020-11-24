@@ -1932,3 +1932,755 @@ func TestComputeRateSIntervals2(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rcveRtIvls))
 	}
 }
+
+func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Unit:          30 * time.Second,
+				Increment:     time.Second,
+				Value:         0.10,
+			},
+			{
+				IntervalStart: time.Minute,
+				Unit:          30 * time.Second,
+				Increment:     time.Second,
+				Value:         0.20,
+			},
+			{
+				IntervalStart: 2 * time.Minute,
+				Unit:          30 * time.Second,
+				Increment:     time.Second,
+				Value:         0.30,
+			},
+		},
+	}
+	rt1.Compile()
+
+	rt2 := &engine.Rate{
+		ID: "RATE2",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 30 * time.Second,
+				Unit:          30 * time.Second,
+				Increment:     time.Second,
+				Value:         0.15,
+			},
+			{
+				IntervalStart: time.Minute + 30*time.Second,
+				Unit:          30 * time.Second,
+				Increment:     time.Second,
+				Value:         0.25,
+			},
+			{
+				IntervalStart: 2*time.Minute + 30*time.Second,
+				Unit:          30 * time.Second,
+				Increment:     time.Second,
+				Value:         0.35,
+			},
+		},
+	}
+	rt1.Compile()
+
+	ordRts := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			30 * time.Second,
+			rt2,
+		},
+		{
+			time.Minute,
+			rt1,
+		},
+		{
+			time.Minute + 30*time.Second,
+			rt2,
+		},
+		{
+			2 * time.Minute,
+			rt1,
+		},
+		{
+			2*time.Minute + 30*time.Second,
+			rt2,
+		},
+	}
+
+	expOrdRates := []*engine.RateSInterval{
+		{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        0,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    30,
+					Usage:             30 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 30 * time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        30 * time.Second,
+					Rate:              rt2,
+					IntervalRateIndex: 0,
+					CompressFactor:    30,
+					Usage:             30 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Minute,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Minute,
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					CompressFactor:    30,
+					Usage:             30 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Minute + 30*time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Minute + 30*time.Second,
+					Rate:              rt2,
+					IntervalRateIndex: 1,
+					CompressFactor:    30,
+					Usage:             30 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 2 * time.Minute,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        2 * time.Minute,
+					Rate:              rt1,
+					IntervalRateIndex: 2,
+					CompressFactor:    30,
+					Usage:             30 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 2*time.Minute + 30*time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        2*time.Minute + 30*time.Second,
+					Rate:              rt2,
+					IntervalRateIndex: 2,
+					CompressFactor:    30,
+					Usage:             30 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+	if rcvOrdRates, err := computeRateSIntervals(ordRts, 0, 3*time.Minute); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvOrdRates, expOrdRates) {
+		t.Errorf("Expected %+v,\nreceived %+v", utils.ToJSON(expOrdRates), utils.ToJSON(rcvOrdRates))
+	}
+}
+
+func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: time.Minute,
+				Unit:          30 * time.Second,
+				Increment:     30 * time.Second,
+				Value:         0.10,
+			},
+		},
+	}
+	rt1.Compile()
+
+	rt2 := &engine.Rate{
+		ID: "RATE2",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 2 * time.Minute,
+				Unit:          30 * time.Second,
+				Increment:     30 * time.Second,
+				Value:         0.20,
+			},
+		},
+	}
+	rt2.Compile()
+	ordRts := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+	}
+
+	expected := "intervalStart for rate: <> higher than usage: 0s"
+	if _, err := computeRateSIntervals(ordRts, 0, 3*time.Minute); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, \nreceived %+v", expected, err)
+	}
+}
+
+func TestComputeRateSIntervalsZeroIncrement(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Unit:          30 * time.Second,
+				Increment:     0 * time.Second,
+				Value:         0.10,
+			},
+		},
+	}
+	rt1.Compile()
+
+	ordRts := []*orderedRate{
+		{
+			0 * time.Second,
+			rt1,
+		},
+	}
+
+	expected := "zero increment to be charged within rate: <>"
+	if _, err := computeRateSIntervals(ordRts, 33*time.Second, 3*time.Minute); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, \nreceived %+q", expected, err)
+	}
+}
+
+func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Unit:          30 * time.Second,
+				Increment:     1 * time.Second,
+				Value:         0.10,
+			},
+			{
+				IntervalStart: 30 * time.Second,
+				Unit:          time.Minute,
+				Increment:     7 * time.Second,
+				Value:         0.25,
+			},
+		},
+	}
+	rt1.Compile()
+
+	ordRts := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+	}
+	expOrdRts := []*engine.RateSInterval{
+		{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        0,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					Usage:             30 * time.Second,
+					CompressFactor:    30,
+				},
+				{
+					UsageStart:        30 * time.Second,
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					Usage:             40 * time.Second,
+					CompressFactor:    6,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, time.Minute+10*time.Second); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
+		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	}
+}
+
+func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Unit:          30 * time.Second,
+				Increment:     1 * time.Second,
+				Value:         0.10,
+			},
+			{
+				IntervalStart: 25 * time.Second,
+				Unit:          time.Minute,
+				Increment:     7 * time.Second,
+				Value:         0.25,
+			},
+		},
+	}
+	rt1.Compile()
+
+	rt2 := &engine.Rate{
+		ID: "RATE2",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 45 * time.Second,
+				Unit:          30 * time.Second,
+				Increment:     1 * time.Second,
+				Value:         0.15,
+			},
+			{
+				IntervalStart: 55 * time.Second,
+				Unit:          30 * time.Minute,
+				Increment:     5 * time.Second,
+				Value:         0.30,
+			},
+		},
+	}
+	rt2.Compile()
+
+	rt3 := &engine.Rate{
+		ID: "RATE3",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 30 * time.Second,
+				Unit:          25 * time.Second,
+				Increment:     5 * time.Second,
+				Value:         0.10,
+			},
+			{
+				IntervalStart: time.Minute,
+				Unit:          10 * time.Second,
+				Increment:     5 * time.Second,
+				Value:         0.05,
+			},
+		},
+	}
+	rt3.Compile()
+
+	ordRts := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			35 * time.Second,
+			rt3,
+		},
+		{
+			46 * time.Second,
+			rt2,
+		},
+		{
+			time.Minute,
+			rt3,
+		},
+	}
+
+	expOrdRts := []*engine.RateSInterval{
+		{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        0,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					Usage:             25 * time.Second,
+					CompressFactor:    25,
+				},
+				{
+					UsageStart:        25 * time.Second,
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					Usage:             10 * time.Second,
+					CompressFactor:    2,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 35 * time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        35 * time.Second,
+					Rate:              rt3,
+					IntervalRateIndex: 0,
+					Usage:             11 * time.Second,
+					CompressFactor:    3,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 46 * time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        46 * time.Second,
+					Rate:              rt2,
+					IntervalRateIndex: 0,
+					Usage:             9 * time.Second,
+					CompressFactor:    9,
+				},
+				{
+					UsageStart:        55 * time.Second,
+					Rate:              rt2,
+					IntervalRateIndex: 1,
+					Usage:             5 * time.Second,
+					CompressFactor:    1,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Minute,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Minute,
+					Rate:              rt3,
+					IntervalRateIndex: 1,
+					Usage:             10 * time.Second,
+					CompressFactor:    2,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, time.Minute+10*time.Second); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
+		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	}
+}
+
+func TestComputeRatesIntervalsAllInOne(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: time.Minute,
+				Unit:          30 * time.Second,
+				Increment:     1 * time.Second,
+				Value:         0.30,
+			},
+			{
+				IntervalStart: 3 * time.Minute,
+				Unit:          time.Minute,
+				Increment:     7 * time.Second,
+				Value:         0.30,
+			},
+		},
+	}
+	rt1.Compile()
+
+	rt2 := &engine.Rate{
+		ID: "RATE2",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: time.Minute + 30*time.Second,
+				Unit:          30 * time.Second,
+				Increment:     1 * time.Second,
+				Value:         0.20,
+			},
+			{
+				IntervalStart: 2*time.Minute + 30*time.Second,
+				Unit:          30 * time.Second,
+				Increment:     7 * time.Second,
+				Value:         0.20,
+			},
+		},
+	}
+	rt2.Compile()
+
+	rt3 := &engine.Rate{
+		ID: "RATE3",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 2 * time.Minute,
+				Unit:          30 * time.Second,
+				Increment:     30 * time.Second,
+				Value:         0.10,
+			},
+		},
+	}
+	rt3.Compile()
+
+	ordRates := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			time.Minute,
+			rt1,
+		},
+		{
+			time.Minute + 30*time.Second,
+			rt2,
+		},
+		{
+			2 * time.Minute,
+			rt3,
+		},
+		{
+			2*time.Minute + 30*time.Second,
+			rt2,
+		},
+		{
+			3 * time.Minute,
+			rt1,
+		},
+	}
+	expOrdRts := []*engine.RateSInterval{
+		{
+			UsageStart: time.Minute,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Minute,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					Usage:             30 * time.Second,
+					CompressFactor:    30,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Minute + 30*time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Minute + 30*time.Second,
+					Rate:              rt2,
+					IntervalRateIndex: 0,
+					Usage:             30 * time.Second,
+					CompressFactor:    30,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 2 * time.Minute,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        2 * time.Minute,
+					Rate:              rt3,
+					IntervalRateIndex: 0,
+					Usage:             30 * time.Second,
+					CompressFactor:    1,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 2*time.Minute + 30*time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        2*time.Minute + 30*time.Second,
+					Rate:              rt2,
+					IntervalRateIndex: 1,
+					Usage:             30 * time.Second,
+					CompressFactor:    5,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 3 * time.Minute,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        3 * time.Minute,
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					Usage:             4 * time.Minute,
+					CompressFactor:    35,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+
+	if rcvOrdRts, err := computeRateSIntervals(ordRates, time.Minute, 6*time.Minute); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
+		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	}
+}
+
+func TestOrderRatesIntervalsFullDay(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				Unit:          time.Hour,
+				Increment:     3 * time.Minute,
+				Value:         0.50,
+			},
+			{
+				IntervalStart: 4 * time.Hour,
+				Unit:          time.Hour,
+				Increment:     3 * time.Minute,
+				Value:         0.35,
+			},
+		},
+	}
+	rt1.Compile()
+
+	rt2 := &engine.Rate{
+		ID: "RATE2",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 13 * time.Hour,
+				Unit:          time.Hour,
+				Increment:     3 * time.Minute,
+				Value:         0.40,
+			},
+			{
+				IntervalStart: 16 * time.Hour,
+				Unit:          time.Hour,
+				Increment:     3 * time.Minute,
+				Value:         0.35,
+			},
+		},
+	}
+	rt1.Compile()
+
+	rtGH := &engine.Rate{
+		ID: "RATE_GOLDEN_HOUR",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 12 * time.Hour,
+				Unit:          30 * time.Hour,
+				Increment:     2 * time.Minute,
+				Value:         0.20,
+			},
+			{
+				IntervalStart: 12*time.Hour + 30*time.Minute,
+				Unit:          time.Hour,
+				Increment:     5 * time.Minute,
+				Value:         0.10,
+			},
+		},
+	}
+	rtGH.Compile()
+
+	ordRts := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			6 * time.Hour,
+			rt1,
+		},
+		{
+			12 * time.Hour,
+			rtGH,
+		},
+		{
+			13 * time.Hour,
+			rt2,
+		},
+	}
+
+	expOrdRts := []*engine.RateSInterval{
+		{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        0,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					Usage:             4 * time.Hour,
+					CompressFactor:    80,
+				},
+				{
+					UsageStart:        4 * time.Hour,
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					Usage:             2 * time.Hour,
+					CompressFactor:    40,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 6 * time.Hour,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        6 * time.Hour,
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					Usage:             6 * time.Hour,
+					CompressFactor:    120,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 12 * time.Hour,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        12 * time.Hour,
+					Rate:              rtGH,
+					IntervalRateIndex: 0,
+					Usage:             30 * time.Minute,
+					CompressFactor:    15,
+				},
+				{
+					UsageStart:        12*time.Hour + 30*time.Minute,
+					Rate:              rtGH,
+					IntervalRateIndex: 1,
+					Usage:             30 * time.Minute,
+					CompressFactor:    6,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 13 * time.Hour,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        13 * time.Hour,
+					Rate:              rt2,
+					IntervalRateIndex: 0,
+					Usage:             3 * time.Hour,
+					CompressFactor:    60,
+				},
+				{
+					UsageStart:        16 * time.Hour,
+					Rate:              rt2,
+					IntervalRateIndex: 1,
+					Usage:             9 * time.Hour,
+					CompressFactor:    180,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, 25*time.Hour); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
+		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	}
+}
