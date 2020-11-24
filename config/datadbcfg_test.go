@@ -533,12 +533,12 @@ func TestDataDBPortStrconvAtoi(t *testing.T) {
              "db_port": 6079,
         }
     }`
-	if cfgJson, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONSTR); err != nil {
+	if cfgJSON, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONSTR); err != nil {
 		t.Error(err)
 	} else {
-		cfgJson.dataDbCfg.DataDbPort = "6o79"
+		cfgJSON.dataDbCfg.DataDbPort = "6o79"
 		expected := "strconv.Atoi: parsing \"6o79\": invalid syntax"
-		if _, err := cfgJson.dataDbCfg.AsMapInterface(); err == nil || err.Error() != expected {
+		if _, err := cfgJSON.dataDbCfg.AsMapInterface(); err == nil || err.Error() != expected {
 			t.Errorf("Expected %+q \n,received %+q", expected, err)
 		}
 	}

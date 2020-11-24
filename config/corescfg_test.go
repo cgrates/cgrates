@@ -98,7 +98,7 @@ func TestCoreSAsMapInterface(t *testing.T) {
 	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
 		t.Error(err)
 	} else if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 	eMap[utils.CapsStatsIntervalCfg] = "1s"
 	eMap[utils.ShutdownTimeoutCfg] = "1s"
@@ -109,7 +109,7 @@ func TestCoreSAsMapInterface(t *testing.T) {
 		CapsStrategy:      utils.MetaBusy,
 	}
 	if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -122,7 +122,7 @@ func TestCoreSCfgClone(t *testing.T) {
 	}
 	rcv := cS.Clone()
 	if !reflect.DeepEqual(cS, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
 	}
 	if rcv.Caps = 1; cS.Caps != 0 {
 		t.Errorf("Expected clone to not modify the cloned")

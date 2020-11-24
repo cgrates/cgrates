@@ -193,7 +193,7 @@ func SureTaxProcessCdr(cdr *CDR) error {
 	if err != nil {
 		return err
 	}
-	resp, err := sureTaxClient.Post(stCfg.Url, "application/json", bytes.NewBuffer(jsnContent))
+	resp, err := sureTaxClient.Post(stCfg.URL, "application/json", bytes.NewBuffer(jsnContent))
 	if err != nil {
 		return err
 	}

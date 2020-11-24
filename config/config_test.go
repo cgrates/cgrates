@@ -217,7 +217,7 @@ func TestHttpAgentCfg(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eCgrCfg.HttpAgentCfg(), cgrCfg.HttpAgentCfg()) {
+	} else if !reflect.DeepEqual(eCgrCfg.HTTPAgentCfg(), cgrCfg.HTTPAgentCfg()) {
 		t.Errorf("Expected: %s, received: %s",
 			utils.ToJSON(eCgrCfg.httpAgentCfg), utils.ToJSON(cgrCfg.httpAgentCfg))
 	}
@@ -869,7 +869,7 @@ func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 		t.Error("time parsing error", err)
 	}
 	eSureTaxCfg := &SureTaxCfg{
-		Url:                  "",
+		URL:                  "",
 		ClientNumber:         "",
 		ValidationKey:        "",
 		BusinessUnit:         "",
@@ -1089,9 +1089,9 @@ func TestLoadGeneralCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadGeneralCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadGeneralCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1107,9 +1107,9 @@ func TestLoadCacheCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadCacheCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadCacheCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1125,9 +1125,9 @@ func TestLoadListenCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadListenCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadListenCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1143,9 +1143,9 @@ func TestLoadHTTPCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadHTTPCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadHTTPCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1161,9 +1161,9 @@ func TestLoadDataDBCfgErrorCase1(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadDataDBCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadDataDBCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1179,11 +1179,11 @@ func TestLoadDataDBCfgErrorCase2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else {
 		cgrConfig.dataDbCfg.RmtConns = []string{utils.MetaInternal}
-		if err := cgrConfig.loadDataDBCfg(cgrCfgJson); err == nil || err.Error() != expected {
+		if err := cgrConfig.loadDataDBCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 			t.Errorf("Expected %+v, received %+v", expected, err)
 		}
 	}
@@ -1201,9 +1201,9 @@ func TestLoadStorDbCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadStorDBCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadStorDBCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1219,9 +1219,9 @@ func TestLoadFilterSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadFilterSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadFilterSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1237,9 +1237,9 @@ func TestLoadRalSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadRalSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadRalSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1255,9 +1255,9 @@ func TestLoadSchedulerCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadSchedulerCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadSchedulerCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1273,9 +1273,9 @@ func TestLoadCdrsCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadCdrsCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadCdrsCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1291,9 +1291,9 @@ func TestLoadSessionSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadSessionSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadSessionSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1309,9 +1309,9 @@ func TestLoadFreeswitchAgentCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadFreeswitchAgentCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadFreeswitchAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1327,9 +1327,9 @@ func TestLoadKamAgentCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadKamAgentCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadKamAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1345,9 +1345,9 @@ func TestLoadAsteriskAgentCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadAsteriskAgentCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadAsteriskAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1367,9 +1367,9 @@ func TestLoadDiameterAgentCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadDiameterAgentCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadDiameterAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1385,9 +1385,9 @@ func TestLoadRadiusAgentCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadRadiusAgentCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadRadiusAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1403,9 +1403,9 @@ func TestLoadDNSAgentCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadDNSAgentCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadDNSAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1423,9 +1423,9 @@ func TestLoadHttpAgentCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadHttpAgentCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadHTTPAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1441,9 +1441,9 @@ func TestLoadAttributeSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadAttributeSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadAttributeSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1459,9 +1459,9 @@ func TestLoadChargerSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadChargerSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadChargerSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1477,9 +1477,9 @@ func TestLoadResourceSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadResourceSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadResourceSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1495,9 +1495,9 @@ func TestLoadStatSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadStatSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadStatSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1513,9 +1513,9 @@ func TestLoadThresholdSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadThresholdSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadThresholdSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1551,9 +1551,9 @@ func TestLoadRouteSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadRouteSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadRouteSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1569,9 +1569,9 @@ func TestLoadMailerCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadMailerCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadMailerCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1587,9 +1587,9 @@ func TestLoadSureTaxCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadSureTaxCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadSureTaxCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1605,9 +1605,9 @@ func TestLoadDispatcherSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadDispatcherSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadDispatcherSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1623,9 +1623,9 @@ func TestLoadDispatcherHCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadDispatcherHCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadDispatcherHCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1641,9 +1641,9 @@ func TestLoadLoaderCgrCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadLoaderCgrCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadLoaderCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1659,9 +1659,9 @@ func TestLoadMigratorCgrCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadMigratorCgrCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadMigratorCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1677,9 +1677,9 @@ func TestLoadTlsCgrCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadTlsCgrCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadTLSCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1696,9 +1696,9 @@ func TestLoadAnalyzerCgrCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadAnalyzerCgrCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadAnalyzerCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1714,9 +1714,9 @@ func TestLoadAPIBanCgrCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadAPIBanCgrCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadAPIBanCgrCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1732,9 +1732,9 @@ func TestLoadApierCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(myJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(myJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadApierCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadApierCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1750,9 +1750,9 @@ func TestLoadErsCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadErsCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadErsCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1768,9 +1768,9 @@ func TestLoadEesCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadEesCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadEesCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1786,9 +1786,9 @@ func TestLoadCoreSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadCoreSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadCoreSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1804,9 +1804,9 @@ func TestLoadRateSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadRateSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadRateSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1826,9 +1826,9 @@ func TestLoadSIPAgentCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadSIPAgentCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadSIPAgentCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1848,9 +1848,9 @@ func TestLoadTemplateSCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadTemplateSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadTemplateSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -1864,9 +1864,9 @@ func TestLoadTemplateSCfgError(t *testing.T) {
      }
 }`
 	expected = "invalid converter terminator in rule: <a{*>"
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadTemplateSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadTemplateSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1882,9 +1882,9 @@ func TestLoadConfigsCfgError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cgrCfgJson, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadConfigSCfg(cgrCfgJson); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadConfigSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1895,7 +1895,7 @@ func TestSuretaxConfig(t *testing.T) {
 		t.Error(err)
 	}
 	expected := &SureTaxCfg{
-		Url:                  "",
+		URL:                  "",
 		ClientNumber:         "",
 		ValidationKey:        "",
 		BusinessUnit:         "",
@@ -3468,7 +3468,7 @@ func TestCfgTlsCfg(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eCgrCfg.TlsCfg(), cgrCfg.TlsCfg()) {
+	} else if !reflect.DeepEqual(eCgrCfg.TLSCfg(), cgrCfg.TLSCfg()) {
 		t.Errorf("Expected: %s, received: %s",
 			utils.ToJSON(eCgrCfg.tlsCfg), utils.ToJSON(cgrCfg.tlsCfg))
 	}
@@ -4853,7 +4853,7 @@ func TestV1ReloadConfigCheckingSanity(t *testing.T) {
 			utils.StatSConnsCfg: []string{"*internal:*stats"},
 		},
 	}
-	expected := `<StatS> not enabled but requested by <RALs> component.`
+	expected := `<StatS> not enabled but requested by <RALs> component`
 	if cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if err := cfgCgr.V1SetConfig(&SetConfigArgs{Config: ralsMap}, &reply); err == nil || err.Error() != expected {
@@ -5420,7 +5420,7 @@ func TestV1GetConfigAsJSONCheckConfigSanity(t *testing.T) {
             "attributes_conns": ["*internal"]
     }
 }`
-	expected := `<AttributeS> not enabled but requested by <ChargerS> component.`
+	expected := `<AttributeS> not enabled but requested by <ChargerS> component`
 	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
 	} else if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: args}, &result); err == nil || err.Error() != expected {

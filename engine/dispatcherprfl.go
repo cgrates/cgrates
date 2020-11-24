@@ -156,8 +156,8 @@ func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply int
 		// connect the rpcConn
 		cfg := config.CgrConfig()
 		if dH.rpcConn, err = NewRPCConnection(dH.Conn,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+			cfg.TLSCfg().ClientKey,
+			cfg.TLSCfg().ClientCerificate, cfg.TLSCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			IntRPC.GetInternalChanel(), false); err != nil {

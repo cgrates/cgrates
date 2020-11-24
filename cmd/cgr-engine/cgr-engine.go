@@ -200,41 +200,41 @@ func startRPC(server *cores.Server, internalRaterChan,
 	if (len(cfg.ListenCfg().RPCGOBTLSListen) != 0 ||
 		len(cfg.ListenCfg().RPCJSONTLSListen) != 0 ||
 		len(cfg.ListenCfg().HTTPTLSListen) != 0) &&
-		(len(cfg.TlsCfg().ServerCerificate) == 0 ||
-			len(cfg.TlsCfg().ServerKey) == 0) {
+		(len(cfg.TLSCfg().ServerCerificate) == 0 ||
+			len(cfg.TLSCfg().ServerKey) == 0) {
 		utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
 		return
 	}
 	if cfg.ListenCfg().RPCGOBTLSListen != "" {
 		go server.ServeGOBTLS(
 			cfg.ListenCfg().RPCGOBTLSListen,
-			cfg.TlsCfg().ServerCerificate,
-			cfg.TlsCfg().ServerKey,
-			cfg.TlsCfg().CaCertificate,
-			cfg.TlsCfg().ServerPolicy,
-			cfg.TlsCfg().ServerName,
+			cfg.TLSCfg().ServerCerificate,
+			cfg.TLSCfg().ServerKey,
+			cfg.TLSCfg().CaCertificate,
+			cfg.TLSCfg().ServerPolicy,
+			cfg.TLSCfg().ServerName,
 			exitChan,
 		)
 	}
 	if cfg.ListenCfg().RPCJSONTLSListen != "" {
 		go server.ServeJSONTLS(
 			cfg.ListenCfg().RPCJSONTLSListen,
-			cfg.TlsCfg().ServerCerificate,
-			cfg.TlsCfg().ServerKey,
-			cfg.TlsCfg().CaCertificate,
-			cfg.TlsCfg().ServerPolicy,
-			cfg.TlsCfg().ServerName,
+			cfg.TLSCfg().ServerCerificate,
+			cfg.TLSCfg().ServerKey,
+			cfg.TLSCfg().CaCertificate,
+			cfg.TLSCfg().ServerPolicy,
+			cfg.TLSCfg().ServerName,
 			exitChan,
 		)
 	}
 	if cfg.ListenCfg().HTTPTLSListen != "" {
 		go server.ServeHTTPTLS(
 			cfg.ListenCfg().HTTPTLSListen,
-			cfg.TlsCfg().ServerCerificate,
-			cfg.TlsCfg().ServerKey,
-			cfg.TlsCfg().CaCertificate,
-			cfg.TlsCfg().ServerPolicy,
-			cfg.TlsCfg().ServerName,
+			cfg.TLSCfg().ServerCerificate,
+			cfg.TLSCfg().ServerKey,
+			cfg.TLSCfg().CaCertificate,
+			cfg.TLSCfg().ServerPolicy,
+			cfg.TLSCfg().ServerName,
 			cfg.HTTPCfg().HTTPJsonRPCURL,
 			cfg.HTTPCfg().HTTPWSURL,
 			cfg.HTTPCfg().HTTPUseBasicAuth,
@@ -319,7 +319,7 @@ func singnalHandler(stopChan <-chan struct{}, exitChan chan<- struct{}) {
 			go func() {
 				var reply string
 				if err := config.CgrConfig().V1ReloadConfig(
-					&config.ConfigReloadArgs{
+					&config.ReloadArgs{
 						Section: utils.EmptyString,
 						Path:    config.CgrConfig().ConfigPath, // use the same path
 					}, &reply); err != nil {

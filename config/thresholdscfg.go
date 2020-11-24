@@ -24,6 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// ThresholdSCfg the threshold config section
 type ThresholdSCfg struct {
 	Enabled             bool
 	IndexedSelects      bool
@@ -34,7 +35,7 @@ type ThresholdSCfg struct {
 	NestedFields        bool
 }
 
-func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
+func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -76,16 +77,16 @@ func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        t.Enabled,
 		utils.IndexedSelectsCfg: t.IndexedSelects,
 		utils.NestedFieldsCfg:   t.NestedFields,
+		utils.StoreIntervalCfg:  utils.EmptyString,
 	}
 	if t.StoreInterval != 0 {
 		initialMP[utils.StoreIntervalCfg] = t.StoreInterval.String()
-	} else {
-		initialMP[utils.StoreIntervalCfg] = utils.EmptyString
 	}
 
 	if t.StringIndexedFields != nil {
@@ -108,6 +109,39 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 			suffixIndexedFields[i] = item
 		}
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
+	}
+	return
+}
+
+// Clone returns a deep copy of ThresholdSCfg
+func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
+	cln = &ThresholdSCfg{
+		Enabled:        t.Enabled,
+		IndexedSelects: t.IndexedSelects,
+		StoreInterval:  t.StoreInterval,
+		NestedFields:   t.NestedFields,
+	}
+
+	if t.StringIndexedFields != nil {
+		idx := make([]string, len(*t.StringIndexedFields))
+		for i, dx := range *t.StringIndexedFields {
+			idx[i] = dx
+		}
+		cln.StringIndexedFields = &idx
+	}
+	if t.PrefixIndexedFields != nil {
+		idx := make([]string, len(*t.PrefixIndexedFields))
+		for i, dx := range *t.PrefixIndexedFields {
+			idx[i] = dx
+		}
+		cln.PrefixIndexedFields = &idx
+	}
+	if t.SuffixIndexedFields != nil {
+		idx := make([]string, len(*t.SuffixIndexedFields))
+		for i, dx := range *t.SuffixIndexedFields {
+			idx[i] = dx
+		}
+		cln.SuffixIndexedFields = &idx
 	}
 	return
 }

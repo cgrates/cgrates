@@ -31,6 +31,7 @@ var (
 	rulesRgxp = regexp.MustCompile(`(?:(.*[^\\])\/(.*[^\\])*\/){1,}`)
 )
 
+// NewRSRParsers creates a new RSRParsers by spliting the rule using the separator
 func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, err error) {
 	if parsersRules == utils.EmptyString {
 		return
@@ -84,6 +85,7 @@ func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, 
 	return NewRSRParsersFromSlice(strings.Split(parsersRules, rsrSeparator))
 }
 
+// NewRSRParsersFromSlice creates a new RSRParsers from a slice
 func NewRSRParsersFromSlice(parsersRules []string) (prsrs RSRParsers, err error) {
 	prsrs = make(RSRParsers, len(parsersRules))
 	for i, rlStr := range parsersRules {
@@ -96,6 +98,7 @@ func NewRSRParsersFromSlice(parsersRules []string) (prsrs RSRParsers, err error)
 	return
 }
 
+// NewRSRParsersMustCompile creates a new RSRParsers and panic if fails
 func NewRSRParsersMustCompile(parsersRules string, rsrSeparator string) (prsrs RSRParsers) {
 	var err error
 	if prsrs, err = NewRSRParsers(parsersRules, rsrSeparator); err != nil {
@@ -140,6 +143,7 @@ func (prsrs RSRParsers) ParseValue(value interface{}) (out string, err error) {
 	return
 }
 
+// ParseDataProvider will parse the dataprovider using DPDynamicString
 func (prsrs RSRParsers) ParseDataProvider(dP utils.DataProvider) (out string, err error) {
 	for _, prsr := range prsrs {
 		var outPrsr string
@@ -151,6 +155,7 @@ func (prsrs RSRParsers) ParseDataProvider(dP utils.DataProvider) (out string, er
 	return
 }
 
+// ParseDataProviderWithInterfaces will parse the dataprovider using DPDynamicInterface
 func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP utils.DataProvider) (out string, err error) {
 	for _, prsr := range prsrs {
 		var outPrsr string
@@ -187,6 +192,7 @@ func (prsrs RSRParsers) Clone() (cln RSRParsers) {
 	return
 }
 
+// NewRSRParser builds one RSRParser
 func NewRSRParser(parserRules string) (rsrParser *RSRParser, err error) {
 	if len(parserRules) == 0 {
 		return
@@ -198,6 +204,7 @@ func NewRSRParser(parserRules string) (rsrParser *RSRParser, err error) {
 	return
 }
 
+// NewRSRParserMustCompile creates a new RSRParser and panic if fails
 func NewRSRParserMustCompile(parserRules string) (rsrPrsr *RSRParser) {
 	var err error
 	if rsrPrsr, err = NewRSRParser(parserRules); err != nil {
@@ -306,6 +313,7 @@ func (prsr *RSRParser) ParseValue(value interface{}) (out string, err error) {
 	return prsr.parseValue(out)
 }
 
+// ParseDataProvider will parse the dataprovider using DPDynamicString
 func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider) (out string, err error) {
 	if prsr.dynRules != nil {
 		var dynPath string
@@ -325,6 +333,7 @@ func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider) (out string, err
 	return prsr.parseValue(outStr)
 }
 
+// ParseDataProviderWithInterfaces will parse the dataprovider using DPDynamicInterface
 func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider) (out string, err error) {
 	if prsr.dynRules != nil {
 		var dynPath string
@@ -344,6 +353,7 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider) (o
 	return prsr.parseValue(utils.IfaceAsString(outIface))
 }
 
+// CompileDynRule will return the compiled dynamic rule
 func (prsr *RSRParser) CompileDynRule(dP utils.DataProvider) (p string, err error) {
 	if prsr.dynRules == nil {
 		return prsr.Rules, nil

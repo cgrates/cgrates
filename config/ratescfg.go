@@ -22,6 +22,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// RateSCfg the rates config section
 type RateSCfg struct {
 	Enabled                 bool
 	IndexedSelects          bool

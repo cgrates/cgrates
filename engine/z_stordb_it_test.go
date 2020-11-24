@@ -125,14 +125,14 @@ func testStorDBitIsDBEmpty(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		} else if test != true {
-			t.Errorf("\nExpecting: true got :%+v", test)
+			t.Errorf("Expecting: true got :%+v", test)
 		}
 	case utils.POSTGRES, utils.MYSQL:
 		test, err := storDB.IsDBEmpty()
 		if err != nil {
 			t.Error(err)
 		} else if test != false {
-			t.Errorf("\nExpecting: false got :%+v", test)
+			t.Errorf("Expecting: false got :%+v", test)
 		}
 	}
 }
@@ -171,7 +171,7 @@ func testStorDBitCRUDTpTimings(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -185,7 +185,7 @@ func testStorDBitCRUDTpTimings(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -240,7 +240,7 @@ func testStorDBitCRUDTpDestinations(t *testing.T) {
 			rcv[1].Prefixes = snd[0].Prefixes
 		}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -270,7 +270,7 @@ func testStorDBitCRUDTpDestinations(t *testing.T) {
 			rcv[1].Prefixes = snd[0].Prefixes
 		}
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -335,7 +335,7 @@ func testStorDBitCRUDTpRates(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -351,7 +351,7 @@ func testStorDBitCRUDTpRates(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -409,7 +409,7 @@ func testStorDBitCRUDTpDestinationRates(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -423,7 +423,7 @@ func testStorDBitCRUDTpDestinationRates(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -474,7 +474,7 @@ func testStorDBitCRUDTpRatingPlans(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -488,7 +488,7 @@ func testStorDBitCRUDTpRatingPlans(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -549,7 +549,7 @@ func testStorDBitCRUDTpRatingProfiles(t *testing.T) {
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) ||
 			reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
 				utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
@@ -575,7 +575,7 @@ func testStorDBitCRUDTpRatingProfiles(t *testing.T) {
 	} else {
 		if len(snd) != len(rcv) ||
 			len(snd[0].RatingPlanActivations) != len(rcv[0].RatingPlanActivations) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
 				utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
@@ -627,7 +627,7 @@ func testStorDBitCRUDTpSharedGroups(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -641,7 +641,7 @@ func testStorDBitCRUDTpSharedGroups(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -720,7 +720,7 @@ func testStorDBitCRUDTpActions(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -734,7 +734,7 @@ func testStorDBitCRUDTpActions(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -785,7 +785,7 @@ func testStorDBitCRUDTpActionPlans(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -799,7 +799,7 @@ func testStorDBitCRUDTpActionPlans(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -886,7 +886,7 @@ func testStorDBitCRUDTpActionTriggers(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -900,7 +900,7 @@ func testStorDBitCRUDTpActionTriggers(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -952,7 +952,7 @@ func testStorDBitCRUDTpAccountActions(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
@@ -966,7 +966,7 @@ func testStorDBitCRUDTpAccountActions(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE

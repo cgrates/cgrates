@@ -389,11 +389,11 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadCdrsCfg, cfg.loadSessionSCfg,
 		cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
 		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
-		cfg.loadDNSAgentCfg, cfg.loadHttpAgentCfg, cfg.loadAttributeSCfg,
+		cfg.loadDNSAgentCfg, cfg.loadHTTPAgentCfg, cfg.loadAttributeSCfg,
 		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg,
 		cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
-		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTlsCgrCfg,
+		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadDispatcherHCfg,
 		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg} {
@@ -579,16 +579,16 @@ func (cfg *CGRConfig) loadDNSAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDNSCfg, err = jsnCfg.DNSAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, cfg.generalCfg.RSRSep)
+	return cfg.dnsAgentCfg.loadFromJSONCfg(jsnDNSCfg, cfg.generalCfg.RSRSep)
 }
 
-// loadHttpAgentCfg loads the HttpAgent section of the configuration
-func (cfg *CGRConfig) loadHttpAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnHttpAgntCfg *[]*HttpAgentJsonCfg
-	if jsnHttpAgntCfg, err = jsnCfg.HttpAgentJsonCfg(); err != nil {
+// loadHTTPAgentCfg loads the HttpAgent section of the configuration
+func (cfg *CGRConfig) loadHTTPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnHTTPAgntCfg *[]*HttpAgentJsonCfg
+	if jsnHTTPAgntCfg, err = jsnCfg.HttpAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, cfg.generalCfg.RSRSep)
+	return cfg.httpAgentCfg.loadFromJsonCfg(jsnHTTPAgntCfg, cfg.generalCfg.RSRSep)
 }
 
 // loadAttributeSCfg loads the AttributeS section of the configuration
@@ -597,7 +597,7 @@ func (cfg *CGRConfig) loadAttributeSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnAttributeSCfg, err = jsnCfg.AttributeServJsonCfg(); err != nil {
 		return
 	}
-	return cfg.attributeSCfg.loadFromJsonCfg(jsnAttributeSCfg)
+	return cfg.attributeSCfg.loadFromJSONCfg(jsnAttributeSCfg)
 }
 
 // loadChargerSCfg loads the ChargerS section of the configuration
@@ -606,7 +606,7 @@ func (cfg *CGRConfig) loadChargerSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnChargerSCfg, err = jsnCfg.ChargerServJsonCfg(); err != nil {
 		return
 	}
-	return cfg.chargerSCfg.loadFromJsonCfg(jsnChargerSCfg)
+	return cfg.chargerSCfg.loadFromJSONCfg(jsnChargerSCfg)
 }
 
 // loadResourceSCfg loads the ResourceS section of the configuration
@@ -615,7 +615,7 @@ func (cfg *CGRConfig) loadResourceSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnRLSCfg, err = jsnCfg.ResourceSJsonCfg(); err != nil {
 		return
 	}
-	return cfg.resourceSCfg.loadFromJsonCfg(jsnRLSCfg)
+	return cfg.resourceSCfg.loadFromJSONCfg(jsnRLSCfg)
 }
 
 // loadStatSCfg loads the StatS section of the configuration
@@ -624,7 +624,7 @@ func (cfg *CGRConfig) loadStatSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnStatSCfg, err = jsnCfg.StatSJsonCfg(); err != nil {
 		return
 	}
-	return cfg.statsCfg.loadFromJsonCfg(jsnStatSCfg)
+	return cfg.statsCfg.loadFromJSONCfg(jsnStatSCfg)
 }
 
 // loadThresholdSCfg loads the ThresholdS section of the configuration
@@ -633,7 +633,7 @@ func (cfg *CGRConfig) loadThresholdSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnThresholdSCfg, err = jsnCfg.ThresholdSJsonCfg(); err != nil {
 		return
 	}
-	return cfg.thresholdSCfg.loadFromJsonCfg(jsnThresholdSCfg)
+	return cfg.thresholdSCfg.loadFromJSONCfg(jsnThresholdSCfg)
 }
 
 // loadRouteSCfg loads the RouteS section of the configuration
@@ -642,7 +642,7 @@ func (cfg *CGRConfig) loadRouteSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnRouteSCfg, err = jsnCfg.RouteSJsonCfg(); err != nil {
 		return
 	}
-	return cfg.routeSCfg.loadFromJsonCfg(jsnRouteSCfg)
+	return cfg.routeSCfg.loadFromJSONCfg(jsnRouteSCfg)
 }
 
 // loadLoaderSCfg loads the LoaderS section of the configuration
@@ -679,7 +679,7 @@ func (cfg *CGRConfig) loadSureTaxCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnSureTaxCfg, err = jsnCfg.SureTaxJsonCfg(); err != nil {
 		return
 	}
-	return cfg.sureTaxCfg.loadFromJsonCfg(jsnSureTaxCfg)
+	return cfg.sureTaxCfg.loadFromJSONCfg(jsnSureTaxCfg)
 }
 
 // loadDispatcherSCfg loads the DispatcherS section of the configuration
@@ -688,7 +688,7 @@ func (cfg *CGRConfig) loadDispatcherSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDispatcherSCfg, err = jsnCfg.DispatcherSJsonCfg(); err != nil {
 		return
 	}
-	return cfg.dispatcherSCfg.loadFromJsonCfg(jsnDispatcherSCfg)
+	return cfg.dispatcherSCfg.loadFromJSONCfg(jsnDispatcherSCfg)
 }
 
 // loadDispatcherHCfg loads the DispatcherH section of the configuration
@@ -697,7 +697,7 @@ func (cfg *CGRConfig) loadDispatcherHCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDispatcherHCfg, err = jsnCfg.DispatcherHJsonCfg(); err != nil {
 		return
 	}
-	return cfg.dispatcherHCfg.loadFromJsonCfg(jsnDispatcherHCfg)
+	return cfg.dispatcherHCfg.loadFromJSONCfg(jsnDispatcherHCfg)
 }
 
 // loadLoaderCgrCfg loads the Loader section of the configuration
@@ -718,13 +718,13 @@ func (cfg *CGRConfig) loadMigratorCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.migratorCgrCfg.loadFromJSONCfg(jsnMigratorCgrCfg)
 }
 
-// loadTlsCgrCfg loads the Tls section of the configuration
-func (cfg *CGRConfig) loadTlsCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnTlsCgrCfg *TlsJsonCfg
-	if jsnTlsCgrCfg, err = jsnCfg.TlsCfgJson(); err != nil {
+// loadTLSCgrCfg loads the Tls section of the configuration
+func (cfg *CGRConfig) loadTLSCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnTLSCgrCfg *TlsJsonCfg
+	if jsnTLSCgrCfg, err = jsnCfg.TlsCfgJson(); err != nil {
 		return
 	}
-	return cfg.tlsCfg.loadFromJsonCfg(jsnTlsCgrCfg)
+	return cfg.tlsCfg.loadFromJsonCfg(jsnTLSCgrCfg)
 }
 
 // loadAnalyzerCgrCfg loads the Analyzer section of the configuration
@@ -807,7 +807,7 @@ func (cfg *CGRConfig) loadTemplateSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 	if jsnTemplateCfg != nil {
 		for k, val := range jsnTemplateCfg {
-			if cfg.templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(val, cfg.generalCfg.RSRSep); err != nil {
+			if cfg.templates[k], err = FCTemplatesFromFCTemplatesJSONCfg(val, cfg.generalCfg.RSRSep); err != nil {
 				return
 			}
 		}
@@ -921,8 +921,8 @@ func (cfg *CGRConfig) AsteriskAgentCfg() *AsteriskAgentCfg {
 	return cfg.asteriskAgentCfg
 }
 
-// HttpAgentCfg returns the config for HttpAgent
-func (cfg *CGRConfig) HttpAgentCfg() HttpAgentCfgs {
+// HTTPAgentCfg returns the config for HttpAgent
+func (cfg *CGRConfig) HTTPAgentCfg() HttpAgentCfgs {
 	cfg.lks[HttpAgentJson].Lock()
 	defer cfg.lks[HttpAgentJson].Unlock()
 	return cfg.httpAgentCfg
@@ -1005,8 +1005,8 @@ func (cfg *CGRConfig) GeneralCfg() *GeneralCfg {
 	return cfg.generalCfg
 }
 
-// TlsCfg returns the config for Tls
-func (cfg *CGRConfig) TlsCfg() *TlsCfg {
+// TLSCfg returns the config for Tls
+func (cfg *CGRConfig) TLSCfg() *TlsCfg {
 	cfg.lks[TlsCfgJson].Lock()
 	defer cfg.lks[TlsCfgJson].Unlock()
 	return cfg.tlsCfg
@@ -1186,7 +1186,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		DATADB_JSN:         cfg.loadDataDBCfg,
 		STORDB_JSN:         cfg.loadStorDBCfg,
 		LISTEN_JSN:         cfg.loadListenCfg,
-		TlsCfgJson:         cfg.loadTlsCgrCfg,
+		TlsCfgJson:         cfg.loadTLSCgrCfg,
 		HTTP_JSN:           cfg.loadHTTPCfg,
 		SCHEDULER_JSN:      cfg.loadSchedulerCfg,
 		CACHE_JSN:          cfg.loadCacheCfg,
@@ -1201,7 +1201,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		KamailioAgentJSN:   cfg.loadKamAgentCfg,
 		DA_JSN:             cfg.loadDiameterAgentCfg,
 		RA_JSN:             cfg.loadRadiusAgentCfg,
-		HttpAgentJson:      cfg.loadHttpAgentCfg,
+		HttpAgentJson:      cfg.loadHTTPAgentCfg,
 		DNSAgentJson:       cfg.loadDNSAgentCfg,
 		ATTRIBUTE_JSN:      cfg.loadAttributeSCfg,
 		ChargerSCfgJson:    cfg.loadChargerSCfg,
@@ -1535,8 +1535,8 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 	}, nil
 }
 
-// ConfigReloadArgs the API params for V1ReloadConfig
-type ConfigReloadArgs struct {
+// ReloadArgs the API params for V1ReloadConfig
+type ReloadArgs struct {
 	Opts    map[string]interface{}
 	Tenant  string
 	Path    string
@@ -1544,7 +1544,7 @@ type ConfigReloadArgs struct {
 }
 
 // V1ReloadConfig reloads the configuration
-func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadArgs, reply *string) (err error) {
+func (cfg *CGRConfig) V1ReloadConfig(args *ReloadArgs, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -1596,7 +1596,7 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithOpts, reply *map[string]inter
 	case STORDB_JSN:
 		mp = cfg.StorDbCfg().AsMapInterface()
 	case TlsCfgJson:
-		mp = cfg.TlsCfg().AsMapInterface()
+		mp = cfg.TLSCfg().AsMapInterface()
 	case CACHE_JSN:
 		mp = cfg.CacheCfg().AsMapInterface()
 	case LISTEN_JSN:
@@ -1666,7 +1666,7 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithOpts, reply *map[string]inter
 	case APIBanCfgJson:
 		mp = cfg.APIBanCfg().AsMapInterface()
 	case HttpAgentJson:
-		mp = cfg.HttpAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+		mp = cfg.HTTPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case MAILER_JSN:
 		mp = cfg.MailerCfg().AsMapInterface()
 	case AnalyzerCfgJson:
@@ -1740,7 +1740,7 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithOpts, reply *string) (e
 	case STORDB_JSN:
 		mp = cfg.StorDbCfg().AsMapInterface()
 	case TlsCfgJson:
-		mp = cfg.TlsCfg().AsMapInterface()
+		mp = cfg.TLSCfg().AsMapInterface()
 	case CACHE_JSN:
 		mp = cfg.CacheCfg().AsMapInterface()
 	case LISTEN_JSN:
@@ -1810,7 +1810,7 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithOpts, reply *string) (e
 	case TemplatesJson:
 		mp = cfg.TemplatesCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case HttpAgentJson:
-		mp = cfg.HttpAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+		mp = cfg.HTTPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case MAILER_JSN:
 		mp = cfg.MailerCfg().AsMapInterface()
 	case AnalyzerCfgJson:

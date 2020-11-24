@@ -26,7 +26,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator string) (*FCTemplate, error) {
+// NewFCTemplateFromFCTemplateJSONCfg creates a FCTemplate from json
+func NewFCTemplateFromFCTemplateJSONCfg(jsnCfg *FcTemplateJsonCfg, separator string) (*FCTemplate, error) {
 	fcTmp := new(FCTemplate)
 	var err error
 	if jsnCfg.Type != nil {
@@ -97,6 +98,7 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 	return fcTmp, nil
 }
 
+// FCTemplate the teplate for a field
 type FCTemplate struct {
 	Tag              string
 	Type             string   // Type of field
@@ -120,10 +122,11 @@ type FCTemplate struct {
 	pathSlice        []string        // Used when we set a NMItem to not recreate this slice for every itemsc
 }
 
-func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg, separator string) (retFields []*FCTemplate, err error) {
+// FCTemplatesFromFCTemplatesJSONCfg will build a list of FCTemplates from json
+func FCTemplatesFromFCTemplatesJSONCfg(jsnCfgFlds []*FcTemplateJsonCfg, separator string) (retFields []*FCTemplate, err error) {
 	retFields = make([]*FCTemplate, len(jsnCfgFlds))
 	for i, jsnFld := range jsnCfgFlds {
-		if retFields[i], err = NewFCTemplateFromFCTemplateJsonCfg(jsnFld, separator); err != nil {
+		if retFields[i], err = NewFCTemplateFromFCTemplateJSONCfg(jsnFld, separator); err != nil {
 			return nil, err
 		}
 	}
@@ -201,6 +204,7 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 	return
 }
 
+// FcTemplates the config for the templates
 type FcTemplates map[string][]*FCTemplate
 
 // AsMapInterface returns the config as a map[string]interface{}

@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
+var cdrXMLBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE broadWorksCDR>
 <broadWorksCDR version="19.0">
   <cdrData>
@@ -162,7 +162,7 @@ var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
 </broadWorksCDR>`
 
 func TestXMLElementText(t *testing.T) {
-	doc, err := xmlquery.Parse(strings.NewReader(cdrXmlBroadsoft))
+	doc, err := xmlquery.Parse(strings.NewReader(cdrXMLBroadsoft))
 	if err != nil {
 		t.Error(err)
 	}
@@ -410,7 +410,7 @@ func TestXMLIndexes(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dP := NewXmlProvider(doc, utils.HierarchyPath([]string{}))
+	dP := NewXMLProvider(doc, utils.HierarchyPath([]string{}))
 	if data, err := dP.FieldAsString([]string{"complete-success-notification", "userid"}); err != nil {
 		t.Error(err)
 	} else if data != "386" {
@@ -443,7 +443,7 @@ func TestFieldAsStringXMLEmptyPath(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dP := &XmlProvider{
+	dP := &XMLProvider{
 		req:     doc,
 		cdrPath: []string{},
 		cache:   utils.MapStorage{},
@@ -455,7 +455,7 @@ func TestFieldAsStringXMLEmptyPath(t *testing.T) {
 
 func TestRemoteHostXML(t *testing.T) {
 	expected := utils.LocalAddr()
-	dp := new(XmlProvider)
+	dp := new(XMLProvider)
 	if received := dp.RemoteHost(); !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expected %+v, received %+v", expected, received)
 	}
@@ -466,7 +466,7 @@ func TestStringXML(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dP := &XmlProvider{
+	dP := &XMLProvider{
 		req:     doc,
 		cdrPath: []string{},
 		cache:   utils.MapStorage{},
@@ -482,7 +482,7 @@ func TestFieldAsInterfaceCache(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dP := &XmlProvider{
+	dP := &XMLProvider{
 		req:     doc,
 		cdrPath: []string{},
 		cache: utils.MapStorage{
@@ -502,7 +502,7 @@ func TestFieldAsInterfaceInvalidSyntax(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dP := NewXmlProvider(doc, utils.HierarchyPath([]string{}))
+	dP := NewXMLProvider(doc, utils.HierarchyPath([]string{}))
 	expected := "strconv.Atoi: parsing \"09]\": invalid syntax"
 	if _, err := dP.FieldAsString([]string{"complete-success-notification[09]]"}); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+q, received %+q", expected, err)
@@ -514,7 +514,7 @@ func TestFieldAsInterfaceInvalidSyntax1(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dP := NewXmlProvider(doc, utils.HierarchyPath([]string{}))
+	dP := NewXMLProvider(doc, utils.HierarchyPath([]string{}))
 	expected := "filter rule <[0> needs to end in ]"
 	if _, err := dP.FieldAsString([]string{"complete-success-notification[0"}); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+q, received %+q", expected, err)

@@ -30,7 +30,7 @@ func TestConfigSanityRater(t *testing.T) {
 		Enabled:    true,
 		StatSConns: []string{utils.MetaInternal},
 	}
-	expected := "<StatS> not enabled but requested by <RALs> component."
+	expected := "<StatS> not enabled but requested by <RALs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -41,7 +41,7 @@ func TestConfigSanityRater(t *testing.T) {
 	}
 	cfg.ralsCfg.StatSConns = []string{}
 	cfg.ralsCfg.ThresholdSConns = []string{utils.MetaInternal}
-	expected = "<ThresholdS> not enabled but requested by <RALs> component."
+	expected = "<ThresholdS> not enabled but requested by <RALs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -65,13 +65,13 @@ func TestConfigSanityCDRServer(t *testing.T) {
 		t.Errorf("Expected %+q, received %+q", expected, err)
 	}
 	cfg.cdrsCfg.EEsConns = []string{utils.MetaInternal}
-	expected = "<EEs> not enabled but requested by <CDRs> component."
+	expected = "<EEs> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+q, received %+q", expected, err)
 	}
 
 	cfg.cdrsCfg.ChargerSConns = []string{utils.MetaInternal}
-	expected = "<ChargerS> not enabled but requested by <CDRs> component."
+	expected = "<ChargerS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -83,7 +83,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	cfg.cdrsCfg.ChargerSConns = []string{}
 
 	cfg.cdrsCfg.RaterConns = []string{utils.MetaInternal}
-	expected = "<RALs> not enabled but requested by <CDRs> component."
+	expected = "<RALs> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -95,7 +95,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	cfg.cdrsCfg.RaterConns = []string{}
 
 	cfg.cdrsCfg.AttributeSConns = []string{utils.MetaInternal}
-	expected = "<AttributeS> not enabled but requested by <CDRs> component."
+	expected = "<AttributeS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -107,7 +107,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	cfg.cdrsCfg.AttributeSConns = []string{}
 
 	cfg.cdrsCfg.StatSConns = []string{utils.MetaInternal}
-	expected = "<StatS> not enabled but requested by <CDRs> component."
+	expected = "<StatS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -119,7 +119,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	cfg.cdrsCfg.StatSConns = []string{}
 
 	cfg.cdrsCfg.ThresholdSConns = []string{utils.MetaInternal}
-	expected = "<ThresholdS> not enabled but requested by <CDRs> component."
+	expected = "<ThresholdS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -237,7 +237,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.sessionSCfg.TerminateAttempts = 1
 
 	cfg.sessionSCfg.ChargerSConns = []string{utils.MetaInternal}
-	expected = "<ChargerS> not enabled but requested by <SessionS> component."
+	expected = "<ChargerS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -250,7 +250,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.chargerSCfg.Enabled = true
 
 	cfg.sessionSCfg.RALsConns = []string{utils.MetaInternal}
-	expected = "<RALs> not enabled but requested by <SessionS> component."
+	expected = "<RALs> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -263,7 +263,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.ralsCfg.Enabled = true
 
 	cfg.sessionSCfg.ResSConns = []string{utils.MetaInternal}
-	expected = "<ResourceS> not enabled but requested by <SessionS> component."
+	expected = "<ResourceS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -276,7 +276,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.resourceSCfg.Enabled = true
 
 	cfg.sessionSCfg.ThreshSConns = []string{utils.MetaInternal}
-	expected = "<ThresholdS> not enabled but requested by <SessionS> component."
+	expected = "<ThresholdS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -289,7 +289,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.thresholdSCfg.Enabled = true
 
 	cfg.sessionSCfg.StatSConns = []string{utils.MetaInternal}
-	expected = "<StatS> not enabled but requested by <SessionS> component."
+	expected = "<StatS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -302,7 +302,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.statsCfg.Enabled = true
 
 	cfg.sessionSCfg.RouteSConns = []string{utils.MetaInternal}
-	expected = "<RouteS> not enabled but requested by <SessionS> component."
+	expected = "<RouteS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -315,7 +315,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.routeSCfg.Enabled = true
 
 	cfg.sessionSCfg.AttrSConns = []string{utils.MetaInternal}
-	expected = "<AttributeS> not enabled but requested by <SessionS> component."
+	expected = "<AttributeS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -328,7 +328,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.attributeSCfg.Enabled = true
 
 	cfg.sessionSCfg.CDRsConns = []string{utils.MetaInternal}
-	expected = "<CDRs> not enabled but requested by <SessionS> component."
+	expected = "<CDRs> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -374,7 +374,7 @@ func TestConfigSanityFreeSWITCHAgent(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{utils.MetaInternal},
 	}
-	expected = "<SessionS> not enabled but requested by <FreeSWITCHAgent> component."
+	expected = "<SessionS> not enabled but requested by <FreeSWITCHAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -396,7 +396,7 @@ func TestConfigSanityKamailioAgent(t *testing.T) {
 	}
 
 	cfg.kamAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
-	expected = "<SessionS> not enabled but requested by <KamailioAgent> component."
+	expected = "<SessionS> not enabled but requested by <KamailioAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -418,7 +418,7 @@ func TestConfigSanityAsteriskAgent(t *testing.T) {
 	}
 
 	cfg.asteriskAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
-	expected = "<SessionS> not enabled but requested by <AsteriskAgent> component."
+	expected = "<SessionS> not enabled but requested by <AsteriskAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -462,7 +462,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 	}
 
 	cfg.diameterAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
-	expected = "<SessionS> not enabled but requested by <DiameterAgent> component."
+	expected = "<SessionS> not enabled but requested by <DiameterAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -516,7 +516,7 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 	}
 
 	cfg.radiusAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
-	expected = "<SessionS> not enabled but requested by <RadiusAgent> component."
+	expected = "<SessionS> not enabled but requested by <RadiusAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -564,7 +564,7 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 	}
 
 	cfg.dnsAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
-	expected = "<SessionS> not enabled but requested by <DNSAgent> component."
+	expected = "<SessionS> not enabled but requested by <DNSAgent> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -611,7 +611,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 			},
 		},
 	}
-	expected := "<SessionS> not enabled but requested by <> HTTPAgent Template."
+	expected := "<SessionS> not enabled but requested by <> HTTPAgent Template"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -675,7 +675,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	expected = "<SessionS> not enabled but requested by <SIPAgent> component."
+	expected = "<SessionS> not enabled but requested by <SIPAgent> component"
 	cfg.sipAgentCfg.SessionSConns = []string{utils.MetaInternal}
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -724,7 +724,7 @@ func TestConfigSanityChargerS(t *testing.T) {
 		Enabled:         true,
 		AttributeSConns: []string{utils.MetaInternal},
 	}
-	expected := "<AttributeS> not enabled but requested by <ChargerS> component."
+	expected := "<AttributeS> not enabled but requested by <ChargerS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -741,7 +741,7 @@ func TestConfigSanityResourceLimiter(t *testing.T) {
 		Enabled:         true,
 		ThresholdSConns: []string{utils.MetaInternal},
 	}
-	expected := "<ThresholdS> not enabled but requested by <ResourceS> component."
+	expected := "<ThresholdS> not enabled but requested by <ResourceS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -758,7 +758,7 @@ func TestConfigSanityStatS(t *testing.T) {
 		Enabled:         true,
 		ThresholdSConns: []string{utils.MetaInternal},
 	}
-	expected := "<ThresholdS> not enabled but requested by <Stats> component."
+	expected := "<ThresholdS> not enabled but requested by <Stats> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -774,7 +774,7 @@ func TestConfigSanityRouteS(t *testing.T) {
 	cfg.routeSCfg.Enabled = true
 
 	cfg.routeSCfg.ResourceSConns = []string{utils.MetaInternal}
-	expected := "<ResourceS> not enabled but requested by <RouteS> component."
+	expected := "<ResourceS> not enabled but requested by <RouteS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -786,7 +786,7 @@ func TestConfigSanityRouteS(t *testing.T) {
 	cfg.routeSCfg.ResourceSConns = []string{}
 
 	cfg.routeSCfg.StatSConns = []string{utils.MetaInternal}
-	expected = "<StatS> not enabled but requested by <RouteS> component."
+	expected = "<StatS> not enabled but requested by <RouteS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -798,7 +798,7 @@ func TestConfigSanityRouteS(t *testing.T) {
 	cfg.routeSCfg.StatSConns = []string{}
 
 	cfg.routeSCfg.AttributeSConns = []string{utils.MetaInternal}
-	expected = "<AttributeS> not enabled but requested by <RouteS> component."
+	expected = "<AttributeS> not enabled but requested by <RouteS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -810,7 +810,7 @@ func TestConfigSanityRouteS(t *testing.T) {
 	cfg.routeSCfg.AttributeSConns = []string{}
 
 	cfg.routeSCfg.RALsConns = []string{utils.MetaInternal}
-	expected = "<RALs> not enabled but requested by <RouteS> component."
+	expected = "<RALs> not enabled but requested by <RouteS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -831,7 +831,7 @@ func TestConfigSanityScheduler(t *testing.T) {
 	cfg.schedulerCfg.Enabled = true
 
 	cfg.schedulerCfg.CDRsConns = []string{utils.MetaInternal}
-	expected := "<CDRs> not enabled but requested by <SchedulerS> component."
+	expected := "<CDRs> not enabled but requested by <SchedulerS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -843,7 +843,7 @@ func TestConfigSanityScheduler(t *testing.T) {
 	cfg.schedulerCfg.CDRsConns = []string{}
 
 	cfg.schedulerCfg.ThreshSConns = []string{utils.MetaInternal}
-	expected = "<ThresholdS> not enabled but requested by <SchedulerS> component."
+	expected = "<ThresholdS> not enabled but requested by <SchedulerS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -855,7 +855,7 @@ func TestConfigSanityScheduler(t *testing.T) {
 	cfg.schedulerCfg.ThreshSConns = []string{}
 
 	cfg.schedulerCfg.StatSConns = []string{utils.MetaInternal}
-	expected = "<Stats> not enabled but requested by <SchedulerS> component."
+	expected = "<Stats> not enabled but requested by <SchedulerS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -878,7 +878,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.ersCfg.SessionSConns = []string{utils.MetaInternal}
-	expected = "<SessionS> not enabled but requested by <ERs> component."
+	expected = "<SessionS> not enabled but requested by <ERs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -994,7 +994,7 @@ func TestConfigSanityEventExporter(t *testing.T) {
 		},
 	}
 
-	expected := "<AttributeS> not enabled but requested by <EEs> component."
+	expected := "<AttributeS> not enabled but requested by <EEs> component"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1245,7 +1245,7 @@ func TestConfigSanityAPIer(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.apier.AttributeSConns = []string{utils.MetaInternal}
 
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <APIerSv1> component." {
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <APIerSv1> component" {
 		t.Error(err)
 	}
 	cfg.apier.AttributeSConns = []string{"test"}
@@ -1257,7 +1257,7 @@ func TestConfigSanityAPIer(t *testing.T) {
 	cfg.attributeSCfg.Enabled = true
 	cfg.apier.SchedulerConns = []string{utils.MetaInternal}
 
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<SchedulerS> not enabled but requested by <APIerSv1> component." {
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<SchedulerS> not enabled but requested by <APIerSv1> component" {
 		t.Error(err)
 	}
 	cfg.apier.SchedulerConns = []string{"test"}
@@ -1273,7 +1273,7 @@ func TestConfigSanityDispatcher(t *testing.T) {
 		Enabled:         true,
 		AttributeSConns: []string{utils.MetaInternal},
 	}
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <DispatcherS> component." {
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <DispatcherS> component" {
 		t.Error(err)
 	}
 	cfg.dispatcherSCfg.AttributeSConns = []string{"test"}
@@ -1342,14 +1342,14 @@ func TestCheckConfigSanity(t *testing.T) {
 		Enabled:    true,
 		StatSConns: []string{utils.MetaInternal},
 	}
-	expected := "<StatS> not enabled but requested by <RALs> component."
+	expected := "<StatS> not enabled but requested by <RALs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.statsCfg.Enabled = true
 	cfg.ralsCfg.ThresholdSConns = []string{utils.MetaInternal}
 
-	expected = "<ThresholdS> not enabled but requested by <RALs> component."
+	expected = "<ThresholdS> not enabled but requested by <RALs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1364,27 +1364,27 @@ func TestCheckConfigSanity(t *testing.T) {
 		Enabled:       true,
 		ChargerSConns: []string{utils.MetaInternal},
 	}
-	expected = "<ChargerS> not enabled but requested by <CDRs> component."
+	expected = "<ChargerS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.chargerSCfg.Enabled = true
 	cfg.cdrsCfg.RaterConns = []string{utils.MetaInternal}
 
-	expected = "<RALs> not enabled but requested by <CDRs> component."
+	expected = "<RALs> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.ralsCfg.Enabled = true
 	cfg.cdrsCfg.AttributeSConns = []string{utils.MetaInternal}
-	expected = "<AttributeS> not enabled but requested by <CDRs> component."
+	expected = "<AttributeS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.statsCfg.Enabled = false
 	cfg.attributeSCfg.Enabled = true
 	cfg.cdrsCfg.StatSConns = []string{utils.MetaInternal}
-	expected = "<StatS> not enabled but requested by <CDRs> component."
+	expected = "<StatS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1397,7 +1397,7 @@ func TestCheckConfigSanity(t *testing.T) {
 	cfg.thresholdSCfg.Enabled = false
 	cfg.cdrsCfg.OnlineCDRExports = []string{"stringx"}
 	cfg.cdrsCfg.ThresholdSConns = []string{utils.MetaInternal}
-	expected = "<ThresholdS> not enabled but requested by <CDRs> component."
+	expected = "<ThresholdS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

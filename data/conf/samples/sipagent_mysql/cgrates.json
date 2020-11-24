@@ -71,4 +71,12 @@
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
+
+"templates": {
+	"*err": [
+		{"tag": "Request", "path": "*rep.Request", "type": "*constant",
+			"value": "SIP/2.0 500 Internal Server Error", "mandatory": true},
+	],
+}
+
 }

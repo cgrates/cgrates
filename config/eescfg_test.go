@@ -200,7 +200,7 @@ func TestEESClone(t *testing.T) {
 }
 
 func TestEventExporterFieldloadFromJsonCfg(t *testing.T) {
-	eventExporterJson := &EEsJsonCfg{
+	eventExporterJSON := &EEsJsonCfg{
 		Exporters: &[]*EventExporterJsonCfg{
 			{
 				Fields: &[]*FcTemplateJsonCfg{
@@ -214,13 +214,13 @@ func TestEventExporterFieldloadFromJsonCfg(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJson, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
 func TestEventExporterFieldloadFromJsonCfg1(t *testing.T) {
-	eventExporterJson := &EEsJsonCfg{
+	eventExporterJSON := &EEsJsonCfg{
 		Exporters: &[]*EventExporterJsonCfg{
 			{
 				Fields: &[]*FcTemplateJsonCfg{
@@ -234,7 +234,7 @@ func TestEventExporterFieldloadFromJsonCfg1(t *testing.T) {
 	expected := "no template with id: <>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJson, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

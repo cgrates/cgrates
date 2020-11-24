@@ -141,7 +141,7 @@ func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
 	for _, xmlElmt := range xmlElmts {
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
-			config.NewXmlProvider(xmlElmt, rdr.Config().XMLRootPath), reqVars,
+			config.NewXMLProvider(xmlElmt, rdr.Config().XMLRootPath), reqVars,
 			nil, nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,

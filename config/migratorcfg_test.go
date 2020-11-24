@@ -75,12 +75,12 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 			utils.RedisSentinelNameCfg: utils.EmptyString,
 		},
 	}
-	if cfgJson, err := NewDefaultCGRConfig(); err != nil {
+	if cfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = cfgJson.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	} else if err = cfg.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, cfgJson.migratorCgrCfg) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJson.migratorCgrCfg))
+	} else if !reflect.DeepEqual(expected, cfg.migratorCgrCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.migratorCgrCfg))
 	}
 }
 
@@ -248,7 +248,7 @@ func TestMigratorCgrCfgClone(t *testing.T) {
 	}
 	rcv := sa.Clone()
 	if !reflect.DeepEqual(sa, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
 	}
 	if rcv.UsersFilters[0] = ""; sa.UsersFilters[0] != utils.Account {
 		t.Errorf("Expected clone to not modify the cloned")

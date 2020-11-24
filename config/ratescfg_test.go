@@ -135,7 +135,7 @@ func TestRateSCfgClone(t *testing.T) {
 	}
 	rcv := sa.Clone()
 	if !reflect.DeepEqual(sa, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
 	}
 	(*rcv.StringIndexedFields)[0] = ""
 	if (*sa.StringIndexedFields)[0] != "*req.index1" {

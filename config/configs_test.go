@@ -109,7 +109,7 @@ func TestConfigSCfgClone(t *testing.T) {
 	}
 	rcv := cS.Clone()
 	if !reflect.DeepEqual(cS, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cS), utils.ToJSON(rcv))
 	}
 	if rcv.URL = ""; cS.URL != "/randomURL/" {
 		t.Errorf("Expected clone to not modify the cloned")

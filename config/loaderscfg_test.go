@@ -116,7 +116,7 @@ func TestLoaderSCfgloadFromJsonCfgCase2(t *testing.T) {
 }
 
 func TestLoaderSCfgloadFromJsonCfgCase3(t *testing.T) {
-	cfgJson := &LoaderJsonCfg{
+	cfg := &LoaderJsonCfg{
 		Data: &[]*LoaderJsonDataType{
 			{
 				Fields: &[]*FcTemplateJsonCfg{
@@ -130,13 +130,13 @@ func TestLoaderSCfgloadFromJsonCfgCase3(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := jsonCfg.loaderCfg[0].loadFromJsonCfg(cfgJson, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err := jsonCfg.loaderCfg[0].loadFromJsonCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
 func TestLoaderSCfgloadFromJsonCfgCase4(t *testing.T) {
-	cfgJson := &LoaderJsonCfg{
+	cfg := &LoaderJsonCfg{
 		Data: &[]*LoaderJsonDataType{
 			{
 				Fields: &[]*FcTemplateJsonCfg{
@@ -150,13 +150,13 @@ func TestLoaderSCfgloadFromJsonCfgCase4(t *testing.T) {
 	expected := "no template with id: <>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(cfgJson, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
 func TestLoaderSCfgloadFromJsonCfgCase5(t *testing.T) {
-	cfgJson := &LoaderJsonCfg{
+	cfg := &LoaderJsonCfg{
 		Data: &[]*LoaderJsonDataType{
 			{
 				Fields: &[]*FcTemplateJsonCfg{
@@ -200,7 +200,7 @@ func TestLoaderSCfgloadFromJsonCfgCase5(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(cfgJson, msgTemplates, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(cfg, msgTemplates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.loaderCfg[0].Data[0].Fields[0], expectedFields[0].Data[0].Fields[0]) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFields[0].Data[0].Fields[0]), utils.ToJSON(jsonCfg.loaderCfg[0].Data[0].Fields[0]))
@@ -208,12 +208,12 @@ func TestLoaderSCfgloadFromJsonCfgCase5(t *testing.T) {
 }
 
 func TestLoaderSCfgloadFromJsonCfgCase6(t *testing.T) {
-	cfgJson := &LoaderJsonCfg{
+	cfg := &LoaderJsonCfg{
 		Data: &[]*LoaderJsonDataType{nil},
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(cfgJson, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }

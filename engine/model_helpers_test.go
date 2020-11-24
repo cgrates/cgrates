@@ -2562,7 +2562,7 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 
 	rcvTPs := TpFilterS(tps).AsTPFilter()
 	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[0])) {
-		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
 
@@ -2597,7 +2597,7 @@ func TestTPFilterAsTPFilterWithDynValues(t *testing.T) {
 
 	rcvTPs := TpFilterS(tps).AsTPFilter()
 	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[0])) {
-		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
 
@@ -3672,14 +3672,14 @@ func TestTPDispatcherHostsCSVHeader(t *testing.T) {
 	tps := &TPDispatcherHosts{}
 	eOut := []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.TLS}
 	if rcv := tps.CSVHeader(); !reflect.DeepEqual(rcv, eOut) {
-		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
 
 func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 	tps := &TPDispatcherHosts{}
 	if rcv := tps.AsTPDispatcherHosts(); rcv != nil {
-		t.Errorf("\nExpecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
+		t.Errorf("Expecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
 	}
 
 	tps = &TPDispatcherHosts{
@@ -3688,7 +3688,7 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 			Tenant: "Tenant1",
 		}}
 	if rcv := tps.AsTPDispatcherHosts(); rcv != nil {
-		t.Errorf("\nExpecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
+		t.Errorf("Expecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
 	}
 
 	tps = &TPDispatcherHosts{
@@ -3709,7 +3709,7 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 		},
 	}
 	if rcv := tps.AsTPDispatcherHosts(); !reflect.DeepEqual(rcv, eOut) {
-		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
 	tps = &TPDispatcherHosts{
@@ -3730,7 +3730,7 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 		},
 	}
 	if rcv := tps.AsTPDispatcherHosts(); !reflect.DeepEqual(rcv, eOut) {
-		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
 	tps = &TPDispatcherHosts{
@@ -3752,7 +3752,7 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 		},
 	}
 	if rcv := tps.AsTPDispatcherHosts(); !reflect.DeepEqual(rcv, eOut) {
-		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
 	tps = &TPDispatcherHosts{
@@ -3776,14 +3776,14 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 	rcv := tps.AsTPDispatcherHosts()
 	sort.Slice(rcv, func(i, j int) bool { return strings.Compare(rcv[i].ID, rcv[j].ID) < 0 })
 	if !reflect.DeepEqual(rcv, eOut) {
-		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
 
 func TestAPItoModelTPDispatcherHost(t *testing.T) {
 	var tpDPH *utils.TPDispatcherHost
 	if rcv := APItoModelTPDispatcherHost(tpDPH); rcv != nil {
-		t.Errorf("\nExpecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
+		t.Errorf("Expecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
 	}
 
 	tpDPH = &utils.TPDispatcherHost{
@@ -3801,7 +3801,7 @@ func TestAPItoModelTPDispatcherHost(t *testing.T) {
 		ID:        "ID",
 	}
 	if rcv := APItoModelTPDispatcherHost(tpDPH); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
 }
@@ -3809,7 +3809,7 @@ func TestAPItoModelTPDispatcherHost(t *testing.T) {
 func TestAPItoDispatcherHost(t *testing.T) {
 	var tpDPH *utils.TPDispatcherHost
 	if rcv := APItoDispatcherHost(tpDPH); rcv != nil {
-		t.Errorf("\nExpecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
+		t.Errorf("Expecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
 	}
 
 	tpDPH = &utils.TPDispatcherHost{
@@ -3830,7 +3830,7 @@ func TestAPItoDispatcherHost(t *testing.T) {
 		},
 	}
 	if rcv := APItoDispatcherHost(tpDPH); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
 	tpDPH = &utils.TPDispatcherHost{
@@ -3852,7 +3852,7 @@ func TestAPItoDispatcherHost(t *testing.T) {
 		},
 	}
 	if rcv := APItoDispatcherHost(tpDPH); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
 
@@ -3876,7 +3876,7 @@ func TestDispatcherHostToAPI(t *testing.T) {
 		},
 	}
 	if rcv := DispatcherHostToAPI(dph); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("\nExpecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
 }

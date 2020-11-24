@@ -168,7 +168,7 @@ type RALsV1Interface interface {
 
 type ConfigSv1Interface interface {
 	GetConfig(section *config.SectionWithOpts, reply *map[string]interface{}) (err error)
-	ReloadConfig(section *config.ConfigReloadArgs, reply *string) (err error)
+	ReloadConfig(section *config.ReloadArgs, reply *string) (err error)
 	SetConfig(args *config.SetConfigArgs, reply *string) (err error)
 	SetConfigFromJSON(args *config.SetConfigFromJSONArgs, reply *string) (err error)
 	GetConfigAsJSON(args *config.SectionWithOpts, reply *string) (err error)

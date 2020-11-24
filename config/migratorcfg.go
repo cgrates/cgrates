@@ -24,6 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// MigratorCgrCfg the migrator config section
 type MigratorCgrCfg struct {
 	OutDataDBType     string
 	OutDataDBHost     string

@@ -98,7 +98,7 @@ func TestLoaderCgrCfgClone(t *testing.T) {
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
 	if rcv.CachesConns[0] = ""; ban.CachesConns[0] != "*internal:*caches" {
 		t.Errorf("Expected clone to not modify the cloned")

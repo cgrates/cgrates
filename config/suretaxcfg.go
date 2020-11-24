@@ -19,15 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
-// SureTax configuration object
+// SureTaxCfg configuration object
 type SureTaxCfg struct {
-	Url                  string
+	URL                  string
 	ClientNumber         string
 	ValidationKey        string
 	BusinessUnit         string
@@ -56,128 +55,129 @@ type SureTaxCfg struct {
 }
 
 // Loads/re-loads data from json config object
-func (self *SureTaxCfg) loadFromJsonCfg(jsnCfg *SureTaxJsonCfg) (err error) {
+func (st *SureTaxCfg) loadFromJSONCfg(jsnCfg *SureTaxJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
 	if jsnCfg.Url != nil {
-		self.Url = *jsnCfg.Url
+		st.URL = *jsnCfg.Url
 	}
 	if jsnCfg.Client_number != nil {
-		self.ClientNumber = *jsnCfg.Client_number
+		st.ClientNumber = *jsnCfg.Client_number
 	}
 	if jsnCfg.Validation_key != nil {
-		self.ValidationKey = *jsnCfg.Validation_key
+		st.ValidationKey = *jsnCfg.Validation_key
 	}
 	if jsnCfg.Business_unit != nil {
-		self.BusinessUnit = *jsnCfg.Business_unit
+		st.BusinessUnit = *jsnCfg.Business_unit
 	}
 	if jsnCfg.Timezone != nil {
-		if self.Timezone, err = time.LoadLocation(*jsnCfg.Timezone); err != nil {
+		if st.Timezone, err = time.LoadLocation(*jsnCfg.Timezone); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Include_local_cost != nil {
-		self.IncludeLocalCost = *jsnCfg.Include_local_cost
+		st.IncludeLocalCost = *jsnCfg.Include_local_cost
 	}
 	if jsnCfg.Return_file_code != nil {
-		self.ReturnFileCode = *jsnCfg.Return_file_code
+		st.ReturnFileCode = *jsnCfg.Return_file_code
 	}
 	if jsnCfg.Response_group != nil {
-		self.ResponseGroup = *jsnCfg.Response_group
+		st.ResponseGroup = *jsnCfg.Response_group
 	}
 	if jsnCfg.Response_type != nil {
-		self.ResponseType = *jsnCfg.Response_type
+		st.ResponseType = *jsnCfg.Response_type
 	}
 	if jsnCfg.Regulatory_code != nil {
-		self.RegulatoryCode = *jsnCfg.Regulatory_code
+		st.RegulatoryCode = *jsnCfg.Regulatory_code
 	}
 	if jsnCfg.Client_tracking != nil {
-		if self.ClientTracking, err = NewRSRParsers(*jsnCfg.Client_tracking, utils.INFIELD_SEP); err != nil {
+		if st.ClientTracking, err = NewRSRParsers(*jsnCfg.Client_tracking, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Customer_number != nil {
-		if self.CustomerNumber, err = NewRSRParsers(*jsnCfg.Customer_number, utils.INFIELD_SEP); err != nil {
+		if st.CustomerNumber, err = NewRSRParsers(*jsnCfg.Customer_number, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Orig_number != nil {
-		if self.OrigNumber, err = NewRSRParsers(*jsnCfg.Orig_number, utils.INFIELD_SEP); err != nil {
+		if st.OrigNumber, err = NewRSRParsers(*jsnCfg.Orig_number, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Term_number != nil {
-		if self.TermNumber, err = NewRSRParsers(*jsnCfg.Term_number, utils.INFIELD_SEP); err != nil {
+		if st.TermNumber, err = NewRSRParsers(*jsnCfg.Term_number, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Bill_to_number != nil {
-		if self.BillToNumber, err = NewRSRParsers(*jsnCfg.Bill_to_number, utils.INFIELD_SEP); err != nil {
+		if st.BillToNumber, err = NewRSRParsers(*jsnCfg.Bill_to_number, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Zipcode != nil {
-		if self.Zipcode, err = NewRSRParsers(*jsnCfg.Zipcode, utils.INFIELD_SEP); err != nil {
+		if st.Zipcode, err = NewRSRParsers(*jsnCfg.Zipcode, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Plus4 != nil {
-		if self.Plus4, err = NewRSRParsers(*jsnCfg.Plus4, utils.INFIELD_SEP); err != nil {
+		if st.Plus4, err = NewRSRParsers(*jsnCfg.Plus4, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.P2PZipcode != nil {
-		if self.P2PZipcode, err = NewRSRParsers(*jsnCfg.P2PZipcode, utils.INFIELD_SEP); err != nil {
+		if st.P2PZipcode, err = NewRSRParsers(*jsnCfg.P2PZipcode, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.P2PPlus4 != nil {
-		if self.P2PPlus4, err = NewRSRParsers(*jsnCfg.P2PPlus4, utils.INFIELD_SEP); err != nil {
+		if st.P2PPlus4, err = NewRSRParsers(*jsnCfg.P2PPlus4, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Units != nil {
-		if self.Units, err = NewRSRParsers(*jsnCfg.Units, utils.INFIELD_SEP); err != nil {
+		if st.Units, err = NewRSRParsers(*jsnCfg.Units, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Unit_type != nil {
-		if self.UnitType, err = NewRSRParsers(*jsnCfg.Unit_type, utils.INFIELD_SEP); err != nil {
+		if st.UnitType, err = NewRSRParsers(*jsnCfg.Unit_type, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Tax_included != nil {
-		if self.TaxIncluded, err = NewRSRParsers(*jsnCfg.Tax_included, utils.INFIELD_SEP); err != nil {
+		if st.TaxIncluded, err = NewRSRParsers(*jsnCfg.Tax_included, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Tax_situs_rule != nil {
-		if self.TaxSitusRule, err = NewRSRParsers(*jsnCfg.Tax_situs_rule, utils.INFIELD_SEP); err != nil {
+		if st.TaxSitusRule, err = NewRSRParsers(*jsnCfg.Tax_situs_rule, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Trans_type_code != nil {
-		if self.TransTypeCode, err = NewRSRParsers(*jsnCfg.Trans_type_code, utils.INFIELD_SEP); err != nil {
+		if st.TransTypeCode, err = NewRSRParsers(*jsnCfg.Trans_type_code, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Sales_type_code != nil {
-		if self.SalesTypeCode, err = NewRSRParsers(*jsnCfg.Sales_type_code, utils.INFIELD_SEP); err != nil {
+		if st.SalesTypeCode, err = NewRSRParsers(*jsnCfg.Sales_type_code, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Tax_exemption_code_list != nil {
-		if self.TaxExemptionCodeList, err = NewRSRParsers(*jsnCfg.Tax_exemption_code_list, utils.INFIELD_SEP); err != nil {
+		if st.TaxExemptionCodeList, err = NewRSRParsers(*jsnCfg.Tax_exemption_code_list, utils.INFIELD_SEP); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (st *SureTaxCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
-		utils.URLCfg:              st.Url,
+	return map[string]interface{}{
+		utils.URLCfg:              st.URL,
 		utils.ClientNumberCfg:     st.ClientNumber,
 		utils.ValidationKeyCfg:    st.ValidationKey,
 		utils.BusinessUnitCfg:     st.BusinessUnit,
@@ -187,102 +187,59 @@ func (st *SureTaxCfg) AsMapInterface(separator string) (initialMP map[string]int
 		utils.ResponseGroupCfg:    st.ResponseGroup,
 		utils.ResponseTypeCfg:     st.ResponseType,
 		utils.RegulatoryCodeCfg:   st.RegulatoryCode,
-	}
-	values := make([]string, len(st.ClientTracking))
-	for i, item := range st.ClientTracking {
-		values[i] = item.Rules
-	}
-	initialMP[utils.ClientTrackingCfg] = strings.Join(values, separator)
 
-	values = make([]string, len(st.CustomerNumber))
-	for i, item := range st.CustomerNumber {
-		values[i] = item.Rules
+		utils.ClientTrackingCfg:       st.ClientTracking.GetRule(separator),
+		utils.CustomerNumberCfg:       st.CustomerNumber.GetRule(separator),
+		utils.OrigNumberCfg:           st.OrigNumber.GetRule(separator),
+		utils.TermNumberCfg:           st.TermNumber.GetRule(separator),
+		utils.BillToNumberCfg:         st.BillToNumber.GetRule(separator),
+		utils.ZipcodeCfg:              st.Zipcode.GetRule(separator),
+		utils.Plus4Cfg:                st.Plus4.GetRule(separator),
+		utils.P2PZipcodeCfg:           st.P2PZipcode.GetRule(separator),
+		utils.P2PPlus4Cfg:             st.P2PPlus4.GetRule(separator),
+		utils.UnitsCfg:                st.Units.GetRule(separator),
+		utils.UnitTypeCfg:             st.UnitType.GetRule(separator),
+		utils.TaxIncludedCfg:          st.TaxIncluded.GetRule(separator),
+		utils.TaxSitusRuleCfg:         st.TaxSitusRule.GetRule(separator),
+		utils.TransTypeCodeCfg:        st.TransTypeCode.GetRule(separator),
+		utils.SalesTypeCodeCfg:        st.SalesTypeCode.GetRule(separator),
+		utils.TaxExemptionCodeListCfg: st.TaxExemptionCodeList.GetRule(separator),
 	}
-	initialMP[utils.CustomerNumberCfg] = strings.Join(values, separator)
+}
 
-	values = make([]string, len(st.OrigNumber))
-	for i, item := range st.OrigNumber {
-		values[i] = item.Rules
+// Clone returns a deep copy of SureTaxCfg
+func (st SureTaxCfg) Clone() (cln *SureTaxCfg) {
+	loc := *time.UTC
+	if st.Timezone != nil {
+		loc = *st.Timezone
 	}
-	initialMP[utils.OrigNumberCfg] = strings.Join(values, separator)
+	return &SureTaxCfg{
+		URL:              st.URL,
+		ClientNumber:     st.ClientNumber,
+		ValidationKey:    st.ValidationKey,
+		BusinessUnit:     st.BusinessUnit,
+		Timezone:         &loc,
+		IncludeLocalCost: st.IncludeLocalCost,
+		ReturnFileCode:   st.ReturnFileCode,
+		ResponseGroup:    st.ResponseGroup,
+		ResponseType:     st.ResponseType,
+		RegulatoryCode:   st.RegulatoryCode,
 
-	values = make([]string, len(st.TermNumber))
-	for i, item := range st.TermNumber {
-		values[i] = item.Rules
+		ClientTracking:       st.ClientTracking.Clone(),
+		CustomerNumber:       st.CustomerNumber.Clone(),
+		OrigNumber:           st.OrigNumber.Clone(),
+		TermNumber:           st.TermNumber.Clone(),
+		BillToNumber:         st.BillToNumber.Clone(),
+		Zipcode:              st.Zipcode.Clone(),
+		Plus4:                st.Plus4.Clone(),
+		P2PZipcode:           st.P2PZipcode.Clone(),
+		P2PPlus4:             st.P2PPlus4.Clone(),
+		Units:                st.Units.Clone(),
+		UnitType:             st.UnitType.Clone(),
+		TaxIncluded:          st.TaxIncluded.Clone(),
+		TaxSitusRule:         st.TaxSitusRule.Clone(),
+		TransTypeCode:        st.TransTypeCode.Clone(),
+		SalesTypeCode:        st.SalesTypeCode.Clone(),
+		TaxExemptionCodeList: st.TaxExemptionCodeList.Clone(),
 	}
-	initialMP[utils.TermNumberCfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.BillToNumber))
-	for i, item := range st.BillToNumber {
-		values[i] = item.Rules
-	}
-	initialMP[utils.BillToNumberCfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.Zipcode))
-	for i, item := range st.Zipcode {
-		values[i] = item.Rules
-	}
-	initialMP[utils.ZipcodeCfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.Plus4))
-	for i, item := range st.Plus4 {
-		values[i] = item.Rules
-	}
-	initialMP[utils.Plus4Cfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.P2PZipcode))
-	for i, item := range st.P2PZipcode {
-		values[i] = item.Rules
-	}
-	initialMP[utils.P2PZipcodeCfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.P2PPlus4))
-	for i, item := range st.P2PPlus4 {
-		values[i] = item.Rules
-	}
-	initialMP[utils.P2PPlus4Cfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.Units))
-	for i, item := range st.Units {
-		values[i] = item.Rules
-	}
-	initialMP[utils.UnitsCfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.UnitType))
-	for i, item := range st.UnitType {
-		values[i] = item.Rules
-	}
-	initialMP[utils.UnitTypeCfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.TaxIncluded))
-	for i, item := range st.TaxIncluded {
-		values[i] = item.Rules
-	}
-	initialMP[utils.TaxIncludedCfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.TaxSitusRule))
-	for i, item := range st.TaxSitusRule {
-		values[i] = item.Rules
-	}
-	initialMP[utils.TaxSitusRuleCfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.TransTypeCode))
-	for i, item := range st.TransTypeCode {
-		values[i] = item.Rules
-	}
-	initialMP[utils.TransTypeCodeCfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.SalesTypeCode))
-	for i, item := range st.SalesTypeCode {
-		values[i] = item.Rules
-	}
-	initialMP[utils.SalesTypeCodeCfg] = strings.Join(values, separator)
-
-	values = make([]string, len(st.TaxExemptionCodeList))
-	for i, item := range st.TaxExemptionCodeList {
-		values[i] = item.Rules
-	}
-	initialMP[utils.TaxExemptionCodeListCfg] = strings.Join(values, separator)
-
-	return
 }

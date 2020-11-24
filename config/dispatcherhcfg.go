@@ -32,7 +32,7 @@ type DispatcherHCfg struct {
 	RegisterInterval time.Duration
 }
 
-func (dps *DispatcherHCfg) loadFromJsonCfg(jsnCfg *DispatcherHJsonCfg) (err error) {
+func (dps *DispatcherHCfg) loadFromJSONCfg(jsnCfg *DispatcherHJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -58,6 +58,7 @@ func (dps *DispatcherHCfg) loadFromJsonCfg(jsnCfg *DispatcherHJsonCfg) (err erro
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (dps *DispatcherHCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:          dps.Enabled,
@@ -79,12 +80,37 @@ func (dps *DispatcherHCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
+// Clone returns a deep copy of DispatcherHCfg
+func (dps DispatcherHCfg) Clone() (cln *DispatcherHCfg) {
+	cln = &DispatcherHCfg{
+		Enabled:          dps.Enabled,
+		RegisterInterval: dps.RegisterInterval,
+		Hosts:            make(map[string][]*DispatcherHRegistarCfg),
+	}
+	if dps.DispatchersConns != nil {
+		cln.DispatchersConns = make([]string, len(dps.DispatchersConns))
+		for i, k := range dps.DispatchersConns {
+			cln.DispatchersConns[i] = k
+		}
+	}
+	for tnt, hosts := range dps.Hosts {
+		clnH := make([]*DispatcherHRegistarCfg, len(hosts))
+		for i, host := range hosts {
+			clnH[i] = host.Clone()
+		}
+		cln.Hosts[tnt] = clnH
+	}
+	return
+}
+
+// DispatcherHRegistarCfg describe the DispatcherHost that will be registered
 type DispatcherHRegistarCfg struct {
 	ID                string
 	RegisterTransport string
 	RegisterTLS       bool
 }
 
+// NewDispatcherHRegistarCfg returns a new DispatcherHRegistarCfg based on the config from json
 func NewDispatcherHRegistarCfg(jsnCfg DispatcherHRegistarJsonCfg) (dhr *DispatcherHRegistarCfg) {
 	dhr = new(DispatcherHRegistarCfg)
 	if jsnCfg.Id != nil {
@@ -100,11 +126,20 @@ func NewDispatcherHRegistarCfg(jsnCfg DispatcherHRegistarJsonCfg) (dhr *Dispatch
 	return
 }
 
-func (dhr *DispatcherHRegistarCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]interface{}
+func (dhr *DispatcherHRegistarCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
 		utils.IDCfg:                dhr.ID,
 		utils.RegisterTransportCfg: dhr.RegisterTransport,
 		utils.RegisterTLSCfg:       dhr.RegisterTLS,
 	}
-	return
+}
+
+// Clone returns a deep copy of DispatcherHRegistarCfg
+func (dhr DispatcherHRegistarCfg) Clone() (cln *DispatcherHRegistarCfg) {
+	return &DispatcherHRegistarCfg{
+		ID:                dhr.ID,
+		RegisterTransport: dhr.RegisterTransport,
+		RegisterTLS:       dhr.RegisterTLS,
+	}
 }

@@ -65,7 +65,7 @@ func TestKamailioAgentReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ConfigReloadArgs{
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "kamevapi", "cgrates", "etc", "cgrates"),
 		Section: config.KamailioAgentJSN,
 	}, &reply); err != nil {

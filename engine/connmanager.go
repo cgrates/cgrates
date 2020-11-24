@@ -84,8 +84,8 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 		var conPool *rpcclient.RPCParallelClientPool
 		if rpcConnCfg.Address == utils.MetaInternal {
 			conPool, err = rpcclient.NewRPCParallelClientPool("", "", rpcConnCfg.TLS,
-				cM.cfg.TlsCfg().ClientKey, cM.cfg.TlsCfg().ClientCerificate,
-				cM.cfg.TlsCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
+				cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
+				cM.cfg.TLSCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
 				cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout,
 				cM.cfg.GeneralCfg().ReplyTimeout, rpcclient.InternalRPC, intChan, int64(cM.cfg.GeneralCfg().MaxParallelConns), false)
 		} else if utils.SliceHasMember([]string{utils.EmptyString, utils.MetaGOB, utils.MetaJSON}, rpcConnCfg.Transport) {
@@ -94,8 +94,8 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 				codec = rpcConnCfg.Transport
 			}
 			conPool, err = rpcclient.NewRPCParallelClientPool(utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS,
-				cM.cfg.TlsCfg().ClientKey, cM.cfg.TlsCfg().ClientCerificate,
-				cM.cfg.TlsCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
+				cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
+				cM.cfg.TLSCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
 				cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout,
 				cM.cfg.GeneralCfg().ReplyTimeout, codec, nil, int64(cM.cfg.GeneralCfg().MaxParallelConns), false)
 		} else {
@@ -108,8 +108,8 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 	default:
 		var conPool *rpcclient.RPCPool
 		if conPool, err = NewRPCPool(connCfg.Strategy,
-			cM.cfg.TlsCfg().ClientKey,
-			cM.cfg.TlsCfg().ClientCerificate, cM.cfg.TlsCfg().CaCertificate,
+			cM.cfg.TLSCfg().ClientKey,
+			cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
 			cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,
 			cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
 			connCfg.Conns, intChan, false); err != nil {

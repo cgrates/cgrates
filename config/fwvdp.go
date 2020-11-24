@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewfwvProvider constructs a utils.DataProvider
+// NewFWVProvider constructs a utils.DataProvider
 func NewFWVProvider(record string) (dP utils.DataProvider) {
 	dP = &FWVProvider{
 		req:   record,
@@ -36,7 +36,7 @@ func NewFWVProvider(record string) (dP utils.DataProvider) {
 	return
 }
 
-// fwvProvider implements engine.utils.DataProvider so we can pass it to filters
+// FWVProvider implements engine.utils.DataProvider so we can pass it to filters
 type FWVProvider struct {
 	req   string
 	cache utils.MapStorage

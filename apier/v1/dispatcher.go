@@ -831,7 +831,7 @@ func (dS *DispatcherConfigSv1) GetConfig(args *config.SectionWithOpts, reply *ma
 	return dS.dS.ConfigSv1GetConfig(args, reply)
 }
 
-func (dS *DispatcherConfigSv1) ReloadConfig(args *config.ConfigReloadArgs, reply *string) (err error) {
+func (dS *DispatcherConfigSv1) ReloadConfig(args *config.ReloadArgs, reply *string) (err error) {
 	return dS.dS.ConfigSv1ReloadConfig(args, reply)
 }
 

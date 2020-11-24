@@ -124,7 +124,7 @@ func testITIsDBEmpty(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
+		t.Errorf("Expecting: true got :%+v", test)
 	}
 }
 

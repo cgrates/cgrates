@@ -320,7 +320,7 @@ func TestSIPAgentCfgClone(t *testing.T) {
 	}
 	rcv := sa.Clone()
 	if !reflect.DeepEqual(sa, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
 	}
 	if rcv.RequestProcessors[0].ID = ""; sa.RequestProcessors[0].ID != "OutboundAUTHDryRun" {
 		t.Errorf("Expected clone to not modify the cloned")

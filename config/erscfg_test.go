@@ -903,7 +903,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cfg.ersCfg.AsMapInterface(utils.INFIELD_SEP); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -1009,7 +1009,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cfg.ersCfg.AsMapInterface(utils.INFIELD_SEP); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 

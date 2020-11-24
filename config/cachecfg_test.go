@@ -225,7 +225,7 @@ func TestCacheCfgClone(t *testing.T) {
 	}
 	rcv := cs.Clone()
 	if !reflect.DeepEqual(cs, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(cs), utils.ToJSON(rcv))
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cs), utils.ToJSON(rcv))
 	}
 	if rcv.Partitions[utils.MetaDestinations].Limit = 0; cs.Partitions[utils.MetaDestinations].Limit != 10 {
 		t.Errorf("Expected clone to not modify the cloned")
