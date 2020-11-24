@@ -36,8 +36,8 @@ type RateProfile struct {
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval
 	Weight             float64
-	RoundingMethod     string
 	RoundingDecimals   int
+	RoundingMethod     string
 	MinCost            float64
 	MaxCost            float64
 	MaxCostStrategy    string
@@ -180,10 +180,41 @@ type RateSIncrement struct {
 	cost *decimal.Big // unexported total increment cost
 }
 
+// RateProfileCost is the cost returned by RateS at cost queries
 type RateProfileCost struct {
-	ID             string // RateProfileID
-	Cost           float64
-	RateSIntervals []*RateSInterval
+	ID               string // RateProfileID
+	Cost             float64
+	RoundingDecimals int
+	RoundingMethod   string
+	MinCost          float64
+	MaxCost          float64
+	MaxCostStrategy  string
+	RateSIntervals   []*RateSInterval
+	Altered          []string
+}
+
+// CorrectCost should be called in final phase of cost calculation
+// in order to apply further correction like Min/MaxCost or rounding
+func (rPc *RateProfileCost) CorrectCost(rndDec *int, rndMtd string) {
+	if rndDec != nil {
+		rPc.RoundingDecimals = *rndDec
+		if rndMtd != utils.EmptyString {
+			rPc.RoundingMethod = rndMtd
+		}
+
+	}
+	if rPc.Cost < rPc.MinCost {
+		rPc.Cost = rPc.MinCost
+		rPc.Altered = append(rPc.Altered, utils.MinCost)
+	}
+	if rPc.Cost > rPc.MaxCost {
+		rPc.Cost = rPc.MaxCost
+		rPc.Altered = append(rPc.Altered, utils.MaxCost)
+	}
+	if rPc.RoundingDecimals != 0 {
+		rPc.Cost = utils.Round(rPc.Cost, rPc.RoundingDecimals, rPc.RoundingMethod)
+		rPc.Altered = append(rPc.Altered, utils.RoundingDecimals)
+	}
 }
 
 // Sort will sort the IntervalRates from each Rate based on IntervalStart
