@@ -1581,15 +1581,15 @@ func TestComputeRateSIntervals(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
+				RecurrentFee:  0.10,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Minute,
-				RecurrentFee:  0.10,
 			},
 			{
 				IntervalStart: 60 * time.Second,
+				RecurrentFee:  0.05,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Second,
-				RecurrentFee:  0.05,
 			},
 		},
 	}
@@ -1599,18 +1599,16 @@ func TestComputeRateSIntervals(t *testing.T) {
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
-
 				IntervalStart: 0,
+				RecurrentFee:  0.20,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Second,
-				RecurrentFee:  0.20,
 			},
 			{
-
 				IntervalStart: 2 * time.Minute,
+				RecurrentFee:  0.15,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Second,
-				RecurrentFee:  0.15,
 			},
 		},
 	}
@@ -1736,15 +1734,15 @@ func TestComputeRateSIntervals1(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
+				RecurrentFee:  0.20,
 				Unit:          30 * time.Second,
 				Increment:     30 * time.Second,
-				RecurrentFee:  0.20,
 			},
 			{
 				IntervalStart: 30 * time.Second,
+				RecurrentFee:  0.15,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Second,
-				RecurrentFee:  0.15,
 			},
 		},
 	}
@@ -1755,15 +1753,15 @@ func TestComputeRateSIntervals1(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
+				RecurrentFee:  0.20,
 				Unit:          1 * time.Minute,
 				Increment:     1 * time.Second,
-				RecurrentFee:  0.20,
 			},
 			{
 				IntervalStart: 2 * time.Minute,
+				RecurrentFee:  0.15,
 				Unit:          time.Minute,
 				Increment:     1 * time.Second,
-				RecurrentFee:  0.15,
 			},
 		},
 	}
@@ -1829,15 +1827,15 @@ func TestComputeRateSIntervals2(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
+				RecurrentFee:  1.00,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
-				RecurrentFee:  1.00,
 			},
 			{
 				IntervalStart: 50 * time.Minute,
+				RecurrentFee:  0.50,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
-				RecurrentFee:  0.50,
 			},
 		},
 	}
@@ -1849,15 +1847,15 @@ func TestComputeRateSIntervals2(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
+				RecurrentFee:  0.15,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
-				RecurrentFee:  0.15,
 			},
 			{
 				IntervalStart: 45 * time.Minute,
+				RecurrentFee:  0.20,
 				Unit:          time.Minute,
 				Increment:     time.Minute,
-				RecurrentFee:  0.20,
 			},
 		},
 	}
@@ -1939,21 +1937,21 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
+				RecurrentFee:  0.10,
 				Unit:          30 * time.Second,
 				Increment:     time.Second,
-				Value:         0.10,
 			},
 			{
 				IntervalStart: time.Minute,
+				RecurrentFee:  0.20,
 				Unit:          30 * time.Second,
 				Increment:     time.Second,
-				Value:         0.20,
 			},
 			{
 				IntervalStart: 2 * time.Minute,
+				RecurrentFee:  0.30,
 				Unit:          30 * time.Second,
 				Increment:     time.Second,
-				Value:         0.30,
 			},
 		},
 	}
@@ -1964,21 +1962,21 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 30 * time.Second,
+				RecurrentFee:  0.15,
 				Unit:          30 * time.Second,
 				Increment:     time.Second,
-				Value:         0.15,
 			},
 			{
 				IntervalStart: time.Minute + 30*time.Second,
+				RecurrentFee:  0.25,
 				Unit:          30 * time.Second,
 				Increment:     time.Second,
-				Value:         0.25,
 			},
 			{
 				IntervalStart: 2*time.Minute + 30*time.Second,
+				RecurrentFee:  0.35,
 				Unit:          30 * time.Second,
 				Increment:     time.Second,
-				Value:         0.35,
 			},
 		},
 	}
@@ -2104,9 +2102,9 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: time.Minute,
+				RecurrentFee:  0.10,
 				Unit:          30 * time.Second,
 				Increment:     30 * time.Second,
-				Value:         0.10,
 			},
 		},
 	}
@@ -2117,9 +2115,9 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 2 * time.Minute,
+				RecurrentFee:  0.20,
 				Unit:          30 * time.Second,
 				Increment:     30 * time.Second,
-				Value:         0.20,
 			},
 		},
 	}
@@ -2143,9 +2141,9 @@ func TestComputeRateSIntervalsZeroIncrement(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
+				RecurrentFee:  0.10,
 				Unit:          30 * time.Second,
 				Increment:     0 * time.Second,
-				Value:         0.10,
 			},
 		},
 	}
@@ -2170,15 +2168,15 @@ func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
+				RecurrentFee:  0.10,
 				Unit:          30 * time.Second,
 				Increment:     1 * time.Second,
-				Value:         0.10,
 			},
 			{
 				IntervalStart: 30 * time.Second,
+				RecurrentFee:  0.25,
 				Unit:          time.Minute,
 				Increment:     7 * time.Second,
-				Value:         0.25,
 			},
 		},
 	}
@@ -2225,15 +2223,15 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
+				RecurrentFee:  0.10,
 				Unit:          30 * time.Second,
 				Increment:     1 * time.Second,
-				Value:         0.10,
 			},
 			{
 				IntervalStart: 25 * time.Second,
+				RecurrentFee:  0.25,
 				Unit:          time.Minute,
 				Increment:     7 * time.Second,
-				Value:         0.25,
 			},
 		},
 	}
@@ -2244,15 +2242,15 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 45 * time.Second,
+				RecurrentFee:  0.15,
 				Unit:          30 * time.Second,
 				Increment:     1 * time.Second,
-				Value:         0.15,
 			},
 			{
 				IntervalStart: 55 * time.Second,
+				RecurrentFee:  0.30,
 				Unit:          30 * time.Minute,
 				Increment:     5 * time.Second,
-				Value:         0.30,
 			},
 		},
 	}
@@ -2263,15 +2261,15 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 30 * time.Second,
+				RecurrentFee:  0.10,
 				Unit:          25 * time.Second,
 				Increment:     5 * time.Second,
-				Value:         0.10,
 			},
 			{
 				IntervalStart: time.Minute,
+				RecurrentFee:  0.05,
 				Unit:          10 * time.Second,
 				Increment:     5 * time.Second,
-				Value:         0.05,
 			},
 		},
 	}
@@ -2378,15 +2376,15 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: time.Minute,
+				RecurrentFee:  0.30,
 				Unit:          30 * time.Second,
 				Increment:     1 * time.Second,
-				Value:         0.30,
 			},
 			{
 				IntervalStart: 3 * time.Minute,
+				RecurrentFee:  0.30,
 				Unit:          time.Minute,
 				Increment:     7 * time.Second,
-				Value:         0.30,
 			},
 		},
 	}
@@ -2397,15 +2395,15 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: time.Minute + 30*time.Second,
+				RecurrentFee:  0.20,
 				Unit:          30 * time.Second,
 				Increment:     1 * time.Second,
-				Value:         0.20,
 			},
 			{
 				IntervalStart: 2*time.Minute + 30*time.Second,
+				RecurrentFee:  0.20,
 				Unit:          30 * time.Second,
 				Increment:     7 * time.Second,
-				Value:         0.20,
 			},
 		},
 	}
@@ -2416,9 +2414,9 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 2 * time.Minute,
+				RecurrentFee:  0.10,
 				Unit:          30 * time.Second,
 				Increment:     30 * time.Second,
-				Value:         0.10,
 			},
 		},
 	}
@@ -2531,15 +2529,15 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
+				RecurrentFee:  0.50,
 				Unit:          time.Hour,
 				Increment:     3 * time.Minute,
-				Value:         0.50,
 			},
 			{
 				IntervalStart: 4 * time.Hour,
+				RecurrentFee:  0.35,
 				Unit:          time.Hour,
 				Increment:     3 * time.Minute,
-				Value:         0.35,
 			},
 		},
 	}
@@ -2550,15 +2548,15 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 13 * time.Hour,
+				RecurrentFee:  0.40,
 				Unit:          time.Hour,
 				Increment:     3 * time.Minute,
-				Value:         0.40,
 			},
 			{
 				IntervalStart: 16 * time.Hour,
+				RecurrentFee:  0.35,
 				Unit:          time.Hour,
 				Increment:     3 * time.Minute,
-				Value:         0.35,
 			},
 		},
 	}
@@ -2569,15 +2567,15 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 12 * time.Hour,
+				RecurrentFee:  0.20,
 				Unit:          30 * time.Hour,
 				Increment:     2 * time.Minute,
-				Value:         0.20,
 			},
 			{
 				IntervalStart: 12*time.Hour + 30*time.Minute,
+				RecurrentFee:  0.10,
 				Unit:          time.Hour,
 				Increment:     5 * time.Minute,
-				Value:         0.10,
 			},
 		},
 	}
