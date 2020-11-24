@@ -28,22 +28,22 @@ import (
 func NewRSRFilter(fltrVal string) (rsrFltr *RSRFilter, err error) {
 	rsrFltr = new(RSRFilter)
 	if fltrVal == "" {
-		return rsrFltr, nil
+		return
 	}
 	if fltrVal[:1] == NegativePrefix {
 		rsrFltr.negative = true
 		fltrVal = fltrVal[1:]
 		if fltrVal == "" {
-			return rsrFltr, nil
+			return
 		}
 	}
 	rsrFltr.filterRule = fltrVal
 	if fltrVal[:1] == DynamicDataPrefix {
 		if rsrFltr.fltrRgxp, err = regexp.Compile(fltrVal[1:]); err != nil {
-			return nil, err
+			return
 		}
 	}
-	return rsrFltr, nil
+	return
 }
 
 // NewRSRFilterMustCompile is used mostly in tests
@@ -141,13 +141,11 @@ func ParseRSRFilters(fldsStr, sep string) (RSRFilters, error) {
 func ParseRSRFiltersFromSlice(fltrStrs []string) (RSRFilters, error) {
 	rsrFltrs := make(RSRFilters, len(fltrStrs))
 	for i, rlStr := range fltrStrs {
-		if rsrFltr, err := NewRSRFilter(rlStr); err != nil {
+		rsrFltr, err := NewRSRFilter(rlStr)
+		if err != nil {
 			return nil, err
-		} else if rsrFltr == nil {
-			return nil, fmt.Errorf("Empty RSRFilter in rule: %s", rlStr)
-		} else {
-			rsrFltrs[i] = rsrFltr
 		}
+		rsrFltrs[i] = rsrFltr
 	}
 	return rsrFltrs, nil
 }
