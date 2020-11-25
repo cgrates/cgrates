@@ -249,7 +249,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 				CompressFactor:    cmpFactor,
 				Usage:             iRtUsage,
 			}
-			if len(rIcmts) != 0 && rIcrm.CompressEquals(rIcmts[len(rIcmts)-1], false) {
+			if len(rIcmts) != 0 && rIcrm.CompressEquals(rIcmts[len(rIcmts)-1]) {
 				rIcmts[len(rIcmts)-1].CompressFactor += rIcrm.CompressFactor
 			} else {
 				rIcmts = append(rIcmts, rIcrm)
