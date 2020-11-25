@@ -43,7 +43,7 @@ func TestListenCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.listenCfg.loadFromJsonCfg(jsonCfg); err != nil {
+	} else if err = jsnCfg.listenCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.listenCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.listenCfg))
@@ -91,5 +91,23 @@ func TestListenCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.listenCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
+
+func TestListenCfgClone(t *testing.T) {
+	ban := &ListenCfg{
+		RPCJSONListen:    "127.0.0.1:2012",
+		RPCGOBListen:     "127.0.0.1:2013",
+		HTTPListen:       "127.0.0.1:2080",
+		RPCJSONTLSListen: "127.0.0.1:2022",
+		RPCGOBTLSListen:  "127.0.0.1:2023",
+		HTTPTLSListen:    "127.0.0.1:2280",
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.RPCJSONListen = ""; ban.RPCJSONListen != "127.0.0.1:2012" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

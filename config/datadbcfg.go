@@ -40,8 +40,8 @@ type DataDbCfg struct {
 	Opts       map[string]interface{}
 }
 
-//loadFromJsonCfg loads Database config from JsonCfg
-func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
+// loadFromJSONCfg loads Database config from JsonCfg
+func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
 		return nil
 	}
@@ -93,7 +93,7 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			if val == nil || !has {
 				val = new(ItemOpt)
 			}
-			val.loadFromJsonCfg(vJsn) //To review if the function signature changes
+			val.loadFromJSONCfg(vJsn) //To review if the function signature changes
 			dbcfg.Items[kJsn] = val
 		}
 	}
@@ -106,29 +106,40 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 }
 
 // Clone returns the cloned object
-func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
-	itms := make(map[string]*ItemOpt)
-	for k, itm := range dbcfg.Items {
-		itms[k] = itm.Clone()
-	}
-	opts := make(map[string]interface{})
-	for k, v := range dbcfg.Opts {
-		opts[k] = v
-	}
-	return &DataDbCfg{
+func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
+	cln = &DataDbCfg{
 		DataDbType: dbcfg.DataDbType,
 		DataDbHost: dbcfg.DataDbHost,
 		DataDbPort: dbcfg.DataDbPort,
 		DataDbName: dbcfg.DataDbName,
 		DataDbUser: dbcfg.DataDbUser,
 		DataDbPass: dbcfg.DataDbPass,
-		RplConns:   dbcfg.RplConns,
-		RmtConns:   dbcfg.RmtConns,
-		Items:      itms,
-		Opts:       opts,
+		Items:      make(map[string]*ItemOpt),
+		Opts:       make(map[string]interface{}),
 	}
+	for k, itm := range dbcfg.Items {
+		cln.Items[k] = itm.Clone()
+	}
+	for k, v := range dbcfg.Opts {
+		cln.Opts[k] = v
+	}
+
+	if dbcfg.RmtConns != nil {
+		cln.RmtConns = make([]string, len(dbcfg.RmtConns))
+		for i, conn := range dbcfg.RmtConns {
+			cln.RmtConns[i] = conn
+		}
+	}
+	if dbcfg.RplConns != nil {
+		cln.RplConns = make([]string, len(dbcfg.RplConns))
+		for i, conn := range dbcfg.RplConns {
+			cln.RplConns[i] = conn
+		}
+	}
+	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}, err error) {
 	initialMP = map[string]interface{}{
 		utils.DataDbTypeCfg: utils.Meta + dbcfg.DataDbType,
@@ -157,6 +168,7 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}, err 
 	return
 }
 
+// ItemOpt the options for the stored items
 type ItemOpt struct {
 	Remote    bool
 	Replicate bool
@@ -165,6 +177,7 @@ type ItemOpt struct {
 	APIKey  string
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.RemoteCfg:    itm.Remote,
@@ -179,7 +192,7 @@ func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
-func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) {
+func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) {
 	if jsonItm == nil {
 		return
 	}
@@ -198,6 +211,7 @@ func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) {
 	return
 }
 
+// Clone returns a deep copy of ItemOpt
 func (itm *ItemOpt) Clone() *ItemOpt {
 	return &ItemOpt{
 		Remote:    itm.Remote,

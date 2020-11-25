@@ -34,7 +34,7 @@ func TestTlsCfgloadFromJsonCfg(t *testing.T) {
 		Server_name:        utils.StringPointer("TestServerName"),
 		Server_policy:      utils.IntPointer(3),
 	}
-	expected := &TlsCfg{
+	expected := &TLSCfg{
 		ServerCerificate: "path/To/Server/Cert",
 		ServerKey:        "path/To/Server/Key",
 		CaCertificate:    "path/To/CA/Cert",
@@ -45,7 +45,7 @@ func TestTlsCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.tlsCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsonCfg.tlsCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.tlsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.tlsCfg))
@@ -97,5 +97,24 @@ func TestTlsCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.tlsCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestTLSCfgClone(t *testing.T) {
+	ban := &TLSCfg{
+		ServerCerificate: "path/To/Server/Cert",
+		ServerKey:        "path/To/Server/Key",
+		CaCertificate:    "path/To/CA/Cert",
+		ClientCerificate: "path/To/Client/Cert",
+		ClientKey:        "path/To/Client/Key",
+		ServerName:       "TestServerName",
+		ServerPolicy:     3,
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.ServerPolicy = 0; ban.ServerPolicy != 3 {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

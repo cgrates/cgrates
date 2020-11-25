@@ -25,7 +25,7 @@ import (
 )
 
 func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
-	cfgJson := &KamAgentJsonCfg{
+	cfgJSON := &KamAgentJsonCfg{
 		Enabled:        utils.BoolPointer(true),
 		Sessions_conns: &[]string{"*internal"},
 		Create_cdr:     utils.BoolPointer(true),
@@ -47,7 +47,7 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.kamAgentCfg.loadFromJsonCfg(cfgJson); err != nil {
+	} else if err = jsnCfg.kamAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.kamAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.kamAgentCfg))
@@ -56,12 +56,12 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 
 func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 	var kamcocfg, expected KamConnCfg
-	if err := kamcocfg.loadFromJsonCfg(nil); err != nil {
+	if err := kamcocfg.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(kamcocfg, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, kamcocfg)
 	}
-	if err := kamcocfg.loadFromJsonCfg(new(KamConnJsonCfg)); err != nil {
+	if err := kamcocfg.loadFromJSONCfg(new(KamConnJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(kamcocfg, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, kamcocfg)
@@ -74,7 +74,7 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 		Address:    "127.0.0.1:8448",
 		Reconnects: 5,
 	}
-	if err = kamcocfg.loadFromJsonCfg(json); err != nil {
+	if err = kamcocfg.loadFromJSONCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, kamcocfg) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(kamcocfg))
@@ -125,5 +125,25 @@ func TestKamAgentCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.kamAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
+	}
+}
+
+func TestKamAgentCfgClone(t *testing.T) {
+	ban := &KamAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		CreateCdr:     true,
+		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 10, Alias: "randomAlias"}},
+		Timezone:      "Local",
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.SessionSConns[1] = ""; ban.SessionSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.EvapiConns[0].Alias = ""; ban.EvapiConns[0].Alias != "randomAlias" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

@@ -61,7 +61,7 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 	expected := LoaderSCfgs{
 		{
 			Enabled:        true,
-			Id:             utils.MetaDefault,
+			ID:             utils.MetaDefault,
 			Tenant:         ten,
 			LockFileName:   ".cgr.lck",
 			CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
@@ -108,9 +108,9 @@ func TestLoaderSCfgloadFromJsonCfgCase2(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -130,7 +130,7 @@ func TestLoaderSCfgloadFromJsonCfgCase3(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := jsonCfg.loaderCfg[0].loadFromJsonCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -150,7 +150,7 @@ func TestLoaderSCfgloadFromJsonCfgCase4(t *testing.T) {
 	expected := "no template with id: <>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -200,7 +200,7 @@ func TestLoaderSCfgloadFromJsonCfgCase5(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(cfg, msgTemplates, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, msgTemplates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.loaderCfg[0].Data[0].Fields[0], expectedFields[0].Data[0].Fields[0]) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFields[0].Data[0].Fields[0]), utils.ToJSON(jsonCfg.loaderCfg[0].Data[0].Fields[0]))
@@ -213,7 +213,7 @@ func TestLoaderSCfgloadFromJsonCfgCase6(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.loaderCfg[0].loadFromJsonCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }
@@ -407,5 +407,45 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 		t.Error(err)
 	} else if rcv := jsonCfg.loaderCfg.AsMapInterface(jsonCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv[0][utils.Tenant], eMap[0][utils.Tenant]) {
 		t.Errorf("Expected %+v, received %+v", rcv[0][utils.Tenant], eMap[0][utils.Tenant])
+	}
+}
+
+func TestLoaderSCfgsClone(t *testing.T) {
+	ban := LoaderSCfgs{{
+		Enabled:        true,
+		ID:             utils.MetaDefault,
+		Tenant:         NewRSRParsersMustCompile("cgrate.org", utils.INFIELD_SEP),
+		LockFileName:   ".cgr.lck",
+		CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
+		FieldSeparator: ",",
+		TpInDir:        "/var/spool/cgrates/loader/in",
+		TpOutDir:       "/var/spool/cgrates/loader/out",
+		Data: []*LoaderDataType{{
+			Type:     "*attributes",
+			Filename: "Attributes.csv",
+			Flags:    utils.FlagsWithParams{},
+			Fields: []*FCTemplate{
+				{
+					Tag:       "TenantID",
+					Path:      "Tenant",
+					pathSlice: []string{"Tenant"},
+					pathItems: utils.PathItems{{Field: "Tenant"}},
+					Type:      utils.META_COMPOSED,
+					Value:     NewRSRParsersMustCompile("cgrate.org", utils.INFIELD_SEP),
+					Mandatory: true,
+					Layout:    time.RFC3339,
+				},
+			}},
+		},
+	}}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv[0].CacheSConns[1] = ""; ban[0].CacheSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv[0].Data[0].Type = ""; ban[0].Data[0].Type != "*attributes" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

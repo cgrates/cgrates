@@ -156,7 +156,7 @@ func TestLoadConfig(t *testing.T) {
 	if !reflect.DeepEqual(ldrCfg.LoaderCgrCfg().SchedulerConns, expAddrs) {
 		t.Errorf("Expected %v received %v", expAddrs, ldrCfg.LoaderCgrCfg().SchedulerConns)
 	}
-	expaddr := config.RpcConns{
+	expaddr := config.RPCConns{
 		utils.MetaInternal: {
 			Strategy: rpcclient.PoolFirst,
 			PoolSize: 0,

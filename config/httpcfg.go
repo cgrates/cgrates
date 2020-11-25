@@ -34,40 +34,41 @@ type HTTPCfg struct {
 	ClientOpts              map[string]interface{}
 }
 
-// loadFromJsonCfg loads Database config from JsonCfg
-func (httpcfg *HTTPCfg) loadFromJsonCfg(jsnHttpCfg *HTTPJsonCfg) (err error) {
-	if jsnHttpCfg == nil {
+// loadFromJSONCfg loads Database config from JsonCfg
+func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
+	if jsnHTTPCfg == nil {
 		return nil
 	}
-	if jsnHttpCfg.Json_rpc_url != nil {
-		httpcfg.HTTPJsonRPCURL = *jsnHttpCfg.Json_rpc_url
+	if jsnHTTPCfg.Json_rpc_url != nil {
+		httpcfg.HTTPJsonRPCURL = *jsnHTTPCfg.Json_rpc_url
 	}
-	if jsnHttpCfg.Dispatchers_registrar_url != nil {
-		httpcfg.DispatchersRegistrarURL = *jsnHttpCfg.Dispatchers_registrar_url
+	if jsnHTTPCfg.Dispatchers_registrar_url != nil {
+		httpcfg.DispatchersRegistrarURL = *jsnHTTPCfg.Dispatchers_registrar_url
 	}
-	if jsnHttpCfg.Ws_url != nil {
-		httpcfg.HTTPWSURL = *jsnHttpCfg.Ws_url
+	if jsnHTTPCfg.Ws_url != nil {
+		httpcfg.HTTPWSURL = *jsnHTTPCfg.Ws_url
 	}
-	if jsnHttpCfg.Freeswitch_cdrs_url != nil {
-		httpcfg.HTTPFreeswitchCDRsURL = *jsnHttpCfg.Freeswitch_cdrs_url
+	if jsnHTTPCfg.Freeswitch_cdrs_url != nil {
+		httpcfg.HTTPFreeswitchCDRsURL = *jsnHTTPCfg.Freeswitch_cdrs_url
 	}
-	if jsnHttpCfg.Http_Cdrs != nil {
-		httpcfg.HTTPCDRsURL = *jsnHttpCfg.Http_Cdrs
+	if jsnHTTPCfg.Http_Cdrs != nil {
+		httpcfg.HTTPCDRsURL = *jsnHTTPCfg.Http_Cdrs
 	}
-	if jsnHttpCfg.Use_basic_auth != nil {
-		httpcfg.HTTPUseBasicAuth = *jsnHttpCfg.Use_basic_auth
+	if jsnHTTPCfg.Use_basic_auth != nil {
+		httpcfg.HTTPUseBasicAuth = *jsnHTTPCfg.Use_basic_auth
 	}
-	if jsnHttpCfg.Auth_users != nil {
-		httpcfg.HTTPAuthUsers = *jsnHttpCfg.Auth_users
+	if jsnHTTPCfg.Auth_users != nil {
+		httpcfg.HTTPAuthUsers = *jsnHTTPCfg.Auth_users
 	}
-	if jsnHttpCfg.Client_opts != nil {
-		for k, v := range jsnHttpCfg.Client_opts {
+	if jsnHTTPCfg.Client_opts != nil {
+		for k, v := range jsnHTTPCfg.Client_opts {
 			httpcfg.ClientOpts[k] = v
 		}
 	}
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (httpcfg *HTTPCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:          httpcfg.HTTPJsonRPCURL,
@@ -78,6 +79,27 @@ func (httpcfg *HTTPCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.HTTPUseBasicAuthCfg:        httpcfg.HTTPUseBasicAuth,
 		utils.HTTPAuthUsersCfg:           httpcfg.HTTPAuthUsers,
 		utils.HTTPClientOptsCfg:          httpcfg.ClientOpts,
+	}
+	return
+}
+
+// Clone returns a deep copy of HTTPCfg
+func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
+	cln = &HTTPCfg{
+		HTTPJsonRPCURL:          httpcfg.HTTPJsonRPCURL,
+		DispatchersRegistrarURL: httpcfg.DispatchersRegistrarURL,
+		HTTPWSURL:               httpcfg.HTTPWSURL,
+		HTTPFreeswitchCDRsURL:   httpcfg.HTTPFreeswitchCDRsURL,
+		HTTPCDRsURL:             httpcfg.HTTPCDRsURL,
+		HTTPUseBasicAuth:        httpcfg.HTTPUseBasicAuth,
+		HTTPAuthUsers:           make(map[string]string),
+		ClientOpts:              make(map[string]interface{}),
+	}
+	for u, a := range httpcfg.HTTPAuthUsers {
+		cln.HTTPAuthUsers[u] = a
+	}
+	for o, val := range httpcfg.ClientOpts {
+		cln.ClientOpts[o] = val
 	}
 	return
 }

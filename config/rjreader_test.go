@@ -79,7 +79,7 @@ func TestNewRjReaderError(t *testing.T) {
 }
 
 func TestUnreadByte(t *testing.T) {
-	reader := rjReader{
+	reader := RjReader{
 		indx: -1,
 	}
 	expected := "bufio: invalid use of UnreadByte"
@@ -121,7 +121,7 @@ a/*comment*/b`))
 }
 
 func TestConsumeComent(t *testing.T) {
-	rjreader := new(rjReader)
+	rjreader := new(RjReader)
 	var pkbit byte = '*'
 	expectedErr := "JSON_INCOMPLETE_COMMENT"
 	if _, err := rjreader.consumeComent(pkbit); err == nil || err.Error() != expectedErr {

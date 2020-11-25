@@ -56,7 +56,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		SessionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 		OriginHost:       "CGR-DA",
 		OriginRealm:      "cgrates.org",
-		VendorId:         0,
+		VendorID:         0,
 		ProductName:      "randomName",
 		ConcurrentReqs:   10,
 		SyncedConnReqs:   true,
@@ -72,7 +72,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.diameterAgentCfg.loadFromJsonCfg(jsonCFG, jsnCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsnCfg.diameterAgentCfg.loadFromJSONCfg(jsonCFG, jsnCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.diameterAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.diameterAgentCfg))
@@ -90,7 +90,7 @@ func TestRequestProcessorloadFromJsonCfg1(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err := jsonCfg.diameterAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err := jsonCfg.diameterAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -114,7 +114,7 @@ func TestRequestProcessorloadFromJsonCfg2(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.diameterAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.diameterAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }
@@ -231,5 +231,40 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.diameterAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
+	}
+}
+
+func TestDiameterAgentCfgClone(t *testing.T) {
+	ban := &DiameterAgentCfg{
+		Enabled:          true,
+		ListenNet:        "tcp",
+		Listen:           "127.0.0.1:3868",
+		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
+		SessionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		OriginHost:       "CGR-DA",
+		OriginRealm:      "cgrates.org",
+		VendorID:         0,
+		ProductName:      "randomName",
+		ConcurrentReqs:   10,
+		SyncedConnReqs:   true,
+		ASRTemplate:      "randomTemplate",
+		RARTemplate:      "randomTemplate",
+		ForcedDisconnect: "forced",
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID:       "cgrates",
+				Timezone: "Local",
+			},
+		},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.SessionSConns[1] = ""; ban.SessionSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.RequestProcessors[0].ID = ""; ban.RequestProcessors[0].ID != "cgrates" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

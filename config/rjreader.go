@@ -31,7 +31,7 @@ import (
 )
 
 // NewRjReader creates a new rjReader from a io.Reader
-func NewRjReader(rdr io.Reader) (r *rjReader, err error) {
+func NewRjReader(rdr io.Reader) (r *RjReader, err error) {
 	var b []byte
 	b, err = ioutil.ReadAll(rdr)
 	if err != nil {
@@ -41,8 +41,8 @@ func NewRjReader(rdr io.Reader) (r *rjReader, err error) {
 }
 
 // NewRjReaderFromBytes creates a new rjReader from a slice of bytes
-func NewRjReaderFromBytes(b []byte) *rjReader {
-	return &rjReader{buf: b}
+func NewRjReaderFromBytes(b []byte) *RjReader {
+	return &RjReader{buf: b}
 }
 
 // isNewLine check if byte is new line
@@ -70,8 +70,8 @@ func isAlfanum(bit byte) bool {
 		(bit >= '0' && bit <= '9')
 }
 
-// structure that implements io.Reader to read json files ignoring C style comments and replacing *env:
-type rjReader struct {
+// RjReader structure that implements io.Reader to read json files ignoring C style comments and replacing *env:
+type RjReader struct {
 	buf        []byte
 	isInString bool // ignore character in strings
 	indx       int  // used to parse the buffer
@@ -79,7 +79,7 @@ type rjReader struct {
 }
 
 // Read implementation
-func (rjr *rjReader) Read(p []byte) (n int, err error) {
+func (rjr *RjReader) Read(p []byte) (n int, err error) {
 	for n = range p {
 		p[n], err = rjr.ReadByte()
 		if !rjr.envOff &&
@@ -99,13 +99,13 @@ func (rjr *rjReader) Read(p []byte) (n int, err error) {
 }
 
 // Close implementation
-func (rjr *rjReader) Close() error {
+func (rjr *RjReader) Close() error {
 	rjr.buf = nil
 	return nil
 }
 
 // ReadByte implementation
-func (rjr *rjReader) ReadByte() (bit byte, err error) {
+func (rjr *RjReader) ReadByte() (bit byte, err error) {
 	if rjr.isInString { //ignore commas in strings
 		return rjr.ReadByteWC()
 	}
@@ -126,7 +126,8 @@ func (rjr *rjReader) ReadByte() (bit byte, err error) {
 	return
 }
 
-func (rjr *rjReader) UnreadByte() (err error) {
+// UnreadByte implementation
+func (rjr *RjReader) UnreadByte() (err error) {
 	if rjr.indx <= 0 {
 		return bufio.ErrInvalidUnreadByte
 	}
@@ -135,12 +136,12 @@ func (rjr *rjReader) UnreadByte() (err error) {
 }
 
 // returns true if the file was parsed completly
-func (rjr *rjReader) isEndOfFile() bool {
+func (rjr *RjReader) isEndOfFile() bool {
 	return rjr.indx >= len(rjr.buf)
 }
 
 // consumeComent consumes the comment based on the peeked byte
-func (rjr *rjReader) consumeComent(pkbit byte) (bool, error) {
+func (rjr *RjReader) consumeComent(pkbit byte) (bool, error) {
 	switch pkbit {
 	case '/':
 		for !rjr.isEndOfFile() {
@@ -167,7 +168,7 @@ func (rjr *rjReader) consumeComent(pkbit byte) (bool, error) {
 }
 
 //readFirstNonWhiteSpace reads first non white space byte
-func (rjr *rjReader) readFirstNonWhiteSpace() (bit byte, err error) {
+func (rjr *RjReader) readFirstNonWhiteSpace() (bit byte, err error) {
 	for !rjr.isEndOfFile() {
 		bit = rjr.buf[rjr.indx]
 		rjr.indx++
@@ -179,7 +180,7 @@ func (rjr *rjReader) readFirstNonWhiteSpace() (bit byte, err error) {
 }
 
 // ReadByteWC reads next byte skiping the comments
-func (rjr *rjReader) ReadByteWC() (bit byte, err error) {
+func (rjr *RjReader) ReadByteWC() (bit byte, err error) {
 	if rjr.isEndOfFile() {
 		return 0, io.EOF
 	}
@@ -209,7 +210,7 @@ func (rjr *rjReader) ReadByteWC() (bit byte, err error) {
 }
 
 // PeekByteWC peeks next byte skiping the comments
-func (rjr *rjReader) PeekByteWC() (bit byte, err error) {
+func (rjr *RjReader) PeekByteWC() (bit byte, err error) {
 	for !rjr.isEndOfFile() {
 		bit = rjr.buf[rjr.indx]
 		if !rjr.isInString && rjr.indx+1 < len(rjr.buf) && bit == '/' { //try consume comment
@@ -234,13 +235,13 @@ func (rjr *rjReader) PeekByteWC() (bit byte, err error) {
 }
 
 //checkMeta check if char mach with next char from MetaEnv if not reset the counting
-func (rjr *rjReader) checkMeta() bool {
+func (rjr *RjReader) checkMeta() bool {
 	return rjr.indx-1+len(utils.MetaEnv) < len(rjr.buf) &&
 		utils.MetaEnv == string(rjr.buf[rjr.indx-1:rjr.indx-1+len(utils.MetaEnv)])
 }
 
 //readEnvName reads the enviorment key
-func (rjr *rjReader) readEnvName(indx int) (name []byte, endindx int) { //0 if not set
+func (rjr *RjReader) readEnvName(indx int) (name []byte, endindx int) { //0 if not set
 	for indx < len(rjr.buf) { //read byte by byte
 		bit := rjr.buf[indx]
 		if !isAlfanum(bit) && bit != '_' { //[a-zA-Z_]+[a-zA-Z0-9_]*
@@ -253,7 +254,7 @@ func (rjr *rjReader) readEnvName(indx int) (name []byte, endindx int) { //0 if n
 }
 
 //replaceEnv replaces the EnvMeta and enviorment key with  enviorment variable value in specific buffer
-func (rjr *rjReader) replaceEnv(startEnv int) error {
+func (rjr *RjReader) replaceEnv(startEnv int) error {
 	midEnv := len(utils.MetaEnv)
 	key, endEnv := rjr.readEnvName(startEnv + midEnv)
 	value, err := ReadEnv(string(key))
@@ -264,8 +265,8 @@ func (rjr *rjReader) replaceEnv(startEnv int) error {
 	return nil
 }
 
-// warning: needs to read file again
-func (rjr *rjReader) HandleJSONError(err error) error {
+// HandleJSONError warning: needs to read file again
+func (rjr *RjReader) HandleJSONError(err error) error {
 	var offset int64
 	switch realErr := err.(type) {
 	case nil:
@@ -291,7 +292,7 @@ func (rjr *rjReader) HandleJSONError(err error) error {
 		strings.Split(string(rjr.buf), "\n")[line-1])
 }
 
-func (rjr *rjReader) getJSONOffsetLine(offset int64) (line, character int64) {
+func (rjr *RjReader) getJSONOffsetLine(offset int64) (line, character int64) {
 	line = 1 // start line counting from 1
 	var lastChar byte
 
@@ -411,8 +412,8 @@ func (rjr *rjReader) getJSONOffsetLine(offset int64) (line, character int64) {
 	return
 }
 
-// Loads the json config out of rjReader
-func (rjr *rjReader) Decode(cfg interface{}) (err error) {
+// Decode loads the json config out of rjReader
+func (rjr *RjReader) Decode(cfg interface{}) (err error) {
 	if err = json.NewDecoder(rjr).Decode(cfg); err != nil {
 		return rjr.HandleJSONError(err)
 	}

@@ -42,8 +42,8 @@ type StorDbCfg struct {
 	Opts                map[string]interface{}
 }
 
-// loadFromJsonCfg loads StoreDb config from JsonCfg
-func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
+// loadFromJSONCfg loads StoreDb config from JsonCfg
+func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
 		return nil
 	}
@@ -101,7 +101,7 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Items != nil {
 		for kJsn, vJsn := range *jsnDbCfg.Items {
 			val := new(ItemOpt)
-			val.loadFromJsonCfg(vJsn) //To review if the function signature changes
+			val.loadFromJSONCfg(vJsn) //To review if the function signature changes
 			dbcfg.Items[kJsn] = val
 		}
 	}
@@ -109,27 +109,52 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 }
 
 // Clone returns the cloned object
-func (dbcfg *StorDbCfg) Clone() *StorDbCfg {
-	items := make(map[string]*ItemOpt)
+func (dbcfg *StorDbCfg) Clone() (cln *StorDbCfg) {
+	cln = &StorDbCfg{
+		Type:     dbcfg.Type,
+		Host:     dbcfg.Host,
+		Port:     dbcfg.Port,
+		Name:     dbcfg.Name,
+		User:     dbcfg.User,
+		Password: dbcfg.Password,
+
+		Items: make(map[string]*ItemOpt),
+		Opts:  make(map[string]interface{}),
+	}
 	for key, item := range dbcfg.Items {
-		items[key] = item.Clone()
+		cln.Items[key] = item.Clone()
 	}
-	return &StorDbCfg{
-		Type:                dbcfg.Type,
-		Host:                dbcfg.Host,
-		Port:                dbcfg.Port,
-		Name:                dbcfg.Name,
-		User:                dbcfg.User,
-		Password:            dbcfg.Password,
-		StringIndexedFields: dbcfg.StringIndexedFields,
-		PrefixIndexedFields: dbcfg.PrefixIndexedFields,
-		RmtConns:            dbcfg.RmtConns,
-		RplConns:            dbcfg.RplConns,
-		Items:               items,
-		Opts:                dbcfg.Opts,
+	for key, val := range dbcfg.Opts {
+		cln.Opts[key] = val
 	}
+	if dbcfg.StringIndexedFields != nil {
+		cln.StringIndexedFields = make([]string, len(dbcfg.StringIndexedFields))
+		for i, idx := range dbcfg.StringIndexedFields {
+			cln.StringIndexedFields[i] = idx
+		}
+	}
+	if dbcfg.PrefixIndexedFields != nil {
+		cln.PrefixIndexedFields = make([]string, len(dbcfg.PrefixIndexedFields))
+		for i, idx := range dbcfg.PrefixIndexedFields {
+			cln.PrefixIndexedFields[i] = idx
+		}
+	}
+	if dbcfg.RmtConns != nil {
+		cln.RmtConns = make([]string, len(dbcfg.RmtConns))
+		for i, conn := range dbcfg.RmtConns {
+			cln.RmtConns[i] = conn
+		}
+	}
+	if dbcfg.RplConns != nil {
+		cln.RplConns = make([]string, len(dbcfg.RplConns))
+		for i, conn := range dbcfg.RplConns {
+			cln.RplConns[i] = conn
+		}
+	}
+	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (dbcfg *StorDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,

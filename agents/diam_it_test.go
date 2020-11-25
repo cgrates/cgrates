@@ -224,7 +224,7 @@ func testDiamItStartEngine(t *testing.T) {
 
 func testDiamItConnectDiameterClient(t *testing.T) {
 	diamClnt, err = NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "INTEGRATION_TESTS",
-		daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
+		daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorID,
 		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION,
 		daCfg.DiameterAgentCfg().DictionariesPath, daCfg.DiameterAgentCfg().ListenNet)
 	if err != nil {

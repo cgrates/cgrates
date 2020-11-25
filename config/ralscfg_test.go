@@ -68,12 +68,12 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 		},
 		DynaprepaidActionPlans: []string{"randomPlans"},
 	}
-	if cfgJson, err := NewDefaultCGRConfig(); err != nil {
+	if cfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = cfgJson.ralsCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = cfg.ralsCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, cfgJson.ralsCfg) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJson.ralsCfg))
+	} else if !reflect.DeepEqual(expected, cfg.ralsCfg) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.ralsCfg))
 	}
 }
 
@@ -86,7 +86,7 @@ func TestRalsCfgFromJsonCfgCase2(t *testing.T) {
 	expected := "time: unknown unit \"hh\" in duration \"189hh\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.ralsCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.ralsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -120,7 +120,7 @@ func TestRalsCfgAsMapInterfaceCase1(t *testing.T) {
 			"*mms":   "10000",
 		},
 		utils.MaxIncrementsCfg: 1000000,
-		utils.BalanceRatingSubjectCfg: map[string]interface{}{
+		utils.BalanceRatingSubjectCfg: map[string]string{
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
 		},
@@ -155,7 +155,7 @@ func TestRalsCfgAsMapInterfaceCase2(t *testing.T) {
 			"*mms":   "10000",
 		},
 		utils.MaxIncrementsCfg: 1000000,
-		utils.BalanceRatingSubjectCfg: map[string]interface{}{
+		utils.BalanceRatingSubjectCfg: map[string]string{
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
 		},
@@ -165,5 +165,48 @@ func TestRalsCfgAsMapInterfaceCase2(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.ralsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestRalsCfgClone(t *testing.T) {
+	ban := &RalsCfg{
+		Enabled:                 true,
+		ThresholdSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StatSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS), "*conn1"},
+		CacheSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
+		RpSubjectPrefixMatching: true,
+		RemoveExpired:           true,
+		MaxComputedUsage: map[string]time.Duration{
+			utils.ANY:   189 * time.Hour,
+			utils.VOICE: 72 * time.Hour,
+			utils.DATA:  107374182400,
+			utils.SMS:   5000,
+			utils.MMS:   10000,
+		},
+		MaxIncrements: 1000000,
+		BalanceRatingSubject: map[string]string{
+			utils.META_ANY:   "*zero1ns",
+			utils.META_VOICE: "*zero1s",
+		},
+		DynaprepaidActionPlans: []string{"randomPlans"},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.CacheSConns[1] = ""; ban.CacheSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.MaxComputedUsage[utils.ANY] = 0; ban.MaxComputedUsage[utils.ANY] != 189*time.Hour {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.BalanceRatingSubject[utils.META_ANY] = ""; ban.BalanceRatingSubject[utils.META_ANY] != "*zero1ns" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

@@ -292,13 +292,13 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 		Opts:          make(map[string]interface{}),
 	}
 
-	if len(eeC.Filters) != 0 {
+	if eeC.Filters != nil {
 		cln.Filters = make([]string, len(eeC.Filters))
 		for idx, val := range eeC.Filters {
 			cln.Filters[idx] = val
 		}
 	}
-	if len(eeC.AttributeSIDs) != 0 {
+	if eeC.AttributeSIDs != nil {
 		cln.AttributeSIDs = make([]string, len(eeC.AttributeSIDs))
 		for idx, val := range eeC.AttributeSIDs {
 			cln.AttributeSIDs[idx] = val

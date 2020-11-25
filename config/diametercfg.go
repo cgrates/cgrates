@@ -19,11 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
+// DiameterAgentCfg the config section that describes the Diameter Agent
 type DiameterAgentCfg struct {
 	Enabled           bool   // enables the diameter agent: <true|false>
 	ListenNet         string // sctp or tcp
@@ -32,7 +31,7 @@ type DiameterAgentCfg struct {
 	SessionSConns     []string
 	OriginHost        string
 	OriginRealm       string
-	VendorId          int
+	VendorID          int
 	ProductName       string
 	ConcurrentReqs    int // limit the maximum number of requests processed
 	SyncedConnReqs    bool
@@ -42,7 +41,7 @@ type DiameterAgentCfg struct {
 	RequestProcessors []*RequestProcessor
 }
 
-func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separator string) (err error) {
+func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -62,10 +61,9 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 		da.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for idx, attrConn := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			da.SessionSConns[idx] = attrConn
 			if attrConn == utils.MetaInternal {
 				da.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			} else {
-				da.SessionSConns[idx] = attrConn
 			}
 		}
 	}
@@ -76,7 +74,7 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 		da.OriginRealm = *jsnCfg.Origin_realm
 	}
 	if jsnCfg.Vendor_id != nil {
-		da.VendorId = *jsnCfg.Vendor_id
+		da.VendorID = *jsnCfg.Vendor_id
 	}
 	if jsnCfg.Product_name != nil {
 		da.ProductName = *jsnCfg.Product_name
@@ -118,40 +116,71 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	return
 }
 
-func (ds *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+// AsMapInterface returns the config as a map[string]interface{}
+func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:            ds.Enabled,
-		utils.ListenNetCfg:          ds.ListenNet,
-		utils.ListenCfg:             ds.Listen,
-		utils.DictionariesPathCfg:   ds.DictionariesPath,
-		utils.OriginHostCfg:         ds.OriginHost,
-		utils.OriginRealmCfg:        ds.OriginRealm,
-		utils.VendorIDCfg:           ds.VendorId,
-		utils.ProductNameCfg:        ds.ProductName,
-		utils.ConcurrentRequestsCfg: ds.ConcurrentReqs,
-		utils.SyncedConnReqsCfg:     ds.SyncedConnReqs,
-		utils.ASRTemplateCfg:        ds.ASRTemplate,
-		utils.RARTemplateCfg:        ds.RARTemplate,
-		utils.ForcedDisconnectCfg:   ds.ForcedDisconnect,
+		utils.EnabledCfg:            da.Enabled,
+		utils.ListenNetCfg:          da.ListenNet,
+		utils.ListenCfg:             da.Listen,
+		utils.DictionariesPathCfg:   da.DictionariesPath,
+		utils.OriginHostCfg:         da.OriginHost,
+		utils.OriginRealmCfg:        da.OriginRealm,
+		utils.VendorIDCfg:           da.VendorID,
+		utils.ProductNameCfg:        da.ProductName,
+		utils.ConcurrentRequestsCfg: da.ConcurrentReqs,
+		utils.SyncedConnReqsCfg:     da.SyncedConnReqs,
+		utils.ASRTemplateCfg:        da.ASRTemplate,
+		utils.RARTemplateCfg:        da.RARTemplate,
+		utils.ForcedDisconnectCfg:   da.ForcedDisconnect,
 	}
 
-	requestProcessors := make([]map[string]interface{}, len(ds.RequestProcessors))
-	for i, item := range ds.RequestProcessors {
+	requestProcessors := make([]map[string]interface{}, len(da.RequestProcessors))
+	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
 	initialMP[utils.RequestProcessorsCfg] = requestProcessors
 
-	if ds.SessionSConns != nil {
-		sessionSConns := make([]string, len(ds.SessionSConns))
-		for i, item := range ds.SessionSConns {
-			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			if item == buf {
-				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
-			} else {
-				sessionSConns[i] = item
+	if da.SessionSConns != nil {
+		sessionSConns := make([]string, len(da.SessionSConns))
+		for i, item := range da.SessionSConns {
+			sessionSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
+	}
+	return
+}
+
+// Clone returns a deep copy of DiameterAgentCfg
+func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {
+	cln = &DiameterAgentCfg{
+		Enabled:          da.Enabled,
+		ListenNet:        da.ListenNet,
+		Listen:           da.Listen,
+		DictionariesPath: da.DictionariesPath,
+		OriginHost:       da.OriginHost,
+		OriginRealm:      da.OriginRealm,
+		VendorID:         da.VendorID,
+		ProductName:      da.ProductName,
+		ConcurrentReqs:   da.ConcurrentReqs,
+		SyncedConnReqs:   da.SyncedConnReqs,
+		ASRTemplate:      da.ASRTemplate,
+		RARTemplate:      da.RARTemplate,
+		ForcedDisconnect: da.ForcedDisconnect,
+	}
+	if da.SessionSConns != nil {
+		cln.SessionSConns = make([]string, len(da.SessionSConns))
+		for i, con := range da.SessionSConns {
+			cln.SessionSConns[i] = con
+		}
+	}
+	if da.RequestProcessors != nil {
+		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
+		for i, req := range da.RequestProcessors {
+			cln.RequestProcessors[i] = req.Clone()
+		}
 	}
 	return
 }

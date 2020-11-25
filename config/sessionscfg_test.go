@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -53,7 +54,7 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 		},
 	}
 	fsAgentCfg := new(FsAgentCfg)
-	if err := fsAgentCfg.loadFromJsonCfg(fsAgentJsnCfg); err != nil {
+	if err := fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eFsAgentConfig, fsAgentCfg) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(eFsAgentConfig), utils.ToJSON(fsAgentCfg))
@@ -106,7 +107,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		DebitInterval:       2,
 		StoreSCosts:         true,
 		SessionTTL:          0,
-		SessionIndexes:      utils.StringMap{},
+		SessionIndexes:      utils.StringSet{},
 		ClientProtocol:      2.5,
 		ChannelSyncInterval: 10,
 		TerminateAttempts:   6,
@@ -123,7 +124,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.sessionSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sessionSCfg))
@@ -137,7 +138,7 @@ func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
 	expected := "Replication connection ID needs to be different than *internal"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -149,7 +150,7 @@ func TestSessionSCfgloadFromJsonCfgCase3(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -161,7 +162,7 @@ func TestSessionSCfgloadFromJsonCfgCase5(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -173,7 +174,7 @@ func TestSessionSCfgloadFromJsonCfgCase7(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -185,7 +186,7 @@ func TestSessionSCfgloadFromJsonCfgCase8(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -197,7 +198,7 @@ func TestSessionSCfgloadFromJsonCfgCase9(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	cfgJSON1 := &SessionSJsonCfg{
@@ -205,7 +206,7 @@ func TestSessionSCfgloadFromJsonCfgCase9(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON1); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON1); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	cfgJSON2 := &SessionSJsonCfg{
@@ -213,7 +214,7 @@ func TestSessionSCfgloadFromJsonCfgCase9(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON2); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	cfgJSON3 := &SessionSJsonCfg{
@@ -221,7 +222,7 @@ func TestSessionSCfgloadFromJsonCfgCase9(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON3); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -248,7 +249,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		DebitInterval:       0,
 		StoreSCosts:         false,
 		SessionTTL:          0,
-		SessionIndexes:      utils.StringMap{},
+		SessionIndexes:      utils.StringSet{},
 		ClientProtocol:      1.0,
 		ChannelSyncInterval: 0,
 		TerminateAttempts:   5,
@@ -269,7 +270,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.sessionSCfg, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sessionSCfg))
@@ -285,7 +286,7 @@ func TestSessionSCfgloadFromJsonCfgCase11(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -483,7 +484,7 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.fsAgentCfg.loadFromJsonCfg(fsAgentJsnCfg); err != nil {
+	} else if err = jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.fsAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.fsAgentCfg))
@@ -497,7 +498,7 @@ func TestFsAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.fsAgentCfg.loadFromJsonCfg(fsAgentJsnCfg); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -509,7 +510,7 @@ func TestFsAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.fsAgentCfg.loadFromJsonCfg(fsAgentJsnCfg); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -603,12 +604,12 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 
 func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 	var fscocfg, expected FsConnCfg
-	if err := fscocfg.loadFromJsonCfg(nil); err != nil {
+	if err := fscocfg.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fscocfg, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, fscocfg)
 	}
-	if err := fscocfg.loadFromJsonCfg(new(FsConnJsonCfg)); err != nil {
+	if err := fscocfg.loadFromJSONCfg(new(FsConnJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fscocfg, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, fscocfg)
@@ -625,7 +626,7 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 		Reconnects: 5,
 		Alias:      "127.0.0.1:8448",
 	}
-	if err = fscocfg.loadFromJsonCfg(json); err != nil {
+	if err = fscocfg.loadFromJSONCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, fscocfg) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
@@ -634,11 +635,11 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 
 func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 	var hpoolcfg, expected RemoteHost
-	hpoolcfg.loadFromJsonCfg(nil)
+	hpoolcfg.loadFromJSONCfg(nil)
 	if !reflect.DeepEqual(hpoolcfg, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, hpoolcfg)
 	}
-	hpoolcfg.loadFromJsonCfg(new(RemoteHostJson))
+	hpoolcfg.loadFromJSONCfg(new(RemoteHostJson))
 	if !reflect.DeepEqual(hpoolcfg, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, hpoolcfg)
 	}
@@ -650,7 +651,7 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 		Address:     "127.0.0.1:8448",
 		Synchronous: true,
 	}
-	hpoolcfg.loadFromJsonCfg(json)
+	hpoolcfg.loadFromJSONCfg(json)
 	if !reflect.DeepEqual(expected, hpoolcfg) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(hpoolcfg))
 	}
@@ -687,7 +688,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.asteriskAgentCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsonCfg.asteriskAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.asteriskAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.asteriskAgentCfg))
@@ -741,12 +742,12 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 
 func TestAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 	var asconcfg, expected AsteriskConnCfg
-	if err := asconcfg.loadFromJsonCfg(nil); err != nil {
+	if err := asconcfg.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(asconcfg, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, asconcfg)
 	}
-	if err := asconcfg.loadFromJsonCfg(new(AstConnJsonCfg)); err != nil {
+	if err := asconcfg.loadFromJSONCfg(new(AstConnJsonCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(asconcfg, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, asconcfg)
@@ -765,9 +766,136 @@ func TestAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
 		ConnectAttempts: 3,
 		Reconnects:      5,
 	}
-	if err = asconcfg.loadFromJsonCfg(json); err != nil {
+	if err = asconcfg.loadFromJSONCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, asconcfg) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(asconcfg))
+	}
+}
+
+func TestAsteriskAgentCfgClone(t *testing.T) {
+	ban := &AsteriskAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		CreateCDR:     true,
+		AsteriskConns: []*AsteriskConnCfg{{
+			Alias:           "127.0.0.1:8448",
+			Address:         "127.0.0.1:8088",
+			User:            "cgrates",
+			Password:        "CGRateS.org",
+			ConnectAttempts: 3,
+			Reconnects:      5,
+		}},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.SessionSConns[1] = ""; ban.SessionSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.AsteriskConns[0].User = ""; ban.AsteriskConns[0].User != "cgrates" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+}
+
+func TestFsAgentCfgClone(t *testing.T) {
+	ban := &FsAgentCfg{
+		Enabled:             true,
+		CreateCdr:           true,
+		SubscribePark:       true,
+		EmptyBalanceAnnFile: "file",
+		EmptyBalanceContext: "context",
+		ExtraFields:         NewRSRParsersMustCompile("tenant", utils.INFIELD_SEP),
+		LowBalanceAnnFile:   "file2",
+		MaxWaitConnection:   time.Second,
+		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		EventSocketConns: []*FsConnCfg{
+			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, Alias: "1.2.3.4:8021"},
+			{Address: "2.3.4.5:8021", Password: "ClueCon", Reconnects: 5, Alias: "2.3.4.5:8021"},
+		},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.SessionSConns[1] = ""; ban.SessionSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.EventSocketConns[0].Password = ""; ban.EventSocketConns[0].Password != "ClueCon" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+}
+
+func TestSessionSCfgClone(t *testing.T) {
+	ban := &SessionSCfg{
+		Enabled:             true,
+		ListenBijson:        "127.0.0.1:2018",
+		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
+		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
+		ResSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+		ThreshSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS), "*conn1"},
+		RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
+		AttrSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
+		ReplicationConns:    []string{"*conn1"},
+		DebitInterval:       2,
+		StoreSCosts:         true,
+		SessionTTL:          0,
+		SessionIndexes:      utils.StringSet{},
+		ClientProtocol:      2.5,
+		ChannelSyncInterval: 10,
+		TerminateAttempts:   6,
+		AlterableFields:     utils.StringSet{},
+		MinDurLowBalance:    1,
+		SchedulerConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+		SessionTTLMaxDelay:  utils.DurationPointer(time.Second),
+		SessionTTLLastUsed:  utils.DurationPointer(time.Second),
+		SessionTTLUsage:     utils.DurationPointer(time.Second),
+		SessionTTLLastUsage: utils.DurationPointer(time.Second),
+		STIRCfg: &STIRcfg{
+			AllowedAttest:      utils.StringSet{utils.META_ANY: {}},
+			PayloadMaxduration: -1,
+			DefaultAttest:      "A",
+			PrivateKeyPath:     "randomPath",
+			PublicKeyPath:      "randomPath",
+		},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.ChargerSConns[1] = ""; ban.ChargerSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	if rcv.RALsConns[1] = ""; ban.RALsConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ResSConns[1] = ""; ban.ResSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ThreshSConns[1] = ""; ban.ThreshSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.RouteSConns[1] = ""; ban.RouteSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.AttrSConns[1] = ""; ban.AttrSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.CDRsConns[1] = ""; ban.CDRsConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ReplicationConns[0] = ""; ban.ReplicationConns[0] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	if rcv.STIRCfg.DefaultAttest = ""; ban.STIRCfg.DefaultAttest != "A" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

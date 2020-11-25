@@ -91,3 +91,29 @@ func TestSchedulerCfgAsMapInterface1(t *testing.T) {
 	}
 
 }
+
+func TestSchedulerCfgClone(t *testing.T) {
+	ban := &SchedulerCfg{
+		Enabled:      true,
+		CDRsConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
+		ThreshSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StatSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		Filters:      []string{"randomFilter"},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.CDRsConns[1] = ""; ban.CDRsConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ThreshSConns[1] = ""; ban.ThreshSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.Filters[0] = ""; ban.Filters[0] != "randomFilter" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+}

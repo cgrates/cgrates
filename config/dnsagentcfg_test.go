@@ -299,3 +299,35 @@ func TestRequestProcessorClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDNSAgentCfgClone(t *testing.T) {
+	ban := &DNSAgentCfg{
+		Enabled:       true,
+		Listen:        "127.0.0.1:2053",
+		ListenNet:     "udp",
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		Timezone:      "UTC",
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID:            "OutboundAUTHDryRun",
+				Filters:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+				Flags:         utils.FlagsWithParamsFromSlice([]string{utils.MetaDryRun}),
+				Timezone:      "UTC",
+				RequestFields: []*FCTemplate{},
+				ReplyFields: []*FCTemplate{
+					{Tag: "Allow", Path: "*rep.response.Allow", Type: "constant", Mandatory: true, Layout: utils.EmptyString},
+				},
+			},
+		},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.SessionSConns[1] = ""; ban.SessionSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.RequestProcessors[0].ID = ""; ban.RequestProcessors[0].ID != "OutboundAUTHDryRun" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+}

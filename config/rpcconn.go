@@ -23,7 +23,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-// Returns the first cached default value for a RemoteHost connection
+// NewDfltRemoteHost returns the first cached default value for a RemoteHost connection
 func NewDfltRemoteHost() *RemoteHost {
 	if dfltRemoteHost == nil {
 		return new(RemoteHost) // No defaults, most probably we are building the defaults now
@@ -32,17 +32,40 @@ func NewDfltRemoteHost() *RemoteHost {
 	return &dfltVal
 }
 
+// NewDfltRPCConn returns the default value for a RPCConn
 func NewDfltRPCConn() *RPCConn {
 	return &RPCConn{Strategy: rpcclient.PoolFirst}
 }
 
+// RPCConns the config for all rpc pools
+type RPCConns map[string]*RPCConn
+
+// AsMapInterface returns the config as a map[string]interface{}
+func (rC RPCConns) AsMapInterface() (rpcConns map[string]interface{}) {
+	rpcConns = make(map[string]interface{})
+	for key, value := range rC {
+		rpcConns[key] = value.AsMapInterface()
+	}
+	return
+}
+
+// Clone returns a deep copy of RPCConns
+func (rC RPCConns) Clone() (cln RPCConns) {
+	cln = make(RPCConns)
+	for id, conn := range rC {
+		cln[id] = conn.Clone()
+	}
+	return
+}
+
+// RPCConn the connection pool config
 type RPCConn struct {
 	Strategy string
 	PoolSize int
 	Conns    []*RemoteHost
 }
 
-func (rC *RPCConn) loadFromJsonCfg(jsnCfg *RPCConnsJson) {
+func (rC *RPCConn) loadFromJSONCfg(jsnCfg *RPCConnsJson) {
 	if jsnCfg == nil {
 		return
 	}
@@ -56,22 +79,13 @@ func (rC *RPCConn) loadFromJsonCfg(jsnCfg *RPCConnsJson) {
 		rC.Conns = make([]*RemoteHost, len(*jsnCfg.Conns))
 		for idx, jsnHaCfg := range *jsnCfg.Conns {
 			rC.Conns[idx] = NewDfltRemoteHost()
-			rC.Conns[idx].loadFromJsonCfg(jsnHaCfg) //To review if the function signature changes
+			rC.Conns[idx].loadFromJSONCfg(jsnHaCfg) //To review if the function signature changes
 		}
 	}
 	return
 }
 
-type RpcConns map[string]*RPCConn
-
-func (rC RpcConns) AsMapInterface() (rpcConns map[string]interface{}) {
-	rpcConns = make(map[string]interface{})
-	for key, value := range rC {
-		rpcConns[key] = value.AsMapInterface()
-	}
-	return
-}
-
+// AsMapInterface returns the config as a map[string]interface{}
 func (rC *RPCConn) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.StrategyCfg: rC.Strategy,
@@ -87,7 +101,22 @@ func (rC *RPCConn) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
-// One connection to Rater
+// Clone returns a deep copy of RPCConn
+func (rC RPCConn) Clone() (cln *RPCConn) {
+	cln = &RPCConn{
+		Strategy: rC.Strategy,
+		PoolSize: rC.PoolSize,
+	}
+	if rC.Conns != nil {
+		cln.Conns = make([]*RemoteHost, len(rC.Conns))
+		for i, req := range rC.Conns {
+			cln.Conns[i] = req.Clone()
+		}
+	}
+	return
+}
+
+// RemoteHost connection config
 type RemoteHost struct {
 	Address     string
 	Transport   string
@@ -95,30 +124,41 @@ type RemoteHost struct {
 	TLS         bool
 }
 
-func (self *RemoteHost) loadFromJsonCfg(jsnCfg *RemoteHostJson) {
+func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) {
 	if jsnCfg == nil {
 		return
 	}
 	if jsnCfg.Address != nil {
-		self.Address = *jsnCfg.Address
+		rh.Address = *jsnCfg.Address
 	}
 	if jsnCfg.Transport != nil {
-		self.Transport = *jsnCfg.Transport
+		rh.Transport = *jsnCfg.Transport
 	}
 	if jsnCfg.Synchronous != nil {
-		self.Synchronous = *jsnCfg.Synchronous
+		rh.Synchronous = *jsnCfg.Synchronous
 	}
 	if jsnCfg.Tls != nil {
-		self.TLS = *jsnCfg.Tls
+		rh.TLS = *jsnCfg.Tls
 	}
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (rh *RemoteHost) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.AddressCfg:     rh.Address,
 		utils.TransportCfg:   rh.Transport,
 		utils.SynchronousCfg: rh.Synchronous,
 		utils.TLS:            rh.TLS,
+	}
+}
+
+// Clone returns a deep copy of RemoteHost
+func (rh RemoteHost) Clone() (cln *RemoteHost) {
+	return &RemoteHost{
+		Address:     rh.Address,
+		Transport:   rh.Transport,
+		Synchronous: rh.Synchronous,
+		TLS:         rh.TLS,
 	}
 }

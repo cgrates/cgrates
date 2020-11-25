@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -100,13 +98,35 @@ func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]in
 	if da.SessionSConns != nil {
 		sessionSConns := make([]string, len(da.SessionSConns))
 		for i, item := range da.SessionSConns {
+			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
-			} else {
-				sessionSConns[i] = item
+				sessionSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
+	}
+	return
+}
+
+// Clone returns a deep copy of DNSAgentCfg
+func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
+	cln = &DNSAgentCfg{
+		Enabled:   da.Enabled,
+		Listen:    da.Listen,
+		ListenNet: da.ListenNet,
+		Timezone:  da.Timezone,
+	}
+	if da.SessionSConns != nil {
+		cln.SessionSConns = make([]string, len(da.SessionSConns))
+		for i, con := range da.SessionSConns {
+			cln.SessionSConns[i] = con
+		}
+	}
+	if da.RequestProcessors != nil {
+		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
+		for i, req := range da.RequestProcessors {
+			cln.RequestProcessors[i] = req.Clone()
+		}
 	}
 	return
 }

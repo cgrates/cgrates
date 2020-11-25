@@ -38,7 +38,7 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 			},
 		},
 	}
-	expected := RpcConns{
+	expected := RPCConns{
 		utils.MetaInternal: {
 			Strategy: utils.MetaFirst,
 			PoolSize: 0,
@@ -67,7 +67,7 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
 	} else {
-		jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJsonCfg(cfgJSON)
+		jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJSONCfg(cfgJSON)
 		if !reflect.DeepEqual(jsonCfg.rpcConns, expected) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rpcConns))
 		}
@@ -75,7 +75,7 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 }
 
 func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
-	expected := RpcConns{
+	expected := RPCConns{
 		utils.MetaInternal: {
 			Strategy: utils.MetaFirst,
 			PoolSize: 0,
@@ -105,7 +105,7 @@ func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJsonCfg(nil)
+	jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJSONCfg(nil)
 	if !reflect.DeepEqual(expected, jsonCfg.rpcConns) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rpcConns))
 	}
@@ -193,5 +193,41 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.rpcConns.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestRPCConnsClone(t *testing.T) {
+	ban := RPCConns{
+		utils.MetaInternal: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+		utils.MetaLocalHost: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 1,
+			Conns: []*RemoteHost{
+				{
+					Address:     "127.0.0.1:2012",
+					Transport:   "*json",
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv[utils.MetaInternal].Conns[0].Address = ""; ban[utils.MetaInternal].Conns[0].Address != utils.MetaInternal {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

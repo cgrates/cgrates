@@ -20,13 +20,12 @@ package config
 
 import (
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Rater config section
+// RalsCfg is rater config section
 type RalsCfg struct {
 	Enabled                 bool     // start standalone server (no balancer)
 	ThresholdSConns         []string // address where to reach ThresholdS config
@@ -40,8 +39,8 @@ type RalsCfg struct {
 	DynaprepaidActionPlans  []string
 }
 
-//loadFromJsonCfg loads Rals config from JsonCfg
-func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
+// loadFromJSONCfg loads Rals config from JsonCfg
+func (ralsCfg *RalsCfg) loadFromJSONCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	if jsnRALsCfg == nil {
 		return nil
 	}
@@ -52,10 +51,9 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		ralsCfg.ThresholdSConns = make([]string, len(*jsnRALsCfg.Thresholds_conns))
 		for idx, conn := range *jsnRALsCfg.Thresholds_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			ralsCfg.ThresholdSConns[idx] = conn
 			if conn == utils.MetaInternal {
 				ralsCfg.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
-			} else {
-				ralsCfg.ThresholdSConns[idx] = conn
 			}
 		}
 	}
@@ -63,10 +61,9 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		ralsCfg.StatSConns = make([]string, len(*jsnRALsCfg.Stats_conns))
 		for idx, conn := range *jsnRALsCfg.Stats_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			ralsCfg.StatSConns[idx] = conn
 			if conn == utils.MetaInternal {
 				ralsCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
-			} else {
-				ralsCfg.StatSConns[idx] = conn
 			}
 		}
 	}
@@ -74,10 +71,9 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		ralsCfg.CacheSConns = make([]string, len(*jsnRALsCfg.CacheS_conns))
 		for idx, conn := range *jsnRALsCfg.CacheS_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			ralsCfg.CacheSConns[idx] = conn
 			if conn == utils.MetaInternal {
 				ralsCfg.CacheSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-			} else {
-				ralsCfg.CacheSConns[idx] = conn
 			}
 		}
 	}
@@ -112,6 +108,7 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:                 ralsCfg.Enabled,
@@ -119,14 +116,14 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.RemoveExpiredCfg:           ralsCfg.RemoveExpired,
 		utils.MaxIncrementsCfg:           ralsCfg.MaxIncrements,
 		utils.DynaprepaidActionplansCfg:  ralsCfg.DynaprepaidActionPlans,
+		utils.BalanceRatingSubjectCfg:    ralsCfg.BalanceRatingSubject,
 	}
 	if ralsCfg.ThresholdSConns != nil {
 		threSholds := make([]string, len(ralsCfg.ThresholdSConns))
 		for i, item := range ralsCfg.ThresholdSConns {
+			threSholds[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
-				threSholds[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds)
-			} else {
-				threSholds[i] = item
+				threSholds[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.ThresholdSConnsCfg] = threSholds
@@ -134,42 +131,76 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if ralsCfg.StatSConns != nil {
 		statS := make([]string, len(ralsCfg.StatSConns))
 		for i, item := range ralsCfg.StatSConns {
+			statS[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
-				statS[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS)
-			} else {
-				statS[i] = item
+				statS[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.StatSConnsCfg] = statS
 	}
-	if ralsCfg.MaxComputedUsage != nil {
-		maxComputed := make(map[string]interface{})
-		for key, item := range ralsCfg.MaxComputedUsage {
-			if key == utils.ANY || key == utils.VOICE {
-				maxComputed[key] = item.String()
-			} else {
-				maxComputed[key] = strconv.Itoa(int(item))
-			}
-		}
-		initialMP[utils.MaxComputedUsageCfg] = maxComputed
-	}
 	if ralsCfg.CacheSConns != nil {
 		cacheSConns := make([]string, len(ralsCfg.CacheSConns))
 		for i, item := range ralsCfg.CacheSConns {
+			cacheSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
-				cacheSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaCaches)
-			} else {
-				cacheSConns[i] = item
+				cacheSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.CachesConnsCfg] = cacheSConns
 	}
-	if ralsCfg.BalanceRatingSubject != nil {
-		balanceRating := make(map[string]interface{})
-		for key, item := range ralsCfg.BalanceRatingSubject {
-			balanceRating[key] = item
+	maxComputed := make(map[string]interface{})
+	for key, item := range ralsCfg.MaxComputedUsage {
+		if key == utils.ANY || key == utils.VOICE {
+			maxComputed[key] = item.String()
+		} else {
+			maxComputed[key] = strconv.Itoa(int(item))
 		}
-		initialMP[utils.BalanceRatingSubjectCfg] = balanceRating
+	}
+	initialMP[utils.MaxComputedUsageCfg] = maxComputed
+	return
+}
+
+// Clone returns a deep copy of RalsCfg
+func (ralsCfg RalsCfg) Clone() (cln *RalsCfg) {
+	cln = &RalsCfg{
+		Enabled:                 ralsCfg.Enabled,
+		RpSubjectPrefixMatching: ralsCfg.RpSubjectPrefixMatching,
+		RemoveExpired:           ralsCfg.RemoveExpired,
+		MaxIncrements:           ralsCfg.MaxIncrements,
+
+		MaxComputedUsage:     make(map[string]time.Duration),
+		BalanceRatingSubject: make(map[string]string),
+	}
+	if ralsCfg.ThresholdSConns != nil {
+		cln.ThresholdSConns = make([]string, len(ralsCfg.ThresholdSConns))
+		for i, con := range ralsCfg.ThresholdSConns {
+			cln.ThresholdSConns[i] = con
+		}
+	}
+	if ralsCfg.StatSConns != nil {
+		cln.StatSConns = make([]string, len(ralsCfg.StatSConns))
+		for i, con := range ralsCfg.StatSConns {
+			cln.StatSConns[i] = con
+		}
+	}
+	if ralsCfg.CacheSConns != nil {
+		cln.CacheSConns = make([]string, len(ralsCfg.CacheSConns))
+		for i, con := range ralsCfg.CacheSConns {
+			cln.CacheSConns[i] = con
+		}
+	}
+	if ralsCfg.DynaprepaidActionPlans != nil {
+		cln.DynaprepaidActionPlans = make([]string, len(ralsCfg.DynaprepaidActionPlans))
+		for i, con := range ralsCfg.DynaprepaidActionPlans {
+			cln.DynaprepaidActionPlans[i] = con
+		}
+	}
+
+	for k, u := range ralsCfg.MaxComputedUsage {
+		cln.MaxComputedUsage[k] = u
+	}
+	for k, r := range ralsCfg.BalanceRatingSubject {
+		cln.BalanceRatingSubject[k] = r
 	}
 	return
 }

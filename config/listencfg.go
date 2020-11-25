@@ -20,7 +20,7 @@ package config
 
 import "github.com/cgrates/cgrates/utils"
 
-// Listen config section
+// ListenCfg is the listen config section
 type ListenCfg struct {
 	RPCJSONListen    string // RPC JSON listening address
 	RPCGOBListen     string // RPC GOB listening address
@@ -30,8 +30,8 @@ type ListenCfg struct {
 	HTTPTLSListen    string // HTTP TLS listening address
 }
 
-//loadFromJsonCfg loads Database config from JsonCfg
-func (lstcfg *ListenCfg) loadFromJsonCfg(jsnListenCfg *ListenJsonCfg) (err error) {
+// loadFromJSONCfg loads Database config from JsonCfg
+func (lstcfg *ListenCfg) loadFromJSONCfg(jsnListenCfg *ListenJsonCfg) (err error) {
 	if jsnListenCfg == nil {
 		return nil
 	}
@@ -56,8 +56,9 @@ func (lstcfg *ListenCfg) loadFromJsonCfg(jsnListenCfg *ListenJsonCfg) (err error
 	return nil
 }
 
-func (lstcfg *ListenCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]interface{}
+func (lstcfg *ListenCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
 		utils.RPCJSONListenCfg:    lstcfg.RPCJSONListen,
 		utils.RPCGOBListenCfg:     lstcfg.RPCGOBListen,
 		utils.HTTPListenCfg:       lstcfg.HTTPListen,
@@ -65,5 +66,16 @@ func (lstcfg *ListenCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.RPCGOBTLSListenCfg:  lstcfg.RPCGOBTLSListen,
 		utils.HTTPTLSListenCfg:    lstcfg.HTTPTLSListen,
 	}
-	return
+}
+
+// Clone returns a deep copy of ListenCfg
+func (lstcfg ListenCfg) Clone() *ListenCfg {
+	return &ListenCfg{
+		RPCJSONListen:    lstcfg.RPCJSONListen,
+		RPCGOBListen:     lstcfg.RPCGOBListen,
+		HTTPListen:       lstcfg.HTTPListen,
+		RPCJSONTLSListen: lstcfg.RPCJSONTLSListen,
+		RPCGOBTLSListen:  lstcfg.RPCGOBTLSListen,
+		HTTPTLSListen:    lstcfg.HTTPTLSListen,
+	}
 }

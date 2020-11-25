@@ -147,7 +147,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.storDbCfg = new(StorDbCfg)
 	cfg.storDbCfg.Items = make(map[string]*ItemOpt)
 	cfg.storDbCfg.Opts = make(map[string]interface{})
-	cfg.tlsCfg = new(TlsCfg)
+	cfg.tlsCfg = new(TLSCfg)
 	cfg.cacheCfg = new(CacheCfg)
 	cfg.cacheCfg.Partitions = make(map[string]*CacheParamCfg)
 	cfg.listenCfg = new(ListenCfg)
@@ -282,18 +282,18 @@ type CGRConfig struct {
 	dfltEvExp *EventExporterCfg // default event exporter
 
 	loaderCfg    LoaderSCfgs   // LoaderS configs
-	httpAgentCfg HttpAgentCfgs // HttpAgent configs
+	httpAgentCfg HTTPAgentCfgs // HttpAgent configs
 
 	rldChans map[string]chan struct{} // index here the channels used for reloads
 
-	rpcConns RpcConns
+	rpcConns RPCConns
 
 	templates FcTemplates
 
 	generalCfg       *GeneralCfg       // General config
 	dataDbCfg        *DataDbCfg        // Database config
 	storDbCfg        *StorDbCfg        // StroreDb config
-	tlsCfg           *TlsCfg           // TLS config
+	tlsCfg           *TLSCfg           // TLS config
 	cacheCfg         *CacheCfg         // Cache config
 	listenCfg        *ListenCfg        // Listen config
 	httpCfg          *HTTPCfg          // HTTP config
@@ -420,7 +420,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 	}
 	for key, val := range jsnRPCConns {
 		cfg.rpcConns[key] = NewDfltRPCConn()
-		cfg.rpcConns[key].loadFromJsonCfg(val)
+		cfg.rpcConns[key].loadFromJSONCfg(val)
 	}
 	return
 }
@@ -431,7 +431,7 @@ func (cfg *CGRConfig) loadGeneralCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnGeneralCfg, err = jsnCfg.GeneralJsonCfg(); err != nil {
 		return
 	}
-	return cfg.generalCfg.loadFromJsonCfg(jsnGeneralCfg)
+	return cfg.generalCfg.loadFromJSONCfg(jsnGeneralCfg)
 }
 
 // loadCacheCfg loads the Cache section of the configuration
@@ -449,7 +449,7 @@ func (cfg *CGRConfig) loadListenCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnListenCfg, err = jsnCfg.ListenJsonCfg(); err != nil {
 		return
 	}
-	return cfg.listenCfg.loadFromJsonCfg(jsnListenCfg)
+	return cfg.listenCfg.loadFromJSONCfg(jsnListenCfg)
 }
 
 // loadHTTPCfg loads the Http section of the configuration
@@ -458,7 +458,7 @@ func (cfg *CGRConfig) loadHTTPCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnHTTPCfg, err = jsnCfg.HttpJsonCfg(); err != nil {
 		return
 	}
-	return cfg.httpCfg.loadFromJsonCfg(jsnHTTPCfg)
+	return cfg.httpCfg.loadFromJSONCfg(jsnHTTPCfg)
 }
 
 // loadDataDBCfg loads the DataDB section of the configuration
@@ -467,7 +467,7 @@ func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDataDbCfg, err = jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		return
 	}
-	if err = cfg.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+	if err = cfg.dataDbCfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
 		return
 	}
 	return
@@ -480,7 +480,7 @@ func (cfg *CGRConfig) loadStorDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDataDbCfg, err = jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		return
 	}
-	return cfg.storDbCfg.loadFromJsonCfg(jsnDataDbCfg)
+	return cfg.storDbCfg.loadFromJSONCfg(jsnDataDbCfg)
 }
 
 // loadFilterSCfg loads the FilterS section of the configuration
@@ -489,7 +489,7 @@ func (cfg *CGRConfig) loadFilterSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnFilterSCfg, err = jsnCfg.FilterSJsonCfg(); err != nil {
 		return
 	}
-	return cfg.filterSCfg.loadFromJsonCfg(jsnFilterSCfg)
+	return cfg.filterSCfg.loadFromJSONCfg(jsnFilterSCfg)
 }
 
 // loadRalSCfg loads the RalS section of the configuration
@@ -498,7 +498,7 @@ func (cfg *CGRConfig) loadRalSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnRALsCfg, err = jsnCfg.RalsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.ralsCfg.loadFromJsonCfg(jsnRALsCfg)
+	return cfg.ralsCfg.loadFromJSONCfg(jsnRALsCfg)
 }
 
 // loadSchedulerCfg loads the Scheduler section of the configuration
@@ -516,7 +516,7 @@ func (cfg *CGRConfig) loadCdrsCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnCdrsCfg, err = jsnCfg.CdrsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.cdrsCfg.loadFromJsonCfg(jsnCdrsCfg)
+	return cfg.cdrsCfg.loadFromJSONCfg(jsnCdrsCfg)
 }
 
 // loadSessionSCfg loads the SessionS section of the configuration
@@ -525,7 +525,7 @@ func (cfg *CGRConfig) loadSessionSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnSessionSCfg, err = jsnCfg.SessionSJsonCfg(); err != nil {
 		return
 	}
-	return cfg.sessionSCfg.loadFromJsonCfg(jsnSessionSCfg)
+	return cfg.sessionSCfg.loadFromJSONCfg(jsnSessionSCfg)
 }
 
 // loadFreeswitchAgentCfg loads the FreeswitchAgent section of the configuration
@@ -534,7 +534,7 @@ func (cfg *CGRConfig) loadFreeswitchAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnSmFsCfg, err = jsnCfg.FreeswitchAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.fsAgentCfg.loadFromJsonCfg(jsnSmFsCfg)
+	return cfg.fsAgentCfg.loadFromJSONCfg(jsnSmFsCfg)
 }
 
 // loadKamAgentCfg loads the KamAgent section of the configuration
@@ -543,7 +543,7 @@ func (cfg *CGRConfig) loadKamAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnKamAgentCfg, err = jsnCfg.KamAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.kamAgentCfg.loadFromJsonCfg(jsnKamAgentCfg)
+	return cfg.kamAgentCfg.loadFromJSONCfg(jsnKamAgentCfg)
 }
 
 // loadAsteriskAgentCfg loads the AsteriskAgent section of the configuration
@@ -552,7 +552,7 @@ func (cfg *CGRConfig) loadAsteriskAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnSMAstCfg, err = jsnCfg.AsteriskAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.asteriskAgentCfg.loadFromJsonCfg(jsnSMAstCfg)
+	return cfg.asteriskAgentCfg.loadFromJSONCfg(jsnSMAstCfg)
 }
 
 // loadDiameterAgentCfg loads the DiameterAgent section of the configuration
@@ -561,7 +561,7 @@ func (cfg *CGRConfig) loadDiameterAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDACfg, err = jsnCfg.DiameterAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, cfg.generalCfg.RSRSep)
+	return cfg.diameterAgentCfg.loadFromJSONCfg(jsnDACfg, cfg.generalCfg.RSRSep)
 }
 
 // loadRadiusAgentCfg loads the RadiusAgent section of the configuration
@@ -570,7 +570,7 @@ func (cfg *CGRConfig) loadRadiusAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnRACfg, err = jsnCfg.RadiusAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, cfg.generalCfg.RSRSep)
+	return cfg.radiusAgentCfg.loadFromJSONCfg(jsnRACfg, cfg.generalCfg.RSRSep)
 }
 
 // loadDNSAgentCfg loads the DNSAgent section of the configuration
@@ -588,7 +588,7 @@ func (cfg *CGRConfig) loadHTTPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnHTTPAgntCfg, err = jsnCfg.HttpAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.httpAgentCfg.loadFromJsonCfg(jsnHTTPAgntCfg, cfg.generalCfg.RSRSep)
+	return cfg.httpAgentCfg.loadFromJSONCfg(jsnHTTPAgntCfg, cfg.generalCfg.RSRSep)
 }
 
 // loadAttributeSCfg loads the AttributeS section of the configuration
@@ -655,7 +655,7 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
 		for _, profile := range jsnLoaderCfg {
 			loadSCfgp := NewDfltLoaderSCfg()
-			if err = loadSCfgp.loadFromJsonCfg(profile, cfg.templates, cfg.generalCfg.RSRSep); err != nil {
+			if err = loadSCfgp.loadFromJSONCfg(profile, cfg.templates, cfg.generalCfg.RSRSep); err != nil {
 				return
 			}
 			cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use apend so the loaderS profile to be loaded from multiple files
@@ -724,7 +724,7 @@ func (cfg *CGRConfig) loadTLSCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnTLSCgrCfg, err = jsnCfg.TlsCfgJson(); err != nil {
 		return
 	}
-	return cfg.tlsCfg.loadFromJsonCfg(jsnTLSCgrCfg)
+	return cfg.tlsCfg.loadFromJSONCfg(jsnTLSCgrCfg)
 }
 
 // loadAnalyzerCgrCfg loads the Analyzer section of the configuration
@@ -922,7 +922,7 @@ func (cfg *CGRConfig) AsteriskAgentCfg() *AsteriskAgentCfg {
 }
 
 // HTTPAgentCfg returns the config for HttpAgent
-func (cfg *CGRConfig) HTTPAgentCfg() HttpAgentCfgs {
+func (cfg *CGRConfig) HTTPAgentCfg() HTTPAgentCfgs {
 	cfg.lks[HttpAgentJson].Lock()
 	defer cfg.lks[HttpAgentJson].Unlock()
 	return cfg.httpAgentCfg
@@ -1006,7 +1006,7 @@ func (cfg *CGRConfig) GeneralCfg() *GeneralCfg {
 }
 
 // TLSCfg returns the config for Tls
-func (cfg *CGRConfig) TLSCfg() *TlsCfg {
+func (cfg *CGRConfig) TLSCfg() *TLSCfg {
 	cfg.lks[TlsCfgJson].Lock()
 	defer cfg.lks[TlsCfgJson].Unlock()
 	return cfg.tlsCfg
@@ -1095,7 +1095,7 @@ func (cfg *CGRConfig) SIPAgentCfg() *SIPAgentCfg {
 }
 
 // RPCConns reads the RPCConns configuration
-func (cfg *CGRConfig) RPCConns() RpcConns {
+func (cfg *CGRConfig) RPCConns() RPCConns {
 	cfg.lks[RPCConnsJsonName].RLock()
 	defer cfg.lks[RPCConnsJsonName].RUnlock()
 	return cfg.rpcConns
@@ -1249,7 +1249,7 @@ func (cfg *CGRConfig) loadCfgWithLocks(path, section string) (err error) {
 
 func (*CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *CgrJsonCfg) error, envOff bool) (err error) {
 	jsnCfg := new(CgrJsonCfg)
-	var rjr *rjReader
+	var rjr *RjReader
 	if rjr, err = NewRjReader(rdr); err != nil {
 		return
 	}
@@ -1854,5 +1854,61 @@ func (cfg *CGRConfig) V1SetConfigFromJSON(args *SetConfigFromJSONArgs, reply *st
 
 	cfg.reloadSections(sortedCfgSections...)
 	*reply = utils.OK
+	return
+}
+
+// Clone returns a deep copy of CGRConfig
+func (cfg CGRConfig) Clone() (cln *CGRConfig) {
+	cln = &CGRConfig{
+		DataFolderPath: cfg.DataFolderPath,
+		ConfigPath:     cfg.ConfigPath,
+
+		dfltEvRdr:        cfg.dfltEvRdr.Clone(),
+		dfltEvExp:        cfg.dfltEvExp.Clone(),
+		loaderCfg:        cfg.loaderCfg.Clone(),
+		httpAgentCfg:     cfg.httpAgentCfg.Clone(),
+		rpcConns:         cfg.rpcConns.Clone(),
+		templates:        cfg.templates.Clone(),
+		generalCfg:       cfg.generalCfg.Clone(),
+		dataDbCfg:        cfg.dataDbCfg.Clone(),
+		storDbCfg:        cfg.storDbCfg.Clone(),
+		tlsCfg:           cfg.tlsCfg.Clone(),
+		cacheCfg:         cfg.cacheCfg.Clone(),
+		listenCfg:        cfg.listenCfg.Clone(),
+		httpCfg:          cfg.httpCfg.Clone(),
+		filterSCfg:       cfg.filterSCfg.Clone(),
+		ralsCfg:          cfg.ralsCfg.Clone(),
+		schedulerCfg:     cfg.schedulerCfg.Clone(),
+		cdrsCfg:          cfg.cdrsCfg.Clone(),
+		sessionSCfg:      cfg.sessionSCfg.Clone(),
+		fsAgentCfg:       cfg.fsAgentCfg.Clone(),
+		kamAgentCfg:      cfg.kamAgentCfg.Clone(),
+		asteriskAgentCfg: cfg.asteriskAgentCfg.Clone(),
+		diameterAgentCfg: cfg.diameterAgentCfg.Clone(),
+		radiusAgentCfg:   cfg.radiusAgentCfg.Clone(),
+		dnsAgentCfg:      cfg.dnsAgentCfg.Clone(),
+		attributeSCfg:    cfg.attributeSCfg.Clone(),
+		chargerSCfg:      cfg.chargerSCfg.Clone(),
+		resourceSCfg:     cfg.resourceSCfg.Clone(),
+		statsCfg:         cfg.statsCfg.Clone(),
+		thresholdSCfg:    cfg.thresholdSCfg.Clone(),
+		routeSCfg:        cfg.routeSCfg.Clone(),
+		sureTaxCfg:       cfg.sureTaxCfg.Clone(),
+		dispatcherSCfg:   cfg.dispatcherSCfg.Clone(),
+		dispatcherHCfg:   cfg.dispatcherHCfg.Clone(),
+		loaderCgrCfg:     cfg.loaderCgrCfg.Clone(),
+		migratorCgrCfg:   cfg.migratorCgrCfg.Clone(),
+		mailerCfg:        cfg.mailerCfg.Clone(),
+		analyzerSCfg:     cfg.analyzerSCfg.Clone(),
+		apier:            cfg.apier.Clone(),
+		ersCfg:           cfg.ersCfg.Clone(),
+		eesCfg:           cfg.eesCfg.Clone(),
+		rateSCfg:         cfg.rateSCfg.Clone(),
+		sipAgentCfg:      cfg.sipAgentCfg.Clone(),
+		configSCfg:       cfg.configSCfg.Clone(),
+		apiBanCfg:        cfg.apiBanCfg.Clone(),
+		coreSCfg:         cfg.coreSCfg.Clone(),
+	}
+	cln.initChanels()
 	return
 }

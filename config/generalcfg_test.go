@@ -76,7 +76,7 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.generalCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.generalCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.generalCfg))
@@ -90,7 +90,7 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -99,7 +99,7 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJsonCfg(cfgJSON1); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON1); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -108,7 +108,7 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJsonCfg(cfgJSON2); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -117,7 +117,7 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJsonCfg(cfgJSON3); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -126,7 +126,7 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJsonCfg(cfgJSON4); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON4); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -135,7 +135,7 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJsonCfg(cfgJSON5); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON5); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -246,5 +246,41 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.generalCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestGeneralCfgClone(t *testing.T) {
+	ban := &GeneralCfg{
+		NodeID:           "randomID",
+		Logger:           utils.MetaSysLog,
+		LogLevel:         6,
+		RoundingDecimals: 5,
+		DBDataEncoding:   "msgpack",
+		TpExportPath:     "/var/spool/cgrates/tpe",
+		PosterAttempts:   3,
+		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
+		DefaultReqType:   utils.META_RATED,
+		DefaultCategory:  utils.CALL,
+		DefaultTenant:    "cgrates.org",
+		DefaultTimezone:  "Local",
+		ConnectAttempts:  3,
+		Reconnects:       -1,
+		ConnectTimeout:   time.Second,
+		ReplyTimeout:     2 * time.Second,
+		MinCallDuration:  0,
+		MaxCallDuration:  3 * time.Hour,
+		DigestSeparator:  ",",
+		DigestEqual:      ":",
+		MaxParallelConns: 100,
+		RSRSep:           ";",
+		DefaultCaching:   utils.MetaReload,
+		FailedPostsTTL:   2,
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.NodeID = ""; ban.NodeID != "randomID" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

@@ -46,7 +46,7 @@ var (
 func NewSessionS(cgrCfg *config.CGRConfig,
 	dm *engine.DataManager,
 	connMgr *engine.ConnManager) *SessionS {
-	cgrCfg.SessionSCfg().SessionIndexes[utils.OriginID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
+	cgrCfg.SessionSCfg().SessionIndexes.Add(utils.OriginID) // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 
 	return &SessionS{
 		cgrCfg:        cgrCfg,
@@ -55,10 +55,10 @@ func NewSessionS(cgrCfg *config.CGRConfig,
 		biJClnts:      make(map[rpcclient.ClientConnector]string),
 		biJIDs:        make(map[string]*biJClient),
 		aSessions:     make(map[string]*Session),
-		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringMap),
+		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
 		aSessionsRIdx: make(map[string][]*riFieldNameVal),
 		pSessions:     make(map[string]*Session),
-		pSessionsIdx:  make(map[string]map[string]map[string]utils.StringMap),
+		pSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
 		pSessionsRIdx: make(map[string][]*riFieldNameVal),
 	}
 }
@@ -83,14 +83,14 @@ type SessionS struct {
 	aSessions map[string]*Session // group sessions per sessionId
 
 	aSIMux        sync.RWMutex                                     // protects aSessionsIdx
-	aSessionsIdx  map[string]map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue][cgrID]utils.StringMap[runID]sID
+	aSessionsIdx  map[string]map[string]map[string]utils.StringSet // map[fieldName]map[fieldValue][cgrID]utils.StringSet[runID]sID
 	aSessionsRIdx map[string][]*riFieldNameVal                     // reverse indexes for active sessions, used on remove
 
 	pSsMux    sync.RWMutex        // protects pSessions
 	pSessions map[string]*Session // group passive sessions based on cgrID
 
 	pSIMux        sync.RWMutex                                     // protects pSessionsIdx
-	pSessionsIdx  map[string]map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue][cgrID]utils.StringMap[runID]sID
+	pSessionsIdx  map[string]map[string]map[string]utils.StringSet // map[fieldName]map[fieldValue][cgrID]utils.StringSet[runID]sID
 	pSessionsRIdx map[string][]*riFieldNameVal                     // reverse indexes for passive sessions, used on remove
 }
 
@@ -857,15 +857,15 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 				fieldVal = utils.MetaEmpty
 			}
 			if _, hasFieldName := ssIndx[fieldName]; !hasFieldName { // Init it here
-				ssIndx[fieldName] = make(map[string]map[string]utils.StringMap)
+				ssIndx[fieldName] = make(map[string]map[string]utils.StringSet)
 			}
 			if _, hasFieldVal := ssIndx[fieldName][fieldVal]; !hasFieldVal {
-				ssIndx[fieldName][fieldVal] = make(map[string]utils.StringMap)
+				ssIndx[fieldName][fieldVal] = make(map[string]utils.StringSet)
 			}
 			if _, hasCGRID := ssIndx[fieldName][fieldVal][s.CGRID]; !hasCGRID {
-				ssIndx[fieldName][fieldVal][s.CGRID] = make(utils.StringMap)
+				ssIndx[fieldName][fieldVal][s.CGRID] = make(utils.StringSet)
 			}
-			ssIndx[fieldName][fieldVal][s.CGRID][sr.CD.RunID] = true
+			ssIndx[fieldName][fieldVal][s.CGRID].Add(sr.CD.RunID)
 
 			// reverse index
 			if _, hasIt := ssRIdx[s.CGRID]; !hasIt {
@@ -925,7 +925,7 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 		for _, fltr := range f.Rules {
 			fldName := strings.TrimPrefix(fltr.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) // remove ~req. prefix
 			if fltr.Type != utils.MetaString ||
-				!sS.cgrCfg.SessionSCfg().SessionIndexes.HasKey(fldName) {
+				!sS.cgrCfg.SessionSCfg().SessionIndexes.Has(fldName) {
 				unindexedFltr = append(unindexedFltr, fltr)
 				continue
 			}
@@ -937,7 +937,7 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 
 // getSessionIDsMatchingIndexes returns map[matchedFieldName]possibleMatchedFieldVal so we optimize further to avoid checking them
 func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
-	pSessions bool) ([]string, map[string]utils.StringMap) {
+	pSessions bool) ([]string, map[string]utils.StringSet) {
 	idxMux := &sS.aSIMux
 	ssIndx := sS.aSessionsIdx
 	if pSessions {
@@ -946,10 +946,10 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 	}
 	idxMux.RLock()
 	defer idxMux.RUnlock()
-	matchingSessions := make(map[string]utils.StringMap)
+	matchingSessions := make(map[string]utils.StringSet)
 	checkNr := 0
-	getMatchingIndexes := func(fltrName string, values []string) (matchingSessionsbyValue map[string]utils.StringMap) {
-		matchingSessionsbyValue = make(map[string]utils.StringMap)
+	getMatchingIndexes := func(fltrName string, values []string) (matchingSessionsbyValue map[string]utils.StringSet) {
+		matchingSessionsbyValue = make(map[string]utils.StringSet)
 		// fltrName = strings.TrimPrefix(fltrName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) //
 		if _, hasFldName := ssIndx[fltrName]; !hasFldName {
 			return
@@ -960,10 +960,10 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 			}
 			for cgrID, runIDs := range ssIndx[fltrName][fltrVal] {
 				if _, hasCGRID := matchingSessionsbyValue[cgrID]; !hasCGRID {
-					matchingSessionsbyValue[cgrID] = utils.NewStringMap()
+					matchingSessionsbyValue[cgrID] = utils.StringSet{}
 				}
 				for runID := range runIDs {
-					matchingSessionsbyValue[cgrID][runID] = true
+					matchingSessionsbyValue[cgrID].Add(runID)
 				}
 			}
 		}
@@ -983,14 +983,14 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 				continue
 			} else {
 				for runID := range runIDs {
-					if !matchedRunIDs.HasKey(runID) {
+					if !matchedRunIDs.Has(runID) {
 						delete(matchingSessions[cgrID], runID)
 					}
 				}
 			}
 		}
 		if len(matchingSessions) == 0 {
-			return make([]string, 0), make(map[string]utils.StringMap)
+			return make([]string, 0), make(map[string]utils.StringSet)
 		}
 	}
 	cgrIDs := []string{}
@@ -1044,7 +1044,7 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 		s.RLock()
 		runIDs := matchingSRuns[s.CGRID]
 		for _, sr := range s.SRuns {
-			if len(cgrIDs) != 0 && !runIDs.HasKey(sr.CD.RunID) {
+			if len(cgrIDs) != 0 && !runIDs.Has(sr.CD.RunID) {
 				continue
 			}
 			if pass(unindx, sr.Event) {
@@ -1099,7 +1099,7 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 		s.RLock()
 		runIDs := matchingSRuns[s.CGRID]
 		for _, sr := range s.SRuns {
-			if len(cgrIDs) != 0 && !runIDs.HasKey(sr.CD.RunID) {
+			if len(cgrIDs) != 0 && !runIDs.Has(sr.CD.RunID) {
 				continue
 			}
 			if pass(unindx, sr.Event) {

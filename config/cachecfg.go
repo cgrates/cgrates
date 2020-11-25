@@ -141,31 +141,24 @@ func (cCfg *CacheCfg) AddTmpCaches() {
 // AsMapInterface returns the config as a map[string]interface{}
 func (cCfg *CacheCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = make(map[string]interface{})
-	if cCfg.Partitions != nil {
-		partitions := make(map[string]interface{}, len(cCfg.Partitions))
-		for key, value := range cCfg.Partitions {
-			partitions[key] = value.AsMapInterface()
-		}
-		initialMP[utils.PartitionsCfg] = partitions
+	partitions := make(map[string]interface{}, len(cCfg.Partitions))
+	for key, value := range cCfg.Partitions {
+		partitions[key] = value.AsMapInterface()
 	}
+	initialMP[utils.PartitionsCfg] = partitions
 	if cCfg.ReplicationConns != nil {
-		replicationConns := make([]string, len(cCfg.ReplicationConns))
-		for i, item := range cCfg.ReplicationConns {
-			replicationConns[i] = item
-		}
-		initialMP[utils.RplConnsCfg] = replicationConns
+		initialMP[utils.RplConnsCfg] = cCfg.ReplicationConns
 	}
 	return
 }
 
 // Clone returns a deep copy of CacheCfg
 func (cCfg CacheCfg) Clone() (cln *CacheCfg) {
-	cln = new(CacheCfg)
-	if cCfg.Partitions != nil {
-		cln.Partitions = make(map[string]*CacheParamCfg)
-		for key, par := range cCfg.Partitions {
-			cln.Partitions[key] = par.Clone()
-		}
+	cln = &CacheCfg{
+		Partitions: make(map[string]*CacheParamCfg),
+	}
+	for key, par := range cCfg.Partitions {
+		cln.Partitions[key] = par.Clone()
 	}
 	if cCfg.ReplicationConns != nil {
 		cln.ReplicationConns = make([]string, len(cCfg.ReplicationConns))

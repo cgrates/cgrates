@@ -34,7 +34,7 @@ func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
 	ldrS = &LoaderService{ldrs: make(map[string]*Loader)}
 	for _, ldrCfg := range ldrsCfg {
 		if ldrCfg.Enabled {
-			ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, filterS, connMgr, ldrCfg.CacheSConns)
+			ldrS.ldrs[ldrCfg.ID] = NewLoader(dm, ldrCfg, timezone, filterS, connMgr, ldrCfg.CacheSConns)
 		}
 	}
 	return
@@ -141,7 +141,7 @@ func (ldrS *LoaderService) Reload(dm *engine.DataManager, ldrsCfg []*config.Load
 	ldrS.ldrs = make(map[string]*Loader)
 	for _, ldrCfg := range ldrsCfg {
 		if ldrCfg.Enabled {
-			ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, filterS, connMgr, ldrCfg.CacheSConns)
+			ldrS.ldrs[ldrCfg.ID] = NewLoader(dm, ldrCfg, timezone, filterS, connMgr, ldrCfg.CacheSConns)
 		}
 	}
 	ldrS.Unlock()

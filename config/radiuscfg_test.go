@@ -89,7 +89,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 	if cfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = cfg.radiusAgentCfg.loadFromJsonCfg(cfgJSON, cfg.generalCfg.RSRSep); err != nil {
+	} else if err = cfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, cfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfg.radiusAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.radiusAgentCfg))
@@ -122,7 +122,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.radiusAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsonCfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.radiusAgentCfg.RequestProcessors[0].ID, expected.RequestProcessors[0].ID) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(jsonCfg.radiusAgentCfg.RequestProcessors[0].ID),
@@ -141,7 +141,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.radiusAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -176,10 +176,10 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		utils.ListenNetCfg:  "udp",
 		utils.ListenAuthCfg: "127.0.0.1:1816",
 		utils.ListenAcctCfg: "127.0.0.1:1892",
-		utils.ClientSecretsCfg: map[string]interface{}{
+		utils.ClientSecretsCfg: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		},
-		utils.ClientDictionariesCfg: map[string]interface{}{
+		utils.ClientDictionariesCfg: map[string]string{
 			utils.MetaDefault: "/usr/share/cgrates/",
 		},
 		utils.SessionSConnsCfg: []string{"*conn1", "*conn2"},
@@ -213,10 +213,10 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 		utils.ListenNetCfg:  "udp",
 		utils.ListenAuthCfg: "127.0.0.1:1812",
 		utils.ListenAcctCfg: "127.0.0.1:1813",
-		utils.ClientSecretsCfg: map[string]interface{}{
+		utils.ClientSecretsCfg: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		},
-		utils.ClientDictionariesCfg: map[string]interface{}{
+		utils.ClientDictionariesCfg: map[string]string{
 			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
 		},
 		utils.SessionSConnsCfg:     []string{"*internal"},
@@ -226,5 +226,53 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.radiusAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestRadiusAgentCfgClone(t *testing.T) {
+	ban := &RadiusAgentCfg{
+		Enabled:            true,
+		ListenNet:          "udp",
+		ListenAuth:         "127.0.0.1:1812",
+		ListenAcct:         "127.0.0.1:1813",
+		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
+		ClientDictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
+		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID:            "OutboundAUTHDryRun",
+				Filters:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
+				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
+				Timezone:      utils.EmptyString,
+				Tenant:        NewRSRParsersMustCompile("~*req.CGRID", utils.INFIELD_SEP),
+				RequestFields: []*FCTemplate{},
+				ReplyFields: []*FCTemplate{
+					{
+						Tag:       "Allow",
+						Path:      "*rep.response.Allow",
+						Type:      utils.META_CONSTANT,
+						Value:     NewRSRParsersMustCompile("1", utils.INFIELD_SEP),
+						Mandatory: true,
+						Layout:    time.RFC3339,
+					},
+				},
+			},
+		},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.SessionSConns[1] = ""; ban.SessionSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.RequestProcessors[0].ID = ""; ban.RequestProcessors[0].ID != "OutboundAUTHDryRun" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ClientSecrets[utils.MetaDefault] = ""; ban.ClientSecrets[utils.MetaDefault] != "CGRateS.org" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ClientDictionaries[utils.MetaDefault] = ""; ban.ClientDictionaries[utils.MetaDefault] != "/usr/share/cgrates/radius/dict/" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
