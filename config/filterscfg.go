@@ -19,18 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
+// FilterSCfg the filters config section
 type FilterSCfg struct {
 	StatSConns     []string
 	ResourceSConns []string
 	ApierSConns    []string
 }
 
-func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
+func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -38,10 +37,9 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 		fSCfg.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
 		for idx, connID := range *jsnCfg.Stats_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			fSCfg.StatSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				fSCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
-			} else {
-				fSCfg.StatSConns[idx] = connID
 			}
 		}
 	}
@@ -49,10 +47,9 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 		fSCfg.ResourceSConns = make([]string, len(*jsnCfg.Resources_conns))
 		for idx, connID := range *jsnCfg.Resources_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			fSCfg.ResourceSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				fSCfg.ResourceSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
-			} else {
-				fSCfg.ResourceSConns[idx] = connID
 			}
 		}
 	}
@@ -60,25 +57,24 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 		fSCfg.ApierSConns = make([]string, len(*jsnCfg.Apiers_conns))
 		for idx, connID := range *jsnCfg.Apiers_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			fSCfg.ApierSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				fSCfg.ApierSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
-			} else {
-				fSCfg.ApierSConns[idx] = connID
 			}
 		}
 	}
 	return
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = make(map[string]interface{})
 	if fSCfg.StatSConns != nil {
 		statSConns := make([]string, len(fSCfg.StatSConns))
 		for i, item := range fSCfg.StatSConns {
+			statSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
-				statSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS)
-			} else {
-				statSConns[i] = item
+				statSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.StatSConnsCfg] = statSConns
@@ -86,10 +82,9 @@ func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if fSCfg.ResourceSConns != nil {
 		resourceSConns := make([]string, len(fSCfg.ResourceSConns))
 		for i, item := range fSCfg.ResourceSConns {
+			resourceSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources) {
-				resourceSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources)
-			} else {
-				resourceSConns[i] = item
+				resourceSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.ResourceSConnsCfg] = resourceSConns
@@ -97,13 +92,36 @@ func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if fSCfg.ApierSConns != nil {
 		apierConns := make([]string, len(fSCfg.ApierSConns))
 		for i, item := range fSCfg.ApierSConns {
+			apierConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier) {
-				apierConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaApier)
-			} else {
-				apierConns[i] = item
+				apierConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.ApierSConnsCfg] = apierConns
+	}
+	return
+}
+
+// Clone returns a deep copy of FilterSCfg
+func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
+	cln = new(FilterSCfg)
+	if fSCfg.StatSConns != nil {
+		cln.StatSConns = make([]string, len(fSCfg.StatSConns))
+		for i, con := range fSCfg.StatSConns {
+			cln.StatSConns[i] = con
+		}
+	}
+	if fSCfg.ResourceSConns != nil {
+		cln.ResourceSConns = make([]string, len(fSCfg.ResourceSConns))
+		for i, con := range fSCfg.ResourceSConns {
+			cln.ResourceSConns[i] = con
+		}
+	}
+	if fSCfg.ApierSConns != nil {
+		cln.ApierSConns = make([]string, len(fSCfg.ApierSConns))
+		for i, con := range fSCfg.ApierSConns {
+			cln.ApierSConns[i] = con
+		}
 	}
 	return
 }

@@ -183,7 +183,6 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 		ID:               "RP1",
 		FilterIDs:        []string{"*string:~*req.Subject:1001"},
 		Weight:           0,
-		ConnectFee:       0.1,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
 		MinCost:          0.1,
@@ -196,9 +195,9 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 				Weight:    0,
 				IntervalRates: []*engine.IntervalRate{
 					{
-						Value:     0.12,
-						Unit:      time.Minute,
-						Increment: time.Minute,
+						RecurrentFee: 0.12,
+						Unit:         time.Minute,
+						Increment:    time.Minute,
 					},
 				},
 				Blocker: false,
@@ -209,9 +208,9 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 				Weight:    10,
 				IntervalRates: []*engine.IntervalRate{
 					{
-						Value:     0.06,
-						Unit:      time.Minute,
-						Increment: time.Second,
+						RecurrentFee: 0.06,
+						Unit:         time.Minute,
+						Increment:    time.Second,
 					},
 				},
 				Blocker: false,

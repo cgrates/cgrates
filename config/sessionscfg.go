@@ -20,13 +20,12 @@ package config
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Returns the first cached default value for a FreeSWITCHAgent connection
+// NewDfltFsConnConfig returns the first cached default value for a FreeSWITCHAgent connection
 func NewDfltFsConnConfig() *FsConnCfg {
 	if dfltFsConnConfig == nil {
 		return new(FsConnCfg) // No defaults, most probably we are building the defaults now
@@ -35,7 +34,7 @@ func NewDfltFsConnConfig() *FsConnCfg {
 	return &dfltVal
 }
 
-// One connection to FreeSWITCH server
+// FsConnCfg one connection to FreeSWITCH server
 type FsConnCfg struct {
 	Address    string
 	Password   string
@@ -43,27 +42,28 @@ type FsConnCfg struct {
 	Alias      string
 }
 
-func (self *FsConnCfg) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
+func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Address != nil {
-		self.Address = *jsnCfg.Address
+		fs.Address = *jsnCfg.Address
 	}
 	if jsnCfg.Password != nil {
-		self.Password = *jsnCfg.Password
+		fs.Password = *jsnCfg.Password
 	}
 	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
+		fs.Reconnects = *jsnCfg.Reconnects
 	}
-	self.Alias = self.Address
+	fs.Alias = fs.Address
 	if jsnCfg.Alias != nil && *jsnCfg.Alias != "" {
-		self.Alias = *jsnCfg.Alias
+		fs.Alias = *jsnCfg.Alias
 	}
 
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (fs *FsConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.AddressCfg:    fs.Address,
@@ -73,6 +73,17 @@ func (fs *FsConnCfg) AsMapInterface() map[string]interface{} {
 	}
 }
 
+// Clone returns a deep copy of AsteriskAgentCfg
+func (fs FsConnCfg) Clone() *FsConnCfg {
+	return &FsConnCfg{
+		Address:    fs.Address,
+		Password:   fs.Password,
+		Reconnects: fs.Reconnects,
+		Alias:      fs.Alias,
+	}
+}
+
+// SessionSCfg is the config section for SessionS
 type SessionSCfg struct {
 	Enabled             bool
 	ListenBijson        string
@@ -92,7 +103,7 @@ type SessionSCfg struct {
 	SessionTTLLastUsed  *time.Duration
 	SessionTTLUsage     *time.Duration
 	SessionTTLLastUsage *time.Duration
-	SessionIndexes      utils.StringMap
+	SessionIndexes      utils.StringSet
 	ClientProtocol      float64
 	ChannelSyncInterval time.Duration
 	TerminateAttempts   int
@@ -102,7 +113,7 @@ type SessionSCfg struct {
 	STIRCfg             *STIRcfg
 }
 
-func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
+func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -116,10 +127,9 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.ChargerSConns = make([]string, len(*jsnCfg.Chargers_conns))
 		for idx, connID := range *jsnCfg.Chargers_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			scfg.ChargerSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				scfg.ChargerSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
-			} else {
-				scfg.ChargerSConns[idx] = connID
 			}
 		}
 	}
@@ -127,10 +137,9 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.RALsConns = make([]string, len(*jsnCfg.Rals_conns))
 		for idx, connID := range *jsnCfg.Rals_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			scfg.RALsConns[idx] = connID
 			if connID == utils.MetaInternal {
 				scfg.RALsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
-			} else {
-				scfg.RALsConns[idx] = connID
 			}
 		}
 	}
@@ -138,10 +147,9 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.ResSConns = make([]string, len(*jsnCfg.Resources_conns))
 		for idx, connID := range *jsnCfg.Resources_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			scfg.ResSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				scfg.ResSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
-			} else {
-				scfg.ResSConns[idx] = connID
 			}
 		}
 	}
@@ -149,10 +157,9 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.ThreshSConns = make([]string, len(*jsnCfg.Thresholds_conns))
 		for idx, connID := range *jsnCfg.Thresholds_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			scfg.ThreshSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				scfg.ThreshSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
-			} else {
-				scfg.ThreshSConns[idx] = connID
 			}
 		}
 	}
@@ -160,10 +167,9 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
 		for idx, connID := range *jsnCfg.Stats_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			scfg.StatSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				scfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
-			} else {
-				scfg.StatSConns[idx] = connID
 			}
 		}
 	}
@@ -171,10 +177,9 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.RouteSConns = make([]string, len(*jsnCfg.Routes_conns))
 		for idx, connID := range *jsnCfg.Routes_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			scfg.RouteSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				scfg.RouteSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)
-			} else {
-				scfg.RouteSConns[idx] = connID
 			}
 		}
 	}
@@ -182,10 +187,9 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.AttrSConns = make([]string, len(*jsnCfg.Attributes_conns))
 		for idx, connID := range *jsnCfg.Attributes_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			scfg.AttrSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				scfg.AttrSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			} else {
-				scfg.AttrSConns[idx] = connID
 			}
 		}
 	}
@@ -193,17 +197,15 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.CDRsConns = make([]string, len(*jsnCfg.Cdrs_conns))
 		for idx, connID := range *jsnCfg.Cdrs_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			scfg.CDRsConns[idx] = connID
 			if connID == utils.MetaInternal {
 				scfg.CDRsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
-			} else {
-				scfg.CDRsConns[idx] = connID
 			}
 		}
 	}
 	if jsnCfg.Replication_conns != nil {
 		scfg.ReplicationConns = make([]string, len(*jsnCfg.Replication_conns))
 		for idx, connID := range *jsnCfg.Replication_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if connID == utils.MetaInternal {
 				return fmt.Errorf("Replication connection ID needs to be different than *internal")
 			}
@@ -224,35 +226,35 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Session_ttl_max_delay != nil {
-		if maxTTLDelay, err := utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_max_delay); err != nil {
+		var maxTTLDelay time.Duration
+		if maxTTLDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_max_delay); err != nil {
 			return err
-		} else {
-			scfg.SessionTTLMaxDelay = &maxTTLDelay
 		}
+		scfg.SessionTTLMaxDelay = &maxTTLDelay
 	}
 	if jsnCfg.Session_ttl_last_used != nil {
-		if sessionTTLLastUsed, err := utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_used); err != nil {
+		var sessionTTLLastUsed time.Duration
+		if sessionTTLLastUsed, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_used); err != nil {
 			return err
-		} else {
-			scfg.SessionTTLLastUsed = &sessionTTLLastUsed
 		}
+		scfg.SessionTTLLastUsed = &sessionTTLLastUsed
 	}
 	if jsnCfg.Session_ttl_usage != nil {
-		if sessionTTLUsage, err := utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_usage); err != nil {
+		var sessionTTLUsage time.Duration
+		if sessionTTLUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_usage); err != nil {
 			return err
-		} else {
-			scfg.SessionTTLUsage = &sessionTTLUsage
 		}
+		scfg.SessionTTLUsage = &sessionTTLUsage
 	}
 	if jsnCfg.Session_ttl_last_usage != nil {
-		if sessionTTLLastUsage, err := utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_usage); err != nil {
+		var sessionTTLLastUsage time.Duration
+		if sessionTTLLastUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_usage); err != nil {
 			return err
-		} else {
-			scfg.SessionTTLLastUsage = &sessionTTLLastUsage
 		}
+		scfg.SessionTTLLastUsage = &sessionTTLLastUsage
 	}
 	if jsnCfg.Session_indexes != nil {
-		scfg.SessionIndexes = utils.StringMapFromSlice(*jsnCfg.Session_indexes)
+		scfg.SessionIndexes = utils.NewStringSet(*jsnCfg.Session_indexes)
 	}
 	if jsnCfg.Client_protocol != nil {
 		scfg.ClientProtocol = *jsnCfg.Client_protocol
@@ -277,38 +279,37 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.SchedulerConns = make([]string, len(*jsnCfg.Scheduler_conns))
 		for idx, connID := range *jsnCfg.Scheduler_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			scfg.SchedulerConns[idx] = connID
 			if connID == utils.MetaInternal {
 				scfg.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
-			} else {
-				scfg.SchedulerConns[idx] = connID
 			}
 		}
 	}
 	return scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir)
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:           scfg.Enabled,
-		utils.ListenBijsonCfg:      scfg.ListenBijson,
-		utils.ReplicationConnsCfg:  scfg.ReplicationConns,
-		utils.StoreSCostsCfg:       scfg.StoreSCosts,
-		utils.SessionIndexesCfg:    scfg.SessionIndexes.Slice(),
-		utils.ClientProtocolCfg:    scfg.ClientProtocol,
-		utils.TerminateAttemptsCfg: scfg.TerminateAttempts,
-		utils.AlterableFieldsCfg:   scfg.AlterableFields.AsSlice(),
-		utils.STIRCfg:              scfg.STIRCfg.AsMapInterface(),
-		utils.MinDurLowBalanceCfg:  "0",
+		utils.EnabledCfg:             scfg.Enabled,
+		utils.ListenBijsonCfg:        scfg.ListenBijson,
+		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
+		utils.StoreSCostsCfg:         scfg.StoreSCosts,
+		utils.SessionIndexesCfg:      scfg.SessionIndexes.AsSlice(),
+		utils.ClientProtocolCfg:      scfg.ClientProtocol,
+		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
+		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
+		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
+		utils.MinDurLowBalanceCfg:    "0",
+		utils.ChannelSyncIntervalCfg: "0",
+		utils.DebitIntervalCfg:       "0",
+		utils.SessionTTLCfg:          "0",
 	}
 	if scfg.DebitInterval != 0 {
 		initialMP[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
-	} else if scfg.DebitInterval == 0 {
-		initialMP[utils.DebitIntervalCfg] = "0"
 	}
 	if scfg.SessionTTL != 0 {
 		initialMP[utils.SessionTTLCfg] = scfg.SessionTTL.String()
-	} else if scfg.SessionTTL == 0 {
-		initialMP[utils.SessionTTLCfg] = "0"
 	}
 	if scfg.SessionTTLMaxDelay != nil {
 		initialMP[utils.SessionTTLMaxDelayCfg] = scfg.SessionTTLMaxDelay.String()
@@ -324,8 +325,6 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	}
 	if scfg.ChannelSyncInterval != 0 {
 		initialMP[utils.ChannelSyncIntervalCfg] = scfg.ChannelSyncInterval.String()
-	} else if scfg.ChannelSyncInterval == 0 {
-		initialMP[utils.ChannelSyncIntervalCfg] = "0"
 	}
 	if scfg.MinDurLowBalance != 0 {
 		initialMP[utils.MinDurLowBalanceCfg] = scfg.MinDurLowBalance.String()
@@ -333,10 +332,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if scfg.ChargerSConns != nil {
 		chargerSConns := make([]string, len(scfg.ChargerSConns))
 		for i, item := range scfg.ChargerSConns {
+			chargerSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers) {
-				chargerSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaChargers)
-			} else {
-				chargerSConns[i] = item
+				chargerSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.ChargerSConnsCfg] = chargerSConns
@@ -344,10 +342,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if scfg.RALsConns != nil {
 		RALsConns := make([]string, len(scfg.RALsConns))
 		for i, item := range scfg.RALsConns {
+			RALsConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
-				RALsConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaResponder)
-			} else {
-				RALsConns[i] = item
+				RALsConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.RALsConnsCfg] = RALsConns
@@ -355,11 +352,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if scfg.ResSConns != nil {
 		resSConns := make([]string, len(scfg.ResSConns))
 		for i, item := range scfg.ResSConns {
-			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
-			if item == buf {
-				resSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaResources)
-			} else {
-				resSConns[i] = item
+			resSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources) {
+				resSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.ResourceSConnsCfg] = resSConns
@@ -367,11 +362,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if scfg.ThreshSConns != nil {
 		threshSConns := make([]string, len(scfg.ThreshSConns))
 		for i, item := range scfg.ThreshSConns {
-			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
-			if item == buf {
-				threshSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaThresholds)
-			} else {
-				threshSConns[i] = item
+			threshSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+				threshSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.ThresholdSConnsCfg] = threshSConns
@@ -379,11 +372,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if scfg.StatSConns != nil {
 		statSConns := make([]string, len(scfg.StatSConns))
 		for i, item := range scfg.StatSConns {
-			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
-			if item == buf {
-				statSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaStatS)
-			} else {
-				statSConns[i] = item
+			statSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+				statSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.StatSConnsCfg] = statSConns
@@ -391,11 +382,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if scfg.RouteSConns != nil {
 		routesConns := make([]string, len(scfg.RouteSConns))
 		for i, item := range scfg.RouteSConns {
-			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)
-			if item == buf {
-				routesConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaRoutes)
-			} else {
-				routesConns[i] = item
+			routesConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes) {
+				routesConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.RouteSConnsCfg] = routesConns
@@ -403,11 +392,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if scfg.AttrSConns != nil {
 		attrSConns := make([]string, len(scfg.AttrSConns))
 		for i, item := range scfg.AttrSConns {
-			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			if item == buf {
-				attrSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaAttributes)
-			} else {
-				attrSConns[i] = item
+			attrSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
+				attrSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.AttributeSConnsCfg] = attrSConns
@@ -415,11 +402,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if scfg.CDRsConns != nil {
 		CDRsConns := make([]string, len(scfg.CDRsConns))
 		for i, item := range scfg.CDRsConns {
-			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
-			if item == buf {
-				CDRsConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaCDRs)
-			} else {
-				CDRsConns[i] = item
+			CDRsConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
+				CDRsConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.CDRsConnsCfg] = CDRsConns
@@ -427,11 +412,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if scfg.SchedulerConns != nil {
 		schedulerConns := make([]string, len(scfg.SchedulerConns))
 		for i, item := range scfg.SchedulerConns {
-			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
-			if item == buf {
-				schedulerConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaScheduler)
-			} else {
-				schedulerConns[i] = item
+			schedulerConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
+				schedulerConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.SchedulerConnsCfg] = schedulerConns
@@ -439,6 +422,101 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
+// Clone returns a deep copy of SessionSCfg
+func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
+	cln = &SessionSCfg{
+		Enabled:             scfg.Enabled,
+		ListenBijson:        scfg.ListenBijson,
+		DebitInterval:       scfg.DebitInterval,
+		StoreSCosts:         scfg.StoreSCosts,
+		SessionTTL:          scfg.SessionTTL,
+		ClientProtocol:      scfg.ClientProtocol,
+		ChannelSyncInterval: scfg.ChannelSyncInterval,
+		TerminateAttempts:   scfg.TerminateAttempts,
+		MinDurLowBalance:    scfg.MinDurLowBalance,
+
+		SessionIndexes:  scfg.SessionIndexes.Clone(),
+		AlterableFields: scfg.AlterableFields.Clone(),
+		STIRCfg:         scfg.STIRCfg.Clone(),
+	}
+	if scfg.SessionTTLMaxDelay != nil {
+		cln.SessionTTLMaxDelay = utils.DurationPointer(*scfg.SessionTTLMaxDelay)
+	}
+	if scfg.SessionTTLLastUsed != nil {
+		cln.SessionTTLLastUsed = utils.DurationPointer(*scfg.SessionTTLLastUsed)
+	}
+	if scfg.SessionTTLUsage != nil {
+		cln.SessionTTLUsage = utils.DurationPointer(*scfg.SessionTTLUsage)
+	}
+	if scfg.SessionTTLLastUsage != nil {
+		cln.SessionTTLLastUsage = utils.DurationPointer(*scfg.SessionTTLLastUsage)
+	}
+
+	if scfg.ChargerSConns != nil {
+		cln.ChargerSConns = make([]string, len(scfg.ChargerSConns))
+		for i, con := range scfg.ChargerSConns {
+			cln.ChargerSConns[i] = con
+		}
+	}
+	if scfg.RALsConns != nil {
+		cln.RALsConns = make([]string, len(scfg.RALsConns))
+		for i, con := range scfg.RALsConns {
+			cln.RALsConns[i] = con
+		}
+	}
+	if scfg.ResSConns != nil {
+		cln.ResSConns = make([]string, len(scfg.ResSConns))
+		for i, con := range scfg.ResSConns {
+			cln.ResSConns[i] = con
+		}
+	}
+	if scfg.ThreshSConns != nil {
+		cln.ThreshSConns = make([]string, len(scfg.ThreshSConns))
+		for i, con := range scfg.ThreshSConns {
+			cln.ThreshSConns[i] = con
+		}
+	}
+	if scfg.StatSConns != nil {
+		cln.StatSConns = make([]string, len(scfg.StatSConns))
+		for i, con := range scfg.StatSConns {
+			cln.StatSConns[i] = con
+		}
+	}
+	if scfg.RouteSConns != nil {
+		cln.RouteSConns = make([]string, len(scfg.RouteSConns))
+		for i, con := range scfg.RouteSConns {
+			cln.RouteSConns[i] = con
+		}
+	}
+	if scfg.AttrSConns != nil {
+		cln.AttrSConns = make([]string, len(scfg.AttrSConns))
+		for i, con := range scfg.AttrSConns {
+			cln.AttrSConns[i] = con
+		}
+	}
+	if scfg.CDRsConns != nil {
+		cln.CDRsConns = make([]string, len(scfg.CDRsConns))
+		for i, con := range scfg.CDRsConns {
+			cln.CDRsConns[i] = con
+		}
+	}
+	if scfg.ReplicationConns != nil {
+		cln.ReplicationConns = make([]string, len(scfg.ReplicationConns))
+		for i, con := range scfg.ReplicationConns {
+			cln.ReplicationConns[i] = con
+		}
+	}
+	if scfg.SchedulerConns != nil {
+		cln.SchedulerConns = make([]string, len(scfg.SchedulerConns))
+		for i, con := range scfg.SchedulerConns {
+			cln.SchedulerConns[i] = con
+		}
+	}
+
+	return
+}
+
+// FsAgentCfg the config section that describes the FreeSWITCH Agent
 type FsAgentCfg struct {
 	Enabled             bool
 	SessionSConns       []string
@@ -452,7 +530,7 @@ type FsAgentCfg struct {
 	EventSocketConns    []*FsConnCfg
 }
 
-func (fscfg *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
+func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -464,10 +542,9 @@ func (fscfg *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		fscfg.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for idx, connID := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			fscfg.SessionSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				fscfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			} else {
-				fscfg.SessionSConns[idx] = connID
 			}
 		}
 	}
@@ -501,12 +578,13 @@ func (fscfg *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		fscfg.EventSocketConns = make([]*FsConnCfg, len(*jsnCfg.Event_socket_conns))
 		for idx, jsnConnCfg := range *jsnCfg.Event_socket_conns {
 			fscfg.EventSocketConns[idx] = NewDfltFsConnConfig()
-			fscfg.EventSocketConns[idx].loadFromJsonCfg(jsnConnCfg)
+			fscfg.EventSocketConns[idx].loadFromJSONCfg(jsnConnCfg)
 		}
 	}
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:             fscfg.Enabled,
@@ -519,21 +597,15 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 	if fscfg.SessionSConns != nil {
 		sessionSConns := make([]string, len(fscfg.SessionSConns))
 		for i, item := range fscfg.SessionSConns {
-			buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			if item == buf {
-				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
-			} else {
-				sessionSConns[i] = item
+			sessionSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
 	if fscfg.ExtraFields != nil {
-		values := make([]string, len(fscfg.ExtraFields))
-		for i, item := range fscfg.ExtraFields {
-			values[i] = item.Rules
-		}
-		initialMP[utils.ExtraFieldsCfg] = strings.Join(values, separator)
+		initialMP[utils.ExtraFieldsCfg] = fscfg.ExtraFields.GetRule(separator)
 	}
 
 	if fscfg.MaxWaitConnection != 0 {
@@ -551,16 +623,34 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 	return
 }
 
-// Returns the first cached default value for a FreeSWITCHAgent connection
-func NewDfltKamConnConfig() *KamConnCfg {
-	if dfltKamConnConfig == nil {
-		return new(KamConnCfg) // No defaults, most probably we are building the defaults now
+// Clone returns a deep copy of FsAgentCfg
+func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
+	cln = &FsAgentCfg{
+		Enabled:             fscfg.Enabled,
+		SubscribePark:       fscfg.SubscribePark,
+		CreateCdr:           fscfg.CreateCdr,
+		ExtraFields:         fscfg.ExtraFields.Clone(),
+		LowBalanceAnnFile:   fscfg.LowBalanceAnnFile,
+		EmptyBalanceContext: fscfg.EmptyBalanceContext,
+		EmptyBalanceAnnFile: fscfg.EmptyBalanceAnnFile,
+		MaxWaitConnection:   fscfg.MaxWaitConnection,
 	}
-	dfltVal := *dfltKamConnConfig
-	return &dfltVal
+	if fscfg.SessionSConns != nil {
+		cln.SessionSConns = make([]string, len(fscfg.SessionSConns))
+		for i, con := range fscfg.SessionSConns {
+			cln.SessionSConns[i] = con
+		}
+	}
+	if fscfg.EventSocketConns != nil {
+		cln.EventSocketConns = make([]*FsConnCfg, len(fscfg.EventSocketConns))
+		for i, req := range fscfg.EventSocketConns {
+			cln.EventSocketConns[i] = req.Clone()
+		}
+	}
+	return
 }
 
-// Uses stored defaults so we can pre-populate by loading from JSON config
+// NewDefaultAsteriskConnCfg is uses stored defaults so we can pre-populate by loading from JSON config
 func NewDefaultAsteriskConnCfg() *AsteriskConnCfg {
 	if dfltAstConnCfg == nil {
 		return new(AsteriskConnCfg) // No defaults, most probably we are building the defaults now
@@ -569,6 +659,7 @@ func NewDefaultAsteriskConnCfg() *AsteriskConnCfg {
 	return &dfltVal
 }
 
+// AsteriskConnCfg the config for a Asterisk connection
 type AsteriskConnCfg struct {
 	Alias           string
 	Address         string
@@ -578,7 +669,7 @@ type AsteriskConnCfg struct {
 	Reconnects      int
 }
 
-func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
+func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -603,6 +694,7 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.AliasCfg:           aConnCfg.Alias,
@@ -614,6 +706,19 @@ func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]interface{} {
 	}
 }
 
+// Clone returns a deep copy of AsteriskConnCfg
+func (aConnCfg AsteriskConnCfg) Clone() *AsteriskConnCfg {
+	return &AsteriskConnCfg{
+		Alias:           aConnCfg.Alias,
+		Address:         aConnCfg.Address,
+		User:            aConnCfg.User,
+		Password:        aConnCfg.Password,
+		ConnectAttempts: aConnCfg.ConnectAttempts,
+		Reconnects:      aConnCfg.Reconnects,
+	}
+}
+
+// AsteriskAgentCfg the config section that describes the Asterisk Agent
 type AsteriskAgentCfg struct {
 	Enabled       bool
 	SessionSConns []string
@@ -621,7 +726,7 @@ type AsteriskAgentCfg struct {
 	AsteriskConns []*AsteriskConnCfg
 }
 
-func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err error) {
+func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -632,10 +737,9 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		aCfg.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for idx, attrConn := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			aCfg.SessionSConns[idx] = attrConn
 			if attrConn == utils.MetaInternal {
 				aCfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			} else {
-				aCfg.SessionSConns[idx] = attrConn
 			}
 		}
 	}
@@ -647,12 +751,13 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		aCfg.AsteriskConns = make([]*AsteriskConnCfg, len(*jsnCfg.Asterisk_conns))
 		for i, jsnAConn := range *jsnCfg.Asterisk_conns {
 			aCfg.AsteriskConns[i] = NewDefaultAsteriskConnCfg()
-			aCfg.AsteriskConns[i].loadFromJsonCfg(jsnAConn)
+			aCfg.AsteriskConns[i].loadFromJSONCfg(jsnAConn)
 		}
 	}
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:   aCfg.Enabled,
@@ -668,13 +773,33 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}
 	if aCfg.SessionSConns != nil {
 		sessionSConns := make([]string, len(aCfg.SessionSConns))
 		for i, item := range aCfg.SessionSConns {
+			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
-			} else {
-				sessionSConns[i] = item
+				sessionSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
+	}
+	return
+}
+
+// Clone returns a deep copy of AsteriskAgentCfg
+func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
+	cln = &AsteriskAgentCfg{
+		Enabled:   aCfg.Enabled,
+		CreateCDR: aCfg.CreateCDR,
+	}
+	if aCfg.SessionSConns != nil {
+		cln.SessionSConns = make([]string, len(aCfg.SessionSConns))
+		for i, con := range aCfg.SessionSConns {
+			cln.SessionSConns[i] = con
+		}
+	}
+	if aCfg.AsteriskConns != nil {
+		cln.AsteriskConns = make([]*AsteriskConnCfg, len(aCfg.AsteriskConns))
+		for i, req := range aCfg.AsteriskConns {
+			cln.AsteriskConns[i] = req.Clone()
+		}
 	}
 	return
 }
@@ -712,21 +837,30 @@ func (stirCfg *STIRcfg) loadFromJSONCfg(jsnCfg *STIRJsonCfg) (err error) {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (stirCfg *STIRcfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.DefaultAttestCfg:  stirCfg.DefaultAttest,
-		utils.PublicKeyPathCfg:  stirCfg.PublicKeyPath,
-		utils.PrivateKeyPathCfg: stirCfg.PrivateKeyPath,
-		utils.AllowedAtestCfg:   stirCfg.AllowedAttest.AsSlice(),
+		utils.DefaultAttestCfg:      stirCfg.DefaultAttest,
+		utils.PublicKeyPathCfg:      stirCfg.PublicKeyPath,
+		utils.PrivateKeyPathCfg:     stirCfg.PrivateKeyPath,
+		utils.AllowedAtestCfg:       stirCfg.AllowedAttest.AsSlice(),
+		utils.PayloadMaxdurationCfg: "0",
 	}
-	var payloadMaxduration string
 	if stirCfg.PayloadMaxduration > 0 {
-		payloadMaxduration = stirCfg.PayloadMaxduration.String()
-	} else if stirCfg.PayloadMaxduration == 0 {
-		payloadMaxduration = "0"
-	} else {
-		payloadMaxduration = "-1"
+		initialMP[utils.PayloadMaxdurationCfg] = stirCfg.PayloadMaxduration.String()
+	} else if stirCfg.PayloadMaxduration < 0 {
+		initialMP[utils.PayloadMaxdurationCfg] = "-1"
 	}
-	initialMP[utils.PayloadMaxdurationCfg] = payloadMaxduration
 	return
+}
+
+// Clone returns a deep copy of STIRcfg
+func (stirCfg STIRcfg) Clone() *STIRcfg {
+	return &STIRcfg{
+		AllowedAttest:      stirCfg.AllowedAttest.Clone(),
+		PayloadMaxduration: stirCfg.PayloadMaxduration,
+		DefaultAttest:      stirCfg.DefaultAttest,
+		PublicKeyPath:      stirCfg.PublicKeyPath,
+		PrivateKeyPath:     stirCfg.PrivateKeyPath,
+	}
 }

@@ -592,8 +592,8 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	cfg.httpAgentCfg = HttpAgentCfgs{
-		&HttpAgentCfg{
+	cfg.httpAgentCfg = HTTPAgentCfgs{
+		&HTTPAgentCfg{
 			SessionSConns: []string{utils.MetaInternal},
 			RequestProcessors: []*RequestProcessor{
 				{
@@ -1115,7 +1115,7 @@ func TestConfigSanityDispatcherH(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.rpcConns = RpcConns{
+	cfg.rpcConns = RPCConns{
 		utils.MetaLocalHost: {},
 		"*conn1":            {},
 	}

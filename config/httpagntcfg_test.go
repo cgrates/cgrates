@@ -54,10 +54,10 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 			},
 		},
 	}
-	expected := HttpAgentCfgs{
+	expected := HTTPAgentCfgs{
 		{
 			ID:             "RandomID",
-			Url:            "/randomURL",
+			URL:            "/randomURL",
 			SessionSConns:  []string{"*internal:*sessions"},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
@@ -81,7 +81,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 	expected[0].RequestProcessors[0].ReplyFields[0].ComputePath()
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.httpAgentCfg.loadFromJsonCfg(cfgJSON, jsnCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsnCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsnCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(&expected, &jsnCfg.httpAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.httpAgentCfg))
@@ -158,10 +158,10 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 			},
 		},
 	}
-	expected := HttpAgentCfgs{
-		&HttpAgentCfg{
+	expected := HTTPAgentCfgs{
+		&HTTPAgentCfg{
 			ID:             "conecto1",
-			Url:            "/conecto",
+			URL:            "/conecto",
 			SessionSConns:  []string{utils.MetaLocalHost},
 			RequestPayload: utils.MetaUrl,
 			ReplyPayload:   utils.MetaXml,
@@ -203,9 +203,9 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 						Layout:    time.RFC3339,
 					}},
 				}},
-		}, &HttpAgentCfg{
+		}, &HTTPAgentCfg{
 			ID:             "conecto_xml",
-			Url:            "/conecto_xml",
+			URL:            "/conecto_xml",
 			SessionSConns:  []string{utils.MetaLocalHost},
 			RequestPayload: utils.MetaXml,
 			ReplyPayload:   utils.MetaXml,
@@ -222,7 +222,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 	expected[0].RequestProcessors[1].RequestFields[0].ComputePath()
 	if cfgJsn, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = cfgJsn.httpAgentCfg.loadFromJsonCfg(cfgJSON, cfgJsn.generalCfg.RSRSep); err != nil {
+	} else if err = cfgJsn.httpAgentCfg.loadFromJSONCfg(cfgJSON, cfgJsn.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfgJsn.httpAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJsn.httpAgentCfg))
@@ -247,9 +247,9 @@ func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 			},
 		},
 	}
-	expected := HttpAgentCfg{
+	expected := HTTPAgentCfg{
 		ID:             "conecto1",
-		Url:            "/conecto",
+		URL:            "/conecto",
 		SessionSConns:  []string{utils.MetaLocalHost},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
@@ -262,8 +262,8 @@ func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 			ReplyFields:   []*FCTemplate{},
 		}},
 	}
-	var httpcfg HttpAgentCfg
-	if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP); err != nil {
+	var httpcfg HTTPAgentCfg
+	if err = httpcfg.loadFromJSONCfg(jsnhttpCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
 		t.Errorf("Expected: %+v \n, received: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
@@ -343,7 +343,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.httpAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -358,7 +358,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase5(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err := jsonCfg.httpAgentCfg.loadFromJsonCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := jsonCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }
@@ -368,8 +368,8 @@ func TestHttpAgentCfgloadFromJsonCfgCase6(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	httpAgentCfg := new(HttpAgentCfg)
-	if err := httpAgentCfg.loadFromJsonCfg(nil, jsonCfg.generalCfg.RSRSep); err != nil {
+	httpAgentCfg := new(HTTPAgentCfg)
+	if err := httpAgentCfg.loadFromJSONCfg(nil, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }
@@ -387,14 +387,14 @@ func TestHttpAgentCfgloadFromJsonCfgCase7(t *testing.T) {
 			Id: utils.StringPointer("RandomID"),
 		},
 	}
-	expected := HttpAgentCfgs{
+	expected := HTTPAgentCfgs{
 		{
 			ID: "RandomID",
 		},
 	}
 	if jsnCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.httpAgentCfg.loadFromJsonCfg(cfgJSON, jsnCfg.generalCfg.RSRSep); err != nil {
+	} else if err = jsnCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsnCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(&expected, &jsnCfg.httpAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.httpAgentCfg))
@@ -402,9 +402,9 @@ func TestHttpAgentCfgloadFromJsonCfgCase7(t *testing.T) {
 }
 
 func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
-	initial := &HttpAgentCfg{
+	initial := &HTTPAgentCfg{
 		ID:             "conecto1",
-		Url:            "/conecto",
+		URL:            "/conecto",
 		SessionSConns:  []string{utils.MetaLocalHost},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
@@ -452,9 +452,9 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 		}},
 	},
 	}
-	expected := &HttpAgentCfg{
+	expected := &HTTPAgentCfg{
 		ID:             "conecto1",
-		Url:            "/conecto",
+		URL:            "/conecto",
 		SessionSConns:  []string{utils.MetaLocalHost},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
@@ -490,7 +490,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 	}
 	expected.RequestProcessors[0].ReplyFields[0].ComputePath()
 	expected.RequestProcessors[1].ReplyFields[0].ComputePath()
-	if err = initial.appendHttpAgntProcCfgs(proceses, utils.INFIELD_SEP); err != nil {
+	if err = initial.appendHTTPAgntProcCfgs(proceses, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, initial) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(initial))
@@ -561,5 +561,42 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.httpAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, recieved %+v", eMap, rcv)
+	}
+}
+
+func TestHTTPAgentCfgsClone(t *testing.T) {
+	ban := HTTPAgentCfgs{
+		{
+			ID:             "RandomID",
+			URL:            "/randomURL",
+			SessionSConns:  []string{"*internal:*sessions", "*conn1"},
+			RequestPayload: "*url",
+			ReplyPayload:   "*xml",
+			RequestProcessors: []*RequestProcessor{{
+				ID:            "OutboundAUTHDryRun",
+				Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
+				Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
+				RequestFields: []*FCTemplate{},
+				ReplyFields: []*FCTemplate{{
+					Tag:       "Allow",
+					Path:      "response.Allow",
+					Type:      "*constant",
+					Value:     NewRSRParsersMustCompile("1", utils.INFIELD_SEP),
+					Mandatory: true,
+					Layout:    time.RFC3339,
+				}},
+			}},
+		},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv[0].SessionSConns[1] = ""; ban[0].SessionSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv[0].RequestProcessors[0].ID = ""; ban[0].RequestProcessors[0].ID != "OutboundAUTHDryRun" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

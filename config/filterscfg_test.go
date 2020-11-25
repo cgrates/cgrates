@@ -37,7 +37,7 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.filterSCfg.loadFromJsonCfg(cfgJSONS); err != nil {
+	} else if err = jsnCfg.filterSCfg.loadFromJSONCfg(cfgJSONS); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.filterSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.filterSCfg))
@@ -77,5 +77,26 @@ func TestFilterSCfgAsMapInterface2(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.filterSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
+
+func TestFilterSCfgClone(t *testing.T) {
+	ban := &FilterSCfg{
+		StatSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		ResourceSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+		ApierSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier), "*conn1"},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ResourceSConns[1] = ""; ban.ResourceSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ApierSConns[1] = ""; ban.ApierSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

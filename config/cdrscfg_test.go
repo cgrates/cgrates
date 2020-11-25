@@ -54,7 +54,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.cdrsCfg.loadFromJsonCfg(jsonCfg); err != nil {
+	} else if err = jsnCfg.cdrsCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.cdrsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.cdrsCfg))
@@ -68,7 +68,7 @@ func TestExtraFieldsinloadFromJsonCfg(t *testing.T) {
 	expectedErrMessage := "emtpy RSRParser in rule: <>"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.cdrsCfg.loadFromJsonCfg(cfgJSON); err == nil || err.Error() != expectedErrMessage {
+	} else if err = jsonCfg.cdrsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expectedErrMessage {
 		t.Errorf("Expected %+v, received %+v", expectedErrMessage, err)
 	}
 }
@@ -138,5 +138,51 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.cdrsCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, recieved %+v", eMap, rcv)
+	}
+}
+
+func TestCdrsCfgClone(t *testing.T) {
+	ban := &CdrsCfg{
+		Enabled:          true,
+		StoreCdrs:        true,
+		SMCostRetries:    1,
+		ChargerSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
+		RaterConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
+		AttributeSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		SchedulerConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
+		OnlineCDRExports: []string{"randomVal"},
+		ExtraFields:      RSRParsers{},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.ChargerSConns[1] = ""; ban.ChargerSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.RaterConns[1] = ""; ban.RaterConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.AttributeSConns[1] = ""; ban.AttributeSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.SchedulerConns[1] = ""; ban.SchedulerConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.EEsConns[1] = ""; ban.EEsConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	if rcv.OnlineCDRExports[0] = ""; ban.OnlineCDRExports[0] != "randomVal" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

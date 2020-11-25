@@ -20,8 +20,8 @@ package config
 
 import "github.com/cgrates/cgrates/utils"
 
-// AttributeSCfg is the configuration of attribute service
-type TlsCfg struct {
+// TLSCfg is the configuration for tls
+type TLSCfg struct {
 	ServerCerificate string
 	ServerKey        string
 	ServerPolicy     int
@@ -31,7 +31,7 @@ type TlsCfg struct {
 	CaCertificate    string
 }
 
-func (tls *TlsCfg) loadFromJsonCfg(jsnCfg *TlsJsonCfg) (err error) {
+func (tls *TLSCfg) loadFromJSONCfg(jsnCfg *TlsJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -59,7 +59,8 @@ func (tls *TlsCfg) loadFromJsonCfg(jsnCfg *TlsJsonCfg) (err error) {
 	return
 }
 
-func (tls *TlsCfg) AsMapInterface() map[string]interface{} {
+// AsMapInterface returns the config as a map[string]interface{}
+func (tls *TLSCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.ServerCerificateCfg: tls.ServerCerificate,
 		utils.ServerKeyCfg:        tls.ServerKey,
@@ -70,4 +71,17 @@ func (tls *TlsCfg) AsMapInterface() map[string]interface{} {
 		utils.CaCertificateCfg:    tls.CaCertificate,
 	}
 
+}
+
+// Clone returns a deep copy of TLSCfg
+func (tls TLSCfg) Clone() *TLSCfg {
+	return &TLSCfg{
+		ServerCerificate: tls.ServerCerificate,
+		ServerKey:        tls.ServerKey,
+		ServerPolicy:     tls.ServerPolicy,
+		ServerName:       tls.ServerName,
+		ClientCerificate: tls.ClientCerificate,
+		ClientKey:        tls.ClientKey,
+		CaCertificate:    tls.CaCertificate,
+	}
 }

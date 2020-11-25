@@ -22,14 +22,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type HttpAgentCfgs []*HttpAgentCfg
+// HTTPAgentCfgs the config section for HTTP Agent
+type HTTPAgentCfgs []*HTTPAgentCfg
 
-func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg, separator string) (err error) {
-	if jsnHttpAgntCfg == nil {
+func (hcfgs *HTTPAgentCfgs) loadFromJSONCfg(jsnHTTPAgntCfg *[]*HttpAgentJsonCfg, separator string) (err error) {
+	if jsnHTTPAgntCfg == nil {
 		return nil
 	}
-	for _, jsnCfg := range *jsnHttpAgntCfg {
-		hac := new(HttpAgentCfg)
+	for _, jsnCfg := range *jsnHTTPAgntCfg {
+		hac := new(HTTPAgentCfg)
 		var haveID bool
 		if jsnCfg.Id != nil {
 			for _, val := range *hcfgs {
@@ -41,7 +42,7 @@ func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg,
 			}
 		}
 
-		if err := hac.loadFromJsonCfg(jsnCfg, separator); err != nil {
+		if err := hac.loadFromJSONCfg(jsnCfg, separator); err != nil {
 			return err
 		}
 		if !haveID {
@@ -51,7 +52,8 @@ func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg,
 	return nil
 }
 
-func (hcfgs HttpAgentCfgs) AsMapInterface(separator string) (mp []map[string]interface{}) {
+// AsMapInterface returns the config as a map[string]interface{}
+func (hcfgs HTTPAgentCfgs) AsMapInterface(separator string) (mp []map[string]interface{}) {
 	mp = make([]map[string]interface{}, len(hcfgs))
 	for i, item := range hcfgs {
 		mp[i] = item.AsMapInterface(separator)
@@ -59,16 +61,29 @@ func (hcfgs HttpAgentCfgs) AsMapInterface(separator string) (mp []map[string]int
 	return
 }
 
-type HttpAgentCfg struct {
+// Clone returns a deep copy of HTTPAgentCfgs
+func (hcfgs HTTPAgentCfgs) Clone() (cln HTTPAgentCfgs) {
+	if hcfgs == nil {
+		return
+	}
+	cln = make(HTTPAgentCfgs, len(hcfgs))
+	for i, h := range hcfgs {
+		cln[i] = h.Clone()
+	}
+	return
+}
+
+// HTTPAgentCfg the config for a HTTP Agent
+type HTTPAgentCfg struct {
 	ID                string // identifier for the agent, so we can update it's processors
-	Url               string
+	URL               string
 	SessionSConns     []string
 	RequestPayload    string
 	ReplyPayload      string
 	RequestProcessors []*RequestProcessor
 }
 
-func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separator string) (err error) {
+func (ha *HTTPAgentCfg) appendHTTPAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separator string) (err error) {
 	if hps == nil {
 		return
 	}
@@ -76,7 +91,7 @@ func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separ
 		rp := new(RequestProcessor)
 		var haveID bool
 		if reqProcJsn.ID != nil {
-			for _, rpSet := range ca.RequestProcessors {
+			for _, rpSet := range ha.RequestProcessors {
 				if rpSet.ID == *reqProcJsn.ID {
 					rp = rpSet // Will load data into the one set
 					haveID = true
@@ -88,58 +103,80 @@ func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separ
 			return
 		}
 		if !haveID {
-			ca.RequestProcessors = append(ca.RequestProcessors, rp)
+			ha.RequestProcessors = append(ha.RequestProcessors, rp)
 		}
 	}
 	return
 }
 
-func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator string) (err error) {
+func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Id != nil {
-		ca.ID = *jsnCfg.Id
+		ha.ID = *jsnCfg.Id
 	}
 	if jsnCfg.Url != nil {
-		ca.Url = *jsnCfg.Url
+		ha.URL = *jsnCfg.Url
 	}
 	if jsnCfg.Sessions_conns != nil {
-		ca.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		ha.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for idx, connID := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if connID == utils.MetaInternal {
-				ca.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+				ha.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			} else {
-				ca.SessionSConns[idx] = connID
+				ha.SessionSConns[idx] = connID
 			}
 		}
 	}
 	if jsnCfg.Request_payload != nil {
-		ca.RequestPayload = *jsnCfg.Request_payload
+		ha.RequestPayload = *jsnCfg.Request_payload
 	}
 	if jsnCfg.Reply_payload != nil {
-		ca.ReplyPayload = *jsnCfg.Reply_payload
+		ha.ReplyPayload = *jsnCfg.Reply_payload
 	}
-	if err = ca.appendHttpAgntProcCfgs(jsnCfg.Request_processors, separator); err != nil {
+	if err = ha.appendHTTPAgntProcCfgs(jsnCfg.Request_processors, separator); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (ca *HttpAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+// AsMapInterface returns the config as a map[string]interface{}
+func (ha *HTTPAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.IDCfg:             ca.ID,
-		utils.URLCfg:            ca.Url,
-		utils.SessionSConnsCfg:  ca.SessionSConns,
-		utils.RequestPayloadCfg: ca.RequestPayload,
-		utils.ReplyPayloadCfg:   ca.ReplyPayload,
+		utils.IDCfg:             ha.ID,
+		utils.URLCfg:            ha.URL,
+		utils.SessionSConnsCfg:  ha.SessionSConns,
+		utils.RequestPayloadCfg: ha.RequestPayload,
+		utils.ReplyPayloadCfg:   ha.ReplyPayload,
 	}
 
-	requestProcessors := make([]map[string]interface{}, len(ca.RequestProcessors))
-	for i, item := range ca.RequestProcessors {
+	requestProcessors := make([]map[string]interface{}, len(ha.RequestProcessors))
+	for i, item := range ha.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
 	initialMP[utils.RequestProcessorsCfg] = requestProcessors
+	return
+}
+
+// Clone returns a deep copy of HTTPAgentCfg
+func (ha HTTPAgentCfg) Clone() (cln *HTTPAgentCfg) {
+	cln = &HTTPAgentCfg{
+		ID:                ha.ID,
+		URL:               ha.URL,
+		RequestPayload:    ha.RequestPayload,
+		ReplyPayload:      ha.ReplyPayload,
+		RequestProcessors: make([]*RequestProcessor, len(ha.RequestProcessors)),
+	}
+	if ha.SessionSConns != nil {
+		cln.SessionSConns = make([]string, len(ha.SessionSConns))
+		for i, con := range ha.SessionSConns {
+			cln.SessionSConns[i] = con
+		}
+	}
+	for i, req := range ha.RequestProcessors {
+		cln.RequestProcessors[i] = req.Clone()
+	}
 	return
 }

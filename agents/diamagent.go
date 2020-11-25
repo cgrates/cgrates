@@ -126,7 +126,7 @@ func (da *DiameterAgent) handlers() diam.Handler {
 	settings := &sm.Settings{
 		OriginHost:       datatype.DiameterIdentity(da.cgrCfg.DiameterAgentCfg().OriginHost),
 		OriginRealm:      datatype.DiameterIdentity(da.cgrCfg.DiameterAgentCfg().OriginRealm),
-		VendorID:         datatype.Unsigned32(da.cgrCfg.DiameterAgentCfg().VendorId),
+		VendorID:         datatype.Unsigned32(da.cgrCfg.DiameterAgentCfg().VendorID),
 		ProductName:      datatype.UTF8String(da.cgrCfg.DiameterAgentCfg().ProductName),
 		FirmwareRevision: datatype.Unsigned32(utils.DIAMETER_FIRMWARE_REVISION),
 	}

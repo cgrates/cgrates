@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// General config section
+// GeneralCfg is the general config section
 type GeneralCfg struct {
 	NodeID           string        // Identifier for this engine instance
 	Logger           string        // dictates the way logs are displayed/stored
@@ -54,8 +54,8 @@ type GeneralCfg struct {
 	MaxParallelConns int    // the maximum number of connection used by the *parallel strategy
 }
 
-//loadFromJsonCfg loads General config from JsonCfg
-func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err error) {
+// loadFromJSONCfg loads General config from JsonCfg
+func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err error) {
 	if jsnGeneralCfg == nil {
 		return nil
 	}
@@ -151,6 +151,7 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.NodeIDCfg:           gencfg.NodeID,
@@ -172,41 +173,66 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.DigestEqualCfg:      gencfg.DigestEqual,
 		utils.RSRSepCfg:           gencfg.RSRSep,
 		utils.MaxParallelConnsCfg: gencfg.MaxParallelConns,
+		utils.LockingTimeoutCfg:   "0",
+		utils.FailedPostsTTLCfg:   "0",
+		utils.ConnectTimeoutCfg:   "0",
+		utils.ReplyTimeoutCfg:     "0",
+		utils.MinCallDurationCfg:  "0",
+		utils.MaxCallDurationCfg:  "0",
 	}
 
 	if gencfg.LockingTimeout != 0 {
 		initialMP[utils.LockingTimeoutCfg] = gencfg.LockingTimeout.String()
-	} else {
-		initialMP[utils.LockingTimeoutCfg] = "0"
 	}
 
 	if gencfg.FailedPostsTTL != 0 {
 		initialMP[utils.FailedPostsTTLCfg] = gencfg.FailedPostsTTL.String()
-	} else {
-		initialMP[utils.FailedPostsTTLCfg] = "0"
 	}
 
 	if gencfg.ConnectTimeout != 0 {
 		initialMP[utils.ConnectTimeoutCfg] = gencfg.ConnectTimeout.String()
-	} else {
-		initialMP[utils.ConnectTimeoutCfg] = "0"
 	}
 
 	if gencfg.ReplyTimeout != 0 {
 		initialMP[utils.ReplyTimeoutCfg] = gencfg.ReplyTimeout.String()
-	} else {
-		initialMP[utils.ReplyTimeoutCfg] = "0"
 	}
 
 	if gencfg.MinCallDuration != 0 {
 		initialMP[utils.MinCallDurationCfg] = gencfg.MinCallDuration.String()
-	} else if gencfg.MinCallDuration == 0 {
-		initialMP[utils.MinCallDurationCfg] = "0"
 	}
 	if gencfg.MaxCallDuration != 0 {
 		initialMP[utils.MaxCallDurationCfg] = gencfg.MaxCallDuration.String()
-	} else if gencfg.MaxCallDuration == 0 {
-		initialMP[utils.MaxCallDurationCfg] = "0"
 	}
 	return
+}
+
+// Clone returns a deep copy of GeneralCfg
+func (gencfg GeneralCfg) Clone() *GeneralCfg {
+	return &GeneralCfg{
+		NodeID:           gencfg.NodeID,
+		Logger:           gencfg.Logger,
+		LogLevel:         gencfg.LogLevel,
+		RoundingDecimals: gencfg.RoundingDecimals,
+		DBDataEncoding:   gencfg.DBDataEncoding,
+		TpExportPath:     gencfg.TpExportPath,
+		PosterAttempts:   gencfg.PosterAttempts,
+		FailedPostsDir:   gencfg.FailedPostsDir,
+		FailedPostsTTL:   gencfg.FailedPostsTTL,
+		DefaultReqType:   gencfg.DefaultReqType,
+		DefaultCategory:  gencfg.DefaultCategory,
+		DefaultTenant:    gencfg.DefaultTenant,
+		DefaultTimezone:  gencfg.DefaultTimezone,
+		DefaultCaching:   gencfg.DefaultCaching,
+		ConnectAttempts:  gencfg.ConnectAttempts,
+		Reconnects:       gencfg.Reconnects,
+		ConnectTimeout:   gencfg.ConnectTimeout,
+		ReplyTimeout:     gencfg.ReplyTimeout,
+		LockingTimeout:   gencfg.LockingTimeout,
+		MinCallDuration:  gencfg.MinCallDuration,
+		MaxCallDuration:  gencfg.MaxCallDuration,
+		DigestSeparator:  gencfg.DigestSeparator,
+		DigestEqual:      gencfg.DigestEqual,
+		RSRSep:           gencfg.RSRSep,
+		MaxParallelConns: gencfg.MaxParallelConns,
+	}
 }

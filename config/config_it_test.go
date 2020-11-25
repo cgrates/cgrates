@@ -471,7 +471,7 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []string{},
-		SessionIndexes:    utils.NewStringMap(),
+		SessionIndexes:    utils.StringSet{},
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
@@ -845,7 +845,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []string{},
-		SessionIndexes:    utils.NewStringMap(),
+		SessionIndexes:    utils.StringSet{},
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
@@ -897,7 +897,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []string{},
-		SessionIndexes:    utils.NewStringMap(),
+		SessionIndexes:    utils.StringSet{},
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
@@ -951,7 +951,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []string{},
-		SessionIndexes:    utils.NewStringMap(),
+		SessionIndexes:    utils.StringSet{},
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),

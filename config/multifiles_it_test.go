@@ -87,10 +87,10 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 	if len(mfCgrCfg.HTTPAgentCfg()) != 2 {
 		t.Errorf("Expected: 2, received: %+v", len(mfCgrCfg.HTTPAgentCfg()))
 	}
-	expected := HttpAgentCfgs{
+	expected := HTTPAgentCfgs{
 		{
 			ID:             "conecto1",
-			Url:            "/newConecto",
+			URL:            "/newConecto",
 			SessionSConns:  []string{utils.MetaLocalHost},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
@@ -163,7 +163,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 		},
 		{
 			ID:             "conecto_xml",
-			Url:            "/conecto_xml",
+			URL:            "/conecto_xml",
 			SessionSConns:  []string{utils.MetaLocalHost},
 			RequestPayload: "*xml",
 			ReplyPayload:   "*xml",

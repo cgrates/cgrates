@@ -83,7 +83,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.storDbCfg.loadFromJsonCfg(cfgJSON); err != nil {
+	} else if err = jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected.Items[utils.MetaSessionsCosts], jsonCfg.storDbCfg.Items[utils.MetaSessionsCosts]) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.Items[utils.MetaSessionsCosts]),
@@ -104,7 +104,7 @@ func TestStoreDbCfgloadFromJsonCfgCase2(t *testing.T) {
 	expected := "Replication connection ID needs to be different than *internal"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.storDbCfg.loadFromJsonCfg(storDbJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", storDbJSON, expected)
 	}
 }
@@ -116,7 +116,7 @@ func TestStoreDbCfgloadFromJsonCfgCase3(t *testing.T) {
 	expected := "Remote connection ID needs to be different than *internal"
 	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.storDbCfg.loadFromJsonCfg(storDbJSON); err == nil || err.Error() != expected {
+	} else if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", storDbJSON, expected)
 	}
 }
@@ -148,7 +148,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+	} else if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -168,7 +168,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+	} else if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -188,7 +188,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+	} else if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -263,4 +263,61 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			t.Errorf("Expected %+v \n, received %+v", eMap[utils.RplConnsCfg], rcv[utils.RplConnsCfg])
 		}
 	}
+}
+
+func TestStorDbCfgClone(t *testing.T) {
+	ban := &StorDbCfg{
+		Type:                utils.MYSQL,
+		Host:                "127.0.0.1",
+		Port:                "-1",
+		Name:                utils.CGRATES,
+		User:                utils.CGRATES,
+		Password:            "pass123",
+		StringIndexedFields: []string{"*req.index1"},
+		PrefixIndexedFields: []string{"*req.index1"},
+		RmtConns:            []string{"*conn1"},
+		RplConns:            []string{"*conn1"},
+		Items: map[string]*ItemOpt{
+			utils.MetaSessionsCosts: {
+				Remote:    true,
+				Replicate: true,
+			},
+			utils.MetaCDRs: {
+				Remote:    true,
+				Replicate: false,
+			},
+		},
+		Opts: map[string]interface{}{
+			utils.MaxOpenConnsCfg:    100.,
+			utils.MaxIdleConnsCfg:    10.,
+			utils.ConnMaxLifetimeCfg: 0.,
+			utils.QueryTimeoutCfg:    "10s",
+			utils.SSLModeCfg:         "disable",
+		},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.StringIndexedFields[0] = ""; ban.StringIndexedFields[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.PrefixIndexedFields[0] = ""; ban.PrefixIndexedFields[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	if rcv.RmtConns[0] = ""; ban.RmtConns[0] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.RplConns[0] = ""; ban.RplConns[0] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+
+	if rcv.Items[utils.MetaCDRs].Remote = false; !ban.Items[utils.MetaCDRs].Remote {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.Opts[utils.SSLModeCfg] = ""; ban.Opts[utils.SSLModeCfg] != "disable" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+
 }

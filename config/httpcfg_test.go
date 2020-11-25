@@ -61,7 +61,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if cfgJsn, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
-	} else if err = cfgJsn.httpCfg.loadFromJsonCfg(cfgJSONStr); err != nil {
+	} else if err = cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfgJsn.httpCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJsn.httpCfg))
@@ -145,5 +145,32 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else if rcv := cgrCfg.httpCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+	}
+}
+
+func TestHTTPCfgClone(t *testing.T) {
+	ban := &HTTPCfg{
+		HTTPJsonRPCURL:          "/jsonrpc",
+		HTTPWSURL:               "/ws",
+		DispatchersRegistrarURL: "/randomUrl",
+		HTTPFreeswitchCDRsURL:   "/freeswitch_json",
+		HTTPCDRsURL:             "/cdr_http",
+		HTTPUseBasicAuth:        false,
+		HTTPAuthUsers: map[string]string{
+			"user": "pass",
+		},
+		ClientOpts: map[string]interface{}{
+			utils.HTTPClientTLSClientConfigCfg: false,
+		},
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if rcv.ClientOpts[utils.HTTPClientTLSClientConfigCfg] = ""; ban.ClientOpts[utils.HTTPClientTLSClientConfigCfg] != false {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.HTTPAuthUsers["user"] = ""; ban.HTTPAuthUsers["user"] != "pass" {
+		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

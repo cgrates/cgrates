@@ -19,44 +19,60 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Represents one connection instance towards Kamailio
+// NewDfltKamConnConfig returns the first cached default value for a KamConnCfg connection
+func NewDfltKamConnConfig() *KamConnCfg {
+	if dfltKamConnConfig == nil {
+		return new(KamConnCfg) // No defaults, most probably we are building the defaults now
+	}
+	dfltVal := *dfltKamConnConfig
+	return &dfltVal
+}
+
+// KamConnCfg represents one connection instance towards Kamailio
 type KamConnCfg struct {
 	Alias      string
 	Address    string
 	Reconnects int
 }
 
-func (self *KamConnCfg) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
+func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Address != nil {
-		self.Address = *jsnCfg.Address
+		kamCfg.Address = *jsnCfg.Address
 	}
 	if jsnCfg.Alias != nil {
-		self.Alias = *jsnCfg.Alias
+		kamCfg.Alias = *jsnCfg.Alias
 	}
 	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
+		kamCfg.Reconnects = *jsnCfg.Reconnects
 	}
 	return nil
 }
 
-func (kamCfg *KamConnCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+// AsMapInterface returns the config as a map[string]interface{}
+func (kamCfg *KamConnCfg) AsMapInterface() map[string]interface{} {
+	return map[string]interface{}{
 		utils.AliasCfg:      kamCfg.Alias,
 		utils.AddressCfg:    kamCfg.Address,
 		utils.ReconnectsCfg: kamCfg.Reconnects,
 	}
-	return
 }
 
-// SM-Kamailio config section
+// Clone returns a deep copy of KamConnCfg
+func (kamCfg KamConnCfg) Clone() *KamConnCfg {
+	return &KamConnCfg{
+		Alias:      kamCfg.Alias,
+		Address:    kamCfg.Address,
+		Reconnects: kamCfg.Reconnects,
+	}
+}
+
+// KamAgentCfg is the Kamailio config section
 type KamAgentCfg struct {
 	Enabled       bool
 	SessionSConns []string
@@ -65,7 +81,7 @@ type KamAgentCfg struct {
 	Timezone      string
 }
 
-func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {
+func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -76,10 +92,9 @@ func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {
 		ka.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for idx, attrConn := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			ka.SessionSConns[idx] = attrConn
 			if attrConn == utils.MetaInternal {
 				ka.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			} else {
-				ka.SessionSConns[idx] = attrConn
 			}
 		}
 	}
@@ -90,7 +105,7 @@ func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {
 		ka.EvapiConns = make([]*KamConnCfg, len(*jsnCfg.Evapi_conns))
 		for idx, jsnConnCfg := range *jsnCfg.Evapi_conns {
 			ka.EvapiConns[idx] = NewDfltKamConnConfig()
-			ka.EvapiConns[idx].loadFromJsonCfg(jsnConnCfg)
+			ka.EvapiConns[idx].loadFromJSONCfg(jsnConnCfg)
 		}
 	}
 	if jsnCfg.Timezone != nil {
@@ -99,6 +114,7 @@ func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {
 	return nil
 }
 
+// AsMapInterface returns the config as a map[string]interface{}
 func (ka *KamAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:   ka.Enabled,
@@ -115,13 +131,34 @@ func (ka *KamAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if ka.SessionSConns != nil {
 		sessionSConns := make([]string, len(ka.SessionSConns))
 		for i, item := range ka.SessionSConns {
+			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = strings.TrimSuffix(item, utils.CONCATENATED_KEY_SEP+utils.MetaSessionS)
-			} else {
-				sessionSConns[i] = item
+				sessionSConns[i] = utils.MetaInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
+	}
+	return
+}
+
+// Clone returns a deep copy of KamAgentCfg
+func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
+	cln = &KamAgentCfg{
+		Enabled:   ka.Enabled,
+		CreateCdr: ka.CreateCdr,
+		Timezone:  ka.Timezone,
+	}
+	if ka.SessionSConns != nil {
+		cln.SessionSConns = make([]string, len(ka.SessionSConns))
+		for i, con := range ka.SessionSConns {
+			cln.SessionSConns[i] = con
+		}
+	}
+	if ka.EvapiConns != nil {
+		cln.EvapiConns = make([]*KamConnCfg, len(ka.EvapiConns))
+		for i, req := range ka.EvapiConns {
+			cln.EvapiConns[i] = req.Clone()
+		}
 	}
 	return
 }
