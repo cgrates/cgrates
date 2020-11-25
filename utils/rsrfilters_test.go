@@ -429,3 +429,47 @@ func TestParseRSRFiltersFromSliceError(t *testing.T) {
 		t.Errorf("Expected <error parsing regexp: missing closing ): `(^_^`> ,received: <%+v>", err)
 	}
 }
+
+func TestRSRFilterPassMatchGreaterThanOrEqual(t *testing.T) {
+	fltr, err := NewRSRFilter(">=0")
+	if err != nil {
+		t.Errorf("Expected <nil> ,received: <%+v>", err)
+	}
+	result := fltr.Pass("string")
+	if !reflect.DeepEqual(false, result) {
+		t.Errorf("Expected <false> ,received: <%+v>", result)
+	}
+}
+
+func TestRSRFilterPassMatchLessThanOrEqual(t *testing.T) {
+	fltr, err := NewRSRFilter("<=0")
+	if err != nil {
+		t.Errorf("Expected <nil> ,received: <%+v>", err)
+	}
+	result := fltr.Pass("string")
+	if !reflect.DeepEqual(false, result) {
+		t.Errorf("Expected <false> ,received: <%+v>", result)
+	}
+}
+
+func TestRSRFilterPassMatchGreaterThan(t *testing.T) {
+	fltr, err := NewRSRFilter(">0")
+	if err != nil {
+		t.Errorf("Expected <nil> ,received: <%+v>", err)
+	}
+	result := fltr.Pass("invalid")
+	if !reflect.DeepEqual(false, result) {
+		t.Errorf("Expected <false> ,received: <%+v>", result)
+	}
+}
+
+func TestRSRFilterPassMatchLessThan(t *testing.T) {
+	fltr, err := NewRSRFilter("<0")
+	if err != nil {
+		t.Errorf("Expected <nil> ,received: <%+v>", err)
+	}
+	result := fltr.Pass("string")
+	if !reflect.DeepEqual(false, result) {
+		t.Errorf("Expected <false> ,received: <%+v>", result)
+	}
+}
