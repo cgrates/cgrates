@@ -1541,6 +1541,7 @@ type ReloadArgs struct {
 	Tenant  string
 	Path    string
 	Section string
+	DryRun  bool
 }
 
 // V1ReloadConfig reloads the configuration
@@ -1548,24 +1549,29 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ReloadArgs, reply *string) (err error
 	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err = cfg.loadCfgWithLocks(args.Path, args.Section); err != nil {
+	cfgV := cfg
+	if args.DryRun {
+		cfgV = cfg.Clone()
+	}
+	if err = cfgV.loadCfgWithLocks(args.Path, args.Section); err != nil {
 		return
 	}
 	//  lock all sections
-	cfg.rLockSections()
+	cfgV.rLockSections()
 
-	err = cfg.checkConfigSanity()
+	err = cfgV.checkConfigSanity()
 
-	cfg.rUnlockSections() // unlock before checking the error
+	cfgV.rUnlockSections() // unlock before checking the error
 
 	if err != nil {
 		return
 	}
-
-	if args.Section == utils.EmptyString || args.Section == utils.MetaAll {
-		cfg.reloadSections(sortedCfgSections...)
-	} else {
-		cfg.reloadSections(args.Section)
+	if !args.DryRun {
+		if args.Section == utils.EmptyString || args.Section == utils.MetaAll {
+			cfgV.reloadSections(sortedCfgSections...)
+		} else {
+			cfgV.reloadSections(args.Section)
+		}
 	}
 	*reply = utils.OK
 	return
@@ -1687,6 +1693,7 @@ type SetConfigArgs struct {
 	Opts   map[string]interface{}
 	Tenant string
 	Config map[string]interface{}
+	DryRun bool
 }
 
 // V1SetConfig reloads the sections of config
@@ -1703,20 +1710,25 @@ func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error
 	if b, err = json.Marshal(args.Config); err != nil {
 		return
 	}
-	if err = cfg.loadCfgFromJSONWithLocks(bytes.NewBuffer(b), sections); err != nil {
+	cfgV := cfg
+	if args.DryRun {
+		cfgV = cfg.Clone()
+	}
+	if err = cfgV.loadCfgFromJSONWithLocks(bytes.NewBuffer(b), sections); err != nil {
 		return
 	}
 	//  lock all sections
-	cfg.rLockSections()
+	cfgV.rLockSections()
 
-	err = cfg.checkConfigSanity()
+	err = cfgV.checkConfigSanity()
 
-	cfg.rUnlockSections() // unlock before checking the error
+	cfgV.rUnlockSections() // unlock before checking the error
 	if err != nil {
 		return
 	}
-
-	cfg.reloadSections(sections...)
+	if !args.DryRun {
+		cfgV.reloadSections(sections...)
+	}
 	*reply = utils.OK
 	return
 }
@@ -1831,6 +1843,7 @@ type SetConfigFromJSONArgs struct {
 	Opts   map[string]interface{}
 	Tenant string
 	Config string
+	DryRun bool
 }
 
 // V1SetConfigFromJSON reloads the sections of config
@@ -1839,20 +1852,24 @@ func (cfg *CGRConfig) V1SetConfigFromJSON(args *SetConfigFromJSONArgs, reply *st
 		*reply = utils.OK
 		return
 	}
-
-	if err = cfg.loadCfgFromJSONWithLocks(bytes.NewBufferString(args.Config), sortedCfgSections); err != nil {
+	cfgV := cfg
+	if args.DryRun {
+		cfgV = cfg.Clone()
+	}
+	if err = cfgV.loadCfgFromJSONWithLocks(bytes.NewBufferString(args.Config), sortedCfgSections); err != nil {
 		return
 	}
 
 	//  lock all sections
-	cfg.rLockSections()
-	err = cfg.checkConfigSanity()
-	cfg.rUnlockSections() // unlock before checking the error
+	cfgV.rLockSections()
+	err = cfgV.checkConfigSanity()
+	cfgV.rUnlockSections() // unlock before checking the error
 	if err != nil {
 		return
 	}
-
-	cfg.reloadSections(sortedCfgSections...)
+	if !args.DryRun {
+		cfgV.reloadSections(sortedCfgSections...)
+	}
 	*reply = utils.OK
 	return
 }

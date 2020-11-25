@@ -4701,6 +4701,16 @@ func TestV1GetConfigSectionConfigs(t *testing.T) {
 	var result string
 	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
+	} else if err = cfgCgr2.V1SetConfig(&SetConfigArgs{Config: reply, DryRun: true}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Unexpected result")
+	} else if cfgCgr, _ := NewDefaultCGRConfig(); !reflect.DeepEqual(cfgCgr.ConfigSCfg(), cfgCgr2.ConfigSCfg()) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(cfgCgr.ConfigSCfg()), utils.ToJSON(cfgCgr2.ConfigSCfg()))
+	}
+
+	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
 	} else if err = cfgCgr2.V1SetConfig(&SetConfigArgs{Config: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -5401,6 +5411,15 @@ func TestV1GetConfigAsJSONCoreS(t *testing.T) {
 	}
 
 	var result string
+	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
+		t.Error(err)
+	} else if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: reply, DryRun: true}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Unexpected result")
+	} else if cgrCfg, _ := NewDefaultCGRConfig(); !reflect.DeepEqual(cgrCfg.CoreSCfg(), cfgCgr2.CoreSCfg()) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(cgrCfg.CoreSCfg()), utils.ToJSON(cfgCgr2.CoreSCfg()))
+	}
 	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
 	} else if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: reply}, &result); err != nil {
