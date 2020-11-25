@@ -656,3 +656,21 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 		t.Errorf("eDcml: %f, received: %+v", eDcml, cost)
 	}
 }
+
+func TestRateProfileCostCorrectCost(t *testing.T) {
+	rPrfCost := &RateProfileCost{
+		ID:   "Test1",
+		Cost: 0.234,
+	}
+	rPrfCost.CorrectCost(utils.IntPointer(2), utils.ROUNDING_UP)
+	if rPrfCost.Cost != 0.24 {
+		t.Errorf("Expected: %+v, received: %+v", 0.24, rPrfCost.Cost)
+	}
+	if rPrfCost.RoundingDecimals != 2 {
+		t.Errorf("Expected: %+v, received: %+v", 2, rPrfCost.Cost)
+	}
+	if !reflect.DeepEqual(rPrfCost.Altered, []string{utils.RoundingDecimals}) {
+		t.Errorf("Expected: %+v, received: %+v", []string{utils.RoundingDecimals}, rPrfCost.Altered)
+	}
+
+}
