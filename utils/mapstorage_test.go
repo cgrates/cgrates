@@ -748,3 +748,32 @@ func TestMapStorageCloneNil(t *testing.T) {
 		t.Errorf("Expecting: <nil>, received: %+v", test.Clone())
 	}
 }
+
+func TestNavMapGetFieldAsMapStringInterfaceError(t *testing.T) {
+	nM := MapStorage{
+		"AnotherFirstLevel": "ValAnotherFirstLevel",
+		"Slice":             &[]struct{}{{}},
+		"SliceString":       []string{"1", "2"},
+		"SliceInterface":    map[string]interface{}{},
+	}
+	path := []string{"SliceInterface[4]"}
+	_, err := nM.FieldAsInterface(path)
+	if err == nil || err.Error() != "NOT_FOUND" {
+		t.Errorf("Expecting: <NOT_FOUND>, received: %+v", err)
+	}
+
+}
+
+func TestNavMapGetFieldAsMapStringInterface(t *testing.T) {
+	nM := MapStorage{
+		"FIELD": map[string]interface{}{
+			"Field1": "Val1",
+			"Field2": "Val2"},
+	}
+	path := []string{"FIELD[Field2]"}
+	result, _ := nM.FieldAsInterface(path)
+	if reflect.DeepEqual(result, "val2") {
+		t.Errorf("Expecting: <val2>, received: %+v", result)
+	}
+
+}
