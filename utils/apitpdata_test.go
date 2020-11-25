@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -1072,12 +1071,15 @@ func TestStartTimeNow(t *testing.T) {
 			},
 		},
 	}
-	if result, err := testCostEventStruct.StartTime(""); err != nil {
+	timpulet1 := time.Now()
+	result, err := testCostEventStruct.StartTime("")
+	timpulet2 := time.Now()
+	if err != nil {
 		t.Errorf("Expected <nil> , received <%+v>", err)
-	} else if !reflect.DeepEqual(time.Now().Minute(), result.Minute()) {
-		t.Errorf("Expected <%+v> , received <%+v>", time.Now().Minute(), result.Minute())
 	}
-
+	if result.Before(timpulet1) && result.After(timpulet2) {
+		t.Errorf("Expected between <%+v> and <%+v>, received <%+v>", timpulet1, timpulet2, result)
+	}
 }
 
 func TestStartTime(t *testing.T) {
@@ -1136,11 +1138,11 @@ func TestUsageMinute(t *testing.T) {
 	}
 }
 
-func TestUsage(t *testing.T) {
+func TestUsageError(t *testing.T) {
 	testCostEventStruct := &ArgsCostForEvent{
 		RateProfileIDs: []string{"123", "456", "789"},
 		CGREventWithOpts: &CGREventWithOpts{
-			Opts: map[string]interface{}{"*ratesStartTime": "start"},
+			Opts: map[string]interface{}{"*ratesUsage": "start"},
 			CGREvent: &CGREvent{
 				Tenant: "*req.CGRID",
 				ID:     "",
@@ -1148,7 +1150,28 @@ func TestUsage(t *testing.T) {
 			},
 		},
 	}
-	result, err := testCostEventStruct.Usage()
-	fmt.Println(result)
-	fmt.Println(err)
+	_, err := testCostEventStruct.Usage()
+	if err == nil && err.Error() != "received <Unsupported time format" {
+		t.Errorf("Expected <nil> , received <%+v>", err)
+	}
+}
+
+func TestUsage(t *testing.T) {
+	testCostEventStruct := &ArgsCostForEvent{
+		RateProfileIDs: []string{"123", "456", "789"},
+		CGREventWithOpts: &CGREventWithOpts{
+			Opts: map[string]interface{}{"*ratesUsage": "2m10s"},
+			CGREvent: &CGREvent{
+				Tenant: "*req.CGRID",
+				ID:     "",
+				Event:  map[string]interface{}{},
+			},
+		},
+	}
+
+	if result, err := testCostEventStruct.Usage(); err != nil {
+		t.Errorf("Expected <nil> , received <%+v>", err)
+	} else if !reflect.DeepEqual(result.String(), "2m10s") {
+		t.Errorf("Expected <2m10s> , received <%+v>", result.String())
+	}
 }
