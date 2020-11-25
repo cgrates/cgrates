@@ -40,6 +40,7 @@ var (
 		testNewCgrJsonCfgFromHttp,
 		testNewCGRConfigFromPath,
 		testCGRConfigReloadAttributeS,
+		testCGRConfigReloadChargerSDryRun,
 		testCGRConfigReloadChargerS,
 		testCGRConfigReloadThresholdS,
 		testCGRConfigReloadStatS,
@@ -158,6 +159,28 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.AttributeSCfg()))
+	}
+}
+
+func testCGRConfigReloadChargerSDryRun(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var reply string
+	if err = cfg.V1ReloadConfig(&ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
+		Section: ChargerSCfgJson,
+		DryRun:  true,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	ecfg, _ := NewDefaultCGRConfig()
+
+	if !reflect.DeepEqual(ecfg.ChargerSCfg(), cfg.ChargerSCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(ecfg.ChargerSCfg()), utils.ToJSON(cfg.ChargerSCfg()))
 	}
 }
 
