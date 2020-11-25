@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -1114,4 +1115,40 @@ func TestStartTimeError(t *testing.T) {
 	if err == nil && err.Error() != "received <Unsupported time format" {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	}
+}
+
+func TestUsageMinute(t *testing.T) {
+	testCostEventStruct := &ArgsCostForEvent{
+		RateProfileIDs: []string{"123", "456", "789"},
+		CGREventWithOpts: &CGREventWithOpts{
+			Opts: map[string]interface{}{},
+			CGREvent: &CGREvent{
+				Tenant: "*req.CGRID",
+				ID:     "",
+				Event:  map[string]interface{}{},
+			},
+		},
+	}
+	if result, err := testCostEventStruct.Usage(); err != nil {
+		t.Errorf("Expected <nil> , received <%+v>", err)
+	} else if !reflect.DeepEqual(result, time.Minute) {
+		t.Errorf("Expected <%+v> , received <%+v>", time.Minute, result)
+	}
+}
+
+func TestUsage(t *testing.T) {
+	testCostEventStruct := &ArgsCostForEvent{
+		RateProfileIDs: []string{"123", "456", "789"},
+		CGREventWithOpts: &CGREventWithOpts{
+			Opts: map[string]interface{}{"*ratesStartTime": "start"},
+			CGREvent: &CGREvent{
+				Tenant: "*req.CGRID",
+				ID:     "",
+				Event:  map[string]interface{}{},
+			},
+		},
+	}
+	result, err := testCostEventStruct.Usage()
+	fmt.Println(result)
+	fmt.Println(err)
 }
