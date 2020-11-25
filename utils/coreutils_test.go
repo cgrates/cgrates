@@ -1514,13 +1514,6 @@ func TestIsURL(t *testing.T) {
 	}
 }
 
-func TestComputeHashError(t *testing.T) {
-	_, err := ComputeHash("test1;test2;test3")
-	if err != nil {
-		t.Errorf("Expecting: <nil>, received: %+v", err)
-	}
-}
-
 func TestComputeHashMatch(t *testing.T) {
 	lns, _ := ComputeHash("test1;test2;test3")
 	if err := VerifyHash(lns, "test1;test2;test3"); err != true {
@@ -1583,5 +1576,12 @@ func TestAESEncryptDecrypt(t *testing.T) {
 	dString, _ := AESDecrypt(eString, encKey)
 	if !reflect.DeepEqual("exampleText", dString) {
 		t.Errorf("Expecting: <exampleText>, received: <%+v>", dString)
+	}
+}
+
+func TestBoolGenerator(t *testing.T) {
+	boolTest := BoolGenerator().RandomBool()
+	if boolTest != true && boolTest != false {
+		t.Errorf("Needs to be bool")
 	}
 }
