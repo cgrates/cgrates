@@ -2797,3 +2797,292 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
 	}
 }
+
+func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.50,
+				Unit:          10 * time.Second,
+				Increment:     2 * time.Second,
+			},
+			{
+				IntervalStart: 4 * time.Second,
+				RecurrentFee:  0.48,
+				Unit:          10 * time.Second,
+				Increment:     2 * time.Second,
+			},
+			{
+				IntervalStart: 8 * time.Second,
+				RecurrentFee:  0.45,
+				Unit:          10 * time.Second,
+				Increment:     2 * time.Second,
+			},
+		},
+	}
+	rt1.Compile()
+
+	rt2 := &engine.Rate{
+		ID: "RATE2",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.50,
+				Unit:          2 * time.Second,
+				Increment:     time.Second,
+			},
+			{
+				IntervalStart: 2 * time.Second,
+				RecurrentFee:  0.48,
+				Unit:          2 * time.Second,
+				Increment:     time.Second,
+			},
+			{
+				IntervalStart: 6 * time.Second,
+				RecurrentFee:  0.45,
+				Unit:          2 * time.Second,
+				Increment:     time.Second,
+			},
+		},
+	}
+	rt2.Compile()
+
+	ordRts := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			time.Second,
+			rt2,
+		},
+		{
+			2 * time.Second,
+			rt1,
+		},
+		{
+			3 * time.Second,
+			rt2,
+		},
+		{
+			5 * time.Second,
+			rt1,
+		},
+		{
+			7 * time.Second,
+			rt2,
+		},
+	}
+
+	expOrdRts := []*engine.RateSInterval{
+		{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        0,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+					Usage:             time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Second,
+					Rate:              rt2,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+					Usage:             time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 2 * time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        2 * time.Second,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    1,
+					Usage:             time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 3 * time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        3 * time.Second,
+					Rate:              rt2,
+					IntervalRateIndex: 1,
+					CompressFactor:    2,
+					Usage:             2 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 5 * time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        5 * time.Second,
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					CompressFactor:    1,
+					Usage:             2 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 7 * time.Second,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        7 * time.Second,
+					Rate:              rt2,
+					IntervalRateIndex: 2,
+					CompressFactor:    3,
+					Usage:             3 * time.Second,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, 10*time.Second); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
+		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	}
+}
+
+func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.05,
+				Unit:          15 * time.Minute,
+				Increment:     15 * time.Minute,
+			},
+			{
+				IntervalStart: time.Hour,
+				RecurrentFee:  0.50,
+				Unit:          5 * time.Minute,
+				Increment:     time.Minute + 30*time.Second,
+			},
+		},
+	}
+	rt1.Compile()
+
+	rt2 := &engine.Rate{
+		ID: "RATE2",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 15 * time.Minute,
+				RecurrentFee:  0.10,
+				Unit:          10 * time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: 30 * time.Minute,
+				RecurrentFee:  0.15,
+				Unit:          10 * time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: 45 * time.Minute,
+				RecurrentFee:  0.20,
+				Unit:          10 * time.Minute,
+				Increment:     time.Minute,
+			},
+		},
+	}
+	rt2.Compile()
+
+	ordRts := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			20 * time.Minute,
+			rt2,
+		},
+		{
+			time.Hour + time.Minute,
+			rt1,
+		},
+	}
+
+	expOrdRts := []*engine.RateSInterval{
+		{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        0,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    2,
+					Usage:             20 * time.Minute,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 20 * time.Minute,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        20 * time.Minute,
+					Rate:              rt2,
+					IntervalRateIndex: 0,
+					CompressFactor:    10,
+					Usage:             10 * time.Minute,
+				},
+				{
+					UsageStart:        30 * time.Minute,
+					Rate:              rt2,
+					IntervalRateIndex: 1,
+					CompressFactor:    15,
+					Usage:             15 * time.Minute,
+				},
+				{
+					UsageStart:        45 * time.Minute,
+					Rate:              rt2,
+					IntervalRateIndex: 2,
+					CompressFactor:    16,
+					Usage:             16 * time.Minute,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: time.Hour + time.Minute,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        time.Hour + time.Minute,
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					CompressFactor:    6,
+					Usage:             9 * time.Minute,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, time.Hour+10*time.Minute); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
+		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	}
+}
