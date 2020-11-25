@@ -228,9 +228,6 @@ func (rpp *RateProfile) Sort() {
 
 // CompressEquals compares two RateSIntervals for Compress function
 func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
-	if rIv.UsageStart != rIv2.UsageStart {
-		return
-	}
 	if len(rIv.Increments) != len(rIv2.Increments) {
 		return
 	}
@@ -254,9 +251,6 @@ func (rIv *RateSInterval) Cost() *decimal.Big {
 
 // CompressEquals compares two RateSIncrement for Compress function
 func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement, full bool) (eq bool) {
-	if rIcr.UsageStart != rIcr2.UsageStart {
-		return
-	}
 	if rIcr.Rate.UID() != rIcr2.Rate.UID() {
 		return
 	}
@@ -275,19 +269,18 @@ func (rIcr *RateSIncrement) Cost() *decimal.Big {
 		icrRt := rIcr.Rate.IntervalRates[rIcr.IntervalRateIndex]
 		if rIcr.Usage == utils.InvalidDuration { // FixedFee
 			rIcr.cost = icrRt.DecimalFixedFee()
-			return rIcr.cost
 		} else {
 			rIcr.cost = icrRt.DecimalRecurrentFee()
-		}
-		if icrRt.Unit != icrRt.Increment {
-			rIcr.cost = utils.DivideBig(
-				utils.MultiplyBig(rIcr.cost, icrRt.DecimalIncrement()),
-				icrRt.DecimalUnit())
-		}
-		if rIcr.CompressFactor != 1 {
-			rIcr.cost = utils.MultiplyBig(
-				rIcr.cost,
-				new(decimal.Big).SetUint64(uint64(rIcr.CompressFactor)))
+			if icrRt.Unit != icrRt.Increment {
+				rIcr.cost = utils.DivideBig(
+					utils.MultiplyBig(rIcr.cost, icrRt.DecimalIncrement()),
+					icrRt.DecimalUnit())
+			}
+			if rIcr.CompressFactor != 1 {
+				rIcr.cost = utils.MultiplyBig(
+					rIcr.cost,
+					new(decimal.Big).SetUint64(uint64(rIcr.CompressFactor)))
+			}
 		}
 	}
 	return rIcr.cost
