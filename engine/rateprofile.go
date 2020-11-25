@@ -232,7 +232,7 @@ func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
 		return
 	}
 	for i, rIcr := range rIv.Increments {
-		if !rIcr.CompressEquals(rIv2.Increments[i], true) {
+		if !rIcr.CompressEquals(rIv2.Increments[i]) {
 			return
 		}
 	}
@@ -250,11 +250,11 @@ func (rIv *RateSInterval) Cost() *decimal.Big {
 }
 
 // CompressEquals compares two RateSIncrement for Compress function
-func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement, full bool) (eq bool) {
+func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
 	if rIcr.Rate.UID() != rIcr2.Rate.UID() {
 		return
 	}
-	if full && rIcr.IntervalRateIndex != rIcr2.IntervalRateIndex {
+	if rIcr.IntervalRateIndex != rIcr2.IntervalRateIndex {
 		return
 	}
 	if rIcr.Usage != rIcr2.Usage {
