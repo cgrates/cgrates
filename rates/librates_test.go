@@ -3086,3 +3086,96 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
 	}
 }
+
+func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
+	rt1 := &engine.Rate{
+		ID: "RATE1",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.20,
+				Unit:          time.Minute,
+				Increment:     30 * time.Second,
+			},
+			{
+				IntervalStart: 30 * time.Minute,
+				RecurrentFee:  0.20,
+				Unit:          time.Minute,
+				Increment:     30 * time.Second,
+			},
+		},
+	}
+	rt1.Compile()
+
+	rt2 := &engine.Rate{
+		ID: "RATE2",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.20,
+				Unit:          time.Minute,
+				Increment:     30 * time.Second,
+			},
+			{
+				IntervalStart: 30 * time.Minute,
+				RecurrentFee:  0.20,
+				Unit:          time.Minute,
+				Increment:     30 * time.Second,
+			},
+		},
+	}
+	rt2.Compile()
+
+	ordRts := []*orderedRate{
+		{
+			0,
+			rt1,
+		},
+		{
+			25 * time.Minute,
+			rt1,
+		},
+	}
+
+	expOrdRts := []*engine.RateSInterval{
+		{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        0,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    50,
+					Usage:             25 * time.Minute,
+				},
+			},
+			CompressFactor: 1,
+		},
+		{
+			UsageStart: 25 * time.Minute,
+			Increments: []*engine.RateSIncrement{
+				{
+					UsageStart:        25 * time.Minute,
+					Rate:              rt1,
+					IntervalRateIndex: 0,
+					CompressFactor:    10,
+					Usage:             5 * time.Minute,
+				},
+				{
+					UsageStart:        30 * time.Minute,
+					Rate:              rt1,
+					IntervalRateIndex: 1,
+					CompressFactor:    60,
+					Usage:             30 * time.Minute,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, time.Hour); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
+		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	}
+}
