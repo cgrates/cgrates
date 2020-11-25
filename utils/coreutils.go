@@ -913,13 +913,9 @@ func AESEncrypt(txt, encKey string) (encrypted string, err error) {
 		return
 	}
 	var aesGCM cipher.AEAD
-	if aesGCM, err = cipher.NewGCM(blk); err != nil {
-		return
-	}
+	aesGCM, _ = cipher.NewGCM(blk)
 	nonce := make([]byte, aesGCM.NonceSize())
-	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		return
-	}
+	io.ReadFull(rand.Reader, nonce)
 	return fmt.Sprintf("%x", aesGCM.Seal(nonce, nonce, []byte(txt), nil)), nil
 }
 
@@ -935,10 +931,7 @@ func AESDecrypt(encrypted string, encKey string) (txt string, err error) {
 	}
 
 	var aesGCM cipher.AEAD
-	if aesGCM, err = cipher.NewGCM(blk); err != nil {
-		return
-	}
-
+	aesGCM, _ = cipher.NewGCM(blk)
 	nonceSize := aesGCM.NonceSize()
 	nonce, ciphertext := enc[:nonceSize], enc[nonceSize:]
 	var plaintext []byte

@@ -771,9 +771,24 @@ func TestNavMapGetFieldAsMapStringInterface(t *testing.T) {
 			"Field2": "Val2"},
 	}
 	path := []string{"FIELD[Field2]"}
-	result, _ := nM.FieldAsInterface(path)
-	if reflect.DeepEqual(result, "val2") {
-		t.Errorf("Expecting: <val2>, received: %+v", result)
+	if result, err := nM.FieldAsInterface(path); err != nil {
+		t.Errorf("Expecting: <nil>, received: %+v", err)
+	} else if !reflect.DeepEqual(result, "Val2") {
+		t.Errorf("Expecting: <Val2>, received: %+v", result)
 	}
 
+}
+
+func TestNavMapGetFieldAsDataProvider(t *testing.T) {
+	nM := MapStorage{
+		"FIELD": MapStorage{
+			"Field1": "Val1",
+			"Field2": "Val2"},
+	}
+	path := []string{"FIELD[Field2]"}
+	if result, err := nM.FieldAsInterface(path); err != nil {
+		t.Errorf("Expecting: <nil>, received: %+v", err)
+	} else if !reflect.DeepEqual(result, "Val2") {
+		t.Errorf("Expecting: <Val2>, received: %+v", result)
+	}
 }

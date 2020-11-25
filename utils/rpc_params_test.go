@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/mitchellh/mapstructure"
@@ -31,11 +32,11 @@ type Attr struct {
 	Age     float64
 }
 
-func (rpc *RpcStruct) Hopa(normal Attr, out *float64) error {
+func (rpc *RpcStruct) Method1(normal Attr, out *float64) error {
 	return nil
 }
 
-func (rpc *RpcStruct) Tropa(pointer *Attr, out *float64) error {
+func (rpc *RpcStruct) Method2(pointer *Attr, out *float64) error {
 	return nil
 }
 
@@ -48,7 +49,7 @@ func TestRPCObjectPointer(t *testing.T) {
 	if len(rpcParamsMap) != 2 {
 		t.Errorf("error registering rpc object: %v", rpcParamsMap)
 	}
-	x, found := rpcParamsMap["RpcStruct.Hopa"]
+	x, found := rpcParamsMap["RpcStruct.Method1"]
 	if !found {
 		t.Errorf("error getting rpcobject: %v (%+v)", rpcParamsMap, x)
 	}
@@ -56,23 +57,21 @@ func TestRPCObjectPointer(t *testing.T) {
 	if err := mapstructure.Decode(map[string]interface{}{"Name": "a", "Surname": "b", "Age": 10.2}, a); err != nil || a.(*Attr).Name != "a" || a.(*Attr).Surname != "b" || a.(*Attr).Age != 10.2 {
 		t.Errorf("error converting to struct: %+v (%v)", a, err)
 	}
-	/*
-		//TODO: make pointer in arguments usable
-		x, found = rpcParamsMap["RpcStruct.Tropa"]
-		if !found {
-			t.Errorf("error getting rpcobject: %v (%+v)", rpcParamsMap, x)
-		}
-		b := x.InParam
-		// log.Printf("T: %+v", b)
-		if err := mapstructure.Decode(map[string]interface{}{"Name": "a", "Surname": "b", "Age": 10.2}, b); err != nil || b.(*Attr).Name != "a" || b.(*Attr).Surname != "b" || b.(*Attr).Age != 10.2 {
-			t.Errorf("error converting to struct: %+v (%v)", b, err)
-		}
-	*/
 }
 
 func TestGetRpcParamsError(t *testing.T) {
 	_, err := GetRpcParams("exampleTest")
 	if err == nil || err.Error() != "NOT_FOUND" {
 		t.Errorf("Expected <NOT_FOUND>, received <%+v>", err)
+	}
+}
+
+func TestGetRpcParams(t *testing.T) {
+	testStruct := &Attr{"", "", 0}
+	RegisterRpcParams("", &RpcStruct{})
+	if result, err := GetRpcParams("RpcStruct.Method1"); err != nil {
+		t.Errorf("Expected <nil>, received <%+v>", err)
+	} else if !reflect.DeepEqual(result.InParam, testStruct) {
+		t.Errorf("Expected <%+v>, received <%+v>", testStruct, result.InParam)
 	}
 }
