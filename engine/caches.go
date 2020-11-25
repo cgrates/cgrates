@@ -33,7 +33,7 @@ import (
 var Cache *CacheS
 
 func init() {
-	Cache = NewCacheS(config.CgrConfig(), nil)
+	Cache = NewCacheS(config.CgrConfig(), nil, nil)
 	// Threshold
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))
@@ -88,13 +88,14 @@ func SetCache(chS *CacheS) {
 }
 
 // NewCacheS initializes the Cache service and executes the precaching
-func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
+func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *CacheS) {
 	cfg.CacheCfg().AddTmpCaches()
 	tCache := cfg.CacheCfg().AsTransCacheConfig()
 	if len(cfg.CacheCfg().ReplicationConns) != 0 {
 		var reply string
 		for k, val := range tCache {
-			if !cfg.CacheCfg().Partitions[k].Replicate {
+			if !cfg.CacheCfg().Partitions[k].Replicate ||
+				k == utils.CacheCapsEvents {
 				continue
 			}
 			val.OnEvicted = func(itmID string, value interface{}) {
@@ -109,6 +110,9 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
 		}
 	}
 
+	if _, has := tCache[utils.CacheCapsEvents]; has && cpS != nil {
+		tCache[utils.CacheCapsEvents].OnEvicted = cpS.OnEvict
+	}
 	c = &CacheS{
 		cfg:     cfg,
 		dm:      dm,

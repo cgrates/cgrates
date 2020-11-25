@@ -42,7 +42,7 @@ func TestCdrsReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	engineShutdown := make(chan struct{}, 1)
-	chS := engine.NewCacheS(cfg, nil)
+	chS := engine.NewCacheS(cfg, nil, nil)
 
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))

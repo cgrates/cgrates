@@ -19,11 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 )
 
-func NewSMGenericV1(sS *sessions.SessionS, caps *cores.Caps) *SMGenericV1 {
+func NewSMGenericV1(sS *sessions.SessionS, caps *engine.Caps) *SMGenericV1 {
 	return &SMGenericV1{
 		Ss:   sS,
 		caps: caps,
@@ -34,7 +34,7 @@ func NewSMGenericV1(sS *sessions.SessionS, caps *cores.Caps) *SMGenericV1 {
 // DEPRECATED, use SessionSv1 instead
 type SMGenericV1 struct {
 	Ss   *sessions.SessionS
-	caps *cores.Caps
+	caps *engine.Caps
 }
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
