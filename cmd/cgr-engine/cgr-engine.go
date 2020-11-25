@@ -76,8 +76,9 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 // initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
 func initCacheS(internalCacheSChan chan rpcclient.ClientConnector,
 	server *cores.Server, dm *engine.DataManager, exitChan chan<- struct{},
-	anz *services.AnalyzerService) (chS *engine.CacheS) {
-	chS = engine.NewCacheS(cfg, dm)
+	anz *services.AnalyzerService,
+	cpS *engine.CapsStats) (chS *engine.CacheS) {
+	chS = engine.NewCacheS(cfg, dm, cpS)
 	go func() {
 		if err := chS.Precache(); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> could not init, error: %s", utils.CacheS, err.Error()))
@@ -439,7 +440,7 @@ func main() {
 	if len(utils.ConcurrentReqsStrategy) != 0 {
 		cncReqsStrategy = utils.ConcurrentReqsStrategy
 	}
-	caps := cores.NewCaps(cncReqsLimit, cncReqsStrategy)
+	caps := engine.NewCaps(cncReqsLimit, cncReqsStrategy)
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
 	cfg.LazySanityCheck()
 
@@ -541,19 +542,19 @@ func main() {
 		}
 	}
 
-	// init CacheS
-	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan, anz)
-	engine.SetCache(cacheS)
-
-	// init GuardianSv1
-	initGuardianSv1(internalGuardianSChan, server, anz)
-
 	// init CoreSv1
 	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz)
 	if err := coreS.Start(); err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	// init CacheS
+	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan, anz, coreS.GetCoreS().CapsStats)
+	engine.SetCache(cacheS)
+
+	// init GuardianSv1
+	initGuardianSv1(internalGuardianSChan, server, anz)
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)

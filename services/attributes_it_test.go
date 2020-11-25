@@ -42,7 +42,7 @@ func TestAttributeSReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 
 	engineShutdown := make(chan struct{}, 1)
-	chS := engine.NewCacheS(cfg, nil)
+	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))

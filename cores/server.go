@@ -39,6 +39,7 @@ import (
 
 	rpc2_jsonrpc "github.com/cenkalti/rpc2/jsonrpc"
 	"github.com/cgrates/cgrates/analyzers"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cenkalti/rpc2"
@@ -53,7 +54,7 @@ func init() {
 	gob.Register(url.Values{})
 }
 
-func NewServer(caps *Caps) (s *Server) {
+func NewServer(caps *engine.Caps) (s *Server) {
 	return &Server{
 		httpMux:         http.NewServeMux(),
 		httpsMux:        http.NewServeMux(),
@@ -70,7 +71,7 @@ type Server struct {
 	stopbiRPCServer chan struct{} // used in order to fully stop the biRPC
 	httpsMux        *http.ServeMux
 	httpMux         *http.ServeMux
-	caps            *Caps
+	caps            *engine.Caps
 	anz             *analyzers.AnalyzerService
 }
 
@@ -347,12 +348,12 @@ type rpcRequest struct {
 	r          io.ReadCloser // holds the JSON formated RPC request
 	rw         io.ReadWriter // holds the JSON formated RPC response
 	remoteAddr net.Addr
-	caps       *Caps
+	caps       *engine.Caps
 	anzWarpper *analyzers.AnalyzerService
 }
 
 // newRPCRequest returns a new rpcRequest.
-func newRPCRequest(r io.ReadCloser, remoteAddr net.Addr, caps *Caps, anz *analyzers.AnalyzerService) *rpcRequest {
+func newRPCRequest(r io.ReadCloser, remoteAddr net.Addr, caps *engine.Caps, anz *analyzers.AnalyzerService) *rpcRequest {
 	return &rpcRequest{
 		r:          r,
 		rw:         new(bytes.Buffer),

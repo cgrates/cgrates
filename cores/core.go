@@ -23,23 +23,24 @@ import (
 	"runtime"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCoreService(cfg *config.CGRConfig, caps *Caps, stopChan chan struct{}) *CoreService {
-	var st *CapsStats
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, stopChan chan struct{}) *CoreService {
+	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
-		st = NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
+		st = engine.NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
 	}
 	return &CoreService{
 		cfg:       cfg,
-		capsStats: st,
+		CapsStats: st,
 	}
 }
 
 type CoreService struct {
 	cfg       *config.CGRConfig
-	capsStats *CapsStats
+	CapsStats *engine.CapsStats
 }
 
 // Shutdown is called to shutdown the service
@@ -49,6 +50,7 @@ func (cS *CoreService) Shutdown() {
 	return
 }
 
+// Status returns the status of the engine
 func (cS *CoreService) Status(arg *utils.TenantWithOpts, reply *map[string]interface{}) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)

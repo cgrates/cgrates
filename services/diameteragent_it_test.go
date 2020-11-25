@@ -43,7 +43,7 @@ func TestDiameterAgentReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	engineShutdown := make(chan struct{}, 1)
-	chS := engine.NewCacheS(cfg, nil)
+	chS := engine.NewCacheS(cfg, nil, nil)
 
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
 	cacheSChan <- chS

@@ -25,14 +25,14 @@ import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewCoreService returns the Core Service
-func NewCoreService(cfg *config.CGRConfig, caps *cores.Caps, server *cores.Server,
-	internalCoreSChan chan rpcclient.ClientConnector, anz *AnalyzerService) servmanager.Service {
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
+	internalCoreSChan chan rpcclient.ClientConnector, anz *AnalyzerService) *CoreService {
 	return &CoreService{
 		connChan: internalCoreSChan,
 		cfg:      cfg,
@@ -47,7 +47,7 @@ type CoreService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
 	server   *cores.Server
-	caps     *cores.Caps
+	caps     *engine.Caps
 	stopChan chan struct{}
 
 	cS       *cores.CoreService
@@ -107,4 +107,11 @@ func (cS *CoreService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (cS *CoreService) ShouldRun() bool {
 	return true
+}
+
+// GetCoreS returns the coreS
+func (cS *CoreService) GetCoreS() *cores.CoreService {
+	cS.RLock()
+	defer cS.RUnlock()
+	return cS.cS
 }

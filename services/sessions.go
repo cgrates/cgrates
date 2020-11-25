@@ -37,7 +37,7 @@ import (
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server, internalChan chan rpcclient.ClientConnector,
 	exitChan chan<- struct{}, connMgr *engine.ConnManager,
-	caps *cores.Caps,
+	caps *engine.Caps,
 	anz *AnalyzerService) servmanager.Service {
 	return &SessionService{
 		connChan: internalChan,
@@ -68,7 +68,7 @@ type SessionService struct {
 	// in order to stop the bircp server if necesary
 	bircpEnabled bool
 	connMgr      *engine.ConnManager
-	caps         *cores.Caps
+	caps         *engine.Caps
 	anz          *AnalyzerService
 }
 

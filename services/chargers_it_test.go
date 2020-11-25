@@ -42,7 +42,7 @@ func TestChargerSReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	cfg.AttributeSCfg().Enabled = true
 	engineShutdown := make(chan struct{}, 1)
-	chS := engine.NewCacheS(cfg, nil)
+	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))

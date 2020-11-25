@@ -42,7 +42,7 @@ func TestApiersReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	engineShutdown := make(chan struct{}, 2)
-	chS := engine.NewCacheS(cfg, nil)
+	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheThresholds))
 	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))

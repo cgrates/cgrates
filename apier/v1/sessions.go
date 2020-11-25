@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/dispatchers"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSessionSv1(sS *sessions.SessionS, caps *cores.Caps) *SessionSv1 {
+func NewSessionSv1(sS *sessions.SessionS, caps *engine.Caps) *SessionSv1 {
 	return &SessionSv1{
 		sS:   sS,
 		caps: caps,
@@ -35,7 +35,7 @@ func NewSessionSv1(sS *sessions.SessionS, caps *cores.Caps) *SessionSv1 {
 // SessionSv1 exports RPC from SessionSv1
 type SessionSv1 struct {
 	sS   *sessions.SessionS
-	caps *cores.Caps
+	caps *engine.Caps
 }
 
 func (ssv1 *SessionSv1) AuthorizeEvent(args *sessions.V1AuthorizeArgs,
