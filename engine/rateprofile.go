@@ -203,11 +203,11 @@ func (rPc *RateProfileCost) CorrectCost(rndDec *int, rndMtd string) {
 		}
 
 	}
-	if rPc.Cost < rPc.MinCost {
+	if rPc.MinCost != 0 && rPc.Cost < rPc.MinCost {
 		rPc.Cost = rPc.MinCost
 		rPc.Altered = append(rPc.Altered, utils.MinCost)
 	}
-	if rPc.Cost > rPc.MaxCost {
+	if rPc.MaxCost != 0 && rPc.Cost > rPc.MaxCost {
 		rPc.Cost = rPc.MaxCost
 		rPc.Altered = append(rPc.Altered, utils.MaxCost)
 	}

@@ -162,7 +162,13 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 	if ordRts, err = orderRatesOnIntervals(aRates, sTime, usage, true, 1000000); err != nil {
 		return
 	}
-	rpCost = &engine.RateProfileCost{ID: rtPfl.ID}
+	rpCost = &engine.RateProfileCost{
+		ID:               rtPfl.ID,
+		MinCost:          rtPfl.MinCost,
+		MaxCost:          rtPfl.MaxCost,
+		RoundingDecimals: rtPfl.RoundingDecimals,
+		RoundingMethod:   rtPfl.RoundingMethod,
+	}
 	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, 0, usage); err != nil {
 		return nil, err
 	}
