@@ -1058,3 +1058,60 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, newAttrReloadCache)
 	}
 }
+
+func TestStartTimeNow(t *testing.T) {
+	testCostEventStruct := &ArgsCostForEvent{
+		RateProfileIDs: []string{"123", "456", "789"},
+		CGREventWithOpts: &CGREventWithOpts{
+			Opts: map[string]interface{}{},
+			CGREvent: &CGREvent{
+				Tenant: "*req.CGRID",
+				ID:     "",
+				Event:  map[string]interface{}{},
+			},
+		},
+	}
+	if result, err := testCostEventStruct.StartTime(""); err != nil {
+		t.Errorf("Expected <nil> , received <%+v>", err)
+	} else if !reflect.DeepEqual(time.Now().Minute(), result.Minute()) {
+		t.Errorf("Expected <%+v> , received <%+v>", time.Now().Minute(), result.Minute())
+	}
+
+}
+
+func TestStartTime(t *testing.T) {
+	testCostEventStruct := &ArgsCostForEvent{
+		RateProfileIDs: []string{"123", "456", "789"},
+		CGREventWithOpts: &CGREventWithOpts{
+			Opts: map[string]interface{}{"*ratesStartTime": "2018-01-07T17:00:10Z"},
+			CGREvent: &CGREvent{
+				Tenant: "*req.CGRID",
+				ID:     "",
+				Event:  map[string]interface{}{},
+			},
+		},
+	}
+	if result, err := testCostEventStruct.StartTime(""); err != nil {
+		t.Errorf("Expected <nil> , received <%+v>", err)
+	} else if !reflect.DeepEqual(result.String(), "2018-01-07 17:00:10 +0000 UTC") {
+		t.Errorf("Expected <2018-01-07 17:00:10 +0000 UTC> , received <%+v>", result)
+	}
+}
+
+func TestStartTimeError(t *testing.T) {
+	testCostEventStruct := &ArgsCostForEvent{
+		RateProfileIDs: []string{"123", "456", "789"},
+		CGREventWithOpts: &CGREventWithOpts{
+			Opts: map[string]interface{}{"*ratesStartTime": "start"},
+			CGREvent: &CGREvent{
+				Tenant: "*req.CGRID",
+				ID:     "",
+				Event:  map[string]interface{}{},
+			},
+		},
+	}
+	_, err := testCostEventStruct.StartTime("")
+	if err == nil && err.Error() != "received <Unsupported time format" {
+		t.Errorf("Expected <nil> , received <%+v>", err)
+	}
+}
