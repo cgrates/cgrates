@@ -674,3 +674,65 @@ func TestRateProfileCostCorrectCost(t *testing.T) {
 	}
 
 }
+
+func TestRateProfileCostCorrectCostMinCost(t *testing.T) {
+	testRPC := &RateProfileCost{
+		Cost:    0.5,
+		MinCost: 1.5,
+	}
+	testRPC.CorrectCost(utils.IntPointer(2), "")
+	if testRPC.Cost != 1.5 {
+		t.Errorf("\nExpecting: <1.5>,\n Received: <%+v>", testRPC.Cost)
+	}
+}
+
+func TestRateProfileCostCorrectCostMaxCost(t *testing.T) {
+	testRPC := &RateProfileCost{
+		Cost:    2.5,
+		MaxCost: 1.5,
+	}
+	testRPC.CorrectCost(utils.IntPointer(2), "")
+	if testRPC.Cost != 1.5 {
+		t.Errorf("\nExpecting: <1.5>,\n Received: <%+v>", testRPC.Cost)
+	}
+}
+
+func TestRateSIncrementCompressEquals(t *testing.T) {
+	rate1 := &Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				RecurrentFee:  0.06,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	inCr1 := &RateSIncrement{
+		UsageStart:        0,
+		Usage:             time.Minute,
+		Rate:              rate1,
+		IntervalRateIndex: 0,
+		CompressFactor:    1,
+	}
+	inCr2 := &RateSIncrement{
+		UsageStart:        0,
+		Usage:             time.Minute,
+		Rate:              rate1,
+		IntervalRateIndex: 0,
+		CompressFactor:    1,
+	}
+	result := inCr1.CompressEquals(inCr2)
+	if result != true {
+		t.Errorf("\nExpecting: <true>,\n Received: <%+v>", result)
+	}
+}
