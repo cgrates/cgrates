@@ -736,3 +736,265 @@ func TestRateSIncrementCompressEquals(t *testing.T) {
 		t.Errorf("\nExpecting: <true>,\n Received: <%+v>", result)
 	}
 }
+
+func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
+	rate1 := &Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+		},
+		uID: "ID",
+	}
+	rate2 := &Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+		},
+		uID: "ID2",
+	}
+	inCr1 := &RateSIncrement{
+		UsageStart:        0,
+		Usage:             time.Minute,
+		Rate:              rate1,
+		IntervalRateIndex: 0,
+		CompressFactor:    1,
+	}
+	inCr2 := &RateSIncrement{
+		UsageStart:        0,
+		Usage:             time.Minute,
+		Rate:              rate2,
+		IntervalRateIndex: 0,
+		CompressFactor:    1,
+	}
+	result := inCr1.CompressEquals(inCr2)
+	if result != false {
+		t.Errorf("\nExpecting: <false>,\n Received: <%+v>", result)
+	}
+}
+func TestRateSIncrementCompressEqualsCase2(t *testing.T) {
+	rate1 := &Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+		},
+	}
+	inCr1 := &RateSIncrement{
+		UsageStart:        0,
+		Usage:             time.Minute,
+		Rate:              rate1,
+		IntervalRateIndex: 0,
+		CompressFactor:    1,
+	}
+	inCr2 := &RateSIncrement{
+		UsageStart:        0,
+		Usage:             time.Minute,
+		Rate:              rate1,
+		IntervalRateIndex: 1,
+		CompressFactor:    1,
+	}
+	result := inCr1.CompressEquals(inCr2)
+	if result != false {
+		t.Errorf("\nExpecting: <false>,\n Received: <%+v>", result)
+	}
+}
+
+func TestRateSIncrementCompressEqualsCase3(t *testing.T) {
+	rate1 := &Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+		},
+	}
+	inCr1 := &RateSIncrement{
+		UsageStart:        0,
+		Usage:             time.Second,
+		Rate:              rate1,
+		IntervalRateIndex: 1,
+		CompressFactor:    1,
+	}
+	inCr2 := &RateSIncrement{
+		UsageStart:        0,
+		Usage:             time.Minute,
+		Rate:              rate1,
+		IntervalRateIndex: 1,
+		CompressFactor:    1,
+	}
+	result := inCr1.CompressEquals(inCr2)
+	if result != false {
+		t.Errorf("\nExpecting: <false>,\n Received: <%+v>", result)
+	}
+}
+
+func TestRateSIntervalCompressEqualsCase1(t *testing.T) {
+	rate1 := &Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				RecurrentFee:  0.06,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	rateSintrv1 := &RateSInterval{
+		UsageStart: 0,
+		Increments: []*RateSIncrement{
+			{
+				UsageStart:        0,
+				Usage:             time.Minute,
+				Rate:              rate1,
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+			},
+			{
+				UsageStart:        time.Minute,
+				Usage:             time.Minute + 10*time.Second,
+				Rate:              rate1,
+				IntervalRateIndex: 1,
+				CompressFactor:    70,
+			},
+		},
+		CompressFactor: 1,
+	}
+
+	rateSintrv2 := &RateSInterval{
+		UsageStart: 0,
+		Increments: []*RateSIncrement{
+			{
+				UsageStart:        0,
+				Usage:             time.Minute,
+				Rate:              rate1,
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+			},
+		},
+		CompressFactor: 1,
+	}
+	result := rateSintrv1.CompressEquals(rateSintrv2)
+	if result != false {
+		t.Errorf("\nExpecting <false>,\nReceived <%+v>", result)
+	}
+}
+
+func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
+	rate1 := &Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				RecurrentFee:  0.06,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	rate2 := &Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				RecurrentFee:  0.06,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	rateSintrv1 := &RateSInterval{
+		UsageStart: 0,
+		Increments: []*RateSIncrement{
+			{
+				UsageStart:        0,
+				Usage:             time.Minute,
+				Rate:              rate1,
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+			},
+			{
+				UsageStart:        0,
+				Usage:             time.Second,
+				Rate:              rate1,
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+			},
+		},
+		CompressFactor: 1,
+	}
+
+	rateSintrv2 := &RateSInterval{
+		UsageStart: 1,
+		Increments: []*RateSIncrement{
+			{
+				UsageStart:        0,
+				Usage:             time.Minute,
+				Rate:              rate2,
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+			},
+			{
+				UsageStart:        0,
+				Usage:             time.Minute,
+				Rate:              rate2,
+				IntervalRateIndex: 2,
+				CompressFactor:    1,
+			},
+		},
+		CompressFactor: 0,
+	}
+	result := rateSintrv1.CompressEquals(rateSintrv2)
+	if result != false {
+		t.Errorf("\nExpecting <false>,\nReceived <%+v>", result)
+	}
+}
