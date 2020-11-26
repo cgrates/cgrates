@@ -710,3 +710,109 @@ func TestRateGroupsUnEqual(t *testing.T) {
 		t.Errorf("\nExpecting: <false>,\n Received: <%+v>", result)
 	}
 }
+
+func TestRateGroupsAddRate(t *testing.T) {
+	rateGroupOG := &RateGroups{&RGRate{
+		Value: 2.2,
+	}}
+	rateGroupOther := &RateGroups{&RGRate{
+		Value: 2.2,
+	}}
+	rateGroupOther.AddRate(&RGRate{})
+	if reflect.DeepEqual(rateGroupOther, rateGroupOG) {
+		t.Errorf("\nExpecting: <true>,\n Received: <false>")
+	}
+}
+
+func TestRateGroupsAddRateEmpty(t *testing.T) {
+	rateGroupOG := &RateGroups{&RGRate{
+		Value: 2.2,
+	}}
+	rateGroupOther := &RateGroups{&RGRate{
+		Value: 2.2,
+	}}
+	rateGroupOther.AddRate()
+	if !reflect.DeepEqual(rateGroupOther, rateGroupOG) {
+		t.Errorf("\nExpecting: <false>,\n Received: <true>")
+	}
+}
+
+func TestRateGroupsAddRateSame(t *testing.T) {
+	rateGroupOG := &RateGroups{&RGRate{
+		Value: 2.2,
+	}}
+	rateGroupOther := &RateGroups{&RGRate{
+		Value: 2.2,
+	}}
+	rateGroupOther.AddRate(&RGRate{
+		Value: 2.2,
+	})
+	if !reflect.DeepEqual(rateGroupOther, rateGroupOG) {
+		t.Errorf("\nExpecting: <false>,\n Received: <true>")
+	}
+}
+
+func TestRateIntervalStringDisabled(t *testing.T) {
+	testInterval := &RateInterval{
+		Timing: &RITiming{
+			Years: utils.Years{1000},
+		},
+		Rating: &RIRate{
+			ConnectFee: 2,
+		},
+		Weight: 6.5,
+	}
+	result := testInterval.String_DISABLED()
+	if !reflect.DeepEqual(result, "[1000] [] [] []  ") {
+		t.Errorf("\nExpecting: <[1000] [] [] [] >,\n Received: <%+v>", result)
+	}
+}
+
+func TestRateIntervalEqualError(t *testing.T) {
+	testRateInterval := &RateInterval{
+		Weight: 2,
+	}
+	testRateInterval2 := &RateInterval{}
+	testRateInterval2 = nil
+	result := testRateInterval.Equal(testRateInterval2)
+	if !reflect.DeepEqual(result, false) {
+		t.Errorf("\nExpecting: <false>,\n Received: <%+v>", result)
+	}
+}
+
+func TestRateIntervalGetRateParametersEmpty(t *testing.T) {
+	testRateInterval := &RateInterval{
+		Rating: &RIRate{},
+		Weight: 2,
+	}
+	rate, rateIncrement, rateUnit := testRateInterval.GetRateParameters(time.Second)
+
+	if !reflect.DeepEqual(rate, float64(-1)) {
+		t.Errorf("\nExpecting: <-1>,\n Received: <%+v> ", rate)
+	}
+	if !reflect.DeepEqual(rateIncrement.String(), "-1ns") {
+		t.Errorf("\nExpecting: <-1ns>,\n Received: <%+v> ", rateIncrement.String())
+	}
+	if !reflect.DeepEqual(rateUnit.String(), "-1ns") {
+		t.Errorf("\nExpecting: <-1ns>,\n Received: <%+v> ", rateUnit)
+	}
+}
+
+func TestRateIntervalGetMaxCost(t *testing.T) {
+	testRateInterval := &RateInterval{
+		Weight: 2,
+	}
+	result, result2 := testRateInterval.GetMaxCost()
+	if !reflect.DeepEqual(result, float64(0.0)) || !reflect.DeepEqual(result2, "") {
+		t.Errorf("\nExpecting: <0> and <>,\n Received: <%+v> and <%+v>", result, result2)
+	}
+}
+
+func TestRGRateCloneNil(t *testing.T) {
+	testRate := &RGRate{}
+	testRate = nil
+	result := testRate.Clone()
+	if !reflect.DeepEqual(result, testRate) {
+		t.Errorf("\nExpecting: <nil>,\n Received: <%+v>", result)
+	}
+}
