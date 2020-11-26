@@ -4523,3 +4523,35 @@ func TestAsTPRateProfile(t *testing.T) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eRprf), utils.ToJSON(rcv[0]))
 	}
 }
+
+func TestModelHelperCsvLoadError(t *testing.T) {
+
+	type testStruct struct {
+		Id        int64
+		Tpid      string
+		Tag       string `index:"cat" re:"\w+\s*,\s*"`
+		Prefix    string `index:"1" re:"\+?\d+.?\d*"`
+		CreatedAt time.Time
+	}
+	var testStruct1 testStruct
+	_, err := csvLoad(testStruct1, []string{"TEST_DEST", "+492"})
+	if err == nil || err.Error() != "invalid testStruct.Tag index cat" {
+		t.Errorf("Expecting: <invalid testStruct.Tag index cat>,\nReceived: <%+v>", err)
+	}
+}
+
+func TestModelHelperCsvLoadError2(t *testing.T) {
+	type testStruct struct {
+		Id        int64
+		Tpid      string
+		Tag       string `index:"0" re:"cat"`
+		Prefix    string `index:"1" re:"\+?\d+.?\d*"`
+		CreatedAt time.Time
+	}
+	var testStruct1 testStruct
+	_, err := csvLoad(testStruct1, []string{"TEST_DEST", "+492"})
+
+	if err == nil || err.Error() != "invalid testStruct.Tag value TEST_DEST" {
+		t.Errorf("Expecting: <invalid testStruct.Tag value TEST_DEST>,\nReceived: <%+v>", err)
+	}
+}
