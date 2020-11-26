@@ -202,12 +202,9 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 				break
 			}
 			// make sure we bill from start
-			if iRt.IntervalStart > iRtUsageSIdx {
-				if j == 0 {
-					return nil, fmt.Errorf("intervalStart for rate: <%s> higher than usage: %v",
-						rt.UID(), iRtUsageSIdx)
-				}
-				break // we are pass the start
+			if iRt.IntervalStart > iRtUsageSIdx && j == 0 {
+				return nil, fmt.Errorf("intervalStart for rate: <%s> higher than usage: %v",
+					rt.UID(), iRtUsageSIdx)
 			}
 			isLastIRt := j == len(rt.IntervalRates)-1
 			if !isLastIRt && rt.IntervalRates[j+1].IntervalStart <= iRtUsageSIdx {
@@ -219,9 +216,6 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 				iRtUsageEIdx = rtUsageEIdx
 			} else {
 				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart
-			}
-			if iRtUsageEIdx == time.Duration(0) {
-				return nil, fmt.Errorf("zero usage to be charged with rate: <%s>", rt.UID())
 			}
 			if iRt.Increment == time.Duration(0) {
 				return nil, fmt.Errorf("zero increment to be charged within rate: <%s>", rt.UID())
@@ -249,11 +243,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 				CompressFactor:    cmpFactor,
 				Usage:             iRtUsage,
 			}
-			if len(rIcmts) != 0 && rIcrm.CompressEquals(rIcmts[len(rIcmts)-1]) {
-				rIcmts[len(rIcmts)-1].CompressFactor += rIcrm.CompressFactor
-			} else {
-				rIcmts = append(rIcmts, rIcrm)
-			}
+			rIcmts = append(rIcmts, rIcrm)
 			iRtUsageSIdx += iRtUsage
 
 		}
