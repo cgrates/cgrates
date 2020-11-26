@@ -228,12 +228,12 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *ma
 			if evict {
 				ee.OnEvicted("", nil) // so we can close ie the file
 			}
-			if hasVerbose && sync {
-				metricMapLock.Lock()
-				metricsMap[ee.ID()] = ee.GetMetrics()
-				metricMapLock.Unlock()
-			}
 			if sync {
+				if hasVerbose {
+					metricMapLock.Lock()
+					metricsMap[ee.ID()] = ee.GetMetrics()
+					metricMapLock.Unlock()
+				}
 				wg.Done()
 			}
 		}(!hasCache, eeCfg.Synchronous, ee)

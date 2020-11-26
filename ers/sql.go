@@ -151,12 +151,12 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB) {
 				for i, colName := range colNames {
 					msg[colName] = columns[i]
 				}
+				db = db.Delete(msg) // to ensure we don't read it again
 				if err := rdr.processMessage(msg); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> processing message %s error: %s",
 							utils.ERs, utils.ToJSON(msg), err.Error()))
 				}
-				db = db.Delete(msg) // to ensure we don't read it again
 				if rdr.Config().ProcessedPath != utils.EmptyString {
 					if err = rdr.postCDR(columns); err != nil {
 						utils.Logger.Warning(

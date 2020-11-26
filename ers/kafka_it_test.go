@@ -110,5 +110,5 @@ func TestKafkaER(t *testing.T) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("Timeout")
 	}
-	rdrExit <- struct{}{}
+	close(rdrExit)
 }
