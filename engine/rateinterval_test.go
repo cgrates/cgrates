@@ -575,3 +575,138 @@ func BenchmarkRateIntervalContainsDate(b *testing.B) {
 		i.Contains(d, false)
 	}
 }
+
+func TestRateIntervalCronStringDefault(t *testing.T) {
+	rit := &RITiming{
+		StartTime: "223000",
+	}
+	cron := rit.CronString()
+	if !reflect.DeepEqual(cron, "* * * * * * *") {
+		t.Errorf("\nExpecting: <* * * * * * *>,\n Received: <%+v>", cron)
+	}
+}
+
+func TestRateIntervalCronStringMonthDayNegative(t *testing.T) {
+	rit := &RITiming{
+		StartTime: "223000",
+		MonthDays: utils.MonthDays{-1},
+	}
+	cron := rit.CronString()
+	if !reflect.DeepEqual(cron, "* * * L * * *") {
+		t.Errorf("\nExpecting: <* * * L * * *>,\n Received: <%+v>", cron)
+	}
+}
+
+func TestRateIntervalIsActiveAt(t *testing.T) {
+	rit := &RITiming{}
+	cronActive := rit.IsActive()
+	if !reflect.DeepEqual(cronActive, true) {
+		t.Errorf("\nExpecting: <true>,\n Received: <%+v>", cronActive)
+	}
+}
+
+func TestRateIntervalIsActiveAtNot(t *testing.T) {
+	rit := &RITiming{
+		Years: utils.Years{1000},
+	}
+	cronActive := rit.IsActive()
+	if !reflect.DeepEqual(cronActive, false) {
+		t.Errorf("\nExpecting: <false>,\n Received: <%+v>", cronActive)
+	}
+}
+
+func TestRateIntervalFieldAsInterfaceError(t *testing.T) {
+	rateTest := &RGRate{
+		Value: 2.2,
+	}
+	_, err := rateTest.FieldAsInterface([]string{"FALSE"})
+	if err == nil && err.Error() != "unsupported field prefix: <FALSE>" {
+		t.Errorf("\nExpecting: <unsupported field prefix: <FALSE>>,\n Received: <%+v>", err)
+	}
+}
+
+func TestRateIntervalFieldAsInterfaceError2(t *testing.T) {
+	rateTest := &RGRate{}
+	_, err := rateTest.FieldAsInterface([]string{"value1", "value2"})
+
+	if err == nil && err != utils.ErrNotFound {
+		t.Errorf("\nExpecting: <NOT_FOUND>,\n Received: <%+v>", err)
+	}
+}
+
+func TestRateIntervalFieldAsInterfaceRateIncrement(t *testing.T) {
+	rateTest := &RGRate{
+		RateIncrement: time.Second,
+	}
+	if result, err := rateTest.FieldAsInterface([]string{"RateIncrement"}); err != nil {
+		t.Errorf("\nExpecting: <nil>,\n Received: <%+v>", err)
+	} else if !reflect.DeepEqual(result, time.Second) {
+		t.Errorf("\nExpecting: <1s>,\n Received: <%+v>", result)
+	}
+
+}
+
+func TestRateIntervalFieldAsInterfaceGroupIntervalStart(t *testing.T) {
+	rateTest := &RGRate{
+		GroupIntervalStart: time.Second,
+	}
+	if result, err := rateTest.FieldAsInterface([]string{"GroupIntervalStart"}); err != nil {
+		t.Errorf("\nExpecting: <nil>,\n Received: <%+v>", err)
+	} else if !reflect.DeepEqual(result, time.Second) {
+		t.Errorf("\nExpecting: <1s>,\n Received: <%+v>", result)
+	}
+
+}
+
+func TestRateIntervalFieldAsInterfaceRateUnit(t *testing.T) {
+	rateTest := &RGRate{
+		RateUnit: time.Second,
+	}
+	if result, err := rateTest.FieldAsInterface([]string{"RateUnit"}); err != nil {
+		t.Errorf("\nExpecting: <nil>,\n Received: <%+v>", err)
+	} else if !reflect.DeepEqual(result, time.Second) {
+		t.Errorf("\nExpecting: <1s>,\n Received: <%+v>", result)
+	}
+
+}
+
+func TestRateGroupsEqual(t *testing.T) {
+	rateGroupOG := RateGroups{&RGRate{
+		Value: 2.2,
+	}}
+	rateGroupOther := RateGroups{&RGRate{
+		Value: 2.2,
+	}}
+	result := rateGroupOG.Equal(rateGroupOther)
+	if !reflect.DeepEqual(result, true) {
+		t.Errorf("\nExpecting: <true>,\n Received: <%+v>", result)
+	}
+}
+
+func TestRateGroupsEqualFalse(t *testing.T) {
+	rateGroupOG := RateGroups{&RGRate{
+		Value: 2.2,
+	}}
+	rateGroupOther := RateGroups{&RGRate{
+		Value: 2.5,
+	}}
+	result := rateGroupOG.Equal(rateGroupOther)
+	if !reflect.DeepEqual(result, false) {
+		t.Errorf("\nExpecting: <false>,\n Received: <%+v>", result)
+	}
+}
+
+func TestRateGroupsUnEqual(t *testing.T) {
+	rateGroupOG := RateGroups{&RGRate{
+		Value: 2.2,
+	},
+		&RGRate{},
+	}
+	rateGroupOther := RateGroups{&RGRate{
+		Value: 2.5,
+	}}
+	result := rateGroupOG.Equal(rateGroupOther)
+	if !reflect.DeepEqual(result, false) {
+		t.Errorf("\nExpecting: <false>,\n Received: <%+v>", result)
+	}
+}
