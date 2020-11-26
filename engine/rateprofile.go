@@ -236,7 +236,7 @@ func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
 			return
 		}
 	}
-	return
+	return true
 }
 
 func (rIv *RateSInterval) Cost() *decimal.Big {

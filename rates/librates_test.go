@@ -1593,7 +1593,6 @@ func TestComputeRateSIntervals(t *testing.T) {
 			},
 		},
 	}
-	rt0.Compile()
 
 	rt1 := &engine.Rate{
 		ID: "RATE1",
@@ -1612,7 +1611,18 @@ func TestComputeRateSIntervals(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFILE",
+		Rates: map[string]*engine.Rate{
+			rt0.ID: rt0,
+			rt1.ID: rt1,
+		},
+	}
+	if err := rp.Compile(); err != nil {
+		t.Fatal(err)
+	}
 
 	rts := []*orderedRate{
 		{
@@ -1746,7 +1756,6 @@ func TestComputeRateSIntervals1(t *testing.T) {
 			},
 		},
 	}
-	rt0.Compile()
 
 	rt1 := &engine.Rate{
 		ID: "RATE1",
@@ -1765,7 +1774,18 @@ func TestComputeRateSIntervals1(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFILE",
+		Rates: map[string]*engine.Rate{
+			rt0.ID: rt0,
+			rt1.ID: rt1,
+		},
+	}
+	if err := rp.Compile(); err != nil {
+		t.Fatal(err)
+	}
 
 	ordRts := []*orderedRate{
 		{
@@ -1839,7 +1859,6 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 			},
 		},
 	}
-	rt0.Compile()
 
 	rt1 := &engine.Rate{
 		ID: "RATE1",
@@ -1859,7 +1878,18 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFILE",
+		Rates: map[string]*engine.Rate{
+			rt0.ID: rt0,
+			rt1.ID: rt1,
+		},
+	}
+	if err := rp.Compile(); err != nil {
+		t.Fatal(err)
+	}
 
 	ordRts := []*orderedRate{
 		{
@@ -2070,7 +2100,6 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
 
 	rt2 := &engine.Rate{
 		ID: "RATE2",
@@ -2095,7 +2124,19 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFILE",
+		Rates: map[string]*engine.Rate{
+			rt1.ID: rt1,
+			rt2.ID: rt2,
+		},
+	}
+	err := rp.Compile()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	ordRts := []*orderedRate{
 		{
@@ -2223,7 +2264,6 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
 
 	rt2 := &engine.Rate{
 		ID: "RATE2",
@@ -2236,7 +2276,19 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 			},
 		},
 	}
-	rt2.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFILE",
+		Rates: map[string]*engine.Rate{
+			rt1.ID: rt1,
+			rt2.ID: rt2,
+		},
+	}
+	if err := rp.Compile(); err != nil {
+		t.Fatal(err)
+	}
+
 	ordRts := []*orderedRate{
 		{
 			0,
@@ -2244,9 +2296,9 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 		},
 	}
 
-	expected := "intervalStart for rate: <> higher than usage: 0s"
+	expected := "intervalStart for rate: <cgrates.org:RATE_PROFILE:RATE1> higher than usage: 0s"
 	if _, err := computeRateSIntervals(ordRts, 0, 3*time.Minute); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, \nreceived %+v", expected, err)
+		t.Errorf("Expected %+v, \nreceived %+q", expected, err)
 	}
 }
 
@@ -2350,7 +2402,6 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
 
 	rt2 := &engine.Rate{
 		ID: "RATE2",
@@ -2369,7 +2420,6 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 			},
 		},
 	}
-	rt2.Compile()
 
 	rt3 := &engine.Rate{
 		ID: "RATE3",
@@ -2388,7 +2438,19 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 			},
 		},
 	}
-	rt3.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFILE",
+		Rates: map[string]*engine.Rate{
+			rt1.ID: rt1,
+			rt2.ID: rt2,
+			rt3.ID: rt3,
+		},
+	}
+	if err := rp.Compile(); err != nil {
+		t.Fatal(err)
+	}
 
 	ordRts := []*orderedRate{
 		{
@@ -2503,7 +2565,6 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
 
 	rt2 := &engine.Rate{
 		ID: "RATE2",
@@ -2522,7 +2583,6 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 			},
 		},
 	}
-	rt2.Compile()
 
 	rt3 := &engine.Rate{
 		ID: "RATE3",
@@ -2535,7 +2595,20 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 			},
 		},
 	}
-	rt3.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFILE",
+		Rates: map[string]*engine.Rate{
+			rt1.ID: rt1,
+			rt2.ID: rt2,
+			rt3.ID: rt3,
+		},
+	}
+	err := rp.Compile()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	ordRates := []*orderedRate{
 		{
@@ -2656,7 +2729,6 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
 
 	rt2 := &engine.Rate{
 		ID: "RATE2",
@@ -2675,7 +2747,6 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
 
 	rtGH := &engine.Rate{
 		ID: "RATE_GOLDEN_HOUR",
@@ -2694,7 +2765,19 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 			},
 		},
 	}
-	rtGH.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFIOLE",
+		Rates: map[string]*engine.Rate{
+			rt1.ID:  rt1,
+			rt2.ID:  rt2,
+			rtGH.ID: rtGH,
+		},
+	}
+	if err := rp.Compile(); err != nil {
+		t.Fatal(err)
+	}
 
 	ordRts := []*orderedRate{
 		{
@@ -2822,7 +2905,6 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
 
 	rt2 := &engine.Rate{
 		ID: "RATE2",
@@ -2847,7 +2929,18 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 			},
 		},
 	}
-	rt2.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFILE",
+		Rates: map[string]*engine.Rate{
+			rt1.ID: rt1,
+			rt2.ID: rt2,
+		},
+	}
+	if err := rp.Compile(); err != nil {
+		t.Fatal(err)
+	}
 
 	ordRts := []*orderedRate{
 		{
@@ -2982,7 +3075,6 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
 
 	rt2 := &engine.Rate{
 		ID: "RATE2",
@@ -3007,7 +3099,18 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 			},
 		},
 	}
-	rt2.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFILE",
+		Rates: map[string]*engine.Rate{
+			rt1.ID: rt1,
+			rt2.ID: rt2,
+		},
+	}
+	if err := rp.Compile(); err != nil {
+		t.Fatal(err)
+	}
 
 	ordRts := []*orderedRate{
 		{
@@ -3105,7 +3208,6 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 			},
 		},
 	}
-	rt1.Compile()
 
 	rt2 := &engine.Rate{
 		ID: "RATE2",
@@ -3124,7 +3226,18 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 			},
 		},
 	}
-	rt2.Compile()
+
+	rp := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_PROFILE",
+		Rates: map[string]*engine.Rate{
+			rt1.ID: rt1,
+			rt2.ID: rt2,
+		},
+	}
+	if err := rp.Compile(); err != nil {
+		t.Fatal(err)
+	}
 
 	ordRts := []*orderedRate{
 		{
