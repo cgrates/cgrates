@@ -255,12 +255,9 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 		rIvl := &engine.RateSInterval{
 			UsageStart:     usageStart,
 			Increments:     rIcmts,
-			CompressFactor: 1}
-		if len(rtIvls) != 0 && rIvl.CompressEquals(rtIvls[len(rtIvls)-1]) {
-			rtIvls[len(rtIvls)-1].CompressFactor += rIvl.CompressFactor
-		} else {
-			rtIvls = append(rtIvls, rIvl)
+			CompressFactor: 1,
 		}
+		rtIvls = append(rtIvls, rIvl)
 		if iRtUsageSIdx >= totalUsage { // charged enough for the usage
 			break
 		}
