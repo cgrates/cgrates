@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -143,4 +144,45 @@ func TestFloatDP(t *testing.T) {
 	} else if s != exp {
 		t.Errorf("Expected: %v ,received:%v", exp, s)
 	}
+}
+
+func TestCapsStatsGetAverageOnEvict(t *testing.T) {
+	st, err := NewStatAverage(1, utils.MetaDynReq, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	cs := &CapsStats{st: st}
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheCapsEvents] = &config.CacheParamCfg{Limit: 2}
+	tmp := Cache
+	Cache = NewCacheS(cfg, nil, cs)
+
+	cs.addSample("1", 10)
+	expAvg := 10.
+	if avg := cs.GetAverage(2); avg != expAvg {
+		t.Errorf("Expected: %v ,received: %v", expAvg, avg)
+	}
+	expPk := 10
+	if pk := cs.GetPeak(); pk != expPk {
+		t.Errorf("Expected: %v ,received:%v", expPk, pk)
+	}
+	cs.addSample("2", 16)
+	expAvg = 13.
+	if avg := cs.GetAverage(2); avg != expAvg {
+		t.Errorf("Expected: %v ,received: %v", expAvg, avg)
+	}
+	expPk = 16
+	if pk := cs.GetPeak(); pk != expPk {
+		t.Errorf("Expected: %v ,received:%v", expPk, pk)
+	}
+	cs.addSample("3", 18)
+	expAvg = 17.
+	if avg := cs.GetAverage(2); avg != expAvg {
+		t.Errorf("Expected: %v ,received: %v", expAvg, avg)
+	}
+	expPk = 18
+	if pk := cs.GetPeak(); pk != expPk {
+		t.Errorf("Expected: %v ,received:%v", expPk, pk)
+	}
+	Cache = tmp
 }
