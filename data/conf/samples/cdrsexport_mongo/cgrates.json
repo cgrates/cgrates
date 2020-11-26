@@ -75,7 +75,7 @@
 				"routingKey": "cgr_cdrs",
 			},
 			"tenant": "cgrates.org",
-			"attempts": 3,
+			"attempts": 4,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],

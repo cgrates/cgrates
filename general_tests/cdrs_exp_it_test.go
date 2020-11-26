@@ -247,10 +247,8 @@ func testCDRsExpExportEvent(t *testing.T) {
 		&engine.ArgV1ProcessEvent{
 			Flags:            []string{"*export:true", utils.MetaRALs},
 			CGREventWithOpts: *cdrsExpEv,
-		}, &reply); err != nil {
+		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() { // some exporters will fail
 		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
 	}
 	time.Sleep(100 * time.Millisecond)
 	filesInDir, _ := ioutil.ReadDir(cdrsExpCfg.GeneralCfg().FailedPostsDir)
@@ -261,7 +259,7 @@ func testCDRsExpExportEvent(t *testing.T) {
 	if err := exec.Command("service", "rabbitmq-server", "start").Run(); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Second)
+	time.Sleep(2 * time.Second)
 	var err error
 	if cdrsExpAMQPCon, err = amqp.Dial("amqp://guest:guest@localhost:5672/"); err != nil {
 		t.Fatal(err)

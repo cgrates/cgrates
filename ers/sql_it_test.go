@@ -184,6 +184,11 @@ func testSQLInitDB(t *testing.T) {
 	}
 	tx.Commit()
 	time.Sleep(10 * time.Millisecond)
+	var result int64
+	db.Table(utils.CDRsTBL).Count(&result)
+	if result != 1 {
+		t.Fatal("Expected table to have only one result ", result)
+	}
 }
 
 func testSQLAddData(t *testing.T) {
@@ -234,28 +239,10 @@ func testSQLReader(t *testing.T) {
 
 func testSQLEmptyTable(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
-	rows, err := db.Table(utils.CDRsTBL).Select("*").Rows()
-	if err != nil {
-		t.Fatal(err)
-	}
-	colNames, err := rows.Columns()
-	if err != nil {
-		t.Fatal(err)
-	}
-	for rows.Next() {
-		columns := make([]interface{}, len(colNames))
-		columnPointers := make([]interface{}, len(colNames))
-		for i := range columns {
-			columnPointers[i] = &columns[i]
-		}
-		if err = rows.Scan(columnPointers...); err != nil {
-			t.Fatal(err)
-		}
-		msg := make(map[string]interface{})
-		for i, colName := range colNames {
-			msg[colName] = columns[i]
-		}
-		t.Fatal("Expected empty table ", utils.ToJSON(msg))
+	var result int64
+	db.Table(utils.CDRsTBL).Count(&result)
+	if result != 0 {
+		t.Fatal("Expected empty table ", result)
 	}
 }
 
@@ -316,7 +303,7 @@ func testSQLStop(t *testing.T) {
 	if _, err := db.DB().Exec(`DROP DATABASE cgrates2;`); err != nil {
 		t.Fatal(err)
 	}
-	rdrExit <- struct{}{}
+	close(rdrExit)
 	db = db.DropTable("cdrs2")
 	db = db.DropTable("cdrs")
 	if err := db.Close(); err != nil {

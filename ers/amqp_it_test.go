@@ -126,5 +126,5 @@ func TestAMQPER(t *testing.T) {
 	if _, err := channel.QueueDelete("cdrs3", false, false, false); err != nil {
 		t.Fatal(err)
 	}
-	rdrExit <- struct{}{}
+	close(rdrExit)
 }

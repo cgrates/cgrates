@@ -267,7 +267,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 		},
 	}
 	var reply string
-	// we expect that the cdr to failed and goes into the failed post directory
+	// we expect that the cdr export to fail and go into the failed post directory
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{CGREventWithOpts: utils.CGREventWithOpts{
 			CGREvent: testCdr1.AsCGREvent()}}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
