@@ -34,6 +34,32 @@ import (
 var cfg *CGRConfig
 var err error
 
+func TestNewDefaultConfigError(t *testing.T) {
+	if _, err = newCGRConfig([]byte(CGRATES_CFG_JSON)); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestNewCgrConfigFromBytesError(t *testing.T) {
+	cfg := []byte(`{
+"cores": {
+	"caps": "0",
+}
+}`)
+	expected := "json: cannot unmarshal string into Go struct field CoreSJsonCfg.Caps of type int"
+	if _, err := newCGRConfig(cfg); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v,\n received %+v", expected, err)
+	}
+}
+
+func TestNewCgrConfigFromBytesDecodeError(t *testing.T) {
+	cfg := []byte(`invalidSection`)
+	expected := "\"invalid character 'i' looking for beginning of value around line 1 and position 1\\n line: \\\"invalidSection\\\"\""
+	if _, err := newCGRConfig(cfg); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v,\n received %+v", expected, err)
+	}
+}
+
 func TestCgrCfgConfigSharing(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
 	SetCgrConfig(cfg)
