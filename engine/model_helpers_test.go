@@ -4099,16 +4099,19 @@ func TestRateProfileToAPI(t *testing.T) {
 		},
 	}
 	eTPRatePrf := &utils.TPRateProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "RP1",
-		FilterIDs:          []string{"*string:~*req.Subject:1001"},
-		Weight:             0,
-		ActivationInterval: new(utils.TPActivationInterval),
-		RoundingMethod:     "*up",
-		RoundingDecimals:   4,
-		MinCost:            0.1,
-		MaxCost:            0.6,
-		MaxCostStrategy:    "*free",
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weight:    0,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "",
+			ExpiryTime:     "",
+		},
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:             "RT_WEEK",
@@ -4577,7 +4580,6 @@ func TestModelHelpersAsMapRatesError(t *testing.T) {
 	if err == nil || err.Error() != "time: invalid duration \"true\"" {
 		t.Errorf("Expecting: <time: invalid duration \"true\">,\n  Received: <%+v>", err)
 	}
-
 }
 
 func TestModelHelpersAsTPRatesError(t *testing.T) {
@@ -4591,9 +4593,11 @@ func TestModelHelpersAsTPRatesError(t *testing.T) {
 
 func TestAPItoModelTPRoutesCase1(t *testing.T) {
 	structTest := &utils.TPRouteProfile{}
+	structTest2 := TPRoutes{}
+	structTest2 = nil
 	result := APItoModelTPRoutes(structTest)
-	if reflect.DeepEqual(result, "[]") {
-		t.Errorf("Expecting: <[]>,\n  Received: <%+v>", result)
+	if !reflect.DeepEqual(structTest2, result) {
+		t.Errorf("Expecting: <%+v>,\n  Received: <%+v>", structTest2, result)
 	}
 }
 
@@ -4624,22 +4628,22 @@ func TestAPItoModelTPRoutesCase2(t *testing.T) {
 		},
 		Weight: 20,
 	}
+
+	expected := "[{\"PK\":0,\"Tpid\":\"TP1\",\"Tenant\":\"cgrates.org\",\"ID\":\"RoutePrf\",\"FilterIDs\":\"FLTR_ACNT_dan;FLTR_DST_DE\",\"ActivationInterval\":\"2014-07-29T15:00:00Z;2014-08-29T15:00:00Z\",\"Sorting\":\"*lc\",\"SortingParameters\":\"PARAM1;PARAM2\",\"RouteID\":\"route1\",\"RouteFilterIDs\":\"FLTR_1;FLTR_2\",\"RouteAccountIDs\":\"Acc1;Acc2\",\"RouteRatingplanIDs\":\"RPL_1;RPL_2\",\"RouteRateProfileIDs\":\"\",\"RouteResourceIDs\":\"ResGroup1;ResGroup2\",\"RouteStatIDs\":\"Stat1;Stat2\",\"RouteWeight\":10,\"RouteBlocker\":false,\"RouteParameters\":\"SortingParam1\",\"Weight\":20,\"CreatedAt\":\"0001-01-01T00:00:00Z\"}]"
 	result := APItoModelTPRoutes(structTest)
-	if result == nil {
-		t.Errorf("Expecting something, received <nil>")
-	}
-	if reflect.DeepEqual(*result[0], "{0 TP1 cgrates.org RoutePrf FLTR_ACNT_dan;FLTR_DST_DE 2014-07-29T15:00:00Z;2014-08-29T15:00:00Z *lc PARAM1;PARAM2 route1 FLTR_1;FLTR_2 Acc1;Acc2 RPL_1;RPL_2  ResGroup1;ResGroup2 Stat1;Stat2 10 false SortingParam1 20 0001-01-01 00:00:00 +0000 UTC}") {
-		t.Errorf("\nExpecting <{0 TP1 cgrates.org RoutePrf FLTR_ACNT_dan;FLTR_DST_DE 2014-07-29T15:00:00Z;2014-08-29T15:00:00Z *lc PARAM1;PARAM2 route1 FLTR_1;FLTR_2 Acc1;Acc2 RPL_1;RPL_2  ResGroup1;ResGroup2 Stat1;Stat2 10 false SortingParam1 20 0001-01-01 00:00:00 +0000 UTC}>,\nReceived  <%+v>", *result[0])
+	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
+		t.Errorf("Expecting: <%+v>,\n  Received: <%+v>", utils.ToJSON(expected), utils.ToJSON(result))
 	}
 
 }
 
 func TestAPItoModelResourceCase1(t *testing.T) {
 	var testStruct *utils.TPResourceProfile
+	var testStruct2 TpResources
 	testStruct = nil
 	result := APItoModelResource(testStruct)
-	if reflect.DeepEqual(result, "[]") {
-		t.Errorf("\nExpecting <[]>,\n Received <%+v>", result)
+	if !reflect.DeepEqual(result, testStruct2) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", testStruct2, result)
 	}
 }
 
@@ -4661,8 +4665,9 @@ func TestAPItoModelResourceCase2(t *testing.T) {
 	}
 
 	result := APItoModelResource(testStruct)
-	if reflect.DeepEqual(*result[0], "{0 LoaderCSVTests cgrates.org ResGroup1  2014-07-29T15:00:00Z;2015-07-29T15:00:00Z Test_TTL 2 test false false 10 TRes1;TRes2 0001-01-01 00:00:00 +0000 UTC}\n") {
-		t.Errorf("\nExpecting <{0 LoaderCSVTests cgrates.org ResGroup1  2014-07-29T15:00:00Z;2015-07-29T15:00:00Z Test_TTL 2 test false false 10 TRes1;TRes2 0001-01-01 00:00:00 +0000 UTC}>,\n Received <%+v>", *result[0])
+	expected := "[{\"PK\":0,\"Tpid\":\"LoaderCSVTests\",\"Tenant\":\"cgrates.org\",\"ID\":\"ResGroup1\",\"FilterIDs\":\"\",\"ActivationInterval\":\"2014-07-29T15:00:00Z;2015-07-29T15:00:00Z\",\"UsageTTL\":\"Test_TTL\",\"Limit\":\"2\",\"AllocationMessage\":\"test\",\"Blocker\":false,\"Stored\":false,\"Weight\":10,\"ThresholdIDs\":\"TRes1;TRes2\",\"CreatedAt\":\"0001-01-01T00:00:00Z\"}]"
+	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
 	}
 }
 
@@ -4682,9 +4687,57 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 		ThresholdIDs:      []string{"TRes1", "TRes2"},
 		AllocationMessage: "test",
 	}
-
 	result := APItoModelResource(testStruct)
-	if reflect.DeepEqual(*result[0], "{0 LoaderCSVTests cgrates.org ResGroup1 FilterID1 2014-07-29T15:00:00Z;2015-07-29T15:00:00Z Test_TTL 2 test false false 10 TRes1;TRes2 0001-01-01 00:00:00 +0000 UTC}\n") {
-		t.Errorf("\nExpecting <{0 LoaderCSVTests cgrates.org ResGroup1 FilterID1 2014-07-29T15:00:00Z;2015-07-29T15:00:00Z Test_TTL 2 test false false 10 TRes1;TRes2 0001-01-01 00:00:00 +0000 UTC}\n}>,\n Received <%+v>", *result[0])
+	expected := "[{\"PK\":0,\"Tpid\":\"LoaderCSVTests\",\"Tenant\":\"cgrates.org\",\"ID\":\"ResGroup1\",\"FilterIDs\":\"FilterID1\",\"ActivationInterval\":\"2014-07-29T15:00:00Z;2015-07-29T15:00:00Z\",\"UsageTTL\":\"Test_TTL\",\"Limit\":\"2\",\"AllocationMessage\":\"test\",\"Blocker\":false,\"Stored\":false,\"Weight\":10,\"ThresholdIDs\":\"TRes1;TRes2\",\"CreatedAt\":\"0001-01-01T00:00:00Z\"},{\"PK\":0,\"Tpid\":\"LoaderCSVTests\",\"Tenant\":\"cgrates.org\",\"ID\":\"ResGroup1\",\"FilterIDs\":\"FilterID2\",\"ActivationInterval\":\"\",\"UsageTTL\":\"\",\"Limit\":\"\",\"AllocationMessage\":\"\",\"Blocker\":false,\"Stored\":false,\"Weight\":0,\"ThresholdIDs\":\"\",\"CreatedAt\":\"0001-01-01T00:00:00Z\"}]"
+	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
 	}
+}
+
+func TestRouteProfileToAPICase1(t *testing.T) {
+	structTest := &RouteProfile{
+		FilterIDs: []string{"FilterID1", "FilterID2"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2020, time.April,
+				11, 21, 34, 01, 0, time.UTC),
+			ExpiryTime: time.Date(2020, time.April,
+				12, 21, 34, 01, 0, time.UTC),
+		},
+		SortingParameters: []string{"Param1", "Param2"},
+		Routes: []*Route{
+			&Route{ID: "ResGroup2"},
+		},
+	}
+	expected := "{\"TPid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"FilterIDs\":[\"FilterID1\",\"FilterID2\"],\"ActivationInterval\":{\"ActivationTime\":\"2020-04-11T21:34:01Z\",\"ExpiryTime\":\"2020-04-12T21:34:01Z\"},\"Sorting\":\"\",\"SortingParameters\":[\"Param1\",\"Param2\"],\"Routes\":[{\"ID\":\"ResGroup2\",\"FilterIDs\":null,\"AccountIDs\":null,\"RatingPlanIDs\":null,\"RateProfileIDs\":null,\"ResourceIDs\":null,\"StatIDs\":null,\"Weight\":0,\"Blocker\":false,\"RouteParameters\":\"\"}],\"Weight\":0}"
+	result := RouteProfileToAPI(structTest)
+	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	}
+}
+
+func TestRateProfileToAPIWithActInterval(t *testing.T) {
+	testProfile := &RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2020, time.April,
+				11, 21, 34, 01, 0, time.UTC),
+			ExpiryTime: time.Date(2020, time.April,
+				12, 21, 34, 01, 0, time.UTC),
+		},
+		Weight:           0,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates:            map[string]*Rate{},
+	}
+	expected := "{\"TPid\":\"\",\"Tenant\":\"cgrates.org\",\"ID\":\"RP1\",\"FilterIDs\":[\"*string:~*req.Subject:1001\"],\"ActivationInterval\":{\"ActivationTime\":\"2020-04-11T21:34:01Z\",\"ExpiryTime\":\"2020-04-12T21:34:01Z\"},\"Weight\":0,\"RoundingMethod\":\"*up\",\"RoundingDecimals\":4,\"MinCost\":0.1,\"MaxCost\":0.6,\"MaxCostStrategy\":\"*free\",\"Rates\":{}}"
+	result := RateProfileToAPI(testProfile)
+	if !reflect.DeepEqual(utils.ToJSON(*result), expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	}
+
 }
