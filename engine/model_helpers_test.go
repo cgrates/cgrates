@@ -4741,3 +4741,132 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 	}
 
 }
+
+func TestModelHelpersAPItoRateProfileErrorTime(t *testing.T) {
+	testStruct := &utils.TPRateProfile{
+		TPid:      "",
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "cat",
+			ExpiryTime:     "cat2",
+		},
+		Weight:           0,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates:            map[string]*utils.TPRate{},
+	}
+	_, err := APItoRateProfile(testStruct, utils.EmptyString)
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoRateProfileError1(t *testing.T) {
+	testStruct := &utils.TPRateProfile{
+		TPid:             "",
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*utils.TPRate{
+			"RT_WEEK": {
+				ID:             "RT_WEEK",
+				Weight:         0,
+				ActivationTime: "* * * * 1-5",
+				IntervalRates: []*utils.TPIntervalRate{
+					{
+						IntervalStart: "cat",
+						RecurrentFee:  0.12,
+						Unit:          "1m0s",
+						Increment:     "1m0s",
+					},
+				},
+			},
+		},
+	}
+
+	_, err := APItoRateProfile(testStruct, utils.EmptyString)
+	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
+		t.Errorf("\n<time: invalid duration \"cat\">,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoRateProfileError2(t *testing.T) {
+	testStruct := &utils.TPRateProfile{
+		TPid:             "",
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*utils.TPRate{
+			"RT_WEEK": {
+				ID:             "RT_WEEK",
+				Weight:         0,
+				ActivationTime: "* * * * 1-5",
+				IntervalRates: []*utils.TPIntervalRate{
+					{
+						IntervalStart: "0s",
+						RecurrentFee:  0.12,
+						Unit:          "cat",
+						Increment:     "1m0s",
+					},
+				},
+			},
+		},
+	}
+
+	_, err := APItoRateProfile(testStruct, utils.EmptyString)
+	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
+		t.Errorf("\n<time: invalid duration \"cat\">,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoRateProfileError3(t *testing.T) {
+	testStruct := &utils.TPRateProfile{
+		TPid:             "",
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*utils.TPRate{
+			"RT_WEEK": {
+				ID:             "RT_WEEK",
+				Weight:         0,
+				ActivationTime: "* * * * 1-5",
+				IntervalRates: []*utils.TPIntervalRate{
+					{
+						IntervalStart: "0s",
+						RecurrentFee:  0.12,
+						Unit:          "1s",
+						Increment:     "cat",
+					},
+				},
+			},
+		},
+	}
+
+	_, err := APItoRateProfile(testStruct, utils.EmptyString)
+	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
+		t.Errorf("\n<time: invalid duration \"cat\">,\n Received <%+v>", err)
+	}
+}
