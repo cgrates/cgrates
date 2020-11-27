@@ -596,30 +596,37 @@ func testV1RatePrfStopEngine(t *testing.T) {
 }
 
 func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
-	rateProfile := &engine.RateProfile{
-		ID:               "RPWithoutTenant",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
-		Rates: map[string]*engine.Rate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*engine.IntervalRate{
-					{
-						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+	rateProfile := &RateProfileWithCache{
+		RateProfileWithOpts: &engine.RateProfileWithOpts{
+			RateProfile: &engine.RateProfile{
+				ID:               "RPWithoutTenant",
+				FilterIDs:        []string{"*string:~*req.Subject:1001"},
+				Weight:           0,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4,
+				MinCost:          0.1,
+				MaxCost:          0.6,
+				MaxCostStrategy:  "*free",
+				Rates: map[string]*engine.Rate{
+					"RT_WEEK": {
+						ID:              "RT_WEEK",
+						Weight:          0,
+						ActivationTimes: "* * * * 1-5",
+						IntervalRates: []*engine.IntervalRate{
+							{
+								IntervalStart: 0,
+								RecurrentFee:  0.12,
+								Unit:          time.Minute,
+								Increment:     time.Minute,
+							},
+						},
 					},
 				},
 			},
 		},
+	}
+	if *encoding == utils.MetaGOB {
+		rateProfile.Rates["RT_WEEK"].FilterIDs = nil
 	}
 	var reply string
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile, rateProfile, &reply); err != nil {
@@ -633,8 +640,8 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "RPWithoutTenant"}},
 		&result); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result, rateProfile) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rateProfile), utils.ToJSON(result))
+	} else if !reflect.DeepEqual(result, rateProfile.RateProfile) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rateProfile.RateProfile), utils.ToJSON(result))
 	}
 }
 
@@ -693,62 +700,71 @@ func testV1RatePrfGetRateProfileIDsCount(t *testing.T) {
 }
 
 func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
-	rPrf := &engine.RateProfile{
-		ID:               "SpecialRate",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
-		Rates: map[string]*engine.Rate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*engine.IntervalRate{
-					{
-						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+	rPrf := &RateProfileWithCache{
+		RateProfileWithOpts: &engine.RateProfileWithOpts{
+			RateProfile: &engine.RateProfile{
+				ID:               "SpecialRate",
+				FilterIDs:        []string{"*string:~*req.Subject:1001"},
+				Weight:           0,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4,
+				MinCost:          0.1,
+				MaxCost:          0.6,
+				MaxCostStrategy:  "*free",
+				Rates: map[string]*engine.Rate{
+					"RT_WEEK": {
+						ID:              "RT_WEEK",
+						Weight:          0,
+						ActivationTimes: "* * * * 1-5",
+						IntervalRates: []*engine.IntervalRate{
+							{
+								IntervalStart: 0,
+								RecurrentFee:  0.12,
+								Unit:          time.Minute,
+								Increment:     time.Minute,
+							},
+							{
+								IntervalStart: time.Minute,
+								RecurrentFee:  0.06,
+								Unit:          time.Minute,
+								Increment:     time.Second,
+							},
+						},
 					},
-					{
-						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+					"RT_WEEKEND": {
+						ID:              "RT_WEEKEND",
+						Weight:          10,
+						ActivationTimes: "* * * * 0,6",
+						IntervalRates: []*engine.IntervalRate{
+							{
+								IntervalStart: 0,
+								RecurrentFee:  0.06,
+								Unit:          time.Minute,
+								Increment:     time.Second,
+							},
+						},
 					},
-				},
-			},
-			"RT_WEEKEND": {
-				ID:              "RT_WEEKEND",
-				Weight:          10,
-				ActivationTimes: "* * * * 0,6",
-				IntervalRates: []*engine.IntervalRate{
-					{
-						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
-					},
-				},
-			},
-			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
-				ActivationTimes: "* * 24 12 *",
-				IntervalRates: []*engine.IntervalRate{
-					{
-						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+					"RT_CHRISTMAS": {
+						ID:              "RT_CHRISTMAS",
+						Weight:          30,
+						ActivationTimes: "* * 24 12 *",
+						IntervalRates: []*engine.IntervalRate{
+							{
+								IntervalStart: 0,
+								RecurrentFee:  0.06,
+								Unit:          time.Minute,
+								Increment:     time.Second,
+							},
+						},
 					},
 				},
 			},
 		},
+	}
+	if *encoding == utils.MetaGOB {
+		rPrf.Rates["RT_WEEK"].FilterIDs = nil
+		rPrf.Rates["RT_WEEKEND"].FilterIDs = nil
+		rPrf.Rates["RT_CHRISTMAS"].FilterIDs = nil
 	}
 	var reply string
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfileRates, rPrf, &reply); err != nil {
@@ -762,8 +778,8 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "SpecialRate"}},
 		&rply); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(rPrf, rply) {
-		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(rPrf), utils.ToJSON(rply))
+	} else if !reflect.DeepEqual(rPrf.RateProfile, rply) {
+		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(rPrf.RateProfile), utils.ToJSON(rply))
 	}
 }
 
@@ -798,12 +814,16 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 			},
 		},
 	}
-	rPrf := &engine.RateProfile{
-		ID:        "DefaultRate",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weight:    10,
-		Rates: map[string]*engine.Rate{
-			"RATE1": rate1,
+	rPrf := &RateProfileWithCache{
+		RateProfileWithOpts: &engine.RateProfileWithOpts{
+			RateProfile: &engine.RateProfile{
+				ID:        "DefaultRate",
+				FilterIDs: []string{"*string:~*req.Subject:1001"},
+				Weight:    10,
+				Rates: map[string]*engine.Rate{
+					"RATE1": rate1,
+				},
+			},
 		},
 	}
 	var reply string
@@ -828,21 +848,17 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 	exp := &engine.RateProfileCost{
 		ID:   "DefaultRate",
 		Cost: 0.12,
-		RateSIntervals: []*engine.RateSInterval{
-			&engine.RateSInterval{
-				UsageStart: 0,
-				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
-						UsageStart:        0,
-						Usage:             time.Minute,
-						Rate:              rate1,
-						IntervalRateIndex: 0,
-						CompressFactor:    1,
-					},
-				},
-				CompressFactor: 1,
-			},
-		},
+		RateSIntervals: []*engine.RateSInterval{{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{{
+				UsageStart:        0,
+				Usage:             time.Minute,
+				Rate:              rate1,
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+			}},
+			CompressFactor: 1,
+		}},
 	}
 	if err := ratePrfRpc.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err != nil {
 		t.Error(err)
@@ -891,17 +907,17 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 		ID:   "DefaultRate",
 		Cost: 0.19,
 		RateSIntervals: []*engine.RateSInterval{
-			&engine.RateSInterval{
+			{
 				UsageStart: 0,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        0,
 						Usage:             time.Minute,
 						Rate:              rate1,
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 					},
-					&engine.RateSIncrement{
+					{
 						UsageStart:        time.Minute,
 						Usage:             time.Minute + 10*time.Second,
 						Rate:              rate1,
@@ -938,17 +954,17 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 		ID:   "DefaultRate",
 		Cost: 15.075,
 		RateSIntervals: []*engine.RateSInterval{
-			&engine.RateSInterval{
+			{
 				UsageStart: 0,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        0,
 						Usage:             time.Minute,
 						Rate:              rate1,
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 					},
-					&engine.RateSIncrement{
+					{
 						UsageStart:        time.Minute,
 						Usage:             4*time.Hour + 9*time.Minute + 15*time.Second,
 						Rate:              rate1,
@@ -1029,10 +1045,10 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 		ID:   "DefaultRate",
 		Cost: 0.12,
 		RateSIntervals: []*engine.RateSInterval{
-			&engine.RateSInterval{
+			{
 				UsageStart: 0,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        0,
 						Usage:             time.Minute,
 						Rate:              rate1,
@@ -1133,17 +1149,17 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 		ID:   "DefaultRate",
 		Cost: 0.19,
 		RateSIntervals: []*engine.RateSInterval{
-			&engine.RateSInterval{
+			{
 				UsageStart: 0,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        0,
 						Usage:             time.Minute,
 						Rate:              rate1,
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 					},
-					&engine.RateSIncrement{
+					{
 						UsageStart:        time.Minute,
 						Usage:             time.Minute + 10*time.Second,
 						Rate:              rate1,
@@ -1181,17 +1197,17 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 		ID:   "DefaultRate",
 		Cost: 15.075,
 		RateSIntervals: []*engine.RateSInterval{
-			&engine.RateSInterval{
+			{
 				UsageStart: 0,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        0,
 						Usage:             time.Minute,
 						Rate:              rate1,
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 					},
-					&engine.RateSIncrement{
+					{
 						UsageStart:        time.Minute,
 						Usage:             4*time.Hour + 9*time.Minute + 15*time.Second,
 						Rate:              rate1,
@@ -1234,22 +1250,24 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 		ID:              "RT_CHRISTMAS",
 		Weight:          30,
 		ActivationTimes: "* * 24 12 *",
-		IntervalRates: []*engine.IntervalRate{
-			{
-				IntervalStart: 0,
-				RecurrentFee:  0.06,
-				Unit:          time.Minute,
-				Increment:     time.Second,
-			},
-		},
+		IntervalRates: []*engine.IntervalRate{{
+			IntervalStart: 0,
+			RecurrentFee:  0.06,
+			Unit:          time.Minute,
+			Increment:     time.Second,
+		}},
 	}
-	rPrf := &engine.RateProfile{
-		ID:        "RateChristmas",
-		FilterIDs: []string{"*string:~*req.Subject:1002"},
-		Weight:    50,
-		Rates: map[string]*engine.Rate{
-			"RATE1":          rate1,
-			"RATE_CHRISTMAS": rtChristmas,
+	rPrf := &RateProfileWithCache{
+		RateProfileWithOpts: &engine.RateProfileWithOpts{
+			RateProfile: &engine.RateProfile{
+				ID:        "RateChristmas",
+				FilterIDs: []string{"*string:~*req.Subject:1002"},
+				Weight:    50,
+				Rates: map[string]*engine.Rate{
+					"RATE1":          rate1,
+					"RATE_CHRISTMAS": rtChristmas,
+				},
+			},
 		},
 	}
 	var reply string
@@ -1279,17 +1297,17 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 		ID:   "RateChristmas",
 		Cost: 93.725,
 		RateSIntervals: []*engine.RateSInterval{
-			&engine.RateSInterval{
+			{
 				UsageStart: 0,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        0,
 						Usage:             time.Minute,
 						Rate:              rate1,
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 					},
-					&engine.RateSIncrement{
+					{
 						UsageStart:        1 * time.Minute,
 						Usage:             59 * time.Minute,
 						Rate:              rate1,
@@ -1299,10 +1317,10 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&engine.RateSInterval{
+			{
 				UsageStart: time.Hour,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        time.Hour,
 						Usage:             24 * time.Hour,
 						Rate:              rtChristmas,
@@ -1312,10 +1330,10 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&engine.RateSInterval{
+			{
 				UsageStart: 25 * time.Hour,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        25 * time.Hour,
 						Usage:             735 * time.Second,
 						Rate:              rate1,
@@ -1382,14 +1400,18 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 			},
 		},
 	}
-	rPrf := &engine.RateProfile{
-		ID:        "RateNewYear",
-		FilterIDs: []string{"*string:~*req.Subject:1003"},
-		Weight:    50,
-		Rates: map[string]*engine.Rate{
-			"RATE1":     rate1,
-			"NEW_YEAR1": rtNewYear1,
-			"NEW_YEAR2": rtNewYear2,
+	rPrf := &RateProfileWithCache{
+		RateProfileWithOpts: &engine.RateProfileWithOpts{
+			RateProfile: &engine.RateProfile{
+				ID:        "RateNewYear",
+				FilterIDs: []string{"*string:~*req.Subject:1003"},
+				Weight:    50,
+				Rates: map[string]*engine.Rate{
+					"RATE1":     rate1,
+					"NEW_YEAR1": rtNewYear1,
+					"NEW_YEAR2": rtNewYear2,
+				},
+			},
 		},
 	}
 	var reply string
@@ -1419,17 +1441,17 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 		ID:   "RateNewYear",
 		Cost: 157.925,
 		RateSIntervals: []*engine.RateSInterval{
-			&engine.RateSInterval{
+			{
 				UsageStart: 0,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        0,
 						Usage:             time.Minute,
 						Rate:              rate1,
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 					},
-					&engine.RateSIncrement{
+					{
 						UsageStart:        1 * time.Minute,
 						Usage:             119 * time.Minute,
 						Rate:              rate1,
@@ -1439,10 +1461,10 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&engine.RateSInterval{
+			{
 				UsageStart: 2 * time.Hour,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        2 * time.Hour,
 						Usage:             12 * time.Hour,
 						Rate:              rtNewYear1,
@@ -1452,10 +1474,10 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&engine.RateSInterval{
+			{
 				UsageStart: 14 * time.Hour,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        14 * time.Hour,
 						Usage:             46800 * time.Second,
 						Rate:              rtNewYear2,
@@ -1465,10 +1487,10 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			&engine.RateSInterval{
+			{
 				UsageStart: 27 * time.Hour,
 				Increments: []*engine.RateSIncrement{
-					&engine.RateSIncrement{
+					{
 						UsageStart:        27 * time.Hour,
 						Usage:             29535 * time.Second,
 						Rate:              rate1,

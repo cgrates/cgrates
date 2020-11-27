@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/gob"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -31,7 +30,6 @@ import (
 	"net/http"
 	"net/http/pprof"
 	"net/rpc"
-	"net/url"
 	"reflect"
 	"strings"
 	"sync"
@@ -45,14 +43,6 @@ import (
 	"github.com/cenkalti/rpc2"
 	"golang.org/x/net/websocket"
 )
-
-func init() {
-	gob.Register(map[string]interface{}{})
-	gob.Register([]interface{}{})
-	gob.Register(time.Duration(0))
-	gob.Register(time.Time{})
-	gob.Register(url.Values{})
-}
 
 func NewServer(caps *engine.Caps) (s *Server) {
 	return &Server{

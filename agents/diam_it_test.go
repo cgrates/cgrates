@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -1433,12 +1434,14 @@ func testDiamItEmulateTerminate(t *testing.T) {
 	}
 	var result string
 	//add the second charger
-	chargerProfile := &engine.ChargerProfile{
-		Tenant:       "cgrates.com",
-		ID:           "CustomCharger",
-		RunID:        "CustomCharger",
-		AttributeIDs: []string{"*constant:*req.Category:custom_charger"},
-		Weight:       20,
+	chargerProfile := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.com",
+			ID:           "CustomCharger",
+			RunID:        "CustomCharger",
+			AttributeIDs: []string{"*constant:*req.Category:custom_charger"},
+			Weight:       20,
+		},
 	}
 
 	if err := apierRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
@@ -1447,12 +1450,14 @@ func testDiamItEmulateTerminate(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add the second charger
-	chargerProfile2 := &engine.ChargerProfile{
-		Tenant:       "cgrates.com",
-		ID:           "Default",
-		RunID:        "*default",
-		AttributeIDs: []string{"*none"},
-		Weight:       20,
+	chargerProfile2 := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.com",
+			ID:           "Default",
+			RunID:        "*default",
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
 	}
 
 	if err := apierRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile2, &result); err != nil {

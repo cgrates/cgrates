@@ -170,11 +170,37 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		"terminate_attempts":  5.,
 	}
 	if *encoding == utils.MetaGOB {
-		var empty []interface{}
-		exp["replication_conns"] = empty
-		exp["scheduler_conns"] = empty
-		exp["stats_conns"] = empty
-		exp["thresholds_conns"] = empty
+		var empty []string
+		exp = map[string]interface{}{
+			"enabled":               true,
+			"listen_bijson":         "127.0.0.1:2014",
+			"chargers_conns":        []string{utils.MetaInternal},
+			"rals_conns":            []string{utils.MetaInternal},
+			"resources_conns":       []string{utils.MetaLocalHost},
+			"thresholds_conns":      empty,
+			"stats_conns":           empty,
+			"routes_conns":          []string{utils.MetaLocalHost},
+			"attributes_conns":      []string{utils.MetaLocalHost},
+			"cdrs_conns":            []string{utils.MetaInternal},
+			"replication_conns":     empty,
+			"scheduler_conns":       empty,
+			"session_indexes":       []string{"OriginID"},
+			"client_protocol":       1.,
+			"terminate_attempts":    5,
+			"channel_sync_interval": "0",
+			"debit_interval":        "0",
+			"session_ttl":           "0",
+			"store_session_costs":   false,
+			"min_dur_low_balance":   "0",
+			"alterable_fields":      empty,
+			"stir": map[string]interface{}{
+				"allowed_attest":      []string{utils.META_ANY},
+				"default_attest":      "A",
+				"payload_maxduration": "-1",
+				"privatekey_path":     "",
+				"publickey_path":      "",
+			},
+		}
 	}
 	exp = map[string]interface{}{
 		config.SessionSJson: exp,
@@ -220,6 +246,39 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 			"privatekey_path":     "",
 			"publickey_path":      "",
 		},
+	}
+	if *encoding == utils.MetaGOB {
+		var empty []string
+		exp = map[string]interface{}{
+			"enabled":               true,
+			"listen_bijson":         "127.0.0.1:2014",
+			"chargers_conns":        []string{utils.MetaInternal},
+			"rals_conns":            []string{utils.MetaInternal},
+			"resources_conns":       []string{utils.MetaLocalHost},
+			"thresholds_conns":      empty,
+			"stats_conns":           empty,
+			"routes_conns":          []string{utils.MetaLocalHost},
+			"attributes_conns":      []string{utils.MetaLocalHost},
+			"cdrs_conns":            []string{utils.MetaInternal},
+			"replication_conns":     empty,
+			"scheduler_conns":       empty,
+			"session_indexes":       []string{"OriginID"},
+			"client_protocol":       1.,
+			"terminate_attempts":    5,
+			"channel_sync_interval": "0",
+			"debit_interval":        "0",
+			"session_ttl":           "0",
+			"store_session_costs":   false,
+			"min_dur_low_balance":   "0",
+			"alterable_fields":      empty,
+			"stir": map[string]interface{}{
+				"allowed_attest":      []string{utils.META_ANY},
+				"default_attest":      "A",
+				"payload_maxduration": "-1",
+				"privatekey_path":     "",
+				"publickey_path":      "",
+			},
+		}
 	}
 	exp = map[string]interface{}{
 		config.SessionSJson: exp,

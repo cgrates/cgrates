@@ -20,7 +20,9 @@ package engine
 
 import (
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
+	"net/url"
 	"runtime"
 	"sync"
 	"time"
@@ -80,6 +82,16 @@ func init() {
 	gob.Register(new(StatDistinct))
 
 	gob.Register(new(HTTPPosterRequest))
+
+	gob.Register([]interface{}{})
+	gob.Register([]map[string]interface{}{})
+	gob.Register(map[string]interface{}{})
+	gob.Register(map[string][]map[string]interface{}{})
+	gob.Register(map[string]string{})
+	gob.Register(time.Duration(0))
+	gob.Register(time.Time{})
+	gob.Register(url.Values{})
+	gob.Register(json.RawMessage{})
 }
 
 //SetCache shared the cache from other subsystems

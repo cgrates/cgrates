@@ -149,7 +149,11 @@ func testReloadVerifyFirstReload(t *testing.T) {
 	} else if mp[utils.EnabledCfg] != true {
 		t.Errorf("Expecting: <true>, received: <%+v>", mp[utils.EnabledCfg])
 	} else if readers, canConvert := mp[utils.ReadersCfg].([]interface{}); !canConvert {
-		t.Errorf("Cannot cast Readers to slice")
+		if readers, canConvert := mp[utils.ReadersCfg].([]map[string]interface{}); !canConvert { // in case of gob
+			t.Errorf("Cannot cast Readers to slice<%T>", mp[utils.ReadersCfg])
+		} else if len(readers) != 3 { // 2 active readers and 1 default
+			t.Errorf("Expecting: <2>, received: <%+v>", len(readers))
+		}
 	} else if len(readers) != 3 { // 2 active readers and 1 default
 		t.Errorf("Expecting: <2>, received: <%+v>", len(readers))
 	}
