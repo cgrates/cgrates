@@ -4556,7 +4556,7 @@ func TestModelHelperCsvLoadError2(t *testing.T) {
 	}
 }
 
-func TestModelHelperCsvDumpError(t *testing.T) {
+func TestModelHelpersCsvDumpError(t *testing.T) {
 	type testStruct struct {
 		Id        int64
 		Tpid      string
@@ -4567,6 +4567,124 @@ func TestModelHelperCsvDumpError(t *testing.T) {
 	var testStruct1 testStruct
 	_, err := CsvDump(testStruct1)
 	if err == nil || err.Error() != "invalid testStruct.Tag index cat" {
-		t.Errorf("Expecting: <invalid testStruct.Tag index cat>,\nReceived: <%+v>", err)
+		t.Errorf("\nExpecting: <invalid testStruct.Tag index cat>,\n  Received: <%+v>", err)
+	}
+}
+
+func TestModelHelpersAsMapRatesError(t *testing.T) {
+	tps := TpRates{{RateUnit: "true"}}
+	_, err := tps.AsMapRates()
+	if err == nil || err.Error() != "time: invalid duration \"true\"" {
+		t.Errorf("Expecting: <time: invalid duration \"true\">,\n  Received: <%+v>", err)
+	}
+
+}
+
+func TestModelHelpersAsTPRatesError(t *testing.T) {
+	tps := TpRates{{RateUnit: "true"}}
+	_, err := tps.AsTPRates()
+	if err == nil || err.Error() != "time: invalid duration \"true\"" {
+		t.Errorf("Expecting: <time: invalid duration \"true\">,\n  Received: <%+v>", err)
+	}
+
+}
+
+func TestAPItoModelTPRoutesCase1(t *testing.T) {
+	structTest := &utils.TPRouteProfile{}
+	result := APItoModelTPRoutes(structTest)
+	if reflect.DeepEqual(result, "[]") {
+		t.Errorf("Expecting: <[]>,\n  Received: <%+v>", result)
+	}
+}
+
+func TestAPItoModelTPRoutesCase2(t *testing.T) {
+	structTest := &utils.TPRouteProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "RoutePrf",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "2014-08-29T15:00:00Z",
+		},
+		Sorting:           "*lc",
+		SortingParameters: []string{"PARAM1", "PARAM2"},
+		Routes: []*utils.TPRoute{
+			&utils.TPRoute{
+				ID:              "route1",
+				FilterIDs:       []string{"FLTR_1", "FLTR_2"},
+				AccountIDs:      []string{"Acc1", "Acc2"},
+				RatingPlanIDs:   []string{"RPL_1", "RPL_2"},
+				ResourceIDs:     []string{"ResGroup1", "ResGroup2"},
+				StatIDs:         []string{"Stat1", "Stat2"},
+				Weight:          10,
+				Blocker:         false,
+				RouteParameters: "SortingParam1",
+			},
+		},
+		Weight: 20,
+	}
+	result := APItoModelTPRoutes(structTest)
+	if result == nil {
+		t.Errorf("Expecting something, received <nil>")
+	}
+	if reflect.DeepEqual(*result[0], "{0 TP1 cgrates.org RoutePrf FLTR_ACNT_dan;FLTR_DST_DE 2014-07-29T15:00:00Z;2014-08-29T15:00:00Z *lc PARAM1;PARAM2 route1 FLTR_1;FLTR_2 Acc1;Acc2 RPL_1;RPL_2  ResGroup1;ResGroup2 Stat1;Stat2 10 false SortingParam1 20 0001-01-01 00:00:00 +0000 UTC}") {
+		t.Errorf("\nExpecting <{0 TP1 cgrates.org RoutePrf FLTR_ACNT_dan;FLTR_DST_DE 2014-07-29T15:00:00Z;2014-08-29T15:00:00Z *lc PARAM1;PARAM2 route1 FLTR_1;FLTR_2 Acc1;Acc2 RPL_1;RPL_2  ResGroup1;ResGroup2 Stat1;Stat2 10 false SortingParam1 20 0001-01-01 00:00:00 +0000 UTC}>,\nReceived  <%+v>", *result[0])
+	}
+
+}
+
+func TestAPItoModelResourceCase1(t *testing.T) {
+	var testStruct *utils.TPResourceProfile
+	testStruct = nil
+	result := APItoModelResource(testStruct)
+	if reflect.DeepEqual(result, "[]") {
+		t.Errorf("\nExpecting <[]>,\n Received <%+v>", result)
+	}
+}
+
+func TestAPItoModelResourceCase2(t *testing.T) {
+	testStruct := &utils.TPResourceProfile{
+		Tenant:    "cgrates.org",
+		TPid:      testTPID,
+		ID:        "ResGroup1",
+		FilterIDs: []string{},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "2015-07-29T15:00:00Z",
+		},
+		UsageTTL:          "Test_TTL",
+		Weight:            10,
+		Limit:             "2",
+		ThresholdIDs:      []string{"TRes1", "TRes2"},
+		AllocationMessage: "test",
+	}
+
+	result := APItoModelResource(testStruct)
+	if reflect.DeepEqual(*result[0], "{0 LoaderCSVTests cgrates.org ResGroup1  2014-07-29T15:00:00Z;2015-07-29T15:00:00Z Test_TTL 2 test false false 10 TRes1;TRes2 0001-01-01 00:00:00 +0000 UTC}\n") {
+		t.Errorf("\nExpecting <{0 LoaderCSVTests cgrates.org ResGroup1  2014-07-29T15:00:00Z;2015-07-29T15:00:00Z Test_TTL 2 test false false 10 TRes1;TRes2 0001-01-01 00:00:00 +0000 UTC}>,\n Received <%+v>", *result[0])
+	}
+}
+
+func TestAPItoModelResourceCase3(t *testing.T) {
+	testStruct := &utils.TPResourceProfile{
+		Tenant:    "cgrates.org",
+		TPid:      testTPID,
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FilterID1", "FilterID2"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "2015-07-29T15:00:00Z",
+		},
+		UsageTTL:          "Test_TTL",
+		Weight:            10,
+		Limit:             "2",
+		ThresholdIDs:      []string{"TRes1", "TRes2"},
+		AllocationMessage: "test",
+	}
+
+	result := APItoModelResource(testStruct)
+	if reflect.DeepEqual(*result[0], "{0 LoaderCSVTests cgrates.org ResGroup1 FilterID1 2014-07-29T15:00:00Z;2015-07-29T15:00:00Z Test_TTL 2 test false false 10 TRes1;TRes2 0001-01-01 00:00:00 +0000 UTC}\n") {
+		t.Errorf("\nExpecting <{0 LoaderCSVTests cgrates.org ResGroup1 FilterID1 2014-07-29T15:00:00Z;2015-07-29T15:00:00Z Test_TTL 2 test false false 10 TRes1;TRes2 0001-01-01 00:00:00 +0000 UTC}\n}>,\n Received <%+v>", *result[0])
 	}
 }
