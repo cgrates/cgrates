@@ -107,9 +107,9 @@ type Loader struct {
 	cacheConns    []string
 }
 
-func (ldr *Loader) ListenAndServe(exitChan chan struct{}) (err error) {
+func (ldr *Loader) ListenAndServe(stopChan chan struct{}) (err error) {
 	utils.Logger.Info(fmt.Sprintf("Starting <%s-%s>", utils.LoaderS, ldr.ldrID))
-	return ldr.serve(exitChan)
+	return ldr.serve(stopChan)
 }
 
 // ProcessFolder will process the content in the folder with locking
@@ -971,26 +971,26 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 	return
 }
 
-func (ldr *Loader) serve(exitChan chan struct{}) (err error) {
+func (ldr *Loader) serve(stopChan chan struct{}) (err error) {
 	fmt.Println(ldr.runDelay)
 	switch ldr.runDelay {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
 	case time.Duration(-1):
 		return utils.WatchDir(ldr.tpInDir, ldr.processFile,
-			utils.LoaderS+"-"+ldr.ldrID, exitChan)
+			utils.LoaderS+"-"+ldr.ldrID, stopChan)
 	default:
-		go ldr.handleFolder(exitChan)
+		go ldr.handleFolder(stopChan)
 	}
 	return
 }
 
-func (ldr *Loader) handleFolder(exitChan chan struct{}) {
+func (ldr *Loader) handleFolder(stopChan chan struct{}) {
 	for {
 		go ldr.ProcessFolder(config.CgrConfig().GeneralCfg().DefaultCaching, utils.MetaStore, false)
 		timer := time.NewTimer(ldr.runDelay)
 		select {
-		case <-exitChan:
+		case <-stopChan:
 			utils.Logger.Info(
 				fmt.Sprintf("<%s-%s> stop monitoring path <%s>",
 					utils.LoaderS, ldr.ldrID, ldr.tpInDir))

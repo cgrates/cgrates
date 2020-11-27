@@ -150,7 +150,7 @@ func (s *Server) BiRPCRegister(rcvr interface{}) {
 	}
 }
 
-func (s *Server) ServeJSON(addr string, exitChan chan<- struct{}) {
+func (s *Server) ServeJSON(addr string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
@@ -158,10 +158,10 @@ func (s *Server) ServeJSON(addr string, exitChan chan<- struct{}) {
 		return
 	}
 
-	defer func() { close(exitChan) }()
 	lJSON, e := net.Listen(utils.TCP, addr)
 	if e != nil {
 		log.Println("ServeJSON listen error:", e)
+		shdChan.CloseOnce()
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at <%s>.", addr))
@@ -178,26 +178,26 @@ func (s *Server) ServeJSON(addr string, exitChan chan<- struct{}) {
 			lastErrorTime = time.Now()
 			errCnt++
 			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
-				break
+				shdChan.CloseOnce()
+				return
 			}
 			continue
 		}
 		go rpc.ServeCodec(newCapsJSONCodec(conn, s.caps, s.anz))
 	}
-
 }
 
-func (s *Server) ServeGOB(addr string, exitChan chan<- struct{}) {
+func (s *Server) ServeGOB(addr string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
-	defer func() { close(exitChan) }()
 	lGOB, e := net.Listen(utils.TCP, addr)
 	if e != nil {
 		log.Println("ServeGOB listen error:", e)
+		shdChan.CloseOnce()
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at <%s>.", addr))
@@ -214,7 +214,8 @@ func (s *Server) ServeGOB(addr string, exitChan chan<- struct{}) {
 			lastErrorTime = time.Now()
 			errCnt++
 			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
-				break
+				shdChan.CloseOnce()
+				return
 			}
 			continue
 		}
@@ -254,14 +255,13 @@ func (s *Server) RegisterProfiler(addr string) {
 }
 
 func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
-	useBasicAuth bool, userList map[string]string, exitChan chan<- struct{}) {
+	useBasicAuth bool, userList map[string]string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
-	// s.httpMux = http.NewServeMux()
 	if jsonRPCURL != "" {
 		s.Lock()
 		s.httpEnabled = true
@@ -297,8 +297,8 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	utils.Logger.Info(fmt.Sprintf("<HTTP> start listening at <%s>", addr))
 	if err := http.ListenAndServe(addr, s.httpMux); err != nil {
 		log.Println(fmt.Sprintf("<HTTP>Error: %s when listening ", err))
+		shdChan.CloseOnce()
 	}
-	close(exitChan)
 }
 
 // ServeBiJSON create a gorutine to listen and serve as BiRPC server
@@ -428,21 +428,22 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 }
 
 func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
-	serverPolicy int, serverName string, exitChan chan<- struct{}) {
+	serverPolicy int, serverName string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
-	defer func() { close(exitChan) }()
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
+		shdChan.CloseOnce()
 		return
 	}
 	listener, err := tls.Listen(utils.TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
+		shdChan.CloseOnce()
 		return
 	}
 
@@ -461,7 +462,8 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 			lastErrorTime = time.Now()
 			errCnt++
 			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
-				break
+				shdChan.CloseOnce()
+				return
 			}
 			continue
 		}
@@ -470,21 +472,22 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 }
 
 func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
-	serverPolicy int, serverName string, exitChan chan<- struct{}) {
+	serverPolicy int, serverName string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
-	defer func() { close(exitChan) }()
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
+		shdChan.CloseOnce()
 		return
 	}
 	listener, err := tls.Listen(utils.TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
+		shdChan.CloseOnce()
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS JSON TLS server at <%s>.", addr))
@@ -502,7 +505,8 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 			lastErrorTime = time.Now()
 			errCnt++
 			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
-				break
+				shdChan.CloseOnce()
+				return
 			}
 			continue
 		}
@@ -512,7 +516,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 
 func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,
 	serverName string, jsonRPCURL string, wsRPCURL string,
-	useBasicAuth bool, userList map[string]string, exitChan chan<- struct{}) {
+	useBasicAuth bool, userList map[string]string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
@@ -550,9 +554,9 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 	if useBasicAuth {
 		utils.Logger.Info("<HTTPS> enabling basic auth")
 	}
-	defer func() { close(exitChan) }()
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
+		shdChan.CloseOnce()
 		return
 	}
 	httpSrv := http.Server{
@@ -563,6 +567,6 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 	utils.Logger.Info(fmt.Sprintf("<HTTPS> start listening at <%s>", addr))
 	if err := httpSrv.ListenAndServeTLS(serverCrt, serverKey); err != nil {
 		log.Println(fmt.Sprintf("<HTTPS>Error: %s when listening ", err))
+		shdChan.CloseOnce()
 	}
-	return
 }

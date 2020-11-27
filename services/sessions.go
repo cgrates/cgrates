@@ -36,7 +36,7 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server, internalChan chan rpcclient.ClientConnector,
-	exitChan chan<- struct{}, connMgr *engine.ConnManager,
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
 	caps *engine.Caps,
 	anz *AnalyzerService) servmanager.Service {
 	return &SessionService{
@@ -44,7 +44,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 		cfg:      cfg,
 		dm:       dm,
 		server:   server,
-		exitChan: exitChan,
+		shdChan:  shdChan,
 		connMgr:  connMgr,
 		caps:     caps,
 		anz:      anz,
@@ -57,7 +57,7 @@ type SessionService struct {
 	cfg      *config.CGRConfig
 	dm       *DataDBService
 	server   *cores.Server
-	exitChan chan<- struct{}
+	shdChan  *utils.SyncedChan
 	stopChan chan struct{}
 
 	sm       *sessions.SessionS
@@ -116,7 +116,7 @@ func (smg *SessionService) Start() (err error) {
 				smg.Lock()
 				smg.bircpEnabled = false
 				smg.Unlock()
-				close(smg.exitChan)
+				smg.shdChan.CloseOnce()
 			}
 		}()
 	}

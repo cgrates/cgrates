@@ -32,13 +32,13 @@ import (
 func TestListenAndServe(t *testing.T) {
 	newRates := &RateS{}
 	cfgRld := make(chan struct{}, 1)
-	exitChan := make(chan struct{}, 1)
+	stopChan := make(chan struct{}, 1)
 	cfgRld <- struct{}{}
 	go func() {
 		time.Sleep(10)
-		exitChan <- struct{}{}
+		stopChan <- struct{}{}
 	}()
-	newRates.ListenAndServe(exitChan, cfgRld)
+	newRates.ListenAndServe(stopChan, cfgRld)
 }
 
 func TestNewRateS(t *testing.T) {

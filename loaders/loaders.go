@@ -51,9 +51,9 @@ func (ldrS *LoaderService) Enabled() bool {
 	return len(ldrS.ldrs) != 0
 }
 
-func (ldrS *LoaderService) ListenAndServe(exitChan chan struct{}) (err error) {
+func (ldrS *LoaderService) ListenAndServe(stopChan chan struct{}) (err error) {
 	for _, ldr := range ldrS.ldrs {
-		if err = ldr.ListenAndServe(exitChan); err != nil {
+		if err = ldr.ListenAndServe(stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s-%s> error: <%s>", utils.LoaderS, ldr.ldrID, err.Error()))
 			return
 		}

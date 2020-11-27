@@ -33,14 +33,14 @@ import (
 
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server,
-	filterSChan chan *engine.FilterS, exitChan chan<- struct{},
+	filterSChan chan *engine.FilterS, shdChan *utils.SyncedChan,
 	internalAnalyzerSChan chan rpcclient.ClientConnector) *AnalyzerService {
 	return &AnalyzerService{
 		connChan:    internalAnalyzerSChan,
 		cfg:         cfg,
 		server:      server,
 		filterSChan: filterSChan,
-		exitChan:    exitChan,
+		shdChan:     shdChan,
 	}
 }
 
@@ -51,7 +51,7 @@ type AnalyzerService struct {
 	server      *cores.Server
 	filterSChan chan *engine.FilterS
 	stopChan    chan struct{}
-	exitChan    chan<- struct{}
+	shdChan     *utils.SyncedChan
 
 	anz      *analyzers.AnalyzerService
 	rpc      *v1.AnalyzerSv1
@@ -74,7 +74,7 @@ func (anz *AnalyzerService) Start() (err error) {
 	go func() {
 		if err := anz.anz.ListenAndServe(anz.stopChan); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
-			close(anz.exitChan)
+			anz.shdChan.CloseOnce()
 		}
 		return
 	}()

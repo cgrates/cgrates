@@ -31,11 +31,11 @@ import (
 
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
 	return &DNSAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		exitChan:    exitChan,
+		shdChan:     shdChan,
 		connMgr:     connMgr,
 	}
 }
@@ -45,7 +45,7 @@ type DNSAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	exitChan    chan<- struct{}
+	shdChan     *utils.SyncedChan
 
 	dns     *agents.DNSAgent
 	connMgr *engine.ConnManager
@@ -73,7 +73,7 @@ func (dns *DNSAgent) Start() (err error) {
 	go func() {
 		if err = dns.dns.ListenAndServe(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
-			close(dns.exitChan) // stop the engine here
+			dns.shdChan.CloseOnce() // stop the engine here
 		}
 	}()
 	return
@@ -96,7 +96,7 @@ func (dns *DNSAgent) Reload() (err error) {
 	go func() {
 		if err := dns.dns.ListenAndServe(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
-			close(dns.exitChan) // stop the engine here
+			dns.shdChan.CloseOnce() // stop the engine here
 		}
 	}()
 	return

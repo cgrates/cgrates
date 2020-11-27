@@ -95,14 +95,14 @@ func (aS *AnalyzerService) deleteHits(hits search.DocumentMatchCollection) (err 
 }
 
 // ListenAndServe will initialize the service
-func (aS *AnalyzerService) ListenAndServe(exitChan <-chan struct{}) (err error) {
+func (aS *AnalyzerService) ListenAndServe(stopChan <-chan struct{}) (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AnalyzerS))
 	if err = aS.clenaUp(); err != nil { // clean up the data at the system start
 		return
 	}
 	for {
 		select {
-		case <-exitChan:
+		case <-stopChan:
 			return
 		case <-time.After(aS.cfg.AnalyzerSCfg().CleanupInterval):
 			if err = aS.clenaUp(); err != nil {
