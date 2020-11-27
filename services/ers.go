@@ -31,12 +31,12 @@ import (
 
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
 	return &EventReaderService{
 		rldChan:     make(chan struct{}, 1),
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		exitChan:    exitChan,
+		shdChan:     shdChan,
 		connMgr:     connMgr,
 	}
 }
@@ -46,7 +46,7 @@ type EventReaderService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	exitChan    chan<- struct{}
+	shdChan     *utils.SyncedChan
 
 	ers      *ers.ERService
 	rldChan  chan struct{}
@@ -76,7 +76,7 @@ func (erS *EventReaderService) Start() (err error) {
 	go func(ers *ers.ERService, stopChan, rldChan chan struct{}) {
 		if err := ers.ListenAndServe(stopChan, rldChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
-			close(erS.exitChan)
+			erS.shdChan.CloseOnce()
 		}
 	}(erS.ers, erS.stopChan, erS.rldChan)
 	return

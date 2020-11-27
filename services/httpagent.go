@@ -48,7 +48,9 @@ type HTTPAgent struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
-	ha      *agents.HTTPAgent
+	// we can realy stop the HTTPAgent so keep a flag
+	// if we registerd the handlers
+	started bool
 	connMgr *engine.ConnManager
 }
 
@@ -62,6 +64,7 @@ func (ha *HTTPAgent) Start() (err error) {
 	ha.filterSChan <- filterS
 
 	ha.Lock()
+	ha.started = true
 	utils.Logger.Info(fmt.Sprintf("<%s> successfully started HTTPAgent", utils.HTTPAgent))
 	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
 		ha.server.RegisterHttpHandler(agntCfg.URL,
@@ -80,6 +83,9 @@ func (ha *HTTPAgent) Reload() (err error) {
 
 // Shutdown stops the service
 func (ha *HTTPAgent) Shutdown() (err error) {
+	ha.Lock()
+	ha.started = false
+	ha.Unlock()
 	return // no shutdown for the momment
 }
 
@@ -87,7 +93,7 @@ func (ha *HTTPAgent) Shutdown() (err error) {
 func (ha *HTTPAgent) IsRunning() bool {
 	ha.RLock()
 	defer ha.RUnlock()
-	return ha != nil && ha.ha != nil
+	return ha != nil && ha.started
 }
 
 // ServiceName returns the service name

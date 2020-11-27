@@ -22,6 +22,7 @@ package services
 import (
 	"os"
 	"path"
+	"sync"
 	"testing"
 	"time"
 
@@ -52,13 +53,14 @@ func TestEventReaderSReload(t *testing.T) {
 	cfg.SessionSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan struct{}, 1)
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1))
 	db := NewDataDBService(cfg, nil)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), engineShutdown, nil, nil, anz)
-	attrS := NewEventReaderService(cfg, filterSChan, engineShutdown, nil)
+	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz)
+	attrS := NewEventReaderService(cfg, filterSChan, shdChan, nil)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
@@ -87,6 +89,6 @@ func TestEventReaderSReload(t *testing.T) {
 	if attrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	close(engineShutdown)
-	srvMngr.ShutdownServices(10 * time.Millisecond)
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
 }

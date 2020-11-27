@@ -21,6 +21,8 @@ package services
 
 import (
 	"path"
+	"runtime"
+	"sync"
 	"testing"
 	"time"
 
@@ -38,23 +40,25 @@ func TestKamailioAgentReload(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan struct{}, 1)
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
 	cacheSChan <- chS
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	db := NewDataDBService(cfg, nil)
-	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1))
 	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
-		engineShutdown, nil, nil, anz)
-	srv := NewKamailioAgent(cfg, engineShutdown, nil)
+		shdChan, nil, nil, anz)
+	srv := NewKamailioAgent(cfg, shdChan, nil)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
@@ -73,21 +77,12 @@ func TestKamailioAgentReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !srv.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	cfg.KamAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.KamailioAgentJSN) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
+	// the engine should be stoped as we could not connect to kamailio
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	select {
-	case <-engineShutdown:
-		// if the chanel was closed by the connect error (we did not start the kamailio for this tests)
-	default:
-		close(engineShutdown)
-	}
-	srvMngr.ShutdownServices(10 * time.Millisecond)
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
 }

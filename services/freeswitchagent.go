@@ -32,19 +32,19 @@ import (
 
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
-	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
 	return &FreeswitchAgent{
-		cfg:      cfg,
-		exitChan: exitChan,
-		connMgr:  connMgr,
+		cfg:     cfg,
+		shdChan: shdChan,
+		connMgr: connMgr,
 	}
 }
 
 // FreeswitchAgent implements Agent interface
 type FreeswitchAgent struct {
 	sync.RWMutex
-	cfg      *config.CGRConfig
-	exitChan chan<- struct{}
+	cfg     *config.CGRConfig
+	shdChan *utils.SyncedChan
 
 	fS      *agents.FSsessions
 	connMgr *engine.ConnManager
@@ -64,7 +64,7 @@ func (fS *FreeswitchAgent) Start() (err error) {
 	go func(f *agents.FSsessions) {
 		if err := f.Connect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-			close(fS.exitChan) // stop the engine here
+			fS.shdChan.CloseOnce() // stop the engine here
 		}
 	}(fS.fS)
 	return
@@ -81,7 +81,7 @@ func (fS *FreeswitchAgent) Reload() (err error) {
 	go func(f *agents.FSsessions) {
 		if err := fS.fS.Connect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-			close(fS.exitChan) // stop the engine here
+			fS.shdChan.CloseOnce() // stop the engine here
 		}
 	}(fS.fS)
 	return

@@ -21,6 +21,7 @@ package services
 
 import (
 	"path"
+	"sync"
 	"testing"
 	"time"
 
@@ -42,15 +43,16 @@ func TestRateSReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan struct{}, 1)
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	db := NewDataDBService(cfg, nil)
-	chS := engine.NewCacheS(cfg, nil)
+	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheRateProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheRateProfilesFilterIndexes))
 	close(chS.GetPrecacheChannel(utils.CacheRateFilterIndexes))
-	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1))
 	rS := NewRateService(cfg, chS, filterSChan, db, server, make(chan rpcclient.ClientConnector, 1), anz)
 	srvMngr.AddServices(rS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
@@ -79,6 +81,6 @@ func TestRateSReload(t *testing.T) {
 	if rS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	close(engineShutdown)
-	srvMngr.ShutdownServices(10 * time.Millisecond)
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
 }

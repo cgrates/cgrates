@@ -33,19 +33,19 @@ import (
 
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig,
-	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
 	return &KamailioAgent{
-		cfg:      cfg,
-		exitChan: exitChan,
-		connMgr:  connMgr,
+		cfg:     cfg,
+		shdChan: shdChan,
+		connMgr: connMgr,
 	}
 }
 
 // KamailioAgent implements Agent interface
 type KamailioAgent struct {
 	sync.RWMutex
-	cfg      *config.CGRConfig
-	exitChan chan<- struct{}
+	cfg     *config.CGRConfig
+	shdChan *utils.SyncedChan
 
 	kam     *agents.KamailioAgent
 	connMgr *engine.ConnManager
@@ -64,12 +64,10 @@ func (kam *KamailioAgent) Start() (err error) {
 		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
 
 	go func(k *agents.KamailioAgent) {
-		if err = k.Connect(); err != nil {
-			if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
-				return
-			}
+		if err = k.Connect(); err != nil &&
+			!strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
-			close(kam.exitChan)
+			kam.shdChan.CloseOnce()
 		}
 	}(kam.kam)
 	return
@@ -90,7 +88,7 @@ func (kam *KamailioAgent) Reload() (err error) {
 				return
 			}
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
-			close(kam.exitChan)
+			kam.shdChan.CloseOnce()
 		}
 	}(kam.kam)
 	return

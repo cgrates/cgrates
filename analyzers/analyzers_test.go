@@ -57,9 +57,9 @@ func TestNewAnalyzerService(t *testing.T) {
 	if err = anz.initDB(); err != nil {
 		t.Fatal(err)
 	}
-	exitChan := make(chan struct{}, 1)
-	exitChan <- struct{}{}
-	if err := anz.ListenAndServe(exitChan); err != nil {
+	shdChan := make(chan struct{}, 1)
+	shdChan <- struct{}{}
+	if err := anz.ListenAndServe(shdChan); err != nil {
 		t.Fatal(err)
 	}
 	anz.db.Close()

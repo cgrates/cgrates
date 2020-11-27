@@ -31,10 +31,10 @@ import (
 
 // NewRalService returns the Ral Service
 func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *cores.Server,
-	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, exitChan chan<- struct{},
+	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, shdChan *utils.SyncedChan,
 	connMgr *engine.ConnManager,
 	anz *AnalyzerService) *RalService {
-	resp := NewResponderService(cfg, server, internalResponderChan, exitChan, anz)
+	resp := NewResponderService(cfg, server, internalResponderChan, shdChan, anz)
 
 	return &RalService{
 		connChan:  internalRALsChan,

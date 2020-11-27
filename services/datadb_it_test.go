@@ -22,6 +22,7 @@ package services
 import (
 	"path"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -42,17 +43,18 @@ func TestDataDBReload(t *testing.T) {
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
-	engineShutdown := make(chan struct{}, 1)
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM)
-	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1))
 	srvMngr.AddServices(NewAttributeService(cfg, db,
 		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz),
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
@@ -185,6 +187,6 @@ func TestDataDBReload(t *testing.T) {
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	close(engineShutdown)
-	srvMngr.ShutdownServices(10 * time.Millisecond)
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
 }

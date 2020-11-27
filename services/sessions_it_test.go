@@ -21,6 +21,7 @@ package services
 
 import (
 	"path"
+	"sync"
 	"testing"
 	"time"
 
@@ -44,8 +45,9 @@ func TestSessionSReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan struct{}, 1)
-	chS := engine.NewCacheS(cfg, nil)
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
 
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
@@ -67,20 +69,20 @@ func TestSessionSReload(t *testing.T) {
 	cacheSChan <- chS
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	db := NewDataDBService(cfg, nil)
 	cfg.StorDbCfg().Type = utils.INTERNAL
-	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1))
 	stordb := NewStorDBService(cfg)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz)
 	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1), make(chan rpcclient.ClientConnector, 1),
-		engineShutdown, nil, anz)
+		shdChan, nil, anz)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1),
 		nil, anz)
-	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), engineShutdown, nil, nil, anz)
+	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, chrS, schS, ralS, cdrS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db, stordb)
@@ -118,6 +120,6 @@ func TestSessionSReload(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	close(engineShutdown)
-	srvMngr.ShutdownServices(10 * time.Millisecond)
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
 }

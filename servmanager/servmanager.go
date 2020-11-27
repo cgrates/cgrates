@@ -24,7 +24,6 @@ import (
 	"reflect"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -33,22 +32,24 @@ import (
 )
 
 // NewServiceManager returns a service manager
-func NewServiceManager(cfg *config.CGRConfig, engineShutdown chan<- struct{}) *ServiceManager {
+func NewServiceManager(cfg *config.CGRConfig, shdChan *utils.SyncedChan, shdWg *sync.WaitGroup) *ServiceManager {
 	sm := &ServiceManager{
-		cfg:            cfg,
-		engineShutdown: engineShutdown,
-		subsystems:     make(map[string]Service),
+		cfg:        cfg,
+		subsystems: make(map[string]Service),
+		shdChan:    shdChan,
+		shdWg:      shdWg,
 	}
 	return sm
 }
 
 // ServiceManager handles service management ran by the engine
 type ServiceManager struct {
-	sync.RWMutex   // lock access to any shared data
-	cfg            *config.CGRConfig
-	engineShutdown chan<- struct{}
-	stopReload     chan struct{}
-	subsystems     map[string]Service
+	sync.RWMutex // lock access to any shared data
+	cfg          *config.CGRConfig
+	subsystems   map[string]Service
+
+	shdChan *utils.SyncedChan
+	shdWg   *sync.WaitGroup
 }
 
 // Call .
@@ -149,17 +150,15 @@ func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 
 // StartServices starts all enabled services
 func (srvMngr *ServiceManager) StartServices() (err error) {
-	srvMngr.stopReload = make(chan struct{})
 	go srvMngr.handleReload()
 	for _, service := range srvMngr.subsystems {
 		if service.ShouldRun() && !service.IsRunning() {
+			srvMngr.shdWg.Add(1)
 			go func(srv Service) {
-				if err := srv.Start(); err != nil {
-					if err == utils.ErrServiceAlreadyRunning { // in case the service was started in another gorutine
-						return
-					}
+				if err := srv.Start(); err != nil &&
+					err != utils.ErrServiceAlreadyRunning { // in case the service was started in another gorutine
 					utils.Logger.Err(fmt.Sprintf("<%s> failed to start %s because: %s", utils.ServiceManager, srv.ServiceName(), err))
-					close(srvMngr.engineShutdown)
+					srvMngr.shdChan.CloseOnce()
 				}
 			}(service)
 		}
@@ -182,7 +181,8 @@ func (srvMngr *ServiceManager) AddServices(services ...Service) {
 func (srvMngr *ServiceManager) handleReload() {
 	for {
 		select {
-		case <-srvMngr.stopReload:
+		case <-srvMngr.shdChan.Done():
+			srvMngr.ShutdownServices()
 			return
 		case <-srvMngr.GetConfig().GetReloadChan(config.ATTRIBUTE_JSN):
 			go srvMngr.reloadService(utils.AttributeS)
@@ -258,22 +258,23 @@ func (srvMngr *ServiceManager) reloadService(srviceName string) (err error) {
 		if srv.IsRunning() {
 			if err = srv.Reload(); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> failed to reload <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
-				close(srvMngr.engineShutdown)
+				srvMngr.shdChan.CloseOnce()
 				return // stop if we encounter an error
 			}
 		} else {
+			srvMngr.shdWg.Add(1)
 			if err = srv.Start(); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
-				close(srvMngr.engineShutdown)
+				srvMngr.shdChan.CloseOnce()
 				return // stop if we encounter an error
 			}
 		}
 	} else if srv.IsRunning() {
 		if err = srv.Shutdown(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed to stop service <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
-			close(srvMngr.engineShutdown)
-			return // stop if we encounter an error
+			srvMngr.shdChan.CloseOnce()
 		}
+		srvMngr.shdWg.Done()
 	}
 	return
 }
@@ -287,32 +288,17 @@ func (srvMngr *ServiceManager) GetService(subsystem string) (srv Service) {
 }
 
 // ShutdownServices will stop all services
-func (srvMngr *ServiceManager) ShutdownServices(timeout time.Duration) {
-	close(srvMngr.stopReload)
-	var wg sync.WaitGroup
+func (srvMngr *ServiceManager) ShutdownServices() {
 	for _, srv := range srvMngr.subsystems { // gracefully stop all running subsystems
-		if !srv.IsRunning() {
-			continue
+		if srv.IsRunning() {
+			go func(srv Service) {
+				if err := srv.Shutdown(); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown subsystem <%s> because: %s",
+						utils.ServiceManager, srv.ServiceName(), err))
+				}
+				srvMngr.shdWg.Done()
+			}(srv)
 		}
-		wg.Add(1)
-		go func(srv Service) {
-			if err := srv.Shutdown(); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown subsystem <%s> because: %s",
-					utils.ServiceManager, srv.ServiceName(), err))
-			}
-			wg.Done()
-		}(srv)
-	}
-	c := make(chan struct{})
-	go func() {
-		wg.Wait()
-		close(c)
-	}()
-	select {
-	case <-c:
-	case <-time.After(timeout):
-		utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown all subsystems in the given time",
-			utils.ServiceManager))
 	}
 }
 

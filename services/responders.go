@@ -31,12 +31,12 @@ import (
 // NewResponderService returns the Resonder Service
 func NewResponderService(cfg *config.CGRConfig, server *cores.Server,
 	internalRALsChan chan rpcclient.ClientConnector,
-	exitChan chan<- struct{}, anz *AnalyzerService) *ResponderService {
+	shdChan *utils.SyncedChan, anz *AnalyzerService) *ResponderService {
 	return &ResponderService{
 		connChan: internalRALsChan,
 		cfg:      cfg,
 		server:   server,
-		exitChan: exitChan,
+		shdChan:  shdChan,
 		anz:      anz,
 	}
 }
@@ -45,9 +45,9 @@ func NewResponderService(cfg *config.CGRConfig, server *cores.Server,
 // this service is manged by the RALs as a component
 type ResponderService struct {
 	sync.RWMutex
-	cfg      *config.CGRConfig
-	server   *cores.Server
-	exitChan chan<- struct{}
+	cfg     *config.CGRConfig
+	server  *cores.Server
+	shdChan *utils.SyncedChan
 
 	resp     *engine.Responder
 	connChan chan rpcclient.ClientConnector
@@ -64,7 +64,7 @@ func (resp *ResponderService) Start() (err error) {
 	resp.Lock()
 	defer resp.Unlock()
 	resp.resp = &engine.Responder{
-		ExitChan:         resp.exitChan,
+		ShdChan:          resp.shdChan,
 		MaxComputedUsage: resp.cfg.RalsCfg().MaxComputedUsage,
 	}
 

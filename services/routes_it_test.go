@@ -21,6 +21,7 @@ package services
 
 import (
 	"path"
+	"sync"
 	"testing"
 	"time"
 
@@ -43,17 +44,18 @@ func TestSupplierSReload(t *testing.T) {
 	cfg.StatSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	engineShutdown := make(chan struct{}, 1)
-	chS := engine.NewCacheS(cfg, nil)
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheRouteProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheRouteFilterIndexes))
 	close(chS.GetPrecacheChannel(utils.CacheStatQueueProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheStatQueues))
 	close(chS.GetPrecacheChannel(utils.CacheStatFilterIndexes))
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	db := NewDataDBService(cfg, nil)
-	anz := NewAnalyzerService(cfg, server, filterSChan, engineShutdown, make(chan rpcclient.ClientConnector, 1))
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1))
 	sts := NewStatService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz)
 	supS := NewRouteService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz)
 	engine.NewConnManager(cfg, nil)
@@ -90,6 +92,6 @@ func TestSupplierSReload(t *testing.T) {
 	if supS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	close(engineShutdown)
-	srvMngr.ShutdownServices(10 * time.Millisecond)
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
 }

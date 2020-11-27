@@ -31,11 +31,11 @@ import (
 
 // NewRadiusAgent returns the Radius Agent
 func NewRadiusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	exitChan chan<- struct{}, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
 	return &RadiusAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		exitChan:    exitChan,
+		shdChan:     shdChan,
 		connMgr:     connMgr,
 	}
 }
@@ -45,7 +45,7 @@ type RadiusAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	exitChan    chan<- struct{}
+	shdChan     *utils.SyncedChan
 	stopChan    chan struct{}
 
 	rad     *agents.RadiusAgent
@@ -80,7 +80,7 @@ func (rad *RadiusAgent) Start() (err error) {
 	go func(r *agents.RadiusAgent) {
 		if err = r.ListenAndServe(rad.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
-			close(rad.exitChan)
+			rad.shdChan.CloseOnce()
 		}
 	}(rad.rad)
 	return
