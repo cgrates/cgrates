@@ -34,10 +34,7 @@ import (
 func TestDispatcherHostsService(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(Registar))
 	defer ts.Close()
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 
 	cfg.RPCConns()["conn1"] = &config.RPCConn{
 		Strategy: rpcclient.PoolFirst,

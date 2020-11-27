@@ -394,7 +394,7 @@ var body = []byte(`{
 var fsCdrCfg *config.CGRConfig
 
 func TestFsCdrFirstNonEmpty(t *testing.T) {
-	fsCdrCfg, _ = config.NewDefaultCGRConfig()
+	fsCdrCfg = config.NewDefaultCGRConfig()
 	reader := bytes.NewReader(body)
 	fsCdr, err := NewFSCdr(reader, fsCdrCfg)
 	if err != nil {
@@ -560,10 +560,8 @@ func TestFsCdrFirstDefined(t *testing.T) {
 }
 
 func TestFscdrAsCDR(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	cgrCfg.CdrsCfg().ExtraFields, err = config.NewRSRParsersFromSlice([]string{"~*req.PayPalAccount"})
 	if err != nil {
 		t.Error(err)
@@ -602,10 +600,8 @@ func TestFscdrAsCDR(t *testing.T) {
 }
 
 func TestFscdrAsCdrOrderId(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	fsCdrByte := []byte(` {
       "variables": { 
           "cgr_orderid": "123s"
@@ -621,10 +617,8 @@ func TestFscdrAsCdrOrderId(t *testing.T) {
 }
 
 func TestFscdrAsCdrSetupTime(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	fsCdrByte := []byte(` {
       "variables": { 
          "start_epoch": "123ss"
@@ -640,10 +634,8 @@ func TestFscdrAsCdrSetupTime(t *testing.T) {
 }
 
 func TestFscdrAsCdrAnswerTime(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	fsCdrByte := []byte(` {
       "variables": { 
          "answer_epoch": "123ss"
@@ -659,10 +651,8 @@ func TestFscdrAsCdrAnswerTime(t *testing.T) {
 }
 
 func TestFscdrAsCdrUsage(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	fsCdrByte := []byte(` {
       "variables": { 
          "billsec": "1ss"
@@ -678,10 +668,8 @@ func TestFscdrAsCdrUsage(t *testing.T) {
 }
 
 func TestFscdrAsCdrPartial(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	fsCdrByte := []byte(` {
       "variables": { 
          "cgr_partial": "InvalidBoolFormat"
@@ -697,10 +685,8 @@ func TestFscdrAsCdrPartial(t *testing.T) {
 }
 
 func TestFscdrAsCdrPreRated(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	fsCdrByte := []byte(` {
       "variables": { 
          "cgr_prerated": "InvalidBoolFormat"
@@ -716,10 +702,8 @@ func TestFscdrAsCdrPreRated(t *testing.T) {
 }
 
 func TestFscdrAsCdrFirstDefined(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	fsCdrByte := []byte(` {
       "variables": { 
          "cgr_account": "randomAccount"
@@ -748,10 +732,8 @@ func TestFscdrAsCdrFirstDefined(t *testing.T) {
 	}
 }
 func TestNewFSCdrDecodeError(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	expectedErr := "EOF"
 	newReader := bytes.NewReader(nil)
 	if _, err := NewFSCdr(newReader, cgrCfg); err == nil || err.Error() != expectedErr {
@@ -760,10 +742,8 @@ func TestNewFSCdrDecodeError(t *testing.T) {
 }
 
 func TestSearchExtraFieldDefaultType(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	newMap := map[string]interface{}{
 		"variables": map[string]string{
 			"cgr_orderid": "123",
@@ -777,10 +757,8 @@ func TestSearchExtraFieldDefaultType(t *testing.T) {
 }
 
 func TestSearchExtraFieldInterface(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	newMap := map[string]interface{}{ //There is a slice with no maps
 		"variables": []interface{}{
 			2,
@@ -796,10 +774,8 @@ func TestSearchExtraFieldInterface(t *testing.T) {
 }
 
 func TestGetExtraFields(t *testing.T) {
-	cgrCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := config.NewDefaultCGRConfig()
+
 	cgrCfg.CdrsCfg().ExtraFields, err = config.NewRSRParsersFromSlice([]string{"PayPalAccount"})
 	if err != nil {
 		t.Error(err)

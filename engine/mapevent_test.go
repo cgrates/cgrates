@@ -317,10 +317,8 @@ func TestMapEventAsCDR(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	expected = &CDR{
 		CGRID:       "da39a3ee5e6b4b0d3255bfef95601890afd80709",
 		Cost:        -1.0,

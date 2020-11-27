@@ -64,14 +64,13 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 			},
 		},
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else {
-		jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJSONCfg(cfgJSON)
-		if !reflect.DeepEqual(jsonCfg.rpcConns, expected) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rpcConns))
-		}
+	jsonCfg := NewDefaultCGRConfig()
+
+	jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJSONCfg(cfgJSON)
+	if !reflect.DeepEqual(jsonCfg.rpcConns, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rpcConns))
 	}
+
 }
 
 func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
@@ -101,10 +100,7 @@ func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
 			},
 		},
 	}
-	jsonCfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	jsonCfg := NewDefaultCGRConfig()
 	jsonCfg.rpcConns[utils.MetaLocalHost].loadFromJSONCfg(nil)
 	if !reflect.DeepEqual(expected, jsonCfg.rpcConns) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rpcConns))

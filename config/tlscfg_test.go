@@ -43,9 +43,8 @@ func TestTlsCfgloadFromJsonCfg(t *testing.T) {
 		ServerName:       "TestServerName",
 		ServerPolicy:     3,
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.tlsCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.tlsCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.tlsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.tlsCfg))

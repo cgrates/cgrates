@@ -49,9 +49,8 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		ProcessRuns:         1,
 		NestedFields:        true,
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.attributeSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.attributeSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.attributeSCfg) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.attributeSCfg))

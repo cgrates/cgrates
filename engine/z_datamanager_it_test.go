@@ -42,7 +42,7 @@ var (
 )
 
 func TestDMitinitDB(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	var dataDB DataDB
 	var err error
 

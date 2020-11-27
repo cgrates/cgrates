@@ -408,7 +408,7 @@ Task-ID: 2
 Task-Desc: heartbeat
 Task-Group: core
 Task-Runtime: 1349437318`
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(body)
 	setupTime, _ := ev.GetSetupTime("Event-Date-Local", "")
@@ -460,7 +460,7 @@ Task-Runtime: 1349437318`
 }
 
 func TestParseFsHangup(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
 	setupTime, _ := ev.GetSetupTime(utils.MetaDefault, "")
@@ -489,7 +489,7 @@ func TestParseFsHangup(t *testing.T) {
 }
 
 func TestParseEventValue(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
 	if tor, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.ToR), ""); tor != utils.VOICE {
@@ -575,7 +575,7 @@ func TestFsEvAsCGREvent(t *testing.T) {
 }
 
 func TestFsEvAsMapStringInterface(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
 	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
@@ -605,7 +605,7 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 }
 
 func TestFsEvGetExtraFields(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	var err error
 	err = nil
 	cfg.FsAgentCfg().ExtraFields, err = config.NewRSRParsersFromSlice([]string{
@@ -953,7 +953,7 @@ variable_rtp_audio_rtcp_packet_count: 0
 variable_rtp_audio_rtcp_octet_count: 0`
 	var fsCdrCfg *config.CGRConfig
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
-	fsCdrCfg, _ = config.NewDefaultCGRConfig()
+	fsCdrCfg = config.NewDefaultCGRConfig()
 	newReader := bytes.NewReader(body)
 	fsCdr, err := engine.NewFSCdr(newReader, fsCdrCfg)
 	if err != nil {

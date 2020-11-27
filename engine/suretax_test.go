@@ -41,7 +41,7 @@ func TestNewSureTaxRequest(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost:        1.01, PreRated: true,
 	}
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	stCfg := cfg.SureTaxCfg()
 	stCfg.ClientNumber = "000000000"
 	stCfg.ValidationKey = "19491161-F004-4F44-BDB3-E976D6739A64"

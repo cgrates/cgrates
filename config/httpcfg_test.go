@@ -59,9 +59,8 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 			utils.HTTPClientDialKeepAliveCfg:         "30s",
 		},
 	}
-	if cfgJsn, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
+	cfgJsn := NewDefaultCGRConfig()
+	if err = cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfgJsn.httpCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJsn.httpCfg))

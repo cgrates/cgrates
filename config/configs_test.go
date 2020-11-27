@@ -37,9 +37,8 @@ func TestConfigsloadFromJsonCfg(t *testing.T) {
 		URL:     "/randomURL/",
 		RootDir: "/randomPath/",
 	}
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.configSCfg.loadFromJSONCfg(jsonCfgs); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.configSCfg.loadFromJSONCfg(jsonCfgs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cgrCfg.configSCfg, expectedCfg) {
 		t.Errorf("Expected %+v, received %+v", expectedCfg, cgrCfg.configSCfg)
@@ -88,10 +87,8 @@ func TestNewCGRConfigFromPathWithoutEnv(t *testing.T) {
 			"node_id": "*env:NODE_ID",
 		},
   }`
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	if err = cfg.loadConfigFromReader(strings.NewReader(cfgsJSONStr), []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, true); err != nil {
 		t.Fatal(err)
 	}

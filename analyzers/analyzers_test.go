@@ -35,15 +35,12 @@ import (
 )
 
 func TestNewAnalyzerService(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
+	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
 	anz, err := NewAnalyzerService(cfg)
@@ -69,16 +66,14 @@ func TestNewAnalyzerService(t *testing.T) {
 }
 
 func TestAnalyzerSLogTraffic(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
+	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
 	anz, err := NewAnalyzerService(cfg)
@@ -125,16 +120,14 @@ func TestAnalyzerSLogTraffic(t *testing.T) {
 }
 
 func TestAnalyzersDeleteHits(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
+	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
 	anz, err := NewAnalyzerService(cfg)
@@ -150,16 +143,14 @@ func TestAnalyzersDeleteHits(t *testing.T) {
 }
 
 func TestAnalyzersListenAndServe(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
+	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
 	anz, err := NewAnalyzerService(cfg)
@@ -188,16 +179,13 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 }
 
 func TestAnalyzersV1Search(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
+	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)

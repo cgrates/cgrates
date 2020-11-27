@@ -678,7 +678,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 }
 
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
@@ -866,7 +866,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 }
 
 func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
@@ -974,7 +974,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 }
 
 func TestPassFilterMaxCost(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
@@ -1026,7 +1026,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 }
 
 func TestPassFilterMissingField(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
@@ -1072,7 +1072,7 @@ func TestPassFilterMissingField(t *testing.T) {
 }
 
 func TestEventCostFilter(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
@@ -1293,7 +1293,7 @@ func TestVerifyPrefixes(t *testing.T) {
 }
 
 func TestPassPartial(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
@@ -1502,7 +1502,7 @@ func TestAPIBan(t *testing.T) {
 			"IP2":       "1.2.3.254",
 		},
 	}
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{

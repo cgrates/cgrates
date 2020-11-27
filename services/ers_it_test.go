@@ -44,10 +44,8 @@ func TestEventReaderSReload(t *testing.T) {
 			t.Fatal("Error creating folder: ", dir, err)
 		}
 	}
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	cfg.SessionSCfg().Enabled = true
@@ -64,7 +62,7 @@ func TestEventReaderSReload(t *testing.T) {
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
-	if err = srvMngr.StartServices(); err != nil {
+	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if attrS.IsRunning() {

@@ -122,9 +122,8 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			PublicKeyPath:      "randomPath",
 		},
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.sessionSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sessionSCfg))
@@ -136,9 +135,8 @@ func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
 		Replication_conns: &[]string{utils.MetaInternal},
 	}
 	expected := "Replication connection ID needs to be different than *internal"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -148,9 +146,8 @@ func TestSessionSCfgloadFromJsonCfgCase3(t *testing.T) {
 		Debit_interval: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -160,9 +157,8 @@ func TestSessionSCfgloadFromJsonCfgCase5(t *testing.T) {
 		Session_ttl: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -172,9 +168,8 @@ func TestSessionSCfgloadFromJsonCfgCase7(t *testing.T) {
 		Channel_sync_interval: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -184,9 +179,8 @@ func TestSessionSCfgloadFromJsonCfgCase8(t *testing.T) {
 		Min_dur_low_balance: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -196,33 +190,29 @@ func TestSessionSCfgloadFromJsonCfgCase9(t *testing.T) {
 		Session_ttl_last_usage: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	cfgJSON1 := &SessionSJsonCfg{
 		Session_ttl_last_used: utils.StringPointer("1ss"),
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON1); err == nil || err.Error() != expected {
+	jsonCfg = NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON1); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	cfgJSON2 := &SessionSJsonCfg{
 		Session_ttl_max_delay: utils.StringPointer("1ss"),
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
+	jsonCfg = NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	cfgJSON3 := &SessionSJsonCfg{
 		Session_ttl_usage: utils.StringPointer("1ss"),
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
+	jsonCfg = NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -268,9 +258,8 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		SessionTTLLastUsed:  utils.DurationPointer(10),
 		SessionTTLUsage:     utils.DurationPointer(1),
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.sessionSCfg, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sessionSCfg))
@@ -284,9 +273,8 @@ func TestSessionSCfgloadFromJsonCfgCase11(t *testing.T) {
 		},
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -482,9 +470,8 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 			},
 		},
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err != nil {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.fsAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.fsAgentCfg))
@@ -496,9 +483,8 @@ func TestFsAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 		Max_wait_connection: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -508,9 +494,8 @@ func TestFsAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 		Extra_fields: &[]string{"a{*"},
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -686,9 +671,8 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 			Reconnects:      5,
 		}},
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.asteriskAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.asteriskAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.asteriskAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.asteriskAgentCfg))

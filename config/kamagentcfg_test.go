@@ -45,9 +45,8 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 10, Alias: "randomAlias"}},
 		Timezone:      "Local",
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.kamAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.kamAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.kamAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.kamAgentCfg))

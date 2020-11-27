@@ -2610,7 +2610,7 @@ func (r *RPCMock) Call(method string, args interface{}, rply interface{}) error 
 func TestCdrLogAction(t *testing.T) {
 	mock := RPCMock{}
 
-	dfltCfg, err := config.NewDefaultCGRConfig()
+	dfltCfg := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
 	}

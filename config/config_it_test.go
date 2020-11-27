@@ -83,10 +83,8 @@ func TestCGRConfig(t *testing.T) {
 
 func testNewCgrJsonCfgFromHttp(t *testing.T) {
 	addr := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/tutmongo/cgrates.json"
-	expVal, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	expVal := NewDefaultCGRConfig()
+
 	err = expVal.loadConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		[]func(*CgrJsonCfg) error{expVal.loadFromJSONCfg}, false)
 	if err != nil {
@@ -97,10 +95,7 @@ func testNewCgrJsonCfgFromHttp(t *testing.T) {
 		return
 	}
 
-	rply, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	rply := NewDefaultCGRConfig()
 	if err = rply.loadConfigFromPath(addr, []func(*CgrJsonCfg) error{rply.loadFromJSONCfg}, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expVal, rply) {
@@ -133,10 +128,8 @@ func testNewCGRConfigFromPath(t *testing.T) {
 
 }
 func testCGRConfigReloadAttributeS(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -163,10 +156,8 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 }
 
 func testCGRConfigReloadChargerSDryRun(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -177,7 +168,7 @@ func testCGRConfigReloadChargerSDryRun(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	ecfg, _ := NewDefaultCGRConfig()
+	ecfg := NewDefaultCGRConfig()
 
 	if !reflect.DeepEqual(ecfg.ChargerSCfg(), cfg.ChargerSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(ecfg.ChargerSCfg()), utils.ToJSON(cfg.ChargerSCfg()))
@@ -185,10 +176,8 @@ func testCGRConfigReloadChargerSDryRun(t *testing.T) {
 }
 
 func testCGRConfigReloadChargerS(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -212,10 +201,8 @@ func testCGRConfigReloadChargerS(t *testing.T) {
 }
 
 func testCGRConfigReloadThresholdS(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -238,10 +225,8 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 }
 
 func testCGRConfigReloadStatS(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -265,10 +250,8 @@ func testCGRConfigReloadStatS(t *testing.T) {
 }
 
 func testCGRConfigReloadResourceS(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -292,10 +275,8 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 }
 
 func testCGRConfigReloadSupplierS(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -324,10 +305,8 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 }
 
 func testCGRConfigV1ReloadConfigFromPathInvalidSection(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	expectedErr := "Invalid section: <InvalidSection>"
 	var reply string
 	if err := cfg.V1ReloadConfig(&ReloadArgs{
@@ -348,9 +327,8 @@ func testCGRConfigV1ReloadConfigFromPathInvalidSection(t *testing.T) {
 func testV1ReloadConfigFromPathConfigSanity(t *testing.T) {
 	expectedErr := "<AttributeS> not enabled but requested by <ChargerS> component"
 	var reply string
-	if cfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfg.V1ReloadConfig(&ReloadArgs{
+	cfg := NewDefaultCGRConfig()
+	if err := cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutinternal"),
 		Section: ChargerSCfgJson}, &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
@@ -358,10 +336,8 @@ func testV1ReloadConfigFromPathConfigSanity(t *testing.T) {
 }
 
 func testLoadConfigFromHTTPValidURL(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	url := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json"
 	if err := cfg.loadConfigFromHTTP(url, nil); err != nil {
 		t.Error(err)
@@ -369,10 +345,8 @@ func testLoadConfigFromHTTPValidURL(t *testing.T) {
 }
 
 func testCGRConfigReloadSchedulerS(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -395,10 +369,8 @@ func testCGRConfigReloadSchedulerS(t *testing.T) {
 }
 
 func testCGRConfigReloadCDRs(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	cfg.RalsCfg().Enabled = true
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
@@ -432,10 +404,8 @@ func testCGRConfigReloadCDRs(t *testing.T) {
 }
 
 func testCGRConfigReloadRALs(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	blMap := cfg.RalsCfg().BalanceRatingSubject
 	maxComp := cfg.RalsCfg().MaxComputedUsage
 	var reply string
@@ -465,10 +435,8 @@ func testCGRConfigReloadRALs(t *testing.T) {
 }
 
 func testCGRConfigReloadSessionS(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
@@ -520,10 +488,8 @@ func testCGRConfigReloadERs(t *testing.T) {
 		}
 	}
 
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	cfg.SessionSCfg().Enabled = true
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
@@ -597,10 +563,8 @@ func testCGRConfigReloadERs(t *testing.T) {
 }
 
 func testCGRConfigReloadDNSAgent(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	cfg.SessionSCfg().Enabled = true
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
@@ -625,10 +589,8 @@ func testCGRConfigReloadDNSAgent(t *testing.T) {
 }
 
 func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	cfg.SessionSCfg().Enabled = true
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
@@ -800,7 +762,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		},
 	}
 
-	cfg, _ := NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	var reply string
 	var rcv map[string]interface{}
 
@@ -830,10 +792,8 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 }
 
 func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
@@ -885,10 +845,8 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 }
 
 func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
@@ -945,10 +903,8 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 }
 
 func testCGRConfigReloadAll(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
@@ -1105,10 +1061,8 @@ func testHttpHandlerConfigSForFolder(t *testing.T) {
 }
 
 func testLoadConfigFromFolderFileNotFound(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	expected := "file </usr/share/cgrates/conf/samples/docker/cgrates.json>:NOT_FOUND:ENV_VAR:DOCKER_IP"
 	if err = cfg.loadConfigFromFolder("/usr/share/cgrates/conf/samples/",
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
@@ -1122,10 +1076,8 @@ func testLoadConfigFromFolderOpenError(t *testing.T) {
 	if err = os.MkdirAll(newDir, 755); err != nil {
 		t.Fatal(err)
 	}
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	expected := "open /tmp/testLoadConfigFromFolderOpenError/notes.json: no such file or directory"
 	if err = cfg.loadConfigFromFile(path.Join(newDir, "notes.json"),
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
@@ -1142,10 +1094,8 @@ func testLoadConfigFromFolderNoConfigFound(t *testing.T) {
 	if err = os.MkdirAll(newDir, 755); err != nil {
 		t.Fatal(err)
 	}
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	if err = cfg.loadConfigFromFolder(newDir,
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
 		false); err == nil || err != filepath.ErrBadPattern {
@@ -1157,10 +1107,8 @@ func testLoadConfigFromFolderNoConfigFound(t *testing.T) {
 }
 
 func testLoadConfigFromPathInvalidArgument(t *testing.T) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	expected := "stat /\x00: invalid argument"
 	if err = cfg.loadConfigFromPath("/\x00",
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
@@ -1174,10 +1122,8 @@ func testLoadConfigFromPathValidPath(t *testing.T) {
 	if err = os.MkdirAll(newDir, 755); err != nil {
 		t.Fatal(err)
 	}
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	expected := "No config file found on path /tmp/randomDir"
 	if err = cfg.loadConfigFromPath(newDir,
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
@@ -1194,10 +1140,8 @@ func testLoadConfigFromPathFile(t *testing.T) {
 	if err = os.MkdirAll(newDir, 755); err != nil {
 		t.Fatal(err)
 	}
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := NewDefaultCGRConfig()
+
 	expected := "No config file found on path /tmp/randomDir"
 	if err = cfg.loadConfigFromPath(newDir,
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},

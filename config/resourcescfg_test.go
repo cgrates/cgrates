@@ -46,9 +46,8 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 	}
-	if cfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	cfg := NewDefaultCGRConfig()
+	if err = cfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfg.resourceSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.resourceSCfg))
@@ -60,9 +59,8 @@ func TestResourceSConfigloadFromJsonCfgCase2(t *testing.T) {
 		Store_interval: utils.StringPointer("2ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"2ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

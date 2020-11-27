@@ -42,10 +42,8 @@ func TestListenAndServe(t *testing.T) {
 }
 
 func TestNewRateS(t *testing.T) {
-	config, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	config := config.NewDefaultCGRConfig()
+
 	data := engine.NewInternalDB(nil, nil, true)
 	dataManager := engine.NewDataManager(data, config.CacheCfg(), nil)
 	filters := engine.NewFilterS(config, nil, dataManager)
@@ -69,10 +67,8 @@ func TestCallRates(t *testing.T) {
 }
 
 func TestMatchingRateProfileEvent(t *testing.T) {
-	defaultCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	defaultCfg := config.NewDefaultCGRConfig()
+
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
@@ -91,7 +87,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 			ExpiryTime: t1,
 		},
 	}
-	err = dm.SetRateProfile(rpp, true)
+	err := dm.SetRateProfile(rpp, true)
 	if err != nil {
 		t.Error(err)
 	}

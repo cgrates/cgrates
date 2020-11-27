@@ -46,9 +46,8 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 		GapiCredentials: json.RawMessage{12, 13, 60},
 		GapiToken:       json.RawMessage{13, 16},
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.loaderCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.loaderCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.loaderCgrCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.loaderCgrCfg))

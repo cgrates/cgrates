@@ -84,9 +84,8 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 		},
 		RegisterInterval: 5,
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.dispatcherHCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.dispatcherHCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.dispatcherHCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.dispatcherHCfg))
@@ -146,9 +145,8 @@ func TestDispatcherCfgParseWithNanoSec(t *testing.T) {
 		Register_interval: utils.StringPointer("1ss"),
 	}
 	expErrMessage := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.dispatcherHCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.dispatcherHCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
 		t.Errorf("Expected %+v \n, recevied %+v", expErrMessage, err)
 	}
 }

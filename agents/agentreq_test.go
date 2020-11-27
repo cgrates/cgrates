@@ -38,7 +38,7 @@ import (
 )
 
 func TestAgReqSetFields(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -142,7 +142,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 		utils.Account: 1009,
 		utils.Tenant:  "cgrates.org",
 	}
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	ar := NewAgentRequest(utils.MapStorage(req), nil,
@@ -490,7 +490,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 }
 
 func TestAgReqMaxCost(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -536,7 +536,7 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -589,7 +589,7 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 	}
 	//create radiusDataProvider
 	dP := newRADataProvider(pkt)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -632,7 +632,7 @@ Host: api.cgrates.org
 	}
 	//create radiusDataProvider
 	dP, _ := newHTTPUrlDP(req)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -703,7 +703,7 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 	}
 	//create radiusDataProvider
 	dP, _ := newHTTPXmlDP(req)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 
@@ -733,7 +733,7 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 }
 
 func TestAgReqEmptyFilter(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -778,7 +778,7 @@ func TestAgReqEmptyFilter(t *testing.T) {
 }
 
 func TestAgReqMetaExponent(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -805,7 +805,7 @@ func TestAgReqMetaExponent(t *testing.T) {
 }
 
 func TestAgReqFieldAsNone(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -845,7 +845,7 @@ func TestAgReqFieldAsNone(t *testing.T) {
 }
 
 func TestAgReqFieldAsNone2(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -888,7 +888,7 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 }
 
 func TestAgReqSetField2(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -949,7 +949,7 @@ func TestAgReqSetField2(t *testing.T) {
 }
 
 func TestAgReqFieldAsInterface(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -996,7 +996,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 }
 
 func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1047,7 +1047,7 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 }
 
 func TestAgReqSetCGRReplyWithError(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1089,7 +1089,7 @@ func (ev myEv) AsNavigableMap() utils.NavigableMap2 {
 }
 
 func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1154,7 +1154,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1238,7 +1238,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1304,7 +1304,7 @@ func TestAgReqParseFieldMetaSum(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1348,7 +1348,7 @@ func TestAgReqParseFieldMetaDifference(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1392,7 +1392,7 @@ func TestAgReqParseFieldMetaMultiply(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1436,7 +1436,7 @@ func TestAgReqParseFieldMetaDivide(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1480,7 +1480,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1534,7 +1534,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 }
 
 func TestAgReqOverwrite(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1586,7 +1586,7 @@ func TestAgReqOverwrite(t *testing.T) {
 }
 
 func TestAgReqGroupType(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1630,7 +1630,7 @@ func TestAgReqGroupType(t *testing.T) {
 }
 
 func TestAgReqSetFieldsInTmp(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1664,7 +1664,7 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 }
 
 func TestAgReqSetFieldsIp2Hex(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1692,7 +1692,7 @@ func TestAgReqSetFieldsIp2Hex(t *testing.T) {
 }
 
 func TestAgReqSetFieldsString2Hex(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1720,7 +1720,7 @@ func TestAgReqSetFieldsString2Hex(t *testing.T) {
 }
 
 func TestAgReqSetFieldsWithRemove(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1858,7 +1858,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 }
 
 func TestAgReqSetFieldsInCache(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1899,7 +1899,7 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 }
 
 func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1994,7 +1994,7 @@ func TestAgReqFiltersInsideField(t *testing.T) {
 			}),
 		}})
 	//create diameterDataProvider
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -2025,7 +2025,7 @@ func TestAgReqFiltersInsideField(t *testing.T) {
 }
 
 func TestAgReqDynamicPath(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -2099,7 +2099,7 @@ func TestAgReqDynamicPath(t *testing.T) {
 }
 
 func TestAgReqRoundingDecimals(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -2151,7 +2151,7 @@ PASS
 ok  	github.com/cgrates/cgrates/agents	36.788s
 */
 func BenchmarkAgReqSetField(b *testing.B) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)

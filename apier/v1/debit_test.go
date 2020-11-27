@@ -35,7 +35,7 @@ var (
 )
 
 func init() {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	apierDebitStorage = engine.NewInternalDB(nil, nil, true)
 
@@ -50,7 +50,7 @@ func init() {
 }
 
 func TestDebitUsageWithOptionsSetConfig(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	apierDebitStorage = engine.NewInternalDB(nil, nil, true)
 	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}

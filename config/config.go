@@ -117,7 +117,7 @@ func (dbDflt dbDefaults) dbPass(dbType string, flagInput string) string {
 }
 
 func init() {
-	cgrCfg, _ = NewDefaultCGRConfig()
+	cgrCfg = NewDefaultCGRConfig()
 	dbDefaultsCfg = newDbDefaults()
 }
 
@@ -132,7 +132,12 @@ func SetCgrConfig(cfg *CGRConfig) {
 }
 
 // NewDefaultCGRConfig returns the default configuration
-func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
+func NewDefaultCGRConfig() (cfg *CGRConfig) {
+	cfg, _ = newCGRConfig([]byte(CGRATES_CFG_JSON))
+	return
+}
+
+func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg = new(CGRConfig)
 	cfg.initChanels()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
@@ -195,7 +200,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.coreSCfg = new(CoreSCfg)
 
 	var cgrJSONCfg *CgrJsonCfg
-	if cgrJSONCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
+	if cgrJSONCfg, err = NewCgrJsonCfgFromBytes(config); err != nil {
 		return
 	}
 	if err = cfg.loadFromJSONCfg(cgrJSONCfg); err != nil {
@@ -228,7 +233,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 
 // NewCGRConfigFromJSONStringWithDefaults returns the given config with the default option loaded
 func NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr string) (cfg *CGRConfig, err error) {
-	cfg, _ = NewDefaultCGRConfig()
+	cfg = NewDefaultCGRConfig()
 	jsnCfg := new(CgrJsonCfg)
 	if err = NewRjReaderFromBytes([]byte(cfgJSONStr)).Decode(jsnCfg); err != nil {
 		return
@@ -240,9 +245,7 @@ func NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr string) (cfg *CGRConfig, 
 
 // NewCGRConfigFromPath reads all json files out of a folder/subfolders and loads them up in lexical order
 func NewCGRConfigFromPath(path string) (cfg *CGRConfig, err error) {
-	if cfg, err = NewDefaultCGRConfig(); err != nil {
-		return
-	}
+	cfg = NewDefaultCGRConfig()
 	cfg.ConfigPath = path
 
 	if err = cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, false); err != nil {
@@ -255,9 +258,7 @@ func NewCGRConfigFromPath(path string) (cfg *CGRConfig, err error) {
 // newCGRConfigFromPathWithoutEnv reads all json files out of a folder/subfolders and loads them up in lexical order
 // it will not read *env variables and will not checkConfigSanity as it is not needed for configs
 func newCGRConfigFromPathWithoutEnv(path string) (cfg *CGRConfig, err error) {
-	if cfg, err = NewDefaultCGRConfig(); err != nil {
-		return
-	}
+	cfg = NewDefaultCGRConfig()
 	cfg.ConfigPath = path
 
 	err = cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, true)

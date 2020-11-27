@@ -35,15 +35,13 @@ func (c *mockConnector) Call(_ string, _, _ interface{}) (err error) {
 	return errors.New("error")
 }
 func TestNewAnalyzeConnector(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
+	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
 	anz, err := NewAnalyzerService(cfg)

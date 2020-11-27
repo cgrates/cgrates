@@ -28,7 +28,7 @@ import (
 )
 
 func TestNewInvalidReader(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = "Invalid"
 	reader.ID = "InvaidReader"
@@ -42,7 +42,7 @@ func TestNewInvalidReader(t *testing.T) {
 }
 
 func TestNewCsvReader(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = utils.MetaFileCSV
@@ -74,7 +74,7 @@ func TestNewCsvReader(t *testing.T) {
 }
 
 func TestNewKafkaReader(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = utils.MetaKafkajsonMap
@@ -96,7 +96,7 @@ func TestNewKafkaReader(t *testing.T) {
 }
 
 func TestNewSQLReader(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
 	reader := cfg.ERsCfg().Readers[0].Clone()
 	reader.Type = utils.MetaSQL
