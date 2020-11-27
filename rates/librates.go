@@ -236,14 +236,13 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 			if intUsage%intIncrm != 0 {
 				cmpFactor++ // int division has used math.Floor, need Ceil
 			}
-			rIcrm := &engine.RateSIncrement{
+			rIcmts = append(rIcmts, &engine.RateSIncrement{
 				UsageStart:        iRtUsageSIdx,
 				Rate:              rt.Rate,
 				IntervalRateIndex: j,
 				CompressFactor:    cmpFactor,
 				Usage:             iRtUsage,
-			}
-			rIcmts = append(rIcmts, rIcrm)
+			})
 			iRtUsageSIdx += iRtUsage
 
 		}
@@ -252,12 +251,11 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 		if len(rIcmts) == 0 {       // no match found
 			continue
 		}
-		rIvl := &engine.RateSInterval{
+		rtIvls = append(rtIvls, &engine.RateSInterval{
 			UsageStart:     usageStart,
 			Increments:     rIcmts,
 			CompressFactor: 1,
-		}
-		rtIvls = append(rtIvls, rIvl)
+		})
 		if iRtUsageSIdx >= totalUsage { // charged enough for the usage
 			break
 		}
