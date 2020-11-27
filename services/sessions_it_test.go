@@ -34,10 +34,8 @@ import (
 )
 
 func TestSessionSReload(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	cfg.ChargerSCfg().Enabled = true
 	cfg.RalsCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
@@ -86,7 +84,7 @@ func TestSessionSReload(t *testing.T) {
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, chrS, schS, ralS, cdrS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db, stordb)
-	if err = srvMngr.StartServices(); err != nil {
+	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if srv.IsRunning() {

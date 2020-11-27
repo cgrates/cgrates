@@ -32,7 +32,7 @@ var (
 )
 
 func init() {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	apierAcntsAcntStorage = engine.NewInternalDB(nil, nil, true)
 	apierAcnts = &APIerSv1{
 		DataManager: engine.NewDataManager(apierAcntsAcntStorage, config.CgrConfig().CacheCfg(), nil),

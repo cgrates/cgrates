@@ -79,9 +79,8 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 		},
 	}
 	expected[0].RequestProcessors[0].ReplyFields[0].ComputePath()
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsnCfg.generalCfg.RSRSep); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsnCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(&expected, &jsnCfg.httpAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.httpAgentCfg))
@@ -220,9 +219,8 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 	expected[0].RequestProcessors[0].ReplyFields[0].ComputePath()
 	expected[0].RequestProcessors[1].ReplyFields[0].ComputePath()
 	expected[0].RequestProcessors[1].RequestFields[0].ComputePath()
-	if cfgJsn, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfgJsn.httpAgentCfg.loadFromJSONCfg(cfgJSON, cfgJsn.generalCfg.RSRSep); err != nil {
+	cfgJsn := NewDefaultCGRConfig()
+	if err = cfgJsn.httpAgentCfg.loadFromJSONCfg(cfgJSON, cfgJsn.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfgJsn.httpAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJsn.httpAgentCfg))
@@ -341,9 +339,8 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 		},
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -354,20 +351,16 @@ func TestHttpAgentCfgloadFromJsonCfgCase5(t *testing.T) {
 			Request_processors: nil,
 		},
 	}
-	jsonCfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	jsonCfg := NewDefaultCGRConfig()
+
 	if err := jsonCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestHttpAgentCfgloadFromJsonCfgCase6(t *testing.T) {
-	jsonCfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	jsonCfg := NewDefaultCGRConfig()
+
 	httpAgentCfg := new(HTTPAgentCfg)
 	if err := httpAgentCfg.loadFromJSONCfg(nil, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)

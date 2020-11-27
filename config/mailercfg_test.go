@@ -37,9 +37,8 @@ func TestMailerCfgloadFromJsonCfg(t *testing.T) {
 		MailerAuthPass: "CGRateS.org",
 		MailerFromAddr: "cgr-mailer@localhost.localdomain",
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.mailerCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.mailerCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.mailerCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.mailerCfg))

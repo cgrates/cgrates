@@ -39,9 +39,8 @@ func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 		StatSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		Filters:      []string{"randomFilter"},
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.schedulerCfg.loadFromJSONCfg(cfgJSONS); err != nil {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.schedulerCfg.loadFromJSONCfg(cfgJSONS); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.schedulerCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.schedulerCfg))

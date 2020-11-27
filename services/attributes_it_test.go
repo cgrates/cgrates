@@ -35,10 +35,8 @@ import (
 )
 
 func TestAttributeSReload(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
@@ -60,7 +58,7 @@ func TestAttributeSReload(t *testing.T) {
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
-	if err = srvMngr.StartServices(); err != nil {
+	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if attrS.IsRunning() {

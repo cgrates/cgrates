@@ -28,7 +28,7 @@ import (
 )
 
 func TestERsNewERService(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	fltrS := &engine.FilterS{}
 	expected := &ERService{cfg: cfg,
 		filterS:   fltrS,
@@ -48,7 +48,7 @@ func TestERsNewERService(t *testing.T) {
 }
 
 func TestERsAddReader(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	fltrS := &engine.FilterS{}
 	erS := NewERService(cfg, fltrS, nil)
 	reader := cfg.ERsCfg().Readers[0]

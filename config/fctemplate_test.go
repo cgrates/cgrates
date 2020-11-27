@@ -57,9 +57,8 @@ func TestFCTemplateInflateTemplate(t *testing.T) {
 		},
 	}
 	expected := "time: unknown unit \"sa\" in duration \"1sa\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if _, err := InflateTemplates(fcTemplate, jsonCfg.templates); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if _, err := InflateTemplates(fcTemplate, jsonCfg.templates); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

@@ -88,7 +88,7 @@ func TestIsIndexed(t *testing.T) {
 }
 
 func TestSessionSIndexAndUnindexSessions(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg := config.NewDefaultCGRConfig()
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"Tenant":  {},
 		"Account": {},
@@ -414,7 +414,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 }
 
 func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -632,7 +632,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 }
 
 func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -1416,7 +1416,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 }
 
 func TestSessionStransitSState(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -1462,7 +1462,7 @@ func TestSessionStransitSState(t *testing.T) {
 }
 
 func TestSessionSrelocateSessionS(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -1612,7 +1612,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 }
 
 func TestSessionSGetIndexedFilters(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg := config.NewDefaultCGRConfig()
 	mpStr := engine.NewInternalDB(nil, nil, true)
 	sS := NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx := map[string][]string{}
@@ -1665,7 +1665,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 }
 
 func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg := config.NewDefaultCGRConfig()
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
@@ -1778,7 +1778,7 @@ type testRPCClientConnection struct{}
 func (*testRPCClientConnection) Call(string, interface{}, interface{}) error { return nil }
 
 func TestNewSessionS(t *testing.T) {
-	cgrCGF, _ := config.NewDefaultCGRConfig()
+	cgrCGF := config.NewDefaultCGRConfig()
 
 	eOut := &SessionS{
 		cgrCfg:        cgrCGF,
@@ -1944,7 +1944,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 }
 
 func TestSessionSgetSession(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -1988,7 +1988,7 @@ func TestSessionSgetSession(t *testing.T) {
 }
 
 func TestSessionSfilterSessions(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg := config.NewDefaultCGRConfig()
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
@@ -2164,7 +2164,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 }
 
 func TestSessionSfilterSessionsCount(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg := config.NewDefaultCGRConfig()
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}

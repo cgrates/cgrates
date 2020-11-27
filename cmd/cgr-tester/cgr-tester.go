@@ -37,7 +37,7 @@ import (
 
 var (
 	cgrTesterFlags = flag.NewFlagSet("cgr-tester", flag.ContinueOnError)
-	cgrConfig, _   = config.NewDefaultCGRConfig()
+	cgrConfig      = config.NewDefaultCGRConfig()
 	tstCfg         = config.CgrConfig()
 	cpuprofile     = cgrTesterFlags.String("cpuprofile", "", "write cpu profile to file")
 	memprofile     = cgrTesterFlags.String("memprofile", "", "write memory profile to this file")

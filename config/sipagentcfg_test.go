@@ -80,9 +80,8 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	for _, r := range expected.RequestProcessors[0].ReplyFields {
 		r.ComputePath()
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSONS, jsonCfg.generalCfg.RSRSep); err != nil {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSONS, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.sipAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sipAgentCfg))
@@ -94,9 +93,8 @@ func TestSIPAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 		Retransmission_timer: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -139,9 +137,8 @@ func TestSIPAgentCfgloadFromJsonCfgCase5(t *testing.T) {
 		}},
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(sipAgent, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(sipAgent, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

@@ -212,9 +212,8 @@ func TestEventExporterFieldloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -232,18 +231,15 @@ func TestEventExporterFieldloadFromJsonCfg1(t *testing.T) {
 		},
 	}
 	expected := "no template with id: <>"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
 func TestEventExporterloadFromJsonCfg(t *testing.T) {
-	jsonCfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	jsonCfg := NewDefaultCGRConfig()
+
 	eventExporter := new(EventExporterCfg)
 	if err := eventExporter.loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
@@ -259,9 +255,8 @@ func TestEESCacheloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.eesCfg.loadFromJSONCfg(eesCfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.eesCfg.loadFromJSONCfg(eesCfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -275,17 +270,15 @@ func TestEESExportersloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.eesCfg.loadFromJSONCfg(eesCfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.eesCfg.loadFromJSONCfg(eesCfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	eesCfgExporter := &EEsJsonCfg{
 		Exporters: nil,
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.eesCfg.loadFromJSONCfg(eesCfgExporter, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err != nil {
+	jsonCfg = NewDefaultCGRConfig()
+	if err = jsonCfg.eesCfg.loadFromJSONCfg(eesCfgExporter, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err != nil {
 		t.Error(err)
 	}
 }
@@ -482,9 +475,8 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 			v.ComputePath()
 		}
 	}
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.eesCfg.loadFromJSONCfg(nil, cgrCfg.templates, cgrCfg.generalCfg.RSRSep, cgrCfg.dfltEvExp); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.eesCfg.loadFromJSONCfg(nil, cgrCfg.templates, cgrCfg.generalCfg.RSRSep, cgrCfg.dfltEvExp); err != nil {
 		t.Error(err)
 	} else if err := cgrCfg.eesCfg.loadFromJSONCfg(jsonCfg, cgrCfg.templates, cgrCfg.generalCfg.RSRSep, cgrCfg.dfltEvExp); err != nil {
 		t.Error(err)
@@ -627,9 +619,8 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 			v.ComputePath()
 		}
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.eesCfg.loadFromJSONCfg(jsonCfg, msgTemplates, jsnCfg.generalCfg.RSRSep, jsnCfg.dfltEvExp); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.eesCfg.loadFromJSONCfg(jsonCfg, msgTemplates, jsnCfg.generalCfg.RSRSep, jsnCfg.dfltEvExp); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCfg, jsnCfg.eesCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedCfg), utils.ToJSON(jsnCfg.eesCfg))

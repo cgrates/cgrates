@@ -631,7 +631,7 @@ func TestSafEventAsCDR(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-	cfg, err := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

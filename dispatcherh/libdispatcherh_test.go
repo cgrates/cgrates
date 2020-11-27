@@ -79,10 +79,7 @@ func TestRegisterArgsAsDispatcherHosts(t *testing.T) {
 }
 
 func TestGetConnPort(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 
 	cfg.ListenCfg().RPCJSONTLSListen = ":2072"
 	cfg.ListenCfg().RPCJSONListen = ":2012"
@@ -234,10 +231,8 @@ func TestRegister(t *testing.T) {
 	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host2.TenantID()); ok {
 		t.Errorf("Expected to not find Host2 in cache %+v", x)
 	}
-	errCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	errCfg := config.NewDefaultCGRConfig()
+
 	engine.NewConnManager(errCfg, map[string]chan rpcclient.ClientConnector{})
 	errCfg.CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
 	errCfg.RPCConns()["errCon"] = &config.RPCConn{

@@ -64,9 +64,7 @@ func TestStorDBit(t *testing.T) {
 	//var stestName string
 	switch *dbType {
 	case utils.MetaInternal:
-		if cfg, err = config.NewDefaultCGRConfig(); err != nil {
-			t.Error(err)
-		}
+		cfg = config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cfg)
 		storDB = NewInternalDB(nil, nil, false)
 	case utils.MetaMySQL:

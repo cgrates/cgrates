@@ -34,10 +34,8 @@ import (
 )
 
 func TestCdrsReload(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -79,7 +77,7 @@ func TestCdrsReload(t *testing.T) {
 	srvMngr.AddServices(cdrS, ralS, schS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server,
 			make(chan rpcclient.ClientConnector, 1), nil, anz), db, stordb)
-	if err = srvMngr.StartServices(); err != nil {
+	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if cdrS.IsRunning() {

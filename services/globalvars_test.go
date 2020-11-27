@@ -26,10 +26,8 @@ import (
 )
 
 func TestGlobalVarS(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	exp := &GlobalVarS{cfg: cfg}
 	if gv := NewGlobalVarS(cfg); !reflect.DeepEqual(gv, exp) {
 		t.Errorf("Expected %+v, received %+v", exp, gv)
@@ -50,7 +48,7 @@ func TestGlobalVarS(t *testing.T) {
 	if err := exp.Reload(); err == nil {
 		t.Error("Expected reload to not be succesfully finished")
 	}
-	if err = exp.Shutdown(); err != nil {
+	if err := exp.Shutdown(); err != nil {
 		t.Fatal(err)
 	}
 }

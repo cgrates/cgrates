@@ -1146,7 +1146,7 @@ func TestFilterWithDiameterDP(t *testing.T) {
 			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(99)),
 		}})
 	dP := newDADataProvider(nil, avps)
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)

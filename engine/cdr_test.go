@@ -678,7 +678,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	} else if expRecord[0] != "1" {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", "1", expRecord[0])
 	}
-	defaultCfg, _ := config.NewDefaultCGRConfig()
+	defaultCfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmForCDR := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgCdrFld = &config.FCTemplate{
@@ -993,10 +993,8 @@ func TestCDRAddDefaults(t *testing.T) {
 		OriginHost: "192.168.1.2",
 		Account:    "1001",
 	}
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	eCDR := &CDR{
 		CGRID:       "bf736fb56ce586357ab2f286b777187a1612c6e6",
 		ToR:         utils.VOICE,
@@ -1244,10 +1242,7 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 		Filters: []string{"*string:~*req.RunID:testRun1"},
 		Value:   config.NewRSRParsersMustCompile("~*req.Cost", utils.INFIELD_SEP),
 	}
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 
 	if out, err := cdr.combimedCdrFieldVal(tpFld, groupCDRs, &FilterS{cfg: cfg}); err != nil {
 		t.Error(err)

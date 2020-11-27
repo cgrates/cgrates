@@ -131,10 +131,8 @@ func TestSQSPoster(t *testing.T) {
 	if !*itTestSQS {
 		return
 	}
-	cfg1, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg1 := config.NewDefaultCGRConfig()
+
 	utils.Newlogger(utils.MetaSysLog, cfg1.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
@@ -212,10 +210,8 @@ func TestS3Poster(t *testing.T) {
 	if !*itTestS3 {
 		return
 	}
-	cfg1, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg1 := config.NewDefaultCGRConfig()
+
 	utils.Newlogger(utils.MetaSysLog, cfg1.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
@@ -275,10 +271,8 @@ func TestAMQPv1Poster(t *testing.T) {
 	if !*itTestAMQPv1 {
 		return
 	}
-	cfg1, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg1 := config.NewDefaultCGRConfig()
+
 	utils.Newlogger(utils.MetaSysLog, cfg1.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 

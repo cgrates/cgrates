@@ -84,7 +84,7 @@ func TestFilterPassDestinations(t *testing.T) {
 }
 
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
 	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
 	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{

@@ -34,10 +34,8 @@ import (
 )
 
 func TestSIPAgentReload(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	cfg.SessionSCfg().Enabled = true
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
@@ -60,7 +58,7 @@ func TestSIPAgentReload(t *testing.T) {
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
-	if err = srvMngr.StartServices(); err != nil {
+	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
 	if srv.IsRunning() {

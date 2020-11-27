@@ -75,9 +75,8 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 			utils.RedisSentinelNameCfg: utils.EmptyString,
 		},
 	}
-	if cfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfg.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	cfg := NewDefaultCGRConfig()
+	if err = cfg.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfg.migratorCgrCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.migratorCgrCfg))

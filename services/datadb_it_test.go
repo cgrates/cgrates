@@ -36,10 +36,8 @@ import (
 )
 
 func TestDataDBReload(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
+
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
@@ -58,7 +56,7 @@ func TestDataDBReload(t *testing.T) {
 	srvMngr.AddServices(NewAttributeService(cfg, db,
 		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz),
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
-	if err = srvMngr.StartServices(); err != nil {
+	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if db.IsRunning() {

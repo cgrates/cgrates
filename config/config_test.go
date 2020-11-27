@@ -35,7 +35,7 @@ var cfg *CGRConfig
 var err error
 
 func TestCgrCfgConfigSharing(t *testing.T) {
-	cfg, _ = NewDefaultCGRConfig()
+	cfg = NewDefaultCGRConfig()
 	SetCgrConfig(cfg)
 	cfgReturn := CgrConfig()
 	if !reflect.DeepEqual(cfgReturn, cfg) {
@@ -55,7 +55,7 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 },
 
 }`
-	eCgrCfg, err := NewDefaultCGRConfig()
+	eCgrCfg := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -204,7 +204,7 @@ func TestHttpAgentCfg(t *testing.T) {
 ],
 }
 	`
-	eCgrCfg, _ := NewDefaultCGRConfig()
+	eCgrCfg := NewDefaultCGRConfig()
 	eCgrCfg.httpAgentCfg = []*HTTPAgentCfg{
 		{
 			ID:                "conecto1",
@@ -220,13 +220,6 @@ func TestHttpAgentCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(eCgrCfg.HTTPAgentCfg(), cgrCfg.HTTPAgentCfg()) {
 		t.Errorf("Expected: %s, received: %s",
 			utils.ToJSON(eCgrCfg.httpAgentCfg), utils.ToJSON(cgrCfg.httpAgentCfg))
-	}
-}
-
-func TestCgrCfgLoadJSONDefaults(t *testing.T) {
-	cgrCfg, err = NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
 	}
 }
 
@@ -1060,7 +1053,7 @@ func TestLoadRPCConnsError(t *testing.T) {
      },		
 }`
 	expected := "json: cannot unmarshal string into Go struct field RPCConnsJson.PoolSize of type int"
-	cgrCfg, err := NewDefaultCGRConfig()
+	cgrCfg := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1085,7 +1078,7 @@ func TestLoadGeneralCfgError(t *testing.T) {
     }
 }`
 	expected := "json: cannot unmarshal array into Go struct field GeneralJsonCfg.Max_call_duration of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1103,7 +1096,7 @@ func TestLoadCacheCfgError(t *testing.T) {
 	},
 }`
 	expected := "json: cannot unmarshal number into Go struct field CacheJsonCfg.Replication_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1121,7 +1114,7 @@ func TestLoadListenCfgError(t *testing.T) {
 	}
 }`
 	expected := "json: cannot unmarshal number into Go struct field ListenJsonCfg.Http_tls of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1139,7 +1132,7 @@ func TestLoadHTTPCfgError(t *testing.T) {
      },
 }`
 	expected := "json: cannot unmarshal string into Go struct field HTTPJsonCfg.Auth_users of type map[string]string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1157,7 +1150,7 @@ func TestLoadDataDBCfgErrorCase1(t *testing.T) {
 	}
 }`
 	expected := "json: cannot unmarshal number into Go struct field DbJsonCfg.Db_host of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1175,7 +1168,7 @@ func TestLoadDataDBCfgErrorCase2(t *testing.T) {
 	}
 }`
 	expected := "Remote connection ID needs to be different than *internal"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1197,7 +1190,7 @@ func TestLoadStorDbCfgError(t *testing.T) {
 	}
 }`
 	expected := "json: cannot unmarshal string into Go struct field DbJsonCfg.Db_port of type int"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1215,7 +1208,7 @@ func TestLoadFilterSCfgError(t *testing.T) {
 	},
 }`
 	expected := "json: cannot unmarshal string into Go struct field FilterSJsonCfg.Stats_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1233,7 +1226,7 @@ func TestLoadRalSCfgError(t *testing.T) {
     },
 }`
 	expected := "json: cannot unmarshal string into Go struct field RalsJsonCfg.Stats_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1251,7 +1244,7 @@ func TestLoadSchedulerCfgError(t *testing.T) {
     },
 }`
 	expected := "json: cannot unmarshal string into Go struct field SchedulerJsonCfg.Filters of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1269,7 +1262,7 @@ func TestLoadCdrsCfgError(t *testing.T) {
 	},
 }`
 	expected := "json: cannot unmarshal string into Go struct field CdrsJsonCfg.Ees_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1287,7 +1280,7 @@ func TestLoadSessionSCfgError(t *testing.T) {
     },
 }`
 	expected := "json: cannot unmarshal number into Go struct field SessionSJsonCfg.Session_ttl_usage of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1305,7 +1298,7 @@ func TestLoadFreeswitchAgentCfgError(t *testing.T) {
 	},
 }`
 	expected := "json: cannot unmarshal string into Go struct field FreeswitchAgentJsonCfg.Sessions_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1323,7 +1316,7 @@ func TestLoadKamAgentCfgError(t *testing.T) {
 		},
 	}`
 	expected := "json: cannot unmarshal number into Go struct field KamAgentJsonCfg.Timezone of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1341,7 +1334,7 @@ func TestLoadAsteriskAgentCfgError(t *testing.T) {
 	},
 }`
 	expected := "json: cannot unmarshal string into Go struct field AsteriskAgentJsonCfg.Sessions_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1363,7 +1356,7 @@ func TestLoadDiameterAgentCfgError(t *testing.T) {
       }
 }`
 	expected := "json: cannot unmarshal number into Go struct field ReqProcessorJsnCfg.Request_processors.ID of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1381,7 +1374,7 @@ func TestLoadRadiusAgentCfgError(t *testing.T) {
      },
 }`
 	expected := "json: cannot unmarshal number into Go struct field RadiusAgentJsonCfg.Listen_auth of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1399,7 +1392,7 @@ func TestLoadDNSAgentCfgError(t *testing.T) {
 		},
 	}`
 	expected := "json: cannot unmarshal number into Go struct field DNSAgentJsonCfg.Listen of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1419,7 +1412,7 @@ func TestLoadHttpAgentCfgError(t *testing.T) {
 	],	
 }`
 	expected := "json: cannot unmarshal array into Go struct field HttpAgentJsonCfg.Id of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1437,7 +1430,7 @@ func TestLoadAttributeSCfgError(t *testing.T) {
 	},		
 }`
 	expected := "json: cannot unmarshal string into Go struct field AttributeSJsonCfg.Process_runs of type int"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1455,7 +1448,7 @@ func TestLoadChargerSCfgError(t *testing.T) {
 	},	
 }`
 	expected := "json: cannot unmarshal string into Go struct field ChargerSJsonCfg.Prefix_indexed_fields of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1473,7 +1466,7 @@ func TestLoadResourceSCfgError(t *testing.T) {
 		},	
 	}`
 	expected := "json: cannot unmarshal string into Go struct field ResourceSJsonCfg.String_indexed_fields of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1491,7 +1484,7 @@ func TestLoadStatSCfgError(t *testing.T) {
 		},	
 }`
 	expected := "json: cannot unmarshal string into Go struct field StatServJsonCfg.String_indexed_fields of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1509,7 +1502,7 @@ func TestLoadThresholdSCfgError(t *testing.T) {
 		},		
 }`
 	expected := "json: cannot unmarshal number into Go struct field ThresholdSJsonCfg.Store_interval of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1529,7 +1522,7 @@ func TestLoadLoaderSCfgError(t *testing.T) {
 	],	
 }`
 	expected := "json: cannot unmarshal number into Go struct field LoaderJsonCfg.Run_delay of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1547,7 +1540,7 @@ func TestLoadRouteSCfgError(t *testing.T) {
 		},
 	}`
 	expected := "json: cannot unmarshal string into Go struct field RouteSJsonCfg.String_indexed_fields of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1565,7 +1558,7 @@ func TestLoadMailerCfgError(t *testing.T) {
 		},
 }`
 	expected := "json: cannot unmarshal number into Go struct field MailerJsonCfg.Server of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1583,7 +1576,7 @@ func TestLoadSureTaxCfgError(t *testing.T) {
     },
 }`
 	expected := "json: cannot unmarshal number into Go struct field SureTaxJsonCfg.Sales_type_code of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1601,7 +1594,7 @@ func TestLoadDispatcherSCfgError(t *testing.T) {
 		},
 }`
 	expected := "json: cannot unmarshal string into Go struct field DispatcherSJsonCfg.Attributes_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1619,7 +1612,7 @@ func TestLoadDispatcherHCfgError(t *testing.T) {
 		},		
 }`
 	expected := "json: cannot unmarshal number into Go struct field DispatcherHJsonCfg.Register_interval of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1637,7 +1630,7 @@ func TestLoadLoaderCgrCfgError(t *testing.T) {
 	},
 }`
 	expected := "json: cannot unmarshal string into Go struct field LoaderCfgJson.Caches_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1655,7 +1648,7 @@ func TestLoadMigratorCgrCfgError(t *testing.T) {
 	},
 }`
 	expected := "json: cannot unmarshal string into Go struct field MigratorCfgJson.Users_filters of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1673,7 +1666,7 @@ func TestLoadTlsCgrCfgError(t *testing.T) {
 	},
 }`
 	expected := "json: cannot unmarshal string into Go struct field TlsJsonCfg.Server_policy of type int"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1692,7 +1685,7 @@ func TestLoadAnalyzerCgrCfgError(t *testing.T) {
     }
 }`
 	expected := "json: cannot unmarshal number into Go struct field AnalyzerSJsonCfg.Enabled of type bool"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1710,7 +1703,7 @@ func TestLoadAPIBanCgrCfgError(t *testing.T) {
 		},
 }`
 	expected := "json: cannot unmarshal string into Go struct field APIBanJsonCfg.Enabled of type bool"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1728,7 +1721,7 @@ func TestLoadApierCfgError(t *testing.T) {
     },
 }`
 	expected := "json: cannot unmarshal string into Go struct field ApierJsonCfg.Scheduler_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1746,7 +1739,7 @@ func TestLoadErsCfgError(t *testing.T) {
 },
 }`
 	expected := "json: cannot unmarshal string into Go struct field ERsJsonCfg.Sessions_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1764,7 +1757,7 @@ func TestLoadEesCfgError(t *testing.T) {
 	  }
     }`
 	expected := "json: cannot unmarshal string into Go struct field EEsJsonCfg.Attributes_conns of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1782,7 +1775,7 @@ func TestLoadCoreSCfgError(t *testing.T) {
 	  }
     }`
 	expected := "json: cannot unmarshal string into Go struct field CoreSJsonCfg.Caps of type int"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1800,7 +1793,7 @@ func TestLoadRateSCfgError(t *testing.T) {
      },
 }`
 	expected := "json: cannot unmarshal string into Go struct field RateSJsonCfg.String_indexed_fields of type []string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1822,7 +1815,7 @@ func TestLoadSIPAgentCfgError(t *testing.T) {
 	},
 }`
 	expected := "json: cannot unmarshal number into Go struct field ReqProcessorJsnCfg.Request_processors.ID of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1844,7 +1837,7 @@ func TestLoadTemplateSCfgError(t *testing.T) {
      }
 }`
 	expected := "json: cannot unmarshal number into Go struct field FcTemplateJsonCfg.Tag of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1878,7 +1871,7 @@ func TestLoadConfigsCfgError(t *testing.T) {
       },
 }`
 	expected := "json: cannot unmarshal number into Go struct field ConfigSCfgJson.Url of type string"
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1922,7 +1915,7 @@ func TestSuretaxConfig(t *testing.T) {
 		SalesTypeCode:        NewRSRParsersMustCompile("R", utils.INFIELD_SEP),
 		TaxExemptionCodeList: NewRSRParsersMustCompile(utils.EmptyString, utils.INFIELD_SEP),
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1950,7 +1943,7 @@ func TestDiameterAgentConfig(t *testing.T) {
 		ForcedDisconnect:  "*none",
 		RequestProcessors: nil,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1971,7 +1964,7 @@ func TestRadiusAgentConfig(t *testing.T) {
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		RequestProcessors:  nil,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -1990,7 +1983,7 @@ func TestDNSAgentConfig(t *testing.T) {
 		Timezone:          "",
 		RequestProcessors: nil,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2012,7 +2005,7 @@ func TestAttributeSConfig(t *testing.T) {
 		ProcessRuns:         1,
 		NestedFields:        false,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2031,7 +2024,7 @@ func TestChargersConfig(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2051,7 +2044,7 @@ func TestResourceSConfig(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2072,7 +2065,7 @@ func TestStatSConfig(t *testing.T) {
 		SuffixIndexedFields:    &[]string{},
 		NestedFields:           false,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2091,7 +2084,7 @@ func TestThresholdSConfig(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2115,7 +2108,7 @@ func TestRouteSConfig(t *testing.T) {
 		DefaultRatio:        1,
 		NestedFields:        false,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2155,7 +2148,7 @@ func TestSessionSConfig(t *testing.T) {
 			PublicKeyPath:      "",
 		},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2185,7 +2178,7 @@ func TestFsAgentConfig(t *testing.T) {
 			},
 		},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2203,7 +2196,7 @@ func TestKamAgentConfig(t *testing.T) {
 		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 5, Alias: ""}},
 		Timezone:      "",
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2227,7 +2220,7 @@ func TestAsteriskAgentConfig(t *testing.T) {
 			Reconnects:      5,
 		}},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2243,7 +2236,7 @@ func TestFilterSConfig(t *testing.T) {
 		ResourceSConns: []string{},
 		ApierSConns:    []string{},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2271,7 +2264,7 @@ func TestLoaderConfig(t *testing.T) {
 			Data:           nil,
 		},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2291,7 +2284,7 @@ func TestDispatcherSConfig(t *testing.T) {
 		AttributeSConns:     []string{},
 		NestedFields:        false,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2309,7 +2302,7 @@ func TestSchedulerConfig(t *testing.T) {
 		StatSConns:   []string{},
 		Filters:      []string{},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2327,7 +2320,7 @@ func TestAnalyzerConfig(t *testing.T) {
 		IndexType:       utils.MetaScorch,
 		TTL:             24 * time.Hour,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2345,7 +2338,7 @@ func TestApierConfig(t *testing.T) {
 		AttributeSConns: []string{},
 		EEsConns:        []string{},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2381,7 +2374,7 @@ func TestERSConfig(t *testing.T) {
 			},
 		},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2423,7 +2416,7 @@ func TestEEsNoLksConfig(t *testing.T) {
 			},
 		},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2445,7 +2438,7 @@ func TestRateSConfig(t *testing.T) {
 		RateSuffixIndexedFields: &[]string{},
 		RateNestedFields:        false,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2465,7 +2458,7 @@ func TestSIPAgentConfig(t *testing.T) {
 		RetransmissionTimer: 1000000000,
 		RequestProcessors:   nil,
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2502,7 +2495,7 @@ func TestRPCConnsConfig(t *testing.T) {
 			},
 		},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2559,7 +2552,7 @@ func TestTemplatesConfig(t *testing.T) {
 			elem.ComputePath()
 		}
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2578,7 +2571,7 @@ func TestConfigsConfig(t *testing.T) {
 		URL:     "/configs/",
 		RootDir: "/var/spool/cgrates/configs",
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2593,7 +2586,7 @@ func TestAPIBanConfig(t *testing.T) {
 		Enabled: false,
 		Keys:    []string{},
 	}
-	cgrConfig, err := NewDefaultCGRConfig()
+	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2604,7 +2597,7 @@ func TestAPIBanConfig(t *testing.T) {
 }
 
 func TestRLockSections(t *testing.T) {
-	cgrCfg, err := NewDefaultCGRConfig()
+	cgrCfg := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2613,7 +2606,7 @@ func TestRLockSections(t *testing.T) {
 }
 
 func TestLockSections(t *testing.T) {
-	cgrCfg, err := NewDefaultCGRConfig()
+	cgrCfg := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -2622,7 +2615,7 @@ func TestLockSections(t *testing.T) {
 }
 
 func TestRLockAndRUnlock(t *testing.T) {
-	cgrCfg, err := NewDefaultCGRConfig()
+	cgrCfg := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -3456,7 +3449,7 @@ func TestCfgTlsCfg(t *testing.T) {
 		"server_policy":3,
 		},
 	}`
-	eCgrCfg, _ := NewDefaultCGRConfig()
+	eCgrCfg := NewDefaultCGRConfig()
 	eCgrCfg.tlsCfg = &TLSCfg{
 		ServerCerificate: "path/To/Server/Cert",
 		ServerKey:        "path/To/Server/Key",
@@ -3543,7 +3536,7 @@ func TestCgrCfgJSONDefaultRateCfg(t *testing.T) {
 
 func TestCgrCfgV1GetConfigAllConfig(t *testing.T) {
 	var rcv map[string]interface{}
-	cgrCfg, err := NewDefaultCGRConfig()
+	cgrCfg := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
 	}
@@ -3577,9 +3570,8 @@ func TestCgrCfgV1GetConfigSectionLoader(t *testing.T) {
 			},
 		},
 	}
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfig(&SectionWithOpts{Section: LoaderJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfig(&SectionWithOpts{Section: LoaderJson}, &reply); err != nil {
 		t.Error(err)
 	} else if mp, can := reply[LoaderJson].([]map[string]interface{}); !can {
 		t.Errorf("Unexpected type: %t", reply[LoaderJson])
@@ -3596,9 +3588,8 @@ func TestCgrCfgV1GetConfigSectionHTTPAgent(t *testing.T) {
 	expected := map[string]interface{}{
 		HttpAgentJson: []map[string]interface{}{},
 	}
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfig(&SectionWithOpts{Section: HttpAgentJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfig(&SectionWithOpts{Section: HttpAgentJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -3615,9 +3606,8 @@ func TestCgrCfgV1GetConfigSectionCoreS(t *testing.T) {
 			utils.ShutdownTimeoutCfg:   "1s",
 		},
 	}
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfig(&SectionWithOpts{Section: CoreSCfgJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfig(&SectionWithOpts{Section: CoreSCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -3724,9 +3714,8 @@ func TestV1GetConfigDataDB(t *testing.T) {
 	expected = map[string]interface{}{
 		DATADB_JSN: expected,
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DATADB_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DATADB_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if mp, can := reply[DATADB_JSN].(map[string]interface{}); !can {
 		t.Errorf("Unexpected type: %t", reply[DATADB_JSN])
@@ -3739,13 +3728,10 @@ func TestV1GetConfigDataDB(t *testing.T) {
 	}
 
 	expectedErr := "strconv.Atoi: parsing \"6579s\": invalid syntax"
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+	cfgCgr = NewDefaultCGRConfig()
+	cfgCgr.dataDbCfg.DataDbPort = "6579s"
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DATADB_JSN}, &reply); err == nil || err.Error() != expectedErr {
 		t.Error(err)
-	} else {
-		cfgCgr.dataDbCfg.DataDbPort = "6579s"
-		if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DATADB_JSN}, &reply); err == nil || err.Error() != expectedErr {
-			t.Error(err)
-		}
 	}
 }
 
@@ -3775,9 +3761,8 @@ func TestV1GetConfigStorDB(t *testing.T) {
 	expected = map[string]interface{}{
 		STORDB_JSN: expected,
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: STORDB_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: STORDB_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if mp, can := reply[STORDB_JSN].(map[string]interface{}); !can {
 		t.Errorf("Unexpected type: %t", reply[STORDB_JSN])
@@ -3802,9 +3787,8 @@ func TestV1GetConfigTLS(t *testing.T) {
 			utils.CaCertificateCfg:    "",
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: TlsCfgJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: TlsCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -3819,9 +3803,8 @@ func TestV1GetConfigCache(t *testing.T) {
 			utils.ReplicationConnsCfg: []string{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: CACHE_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: CACHE_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if mp, can := reply[CACHE_JSN].(map[string]interface{}); !can {
 		t.Errorf("Unexpected type: %t", reply[CACHE_JSN])
@@ -3862,9 +3845,8 @@ func TestV1GetConfigHTTP(t *testing.T) {
 			},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: HTTP_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: HTTP_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -3880,9 +3862,8 @@ func TestV1GetConfigFilterS(t *testing.T) {
 			utils.ApierSConnsCfg:    []string{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: FilterSjsn}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: FilterSjsn}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -3914,9 +3895,8 @@ func TestV1GetConfigRals(t *testing.T) {
 			utils.DynaprepaidActionplansCfg: []string{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RALS_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RALS_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -3934,9 +3914,8 @@ func TestV1GetConfigScheduler(t *testing.T) {
 			utils.FiltersCfg:      []string{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: SCHEDULER_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: SCHEDULER_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -3961,9 +3940,8 @@ func TestV1GetConfigCdrs(t *testing.T) {
 			utils.EEsConnsCfg:         []string{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: CDRS_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: CDRS_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4004,9 +3982,8 @@ func TestV1GetConfigSessionS(t *testing.T) {
 			},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: SessionSJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: SessionSJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4035,9 +4012,8 @@ func TestV1GetConfigFsAgent(t *testing.T) {
 			},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: FreeSWITCHAgentJSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: FreeSWITCHAgentJSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4061,9 +4037,8 @@ func TestV1GetConfigKamailioAgent(t *testing.T) {
 			},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: KamailioAgentJSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: KamailioAgentJSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4089,9 +4064,8 @@ func TestV1GetConfigAsteriskAgent(t *testing.T) {
 			},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: AsteriskAgentJSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: AsteriskAgentJSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4119,9 +4093,8 @@ func TestV1GetConfigDiameterAgent(t *testing.T) {
 			utils.RequestProcessorsCfg:  []map[string]interface{}{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DA_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DA_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4146,9 +4119,8 @@ func TestV1GetConfigRadiusAgent(t *testing.T) {
 			utils.RequestProcessorsCfg: []map[string]interface{}{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RA_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RA_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4167,9 +4139,8 @@ func TestV1GetConfigDNSAgent(t *testing.T) {
 			utils.RequestProcessorsCfg: []map[string]interface{}{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DNSAgentJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DNSAgentJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4191,9 +4162,8 @@ func TestV1GetConfigAttribute(t *testing.T) {
 			utils.ProcessRunsCfg:         1,
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: ATTRIBUTE_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: ATTRIBUTE_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4212,9 +4182,8 @@ func TestV1GetConfigChargers(t *testing.T) {
 			utils.SuffixIndexedFieldsCfg: []string{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: ChargerSCfgJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: ChargerSCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4234,9 +4203,8 @@ func TestV1GetConfigResourceS(t *testing.T) {
 			utils.NestedFieldsCfg:        false,
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RESOURCES_JSON}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RESOURCES_JSON}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4257,9 +4225,8 @@ func TestV1GetConfigStats(t *testing.T) {
 			utils.NestedFieldsCfg:           false,
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: STATS_JSON}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: STATS_JSON}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4278,9 +4245,8 @@ func TestV1GetConfigThresholds(t *testing.T) {
 			utils.NestedFieldsCfg:        false,
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: THRESHOLDS_JSON}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: THRESHOLDS_JSON}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4304,9 +4270,8 @@ func TestV1GetConfigRoutes(t *testing.T) {
 			utils.DefaultRatioCfg:        1,
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RouteSJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RouteSJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4345,15 +4310,12 @@ func TestV1GetConfigSuretax(t *testing.T) {
 			utils.TaxExemptionCodeListCfg: utils.EmptyString,
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Fatal(err)
-	} else {
-		cfgCgr.SureTaxCfg().Timezone = time.UTC
-		if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: SURETAX_JSON}, &reply); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(reply, expected) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-		}
+	cfgCgr := NewDefaultCGRConfig()
+	cfgCgr.SureTaxCfg().Timezone = time.UTC
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: SURETAX_JSON}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 
@@ -4369,9 +4331,8 @@ func TestV1GetConfigDispatcherS(t *testing.T) {
 			utils.AttributeSConnsCfg:     []string{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DispatcherSJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DispatcherSJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4388,9 +4349,8 @@ func TestV1GetConfigDispatcherH(t *testing.T) {
 			utils.RegisterIntervalCfg: "5m0s",
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DispatcherHJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DispatcherHJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4411,9 +4371,8 @@ func TestV1GetConfigSectionLoader(t *testing.T) {
 			utils.GapiTokenCfg:       json.RawMessage(`".gapi/token.json"`),
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: CgrLoaderCfgJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: CgrLoaderCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4451,9 +4410,8 @@ func TestV1GetConfigSectionMigrator(t *testing.T) {
 			},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: CgrMigratorCfgJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: CgrMigratorCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4471,9 +4429,8 @@ func TestV1GetConfigSectionApierS(t *testing.T) {
 			utils.EEsConnsCfg:        []string{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: ApierS}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: ApierS}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4515,9 +4472,8 @@ func TestV1GetConfigSectionEES(t *testing.T) {
 			},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: EEsJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: EEsJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4556,9 +4512,8 @@ func TestV1GetConfigSectionERS(t *testing.T) {
 			},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: ERsJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: ERsJson}, &reply); err != nil {
 		t.Error(err)
 	} else if mp, can := reply[ERsJson].(map[string]interface{}); !can {
 		t.Errorf("Unexpected type: %t", reply[ERsJson])
@@ -4600,9 +4555,8 @@ func TestV1GetConfigSectionRPConns(t *testing.T) {
 			},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RPCConnsJsonName}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RPCConnsJsonName}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4622,9 +4576,8 @@ func TestV1GetConfigSectionSIPAgent(t *testing.T) {
 			utils.RequestProcessorsCfg:   []map[string]interface{}{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: SIPAgentJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: SIPAgentJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4662,9 +4615,8 @@ func TestV1GetConfigSectionTemplates(t *testing.T) {
 			"*errSip":     {},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: TemplatesJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: TemplatesJson}, &reply); err != nil {
 		t.Error(err)
 	} else if mp, can := reply[TemplatesJson].(map[string][]map[string]interface{}); !can {
 		t.Errorf("Unexpected type: %t", reply[TemplatesJson])
@@ -4687,10 +4639,7 @@ func TestV1GetConfigSectionConfigs(t *testing.T) {
 			utils.RootDirCfg: "/var/spool/cgrates/configs",
 		},
 	}
-	cfgCgr, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfgCgr := NewDefaultCGRConfig()
 	cfgCgr.ConfigSCfg().Enabled = true
 	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: ConfigSJson}, &reply); err != nil {
 		t.Error(err)
@@ -4699,19 +4648,17 @@ func TestV1GetConfigSectionConfigs(t *testing.T) {
 	}
 
 	var result string
-	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfgCgr2.V1SetConfig(&SetConfigArgs{Config: reply, DryRun: true}, &result); err != nil {
+	cfgCgr2 := NewDefaultCGRConfig()
+	if err = cfgCgr2.V1SetConfig(&SetConfigArgs{Config: reply, DryRun: true}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected result")
-	} else if cfgCgr, _ := NewDefaultCGRConfig(); !reflect.DeepEqual(cfgCgr.ConfigSCfg(), cfgCgr2.ConfigSCfg()) {
+	} else if cfgCgr := NewDefaultCGRConfig(); !reflect.DeepEqual(cfgCgr.ConfigSCfg(), cfgCgr2.ConfigSCfg()) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(cfgCgr.ConfigSCfg()), utils.ToJSON(cfgCgr2.ConfigSCfg()))
 	}
 
-	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfgCgr2.V1SetConfig(&SetConfigArgs{Config: reply}, &result); err != nil {
+	cfgCgr2 = NewDefaultCGRConfig()
+	if err = cfgCgr2.V1SetConfig(&SetConfigArgs{Config: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected result")
@@ -4728,9 +4675,8 @@ func TestV1GetConfigSectionAPIBans(t *testing.T) {
 			utils.KeysCfg:    []string{},
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: APIBanCfgJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: APIBanCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4747,9 +4693,8 @@ func TestV1GetConfigSectionMailer(t *testing.T) {
 			utils.MailerFromAddrCfg: "cgr-mailer@localhost.localdomain",
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: MAILER_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: MAILER_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4767,9 +4712,8 @@ func TestV1GetConfigSectionAnalyzer(t *testing.T) {
 			utils.TTLCfg:             "24h0m0s",
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: AnalyzerCfgJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: AnalyzerCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4791,9 +4735,8 @@ func TestV1GetConfigSectionRateS(t *testing.T) {
 			utils.RateNestedFieldsCfg:        false,
 		},
 	}
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RateSJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RateSJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -4803,18 +4746,16 @@ func TestV1GetConfigSectionRateS(t *testing.T) {
 func TestV1GetConfigSectionInvalidSection(t *testing.T) {
 	var reply map[string]interface{}
 	expected := "Invalid section"
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: "invalidSection"}, &reply); err == nil || err.Error() != expected {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: "invalidSection"}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
 func TestV1ReloadConfigEmptyConfig(t *testing.T) {
 	var reply string
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1SetConfig(&SetConfigArgs{}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1SetConfig(&SetConfigArgs{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected output: %+v", reply)
@@ -4824,9 +4765,8 @@ func TestV1ReloadConfigEmptyConfig(t *testing.T) {
 func TestV1ReloadConfigUnmarshalError(t *testing.T) {
 	var reply string
 	expected := "json: unsupported type: chan int"
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1SetConfig(&SetConfigArgs{
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1SetConfig(&SetConfigArgs{
 		Config: map[string]interface{}{
 			"randomValue": make(chan int),
 		},
@@ -4842,9 +4782,8 @@ func TestV1ReloadConfigJSONWithLocks(t *testing.T) {
 		"inexistentSection": map[string]interface{}{},
 	}
 	expected := "Invalid section: <inexistentSection>"
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1SetConfig(&SetConfigArgs{Config: section}, &reply); err == nil || err.Error() != expected {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1SetConfig(&SetConfigArgs{Config: section}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -4891,9 +4830,8 @@ func TestV1GetConfigAsJSONGeneral(t *testing.T) {
 func TestV1GetConfigAsJSONDataDB(t *testing.T) {
 	var reply string
 	expected := `{"data_db":{"db_host":"127.0.0.1","db_name":"10","db_password":"","db_port":6379,"db_type":"*redis","db_user":"cgrates","items":{"*account_action_plans":{"remote":false,"replicate":false},"*accounts":{"remote":false,"replicate":false},"*action_plans":{"remote":false,"replicate":false},"*action_triggers":{"remote":false,"replicate":false},"*actions":{"remote":false,"replicate":false},"*attribute_profiles":{"remote":false,"replicate":false},"*charger_profiles":{"remote":false,"replicate":false},"*destinations":{"remote":false,"replicate":false},"*dispatcher_hosts":{"remote":false,"replicate":false},"*dispatcher_profiles":{"remote":false,"replicate":false},"*filters":{"remote":false,"replicate":false},"*indexes":{"remote":false,"replicate":false},"*load_ids":{"remote":false,"replicate":false},"*rate_profiles":{"remote":false,"replicate":false},"*rating_plans":{"remote":false,"replicate":false},"*rating_profiles":{"remote":false,"replicate":false},"*resource_profiles":{"remote":false,"replicate":false},"*resources":{"remote":false,"replicate":false},"*reverse_destinations":{"remote":false,"replicate":false},"*route_profiles":{"remote":false,"replicate":false},"*shared_groups":{"remote":false,"replicate":false},"*statqueue_profiles":{"remote":false,"replicate":false},"*statqueues":{"remote":false,"replicate":false},"*threshold_profiles":{"remote":false,"replicate":false},"*thresholds":{"remote":false,"replicate":false},"*timings":{"remote":false,"replicate":false}},"opts":{"query_timeout":"10s","redis_ca_certificate":"","redis_client_certificate":"","redis_client_key":"","redis_cluster":false,"redis_cluster_ondown_delay":"0","redis_cluster_sync":"5s","redis_sentinel":"","redis_tls":false},"remote_conns":[],"replication_conns":[]}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: DATADB_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: DATADB_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -4903,22 +4841,18 @@ func TestV1GetConfigAsJSONDataDB(t *testing.T) {
 func TestV1GetConfigAsJSONDataDBError(t *testing.T) {
 	var reply string
 	expectedErr := "strconv.Atoi: parsing \"6579s\": invalid syntax"
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	cfgCgr.dataDbCfg.DataDbPort = "6579s"
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: DATADB_JSN}, &reply); err == nil || err.Error() != expectedErr {
 		t.Error(err)
-	} else {
-		cfgCgr.dataDbCfg.DataDbPort = "6579s"
-		if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: DATADB_JSN}, &reply); err == nil || err.Error() != expectedErr {
-			t.Error(err)
-		}
 	}
 }
 
 func TestV1GetConfigAsJSONStorDB(t *testing.T) {
 	var reply string
 	expected := `{"stor_db":{"db_host":"127.0.0.1","db_name":"cgrates","db_password":"","db_port":3306,"db_type":"*mysql","db_user":"cgrates","items":{"*cdrs":{"remote":false,"replicate":false},"*session_costs":{"remote":false,"replicate":false},"*tp_account_actions":{"remote":false,"replicate":false},"*tp_action_plans":{"remote":false,"replicate":false},"*tp_action_triggers":{"remote":false,"replicate":false},"*tp_actions":{"remote":false,"replicate":false},"*tp_attributes":{"remote":false,"replicate":false},"*tp_chargers":{"remote":false,"replicate":false},"*tp_destination_rates":{"remote":false,"replicate":false},"*tp_destinations":{"remote":false,"replicate":false},"*tp_dispatcher_hosts":{"remote":false,"replicate":false},"*tp_dispatcher_profiles":{"remote":false,"replicate":false},"*tp_filters":{"remote":false,"replicate":false},"*tp_rate_profiles":{"remote":false,"replicate":false},"*tp_rates":{"remote":false,"replicate":false},"*tp_rating_plans":{"remote":false,"replicate":false},"*tp_rating_profiles":{"remote":false,"replicate":false},"*tp_resources":{"remote":false,"replicate":false},"*tp_routes":{"remote":false,"replicate":false},"*tp_shared_groups":{"remote":false,"replicate":false},"*tp_stats":{"remote":false,"replicate":false},"*tp_thresholds":{"remote":false,"replicate":false},"*tp_timings":{"remote":false,"replicate":false},"*versions":{"remote":false,"replicate":false}},"opts":{"conn_max_lifetime":0,"max_idle_conns":10,"max_open_conns":100,"query_timeout":"10s","sslmode":"disable"},"prefix_indexed_fields":[],"remote_conns":null,"replication_conns":null,"string_indexed_fields":[]}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: STORDB_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: STORDB_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -4928,9 +4862,8 @@ func TestV1GetConfigAsJSONStorDB(t *testing.T) {
 func TestV1GetConfigAsJSONTls(t *testing.T) {
 	var reply string
 	expected := `{"tls":{"ca_certificate":"","client_certificate":"","client_key":"","server_certificate":"","server_key":"","server_name":"","server_policy":4}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: TlsCfgJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: TlsCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -4940,9 +4873,8 @@ func TestV1GetConfigAsJSONTls(t *testing.T) {
 func TestV1GetConfigAsJSONTCache(t *testing.T) {
 	var reply string
 	expected := `{"caches":{"partitions":{"*account_action_plans":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*accounts":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*action_plans":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*action_triggers":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*actions":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*apiban":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"2m0s"},"*attribute_filter_indexes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*attribute_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*caps_events":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*cdr_ids":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"10m0s"},"*cdrs":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*charger_filter_indexes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*charger_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*closed_sessions":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"10s"},"*destinations":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*diameter_messages":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*dispatcher_filter_indexes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*dispatcher_hosts":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*dispatcher_loads":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*dispatcher_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*dispatcher_routes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*dispatchers":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*event_charges":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"10s"},"*event_resources":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*filters":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*load_ids":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*rate_filter_indexes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*rate_profile_filter_indexes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*rate_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*rating_plans":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*rating_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*resource_filter_indexes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*resource_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*resources":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*reverse_destinations":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*reverse_filter_indexes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*route_filter_indexes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*route_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*rpc_connections":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*rpc_responses":{"limit":0,"precache":false,"replicate":false,"static_ttl":false,"ttl":"2s"},"*session_costs":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*shared_groups":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*stat_filter_indexes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*statqueue_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*statqueues":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*stir":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*threshold_filter_indexes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*threshold_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*thresholds":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*timings":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_account_actions":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_action_plans":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_action_triggers":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_actions":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_attributes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_chargers":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_destination_rates":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_destinations":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_dispatcher_hosts":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_dispatcher_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_filters":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_rate_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_rates":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_rating_plans":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_rating_profiles":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_resources":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_routes":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_shared_groups":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_stats":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_thresholds":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*tp_timings":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""},"*uch":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*versions":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":""}},"replication_conns":[]}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: CACHE_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: CACHE_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -4952,9 +4884,8 @@ func TestV1GetConfigAsJSONTCache(t *testing.T) {
 func TestV1GetConfigAsJSONTListen(t *testing.T) {
 	var reply string
 	expected := `{"listen":{"http":"127.0.0.1:2080","http_tls":"127.0.0.1:2280","rpc_gob":"127.0.0.1:2013","rpc_gob_tls":"127.0.0.1:2023","rpc_json":"127.0.0.1:2012","rpc_json_tls":"127.0.0.1:2022"}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: LISTEN_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: LISTEN_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -4964,9 +4895,8 @@ func TestV1GetConfigAsJSONTListen(t *testing.T) {
 func TestV1GetConfigAsJSONHTTP(t *testing.T) {
 	var reply string
 	expected := `{"http":{"auth_users":{},"client_opts":{"dialFallbackDelay":"300ms","dialKeepAlive":"30s","dialTimeout":"30s","disableCompression":false,"disableKeepAlives":false,"expectContinueTimeout":"0","forceAttemptHttp2":true,"idleConnTimeout":"90s","maxConnsPerHost":0,"maxIdleConns":100,"maxIdleConnsPerHost":2,"responseHeaderTimeout":"0","skipTlsVerify":false,"tlsHandshakeTimeout":"10s"},"dispatchers_registrar_url":"/dispatchers_registrar","freeswitch_cdrs_url":"/freeswitch_json","http_cdrs":"/cdr_http","json_rpc_url":"/jsonrpc","use_basic_auth":false,"ws_url":"/ws"}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: HTTP_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: HTTP_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -4976,9 +4906,8 @@ func TestV1GetConfigAsJSONHTTP(t *testing.T) {
 func TestV1GetConfigAsJSONFilterS(t *testing.T) {
 	var reply string
 	expected := `{"filters":{"apiers_conns":[],"resources_conns":[],"stats_conns":[]}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: FilterSjsn}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: FilterSjsn}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -4988,9 +4917,8 @@ func TestV1GetConfigAsJSONFilterS(t *testing.T) {
 func TestV1GetConfigAsJSONRals(t *testing.T) {
 	var reply string
 	expected := `{"rals":{"balance_rating_subject":{"*any":"*zero1ns","*voice":"*zero1s"},"caches_conns":["*internal"],"dynaprepaid_actionplans":[],"enabled":false,"max_computed_usage":{"*any":"189h0m0s","*data":"107374182400","*mms":"10000","*sms":"10000","*voice":"72h0m0s"},"max_increments":1000000,"remove_expired":true,"rp_subject_prefix_matching":false,"stats_conns":[],"thresholds_conns":[]}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: RALS_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: RALS_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5000,9 +4928,8 @@ func TestV1GetConfigAsJSONRals(t *testing.T) {
 func TestV1GetConfigAsJSONScheduler(t *testing.T) {
 	var reply string
 	expected := `{"schedulers":{"cdrs_conns":[],"enabled":false,"filters":[],"stats_conns":[],"thresholds_conns":[]}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: SCHEDULER_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: SCHEDULER_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5012,9 +4939,8 @@ func TestV1GetConfigAsJSONScheduler(t *testing.T) {
 func TestV1GetConfigAsJSONCdrs(t *testing.T) {
 	var reply string
 	expected := `{"cdrs":{"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":[],"rals_conns":[],"scheduler_conns":[],"session_cost_retries":5,"stats_conns":[],"store_cdrs":true,"thresholds_conns":[]}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: CDRS_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: CDRS_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5024,9 +4950,8 @@ func TestV1GetConfigAsJSONCdrs(t *testing.T) {
 func TestV1GetConfigAsJSONSessionS(t *testing.T) {
 	var reply string
 	expected := `{"sessions":{"alterable_fields":[],"attributes_conns":[],"cdrs_conns":[],"channel_sync_interval":"0","chargers_conns":[],"client_protocol":1,"debit_interval":"0","enabled":false,"listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","rals_conns":[],"replication_conns":[],"resources_conns":[],"routes_conns":[],"scheduler_conns":[],"session_indexes":[],"session_ttl":"0","stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: SessionSJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: SessionSJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5036,9 +4961,8 @@ func TestV1GetConfigAsJSONSessionS(t *testing.T) {
 func TestV1GetConfigAsJSONFreeSwitchAgent(t *testing.T) {
 	var reply string
 	expected := `{"freeswitch_agent":{"create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","password":"ClueCon","reconnects":5}],"extra_fields":"","low_balance_ann_file":"","max_wait_connection":"2s","sessions_conns":["*internal"],"subscribe_park":true}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: FreeSWITCHAgentJSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: FreeSWITCHAgentJSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5048,9 +4972,8 @@ func TestV1GetConfigAsJSONFreeSwitchAgent(t *testing.T) {
 func TestV1GetConfigAsJSONFKamailioAgent(t *testing.T) {
 	var reply string
 	expected := `{"kamailio_agent":{"create_cdr":false,"enabled":false,"evapi_conns":[{"address":"127.0.0.1:8448","alias":"","reconnects":5}],"sessions_conns":["*internal"],"timezone":""}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: KamailioAgentJSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: KamailioAgentJSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5060,9 +4983,8 @@ func TestV1GetConfigAsJSONFKamailioAgent(t *testing.T) {
 func TestV1GetConfigAsJSONAsteriskAgent(t *testing.T) {
 	var reply string
 	expected := `{"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","connect_attempts":3,"password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"create_cdr":false,"enabled":false,"sessions_conns":["*internal"]}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: AsteriskAgentJSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: AsteriskAgentJSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5072,9 +4994,8 @@ func TestV1GetConfigAsJSONAsteriskAgent(t *testing.T) {
 func TestV1GetConfigAsJSONADiameterAgent(t *testing.T) {
 	var reply string
 	expected := `{"diameter_agent":{"asr_template":"","concurrent_requests":-1,"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"sessions_conns":["*internal"],"synced_conn_requests":false,"vendor_id":0}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: DA_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: DA_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5084,9 +5005,8 @@ func TestV1GetConfigAsJSONADiameterAgent(t *testing.T) {
 func TestV1GetConfigAsJSONARadiusAgent(t *testing.T) {
 	var reply string
 	expected := `{"radius_agent":{"client_dictionaries":{"*default":"/usr/share/cgrates/radius/dict/"},"client_secrets":{"*default":"CGRateS.org"},"enabled":false,"listen_acct":"127.0.0.1:1813","listen_auth":"127.0.0.1:1812","listen_net":"udp","request_processors":[],"sessions_conns":["*internal"]}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: RA_JSN}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: RA_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5096,9 +5016,8 @@ func TestV1GetConfigAsJSONARadiusAgent(t *testing.T) {
 func TestV1GetConfigAsJSONDNSAgent(t *testing.T) {
 	var reply string
 	expected := `{"dns_agent":{"enabled":false,"listen":"127.0.0.1:2053","listen_net":"udp","request_processors":[],"sessions_conns":["*internal"],"timezone":""}}`
-	if cfgCgr, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: DNSAgentJson}, &reply); err != nil {
+	cfgCgr := NewDefaultCGRConfig()
+	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: DNSAgentJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5108,9 +5027,8 @@ func TestV1GetConfigAsJSONDNSAgent(t *testing.T) {
 func TestV1GetConfigAsJSONAttributes(t *testing.T) {
 	var reply string
 	expected := `{"attributes":{"apiers_conns":[],"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"process_runs":1,"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: ATTRIBUTE_JSN}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: ATTRIBUTE_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5120,9 +5038,8 @@ func TestV1GetConfigAsJSONAttributes(t *testing.T) {
 func TestV1GetConfigAsJSONChargerS(t *testing.T) {
 	var reply string
 	expected := `{"chargers":{"attributes_conns":[],"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"suffix_indexed_fields":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: ChargerSCfgJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: ChargerSCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5132,9 +5049,8 @@ func TestV1GetConfigAsJSONChargerS(t *testing.T) {
 func TestV1GetConfigAsJSONResourceS(t *testing.T) {
 	var reply string
 	expected := `{"resources":{"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[],"thresholds_conns":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: RESOURCES_JSON}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: RESOURCES_JSON}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5144,9 +5060,8 @@ func TestV1GetConfigAsJSONResourceS(t *testing.T) {
 func TestV1GetConfigAsJSONStatS(t *testing.T) {
 	var reply string
 	expected := `{"stats":{"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: STATS_JSON}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: STATS_JSON}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5156,9 +5071,8 @@ func TestV1GetConfigAsJSONStatS(t *testing.T) {
 func TestV1GetConfigAsJSONThresholdS(t *testing.T) {
 	var reply string
 	expected := `{"thresholds":{"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: THRESHOLDS_JSON}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: THRESHOLDS_JSON}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5168,9 +5082,8 @@ func TestV1GetConfigAsJSONThresholdS(t *testing.T) {
 func TestV1GetConfigAsJSONRouteS(t *testing.T) {
 	var reply string
 	expected := `{"routes":{"attributes_conns":[],"default_ratio":1,"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"rals_conns":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: RouteSJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: RouteSJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5180,10 +5093,8 @@ func TestV1GetConfigAsJSONRouteS(t *testing.T) {
 func TestV1GetConfigAsJSONSureTax(t *testing.T) {
 	var reply string
 	expected := `{"suretax":{"bill_to_number":"","business_unit":"","client_number":"","client_tracking":"~*req.CGRID","customer_number":"~*req.Subject","include_local_cost":false,"orig_number":"~*req.Subject","p2pplus4":"","p2pzipcode":"","plus4":"","regulatory_code":"03","response_group":"03","response_type":"D4","return_file_code":"0","sales_type_code":"R","tax_exemption_code_list":"","tax_included":"0","tax_situs_rule":"04","term_number":"~*req.Destination","timezone":"UTC","trans_type_code":"010101","unit_type":"00","units":"1","url":"","validation_key":"","zipcode":""}}`
-	cgrCfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
+	cgrCfg := NewDefaultCGRConfig()
+
 	cgrCfg.SureTaxCfg().Timezone = time.UTC
 	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: SURETAX_JSON}, &reply); err != nil {
 		t.Error(err)
@@ -5195,9 +5106,8 @@ func TestV1GetConfigAsJSONSureTax(t *testing.T) {
 func TestV1GetConfigAsJSONDispatcherS(t *testing.T) {
 	var reply string
 	expected := `{"dispatchers":{"attributes_conns":[],"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"suffix_indexed_fields":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: DispatcherSJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: DispatcherSJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5207,9 +5117,8 @@ func TestV1GetConfigAsJSONDispatcherS(t *testing.T) {
 func TestV1GetConfigAsJSONDispatcherH(t *testing.T) {
 	var reply string
 	expected := `{"dispatcherh":{"dispatchers_conns":[],"enabled":false,"hosts":{},"register_interval":"5m0s"}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: DispatcherHJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: DispatcherHJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5219,9 +5128,8 @@ func TestV1GetConfigAsJSONDispatcherH(t *testing.T) {
 func TestV1GetConfigAsJSONLoaders(t *testing.T) {
 	var reply string
 	expected := `{"loaders":[{"caches_conns":["*internal"],"data":[{"fields":[{"mandatory":true,"path":"Tenant","tag":"TenantID","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ProfileID","type":"*variable","value":"~*req.1"},{"path":"Contexts","tag":"Contexts","type":"*variable","value":"~*req.2"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.3"},{"path":"ActivationInterval","tag":"ActivationInterval","type":"*variable","value":"~*req.4"},{"path":"AttributeFilterIDs","tag":"AttributeFilterIDs","type":"*variable","value":"~*req.5"},{"path":"Path","tag":"Path","type":"*variable","value":"~*req.6"},{"path":"Type","tag":"Type","type":"*variable","value":"~*req.7"},{"path":"Value","tag":"Value","type":"*variable","value":"~*req.8"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.9"},{"path":"Weight","tag":"Weight","type":"*variable","value":"~*req.10"}],"file_name":"Attributes.csv","flags":null,"type":"*attributes"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Type","tag":"Type","type":"*variable","value":"~*req.2"},{"path":"Element","tag":"Element","type":"*variable","value":"~*req.3"},{"path":"Values","tag":"Values","type":"*variable","value":"~*req.4"},{"path":"ActivationInterval","tag":"ActivationInterval","type":"*variable","value":"~*req.5"}],"file_name":"Filters.csv","flags":null,"type":"*filters"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"ActivationInterval","tag":"ActivationInterval","type":"*variable","value":"~*req.3"},{"path":"UsageTTL","tag":"TTL","type":"*variable","value":"~*req.4"},{"path":"Limit","tag":"Limit","type":"*variable","value":"~*req.5"},{"path":"AllocationMessage","tag":"AllocationMessage","type":"*variable","value":"~*req.6"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.7"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.8"},{"path":"Weight","tag":"Weight","type":"*variable","value":"~*req.9"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.10"}],"file_name":"Resources.csv","flags":null,"type":"*resources"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"ActivationInterval","tag":"ActivationInterval","type":"*variable","value":"~*req.3"},{"path":"QueueLength","tag":"QueueLength","type":"*variable","value":"~*req.4"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.5"},{"path":"MinItems","tag":"MinItems","type":"*variable","value":"~*req.6"},{"path":"MetricIDs","tag":"MetricIDs","type":"*variable","value":"~*req.7"},{"path":"MetricFilterIDs","tag":"MetricFilterIDs","type":"*variable","value":"~*req.8"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.9"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.10"},{"path":"Weight","tag":"Weight","type":"*variable","value":"~*req.11"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.12"}],"file_name":"Stats.csv","flags":null,"type":"*stats"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"ActivationInterval","tag":"ActivationInterval","type":"*variable","value":"~*req.3"},{"path":"MaxHits","tag":"MaxHits","type":"*variable","value":"~*req.4"},{"path":"MinHits","tag":"MinHits","type":"*variable","value":"~*req.5"},{"path":"MinSleep","tag":"MinSleep","type":"*variable","value":"~*req.6"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.7"},{"path":"Weight","tag":"Weight","type":"*variable","value":"~*req.8"},{"path":"ActionIDs","tag":"ActionIDs","type":"*variable","value":"~*req.9"},{"path":"Async","tag":"Async","type":"*variable","value":"~*req.10"}],"file_name":"Thresholds.csv","flags":null,"type":"*thresholds"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"ActivationInterval","tag":"ActivationInterval","type":"*variable","value":"~*req.3"},{"path":"Sorting","tag":"Sorting","type":"*variable","value":"~*req.4"},{"path":"SortingParameters","tag":"SortingParameters","type":"*variable","value":"~*req.5"},{"path":"RouteID","tag":"RouteID","type":"*variable","value":"~*req.6"},{"path":"RouteFilterIDs","tag":"RouteFilterIDs","type":"*variable","value":"~*req.7"},{"path":"RouteAccountIDs","tag":"RouteAccountIDs","type":"*variable","value":"~*req.8"},{"path":"RouteRatingPlanIDs","tag":"RouteRatingPlanIDs","type":"*variable","value":"~*req.9"},{"path":"RouteResourceIDs","tag":"RouteResourceIDs","type":"*variable","value":"~*req.10"},{"path":"RouteStatIDs","tag":"RouteStatIDs","type":"*variable","value":"~*req.11"},{"path":"RouteWeight","tag":"RouteWeight","type":"*variable","value":"~*req.12"},{"path":"RouteBlocker","tag":"RouteBlocker","type":"*variable","value":"~*req.13"},{"path":"RouteParameters","tag":"RouteParameters","type":"*variable","value":"~*req.14"},{"path":"Weight","tag":"Weight","type":"*variable","value":"~*req.15"}],"file_name":"Routes.csv","flags":null,"type":"*routes"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"ActivationInterval","tag":"ActivationInterval","type":"*variable","value":"~*req.3"},{"path":"RunID","tag":"RunID","type":"*variable","value":"~*req.4"},{"path":"AttributeIDs","tag":"AttributeIDs","type":"*variable","value":"~*req.5"},{"path":"Weight","tag":"Weight","type":"*variable","value":"~*req.6"}],"file_name":"Chargers.csv","flags":null,"type":"*chargers"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Contexts","tag":"Contexts","type":"*variable","value":"~*req.2"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.3"},{"path":"ActivationInterval","tag":"ActivationInterval","type":"*variable","value":"~*req.4"},{"path":"Strategy","tag":"Strategy","type":"*variable","value":"~*req.5"},{"path":"StrategyParameters","tag":"StrategyParameters","type":"*variable","value":"~*req.6"},{"path":"ConnID","tag":"ConnID","type":"*variable","value":"~*req.7"},{"path":"ConnFilterIDs","tag":"ConnFilterIDs","type":"*variable","value":"~*req.8"},{"path":"ConnWeight","tag":"ConnWeight","type":"*variable","value":"~*req.9"},{"path":"ConnBlocker","tag":"ConnBlocker","type":"*variable","value":"~*req.10"},{"path":"ConnParameters","tag":"ConnParameters","type":"*variable","value":"~*req.11"},{"path":"Weight","tag":"Weight","type":"*variable","value":"~*req.12"}],"file_name":"DispatcherProfiles.csv","flags":null,"type":"*dispatchers"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Address","tag":"Address","type":"*variable","value":"~*req.2"},{"path":"Transport","tag":"Transport","type":"*variable","value":"~*req.3"},{"path":"TLS","tag":"TLS","type":"*variable","value":"~*req.4"}],"file_name":"DispatcherHosts.csv","flags":null,"type":"*dispatcher_hosts"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"ActivationInterval","tag":"ActivationInterval","type":"*variable","value":"~*req.3"},{"path":"Weight","tag":"Weight","type":"*variable","value":"~*req.4"},{"path":"ConnectFee","tag":"ConnectFee","type":"*variable","value":"~*req.5"},{"path":"RoundingMethod","tag":"RoundingMethod","type":"*variable","value":"~*req.6"},{"path":"RoundingDecimals","tag":"RoundingDecimals","type":"*variable","value":"~*req.7"},{"path":"MinCost","tag":"MinCost","type":"*variable","value":"~*req.8"},{"path":"MaxCost","tag":"MaxCost","type":"*variable","value":"~*req.9"},{"path":"MaxCostStrategy","tag":"MaxCostStrategy","type":"*variable","value":"~*req.10"},{"path":"RateID","tag":"RateID","type":"*variable","value":"~*req.11"},{"path":"RateFilterIDs","tag":"RateFilterIDs","type":"*variable","value":"~*req.12"},{"path":"RateActivationStart","tag":"RateActivationStart","type":"*variable","value":"~*req.13"},{"path":"RateWeight","tag":"RateWeight","type":"*variable","value":"~*req.14"},{"path":"RateBlocker","tag":"RateBlocker","type":"*variable","value":"~*req.15"},{"path":"RateIntervalStart","tag":"RateIntervalStart","type":"*variable","value":"~*req.16"},{"path":"RateValue","tag":"RateValue","type":"*variable","value":"~*req.17"},{"path":"RateUnit","tag":"RateUnit","type":"*variable","value":"~*req.18"},{"path":"RateIncrement","tag":"RateIncrement","type":"*variable","value":"~*req.19"}],"file_name":"RateProfiles.csv","flags":null,"type":"*rate_profiles"}],"dry_run":false,"enabled":false,"field_separator":",","id":"*default","lock_filename":".cgr.lck","run_delay":"0","tenant":"","tp_in_dir":"/var/spool/cgrates/loader/in","tp_out_dir":"/var/spool/cgrates/loader/out"}]}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: LoaderJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: LoaderJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5231,9 +5139,8 @@ func TestV1GetConfigAsJSONLoaders(t *testing.T) {
 func TestV1GetConfigAsJSONCgrLoader(t *testing.T) {
 	var reply string
 	expected := `{"loader":{"caches_conns":["*localhost"],"data_path":"./","disable_reverse":false,"field_separator":",","gapi_credentials":".gapi/credentials.json","gapi_token":".gapi/token.json","scheduler_conns":["*localhost"],"tpid":""}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: CgrLoaderCfgJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: CgrLoaderCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5243,9 +5150,8 @@ func TestV1GetConfigAsJSONCgrLoader(t *testing.T) {
 func TestV1GetConfigAsJSONCgrMigrator(t *testing.T) {
 	var reply string
 	expected := `{"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_datadb_opts":{"redis_ca_certificate":"","redis_client_certificate":"","redis_client_key":"","redis_cluster":false,"redis_cluster_ondown_delay":"0","redis_cluster_sync":"5s","redis_sentinel":"","redis_tls":false},"out_datadb_password":"","out_datadb_port":"6379","out_datadb_type":"redis","out_datadb_user":"cgrates","out_stordb_host":"127.0.0.1","out_stordb_name":"cgrates","out_stordb_opts":{},"out_stordb_password":"","out_stordb_port":"3306","out_stordb_type":"mysql","out_stordb_user":"cgrates","users_filters":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: CgrMigratorCfgJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: CgrMigratorCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5255,9 +5161,8 @@ func TestV1GetConfigAsJSONCgrMigrator(t *testing.T) {
 func TestV1GetConfigAsJSONApierS(t *testing.T) {
 	var reply string
 	expected := `{"apiers":{"attributes_conns":[],"caches_conns":["*internal"],"ees_conns":[],"enabled":false,"scheduler_conns":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: ApierS}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: ApierS}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5267,9 +5172,8 @@ func TestV1GetConfigAsJSONApierS(t *testing.T) {
 func TestV1GetConfigAsJSONCfgEES(t *testing.T) {
 	var reply string
 	expected := `{"ees":{"attributes_conns":[],"cache":{"*file_csv":{"limit":-1,"precache":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"enabled":false,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"export_path":"/var/spool/cgrates/ees","field_separator":",","fields":[],"filters":[],"flags":[],"id":"*default","opts":{},"synchronous":false,"tenant":"","timezone":"","type":"*none"}]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: EEsJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: EEsJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5279,9 +5183,8 @@ func TestV1GetConfigAsJSONCfgEES(t *testing.T) {
 func TestV1GetConfigAsJSONCfgERS(t *testing.T) {
 	var reply string
 	expected := `{"ers":{"enabled":false,"readers":[{"cache_dump_fields":[],"concurrent_requests":1024,"failed_calls_prefix":"","field_separator":",","fields":[{"mandatory":true,"path":"*cgreq.ToR","tag":"ToR","type":"*variable","value":"~*req.2"},{"mandatory":true,"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.3"},{"mandatory":true,"path":"*cgreq.RequestType","tag":"RequestType","type":"*variable","value":"~*req.4"},{"mandatory":true,"path":"*cgreq.Tenant","tag":"Tenant","type":"*variable","value":"~*req.6"},{"mandatory":true,"path":"*cgreq.Category","tag":"Category","type":"*variable","value":"~*req.7"},{"mandatory":true,"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.8"},{"mandatory":true,"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.9"},{"mandatory":true,"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.10"},{"mandatory":true,"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.11"},{"mandatory":true,"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.12"},{"mandatory":true,"path":"*cgreq.Usage","tag":"Usage","type":"*variable","value":"~*req.13"}],"filters":[],"flags":[],"header_define_character":":","id":"*default","opts":{},"partial_cache_expiry_action":"","partial_record_cache":"0","processed_path":"/var/spool/cgrates/ers/out","row_length":0,"run_delay":"0","source_path":"/var/spool/cgrates/ers/in","tenant":"","timezone":"","type":"*none","xml_root_path":[""]}],"sessions_conns":["*internal"]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: ERsJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: ERsJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5291,9 +5194,8 @@ func TestV1GetConfigAsJSONCfgERS(t *testing.T) {
 func TestV1GetConfigAsJSONSIPAgent(t *testing.T) {
 	var reply string
 	expected := `{"sip_agent":{"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":1000000000,"sessions_conns":["*internal"],"timezone":""}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: SIPAgentJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: SIPAgentJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5303,9 +5205,8 @@ func TestV1GetConfigAsJSONSIPAgent(t *testing.T) {
 func TestV1GetConfigAsJSONConfigS(t *testing.T) {
 	var reply string
 	expected := `{"configs":{"enabled":false,"root_dir":"/var/spool/cgrates/configs","url":"/configs/"}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: ConfigSJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: ConfigSJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5315,9 +5216,8 @@ func TestV1GetConfigAsJSONConfigS(t *testing.T) {
 func TestV1GetConfigAsJSONApiBan(t *testing.T) {
 	var reply string
 	expected := `{"apiban":{"enabled":false,"keys":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: APIBanCfgJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: APIBanCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5327,9 +5227,8 @@ func TestV1GetConfigAsJSONApiBan(t *testing.T) {
 func TestV1GetConfigAsJSONRPCConns(t *testing.T) {
 	var reply string
 	expected := `{"rpc_conns":{"*internal":{"conns":[{"TLS":false,"address":"*internal","synchronous":false,"transport":""}],"poolSize":0,"strategy":"*first"},"*localhost":{"conns":[{"TLS":false,"address":"127.0.0.1:2012","synchronous":false,"transport":"*json"}],"poolSize":0,"strategy":"*first"}}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: RPCConnsJsonName}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: RPCConnsJsonName}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5339,9 +5238,8 @@ func TestV1GetConfigAsJSONRPCConns(t *testing.T) {
 func TestV1GetConfigAsJSONTemplates(t *testing.T) {
 	var reply string
 	expected := `{"templates":{"*asr":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"}],"*cca":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"path":"*rep.Result-Code","tag":"ResultCode","type":"*constant","value":"2001"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"},{"mandatory":true,"path":"*rep.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"mandatory":true,"path":"*rep.CC-Request-Type","tag":"CCRequestType","type":"*variable","value":"~*req.CC-Request-Type"},{"mandatory":true,"path":"*rep.CC-Request-Number","tag":"CCRequestNumber","type":"*variable","value":"~*req.CC-Request-Number"}],"*err":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"}],"*errSip":[{"mandatory":true,"path":"*rep.Request","tag":"Request","type":"*constant","value":"SIP/2.0 500 Internal Server Error"}],"*rar":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"path":"*diamreq.Re-Auth-Request-Type","tag":"ReAuthRequestType","type":"*constant","value":"0"}]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: TemplatesJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: TemplatesJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5351,9 +5249,8 @@ func TestV1GetConfigAsJSONTemplates(t *testing.T) {
 func TestV1GetConfigAsJSONHTTPAgent(t *testing.T) {
 	var reply string
 	expected := `{"http_agent":[]}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: HttpAgentJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: HttpAgentJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5363,9 +5260,8 @@ func TestV1GetConfigAsJSONHTTPAgent(t *testing.T) {
 func TestV1GetConfigAsJSONMailer(t *testing.T) {
 	var reply string
 	expected := `{"mailer":{"auth_password":"CGRateS.org","auth_user":"cgrates","from_address":"cgr-mailer@localhost.localdomain","server":"localhost"}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: MAILER_JSN}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: MAILER_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5375,9 +5271,8 @@ func TestV1GetConfigAsJSONMailer(t *testing.T) {
 func TestV1GetConfigAsJSONAnalyzer(t *testing.T) {
 	var reply string
 	expected := `{"analyzers":{"cleanup_interval":"1h0m0s","db_path":"/var/spool/cgrates/analyzers","enabled":false,"index_type":"*scorch","ttl":"24h0m0s"}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: AnalyzerCfgJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: AnalyzerCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5387,9 +5282,8 @@ func TestV1GetConfigAsJSONAnalyzer(t *testing.T) {
 func TestV1GetConfigAsJSONRateS(t *testing.T) {
 	var reply string
 	expected := `{"rates":{"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"rate_indexed_selects":true,"rate_nested_fields":false,"rate_prefix_indexed_fields":[],"rate_suffix_indexed_fields":[],"suffix_indexed_fields":[]}}`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: RateSJson}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: RateSJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5399,10 +5293,8 @@ func TestV1GetConfigAsJSONRateS(t *testing.T) {
 func TestV1GetConfigAsJSONCoreS(t *testing.T) {
 	var reply string
 	expected := `{"cores":{"caps":10,"caps_stats_interval":"0","caps_strategy":"*busy","shutdown_timeout":"1s"}}`
-	cgrCfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg := NewDefaultCGRConfig()
+
 	cgrCfg.coreSCfg.Caps = 10
 	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: CoreSCfgJson}, &reply); err != nil {
 		t.Error(err)
@@ -5411,18 +5303,16 @@ func TestV1GetConfigAsJSONCoreS(t *testing.T) {
 	}
 
 	var result string
-	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: reply, DryRun: true}, &result); err != nil {
+	cfgCgr2 := NewDefaultCGRConfig()
+	if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: reply, DryRun: true}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected result")
-	} else if cgrCfg, _ := NewDefaultCGRConfig(); !reflect.DeepEqual(cgrCfg.CoreSCfg(), cfgCgr2.CoreSCfg()) {
+	} else if cgrCfg := NewDefaultCGRConfig(); !reflect.DeepEqual(cgrCfg.CoreSCfg(), cfgCgr2.CoreSCfg()) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(cgrCfg.CoreSCfg()), utils.ToJSON(cfgCgr2.CoreSCfg()))
 	}
-	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: reply}, &result); err != nil {
+
+	if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected result")
@@ -5440,9 +5330,8 @@ func TestV1GetConfigAsJSONCheckConfigSanity(t *testing.T) {
     }
 }`
 	expected := `<AttributeS> not enabled but requested by <ChargerS> component`
-	if cfgCgr2, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: args}, &result); err == nil || err.Error() != expected {
+	cfgCgr2 := NewDefaultCGRConfig()
+	if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: args}, &result); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -5450,9 +5339,8 @@ func TestV1GetConfigAsJSONCheckConfigSanity(t *testing.T) {
 func TestV1GetConfigAsJSONInvalidSection(t *testing.T) {
 	var reply string
 	expected := `Invalid section`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: "InvalidSection"}, &reply); err == nil || err.Error() != expected {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: "InvalidSection"}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -5480,21 +5368,17 @@ func TestV1GetConfigAsJSONAllConfig(t *testing.T) {
 func TestV1GetConfigAsJSONAllConfigError(t *testing.T) {
 	var reply string
 	expected := "strconv.Atoi: parsing \"6379s\": invalid syntax"
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else {
-		cgrCfg.dataDbCfg.DataDbPort = "6379s"
-		if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: utils.EmptyString}, &reply); err == nil || err.Error() != expected {
-			t.Errorf("Expected %+v, received %+v", expected, err)
-		}
+	cgrCfg := NewDefaultCGRConfig()
+	cgrCfg.dataDbCfg.DataDbPort = "6379s"
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: utils.EmptyString}, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
 func TestV1ReloadConfigFromJSONEmptyConfig(t *testing.T) {
 	var reply string
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: utils.EmptyString}, &reply); err != nil {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: utils.EmptyString}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply")
@@ -5504,9 +5388,8 @@ func TestV1ReloadConfigFromJSONEmptyConfig(t *testing.T) {
 func TestV1ReloadConfigFromJSONInvalidSection(t *testing.T) {
 	var reply string
 	expected := "invalid character 'I' looking for beginning of value around line 1 and position 1\n line: \"InvalidSection\""
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: "InvalidSection"}, &reply); err == nil || err.Error() != expected {
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: "InvalidSection"}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -5719,10 +5602,8 @@ func TestCgrCfgJSONDefaultsConfigS(t *testing.T) {
 }
 
 func TestLoadConfigFromHTTP(t *testing.T) {
-	cfgCgr, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfgCgr := NewDefaultCGRConfig()
+
 	url := "inexistentURL"
 	expected := "parse \"inexistentURL\": invalid URI for request"
 	if err := cfgCgr.loadConfigFromHTTP(url, nil); err == nil || err.Error() != expected {
@@ -5736,10 +5617,8 @@ func TestReloadSections(t *testing.T) {
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
 		RouteSJson, LoaderJson, DispatcherSJson, RateSJson, ApierS})
 	subsystemsThatNeedStorDB := utils.NewStringSet([]string{RALS_JSN, CDRS_JSN, ApierS})
-	cfgCgr, err := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfgCgr := NewDefaultCGRConfig()
+
 	for _, section := range []string{RPCConnsJsonName, HTTP_JSN, SCHEDULER_JSN, RALS_JSN, CDRS_JSN, ERsJson,
 		SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson,
 		DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON, RouteSJson,
@@ -5768,43 +5647,39 @@ func TestReloadSections(t *testing.T) {
 }
 
 func TestReloadSectionsSpecialCase(t *testing.T) {
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else {
-		cgrCfg.reloadSections(RPCConnsJsonName, RALS_JSN)
+	cgrCfg = NewDefaultCGRConfig()
+	cgrCfg.reloadSections(RPCConnsJsonName, RALS_JSN)
 
-		// the chan should be populated
-		if len(cgrCfg.GetReloadChan(RPCConnsJsonName)) != 1 {
-			t.Fatalf("Section <%s> reload didn't happen", RPCConnsJsonName)
-		}
-		<-cgrCfg.GetReloadChan(RPCConnsJsonName)
-		// the chan should be populated
-		if len(cgrCfg.GetReloadChan(RALS_JSN)) != 1 {
-			t.Fatalf("Section <%s> reload didn't happen", RALS_JSN)
-		}
-		<-cgrCfg.GetReloadChan(RALS_JSN)
-
-		// the chan should be populated
-		if len(cgrCfg.GetReloadChan(DATADB_JSN)) != 1 {
-			t.Fatalf("Section <%s> didn't reload the %s", RALS_JSN, DATADB_JSN)
-		}
-		<-cgrCfg.GetReloadChan(DATADB_JSN)
-		// the chan should be populated
-		if len(cgrCfg.GetReloadChan(STORDB_JSN)) != 1 {
-			t.Fatalf("Section <%s> didn't reload the %s", RALS_JSN, STORDB_JSN)
-		}
-		<-cgrCfg.GetReloadChan(STORDB_JSN)
+	// the chan should be populated
+	if len(cgrCfg.GetReloadChan(RPCConnsJsonName)) != 1 {
+		t.Fatalf("Section <%s> reload didn't happen", RPCConnsJsonName)
 	}
+	<-cgrCfg.GetReloadChan(RPCConnsJsonName)
+	// the chan should be populated
+	if len(cgrCfg.GetReloadChan(RALS_JSN)) != 1 {
+		t.Fatalf("Section <%s> reload didn't happen", RALS_JSN)
+	}
+	<-cgrCfg.GetReloadChan(RALS_JSN)
+
+	// the chan should be populated
+	if len(cgrCfg.GetReloadChan(DATADB_JSN)) != 1 {
+		t.Fatalf("Section <%s> didn't reload the %s", RALS_JSN, DATADB_JSN)
+	}
+	<-cgrCfg.GetReloadChan(DATADB_JSN)
+	// the chan should be populated
+	if len(cgrCfg.GetReloadChan(STORDB_JSN)) != 1 {
+		t.Fatalf("Section <%s> didn't reload the %s", RALS_JSN, STORDB_JSN)
+	}
+	<-cgrCfg.GetReloadChan(STORDB_JSN)
 }
 
 func TestLoadConfigFromReaderError(t *testing.T) {
 	expectedErrFile := "open randomfile.go: no such file or directory"
 	file, err := os.Open("randomfile.go")
 	expectedErr := "invalid argument"
+	cgrCfg := NewDefaultCGRConfig()
 	if err == nil || err.Error() != expectedErrFile {
 		t.Errorf("Expected %+v, receivewd %+v", expectedErrFile, err)
-	} else if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
 	} else if err := cgrCfg.loadConfigFromReader(file, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, true); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -5817,9 +5692,8 @@ func TestLoadConfigFromReaderLoadFunctionsError(t *testing.T) {
      }
 }`
 	expected := `json: cannot unmarshal number into Go struct field DbJsonCfg.Db_type of type string`
-	if cgrCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrCfg.loadConfigFromReader(strings.NewReader(cfgJSONStr),
+	cgrCfg := NewDefaultCGRConfig()
+	if err := cgrCfg.loadConfigFromReader(strings.NewReader(cfgJSONStr),
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadDataDBCfg},
 		true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -5828,24 +5702,22 @@ func TestLoadConfigFromReaderLoadFunctionsError(t *testing.T) {
 
 func TestCallOnCGRConfig(t *testing.T) {
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if cgrcfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err := cgrcfg.Call("inexistentMethod", nil, nil); err == nil || err.Error() != expected {
+	cgrcfg := NewDefaultCGRConfig()
+	if err := cgrcfg.Call("inexistentMethod", nil, nil); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
 func TestLoadCfgFromJSONWithLocksInvalidSeciton(t *testing.T) {
 	expected := "Invalid section: <invalidSection>"
-	if cfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = cfg.loadCfgWithLocks("/random/path", "invalidSection"); err == nil || err.Error() != expected {
+	cfg := NewDefaultCGRConfig()
+	if err = cfg.loadCfgWithLocks("/random/path", "invalidSection"); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
 func TestCGRConfigClone(t *testing.T) {
-	cfg, _ := NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	rcv := cfg.Clone()
 	cfg.rldChans = nil
 	rcv.rldChans = nil

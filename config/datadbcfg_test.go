@@ -75,9 +75,8 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 			utils.RedisSentinelNameCfg: "sentinel",
 		},
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.dataDbCfg.loadFromJSONCfg(nil); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
 	} else if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
@@ -99,9 +98,8 @@ func TestConnsloadFromJsonCfg(t *testing.T) {
 		Remote_conns: &[]string{"*internal"},
 	}
 	expectedErrRmt := "Remote connection ID needs to be different than *internal"
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expectedErrRmt {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expectedErrRmt {
 		t.Errorf("Expected %+v, received %+v", expectedErrRmt, err)
 	}
 
@@ -109,9 +107,8 @@ func TestConnsloadFromJsonCfg(t *testing.T) {
 		Replication_conns: &[]string{"*internal"},
 	}
 	expectedErrRpl := "Replication connection ID needs to be different than *internal"
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expectedErrRpl {
+	jsnCfg = NewDefaultCGRConfig()
+	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expectedErrRpl {
 		t.Errorf("Expected %+v, received %+v", expectedErrRpl, err)
 	}
 }
@@ -570,9 +567,8 @@ func TestCloneDataDB(t *testing.T) {
 			utils.RedisSentinelNameCfg: "sentinel",
 		},
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else {
 		rcv := jsnCfg.dataDbCfg.Clone()

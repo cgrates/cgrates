@@ -41,7 +41,7 @@ var (
 	storDBIn   migrator.MigratorStorDB
 	storDBOut  migrator.MigratorStorDB
 	err        error
-	dfltCfg, _ = config.NewDefaultCGRConfig()
+	dfltCfg    = config.NewDefaultCGRConfig()
 	cfgPath    = cgrMigratorFlags.String("config_path", "",
 		"Configuration directory path.")
 

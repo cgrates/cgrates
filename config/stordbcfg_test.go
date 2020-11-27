@@ -81,9 +81,8 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			utils.SSLModeCfg:         "disable",
 		},
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected.Items[utils.MetaSessionsCosts], jsonCfg.storDbCfg.Items[utils.MetaSessionsCosts]) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.Items[utils.MetaSessionsCosts]),
@@ -102,9 +101,8 @@ func TestStoreDbCfgloadFromJsonCfgCase2(t *testing.T) {
 		Replication_conns: &[]string{utils.MetaInternal},
 	}
 	expected := "Replication connection ID needs to be different than *internal"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", storDbJSON, expected)
 	}
 }
@@ -114,21 +112,17 @@ func TestStoreDbCfgloadFromJsonCfgCase3(t *testing.T) {
 		Remote_conns: &[]string{utils.MetaInternal},
 	}
 	expected := "Remote connection ID needs to be different than *internal"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", storDbJSON, expected)
 	}
 }
 
 func TestStoreDbCfgloadFromJsonCfgCase4(t *testing.T) {
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else {
-		clonedStoreDb := jsonCfg.storDbCfg.Clone()
-		if !reflect.DeepEqual(clonedStoreDb, jsonCfg.storDbCfg) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(clonedStoreDb), utils.ToJSON(jsonCfg.storDbCfg))
-		}
+	jsonCfg := NewDefaultCGRConfig()
+	clonedStoreDb := jsonCfg.storDbCfg.Clone()
+	if !reflect.DeepEqual(clonedStoreDb, jsonCfg.storDbCfg) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(clonedStoreDb), utils.ToJSON(jsonCfg.storDbCfg))
 	}
 }
 

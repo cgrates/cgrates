@@ -74,9 +74,8 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		DefaultCaching:   utils.MetaReload,
 		FailedPostsTTL:   2,
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.generalCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.generalCfg))
@@ -88,54 +87,48 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 		Connect_timeout: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
 	cfgJSON1 := &GeneralJsonCfg{
 		Reply_timeout: utils.StringPointer("1ss"),
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON1); err == nil || err.Error() != expected {
+	jsonCfg = NewDefaultCGRConfig()
+	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON1); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
 	cfgJSON2 := &GeneralJsonCfg{
 		Failed_posts_ttl: utils.StringPointer("1ss"),
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
+	jsonCfg = NewDefaultCGRConfig()
+	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
 	cfgJSON3 := &GeneralJsonCfg{
 		Locking_timeout: utils.StringPointer("1ss"),
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
+	jsonCfg = NewDefaultCGRConfig()
+	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
 	cfgJSON4 := &GeneralJsonCfg{
 		Min_call_duration: utils.StringPointer("1ss"),
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON4); err == nil || err.Error() != expected {
+	jsonCfg = NewDefaultCGRConfig()
+	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON4); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
 	cfgJSON5 := &GeneralJsonCfg{
 		Max_call_duration: utils.StringPointer("1ss"),
 	}
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON5); err == nil || err.Error() != expected {
+	jsonCfg = NewDefaultCGRConfig()
+	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON5); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 

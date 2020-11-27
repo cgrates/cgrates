@@ -52,9 +52,8 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 		ExtraFields:      RSRParsers{},
 	}
-	if jsnCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsnCfg.cdrsCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.cdrsCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.cdrsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.cdrsCfg))
@@ -66,9 +65,8 @@ func TestExtraFieldsinloadFromJsonCfg(t *testing.T) {
 		Extra_fields: &[]string{utils.EmptyString},
 	}
 	expectedErrMessage := "emtpy RSRParser in rule: <>"
-	if jsonCfg, err := NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.cdrsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expectedErrMessage {
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.cdrsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expectedErrMessage {
 		t.Errorf("Expected %+v, received %+v", expectedErrMessage, err)
 	}
 }
