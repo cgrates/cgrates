@@ -3078,3 +3078,11 @@ func TestStatDistrictMarshal(t *testing.T) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(statDistinct), utils.ToJSON(nStatDistinct))
 	}
 }
+
+func TestStatMetricsNewStatMetricError(t *testing.T) {
+	_, err := NewStatMetric("", 0, []string{})
+	if err == nil || err.Error() != "unsupported metric type <>" {
+		t.Errorf("\nExpecting <unsupported metric type>,\nRecevied  <%+v>", err)
+	}
+
+}
