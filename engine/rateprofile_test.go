@@ -998,3 +998,50 @@ func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
 		t.Errorf("\nExpecting <false>,\nReceived <%+v>", result)
 	}
 }
+
+func TestRateSIntervalCompressEqualsCase3(t *testing.T) {
+	rate1 := &Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.12,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+		},
+	}
+	rateSintrv1 := &RateSInterval{
+		UsageStart: 0,
+		Increments: []*RateSIncrement{
+			{
+				UsageStart:        0,
+				Usage:             time.Minute,
+				Rate:              rate1,
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+			},
+		},
+		CompressFactor: 1,
+	}
+
+	rateSintrv2 := &RateSInterval{
+		UsageStart: 0,
+		Increments: []*RateSIncrement{
+			{
+				UsageStart:        0,
+				Usage:             time.Minute,
+				Rate:              rate1,
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+			},
+		},
+		CompressFactor: 1,
+	}
+	result := rateSintrv1.CompressEquals(rateSintrv2)
+	if result != true {
+		t.Errorf("\nExpecting <true>,\nReceived <%+v>", result)
+	}
+}
