@@ -4555,3 +4555,18 @@ func TestModelHelperCsvLoadError2(t *testing.T) {
 		t.Errorf("Expecting: <invalid testStruct.Tag value TEST_DEST>,\nReceived: <%+v>", err)
 	}
 }
+
+func TestModelHelperCsvDumpError(t *testing.T) {
+	type testStruct struct {
+		Id        int64
+		Tpid      string
+		Tag       string `index:"cat" re:"\w+\s*,\s*"`
+		Prefix    string `index:"1" re:"\+?\d+.?\d*"`
+		CreatedAt time.Time
+	}
+	var testStruct1 testStruct
+	_, err := CsvDump(testStruct1)
+	if err == nil || err.Error() != "invalid testStruct.Tag index cat" {
+		t.Errorf("Expecting: <invalid testStruct.Tag index cat>,\nReceived: <%+v>", err)
+	}
+}
