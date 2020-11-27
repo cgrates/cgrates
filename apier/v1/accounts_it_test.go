@@ -1003,7 +1003,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 		if len(acnt.ActionTriggers) != 1 {
 			t.Errorf("Expected 1, received: %+v", len(acnt.ActionTriggers))
 		} else {
-			if acnt.ActionTriggers[0].Executed != false {
+			if acnt.ActionTriggers[0].Executed {
 				t.Errorf("Expected false, received: %+v", acnt.ActionTriggers[0].Executed)
 			}
 		}
@@ -1038,7 +1038,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 		if len(acnt.ActionTriggers) != 1 {
 			t.Errorf("Expected 1, received: %+v", len(acnt.ActionTriggers))
 		} else {
-			if acnt.ActionTriggers[0].Executed != true {
+			if !acnt.ActionTriggers[0].Executed {
 				t.Errorf("Expected true, received: %+v", acnt.ActionTriggers[0].Executed)
 			}
 		}
@@ -1053,6 +1053,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 
+	acnt = engine.Account{}
 	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Fatal(err)
 	} else {
@@ -1070,8 +1071,8 @@ func testAccITAccountWithTriggers(t *testing.T) {
 		if len(acnt.ActionTriggers) != 1 {
 			t.Errorf("Expected 1, received: %+v", len(acnt.ActionTriggers))
 		} else {
-			if acnt.ActionTriggers[0].Executed != false {
-				t.Errorf("Expected true, received: %+v", acnt.ActionTriggers[0].Executed)
+			if acnt.ActionTriggers[0].Executed {
+				t.Errorf("Expected false, received: %+v", acnt.ActionTriggers[0].Executed)
 			}
 		}
 	}

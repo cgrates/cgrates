@@ -207,6 +207,10 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		},
 		Weight: 10.0,
 	}
+	if *encoding == utils.MetaGOB {
+		eAttrPrf.Attributes[0].FilterIDs = nil
+		eAttrPrf.Attributes[1].FilterIDs = nil
+	}
 	eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,

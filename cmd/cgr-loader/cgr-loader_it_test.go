@@ -35,8 +35,9 @@ import (
 )
 
 var (
-	dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	dbType  = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
+	dataDir  = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	dbType   = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
+	encoding = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 )
 
 func TestLoadConfig(t *testing.T) {
