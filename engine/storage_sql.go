@@ -268,7 +268,7 @@ func (self *SQLStorage) SetTPTimings(timings []*utils.ApierTPTiming) error {
 
 	tx := self.db.Begin()
 	for _, timing := range timings {
-		if err := tx.Where(&TpTiming{Tpid: timing.TPid, Tag: timing.ID}).Delete(TpTiming{}).Error; err != nil {
+		if err := tx.Where(&TpTimingMdl{Tpid: timing.TPid, Tag: timing.ID}).Delete(TpTimingMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -289,7 +289,7 @@ func (self *SQLStorage) SetTPDestinations(dests []*utils.TPDestination) error {
 	tx := self.db.Begin()
 	for _, dst := range dests {
 		// Remove previous
-		if err := tx.Where(&TpDestination{Tpid: dst.TPid, Tag: dst.ID}).Delete(TpDestination{}).Error; err != nil {
+		if err := tx.Where(&TpDestinationMdl{Tpid: dst.TPid, Tag: dst.ID}).Delete(TpDestinationMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -313,7 +313,7 @@ func (self *SQLStorage) SetTPRates(rs []*utils.TPRateRALs) error {
 	for _, rate := range rs {
 		if found, _ := m[rate.ID]; !found {
 			m[rate.ID] = true
-			if err := tx.Where(&TpRate{Tpid: rate.TPid, Tag: rate.ID}).Delete(TpRate{}).Error; err != nil {
+			if err := tx.Where(&TpRateMdl{Tpid: rate.TPid, Tag: rate.ID}).Delete(TpRateMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -338,7 +338,7 @@ func (self *SQLStorage) SetTPDestinationRates(drs []*utils.TPDestinationRate) er
 	for _, dRate := range drs {
 		if found, _ := m[dRate.ID]; !found {
 			m[dRate.ID] = true
-			if err := tx.Where(&TpDestinationRate{Tpid: dRate.TPid, Tag: dRate.ID}).Delete(TpDestinationRate{}).Error; err != nil {
+			if err := tx.Where(&TpDestinationRateMdl{Tpid: dRate.TPid, Tag: dRate.ID}).Delete(TpDestinationRateMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -363,7 +363,7 @@ func (self *SQLStorage) SetTPRatingPlans(rps []*utils.TPRatingPlan) error {
 	for _, rPlan := range rps {
 		if found, _ := m[rPlan.ID]; !found {
 			m[rPlan.ID] = true
-			if err := tx.Where(&TpRatingPlan{Tpid: rPlan.TPid, Tag: rPlan.ID}).Delete(TpRatingPlan{}).Error; err != nil {
+			if err := tx.Where(&TpRatingPlanMdl{Tpid: rPlan.TPid, Tag: rPlan.ID}).Delete(TpRatingPlanMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -385,9 +385,9 @@ func (self *SQLStorage) SetTPRatingProfiles(rpfs []*utils.TPRatingProfile) error
 	}
 	tx := self.db.Begin()
 	for _, rpf := range rpfs {
-		if err := tx.Where(&TpRatingProfile{Tpid: rpf.TPid, Loadid: rpf.LoadId,
+		if err := tx.Where(&TpRatingProfileMdl{Tpid: rpf.TPid, Loadid: rpf.LoadId,
 			Tenant: rpf.Tenant, Category: rpf.Category,
-			Subject: rpf.Subject}).Delete(TpRatingProfile{}).Error; err != nil {
+			Subject: rpf.Subject}).Delete(TpRatingProfileMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -411,7 +411,7 @@ func (self *SQLStorage) SetTPSharedGroups(sgs []*utils.TPSharedGroups) error {
 	for _, sGroup := range sgs {
 		if found, _ := m[sGroup.ID]; !found {
 			m[sGroup.ID] = true
-			if err := tx.Where(&TpSharedGroup{Tpid: sGroup.TPid, Tag: sGroup.ID}).Delete(TpSharedGroup{}).Error; err != nil {
+			if err := tx.Where(&TpSharedGroupMdl{Tpid: sGroup.TPid, Tag: sGroup.ID}).Delete(TpSharedGroupMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -436,7 +436,7 @@ func (self *SQLStorage) SetTPActions(acts []*utils.TPActions) error {
 	for _, a := range acts {
 		if found, _ := m[a.ID]; !found {
 			m[a.ID] = true
-			if err := tx.Where(&TpAction{Tpid: a.TPid, Tag: a.ID}).Delete(TpAction{}).Error; err != nil {
+			if err := tx.Where(&TpActionMdl{Tpid: a.TPid, Tag: a.ID}).Delete(TpActionMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -462,7 +462,7 @@ func (self *SQLStorage) SetTPActionPlans(ats []*utils.TPActionPlan) error {
 	for _, aPlan := range ats {
 		if found, _ := m[aPlan.ID]; !found {
 			m[aPlan.ID] = true
-			if err := tx.Where(&TpActionPlan{Tpid: aPlan.TPid, Tag: aPlan.ID}).Delete(TpActionPlan{}).Error; err != nil {
+			if err := tx.Where(&TpActionPlanMdl{Tpid: aPlan.TPid, Tag: aPlan.ID}).Delete(TpActionPlanMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -487,7 +487,7 @@ func (self *SQLStorage) SetTPActionTriggers(ats []*utils.TPActionTriggers) error
 	for _, aTrigger := range ats {
 		if found, _ := m[aTrigger.ID]; !found {
 			m[aTrigger.ID] = true
-			if err := tx.Where(&TpActionTrigger{Tpid: aTrigger.TPid, Tag: aTrigger.ID}).Delete(TpActionTrigger{}).Error; err != nil {
+			if err := tx.Where(&TpActionTriggerMdl{Tpid: aTrigger.TPid, Tag: aTrigger.ID}).Delete(TpActionTriggerMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -514,7 +514,7 @@ func (self *SQLStorage) SetTPAccountActions(aas []*utils.TPAccountActions) error
 	for _, aa := range aas {
 		if found, _ := m[aa.GetId()]; !found {
 			m[aa.GetId()] = true
-			if err := tx.Where(&TpAccountAction{Tpid: aa.TPid, Loadid: aa.LoadId, Tenant: aa.Tenant, Account: aa.Account}).Delete(&TpAccountAction{}).Error; err != nil {
+			if err := tx.Where(&TpAccountActionMdl{Tpid: aa.TPid, Loadid: aa.LoadId, Tenant: aa.Tenant, Account: aa.Account}).Delete(&TpAccountActionMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -536,7 +536,7 @@ func (self *SQLStorage) SetTPResources(rls []*utils.TPResourceProfile) error {
 	tx := self.db.Begin()
 	for _, rl := range rls {
 		// Remove previous
-		if err := tx.Where(&TpResource{Tpid: rl.TPid, ID: rl.ID}).Delete(TpResource{}).Error; err != nil {
+		if err := tx.Where(&TpResourceMdl{Tpid: rl.TPid, ID: rl.ID}).Delete(TpResourceMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -558,7 +558,7 @@ func (self *SQLStorage) SetTPStats(sts []*utils.TPStatProfile) error {
 	tx := self.db.Begin()
 	for _, stq := range sts {
 		// Remove previous
-		if err := tx.Where(&TpStat{Tpid: stq.TPid, ID: stq.ID}).Delete(TpStat{}).Error; err != nil {
+		if err := tx.Where(&TpStatMdl{Tpid: stq.TPid, ID: stq.ID}).Delete(TpStatMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -580,7 +580,7 @@ func (self *SQLStorage) SetTPThresholds(ths []*utils.TPThresholdProfile) error {
 	tx := self.db.Begin()
 	for _, th := range ths {
 		// Remove previous
-		if err := tx.Where(&TpThreshold{Tpid: th.TPid, ID: th.ID}).Delete(TpThreshold{}).Error; err != nil {
+		if err := tx.Where(&TpThresholdMdl{Tpid: th.TPid, ID: th.ID}).Delete(TpThresholdMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -602,7 +602,7 @@ func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilterProfile) error {
 	tx := self.db.Begin()
 	for _, th := range ths {
 		// Remove previous
-		if err := tx.Where(&TpFilter{Tpid: th.TPid, ID: th.ID}).Delete(TpFilter{}).Error; err != nil {
+		if err := tx.Where(&TpFilterMdl{Tpid: th.TPid, ID: th.ID}).Delete(TpFilterMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -624,7 +624,7 @@ func (self *SQLStorage) SetTPRoutes(tpRoutes []*utils.TPRouteProfile) error {
 	tx := self.db.Begin()
 	for _, tpRoute := range tpRoutes {
 		// Remove previous
-		if err := tx.Where(&TpRoute{Tpid: tpRoute.TPid, ID: tpRoute.ID}).Delete(TpRoute{}).Error; err != nil {
+		if err := tx.Where(&TpRouteMdl{Tpid: tpRoute.TPid, ID: tpRoute.ID}).Delete(TpRouteMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -646,7 +646,7 @@ func (self *SQLStorage) SetTPAttributes(tpAttrs []*utils.TPAttributeProfile) err
 	tx := self.db.Begin()
 	for _, stq := range tpAttrs {
 		// Remove previous
-		if err := tx.Where(&TPAttribute{Tpid: stq.TPid, ID: stq.ID}).Delete(TPAttribute{}).Error; err != nil {
+		if err := tx.Where(&TPAttributeMdl{Tpid: stq.TPid, ID: stq.ID}).Delete(TPAttributeMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -668,7 +668,7 @@ func (self *SQLStorage) SetTPChargers(tpCPPs []*utils.TPChargerProfile) error {
 	tx := self.db.Begin()
 	for _, cpp := range tpCPPs {
 		// Remove previous
-		if err := tx.Where(&TPCharger{Tpid: cpp.TPid, ID: cpp.ID}).Delete(TPCharger{}).Error; err != nil {
+		if err := tx.Where(&TPChargerMdl{Tpid: cpp.TPid, ID: cpp.ID}).Delete(TPChargerMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -690,7 +690,7 @@ func (self *SQLStorage) SetTPDispatcherProfiles(tpDPPs []*utils.TPDispatcherProf
 	tx := self.db.Begin()
 	for _, dpp := range tpDPPs {
 		// Remove previous
-		if err := tx.Where(&TPDispatcherProfile{Tpid: dpp.TPid, ID: dpp.ID}).Delete(TPDispatcherProfile{}).Error; err != nil {
+		if err := tx.Where(&TPDispatcherProfileMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(TPDispatcherProfileMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -712,7 +712,7 @@ func (self *SQLStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) e
 	tx := self.db.Begin()
 	for _, dpp := range tpDPPs {
 		// Remove previous
-		if err := tx.Where(&TPDispatcherHost{Tpid: dpp.TPid, ID: dpp.ID}).Delete(TPDispatcherHost{}).Error; err != nil {
+		if err := tx.Where(&TPDispatcherHostMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(TPDispatcherHostMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}

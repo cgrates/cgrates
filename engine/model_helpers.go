@@ -146,7 +146,7 @@ func getColumnCount(s interface{}) int {
 	return count
 }
 
-type TpDestinations []TpDestination
+type TpDestinations []TpDestinationMdl
 
 func (tps TpDestinations) AsMapDestinations() (map[string]*Destination, error) {
 	result := make(map[string]*Destination)
@@ -184,14 +184,14 @@ func (tps TpDestinations) AsTPDestinations() (result []*utils.TPDestination) {
 func APItoModelDestination(d *utils.TPDestination) (result TpDestinations) {
 	if d != nil {
 		for _, p := range d.Prefixes {
-			result = append(result, TpDestination{
+			result = append(result, TpDestinationMdl{
 				Tpid:   d.TPid,
 				Tag:    d.ID,
 				Prefix: p,
 			})
 		}
 		if len(d.Prefixes) == 0 {
-			result = append(result, TpDestination{
+			result = append(result, TpDestinationMdl{
 				Tpid: d.TPid,
 				Tag:  d.ID,
 			})
@@ -200,7 +200,7 @@ func APItoModelDestination(d *utils.TPDestination) (result TpDestinations) {
 	return
 }
 
-type TpTimings []TpTiming
+type TpTimings []TpTimingMdl
 
 func (tps TpTimings) AsMapTPTimings() (map[string]*utils.ApierTPTiming, error) {
 	result := make(map[string]*utils.ApierTPTiming)
@@ -239,8 +239,8 @@ func (tps TpTimings) AsTPTimings() (result []*utils.ApierTPTiming) {
 	return result
 }
 
-func APItoModelTiming(t *utils.ApierTPTiming) (result TpTiming) {
-	return TpTiming{
+func APItoModelTiming(t *utils.ApierTPTiming) (result TpTimingMdl) {
+	return TpTimingMdl{
 		Tpid:      t.TPid,
 		Tag:       t.ID,
 		Years:     t.Years,
@@ -261,7 +261,7 @@ func APItoModelTimings(ts []*utils.ApierTPTiming) (result TpTimings) {
 	return result
 }
 
-type TpRates []TpRate
+type TpRates []TpRateMdl
 
 func (tps TpRates) AsMapRates() (map[string]*utils.TPRateRALs, error) {
 	result := make(map[string]*utils.TPRateRALs)
@@ -316,7 +316,7 @@ func MapTPRates(s []*utils.TPRateRALs) (map[string]*utils.TPRateRALs, error) {
 func APItoModelRate(r *utils.TPRateRALs) (result TpRates) {
 	if r != nil {
 		for _, rs := range r.RateSlots {
-			result = append(result, TpRate{
+			result = append(result, TpRateMdl{
 				Tpid:               r.TPid,
 				Tag:                r.ID,
 				ConnectFee:         rs.ConnectFee,
@@ -327,7 +327,7 @@ func APItoModelRate(r *utils.TPRateRALs) (result TpRates) {
 			})
 		}
 		if len(r.RateSlots) == 0 {
-			result = append(result, TpRate{
+			result = append(result, TpRateMdl{
 				Tpid: r.TPid,
 				Tag:  r.ID,
 			})
@@ -345,7 +345,7 @@ func APItoModelRates(rs []*utils.TPRateRALs) (result TpRates) {
 	return result
 }
 
-type TpDestinationRates []TpDestinationRate
+type TpDestinationRates []TpDestinationRateMdl
 
 func (tps TpDestinationRates) AsMapDestinationRates() (map[string]*utils.TPDestinationRate, error) {
 	result := make(map[string]*utils.TPDestinationRate)
@@ -401,7 +401,7 @@ func MapTPDestinationRates(s []*utils.TPDestinationRate) (map[string]*utils.TPDe
 func APItoModelDestinationRate(d *utils.TPDestinationRate) (result TpDestinationRates) {
 	if d != nil {
 		for _, dr := range d.DestinationRates {
-			result = append(result, TpDestinationRate{
+			result = append(result, TpDestinationRateMdl{
 				Tpid:             d.TPid,
 				Tag:              d.ID,
 				DestinationsTag:  dr.DestinationId,
@@ -413,7 +413,7 @@ func APItoModelDestinationRate(d *utils.TPDestinationRate) (result TpDestination
 			})
 		}
 		if len(d.DestinationRates) == 0 {
-			result = append(result, TpDestinationRate{
+			result = append(result, TpDestinationRateMdl{
 				Tpid: d.TPid,
 				Tag:  d.ID,
 			})
@@ -433,7 +433,7 @@ func APItoModelDestinationRates(drs []*utils.TPDestinationRate) (result TpDestin
 	return result
 }
 
-type TpRatingPlans []TpRatingPlan
+type TpRatingPlans []TpRatingPlanMdl
 
 func (tps TpRatingPlans) AsMapTPRatingPlans() (map[string]*utils.TPRatingPlan, error) {
 	result := make(map[string]*utils.TPRatingPlan)
@@ -517,7 +517,7 @@ func MapTPRatingPlanBindings(s []*utils.TPRatingPlan) map[string][]*utils.TPRati
 func APItoModelRatingPlan(rp *utils.TPRatingPlan) (result TpRatingPlans) {
 	if rp != nil {
 		for _, rpb := range rp.RatingPlanBindings {
-			result = append(result, TpRatingPlan{
+			result = append(result, TpRatingPlanMdl{
 				Tpid:         rp.TPid,
 				Tag:          rp.ID,
 				DestratesTag: rpb.DestinationRatesId,
@@ -526,7 +526,7 @@ func APItoModelRatingPlan(rp *utils.TPRatingPlan) (result TpRatingPlans) {
 			})
 		}
 		if len(rp.RatingPlanBindings) == 0 {
-			result = append(result, TpRatingPlan{
+			result = append(result, TpRatingPlanMdl{
 				Tpid: rp.TPid,
 				Tag:  rp.ID,
 			})
@@ -544,7 +544,7 @@ func APItoModelRatingPlans(rps []*utils.TPRatingPlan) (result TpRatingPlans) {
 	return result
 }
 
-type TpRatingProfiles []TpRatingProfile
+type TpRatingProfiles []TpRatingProfileMdl
 
 func (tps TpRatingProfiles) AsMapTPRatingProfiles() (map[string]*utils.TPRatingProfile, error) {
 	result := make(map[string]*utils.TPRatingProfile)
@@ -597,7 +597,7 @@ func MapTPRatingProfiles(s []*utils.TPRatingProfile) (map[string]*utils.TPRating
 func APItoModelRatingProfile(rp *utils.TPRatingProfile) (result TpRatingProfiles) {
 	if rp != nil {
 		for _, rpa := range rp.RatingPlanActivations {
-			result = append(result, TpRatingProfile{
+			result = append(result, TpRatingProfileMdl{
 				Tpid:             rp.TPid,
 				Loadid:           rp.LoadId,
 				Tenant:           rp.Tenant,
@@ -609,7 +609,7 @@ func APItoModelRatingProfile(rp *utils.TPRatingProfile) (result TpRatingProfiles
 			})
 		}
 		if len(rp.RatingPlanActivations) == 0 {
-			result = append(result, TpRatingProfile{
+			result = append(result, TpRatingProfileMdl{
 				Tpid:     rp.TPid,
 				Loadid:   rp.LoadId,
 				Tenant:   rp.Tenant,
@@ -630,7 +630,7 @@ func APItoModelRatingProfiles(rps []*utils.TPRatingProfile) (result TpRatingProf
 	return result
 }
 
-type TpSharedGroups []TpSharedGroup
+type TpSharedGroups []TpSharedGroupMdl
 
 func (tps TpSharedGroups) AsMapTPSharedGroups() (map[string]*utils.TPSharedGroups, error) {
 	result := make(map[string]*utils.TPSharedGroups)
@@ -682,7 +682,7 @@ func MapTPSharedGroup(s []*utils.TPSharedGroups) map[string][]*utils.TPSharedGro
 func APItoModelSharedGroup(sgs *utils.TPSharedGroups) (result TpSharedGroups) {
 	if sgs != nil {
 		for _, sg := range sgs.SharedGroups {
-			result = append(result, TpSharedGroup{
+			result = append(result, TpSharedGroupMdl{
 				Tpid:          sgs.TPid,
 				Tag:           sgs.ID,
 				Account:       sg.Account,
@@ -691,7 +691,7 @@ func APItoModelSharedGroup(sgs *utils.TPSharedGroups) (result TpSharedGroups) {
 			})
 		}
 		if len(sgs.SharedGroups) == 0 {
-			result = append(result, TpSharedGroup{
+			result = append(result, TpSharedGroupMdl{
 				Tpid: sgs.TPid,
 				Tag:  sgs.ID,
 			})
@@ -709,7 +709,7 @@ func APItoModelSharedGroups(sgs []*utils.TPSharedGroups) (result TpSharedGroups)
 	return result
 }
 
-type TpActions []TpAction
+type TpActions []TpActionMdl
 
 func (tps TpActions) AsMapTPActions() (map[string]*utils.TPActions, error) {
 	result := make(map[string]*utils.TPActions)
@@ -774,7 +774,7 @@ func MapTPActions(s []*utils.TPActions) map[string][]*utils.TPAction {
 func APItoModelAction(as *utils.TPActions) (result TpActions) {
 	if as != nil {
 		for _, a := range as.Actions {
-			result = append(result, TpAction{
+			result = append(result, TpActionMdl{
 				Tpid:            as.TPid,
 				Tag:             as.ID,
 				Action:          a.Identifier,
@@ -796,7 +796,7 @@ func APItoModelAction(as *utils.TPActions) (result TpActions) {
 			})
 		}
 		if len(as.Actions) == 0 {
-			result = append(result, TpAction{
+			result = append(result, TpActionMdl{
 				Tpid: as.TPid,
 				Tag:  as.ID,
 			})
@@ -814,7 +814,7 @@ func APItoModelActions(as []*utils.TPActions) (result TpActions) {
 	return result
 }
 
-type TpActionPlans []TpActionPlan
+type TpActionPlans []TpActionPlanMdl
 
 func (tps TpActionPlans) AsMapTPActionPlans() (map[string]*utils.TPActionPlan, error) {
 	result := make(map[string]*utils.TPActionPlan)
@@ -866,7 +866,7 @@ func MapTPActionTimings(s []*utils.TPActionPlan) map[string][]*utils.TPActionTim
 func APItoModelActionPlan(a *utils.TPActionPlan) (result TpActionPlans) {
 	if a != nil {
 		for _, ap := range a.ActionPlan {
-			result = append(result, TpActionPlan{
+			result = append(result, TpActionPlanMdl{
 				Tpid:       a.TPid,
 				Tag:        a.ID,
 				ActionsTag: ap.ActionsId,
@@ -875,7 +875,7 @@ func APItoModelActionPlan(a *utils.TPActionPlan) (result TpActionPlans) {
 			})
 		}
 		if len(a.ActionPlan) == 0 {
-			result = append(result, TpActionPlan{
+			result = append(result, TpActionPlanMdl{
 				Tpid: a.TPid,
 				Tag:  a.ID,
 			})
@@ -893,7 +893,7 @@ func APItoModelActionPlans(aps []*utils.TPActionPlan) (result TpActionPlans) {
 	return result
 }
 
-type TpActionTriggers []TpActionTrigger
+type TpActionTriggers []TpActionTriggerMdl
 
 func (tps TpActionTriggers) AsMapTPActionTriggers() (map[string]*utils.TPActionTriggers, error) {
 	result := make(map[string]*utils.TPActionTriggers)
@@ -963,7 +963,7 @@ func MapTPActionTriggers(s []*utils.TPActionTriggers) map[string][]*utils.TPActi
 func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result TpActionTriggers) {
 	if ats != nil {
 		for _, at := range ats.ActionTriggers {
-			result = append(result, TpActionTrigger{
+			result = append(result, TpActionTriggerMdl{
 				Tpid:                   ats.TPid,
 				Tag:                    ats.ID,
 				UniqueId:               at.UniqueID,
@@ -989,7 +989,7 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result TpActionTrigge
 			})
 		}
 		if len(ats.ActionTriggers) == 0 {
-			result = append(result, TpActionTrigger{
+			result = append(result, TpActionTriggerMdl{
 				Tpid: ats.TPid,
 				Tag:  ats.ID,
 			})
@@ -1007,7 +1007,7 @@ func APItoModelActionTriggers(ts []*utils.TPActionTriggers) (result TpActionTrig
 	return result
 }
 
-type TpAccountActions []TpAccountAction
+type TpAccountActions []TpAccountActionMdl
 
 func (tps TpAccountActions) AsMapTPAccountActions() (map[string]*utils.TPAccountActions, error) {
 	result := make(map[string]*utils.TPAccountActions)
@@ -1050,8 +1050,8 @@ func MapTPAccountActions(s []*utils.TPAccountActions) (map[string]*utils.TPAccou
 	return result, nil
 }
 
-func APItoModelAccountAction(aa *utils.TPAccountActions) *TpAccountAction {
-	return &TpAccountAction{
+func APItoModelAccountAction(aa *utils.TPAccountActions) *TpAccountActionMdl {
+	return &TpAccountActionMdl{
 		Tpid:              aa.TPid,
 		Loadid:            aa.LoadId,
 		Tenant:            aa.Tenant,
@@ -1072,7 +1072,7 @@ func APItoModelAccountActions(aas []*utils.TPAccountActions) (result TpAccountAc
 	return result
 }
 
-type TpResources []*TpResource
+type TpResources []*TpResourceMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps TpResources) CSVHeader() (result []string) {
@@ -1167,7 +1167,7 @@ func APItoModelResource(rl *utils.TPResourceProfile) (mdls TpResources) {
 	}
 	// In case that TPResourceProfile don't have filter
 	if len(rl.FilterIDs) == 0 {
-		mdl := &TpResource{
+		mdl := &TpResourceMdl{
 			Tpid:              rl.TPid,
 			Tenant:            rl.Tenant,
 			ID:                rl.ID,
@@ -1195,7 +1195,7 @@ func APItoModelResource(rl *utils.TPResourceProfile) (mdls TpResources) {
 		mdls = append(mdls, mdl)
 	}
 	for i, fltr := range rl.FilterIDs {
-		mdl := &TpResource{
+		mdl := &TpResourceMdl{
 			Tpid:    rl.TPid,
 			Tenant:  rl.Tenant,
 			ID:      rl.ID,
@@ -1297,7 +1297,7 @@ func ResourceProfileToAPI(rp *ResourceProfile) (tpRL *utils.TPResourceProfile) {
 	return
 }
 
-type TpStats []*TpStat
+type TpStats []*TpStatMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps TpStats) CSVHeader() (result []string) {
@@ -1415,7 +1415,7 @@ func (models TpStats) AsTPStats() (result []*utils.TPStatProfile) {
 func APItoModelStats(st *utils.TPStatProfile) (mdls TpStats) {
 	if st != nil && len(st.Metrics) != 0 {
 		for i, metric := range st.Metrics {
-			mdl := &TpStat{
+			mdl := &TpStatMdl{
 				Tpid:   st.TPid,
 				Tenant: st.Tenant,
 				ID:     st.ID,
@@ -1546,7 +1546,7 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 	return
 }
 
-type TpThresholds []*TpThreshold
+type TpThresholds []*TpThresholdMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps TpThresholds) CSVHeader() (result []string) {
@@ -1632,7 +1632,7 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls TpThresholds) {
 			min = len(th.ActionIDs)
 		}
 		for i := 0; i < min; i++ {
-			mdl := &TpThreshold{
+			mdl := &TpThresholdMdl{
 				Tpid:   th.TPid,
 				Tenant: th.Tenant,
 				ID:     th.ID,
@@ -1660,7 +1660,7 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls TpThresholds) {
 
 		if len(th.FilterIDs)-min > 0 {
 			for i := min; i < len(th.FilterIDs); i++ {
-				mdl := &TpThreshold{
+				mdl := &TpThresholdMdl{
 					Tpid:   th.TPid,
 					Tenant: th.Tenant,
 					ID:     th.ID,
@@ -1671,7 +1671,7 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls TpThresholds) {
 		}
 		if len(th.ActionIDs)-min > 0 {
 			for i := min; i < len(th.ActionIDs); i++ {
-				mdl := &TpThreshold{
+				mdl := &TpThresholdMdl{
 					Tpid:   th.TPid,
 					Tenant: th.Tenant,
 					ID:     th.ID,
@@ -1766,7 +1766,7 @@ func ThresholdProfileToAPI(th *ThresholdProfile) (tpTH *utils.TPThresholdProfile
 	return
 }
 
-type TpFilterS []*TpFilter
+type TpFilterS []*TpFilterMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps TpFilterS) CSVHeader() (result []string) {
@@ -1822,7 +1822,7 @@ func APItoModelTPFilter(th *utils.TPFilterProfile) (mdls TpFilterS) {
 		return
 	}
 	for _, fltr := range th.Filters {
-		mdl := &TpFilter{
+		mdl := &TpFilterMdl{
 			Tpid:   th.TPid,
 			Tenant: th.Tenant,
 			ID:     th.ID,
@@ -1895,7 +1895,7 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 	return
 }
 
-type TPRoutes []*TpRoute
+type TPRoutes []*TpRouteMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps TPRoutes) CSVHeader() (result []string) {
@@ -2026,7 +2026,7 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls TPRoutes) {
 		return
 	}
 	for i, supl := range st.Routes {
-		mdl := &TpRoute{
+		mdl := &TpRouteMdl{
 			Tenant: st.Tenant,
 			Tpid:   st.TPid,
 			ID:     st.ID,
@@ -2181,7 +2181,7 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 	return
 }
 
-type TPAttributes []*TPAttribute
+type TPAttributes []*TPAttributeMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps TPAttributes) CSVHeader() (result []string) {
@@ -2272,7 +2272,7 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
 		return
 	}
 	for i, reqAttribute := range th.Attributes {
-		mdl := &TPAttribute{
+		mdl := &TPAttributeMdl{
 			Tpid:   th.TPid,
 			Tenant: th.Tenant,
 			ID:     th.ID,
@@ -2393,7 +2393,7 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 	return
 }
 
-type TPChargers []*TPCharger
+type TPChargers []*TPChargerMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps TPChargers) CSVHeader() (result []string) {
@@ -2487,7 +2487,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
 			isFilter = false
 		}
 		if min == 0 {
-			mdl := &TPCharger{
+			mdl := &TPChargerMdl{
 				Tenant: tpCPP.Tenant,
 				Tpid:   tpCPP.TPid,
 				ID:     tpCPP.ID,
@@ -2511,7 +2511,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
 			mdls = append(mdls, mdl)
 		} else {
 			for i := 0; i < min; i++ {
-				mdl := &TPCharger{
+				mdl := &TPChargerMdl{
 					Tenant: tpCPP.Tenant,
 					Tpid:   tpCPP.TPid,
 					ID:     tpCPP.ID,
@@ -2535,7 +2535,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
 		}
 		if len(tpCPP.FilterIDs)-min > 0 {
 			for i := min; i < len(tpCPP.FilterIDs); i++ {
-				mdl := &TPCharger{
+				mdl := &TPChargerMdl{
 					Tenant: tpCPP.Tenant,
 					Tpid:   tpCPP.TPid,
 					ID:     tpCPP.ID,
@@ -2546,7 +2546,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
 		}
 		if len(tpCPP.AttributeIDs)-min > 0 {
 			for i := min; i < len(tpCPP.AttributeIDs); i++ {
-				mdl := &TPCharger{
+				mdl := &TPChargerMdl{
 					Tenant: tpCPP.Tenant,
 					Tpid:   tpCPP.TPid,
 					ID:     tpCPP.ID,
@@ -2610,7 +2610,7 @@ func ChargerProfileToAPI(chargerPrf *ChargerProfile) (tpCharger *utils.TPCharger
 	return
 }
 
-type TPDispatcherProfiles []*TPDispatcherProfile
+type TPDispatcherProfiles []*TPDispatcherProfileMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps TPDispatcherProfiles) CSVHeader() (result []string) {
@@ -2770,7 +2770,7 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDis
 	strategy := paramsToString(tpDPP.StrategyParams)
 
 	if len(tpDPP.Hosts) == 0 {
-		return append(mdls, &TPDispatcherProfile{
+		return append(mdls, &TPDispatcherProfileMdl{
 			Tpid:               tpDPP.TPid,
 			Tenant:             tpDPP.Tenant,
 			ID:                 tpDPP.ID,
@@ -2786,7 +2786,7 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDis
 	confilter := strings.Join(tpDPP.Hosts[0].FilterIDs, utils.INFIELD_SEP)
 	conparam := paramsToString(tpDPP.Hosts[0].Params)
 
-	mdls = append(mdls, &TPDispatcherProfile{
+	mdls = append(mdls, &TPDispatcherProfileMdl{
 		Tpid:               tpDPP.TPid,
 		Tenant:             tpDPP.Tenant,
 		ID:                 tpDPP.ID,
@@ -2806,7 +2806,7 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDis
 	for i := 1; i < len(tpDPP.Hosts); i++ {
 		confilter = strings.Join(tpDPP.Hosts[i].FilterIDs, utils.INFIELD_SEP)
 		conparam = paramsToString(tpDPP.Hosts[i].Params)
-		mdls = append(mdls, &TPDispatcherProfile{
+		mdls = append(mdls, &TPDispatcherProfileMdl{
 			Tpid:   tpDPP.TPid,
 			Tenant: tpDPP.Tenant,
 			ID:     tpDPP.ID,
@@ -2934,7 +2934,7 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 }
 
 // TPHosts
-type TPDispatcherHosts []*TPDispatcherHost
+type TPDispatcherHosts []*TPDispatcherHostMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps TPDispatcherHosts) CSVHeader() (result []string) {
@@ -2968,11 +2968,11 @@ func (tps TPDispatcherHosts) AsTPDispatcherHosts() (result []*utils.TPDispatcher
 	return
 }
 
-func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls *TPDispatcherHost) {
+func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls *TPDispatcherHostMdl) {
 	if tpDPH == nil {
 		return
 	}
-	return &TPDispatcherHost{
+	return &TPDispatcherHostMdl{
 		Tpid:      tpDPH.TPid,
 		Tenant:    tpDPH.Tenant,
 		ID:        tpDPH.ID,
