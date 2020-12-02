@@ -3752,13 +3752,6 @@ func TestV1GetConfigDataDB(t *testing.T) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 		}
 	}
-
-	expectedErr := "strconv.Atoi: parsing \"6579s\": invalid syntax"
-	cfgCgr = NewDefaultCGRConfig()
-	cfgCgr.dataDbCfg.DataDbPort = "6579s"
-	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DATADB_JSN}, &reply); err == nil || err.Error() != expectedErr {
-		t.Error(err)
-	}
 }
 
 func TestV1GetConfigStorDB(t *testing.T) {
@@ -4864,16 +4857,6 @@ func TestV1GetConfigAsJSONDataDB(t *testing.T) {
 	}
 }
 
-func TestV1GetConfigAsJSONDataDBError(t *testing.T) {
-	var reply string
-	expectedErr := "strconv.Atoi: parsing \"6579s\": invalid syntax"
-	cfgCgr := NewDefaultCGRConfig()
-	cfgCgr.dataDbCfg.DataDbPort = "6579s"
-	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: DATADB_JSN}, &reply); err == nil || err.Error() != expectedErr {
-		t.Error(err)
-	}
-}
-
 func TestV1GetConfigAsJSONStorDB(t *testing.T) {
 	var reply string
 	expected := `{"stor_db":{"db_host":"127.0.0.1","db_name":"cgrates","db_password":"","db_port":3306,"db_type":"*mysql","db_user":"cgrates","items":{"*cdrs":{"remote":false,"replicate":false},"*session_costs":{"remote":false,"replicate":false},"*tp_account_actions":{"remote":false,"replicate":false},"*tp_action_plans":{"remote":false,"replicate":false},"*tp_action_triggers":{"remote":false,"replicate":false},"*tp_actions":{"remote":false,"replicate":false},"*tp_attributes":{"remote":false,"replicate":false},"*tp_chargers":{"remote":false,"replicate":false},"*tp_destination_rates":{"remote":false,"replicate":false},"*tp_destinations":{"remote":false,"replicate":false},"*tp_dispatcher_hosts":{"remote":false,"replicate":false},"*tp_dispatcher_profiles":{"remote":false,"replicate":false},"*tp_filters":{"remote":false,"replicate":false},"*tp_rate_profiles":{"remote":false,"replicate":false},"*tp_rates":{"remote":false,"replicate":false},"*tp_rating_plans":{"remote":false,"replicate":false},"*tp_rating_profiles":{"remote":false,"replicate":false},"*tp_resources":{"remote":false,"replicate":false},"*tp_routes":{"remote":false,"replicate":false},"*tp_shared_groups":{"remote":false,"replicate":false},"*tp_stats":{"remote":false,"replicate":false},"*tp_thresholds":{"remote":false,"replicate":false},"*tp_timings":{"remote":false,"replicate":false},"*versions":{"remote":false,"replicate":false}},"opts":{"conn_max_lifetime":0,"max_idle_conns":10,"max_open_conns":100,"query_timeout":"10s","sslmode":"disable"},"prefix_indexed_fields":[],"remote_conns":null,"replication_conns":null,"string_indexed_fields":[]}}`
@@ -5388,16 +5371,6 @@ func TestV1GetConfigAsJSONAllConfig(t *testing.T) {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
-	}
-}
-
-func TestV1GetConfigAsJSONAllConfigError(t *testing.T) {
-	var reply string
-	expected := "strconv.Atoi: parsing \"6379s\": invalid syntax"
-	cgrCfg := NewDefaultCGRConfig()
-	cgrCfg.dataDbCfg.DataDbPort = "6379s"
-	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: utils.EmptyString}, &reply); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 

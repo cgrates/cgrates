@@ -140,7 +140,7 @@ func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}, err error) {
+func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.DataDbTypeCfg: utils.Meta + dbcfg.DataDbType,
 		utils.DataDbHostCfg: dbcfg.DataDbHost,
@@ -159,11 +159,7 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}, err 
 		initialMP[utils.ItemsCfg] = items
 	}
 	if dbcfg.DataDbPort != "" {
-		var dbPort int
-		if dbPort, err = strconv.Atoi(dbcfg.DataDbPort); err != nil {
-			return nil, err
-		}
-		initialMP[utils.DataDbPortCfg] = dbPort
+		initialMP[utils.DataDbPortCfg], _ = strconv.Atoi(dbcfg.DataDbPort)
 	}
 	return
 }

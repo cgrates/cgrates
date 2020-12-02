@@ -508,7 +508,7 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv, err := cgrCfg.dataDbCfg.AsMapInterface()
+		rcv := cgrCfg.dataDbCfg.AsMapInterface()
 		if err != nil {
 			t.Error(err)
 		}
@@ -520,23 +520,6 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 			rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations],
 				rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations])
-		}
-	}
-}
-
-func TestDataDBPortStrconvAtoi(t *testing.T) {
-	cfgJSONSTR := `{
-        "data_db": {
-             "db_port": 6079,
-        }
-    }`
-	if cfgJSON, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONSTR); err != nil {
-		t.Error(err)
-	} else {
-		cfgJSON.dataDbCfg.DataDbPort = "6o79"
-		expected := "strconv.Atoi: parsing \"6o79\": invalid syntax"
-		if _, err := cfgJSON.dataDbCfg.AsMapInterface(); err == nil || err.Error() != expected {
-			t.Errorf("Expected %+q \n,received %+q", expected, err)
 		}
 	}
 }
