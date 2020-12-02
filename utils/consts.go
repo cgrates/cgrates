@@ -558,6 +558,7 @@ const (
 	MetaStdLog               = "*stdout"
 	EventSource              = "EventSource"
 	AccountID                = "AccountID"
+	AccountIDs               = "AccountIDs"
 	ResourceID               = "ResourceID"
 	TotalUsage               = "TotalUsage"
 	StatID                   = "StatID"
@@ -880,6 +881,12 @@ const (
 	RateProfileMatched       = "RateProfileMatched"
 	InvalidDuration          = time.Duration(-1)
 	ActionS                  = "ActionS"
+	Schedule                 = "Schedule"
+	ActionFilterIDs          = "ActionFilterIDs"
+	ActionBlocker            = "ActionBlocker"
+	ActionTTL                = "ActionTTL"
+	ActionOpts               = "ActionOpts"
+	ActionPath               = "ActionPath"
 )
 
 // Migrator Action
@@ -1762,6 +1769,7 @@ const (
 	TBLTPDispatchers      = "tp_dispatcher_profiles"
 	TBLTPDispatcherHosts  = "tp_dispatcher_hosts"
 	TBLTPRateProfiles     = "tp_rate_profiles"
+	TBLTPActionProfiles   = "tp_action_profiles"
 )
 
 // Cache Name
