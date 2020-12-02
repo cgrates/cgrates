@@ -118,7 +118,8 @@ func testElasticStartElasticsearch(t *testing.T) {
 }
 
 func testElasticExportEvents(t *testing.T) {
-	eventVoice := &utils.CGREventWithIDs{
+	eventVoice := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"ElasticsearchExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -144,13 +145,11 @@ func testElasticExportEvents(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "ElasticExporter",
-			},
 		},
 	}
 
-	eventData := &utils.CGREventWithIDs{
+	eventData := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"ElasticsearchExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -176,73 +175,73 @@ func testElasticExportEvents(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 			},
+		},
+	}
+
+	eventSMS := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"ElasticsearchExporter"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "SMSEvent",
+				Time:   utils.TimePointer(time.Now()),
+				Event: map[string]interface{}{
+					utils.CGRID:       utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:         utils.SMS,
+					utils.OriginID:    "sdfwer",
+					utils.OriginHost:  "192.168.1.1",
+					utils.RequestType: utils.META_RATED,
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+					utils.Usage:       time.Duration(1),
+					utils.RunID:       utils.MetaDefault,
+					utils.Cost:        0.15,
+					"ExtraFields": map[string]string{"extra1": "val_extra1",
+						"extra2": "val_extra2", "extra3": "val_extra3"},
+				},
+			},
+		},
+	}
+
+	eventSMSNoFields := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"ElasticExporterWithNoFields"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "SMSEvent",
+				Time:   utils.TimePointer(time.Now()),
+				Event: map[string]interface{}{
+					utils.CGRID:       utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:         utils.SMS,
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.RunID:       utils.MetaDefault,
+				},
+			},
 			Opts: map[string]interface{}{
-				"ExporterUsed": "ElasticExporter",
+				"ExporterUsed": "ElasticExporterWithNoFields",
 			},
-		},
-	}
-
-	eventSMS := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "SMSEvent",
-			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
-				utils.CGRID:       utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
-				utils.ToR:         utils.SMS,
-				utils.OriginID:    "sdfwer",
-				utils.OriginHost:  "192.168.1.1",
-				utils.RequestType: utils.META_RATED,
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
-				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-				utils.Usage:       time.Duration(1),
-				utils.RunID:       utils.MetaDefault,
-				utils.Cost:        0.15,
-				"ExtraFields": map[string]string{"extra1": "val_extra1",
-					"extra2": "val_extra2", "extra3": "val_extra3"},
-			},
-		},
-		Opts: map[string]interface{}{
-			"ExporterUsed": "ElasticExporter",
-		},
-	}
-
-	eventSMSNoFields := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "SMSEvent",
-			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
-				utils.CGRID:       utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
-				utils.ToR:         utils.SMS,
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.RunID:       utils.MetaDefault,
-			},
-		},
-		Opts: map[string]interface{}{
-			"ExporterUsed": "ElasticExporterWithNoFields",
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := elasticRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := elasticRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := elasticRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := elasticRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := elasticRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := elasticRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := elasticRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
+	if err := elasticRpc.Call(utils.EeSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
 		t.Error(err)
 	}
 }

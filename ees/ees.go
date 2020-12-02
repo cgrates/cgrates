@@ -140,11 +140,11 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attr
 
 // V1ProcessEvent will be called each time a new event is received from readers
 // rply -> map[string]map[string]interface{}
-func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithIDs, rply *map[string]map[string]interface{}) (err error) {
+func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
 	eeS.cfg.RLocks(config.EEsJson)
 	defer eeS.cfg.RUnlocks(config.EEsJson)
 
-	expIDs := utils.NewStringSet(cgrEv.IDs)
+	expIDs := utils.NewStringSet(cgrEv.EeIDs)
 	lenExpIDs := expIDs.Size()
 	cgrDp := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,

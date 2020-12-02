@@ -4734,7 +4734,7 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates:            map[string]*Rate{},
 	}
-	expected := "{\"TPid\":\"\",\"Tenant\":\"cgrates.org\",\"ID\":\"RP1\",\"FilterIDs\":[\"*string:~*req.Subject:1001\"],\"ActivationInterval\":{\"ActivationTime\":\"2020-04-11T21:34:01Z\",\"ExpiryTime\":\"2020-04-12T21:34:01Z\"},\"Weight\":0,\"RoundingMethod\":\"*up\",\"RoundingDecimals\":4,\"MinCost\":0.1,\"MaxCost\":0.6,\"MaxCostStrategy\":\"*free\",\"Rates\":{}}"
+	expected := "{\"TPid\":\"\",\"Tenant\":\"cgrates.org\",\"ID\":\"RP1\",\"FilterIDs\":[\"*string:~*req.Subject:1001\"],\"ActivationInterval\":{\"ActivationTime\":\"2020-04-11T21:34:01Z\",\"ExpiryTime\":\"2020-04-12T21:34:01Z\"},\"Weight\":0,\"RoundingDecimals\":4,\"RoundingMethod\":\"*up\",\"MinCost\":0.1,\"MaxCost\":0.6,\"MaxCostStrategy\":\"*free\",\"Rates\":{}}"
 	result := RateProfileToAPI(testProfile)
 	if !reflect.DeepEqual(utils.ToJSON(*result), expected) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))

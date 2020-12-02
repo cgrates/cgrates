@@ -111,7 +111,8 @@ func testHTTPJsonMapStartHTTPServer(t *testing.T) {
 }
 
 func testHTTPJsonMapExportEvent(t *testing.T) {
-	eventVoice := &utils.CGREventWithIDs{
+	eventVoice := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"HTTPJsonMapExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -138,13 +139,13 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 				},
 			},
 			Opts: map[string]interface{}{
-				"ExporterUsed":      "HTTPJsonMapExporter",
 				utils.MetaEventType: utils.CDR,
 			},
 		},
 	}
 
-	eventData := &utils.CGREventWithIDs{
+	eventData := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"HTTPJsonMapExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -171,13 +172,13 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 				},
 			},
 			Opts: map[string]interface{}{
-				"ExporterUsed":      "HTTPJsonMapExporter",
 				utils.MetaEventType: utils.CDR,
 			},
 		},
 	}
 
-	eventSMS := &utils.CGREventWithIDs{
+	eventSMS := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"HTTPJsonMapExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -205,13 +206,13 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 				},
 			},
 			Opts: map[string]interface{}{
-				"ExporterUsed":      "HTTPJsonMapExporter",
 				utils.MetaEventType: utils.CDR,
 			},
 		},
 	}
 
-	eventSMSNoFields := &utils.CGREventWithIDs{
+	eventSMSNoFields := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"HTTPJsonMapExporterWithNoFields"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -227,13 +228,10 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 					utils.RunID:       utils.MetaDefault,
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "HTTPJsonMapExporterWithNoFields",
-			},
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := httpJSONMapRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -256,7 +254,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
-	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := httpJSONMapRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -279,7 +277,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
-	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := httpJSONMapRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -303,7 +301,7 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
 
-	if err := httpJSONMapRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
+	if err := httpJSONMapRpc.Call(utils.EeSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)

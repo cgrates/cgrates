@@ -97,7 +97,8 @@ func testFwvRPCConn(t *testing.T) {
 }
 
 func testFwvExportEvent(t *testing.T) {
-	event := &utils.CGREventWithIDs{
+	event := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"FwvExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -123,13 +124,10 @@ func testFwvExportEvent(t *testing.T) {
 					"ExtraFields":     map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "FWVExporter",
-			},
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := fwvRpc.Call(utils.EventExporterSv1ProcessEvent, event, &reply); err != nil {
+	if err := fwvRpc.Call(utils.EeSv1ProcessEvent, event, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)

@@ -1688,9 +1688,9 @@ const (
 
 // EEs
 const (
-	EventExporterSv1             = "EventExporterSv1"
-	EventExporterSv1Ping         = "EventExporterSv1.Ping"
-	EventExporterSv1ProcessEvent = "EventExporterSv1.ProcessEvent"
+	EeSv1             = "EeSv1"
+	EeSv1Ping         = "EeSv1.Ping"
+	EeSv1ProcessEvent = "EeSv1.ProcessEvent"
 )
 
 //cgr_ variables

@@ -666,7 +666,7 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
 	engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.RateSv1, internalRateSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.EventExporterSv1, internalEEsChan)
+	engine.IntRPC.AddInternalRPCClient(utils.EeSv1, internalEEsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.DispatcherSv1, internalDispatcherSChan)
 
 	initConfigSv1(internalConfigChan, server, anz)

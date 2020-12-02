@@ -61,7 +61,7 @@ type EventExporterService struct {
 	stopChan    chan struct{}
 
 	eeS *ees.EventExporterS
-	rpc *v1.EventExporterSv1
+	rpc *v1.EeSv1
 	anz *AnalyzerService
 }
 
@@ -124,7 +124,7 @@ func (es *EventExporterService) Start() (err error) {
 	es.stopChan = make(chan struct{})
 	go es.eeS.ListenAndServe(es.stopChan, es.rldChan)
 
-	es.rpc = v1.NewEventExporterSv1(es.eeS)
+	es.rpc = v1.NewEeSv1(es.eeS)
 	if !es.cfg.DispatcherSCfg().Enabled {
 		es.server.RpcRegister(es.rpc)
 	}

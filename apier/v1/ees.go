@@ -23,21 +23,21 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewEventExporterSv1(eeS *ees.EventExporterS) *EventExporterSv1 {
-	return &EventExporterSv1{eeS: eeS}
+func NewEeSv1(eeS *ees.EventExporterS) *EeSv1 {
+	return &EeSv1{eeS: eeS}
 }
 
-type EventExporterSv1 struct {
+type EeSv1 struct {
 	eeS *ees.EventExporterS
 }
 
-func (eSv1 *EventExporterSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (eeSv1 *EeSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
 // ProcessEvent triggers exports on EEs side
-func (eSv1 *EventExporterSv1) ProcessEvent(args *utils.CGREventWithIDs,
+func (eeSv1 *EeSv1) ProcessEvent(args *utils.CGREventWithEeIDs,
 	reply *map[string]map[string]interface{}) error {
-	return eSv1.eeS.V1ProcessEvent(args, reply)
+	return eeSv1.eeS.V1ProcessEvent(args, reply)
 }

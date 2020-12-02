@@ -1044,13 +1044,13 @@ func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err err
 	default:
 		return // nothing to post
 	}
-	args := &utils.CGREventWithIDs{
-		IDs:              strings.Split(a.ExtraParameters, utils.INFIELD_SEP),
+	args := &utils.CGREventWithEeIDs{
+		EeIDs:            strings.Split(a.ExtraParameters, utils.INFIELD_SEP),
 		CGREventWithOpts: cgrEv,
 	}
 	var rply map[string]map[string]interface{}
 	return connMgr.Call(config.CgrConfig().ApierCfg().EEsConns, nil,
-		utils.EventExporterSv1ProcessEvent, args, &rply)
+		utils.EeSv1ProcessEvent, args, &rply)
 }
 
 func resetThreshold(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
