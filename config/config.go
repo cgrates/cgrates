@@ -1484,17 +1484,13 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{}, err error) {
-	var datadb map[string]interface{}
-	if datadb, err = cfg.dataDbCfg.AsMapInterface(); err != nil {
-		return
-	}
+func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{}) {
 	return map[string]interface{}{
 		LoaderJson:         cfg.loaderCfg.AsMapInterface(separator),
 		HttpAgentJson:      cfg.httpAgentCfg.AsMapInterface(separator),
 		RPCConnsJsonName:   cfg.rpcConns.AsMapInterface(),
 		GENERAL_JSN:        cfg.generalCfg.AsMapInterface(),
-		DATADB_JSN:         datadb,
+		DATADB_JSN:         cfg.dataDbCfg.AsMapInterface(),
 		STORDB_JSN:         cfg.storDbCfg.AsMapInterface(),
 		TlsCfgJson:         cfg.tlsCfg.AsMapInterface(),
 		CACHE_JSN:          cfg.cacheCfg.AsMapInterface(),
@@ -1533,7 +1529,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		TemplatesJson:      cfg.templates.AsMapInterface(separator),
 		ConfigSJson:        cfg.configSCfg.AsMapInterface(),
 		CoreSCfgJson:       cfg.coreSCfg.AsMapInterface(),
-	}, nil
+	}
 }
 
 // ReloadArgs the API params for V1ReloadConfig
@@ -1590,13 +1586,13 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithOpts, reply *map[string]inter
 	var mp interface{}
 	switch args.Section {
 	case utils.EmptyString:
-		*reply, err = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
+		*reply = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
 		return
 	case GENERAL_JSN:
 		mp = cfg.GeneralCfg().AsMapInterface()
 	case DATADB_JSN:
 		var datadb map[string]interface{}
-		if datadb, err = cfg.DataDbCfg().AsMapInterface(); err != nil {
+		if datadb = cfg.DataDbCfg().AsMapInterface(); err != nil {
 			return
 		}
 		mp = datadb
@@ -1739,17 +1735,13 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithOpts, reply *string) (e
 	var mp interface{}
 	switch args.Section {
 	case utils.EmptyString:
-		if mp, err = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep); err != nil {
-			return
-		}
+		mp = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
 		*reply = utils.ToJSON(mp)
 		return
 	case GENERAL_JSN:
 		mp = cfg.GeneralCfg().AsMapInterface()
 	case DATADB_JSN:
-		if mp, err = cfg.DataDbCfg().AsMapInterface(); err != nil {
-			return
-		}
+		mp = cfg.DataDbCfg().AsMapInterface()
 	case STORDB_JSN:
 		mp = cfg.StorDbCfg().AsMapInterface()
 	case TlsCfgJson:
