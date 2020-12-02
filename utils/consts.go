@@ -879,6 +879,7 @@ const (
 	StatsNA                  = -1.0
 	RateProfileMatched       = "RateProfileMatched"
 	InvalidDuration          = time.Duration(-1)
+	ActionS                  = "ActionS"
 )
 
 // Migrator Action

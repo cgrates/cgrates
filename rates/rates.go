@@ -177,28 +177,6 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 	return
 }
 
-// ArgsCostForEvent arguments used for proccess event
-type ArgsCostForEvent struct {
-	RateProfileIDs []string
-	*utils.CGREventWithOpts
-}
-
-// StartTime returns the event time used to check active rate profiles
-func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error) {
-	if tIface, has := args.Opts[utils.OptsRatesStartTime]; has {
-		return utils.IfaceAsTime(tIface, tmz)
-	}
-	return time.Now(), nil
-}
-
-// Usage returns the event time used to check active rate profiles
-func (args *ArgsCostForEvent) Usage() (usage time.Duration, err error) {
-	if uIface, has := args.Opts[utils.OptsRatesUsage]; has {
-		return utils.IfaceAsDuration(uIface)
-	}
-	return time.Duration(time.Minute), nil
-}
-
 // V1CostForEvent will be called to calculate the cost for an event
 func (rS *RateS) V1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) (err error) {
 	rPfIDs := make([]string, len(args.RateProfileIDs))
