@@ -1461,8 +1461,8 @@ type TPRateProfile struct {
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval
 	Weight             float64
-	RoundingMethod     string
 	RoundingDecimals   int
+	RoundingMethod     string
 	MinCost            float64
 	MaxCost            float64
 	MaxCostStrategy    string
@@ -1481,9 +1481,9 @@ type TPRate struct {
 type TPIntervalRate struct {
 	IntervalStart string
 	FixedFee      float64
+	RecurrentFee  float64 // RateValue
 	Unit          string
 	Increment     string
-	RecurrentFee  float64 // RateValue
 }
 
 type ArgExportCDRs struct {
