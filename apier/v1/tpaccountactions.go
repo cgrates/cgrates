@@ -130,7 +130,7 @@ func (apierSv1 *APIerSv1) RemoveTPAccountActions(attrs *AttrGetTPAccountActions,
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "LoadId", "Tenant", "Account"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	aa := engine.TpAccountAction{Tpid: attrs.TPid}
+	aa := engine.TpAccountActionMdl{Tpid: attrs.TPid}
 	if err := aa.SetAccountActionId(attrs.AccountActionsId); err != nil {
 		return err
 	}

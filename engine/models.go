@@ -29,7 +29,7 @@ import (
 // Structs here are one to one mapping of the tables and fields
 // to be used by gorm orm
 
-type TpTiming struct {
+type TpTimingMdl struct {
 	Id        int64
 	Tpid      string
 	Tag       string `index:"0" re:"\w+\s*,\s*"`
@@ -41,7 +41,7 @@ type TpTiming struct {
 	CreatedAt time.Time
 }
 
-type TpDestination struct {
+type TpDestinationMdl struct {
 	Id        int64
 	Tpid      string
 	Tag       string `index:"0" re:"\w+\s*,\s*"`
@@ -49,7 +49,7 @@ type TpDestination struct {
 	CreatedAt time.Time
 }
 
-type TpRate struct {
+type TpRateMdl struct {
 	Id                 int64
 	Tpid               string
 	Tag                string  `index:"0" re:"\w+\s*"`
@@ -61,7 +61,7 @@ type TpRate struct {
 	CreatedAt          time.Time
 }
 
-type TpDestinationRate struct {
+type TpDestinationRateMdl struct {
 	Id               int64
 	Tpid             string
 	Tag              string  `index:"0" re:"\w+\s*"`
@@ -74,7 +74,7 @@ type TpDestinationRate struct {
 	CreatedAt        time.Time
 }
 
-type TpRatingPlan struct {
+type TpRatingPlanMdl struct {
 	Id           int64
 	Tpid         string
 	Tag          string  `index:"0" re:"\w+\s*,\s*"`
@@ -84,7 +84,7 @@ type TpRatingPlan struct {
 	CreatedAt    time.Time
 }
 
-type TpRatingProfile struct {
+type TpRatingProfileMdl struct {
 	Id               int64
 	Tpid             string
 	Loadid           string
@@ -97,7 +97,7 @@ type TpRatingProfile struct {
 	CreatedAt        time.Time
 }
 
-type TpAction struct {
+type TpActionMdl struct {
 	Id              int64
 	Tpid            string
 	Tag             string  `index:"0" re:"\w+\s*"`
@@ -120,7 +120,7 @@ type TpAction struct {
 	CreatedAt       time.Time
 }
 
-type TpActionPlan struct {
+type TpActionPlanMdl struct {
 	Id         int64
 	Tpid       string
 	Tag        string  `index:"0" re:"\w+\s*,\s*"`
@@ -130,7 +130,7 @@ type TpActionPlan struct {
 	CreatedAt  time.Time
 }
 
-type TpActionTrigger struct {
+type TpActionTriggerMdl struct {
 	Id                     int64
 	Tpid                   string
 	Tag                    string  `index:"0" re:"\w+"`
@@ -157,7 +157,7 @@ type TpActionTrigger struct {
 	CreatedAt              time.Time
 }
 
-type TpAccountAction struct {
+type TpAccountActionMdl struct {
 	Id                int64
 	Tpid              string
 	Loadid            string
@@ -170,7 +170,7 @@ type TpAccountAction struct {
 	CreatedAt         time.Time
 }
 
-func (aa *TpAccountAction) SetAccountActionId(id string) error {
+func (aa *TpAccountActionMdl) SetAccountActionId(id string) error {
 	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
 	if len(ids) != 3 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
@@ -181,11 +181,11 @@ func (aa *TpAccountAction) SetAccountActionId(id string) error {
 	return nil
 }
 
-func (aa *TpAccountAction) GetAccountActionId() string {
+func (aa *TpAccountActionMdl) GetAccountActionId() string {
 	return utils.ConcatenatedKey(aa.Tenant, aa.Account)
 }
 
-type TpSharedGroup struct {
+type TpSharedGroupMdl struct {
 	Id            int64
 	Tpid          string
 	Tag           string `index:"0" re:"\w+\s*"`
@@ -195,7 +195,7 @@ type TpSharedGroup struct {
 	CreatedAt     time.Time
 }
 
-type TpResource struct {
+type TpResourceMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -212,7 +212,7 @@ type TpResource struct {
 	CreatedAt          time.Time
 }
 
-type TpStat struct {
+type TpStatMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -231,7 +231,7 @@ type TpStat struct {
 	CreatedAt          time.Time
 }
 
-type TpThreshold struct {
+type TpThresholdMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -248,7 +248,7 @@ type TpThreshold struct {
 	CreatedAt          time.Time
 }
 
-type TpFilter struct {
+type TpFilterMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string `index:"0" re:""`
@@ -348,7 +348,7 @@ func (t TBLVersion) TableName() string {
 	return utils.TBLVersions
 }
 
-type TpRoute struct {
+type TpRouteMdl struct {
 	PK                  uint `gorm:"primary_key"`
 	Tpid                string
 	Tenant              string  `index:"0" re:""`
@@ -371,7 +371,7 @@ type TpRoute struct {
 	CreatedAt           time.Time
 }
 
-type TPAttribute struct {
+type TPAttributeMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -388,7 +388,7 @@ type TPAttribute struct {
 	CreatedAt          time.Time
 }
 
-type TPCharger struct {
+type TPChargerMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -401,7 +401,7 @@ type TPCharger struct {
 	CreatedAt          time.Time
 }
 
-type TPDispatcherProfile struct {
+type TPDispatcherProfileMdl struct {
 	PK                 uint    `gorm:"primary_key"`
 	Tpid               string  //
 	Tenant             string  `index:"0" re:""`
@@ -420,7 +420,7 @@ type TPDispatcherProfile struct {
 	CreatedAt          time.Time
 }
 
-type TPDispatcherHost struct {
+type TPDispatcherHostMdl struct {
 	PK        uint   `gorm:"primary_key"`
 	Tpid      string //
 	Tenant    string `index:"0" re:""`

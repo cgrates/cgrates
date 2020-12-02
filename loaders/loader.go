@@ -285,7 +285,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		for _, lDataSet := range lds {
 			attrModels := make(engine.TPAttributes, len(lDataSet))
 			for i, ld := range lDataSet {
-				attrModels[i] = new(engine.TPAttribute)
+				attrModels[i] = new(engine.TPAttributeMdl)
 				if err = utils.UpdateStructWithIfaceMap(attrModels[i], ld); err != nil {
 					return
 				}
@@ -314,7 +314,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		for _, lDataSet := range lds {
 			resModels := make(engine.TpResources, len(lDataSet))
 			for i, ld := range lDataSet {
-				resModels[i] = new(engine.TpResource)
+				resModels[i] = new(engine.TpResourceMdl)
 				if err = utils.UpdateStructWithIfaceMap(resModels[i], ld); err != nil {
 					return
 				}
@@ -353,7 +353,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		for _, lDataSet := range lds {
 			fltrModels := make(engine.TpFilterS, len(lDataSet))
 			for i, ld := range lDataSet {
-				fltrModels[i] = new(engine.TpFilter)
+				fltrModels[i] = new(engine.TpFilterMdl)
 				if err = utils.UpdateStructWithIfaceMap(fltrModels[i], ld); err != nil {
 					return
 				}
@@ -383,7 +383,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		for _, lDataSet := range lds {
 			stsModels := make(engine.TpStats, len(lDataSet))
 			for i, ld := range lDataSet {
-				stsModels[i] = new(engine.TpStat)
+				stsModels[i] = new(engine.TpStatMdl)
 				if err = utils.UpdateStructWithIfaceMap(stsModels[i], ld); err != nil {
 					return
 				}
@@ -429,7 +429,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		for _, lDataSet := range lds {
 			thModels := make(engine.TpThresholds, len(lDataSet))
 			for i, ld := range lDataSet {
-				thModels[i] = new(engine.TpThreshold)
+				thModels[i] = new(engine.TpThresholdMdl)
 				if err = utils.UpdateStructWithIfaceMap(thModels[i], ld); err != nil {
 					return
 				}
@@ -462,7 +462,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		for _, lDataSet := range lds {
 			sppModels := make(engine.TPRoutes, len(lDataSet))
 			for i, ld := range lDataSet {
-				sppModels[i] = new(engine.TpRoute)
+				sppModels[i] = new(engine.TpRouteMdl)
 				if err = utils.UpdateStructWithIfaceMap(sppModels[i], ld); err != nil {
 					return
 				}
@@ -492,7 +492,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		for _, lDataSet := range lds {
 			cppModels := make(engine.TPChargers, len(lDataSet))
 			for i, ld := range lDataSet {
-				cppModels[i] = new(engine.TPCharger)
+				cppModels[i] = new(engine.TPChargerMdl)
 				if err = utils.UpdateStructWithIfaceMap(cppModels[i], ld); err != nil {
 					return
 				}
@@ -522,7 +522,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		for _, lDataSet := range lds {
 			dispModels := make(engine.TPDispatcherProfiles, len(lDataSet))
 			for i, ld := range lDataSet {
-				dispModels[i] = new(engine.TPDispatcherProfile)
+				dispModels[i] = new(engine.TPDispatcherProfileMdl)
 				if err = utils.UpdateStructWithIfaceMap(dispModels[i], ld); err != nil {
 					return
 				}
@@ -550,7 +550,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		for _, lDataSet := range lds {
 			dispModels := make(engine.TPDispatcherHosts, len(lDataSet))
 			for i, ld := range lDataSet {
-				dispModels[i] = new(engine.TPDispatcherHost)
+				dispModels[i] = new(engine.TPDispatcherHostMdl)
 				if err = utils.UpdateStructWithIfaceMap(dispModels[i], ld); err != nil {
 					return
 				}

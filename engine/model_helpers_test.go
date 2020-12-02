@@ -30,15 +30,15 @@ import (
 )
 
 func TestModelHelperCsvLoad(t *testing.T) {
-	l, err := csvLoad(TpDestination{}, []string{"TEST_DEST", "+492"})
-	tpd, ok := l.(TpDestination)
+	l, err := csvLoad(TpDestinationMdl{}, []string{"TEST_DEST", "+492"})
+	tpd, ok := l.(TpDestinationMdl)
 	if err != nil || !ok || tpd.Tag != "TEST_DEST" || tpd.Prefix != "+492" {
 		t.Errorf("model load failed: %+v", tpd)
 	}
 }
 
 func TestModelHelperCsvDump(t *testing.T) {
-	tpd := TpDestination{
+	tpd := TpDestinationMdl{
 		Tag:    "TEST_DEST",
 		Prefix: "+492"}
 	csv, err := CsvDump(tpd)
@@ -82,8 +82,8 @@ func TestTpDestinationsAsMapDestinations(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	in = &TpDestinations{
-		TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST1", Prefix: "+491"},
-		TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST2", Prefix: "+492"},
+		TpDestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST1", Prefix: "+491"},
+		TpDestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST2", Prefix: "+492"},
 	}
 	eOut = map[string]*Destination{
 		"TEST_DEST1": {
@@ -105,9 +105,9 @@ func TestTpDestinationsAsMapDestinations(t *testing.T) {
 		}
 	}
 	in = &TpDestinations{
-		TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST1", Prefix: "+491"},
-		TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST2", Prefix: "+492"},
-		TpDestination{Tpid: "TEST_ID", Tag: "", Prefix: ""},
+		TpDestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST1", Prefix: "+491"},
+		TpDestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST2", Prefix: "+492"},
+		TpDestinationMdl{Tpid: "TEST_ID", Tag: "", Prefix: ""},
 	}
 	eOut = map[string]*Destination{
 		"TEST_DEST1": {
@@ -136,7 +136,7 @@ func TestTpDestinationsAsMapDestinations(t *testing.T) {
 func TestTpDestinationsAPItoModelDestination(t *testing.T) {
 	d := &utils.TPDestination{}
 	eOut := TpDestinations{
-		TpDestination{},
+		TpDestinationMdl{},
 	}
 	if rcv := APItoModelDestination(d); rcv != nil {
 		if !reflect.DeepEqual(rcv, eOut) {
@@ -150,7 +150,7 @@ func TestTpDestinationsAPItoModelDestination(t *testing.T) {
 		Prefixes: []string{"+491"},
 	}
 	eOut = TpDestinations{
-		TpDestination{
+		TpDestinationMdl{
 			Tpid:   "TEST_TPID",
 			Tag:    "TEST_ID",
 			Prefix: "+491",
@@ -164,12 +164,12 @@ func TestTpDestinationsAPItoModelDestination(t *testing.T) {
 }
 
 func TestTpDestinationsAsTPDestinations(t *testing.T) {
-	tpd1 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+491"}
-	tpd2 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+492"}
-	tpd3 := TpDestination{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+493"}
+	tpd1 := TpDestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+491"}
+	tpd2 := TpDestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+492"}
+	tpd3 := TpDestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST", Prefix: "+493"}
 	eTPDestinations := []*utils.TPDestination{{TPid: "TEST_TPID", ID: "TEST_DEST",
 		Prefixes: []string{"+491", "+492", "+493"}}}
-	if tpDst := TpDestinations([]TpDestination{tpd1, tpd2, tpd3}).AsTPDestinations(); !reflect.DeepEqual(eTPDestinations, tpDst) {
+	if tpDst := TpDestinations([]TpDestinationMdl{tpd1, tpd2, tpd3}).AsTPDestinations(); !reflect.DeepEqual(eTPDestinations, tpDst) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPDestinations, tpDst)
 	}
 
@@ -371,7 +371,7 @@ func TestAPItoModelTimings(t *testing.T) {
 		},
 	}
 	eOut = TpTimings{
-		TpTiming{
+		TpTimingMdl{
 			Tpid:   "TPid1",
 			Months: "1;2;3;4",
 			Tag:    "ID1",
@@ -396,12 +396,12 @@ func TestAPItoModelTimings(t *testing.T) {
 		},
 	}
 	eOut = TpTimings{
-		TpTiming{
+		TpTimingMdl{
 			Tpid:   "TPid1",
 			Months: "1;2;3;4",
 			Tag:    "ID1",
 		},
-		TpTiming{
+		TpTimingMdl{
 			Tpid:      "TPid2",
 			Tag:       "ID2",
 			Months:    "1;2;3;4",
@@ -477,13 +477,13 @@ func TestAPItoModelRates(t *testing.T) {
 		},
 	}
 	eOut = TpRates{
-		TpRate{
+		TpRateMdl{
 			Tpid:       "TPid",
 			Tag:        "SomeID",
 			ConnectFee: 0.7,
 			Rate:       0.8,
 		},
-		TpRate{
+		TpRateMdl{
 			Tpid:       "TPid",
 			Tag:        "SomeID",
 			ConnectFee: 0.77,
@@ -501,7 +501,7 @@ func TestAPItoModelRates(t *testing.T) {
 		},
 	}
 	eOut = TpRates{
-		TpRate{
+		TpRateMdl{
 			Tpid: "TPid",
 			Tag:  "SomeID",
 		},
@@ -552,7 +552,7 @@ func TestTPDestinationRateAsExportSlice(t *testing.T) {
 		DestinationRates: []*utils.DestinationRate{},
 	}
 	eOut := TpDestinationRates{
-		TpDestinationRate{
+		TpDestinationRateMdl{
 			Tpid: "TEST_TPID",
 			Tag:  "TEST_DSTRATE",
 		},
@@ -587,7 +587,7 @@ func TestAPItoModelDestinationRates(t *testing.T) {
 		},
 	}
 	eOut := TpDestinationRates{
-		TpDestinationRate{
+		TpDestinationRateMdl{
 			Tpid:             "TEST_TPID",
 			Tag:              "TEST_DSTRATE",
 			DestinationsTag:  "TEST_DEST1",
@@ -595,7 +595,7 @@ func TestAPItoModelDestinationRates(t *testing.T) {
 			RoundingMethod:   "*up",
 			RoundingDecimals: 4,
 		},
-		TpDestinationRate{
+		TpDestinationRateMdl{
 			Tpid:             "TEST_TPID",
 			Tag:              "TEST_DSTRATE",
 			DestinationsTag:  "TEST_DEST2",
@@ -619,7 +619,7 @@ func TestTpDestinationRatesAsTPDestinationRates(t *testing.T) {
 	}
 
 	pts = TpDestinationRates{
-		TpDestinationRate{
+		TpDestinationRateMdl{
 			Id:               66,
 			Tpid:             "Tpid",
 			Tag:              "Tag",
@@ -788,7 +788,7 @@ func TestTPRatingPlanAsExportSlice(t *testing.T) {
 
 func TestAPItoModelRatingPlan(t *testing.T) {
 	rp := &utils.TPRatingPlan{}
-	eOut := TpRatingPlans{TpRatingPlan{}}
+	eOut := TpRatingPlans{TpRatingPlanMdl{}}
 	if rcv := APItoModelRatingPlan(rp); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
@@ -807,14 +807,14 @@ func TestAPItoModelRatingPlan(t *testing.T) {
 		}}
 
 	eOut = TpRatingPlans{
-		TpRatingPlan{
+		TpRatingPlanMdl{
 			Tpid:         "TEST_TPID",
 			Tag:          "TEST_RPLAN",
 			DestratesTag: "TEST_DSTRATE1",
 			TimingTag:    "TEST_TIMING1",
 			Weight:       10.0,
 		},
-		TpRatingPlan{
+		TpRatingPlanMdl{
 			Tpid:         "TEST_TPID",
 			Tag:          "TEST_RPLAN",
 			DestratesTag: "TEST_DSTRATE2",
@@ -830,7 +830,7 @@ func TestAPItoModelRatingPlan(t *testing.T) {
 		ID:   "TEST_RPLAN",
 	}
 	eOut = TpRatingPlans{
-		TpRatingPlan{
+		TpRatingPlanMdl{
 			Tpid: "TEST_TPID",
 			Tag:  "TEST_RPLAN",
 		},
@@ -859,7 +859,7 @@ func TestAPItoModelRatingPlans(t *testing.T) {
 		},
 	}
 	eOut := TpRatingPlans{
-		TpRatingPlan{
+		TpRatingPlanMdl{
 			Tag:          "ID",
 			Tpid:         "TPid",
 			DestratesTag: "DestinationRatesId",
@@ -934,7 +934,7 @@ func TestAPItoModelRatingProfile(t *testing.T) {
 		},
 	}
 	eOut := TpRatingProfiles{
-		TpRatingProfile{
+		TpRatingProfileMdl{
 			Tpid:             "TEST_TPID",
 			Loadid:           "TEST_LOADID",
 			Tenant:           "cgrates.org",
@@ -944,7 +944,7 @@ func TestAPItoModelRatingProfile(t *testing.T) {
 			FallbackSubjects: "subj1;subj2",
 			ActivationTime:   "2014-01-14T00:00:00Z",
 		},
-		TpRatingProfile{
+		TpRatingProfileMdl{
 			Tpid:             "TEST_TPID",
 			Loadid:           "TEST_LOADID",
 			Tenant:           "cgrates.org",
@@ -966,7 +966,7 @@ func TestAPItoModelRatingProfile(t *testing.T) {
 		Subject:  "*any",
 	}
 	eOut = TpRatingProfiles{
-		TpRatingProfile{
+		TpRatingProfileMdl{
 			Tpid:     "TEST_TPID",
 			Loadid:   "TEST_LOADID",
 			Tenant:   "cgrates.org",
@@ -1001,14 +1001,14 @@ func TestAPItoModelRatingProfiles(t *testing.T) {
 		},
 	}
 	eOut := TpRatingProfiles{
-		TpRatingProfile{
+		TpRatingProfileMdl{
 			Tpid:     "TEST_TPID",
 			Loadid:   "TEST_LOADID",
 			Tenant:   "cgrates.org",
 			Category: "call",
 			Subject:  "*any",
 		},
-		TpRatingProfile{
+		TpRatingProfileMdl{
 			Tpid:     "TEST_TPID2",
 			Loadid:   "TEST_LOADID2",
 			Tenant:   "cgrates.org",
@@ -1129,14 +1129,14 @@ func TestAPItoModelSharedGroups(t *testing.T) {
 		},
 	}
 	eOut := TpSharedGroups{
-		TpSharedGroup{
+		TpSharedGroupMdl{
 			Tpid:          "TEST_TPID",
 			Tag:           "SHARED_GROUP_TEST",
 			Account:       "*any",
 			Strategy:      "*highest",
 			RatingSubject: "special1",
 		},
-		TpSharedGroup{
+		TpSharedGroupMdl{
 			Tpid:          "TEST_TPID",
 			Tag:           "SHARED_GROUP_TEST",
 			Account:       "*second",
@@ -1154,7 +1154,7 @@ func TestAPItoModelSharedGroups(t *testing.T) {
 		},
 	}
 	eOut = TpSharedGroups{
-		TpSharedGroup{
+		TpSharedGroupMdl{
 			Tpid: "TEST_TPID",
 			Tag:  "SHARED_GROUP_TEST",
 		},
@@ -1193,28 +1193,28 @@ func TestAPItoModelSharedGroups(t *testing.T) {
 		},
 	}
 	eOut = TpSharedGroups{
-		TpSharedGroup{
+		TpSharedGroupMdl{
 			Tpid:          "TEST_TPID",
 			Tag:           "SHARED_GROUP_TEST",
 			Account:       "*any",
 			Strategy:      "*highest",
 			RatingSubject: "special1",
 		},
-		TpSharedGroup{
+		TpSharedGroupMdl{
 			Tpid:          "TEST_TPID",
 			Tag:           "SHARED_GROUP_TEST",
 			Account:       "*second",
 			Strategy:      "*highest",
 			RatingSubject: "special2",
 		},
-		TpSharedGroup{
+		TpSharedGroupMdl{
 			Tpid:          "TEST_TPID2",
 			Tag:           "SHARED_GROUP_TEST2",
 			Account:       "*any",
 			Strategy:      "*highest",
 			RatingSubject: "special1",
 		},
-		TpSharedGroup{
+		TpSharedGroupMdl{
 			Tpid:          "TEST_TPID2",
 			Tag:           "SHARED_GROUP_TEST2",
 			Account:       "second",
@@ -1281,14 +1281,14 @@ func TestAPItoModelActionPlan(t *testing.T) {
 	}
 
 	eOut := TpActionPlans{
-		TpActionPlan{
+		TpActionPlanMdl{
 			Tpid:       "TEST_TPID",
 			Tag:        "PACKAGE_10",
 			ActionsTag: "TOPUP_RST_10",
 			TimingTag:  "ASAP",
 			Weight:     10,
 		},
-		TpActionPlan{
+		TpActionPlanMdl{
 			Tpid:       "TEST_TPID",
 			Tag:        "PACKAGE_10",
 			ActionsTag: "TOPUP_RST_5",
@@ -1304,7 +1304,7 @@ func TestAPItoModelActionPlan(t *testing.T) {
 		ID:   "PACKAGE_10",
 	}
 	eOut = TpActionPlans{
-		TpActionPlan{
+		TpActionPlanMdl{
 			Tpid: "TEST_TPID",
 			Tag:  "PACKAGE_10",
 		},
@@ -1336,14 +1336,14 @@ func TestAPItoModelActionPlans(t *testing.T) {
 		},
 	}
 	eOut := TpActionPlans{
-		TpActionPlan{
+		TpActionPlanMdl{
 			Tpid:       "TEST_TPID",
 			Tag:        "PACKAGE_10",
 			ActionsTag: "TOPUP_RST_10",
 			TimingTag:  "ASAP",
 			Weight:     10,
 		},
-		TpActionPlan{
+		TpActionPlanMdl{
 			Tpid:       "TEST_TPID",
 			Tag:        "PACKAGE_10",
 			ActionsTag: "TOPUP_RST_5",
@@ -1361,7 +1361,7 @@ func TestAPItoModelActionPlans(t *testing.T) {
 		},
 	}
 	eOut = TpActionPlans{
-		TpActionPlan{
+		TpActionPlanMdl{
 			Tpid: "TEST_TPID",
 			Tag:  "PACKAGE_10",
 		},
@@ -1489,7 +1489,7 @@ func TestAPItoModelActionTrigger(t *testing.T) {
 		},
 	}
 	eOut := TpActionTriggers{
-		TpActionTrigger{
+		TpActionTriggerMdl{
 			Tpid:                 "TEST_TPID",
 			Tag:                  "STANDARD_TRIGGERS",
 			UniqueId:             "1",
@@ -1509,7 +1509,7 @@ func TestAPItoModelActionTrigger(t *testing.T) {
 			ActionsTag:           "LOG_WARNING",
 			Weight:               10,
 		},
-		TpActionTrigger{
+		TpActionTriggerMdl{
 			Tpid:                   "TEST_TPID",
 			Tag:                    "STANDARD_TRIGGERS",
 			UniqueId:               "2",
@@ -1539,7 +1539,7 @@ func TestAPItoModelActionTrigger(t *testing.T) {
 		ID:   "STANDARD_TRIGGERS",
 	}
 	eOut = TpActionTriggers{
-		TpActionTrigger{
+		TpActionTriggerMdl{
 			Tpid: "TEST_TPID",
 			Tag:  "STANDARD_TRIGGERS",
 		},
@@ -1596,14 +1596,14 @@ func TestAPItoModelActionTriggers(t *testing.T) {
 		},
 	}
 	eOut := TpActionTriggers{
-		TpActionTrigger{
+		TpActionTriggerMdl{
 			Tpid:          "TEST_TPID",
 			Tag:           "STANDARD_TRIGGERS",
 			UniqueId:      "1",
 			ThresholdType: "*min_balance",
 			Weight:        0.7,
 		},
-		TpActionTrigger{
+		TpActionTriggerMdl{
 			Tpid:          "TEST_TPID",
 			Tag:           "STANDARD_TRIGGERS",
 			UniqueId:      "2",
@@ -1626,7 +1626,7 @@ func TestAPItoModelAction(t *testing.T) {
 		ID:   "TEST_ACTIONS",
 	}
 	eOut := TpActions{
-		TpAction{
+		TpActionMdl{
 			Tpid: "TEST_TPID",
 			Tag:  "TEST_ACTIONS",
 		},
@@ -1665,7 +1665,7 @@ func TestAPItoModelAction(t *testing.T) {
 		},
 	}
 	eOut = TpActions{
-		TpAction{
+		TpActionMdl{
 			Tpid:            "TEST_TPID",
 			Tag:             "TEST_ACTIONS",
 			BalanceType:     "*monetary",
@@ -1679,7 +1679,7 @@ func TestAPItoModelAction(t *testing.T) {
 			Weight:          10,
 			Action:          "*topup_reset",
 		},
-		TpAction{
+		TpActionMdl{
 			Tpid:            "TEST_TPID",
 			Tag:             "TEST_ACTIONS",
 			Action:          "*http_post",
@@ -1710,11 +1710,11 @@ func TestAPItoModelActions(t *testing.T) {
 		},
 	}
 	eOut := TpActions{
-		TpAction{
+		TpActionMdl{
 			Tpid: "TEST_TPID",
 			Tag:  "TEST_ACTIONS",
 		},
-		TpAction{
+		TpActionMdl{
 			Tpid: "TEST_TPID2",
 			Tag:  "TEST_ACTIONS2",
 		},
@@ -1750,7 +1750,7 @@ func TestAPItoModelActions(t *testing.T) {
 		},
 	}
 	eOut = TpActions{
-		TpAction{
+		TpActionMdl{
 			Tpid:            "TEST_TPID",
 			Tag:             "TEST_ACTIONS",
 			BalanceType:     "*monetary",
@@ -1764,7 +1764,7 @@ func TestAPItoModelActions(t *testing.T) {
 			Weight:          10,
 			Action:          "*topup_reset",
 		},
-		TpAction{
+		TpActionMdl{
 			Tpid:            "TEST_TPID",
 			Tag:             "TEST_ACTIONS",
 			Action:          "*http_post",
@@ -1780,7 +1780,7 @@ func TestAPItoModelActions(t *testing.T) {
 }
 
 func TestTpResourcesAsTpResources(t *testing.T) {
-	tps := []*TpResource{
+	tps := []*TpResourceMdl{
 		{
 			Tpid:               "TEST_TPID",
 			Tenant:             "cgrates.org",
@@ -1918,7 +1918,7 @@ func TestAPItoModelResource(t *testing.T) {
 		ThresholdIDs:       []string{"TRes1"},
 		AllocationMessage:  "test",
 	}
-	expModel := &TpResource{
+	expModel := &TpResourceMdl{
 		Tpid:               testTPID,
 		Tenant:             "cgrates.org",
 		ID:                 "ResGroup1",
@@ -1938,7 +1938,7 @@ func TestAPItoModelResource(t *testing.T) {
 
 func TestTPStatsAsTPStats(t *testing.T) {
 	tps := TpStats{
-		&TpStat{
+		&TpStatMdl{
 			Tpid:               "TEST_TPID",
 			Tenant:             "cgrates.org",
 			ID:                 "Stats1",
@@ -1952,7 +1952,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			Blocker:            true,
 			Weight:             20.0,
 		},
-		&TpStat{
+		&TpStatMdl{
 			Tpid:               "TEST_TPID",
 			Tenant:             "cgrates.org",
 			ID:                 "Stats1",
@@ -1967,7 +1967,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			Blocker:            true,
 			Weight:             20.0,
 		},
-		&TpStat{
+		&TpStatMdl{
 			Tpid:               "TEST_TPID",
 			Tenant:             "itsyscom.com",
 			ID:                 "Stats1",
@@ -2139,7 +2139,7 @@ func TestAPItoModelStats(t *testing.T) {
 	}
 	rcv := APItoModelStats(tpS)
 	eRcv := TpStats{
-		&TpStat{
+		&TpStatMdl{
 			Tpid:               "TPS1",
 			Tenant:             "cgrates.org",
 			ID:                 "Stat1",
@@ -2154,7 +2154,7 @@ func TestAPItoModelStats(t *testing.T) {
 			Weight:             20.0,
 			ThresholdIDs:       "Th1",
 		},
-		&TpStat{
+		&TpStatMdl{
 			Tpid:      "TPS1",
 			Tenant:    "cgrates.org",
 			ID:        "Stat1",
@@ -2169,7 +2169,7 @@ func TestAPItoModelStats(t *testing.T) {
 }
 
 func TestTPThresholdsAsTPThreshold(t *testing.T) {
-	tps := []*TpThreshold{
+	tps := []*TpThresholdMdl{
 		{
 			Tpid:               "TEST_TPID",
 			ID:                 "Threhold",
@@ -2243,7 +2243,7 @@ func TestAPItoModelAccountActions(t *testing.T) {
 		},
 	}
 	eOut := TpAccountActions{
-		TpAccountAction{
+		TpAccountActionMdl{
 			Tpid:              "TEST_TPID",
 			Loadid:            "TEST_LOADID",
 			Tenant:            "cgrates.org",
@@ -2251,7 +2251,7 @@ func TestAPItoModelAccountActions(t *testing.T) {
 			ActionPlanTag:     "PACKAGE_10_SHARED_A_5",
 			ActionTriggersTag: "STANDARD_TRIGGERS",
 		},
-		TpAccountAction{
+		TpAccountActionMdl{
 			Tpid:              "TEST_TPID2",
 			Loadid:            "TEST_LOADID2",
 			Tenant:            "cgrates.org",
@@ -2537,7 +2537,7 @@ func TestThresholdProfileToAPI(t *testing.T) {
 }
 
 func TestTPFilterAsTPFilter(t *testing.T) {
-	tps := []*TpFilter{
+	tps := []*TpFilterMdl{
 		{
 			Tpid:    "TEST_TPID",
 			ID:      "Filter1",
@@ -2567,7 +2567,7 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 }
 
 func TestTPFilterAsTPFilterWithDynValues(t *testing.T) {
-	tps := []*TpFilter{
+	tps := []*TpFilterMdl{
 		{
 			Tpid:               "TEST_TPID",
 			ID:                 "Filter1",
@@ -2602,7 +2602,7 @@ func TestTPFilterAsTPFilterWithDynValues(t *testing.T) {
 }
 
 func TestTPFilterAsTPFilter2(t *testing.T) {
-	tps := []*TpFilter{
+	tps := []*TpFilterMdl{
 		{
 			Tpid:    "TEST_TPID",
 			Tenant:  "cgrates.org",
@@ -2681,13 +2681,13 @@ func TestAPItoModelTPFilter(t *testing.T) {
 		},
 	}
 	eOut := TpFilterS{
-		&TpFilter{
+		&TpFilterMdl{
 			ID:      "someID",
 			Type:    "*prefix",
 			Element: "Account",
 			Values:  "1010",
 		},
-		&TpFilter{
+		&TpFilterMdl{
 			ID:      "someID",
 			Type:    "*prefix",
 			Element: "Account",
@@ -2990,7 +2990,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 		Weight: 20,
 	}
 	expected := TPAttributes{
-		&TPAttribute{
+		&TPAttributeMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
@@ -3032,7 +3032,7 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 		Weight: 20,
 	}
 	expected := TPAttributes{
-		&TPAttribute{
+		&TPAttributeMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
@@ -3043,7 +3043,7 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
-		&TPAttribute{
+		&TPAttributeMdl{
 			Tpid:   "TP1",
 			Tenant: "cgrates.org",
 			ID:     "ALS1",
@@ -3069,7 +3069,7 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 
 func TestModelAsTPAttribute(t *testing.T) {
 	models := TPAttributes{
-		&TPAttribute{
+		&TPAttributeMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
@@ -3206,7 +3206,7 @@ func TestAPItoModelTPCharger(t *testing.T) {
 		Weight:       20,
 	}
 	expected := TPChargers{
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3216,7 +3216,7 @@ func TestAPItoModelTPCharger(t *testing.T) {
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3247,7 +3247,7 @@ func TestAPItoModelTPCharger2(t *testing.T) {
 		Weight:       20,
 	}
 	expected := TPChargers{
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3257,7 +3257,7 @@ func TestAPItoModelTPCharger2(t *testing.T) {
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3287,7 +3287,7 @@ func TestAPItoModelTPCharger3(t *testing.T) {
 		Weight:       20,
 	}
 	expected := TPChargers{
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3297,7 +3297,7 @@ func TestAPItoModelTPCharger3(t *testing.T) {
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "Charger1",
@@ -3325,7 +3325,7 @@ func TestAPItoModelTPCharger4(t *testing.T) {
 		Weight: 20,
 	}
 	expected := TPChargers{
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3356,7 +3356,7 @@ func TestAPItoModelTPCharger5(t *testing.T) {
 		Weight:       20,
 	}
 	expected := TPChargers{
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3386,7 +3386,7 @@ func TestAPItoModelTPCharger6(t *testing.T) {
 		Weight: 20,
 	}
 	expected := TPChargers{
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3403,7 +3403,7 @@ func TestAPItoModelTPCharger6(t *testing.T) {
 
 func TestModelAsTPChargers(t *testing.T) {
 	models := TPChargers{
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3448,7 +3448,7 @@ func TestModelAsTPChargers(t *testing.T) {
 
 func TestModelAsTPChargers2(t *testing.T) {
 	models := TPChargers{
-		&TPCharger{
+		&TPChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3638,7 +3638,7 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 		},
 	}
 	expected := TPDispatcherProfiles{
-		&TPDispatcherProfile{
+		&TPDispatcherProfileMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Dsp",
@@ -3652,7 +3652,7 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 			ConnBlocker:        false,
 			ConnParameters:     "192.168.54.203",
 		},
-		&TPDispatcherProfile{
+		&TPDispatcherProfileMdl{
 			Tpid:           "TP1",
 			Tenant:         "cgrates.org",
 			ID:             "Dsp",
@@ -3683,7 +3683,7 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 	}
 
 	tps = &TPDispatcherHosts{
-		&TPDispatcherHost{
+		&TPDispatcherHostMdl{
 			ID:     "ID1",
 			Tenant: "Tenant1",
 		}}
@@ -3692,7 +3692,7 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 	}
 
 	tps = &TPDispatcherHosts{
-		&TPDispatcherHost{
+		&TPDispatcherHostMdl{
 			Address:   "Address1",
 			ID:        "ID1",
 			Tenant:    "Tenant1",
@@ -3713,7 +3713,7 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 	}
 
 	tps = &TPDispatcherHosts{
-		&TPDispatcherHost{
+		&TPDispatcherHostMdl{
 			Address:   "Address2",
 			ID:        "ID2",
 			Tenant:    "Tenant2",
@@ -3734,7 +3734,7 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 	}
 
 	tps = &TPDispatcherHosts{
-		&TPDispatcherHost{
+		&TPDispatcherHostMdl{
 			Address:   "Address3",
 			ID:        "ID3",
 			Tenant:    "Tenant3",
@@ -3756,7 +3756,7 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 	}
 
 	tps = &TPDispatcherHosts{
-		&TPDispatcherHost{
+		&TPDispatcherHostMdl{
 			Address:   "Address4",
 			ID:        "ID4",
 			Tenant:    "Tenant4",
@@ -3794,7 +3794,7 @@ func TestAPItoModelTPDispatcherHost(t *testing.T) {
 			Transport: "*json",
 		},
 	}
-	eOut := &TPDispatcherHost{
+	eOut := &TPDispatcherHostMdl{
 		Address:   "Address1",
 		Transport: "*json",
 		Tenant:    "Tenant",
@@ -3883,7 +3883,7 @@ func TestDispatcherHostToAPI(t *testing.T) {
 
 func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 	mdl := TPRoutes{
-		&TpRoute{
+		&TpRouteMdl{
 			PK:                 1,
 			Tpid:               "TP",
 			Tenant:             "cgrates.org",
@@ -3904,7 +3904,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			Weight:             10.0,
 			CreatedAt:          time.Time{},
 		},
-		&TpRoute{
+		&TpRouteMdl{
 			PK:                 2,
 			Tpid:               "TP",
 			Tenant:             "cgrates.org",
@@ -3960,7 +3960,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 	}
 
 	mdlReverse := TPRoutes{
-		&TpRoute{
+		&TpRouteMdl{
 			PK:                 2,
 			Tpid:               "TP",
 			Tenant:             "cgrates.org",
@@ -3981,7 +3981,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			Weight:             0,
 			CreatedAt:          time.Time{},
 		},
-		&TpRoute{
+		&TpRouteMdl{
 			PK:                 1,
 			Tpid:               "TP",
 			Tenant:             "cgrates.org",
