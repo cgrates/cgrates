@@ -106,7 +106,8 @@ func testCsvRPCConn(t *testing.T) {
 }
 
 func testCsvExportEvent(t *testing.T) {
-	eventVoice := &utils.CGREventWithIDs{
+	eventVoice := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"CSVExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -130,13 +131,11 @@ func testCsvExportEvent(t *testing.T) {
 					utils.Cost:        1.01,
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "CSVExporter",
-			},
 		},
 	}
 
-	eventData := &utils.CGREventWithIDs{
+	eventData := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"CSVExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -160,13 +159,11 @@ func testCsvExportEvent(t *testing.T) {
 					utils.Cost:        0.012,
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "CSVExporter",
-			},
 		},
 	}
 
-	eventSMS := &utils.CGREventWithIDs{
+	eventSMS := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"CSVExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -190,19 +187,16 @@ func testCsvExportEvent(t *testing.T) {
 					utils.Cost:        0.15,
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "CSVExporter",
-			},
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -237,7 +231,8 @@ func testCsvVerifyExports(t *testing.T) {
 }
 
 func testCsvExportComposedEvent(t *testing.T) {
-	eventVoice := &utils.CGREventWithIDs{
+	eventVoice := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"CSVExporterComposed"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -264,13 +259,11 @@ func testCsvExportComposedEvent(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "CSVExporterComposed",
-			},
 		},
 	}
 
-	eventSMS := &utils.CGREventWithIDs{
+	eventSMS := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"CSVExporterComposed"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -297,16 +290,13 @@ func testCsvExportComposedEvent(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "CSVExporterComposed",
-			},
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -347,7 +337,8 @@ func testCsvExportMaskedDestination(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	eventVoice := &utils.CGREventWithIDs{
+	eventVoice := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"CSVMaskedDestination"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -371,13 +362,10 @@ func testCsvExportMaskedDestination(t *testing.T) {
 					utils.Cost:        1.01,
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "CSVMaskedDestination",
-			},
 		},
 	}
 	var rply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &rply); err != nil {
+	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &rply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -406,7 +394,8 @@ func testCsvVerifyMaskedDestination(t *testing.T) {
 }
 
 func testCsvExportEventWithInflateTemplate(t *testing.T) {
-	eventVoice := &utils.CGREventWithIDs{
+	eventVoice := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"CSVExporterWIthTemplate"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -432,13 +421,11 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "CSVExporterWIthTemplate",
-			},
 		},
 	}
 
-	eventData := &utils.CGREventWithIDs{
+	eventData := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"CSVExporterWIthTemplate"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -464,13 +451,11 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "CSVExporterWIthTemplate",
-			},
 		},
 	}
 
-	eventSMS := &utils.CGREventWithIDs{
+	eventSMS := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"CSVExporterWIthTemplate"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -496,19 +481,16 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "CSVExporterWIthTemplate",
-			},
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)
@@ -542,7 +524,8 @@ func testCsvVerifyExportsWithInflateTemplate(t *testing.T) {
 }
 
 func testCsvExportNotFoundExporter(t *testing.T) {
-	eventVoice := &utils.CGREventWithIDs{
+	eventVoice := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"ExporterNotFound"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -568,14 +551,11 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "ExporterNotFound",
-			},
 		},
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := csvRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err == nil ||
+	if err := csvRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

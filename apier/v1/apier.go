@@ -1874,8 +1874,8 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 	withErros := false
 	var rplyCdr map[string]map[string]interface{}
 	for _, cdr := range cdrs {
-		argCdr := &utils.CGREventWithIDs{
-			IDs: args.ExporterIDs,
+		argCdr := &utils.CGREventWithEeIDs{
+			EeIDs: args.ExporterIDs,
 			CGREventWithOpts: &utils.CGREventWithOpts{
 				CGREvent: cdr.AsCGREvent(),
 				Opts:     make(map[string]interface{}),
@@ -1884,7 +1884,7 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 		if args.Verbose {
 			argCdr.CGREventWithOpts.Opts[utils.OptsEEsVerbose] = struct{}{}
 		}
-		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().EEsConns, nil, utils.EventExporterSv1ProcessEvent,
+		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().EEsConns, nil, utils.EeSv1ProcessEvent,
 			argCdr, &rplyCdr); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error: <%s> processing event: <%s> with <%s>",
 				utils.ApierS, err.Error(), utils.ToJSON(cdr.AsCGREvent()), utils.EventExporterS))

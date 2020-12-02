@@ -213,8 +213,8 @@ func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err e
 	return
 }
 
-// CGREventWithIDs is the CGREventWithOpts with ExporterIDs
-type CGREventWithIDs struct {
-	IDs []string
+// CGREventWithEeIDs is the CGREventWithOpts with EventExporterIDs
+type CGREventWithEeIDs struct {
+	EeIDs []string
 	*CGREventWithOpts
 }

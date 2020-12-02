@@ -114,7 +114,8 @@ func testHTTPStartHTTPServer(t *testing.T) {
 }
 
 func testHTTPExportEvent(t *testing.T) {
-	eventVoice := &utils.CGREventWithIDs{
+	eventVoice := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"HTTPPostExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -140,13 +141,11 @@ func testHTTPExportEvent(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "HTTPPostExporter",
-			},
 		},
 	}
 
-	eventData := &utils.CGREventWithIDs{
+	eventData := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"HTTPPostExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -172,67 +171,64 @@ func testHTTPExportEvent(t *testing.T) {
 						"extra2": "val_extra2", "extra3": "val_extra3"},
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "HTTPPostExporter",
+		},
+	}
+
+	eventSMS := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"HTTPPostExporter"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "SMSEvent",
+				Time:   utils.TimePointer(time.Now()),
+				Event: map[string]interface{}{
+					utils.CGRID:       utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:         utils.SMS,
+					utils.OriginID:    "sdfwer",
+					utils.OriginHost:  "192.168.1.1",
+					utils.RequestType: utils.META_RATED,
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
+					utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
+					utils.Usage:       1,
+					utils.RunID:       utils.MetaDefault,
+					utils.Cost:        0.15,
+					"ExtraFields": map[string]string{"extra1": "val_extra1",
+						"extra2": "val_extra2", "extra3": "val_extra3"},
+				},
 			},
 		},
 	}
 
-	eventSMS := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "SMSEvent",
-			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
-				utils.CGRID:       utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
-				utils.ToR:         utils.SMS,
-				utils.OriginID:    "sdfwer",
-				utils.OriginHost:  "192.168.1.1",
-				utils.RequestType: utils.META_RATED,
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Unix(1383813745, 0).UTC(),
-				utils.AnswerTime:  time.Unix(1383813746, 0).UTC(),
-				utils.Usage:       1,
-				utils.RunID:       utils.MetaDefault,
-				utils.Cost:        0.15,
-				"ExtraFields": map[string]string{"extra1": "val_extra1",
-					"extra2": "val_extra2", "extra3": "val_extra3"},
+	eventSMSNoFields := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"HTTPPostExporterWithNoFields"},
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "SMSEvent",
+				Time:   utils.TimePointer(time.Now()),
+				Event: map[string]interface{}{
+					utils.CGRID:       utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:         utils.SMS,
+					utils.OriginID:    "sms2",
+					utils.RequestType: utils.META_RATED,
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "1001",
+					utils.Subject:     "1001",
+					utils.Destination: "1002",
+					utils.RunID:       utils.MetaDefault,
+				},
 			},
-		},
-		Opts: map[string]interface{}{
-			"ExporterUsed": "HTTPPostExporter",
-		},
-	}
-
-	eventSMSNoFields := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "SMSEvent",
-			Time:   utils.TimePointer(time.Now()),
-			Event: map[string]interface{}{
-				utils.CGRID:       utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
-				utils.ToR:         utils.SMS,
-				utils.OriginID:    "sms2",
-				utils.RequestType: utils.META_RATED,
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.RunID:       utils.MetaDefault,
-			},
-		},
-		Opts: map[string]interface{}{
-			"ExporterUsed": "HTTPPostExporterWithNoFields",
 		},
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := httpPostRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -255,7 +251,7 @@ func testHTTPExportEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
 
-	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventData, &reply); err != nil {
+	if err := httpPostRpc.Call(utils.EeSv1ProcessEvent, eventData, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -278,7 +274,7 @@ func testHTTPExportEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
 
-	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMS, &reply); err != nil {
+	if err := httpPostRpc.Call(utils.EeSv1ProcessEvent, eventSMS, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -300,7 +296,7 @@ func testHTTPExportEvent(t *testing.T) {
 	if len(httpJsonHdr["Origin"]) == 0 || httpJsonHdr["Origin"][0] != expHeader {
 		t.Errorf("Expected %+v, received: %+v", expHeader, httpJsonHdr["Origin"])
 	}
-	if err := httpPostRpc.Call(utils.EventExporterSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
+	if err := httpPostRpc.Call(utils.EeSv1ProcessEvent, eventSMSNoFields, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)

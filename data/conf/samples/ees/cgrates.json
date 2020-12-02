@@ -71,7 +71,6 @@
 			"attribute_context": "customContext",
 			"attempts": 1,
 			"field_separator": ",",
-			"filters": ["*string:~*opts.ExporterUsed:CSVExporter"],
 		},
 		{
 			"id": "CSVExporterComposed",
@@ -82,7 +81,6 @@
 			"attribute_context": "customContext",
 			"attempts": 1,
 			"field_separator": ",",
-			"filters": ["*string:~*opts.ExporterUsed:CSVExporterComposed"],
 			"fields":[
 				{"tag": "Number", "path": "*hdr.Number", "type": "*constant", "value": "NumberOfEvent"},
 				{"tag": "CGRID", "path": "*hdr.CGRID", "type": "*constant", "value": "CGRID"},
@@ -131,7 +129,6 @@
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
-			"filters": ["*string:~*opts.ExporterUsed:FWVExporter"],
 			"fields":[
 				{"tag": "TypeOfRecord", "path": "*hdr.TypeOfRecord", "type": "*constant",
 					"value": "10", "width": 2},
@@ -206,7 +203,6 @@
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
-			"filters": ["*string:~*opts.ExporterUsed:HTTPPostExporter"],
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
@@ -233,7 +229,6 @@
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
-			"filters": ["*string:~*opts.ExporterUsed:HTTPJsonMapExporter"],
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
@@ -262,7 +257,6 @@
 			"attribute_context": "customContext",
 			"attempts": 1,
 			"field_separator": ",",
-			"filters": ["*string:~*opts.ExporterUsed:CSVMaskedDestination"],
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
@@ -286,7 +280,6 @@
 			"type": "*virt",
 			"tenant": "cgrates.org",
 			"attempts": 1,
-			"filters": ["*string:~*opts.ExporterUsed:RouteExporter"],
 			"fields":[
 				{"tag": "Cost", "path": "*uch.<~*req.CGRID;~*req.RunID;-Cost>", "type": "*variable",
 					"value": "~*req.Cost", "rounding_decimals": 4},
@@ -305,7 +298,6 @@
 			"attribute_context": "customContext",
 			"attempts": 1,
 			"field_separator": ",",
-			"filters": ["*string:~*opts.ExporterUsed:CSVExporterFromVirt"],
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
@@ -330,7 +322,6 @@
 			"attribute_context": "customContext",
 			"attempts": 1,
 			"field_separator": ",",
-			"filters": ["*string:~*opts.ExporterUsed:CSVExporterWIthTemplate"],
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],
@@ -341,7 +332,6 @@
 			"export_path": "http://localhost:9200",
 			"tenant": "cgrates.org",
 			"attempts": 1,
-			"filters": ["*string:~*opts.ExporterUsed:ElasticExporter"],
 			"opts": {
 				"index": "cdrs",
 				//"if_primary_term": 0,
@@ -380,8 +370,6 @@
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
-			"filters": ["*string:~*opts.ExporterUsed:HTTPJsonMapExporterWithNoFields"],
-			"fields":[]
 		},		
 		{
 			"id": "ElasticExporterWithNoFields",
@@ -389,8 +377,6 @@
 			"export_path": "http://localhost:9200",
 			"tenant": "cgrates.org",
 			"attempts": 1,
-			"filters": ["*string:~*opts.ExporterUsed:ElasticExporterWithNoFields"],
-			"fields":[],
 		},		
 		{
 			"id": "HTTPPostExporterWithNoFields",
@@ -400,8 +386,6 @@
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
-			"filters": ["*string:~*opts.ExporterUsed:HTTPPostExporterWithNoFields"],
-			"fields":[]
 		}
 	]
 },

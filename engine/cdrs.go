@@ -439,10 +439,10 @@ func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREventWithOpts) (err err
 }
 
 // eeSProcessEvent will process the event with the EEs component
-func (cdrS *CDRServer) eeSProcessEvent(cgrEv *utils.CGREventWithIDs) (err error) {
+func (cdrS *CDRServer) eeSProcessEvent(cgrEv *utils.CGREventWithEeIDs) (err error) {
 	var reply map[string]map[string]interface{}
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().EEsConns, nil,
-		utils.EventExporterSv1ProcessEvent,
+		utils.EeSv1ProcessEvent,
 		cgrEv, &reply); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
 		err = nil // NotFound is not considered error
@@ -601,12 +601,12 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithOpts,
 	if export {
 		if len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0 {
 			for _, cgrEv := range cgrEvs {
-				evWithOpts := &utils.CGREventWithIDs{
+				evWithOpts := &utils.CGREventWithEeIDs{
 					CGREventWithOpts: &utils.CGREventWithOpts{
 						CGREvent: cgrEv.CGREvent,
 						Opts:     cgrEv.Opts,
 					},
-					IDs: cdrS.cgrCfg.CdrsCfg().OnlineCDRExports,
+					EeIDs: cdrS.cgrCfg.CdrsCfg().OnlineCDRExports,
 				}
 				if err = cdrS.eeSProcessEvent(evWithOpts); err != nil {
 					utils.Logger.Warning(

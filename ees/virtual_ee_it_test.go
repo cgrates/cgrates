@@ -99,7 +99,8 @@ func testVirtRPCConn(t *testing.T) {
 }
 
 func testVirtExportSupplierEvent(t *testing.T) {
-	supplierEvent := &utils.CGREventWithIDs{
+	supplierEvent := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"RouteExporter"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -123,21 +124,19 @@ func testVirtExportSupplierEvent(t *testing.T) {
 					utils.Cost:        1.23,
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "RouteExporter",
-			},
 		},
 	}
 
 	var reply map[string]utils.MapStorage
-	if err := virtRpc.Call(utils.EventExporterSv1ProcessEvent, supplierEvent, &reply); err != nil {
+	if err := virtRpc.Call(utils.EeSv1ProcessEvent, supplierEvent, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
 }
 
 func testVirtExportEvents(t *testing.T) {
-	eventVoice := &utils.CGREventWithIDs{
+	eventVoice := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"CSVExporterFromVirt"},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -161,13 +160,10 @@ func testVirtExportEvents(t *testing.T) {
 					utils.Cost:        1.01,
 				},
 			},
-			Opts: map[string]interface{}{
-				"ExporterUsed": "CSVExporterFromVirt",
-			},
 		},
 	}
 	var reply map[string]utils.MapStorage
-	if err := virtRpc.Call(utils.EventExporterSv1ProcessEvent, eventVoice, &reply); err != nil {
+	if err := virtRpc.Call(utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Second)

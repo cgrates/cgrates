@@ -80,7 +80,7 @@ func (self *CmdApierPing) RpcMethod() string {
 	case utils.ApierSLow:
 		return utils.APIerSv1Ping
 	case utils.EEsLow:
-		return utils.EventExporterSv1Ping
+		return utils.EeSv1Ping
 	case utils.RateSLow:
 		return utils.RateSv1Ping
 	default:
