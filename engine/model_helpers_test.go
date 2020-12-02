@@ -4973,3 +4973,150 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 		t.Errorf("\nExpecting <[{\"TPid\":\"\",\"Tenant\":\"cgrates.org\",\"ID\":\"RP1\",\"FilterIDs\":[\"*string:~*req.Subject:1001\",\"TEST_RateFilterIDs\"],\"ActivationInterval\":{\"ActivationTime\":\"2014-07-29T15:00:00Z\",\"ExpiryTime\":\"\"},\"Weight\":1.2,\"RoundingMethod\":\"*up\",\"RoundingDecimals\":4,\"MinCost\":0.1,\"MaxCost\":0.6,\"MaxCostStrategy\":\"*free\",\"Rates\":{\"RT_WEEK\":{\"ID\":\"RT_WEEK\",\"FilterIDs\":[\"TEST_RateFilterIDs\"],\"ActivationTime\":\"* * * * 1-5\",\"Weight\":1.3,\"Blocker\":false,\"IntervalRates\":[{\"IntervalStart\":\"1m\",\"FixedFee\":0,\"Unit\":\"1m0s\",\"Increment\":\"1s\",\"RecurrentFee\":0.06},{\"IntervalStart\":\"0s\",\"FixedFee\":0,\"Unit\":\"1m0s\",\"Increment\":\"1m0s\",\"RecurrentFee\":0.12}]}}}]>,\n Received <%+v>", utils.ToJSON(result))
 	}
 }
+
+func TestRateProfileMdlsCSVHeader(t *testing.T) {
+	testRPMdls := RateProfileMdls{}
+	result := testRPMdls.CSVHeader()
+	expected := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
+		utils.ActivationIntervalString, utils.Weight, utils.ConnectFee, utils.RoundingMethod,
+		utils.RoundingDecimals, utils.MinCost, utils.MaxCost, utils.MaxCostStrategy, utils.RateID,
+		utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeight, utils.RateBlocker,
+		utils.RateIntervalStart, utils.RateFixedFee, utils.RateRecurrentFee, utils.RateUnit, utils.RateIncrement}
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, result)
+	}
+}
+
+func TestDispatcherProfileToAPICase2(t *testing.T) {
+	structTest := &DispatcherProfile{
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 35, 0, 0, time.UTC),
+		},
+		FilterIDs: []string{"field1", "field2"},
+		StrategyParams: map[string]interface{}{
+			"Field1": "Params1",
+		},
+		Hosts: []*DispatcherHostProfile{
+			{FilterIDs: []string{"fieldA", "fieldB"}},
+		},
+	}
+	expected := "{\"TPid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"Subsystems\":[],\"FilterIDs\":[\"field1\",\"field2\"],\"ActivationInterval\":{\"ActivationTime\":\"2014-07-14T14:35:00Z\",\"ExpiryTime\":\"2014-07-15T14:35:00Z\"},\"Strategy\":\"\",\"StrategyParams\":[\"Params1\"],\"Weight\":0,\"Hosts\":[{\"ID\":\"\",\"FilterIDs\":[\"fieldA\",\"fieldB\"],\"Weight\":0,\"Params\":[],\"Blocker\":false}]}"
+	result := DispatcherProfileToAPI(structTest)
+	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	}
+}
+
+func TestAPItoDispatcherProfileCase2(t *testing.T) {
+	structTest := &utils.TPDispatcherProfile{
+		StrategyParams: []interface{}{"Param1"},
+		Hosts: []*utils.TPDispatcherHostProfile{{
+			Params: []interface{}{""},
+		}},
+	}
+	expected := "{\"Tenant\":\"\",\"ID\":\"\",\"Subsystems\":[],\"FilterIDs\":[],\"ActivationInterval\":null,\"Strategy\":\"\",\"StrategyParams\":{\"0\":\"Param1\"},\"Weight\":0,\"Hosts\":[{\"ID\":\"\",\"FilterIDs\":[],\"Weight\":0,\"Params\":{},\"Blocker\":false}]}"
+	result, _ := APItoDispatcherProfile(structTest, "")
+	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	}
+}
+
+func TestAPItoDispatcherProfileError(t *testing.T) {
+	structTest := &utils.TPDispatcherProfile{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "cat1",
+			ExpiryTime:     "cat2",
+		},
+		StrategyParams: []interface{}{"Param1"},
+		Hosts: []*utils.TPDispatcherHostProfile{{
+			Params: []interface{}{""},
+		}},
+	}
+
+	_, err := APItoDispatcherProfile(structTest, "")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("\nExpected <Unsupported time format>,\n Received <%+v>", err)
+	}
+}
+
+func TestAPItoModelTPDispatcherProfileNil(t *testing.T) {
+	structTest := &utils.TPDispatcherProfile{}
+	structTest = nil
+	expected := "null"
+	result := APItoModelTPDispatcherProfile(structTest)
+	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	}
+}
+
+func TestAPItoModelTPDispatcherProfileCase2(t *testing.T) {
+	structTest := &utils.TPDispatcherProfile{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "2014-07-30T15:00:00Z",
+		},
+	}
+	expected := "[{\"PK\":0,\"Tpid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"Subsystems\":\"\",\"FilterIDs\":\"\",\"ActivationInterval\":\"2014-07-29T15:00:00Z;2014-07-30T15:00:00Z\",\"Strategy\":\"\",\"StrategyParameters\":\"\",\"ConnID\":\"\",\"ConnFilterIDs\":\"\",\"ConnWeight\":0,\"ConnBlocker\":false,\"ConnParameters\":\"\",\"Weight\":0,\"CreatedAt\":\"0001-01-01T00:00:00Z\"}]"
+	result := APItoModelTPDispatcherProfile(structTest)
+	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersParamsToString(t *testing.T) {
+	testInterface := []interface{}{"Param1", "Param2"}
+	result := paramsToString(testInterface)
+	if !reflect.DeepEqual(result, "Param1;Param2") {
+		t.Errorf("\nExpecting <Param1;Param2>,\n Received <%+v>", result)
+	}
+}
+
+func TestModelHelpersAsTPDispatcherProfiles(t *testing.T) {
+	structTest := TPDispatcherProfiles{
+		&TPDispatcherProfileMdl{
+			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+			StrategyParameters: "Param1",
+		},
+	}
+	result := structTest.AsTPDispatcherProfiles()
+	expected := "[{\"TPid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"Subsystems\":null,\"FilterIDs\":null,\"ActivationInterval\":{\"ActivationTime\":\"2014-07-29T15:00:00Z\",\"ExpiryTime\":\"2014-08-29T15:00:00Z\"},\"Strategy\":\"\",\"StrategyParams\":[\"Param1\"],\"Weight\":0,\"Hosts\":null}]"
+	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	}
+}
+
+func TestTPDispatcherProfilesCSVHeader(t *testing.T) {
+	structTest := TPDispatcherProfiles{
+		&TPDispatcherProfileMdl{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "Dsp",
+			Subsystems:         "*any",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			Strategy:           utils.MetaFirst,
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			Weight:             20,
+			ConnID:             "C1",
+			ConnWeight:         10,
+			ConnBlocker:        false,
+			ConnParameters:     "192.168.54.203",
+		},
+		&TPDispatcherProfileMdl{
+			Tpid:           "TP1",
+			Tenant:         "cgrates.org",
+			ID:             "Dsp",
+			ConnID:         "C2",
+			ConnWeight:     10,
+			ConnBlocker:    false,
+			ConnParameters: "192.168.54.204",
+		},
+	}
+	expected := []string{"#" + utils.Tenant, utils.ID, utils.Subsystems, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.Strategy, utils.StrategyParameters, utils.ConnID, utils.ConnFilterIDs,
+		utils.ConnWeight, utils.ConnBlocker, utils.ConnParameters, utils.Weight}
+	result := structTest.CSVHeader()
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, result)
+	}
+}
