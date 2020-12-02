@@ -20,8 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path"
@@ -72,6 +74,9 @@ var (
 		testLoadConfigFromFolderNoConfigFound,
 		testLoadConfigFromFolderOpenError,
 		testHandleConfigSFolderError,
+		testHandleConfigSFilesError,
+		testHandleConfigSFileErrorWrite,
+		testHandleConfigSFolderErrorWrite,
 	}
 )
 
@@ -1118,13 +1123,13 @@ func testLoadConfigFromPathInvalidArgument(t *testing.T) {
 }
 
 func testLoadConfigFromPathValidPath(t *testing.T) {
-	newDir := "/tmp/randomDir"
+	newDir := "/tmp/testLoadConfigFromPathValidPath"
 	if err = os.MkdirAll(newDir, 755); err != nil {
 		t.Fatal(err)
 	}
 	cfg := NewDefaultCGRConfig()
 
-	expected := "No config file found on path /tmp/randomDir"
+	expected := "No config file found on path /tmp/testLoadConfigFromPathValidPath"
 	if err = cfg.loadConfigFromPath(newDir,
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
 		false); err == nil || err.Error() != expected {
@@ -1136,13 +1141,13 @@ func testLoadConfigFromPathValidPath(t *testing.T) {
 }
 
 func testLoadConfigFromPathFile(t *testing.T) {
-	newDir := "/tmp/randomDir"
+	newDir := "/tmp/testLoadConfigFromPathFile"
 	if err = os.MkdirAll(newDir, 755); err != nil {
 		t.Fatal(err)
 	}
 	cfg := NewDefaultCGRConfig()
 
-	expected := "No config file found on path /tmp/randomDir"
+	expected := "No config file found on path /tmp/testLoadConfigFromPathFile"
 	if err = cfg.loadConfigFromPath(newDir,
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
 		false); err == nil || err.Error() != expected {
@@ -1152,3 +1157,77 @@ func testLoadConfigFromPathFile(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func testHandleConfigSFilesError(t *testing.T) {
+	flPath := "/usr/share/cgrates/conf/samples/NotExists/cgrates.json"
+	w := httptest.NewRecorder()
+	handleConfigSFile(flPath, w)
+
+	resp := w.Result()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	expected := "open /usr/share/cgrates/conf/samples/NotExists/cgrates.json: no such file or directory"
+	if expected != string(body) {
+		t.Errorf("Expected %s , received: %s ", expected, string(body))
+	}
+}
+
+func testHandleConfigSFileErrorWrite(t *testing.T) {
+	flPath := "/tmp/testHandleConfigSFilesErrorWrite"
+	if err := os.MkdirAll(flPath, 0777); err != nil {
+		t.Fatal(err)
+	}
+	newFile, err := os.Create(path.Join(flPath, "random.json"))
+	if err != nil {
+		t.Error(err)
+	}
+	newFile.Write([]byte(`{}`))
+	newFile.Close()
+
+	w := new(responseTest)
+	handleConfigSFile(path.Join(flPath, "random.json"), w)
+
+	if err = os.Remove(path.Join(flPath, "random.json")); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = os.RemoveAll(flPath); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testHandleConfigSFolderErrorWrite(t *testing.T) {
+	flPath := "/tmp/testHandleConfigSFilesErrorWrite"
+	if err := os.MkdirAll(flPath, 0777); err != nil {
+		t.Fatal(err)
+	}
+	newFile, err := os.Create(path.Join(flPath, "random.json"))
+	if err != nil {
+		t.Error(err)
+	}
+	newFile.Write([]byte(`{}`))
+	newFile.Close()
+
+	w := new(responseTest)
+	handleConfigSFolder(flPath, w)
+
+	if err = os.Remove(path.Join(flPath, "random.json")); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = os.RemoveAll(flPath); err != nil {
+		t.Fatal(err)
+	}
+}
+
+type responseTest struct{}
+
+func (responseTest) Header() http.Header {
+	return nil
+}
+
+func (responseTest) Write(p []byte) (int, error) {
+	return 0, fmt.Errorf("Invalid section")
+}
+
+func (responseTest) WriteHeader(statusCode int) {}
