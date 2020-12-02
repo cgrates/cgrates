@@ -92,6 +92,7 @@ func init() {
 	gob.Register(time.Time{})
 	gob.Register(url.Values{})
 	gob.Register(json.RawMessage{})
+	gob.Register(BalanceSummaries{})
 }
 
 //SetCache shared the cache from other subsystems
@@ -440,6 +441,11 @@ func (chS *CacheS) ReplicateSet(chID, itmID string, value interface{}) (err erro
 
 // V1ReplicateSet replicate an item
 func (chS *CacheS) V1ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
+	if cmp, canCast := args.Value.(utils.Compiler); canCast {
+		if err = cmp.Compile(); err != nil {
+			return
+		}
+	}
 	chS.tCache.Set(args.CacheID, args.ItemID, args.Value, nil, true, utils.EmptyString)
 	*reply = utils.OK
 	return

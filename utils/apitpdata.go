@@ -1427,6 +1427,11 @@ type ArgCacheReplicateSet struct {
 	Tenant  string
 }
 
+// Compiler are objects that need post compiling
+type Compiler interface {
+	Compile() error
+}
+
 type ArgCacheReplicateRemove struct {
 	CacheID string
 	ItemID  string

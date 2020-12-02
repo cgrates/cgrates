@@ -901,6 +901,9 @@ func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err er
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
+	if ec.cache == nil {
+		ec.cache = utils.MapStorage{} // fix gob deserialization
+	}
 	if val, err = ec.cache.FieldAsInterface(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
 			return
@@ -958,12 +961,18 @@ func (ec *EventCost) fieldAsInterface(fldPath []string) (val interface{}, err er
 		if len(fldPath) != 1 {
 			return nil, utils.ErrNotFound
 		}
-		return ec.Usage, nil
+		if ec.Usage == nil {
+			return nil, nil
+		}
+		return *ec.Usage, nil
 	case utils.Cost:
 		if len(fldPath) != 1 {
 			return nil, utils.ErrNotFound
 		}
-		return ec.Cost, nil
+		if ec.Cost == nil {
+			return nil, nil
+		}
+		return *ec.Cost, nil
 	case utils.AccountSummary:
 		if len(fldPath) == 1 {
 			return ec.AccountSummary, nil

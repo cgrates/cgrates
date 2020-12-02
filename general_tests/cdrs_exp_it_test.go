@@ -37,6 +37,7 @@ import (
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -222,12 +223,14 @@ func testCDRsExpInitRPC(t *testing.T) {
 
 func testCDRsExpLoadAddCharger(t *testing.T) {
 	// //add a default charger
-	chargerProfile := &engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "*raw",
-		RunID:        utils.MetaRaw,
-		AttributeIDs: []string{"*constant:*opts.AddOrderID:true"},
-		Weight:       20,
+	chargerProfile := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "*raw",
+			RunID:        utils.MetaRaw,
+			AttributeIDs: []string{"*constant:*opts.AddOrderID:true"},
+			Weight:       20,
+		},
 	}
 	var result string
 	if err := cdrsExpRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
