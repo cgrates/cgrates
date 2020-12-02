@@ -3287,3 +3287,164 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 	}
 	return
 }
+
+type ActionProfileMdls []*ActionProfileMdl
+
+// CSVHeader return the header for csv fields as a slice of string
+func (apm ActionProfileMdls) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
+		utils.ActivationIntervalString, utils.Weight, utils.Schedule, utils.AccountIDs,
+		utils.ActionID, utils.ActionFilterIDs, utils.ActionBlocker, utils.ActionTTL,
+		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
+	}
+}
+
+func (tps ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfile) {
+	filterIDsMap := make(map[string]utils.StringMap)
+	accountIDsMap := make(map[string]utils.StringMap)
+	actPrfMap := make(map[string]*utils.TPActionProfile)
+	for _, tp := range tps {
+		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
+		aPrf, found := actPrfMap[tenID]
+		if !found {
+			aPrf = &utils.TPActionProfile{
+				TPid:   tp.Tpid,
+				Tenant: tp.Tenant,
+				ID:     tp.ID,
+			}
+		}
+		if tp.FilterIDs != utils.EmptyString {
+			if _, has := filterIDsMap[tenID]; !has {
+				filterIDsMap[tenID] = make(utils.StringMap)
+			}
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, filter := range filterSplit {
+				filterIDsMap[tenID][filter] = true
+			}
+		}
+		if tp.ActivationInterval != utils.EmptyString {
+			aPrf.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				aPrf.ActivationInterval.ActivationTime = aiSplt[0]
+				aPrf.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				aPrf.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
+		if tp.Weight != 0 {
+			aPrf.Weight = tp.Weight
+		}
+		if tp.Schedule != utils.EmptyString {
+			aPrf.Schedule = tp.Schedule
+		}
+		if tp.AccountIDs != utils.EmptyString {
+			if _, has := accountIDsMap[tenID]; !has {
+				accountIDsMap[tenID] = make(utils.StringMap)
+			}
+			accountIDsSplit := strings.Split(tp.AccountIDs, utils.INFIELD_SEP)
+			for _, filter := range accountIDsSplit {
+				accountIDsMap[tenID][filter] = true
+			}
+		}
+
+		if tp.ActionID != utils.EmptyString {
+			filterIDs := make([]string, 0)
+			if tp.ActionFilterIDs != utils.EmptyString {
+				filterAttrSplit := strings.Split(tp.ActionFilterIDs, utils.INFIELD_SEP)
+				for _, filterAttr := range filterAttrSplit {
+					filterIDs = append(filterIDs, filterAttr)
+				}
+			}
+			aPrf.Actions = append(aPrf.Actions, &utils.TPAPAction{
+				ID:        tp.ActionID,
+				FilterIDs: filterIDs,
+				Blocker:   tp.ActionBlocker,
+				TTL:       tp.ActionTTL,
+				Type:      tp.ActionType,
+				Opts:      tp.ActionOpts,
+				Path:      tp.ActionPath,
+				Value:     tp.ActionValue,
+			})
+		}
+		actPrfMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = aPrf
+	}
+	result = make([]*utils.TPActionProfile, len(actPrfMap))
+	i := 0
+	for tntID, th := range actPrfMap {
+		result[i] = th
+		for filterID := range filterIDsMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
+		}
+		for accountID := range accountIDsMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, accountID)
+		}
+		i++
+	}
+	return
+}
+
+func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileMdls) {
+	if len(tPrf.Actions) == 0 {
+		return
+	}
+	i := 0
+	for _, action := range tPrf.Actions {
+		mdl := &ActionProfileMdl{
+			Tenant: tPrf.Tenant,
+			Tpid:   tPrf.TPid,
+			ID:     tPrf.ID,
+		}
+		if i == 0 {
+			for i, val := range tPrf.FilterIDs {
+				if i != 0 {
+					mdl.FilterIDs += utils.INFIELD_SEP
+				}
+				mdl.FilterIDs += val
+			}
+
+			if tPrf.ActivationInterval != nil {
+				if tPrf.ActivationInterval.ActivationTime != utils.EmptyString {
+					mdl.ActivationInterval = tPrf.ActivationInterval.ActivationTime
+				}
+				if tPrf.ActivationInterval.ExpiryTime != utils.EmptyString {
+					mdl.ActivationInterval += utils.INFIELD_SEP + tPrf.ActivationInterval.ExpiryTime
+				}
+			}
+			mdl.Weight = tPrf.Weight
+			mdl.Schedule = tPrf.Schedule
+			for i, val := range tPrf.AccountIDs {
+				if i != 0 {
+					mdl.AccountIDs += utils.INFIELD_SEP
+				}
+				mdl.AccountIDs += val
+			}
+		}
+		mdl.ActionID = action.ID
+		for i, val := range action.FilterIDs {
+			if i != 0 {
+				mdl.ActionFilterIDs += utils.INFIELD_SEP
+			}
+			mdl.ActionFilterIDs += val
+		}
+		mdl.ActionBlocker = action.Blocker
+		mdl.ActionTTL = action.TTL
+		mdl.ActionType = action.Type
+		// convert opts
+		mdl.ActionPath = action.Path
+		mdl.ActionValue = action.Value
+		mdls = append(mdls, mdl)
+		i++
+	}
+	return
+}
+
+func APItoActionProfile(tpRp *utils.TPActionProfile, timezone string) (rp *ActionProfile, err error) {
+
+	return rp, nil
+}
+
+func ActionProfileToAPI(rp *ActionProfile) (tpRp *utils.TPActionProfile) {
+
+	return
+}

@@ -1513,3 +1513,26 @@ func (args *ArgsCostForEvent) Usage() (usage time.Duration, err error) {
 	}
 	return time.Duration(time.Minute), nil
 }
+
+type TPActionProfile struct {
+	TPid               string
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *TPActivationInterval
+	Weight             float64
+	Schedule           string
+	AccountIDs         []string
+	Actions            []*TPAPAction
+}
+
+type TPAPAction struct {
+	ID        string
+	FilterIDs []string
+	Blocker   bool
+	TTL       string
+	Type      string
+	Opts      string
+	Path      string
+	Value     string
+}
