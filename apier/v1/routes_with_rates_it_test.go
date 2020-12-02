@@ -266,6 +266,9 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 			},
 		},
 	}
+	if *encoding == utils.MetaGOB {
+		eSpls.SortedRoutes[0].SortingData[utils.CapMaxUsage] = 30 * time.Second
+	}
 	var suplsReply *engine.SortedRoutes
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
@@ -318,6 +321,9 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 			},
 		},
 	}
+	if *encoding == utils.MetaGOB {
+		eSpls.SortedRoutes[0].SortingData[utils.CapMaxUsage] = 30 * time.Second
+	}
 	var routeRply *engine.SortedRoutes
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &routeRply); err != nil {
@@ -369,6 +375,9 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 				},
 			},
 		},
+	}
+	if *encoding == utils.MetaGOB {
+		eSpls.SortedRoutes[1].SortingData[utils.CapMaxUsage] = 30 * time.Second
 	}
 	var routeRply2 *engine.SortedRoutes
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,

@@ -2714,8 +2714,8 @@ func TestEventCostfieldAsInterface(t *testing.T) {
 	}
 	if rcv, err := eventCost.fieldAsInterface([]string{utils.Usage}); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(utils.DurationPointer(5*time.Minute), rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.DurationPointer(5*time.Minute), rcv)
+	} else if !reflect.DeepEqual(5*time.Minute, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", 5*time.Minute, rcv)
 	}
 	// case utils.Cost:
 	if rcv, err := eventCost.fieldAsInterface([]string{utils.Cost, utils.Cost}); err == nil || err != utils.ErrNotFound {
@@ -2728,8 +2728,8 @@ func TestEventCostfieldAsInterface(t *testing.T) {
 	}
 	if rcv, err := eventCost.fieldAsInterface([]string{utils.Cost}); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(utils.Float64Pointer(0.7), rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.Float64Pointer(0.7), rcv)
+	} else if !reflect.DeepEqual(0.7, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", 0.7, rcv)
 	}
 	// case utils.AccountSummary:
 	eventCost = &EventCost{

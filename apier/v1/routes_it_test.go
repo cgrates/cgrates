@@ -1110,15 +1110,22 @@ func testV1RouteGetRouteForEvent(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))
 	}
 
+	supProf = nil
 	ev.CGREvent.Tenant = utils.EmptyString
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRouteProfilesForEvent,
 		ev, &supProf); err != nil {
 		t.Fatal(err)
 	}
 	sort.Slice(expected.Routes, func(i, j int) bool {
+		if expected.Routes[i].ID != expected.Routes[j].ID {
+			return expected.Routes[i].ID < expected.Routes[j].ID
+		}
 		return expected.Routes[i].Weight < expected.Routes[j].Weight
 	})
 	sort.Slice(supProf[0].Routes, func(i, j int) bool {
+		if supProf[0].Routes[i].ID != supProf[0].Routes[j].ID {
+			return supProf[0].Routes[i].ID < supProf[0].Routes[j].ID
+		}
 		return supProf[0].Routes[i].Weight < supProf[0].Routes[j].Weight
 	})
 	if !reflect.DeepEqual(&expected, supProf[0]) {
@@ -1410,7 +1417,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				RouteID: "RouteWithAccAndRP",
 				SortingData: map[string]interface{}{
 					utils.Account: "AccWithVoice",
-					"Cost":        0.0,
+					utils.Cost:    0.0,
 					"MaxUsage":    30000000000.0,
 					utils.Weight:  20.0,
 				},
@@ -1424,6 +1431,27 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				},
 			},
 		},
+	}
+	if *encoding == utils.MetaGOB {
+		eSpls.SortedRoutes = []*engine.SortedRoute{
+			{
+				RouteID: "RouteWithAccAndRP",
+				SortingData: map[string]interface{}{
+					utils.Account: "AccWithVoice",
+					utils.Cost:    0.,
+					"MaxUsage":    30 * time.Second,
+					utils.Weight:  20.,
+				},
+			},
+			{
+				RouteID: "RouteWithRP",
+				SortingData: map[string]interface{}{
+					utils.Cost:     0.3,
+					"RatingPlanID": "RP_ANY1CNT_SEC",
+					utils.Weight:   10.,
+				},
+			},
+		}
 	}
 	var suplsReply *engine.SortedRoutes
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
@@ -1461,7 +1489,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				RouteID: "RouteWithAccAndRP",
 				SortingData: map[string]interface{}{
 					utils.Account:  "AccWithVoice",
-					"Cost":         0.6,
+					utils.Cost:     0.6,
 					"MaxUsage":     30000000000.0,
 					"RatingPlanID": "RP_ANY2CNT_SEC",
 					utils.Weight:   20.0,
@@ -1470,12 +1498,34 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			{
 				RouteID: "RouteWithRP",
 				SortingData: map[string]interface{}{
-					"Cost":         0.6,
+					utils.Cost:     0.6,
 					"RatingPlanID": "RP_ANY1CNT_SEC",
 					utils.Weight:   10.0,
 				},
 			},
 		},
+	}
+	if *encoding == utils.MetaGOB {
+		eSpls.SortedRoutes = []*engine.SortedRoute{
+			{
+				RouteID: "RouteWithAccAndRP",
+				SortingData: map[string]interface{}{
+					utils.Account:  "AccWithVoice",
+					utils.Cost:     0.6,
+					"MaxUsage":     30 * time.Second,
+					"RatingPlanID": "RP_ANY2CNT_SEC",
+					utils.Weight:   20.,
+				},
+			},
+			{
+				RouteID: "RouteWithRP",
+				SortingData: map[string]interface{}{
+					utils.Cost:     0.6,
+					"RatingPlanID": "RP_ANY1CNT_SEC",
+					utils.Weight:   10.,
+				},
+			},
+		}
 	}
 	var routeRply *engine.SortedRoutes
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
@@ -1512,7 +1562,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			{
 				RouteID: "RouteWithRP",
 				SortingData: map[string]interface{}{
-					"Cost":         0.61,
+					utils.Cost:     0.61,
 					"RatingPlanID": "RP_ANY1CNT_SEC",
 					utils.Weight:   10.0,
 				},
@@ -1521,13 +1571,35 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				RouteID: "RouteWithAccAndRP",
 				SortingData: map[string]interface{}{
 					utils.Account:  "AccWithVoice",
-					"Cost":         0.62,
+					utils.Cost:     0.62,
 					"MaxUsage":     30000000000.0,
 					"RatingPlanID": "RP_ANY2CNT_SEC",
 					utils.Weight:   20.0,
 				},
 			},
 		},
+	}
+	if *encoding == utils.MetaGOB {
+		eSpls.SortedRoutes = []*engine.SortedRoute{
+			{
+				RouteID: "RouteWithRP",
+				SortingData: map[string]interface{}{
+					utils.Cost:     0.61,
+					"RatingPlanID": "RP_ANY1CNT_SEC",
+					utils.Weight:   10.,
+				},
+			},
+			{
+				RouteID: "RouteWithAccAndRP",
+				SortingData: map[string]interface{}{
+					utils.Account:  "AccWithVoice",
+					utils.Cost:     0.62,
+					"MaxUsage":     30 * time.Second,
+					"RatingPlanID": "RP_ANY2CNT_SEC",
+					utils.Weight:   20.,
+				},
+			},
+		}
 	}
 	var routeRply2 *engine.SortedRoutes
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,

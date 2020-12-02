@@ -971,6 +971,7 @@ func testV1TSResetThresholdsWithoutTenant(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.OK, result)
 	}
 	expectedThreshold.Hits = 0
+	reply = nil
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "THD_ACNT_BALANCE_1"}},
 		&reply); err != nil {

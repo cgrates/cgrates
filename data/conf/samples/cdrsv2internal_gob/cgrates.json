@@ -1,0 +1,69 @@
+{
+// CGRateS Configuration file
+//
+// Used in apier_local_tests
+// Starts rater, cdrs and mediator connecting over internal channel
+
+"general": {
+    "log_level": 7,
+},
+
+"stor_db": {
+	"db_type": "*internal",
+	"string_indexed_fields": ["RunID"]
+},
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["conn1"],
+	"dynaprepaid_actionplans": ["PACKAGE_1001"],
+},
+
+"schedulers": {
+	"enabled": true,
+	"thresholds_conns": ["conn1"],
+},
+
+"cdrs": {
+	"enabled": true,
+	"attributes_conns":["*internal"],
+	"chargers_conns":["conn1"],
+	"rals_conns": ["conn1"],
+	"stats_conns": ["conn1"],
+	"thresholds_conns": ["conn1"],
+	"scheduler_conns": ["conn1"],
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+}

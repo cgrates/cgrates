@@ -391,24 +391,22 @@ func testSes3ItBalance(t *testing.T) {
 
 func testSes3ItCDRs(t *testing.T) {
 	var reply string
-	if err := ses3RPC.Call(utils.SessionSv1ProcessCDR, &engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSesItProccesCDR",
-				Event: map[string]interface{}{
-					utils.Tenant:      "cgrates.org",
-					utils.Category:    "call",
-					utils.ToR:         utils.VOICE,
-					utils.OriginID:    "TestTerminate",
-					utils.RequestType: utils.META_PREPAID,
-					utils.Account:     "1002",
-					utils.Subject:     "1001",
-					utils.Destination: "1001",
-					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:       2 * time.Second,
-				},
+	if err := ses3RPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSesItProccesCDR",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestTerminate",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Subject:     "1001",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       2 * time.Second,
 			},
 		},
 	}, &reply); err != nil {
