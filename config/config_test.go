@@ -54,9 +54,9 @@ func TestNewCgrConfigFromBytesError(t *testing.T) {
 
 func TestNewCgrConfigFromBytesDecodeError(t *testing.T) {
 	cfg := []byte(`invalidSection`)
-	expected := "\"invalid character 'i' looking for beginning of value around line 1 and position 1\\n line: \\\"invalidSection\\\"\""
+	expected := "invalid character 'i' looking for beginning of value around line 1 and position 1\n line: \"invalidSection\""
 	if _, err := newCGRConfig(cfg); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v,\n received %+v", expected, err)
+		t.Errorf("Expected %+v,\n received %+q", expected, err)
 	}
 }
 
