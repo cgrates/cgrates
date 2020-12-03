@@ -4708,7 +4708,7 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 		Tenant:    "cgrates.org",
 		TPid:      testTPID,
 		ID:        "ResGroup1",
-		FilterIDs: []string{"FilterID1", "FilterID2"},
+		FilterIDs: []string{"FilterID1"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "2015-07-29T15:00:00Z",
@@ -4719,11 +4719,23 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 		ThresholdIDs:      []string{"TRes1", "TRes2"},
 		AllocationMessage: "test",
 	}
+	expStruct := TpResources{{
+		Tenant:             "cgrates.org",
+		Tpid:               testTPID,
+		ID:                 "ResGroup1",
+		FilterIDs:          "FilterID1",
+		ActivationInterval: "2014-07-29T15:00:00Z;2015-07-29T15:00:00Z",
+		UsageTTL:           "Test_TTL",
+		Weight:             10,
+		Limit:              "2",
+		ThresholdIDs:       "TRes1;TRes2",
+		AllocationMessage:  "test",
+	}}
 	result := APItoModelResource(testStruct)
-	expected := "[{\"PK\":0,\"Tpid\":\"LoaderCSVTests\",\"Tenant\":\"cgrates.org\",\"ID\":\"ResGroup1\",\"FilterIDs\":\"FilterID1\",\"ActivationInterval\":\"2014-07-29T15:00:00Z;2015-07-29T15:00:00Z\",\"UsageTTL\":\"Test_TTL\",\"Limit\":\"2\",\"AllocationMessage\":\"test\",\"Blocker\":false,\"Stored\":false,\"Weight\":10,\"ThresholdIDs\":\"TRes1;TRes2\",\"CreatedAt\":\"0001-01-01T00:00:00Z\"},{\"PK\":0,\"Tpid\":\"LoaderCSVTests\",\"Tenant\":\"cgrates.org\",\"ID\":\"ResGroup1\",\"FilterIDs\":\"FilterID2\",\"ActivationInterval\":\"\",\"UsageTTL\":\"\",\"Limit\":\"\",\"AllocationMessage\":\"\",\"Blocker\":false,\"Stored\":false,\"Weight\":0,\"ThresholdIDs\":\"\",\"CreatedAt\":\"0001-01-01T00:00:00Z\"}]"
-	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	if !reflect.DeepEqual(expStruct, result) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
+
 }
 
 func TestRouteProfileToAPICase1(t *testing.T) {
@@ -4740,11 +4752,24 @@ func TestRouteProfileToAPICase1(t *testing.T) {
 			&Route{ID: "ResGroup2"},
 		},
 	}
-	expected := "{\"TPid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"FilterIDs\":[\"FilterID1\",\"FilterID2\"],\"ActivationInterval\":{\"ActivationTime\":\"2020-04-11T21:34:01Z\",\"ExpiryTime\":\"2020-04-12T21:34:01Z\"},\"Sorting\":\"\",\"SortingParameters\":[\"Param1\",\"Param2\"],\"Routes\":[{\"ID\":\"ResGroup2\",\"FilterIDs\":null,\"AccountIDs\":null,\"RatingPlanIDs\":null,\"RateProfileIDs\":null,\"ResourceIDs\":null,\"StatIDs\":null,\"Weight\":0,\"Blocker\":false,\"RouteParameters\":\"\"}],\"Weight\":0}"
-	result := RouteProfileToAPI(structTest)
-	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+
+	expStruct := &utils.TPRouteProfile{
+		FilterIDs: []string{"FilterID1", "FilterID2"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2020-04-11T21:34:01Z",
+			ExpiryTime:     "2020-04-12T21:34:01Z",
+		},
+		SortingParameters: []string{"Param1", "Param2"},
+		Routes: []*utils.TPRoute{{
+			ID: "ResGroup2",
+		}},
 	}
+
+	result := RouteProfileToAPI(structTest)
+	if !reflect.DeepEqual(expStruct, result) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+
 }
 
 func TestRateProfileToAPIWithActInterval(t *testing.T) {
@@ -4766,12 +4791,27 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates:            map[string]*Rate{},
 	}
-	expected := "{\"TPid\":\"\",\"Tenant\":\"cgrates.org\",\"ID\":\"RP1\",\"FilterIDs\":[\"*string:~*req.Subject:1001\"],\"ActivationInterval\":{\"ActivationTime\":\"2020-04-11T21:34:01Z\",\"ExpiryTime\":\"2020-04-12T21:34:01Z\"},\"Weight\":0,\"RoundingDecimals\":4,\"RoundingMethod\":\"*up\",\"MinCost\":0.1,\"MaxCost\":0.6,\"MaxCostStrategy\":\"*free\",\"Rates\":{}}"
-	result := RateProfileToAPI(testProfile)
-	if !reflect.DeepEqual(utils.ToJSON(*result), expected) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
-	}
 
+	expStruct := &utils.TPRateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2020-04-11T21:34:01Z",
+			ExpiryTime:     "2020-04-12T21:34:01Z",
+		},
+		Weight:           0,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MinCost:          0.1,
+		MaxCost:          0.6,
+		MaxCostStrategy:  "*free",
+		Rates:            map[string]*utils.TPRate{},
+	}
+	result := RateProfileToAPI(testProfile)
+	if !reflect.DeepEqual(expStruct, result) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
 }
 
 func TestModelHelpersAPItoRateProfileErrorTime(t *testing.T) {
@@ -4932,77 +4972,25 @@ func TestAPItoModelTPRateProfileCase2(t *testing.T) {
 					Unit:          "1m0s",
 					Increment:     "1s",
 				},
-				{
-					IntervalStart: "0s",
-					RecurrentFee:  0.06,
-					Unit:          "1m0s",
-					Increment:     "1s",
-				},
 			},
 		},
 		},
 	}
-	expected := "[{\"PK\":0,\"Tpid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"FilterIDs\":\"test_string1;test_string2\",\"ActivationInterval\":\"2014-07-29T15:00:00Z;2014-08-29T15:00:00Z\",\"Weight\":0,\"RoundingMethod\":\"\",\"RoundingDecimals\":0,\"MinCost\":0,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"RateID\":\"RT_CHRISTMAS\",\"RateFilterIDs\":\"test_string1;test_string2\",\"RateActivationStart\":\"* * 24 12 *\",\"RateWeight\":30,\"RateBlocker\":false,\"RateIntervalStart\":\"0s\",\"RateFixedFee\":0,\"RateRecurrentFee\":0.06,\"RateUnit\":\"1m0s\",\"RateIncrement\":\"1s\",\"CreatedAt\":\"0001-01-01T00:00:00Z\"},{\"PK\":0,\"Tpid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"FilterIDs\":\"\",\"ActivationInterval\":\"\",\"Weight\":0,\"RoundingMethod\":\"\",\"RoundingDecimals\":0,\"MinCost\":0,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"RateID\":\"RT_CHRISTMAS\",\"RateFilterIDs\":\"\",\"RateActivationStart\":\"\",\"RateWeight\":0,\"RateBlocker\":false,\"RateIntervalStart\":\"0s\",\"RateFixedFee\":0,\"RateRecurrentFee\":0.06,\"RateUnit\":\"1m0s\",\"RateIncrement\":\"1s\",\"CreatedAt\":\"0001-01-01T00:00:00Z\"}]"
-	result := APItoModelTPRateProfile(testStruct)
-	if !reflect.DeepEqual(expected, utils.ToJSON(result)) {
-		t.Errorf("\nExpecting <[{\"PK\":0,\"Tpid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"FilterIDs\":\"test_string1;test_string2\",\"ActivationInterval\":\"2014-07-29T15:00:00Z;2014-08-29T15:00:00Z\",\"Weight\":0,\"RoundingMethod\":\"\",\"RoundingDecimals\":0,\"MinCost\":0,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"RateID\":\"RT_CHRISTMAS\",\"RateFilterIDs\":\"test_string1;test_string2\",\"RateActivationStart\":\"* * 24 12 *\",\"RateWeight\":30,\"RateBlocker\":false,\"RateIntervalStart\":\"0s\",\"RateFixedFee\":0,\"RateRecurrentFee\":0.06,\"RateUnit\":\"1m0s\",\"RateIncrement\":\"1s\",\"CreatedAt\":\"0001-01-01T00:00:00Z\"},{\"PK\":0,\"Tpid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"FilterIDs\":\"\",\"ActivationInterval\":\"\",\"Weight\":0,\"RoundingMethod\":\"\",\"RoundingDecimals\":0,\"MinCost\":0,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"RateID\":\"RT_CHRISTMAS\",\"RateFilterIDs\":\"\",\"RateActivationStart\":\"\",\"RateWeight\":0,\"RateBlocker\":false,\"RateIntervalStart\":\"0s\",\"RateFixedFee\":0,\"RateRecurrentFee\":0.06,\"RateUnit\":\"1m0s\",\"RateIncrement\":\"1s\",\"CreatedAt\":\"0001-01-01T00:00:00Z\"}]>,\n Received <%+v>", utils.ToJSON(result))
-	}
-}
-
-func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
-	testRPMdls := RateProfileMdls{&RateProfileMdl{
-		PK:                  0,
-		Tpid:                "",
-		Tenant:              "cgrates.org",
-		ID:                  "RP1",
-		FilterIDs:           "*string:~*req.Subject:1001",
+	expStruct := RateProfileMdls{{
+		FilterIDs:           "test_string1;test_string2",
 		ActivationInterval:  "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
-		Weight:              1.2,
-		RoundingMethod:      "*up",
-		RoundingDecimals:    4,
-		MinCost:             0.1,
-		MaxCost:             0.6,
-		MaxCostStrategy:     "*free",
-		RateID:              "RT_WEEK",
-		RateFilterIDs:       "TEST_RateFilterIDs",
-		RateActivationStart: "* * * * 1-5",
-		RateWeight:          1.2,
-		RateBlocker:         false,
-		RateIntervalStart:   "1m",
+		RateID:              "RT_CHRISTMAS",
+		RateFilterIDs:       "test_string1;test_string2",
+		RateWeight:          30,
+		RateActivationStart: "* * 24 12 *",
+		RateIntervalStart:   "0s",
 		RateRecurrentFee:    0.06,
 		RateUnit:            "1m0s",
 		RateIncrement:       "1s",
-		CreatedAt:           time.Time{},
-	},
-		&RateProfileMdl{
-			PK:                  0,
-			Tpid:                "",
-			Tenant:              "cgrates.org",
-			ID:                  "RP1",
-			FilterIDs:           "*string:~*req.Subject:1001",
-			ActivationInterval:  "2014-07-29T15:00:00Z",
-			Weight:              1.2,
-			RoundingMethod:      "",
-			RoundingDecimals:    0,
-			MinCost:             0,
-			MaxCost:             0,
-			MaxCostStrategy:     "",
-			RateID:              "RT_WEEK",
-			RateFilterIDs:       "",
-			RateActivationStart: "",
-			RateWeight:          1.3,
-			RateBlocker:         false,
-			RateIntervalStart:   "0s",
-			RateRecurrentFee:    0.12,
-			RateUnit:            "1m0s",
-			RateIncrement:       "1m0s",
-			CreatedAt:           time.Time{},
-		},
-	}
-	result := testRPMdls.AsTPRateProfile()
-	expected := "[{\"TPid\":\"\",\"Tenant\":\"cgrates.org\",\"ID\":\"RP1\",\"FilterIDs\":[\"*string:~*req.Subject:1001\"],\"ActivationInterval\":{\"ActivationTime\":\"2014-07-29T15:00:00Z\",\"ExpiryTime\":\"\"},\"Weight\":1.2,\"RoundingMethod\":\"*up\",\"RoundingDecimals\":4,\"MinCost\":0.1,\"MaxCost\":0.6,\"MaxCostStrategy\":\"*free\",\"Rates\":{\"RT_WEEK\":{\"ID\":\"RT_WEEK\",\"FilterIDs\":[\"TEST_RateFilterIDs\"],\"ActivationTime\":\"* * * * 1-5\",\"Weight\":1.3,\"Blocker\":false,\"IntervalRates\":[{\"IntervalStart\":\"1m\",\"FixedFee\":0,\"Unit\":\"1m0s\",\"Increment\":\"1s\",\"RecurrentFee\":0.06},{\"IntervalStart\":\"0s\",\"FixedFee\":0,\"Unit\":\"1m0s\",\"Increment\":\"1m0s\",\"RecurrentFee\":0.12}]}}}]"
-	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
-		t.Errorf("\nExpecting <[{\"TPid\":\"\",\"Tenant\":\"cgrates.org\",\"ID\":\"RP1\",\"FilterIDs\":[\"*string:~*req.Subject:1001\"],\"ActivationInterval\":{\"ActivationTime\":\"2014-07-29T15:00:00Z\",\"ExpiryTime\":\"\"},\"Weight\":1.2,\"RoundingMethod\":\"*up\",\"RoundingDecimals\":4,\"MinCost\":0.1,\"MaxCost\":0.6,\"MaxCostStrategy\":\"*free\",\"Rates\":{\"RT_WEEK\":{\"ID\":\"RT_WEEK\",\"FilterIDs\":[\"TEST_RateFilterIDs\"],\"ActivationTime\":\"* * * * 1-5\",\"Weight\":1.3,\"Blocker\":false,\"IntervalRates\":[{\"IntervalStart\":\"1m\",\"FixedFee\":0,\"Unit\":\"1m0s\",\"Increment\":\"1s\",\"RecurrentFee\":0.06},{\"IntervalStart\":\"0s\",\"FixedFee\":0,\"Unit\":\"1m0s\",\"Increment\":\"1m0s\",\"RecurrentFee\":0.12}]}}}]>,\n Received <%+v>", utils.ToJSON(result))
+	}}
+	result := APItoModelTPRateProfile(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
 
@@ -5021,6 +5009,7 @@ func TestRateProfileMdlsCSVHeader(t *testing.T) {
 
 func TestDispatcherProfileToAPICase2(t *testing.T) {
 	structTest := &DispatcherProfile{
+		Subsystems: []string{},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 35, 0, 0, time.UTC),
@@ -5030,27 +5019,61 @@ func TestDispatcherProfileToAPICase2(t *testing.T) {
 			"Field1": "Params1",
 		},
 		Hosts: []*DispatcherHostProfile{
-			{FilterIDs: []string{"fieldA", "fieldB"}},
+			{
+				FilterIDs: []string{"fieldA", "fieldB"},
+				Params:    map[string]interface{}{},
+			},
 		},
 	}
-	expected := "{\"TPid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"Subsystems\":[],\"FilterIDs\":[\"field1\",\"field2\"],\"ActivationInterval\":{\"ActivationTime\":\"2014-07-14T14:35:00Z\",\"ExpiryTime\":\"2014-07-15T14:35:00Z\"},\"Strategy\":\"\",\"StrategyParams\":[\"Params1\"],\"Weight\":0,\"Hosts\":[{\"ID\":\"\",\"FilterIDs\":[\"fieldA\",\"fieldB\"],\"Weight\":0,\"Params\":[],\"Blocker\":false}]}"
+
+	expStruct := &utils.TPDispatcherProfile{
+		Subsystems: []string{},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
+		},
+		FilterIDs:      []string{"field1", "field2"},
+		StrategyParams: []interface{}{"Params1"},
+		Hosts: []*utils.TPDispatcherHostProfile{
+			{
+				FilterIDs: []string{"fieldA", "fieldB"},
+				Params:    []interface{}{},
+			},
+		},
+	}
+
 	result := DispatcherProfileToAPI(structTest)
-	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
 
 func TestAPItoDispatcherProfileCase2(t *testing.T) {
 	structTest := &utils.TPDispatcherProfile{
+		Subsystems:     []string{},
+		FilterIDs:      []string{},
 		StrategyParams: []interface{}{"Param1"},
 		Hosts: []*utils.TPDispatcherHostProfile{{
-			Params: []interface{}{""},
+			Params: []interface{}{"Param1"},
 		}},
 	}
-	expected := "{\"Tenant\":\"\",\"ID\":\"\",\"Subsystems\":[],\"FilterIDs\":[],\"ActivationInterval\":null,\"Strategy\":\"\",\"StrategyParams\":{\"0\":\"Param1\"},\"Weight\":0,\"Hosts\":[{\"ID\":\"\",\"FilterIDs\":[],\"Weight\":0,\"Params\":{},\"Blocker\":false}]}"
+	expStruct := &DispatcherProfile{
+		Subsystems: []string{},
+		FilterIDs:  []string{},
+		StrategyParams: map[string]interface{}{
+			"0": "Param1",
+		},
+		Hosts: DispatcherHostProfiles{{
+			FilterIDs: []string{},
+			Params: map[string]interface{}{
+				"0": "Param1",
+			},
+		},
+		},
+	}
 	result, _ := APItoDispatcherProfile(structTest, "")
-	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
 
@@ -5082,20 +5105,6 @@ func TestAPItoModelTPDispatcherProfileNil(t *testing.T) {
 	}
 }
 
-func TestAPItoModelTPDispatcherProfileCase2(t *testing.T) {
-	structTest := &utils.TPDispatcherProfile{
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-			ExpiryTime:     "2014-07-30T15:00:00Z",
-		},
-	}
-	expected := "[{\"PK\":0,\"Tpid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"Subsystems\":\"\",\"FilterIDs\":\"\",\"ActivationInterval\":\"2014-07-29T15:00:00Z;2014-07-30T15:00:00Z\",\"Strategy\":\"\",\"StrategyParameters\":\"\",\"ConnID\":\"\",\"ConnFilterIDs\":\"\",\"ConnWeight\":0,\"ConnBlocker\":false,\"ConnParameters\":\"\",\"Weight\":0,\"CreatedAt\":\"0001-01-01T00:00:00Z\"}]"
-	result := APItoModelTPDispatcherProfile(structTest)
-	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
-	}
-}
-
 func TestModelHelpersParamsToString(t *testing.T) {
 	testInterface := []interface{}{"Param1", "Param2"}
 	result := paramsToString(testInterface)
@@ -5111,10 +5120,17 @@ func TestModelHelpersAsTPDispatcherProfiles(t *testing.T) {
 			StrategyParameters: "Param1",
 		},
 	}
+	expStruct := []*utils.TPDispatcherProfile{{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "2014-08-29T15:00:00Z",
+		},
+		StrategyParams: []interface{}{"Param1"},
+	},
+	}
 	result := structTest.AsTPDispatcherProfiles()
-	expected := "[{\"TPid\":\"\",\"Tenant\":\"\",\"ID\":\"\",\"Subsystems\":null,\"FilterIDs\":null,\"ActivationInterval\":{\"ActivationTime\":\"2014-07-29T15:00:00Z\",\"ExpiryTime\":\"2014-08-29T15:00:00Z\"},\"Strategy\":\"\",\"StrategyParams\":[\"Param1\"],\"Weight\":0,\"Hosts\":null}]"
-	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
 
@@ -5179,9 +5195,60 @@ func TestChargerProfileToAPILastCase(t *testing.T) {
 		Weight:       20,
 	}
 
-	result := ChargerProfileToAPI(testStruct)
-	expected := "{\"TPid\":\"\",\"Tenant\":\"cgrates.org\",\"ID\":\"CPP_1\",\"FilterIDs\":[\"FLTR_CP_1\",\"FLTR_CP_4\",\"*string:~*opts.*subsys:*chargers\"],\"ActivationInterval\":{\"ActivationTime\":\"2014-07-14T14:25:00Z\",\"ExpiryTime\":\"\"},\"RunID\":\"TestRunID\",\"AttributeIDs\":[\"*none\"],\"Weight\":20}"
-	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
-		t.Errorf("\nExpected <%+v>,\n Received <%+v>", expected, utils.ToJSON(result))
+	expStruct := &utils.TPChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "CPP_1",
+		FilterIDs: []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "",
+		},
+		AttributeIDs: []string{"*none"},
+		RunID:        "TestRunID",
+		Weight:       20,
 	}
+
+	result := ChargerProfileToAPI(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
+	testRPMdls := RateProfileMdls{&RateProfileMdl{
+		Tpid:               "",
+		Tenant:             "cgrates.org",
+		ID:                 "RP1",
+		FilterIDs:          "*string:~*req.Subject:1001",
+		ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+		Weight:             1.2,
+		RoundingMethod:     "*up",
+		RoundingDecimals:   4,
+		MinCost:            0.1,
+		MaxCost:            0.6,
+		MaxCostStrategy:    "*free",
+	},
+	}
+	expStruct := []*utils.TPRateProfile{
+		{TPid: "",
+			Tenant:    "cgrates.org",
+			ID:        "RP1",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "2014-08-29T15:00:00Z",
+			},
+			Weight:           1.2,
+			RoundingMethod:   "*up",
+			RoundingDecimals: 4,
+			MinCost:          0.1,
+			MaxCost:          0.6,
+			MaxCostStrategy:  "*free",
+		},
+	}
+	result := testRPMdls.AsTPRateProfile()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+
 }
