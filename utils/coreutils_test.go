@@ -1600,3 +1600,13 @@ func TestBoolGenerator(t *testing.T) {
 		t.Errorf("Needs to be bool")
 	}
 }
+
+func TestMonthlyEstimated(t *testing.T) {
+	t1 := time.Date(2021, 1, 31, 0, 0, 0, 0, time.UTC)
+	expectedTime := time.Date(2021, 2, 28, 0, 0, 0, 0, time.UTC)
+	if rcv, err := monthlyEstimated(t1); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expectedTime) {
+		t.Errorf("Expected %+v, received %+v", expectedTime, rcv)
+	}
+}

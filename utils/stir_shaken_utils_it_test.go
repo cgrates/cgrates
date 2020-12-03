@@ -19,8 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"reflect"
 	"testing"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 var (
@@ -55,17 +58,36 @@ func testGetReaderFromPathStatusCode(t *testing.T) {
 }
 
 func testNewECDSAPrvKey(t *testing.T) {
-	urlPath := "https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm"
-	expPrvKey := "Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key"
-	if _, err := NewECDSAPrvKey(urlPath, time.Duration(0)); err == nil || err.Error() != expPrvKey {
-		t.Errorf("Expected %+v, received %+v", expPrvKey, err)
+	urlPath := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pem"
+	expected, err := jwt.ParseECPrivateKeyFromPEM([]byte(`
+-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEICcL1+2nj9ylMlTKjSpIGx03gALK0cISciviwudQuvb9oAoGCCqGSM49
+AwEHoUQDQgAEjS4zmWotYqKWB2/sn+4v1uUoPAQ2N2ZtrUsmewkl3ErAbIokXSZS
+rucJPPszlBtYbbhcmbXC7DKP9u9Pq/GnVg==
+-----END EC PRIVATE KEY-----`))
+	if err != nil {
+		t.Error(err)
+	}
+	if prvKey, err := NewECDSAPrvKey(urlPath, time.Duration(0)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, prvKey) {
+		t.Errorf("Expected %+v, received %+v", expected, prvKey)
 	}
 }
 
 func testNewECDSAPublicKey(t *testing.T) {
-	urlPath := "https://en.wikipedia.org/wiki/Wiki"
-	expPublKey := "Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key"
-	if _, err := NewECDSAPubKey(urlPath, 0); err == nil || err.Error() != expPublKey {
-		t.Errorf("Expected %+v, received %+v", expPublKey, err)
+	urlPath := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_pubkey.pem"
+	expPublKey, err := jwt.ParseECPublicKeyFromPEM([]byte(` 
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEjS4zmWotYqKWB2/sn+4v1uUoPAQ2
+N2ZtrUsmewkl3ErAbIokXSZSrucJPPszlBtYbbhcmbXC7DKP9u9Pq/GnVg==
+-----END PUBLIC KEY-----`))
+	if err != nil {
+		t.Error(err)
+	}
+	if publKey, err := NewECDSAPubKey(urlPath, 0); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expPublKey, publKey) {
+		t.Errorf("Expected %+v, received %+v", expPublKey, publKey)
 	}
 }
