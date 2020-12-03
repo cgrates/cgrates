@@ -44,8 +44,8 @@ var (
 		testSessionsItStartEngine,
 		testSessionsItApierRpcConn,
 		testSessionsItTPFromFolder,
-		testSessionsItTerminatUnexist,
-		testSessionsItUpdateUnexist,
+		testSessionsItTerminatNonexist,
+		testSessionsItUpdateNonexist,
 		testSessionsItTerminatePassive,
 		testSessionsItEventCostCompressing,
 		testSessionsItStopCgrEngine,
@@ -120,7 +120,7 @@ func testSessionsItTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func testSessionsItTerminatUnexist(t *testing.T) {
+func testSessionsItTerminatNonexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 10.0
@@ -139,7 +139,7 @@ func testSessionsItTerminatUnexist(t *testing.T) {
 			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				ID:     "TestSessionsItTerminatUnexist",
+				ID:     "testSessionsItTerminatNonexist",
 				Event: map[string]interface{}{
 					utils.EVENT_NAME:  "TerminateEvent",
 					utils.ToR:         utils.VOICE,
@@ -197,7 +197,7 @@ func testSessionsItTerminatUnexist(t *testing.T) {
 
 }
 
-func testSessionsItUpdateUnexist(t *testing.T) {
+func testSessionsItUpdateNonexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.299800
@@ -216,7 +216,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				ID:     "TestSessionsItUpdateUnexist",
+				ID:     "testSessionsItUpdateNonexist",
 				Event: map[string]interface{}{
 					utils.EVENT_NAME:  "UpdateEvent",
 					utils.ToR:         utils.VOICE,
@@ -257,7 +257,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				ID:     "TestSessionsItTerminatUnexist",
+				ID:     "testSessionsItTerminatNonexist",
 				Event: map[string]interface{}{
 					utils.EVENT_NAME:  "TerminateEvent",
 					utils.ToR:         utils.VOICE,
@@ -339,7 +339,7 @@ func testSessionsItTerminatePassive(t *testing.T) {
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				ID:     "TestSessionsItTerminatUnexist",
+				ID:     "testSessionsItTerminatNonexist",
 				Event: map[string]interface{}{
 					utils.EVENT_NAME:  "TerminateEvent",
 					utils.ToR:         utils.VOICE,
