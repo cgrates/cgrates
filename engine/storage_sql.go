@@ -268,7 +268,7 @@ func (self *SQLStorage) SetTPTimings(timings []*utils.ApierTPTiming) error {
 
 	tx := self.db.Begin()
 	for _, timing := range timings {
-		if err := tx.Where(&TpTimingMdl{Tpid: timing.TPid, Tag: timing.ID}).Delete(TpTimingMdl{}).Error; err != nil {
+		if err := tx.Where(&TimingMdl{Tpid: timing.TPid, Tag: timing.ID}).Delete(TimingMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -289,7 +289,7 @@ func (self *SQLStorage) SetTPDestinations(dests []*utils.TPDestination) error {
 	tx := self.db.Begin()
 	for _, dst := range dests {
 		// Remove previous
-		if err := tx.Where(&TpDestinationMdl{Tpid: dst.TPid, Tag: dst.ID}).Delete(TpDestinationMdl{}).Error; err != nil {
+		if err := tx.Where(&DestinationMdl{Tpid: dst.TPid, Tag: dst.ID}).Delete(DestinationMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -313,7 +313,7 @@ func (self *SQLStorage) SetTPRates(rs []*utils.TPRateRALs) error {
 	for _, rate := range rs {
 		if found, _ := m[rate.ID]; !found {
 			m[rate.ID] = true
-			if err := tx.Where(&TpRateMdl{Tpid: rate.TPid, Tag: rate.ID}).Delete(TpRateMdl{}).Error; err != nil {
+			if err := tx.Where(&RateMdl{Tpid: rate.TPid, Tag: rate.ID}).Delete(RateMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -338,7 +338,7 @@ func (self *SQLStorage) SetTPDestinationRates(drs []*utils.TPDestinationRate) er
 	for _, dRate := range drs {
 		if found, _ := m[dRate.ID]; !found {
 			m[dRate.ID] = true
-			if err := tx.Where(&TpDestinationRateMdl{Tpid: dRate.TPid, Tag: dRate.ID}).Delete(TpDestinationRateMdl{}).Error; err != nil {
+			if err := tx.Where(&DestinationRateMdl{Tpid: dRate.TPid, Tag: dRate.ID}).Delete(DestinationRateMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -363,7 +363,7 @@ func (self *SQLStorage) SetTPRatingPlans(rps []*utils.TPRatingPlan) error {
 	for _, rPlan := range rps {
 		if found, _ := m[rPlan.ID]; !found {
 			m[rPlan.ID] = true
-			if err := tx.Where(&TpRatingPlanMdl{Tpid: rPlan.TPid, Tag: rPlan.ID}).Delete(TpRatingPlanMdl{}).Error; err != nil {
+			if err := tx.Where(&RatingPlanMdl{Tpid: rPlan.TPid, Tag: rPlan.ID}).Delete(RatingPlanMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -385,9 +385,9 @@ func (self *SQLStorage) SetTPRatingProfiles(rpfs []*utils.TPRatingProfile) error
 	}
 	tx := self.db.Begin()
 	for _, rpf := range rpfs {
-		if err := tx.Where(&TpRatingProfileMdl{Tpid: rpf.TPid, Loadid: rpf.LoadId,
+		if err := tx.Where(&RatingProfileMdl{Tpid: rpf.TPid, Loadid: rpf.LoadId,
 			Tenant: rpf.Tenant, Category: rpf.Category,
-			Subject: rpf.Subject}).Delete(TpRatingProfileMdl{}).Error; err != nil {
+			Subject: rpf.Subject}).Delete(RatingProfileMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -411,7 +411,7 @@ func (self *SQLStorage) SetTPSharedGroups(sgs []*utils.TPSharedGroups) error {
 	for _, sGroup := range sgs {
 		if found, _ := m[sGroup.ID]; !found {
 			m[sGroup.ID] = true
-			if err := tx.Where(&TpSharedGroupMdl{Tpid: sGroup.TPid, Tag: sGroup.ID}).Delete(TpSharedGroupMdl{}).Error; err != nil {
+			if err := tx.Where(&SharedGroupMdl{Tpid: sGroup.TPid, Tag: sGroup.ID}).Delete(SharedGroupMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -436,7 +436,7 @@ func (self *SQLStorage) SetTPActions(acts []*utils.TPActions) error {
 	for _, a := range acts {
 		if found, _ := m[a.ID]; !found {
 			m[a.ID] = true
-			if err := tx.Where(&TpActionMdl{Tpid: a.TPid, Tag: a.ID}).Delete(TpActionMdl{}).Error; err != nil {
+			if err := tx.Where(&ActionMdl{Tpid: a.TPid, Tag: a.ID}).Delete(ActionMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -462,7 +462,7 @@ func (self *SQLStorage) SetTPActionPlans(ats []*utils.TPActionPlan) error {
 	for _, aPlan := range ats {
 		if found, _ := m[aPlan.ID]; !found {
 			m[aPlan.ID] = true
-			if err := tx.Where(&TpActionPlanMdl{Tpid: aPlan.TPid, Tag: aPlan.ID}).Delete(TpActionPlanMdl{}).Error; err != nil {
+			if err := tx.Where(&ActionPlanMdl{Tpid: aPlan.TPid, Tag: aPlan.ID}).Delete(ActionPlanMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -487,7 +487,7 @@ func (self *SQLStorage) SetTPActionTriggers(ats []*utils.TPActionTriggers) error
 	for _, aTrigger := range ats {
 		if found, _ := m[aTrigger.ID]; !found {
 			m[aTrigger.ID] = true
-			if err := tx.Where(&TpActionTriggerMdl{Tpid: aTrigger.TPid, Tag: aTrigger.ID}).Delete(TpActionTriggerMdl{}).Error; err != nil {
+			if err := tx.Where(&ActionTriggerMdl{Tpid: aTrigger.TPid, Tag: aTrigger.ID}).Delete(ActionTriggerMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -514,7 +514,7 @@ func (self *SQLStorage) SetTPAccountActions(aas []*utils.TPAccountActions) error
 	for _, aa := range aas {
 		if found, _ := m[aa.GetId()]; !found {
 			m[aa.GetId()] = true
-			if err := tx.Where(&TpAccountActionMdl{Tpid: aa.TPid, Loadid: aa.LoadId, Tenant: aa.Tenant, Account: aa.Account}).Delete(&TpAccountActionMdl{}).Error; err != nil {
+			if err := tx.Where(&AccountActionMdl{Tpid: aa.TPid, Loadid: aa.LoadId, Tenant: aa.Tenant, Account: aa.Account}).Delete(&AccountActionMdl{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -536,7 +536,7 @@ func (self *SQLStorage) SetTPResources(rls []*utils.TPResourceProfile) error {
 	tx := self.db.Begin()
 	for _, rl := range rls {
 		// Remove previous
-		if err := tx.Where(&TpResourceMdl{Tpid: rl.TPid, ID: rl.ID}).Delete(TpResourceMdl{}).Error; err != nil {
+		if err := tx.Where(&ResourceMdl{Tpid: rl.TPid, ID: rl.ID}).Delete(ResourceMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -558,7 +558,7 @@ func (self *SQLStorage) SetTPStats(sts []*utils.TPStatProfile) error {
 	tx := self.db.Begin()
 	for _, stq := range sts {
 		// Remove previous
-		if err := tx.Where(&TpStatMdl{Tpid: stq.TPid, ID: stq.ID}).Delete(TpStatMdl{}).Error; err != nil {
+		if err := tx.Where(&StatMdl{Tpid: stq.TPid, ID: stq.ID}).Delete(StatMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -580,7 +580,7 @@ func (self *SQLStorage) SetTPThresholds(ths []*utils.TPThresholdProfile) error {
 	tx := self.db.Begin()
 	for _, th := range ths {
 		// Remove previous
-		if err := tx.Where(&TpThresholdMdl{Tpid: th.TPid, ID: th.ID}).Delete(TpThresholdMdl{}).Error; err != nil {
+		if err := tx.Where(&ThresholdMdl{Tpid: th.TPid, ID: th.ID}).Delete(ThresholdMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -602,7 +602,7 @@ func (self *SQLStorage) SetTPFilters(ths []*utils.TPFilterProfile) error {
 	tx := self.db.Begin()
 	for _, th := range ths {
 		// Remove previous
-		if err := tx.Where(&TpFilterMdl{Tpid: th.TPid, ID: th.ID}).Delete(TpFilterMdl{}).Error; err != nil {
+		if err := tx.Where(&FilterMdl{Tpid: th.TPid, ID: th.ID}).Delete(FilterMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -624,7 +624,7 @@ func (self *SQLStorage) SetTPRoutes(tpRoutes []*utils.TPRouteProfile) error {
 	tx := self.db.Begin()
 	for _, tpRoute := range tpRoutes {
 		// Remove previous
-		if err := tx.Where(&TpRouteMdl{Tpid: tpRoute.TPid, ID: tpRoute.ID}).Delete(TpRouteMdl{}).Error; err != nil {
+		if err := tx.Where(&RouteMdl{Tpid: tpRoute.TPid, ID: tpRoute.ID}).Delete(RouteMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -1189,7 +1189,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 }
 
 func (self *SQLStorage) GetTPDestinations(tpid, id string) (uTPDsts []*utils.TPDestination, err error) {
-	var tpDests TpDestinations
+	var tpDests DestinationMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
@@ -1204,7 +1204,7 @@ func (self *SQLStorage) GetTPDestinations(tpid, id string) (uTPDsts []*utils.TPD
 }
 
 func (self *SQLStorage) GetTPRates(tpid, id string) ([]*utils.TPRateRALs, error) {
-	var tpRates TpRates
+	var tpRates RateMdls
 	q := self.db.Where("tpid = ?", tpid).Order("id")
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
@@ -1223,7 +1223,7 @@ func (self *SQLStorage) GetTPRates(tpid, id string) ([]*utils.TPRateRALs, error)
 }
 
 func (self *SQLStorage) GetTPDestinationRates(tpid, id string, pagination *utils.Paginator) ([]*utils.TPDestinationRate, error) {
-	var tpDestinationRates TpDestinationRates
+	var tpDestinationRates DestinationRateMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
@@ -1250,7 +1250,7 @@ func (self *SQLStorage) GetTPDestinationRates(tpid, id string, pagination *utils
 }
 
 func (self *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
-	var tpTimings TpTimings
+	var tpTimings TimingMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
@@ -1266,7 +1266,7 @@ func (self *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, e
 }
 
 func (self *SQLStorage) GetTPRatingPlans(tpid, id string, pagination *utils.Paginator) ([]*utils.TPRatingPlan, error) {
-	var tpRatingPlans TpRatingPlans
+	var tpRatingPlans RatingPlanMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
@@ -1293,7 +1293,7 @@ func (self *SQLStorage) GetTPRatingPlans(tpid, id string, pagination *utils.Pagi
 }
 
 func (self *SQLStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
-	var tpRpfs TpRatingProfiles
+	var tpRpfs RatingProfileMdls
 	q := self.db.Where("tpid = ?", filter.TPid)
 	if len(filter.LoadId) != 0 {
 		q = q.Where("loadid = ?", filter.LoadId)
@@ -1321,7 +1321,7 @@ func (self *SQLStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*u
 }
 
 func (self *SQLStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
-	var tpShareGroups TpSharedGroups
+	var tpShareGroups SharedGroupMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
@@ -1340,7 +1340,7 @@ func (self *SQLStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGro
 }
 
 func (self *SQLStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
-	var tpActions TpActions
+	var tpActions ActionMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
@@ -1359,7 +1359,7 @@ func (self *SQLStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error
 }
 
 func (self *SQLStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionTriggers, error) {
-	var tpActionTriggers TpActionTriggers
+	var tpActionTriggers ActionTriggerMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
@@ -1378,7 +1378,7 @@ func (self *SQLStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionT
 }
 
 func (self *SQLStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan, error) {
-	var tpActionPlans TpActionPlans
+	var tpActionPlans ActionPlanMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("tag = ?", id)
@@ -1397,7 +1397,7 @@ func (self *SQLStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan
 }
 
 func (self *SQLStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*utils.TPAccountActions, error) {
-	var tpAccActs TpAccountActions
+	var tpAccActs AccountActionMdls
 	q := self.db.Where("tpid = ?", filter.TPid)
 	if len(filter.LoadId) != 0 {
 		q = q.Where("loadid = ?", filter.LoadId)
@@ -1422,7 +1422,7 @@ func (self *SQLStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*
 }
 
 func (self *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {
-	var rls TpResources
+	var rls ResourceMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1441,7 +1441,7 @@ func (self *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 }
 
 func (self *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProfile, error) {
-	var sts TpStats
+	var sts StatMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1460,7 +1460,7 @@ func (self *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 }
 
 func (self *SQLStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThresholdProfile, error) {
-	var ths TpThresholds
+	var ths ThresholdMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1479,7 +1479,7 @@ func (self *SQLStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThr
 }
 
 func (self *SQLStorage) GetTPFilters(tpid, tenant, id string) ([]*utils.TPFilterProfile, error) {
-	var ths TpFilterS
+	var ths FilterMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1498,7 +1498,7 @@ func (self *SQLStorage) GetTPFilters(tpid, tenant, id string) ([]*utils.TPFilter
 }
 
 func (self *SQLStorage) GetTPRoutes(tpid, tenant, id string) ([]*utils.TPRouteProfile, error) {
-	var tpRoutes TPRoutes
+	var tpRoutes RouteMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)

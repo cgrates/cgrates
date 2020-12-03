@@ -1642,7 +1642,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			if err := csvWriter.Write(engine.TpFilterS{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.FilterMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
@@ -1680,7 +1680,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			if err := csvWriter.Write(engine.TpResources{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.ResourceMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
@@ -1718,7 +1718,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			if err := csvWriter.Write(engine.TpStats{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.StatMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
@@ -1756,7 +1756,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			if err := csvWriter.Write(engine.TPRoutes{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.RouteMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
@@ -1794,7 +1794,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			if err := csvWriter.Write(engine.TpThresholds{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.ThresholdMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {

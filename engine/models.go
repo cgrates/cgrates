@@ -29,7 +29,7 @@ import (
 // Structs here are one to one mapping of the tables and fields
 // to be used by gorm orm
 
-type TpTimingMdl struct {
+type TimingMdl struct {
 	Id        int64
 	Tpid      string
 	Tag       string `index:"0" re:"\w+\s*,\s*"`
@@ -41,7 +41,11 @@ type TpTimingMdl struct {
 	CreatedAt time.Time
 }
 
-type TpDestinationMdl struct {
+func (TimingMdl) TableName() string {
+	return utils.TBLTPTimings
+}
+
+type DestinationMdl struct {
 	Id        int64
 	Tpid      string
 	Tag       string `index:"0" re:"\w+\s*,\s*"`
@@ -49,7 +53,11 @@ type TpDestinationMdl struct {
 	CreatedAt time.Time
 }
 
-type TpRateMdl struct {
+func (DestinationMdl) TableName() string {
+	return utils.TBLTPDestinations
+}
+
+type RateMdl struct {
 	Id                 int64
 	Tpid               string
 	Tag                string  `index:"0" re:"\w+\s*"`
@@ -61,7 +69,11 @@ type TpRateMdl struct {
 	CreatedAt          time.Time
 }
 
-type TpDestinationRateMdl struct {
+func (RateMdl) TableName() string {
+	return utils.TBLTPRates
+}
+
+type DestinationRateMdl struct {
 	Id               int64
 	Tpid             string
 	Tag              string  `index:"0" re:"\w+\s*"`
@@ -74,7 +86,11 @@ type TpDestinationRateMdl struct {
 	CreatedAt        time.Time
 }
 
-type TpRatingPlanMdl struct {
+func (DestinationRateMdl) TableName() string {
+	return utils.TBLTPDestinationRates
+}
+
+type RatingPlanMdl struct {
 	Id           int64
 	Tpid         string
 	Tag          string  `index:"0" re:"\w+\s*,\s*"`
@@ -84,7 +100,11 @@ type TpRatingPlanMdl struct {
 	CreatedAt    time.Time
 }
 
-type TpRatingProfileMdl struct {
+func (RatingPlanMdl) TableName() string {
+	return utils.TBLTPRatingPlans
+}
+
+type RatingProfileMdl struct {
 	Id               int64
 	Tpid             string
 	Loadid           string
@@ -97,7 +117,11 @@ type TpRatingProfileMdl struct {
 	CreatedAt        time.Time
 }
 
-type TpActionMdl struct {
+func (RatingProfileMdl) TableName() string {
+	return utils.TBLTPRatingProfiles
+}
+
+type ActionMdl struct {
 	Id              int64
 	Tpid            string
 	Tag             string  `index:"0" re:"\w+\s*"`
@@ -120,7 +144,11 @@ type TpActionMdl struct {
 	CreatedAt       time.Time
 }
 
-type TpActionPlanMdl struct {
+func (ActionMdl) TableName() string {
+	return utils.TBLTPActions
+}
+
+type ActionPlanMdl struct {
 	Id         int64
 	Tpid       string
 	Tag        string  `index:"0" re:"\w+\s*,\s*"`
@@ -130,7 +158,11 @@ type TpActionPlanMdl struct {
 	CreatedAt  time.Time
 }
 
-type TpActionTriggerMdl struct {
+func (ActionPlanMdl) TableName() string {
+	return utils.TBLTPActionPlans
+}
+
+type ActionTriggerMdl struct {
 	Id                     int64
 	Tpid                   string
 	Tag                    string  `index:"0" re:"\w+"`
@@ -157,7 +189,11 @@ type TpActionTriggerMdl struct {
 	CreatedAt              time.Time
 }
 
-type TpAccountActionMdl struct {
+func (ActionTriggerMdl) TableName() string {
+	return utils.TBLTPActionTriggers
+}
+
+type AccountActionMdl struct {
 	Id                int64
 	Tpid              string
 	Loadid            string
@@ -170,7 +206,11 @@ type TpAccountActionMdl struct {
 	CreatedAt         time.Time
 }
 
-func (aa *TpAccountActionMdl) SetAccountActionId(id string) error {
+func (AccountActionMdl) TableName() string {
+	return utils.TBLTPAccountActions
+}
+
+func (aa *AccountActionMdl) SetAccountActionId(id string) error {
 	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
 	if len(ids) != 3 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
@@ -181,11 +221,11 @@ func (aa *TpAccountActionMdl) SetAccountActionId(id string) error {
 	return nil
 }
 
-func (aa *TpAccountActionMdl) GetAccountActionId() string {
+func (aa *AccountActionMdl) GetAccountActionId() string {
 	return utils.ConcatenatedKey(aa.Tenant, aa.Account)
 }
 
-type TpSharedGroupMdl struct {
+type SharedGroupMdl struct {
 	Id            int64
 	Tpid          string
 	Tag           string `index:"0" re:"\w+\s*"`
@@ -195,7 +235,11 @@ type TpSharedGroupMdl struct {
 	CreatedAt     time.Time
 }
 
-type TpResourceMdl struct {
+func (SharedGroupMdl) TableName() string {
+	return utils.TBLTPSharedGroups
+}
+
+type ResourceMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -212,7 +256,11 @@ type TpResourceMdl struct {
 	CreatedAt          time.Time
 }
 
-type TpStatMdl struct {
+func (ResourceMdl) TableName() string {
+	return utils.TBLTPResources
+}
+
+type StatMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -231,7 +279,11 @@ type TpStatMdl struct {
 	CreatedAt          time.Time
 }
 
-type TpThresholdMdl struct {
+func (StatMdl) TableName() string {
+	return utils.TBLTPStats
+}
+
+type ThresholdMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -248,7 +300,11 @@ type TpThresholdMdl struct {
 	CreatedAt          time.Time
 }
 
-type TpFilterMdl struct {
+func (ThresholdMdl) TableName() string {
+	return utils.TBLTPThresholds
+}
+
+type FilterMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string `index:"0" re:""`
@@ -258,6 +314,10 @@ type TpFilterMdl struct {
 	Values             string `index:"4" re:""`
 	ActivationInterval string `index:"5" re:""`
 	CreatedAt          time.Time
+}
+
+func (FilterMdl) TableName() string {
+	return utils.TBLTPFilters
 }
 
 type CDRsql struct {
@@ -348,7 +408,7 @@ func (t TBLVersion) TableName() string {
 	return utils.TBLVersions
 }
 
-type TpRouteMdl struct {
+type RouteMdl struct {
 	PK                  uint `gorm:"primary_key"`
 	Tpid                string
 	Tenant              string  `index:"0" re:""`
@@ -369,6 +429,10 @@ type TpRouteMdl struct {
 	RouteParameters     string  `index:"15" re:""`
 	Weight              float64 `index:"16" re:"\d+\.?\d*"`
 	CreatedAt           time.Time
+}
+
+func (RouteMdl) TableName() string {
+	return utils.TBLTPRoutes
 }
 
 type TPAttributeMdl struct {
