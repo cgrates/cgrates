@@ -435,7 +435,7 @@ func (RouteMdl) TableName() string {
 	return utils.TBLTPRoutes
 }
 
-type TPAttributeMdl struct {
+type AttributeMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -452,7 +452,11 @@ type TPAttributeMdl struct {
 	CreatedAt          time.Time
 }
 
-type TPChargerMdl struct {
+func (AttributeMdl) TableName() string {
+	return utils.TBLTPAttributes
+}
+
+type ChargerMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
@@ -465,7 +469,11 @@ type TPChargerMdl struct {
 	CreatedAt          time.Time
 }
 
-type TPDispatcherProfileMdl struct {
+func (ChargerMdl) TableName() string {
+	return utils.TBLTPChargers
+}
+
+type DispatcherProfileMdl struct {
 	PK                 uint    `gorm:"primary_key"`
 	Tpid               string  //
 	Tenant             string  `index:"0" re:""`
@@ -484,7 +492,11 @@ type TPDispatcherProfileMdl struct {
 	CreatedAt          time.Time
 }
 
-type TPDispatcherHostMdl struct {
+func (DispatcherProfileMdl) TableName() string {
+	return utils.TBLTPDispatchers
+}
+
+type DispatcherHostMdl struct {
 	PK        uint   `gorm:"primary_key"`
 	Tpid      string //
 	Tenant    string `index:"0" re:""`
@@ -493,6 +505,10 @@ type TPDispatcherHostMdl struct {
 	Transport string `index:"3" re:""`
 	TLS       bool   `index:"4" re:""`
 	CreatedAt time.Time
+}
+
+func (DispatcherHostMdl) TableName() string {
+	return utils.TBLTPDispatcherHosts
 }
 
 type RateProfileMdl struct {

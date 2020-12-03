@@ -646,7 +646,7 @@ func (self *SQLStorage) SetTPAttributes(tpAttrs []*utils.TPAttributeProfile) err
 	tx := self.db.Begin()
 	for _, stq := range tpAttrs {
 		// Remove previous
-		if err := tx.Where(&TPAttributeMdl{Tpid: stq.TPid, ID: stq.ID}).Delete(TPAttributeMdl{}).Error; err != nil {
+		if err := tx.Where(&AttributeMdl{Tpid: stq.TPid, ID: stq.ID}).Delete(AttributeMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -668,7 +668,7 @@ func (self *SQLStorage) SetTPChargers(tpCPPs []*utils.TPChargerProfile) error {
 	tx := self.db.Begin()
 	for _, cpp := range tpCPPs {
 		// Remove previous
-		if err := tx.Where(&TPChargerMdl{Tpid: cpp.TPid, ID: cpp.ID}).Delete(TPChargerMdl{}).Error; err != nil {
+		if err := tx.Where(&ChargerMdl{Tpid: cpp.TPid, ID: cpp.ID}).Delete(ChargerMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -690,7 +690,7 @@ func (self *SQLStorage) SetTPDispatcherProfiles(tpDPPs []*utils.TPDispatcherProf
 	tx := self.db.Begin()
 	for _, dpp := range tpDPPs {
 		// Remove previous
-		if err := tx.Where(&TPDispatcherProfileMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(TPDispatcherProfileMdl{}).Error; err != nil {
+		if err := tx.Where(&DispatcherProfileMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(DispatcherProfileMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -712,7 +712,7 @@ func (self *SQLStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) e
 	tx := self.db.Begin()
 	for _, dpp := range tpDPPs {
 		// Remove previous
-		if err := tx.Where(&TPDispatcherHostMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(TPDispatcherHostMdl{}).Error; err != nil {
+		if err := tx.Where(&DispatcherHostMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(DispatcherHostMdl{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -1539,7 +1539,7 @@ func (self *SQLStorage) GetTPRoutes(tpid, tenant, id string) ([]*utils.TPRoutePr
 }
 
 func (self *SQLStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAttributeProfile, error) {
-	var sps TPAttributes
+	var sps AttributeMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1558,7 +1558,7 @@ func (self *SQLStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAtt
 }
 
 func (self *SQLStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPChargerProfile, error) {
-	var cpps TPChargers
+	var cpps ChargerMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1577,7 +1577,7 @@ func (self *SQLStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPCharg
 }
 
 func (self *SQLStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
-	var dpps TPDispatcherProfiles
+	var dpps DispatcherProfileMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1596,7 +1596,7 @@ func (self *SQLStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*uti
 }
 
 func (self *SQLStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.TPDispatcherHost, error) {
-	var dpps TPDispatcherHosts
+	var dpps DispatcherHostMdls
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)

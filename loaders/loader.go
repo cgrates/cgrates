@@ -283,9 +283,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	case utils.MetaAttributes:
 		cacheIDs = []string{utils.CacheAttributeFilterIndexes}
 		for _, lDataSet := range lds {
-			attrModels := make(engine.TPAttributes, len(lDataSet))
+			attrModels := make(engine.AttributeMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				attrModels[i] = new(engine.TPAttributeMdl)
+				attrModels[i] = new(engine.AttributeMdl)
 				if err = utils.UpdateStructWithIfaceMap(attrModels[i], ld); err != nil {
 					return
 				}
@@ -490,9 +490,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	case utils.MetaChargers:
 		cacheIDs = []string{utils.CacheChargerFilterIndexes}
 		for _, lDataSet := range lds {
-			cppModels := make(engine.TPChargers, len(lDataSet))
+			cppModels := make(engine.ChargerMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				cppModels[i] = new(engine.TPChargerMdl)
+				cppModels[i] = new(engine.ChargerMdl)
 				if err = utils.UpdateStructWithIfaceMap(cppModels[i], ld); err != nil {
 					return
 				}
@@ -520,9 +520,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	case utils.MetaDispatchers:
 		cacheIDs = []string{utils.CacheDispatcherFilterIndexes}
 		for _, lDataSet := range lds {
-			dispModels := make(engine.TPDispatcherProfiles, len(lDataSet))
+			dispModels := make(engine.DispatcherProfileMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				dispModels[i] = new(engine.TPDispatcherProfileMdl)
+				dispModels[i] = new(engine.DispatcherProfileMdl)
 				if err = utils.UpdateStructWithIfaceMap(dispModels[i], ld); err != nil {
 					return
 				}
@@ -548,9 +548,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		}
 	case utils.MetaDispatcherHosts:
 		for _, lDataSet := range lds {
-			dispModels := make(engine.TPDispatcherHosts, len(lDataSet))
+			dispModels := make(engine.DispatcherHostMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				dispModels[i] = new(engine.TPDispatcherHostMdl)
+				dispModels[i] = new(engine.DispatcherHostMdl)
 				if err = utils.UpdateStructWithIfaceMap(dispModels[i], ld); err != nil {
 					return
 				}

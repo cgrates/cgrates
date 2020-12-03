@@ -2989,8 +2989,8 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	expected := TPAttributes{
-		&TPAttributeMdl{
+	expected := AttributeMdls{
+		&AttributeMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
@@ -3031,8 +3031,8 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	expected := TPAttributes{
-		&TPAttributeMdl{
+	expected := AttributeMdls{
+		&AttributeMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
@@ -3043,7 +3043,7 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
-		&TPAttributeMdl{
+		&AttributeMdl{
 			Tpid:   "TP1",
 			Tenant: "cgrates.org",
 			ID:     "ALS1",
@@ -3068,8 +3068,8 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 }
 
 func TestModelAsTPAttribute(t *testing.T) {
-	models := TPAttributes{
-		&TPAttributeMdl{
+	models := AttributeMdls{
+		&AttributeMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
@@ -3205,8 +3205,8 @@ func TestAPItoModelTPCharger(t *testing.T) {
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
 	}
-	expected := TPChargers{
-		&TPChargerMdl{
+	expected := ChargerMdls{
+		&ChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3216,7 +3216,7 @@ func TestAPItoModelTPCharger(t *testing.T) {
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
-		&TPChargerMdl{
+		&ChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3246,8 +3246,8 @@ func TestAPItoModelTPCharger2(t *testing.T) {
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
 	}
-	expected := TPChargers{
-		&TPChargerMdl{
+	expected := ChargerMdls{
+		&ChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3257,7 +3257,7 @@ func TestAPItoModelTPCharger2(t *testing.T) {
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
-		&TPChargerMdl{
+		&ChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3286,8 +3286,8 @@ func TestAPItoModelTPCharger3(t *testing.T) {
 		AttributeIDs: []string{"ATTR1"},
 		Weight:       20,
 	}
-	expected := TPChargers{
-		&TPChargerMdl{
+	expected := ChargerMdls{
+		&ChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3297,7 +3297,7 @@ func TestAPItoModelTPCharger3(t *testing.T) {
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
-		&TPChargerMdl{
+		&ChargerMdl{
 			Tpid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "Charger1",
@@ -3324,8 +3324,8 @@ func TestAPItoModelTPCharger4(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	expected := TPChargers{
-		&TPChargerMdl{
+	expected := ChargerMdls{
+		&ChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3355,8 +3355,8 @@ func TestAPItoModelTPCharger5(t *testing.T) {
 		AttributeIDs: []string{"ATTR1"},
 		Weight:       20,
 	}
-	expected := TPChargers{
-		&TPChargerMdl{
+	expected := ChargerMdls{
+		&ChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3385,8 +3385,8 @@ func TestAPItoModelTPCharger6(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	expected := TPChargers{
-		&TPChargerMdl{
+	expected := ChargerMdls{
+		&ChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3402,8 +3402,8 @@ func TestAPItoModelTPCharger6(t *testing.T) {
 }
 
 func TestModelAsTPChargers(t *testing.T) {
-	models := TPChargers{
-		&TPChargerMdl{
+	models := ChargerMdls{
+		&ChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3447,8 +3447,8 @@ func TestModelAsTPChargers(t *testing.T) {
 }
 
 func TestModelAsTPChargers2(t *testing.T) {
-	models := TPChargers{
-		&TPChargerMdl{
+	models := ChargerMdls{
+		&ChargerMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Charger1",
@@ -3637,8 +3637,8 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 			},
 		},
 	}
-	expected := TPDispatcherProfiles{
-		&TPDispatcherProfileMdl{
+	expected := DispatcherProfileMdls{
+		&DispatcherProfileMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Dsp",
@@ -3652,7 +3652,7 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 			ConnBlocker:        false,
 			ConnParameters:     "192.168.54.203",
 		},
-		&TPDispatcherProfileMdl{
+		&DispatcherProfileMdl{
 			Tpid:           "TP1",
 			Tenant:         "cgrates.org",
 			ID:             "Dsp",
@@ -3669,7 +3669,7 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 }
 
 func TestTPDispatcherHostsCSVHeader(t *testing.T) {
-	tps := &TPDispatcherHosts{}
+	tps := &DispatcherHostMdls{}
 	eOut := []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.TLS}
 	if rcv := tps.CSVHeader(); !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
@@ -3677,13 +3677,13 @@ func TestTPDispatcherHostsCSVHeader(t *testing.T) {
 }
 
 func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
-	tps := &TPDispatcherHosts{}
+	tps := &DispatcherHostMdls{}
 	if rcv := tps.AsTPDispatcherHosts(); rcv != nil {
 		t.Errorf("Expecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
 	}
 
-	tps = &TPDispatcherHosts{
-		&TPDispatcherHostMdl{
+	tps = &DispatcherHostMdls{
+		&DispatcherHostMdl{
 			ID:     "ID1",
 			Tenant: "Tenant1",
 		}}
@@ -3691,8 +3691,8 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 		t.Errorf("Expecting: nil,\nReceived: %+v", utils.ToJSON(rcv))
 	}
 
-	tps = &TPDispatcherHosts{
-		&TPDispatcherHostMdl{
+	tps = &DispatcherHostMdls{
+		&DispatcherHostMdl{
 			Address:   "Address1",
 			ID:        "ID1",
 			Tenant:    "Tenant1",
@@ -3712,8 +3712,8 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
-	tps = &TPDispatcherHosts{
-		&TPDispatcherHostMdl{
+	tps = &DispatcherHostMdls{
+		&DispatcherHostMdl{
 			Address:   "Address2",
 			ID:        "ID2",
 			Tenant:    "Tenant2",
@@ -3733,8 +3733,8 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
-	tps = &TPDispatcherHosts{
-		&TPDispatcherHostMdl{
+	tps = &DispatcherHostMdls{
+		&DispatcherHostMdl{
 			Address:   "Address3",
 			ID:        "ID3",
 			Tenant:    "Tenant3",
@@ -3755,8 +3755,8 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
-	tps = &TPDispatcherHosts{
-		&TPDispatcherHostMdl{
+	tps = &DispatcherHostMdls{
+		&DispatcherHostMdl{
 			Address:   "Address4",
 			ID:        "ID4",
 			Tenant:    "Tenant4",
@@ -3794,7 +3794,7 @@ func TestAPItoModelTPDispatcherHost(t *testing.T) {
 			Transport: "*json",
 		},
 	}
-	eOut := &TPDispatcherHostMdl{
+	eOut := &DispatcherHostMdl{
 		Address:   "Address1",
 		Transport: "*json",
 		Tenant:    "Tenant",
@@ -5114,8 +5114,8 @@ func TestModelHelpersParamsToString(t *testing.T) {
 }
 
 func TestModelHelpersAsTPDispatcherProfiles(t *testing.T) {
-	structTest := TPDispatcherProfiles{
-		&TPDispatcherProfileMdl{
+	structTest := DispatcherProfileMdls{
+		&DispatcherProfileMdl{
 			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
 			StrategyParameters: "Param1",
 		},
@@ -5135,8 +5135,8 @@ func TestModelHelpersAsTPDispatcherProfiles(t *testing.T) {
 }
 
 func TestTPDispatcherProfilesCSVHeader(t *testing.T) {
-	structTest := TPDispatcherProfiles{
-		&TPDispatcherProfileMdl{
+	structTest := DispatcherProfileMdls{
+		&DispatcherProfileMdl{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Dsp",
@@ -5150,7 +5150,7 @@ func TestTPDispatcherProfilesCSVHeader(t *testing.T) {
 			ConnBlocker:        false,
 			ConnParameters:     "192.168.54.203",
 		},
-		&TPDispatcherProfileMdl{
+		&DispatcherProfileMdl{
 			Tpid:           "TP1",
 			Tenant:         "cgrates.org",
 			ID:             "Dsp",
@@ -5251,4 +5251,21 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 
+}
+
+func TestAPItoModelTPDispatcherProfileCase2(t *testing.T) {
+	structTest := &utils.TPDispatcherProfile{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "2014-07-30T15:00:00Z",
+		},
+	}
+	expStruct := DispatcherProfileMdls{{
+		ActivationInterval: "2014-07-29T15:00:00Z;2014-07-30T15:00:00Z",
+	},
+	}
+	result := APItoModelTPDispatcherProfile(structTest)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%T>,\n Received <%T>", expStruct, result)
+	}
 }

@@ -2182,15 +2182,15 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 	return
 }
 
-type TPAttributes []*TPAttributeMdl
+type AttributeMdls []*AttributeMdl
 
 // CSVHeader return the header for csv fields as a slice of string
-func (tps TPAttributes) CSVHeader() (result []string) {
+func (tps AttributeMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
 		utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value, utils.Blocker, utils.Weight}
 }
 
-func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
+func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	mst := make(map[string]*utils.TPAttributeProfile)
 	filterMap := make(map[string]utils.StringMap)
 	contextMap := make(map[string]utils.StringMap)
@@ -2268,12 +2268,12 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	return
 }
 
-func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
+func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls AttributeMdls) {
 	if len(th.Attributes) == 0 {
 		return
 	}
 	for i, reqAttribute := range th.Attributes {
-		mdl := &TPAttributeMdl{
+		mdl := &AttributeMdl{
 			Tpid:   th.TPid,
 			Tenant: th.Tenant,
 			ID:     th.ID,
@@ -2394,15 +2394,15 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 	return
 }
 
-type TPChargers []*TPChargerMdl
+type ChargerMdls []*ChargerMdl
 
 // CSVHeader return the header for csv fields as a slice of string
-func (tps TPChargers) CSVHeader() (result []string) {
+func (tps ChargerMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
 		utils.RunID, utils.AttributeIDs, utils.Weight}
 }
 
-func (tps TPChargers) AsTPChargers() (result []*utils.TPChargerProfile) {
+func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
 	mst := make(map[string]*utils.TPChargerProfile)
 	filterMap := make(map[string]utils.StringMap)
 	attributeMap := make(map[string][]string)
@@ -2479,7 +2479,7 @@ func (tps TPChargers) AsTPChargers() (result []*utils.TPChargerProfile) {
 	return
 }
 
-func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
+func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls ChargerMdls) {
 	if tpCPP != nil {
 		min := len(tpCPP.FilterIDs)
 		isFilter := true
@@ -2488,7 +2488,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
 			isFilter = false
 		}
 		if min == 0 {
-			mdl := &TPChargerMdl{
+			mdl := &ChargerMdl{
 				Tenant: tpCPP.Tenant,
 				Tpid:   tpCPP.TPid,
 				ID:     tpCPP.ID,
@@ -2512,7 +2512,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
 			mdls = append(mdls, mdl)
 		} else {
 			for i := 0; i < min; i++ {
-				mdl := &TPChargerMdl{
+				mdl := &ChargerMdl{
 					Tenant: tpCPP.Tenant,
 					Tpid:   tpCPP.TPid,
 					ID:     tpCPP.ID,
@@ -2536,7 +2536,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
 		}
 		if len(tpCPP.FilterIDs)-min > 0 {
 			for i := min; i < len(tpCPP.FilterIDs); i++ {
-				mdl := &TPChargerMdl{
+				mdl := &ChargerMdl{
 					Tenant: tpCPP.Tenant,
 					Tpid:   tpCPP.TPid,
 					ID:     tpCPP.ID,
@@ -2547,7 +2547,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
 		}
 		if len(tpCPP.AttributeIDs)-min > 0 {
 			for i := min; i < len(tpCPP.AttributeIDs); i++ {
-				mdl := &TPChargerMdl{
+				mdl := &ChargerMdl{
 					Tenant: tpCPP.Tenant,
 					Tpid:   tpCPP.TPid,
 					ID:     tpCPP.ID,
@@ -2611,16 +2611,16 @@ func ChargerProfileToAPI(chargerPrf *ChargerProfile) (tpCharger *utils.TPCharger
 	return
 }
 
-type TPDispatcherProfiles []*TPDispatcherProfileMdl
+type DispatcherProfileMdls []*DispatcherProfileMdl
 
 // CSVHeader return the header for csv fields as a slice of string
-func (tps TPDispatcherProfiles) CSVHeader() (result []string) {
+func (tps DispatcherProfileMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.Subsystems, utils.FilterIDs, utils.ActivationIntervalString,
 		utils.Strategy, utils.StrategyParameters, utils.ConnID, utils.ConnFilterIDs,
 		utils.ConnWeight, utils.ConnBlocker, utils.ConnParameters, utils.Weight}
 }
 
-func (tps TPDispatcherProfiles) AsTPDispatcherProfiles() (result []*utils.TPDispatcherProfile) {
+func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDispatcherProfile) {
 	mst := make(map[string]*utils.TPDispatcherProfile)
 	filterMap := make(map[string]utils.StringMap)
 	contextMap := make(map[string]utils.StringMap)
@@ -2750,7 +2750,7 @@ func paramsToString(sp []interface{}) (strategy string) {
 	return
 }
 
-func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatcherProfiles) {
+func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls DispatcherProfileMdls) {
 	if tpDPP == nil {
 		return
 	}
@@ -2771,7 +2771,7 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDis
 	strategy := paramsToString(tpDPP.StrategyParams)
 
 	if len(tpDPP.Hosts) == 0 {
-		return append(mdls, &TPDispatcherProfileMdl{
+		return append(mdls, &DispatcherProfileMdl{
 			Tpid:               tpDPP.TPid,
 			Tenant:             tpDPP.Tenant,
 			ID:                 tpDPP.ID,
@@ -2787,7 +2787,7 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDis
 	confilter := strings.Join(tpDPP.Hosts[0].FilterIDs, utils.INFIELD_SEP)
 	conparam := paramsToString(tpDPP.Hosts[0].Params)
 
-	mdls = append(mdls, &TPDispatcherProfileMdl{
+	mdls = append(mdls, &DispatcherProfileMdl{
 		Tpid:               tpDPP.TPid,
 		Tenant:             tpDPP.Tenant,
 		ID:                 tpDPP.ID,
@@ -2807,7 +2807,7 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDis
 	for i := 1; i < len(tpDPP.Hosts); i++ {
 		confilter = strings.Join(tpDPP.Hosts[i].FilterIDs, utils.INFIELD_SEP)
 		conparam = paramsToString(tpDPP.Hosts[i].Params)
-		mdls = append(mdls, &TPDispatcherProfileMdl{
+		mdls = append(mdls, &DispatcherProfileMdl{
 			Tpid:   tpDPP.TPid,
 			Tenant: tpDPP.Tenant,
 			ID:     tpDPP.ID,
@@ -2935,14 +2935,14 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 }
 
 // TPHosts
-type TPDispatcherHosts []*TPDispatcherHostMdl
+type DispatcherHostMdls []*DispatcherHostMdl
 
 // CSVHeader return the header for csv fields as a slice of string
-func (tps TPDispatcherHosts) CSVHeader() (result []string) {
+func (tps DispatcherHostMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.TLS}
 }
 
-func (tps TPDispatcherHosts) AsTPDispatcherHosts() (result []*utils.TPDispatcherHost) {
+func (tps DispatcherHostMdls) AsTPDispatcherHosts() (result []*utils.TPDispatcherHost) {
 	hostsMap := make(map[string]*utils.TPDispatcherHost)
 	for _, tp := range tps {
 		if len(tp.Address) == 0 { // empty addres do not populate conns
@@ -2969,11 +2969,11 @@ func (tps TPDispatcherHosts) AsTPDispatcherHosts() (result []*utils.TPDispatcher
 	return
 }
 
-func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls *TPDispatcherHostMdl) {
+func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls *DispatcherHostMdl) {
 	if tpDPH == nil {
 		return
 	}
-	return &TPDispatcherHostMdl{
+	return &DispatcherHostMdl{
 		Tpid:      tpDPH.TPid,
 		Tenant:    tpDPH.Tenant,
 		ID:        tpDPH.ID,
