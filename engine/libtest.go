@@ -287,6 +287,9 @@ cgrates.org,RP1,,,,,,,,,RT_WEEK,,,,,1m,1.234,0.06,1m,1s
 cgrates.org,RP1,,,,,,,,,RT_WEEKEND,,"* * * * 0,6",10,false,0s,0.089,0.06,1m,1s
 cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.0564,0.06,1m,1s
 `
+	ActionProfileCSVContent = `
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+`
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {

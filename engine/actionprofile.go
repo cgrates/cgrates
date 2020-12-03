@@ -53,3 +53,8 @@ type APAction struct {
 	Path      string                 // Path to execute
 	Value     config.RSRParsers      // Value to execute on path
 }
+
+type ActionProfileWithOpts struct {
+	*ActionProfile
+	Opts map[string]interface{}
+}

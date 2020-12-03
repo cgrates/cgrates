@@ -960,6 +960,26 @@ func (iDB *InternalDB) RemoveRateProfileDrv(tenant, id string) (err error) {
 	return
 }
 
+func (iDB *InternalDB) GetActionProfileDrv(tenant, id string) (ap *ActionProfile, err error) {
+	x, ok := Cache.Get(utils.CacheActionProfiles, utils.ConcatenatedKey(tenant, id))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*ActionProfile), nil
+}
+
+func (iDB *InternalDB) SetActionProfileDrv(ap *ActionProfile) (err error) {
+	Cache.SetWithoutReplicate(utils.CacheActionProfiles, ap.TenantID(), ap, nil,
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
+}
+
+func (iDB *InternalDB) RemoveActionProfileDrv(tenant, id string) (err error) {
+	Cache.RemoveWithoutReplicate(utils.CacheActionProfiles, utils.ConcatenatedKey(tenant, id),
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
+}
+
 func (iDB *InternalDB) RemoveLoadIDsDrv() (err error) {
 	return utils.ErrNotImplemented
 }

@@ -3329,6 +3329,138 @@ func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (er
 	return
 }
 
+func (dm *DataManager) GetActionProfile(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (ap *ActionProfile, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheActionProfiles, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*ActionProfile), nil
+		}
+	}
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	ap, err = dm.dataDB.GetActionProfileDrv(tenant, id)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetActionProfile,
+				&utils.TenantIDWithOpts{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					Opts: map[string]interface{}{
+						utils.OptsAPIKey:  itm.APIKey,
+						utils.OptsRouteID: itm.RouteID,
+					}}, &ap); err == nil {
+				err = dm.dataDB.SetActionProfileDrv(ap)
+			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(utils.CacheActionProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+
+			}
+			return nil, err
+		}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(utils.CacheActionProfiles, tntID, ap, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
+		}
+	}
+	return
+}
+
+func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	if withIndex {
+		if brokenReference := dm.checkFilters(ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
+			// if we get a broken filter do not set the profile
+			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
+				brokenReference, ap.TenantID())
+		}
+	}
+	oldRpp, err := dm.GetActionProfile(ap.Tenant, ap.ID, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().SetActionProfileDrv(ap); err != nil {
+		return err
+	}
+	if withIndex {
+		var oldFiltersIDs *[]string
+		if oldRpp != nil {
+			oldFiltersIDs = &oldRpp.FilterIDs
+		}
+		if err := updatedIndexes(dm, utils.CacheActionProfilesFilterIndexes, ap.Tenant,
+			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs); err != nil {
+			return err
+		}
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; itm.Replicate {
+		var reply string
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetActionProfile,
+			&ActionProfileWithOpts{
+				ActionProfile: ap,
+				Opts: map[string]interface{}{
+					utils.OptsAPIKey:  itm.APIKey,
+					utils.OptsRouteID: itm.RouteID,
+				}}, &reply); err != nil {
+			err = utils.CastRPCErr(err)
+			return
+		}
+	}
+	return
+}
+
+func (dm *DataManager) RemoveActionProfile(tenant, id string,
+	transactionID string, withIndex bool) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	oldRpp, err := dm.GetActionProfile(tenant, id, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().RemoveActionProfileDrv(tenant, id); err != nil {
+		return
+	}
+	if oldRpp == nil {
+		return utils.ErrNotFound
+	}
+	if withIndex {
+		if err = removeItemFromFilterIndex(dm, utils.CacheActionProfilesFilterIndexes,
+			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
+			return
+		}
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; itm.Replicate {
+		var reply string
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveActionProfile,
+			&utils.TenantIDWithOpts{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				Opts: map[string]interface{}{
+					utils.OptsAPIKey:  itm.APIKey,
+					utils.OptsRouteID: itm.RouteID,
+				}}, &reply)
+	}
+	return
+}
+
 // Reconnect reconnects to the DB when the config was changed
 func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg) (err error) {
 	d, err := NewDataDBConn(newcfg.DataDbType, newcfg.DataDbHost, newcfg.DataDbPort, newcfg.DataDbName,
