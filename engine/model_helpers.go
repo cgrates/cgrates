@@ -3430,7 +3430,7 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 		mdl.ActionBlocker = action.Blocker
 		mdl.ActionTTL = action.TTL
 		mdl.ActionType = action.Type
-		// convert opts
+		mdl.ActionOpts = action.Opts
 		mdl.ActionPath = action.Path
 		mdl.ActionValue = action.Value
 		mdls = append(mdls, mdl)
@@ -3439,12 +3439,92 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 	return
 }
 
-func APItoActionProfile(tpRp *utils.TPActionProfile, timezone string) (rp *ActionProfile, err error) {
-
-	return rp, nil
+func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *ActionProfile, err error) {
+	ap = &ActionProfile{
+		Tenant:     tpAp.Tenant,
+		ID:         tpAp.ID,
+		FilterIDs:  make([]string, len(tpAp.FilterIDs)),
+		Weight:     tpAp.Weight,
+		Schedule:   tpAp.Schedule,
+		AccountIDs: utils.NewStringSet(tpAp.AccountIDs),
+		Actions:    make([]*APAction, len(tpAp.Actions)),
+	}
+	for i, stp := range tpAp.FilterIDs {
+		ap.FilterIDs[i] = stp
+	}
+	if tpAp.ActivationInterval != nil {
+		if ap.ActivationInterval, err = tpAp.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return
+		}
+	}
+	for i, act := range tpAp.Actions {
+		if act.Path == utils.EmptyString {
+			err = fmt.Errorf("empty path in ActionProfile <%s> for action <%s>", ap.TenantID(), act.ID)
+			return
+		}
+		ap.Actions[i] = &APAction{
+			ID:        act.ID,
+			FilterIDs: act.FilterIDs,
+			Blocker:   act.Blocker,
+			Type:      act.Type,
+			Path:      act.Path,
+		}
+		if ap.Actions[i].TTL, err = utils.ParseDurationWithNanosecs(act.TTL); err != nil {
+			return
+		}
+		if act.Opts != utils.EmptyString {
+			ap.Actions[i].Opts = make(map[string]interface{})
+			for _, opt := range strings.Split(act.Opts, utils.INFIELD_SEP) { // example of opts: key1:val1;key2:val2;key3:val3
+				keyValSls := utils.SplitConcatenatedKey(opt)
+				if len(keyValSls) != 2 {
+					err = fmt.Errorf("malformed option for ActionProfile <%s> for action <%s>", ap.TenantID(), act.ID)
+					return
+				}
+				ap.Actions[i].Opts[keyValSls[0]] = keyValSls[1]
+			}
+		}
+		if ap.Actions[i].Value, err = config.NewRSRParsers(act.Value, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
+			return
+		}
+	}
+	return
 }
 
-func ActionProfileToAPI(rp *ActionProfile) (tpRp *utils.TPActionProfile) {
-
+func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
+	tpAp = &utils.TPActionProfile{
+		Tenant:     ap.Tenant,
+		ID:         ap.ID,
+		Weight:     ap.Weight,
+		Schedule:   ap.Schedule,
+		AccountIDs: ap.AccountIDs.AsSlice(),
+		Actions:    make([]*utils.TPAPAction, len(ap.Actions)),
+	}
+	for i, fli := range ap.FilterIDs {
+		tpAp.FilterIDs[i] = fli
+	}
+	if ap.ActivationInterval != nil {
+		if !ap.ActivationInterval.ActivationTime.IsZero() {
+			tpAp.ActivationInterval.ActivationTime = ap.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !ap.ActivationInterval.ExpiryTime.IsZero() {
+			tpAp.ActivationInterval.ExpiryTime = ap.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
+	}
+	for i, act := range ap.Actions {
+		tpAp.Actions[i] = &utils.TPAPAction{
+			ID:        act.ID,
+			FilterIDs: act.FilterIDs,
+			Blocker:   act.Blocker,
+			TTL:       act.TTL.String(),
+			Type:      act.Type,
+			Path:      act.Path,
+			Value:     act.Value.GetRule(config.CgrConfig().GeneralCfg().RSRSep),
+		}
+		elems := make([]string, len(act.Opts))
+		for k, v := range act.Opts {
+			elems = append(elems, utils.ConcatenatedKey(k, utils.IfaceAsString(v)))
+		}
+		tpAp.Actions[i].Opts = strings.Join(elems, utils.INFIELD_SEP)
+	}
 	return
 }

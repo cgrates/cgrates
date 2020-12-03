@@ -65,6 +65,9 @@ func init() {
 	// RateProfiles
 	gob.Register(new(RateProfile))
 	gob.Register(new(RateProfileWithOpts))
+	// ActionProfiles
+	gob.Register(new(ActionProfile))
+	gob.Register(new(ActionProfileWithOpts))
 
 	// CDRs
 	gob.Register(new(EventCost))

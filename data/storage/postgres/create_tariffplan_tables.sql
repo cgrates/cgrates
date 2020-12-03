@@ -491,6 +491,37 @@ CREATE INDEX tp_routes_unique ON tp_routes  ("tpid",  "tenant", "id",
     "filter_ids", "rate_id");
 
 --
+-- Table structure for table `tp_action_profiles`
+--
+
+
+DROP TABLE IF EXISTS tp_action_profiles;
+CREATE TABLE tp_action_profiles (
+  "pk" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tenant" varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
+  "filter_ids" varchar(64) NOT NULL,
+  "activation_interval" varchar(64) NOT NULL,
+  "weight" decimal(8,2) NOT NULL,
+  "schedule" varchar(64) NOT NULL,
+  "account_ids" varchar(64) NOT NULL,
+  "action_id" varchar(64) NOT NULL,
+  "action_filter_ids" varchar(64) NOT NULL,
+  "action_blocker" BOOLEAN NOT NULL,
+  "action_ttl" varchar(64) NOT NULL,
+  "action_type" varchar(64) NOT NULL,
+  "action_opts" varchar(64) NOT NULL,
+  "action_path" varchar(64) NOT NULL,
+  "action_value" varchar(64) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+  );
+  CREATE INDEX tp_action_profiles_ids ON tp_action_profiles (tpid);
+  CREATE INDEX tp_action_profiles_unique ON tp_action_profiles  ("tpid",  "tenant", "id",
+    "filter_ids", "action_id");
+
+
+--
 -- Table structure for table `versions`
 --
 
