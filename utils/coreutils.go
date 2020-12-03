@@ -216,12 +216,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	case tmStr == "*monthly":
 		return time.Now().AddDate(0, 1, 0), nil // add one month
 	case tmStr == "*monthly_estimated":
-		initialMnt := time.Now().Month()
-		tAfter := time.Now().AddDate(0, 1, 0)
-		for tAfter.Month()-initialMnt > 1 {
-			tAfter = tAfter.AddDate(0, 0, -1)
-		}
-		return tAfter, nil
+		return monthlyEstimated(time.Now())
 	case tmStr == "*yearly":
 		return time.Now().AddDate(1, 0, 0), nil // add one year
 
@@ -294,6 +289,15 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 
 	}
 	return nilTime, errors.New("Unsupported time format")
+}
+
+func monthlyEstimated(t1 time.Time) (time.Time, error) {
+	initialMnt := t1.Month()
+	tAfter := t1.AddDate(0, 1, 0)
+	for tAfter.Month()-initialMnt > 1 {
+		tAfter = tAfter.AddDate(0, 0, -1)
+	}
+	return tAfter, nil
 }
 
 // RoundDuration returns a number equal or larger than the amount that exactly
@@ -403,39 +407,54 @@ func InfieldSplit(val string) []string {
 	return strings.Split(val, INFIELD_SEP)
 }
 
+//Splited Unzip in small functions to have better coverage
 func Unzip(src, dest string) error {
 	r, err := zip.OpenReader(src)
 	if err != nil {
 		return err
 	}
 	defer r.Close()
-
 	for _, f := range r.File {
-		rc, err := f.Open()
-		if err != nil {
-			return err
-		}
-		defer rc.Close()
-
 		path := filepath.Join(dest, f.Name)
 		if f.FileInfo().IsDir() {
 			os.MkdirAll(path, f.Mode())
-		} else {
-			f, err := os.OpenFile(
-				path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-
-			_, err = io.Copy(f, rc)
-			if err != nil {
-				return err
-			}
+			continue
+		}
+		err = unzipFile(f, path, f.Mode())
+		if err != nil {
+			return err
 		}
 	}
+	return err
+}
 
+type zipFile interface {
+	Open() (io.ReadCloser, error)
+}
+
+func unzipFile(f zipFile, path string, fm os.FileMode) (err error) {
+	rc, err := f.Open()
+	if err != nil {
+		return err
+	}
+	err = copyFile(rc, path, fm)
+	rc.Close()
+	if err != nil {
+		return err
+	}
 	return nil
+}
+
+func copyFile(rc io.ReadCloser, path string, fm os.FileMode) (err error) {
+	f, err := os.OpenFile(
+		path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, fm)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = io.Copy(f, rc)
+	return
 }
 
 // successive Fibonacci numbers.
@@ -957,12 +976,10 @@ func AESDecrypt(encrypted string, encKey string) (txt string, err error) {
 // Hash generates the hash text
 func ComputeHash(dataKeys ...string) (lns string, err error) {
 	var hashByts []byte
-	if hashByts, err = bcrypt.GenerateFromPassword(
+	hashByts, err = bcrypt.GenerateFromPassword(
 		[]byte(ConcatenatedKey(dataKeys...)),
-		bcrypt.MinCost); err != nil {
-		return
-	}
-	return string(hashByts), nil
+		bcrypt.MinCost)
+	return string(hashByts), err
 }
 
 // VerifyHash matches the data hash with the dataKeys ha
