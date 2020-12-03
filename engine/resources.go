@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"math/rand"
+	"runtime"
 	"sort"
 	"sync"
 	"time"
@@ -315,12 +316,13 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
 	filterS *FilterS, connMgr *ConnManager) (*ResourceService, error) {
 	return &ResourceService{dm: dm,
-		storedResources: make(utils.StringMap),
+		storedResources: make(utils.StringSet),
 		cgrcfg:          cgrcfg,
 		filterS:         filterS,
 		loopStoped:      make(chan struct{}),
 		stopBackup:      make(chan struct{}),
-		connMgr:         connMgr}, nil
+		connMgr:         connMgr,
+	}, nil
 
 }
 
@@ -328,7 +330,7 @@ func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
 type ResourceService struct {
 	dm              *DataManager // So we can load the data in cache and index it
 	filterS         *FilterS
-	storedResources utils.StringMap // keep a record of resources which need saving, map[resID]bool
+	storedResources utils.StringSet // keep a record of resources which need saving, map[resID]bool
 	srMux           sync.RWMutex    // protects storedResources
 	cgrcfg          *config.CGRConfig
 	stopBackup      chan struct{} // control storing process
@@ -374,7 +376,7 @@ func (rS *ResourceService) storeResources() {
 		rS.srMux.Lock()
 		rID := rS.storedResources.GetOne()
 		if rID != "" {
-			delete(rS.storedResources, rID)
+			rS.storedResources.Remove(rID)
 		}
 		rS.srMux.Unlock()
 		if rID == "" {
@@ -386,13 +388,11 @@ func (rS *ResourceService) storeResources() {
 			failedRIDs = append(failedRIDs, rID) // record failure so we can schedule it for next backup
 		}
 		// randomize the CPU load and give up thread control
-		time.Sleep(time.Duration(rand.Intn(1000)) * time.Nanosecond)
+		runtime.Gosched()
 	}
 	if len(failedRIDs) != 0 { // there were errors on save, schedule the keys for next backup
 		rS.srMux.Lock()
-		for _, rID := range failedRIDs {
-			rS.storedResources[rID] = true
-		}
+		rS.storedResources.AddSlice(failedRIDs)
 		rS.srMux.Unlock()
 	}
 }
@@ -715,7 +715,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 		} else {
 			*r.dirty = true // mark it to be saved
 			rS.srMux.Lock()
-			rS.storedResources[r.TenantID()] = true
+			rS.storedResources.Add(r.TenantID())
 			rS.srMux.Unlock()
 		}
 		if err = rS.processThresholds(r, args.Opts); err != nil {
@@ -782,7 +782,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 				}
 			} else {
 				*r.dirty = true // mark it to be saved
-				rS.storedResources[r.TenantID()] = true
+				rS.storedResources.Add(r.TenantID())
 			}
 		}
 		if err = rS.processThresholds(r, args.Opts); err != nil {

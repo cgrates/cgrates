@@ -34,7 +34,7 @@ func (m *Migrator) migrateCurrentDestinations() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.DESTINATION_PREFIX)
-		dst, err := m.dmIN.DataManager().GetDestination(idg, true, utils.NonTransactional)
+		dst, err := m.dmIN.DataManager().GetDestination(idg, false, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -109,7 +109,7 @@ func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 			continue
 		}
 		for _, rdid := range rdst {
-			rdstn, err := m.dmIN.DataManager().GetDestination(rdid, true, utils.NonTransactional)
+			rdstn, err := m.dmIN.DataManager().GetDestination(rdid, false, true, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -122,7 +122,7 @@ func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 			if err := m.dmOut.DataManager().SetReverseDestination(rdstn, utils.NonTransactional); err != nil {
 				return err
 			}
-			m.stats[utils.ReverseDestinations] += 1
+			m.stats[utils.ReverseDestinations]++
 		}
 	}
 	return

@@ -20,7 +20,7 @@ package engine
 
 import (
 	"fmt"
-	"math/rand"
+	"runtime"
 	"sync"
 	"time"
 
@@ -38,9 +38,10 @@ func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
 		connMgr:          connMgr,
 		filterS:          filterS,
 		cgrcfg:           cgrcfg,
-		storedStatQueues: make(utils.StringMap),
+		storedStatQueues: make(utils.StringSet),
 		loopStoped:       make(chan struct{}),
-		stopBackup:       make(chan struct{})}, nil
+		stopBackup:       make(chan struct{}),
+	}, nil
 }
 
 // StatService builds stats for events
@@ -51,7 +52,7 @@ type StatService struct {
 	cgrcfg           *config.CGRConfig
 	loopStoped       chan struct{}
 	stopBackup       chan struct{}
-	storedStatQueues utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
+	storedStatQueues utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
 	ssqMux           sync.RWMutex    // protects storedStatQueues
 }
 
@@ -89,13 +90,12 @@ func (sS *StatService) storeStats() {
 		sS.ssqMux.Lock()
 		sID := sS.storedStatQueues.GetOne()
 		if sID != "" {
-			delete(sS.storedStatQueues, sID)
+			sS.storedStatQueues.Remove(sID)
 		}
 		sS.ssqMux.Unlock()
 		if sID == "" {
 			break // no more keys, backup completed
 		}
-		lkID := utils.StatQueuePrefix + sID
 		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
 			if sqIf, ok := Cache.Get(utils.CacheStatQueues, sID); !ok || sqIf == nil {
 				utils.Logger.Warning(
@@ -105,15 +105,13 @@ func (sS *StatService) storeStats() {
 				failedSqIDs = append(failedSqIDs, sID) // record failure so we can schedule it for next backup
 			}
 			return
-		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
+		}, sS.cgrcfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sID)
 		// randomize the CPU load and give up thread control
-		time.Sleep(time.Duration(rand.Intn(1000)) * time.Nanosecond)
+		runtime.Gosched()
 	}
 	if len(failedSqIDs) != 0 { // there were errors on save, schedule the keys for next backup
 		sS.ssqMux.Lock()
-		for _, sqID := range failedSqIDs {
-			sS.storedStatQueues[sqID] = true
-		}
+		sS.storedStatQueues.AddSlice(failedSqIDs)
 		sS.ssqMux.Unlock()
 	}
 }
@@ -273,7 +271,7 @@ func (sS *StatService) storeStatQueue(sq *StatQueue) {
 			sS.StoreStatQueue(sq)
 		} else {
 			sS.ssqMux.Lock()
-			sS.storedStatQueues[sq.TenantID()] = true
+			sS.storedStatQueues.Add(sq.TenantID())
 			sS.ssqMux.Unlock()
 		}
 	}

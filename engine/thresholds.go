@@ -20,7 +20,7 @@ package engine
 
 import (
 	"fmt"
-	"math/rand"
+	"runtime"
 	"sort"
 	"sync"
 	"time"
@@ -142,7 +142,8 @@ func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *Fil
 		filterS:     filterS,
 		stopBackup:  make(chan struct{}),
 		loopStoped:  make(chan struct{}),
-		storedTdIDs: make(utils.StringMap)}, nil
+		storedTdIDs: make(utils.StringSet),
+	}, nil
 }
 
 // ThresholdService manages Threshold execution and storing them to dataDB
@@ -152,7 +153,7 @@ type ThresholdService struct {
 	filterS     *FilterS
 	stopBackup  chan struct{}
 	loopStoped  chan struct{}
-	storedTdIDs utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
+	storedTdIDs utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
 	stMux       sync.RWMutex    // protects storedTdIDs
 }
 
@@ -190,7 +191,7 @@ func (tS *ThresholdService) storeThresholds() {
 		tS.stMux.Lock()
 		tID := tS.storedTdIDs.GetOne()
 		if tID != "" {
-			delete(tS.storedTdIDs, tID)
+			tS.storedTdIDs.Remove(tID)
 		}
 		tS.stMux.Unlock()
 		if tID == "" {
@@ -202,13 +203,11 @@ func (tS *ThresholdService) storeThresholds() {
 			failedTdIDs = append(failedTdIDs, tID) // record failure so we can schedule it for next backup
 		}
 		// randomize the CPU load and give up thread control
-		time.Sleep(time.Duration(rand.Intn(1000)) * time.Nanosecond)
+		runtime.Gosched()
 	}
 	if len(failedTdIDs) != 0 { // there were errors on save, schedule the keys for next backup
 		tS.stMux.Lock()
-		for _, tID := range failedTdIDs {
-			tS.storedTdIDs[tID] = true
-		}
+		tS.storedTdIDs.AddSlice(failedTdIDs)
 		tS.stMux.Unlock()
 	}
 }
@@ -371,7 +370,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcess
 			tS.StoreThreshold(t)
 		} else {
 			tS.stMux.Lock()
-			tS.storedTdIDs[t.TenantID()] = true
+			tS.storedTdIDs.Add(t.TenantID())
 			tS.stMux.Unlock()
 		}
 	}
@@ -493,7 +492,7 @@ func (tS *ThresholdService) V1ResetThreshold(tntID *utils.TenantID, rply *string
 			}
 		} else {
 			tS.stMux.Lock()
-			tS.storedTdIDs[thd.TenantID()] = true
+			tS.storedTdIDs.Add(thd.TenantID())
 			tS.stMux.Unlock()
 		}
 	}

@@ -61,7 +61,6 @@ type TpReader struct {
 	resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues         []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
-	revDests           map[string][]string
 	acntActionPlans    map[string][]string
 	cacheConns         []string
 	schedulerConns     []string
@@ -110,7 +109,6 @@ func (tpr *TpReader) Init() {
 	tpr.rateProfiles = make(map[utils.TenantID]*utils.TPRateProfile)
 	tpr.actionProfiles = make(map[utils.TenantID]*utils.TPActionProfile)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
-	tpr.revDests = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
 }
 
@@ -143,12 +141,6 @@ func (tpr *TpReader) LoadDestinations() (err error) {
 	}
 	for _, tpDst := range tps {
 		tpr.destinations[tpDst.ID] = NewDestinationFromTPDestination(tpDst)
-		for _, prfx := range tpr.destinations[tpDst.ID].Prefixes {
-			if _, hasIt := tpr.revDests[prfx]; !hasIt {
-				tpr.revDests[prfx] = make([]string, 0)
-			}
-			tpr.revDests[prfx] = append(tpr.revDests[prfx], tpDst.ID)
-		}
 	}
 	return
 }
@@ -213,7 +205,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 	return nil
 }
 
-// Returns true, nil in case of load success, false, nil in case of RatingPlan  not found dataStorage
+// LoadRatingPlansFiltered returns true, nil in case of load success, false, nil in case of RatingPlan  not found dataStorage
 func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 	mpRpls, err := tpr.lr.GetTPRatingPlans(tpr.tpid, tag, nil)
 	if err != nil {
@@ -282,11 +274,8 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 					}
 				}
 
-				dms := make([]*Destination, len(tpDests))
-				for i, tpDst := range tpDests {
-					dms[i] = NewDestinationFromTPDestination(tpDst)
-				}
-				for _, destination := range dms {
+				for _, tpDst := range tpDests {
+					destination := NewDestinationFromTPDestination(tpDst)
 					tpr.dm.SetDestination(destination, utils.NonTransactional)
 					tpr.dm.SetReverseDestination(destination, utils.NonTransactional)
 				}
@@ -1411,7 +1400,7 @@ func (tpr *TpReader) IsValid() (valid bool) {
 	return
 }
 
-func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) {
+func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	if tpr.dm.dataDB == nil {
 		return errors.New("no database connection")
 	}
@@ -1422,7 +1411,8 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 		log.Print("Destinations:")
 	}
 	for _, d := range tpr.destinations {
-		if err = tpr.dm.SetDestination(d, utils.NonTransactional); err != nil {
+		fmt.Println(d.Id)
+		if err = tpr.setDestination(d, disableReverse, utils.NonTransactional); err != nil {
 			return
 		}
 		if verbose {
@@ -1431,15 +1421,9 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 	}
 	if len(tpr.destinations) != 0 {
 		loadIDs[utils.CacheDestinations] = loadID
-	}
-	if len(tpr.revDests) != 0 {
 		loadIDs[utils.CacheReverseDestinations] = loadID
 	}
 	if verbose {
-		log.Print("Reverse Destinations:")
-		for id, vals := range tpr.revDests {
-			log.Printf("\t %s : %+v", id, vals)
-		}
 		log.Print("Rating Plans:")
 	}
 	for _, rp := range tpr.ratingPlans {
@@ -1871,15 +1855,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 	if len(tpr.timings) != 0 {
 		loadIDs[utils.CacheTimings] = loadID
 	}
-	if !disable_reverse {
-		if len(tpr.destinations) > 0 {
-			if verbose {
-				log.Print("Rebuilding reverse destinations")
-			}
-			if err = tpr.dm.DataDB().RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
-				return
-			}
-		}
+	if !disableReverse {
 		if len(tpr.acntActionPlans) > 0 {
 			if verbose {
 				log.Print("Rebuilding account action plans")
@@ -1979,13 +1955,13 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		}
 		return keys, nil
 	case utils.REVERSE_DESTINATION_PREFIX:
-		keys := make([]string, len(tpr.revDests))
-		i := 0
-		for k := range tpr.revDests {
-			keys[i] = k
-			i++
+		keys := utils.StringSet{}
+		for _, dst := range tpr.destinations {
+			for _, prfx := range dst.Prefixes {
+				keys.Add(prfx)
+			}
 		}
-		return keys, nil
+		return keys.AsSlice(), nil
 	case utils.RATING_PLAN_PREFIX:
 		keys := make([]string, len(tpr.ratingPlans))
 		i := 0
@@ -2136,24 +2112,19 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	return nil, errors.New("Unsupported load category")
 }
 
-func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err error) {
+func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error) {
 	loadID := time.Now().UnixNano()
 	loadIDs := make(map[string]int64)
 	for _, d := range tpr.destinations {
 		if err = tpr.dm.RemoveDestination(d.Id, utils.NonTransactional); err != nil {
+			fmt.Println("delete", d.Id)
 			return
 		}
 		if verbose {
 			log.Print("\t", d.Id, " : ", d.Prefixes)
 		}
 	}
-	if verbose {
-		log.Print("Reverse Destinations:")
-		for id, vals := range tpr.revDests {
-			log.Printf("\t %s : %+v", id, vals)
-		}
-		log.Print("Rating Plans:")
-	}
+	fmt.Println(4)
 	for _, rp := range tpr.ratingPlans {
 		if err = tpr.dm.RemoveRatingPlan(rp.Id, utils.NonTransactional); err != nil {
 			return
@@ -2399,12 +2370,13 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			log.Print("\t", t.ID)
 		}
 	}
-	if !disable_reverse {
+	if !disableReverse {
 		if len(tpr.destinations) > 0 {
 			if verbose {
 				log.Print("Removing reverse destinations")
 			}
 			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+				fmt.Println(1)
 				return
 			}
 		}
@@ -2417,6 +2389,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			}
 		}
 	}
+	fmt.Println(2)
 	//We remove the filters at the end because of indexes
 	if verbose {
 		log.Print("Filters:")
@@ -2432,8 +2405,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	}
 	if len(tpr.destinations) != 0 {
 		loadIDs[utils.CacheDestinations] = loadID
-	}
-	if len(tpr.revDests) != 0 {
 		loadIDs[utils.CacheReverseDestinations] = loadID
 	}
 	if len(tpr.ratingPlans) != 0 {
@@ -2762,4 +2733,20 @@ func (tpr *TpReader) addDefaultTimings() {
 		EndTime:   "",
 	}
 
+}
+
+func (tpr *TpReader) setDestination(dest *Destination, disableReverse bool, transID string) (err error) {
+	if disableReverse {
+		return tpr.dm.SetDestination(dest, transID)
+	}
+	var oldDest *Destination
+	if oldDest, err = tpr.dm.GetDestination(dest.Id, true, false, transID); err != nil &&
+		err != utils.ErrNotFound {
+		return
+	}
+	if err = tpr.dm.SetDestination(dest, transID); err != nil {
+		fmt.Println(10)
+		return
+	}
+	return tpr.dm.UpdateReverseDestination(oldDest, dest, transID)
 }

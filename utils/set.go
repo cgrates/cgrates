@@ -101,3 +101,11 @@ func (s StringSet) Clone() (cln StringSet) {
 	}
 	return
 }
+
+// GetOne returns a key from set
+func (s StringSet) GetOne() string {
+	for k := range s {
+		return k
+	}
+	return EmptyString
+}

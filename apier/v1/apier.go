@@ -61,7 +61,7 @@ func (apierSv1 *APIerSv1) Call(serviceMethod string,
 }
 
 func (apierSv1 *APIerSv1) GetDestination(dstId *string, reply *engine.Destination) error {
-	if dst, err := apierSv1.DataManager.GetDestination(*dstId, false, utils.NonTransactional); err != nil {
+	if dst, err := apierSv1.DataManager.GetDestination(*dstId, true, true, utils.NonTransactional); err != nil {
 		return utils.ErrNotFound
 	} else {
 		*reply = *dst
@@ -141,7 +141,7 @@ func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply 
 	}
 	dest := &engine.Destination{Id: attrs.Id, Prefixes: attrs.Prefixes}
 	var oldDest *engine.Destination
-	if oldDest, err = apierSv1.DataManager.GetDestination(attrs.Id, false, utils.NonTransactional); err != nil {
+	if oldDest, err = apierSv1.DataManager.GetDestination(attrs.Id, true, true, utils.NonTransactional); err != nil {
 		if err != utils.ErrNotFound {
 			return utils.NewErrServerError(err)
 		}
