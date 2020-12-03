@@ -1492,7 +1492,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			if err := csvWriter.Write(engine.TPAttributes{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.AttributeMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
@@ -1530,7 +1530,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			if err := csvWriter.Write(engine.TPChargers{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.ChargerMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
@@ -1568,7 +1568,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			if err := csvWriter.Write(engine.TPDispatcherProfiles{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.DispatcherProfileMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
@@ -1606,7 +1606,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSV_SEP
 			//write the header of the file
-			if err := csvWriter.Write(engine.TPDispatcherHosts{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.DispatcherHostMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {

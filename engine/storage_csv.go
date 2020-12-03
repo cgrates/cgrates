@@ -606,9 +606,9 @@ func (csvs *CSVStorage) GetTPRoutes(tpid, tenant, id string) ([]*utils.TPRoutePr
 }
 
 func (csvs *CSVStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAttributeProfile, error) {
-	var tpAls TPAttributes
-	if err := csvs.proccesData(TPAttributeMdl{}, csvs.attributeProfilesFn, func(tp interface{}) {
-		attributeProfile := tp.(TPAttributeMdl)
+	var tpAls AttributeMdls
+	if err := csvs.proccesData(AttributeMdl{}, csvs.attributeProfilesFn, func(tp interface{}) {
+		attributeProfile := tp.(AttributeMdl)
 		attributeProfile.Tpid = tpid
 		tpAls = append(tpAls, &attributeProfile)
 	}); err != nil {
@@ -618,9 +618,9 @@ func (csvs *CSVStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAtt
 }
 
 func (csvs *CSVStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPChargerProfile, error) {
-	var tpCPPs TPChargers
-	if err := csvs.proccesData(TPChargerMdl{}, csvs.chargerProfilesFn, func(tp interface{}) {
-		cpp := tp.(TPChargerMdl)
+	var tpCPPs ChargerMdls
+	if err := csvs.proccesData(ChargerMdl{}, csvs.chargerProfilesFn, func(tp interface{}) {
+		cpp := tp.(ChargerMdl)
 		cpp.Tpid = tpid
 		tpCPPs = append(tpCPPs, &cpp)
 	}); err != nil {
@@ -630,9 +630,9 @@ func (csvs *CSVStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPCharg
 }
 
 func (csvs *CSVStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
-	var tpDPPs TPDispatcherProfiles
-	if err := csvs.proccesData(TPDispatcherProfileMdl{}, csvs.dispatcherProfilesFn, func(tp interface{}) {
-		dpp := tp.(TPDispatcherProfileMdl)
+	var tpDPPs DispatcherProfileMdls
+	if err := csvs.proccesData(DispatcherProfileMdl{}, csvs.dispatcherProfilesFn, func(tp interface{}) {
+		dpp := tp.(DispatcherProfileMdl)
 		dpp.Tpid = tpid
 		tpDPPs = append(tpDPPs, &dpp)
 	}); err != nil {
@@ -642,9 +642,9 @@ func (csvs *CSVStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*uti
 }
 
 func (csvs *CSVStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.TPDispatcherHost, error) {
-	var tpDDHs TPDispatcherHosts
-	if err := csvs.proccesData(TPDispatcherHostMdl{}, csvs.dispatcherHostsFn, func(tp interface{}) {
-		dpp := tp.(TPDispatcherHostMdl)
+	var tpDDHs DispatcherHostMdls
+	if err := csvs.proccesData(DispatcherHostMdl{}, csvs.dispatcherHostsFn, func(tp interface{}) {
+		dpp := tp.(DispatcherHostMdl)
 		dpp.Tpid = tpid
 		tpDDHs = append(tpDDHs, &dpp)
 	}); err != nil {
