@@ -62,9 +62,7 @@ func (_ raceConn) Call(serviceMethod string, args interface{}, reply interface{}
 func TestSessionSRace(t *testing.T) {
 	// config
 	var err error
-	if cfg, err = config.NewDefaultCGRConfig(); err != nil {
-		t.Fatal(err)
-	}
+	cfg = config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}

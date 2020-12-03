@@ -160,30 +160,6 @@ func TestLoadDestinations(t *testing.T) {
 	}
 }
 
-func TestLoadReverseDestinations(t *testing.T) {
-	eRevDsts := map[string][]string{
-		"444":     {"EU_LANDLINE"},
-		"0257":    {"NAT"},
-		"112":     {"URG"},
-		"49":      {"ALL GERMANY"},
-		"+4972":   {"PSTN_72"},
-		"999":     {"EXOTIC"},
-		"+4970":   {"PSTN_70"},
-		"41":      {"ALL GERMANY_O2"},
-		"0724":    {"RET"},
-		"0723045": {"SPEC"},
-		"43":      {"GERMANY_PREMIUM ALL"},
-		"0256":    {"NAT"},
-		"+49":     {"NAT"},
-		"+4971":   {"PSTN_71"},
-		"447956":  {"DST_UK_Mobile_BIG5"},
-		"0723":    {"RET NAT"},
-	}
-	if len(eRevDsts) != len(csvr.revDests) {
-		t.Errorf("Expecting: %+v, received: %+v", eRevDsts, csvr.revDests)
-	}
-}
-
 func TestLoadTimimgs(t *testing.T) {
 	if len(csvr.timings) != 14 {
 		t.Error("Failed to load timings: ", csvr.timings)

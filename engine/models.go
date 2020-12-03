@@ -538,7 +538,7 @@ type RateProfileMdl struct {
 	CreatedAt time.Time
 }
 
-func (_ RateProfileMdl) TableName() string {
+func (RateProfileMdl) TableName() string {
 	return utils.TBLTPRateProfiles
 }
 
@@ -564,6 +564,6 @@ type ActionProfileMdl struct {
 	CreatedAt time.Time
 }
 
-func (_ ActionProfileMdl) TableName() string {
+func (ActionProfileMdl) TableName() string {
 	return utils.TBLTPActionProfiles
 }

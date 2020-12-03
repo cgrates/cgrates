@@ -49,7 +49,7 @@ func (rplSv1 *ReplicatorSv1) GetAccount(args *utils.StringWithOpts, reply *engin
 
 //GetDestination
 func (rplSv1 *ReplicatorSv1) GetDestination(key *utils.StringWithOpts, reply *engine.Destination) error {
-	if rcv, err := rplSv1.dm.DataDB().GetDestinationDrv(key.Arg, true, utils.NonTransactional); err != nil {
+	if rcv, err := rplSv1.dm.DataDB().GetDestinationDrv(key.Arg, utils.NonTransactional); err != nil {
 		return err
 	} else {
 		*reply = *rcv

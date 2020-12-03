@@ -510,7 +510,7 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 		}
 
 		newDest := &Destination{Id: ddcDestID, Prefixes: destinations.AsSlice()}
-		oldDest, err := dm.GetDestination(ddcDestID, false, utils.NonTransactional)
+		oldDest, err := dm.GetDestination(ddcDestID, true, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

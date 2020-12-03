@@ -73,7 +73,7 @@ func TestMsgpackTime(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixShort(t *testing.T) {
-	dest, err := dm.GetDestination("NAT", true, utils.NonTransactional)
+	dest, err := dm.GetDestination("NAT", false, true, utils.NonTransactional)
 	precision := dest.containsPrefix("0723")
 	if err != nil || precision != 4 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -81,7 +81,7 @@ func TestStorageDestinationContainsPrefixShort(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixLong(t *testing.T) {
-	dest, err := dm.GetDestination("NAT", true, utils.NonTransactional)
+	dest, err := dm.GetDestination("NAT", false, true, utils.NonTransactional)
 	precision := dest.containsPrefix("0723045326")
 	if err != nil || precision != 4 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -89,7 +89,7 @@ func TestStorageDestinationContainsPrefixLong(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
-	dest, err := dm.GetDestination("NAT", true, utils.NonTransactional)
+	dest, err := dm.GetDestination("NAT", false, true, utils.NonTransactional)
 	precision := dest.containsPrefix("072")
 	if err != nil || precision != 0 {
 		t.Error("Error finding prefix: ", err, precision)

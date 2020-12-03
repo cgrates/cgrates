@@ -219,7 +219,7 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		for _, key := range keys {
-			dest, err := rs.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
+			dest, err := rs.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -266,7 +266,7 @@ func (rs *RedisStorage) RemoveReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		for _, key := range keys {
-			dest, err := rs.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
+			dest, err := rs.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -441,24 +441,11 @@ func (rs *RedisStorage) RemoveRatingProfileDrv(key string) (err error) {
 }
 
 // GetDestination retrieves a destination with id from  tp_db
-func (rs *RedisStorage) GetDestinationDrv(key string, skipCache bool,
-	transactionID string) (dest *Destination, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheDestinations, key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*Destination), nil
-		}
-	}
+func (rs *RedisStorage) GetDestinationDrv(key, transactionID string) (dest *Destination, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redis_GET, utils.DESTINATION_PREFIX+key); err != nil {
 		return
 	} else if len(values) == 0 {
-		if errCh := Cache.Set(utils.CacheDestinations, key, nil, nil,
-			cacheCommit(transactionID), transactionID); errCh != nil {
-			return nil, errCh
-		}
 		err = utils.ErrNotFound
 		return
 	}
@@ -472,11 +459,7 @@ func (rs *RedisStorage) GetDestinationDrv(key string, skipCache bool,
 		return
 	}
 	r.Close()
-	if err = rs.ms.Unmarshal(out, &dest); err != nil {
-		return
-	}
-	err = Cache.Set(utils.CacheDestinations, key, dest, nil,
-		cacheCommit(transactionID), transactionID)
+	err = rs.ms.Unmarshal(out, &dest)
 	return
 }
 
@@ -531,7 +514,7 @@ func (rs *RedisStorage) SetReverseDestinationDrv(dest *Destination, transactionI
 func (rs *RedisStorage) RemoveDestinationDrv(destID, transactionID string) (err error) {
 	// get destination for prefix list
 	var d *Destination
-	if d, err = rs.GetDestinationDrv(destID, false, transactionID); err != nil {
+	if d, err = rs.GetDestinationDrv(destID, transactionID); err != nil {
 		return
 	}
 	if err = rs.Cmd(nil, redis_DEL, utils.DESTINATION_PREFIX+destID); err != nil {
@@ -553,43 +536,13 @@ func (rs *RedisStorage) RemoveDestinationDrv(destID, transactionID string) (err 
 	return
 }
 
-func (rs *RedisStorage) UpdateReverseDestinationDrv(oldDest, newDest *Destination, transactionID string) (err error) {
-	//log.Printf("Old: %+v, New: %+v", oldDest, newDest)
-	var obsoletePrefixes []string
-	var addedPrefixes []string
-	var found bool
-	if oldDest == nil {
-		oldDest = new(Destination) // so we can process prefixes
-	}
-	for _, oldPrefix := range oldDest.Prefixes {
-		found = false
-		for _, newPrefix := range newDest.Prefixes {
-			if oldPrefix == newPrefix {
-				found = true
-				break
-			}
-		}
-		if !found {
-			obsoletePrefixes = append(obsoletePrefixes, oldPrefix)
-		}
-	}
-	for _, newPrefix := range newDest.Prefixes {
-		found = false
-		for _, oldPrefix := range oldDest.Prefixes {
-			if newPrefix == oldPrefix {
-				found = true
-				break
-			}
-		}
-		if !found {
-			addedPrefixes = append(addedPrefixes, newPrefix)
-		}
-	}
+func (rs *RedisStorage) UpdateReverseDestinationDrv(dstID string,
+	obsoletePrefixes, addedPrefixes []string, transactionID string) (err error) {
 	// remove id for all obsolete prefixes
 	cCommit := cacheCommit(transactionID)
 	for _, obsoletePrefix := range obsoletePrefixes {
 		if err = rs.Cmd(nil, redis_SREM,
-			utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, oldDest.Id); err != nil {
+			utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, dstID); err != nil {
 			return
 		}
 		if err = Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
@@ -600,7 +553,7 @@ func (rs *RedisStorage) UpdateReverseDestinationDrv(oldDest, newDest *Destinatio
 
 	// add the id to all new prefixes
 	for _, addedPrefix := range addedPrefixes {
-		if err = rs.Cmd(nil, redis_SADD, utils.REVERSE_DESTINATION_PREFIX+addedPrefix, newDest.Id); err != nil {
+		if err = rs.Cmd(nil, redis_SADD, utils.REVERSE_DESTINATION_PREFIX+addedPrefix, dstID); err != nil {
 			return
 		}
 	}

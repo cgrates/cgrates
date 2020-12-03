@@ -606,13 +606,13 @@ func testOnStorITRatingProfile(t *testing.T) {
 
 func testOnStorITCRUDDestinations(t *testing.T) {
 	dst := &Destination{Id: "CRUDDestination2", Prefixes: []string{"+491", "+492", "+493"}}
-	if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetDestination(dst.Id, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetDestination(dst.Id, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetDestination(dst.Id, false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dst, rcv) {
 		t.Errorf("Expecting: %v, received: %v", dst, rcv)
@@ -637,14 +637,14 @@ func testOnStorITCRUDDestinations(t *testing.T) {
 	if err = onStor.RemoveDestination(dst.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetDestination(dst.Id, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
 
 func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	dst := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+494", "+495", "+496"}}
-	dst2 := &Destination{Id: "CRUDReverseDestination2", Prefixes: []string{"+497", "+498", "+499"}}
+	dst2 := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+497", "+498", "+499"}}
 	if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}

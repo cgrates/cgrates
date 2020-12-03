@@ -252,7 +252,7 @@ func (apiv2 *APIerSv2) GetDestinations(attr *AttrGetDestinations, reply *[]*engi
 	}
 	dests := make([]*engine.Destination, len(attr.DestinationIDs))
 	for i, destID := range attr.DestinationIDs {
-		if dests[i], err = apiv2.DataManager.GetDestination(destID, false, utils.NonTransactional); err != nil {
+		if dests[i], err = apiv2.DataManager.GetDestination(destID, true, true, utils.NonTransactional); err != nil {
 			return
 		}
 	}
