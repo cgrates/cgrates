@@ -312,9 +312,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	case utils.MetaResources:
 		cacheIDs = []string{utils.CacheResourceFilterIndexes}
 		for _, lDataSet := range lds {
-			resModels := make(engine.TpResources, len(lDataSet))
+			resModels := make(engine.ResourceMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				resModels[i] = new(engine.TpResourceMdl)
+				resModels[i] = new(engine.ResourceMdl)
 				if err = utils.UpdateStructWithIfaceMap(resModels[i], ld); err != nil {
 					return
 				}
@@ -351,9 +351,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		}
 	case utils.MetaFilters:
 		for _, lDataSet := range lds {
-			fltrModels := make(engine.TpFilterS, len(lDataSet))
+			fltrModels := make(engine.FilterMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				fltrModels[i] = new(engine.TpFilterMdl)
+				fltrModels[i] = new(engine.FilterMdl)
 				if err = utils.UpdateStructWithIfaceMap(fltrModels[i], ld); err != nil {
 					return
 				}
@@ -381,9 +381,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	case utils.MetaStats:
 		cacheIDs = []string{utils.CacheStatFilterIndexes}
 		for _, lDataSet := range lds {
-			stsModels := make(engine.TpStats, len(lDataSet))
+			stsModels := make(engine.StatMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				stsModels[i] = new(engine.TpStatMdl)
+				stsModels[i] = new(engine.StatMdl)
 				if err = utils.UpdateStructWithIfaceMap(stsModels[i], ld); err != nil {
 					return
 				}
@@ -427,9 +427,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	case utils.MetaThresholds:
 		cacheIDs = []string{utils.CacheThresholdFilterIndexes}
 		for _, lDataSet := range lds {
-			thModels := make(engine.TpThresholds, len(lDataSet))
+			thModels := make(engine.ThresholdMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				thModels[i] = new(engine.TpThresholdMdl)
+				thModels[i] = new(engine.ThresholdMdl)
 				if err = utils.UpdateStructWithIfaceMap(thModels[i], ld); err != nil {
 					return
 				}
@@ -460,9 +460,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	case utils.MetaRoutes:
 		cacheIDs = []string{utils.CacheRouteFilterIndexes}
 		for _, lDataSet := range lds {
-			sppModels := make(engine.TPRoutes, len(lDataSet))
+			sppModels := make(engine.RouteMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				sppModels[i] = new(engine.TpRouteMdl)
+				sppModels[i] = new(engine.RouteMdl)
 				if err = utils.UpdateStructWithIfaceMap(sppModels[i], ld); err != nil {
 					return
 				}
