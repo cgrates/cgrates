@@ -5266,6 +5266,46 @@ func TestAPItoModelTPDispatcherProfileCase2(t *testing.T) {
 	}
 	result := APItoModelTPDispatcherProfile(structTest)
 	if !reflect.DeepEqual(result, expStruct) {
-		t.Errorf("\nExpecting <%T>,\n Received <%T>", expStruct, result)
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestStatMdlsCSVHeader(t *testing.T) {
+	testStruct := ResourceMdls{
+		{
+			Tpid:               "TEST_TPID",
+			Tenant:             "cgrates.org",
+			ID:                 "ResGroup1",
+			FilterIDs:          "FLTR_RES_GR1",
+			ActivationInterval: "2014-07-29T15:00:00Z",
+			Stored:             false,
+			Blocker:            false,
+			Weight:             10.0,
+			Limit:              "45",
+			ThresholdIDs:       "WARN_RES1;WARN_RES1",
+		},
+	}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.UsageTTL, utils.Limit, utils.AllocationMessage, utils.Blocker, utils.Stored,
+		utils.Weight, utils.ThresholdIDs}
+	result := testStruct.CSVHeader()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestThresholdMdlsCSVHeader(t *testing.T) {
+	testStruct := ThresholdMdls{
+		{
+			Tpid:   "test_tpid",
+			Tenant: "test_tenant",
+		},
+	}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.MaxHits, utils.MinHits, utils.MinSleep,
+		utils.Blocker, utils.Weight, utils.ActionIDs, utils.Async}
+	result := testStruct.CSVHeader()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
