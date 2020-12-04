@@ -123,24 +123,6 @@ func TestDestinationNonCachedDestWrongPrefix(t *testing.T) {
 	}
 }
 
-/*
-func TestCleanStalePrefixes(t *testing.T) {
-	x := struct{}{}
-	cache.Set(utils.DESTINATION_PREFIX+"1", map[string]struct{}{"D1": x, "D2": x})
-	cache.Set(utils.DESTINATION_PREFIX+"2", map[string]struct{}{"D1": x})
-	cache.Set(utils.DESTINATION_PREFIX+"3", map[string]struct{}{"D2": x})
-	CleanStalePrefixes([]string{"D1"})
-	if r, ok := cache.Get(utils.DESTINATION_PREFIX + "1"); !ok || len(r.(map[string]struct{})) != 1 {
-		t.Error("Error cleaning stale destination ids", r)
-	}
-	if r, ok := cache.Get(utils.DESTINATION_PREFIX + "2"); ok {
-		t.Error("Error removing stale prefix: ", r)
-	}
-	if r, ok := cache.Get(utils.DESTINATION_PREFIX + "3"); !ok || len(r.(map[string]struct{})) != 1 {
-		t.Error("Error performing stale cleaning: ", r)
-	}
-}*/
-
 /********************************* Benchmarks **********************************/
 
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {

@@ -110,7 +110,7 @@ func TestFromJSONArraySpace(t *testing.T) {
 }
 
 func TestGetStringValue(t *testing.T) {
-	dflt := map[string]struct{}{}
+	dflt := utils.StringSet{}
 	expected := "10"
 	if rply := getStringValue(int64(10), dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
@@ -153,7 +153,7 @@ func TestGetStringValue(t *testing.T) {
 	expected = `{"ID":"id1","TimeValue":"1s"}`
 	if rply := getStringValue(map[string]interface{}{
 		"ID":        "id1",
-		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": {}}); rply != expected {
+		"TimeValue": int64(time.Second)}, utils.StringSet{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
@@ -164,7 +164,7 @@ func TestGetStringValue(t *testing.T) {
 }
 
 func TestGetSliceAsString(t *testing.T) {
-	dflt := map[string]struct{}{}
+	dflt := utils.StringSet{}
 	expected := "[10,20,30]"
 	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
@@ -177,7 +177,7 @@ func TestGetSliceAsString(t *testing.T) {
 }
 
 func TestGetMapAsString(t *testing.T) {
-	dflt := map[string]struct{}{}
+	dflt := utils.StringSet{}
 	expected := `{"ID":"id1","TimeValue":10000}`
 	if rply := getStringValue(map[string]interface{}{
 		"ID":        "id1",
@@ -188,13 +188,13 @@ func TestGetMapAsString(t *testing.T) {
 	expected = `{"ID":"id1","TimeValue":"1s"}`
 	if rply := getStringValue(map[string]interface{}{
 		"ID":        "id1",
-		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": {}}); rply != expected {
+		"TimeValue": int64(time.Second)}, utils.StringSet{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 }
 
 func TestGetFormatedResult(t *testing.T) {
-	dflt := map[string]struct{}{}
+	dflt := utils.StringSet{}
 	expected := `{
  "ID": "id1",
  "TimeValue": 10000
@@ -211,7 +211,7 @@ func TestGetFormatedResult(t *testing.T) {
 }`
 	if rply := GetFormatedResult(map[string]interface{}{
 		"ID":        "id1",
-		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": {}}); rply != expected {
+		"TimeValue": int64(time.Second)}, utils.StringSet{"TimeValue": {}}); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 
@@ -228,7 +228,7 @@ func TestGetFormatedResult(t *testing.T) {
 }
 
 func TestGetFormatedSliceResult(t *testing.T) {
-	dflt := map[string]struct{}{}
+	dflt := utils.StringSet{}
 	expected := "[10,20,30]"
 	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
 		t.Errorf("Expecting: %s , received: %s", expected, rply)

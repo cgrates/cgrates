@@ -95,7 +95,7 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err er
 			}
 		case <-cfgRldChan: // handle reload
 			cfgIDs := make(map[string]int)
-			pathReloaded := make(map[string]struct{})
+			pathReloaded := make(utils.StringSet)
 			// index config IDs
 			for i, rdrCfg := range erS.cfg.ERsCfg().Readers {
 				cfgIDs[rdrCfg.ID] = i
@@ -109,7 +109,7 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err er
 						newCfg.ID == rdr.Config().ID { // make sure the index did not change
 						continue
 					}
-					pathReloaded[id] = struct{}{}
+					pathReloaded.Add(id)
 				}
 				delete(erS.rdrs, id)
 				close(erS.stopLsn[id])
@@ -117,10 +117,9 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err er
 			}
 			// add new ids
 			for id, rdrIdx := range cfgIDs {
-				if _, has := erS.rdrs[id]; has {
-					if _, has := pathReloaded[id]; !has {
-						continue
-					}
+				if _, has := erS.rdrs[id]; has &&
+					!pathReloaded.Has(id) {
+					continue
 				}
 				if erS.cfg.ERsCfg().Readers[rdrIdx].Type == utils.META_NONE { // ignore *default reader
 					continue

@@ -2014,7 +2014,7 @@ func TestDDCGetStringValue2(t *testing.T) {
 func TestDDCCompress(t *testing.T) {
 	ddc := &StatDDC{
 		Events:      make(map[string]map[string]int64),
-		FieldValues: make(map[string]map[string]struct{}),
+		FieldValues: make(map[string]utils.StringSet),
 		MinItems:    2,
 		FilterIDs:   []string{},
 	}
@@ -2027,7 +2027,7 @@ func TestDDCCompress(t *testing.T) {
 				"1002": 1,
 			},
 		},
-		FieldValues: map[string]map[string]struct{}{
+		FieldValues: map[string]utils.StringSet{
 			"1001": {
 				"EVENT_1": {},
 			},
@@ -2775,7 +2775,7 @@ func TestStatDistinctGetStringValue2(t *testing.T) {
 func TestStatDistinctCompress(t *testing.T) {
 	ddc := &StatDistinct{
 		Events:      make(map[string]map[string]int64),
-		FieldValues: make(map[string]map[string]struct{}),
+		FieldValues: make(map[string]utils.StringSet),
 		MinItems:    2,
 		FilterIDs:   []string{},
 		FieldName:   utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
@@ -2789,7 +2789,7 @@ func TestStatDistinctCompress(t *testing.T) {
 				"1002": 1,
 			},
 		},
-		FieldValues: map[string]map[string]struct{}{
+		FieldValues: map[string]utils.StringSet{
 			"1001": {
 				"EVENT_1": {},
 			},

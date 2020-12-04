@@ -267,7 +267,7 @@ func (sq *StatQueue) Compress(maxQL int64, roundDec int) bool {
 	}
 	var newSQItems []SQItem
 	sqMap := make(map[string]*time.Time)
-	idMap := make(map[string]struct{})
+	idMap := make(utils.StringSet)
 	defaultCompressID := sq.SQItems[len(sq.SQItems)-1].EventID
 	defaultTTL := sq.SQItems[len(sq.SQItems)-1].ExpiryTime
 
@@ -277,7 +277,7 @@ func (sq *StatQueue) Compress(maxQL int64, roundDec int) bool {
 
 	for _, m := range sq.SQMetrics {
 		for _, id := range m.Compress(maxQL, defaultCompressID, roundDec) {
-			idMap[id] = struct{}{}
+			idMap.Add(id)
 		}
 	}
 	for k := range idMap {

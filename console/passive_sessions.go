@@ -67,7 +67,7 @@ func (self *CmdPassiveSessions) RpcResult() interface{} {
 }
 
 func (self *CmdPassiveSessions) GetFormatedResult(result interface{}) string {
-	return GetFormatedSliceResult(result, map[string]struct{}{
+	return GetFormatedSliceResult(result, utils.StringSet{
 		"Usage":         {},
 		"DurationIndex": {},
 		"MaxRateUnit":   {},

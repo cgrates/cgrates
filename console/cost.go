@@ -72,7 +72,7 @@ func (self *CmdGetCost) ClientArgs() []string {
 }
 
 func (self *CmdGetCost) GetFormatedResult(result interface{}) string {
-	return GetFormatedResult(result, map[string]struct{}{
+	return GetFormatedResult(result, utils.StringSet{
 		"Usage":              {},
 		"GroupIntervalStart": {},
 		"RateIncrement":      {},

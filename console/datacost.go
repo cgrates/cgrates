@@ -71,7 +71,7 @@ func (self *CmdGetDataCost) ClientArgs() []string {
 }
 
 func (self *CmdGetDataCost) GetFormatedResult(result interface{}) string {
-	return GetFormatedResult(result, map[string]struct{}{
+	return GetFormatedResult(result, utils.StringSet{
 		"Usage":              {},
 		"GroupIntervalStart": {},
 		"RateIncrement":      {},
