@@ -367,34 +367,6 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 	return
 }
 
-func (ms *MongoStorage) getColNameForPrefix(prefix string) (string, bool) {
-	res, ok := map[string]string{
-		utils.DESTINATION_PREFIX:         ColDst,
-		utils.REVERSE_DESTINATION_PREFIX: ColRds,
-		utils.ACTION_PREFIX:              ColAct,
-		utils.ACTION_PLAN_PREFIX:         ColApl,
-		utils.AccountActionPlansPrefix:   ColAAp,
-		utils.TASKS_KEY:                  ColTsk,
-		utils.ACTION_TRIGGER_PREFIX:      ColAtr,
-		utils.RATING_PLAN_PREFIX:         ColRpl,
-		utils.RATING_PROFILE_PREFIX:      ColRpf,
-		utils.ACCOUNT_PREFIX:             ColAcc,
-		utils.SHARED_GROUP_PREFIX:        ColShg,
-		utils.LOADINST_KEY:               ColLht,
-		utils.VERSION_PREFIX:             ColVer,
-		utils.TimingsPrefix:              ColTmg,
-		utils.ResourcesPrefix:            ColRes,
-		utils.ResourceProfilesPrefix:     ColRsP,
-		utils.ThresholdProfilePrefix:     ColTps,
-		utils.StatQueueProfilePrefix:     ColSqp,
-		utils.ThresholdPrefix:            ColThs,
-		utils.FilterPrefix:               ColFlt,
-		utils.RouteProfilePrefix:         ColRts,
-		utils.AttributeProfilePrefix:     ColAttr,
-	}[prefix]
-	return res, ok
-}
-
 // Close disconects the client
 func (ms *MongoStorage) Close() {
 	if err := ms.client.Disconnect(ms.ctx); err != nil {
@@ -423,103 +395,60 @@ func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
 	return
 }
 
-// RebuildReverseForPrefix implementation
-func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
-	if !utils.SliceHasMember([]string{utils.AccountActionPlansPrefix, utils.REVERSE_DESTINATION_PREFIX}, prefix) {
+func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) (err error) {
+	var colName string
+	switch prefix {
+	case utils.DESTINATION_PREFIX:
+		colName = ColDst
+	case utils.REVERSE_DESTINATION_PREFIX:
+		colName = ColRds
+	case utils.ACTION_PREFIX:
+		colName = ColAct
+	case utils.ACTION_PLAN_PREFIX:
+		colName = ColApl
+	case utils.AccountActionPlansPrefix:
+		colName = ColAAp
+	case utils.TASKS_KEY:
+		colName = ColTsk
+	case utils.ACTION_TRIGGER_PREFIX:
+		colName = ColAtr
+	case utils.RATING_PLAN_PREFIX:
+		colName = ColRpl
+	case utils.RATING_PROFILE_PREFIX:
+		colName = ColRpf
+	case utils.ACCOUNT_PREFIX:
+		colName = ColAcc
+	case utils.SHARED_GROUP_PREFIX:
+		colName = ColShg
+	case utils.LOADINST_KEY:
+		colName = ColLht
+	case utils.VERSION_PREFIX:
+		colName = ColVer
+	case utils.TimingsPrefix:
+		colName = ColTmg
+	case utils.ResourcesPrefix:
+		colName = ColRes
+	case utils.ResourceProfilesPrefix:
+		colName = ColRsP
+	case utils.ThresholdProfilePrefix:
+		colName = ColTps
+	case utils.StatQueueProfilePrefix:
+		colName = ColSqp
+	case utils.ThresholdPrefix:
+		colName = ColThs
+	case utils.FilterPrefix:
+		colName = ColFlt
+	case utils.RouteProfilePrefix:
+		colName = ColRts
+	case utils.AttributeProfilePrefix:
+		colName = ColAttr
+	default:
 		return utils.ErrInvalidKey
 	}
-	colName, ok := ms.getColNameForPrefix(prefix)
-	if !ok {
-		return utils.ErrInvalidKey
-	}
+
 	return ms.query(func(sctx mongo.SessionContext) error {
-		col := ms.getCol(colName)
-		if _, err := col.DeleteMany(sctx, bson.M{}); err != nil {
-			return err
-		}
-		var keys []string
-		switch prefix {
-		case utils.REVERSE_DESTINATION_PREFIX:
-			if keys, err = ms.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				dest, err := ms.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err = ms.SetReverseDestinationDrv(dest, utils.NonTransactional); err != nil {
-					return err
-				}
-			}
-		case utils.AccountActionPlansPrefix:
-			if keys, err = ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				apl, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				for acntID := range apl.AccountIDs {
-					if err = ms.SetAccountActionPlansDrv(acntID, []string{apl.Id}, false); err != nil {
-						return err
-					}
-				}
-			}
-		}
-		return nil
-	})
-}
-
-// RemoveReverseForPrefix implementation
-func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
-	if !utils.SliceHasMember([]string{utils.AccountActionPlansPrefix, utils.REVERSE_DESTINATION_PREFIX}, prefix) {
-		return utils.ErrInvalidKey
-	}
-	colName, ok := ms.getColNameForPrefix(prefix)
-	if !ok {
-		return utils.ErrInvalidKey
-	}
-	return ms.query(func(sctx mongo.SessionContext) error {
-		col := ms.getCol(colName)
-
-		if _, err := col.DeleteMany(sctx, bson.M{}); err != nil {
-			return err
-		}
-
-		var keys []string
-		switch prefix {
-		case utils.REVERSE_DESTINATION_PREFIX:
-			if keys, err = ms.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				dest, err := ms.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err := ms.RemoveDestinationDrv(dest.Id, utils.NonTransactional); err != nil {
-					return err
-				}
-			}
-		case utils.AccountActionPlansPrefix:
-			if keys, err = ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				apl, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				for acntID := range apl.AccountIDs {
-					if err = ms.RemAccountActionPlansDrv(acntID, []string{apl.Id}); err != nil {
-						return err
-					}
-				}
-			}
-		}
-		return nil
+		_, err := ms.getCol(colName).DeleteMany(sctx, bson.M{})
+		return err
 	})
 }
 
@@ -705,7 +634,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		case utils.FilterIndexPrfx:
 			result, err = ms.getField3(sctx, ColIndx, utils.FilterIndexPrfx, "key")
 		default:
-			err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
+			err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 		}
 		return err
 	})
@@ -920,52 +849,24 @@ func (ms *MongoStorage) SetDestinationDrv(dest *Destination, transactionID strin
 
 func (ms *MongoStorage) RemoveDestinationDrv(destID string,
 	transactionID string) (err error) {
-	// get destination for prefix list
-	d, err := ms.GetDestinationDrv(destID, transactionID)
-	if err != nil {
-		fmt.Println("get", destID)
-		return
-	}
-	if err = ms.query(func(sctx mongo.SessionContext) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColDst).DeleteOne(sctx, bson.M{"key": destID})
 		if dr.DeletedCount == 0 {
-			fmt.Println("deletecount", destID)
 			return utils.ErrNotFound
 		}
 		return err
-	}); err != nil {
-		return err
-	}
-	if errCh := Cache.Remove(utils.CacheDestinations, destID,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		fmt.Println("cache", destID)
-		return errCh
-	}
-
-	for _, prefix := range d.Prefixes {
-		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColRds).UpdateOne(sctx, bson.M{"key": prefix},
-				bson.M{"$pull": bson.M{"value": destID}})
-			return err
-		}); err != nil {
-			fmt.Println("reverse", destID, "p", prefix)
-			return err
-		}
-		ms.GetReverseDestinationDrv(prefix, true, transactionID) // it will recache the destination
-	}
-	return
+	})
 }
 
-func (ms *MongoStorage) GetReverseDestinationDrv(prefix string, skipCache bool,
-	transactionID string) (ids []string, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheReverseDestinations, prefix); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.([]string), nil
-		}
-	}
+func (ms *MongoStorage) RemoveReverseDestinationDrv(dstID, prfx, transactionID string) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		_, err = ms.getCol(ColRds).UpdateOne(sctx, bson.M{"key": prfx},
+			bson.M{"$pull": bson.M{"value": dstID}})
+		return err
+	})
+}
+
+func (ms *MongoStorage) GetReverseDestinationDrv(prefix, transactionID string) (ids []string, err error) {
 	var result struct {
 		Key   string
 		Value []string
@@ -974,10 +875,6 @@ func (ms *MongoStorage) GetReverseDestinationDrv(prefix string, skipCache bool,
 		cur := ms.getCol(ColRds).FindOne(sctx, bson.M{"key": prefix})
 		if err := cur.Decode(&result); err != nil {
 			if err == mongo.ErrNoDocuments {
-				if errCh := Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
-					cacheCommit(transactionID), transactionID); errCh != nil {
-					return errCh
-				}
 				return utils.ErrNotFound
 			}
 			return err
@@ -987,52 +884,14 @@ func (ms *MongoStorage) GetReverseDestinationDrv(prefix string, skipCache bool,
 		return nil, err
 	}
 	ids = result.Value
-	if errCh := Cache.Set(utils.CacheReverseDestinations, prefix, ids, nil,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return nil, errCh
-	}
 	return
 }
 
-func (ms *MongoStorage) SetReverseDestinationDrv(dest *Destination,
-	transactionID string) (err error) {
-	for _, p := range dest.Prefixes {
+func (ms *MongoStorage) SetReverseDestinationDrv(destID string, prefixes []string, transactionID string) (err error) {
+	for _, p := range prefixes {
 		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
 			_, err = ms.getCol(ColRds).UpdateOne(sctx, bson.M{"key": p},
-				bson.M{"$addToSet": bson.M{"value": dest.Id}},
-				options.Update().SetUpsert(true),
-			)
-			return err
-		}); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (ms *MongoStorage) UpdateReverseDestinationDrv(dstID string,
-	obsoletePrefixes, addedPrefixes []string, transactionID string) (err error) {
-	// remove id for all obsolete prefixes
-	cCommit := cacheCommit(transactionID)
-	for _, obsoletePrefix := range obsoletePrefixes {
-		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColRds).UpdateOne(sctx, bson.M{"key": obsoletePrefix},
-				bson.M{"$pull": bson.M{"value": dstID}})
-			return err
-		}); err != nil {
-			return err
-		}
-		if errCh := Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
-			cCommit, transactionID); errCh != nil {
-			return errCh
-		}
-	}
-
-	// add the id to all new prefixes
-	for _, addedPrefix := range addedPrefixes {
-		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColRds).UpdateOne(sctx, bson.M{"key": addedPrefix},
-				bson.M{"$addToSet": bson.M{"value": dstID}},
+				bson.M{"$addToSet": bson.M{"value": destID}},
 				options.Update().SetUpsert(true),
 			)
 			return err

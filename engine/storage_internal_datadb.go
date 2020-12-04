@@ -97,68 +97,14 @@ func (iDB *InternalDB) GetKeysForPrefix(prefix string) (ids []string, err error)
 	return
 }
 
-// RebuildReverseForPrefix will build the reverse destinations
-func (iDB *InternalDB) RebuildReverseForPrefix(prefix string) (err error) {
-	switch prefix {
-	case utils.REVERSE_DESTINATION_PREFIX:
-		var keys []string
-		if keys, err = iDB.GetKeysForPrefix(prefix); err != nil {
-			return
-		}
-		for _, key := range keys {
-			Cache.RemoveWithoutReplicate(utils.CacheReverseDestinations, key,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		}
-
-		if keys, err = iDB.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
-			return
-		}
-		for _, key := range keys {
-			var dest *Destination
-			if dest, err = iDB.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):],
-				utils.NonTransactional); err != nil {
-				return
-			}
-			if err = iDB.SetReverseDestinationDrv(dest, utils.NonTransactional); err != nil {
-				return
-			}
-		}
-	case utils.AccountActionPlansPrefix:
-	default:
-		return utils.ErrInvalidKey
+func (iDB *InternalDB) RemoveKeysForPrefix(prefix string) (err error) {
+	var keys []string
+	if keys, err = iDB.GetKeysForPrefix(prefix); err != nil {
+		return
 	}
-	return
-}
-
-// RemoveReverseForPrefix implementation
-func (iDB *InternalDB) RemoveReverseForPrefix(prefix string) (err error) {
-	switch prefix {
-	case utils.REVERSE_DESTINATION_PREFIX:
-		var keys []string
-		if keys, err = iDB.GetKeysForPrefix(prefix); err != nil {
-			return
-		}
-		for _, key := range keys {
-			Cache.RemoveWithoutReplicate(utils.CacheReverseDestinations, key,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		}
-		keys, err = iDB.GetKeysForPrefix(utils.DESTINATION_PREFIX)
-		if err != nil {
-			return err
-		}
-		for _, key := range keys {
-			var dest *Destination
-			if dest, err = iDB.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):],
-				utils.NonTransactional); err != nil {
-				return
-			}
-			if err = iDB.RemoveDestinationDrv(dest.Id, utils.NonTransactional); err != nil {
-				return
-			}
-		}
-	case utils.AccountActionPlansPrefix:
-	default:
-		return utils.ErrInvalidKey
+	for _, key := range keys {
+		Cache.RemoveWithoutReplicate(utils.CacheReverseDestinations, key,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
 }
@@ -303,23 +249,35 @@ func (iDB *InternalDB) SetDestinationDrv(dest *Destination, transactionID string
 }
 
 func (iDB *InternalDB) RemoveDestinationDrv(destID string, transactionID string) (err error) {
-	// get destination for prefix list
-	var d *Destination
-	if d, err = iDB.GetDestinationDrv(destID, transactionID); err != nil {
-		return
-	}
 	Cache.RemoveWithoutReplicate(utils.CacheDestinations, destID,
 		cacheCommit(transactionID), transactionID)
-	for _, prefix := range d.Prefixes {
-		Cache.RemoveWithoutReplicate(utils.CacheReverseDestinations, prefix,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
+}
+
+func (iDB *InternalDB) RemoveReverseDestinationDrv(dstID, prfx, transactionID string) (err error) {
+	var revDst []string
+	if Cache.HasItem(utils.CacheReverseDestinations, prfx) {
+		x, ok := Cache.Get(utils.CacheReverseDestinations, prfx)
+		if !ok || x == nil {
+			return utils.ErrNotFound
+		}
+		revDst = x.([]string)
+	}
+	mpRevDst := utils.NewStringSet(revDst)
+	mpRevDst.Remove(dstID)
+	if mpRevDst.Size() != 0 {
+		Cache.SetWithoutReplicate(utils.CacheReverseDestinations, prfx, mpRevDst.AsSlice(), nil,
+			cacheCommit(transactionID), transactionID)
+	} else {
+		Cache.RemoveWithoutReplicate(utils.CacheReverseDestinations, prfx,
+			cacheCommit(transactionID), transactionID)
 	}
 	return
 }
 
-func (iDB *InternalDB) SetReverseDestinationDrv(dest *Destination, transactionID string) (err error) {
+func (iDB *InternalDB) SetReverseDestinationDrv(destID string, prefixes []string, transactionID string) (err error) {
 	var revDst []string
-	for _, p := range dest.Prefixes {
+	for _, p := range prefixes {
 		if Cache.HasItem(utils.CacheReverseDestinations, p) {
 			x, ok := Cache.Get(utils.CacheReverseDestinations, p)
 			if !ok || x == nil {
@@ -328,7 +286,7 @@ func (iDB *InternalDB) SetReverseDestinationDrv(dest *Destination, transactionID
 			revDst = x.([]string)
 		}
 		mpRevDst := utils.NewStringSet(revDst)
-		mpRevDst.Add(dest.Id)
+		mpRevDst.Add(destID)
 		// for ReverseDestination we will use Groups
 		Cache.SetWithoutReplicate(utils.CacheReverseDestinations, p, mpRevDst.AsSlice(), nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
@@ -336,57 +294,13 @@ func (iDB *InternalDB) SetReverseDestinationDrv(dest *Destination, transactionID
 	return
 }
 
-func (iDB *InternalDB) GetReverseDestinationDrv(prefix string,
-	skipCache bool, transactionID string) (ids []string, err error) {
+func (iDB *InternalDB) GetReverseDestinationDrv(prefix, transactionID string) (ids []string, err error) {
 	if x, ok := Cache.Get(utils.CacheReverseDestinations, prefix); ok && x != nil {
-		ids := x.([]string)
-		if len(ids) != 0 {
-			return ids, nil
+		if ids = x.([]string); len(ids) != 0 {
+			return
 		}
 	}
 	return nil, utils.ErrNotFound
-}
-
-func (iDB *InternalDB) UpdateReverseDestinationDrv(dstID string,
-	obsoletePrefixes, addedPrefixes []string, transactionID string) (err error) {
-	var mpRevDst utils.StringSet
-	// remove id for all obsolete prefixes
-	cCommit := cacheCommit(transactionID)
-	for _, obsoletePrefix := range obsoletePrefixes {
-		if Cache.HasItem(utils.CacheReverseDestinations, obsoletePrefix) {
-			x, ok := Cache.Get(utils.CacheReverseDestinations, obsoletePrefix)
-			if !ok || x == nil {
-				return utils.ErrNotFound
-			}
-			mpRevDst = utils.NewStringSet(x.([]string))
-			if _, has := mpRevDst[dstID]; has {
-				delete(mpRevDst, dstID)
-			}
-			// for ReverseDestination we will use Groups
-			Cache.SetWithoutReplicate(utils.CacheReverseDestinations, obsoletePrefix, mpRevDst.AsSlice(), nil,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		}
-
-		Cache.RemoveWithoutReplicate(utils.CacheReverseDestinations, obsoletePrefix,
-			cCommit, transactionID)
-	}
-	// add the id to all new prefixes
-	for _, addedPrefix := range addedPrefixes {
-		if Cache.HasItem(utils.CacheReverseDestinations, addedPrefix) {
-			x, ok := Cache.Get(utils.CacheReverseDestinations, addedPrefix)
-			if !ok || x == nil {
-				return utils.ErrNotFound
-			}
-			mpRevDst = utils.NewStringSet(x.([]string))
-		} else {
-			mpRevDst = make(utils.StringSet)
-		}
-		mpRevDst.Add(dstID)
-		// for ReverseDestination we will use Groups
-		Cache.SetWithoutReplicate(utils.CacheReverseDestinations, addedPrefix, mpRevDst.AsSlice(), nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	}
-	return
 }
 
 func (iDB *InternalDB) GetActionsDrv(id string) (acts Actions, err error) {

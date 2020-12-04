@@ -1411,7 +1411,6 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("Destinations:")
 	}
 	for _, d := range tpr.destinations {
-		fmt.Println(d.Id)
 		if err = tpr.setDestination(d, disableReverse, utils.NonTransactional); err != nil {
 			return
 		}
@@ -1860,7 +1859,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 			if verbose {
 				log.Print("Rebuilding account action plans")
 			}
-			if err = tpr.dm.DataDB().RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
+			if err = tpr.dm.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 				return
 			}
 		}
@@ -2117,14 +2116,12 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	loadIDs := make(map[string]int64)
 	for _, d := range tpr.destinations {
 		if err = tpr.dm.RemoveDestination(d.Id, utils.NonTransactional); err != nil {
-			fmt.Println("delete", d.Id)
 			return
 		}
 		if verbose {
 			log.Print("\t", d.Id, " : ", d.Prefixes)
 		}
 	}
-	fmt.Println(4)
 	for _, rp := range tpr.ratingPlans {
 		if err = tpr.dm.RemoveRatingPlan(rp.Id, utils.NonTransactional); err != nil {
 			return
@@ -2375,8 +2372,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 			if verbose {
 				log.Print("Removing reverse destinations")
 			}
-			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
-				fmt.Println(1)
+			if err = tpr.dm.DataDB().RemoveKeysForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 				return
 			}
 		}
@@ -2384,12 +2380,11 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 			if verbose {
 				log.Print("Removing account action plans")
 			}
-			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
+			if err = tpr.dm.DataDB().RemoveKeysForPrefix(utils.AccountActionPlansPrefix); err != nil {
 				return
 			}
 		}
 	}
-	fmt.Println(2)
 	//We remove the filters at the end because of indexes
 	if verbose {
 		log.Print("Filters:")
@@ -2740,12 +2735,15 @@ func (tpr *TpReader) setDestination(dest *Destination, disableReverse bool, tran
 		return tpr.dm.SetDestination(dest, transID)
 	}
 	var oldDest *Destination
-	if oldDest, err = tpr.dm.GetDestination(dest.Id, true, false, transID); err != nil &&
+	if oldDest, err = tpr.dm.GetDestination(dest.Id, false, false, transID); err != nil &&
 		err != utils.ErrNotFound {
 		return
 	}
 	if err = tpr.dm.SetDestination(dest, transID); err != nil {
-		fmt.Println(10)
+		return
+	}
+	if err = Cache.Set(utils.CacheDestinations, dest.Id, dest, nil,
+		cacheCommit(transID), transID); err != nil {
 		return
 	}
 	return tpr.dm.UpdateReverseDestination(oldDest, dest, transID)

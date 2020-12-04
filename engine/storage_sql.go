@@ -75,7 +75,7 @@ func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (self *SQLStorage) RebuildReverseForPrefix(prefix string) error {
+func (SQLStorage) RemoveKeysForPrefix(string) error {
 	return utils.ErrNotImplemented
 }
 

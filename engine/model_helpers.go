@@ -1767,7 +1767,6 @@ func ThresholdProfileToAPI(th *ThresholdProfile) (tpTH *utils.TPThresholdProfile
 }
 
 type FilterMdls []*FilterMdl
-type TpFilterS []*FilterMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps FilterMdls) CSVHeader() (result []string) {

@@ -99,7 +99,7 @@ func (apierSv1 *APIerSv1) GetReverseDestination(prefix *string, reply *[]string)
 		return utils.NewErrMandatoryIeMissing("prefix")
 	}
 	var revLst []string
-	if revLst, err = apierSv1.DataManager.GetReverseDestination(*prefix, false, utils.NonTransactional); err != nil {
+	if revLst, err = apierSv1.DataManager.GetReverseDestination(*prefix, true, true, utils.NonTransactional); err != nil {
 		return
 	}
 	*reply = revLst
@@ -108,7 +108,7 @@ func (apierSv1 *APIerSv1) GetReverseDestination(prefix *string, reply *[]string)
 
 // ComputeReverseDestinations will rebuild complete reverse destinations data
 func (apierSv1 *APIerSv1) ComputeReverseDestinations(ignr *string, reply *string) (err error) {
-	if err = apierSv1.DataManager.DataDB().RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+	if err = apierSv1.DataManager.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -117,7 +117,7 @@ func (apierSv1 *APIerSv1) ComputeReverseDestinations(ignr *string, reply *string
 
 // ComputeAccountActionPlans will rebuild complete reverse accountActions data
 func (apierSv1 *APIerSv1) ComputeAccountActionPlans(ignr *string, reply *string) (err error) {
-	if err = apierSv1.DataManager.DataDB().RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
+	if err = apierSv1.DataManager.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 		return
 	}
 	*reply = utils.OK

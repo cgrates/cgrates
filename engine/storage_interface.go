@@ -34,8 +34,7 @@ type Storage interface {
 	Close()
 	Flush(string) error
 	GetKeysForPrefix(string) ([]string, error)
-	RebuildReverseForPrefix(string) error
-	RemoveReverseForPrefix(string) error
+	RemoveKeysForPrefix(string) error
 	GetVersions(itm string) (vrs Versions, err error)
 	SetVersions(vrs Versions, overwrite bool) (err error)
 	RemoveVersions(vrs Versions) (err error)
@@ -57,9 +56,9 @@ type DataDB interface {
 	GetDestinationDrv(string, string) (*Destination, error)
 	SetDestinationDrv(*Destination, string) error
 	RemoveDestinationDrv(string, string) error
-	SetReverseDestinationDrv(*Destination, string) error
-	GetReverseDestinationDrv(string, bool, string) ([]string, error)
-	UpdateReverseDestinationDrv(dstID string, obsoletePrefixes, addedPrefixes []string, transactionID string) error
+	RemoveReverseDestinationDrv(string, string, string) error
+	SetReverseDestinationDrv(string, []string, string) error
+	GetReverseDestinationDrv(string, string) ([]string, error)
 	GetActionsDrv(string) (Actions, error)
 	SetActionsDrv(string, Actions) error
 	RemoveActionsDrv(string) error

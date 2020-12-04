@@ -199,13 +199,9 @@ func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 	return true, nil
 }
 
-func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
-	if !utils.SliceHasMember([]string{utils.AccountActionPlansPrefix, utils.REVERSE_DESTINATION_PREFIX}, prefix) {
-		return utils.ErrInvalidKey
-	}
+func (rs *RedisStorage) RemoveKeysForPrefix(prefix string) (err error) {
 	var keys []string
-	keys, err = rs.GetKeysForPrefix(prefix)
-	if err != nil {
+	if keys, err = rs.GetKeysForPrefix(prefix); err != nil {
 		return
 	}
 	for _, key := range keys {
@@ -213,84 +209,7 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 			return
 		}
 	}
-	switch prefix {
-	case utils.REVERSE_DESTINATION_PREFIX:
-		if keys, err = rs.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
-			return
-		}
-		for _, key := range keys {
-			dest, err := rs.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], utils.NonTransactional)
-			if err != nil {
-				return err
-			}
-			if err = rs.SetReverseDestinationDrv(dest, utils.NonTransactional); err != nil {
-				return err
-			}
-		}
-	case utils.AccountActionPlansPrefix:
-		if keys, err = rs.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
-			return
-		}
-		for _, key := range keys {
-			apl, err := rs.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional) // skipCache on get since loader checks and caches empty data for loaded objects
-			if err != nil {
-				return err
-			}
-			for acntID := range apl.AccountIDs {
-				if err = rs.SetAccountActionPlansDrv(acntID, []string{apl.Id}, false); err != nil {
-					return err
-				}
-			}
-		}
-	}
-	return nil
-}
-
-func (rs *RedisStorage) RemoveReverseForPrefix(prefix string) (err error) {
-	if !utils.SliceHasMember([]string{utils.AccountActionPlansPrefix, utils.REVERSE_DESTINATION_PREFIX}, prefix) {
-		return utils.ErrInvalidKey
-	}
-	var keys []string
-	keys, err = rs.GetKeysForPrefix(prefix)
-	if err != nil {
-		return
-	}
-	for _, key := range keys {
-		if err = rs.Cmd(nil, redis_DEL, key); err != nil {
-			return
-		}
-	}
-	switch prefix {
-	case utils.REVERSE_DESTINATION_PREFIX:
-		if keys, err = rs.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
-			return
-		}
-		for _, key := range keys {
-			dest, err := rs.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], utils.NonTransactional)
-			if err != nil {
-				return err
-			}
-			if err := rs.RemoveDestinationDrv(dest.Id, utils.NonTransactional); err != nil {
-				return err
-			}
-		}
-	case utils.AccountActionPlansPrefix:
-		if keys, err = rs.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
-			return
-		}
-		for _, key := range keys {
-			apl, err := rs.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional) // skipCache on get since loader checks and caches empty data for loaded objects
-			if err != nil {
-				return err
-			}
-			for acntID := range apl.AccountIDs {
-				if err = rs.RemAccountActionPlansDrv(acntID, []string{apl.Id}); err != nil {
-					return err
-				}
-			}
-		}
-	}
-	return nil
+	return
 }
 
 func (rs *RedisStorage) getKeysForFilterIndexesKeys(fkeys []string) (keys []string, err error) {
@@ -476,35 +395,19 @@ func (rs *RedisStorage) SetDestinationDrv(dest *Destination, transactionID strin
 	return
 }
 
-func (rs *RedisStorage) GetReverseDestinationDrv(key string,
-	skipCache bool, transactionID string) (ids []string, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheReverseDestinations, key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.([]string), nil
-		}
-	}
+func (rs *RedisStorage) GetReverseDestinationDrv(key, transactionID string) (ids []string, err error) {
 	if err = rs.Cmd(&ids, redis_SMEMBERS, utils.REVERSE_DESTINATION_PREFIX+key); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		if err = Cache.Set(utils.CacheReverseDestinations, key, nil, nil,
-			cacheCommit(transactionID), transactionID); err != nil {
-			return
-		}
 		err = utils.ErrNotFound
-		return
 	}
-	err = Cache.Set(utils.CacheReverseDestinations, key, ids, nil,
-		cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (rs *RedisStorage) SetReverseDestinationDrv(dest *Destination, transactionID string) (err error) {
-	for _, p := range dest.Prefixes {
-		if err = rs.Cmd(nil, redis_SADD, utils.REVERSE_DESTINATION_PREFIX+p, dest.Id); err != nil {
+func (rs *RedisStorage) SetReverseDestinationDrv(destID string, prefixes []string, transactionID string) (err error) {
+	for _, p := range prefixes {
+		if err = rs.Cmd(nil, redis_SADD, utils.REVERSE_DESTINATION_PREFIX+p, destID); err != nil {
 			return
 		}
 	}
@@ -512,52 +415,11 @@ func (rs *RedisStorage) SetReverseDestinationDrv(dest *Destination, transactionI
 }
 
 func (rs *RedisStorage) RemoveDestinationDrv(destID, transactionID string) (err error) {
-	// get destination for prefix list
-	var d *Destination
-	if d, err = rs.GetDestinationDrv(destID, transactionID); err != nil {
-		return
-	}
-	if err = rs.Cmd(nil, redis_DEL, utils.DESTINATION_PREFIX+destID); err != nil {
-		return
-	}
-	if err = Cache.Remove(utils.CacheDestinations, destID,
-		cacheCommit(transactionID), transactionID); err != nil {
-		return
-	}
-	if d == nil {
-		return utils.ErrNotFound
-	}
-	for _, prefix := range d.Prefixes {
-		if err = rs.Cmd(nil, redis_SREM, utils.REVERSE_DESTINATION_PREFIX+prefix, destID); err != nil {
-			return
-		}
-		rs.GetReverseDestinationDrv(prefix, true, transactionID) // it will recache the destination
-	}
-	return
+	return rs.Cmd(nil, redis_DEL, utils.DESTINATION_PREFIX+destID)
 }
 
-func (rs *RedisStorage) UpdateReverseDestinationDrv(dstID string,
-	obsoletePrefixes, addedPrefixes []string, transactionID string) (err error) {
-	// remove id for all obsolete prefixes
-	cCommit := cacheCommit(transactionID)
-	for _, obsoletePrefix := range obsoletePrefixes {
-		if err = rs.Cmd(nil, redis_SREM,
-			utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, dstID); err != nil {
-			return
-		}
-		if err = Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
-			cCommit, transactionID); err != nil {
-			return
-		}
-	}
-
-	// add the id to all new prefixes
-	for _, addedPrefix := range addedPrefixes {
-		if err = rs.Cmd(nil, redis_SADD, utils.REVERSE_DESTINATION_PREFIX+addedPrefix, dstID); err != nil {
-			return
-		}
-	}
-	return
+func (rs *RedisStorage) RemoveReverseDestinationDrv(dstID, prfx, transactionID string) (err error) {
+	return rs.Cmd(nil, redis_SREM, utils.REVERSE_DESTINATION_PREFIX+prfx, dstID)
 }
 
 func (rs *RedisStorage) GetActionsDrv(key string) (as Actions, err error) {
