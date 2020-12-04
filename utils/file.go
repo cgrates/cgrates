@@ -26,8 +26,7 @@ import (
 
 // WatchDir sets up a watcher via inotify to be triggered on new files
 // sysID is the subsystem ID, f will be triggered on match
-func WatchDir(dirPath string, f func(itmPath, itmID string) error,
-	sysID string, stopWatching chan struct{}) (err error) {
+func WatchDir(dirPath string, f func(itmPath, itmID string) error, sysID string, stopWatching chan struct{}) (err error) {
 	var watcher *fsnotify.Watcher
 	if watcher, err = fsnotify.NewWatcher(); err != nil {
 		return
@@ -45,7 +44,6 @@ func WatchDir(dirPath string, f func(itmPath, itmID string) error,
 				Logger.Info(fmt.Sprintf("<%s> stop watching path <%s>", sysID, dirPath))
 				return
 			case ev := <-watcher.Events:
-				fmt.Println("event", ev.Name)
 				if ev.Op&fsnotify.Create == fsnotify.Create {
 					go func() { //Enable async processing here so we can simultaneously process files
 						if err = f(filepath.Dir(ev.Name), filepath.Base(ev.Name)); err != nil {
