@@ -126,7 +126,7 @@ func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
 		if err = tpr.dm.SetDestination(dst, transID); err != nil {
 			Cache.RollbackTransaction(transID)
 		}
-		if err = tpr.dm.SetReverseDestination(dst, transID); err != nil {
+		if err = tpr.dm.SetReverseDestination(dst.Id, dst.Prefixes, transID); err != nil {
 			Cache.RollbackTransaction(transID)
 		}
 	}
@@ -277,7 +277,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				for _, tpDst := range tpDests {
 					destination := NewDestinationFromTPDestination(tpDst)
 					tpr.dm.SetDestination(destination, utils.NonTransactional)
-					tpr.dm.SetReverseDestination(destination, utils.NonTransactional)
+					tpr.dm.SetReverseDestination(destination.Id, destination.Prefixes, utils.NonTransactional)
 				}
 			}
 		}

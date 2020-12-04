@@ -646,7 +646,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	} else if expRecord[0] != cdr.Destination {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.Destination, expRecord)
 	}
-	if err := dm.SetReverseDestination(&Destination{Id: "MASKED_DESTINATIONS", Prefixes: []string{"+4986517174963"}},
+	if err := dm.SetReverseDestination("MASKED_DESTINATIONS", []string{"+4986517174963"},
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	}

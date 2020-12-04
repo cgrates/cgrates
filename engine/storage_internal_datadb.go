@@ -276,14 +276,12 @@ func (iDB *InternalDB) RemoveReverseDestinationDrv(dstID, prfx, transactionID st
 }
 
 func (iDB *InternalDB) SetReverseDestinationDrv(destID string, prefixes []string, transactionID string) (err error) {
-	var revDst []string
 	for _, p := range prefixes {
+		var revDst []string
 		if Cache.HasItem(utils.CacheReverseDestinations, p) {
-			x, ok := Cache.Get(utils.CacheReverseDestinations, p)
-			if !ok || x == nil {
-				return utils.ErrNotFound
+			if x, ok := Cache.Get(utils.CacheReverseDestinations, p); ok && x != nil {
+				revDst = x.([]string)
 			}
-			revDst = x.([]string)
 		}
 		mpRevDst := utils.NewStringSet(revDst)
 		mpRevDst.Add(destID)

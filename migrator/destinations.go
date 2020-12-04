@@ -119,7 +119,7 @@ func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 			if err := m.dmOut.DataManager().SetDestination(rdstn, utils.NonTransactional); err != nil {
 				return err
 			}
-			if err := m.dmOut.DataManager().SetReverseDestination(rdstn, utils.NonTransactional); err != nil {
+			if err := m.dmOut.DataManager().SetReverseDestination(rdstn.Id, rdstn.Prefixes, utils.NonTransactional); err != nil {
 				return err
 			}
 			m.stats[utils.ReverseDestinations]++

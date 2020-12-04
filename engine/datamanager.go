@@ -320,7 +320,7 @@ func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
 			if dest, err = dm.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, true, utils.NonTransactional); err != nil {
 				return err
 			}
-			if err = dm.SetReverseDestination(dest, utils.NonTransactional); err != nil {
+			if err = dm.SetReverseDestination(dest.Id, dest.Prefixes, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -466,18 +466,18 @@ func (dm *DataManager) RemoveDestination(destID string, transactionID string) (e
 	return
 }
 
-func (dm *DataManager) SetReverseDestination(dest *Destination, transactionID string) (err error) {
+func (dm *DataManager) SetReverseDestination(destID string, prefixes []string, transactionID string) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if err = dm.dataDB.SetReverseDestinationDrv(dest.Id, dest.Prefixes, transactionID); err != nil {
+	if err = dm.dataDB.SetReverseDestinationDrv(destID, prefixes, transactionID); err != nil {
 		return
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaReverseDestinations].Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetReverseDestination, dest, &reply); err != nil {
+			utils.ReplicatorSv1SetReverseDestination, &Destination{Id: destID, Prefixes: prefixes}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -511,7 +511,7 @@ func (dm *DataManager) GetReverseDestination(prefix string,
 						utils.OptsRouteID: itm.RouteID,
 					},
 				}, &ids); err == nil {
-				// need to discuss
+				err = dm.dataDB.SetReverseDestinationDrv(prefix, ids, transactionID)
 			}
 		}
 		if err != nil {
@@ -576,7 +576,7 @@ func (dm *DataManager) UpdateReverseDestination(oldDest, newDest *Destination,
 			addedPrefixes = append(addedPrefixes, newPrefix)
 		}
 	}
-	return dm.dataDB.SetReverseDestinationDrv(newDest.Id, addedPrefixes, transactionID)
+	return dm.SetReverseDestination(newDest.Id, addedPrefixes, transactionID)
 }
 
 func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {
