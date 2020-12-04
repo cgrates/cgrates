@@ -4650,7 +4650,8 @@ func TestAPItoModelTPRoutesCase2(t *testing.T) {
 		Weight:              20,
 	},
 	}
-
+	sort.Strings(structTest.FilterIDs)
+	sort.Strings(structTest.SortingParameters)
 	result := APItoModelTPRoutes(structTest)
 	if !reflect.DeepEqual(result, expStructTest) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStructTest), utils.ToJSON(result))
@@ -4766,6 +4767,8 @@ func TestRouteProfileToAPICase1(t *testing.T) {
 	}
 
 	result := RouteProfileToAPI(structTest)
+	sort.Strings(result.FilterIDs)
+	sort.Strings(result.SortingParameters)
 	if !reflect.DeepEqual(expStruct, result) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
@@ -5043,6 +5046,7 @@ func TestDispatcherProfileToAPICase2(t *testing.T) {
 	}
 
 	result := DispatcherProfileToAPI(structTest)
+	sort.Strings(result.FilterIDs)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
@@ -5186,7 +5190,7 @@ func TestChargerProfileToAPILastCase(t *testing.T) {
 	testStruct := &ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "CPP_1",
-		FilterIDs: []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers"},
+		FilterIDs: []string{"*string:~*opts.*subsys:*chargers", "FLTR_CP_1", "FLTR_CP_4"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -5198,7 +5202,7 @@ func TestChargerProfileToAPILastCase(t *testing.T) {
 	expStruct := &utils.TPChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "CPP_1",
-		FilterIDs: []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers"},
+		FilterIDs: []string{"*string:~*opts.*subsys:*chargers", "FLTR_CP_1", "FLTR_CP_4"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:25:00Z",
 			ExpiryTime:     "",
@@ -5209,6 +5213,7 @@ func TestChargerProfileToAPILastCase(t *testing.T) {
 	}
 
 	result := ChargerProfileToAPI(testStruct)
+	sort.Strings(result.FilterIDs)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
@@ -5227,6 +5232,9 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 		MinCost:            0.1,
 		MaxCost:            0.6,
 		MaxCostStrategy:    "*free",
+		RateID:             "0",
+		RateFilterIDs:      "test_filter_id",
+		RateWeight:         2,
 	},
 	}
 	expStruct := []*utils.TPRateProfile{
@@ -5244,6 +5252,79 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 			MinCost:          0.1,
 			MaxCost:          0.6,
 			MaxCostStrategy:  "*free",
+			Rates: map[string]*utils.TPRate{
+				"0": {
+					ID:        "0",
+					FilterIDs: []string{"test_filter_id"},
+					Weight:    2,
+					IntervalRates: []*utils.TPIntervalRate{
+						{
+							IntervalStart: "",
+							FixedFee:      0,
+							RecurrentFee:  0,
+							Unit:          "",
+							Increment:     "",
+						},
+					},
+				},
+			},
+		},
+	}
+	result := testRPMdls.AsTPRateProfile()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+
+}
+
+func TestRateProfileMdlsAsTPRateProfileCase3(t *testing.T) {
+	testRPMdls := RateProfileMdls{&RateProfileMdl{
+		Tpid:               "",
+		Tenant:             "cgrates.org",
+		ID:                 "RP1",
+		FilterIDs:          "*string:~*req.Subject:1001",
+		ActivationInterval: "2014-07-29T15:00:00Z",
+		Weight:             1.2,
+		RoundingMethod:     "*up",
+		RoundingDecimals:   4,
+		MinCost:            0.1,
+		MaxCost:            0.6,
+		MaxCostStrategy:    "*free",
+		RateID:             "0",
+		RateFilterIDs:      "test_filter_id",
+		RateWeight:         2,
+	},
+	}
+	expStruct := []*utils.TPRateProfile{
+		{TPid: "",
+			Tenant:    "cgrates.org",
+			ID:        "RP1",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			Weight:           1.2,
+			RoundingMethod:   "*up",
+			RoundingDecimals: 4,
+			MinCost:          0.1,
+			MaxCost:          0.6,
+			MaxCostStrategy:  "*free",
+			Rates: map[string]*utils.TPRate{
+				"0": {
+					ID:        "0",
+					FilterIDs: []string{"test_filter_id"},
+					Weight:    2,
+					IntervalRates: []*utils.TPIntervalRate{
+						{
+							IntervalStart: "",
+							FixedFee:      0,
+							RecurrentFee:  0,
+							Unit:          "",
+							Increment:     "",
+						},
+					},
+				},
+			},
 		},
 	}
 	result := testRPMdls.AsTPRateProfile()
@@ -5305,6 +5386,397 @@ func TestThresholdMdlsCSVHeader(t *testing.T) {
 		utils.MaxHits, utils.MinHits, utils.MinSleep,
 		utils.Blocker, utils.Weight, utils.ActionIDs, utils.Async}
 	result := testStruct.CSVHeader()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+func TestActionProfileMdlsCSVHeader(t *testing.T) {
+	testStruct := ActionProfileMdls{
+		{
+			Tpid:   "test_tpid",
+			Tenant: "test_tenant",
+		},
+	}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
+		utils.ActivationIntervalString, utils.Weight, utils.Schedule, utils.AccountIDs,
+		utils.ActionID, utils.ActionFilterIDs, utils.ActionBlocker, utils.ActionTTL,
+		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
+	}
+	result := testStruct.CSVHeader()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
+	testStruct := ActionProfileMdls{
+		{
+			Tpid:               "test_id",
+			Tenant:             "cgrates.org",
+			ID:                 "RP1",
+			FilterIDs:          "*string:~*req.Subject:1001",
+			ActivationInterval: "2014-07-29T15:00:00Z",
+			Weight:             1,
+			Schedule:           "test_schedule",
+			ActionID:           "test_action_id",
+			ActionFilterIDs:    "test_action_filter_ids",
+		},
+	}
+	expStruct := []*utils.TPActionProfile{
+		{
+			TPid:      "test_id",
+			Tenant:    "cgrates.org",
+			ID:        "RP1",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			Weight:   1,
+			Schedule: "test_schedule",
+			Actions: []*utils.TPAPAction{
+				{
+					ID:        "test_action_id",
+					FilterIDs: []string{"test_action_filter_ids"},
+				},
+			},
+		},
+	}
+	result := testStruct.AsTPActionProfile()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+//teo
+func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
+	testStruct := ActionProfileMdls{
+		{
+			Tpid:               "test_id",
+			Tenant:             "cgrates.org",
+			ID:                 "RP1",
+			FilterIDs:          "*string:~*req.Subject:1001",
+			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+			Weight:             1,
+			Schedule:           "test_schedule",
+			AccountIDs:         "test_account_id1;test_account_id2",
+			ActionID:           "test_action_id",
+			ActionFilterIDs:    "test_action_filter_ids",
+		},
+	}
+	expStruct := []*utils.TPActionProfile{
+		{
+			TPid:      "test_id",
+			Tenant:    "cgrates.org",
+			ID:        "RP1",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "2014-08-29T15:00:00Z",
+			},
+			Weight:     1,
+			Schedule:   "test_schedule",
+			AccountIDs: []string{"test_account_id1", "test_account_id2"},
+			Actions: []*utils.TPAPAction{
+				{
+					ID:        "test_action_id",
+					FilterIDs: []string{"test_action_filter_ids"},
+				},
+			},
+		},
+	}
+	result := testStruct.AsTPActionProfile()
+	sort.Strings(result[0].AccountIDs)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestAPItoModelTPActionProfileTPActionProfileNil(t *testing.T) {
+	testStruct := &utils.TPActionProfile{}
+	expStruct := ActionProfileMdls{}
+	expStruct = nil
+	result := APItoModelTPActionProfile(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestAPItoModelTPActionProfileTPActionProfile(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
+		TPid:      "test_id",
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "2014-08-29T15:00:00Z",
+		},
+		Weight:     1,
+		Schedule:   "test_schedule",
+		AccountIDs: []string{"test_account_id1", "test_account_id2"},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+			},
+		},
+	}
+
+	expStruct := ActionProfileMdls{{
+		Tpid:               "test_id",
+		Tenant:             "cgrates.org",
+		ID:                 "RP1",
+		FilterIDs:          "*string:~*req.Subject:1001;*string:~*req.Subject:1002",
+		ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+		Weight:             1,
+		Schedule:           "test_schedule",
+		AccountIDs:         "test_account_id1;test_account_id2",
+		ActionID:           "test_action_id",
+		ActionFilterIDs:    "test_action_filter_id1;test_action_filter_id2",
+	}}
+	result := APItoModelTPActionProfile(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersAPItoActionProfile(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight:     1,
+		Schedule:   "test_schedule",
+		AccountIDs: []string{},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				Path:      "test_path",
+				Opts:      "key1:val1;key2:val2",
+			},
+		},
+	}
+
+	expStruct := &ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
+		},
+		Weight:     1,
+		Schedule:   "test_schedule",
+		AccountIDs: utils.StringSet{},
+		Actions: []*APAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				Path:      "test_path",
+				Opts: map[string]interface{}{
+					"key1": "val1",
+					"key2": "val2",
+				},
+			},
+		},
+	}
+	result, _ := APItoActionProfile(testStruct, "")
+	sort.Strings(result.FilterIDs)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+
+}
+
+func TestModelHelpersAPItoActionProfileError1(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "cat",
+			ExpiryTime:     "cat",
+		},
+		Weight:     1,
+		Schedule:   "test_schedule",
+		AccountIDs: []string{},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				Path:      "test_path",
+			},
+		},
+	}
+
+	_, err := APItoActionProfile(testStruct, "")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoActionProfileError2(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight:     1,
+		Schedule:   "test_schedule",
+		AccountIDs: []string{},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				Path:      "",
+			},
+		},
+	}
+
+	_, err := APItoActionProfile(testStruct, "")
+	if err == nil || err.Error() != "empty path in ActionProfile <cgrates.org:RP1> for action <test_action_id>" {
+		t.Errorf("\nExpecting <empty path in ActionProfile <cgrates.org:RP1> for action <test_action_id>>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoActionProfileError3(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight:     1,
+		Schedule:   "test_schedule",
+		AccountIDs: []string{},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				Path:      "test_path",
+				TTL:       "cat",
+			},
+		},
+	}
+
+	_, err := APItoActionProfile(testStruct, "")
+	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
+		t.Errorf("\nExpecting <time: invalid duration \"cat\">,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoActionProfileError4(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight:     1,
+		Schedule:   "test_schedule",
+		AccountIDs: []string{},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				Path:      "test_path",
+				Opts:      "test_opt",
+			},
+		},
+	}
+
+	_, err := APItoActionProfile(testStruct, "")
+	if err == nil || err.Error() != "malformed option for ActionProfile <cgrates.org:RP1> for action <test_action_id>" {
+		t.Errorf("\nExpecting <malformed option for ActionProfile <cgrates.org:RP1> for action <test_action_id>>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoActionProfileError5(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight:     1,
+		Schedule:   "test_schedule",
+		AccountIDs: []string{},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				Path:      "test_path",
+				Value:     "\"constant;`>;q=0.7;expires=3600constant\"",
+			},
+		},
+	}
+
+	_, err := APItoActionProfile(testStruct, "")
+	if err == nil || err.Error() != "Unclosed unspilit syntax" {
+		t.Errorf("\nExpecting <Unclosed unspilit syntax>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersActionProfileToAPI(t *testing.T) {
+	testStruct := &ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
+		},
+		Weight:     1,
+		Schedule:   "test_schedule",
+		AccountIDs: utils.StringSet{},
+		Actions: []*APAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				TTL:       time.Second,
+				Path:      "test_path",
+				Opts: map[string]interface{}{
+					"key1": "val1",
+				},
+			},
+		},
+	}
+	expStruct := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight:     1,
+		Schedule:   "test_schedule",
+		AccountIDs: []string{},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				TTL:       "1s",
+				Path:      "test_path",
+				Opts:      "key1:val1",
+			},
+		},
+	}
+	result := ActionProfileToAPI(testStruct)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
