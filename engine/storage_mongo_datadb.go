@@ -698,6 +698,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField3(sctx, ColIndx, utils.ActionPlanIndexes, "key")
 		case utils.ActionProfilesFilterIndexPrfx:
 			result, err = ms.getField3(sctx, ColIndx, utils.ActionProfilesFilterIndexPrfx, "key")
+		case utils.RateProfilesFilterIndexPrfx:
+			result, err = ms.getField3(sctx, ColIndx, utils.RateProfilesFilterIndexPrfx, "key")
 		case utils.RateFilterIndexPrfx:
 			result, err = ms.getField3(sctx, ColIndx, utils.RateFilterIndexPrfx, "key")
 		case utils.FilterIndexPrfx:
