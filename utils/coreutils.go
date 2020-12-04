@@ -966,11 +966,8 @@ func AESDecrypt(encrypted string, encKey string) (txt string, err error) {
 	nonceSize := aesGCM.NonceSize()
 	nonce, ciphertext := enc[:nonceSize], enc[nonceSize:]
 	var plaintext []byte
-	if plaintext, err = aesGCM.Open(nil, nonce, ciphertext, nil); err != nil {
-		return
-	}
-
-	return fmt.Sprintf("%s", plaintext), nil
+	plaintext, err = aesGCM.Open(nil, nonce, ciphertext, nil)
+	return string(plaintext), err
 }
 
 // Hash generates the hash text

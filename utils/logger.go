@@ -31,10 +31,7 @@ var nodeID string
 
 func init() {
 	if Logger == nil || reflect.ValueOf(Logger).IsNil() {
-		err := Newlogger(MetaSysLog, nodeID)
-		if err != nil {
-			Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
-		}
+		Newlogger(MetaSysLog, nodeID)
 	}
 }
 
@@ -44,12 +41,9 @@ func Newlogger(loggertype, id string) (err error) {
 	nodeID = id
 	var l *syslog.Writer
 	if loggertype == MetaSysLog {
-		if l, err = syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, fmt.Sprintf("CGRateS <%s> ", nodeID)); err != nil {
-			return err
-		} else {
-			Logger.SetSyslog(l)
-		}
-		return nil
+		l, err = syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, fmt.Sprintf("CGRateS <%s> ", nodeID))
+		Logger.SetSyslog(l) // if we received an error, l is nil
+		return err
 	} else if loggertype != MetaStdLog {
 		return fmt.Errorf("unsuported logger: <%s>", loggertype)
 	}
@@ -92,7 +86,7 @@ type StdLogger struct {
 
 func (sl *StdLogger) Close() (err error) {
 	if sl.syslog != nil {
-		sl.Close()
+		err = sl.syslog.Close()
 	}
 	return
 }
