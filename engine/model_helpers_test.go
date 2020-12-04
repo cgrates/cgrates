@@ -2891,7 +2891,7 @@ func TestAttributeProfileToAPI(t *testing.T) {
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
 		},
 		Attributes: []*utils.TPAttribute{
 			{
@@ -2908,6 +2908,7 @@ func TestAttributeProfileToAPI(t *testing.T) {
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
 			{
@@ -2975,14 +2976,14 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
-		Contexts:  []string{"con1"},
+		Contexts:  []string{"con1", "con2"},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
 		},
 		Attributes: []*utils.TPAttribute{
-			{
+			{FilterIDs: []string{"filter_id1", "filter_id2"},
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Value: "Al1",
 			},
@@ -2994,11 +2995,12 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
-			Contexts:           "con1",
+			Contexts:           "con1;con2",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			AttributeFilterIDs: "filter_id1;filter_id2",
 			Path:               utils.MetaReq + utils.NestingSep + "FL1",
 			Value:              "Al1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
+			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
 			Weight:             20,
 		},
 	}
@@ -3065,6 +3067,64 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 		}
 	}
 
+}
+
+func TestModelAsTPAttribute2(t *testing.T) {
+	models := AttributeMdls{
+		&AttributeMdl{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "ALS1",
+			Contexts:           "con1",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			Path:               utils.MetaReq + utils.NestingSep + "FL1",
+			Value:              "Al1",
+			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
+			Weight:             20,
+		},
+	}
+	expected := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
+		},
+		Attributes: []*utils.TPAttribute{
+			{
+				FilterIDs: []string{},
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
+				Value:     "Al1",
+			},
+		},
+		Weight: 20,
+	}
+	expected2 := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_DST_DE", "FLTR_ACNT_dan"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Attributes: []*utils.TPAttribute{
+			{
+				FilterIDs: []string{},
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
+				Value:     "Al1",
+			},
+		},
+		Weight: 20,
+	}
+	rcv := models.AsTPAttributes()
+	if !reflect.DeepEqual(expected, rcv[0]) && !reflect.DeepEqual(expected2, rcv[0]) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
+	}
 }
 
 func TestModelAsTPAttribute(t *testing.T) {
@@ -3166,7 +3226,7 @@ func TestChargerProfileToAPI(t *testing.T) {
 		RunID:     "*rated",
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
 		},
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
@@ -3178,6 +3238,7 @@ func TestChargerProfileToAPI(t *testing.T) {
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 35, 0, 0, time.UTC),
 		},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
@@ -3200,7 +3261,7 @@ func TestAPItoModelTPCharger(t *testing.T) {
 		RunID:     "*rated",
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
 		},
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
@@ -3213,7 +3274,7 @@ func TestAPItoModelTPCharger(t *testing.T) {
 			FilterIDs:          "FLTR_ACNT_dan",
 			RunID:              "*rated",
 			AttributeIDs:       "ATTR1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
+			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
 			Weight:             20,
 		},
 		&ChargerMdl{
@@ -3241,7 +3302,7 @@ func TestAPItoModelTPCharger2(t *testing.T) {
 		RunID:     "*rated",
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
 		},
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
@@ -3254,7 +3315,7 @@ func TestAPItoModelTPCharger2(t *testing.T) {
 			FilterIDs:          "FLTR_ACNT_dan",
 			RunID:              "*rated",
 			AttributeIDs:       "ATTR1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
+			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
 			Weight:             20,
 		},
 		&ChargerMdl{
@@ -3320,7 +3381,7 @@ func TestAPItoModelTPCharger4(t *testing.T) {
 		RunID:     "*rated",
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
 		},
 		Weight: 20,
 	}
@@ -3331,7 +3392,7 @@ func TestAPItoModelTPCharger4(t *testing.T) {
 			ID:                 "Charger1",
 			FilterIDs:          "FLTR_ACNT_dan",
 			RunID:              "*rated",
-			ActivationInterval: "2014-07-14T14:35:00Z",
+			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
 			Weight:             20,
 		},
 	}
@@ -3468,6 +3529,39 @@ func TestModelAsTPChargers2(t *testing.T) {
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
+		},
+		AttributeIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call", "ATTR1", "*constant:*req.Category:call"},
+		Weight:       20,
+	}
+	rcv := models.AsTPChargers()
+	sort.Strings(rcv[0].FilterIDs)
+	if !reflect.DeepEqual(expected, rcv[0]) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
+	}
+}
+
+func TestModelAsTPChargers3(t *testing.T) {
+	models := ChargerMdls{
+		&ChargerMdl{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "Charger1",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			RunID:              "*rated",
+			AttributeIDs:       "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call",
+			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
+			Weight:             20,
+		},
+	}
+	expected := &utils.TPChargerProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		RunID:     "*rated",
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
 		},
 		AttributeIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call", "ATTR1", "*constant:*req.Category:call"},
 		Weight:       20,
@@ -4014,6 +4108,163 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2017-11-27T00:00:00Z",
 				ExpiryTime:     "",
+			},
+			Routes: []*utils.TPRoute{
+				{
+					ID:     "route1",
+					Weight: 10.0,
+				},
+				{
+					ID:     "route2",
+					Weight: 20.0,
+				},
+			},
+			Weight: 10,
+		},
+	}
+	rcvRev := mdlReverse.AsTPRouteProfile()
+	sort.Slice(rcvRev[0].Routes, func(i, j int) bool {
+		return strings.Compare(rcvRev[0].Routes[i].ID, rcvRev[0].Routes[j].ID) < 0
+	})
+	sort.Strings(rcvRev[0].SortingParameters)
+	if !reflect.DeepEqual(rcvRev, expPrfRev) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrfRev), utils.ToJSON(rcvRev))
+	}
+}
+
+func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
+	mdl := RouteMdls{
+		&RouteMdl{
+			PK:                 1,
+			Tpid:               "TP",
+			Tenant:             "cgrates.org",
+			ID:                 "RoutePrf",
+			FilterIDs:          "FltrRoute",
+			ActivationInterval: "2017-11-27T00:00:00Z;2017-11-28T00:00:00Z",
+			Sorting:            "*weight",
+			SortingParameters:  "srtPrm1",
+			RouteID:            "route1",
+			RouteFilterIDs:     "",
+			RouteAccountIDs:    "",
+			RouteRatingplanIDs: "",
+			RouteResourceIDs:   "",
+			RouteStatIDs:       "",
+			RouteWeight:        10.0,
+			RouteBlocker:       false,
+			RouteParameters:    "",
+			Weight:             10.0,
+			CreatedAt:          time.Time{},
+		},
+		&RouteMdl{
+			PK:                 2,
+			Tpid:               "TP",
+			Tenant:             "cgrates.org",
+			ID:                 "RoutePrf",
+			FilterIDs:          "",
+			ActivationInterval: "2017-11-27T00:00:00Z;2017-11-28T00:00:00Z",
+			Sorting:            "",
+			SortingParameters:  "",
+			RouteID:            "route2",
+			RouteFilterIDs:     "",
+			RouteAccountIDs:    "",
+			RouteRatingplanIDs: "",
+			RouteResourceIDs:   "",
+			RouteStatIDs:       "",
+			RouteWeight:        20.0,
+			RouteBlocker:       false,
+			RouteParameters:    "",
+			Weight:             0,
+			CreatedAt:          time.Time{},
+		},
+	}
+	expPrf := []*utils.TPRouteProfile{
+		{
+			TPid:              "TP",
+			Tenant:            "cgrates.org",
+			ID:                "RoutePrf",
+			Sorting:           "*weight",
+			SortingParameters: []string{"srtPrm1"},
+			FilterIDs:         []string{"FltrRoute"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2017-11-27T00:00:00Z",
+				ExpiryTime:     "2017-11-28T00:00:00Z",
+			},
+			Routes: []*utils.TPRoute{
+				{
+					ID:     "route1",
+					Weight: 10.0,
+				},
+				{
+					ID:     "route2",
+					Weight: 20.0,
+				},
+			},
+			Weight: 10,
+		},
+	}
+	rcv := mdl.AsTPRouteProfile()
+	sort.Slice(rcv[0].Routes, func(i, j int) bool {
+		return strings.Compare(rcv[0].Routes[i].ID, rcv[0].Routes[j].ID) < 0
+	})
+	if !reflect.DeepEqual(rcv, expPrf) {
+		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrf), utils.ToJSON(rcv))
+	}
+
+	mdlReverse := RouteMdls{
+		&RouteMdl{
+			PK:                 2,
+			Tpid:               "TP",
+			Tenant:             "cgrates.org",
+			ID:                 "RoutePrf",
+			FilterIDs:          "",
+			ActivationInterval: "",
+			Sorting:            "",
+			SortingParameters:  "",
+			RouteID:            "route2",
+			RouteFilterIDs:     "",
+			RouteAccountIDs:    "",
+			RouteRatingplanIDs: "",
+			RouteResourceIDs:   "",
+			RouteStatIDs:       "",
+			RouteWeight:        20.0,
+			RouteBlocker:       false,
+			RouteParameters:    "",
+			Weight:             0,
+			CreatedAt:          time.Time{},
+		},
+		&RouteMdl{
+			PK:                 1,
+			Tpid:               "TP",
+			Tenant:             "cgrates.org",
+			ID:                 "RoutePrf",
+			FilterIDs:          "FltrRoute",
+			ActivationInterval: "2017-11-27T00:00:00Z;2017-11-28T00:00:00Z",
+			Sorting:            "*weight",
+			SortingParameters:  "srtPrm1",
+			RouteID:            "route1",
+			RouteFilterIDs:     "",
+			RouteAccountIDs:    "",
+			RouteRatingplanIDs: "",
+			RouteResourceIDs:   "",
+			RouteStatIDs:       "",
+			RouteWeight:        10.0,
+			RouteBlocker:       false,
+			RouteParameters:    "",
+			Weight:             10.0,
+			CreatedAt:          time.Time{},
+		},
+	}
+	expPrfRev := []*utils.TPRouteProfile{
+		{
+			TPid:              "TP",
+			Tenant:            "cgrates.org",
+			ID:                "RoutePrf",
+			Sorting:           "*weight",
+			SortingParameters: []string{"srtPrm1"},
+			FilterIDs:         []string{"FltrRoute"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2017-11-27T00:00:00Z",
+				ExpiryTime:     "2017-11-28T00:00:00Z",
 			},
 			Routes: []*utils.TPRoute{
 				{
@@ -5780,4 +6031,161 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
+}
+
+func TestChargerMdlsCSVHeader(t *testing.T) {
+
+	testStruct := ChargerMdls{
+		{
+			Tenant: "cgrates.org",
+			ID:     "RP1",
+		},
+	}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.RunID, utils.AttributeIDs, utils.Weight}
+
+	result := testStruct.CSVHeader()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestAPItoAttributeProfileError1(t *testing.T) {
+	tpAlsPrf := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Attributes: []*utils.TPAttribute{
+			{
+				Path:  "",
+				Value: "Al1",
+			},
+		},
+		Weight: 20,
+	}
+
+	_, err := APItoAttributeProfile(tpAlsPrf, "UTC")
+	if err == nil || err.Error() != "empty path in AttributeProfile <cgrates.org:ALS1>" {
+		t.Errorf("\nExpecting <empty path in AttributeProfile <cgrates.org:ALS1>>,\n Received <%+v>", err)
+	}
+
+}
+
+func TestAPItoAttributeProfileError2(t *testing.T) {
+	tpAlsPrf := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Attributes: []*utils.TPAttribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: "\"constant;`>;q=0.7;expires=3600constant\"",
+			},
+		},
+		Weight: 20,
+	}
+
+	_, err := APItoAttributeProfile(tpAlsPrf, "UTC")
+	if err == nil || err.Error() != "Unclosed unspilit syntax" {
+		t.Errorf("\nExpecting <Unclosed unspilit syntax>,\n Received <%+v>", err)
+	}
+
+}
+
+func TestAPItoAttributeProfileError3(t *testing.T) {
+	tpAlsPrf := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "cat",
+			ExpiryTime:     "",
+		},
+		Attributes: []*utils.TPAttribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: "Al1",
+			},
+		},
+		Weight: 20,
+	}
+
+	_, err := APItoAttributeProfile(tpAlsPrf, "UTC")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
+	}
+}
+
+func TestAPItoModelTPAttributeNoAttributes(t *testing.T) {
+	testStruct := &utils.TPAttributeProfile{}
+	expStruct := AttributeMdls{}
+	expStruct = nil
+	result := APItoModelTPAttribute(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestAttributeMdlsCSVHeader(t *testing.T) {
+	testStruct := AttributeMdls{
+		{
+			Tenant: "cgrates.org",
+			ID:     "ALS1",
+		},
+	}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value, utils.Blocker, utils.Weight}
+	result := testStruct.CSVHeader()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersTestAPItoRouteProfile(t *testing.T) {
+	testStruct := &utils.TPRouteProfile{
+		FilterIDs:         []string{},
+		SortingParameters: []string{"param1"},
+		Routes:            []*utils.TPRoute{},
+	}
+	expStruct := &RouteProfile{
+		FilterIDs:         []string{},
+		SortingParameters: []string{"param1"},
+		Routes:            []*Route{},
+	}
+	result, err := APItoRouteProfile(testStruct, "")
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+func TestModelHelpersTestAPItoRouteProfileErr(t *testing.T) {
+	testStruct := &utils.TPRouteProfile{
+		FilterIDs: []string{},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "cat",
+		},
+		SortingParameters: []string{"param1"},
+		Routes:            []*utils.TPRoute{},
+	}
+	_, err := APItoRouteProfile(testStruct, "")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
+	}
+
 }
