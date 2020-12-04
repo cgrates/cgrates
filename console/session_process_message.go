@@ -76,7 +76,7 @@ func (self *CmdSessionsProcessEvent) RpcResult() interface{} {
 }
 
 func (self *CmdSessionsProcessEvent) GetFormatedResult(result interface{}) string {
-	return GetFormatedResult(result, map[string]struct{}{
+	return GetFormatedResult(result, utils.StringSet{
 		"Usage":    {},
 		"MaxUsage": {},
 	})

@@ -34,19 +34,19 @@ import (
 )
 
 func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
-	getTpIDs := func(ctx context.Context, col string, tpMap map[string]struct{}) (map[string]struct{}, error) {
+	getTpIDs := func(ctx context.Context, col string, tpMap utils.StringSet) (utils.StringSet, error) {
 		if strings.HasPrefix(col, "tp_") {
 			result, err := ms.getCol(col).Distinct(ctx, "tpid", bson.D{})
 			if err != nil {
 				return tpMap, err
 			}
 			for _, tpid := range result {
-				tpMap[tpid.(string)] = struct{}{}
+				tpMap.Add(tpid.(string))
 			}
 		}
 		return tpMap, nil
 	}
-	tpidMap := make(map[string]struct{})
+	tpidMap := make(utils.StringSet)
 
 	if colName == "" {
 		if err := ms.query(func(sctx mongo.SessionContext) error {
@@ -75,9 +75,7 @@ func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
 			return nil, err
 		}
 	}
-	for tpid := range tpidMap {
-		tpids = append(tpids, tpid)
-	}
+	tpids = tpidMap.AsSlice()
 	return tpids, nil
 }
 

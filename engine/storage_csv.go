@@ -190,7 +190,7 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 		return nil, err
 	}
 	getIfExist := func(name string) []string {
-		if _, has := sheetNames[name]; has {
+		if sheetNames.Has(name) {
 			return []string{name}
 		}
 		return []string{}
@@ -854,15 +854,15 @@ func newSheet() (sht *sheets.Service, err error) { //*google_api
 	return
 }
 
-func getSpreatsheetTabs(spreadsheetID string, srv *sheets.Service) (sheetsName map[string]struct{}, err error) {
-	sheetsName = make(map[string]struct{})
+func getSpreatsheetTabs(spreadsheetID string, srv *sheets.Service) (sheetsName utils.StringSet, err error) {
+	sheetsName = make(utils.StringSet)
 	sht, err := srv.Spreadsheets.Get(spreadsheetID).Do()
 	if err != nil {
 		err = fmt.Errorf("Unable get the information about spreadsheet because: %v", err)
 		return
 	}
 	for _, sheet := range sht.Sheets {
-		sheetsName[sheet.Properties.Title] = struct{}{}
+		sheetsName.Add(sheet.Properties.Title)
 	}
 	return
 }

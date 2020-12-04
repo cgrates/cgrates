@@ -136,7 +136,7 @@ func FromJSON(jsn []byte, interestingFields []string) (line string) {
 	return strings.TrimSpace(line)
 }
 
-func getStringValue(v interface{}, defaultDurationFields map[string]struct{}) string {
+func getStringValue(v interface{}, defaultDurationFields utils.StringSet) string {
 	switch o := v.(type) {
 	case nil:
 		return "null"
@@ -154,7 +154,7 @@ func getStringValue(v interface{}, defaultDurationFields map[string]struct{}) st
 	return utils.ToJSON(v)
 }
 
-func getSliceAsString(mp []interface{}, defaultDurationFields map[string]struct{}) (out string) {
+func getSliceAsString(mp []interface{}, defaultDurationFields utils.StringSet) (out string) {
 	out = "["
 	for _, v := range mp {
 		out += fmt.Sprintf(`%s,`, getStringValue(v, defaultDurationFields))
@@ -162,11 +162,11 @@ func getSliceAsString(mp []interface{}, defaultDurationFields map[string]struct{
 	return strings.TrimSuffix(out, ",") + "]"
 }
 
-func getMapAsString(mp map[string]interface{}, defaultDurationFields map[string]struct{}) (out string) {
+func getMapAsString(mp map[string]interface{}, defaultDurationFields utils.StringSet) (out string) {
 	// in order to find the data faster
 	keylist := []string{} // add key value pairs to list so at the end we can sort them
 	for k, v := range mp {
-		if _, has := defaultDurationFields[k]; has {
+		if defaultDurationFields.Has(k) {
 			if t, err := utils.IfaceAsDuration(v); err == nil {
 				keylist = append(keylist, fmt.Sprintf(`"%s":"%s"`, k, t.String()))
 				continue
@@ -178,7 +178,7 @@ func getMapAsString(mp map[string]interface{}, defaultDurationFields map[string]
 	return fmt.Sprintf(`{%s}`, strings.Join(keylist, ","))
 }
 
-func GetFormatedResult(result interface{}, defaultDurationFields map[string]struct{}) string {
+func GetFormatedResult(result interface{}, defaultDurationFields utils.StringSet) string {
 	jsonResult, _ := json.Marshal(result)
 	var mp map[string]interface{}
 	if err := json.Unmarshal(jsonResult, &mp); err != nil {
@@ -191,7 +191,7 @@ func GetFormatedResult(result interface{}, defaultDurationFields map[string]stru
 	return out.String()
 }
 
-func GetFormatedSliceResult(result interface{}, defaultDurationFields map[string]struct{}) string {
+func GetFormatedSliceResult(result interface{}, defaultDurationFields utils.StringSet) string {
 	jsonResult, _ := json.Marshal(result)
 	var mp []interface{}
 	if err := json.Unmarshal(jsonResult, &mp); err != nil {

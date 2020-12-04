@@ -900,14 +900,14 @@ func (pdd *StatPDD) GetCompressFactor(events map[string]int) map[string]int {
 }
 
 func NewDDC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatDDC{Events: make(map[string]map[string]int64), FieldValues: make(map[string]map[string]struct{}),
+	return &StatDDC{Events: make(map[string]map[string]int64), FieldValues: make(map[string]utils.StringSet),
 		MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 type StatDDC struct {
 	FilterIDs   []string
-	FieldValues map[string]map[string]struct{} // map[fieldValue]map[eventID]
-	Events      map[string]map[string]int64    // map[EventTenantID]map[fieldValue]compressfactor
+	FieldValues map[string]utils.StringSet  // map[fieldValue]map[eventID]
+	Events      map[string]map[string]int64 // map[EventTenantID]map[fieldValue]compressfactor
 	MinItems    int
 	Count       int64
 }
@@ -948,9 +948,9 @@ func (ddc *StatDDC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 
 	// add to fieldValues
 	if _, has := ddc.FieldValues[fieldValue]; !has {
-		ddc.FieldValues[fieldValue] = make(map[string]struct{})
+		ddc.FieldValues[fieldValue] = make(utils.StringSet)
 	}
-	ddc.FieldValues[fieldValue][evID] = struct{}{}
+	ddc.FieldValues[fieldValue].Add(evID)
 
 	// add to events
 	if _, has := ddc.Events[evID]; !has {
@@ -992,8 +992,8 @@ func (ddc *StatDDC) RemEvent(evID string) (err error) {
 	if _, has := ddc.FieldValues[fieldValue]; !has {
 		return
 	}
-	delete(ddc.FieldValues[fieldValue], evID)
-	if len(ddc.FieldValues[fieldValue]) <= 0 {
+	ddc.FieldValues[fieldValue].Remove(evID)
+	if ddc.FieldValues[fieldValue].Size() <= 0 {
 		delete(ddc.FieldValues, fieldValue)
 	}
 	return
@@ -1309,14 +1309,14 @@ func (avg *StatAverage) GetCompressFactor(events map[string]int) map[string]int 
 }
 
 func NewStatDistinct(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatDistinct{Events: make(map[string]map[string]int64), FieldValues: make(map[string]map[string]struct{}),
+	return &StatDistinct{Events: make(map[string]map[string]int64), FieldValues: make(map[string]utils.StringSet),
 		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
 }
 
 type StatDistinct struct {
 	FilterIDs   []string
-	FieldValues map[string]map[string]struct{} // map[fieldValue]map[eventID]
-	Events      map[string]map[string]int64    // map[EventTenantID]map[fieldValue]compressfactor
+	FieldValues map[string]utils.StringSet  // map[fieldValue]map[eventID]
+	Events      map[string]map[string]int64 // map[EventTenantID]map[fieldValue]compressfactor
 	MinItems    int
 	FieldName   string
 	Count       int64
@@ -1363,9 +1363,9 @@ func (dst *StatDistinct) AddEvent(evID string, ev utils.DataProvider) (err error
 
 	// add to fieldValues
 	if _, has := dst.FieldValues[fieldValue]; !has {
-		dst.FieldValues[fieldValue] = make(map[string]struct{})
+		dst.FieldValues[fieldValue] = make(utils.StringSet)
 	}
-	dst.FieldValues[fieldValue][evID] = struct{}{}
+	dst.FieldValues[fieldValue].Add(evID)
 
 	// add to events
 	if _, has := dst.Events[evID]; !has {
@@ -1407,8 +1407,8 @@ func (dst *StatDistinct) RemEvent(evID string) (err error) {
 	if _, has := dst.FieldValues[fieldValue]; !has {
 		return
 	}
-	delete(dst.FieldValues[fieldValue], evID)
-	if len(dst.FieldValues[fieldValue]) <= 0 {
+	dst.FieldValues[fieldValue].Remove(evID)
+	if dst.FieldValues[fieldValue].Size() <= 0 {
 		delete(dst.FieldValues, fieldValue)
 	}
 	return
