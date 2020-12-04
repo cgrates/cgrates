@@ -3492,13 +3492,14 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 
 func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 	tpAp = &utils.TPActionProfile{
-		Tenant:     ap.Tenant,
-		ID:         ap.ID,
-		FilterIDs:  make([]string, len(tpAp.FilterIDs)),
-		Weight:     ap.Weight,
-		Schedule:   ap.Schedule,
-		AccountIDs: ap.AccountIDs.AsSlice(),
-		Actions:    make([]*utils.TPAPAction, len(ap.Actions)),
+		Tenant:             ap.Tenant,
+		ID:                 ap.ID,
+		FilterIDs:          make([]string, len(ap.FilterIDs)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		Weight:             ap.Weight,
+		Schedule:           ap.Schedule,
+		AccountIDs:         ap.AccountIDs.AsSlice(),
+		Actions:            make([]*utils.TPAPAction, len(ap.Actions)),
 	}
 	for i, fli := range ap.FilterIDs {
 		tpAp.FilterIDs[i] = fli
@@ -3521,7 +3522,8 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 			Path:      act.Path,
 			Value:     act.Value.GetRule(config.CgrConfig().GeneralCfg().RSRSep),
 		}
-		elems := make([]string, len(act.Opts))
+
+		elems := make([]string, 0, len(act.Opts))
 		for k, v := range act.Opts {
 			elems = append(elems, utils.ConcatenatedKey(k, utils.IfaceAsString(v)))
 		}
