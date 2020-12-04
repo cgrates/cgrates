@@ -132,7 +132,7 @@ func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
 	dispatcherprofilesPaths := appendName(allFoldersPath, utils.DispatcherProfilesCsv)
 	dispatcherhostsPaths := appendName(allFoldersPath, utils.DispatcherHostsCsv)
 	rateProfilesFn := appendName(allFoldersPath, utils.RateProfilesCsv)
-	actionProfilesFn := append(allFoldersPath, utils.ActionProfilesCsv)
+	actionProfilesFn := appendName(allFoldersPath, utils.ActionProfilesCsv)
 	return NewCSVStorage(sep,
 		destinationsPaths,
 		timingsPaths,
