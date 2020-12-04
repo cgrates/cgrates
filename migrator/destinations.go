@@ -101,7 +101,7 @@ func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 	}
 	for _, id := range ids {
 		id := strings.TrimPrefix(id, utils.REVERSE_DESTINATION_PREFIX)
-		rdst, err := m.dmIN.DataManager().GetReverseDestination(id, true, utils.NonTransactional)
+		rdst, err := m.dmIN.DataManager().GetReverseDestination(id, false, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

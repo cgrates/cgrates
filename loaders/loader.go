@@ -972,7 +972,6 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 }
 
 func (ldr *Loader) serve(stopChan chan struct{}) (err error) {
-	fmt.Println(ldr.runDelay)
 	switch ldr.runDelay {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
@@ -1001,7 +1000,6 @@ func (ldr *Loader) handleFolder(stopChan chan struct{}) {
 	}
 }
 func (ldr *Loader) processFile(_, itmID string) (err error) {
-	fmt.Println(itmID)
 	loaderType := ldr.getLdrType(itmID)
 	if len(loaderType) == 0 {
 		return

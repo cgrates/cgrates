@@ -59,7 +59,7 @@ func (rplSv1 *ReplicatorSv1) GetDestination(key *utils.StringWithOpts, reply *en
 
 //GetDestination
 func (rplSv1 *ReplicatorSv1) GetReverseDestination(key *utils.StringWithOpts, reply *[]string) error {
-	if rcv, err := rplSv1.dm.DataDB().GetReverseDestinationDrv(key.Arg, true, utils.NonTransactional); err != nil {
+	if rcv, err := rplSv1.dm.DataDB().GetReverseDestinationDrv(key.Arg, utils.NonTransactional); err != nil {
 		return err
 	} else {
 		*reply = rcv
@@ -334,7 +334,7 @@ func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.DestinationWithOpts, rep
 
 // SetReverseDestination
 func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.DestinationWithOpts, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetReverseDestinationDrv(dst.Destination, utils.NonTransactional); err != nil {
+	if err := rplSv1.dm.DataDB().SetReverseDestinationDrv(dst.Destination.Id, dst.Destination.Prefixes, utils.NonTransactional); err != nil {
 		return err
 	}
 	*reply = utils.OK

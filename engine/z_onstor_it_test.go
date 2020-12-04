@@ -645,14 +645,14 @@ func testOnStorITCRUDDestinations(t *testing.T) {
 func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	dst := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+494", "+495", "+496"}}
 	dst2 := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+497", "+498", "+499"}}
-	if _, rcvErr := onStor.GetReverseDestination(dst.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetReverseDestination(dst.Id, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetReverseDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	for i := range dst.Prefixes {
-		if rcv, err := onStor.GetReverseDestination(dst.Prefixes[i], true, utils.NonTransactional); err != nil {
+		if rcv, err := onStor.GetReverseDestination(dst.Prefixes[i], false, true, utils.NonTransactional); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual([]string{dst.Id}, rcv) {
 			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
@@ -662,7 +662,7 @@ func testOnStorITCRUDReverseDestinations(t *testing.T) {
 		t.Error(err)
 	}
 	for i := range dst.Prefixes {
-		if rcv, err := onStor.GetReverseDestination(dst2.Prefixes[i], true, utils.NonTransactional); err != nil {
+		if rcv, err := onStor.GetReverseDestination(dst2.Prefixes[i], false, true, utils.NonTransactional); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
 			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
@@ -677,7 +677,7 @@ func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	// }
 	//
 	for i := range dst.Prefixes {
-		if rcv, err := onStor.GetReverseDestination(dst2.Prefixes[i], false, utils.NonTransactional); err != nil {
+		if rcv, err := onStor.GetReverseDestination(dst2.Prefixes[i], true, true, utils.NonTransactional); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
 			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)

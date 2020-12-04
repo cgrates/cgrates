@@ -83,7 +83,7 @@ func TestDestinationGetExists(t *testing.T) {
 }
 
 func TestDestinationReverseGetExistsCache(t *testing.T) {
-	dm.GetReverseDestination("0256", false, utils.NonTransactional)
+	dm.GetReverseDestination("0256", true, true, utils.NonTransactional)
 	if _, ok := Cache.Get(utils.CacheReverseDestinations, "0256"); !ok {
 		t.Error("Destination not cached:", err)
 	}

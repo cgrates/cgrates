@@ -185,10 +185,10 @@ func (b *Balance) Clone() *Balance {
 	return n
 }
 
-func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destId string) {
+func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destID string) {
 	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.ANY] == false {
 		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-			if destIDs, err := dm.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+			if destIDs, err := dm.GetReverseDestination(p, true, true, utils.NonTransactional); err == nil {
 				for _, dID := range destIDs {
 					if b.DestinationIDs[dID] == true {
 						return p, dID

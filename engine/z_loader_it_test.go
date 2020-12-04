@@ -21,7 +21,6 @@ package engine
 
 import (
 	"flag"
-	"fmt"
 	"path"
 	"reflect"
 	"testing"
@@ -206,15 +205,12 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err = loader.LoadDispatcherHosts(); err != nil {
 		t.Error("Failed loading Dispatcher hosts: ", err.Error())
 	}
-	fmt.Println(utils.ToJSON(loader.destinations))
 	if err := loader.WriteToDatabase(false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
 	}
-	fmt.Println(utils.ToJSON(loader.destinations))
 	if err := loader.RemoveFromDatabase(false, true); err != nil {
 		t.Error("Could not remove data from dataDb: ", err.Error())
 	}
-	fmt.Println(utils.ToJSON(loader.destinations))
 }
 
 // Loads data from csv files in tp scenario to dataDbCsv

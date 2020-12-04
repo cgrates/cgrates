@@ -80,7 +80,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 	if err := apierDebitStorage.SetDestinationDrv(dstDe, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if err := apierDebitStorage.SetReverseDestinationDrv(dstDe, utils.NonTransactional); err != nil {
+	if err := apierDebitStorage.SetReverseDestinationDrv(dstDe.Id, dstDe.Prefixes, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	rp1 := &engine.RatingPlan{

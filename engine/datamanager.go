@@ -167,7 +167,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.DESTINATION_PREFIX:
 			_, err = dm.GetDestination(dataID, false, true, utils.NonTransactional)
 		case utils.REVERSE_DESTINATION_PREFIX:
-			_, err = dm.GetReverseDestination(dataID, true, utils.NonTransactional)
+			_, err = dm.GetReverseDestination(dataID, false, true, utils.NonTransactional)
 		case utils.RATING_PLAN_PREFIX:
 			_, err = dm.GetRatingPlan(dataID, true, utils.NonTransactional)
 		case utils.RATING_PROFILE_PREFIX:
@@ -305,6 +305,50 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 	return
 }
 
+func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
+	switch prefix {
+	case utils.REVERSE_DESTINATION_PREFIX:
+		if err = dm.dataDB.RemoveKeysForPrefix(prefix); err != nil {
+			return
+		}
+		var keys []string
+		if keys, err = dm.dataDB.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
+			return
+		}
+		for _, key := range keys {
+			var dest *Destination
+			if dest, err = dm.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, true, utils.NonTransactional); err != nil {
+				return err
+			}
+			if err = dm.SetReverseDestination(dest, utils.NonTransactional); err != nil {
+				return err
+			}
+		}
+	case utils.AccountActionPlansPrefix:
+		if err = dm.dataDB.RemoveKeysForPrefix(prefix); err != nil {
+			return
+		}
+		var keys []string
+		if keys, err = dm.dataDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+			return
+		}
+		for _, key := range keys {
+			var apl *ActionPlan
+			if apl, err = dm.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional); err != nil {
+				return err
+			}
+			for acntID := range apl.AccountIDs {
+				if err = dm.SetAccountActionPlans(acntID, []string{apl.Id}, false); err != nil {
+					return err
+				}
+			}
+		}
+	default:
+		return utils.ErrInvalidKey
+	}
+	return
+}
+
 func (dm *DataManager) GetDestination(key string, cacheRead, cacheWrite bool, transactionID string) (dest *Destination, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
@@ -345,9 +389,9 @@ func (dm *DataManager) GetDestination(key string, cacheRead, cacheWrite bool, tr
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(utils.CacheDestinations, key, dest, nil,
-			cacheCommit(transactionID), transactionID); errCh != nil {
-			return nil, errCh
+		if err := Cache.Set(utils.CacheDestinations, key, dest, nil,
+			cacheCommit(transactionID), transactionID); err != nil {
+			return nil, err
 		}
 	}
 	return
@@ -384,9 +428,30 @@ func (dm *DataManager) RemoveDestination(destID string, transactionID string) (e
 		err = utils.ErrNoDatabaseConn
 		return
 	}
+
+	var oldDst *Destination
+	if oldDst, err = dm.GetDestination(destID, true, false,
+		transactionID); err != nil && err != utils.ErrNotFound {
+		return
+	}
+
 	if err = dm.dataDB.RemoveDestinationDrv(destID, transactionID); err != nil {
 		return
 	}
+	if err = Cache.Remove(utils.CacheDestinations, destID,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
+	}
+	if oldDst == nil {
+		return utils.ErrNotFound
+	}
+	for _, prfx := range oldDst.Prefixes {
+		if err = dm.dataDB.RemoveReverseDestinationDrv(destID, prfx, transactionID); err != nil {
+			return
+		}
+		dm.GetReverseDestination(prfx, false, true, transactionID) // it will recache the destination
+	}
+
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]; itm.Replicate {
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveDestination,
@@ -406,7 +471,7 @@ func (dm *DataManager) SetReverseDestination(dest *Destination, transactionID st
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	if err = dm.dataDB.SetReverseDestinationDrv(dest, transactionID); err != nil {
+	if err = dm.dataDB.SetReverseDestinationDrv(dest.Id, dest.Prefixes, transactionID); err != nil {
 		return
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaReverseDestinations].Replicate {
@@ -421,12 +486,20 @@ func (dm *DataManager) SetReverseDestination(dest *Destination, transactionID st
 }
 
 func (dm *DataManager) GetReverseDestination(prefix string,
-	skipCache bool, transactionID string) (ids []string, err error) {
+	cacheRead, cacheWrite bool, transactionID string) (ids []string, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	ids, err = dm.dataDB.GetReverseDestinationDrv(prefix, skipCache, transactionID)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheReverseDestinations, prefix); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.([]string), nil
+		}
+	}
+	ids, err = dm.dataDB.GetReverseDestinationDrv(prefix, transactionID)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaReverseDestinations]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
@@ -443,22 +516,34 @@ func (dm *DataManager) GetReverseDestination(prefix string,
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			return nil, err
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+			}
+			return
+		}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(utils.CacheReverseDestinations, prefix, ids, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
 		}
 	}
 	return
 }
 
 func (dm *DataManager) UpdateReverseDestination(oldDest, newDest *Destination,
-	transactionID string) error {
+	transactionID string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if oldDest == nil {
-		return dm.dataDB.UpdateReverseDestinationDrv(newDest.Id, nil, newDest.Prefixes, transactionID)
+		return dm.dataDB.SetReverseDestinationDrv(newDest.Id, newDest.Prefixes, transactionID)
 	}
 
-	var obsoletePrefixes []string
+	cCommit := cacheCommit(transactionID)
 	var addedPrefixes []string
 	for _, oldPrefix := range oldDest.Prefixes {
 		var found bool
@@ -469,7 +554,13 @@ func (dm *DataManager) UpdateReverseDestination(oldDest, newDest *Destination,
 			}
 		}
 		if !found {
-			obsoletePrefixes = append(obsoletePrefixes, oldPrefix)
+			if err = dm.dataDB.RemoveReverseDestinationDrv(newDest.Id, oldPrefix, transactionID); err != nil {
+				return
+			}
+			if err = Cache.Remove(utils.CacheReverseDestinations, oldPrefix,
+				cCommit, transactionID); err != nil {
+				return
+			}
 		}
 	}
 
@@ -485,7 +576,7 @@ func (dm *DataManager) UpdateReverseDestination(oldDest, newDest *Destination,
 			addedPrefixes = append(addedPrefixes, newPrefix)
 		}
 	}
-	return dm.dataDB.UpdateReverseDestinationDrv(newDest.Id, obsoletePrefixes, addedPrefixes, transactionID)
+	return dm.dataDB.SetReverseDestinationDrv(newDest.Id, addedPrefixes, transactionID)
 }
 
 func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {
