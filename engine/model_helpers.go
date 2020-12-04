@@ -3377,7 +3377,7 @@ func (tps ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfil
 			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
 		}
 		for accountID := range accountIDsMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, accountID)
+			result[i].AccountIDs = append(result[i].AccountIDs, accountID)
 		}
 		i++
 	}
@@ -3494,6 +3494,7 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 	tpAp = &utils.TPActionProfile{
 		Tenant:     ap.Tenant,
 		ID:         ap.ID,
+		FilterIDs:  make([]string, len(tpAp.FilterIDs)),
 		Weight:     ap.Weight,
 		Schedule:   ap.Schedule,
 		AccountIDs: ap.AccountIDs.AsSlice(),
