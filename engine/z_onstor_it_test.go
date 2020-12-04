@@ -177,7 +177,7 @@ func testOnStorITCacheDestinations(t *testing.T) {
 
 func testOnStorITCacheReverseDestinations(t *testing.T) {
 	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
-	if err := onStor.SetReverseDestination(dst, utils.NonTransactional); err != nil {
+	if err := onStor.SetReverseDestination(dst.Id, dst.Prefixes, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	for _, prfx := range dst.Prefixes {
@@ -648,7 +648,7 @@ func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	if _, rcvErr := onStor.GetReverseDestination(dst.Id, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetReverseDestination(dst, utils.NonTransactional); err != nil {
+	if err := onStor.SetReverseDestination(dst.Id, dst.Prefixes, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	for i := range dst.Prefixes {
