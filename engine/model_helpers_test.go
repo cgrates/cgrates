@@ -3122,6 +3122,7 @@ func TestModelAsTPAttribute2(t *testing.T) {
 		Weight: 20,
 	}
 	rcv := models.AsTPAttributes()
+	sort.Strings(rcv[0].FilterIDs)
 	if !reflect.DeepEqual(expected, rcv[0]) && !reflect.DeepEqual(expected2, rcv[0]) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
 	}
@@ -3180,6 +3181,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 		Weight: 20,
 	}
 	rcv := models.AsTPAttributes()
+	sort.Strings(rcv[0].FilterIDs)
 	if !reflect.DeepEqual(expected, rcv[0]) && !reflect.DeepEqual(expected2, rcv[0]) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
 	}
