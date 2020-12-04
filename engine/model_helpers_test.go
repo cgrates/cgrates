@@ -6191,3 +6191,34 @@ func TestModelHelpersTestAPItoRouteProfileErr(t *testing.T) {
 	}
 
 }
+
+func TestModelHelperAPItoFilterError(t *testing.T) {
+	testStruct := &utils.TPFilterProfile{
+		Filters: []*utils.TPFilter{{
+			Type:    "test_type",
+			Element: "",
+			Values:  []string{"val1"},
+		},
+		},
+	}
+
+	_, err := APItoFilter(testStruct, "")
+	if err == nil || err.Error() != "emtpy RSRParser in rule: <>" {
+		t.Errorf("\nExpecting <emtpy RSRParser in rule: <>>,\n Received <%+v>", err)
+	}
+
+}
+
+func TestModelHelperAPItoFilterError2(t *testing.T) {
+	testStruct := &utils.TPFilterProfile{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "cat",
+		},
+	}
+
+	_, err := APItoFilter(testStruct, "")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
+	}
+
+}
