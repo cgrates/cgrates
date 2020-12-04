@@ -121,21 +121,61 @@ func testActionSLoadFromFolder(t *testing.T) {
 
 func testActionSGetActionProfile(t *testing.T) {
 	expected := &engine.ActionProfile{
-		Tenant:             "",
-		ID:                 "",
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		Weight:             0,
-		Schedule:           "",
-		AccountIDs:         nil,
-		Actions:            nil,
+		Tenant:     "cgrates.org",
+		ID:         "ONE_TIME_ACT",
+		FilterIDs:  []string{},
+		Weight:     10,
+		Schedule:   utils.ASAP,
+		AccountIDs: map[string]struct{}{"1001": struct{}{}, "1002": struct{}{}},
+		Actions: []*engine.APAction{
+			&engine.APAction{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Path:      "~*balance.TestBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("10", actPrfCfg.GeneralCfg().RSRSep),
+			},
+			&engine.APAction{
+				ID:        "SET_BALANCE_TEST_DATA",
+				FilterIDs: []string{},
+				Type:      "*set_balance",
+				Path:      "~*balance.TestDataBalance.Type",
+				Value:     config.NewRSRParsersMustCompile("*data", actPrfCfg.GeneralCfg().RSRSep),
+			},
+			&engine.APAction{
+				ID:        "TOPUP_TEST_DATA",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Path:      "~*balance.TestDataBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("1024", actPrfCfg.GeneralCfg().RSRSep),
+			},
+			&engine.APAction{
+				ID:        "SET_BALANCE_TEST_VOICE",
+				FilterIDs: []string{},
+				Type:      "*set_balance",
+				Path:      "~*balance.TestVoiceBalance.Type",
+				Value:     config.NewRSRParsersMustCompile("*voice", actPrfCfg.GeneralCfg().RSRSep),
+			},
+			&engine.APAction{
+				ID:        "TOPUP_TEST_VOICE",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Path:      "~*balance.TestVoiceBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("15m15s", actPrfCfg.GeneralCfg().RSRSep),
+			},
+		},
 	}
 	var reply *engine.ActionProfile
 	if err := actSRPC.Call(utils.APIerSv1GetActionProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}}, &reply); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}}, &reply); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	} else {
+		for _, act := range reply.Actions { // the path variable from RSRParsers is with lower letter and need to be compiled manually in tests to pass reflect.DeepEqual
+			act.Value.Compile()
+		}
+		if !reflect.DeepEqual(expected, reply) {
+			t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		}
 	}
 }
 
