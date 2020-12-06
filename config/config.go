@@ -194,6 +194,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.eesCfg = new(EEsCfg)
 	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
 	cfg.rateSCfg = new(RateSCfg)
+	//cfg.actionSCfg = new(ActionSCfg)
 	cfg.sipAgentCfg = new(SIPAgentCfg)
 	cfg.configSCfg = new(ConfigSCfg)
 	cfg.apiBanCfg = new(APIBanCfg)
@@ -326,6 +327,7 @@ type CGRConfig struct {
 	ersCfg           *ERsCfg           // EventReader config
 	eesCfg           *EEsCfg           // EventExporter config
 	rateSCfg         *RateSCfg         // RateS config
+	actionSCfg       *ActionSCfg       // ActionS config
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
 	configSCfg       *ConfigSCfg       // ConfigS config
 	apiBanCfg        *APIBanCfg        // APIBan config
@@ -1086,6 +1088,13 @@ func (cfg *CGRConfig) RateSCfg() *RateSCfg {
 	cfg.lks[RateSJson].RLock()
 	defer cfg.lks[RateSJson].RUnlock()
 	return cfg.rateSCfg
+}
+
+// ActionSCfg reads the ActionS configuration
+func (cfg *CGRConfig) ActionSCfg() *ActionSCfg {
+	cfg.lks[ActionSJson].RLock()
+	defer cfg.lks[ActionSJson].RUnlock()
+	return cfg.actionSCfg
 }
 
 // SIPAgentCfg reads the Apier configuration

@@ -60,6 +60,7 @@ const (
 	ERsJson            = "ers"
 	EEsJson            = "ees"
 	RateSJson          = "rates"
+	ActionSJson        = "actions"
 	RPCConnsJsonName   = "rpc_conns"
 	SIPAgentJson       = "sip_agent"
 	TemplatesJson      = "templates"

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"sort"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -42,6 +43,14 @@ func (aP *ActionProfile) TenantID() string {
 	return utils.ConcatenatedKey(aP.Tenant, aP.ID)
 }
 
+// ActionProfiles is a sortable list of ActionProfiles
+type ActionProfiles []*ActionProfile
+
+// Sort is part of sort interface, sort based on Weight
+func (aps ActionProfiles) Sort() {
+	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
+}
+
 // APAction defines action related information used within a ActionProfile
 type APAction struct {
 	ID        string                 // Action ID
@@ -54,6 +63,7 @@ type APAction struct {
 	Value     config.RSRParsers      // Value to execute on path
 }
 
+// ActionProfileWithOpts is used in API calls
 type ActionProfileWithOpts struct {
 	*ActionProfile
 	Opts map[string]interface{}

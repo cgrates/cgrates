@@ -66,3 +66,56 @@ func (aS *ActionS) Shutdown() (err error) {
 func (aS *ActionS) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(aS, serviceMethod, args, reply)
 }
+
+// matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
+func (aS *ActionS) matchingActionProfilesForEvent(tnt string, aPrflIDs []string,
+	cgrEv *utils.CGREventWithOpts) (actPrfls engine.ActionProfiles, err error) {
+	evNm := utils.MapStorage{
+		utils.MetaReq:  cgrEv.CGREvent.Event,
+		utils.MetaOpts: cgrEv.Opts,
+	}
+	if len(aPrflIDs) == 0 {
+		var aPfIDMp utils.StringSet
+		if aPfIDMp, err = engine.MatchingItemIDsForEvent(
+			evNm,
+			aS.cfg.ActionSCfg().StringIndexedFields,
+			aS.cfg.ActionSCfg().PrefixIndexedFields,
+			aS.cfg.ActionSCfg().SuffixIndexedFields,
+			aS.dm,
+			utils.CacheActionProfilesFilterIndexes,
+			tnt,
+			aS.cfg.ActionSCfg().IndexedSelects,
+			aS.cfg.ActionSCfg().NestedFields,
+		); err != nil {
+			return
+		}
+		aPrflIDs = aPfIDMp.AsSlice()
+	}
+	for _, aPfID := range aPrflIDs {
+		var aPf *engine.ActionProfile
+		if aPf, err = aS.dm.GetActionProfile(tnt, aPfID,
+			true, true, utils.NonTransactional); err != nil {
+			if err == utils.ErrNotFound {
+				err = nil
+				continue
+			}
+			return
+		}
+		if aPf.ActivationInterval != nil && cgrEv.Time != nil &&
+			!aPf.ActivationInterval.IsActiveAtTime(*cgrEv.Time) { // not active
+			continue
+		}
+		var pass bool
+		if pass, err = aS.fltrS.Pass(tnt, aPf.FilterIDs, evNm); err != nil {
+			return
+		} else if !pass {
+			continue
+		}
+		actPrfls = append(actPrfls, aPf)
+	}
+	if len(actPrfls) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	actPrfls.Sort()
+	return
+}
