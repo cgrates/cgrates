@@ -1471,16 +1471,16 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 	}
 	maxUsage = make(map[string]time.Duration)
 	for i, sr := range s.SRuns {
+		reqType := sr.Event.GetStringIgnoreErrors(utils.RequestType)
+		if reqType == utils.META_NONE {
+			continue
+		}
 		var rplyMaxUsage time.Duration
-		if !authReqs.HasField(
-			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
+		if reqType != utils.META_PREPAID || s.debitStop != nil {
 			rplyMaxUsage = reqMaxUsage
 		} else if rplyMaxUsage, err = sS.debitSession(s, i, reqMaxUsage,
 			updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
 			return
-		}
-		if rplyMaxUsage > reqMaxUsage {
-			rplyMaxUsage = reqMaxUsage
 		}
 		maxUsage[sr.CD.RunID] = rplyMaxUsage
 	}
@@ -1519,51 +1519,38 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 			sr.TotalUsage += *lastUsage
 			sUsage = sr.TotalUsage
 		}
-		var charged time.Duration // already charged
 		if sr.EventCost != nil {
-			charged = sr.EventCost.GetUsage()
-		}
-		if notCharged := sUsage - charged; notCharged > 0 { // we did not charge enough, make a manual debit here
-			if sr.CD.LoopIndex > 0 {
-				sr.CD.TimeStart = sr.CD.TimeEnd
-			}
-			sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
-			sr.CD.DurationIndex += notCharged
-			cc := new(engine.CallCost)
-			if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderDebit,
-				&engine.CallDescriptorWithOpts{
-					CallDescriptor: sr.CD,
-					Opts:           s.OptsStart,
-				}, cc); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<%s> failed extra charging session: <%s>, srIdx: <%d>, error: <%s>",
-						utils.SessionS, s.CGRID, sRunIdx, err.Error()))
-			} else {
-				newEc := engine.NewEventCostFromCallCost(cc, s.CGRID,
-					sr.Event.GetStringIgnoreErrors(utils.RunID))
-				if sr.EventCost == nil {
-					sr.EventCost = newEc
-				} else {
-					sr.EventCost.Merge(newEc)
+			if !isMsg { // in case of one time charge there is no need of corrections
+				if notCharged := sUsage - sr.EventCost.GetUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
+					if sr.CD.LoopIndex > 0 {
+						sr.CD.TimeStart = sr.CD.TimeEnd
+					}
+					sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
+					sr.CD.DurationIndex += notCharged
+					cc := new(engine.CallCost)
+					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderDebit,
+						&engine.CallDescriptorWithOpts{
+							CallDescriptor: sr.CD,
+							Opts:           s.OptsStart,
+						}, cc); err == nil {
+						sr.EventCost.Merge(
+							engine.NewEventCostFromCallCost(cc, s.CGRID,
+								sr.Event.GetStringIgnoreErrors(utils.RunID)))
+					}
+				} else if notCharged < 0 { // charged too much, try refund
+					if err = sS.refundSession(s, sRunIdx, -notCharged); err != nil {
+						utils.Logger.Warning(
+							fmt.Sprintf(
+								"<%s> failed refunding session: <%s>, srIdx: <%d>, error: <%s>",
+								utils.SessionS, s.CGRID, sRunIdx, err.Error()))
+					}
 				}
-
+				if err := sS.roundCost(s, sRunIdx); err != nil { // will round the cost and refund the extra increment
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> failed rounding  session cost for <%s>, srIdx: <%d>, error: <%s>",
+							utils.SessionS, s.CGRID, sRunIdx, err.Error()))
+				}
 			}
-		} else if notCharged < 0 { // charged too much, try refund
-			if err = sS.refundSession(s, sRunIdx, -notCharged); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<%s> failed refunding session: <%s>, srIdx: <%d>, error: <%s>",
-						utils.SessionS, s.CGRID, sRunIdx, err.Error()))
-			}
-		}
-		if sr.EventCost != nil {
-			if err := sS.roundCost(s, sRunIdx); err != nil { // will round the cost and refund the extra increment
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> failed rounding  session cost for <%s>, srIdx: <%d>, error: <%s>",
-						utils.SessionS, s.CGRID, sRunIdx, err.Error()))
-			}
-
 			if sS.cgrCfg.SessionSCfg().StoreSCosts {
 				if err := sS.storeSCost(s, sRunIdx); err != nil {
 					utils.Logger.Warning(
@@ -1571,11 +1558,11 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 							utils.SessionS, s.CGRID, sRunIdx, err.Error()))
 				}
 			}
+
 			// set cost fields
 			sr.Event[utils.Cost] = sr.EventCost.GetCost()
 			sr.Event[utils.CostDetails] = utils.ToJSON(sr.EventCost) // avoid map[string]interface{} when decoding
 			sr.Event[utils.CostSource] = utils.MetaSessionS
-
 		}
 		// Set Usage field
 		if sRunIdx == 0 {
@@ -2618,6 +2605,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 		}
 		var s *Session
 		fib := utils.Fib()
+		var isMsg bool // one time charging, do not perform indexing and sTerminator
 		for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
 			if s = sS.getRelocateSession(cgrID,
 				ev.GetStringIgnoreErrors(utils.InitialOriginID),
@@ -2629,22 +2617,27 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 				time.Sleep(time.Duration(fib()) * time.Millisecond)
 				continue
 			}
-
+			isMsg = true
 			if s, err = sS.initSession(&utils.CGREventWithOpts{
 				CGREvent: args.CGREvent,
 				Opts:     args.Opts,
 			}, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
-				dbtItvl, false, args.ForceDuration); err != nil {
+				dbtItvl, isMsg, args.ForceDuration); err != nil {
+				return utils.NewErrRALs(err)
+			}
+			if _, err = sS.updateSession(s, ev, args.Opts, isMsg); err != nil {
 				return err
 			}
-
+			break
 		}
-		s.UpdateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
+		if !isMsg {
+			s.UpdateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
+		}
 		if err = sS.terminateSession(s,
 			ev.GetDurationPtrIgnoreErrors(utils.Usage),
 			ev.GetDurationPtrIgnoreErrors(utils.LastUsed),
 			ev.GetTimePtrIgnoreErrors(utils.AnswerTime, utils.EmptyString),
-			false); err != nil {
+			isMsg); err != nil {
 			return utils.NewErrRALs(err)
 		}
 	}

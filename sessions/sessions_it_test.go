@@ -191,7 +191,7 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		}
 		if cdrs[0].Cost != 0.7002 {
-			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
+			t.Errorf("Unexpected CDR Cost received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
 		}
 	}
 
