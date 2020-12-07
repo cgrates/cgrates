@@ -37,7 +37,7 @@ import (
 func TestDispatcherSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
-	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	cfg.AttributeSCfg().Enabled = true
 	shdChan := utils.NewSyncedChan()

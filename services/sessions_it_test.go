@@ -39,7 +39,7 @@ func TestSessionSReload(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	cfg.RalsCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
-	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil

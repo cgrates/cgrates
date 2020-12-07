@@ -98,7 +98,7 @@ func testSQLInitConfig(t *testing.T) {
 		}`); err != nil {
 		t.Fatal(err)
 	}
-	utils.Newlogger(utils.MetaSysLog, sqlCfg.GeneralCfg().NodeID)
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, sqlCfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 }
 

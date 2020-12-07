@@ -37,7 +37,7 @@ func TestThresholdSReload(t *testing.T) {
 	// utils.Logger.SetLogLevel(7)
 	cfg := config.NewDefaultCGRConfig()
 
-	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil

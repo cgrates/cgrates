@@ -64,7 +64,7 @@ func TestAMQPER(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
 	rdrEvents = make(chan *erEvent, 1)
