@@ -17,3 +17,86 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package config
+
+import (
+	"reflect"
+	"testing"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
+func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
+	jsonCfg := &ActionSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(false),
+		String_indexed_fields: &[]string{"*req.index1"},
+		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
+		Suffix_indexed_fields: &[]string{"*req.index1"},
+		Nested_fields:         utils.BoolPointer(true),
+	}
+	expected := &ActionSCfg{
+		Enabled:             true,
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index1"},
+		NestedFields:        true,
+	}
+	jsnCfg := NewDefaultCGRConfig()
+	if err = jsnCfg.actionSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, jsnCfg.actionSCfg) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expected), utils.ToJSON(jsnCfg.actionSCfg))
+	}
+}
+
+func TestActionSCfgAsMapInterface(t *testing.T) {
+	cfgJSONStr := `{
+"actions": {								
+	"enabled": true,
+	"Indexed_selects": false,		
+	"String_indexed_fields": ["*req.index1"],			
+	"Prefix_indexed_fields": ["*req.index1","*req.index2"],		
+    "Suffix_indexed_fields": ["*req.index1"],
+	"Nested_fields": true,						
+	},		
+}`
+
+	eMap := map[string]interface{}{
+		utils.EnabledCfg:             true,
+		utils.IndexedSelectsCfg:      false,
+		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
+		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
+		utils.SuffixIndexedFieldsCfg: []string{"*req.index1"},
+		utils.NestedFieldsCfg:        true,
+	}
+	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if rcv := cgrCfg.actionSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected: %+v\n Received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestActionSCfgClone(t *testing.T) {
+	ban := &ActionSCfg{
+		Enabled:             true,
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index1"},
+		NestedFields:        true,
+	}
+	rcv := ban.Clone()
+	if !reflect.DeepEqual(ban, rcv) {
+		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	}
+	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.PrefixIndexedFields)[0] = ""; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+}
