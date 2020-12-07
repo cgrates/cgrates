@@ -311,6 +311,15 @@ const (
 	SetupTime                    = "SetupTime"
 	AnswerTime                   = "AnswerTime"
 	Usage                        = "Usage"
+	DurationIndex                = "DurationIndex"
+	MaxRateUnit                  = "MaxRateUnit"
+	DebitInterval                = "DebitInterval"
+	TimeStart                    = "TimeStart"
+	TimeEnd                      = "TimeEnd"
+	CallDuration                 = "CallDuration"
+	FallbackSubject              = "FallbackSubject"
+	DryRun                       = "DryRun"
+	ExtraFields                  = "ExtraFields"
 	CustomValue                  = "CustomValue"
 	Value                        = "Value"
 	LastUsed                     = "LastUsed"
@@ -1403,6 +1412,7 @@ const (
 	APIerSv1RemoveActionTrigger         = "APIerSv1.RemoveActionTrigger"
 	APIerSv1GetAccount                  = "APIerSv1.GetAccount"
 	APIerSv1GetAttributeProfileIDsCount = "APIerSv1.GetAttributeProfileIDsCount"
+	APIerSv1GetMaxUsage                 = "APIerSv1.GetMaxUsage"
 )
 
 // APIerSv1 TP APIs

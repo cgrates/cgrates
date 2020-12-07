@@ -104,11 +104,11 @@ func (ce *CommandExecuter) ClientArgs() (args []string) {
 
 // To be overwritten by commands that do not need a rpc call
 func (ce *CommandExecuter) LocalExecute() string {
-	return ""
+	return utils.EmptyString
 }
 
 func ToJSON(line string) (jsn []byte) {
-	if !strings.Contains(line, "=") && line != "" {
+	if !strings.Contains(line, utils.AttrValueSep) && line != utils.EmptyString {
 		line = fmt.Sprintf("Item=\"%s\"", line)
 	}
 	jsn = append(jsn, '{')
@@ -117,7 +117,7 @@ func ToJSON(line string) (jsn []byte) {
 			jsn = append(jsn, []byte(fmt.Sprintf("\"%s\":%s,", group[1], group[2]))...)
 		}
 	}
-	jsn = bytes.TrimRight(jsn, ",")
+	jsn = bytes.TrimRight(jsn, utils.FIELDS_SEP)
 	jsn = append(jsn, '}')
 	return
 }
@@ -155,11 +155,11 @@ func getStringValue(v interface{}, defaultDurationFields utils.StringSet) string
 }
 
 func getSliceAsString(mp []interface{}, defaultDurationFields utils.StringSet) (out string) {
-	out = "["
+	out = utils.IdxStart
 	for _, v := range mp {
 		out += fmt.Sprintf(`%s,`, getStringValue(v, defaultDurationFields))
 	}
-	return strings.TrimSuffix(out, ",") + "]"
+	return strings.TrimSuffix(out, utils.FIELDS_SEP) + utils.IdxEnd
 }
 
 func getMapAsString(mp map[string]interface{}, defaultDurationFields utils.StringSet) (out string) {
@@ -175,19 +175,19 @@ func getMapAsString(mp map[string]interface{}, defaultDurationFields utils.Strin
 		keylist = append(keylist, fmt.Sprintf(`"%s":%s`, k, getStringValue(v, defaultDurationFields)))
 	}
 	sort.Strings(keylist)
-	return fmt.Sprintf(`{%s}`, strings.Join(keylist, ","))
+	return fmt.Sprintf(`{%s}`, strings.Join(keylist, utils.FIELDS_SEP))
 }
 
 func GetFormatedResult(result interface{}, defaultDurationFields utils.StringSet) string {
 	jsonResult, _ := json.Marshal(result)
 	var mp map[string]interface{}
 	if err := json.Unmarshal(jsonResult, &mp); err != nil {
-		out, _ := json.MarshalIndent(result, "", " ")
+		out, _ := json.MarshalIndent(result, utils.EmptyString, " ")
 		return string(out)
 	}
 	mpstr := getMapAsString(mp, defaultDurationFields)
 	var out bytes.Buffer
-	json.Indent(&out, []byte(mpstr), "", " ")
+	json.Indent(&out, []byte(mpstr), utils.EmptyString, " ")
 	return out.String()
 }
 
@@ -195,16 +195,16 @@ func GetFormatedSliceResult(result interface{}, defaultDurationFields utils.Stri
 	jsonResult, _ := json.Marshal(result)
 	var mp []interface{}
 	if err := json.Unmarshal(jsonResult, &mp); err != nil {
-		out, _ := json.MarshalIndent(result, "", " ")
+		out, _ := json.MarshalIndent(result, utils.EmptyString, " ")
 		return string(out)
 	}
 	mpstr := getSliceAsString(mp, defaultDurationFields)
 	var out bytes.Buffer
-	json.Indent(&out, []byte(mpstr), "", " ")
+	json.Indent(&out, []byte(mpstr), utils.EmptyString, " ")
 	return out.String()
 }
 
 func (ce *CommandExecuter) GetFormatedResult(result interface{}) string {
-	out, _ := json.MarshalIndent(result, "", " ")
+	out, _ := json.MarshalIndent(result, utils.EmptyString, " ")
 	return string(out)
 }

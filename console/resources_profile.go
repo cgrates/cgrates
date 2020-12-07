@@ -67,6 +67,6 @@ func (self *CmdGetResourceProfile) RpcResult() interface{} {
 
 func (self *CmdGetResourceProfile) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, utils.StringSet{
-		"UsageTTL": {},
+		utils.UsageTTL: {},
 	})
 }

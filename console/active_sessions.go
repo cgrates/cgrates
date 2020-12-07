@@ -69,9 +69,9 @@ func (self *CmdActiveSessions) RpcResult() interface{} {
 
 func (self *CmdActiveSessions) GetFormatedResult(result interface{}) string {
 	return GetFormatedSliceResult(result, utils.StringSet{
-		"Usage":         {},
-		"DurationIndex": {},
-		"MaxRateUnit":   {},
-		"DebitInterval": {},
+		utils.Usage:         {},
+		utils.DurationIndex: {},
+		utils.MaxRateUnit:   {},
+		utils.DebitInterval: {},
 	})
 }

@@ -66,9 +66,9 @@ func (self *CmdGetCostDetails) RpcResult() interface{} {
 
 func (self *CmdGetCostDetails) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, utils.StringSet{
-		"Usage":              {},
-		"GroupIntervalStart": {},
-		"RateIncrement":      {},
-		"RateUnit":           {},
+		utils.Usage:              {},
+		utils.GroupIntervalStart: {},
+		utils.RateIncrement:      {},
+		utils.RateUnit:           {},
 	})
 }

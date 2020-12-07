@@ -67,6 +67,6 @@ func (self *CmdGetAccounts) RpcResult() interface{} {
 
 func (self *CmdGetAccounts) GetFormatedResult(result interface{}) string {
 	return GetFormatedSliceResult(result, utils.StringSet{
-		"MinSleep": {},
+		utils.MinSleep: {},
 	})
 }
