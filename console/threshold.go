@@ -69,6 +69,6 @@ func (self *CmdGetThreshold) RpcResult() interface{} {
 
 func (self *CmdGetThreshold) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, utils.StringSet{
-		"MinSleep": {},
+		utils.MinSleep: {},
 	})
 }

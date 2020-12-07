@@ -67,6 +67,6 @@ func (self *CmdGetStatQueueProfile) RpcResult() interface{} {
 
 func (self *CmdGetStatQueueProfile) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, utils.StringSet{
-		"TTL": {},
+		utils.TTL: {},
 	})
 }

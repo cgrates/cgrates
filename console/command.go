@@ -21,6 +21,8 @@ package console
 import (
 	"fmt"
 	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -62,8 +64,8 @@ func GetCommandValue(command string, verbose bool) (Commander, error) {
 	var cmdName string
 	var cmdArgs string
 	if firstSpace <= 0 {
-		cmdName = command[:len(command)]
-		cmdArgs = ""
+		cmdName = command
+		cmdArgs = utils.EmptyString
 	} else {
 		cmdName = command[:firstSpace]
 		cmdArgs = command[firstSpace+1:]

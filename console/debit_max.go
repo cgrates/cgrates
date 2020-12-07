@@ -27,7 +27,7 @@ func init() {
 	c := &CmdMaxDebit{
 		name:       "debit_max",
 		rpcMethod:  utils.ResponderMaxDebit,
-		clientArgs: []string{"Category", "ToR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
+		clientArgs: []string{utils.Category, utils.ToR, utils.Tenant, utils.Subject, utils.Account, utils.Destination, utils.TimeStart, utils.TimeEnd, utils.CallDuration, utils.FallbackSubject},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

@@ -31,7 +31,7 @@ func init() {
 	c := &CmdGetMaxDuration{
 		name:       "maxduration",
 		rpcMethod:  utils.ResponderGetMaxSessionTime,
-		clientArgs: []string{"Category", "ToR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
+		clientArgs: []string{utils.Category, utils.ToR, utils.Tenant, utils.Subject, utils.Account, utils.Destination, utils.TimeStart, utils.TimeEnd, utils.CallDuration, utils.FallbackSubject},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -81,6 +81,6 @@ func (self *CmdGetMaxDuration) GetFormatedResult(result interface{}) string {
 	if tv, canCast := result.(*time.Duration); canCast {
 		return fmt.Sprintf(`"%s"`, tv.String())
 	}
-	out, _ := json.MarshalIndent(result, "", " ")
+	out, _ := json.MarshalIndent(result, utils.EmptyString, " ")
 	return string(out)
 }

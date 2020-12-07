@@ -77,7 +77,7 @@ func (self *CmdSessionsUpdate) RpcResult() interface{} {
 
 func (self *CmdSessionsUpdate) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, utils.StringSet{
-		"Usage":    {},
-		"MaxUsage": {},
+		utils.Usage:       {},
+		utils.CapMaxUsage: {},
 	})
 }

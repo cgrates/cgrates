@@ -28,7 +28,7 @@ func init() {
 	c := &CmdGetDataCost{
 		name:       "datacost",
 		rpcMethod:  utils.APIerSv1GetDataCost,
-		clientArgs: []string{"Category", "Tenant", "Account", "Subject", "StartTime", "Usage"},
+		clientArgs: []string{utils.Category, utils.Tenant, utils.Account, utils.Subject, utils.StartTime, utils.Usage},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -72,9 +72,9 @@ func (self *CmdGetDataCost) ClientArgs() []string {
 
 func (self *CmdGetDataCost) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, utils.StringSet{
-		"Usage":              {},
-		"GroupIntervalStart": {},
-		"RateIncrement":      {},
-		"RateUnit":           {},
+		utils.Usage:              {},
+		utils.GroupIntervalStart: {},
+		utils.RateIncrement:      {},
+		utils.RateUnit:           {},
 	})
 }
