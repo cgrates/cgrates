@@ -32,9 +32,9 @@ import (
 // NewRalService returns the Ral Service
 func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *cores.Server,
 	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, shdChan *utils.SyncedChan,
-	connMgr *engine.ConnManager,
-	anz *AnalyzerService) *RalService {
-	resp := NewResponderService(cfg, server, internalResponderChan, shdChan, anz)
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) *RalService {
+	resp := NewResponderService(cfg, server, internalResponderChan, shdChan, anz, srvDep)
 
 	return &RalService{
 		connChan:  internalRALsChan,
@@ -44,6 +44,7 @@ func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *cores.S
 		responder: resp,
 		connMgr:   connMgr,
 		anz:       anz,
+		srvDep:    srvDep,
 	}
 }
 
@@ -58,6 +59,7 @@ type RalService struct {
 	connChan  chan rpcclient.ClientConnector
 	connMgr   *engine.ConnManager
 	anz       *AnalyzerService
+	srvDep    map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

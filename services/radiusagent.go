@@ -31,12 +31,14 @@ import (
 
 // NewRadiusAgent returns the Radius Agent
 func NewRadiusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RadiusAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
 		connMgr:     connMgr,
+		srvDep:      srvDep,
 	}
 }
 
@@ -50,6 +52,7 @@ type RadiusAgent struct {
 
 	rad     *agents.RadiusAgent
 	connMgr *engine.ConnManager
+	srvDep  map[string]*sync.WaitGroup
 
 	lnet  string
 	lauth string

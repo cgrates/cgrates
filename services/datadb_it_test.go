@@ -49,13 +49,14 @@ func TestDataDBReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	cM := engine.NewConnManager(cfg, nil)
-	db := NewDataDBService(cfg, cM)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1))
+	db := NewDataDBService(cfg, cM, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	srvMngr.AddServices(NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz),
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz), db)
+		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep),
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

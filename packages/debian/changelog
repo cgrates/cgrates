@@ -134,6 +134,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [DispatcherS] Updated *broadcast, *broadcast_sync and *broadcast_async to behave similar to RPCPool
   * [ActionsS] Added *remote_set_account action
   * [SessionS] Properly charge terminate without initiate event
+  * [ServiceS] Added service dependency map to control the shutdown order
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

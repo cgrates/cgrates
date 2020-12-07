@@ -30,15 +30,15 @@ import (
 
 // NewAPIerSv2Service returns the APIerSv2 Service
 func NewAPIerSv2Service(apiv1 *APIerSv1Service, cfg *config.CGRConfig,
-	server *cores.Server,
-	internalAPIerSv2Chan chan rpcclient.ClientConnector,
-	anz *AnalyzerService) *APIerSv2Service {
+	server *cores.Server, internalAPIerSv2Chan chan rpcclient.ClientConnector,
+	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) *APIerSv2Service {
 	return &APIerSv2Service{
 		apiv1:    apiv1,
 		connChan: internalAPIerSv2Chan,
 		cfg:      cfg,
 		server:   server,
 		anz:      anz,
+		srvDep:   srvDep,
 	}
 }
 
@@ -52,6 +52,7 @@ type APIerSv2Service struct {
 	api      *v2.APIerSv2
 	connChan chan rpcclient.ClientConnector
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

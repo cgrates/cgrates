@@ -21,6 +21,7 @@ package services
 import (
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/cgrates/cgrates/engine"
 
@@ -30,15 +31,18 @@ import (
 )
 
 // NewGlobalVarS .
-func NewGlobalVarS(cfg *config.CGRConfig) servmanager.Service {
+func NewGlobalVarS(cfg *config.CGRConfig,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &GlobalVarS{
-		cfg: cfg,
+		cfg:    cfg,
+		srvDep: srvDep,
 	}
 }
 
 // GlobalVarS implements Agent interface
 type GlobalVarS struct {
-	cfg *config.CGRConfig
+	cfg    *config.CGRConfig
+	srvDep map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

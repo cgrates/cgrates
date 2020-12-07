@@ -31,12 +31,14 @@ import (
 
 // NewSIPAgent returns the sip Agent
 func NewSIPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SIPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
 		connMgr:     connMgr,
+		srvDep:      srvDep,
 	}
 }
 
@@ -49,6 +51,7 @@ type SIPAgent struct {
 
 	sip     *agents.SIPAgent
 	connMgr *engine.ConnManager
+	srvDep  map[string]*sync.WaitGroup
 
 	oldListen string
 }

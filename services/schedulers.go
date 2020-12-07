@@ -34,8 +34,8 @@ import (
 func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, fltrSChan chan *engine.FilterS,
 	server *cores.Server, internalSchedulerrSChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager,
-	anz *AnalyzerService) *SchedulerService {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) *SchedulerService {
 	return &SchedulerService{
 		connChan:  internalSchedulerrSChan,
 		cfg:       cfg,
@@ -45,6 +45,7 @@ func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 		server:    server,
 		connMgr:   connMgr,
 		anz:       anz,
+		srvDep:    srvDep,
 	}
 }
 
@@ -62,6 +63,7 @@ type SchedulerService struct {
 	connChan chan rpcclient.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

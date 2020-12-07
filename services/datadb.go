@@ -29,11 +29,13 @@ import (
 )
 
 // NewDataDBService returns the DataDB Service
-func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *DataDBService {
+func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup) *DataDBService {
 	return &DataDBService{
 		cfg:     cfg,
 		dbchan:  make(chan *engine.DataManager, 1),
 		connMgr: connMgr,
+		srvDep:  srvDep,
 	}
 }
 
@@ -46,6 +48,7 @@ type DataDBService struct {
 
 	dm     *engine.DataManager
 	dbchan chan *engine.DataManager
+	srvDep map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
@@ -108,6 +111,7 @@ func (db *DataDBService) Reload() (err error) {
 
 // Shutdown stops the service
 func (db *DataDBService) Shutdown() (err error) {
+	db.srvDep[utils.DataDB].Wait()
 	db.Lock()
 	db.dm.DataDB().Close()
 	db.dm = nil

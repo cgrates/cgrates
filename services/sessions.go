@@ -37,8 +37,8 @@ import (
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server, internalChan chan rpcclient.ClientConnector,
 	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	caps *engine.Caps,
-	anz *AnalyzerService) servmanager.Service {
+	caps *engine.Caps, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SessionService{
 		connChan: internalChan,
 		cfg:      cfg,
@@ -48,6 +48,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 		connMgr:  connMgr,
 		caps:     caps,
 		anz:      anz,
+		srvDep:   srvDep,
 	}
 }
 
@@ -70,6 +71,7 @@ type SessionService struct {
 	connMgr      *engine.ConnManager
 	caps         *engine.Caps
 	anz          *AnalyzerService
+	srvDep       map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

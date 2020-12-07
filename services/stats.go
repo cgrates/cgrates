@@ -35,8 +35,8 @@ import (
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalStatSChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager,
-	anz *AnalyzerService) servmanager.Service {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &StatService{
 		connChan:    internalStatSChan,
 		cfg:         cfg,
@@ -46,6 +46,7 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		connMgr:     connMgr,
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -63,6 +64,7 @@ type StatService struct {
 	rpc      *v1.StatSv1
 	connChan chan rpcclient.ClientConnector
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
@@ -70,6 +72,7 @@ func (sts *StatService) Start() (err error) {
 	if sts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+	sts.srvDep[utils.DataDB].Add(1)
 
 	<-sts.cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)
 	<-sts.cacheS.GetPrecacheChannel(utils.CacheStatQueues)
@@ -111,6 +114,7 @@ func (sts *StatService) Reload() (err error) {
 
 // Shutdown stops the service
 func (sts *StatService) Shutdown() (err error) {
+	defer sts.srvDep[utils.DataDB].Done()
 	sts.Lock()
 	defer sts.Unlock()
 	if err = sts.sts.Shutdown(); err != nil {

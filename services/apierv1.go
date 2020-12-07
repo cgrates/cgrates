@@ -37,8 +37,8 @@ func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 	schedService *SchedulerService,
 	responderService *ResponderService,
 	internalAPIerSv1Chan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager,
-	anz *AnalyzerService) *APIerSv1Service {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) *APIerSv1Service {
 	return &APIerSv1Service{
 		connChan:         internalAPIerSv1Chan,
 		cfg:              cfg,
@@ -51,6 +51,7 @@ func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 		connMgr:          connMgr,
 		APIerSv1Chan:     make(chan *v1.APIerSv1, 1),
 		anz:              anz,
+		srvDep:           srvDep,
 	}
 }
 
@@ -73,6 +74,7 @@ type APIerSv1Service struct {
 
 	APIerSv1Chan chan *v1.APIerSv1
 	anz          *AnalyzerService
+	srvDep       map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

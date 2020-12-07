@@ -35,7 +35,8 @@ import (
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalChan chan rpcclient.ClientConnector,
-	anz *AnalyzerService) servmanager.Service {
+	anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AttributeService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -44,6 +45,7 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		server:      server,
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -60,6 +62,7 @@ type AttributeService struct {
 	rpc      *v1.AttributeSv1               // useful on restart
 	connChan chan rpcclient.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

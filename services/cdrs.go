@@ -37,8 +37,8 @@ import (
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalCDRServerChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager,
-	anz *AnalyzerService) servmanager.Service {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &CDRServer{
 		connChan:    internalCDRServerChan,
 		cfg:         cfg,
@@ -48,6 +48,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		connMgr:     connMgr,
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -68,7 +69,7 @@ type CDRServer struct {
 
 	stopChan chan struct{}
 	anz      *AnalyzerService
-	// storDBChan chan engine.StorDB
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

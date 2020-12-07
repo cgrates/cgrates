@@ -61,22 +61,23 @@ func TestCdrsReload(t *testing.T) {
 	cfg.ChargerSCfg().Enabled = true
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
-	db := NewDataDBService(cfg, nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.INTERNAL
-	stordb := NewStorDBService(cfg)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1))
-	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz)
+	stordb := NewStorDBService(cfg, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
 	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1),
 		make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, anz)
+		shdChan, nil, anz, srvDep)
 	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
-		cdrsRPC, nil, anz)
+		cdrsRPC, nil, anz, srvDep)
 	srvMngr.AddServices(cdrS, ralS, schS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server,
-			make(chan rpcclient.ClientConnector, 1), nil, anz), db, stordb)
+			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
