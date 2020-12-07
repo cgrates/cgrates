@@ -1178,7 +1178,7 @@ func testOnStorITResourceProfile(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RL_TEST2",
 		Weight:    10,
-		FilterIDs: []string{"FLTR_RES_RL_TEST2"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC)},
@@ -1446,7 +1446,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		Tenant:             "cgrates.org",
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{"FLTR_1"},
+		FilterIDs:          []string{"*string:~*req.Account:1001"},
 		QueueLength:        2,
 		TTL:                0,
 		Stored:             true,
@@ -1795,7 +1795,7 @@ func testOnStorITRouteProfile(t *testing.T) {
 	splProfile := &RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPRF_1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -1903,7 +1903,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -1983,7 +1983,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -2048,7 +2048,7 @@ func testOnStorITChargerProfile(t *testing.T) {
 	cpp := &ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "CPP_1",
-		FilterIDs: []string{"*string:Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -2077,7 +2077,7 @@ func testOnStorITChargerProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	//update
-	cpp.FilterIDs = []string{"*string:Accout:1001", "*prefix:Destination:10"}
+	cpp.FilterIDs = []string{"*string:~*req.Accout:1001", "*prefix:~*req.Destination:10"}
 	if err := onStor.SetChargerProfile(cpp, false); err != nil {
 		t.Error(err)
 	}
@@ -2133,7 +2133,7 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	//update
-	dpp.FilterIDs = []string{"*string:Accout:1001", "*prefix:Destination:10"}
+	dpp.FilterIDs = []string{"*string:~*req.Accout:1001", "*prefix:~*req.Destination:10"}
 	if err := onStor.SetDispatcherProfile(dpp, false); err != nil {
 		t.Error(err)
 	}
@@ -2220,7 +2220,7 @@ func testOnStorITRateProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	//update
-	rPrf.FilterIDs = []string{"*string:Accout:1001", "*prefix:Destination:10"}
+	rPrf.FilterIDs = []string{"*string:~*req.Accout:1001", "*prefix:~*req.Destination:10"}
 	if err := onStor.SetRateProfile(rPrf, false); err != nil {
 		t.Error(err)
 	}
