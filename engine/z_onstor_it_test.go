@@ -77,6 +77,7 @@ var (
 		testOnStorITChargerProfile,
 		testOnStorITDispatcherProfile,
 		testOnStorITRateProfile,
+		testOnStorITActionProfile,
 
 		//testOnStorITCacheActionTriggers,
 		//testOnStorITCRUDActionTriggers,
@@ -2240,5 +2241,78 @@ func testOnStorITRateProfile(t *testing.T) {
 	if _, rcvErr := onStor.GetRateProfile("cgrates.org", "RP1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITActionProfile(t *testing.T) {
+	actPrf := &ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TEST_ID1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weight:    20,
+		Schedule:  utils.ASAP,
+		AccountIDs: map[string]struct{}{
+			"1001": {},
+		},
+		Actions: []*APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Path:      "~*balance.TestBalance.Value",
+			},
+			{
+				ID:        "TOPUP_TEST_VOICE",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Path:      "~*balance.TestVoiceBalance.Value",
+			},
+		},
+	}
+
+	//empty in database
+	if _, err := onStor.GetActionProfile("cgrates.org", "TEST_ID1",
+		true, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//get from database
+	if err := onStor.SetActionProfile(actPrf, false); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetActionProfile("cgrates.org", "TEST_ID1",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, actPrf) {
+		t.Errorf("Expecting: %v, received: %v", actPrf, rcv)
+	}
+
+	//craft akeysFromPrefix
+	expectedKey := []string{"acp_cgrates.org:TEST_ID1"}
+	if rcv, err := onStor.DataDB().GetKeysForPrefix(utils.ActionProfilePrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedKey, rcv) {
+		t.Errorf("Expecting: %v, received: %v", expectedKey, rcv)
+	}
+
+	//updateFilters
+	actPrf.FilterIDs = []string{"*prefix:~*req.Destination:10"}
+	if err := onStor.SetActionProfile(actPrf, false); err != nil {
+		t.Error(err)
+	} else if rcv, err := onStor.GetActionProfile("cgrates.org", "TEST_ID1",
+		false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(actPrf, rcv) {
+		t.Errorf("Expecting: %v, received: %v", actPrf, rcv)
+	}
+	time.Sleep(sleepDelay)
+
+	//remove from database
+	if err := onStor.RemoveActionProfile("cgrates.org", "TEST_ID1",
+		utils.NonTransactional, false); err != nil {
+		t.Error(err)
+	} else if _, err := onStor.GetActionProfile("cgrates.org", "TEST_ID1",
+		false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }

@@ -109,6 +109,9 @@ func init() {
 	if err := csvr.LoadRateProfiles(); err != nil {
 		log.Print("error in LoadRateProfiles:", err)
 	}
+	if err := csvr.LoadActionProfiles(); err != nil {
+		log.Print("error in LoadActionProfiles: ", err)
+	}
 	if err := csvr.WriteToDatabase(false, false); err != nil {
 		log.Print("error when writing into database", err)
 	}
@@ -1471,6 +1474,81 @@ func TestLoadRateProfiles(t *testing.T) {
 	if !reflect.DeepEqual(eRatePrf, csvr.rateProfiles[dppKey]) {
 		t.Errorf("Expecting: %+v,\n received: %+v",
 			utils.ToJSON(eRatePrf), utils.ToJSON(csvr.rateProfiles[dppKey]))
+	}
+}
+
+func TestLoadActionProfiles(t *testing.T) {
+	expected := &utils.TPActionProfile{
+		TPid:       testTPID,
+		Tenant:     "cgrates.org",
+		ID:         "ONE_TIME_ACT",
+		FilterIDs:  nil,
+		Weight:     10,
+		Schedule:   utils.ASAP,
+		AccountIDs: []string{"1001", "1002"},
+		Actions: []*utils.TPAPAction{
+			&utils.TPAPAction{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				TTL:       "0s",
+				Type:      "*topup",
+				Path:      "~*balance.TestBalance.Value",
+				Value:     "10",
+			},
+			&utils.TPAPAction{
+				ID:        "SET_BALANCE_TEST_DATA",
+				FilterIDs: []string{},
+				TTL:       "0s",
+				Type:      "*set_balance",
+				Path:      "~*balance.TestDataBalance.Type",
+				Value:     "*data",
+			},
+			&utils.TPAPAction{
+				ID:        "TOPUP_TEST_DATA",
+				FilterIDs: []string{},
+				TTL:       "0s",
+				Type:      "*topup",
+				Path:      "~*balance.TestDataBalance.Value",
+				Value:     "1024",
+			},
+			&utils.TPAPAction{
+				ID:        "SET_BALANCE_TEST_VOICE",
+				FilterIDs: []string{},
+				TTL:       "0s",
+				Type:      "*set_balance",
+				Path:      "~*balance.TestVoiceBalance.Type",
+				Value:     "*voice",
+			},
+			&utils.TPAPAction{
+				ID:        "TOPUP_TEST_VOICE",
+				FilterIDs: []string{},
+				TTL:       "0s",
+				Type:      "*topup",
+				Path:      "~*balance.TestVoiceBalance.Value",
+				Value:     "15m15s",
+			},
+		},
+	}
+
+	if len(csvr.actionProfiles) != 1 {
+		t.Fatalf("Failed to load ActionProfiles: %s", utils.ToJSON(csvr.actionProfiles))
+	}
+	actPrfKey := utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "ONE_TIME_ACT",
+	}
+	sort.Strings(expected.AccountIDs)
+	sort.Strings(csvr.actionProfiles[actPrfKey].AccountIDs)
+	sort.Slice(expected.Actions, func(i, j int) bool {
+		return false
+	})
+	sort.Slice(csvr.actionProfiles[actPrfKey].AccountIDs, func(i, j int) bool {
+		return false
+	})
+
+	if !reflect.DeepEqual(csvr.actionProfiles[actPrfKey], expected) {
+		t.Errorf("Expecting: %+v,\n received: %+v",
+			utils.ToJSON(expected), utils.ToJSON(csvr.actionProfiles[actPrfKey]))
 	}
 }
 
