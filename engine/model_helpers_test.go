@@ -5604,7 +5604,7 @@ func TestAPItoModelTPDispatcherProfileCase2(t *testing.T) {
 	}
 }
 
-func TestStatMdlsCSVHeader(t *testing.T) {
+func ModelHelpersTestStatMdlsCSVHeader(t *testing.T) {
 	testStruct := ResourceMdls{
 		{
 			Tpid:               "TEST_TPID",
@@ -6221,4 +6221,443 @@ func TestModelHelperAPItoFilterError2(t *testing.T) {
 		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
 	}
 
+}
+
+func TestFilterMdlsCSVHeader(t *testing.T) {
+	testStruct := FilterMdls{{
+		Tpid:   "test_tpid",
+		Tenant: "test_tenant",
+	}}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.Type, utils.Element,
+		utils.Values, utils.ActivationIntervalString}
+	result := testStruct.CSVHeader()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+
+}
+
+func TestModelHelpersThresholdProfileToAPIExpTime(t *testing.T) {
+	testStruct := &ThresholdProfile{
+		FilterIDs: []string{"test_filter_id"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
+		},
+		ActionIDs: []string{"test_action_id"},
+	}
+	expStruct := &utils.TPThresholdProfile{
+		FilterIDs: []string{"test_filter_id"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		ActionIDs: []string{"test_action_id"},
+	}
+	result := ThresholdProfileToAPI(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersAPItoThresholdProfileError1(t *testing.T) {
+	testStruct := &utils.TPThresholdProfile{
+		TPid:               "",
+		Tenant:             "",
+		ID:                 "",
+		FilterIDs:          nil,
+		ActivationInterval: nil,
+		MaxHits:            0,
+		MinHits:            0,
+		MinSleep:           "cat",
+		Blocker:            false,
+		Weight:             0,
+		ActionIDs:          nil,
+		Async:              false,
+	}
+	_, err := APItoThresholdProfile(testStruct, "")
+	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
+		t.Errorf("\nExpecting <time: invalid duration \"cat\">,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoThresholdProfileError2(t *testing.T) {
+	testStruct := &utils.TPThresholdProfile{
+		TPid:      "",
+		Tenant:    "",
+		ID:        "",
+		FilterIDs: nil,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "cat",
+		},
+		MaxHits:   0,
+		MinHits:   0,
+		MinSleep:  "",
+		Blocker:   false,
+		Weight:    0,
+		ActionIDs: nil,
+		Async:     false,
+	}
+	_, err := APItoThresholdProfile(testStruct, "")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoModelTPThresholdExpTime1(t *testing.T) {
+	testStruct := &utils.TPThresholdProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "TH_1",
+		FilterIDs: []string{},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
+		},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  "1s",
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"WARN3", "LOG"},
+	}
+	expStruct := ThresholdMdls{
+		{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "TH_1",
+			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
+			MaxHits:            12,
+			MinHits:            10,
+			MinSleep:           "1s",
+			Blocker:            false,
+			Weight:             20.0,
+			ActionIDs:          "WARN3",
+		},
+		{
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			ActionIDs: "LOG",
+		},
+	}
+
+	result := APItoModelTPThreshold(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersAPItoModelTPThresholdExpTime2(t *testing.T) {
+	testStruct := &utils.TPThresholdProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "TH_1",
+		FilterIDs: []string{"FilterID1"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "2014-07-15T14:35:00Z",
+		},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  "1s",
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"WARN3"},
+	}
+	expStruct := ThresholdMdls{
+		{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "TH_1",
+			FilterIDs:          "FilterID1",
+			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
+			MaxHits:            12,
+			MinHits:            10,
+			MinSleep:           "1s",
+			Blocker:            false,
+			Weight:             20.0,
+			ActionIDs:          "WARN3",
+		},
+	}
+
+	result := APItoModelTPThreshold(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestThresholdMdlsAsTPThresholdActivationTime(t *testing.T) {
+	testStruct := ThresholdMdls{
+		{
+			Tpid:               "",
+			Tenant:             "",
+			ID:                 "",
+			FilterIDs:          "",
+			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
+			MaxHits:            0,
+			MinHits:            0,
+			MinSleep:           "",
+			Blocker:            false,
+			Weight:             0,
+			ActionIDs:          "",
+			Async:              false,
+		},
+	}
+	expStruct := []*utils.TPThresholdProfile{
+		{
+			TPid:      "",
+			Tenant:    "",
+			ID:        "",
+			FilterIDs: nil,
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-14T14:35:00Z",
+				ExpiryTime:     "2014-07-15T14:35:00Z",
+			},
+			MaxHits:   0,
+			MinHits:   0,
+			MinSleep:  "",
+			Blocker:   false,
+			Weight:    0,
+			ActionIDs: nil,
+			Async:     false,
+		},
+	}
+	result := testStruct.AsTPThreshold()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
+	testStruct := &StatQueueProfile{
+		Tenant:    "",
+		ID:        "",
+		FilterIDs: []string{"test_filter_Id"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
+		},
+		QueueLength: 0,
+		MinItems:    0,
+		Metrics: []*MetricWithFilters{{
+			FilterIDs: []string{"test_id"},
+		},
+		},
+		Stored:       false,
+		Blocker:      false,
+		Weight:       0,
+		ThresholdIDs: []string{"threshold_id"},
+	}
+	expStruct := &utils.TPStatProfile{
+		Tenant:    "",
+		ID:        "",
+		FilterIDs: []string{"test_filter_Id"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		QueueLength: 0,
+		MinItems:    0,
+		Metrics: []*utils.MetricWithFilters{
+			{
+				FilterIDs: []string{"test_id"},
+			},
+		},
+		Blocker:      false,
+		Stored:       false,
+		Weight:       0,
+		ThresholdIDs: []string{"threshold_id"},
+	}
+	result := StatQueueProfileToAPI(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersAPItoStatsError1(t *testing.T) {
+	testStruct := &utils.TPStatProfile{
+		TPid:               "",
+		Tenant:             "",
+		ID:                 "",
+		FilterIDs:          nil,
+		ActivationInterval: nil,
+		QueueLength:        0,
+		TTL:                "cat",
+		Metrics:            nil,
+		Blocker:            false,
+		Stored:             false,
+		Weight:             0,
+		MinItems:           0,
+		ThresholdIDs:       nil,
+	}
+	_, err := APItoStats(testStruct, "")
+	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
+		t.Errorf("\nExpecting <time: invalid duration \"cat\">,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoStatsError2(t *testing.T) {
+	testStruct := &utils.TPStatProfile{
+		TPid:      "",
+		Tenant:    "",
+		ID:        "",
+		FilterIDs: nil,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "cat",
+			ExpiryTime:     "cat",
+		},
+		QueueLength:  0,
+		TTL:          "",
+		Metrics:      nil,
+		Blocker:      false,
+		Stored:       false,
+		Weight:       0,
+		MinItems:     0,
+		ThresholdIDs: nil,
+	}
+	_, err := APItoStats(testStruct, "")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
+	testStruct := &utils.TPStatProfile{
+		TPid:      "TPS1",
+		Tenant:    "cgrates.org",
+		ID:        "Stat1",
+		FilterIDs: []string{"*string:Account:1002", "*string:Account:1003"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-25T15:00:00Z",
+			ExpiryTime:     "2014-07-26T15:00:00Z",
+		},
+		QueueLength: 100,
+		TTL:         "1s",
+		Metrics: []*utils.MetricWithFilters{
+			{
+				FilterIDs: []string{"test_filter_id1", "test_filter_id2"},
+				MetricID:  "*tcc",
+			},
+		},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     2,
+		ThresholdIDs: []string{"Th1", "Th2"},
+	}
+	expStruct := StatMdls{
+		&StatMdl{
+			Tpid:               "TPS1",
+			Tenant:             "cgrates.org",
+			ID:                 "Stat1",
+			FilterIDs:          "*string:Account:1002;*string:Account:1003",
+			ActivationInterval: "2014-07-25T15:00:00Z;2014-07-26T15:00:00Z",
+			QueueLength:        100,
+			TTL:                "1s",
+			MinItems:           2,
+			MetricIDs:          "*tcc",
+			MetricFilterIDs:    "test_filter_id1;test_filter_id2",
+			Stored:             true,
+			Blocker:            true,
+			Weight:             20.0,
+			ThresholdIDs:       "Th1;Th2",
+		},
+	}
+	result := APItoModelStats(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestStatMdlsAsTPStatsCase2(t *testing.T) {
+	testStruct := StatMdls{{
+		ActivationInterval: "2014-07-25T15:00:00Z;2014-07-26T15:00:00Z",
+		MetricIDs:          "test_id",
+		MetricFilterIDs:    "test_filter_id",
+	}}
+	expStruct := []*utils.TPStatProfile{{
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-25T15:00:00Z",
+			ExpiryTime:     "2014-07-26T15:00:00Z",
+		},
+		Metrics: []*utils.MetricWithFilters{
+			{
+				MetricID:  "test_id",
+				FilterIDs: []string{"test_filter_id"},
+			},
+		},
+	}}
+	result := testStruct.AsTPStats()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestStatMdlsCSVHeader(t *testing.T) {
+	testStruct := StatMdls{{
+		PK:                 0,
+		Tpid:               "",
+		Tenant:             "test_tenant",
+		ID:                 "test_id",
+		FilterIDs:          "test_filter_id",
+		ActivationInterval: "test_interval",
+		QueueLength:        0,
+		TTL:                "",
+		MinItems:           0,
+		MetricIDs:          "",
+		MetricFilterIDs:    "",
+		Stored:             false,
+		Blocker:            false,
+		Weight:             0,
+		ThresholdIDs:       "",
+		CreatedAt:          time.Time{},
+	}}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		utils.QueueLength, utils.TTL, utils.MinItems, utils.MetricIDs, utils.MetricFilterIDs,
+		utils.Stored, utils.Blocker, utils.Weight, utils.ThresholdIDs}
+	result := testStruct.CSVHeader()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersResourceProfileToAPICase2(t *testing.T) {
+	testStruct := &ResourceProfile{
+		Tenant:    "",
+		ID:        "",
+		FilterIDs: []string{"test_filter_id"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
+		},
+		UsageTTL:          time.Second,
+		Limit:             0,
+		AllocationMessage: "",
+		Blocker:           false,
+		Stored:            false,
+		Weight:            0,
+		ThresholdIDs:      []string{"test_threshold_id"},
+	}
+	expStruct := &utils.TPResourceProfile{
+		TPid:      "",
+		Tenant:    "",
+		ID:        "",
+		FilterIDs: []string{"test_filter_id"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		UsageTTL:          "1s",
+		Limit:             "0",
+		AllocationMessage: "",
+		Blocker:           false,
+		Stored:            false,
+		Weight:            0,
+		ThresholdIDs:      []string{"test_threshold_id"},
+	}
+	result := ResourceProfileToAPI(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
 }
