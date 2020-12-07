@@ -56,7 +56,8 @@ cgrates (0.10.1) UNRELEASED; urgency=medium
   * [SessionS] Use correctly SessionTTLUsage when calculate end usage in case of terminate session from ttl mechanism
   * [SessionS] Add SessionTLLLastUsage as option for an extra debit in case of ttl mechanism
   * [Templates] Added new dataconverter: *string2hex
-
+  * [SessionS] Properly charge terminate without initiate event
+  
  -- DanB <danb@cgrates.org>   Wed, 5 May 2020 15:22:59 +0200
 
 cgrates (0.10.0) UNRELEASED; urgency=medium

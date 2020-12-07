@@ -227,7 +227,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 				utils.SetupTime:        time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
 				utils.AnswerTime:       time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.Usage:            usage,
-				utils.CGRDebitInterval: "10s",
+				utils.CGRDebitInterval: "0s",
 			},
 		},
 	}
@@ -242,7 +242,7 @@ func testSessionsItUpdateUnexist(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	eAcntVal = 8.582900
+	eAcntVal = 8.599600
 	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
