@@ -668,3 +668,13 @@ type CoreSJsonCfg struct {
 	Caps_stats_interval *string
 	Shutdown_timeout    *string
 }
+
+// Action service config section
+type ActionSJsonCfg struct {
+	Enabled               *bool
+	Indexed_selects       *bool
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
+}

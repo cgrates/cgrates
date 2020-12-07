@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // ActionSCfg is the configuration of ActionS
 type ActionSCfg struct {
 	Enabled             bool
@@ -26,4 +28,103 @@ type ActionSCfg struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	NestedFields        bool
+}
+
+func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Enabled != nil {
+		acS.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Indexed_selects != nil {
+		acS.IndexedSelects = *jsnCfg.Indexed_selects
+	}
+	if jsnCfg.String_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.String_indexed_fields))
+		for i, fID := range *jsnCfg.String_indexed_fields {
+			sif[i] = fID
+		}
+		acS.StringIndexedFields = &sif
+	}
+	if jsnCfg.Prefix_indexed_fields != nil {
+		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
+		for i, fID := range *jsnCfg.Prefix_indexed_fields {
+			pif[i] = fID
+		}
+		acS.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Suffix_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
+		for i, fID := range *jsnCfg.Suffix_indexed_fields {
+			sif[i] = fID
+		}
+		acS.SuffixIndexedFields = &sif
+	}
+	if jsnCfg.Nested_fields != nil {
+		acS.NestedFields = *jsnCfg.Nested_fields
+	}
+	return
+}
+
+// AsMapInterface returns the config as a map[string]interface{}
+func (acS *ActionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	initialMP = map[string]interface{}{
+		utils.EnabledCfg:        acS.Enabled,
+		utils.IndexedSelectsCfg: acS.IndexedSelects,
+		utils.NestedFieldsCfg:   acS.NestedFields,
+	}
+	if acS.StringIndexedFields != nil {
+		stringIndexedFields := make([]string, len(*acS.StringIndexedFields))
+		for i, item := range *acS.StringIndexedFields {
+			stringIndexedFields[i] = item
+		}
+		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
+	}
+	if acS.PrefixIndexedFields != nil {
+		prefixIndexedFields := make([]string, len(*acS.PrefixIndexedFields))
+		for i, item := range *acS.PrefixIndexedFields {
+			prefixIndexedFields[i] = item
+		}
+		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
+	}
+	if acS.SuffixIndexedFields != nil {
+		suffixIndexedFields := make([]string, len(*acS.SuffixIndexedFields))
+		for i, item := range *acS.SuffixIndexedFields {
+			suffixIndexedFields[i] = item
+		}
+		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
+	}
+	return
+}
+
+// Clone returns a deep copy of ActionSCfg
+func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
+	cln = &ActionSCfg{
+		Enabled:        acS.Enabled,
+		IndexedSelects: acS.IndexedSelects,
+		NestedFields:   acS.NestedFields,
+	}
+	if acS.StringIndexedFields != nil {
+		idx := make([]string, len(*acS.StringIndexedFields))
+		for i, dx := range *acS.StringIndexedFields {
+			idx[i] = dx
+		}
+		cln.StringIndexedFields = &idx
+	}
+	if acS.PrefixIndexedFields != nil {
+		idx := make([]string, len(*acS.PrefixIndexedFields))
+		for i, dx := range *acS.PrefixIndexedFields {
+			idx[i] = dx
+		}
+		cln.PrefixIndexedFields = &idx
+	}
+	if acS.SuffixIndexedFields != nil {
+		idx := make([]string, len(*acS.SuffixIndexedFields))
+		for i, dx := range *acS.SuffixIndexedFields {
+			idx[i] = dx
+		}
+		cln.SuffixIndexedFields = &idx
+	}
+	return
 }
