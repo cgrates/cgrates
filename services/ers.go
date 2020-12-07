@@ -31,13 +31,15 @@ import (
 
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventReaderService{
 		rldChan:     make(chan struct{}, 1),
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
 		connMgr:     connMgr,
+		srvDep:      srvDep,
 	}
 }
 
@@ -52,6 +54,7 @@ type EventReaderService struct {
 	rldChan  chan struct{}
 	stopChan chan struct{}
 	connMgr  *engine.ConnManager
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

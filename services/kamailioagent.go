@@ -33,11 +33,13 @@ import (
 
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &KamailioAgent{
 		cfg:     cfg,
 		shdChan: shdChan,
 		connMgr: connMgr,
+		srvDep:  srvDep,
 	}
 }
 
@@ -49,6 +51,7 @@ type KamailioAgent struct {
 
 	kam     *agents.KamailioAgent
 	connMgr *engine.ConnManager
+	srvDep  map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

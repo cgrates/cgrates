@@ -29,10 +29,11 @@ import (
 )
 
 // NewStorDBService returns the StorDB Service
-func NewStorDBService(cfg *config.CGRConfig) *StorDBService {
+func NewStorDBService(cfg *config.CGRConfig,
+	srvDep map[string]*sync.WaitGroup) *StorDBService {
 	return &StorDBService{
-		cfg: cfg,
-		// db:     engine.NewInternalDB([]string{}, []string{}), // to be removed
+		cfg:    cfg,
+		srvDep: srvDep,
 	}
 }
 
@@ -44,6 +45,8 @@ type StorDBService struct {
 
 	db        engine.StorDB
 	syncChans []chan engine.StorDB
+
+	srvDep map[string]*sync.WaitGroup
 
 	reconnected bool
 }

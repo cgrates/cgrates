@@ -37,8 +37,8 @@ import (
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager,
-	anz *AnalyzerService) servmanager.Service {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &DispatcherService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -48,6 +48,7 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		connMgr:     connMgr,
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -65,6 +66,7 @@ type DispatcherService struct {
 	rpc      *v1.DispatcherSv1
 	connChan chan rpcclient.ClientConnector
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

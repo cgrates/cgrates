@@ -32,11 +32,13 @@ import (
 
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AsteriskAgent{
 		cfg:     cfg,
 		shdChan: shdChan,
 		connMgr: connMgr,
+		srvDep:  srvDep,
 	}
 }
 
@@ -49,6 +51,7 @@ type AsteriskAgent struct {
 
 	smas    []*agents.AsteriskAgent
 	connMgr *engine.ConnManager
+	srvDep  map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

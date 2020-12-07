@@ -418,7 +418,7 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 	if tSv1ConfDIR == "tutinternal" {
 		t.SkipNow()
 	}
-	time.Sleep(time.Second)
+	// time.Sleep(time.Second)
 	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}

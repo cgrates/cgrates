@@ -35,8 +35,8 @@ import (
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalRouteSChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager,
-	anz *AnalyzerService) servmanager.Service {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RouteService{
 		connChan:    internalRouteSChan,
 		cfg:         cfg,
@@ -46,6 +46,7 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		connMgr:     connMgr,
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -63,6 +64,7 @@ type RouteService struct {
 	rpc      *v1.RouteSv1
 	connChan chan rpcclient.ClientConnector
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

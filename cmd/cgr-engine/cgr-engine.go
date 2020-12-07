@@ -522,12 +522,46 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          internalRateSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 	})
-	gvService := services.NewGlobalVarS(cfg)
+	srvDep := map[string]*sync.WaitGroup{
+		utils.AnalyzerS:       new(sync.WaitGroup),
+		utils.APIerSv1:        new(sync.WaitGroup),
+		utils.APIerSv2:        new(sync.WaitGroup),
+		utils.AsteriskAgent:   new(sync.WaitGroup),
+		utils.AttributeS:      new(sync.WaitGroup),
+		utils.CDRServer:       new(sync.WaitGroup),
+		utils.ChargerS:        new(sync.WaitGroup),
+		utils.CoreS:           new(sync.WaitGroup),
+		utils.DataDB:          new(sync.WaitGroup),
+		utils.DiameterAgent:   new(sync.WaitGroup),
+		utils.DispatcherH:     new(sync.WaitGroup),
+		utils.DispatcherS:     new(sync.WaitGroup),
+		utils.DNSAgent:        new(sync.WaitGroup),
+		utils.EventExporterS:  new(sync.WaitGroup),
+		utils.ERs:             new(sync.WaitGroup),
+		utils.FreeSWITCHAgent: new(sync.WaitGroup),
+		utils.GlobalVarS:      new(sync.WaitGroup),
+		utils.HTTPAgent:       new(sync.WaitGroup),
+		utils.KamailioAgent:   new(sync.WaitGroup),
+		utils.LoaderS:         new(sync.WaitGroup),
+		utils.RadiusAgent:     new(sync.WaitGroup),
+		utils.RALService:      new(sync.WaitGroup),
+		utils.RateS:           new(sync.WaitGroup),
+		utils.ResourceS:       new(sync.WaitGroup),
+		utils.ResponderS:      new(sync.WaitGroup),
+		utils.RouteS:          new(sync.WaitGroup),
+		utils.SchedulerS:      new(sync.WaitGroup),
+		utils.SessionS:        new(sync.WaitGroup),
+		utils.SIPAgent:        new(sync.WaitGroup),
+		utils.StatS:           new(sync.WaitGroup),
+		utils.StorDB:          new(sync.WaitGroup),
+		utils.ThresholdS:      new(sync.WaitGroup),
+	}
+	gvService := services.NewGlobalVarS(cfg, srvDep)
 	shdWg.Add(1)
 	if err = gvService.Start(); err != nil {
 		return
 	}
-	dmService := services.NewDataDBService(cfg, connManager)
+	dmService := services.NewDataDBService(cfg, connManager, srvDep)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
 		shdWg.Add(1)
 		if err = dmService.Start(); err != nil {
@@ -535,7 +569,7 @@ func main() {
 		}
 	}
 
-	storDBService := services.NewStorDBService(cfg)
+	storDBService := services.NewStorDBService(cfg, srvDep)
 	if storDBService.ShouldRun() { // Some services can run without db, ie:  ERs
 		shdWg.Add(1)
 		if err = storDBService.Start(); err != nil {
@@ -559,7 +593,7 @@ func main() {
 	filterSChan := make(chan *engine.FilterS, 1)
 
 	// init AnalyzerS
-	anz := services.NewAnalyzerService(cfg, server, filterSChan, shdChan, internalAnalyzerSChan)
+	anz := services.NewAnalyzerService(cfg, server, filterSChan, shdChan, internalAnalyzerSChan, srvDep)
 	if anz.ShouldRun() {
 		shdWg.Add(1)
 		if err := anz.Start(); err != nil {
@@ -569,7 +603,7 @@ func main() {
 	}
 
 	// init CoreSv1
-	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz)
+	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, srvDep)
 	shdWg.Add(1)
 	if err := coreS.Start(); err != nil {
 		fmt.Println(err)
@@ -585,55 +619,55 @@ func main() {
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, shdChan, shdWg)
-	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, anz)
-	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager, anz)
-	dspH := services.NewDispatcherHostsService(cfg, server, connManager, anz)
+	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, anz, srvDep)
+	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager, anz, srvDep)
+	dspH := services.NewDispatcherHostsService(cfg, server, connManager, anz, srvDep)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
-		internalChargerSChan, connManager, anz)
-	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan, anz)
+		internalChargerSChan, connManager, anz, srvDep)
+	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan, anz, srvDep)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
-		internalStatSChan, connManager, anz)
+		internalStatSChan, connManager, anz, srvDep)
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
-		internalResourceSChan, connManager, anz)
+		internalResourceSChan, connManager, anz, srvDep)
 	routeS := services.NewRouteService(cfg, dmService, cacheS, filterSChan, server,
-		internalRouteSChan, connManager, anz)
+		internalRouteSChan, connManager, anz, srvDep)
 
 	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan,
-		server, internalSchedulerSChan, connManager, anz)
+		server, internalSchedulerSChan, connManager, anz, srvDep)
 
 	rals := services.NewRalService(cfg, cacheS, server,
 		internalRALsChan, internalResponderChan,
-		shdChan, connManager, anz)
+		shdChan, connManager, anz, srvDep)
 
 	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponder(),
-		internalAPIerSv1Chan, connManager, anz)
+		internalAPIerSv1Chan, connManager, anz, srvDep)
 
-	apiSv2 := services.NewAPIerSv2Service(apiSv1, cfg, server, internalAPIerSv2Chan, anz)
+	apiSv2 := services.NewAPIerSv2Service(apiSv1, cfg, server, internalAPIerSv2Chan, anz, srvDep)
 
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
-		connManager, anz)
+		connManager, anz, srvDep)
 
-	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, shdChan, connManager, caps, anz)
+	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, shdChan, connManager, caps, anz, srvDep)
 
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
-		internalLoaderSChan, connManager, anz)
+		internalLoaderSChan, connManager, anz, srvDep)
 
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, schS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
-		services.NewEventReaderService(cfg, filterSChan, shdChan, connManager),
-		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager),
-		services.NewFreeswitchAgent(cfg, shdChan, connManager),
-		services.NewKamailioAgent(cfg, shdChan, connManager),
-		services.NewAsteriskAgent(cfg, shdChan, connManager),              // partial reload
-		services.NewRadiusAgent(cfg, filterSChan, shdChan, connManager),   // partial reload
-		services.NewDiameterAgent(cfg, filterSChan, shdChan, connManager), // partial reload
-		services.NewHTTPAgent(cfg, filterSChan, server, connManager),      // no reload
+		services.NewEventReaderService(cfg, filterSChan, shdChan, connManager, srvDep),
+		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, srvDep),
+		services.NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
+		services.NewKamailioAgent(cfg, shdChan, connManager, srvDep),
+		services.NewAsteriskAgent(cfg, shdChan, connManager, srvDep),              // partial reload
+		services.NewRadiusAgent(cfg, filterSChan, shdChan, connManager, srvDep),   // partial reload
+		services.NewDiameterAgent(cfg, filterSChan, shdChan, connManager, srvDep), // partial reload
+		services.NewHTTPAgent(cfg, filterSChan, server, connManager, srvDep),      // no reload
 		ldrs, anz, dspS, dspH, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
-			connManager, server, internalEEsChan, anz),
+			connManager, server, internalEEsChan, anz, srvDep),
 		services.NewRateService(cfg, cacheS, filterSChan, dmService,
-			server, internalRateSChan, anz),
-		services.NewSIPAgent(cfg, filterSChan, shdChan, connManager),
+			server, internalRateSChan, anz, srvDep),
+		services.NewSIPAgent(cfg, filterSChan, shdChan, connManager, srvDep),
 	)
 	srvManager.StartServices()
 	// Start FilterS

@@ -35,7 +35,7 @@ import (
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalThresholdSChan chan rpcclient.ClientConnector,
-	anz *AnalyzerService) servmanager.Service {
+	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
 		cfg:         cfg,
@@ -44,6 +44,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		server:      server,
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -60,6 +61,7 @@ type ThresholdService struct {
 	rpc      *v1.ThresholdSv1
 	connChan chan rpcclient.ClientConnector
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
@@ -67,6 +69,7 @@ func (thrs *ThresholdService) Start() (err error) {
 	if thrs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+	thrs.srvDep[utils.DataDB].Add(1)
 
 	<-thrs.cacheS.GetPrecacheChannel(utils.CacheThresholdProfiles)
 	<-thrs.cacheS.GetPrecacheChannel(utils.CacheThresholds)
@@ -105,6 +108,7 @@ func (thrs *ThresholdService) Reload() (err error) {
 
 // Shutdown stops the service
 func (thrs *ThresholdService) Shutdown() (err error) {
+	defer thrs.srvDep[utils.DataDB].Done()
 	thrs.Lock()
 	defer thrs.Unlock()
 	if err = thrs.thrs.Shutdown(); err != nil {

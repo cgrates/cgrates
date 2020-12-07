@@ -32,13 +32,15 @@ import (
 
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
-	internalCoreSChan chan rpcclient.ClientConnector, anz *AnalyzerService) *CoreService {
+	internalCoreSChan chan rpcclient.ClientConnector, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) *CoreService {
 	return &CoreService{
 		connChan: internalCoreSChan,
 		cfg:      cfg,
 		caps:     caps,
 		server:   server,
 		anz:      anz,
+		srvDep:   srvDep,
 	}
 }
 
@@ -54,6 +56,7 @@ type CoreService struct {
 	rpc      *v1.CoreSv1
 	connChan chan rpcclient.ClientConnector
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

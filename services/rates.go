@@ -35,13 +35,11 @@ import (
 )
 
 // NewRateService constructs RateService
-func NewRateService(
-	cfg *config.CGRConfig, cacheS *engine.CacheS,
-	filterSChan chan *engine.FilterS,
-	dmS *DataDBService,
-	server *cores.Server,
-	intConnChan chan rpcclient.ClientConnector,
-	anz *AnalyzerService) servmanager.Service {
+func NewRateService(cfg *config.CGRConfig,
+	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	dmS *DataDBService, server *cores.Server,
+	intConnChan chan rpcclient.ClientConnector, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
 		cacheS:      cacheS,
@@ -51,6 +49,7 @@ func NewRateService(
 		intConnChan: intConnChan,
 		rldChan:     make(chan struct{}),
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -71,6 +70,7 @@ type RateService struct {
 	rpc         *v1.RateSv1
 	intConnChan chan rpcclient.ClientConnector
 	anz         *AnalyzerService
+	srvDep      map[string]*sync.WaitGroup
 }
 
 // ServiceName returns the service name

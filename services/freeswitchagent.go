@@ -32,11 +32,13 @@ import (
 
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager) servmanager.Service {
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &FreeswitchAgent{
 		cfg:     cfg,
 		shdChan: shdChan,
 		connMgr: connMgr,
+		srvDep:  srvDep,
 	}
 }
 
@@ -48,6 +50,7 @@ type FreeswitchAgent struct {
 
 	fS      *agents.FSsessions
 	connMgr *engine.ConnManager
+	srvDep  map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

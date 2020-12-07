@@ -31,12 +31,14 @@ import (
 
 // NewDispatcherHostsService returns the Dispatcher Service
 func NewDispatcherHostsService(cfg *config.CGRConfig, server *cores.Server,
-	connMgr *engine.ConnManager, anz *AnalyzerService) servmanager.Service {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &DispatcherHostsService{
 		cfg:     cfg,
 		server:  server,
 		connMgr: connMgr,
 		anz:     anz,
+		srvDep:  srvDep,
 	}
 }
 
@@ -48,8 +50,9 @@ type DispatcherHostsService struct {
 	connMgr  *engine.ConnManager
 	stopChan chan struct{}
 
-	dspS *dispatcherh.DispatcherHostsService
-	anz  *AnalyzerService
+	dspS   *dispatcherh.DispatcherHostsService
+	anz    *AnalyzerService
+	srvDep map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

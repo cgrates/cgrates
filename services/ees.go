@@ -35,8 +35,8 @@ import (
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, server *cores.Server,
-	intConnChan chan rpcclient.ClientConnector,
-	anz *AnalyzerService) servmanager.Service {
+	intConnChan chan rpcclient.ClientConnector, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
@@ -45,6 +45,7 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 		intConnChan: intConnChan,
 		rldChan:     make(chan struct{}),
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -60,9 +61,10 @@ type EventExporterService struct {
 	rldChan     chan struct{}
 	stopChan    chan struct{}
 
-	eeS *ees.EventExporterS
-	rpc *v1.EeSv1
-	anz *AnalyzerService
+	eeS    *ees.EventExporterS
+	rpc    *v1.EeSv1
+	anz    *AnalyzerService
+	srvDep map[string]*sync.WaitGroup
 }
 
 // ServiceName returns the service name

@@ -31,13 +31,15 @@ import (
 // NewResponderService returns the Resonder Service
 func NewResponderService(cfg *config.CGRConfig, server *cores.Server,
 	internalRALsChan chan rpcclient.ClientConnector,
-	shdChan *utils.SyncedChan, anz *AnalyzerService) *ResponderService {
+	shdChan *utils.SyncedChan, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) *ResponderService {
 	return &ResponderService{
 		connChan: internalRALsChan,
 		cfg:      cfg,
 		server:   server,
 		shdChan:  shdChan,
 		anz:      anz,
+		srvDep:   srvDep,
 	}
 }
 
@@ -52,6 +54,7 @@ type ResponderService struct {
 	resp     *engine.Responder
 	connChan chan rpcclient.ClientConnector
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

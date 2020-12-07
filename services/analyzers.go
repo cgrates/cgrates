@@ -34,13 +34,15 @@ import (
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server,
 	filterSChan chan *engine.FilterS, shdChan *utils.SyncedChan,
-	internalAnalyzerSChan chan rpcclient.ClientConnector) *AnalyzerService {
+	internalAnalyzerSChan chan rpcclient.ClientConnector,
+	srvDep map[string]*sync.WaitGroup) *AnalyzerService {
 	return &AnalyzerService{
 		connChan:    internalAnalyzerSChan,
 		cfg:         cfg,
 		server:      server,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
+		srvDep:      srvDep,
 	}
 }
 
@@ -56,6 +58,7 @@ type AnalyzerService struct {
 	anz      *analyzers.AnalyzerService
 	rpc      *v1.AnalyzerSv1
 	connChan chan rpcclient.ClientConnector
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

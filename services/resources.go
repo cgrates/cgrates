@@ -35,8 +35,8 @@ import (
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalResourceSChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager,
-	anz *AnalyzerService) servmanager.Service {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ResourceService{
 		connChan:    internalResourceSChan,
 		cfg:         cfg,
@@ -46,6 +46,7 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		connMgr:     connMgr,
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -63,6 +64,7 @@ type ResourceService struct {
 	connChan chan rpcclient.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

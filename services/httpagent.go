@@ -32,12 +32,14 @@ import (
 
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	server *cores.Server, connMgr *engine.ConnManager) servmanager.Service {
+	server *cores.Server, connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &HTTPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     connMgr,
+		srvDep:      srvDep,
 	}
 }
 
@@ -52,6 +54,7 @@ type HTTPAgent struct {
 	// if we registerd the handlers
 	started bool
 	connMgr *engine.ConnManager
+	srvDep  map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

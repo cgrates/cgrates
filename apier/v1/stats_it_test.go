@@ -391,7 +391,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	if stsV1ConfDIR == "tutinternal" {
 		t.SkipNow()
 	}
-	time.Sleep(time.Second)
+	// time.Sleep(time.Second)
 	if _, err := engine.StopStartEngine(stsV1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}

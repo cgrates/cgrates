@@ -35,7 +35,7 @@ import (
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *cores.Server,
 	internalChargerSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager,
-	anz *AnalyzerService) servmanager.Service {
+	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ChargerService{
 		connChan:    internalChargerSChan,
 		cfg:         cfg,
@@ -45,6 +45,7 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		connMgr:     connMgr,
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -62,6 +63,7 @@ type ChargerService struct {
 	rpc      *v1.ChargerSv1
 	connChan chan rpcclient.ClientConnector
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

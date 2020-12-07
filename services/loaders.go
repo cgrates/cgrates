@@ -34,8 +34,8 @@ import (
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, server *cores.Server,
 	internalLoaderSChan chan rpcclient.ClientConnector,
-	connMgr *engine.ConnManager,
-	anz *AnalyzerService) *LoaderService {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) *LoaderService {
 	return &LoaderService{
 		connChan:    internalLoaderSChan,
 		cfg:         cfg,
@@ -45,6 +45,7 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 		connMgr:     connMgr,
 		stopChan:    make(chan struct{}),
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -62,6 +63,7 @@ type LoaderService struct {
 	connChan chan rpcclient.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

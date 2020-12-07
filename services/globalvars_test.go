@@ -29,7 +29,7 @@ func TestGlobalVarS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	exp := &GlobalVarS{cfg: cfg}
-	if gv := NewGlobalVarS(cfg); !reflect.DeepEqual(gv, exp) {
+	if gv := NewGlobalVarS(cfg, nil); !reflect.DeepEqual(gv, exp) {
 		t.Errorf("Expected %+v, received %+v", exp, gv)
 	}
 	if exp.ServiceName() != utils.GlobalVarS {
