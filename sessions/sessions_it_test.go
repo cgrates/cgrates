@@ -212,7 +212,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 		UpdateSession: true,
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			Opts: map[string]interface{}{
-				utils.OptsDebitInterval: "10s",
+				utils.OptsDebitInterval: "0s",
 			},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -245,7 +245,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	eAcntVal = 8.582900
+	eAcntVal = 8.599600
 	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
