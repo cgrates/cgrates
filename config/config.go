@@ -194,12 +194,11 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.eesCfg = new(EEsCfg)
 	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
 	cfg.rateSCfg = new(RateSCfg)
-	//cfg.actionSCfg = new(ActionSCfg)
+	cfg.actionSCfg = new(ActionSCfg)
 	cfg.sipAgentCfg = new(SIPAgentCfg)
 	cfg.configSCfg = new(ConfigSCfg)
 	cfg.apiBanCfg = new(APIBanCfg)
 	cfg.coreSCfg = new(CoreSCfg)
-	cfg.actionSCfg = new(ActionSCfg)
 
 	var cgrJSONCfg *CgrJsonCfg
 	if cgrJSONCfg, err = NewCgrJsonCfgFromBytes(config); err != nil {
@@ -1245,7 +1244,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		ConfigSJson:        cfg.loadConfigSCfg,
 		APIBanCfgJson:      cfg.loadAPIBanCgrCfg,
 		CoreSCfgJson:       cfg.loadCoreSCfg,
-		ActionSCfgJson:     cfg.loadActionSCfg,
+		ActionSJson:        cfg.loadActionSCfg,
 	}
 }
 
@@ -1549,7 +1548,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		TemplatesJson:      cfg.templates.AsMapInterface(separator),
 		ConfigSJson:        cfg.configSCfg.AsMapInterface(),
 		CoreSCfgJson:       cfg.coreSCfg.AsMapInterface(),
-		ActionSCfgJson:     cfg.actionSCfg.AsMapInterface(),
+		ActionSJson:        cfg.actionSCfg.AsMapInterface(),
 	}
 }
 
@@ -1699,7 +1698,7 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithOpts, reply *map[string]inter
 		mp = cfg.RateSCfg().AsMapInterface()
 	case CoreSCfgJson:
 		mp = cfg.CoreSCfg().AsMapInterface()
-	case ActionSCfgJson:
+	case ActionSJson:
 		mp = cfg.ActionSCfg().AsMapInterface()
 	default:
 		return errors.New("Invalid section")

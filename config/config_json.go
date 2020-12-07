@@ -67,7 +67,6 @@ const (
 	ConfigSJson        = "configs"
 	APIBanCfgJson      = "apiban"
 	CoreSCfgJson       = "cores"
-	ActionSCfgJson     = "actions"
 )
 
 var (
@@ -76,7 +75,7 @@ var (
 		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
 		AnalyzerCfgJson, ApierS, EEsJson, RateSJson, SIPAgentJson, DispatcherHJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson,
-		ActionSCfgJson}
+		ActionSJson}
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -588,7 +587,7 @@ func (self CgrJsonCfg) CoreSCfgJson() (*CoreSJsonCfg, error) {
 }
 
 func (self CgrJsonCfg) ActionSCfgJson() (*ActionSJsonCfg, error) {
-	rawCfg, hasKey := self[CoreSCfgJson]
+	rawCfg, hasKey := self[ActionSJson]
 	if !hasKey {
 		return nil, nil
 	}
