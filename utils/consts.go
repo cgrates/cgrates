@@ -1488,6 +1488,11 @@ const (
 )
 
 const (
+	ActionSv1     = "ActionSv1"
+	ActionSv1Ping = "ActionSv1.Ping"
+)
+
+const (
 	CoreS         = "CoreS"
 	CoreSv1       = "CoreSv1"
 	CoreSv1Status = "CoreSv1.Status"
