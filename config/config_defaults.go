@@ -1038,4 +1038,15 @@ const CGRATES_CFG_JSON = `
 	"keys": [],
 },
 
+
+"actions": {								// ActionS config
+	"enabled": false,						// starts attribute service: <true|false>
+	"indexed_selects": true,				// enable profile matching exclusively on indexes
+	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+},
+
+
 }`
