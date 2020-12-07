@@ -287,8 +287,8 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	expMaxUsage := map[string]time.Duration{
 		"CustomerCharges": initUsage,
 		"SupplierCharges": initUsage,
-		"raw":             initUsage,
-		utils.MetaRaw:     initUsage,
+		// "raw":             initUsage,
+		utils.MetaRaw: initUsage,
 	}
 	if !reflect.DeepEqual(expMaxUsage, rply.MaxUsage) {
 		t.Errorf("Expected %s received %s", expMaxUsage, rply.MaxUsage)
@@ -398,8 +398,8 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 	expMaxUsage := map[string]time.Duration{
 		"CustomerCharges": reqUsage,
 		"SupplierCharges": reqUsage,
-		"raw":             reqUsage,
-		utils.MetaRaw:     reqUsage,
+		// "raw":             reqUsage,
+		utils.MetaRaw: reqUsage,
 	}
 	if !reflect.DeepEqual(expMaxUsage, rply.MaxUsage) {
 		t.Errorf("Expected %s received %s", expMaxUsage, rply.MaxUsage)
