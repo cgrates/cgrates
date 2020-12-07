@@ -33,11 +33,11 @@ func TestEmergLogger(t *testing.T) {
 	log.SetOutput(output)
 	loggertype := MetaSysLog
 	id := "id_emerg"
-	if err := Newlogger(loggertype, id); err != nil {
+	if _, err := Newlogger(loggertype, id); err != nil {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
+	newLogger := &StdLogger{nodeID: id}
 
 	newLogger.SetLogLevel(-1)
 	if err := newLogger.Emerg(EmptyString); err != nil {
@@ -61,11 +61,11 @@ func TestAlertLogger(t *testing.T) {
 	log.SetOutput(output)
 	loggertype := MetaSysLog
 	id := "id_alert"
-	if err := Newlogger(loggertype, id); err != nil {
+	if _, err := Newlogger(loggertype, id); err != nil {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
+	newLogger := &StdLogger{nodeID: id}
 
 	newLogger.SetLogLevel(0)
 	if err := newLogger.Alert("Alert"); err != nil {
@@ -90,11 +90,11 @@ func TestCritLogger(t *testing.T) {
 
 	loggertype := MetaSysLog
 	id := "id_crit"
-	if err := Newlogger(loggertype, id); err != nil {
+	if _, err := Newlogger(loggertype, id); err != nil {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
+	newLogger := &StdLogger{nodeID: id}
 
 	newLogger.SetLogLevel(1)
 	if err := newLogger.Crit("Critical_level"); err != nil {
@@ -119,11 +119,11 @@ func TestErrorLogger(t *testing.T) {
 
 	loggertype := MetaSysLog
 	id := "id_error"
-	if err := Newlogger(loggertype, id); err != nil {
+	if _, err := Newlogger(loggertype, id); err != nil {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
+	newLogger := &StdLogger{nodeID: id}
 
 	newLogger.SetLogLevel(2)
 	if err := newLogger.Err("error_panic"); err != nil {
@@ -148,11 +148,11 @@ func TestWarningLogger(t *testing.T) {
 
 	loggertype := MetaSysLog
 	id := "id_error"
-	if err := Newlogger(loggertype, id); err != nil {
+	if _, err := Newlogger(loggertype, id); err != nil {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
+	newLogger := &StdLogger{nodeID: id}
 
 	newLogger.SetLogLevel(3)
 	if err := newLogger.Warning("warning_panic"); err != nil {
@@ -177,11 +177,11 @@ func TestNoticeLogger(t *testing.T) {
 
 	loggertype := MetaSysLog
 	id := "id_notice"
-	if err := Newlogger(loggertype, id); err != nil {
+	if _, err := Newlogger(loggertype, id); err != nil {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
+	newLogger := &StdLogger{nodeID: id}
 
 	newLogger.SetLogLevel(4)
 	if err := newLogger.Notice("notice_panic"); err != nil {
@@ -206,11 +206,11 @@ func TestInfoLogger(t *testing.T) {
 
 	loggertype := MetaSysLog
 	id := "id_info"
-	if err := Newlogger(loggertype, id); err != nil {
+	if _, err := Newlogger(loggertype, id); err != nil {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
+	newLogger := &StdLogger{nodeID: id}
 
 	newLogger.SetLogLevel(5)
 	if err := newLogger.Info("info_panic"); err != nil {
@@ -235,12 +235,14 @@ func TestDebugLogger(t *testing.T) {
 
 	loggertype := MetaSysLog
 	id := "id_debug"
-	if err := Newlogger(loggertype, id); err != nil {
+	if _, err := Newlogger(loggertype, id); err != nil {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
-
+	newLogger, err := Newlogger(MetaStdLog, id)
+	if err != nil {
+		t.Error(err)
+	}
 	newLogger.SetLogLevel(6)
 	if err := newLogger.Debug("debug_panic"); err != nil {
 		t.Error(err)
@@ -264,7 +266,7 @@ func TestWriteLogger(t *testing.T) {
 
 	loggertype := MetaSysLog
 	id := "id_write"
-	if err := Newlogger(loggertype, id); err != nil {
+	if _, err := Newlogger(loggertype, id); err != nil {
 		t.Error(err)
 	}
 
@@ -272,7 +274,7 @@ func TestWriteLogger(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	newLogger := new(StdLogger)
+	newLogger := &StdLogger{nodeID: id}
 	newLogger.SetSyslog(newWriter)
 
 	if n, err := newLogger.Write([]byte(EmptyString)); err != nil {
@@ -288,11 +290,11 @@ func TestCloseLogger(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 
 	loggertype := MetaStdLog
-	if err := Newlogger(loggertype, EmptyString); err != nil {
+	if _, err := Newlogger(loggertype, EmptyString); err != nil {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
+	newLogger := &StdLogger{nodeID: EmptyString}
 	if err := newLogger.Close(); err != nil {
 		t.Error(err)
 	}
@@ -318,7 +320,7 @@ func TestNewLoggerInvalidLoggerType(t *testing.T) {
 
 	loggertype := "Invalid_TYPE"
 	expected := "unsuported logger: <Invalid_TYPE>"
-	if err := Newlogger(loggertype, EmptyString); err == nil || err.Error() != expected {
+	if _, err := Newlogger(loggertype, EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

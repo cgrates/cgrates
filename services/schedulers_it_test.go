@@ -36,7 +36,7 @@ import (
 func TestSchedulerSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
-	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)

@@ -27,27 +27,28 @@ import (
 )
 
 var Logger LoggerInterface
-var nodeID string
 
 func init() {
 	if Logger == nil || reflect.ValueOf(Logger).IsNil() {
-		Newlogger(MetaSysLog, nodeID)
+		//used for testing only, so we will ignore the error for now
+		Logger, _ = Newlogger(MetaSysLog, EmptyString)
 	}
 }
 
-//functie Newlogger (logger type)
-func Newlogger(loggertype, id string) (err error) {
-	Logger = new(StdLogger)
-	nodeID = id
-	var l *syslog.Writer
-	if loggertype == MetaSysLog {
-		l, err = syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, fmt.Sprintf("CGRateS <%s> ", nodeID))
-		Logger.SetSyslog(l) // if we received an error, l is nil
-		return err
-	} else if loggertype != MetaStdLog {
-		return fmt.Errorf("unsuported logger: <%s>", loggertype)
+// Newlogger  creates the Loggerr object
+func Newlogger(loggertype, id string) (lgr LoggerInterface, err error) {
+	lgr = &StdLogger{nodeID: id}
+	switch loggertype {
+	case MetaStdLog:
+		return
+	case MetaSysLog:
+		var l *syslog.Writer
+		l, err = syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, fmt.Sprintf("CGRateS <%s> ", id))
+		lgr.SetSyslog(l) // if we received an error, l is nil
+		return
+	default:
+		return nil, fmt.Errorf("unsuported logger: <%s>", loggertype)
 	}
-	return nil
 }
 
 type LoggerInterface interface {
@@ -81,6 +82,7 @@ const (
 // Logs to standard output
 type StdLogger struct {
 	logLevel int
+	nodeID   string
 	syslog   *syslog.Writer
 }
 
@@ -119,7 +121,7 @@ func (sl *StdLogger) Alert(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Alert(m)
 	} else {
-		log.Print("CGRateS <" + nodeID + "> [ALERT] " + m)
+		log.Print("CGRateS <" + sl.nodeID + "> [ALERT] " + m)
 	}
 	return
 }
@@ -132,7 +134,7 @@ func (sl *StdLogger) Crit(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Crit(m)
 	} else {
-		log.Print("CGRateS <" + nodeID + "> [CRITICAL] " + m)
+		log.Print("CGRateS <" + sl.nodeID + "> [CRITICAL] " + m)
 	}
 	return
 }
@@ -145,7 +147,7 @@ func (sl *StdLogger) Debug(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Debug(m)
 	} else {
-		log.Print("CGRateS <" + nodeID + "> [DEBUG] " + m)
+		log.Print("CGRateS <" + sl.nodeID + "> [DEBUG] " + m)
 	}
 	return
 }
@@ -158,7 +160,7 @@ func (sl *StdLogger) Emerg(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Emerg(m)
 	} else {
-		log.Print("CGRateS <" + nodeID + "> [EMERGENCY] " + m)
+		log.Print("CGRateS <" + sl.nodeID + "> [EMERGENCY] " + m)
 	}
 	return
 }
@@ -171,7 +173,7 @@ func (sl *StdLogger) Err(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Err(m)
 	} else {
-		log.Print("CGRateS <" + nodeID + "> [ERROR] " + m)
+		log.Print("CGRateS <" + sl.nodeID + "> [ERROR] " + m)
 	}
 	return
 }
@@ -184,7 +186,7 @@ func (sl *StdLogger) Info(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Info(m)
 	} else {
-		log.Print("CGRateS <" + nodeID + "> [INFO] " + m)
+		log.Print("CGRateS <" + sl.nodeID + "> [INFO] " + m)
 	}
 	return
 }
@@ -197,7 +199,7 @@ func (sl *StdLogger) Notice(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Notice(m)
 	} else {
-		log.Print("CGRateS <" + nodeID + "> [NOTICE] " + m)
+		log.Print("CGRateS <" + sl.nodeID + "> [NOTICE] " + m)
 	}
 	return
 }
@@ -211,7 +213,7 @@ func (sl *StdLogger) Warning(m string) (err error) {
 	if sl.syslog != nil {
 		sl.syslog.Warning(m)
 	} else {
-		log.Print("CGRateS <" + nodeID + "> [WARNING] " + m)
+		log.Print("CGRateS <" + sl.nodeID + "> [WARNING] " + m)
 	}
 	return
 }

@@ -448,7 +448,7 @@ func main() {
 	config.SetCgrConfig(cfg) // Share the config object
 
 	// init syslog
-	if err = utils.Newlogger(utils.FirstNonEmpty(*syslogger,
+	if utils.Logger, err = utils.Newlogger(utils.FirstNonEmpty(*syslogger,
 		cfg.GeneralCfg().Logger), cfg.GeneralCfg().NodeID); err != nil {
 		log.Fatalf("Could not initialize syslog connection, err: <%s>", err.Error())
 		return
