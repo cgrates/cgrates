@@ -1299,3 +1299,17 @@ type DispatcherRateSv1 struct {
 func (dR *DispatcherRateSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
 	return dR.dR.RateSv1Ping(args, reply)
 }
+
+func NewDispatcherActionSv1(dps *dispatchers.DispatcherService) *DispatcherActionSv1 {
+	return &DispatcherActionSv1{dR: dps}
+}
+
+// Exports RPC from RLs
+type DispatcherActionSv1 struct {
+	dR *dispatchers.DispatcherService
+}
+
+// Ping implements RateSv1Ping
+func (dR *DispatcherActionSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+	return dR.dR.ActionSv1Ping(args, reply)
+}

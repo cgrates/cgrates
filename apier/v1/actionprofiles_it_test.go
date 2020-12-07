@@ -48,6 +48,7 @@ var (
 		testActionSRPCConn,
 		testActionSLoadFromFolder,
 		testActionSGetActionProfile,
+		testActionSPing,
 		testActionSKillEngine,
 	}
 )
@@ -176,6 +177,15 @@ func testActionSGetActionProfile(t *testing.T) {
 		if !reflect.DeepEqual(expected, reply) {
 			t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 		}
+	}
+}
+
+func testActionSPing(t *testing.T) {
+	var resp string
+	if err := actSRPC.Call(utils.ActionSv1Ping, new(utils.CGREvent), &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.Pong {
+		t.Error("Unexpected reply returned", resp)
 	}
 }
 

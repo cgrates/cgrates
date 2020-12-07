@@ -21,6 +21,8 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/actions"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -137,5 +139,27 @@ func (apierSv1 *APIerSv1) RemoveActionProfile(arg *utils.TenantIDWithCache, repl
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
+	return nil
+}
+
+// NewActionSv1 initializes ActionSv1
+func NewActionSv1(aS *actions.ActionS) *ActionSv1 {
+	return &ActionSv1{aS: aS}
+}
+
+// ActionSv1 exports RPC from RLs
+type ActionSv1 struct {
+	aS *actions.ActionS
+}
+
+// Call implements rpcclient.ClientConnector interface for internal RPC
+func (aSv1 *ActionSv1) Call(serviceMethod string,
+	args interface{}, reply interface{}) error {
+	return utils.APIerRPCCall(aSv1, serviceMethod, args, reply)
+}
+
+// Ping return pong if the service is active
+func (aSv1 *ActionSv1) Ping(ign *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
 	return nil
 }
