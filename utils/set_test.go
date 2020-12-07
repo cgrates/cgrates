@@ -218,3 +218,16 @@ func TestSetCloneEmpty(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, received)
 	}
 }
+
+func TestGetOne(t *testing.T) {
+	set := StringSet{
+		"test1": struct{}{},
+		"test2": struct{}{},
+	}
+	value := set.GetOne()
+	expected := "test1"
+	if value != expected {
+		t.Errorf("Expected %+v, received %+v", expected, value)
+	}
+
+}
