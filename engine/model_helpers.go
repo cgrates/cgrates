@@ -101,13 +101,13 @@ func CsvDump(s interface{}) ([]string, error) {
 		s = st.Interface()
 	}
 	numFields := st.NumField()
-	stcopy := reflect.TypeOf(s)
+	stCopy := reflect.TypeOf(s)
 	for i := 0; i < numFields; i++ {
-		field := stcopy.Field(i)
+		field := stCopy.Field(i)
 		index := field.Tag.Get("index")
 		if index != utils.EmptyString {
 			if idx, err := strconv.Atoi(index); err != nil {
-				return nil, fmt.Errorf("invalid %v.%v index %v", stcopy.Name(), field.Name, index)
+				return nil, fmt.Errorf("invalid %v.%v index %v", stCopy.Name(), field.Name, index)
 			} else {
 				fieldIndexMap[field.Name] = idx
 			}
@@ -1880,7 +1880,7 @@ func (tps RouteMdls) CSVHeader() (result []string) {
 }
 
 func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
-	filtermap := make(map[string]utils.StringMap)
+	filterMap := make(map[string]utils.StringMap)
 	mst := make(map[string]*utils.TPRouteProfile)
 	routeMap := make(map[string]map[string]*utils.TPRoute)
 	sortingParameterMap := make(map[string]utils.StringMap)
@@ -1965,12 +1965,12 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 			}
 		}
 		if tp.FilterIDs != utils.EmptyString {
-			if _, has := filtermap[tenID]; !has {
-				filtermap[tenID] = make(utils.StringMap)
+			if _, has := filterMap[tenID]; !has {
+				filterMap[tenID] = make(utils.StringMap)
 			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
-				filtermap[tenID][filter] = true
+				filterMap[tenID][filter] = true
 			}
 		}
 		mst[tenID] = th
@@ -1979,11 +1979,11 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 	i := 0
 	for tntID, th := range mst {
 		result[i] = th
-		for _, supdata := range routeMap[tntID] {
-			result[i].Routes = append(result[i].Routes, supdata)
+		for _, supData := range routeMap[tntID] {
+			result[i].Routes = append(result[i].Routes, supData)
 		}
-		for filterdata := range filtermap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filterdata)
+		for filterData := range filterMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filterData)
 		}
 		for sortingParam := range sortingParameterMap[tntID] {
 			result[i].SortingParameters = append(result[i].SortingParameters, sortingParam)
@@ -2756,8 +2756,8 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls Dispa
 		})
 	}
 
-	confilter := strings.Join(tpDPP.Hosts[0].FilterIDs, utils.INFIELD_SEP)
-	conparam := paramsToString(tpDPP.Hosts[0].Params)
+	conFilter := strings.Join(tpDPP.Hosts[0].FilterIDs, utils.INFIELD_SEP)
+	conParam := paramsToString(tpDPP.Hosts[0].Params)
 
 	mdls = append(mdls, &DispatcherProfileMdl{
 		Tpid:               tpDPP.TPid,
@@ -2771,24 +2771,24 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls Dispa
 		Weight:             tpDPP.Weight,
 
 		ConnID:         tpDPP.Hosts[0].ID,
-		ConnFilterIDs:  confilter,
+		ConnFilterIDs:  conFilter,
 		ConnWeight:     tpDPP.Hosts[0].Weight,
 		ConnBlocker:    tpDPP.Hosts[0].Blocker,
-		ConnParameters: conparam,
+		ConnParameters: conParam,
 	})
 	for i := 1; i < len(tpDPP.Hosts); i++ {
-		confilter = strings.Join(tpDPP.Hosts[i].FilterIDs, utils.INFIELD_SEP)
-		conparam = paramsToString(tpDPP.Hosts[i].Params)
+		conFilter = strings.Join(tpDPP.Hosts[i].FilterIDs, utils.INFIELD_SEP)
+		conParam = paramsToString(tpDPP.Hosts[i].Params)
 		mdls = append(mdls, &DispatcherProfileMdl{
 			Tpid:   tpDPP.TPid,
 			Tenant: tpDPP.Tenant,
 			ID:     tpDPP.ID,
 
 			ConnID:         tpDPP.Hosts[i].ID,
-			ConnFilterIDs:  confilter,
+			ConnFilterIDs:  conFilter,
 			ConnWeight:     tpDPP.Hosts[i].Weight,
 			ConnBlocker:    tpDPP.Hosts[i].Blocker,
-			ConnParameters: conparam,
+			ConnParameters: conParam,
 		})
 	}
 	return
@@ -2996,7 +2996,7 @@ func (tps RateProfileMdls) CSVHeader() (result []string) {
 }
 
 func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
-	filtermap := make(map[string]utils.StringMap)
+	filterMap := make(map[string]utils.StringMap)
 	mst := make(map[string]*utils.TPRateProfile)
 	rateMap := make(map[string]map[string]*utils.TPRate)
 	for _, tp := range tps {
@@ -3081,12 +3081,12 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 			}
 		}
 		if tp.FilterIDs != utils.EmptyString {
-			if _, has := filtermap[tenID]; !has {
-				filtermap[tenID] = make(utils.StringMap)
+			if _, has := filterMap[tenID]; !has {
+				filterMap[tenID] = make(utils.StringMap)
 			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
-				filtermap[tenID][filter] = true
+				filterMap[tenID][filter] = true
 			}
 		}
 		mst[tenID] = rPrf
@@ -3096,8 +3096,8 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 	for tntID, th := range mst {
 		result[i] = th
 		result[i].Rates = rateMap[tntID]
-		for filterdata := range filtermap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filterdata)
+		for filterData := range filterMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filterData)
 		}
 		i++
 	}
