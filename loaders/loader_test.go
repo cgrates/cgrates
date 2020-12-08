@@ -2045,3 +2045,164 @@ func TestNewLoaderWithMultiFiles(t *testing.T) {
 		t.Errorf("Expected %s,received %s", utils.ToJSON(expected), utils.ToJSON(openRdrs))
 	}
 }
+
+func TestLoaderActionProfile(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaActionProfiles: {
+			{Tag: "Tenant",
+				Path:      "Tenant",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true,
+				Layout:    time.RFC3339},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true,
+				Layout:    time.RFC3339},
+			{Tag: "FilterIDs",
+				Path:   "FilterIDs",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActivationInterval",
+				Path:   "ActivationInterval",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "Weight",
+				Path:   "Weight",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "Schedule",
+				Path:   "Schedule",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "AccountIDs",
+				Path:   "AccountIDs",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionID",
+				Path:   "ActionID",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionFilterIDs",
+				Path:   "ActionFilterIDs",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionBlocker",
+				Path:   "ActionBlocker",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionTTL",
+				Path:   "ActionTTL",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionType",
+				Path:   "ActionType",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionOpts",
+				Path:   "ActionOpts",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionPath",
+				Path:   "ActionPath",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionValue",
+				Path:   "ActionValue",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.14", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+		},
+	}
+	rdr := ioutil.NopCloser(strings.NewReader(engine.ActionProfileCSVContent))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{fileName: utils.ActionProfilesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+
+	expected := &engine.ActionProfile{
+		Tenant:     "cgrates.org",
+		ID:         "ONE_TIME_ACT",
+		FilterIDs:  []string{},
+		Weight:     10,
+		Schedule:   utils.ASAP,
+		AccountIDs: map[string]struct{}{"1001": struct{}{}, "1002": struct{}{}},
+		Actions: []*engine.APAction{
+			&engine.APAction{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Path:      "~*balance.TestBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("10", utils.INFIELD_SEP),
+			},
+			&engine.APAction{
+				ID:        "SET_BALANCE_TEST_DATA",
+				FilterIDs: []string{},
+				Type:      "*set_balance",
+				Path:      "~*balance.TestDataBalance.Type",
+				Value:     config.NewRSRParsersMustCompile("*data", utils.INFIELD_SEP),
+			},
+			&engine.APAction{
+				ID:        "TOPUP_TEST_DATA",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Path:      "~*balance.TestDataBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("1024", utils.INFIELD_SEP),
+			},
+			&engine.APAction{
+				ID:        "SET_BALANCE_TEST_VOICE",
+				FilterIDs: []string{},
+				Type:      "*set_balance",
+				Path:      "~*balance.TestVoiceBalance.Type",
+				Value:     config.NewRSRParsersMustCompile("*voice", utils.INFIELD_SEP),
+			},
+			&engine.APAction{
+				ID:        "TOPUP_TEST_VOICE",
+				FilterIDs: []string{},
+				Type:      "*topup",
+				Path:      "~*balance.TestVoiceBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("15m15s", utils.INFIELD_SEP),
+			},
+		},
+	}
+
+	aps, err := ldr.dm.GetActionProfile("cgrates.org", "ONE_TIME_ACT",
+		true, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected, aps) {
+		t.Errorf("expecting: %s, received: %s",
+			utils.ToJSON(expected), utils.ToJSON(aps))
+	}
+}

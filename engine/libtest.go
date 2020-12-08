@@ -289,6 +289,11 @@ cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.0564,0.06,1m,1s
 `
 	ActionProfileCSVContent = `
 #Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ONE_TIME_ACT,,,10,*asap,1001;1002,TOPUP,,false,0s,*topup,,~*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,~*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*topup,,~*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,~*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*topup,,~*balance.TestVoiceBalance.Value,15m15s
 `
 )
 
