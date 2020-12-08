@@ -19,3 +19,61 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package dispatchers
+
+import (
+	"testing"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
+var sTestsDspActPrf = []func(t *testing.T){
+	testDspActPrfPing,
+}
+
+//Test start here
+func TestDspActionSIT(t *testing.T) {
+	var config1, config2, config3 string
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaMySQL:
+		config1 = "all_mysql"
+		config2 = "all2_mysql"
+		config3 = "dispatchers_mysql"
+	case utils.MetaMongo:
+		config1 = "all_mongo"
+		config2 = "all2_mongo"
+		config3 = "dispatchers_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
+	dispDIR := "dispatchers"
+	if *encoding == utils.MetaGOB {
+		dispDIR += "_gob"
+	}
+	testDsp(t, sTestsDspActPrf, "TestDspActionSIT", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)
+}
+
+func testDspActPrfPing(t *testing.T) {
+	var reply string
+	if err := allEngine.RPC.Call(utils.ActionSv1Ping, new(utils.CGREvent), &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	if err := dispEngine.RPC.Call(utils.ActionSv1Ping, &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+		},
+		Opts: map[string]interface{}{
+			utils.OptsAPIKey: "actPrf12345",
+		},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+}
