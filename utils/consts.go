@@ -1059,6 +1059,7 @@ const (
 	MetaTpStats             = "*tp_stats"
 	MetaTpSharedGroups      = "*tp_shared_groups"
 	MetaTpRatingProfiles    = "*tp_rating_profiles"
+	MetaTpActionProfiles    = "*tp_action_profiles"
 	MetaTpResources         = "*tp_resources"
 	MetaTpRates             = "*tp_rates"
 	MetaTpTimings           = "*tp_timings"
