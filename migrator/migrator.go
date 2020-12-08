@@ -134,6 +134,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateRatingPlans()
 		case utils.MetaRatingProfiles:
 			err = m.migrateRatingProfiles()
+		case utils.MetaActionProfiles:
+			err = m.migrateActionProfiles()
 		case utils.MetaDestinations:
 			err = m.migrateDestinations()
 		case utils.MetaReverseDestinations:

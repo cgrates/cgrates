@@ -221,7 +221,7 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 		t.Fatal(err)
 	}
 	switch ratePrfAction {
-	case utils.Migrate: // for the moment only one version of rate profiles exists
+	case utils.Migrate: //QQ for the moment only one version of rate profiles exists
 	case utils.Move:
 		if err := ratePrfMigrator.dmIN.DataManager().SetRateProfile(rPrf, true); err != nil {
 			t.Error(err)

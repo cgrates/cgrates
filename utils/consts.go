@@ -1101,6 +1101,7 @@ const (
 	TpDispatcherProfiles = "TpDispatcherProfiles"
 	TpDispatcherHosts    = "TpDispatcherHosts"
 	TpRateProfiles       = "TpRateProfiles"
+	TpActionProfiles     = "TpActionProfiles"
 )
 
 // Dispatcher Const
