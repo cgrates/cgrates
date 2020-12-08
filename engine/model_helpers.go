@@ -1091,27 +1091,21 @@ func (tps ResourceMdls) AsTPResources() (result []*utils.TPResourceProfile) {
 			}
 		}
 		if tp.ThresholdIDs != utils.EmptyString {
-			if _, has := thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
-				ID: tp.ID}).TenantID()]; !has {
-				thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
-					ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			if _, has := thresholdMap[tenID]; !has {
+				thresholdMap[tenID] = make(utils.StringMap)
 			}
 			trshSplt := strings.Split(tp.ThresholdIDs, utils.INFIELD_SEP)
 			for _, trsh := range trshSplt {
-				thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
-					ID: tp.ID}).TenantID()][trsh] = true
+				thresholdMap[tenID][trsh] = true
 			}
 		}
 		if tp.FilterIDs != utils.EmptyString {
-			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant,
-				ID: tp.ID}).TenantID()]; !has {
-				filterMap[(&utils.TenantID{Tenant: tp.Tenant,
-					ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			if _, has := filterMap[tenID]; !has {
+				filterMap[tenID] = make(utils.StringMap)
 			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
-				filterMap[(&utils.TenantID{Tenant: tp.Tenant,
-					ID: tp.ID}).TenantID()][filter] = true
+				filterMap[tenID][filter] = true
 			}
 		}
 		mrl[tenID] = rl
