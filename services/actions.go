@@ -37,7 +37,7 @@ import (
 func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalChan chan rpcclient.ClientConnector,
-	anz *AnalyzerService) servmanager.Service {
+	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ActionService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -46,6 +46,7 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		server:      server,
 		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -62,6 +63,7 @@ type ActionService struct {
 	rpc      *v1.ActionSv1                  // useful on restart
 	connChan chan rpcclient.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start

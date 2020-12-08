@@ -559,6 +559,7 @@ func main() {
 		utils.StatS:           new(sync.WaitGroup),
 		utils.StorDB:          new(sync.WaitGroup),
 		utils.ThresholdS:      new(sync.WaitGroup),
+		utils.ActionS:         new(sync.WaitGroup),
 	}
 	gvService := services.NewGlobalVarS(cfg, srvDep)
 	shdWg.Add(1)
@@ -672,6 +673,7 @@ func main() {
 		services.NewRateService(cfg, cacheS, filterSChan, dmService,
 			server, internalRateSChan, anz, srvDep),
 		services.NewSIPAgent(cfg, filterSChan, shdChan, connManager, srvDep),
+		services.NewActionService(cfg, dmService, cacheS, filterSChan, server, internalActionSChan, anz, srvDep),
 	)
 	srvManager.StartServices()
 	// Start FilterS
