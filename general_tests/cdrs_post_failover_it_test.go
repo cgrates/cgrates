@@ -23,6 +23,7 @@ package general_tests
 import (
 	"io/ioutil"
 	"net/rpc"
+	"os"
 	"path"
 	"testing"
 	"time"
@@ -77,6 +78,12 @@ func testCDRsPostFailoverInitConfig(t *testing.T) {
 	cdrsPostFailCfgPath = path.Join(*dataDir, "conf", "samples", cdrsPostFailConfDIR)
 	if cdrsPostFailCfg, err = config.NewCGRConfigFromPath(cdrsPostFailCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
+	}
+	if err = os.RemoveAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir); err != nil {
+		t.Error(err)
+	}
+	if err = os.MkdirAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir, 0755); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -206,6 +213,9 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 }
 
 func testCDRsPostFailoverKillEngine(t *testing.T) {
+	if err = os.RemoveAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir); err != nil {
+		t.Error(err)
+	}
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}

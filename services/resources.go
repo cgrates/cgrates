@@ -72,7 +72,7 @@ func (reS *ResourceService) Start() (err error) {
 	if reS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-
+	reS.srvDep[utils.DataDB].Add(1)
 	<-reS.cacheS.GetPrecacheChannel(utils.CacheResourceProfiles)
 	<-reS.cacheS.GetPrecacheChannel(utils.CacheResources)
 	<-reS.cacheS.GetPrecacheChannel(utils.CacheResourceFilterIndexes)
@@ -110,6 +110,7 @@ func (reS *ResourceService) Reload() (err error) {
 
 // Shutdown stops the service
 func (reS *ResourceService) Shutdown() (err error) {
+	defer reS.srvDep[utils.DataDB].Done()
 	reS.Lock()
 	defer reS.Unlock()
 	if err = reS.reS.Shutdown(); err != nil {

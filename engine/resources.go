@@ -383,7 +383,7 @@ func (rS *ResourceService) storeResources() {
 			break // no more keys, backup completed
 		}
 		if rIf, ok := Cache.Get(utils.CacheResources, rID); !ok || rIf == nil {
-			utils.Logger.Warning(fmt.Sprintf("<ResourceS> failed retrieving from cache resource with ID: %s", rID))
+			utils.Logger.Warning(fmt.Sprintf("<%s> failed retrieving from cache resource with ID: %s", utils.ResourceS, rID))
 		} else if err := rS.StoreResource(rIf.(*Resource)); err != nil {
 			failedRIDs = append(failedRIDs, rID) // record failure so we can schedule it for next backup
 		}

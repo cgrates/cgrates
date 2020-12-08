@@ -127,37 +127,37 @@ func testActionSGetActionProfile(t *testing.T) {
 		FilterIDs:  []string{},
 		Weight:     10,
 		Schedule:   utils.ASAP,
-		AccountIDs: map[string]struct{}{"1001": struct{}{}, "1002": struct{}{}},
+		AccountIDs: utils.StringSet{"1001": {}, "1002": {}},
 		Actions: []*engine.APAction{
-			&engine.APAction{
+			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
 				Path:      "~*balance.TestBalance.Value",
 				Value:     config.NewRSRParsersMustCompile("10", actPrfCfg.GeneralCfg().RSRSep),
 			},
-			&engine.APAction{
+			{
 				ID:        "SET_BALANCE_TEST_DATA",
 				FilterIDs: []string{},
 				Type:      "*set_balance",
 				Path:      "~*balance.TestDataBalance.Type",
 				Value:     config.NewRSRParsersMustCompile("*data", actPrfCfg.GeneralCfg().RSRSep),
 			},
-			&engine.APAction{
+			{
 				ID:        "TOPUP_TEST_DATA",
 				FilterIDs: []string{},
 				Type:      "*topup",
 				Path:      "~*balance.TestDataBalance.Value",
 				Value:     config.NewRSRParsersMustCompile("1024", actPrfCfg.GeneralCfg().RSRSep),
 			},
-			&engine.APAction{
+			{
 				ID:        "SET_BALANCE_TEST_VOICE",
 				FilterIDs: []string{},
 				Type:      "*set_balance",
 				Path:      "~*balance.TestVoiceBalance.Type",
 				Value:     config.NewRSRParsersMustCompile("*voice", actPrfCfg.GeneralCfg().RSRSep),
 			},
-			&engine.APAction{
+			{
 				ID:        "TOPUP_TEST_VOICE",
 				FilterIDs: []string{},
 				Type:      "*topup",
@@ -165,6 +165,12 @@ func testActionSGetActionProfile(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("15m15s", actPrfCfg.GeneralCfg().RSRSep),
 			},
 		},
+	}
+	if *encoding == utils.MetaGOB {
+		expected.FilterIDs = nil
+		for i := range expected.Actions {
+			expected.Actions[i].FilterIDs = nil
+		}
 	}
 	var reply *engine.ActionProfile
 	if err := actSRPC.Call(utils.APIerSv1GetActionProfile,
