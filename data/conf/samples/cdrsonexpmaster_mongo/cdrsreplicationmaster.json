@@ -32,7 +32,7 @@
 	"store_cdrs": false,		// store cdrs in storDb
 	"chargers_conns":["*internal"],
 	"rals_conns": ["*internal"],
-	"online_cdr_exports": ["http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file","aws_test_file","sqs_test_file","kafka_localhost","s3_test_file", "eventcost_filter"],
+	"online_cdr_exports": ["http_localhost", "amqp_localhost", "http_test_file", "kafka_localhost", "eventcost_filter"],
 	"ees_conns": ["*localhost"]
 },
 
@@ -44,6 +44,7 @@
 	"enabled": true,
 },
 
+
 "ees": {
 	"enabled": true,
 	"exporters": [
@@ -52,7 +53,9 @@
 			"type": "*http_post",
 			"export_path": "http://127.0.0.1:12080/cdr_http",
 			"tenant": "cgrates.org",
+			"synchronous": true,
 			"attempts": 1,
+			"filters":["*string:~*opts.ExporterID:http_localhost"],
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
@@ -104,52 +107,10 @@
 			"type": "*http_post",
 			"export_path": "http://127.0.0.1:12080/invalid",
 			"tenant": "cgrates.org",
+			"synchronous": true,
 			"attempts": 1,
 			"fields":[
 				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
-			],
-		},
-		{
-			"id": "aws_test_file",
-			"type": "*amqpv1_json_map",
-			"export_path": "amqps://guest:guest@localhost:25672/",
-			"opts": {
-				"queueID": "cgrates_cdrs",
-			},
-			"tenant": "cgrates.org",
-			"attempts": 1,
-			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}
-			],
-		},
-		{
-			"id": "sqs_test_file",
-			"type": "*sqs_json_map",
-			// export_path for sqs:  "endpoint"
-			"export_path": "http://sqs.eu-west-2.amazonaws.com/",
-			"opts": {
-				"awsRegion": "eu-west-2",
-				"awsKey": "testkey",
-				"awsSecret": "testsecret",
-				"queueID": "cgrates-cdrs",
-			},
-			"tenant": "cgrates.org",
-			"attempts": 1,
-			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}
-			],
-		},
-		{
-			"id": "amqp_test_file",
-			"type": "*amqp_json_map",
-			"export_path": "amqp://guest:guest@localhost:25672/",
-			"opts": {
-				"queueID": "cgrates_cdrs",
-			},
-			"tenant": "cgrates.org",
-			"attempts": 1,
-			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}
 			],
 		},
 		{
@@ -160,23 +121,7 @@
 				"topic": "cgrates_cdrs",
 			},
 			"tenant": "cgrates.org",
-			"attempts": 1,
-			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}
-			],
-		},
-		{
-			"id": "s3_test_file",
-			"type": "*s3_json_map",
-			// export_path for s3:  "endpoint"
-			"export_path": "http://s3.us-east-2.amazonaws.com/",
-			"opts": {
-				"awsRegion": "eu-west-2",
-				"awsKey": "testkey",
-				"awsSecret": "testsecret",
-				"queueID": "cgrates-cdrs",
-			},
-			"tenant": "cgrates.org",
+			"synchronous": true,
 			"attempts": 1,
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}
@@ -191,6 +136,7 @@
 			},
 			"tenant": "cgrates.org",
 			"filters":["*string:~*ec.Cost:100"],
+			"synchronous": true,
 			"attempts": 1,
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}

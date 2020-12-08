@@ -115,6 +115,7 @@ func (pstr *HTTPPoster) do(req *http.Request) (respBody []byte, err error) {
 		return
 	}
 	if resp.StatusCode > 299 {
+		err = fmt.Errorf("unexpected status code received: <%d>", resp.StatusCode)
 		utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, unexpected status code received: <%d>", pstr.addr, resp.StatusCode))
 		return
 	}
