@@ -606,6 +606,36 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				cacheArgs[utils.RateProfileIDs] = ids
 			}
 		}
+	case utils.MetaActionProfiles:
+		cacheIDs = []string{utils.CacheActionProfilesFilterIndexes}
+		for _, lDataSet := range lds {
+			acpsModels := make(engine.ActionProfileMdls, len(lDataSet))
+			for i, ld := range lDataSet {
+				acpsModels[i] = new(engine.ActionProfileMdl)
+				if err = utils.UpdateStructWithIfaceMap(acpsModels[i], ld); err != nil {
+					return
+				}
+			}
+
+			for _, tpAcp := range acpsModels.AsTPActionProfile() {
+				acp, err := engine.APItoActionProfile(tpAcp, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: ActionProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(acp)))
+					continue
+				}
+				// get IDs so we can reload in cache
+				ids = append(ids, acp.TenantID())
+				if err := ldr.dm.SetActionProfile(acp, true); err != nil {
+					return err
+				}
+				cacheArgs[utils.ActionProfileIDs] = ids
+			}
+		}
 	}
 
 	if len(ldr.cacheConns) != 0 {
@@ -926,6 +956,24 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				}
 
 				cacheArgs[utils.RateProfileIDs] = ids
+			}
+		}
+	case utils.MetaActionProfiles:
+		cacheIDs = []string{utils.CacheActionProfiles, utils.CacheActionProfilesFilterIndexes}
+		for tntID := range lds {
+			if ldr.dryRun {
+				utils.Logger.Info(
+					fmt.Sprintf("<%s-%s> DRY_RUN: ActionProfileID: %s",
+						utils.LoaderS, ldr.ldrID, tntID))
+			} else {
+				tntIDStruct := utils.NewTenantID(tntID)
+				// get IDs so we can reload in cache
+				ids = append(ids, tntID)
+				if err := ldr.dm.RemoveActionProfile(tntIDStruct.Tenant,
+					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+					return err
+				}
+				cacheArgs[utils.ActionProfileIDs] = ids
 			}
 		}
 	}
