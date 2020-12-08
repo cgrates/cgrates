@@ -165,6 +165,7 @@ func CurrentDataDBVersions() Versions {
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
 		utils.RateProfiles:        1,
+		utils.ActionProfiles:      1,
 	}
 }
 
@@ -196,6 +197,7 @@ func CurrentStorDBVersions() Versions {
 		utils.TpChargers:         1,
 		utils.TpDispatchers:      1,
 		utils.TpRateProfiles:     1,
+		utils.TpActionProfiles:   1,
 	}
 }
 
