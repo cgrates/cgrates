@@ -347,8 +347,8 @@ func APItoModelRates(rs []*utils.TPRateRALs) (result RateMdls) {
 
 type DestinationRateMdls []DestinationRateMdl
 
-func (tps DestinationRateMdls) AsMapDestinationRates() (map[string]*utils.TPDestinationRate, error) {
-	result := make(map[string]*utils.TPDestinationRate)
+func (tps DestinationRateMdls) AsMapDestinationRates() (result map[string]*utils.TPDestinationRate) {
+	result = make(map[string]*utils.TPDestinationRate)
 	for _, tp := range tps {
 		dr := &utils.TPDestinationRate{
 			TPid: tp.Tpid,
@@ -372,18 +372,14 @@ func (tps DestinationRateMdls) AsMapDestinationRates() (map[string]*utils.TPDest
 		}
 		result[tp.Tag] = existing
 	}
-	return result, nil
+	return
 }
 
-func (tps DestinationRateMdls) AsTPDestinationRates() (result []*utils.TPDestinationRate, err error) {
-	if atps, err := tps.AsMapDestinationRates(); err != nil {
-		return nil, err
-	} else {
-		for _, tp := range atps {
-			result = append(result, tp)
-		}
-		return result, nil
+func (tps DestinationRateMdls) AsTPDestinationRates() (result []*utils.TPDestinationRate) {
+	for _, tp := range tps.AsMapDestinationRates() {
+		result = append(result, tp)
 	}
+	return
 }
 
 func MapTPDestinationRates(s []*utils.TPDestinationRate) (map[string]*utils.TPDestinationRate, error) {
@@ -435,8 +431,8 @@ func APItoModelDestinationRates(drs []*utils.TPDestinationRate) (result Destinat
 
 type RatingPlanMdls []RatingPlanMdl
 
-func (tps RatingPlanMdls) AsMapTPRatingPlans() (map[string]*utils.TPRatingPlan, error) {
-	result := make(map[string]*utils.TPRatingPlan)
+func (tps RatingPlanMdls) AsMapTPRatingPlans() (result map[string]*utils.TPRatingPlan) {
+	result = make(map[string]*utils.TPRatingPlan)
 	for _, tp := range tps {
 		rp := &utils.TPRatingPlan{
 			TPid: tp.Tpid,
@@ -454,18 +450,14 @@ func (tps RatingPlanMdls) AsMapTPRatingPlans() (map[string]*utils.TPRatingPlan, 
 			existing.RatingPlanBindings = append(existing.RatingPlanBindings, rpb)
 		}
 	}
-	return result, nil
+	return
 }
 
-func (tps RatingPlanMdls) AsTPRatingPlans() (result []*utils.TPRatingPlan, err error) {
-	if atps, err := tps.AsMapTPRatingPlans(); err != nil {
-		return nil, err
-	} else {
-		for _, tp := range atps {
-			result = append(result, tp)
-		}
-		return result, nil
+func (tps RatingPlanMdls) AsTPRatingPlans() (result []*utils.TPRatingPlan) {
+	for _, tp := range tps.AsMapTPRatingPlans() {
+		result = append(result, tp)
 	}
+	return
 }
 
 func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) (i *RateInterval) {
@@ -546,8 +538,8 @@ func APItoModelRatingPlans(rps []*utils.TPRatingPlan) (result RatingPlanMdls) {
 
 type RatingProfileMdls []RatingProfileMdl
 
-func (tps RatingProfileMdls) AsMapTPRatingProfiles() (map[string]*utils.TPRatingProfile, error) {
-	result := make(map[string]*utils.TPRatingProfile)
+func (tps RatingProfileMdls) AsMapTPRatingProfiles() (result map[string]*utils.TPRatingProfile) {
+	result = make(map[string]*utils.TPRatingProfile)
 	for _, tp := range tps {
 		rp := &utils.TPRatingProfile{
 			TPid:     tp.Tpid,
@@ -568,18 +560,14 @@ func (tps RatingProfileMdls) AsMapTPRatingProfiles() (map[string]*utils.TPRating
 			existing.RatingPlanActivations = append(existing.RatingPlanActivations, ra)
 		}
 	}
-	return result, nil
+	return
 }
 
-func (tps RatingProfileMdls) AsTPRatingProfiles() (result []*utils.TPRatingProfile, err error) {
-	if atps, err := tps.AsMapTPRatingProfiles(); err != nil {
-		return nil, err
-	} else {
-		for _, tp := range atps {
-			result = append(result, tp)
-		}
-		return result, nil
+func (tps RatingProfileMdls) AsTPRatingProfiles() (result []*utils.TPRatingProfile) {
+	for _, tp := range tps.AsMapTPRatingProfiles() {
+		result = append(result, tp)
 	}
+	return
 }
 
 func MapTPRatingProfiles(s []*utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error) {
@@ -632,8 +620,8 @@ func APItoModelRatingProfiles(rps []*utils.TPRatingProfile) (result RatingProfil
 
 type SharedGroupMdls []SharedGroupMdl
 
-func (tps SharedGroupMdls) AsMapTPSharedGroups() (map[string]*utils.TPSharedGroups, error) {
-	result := make(map[string]*utils.TPSharedGroups)
+func (tps SharedGroupMdls) AsMapTPSharedGroups() (result map[string]*utils.TPSharedGroups) {
+	result = make(map[string]*utils.TPSharedGroups)
 	for _, tp := range tps {
 		sgs := &utils.TPSharedGroups{
 			TPid: tp.Tpid,
@@ -651,18 +639,14 @@ func (tps SharedGroupMdls) AsMapTPSharedGroups() (map[string]*utils.TPSharedGrou
 			existing.SharedGroups = append(existing.SharedGroups, sg)
 		}
 	}
-	return result, nil
+	return
 }
 
-func (tps SharedGroupMdls) AsTPSharedGroups() (result []*utils.TPSharedGroups, err error) {
-	if atps, err := tps.AsMapTPSharedGroups(); err != nil {
-		return nil, err
-	} else {
-		for _, tp := range atps {
-			result = append(result, tp)
-		}
-		return result, nil
+func (tps SharedGroupMdls) AsTPSharedGroups() (result []*utils.TPSharedGroups) {
+	for _, tp := range tps.AsMapTPSharedGroups() {
+		result = append(result, tp)
 	}
+	return
 }
 
 func MapTPSharedGroup(s []*utils.TPSharedGroups) map[string][]*utils.TPSharedGroup {
@@ -711,8 +695,8 @@ func APItoModelSharedGroups(sgs []*utils.TPSharedGroups) (result SharedGroupMdls
 
 type ActionMdls []ActionMdl
 
-func (tps ActionMdls) AsMapTPActions() (map[string]*utils.TPActions, error) {
-	result := make(map[string]*utils.TPActions)
+func (tps ActionMdls) AsMapTPActions() (result map[string]*utils.TPActions) {
+	result = make(map[string]*utils.TPActions)
 	for _, tp := range tps {
 		as := &utils.TPActions{
 			TPid: tp.Tpid,
@@ -743,18 +727,14 @@ func (tps ActionMdls) AsMapTPActions() (map[string]*utils.TPActions, error) {
 			existing.Actions = append(existing.Actions, a)
 		}
 	}
-	return result, nil
+	return
 }
 
-func (tps ActionMdls) AsTPActions() (result []*utils.TPActions, err error) {
-	if atps, err := tps.AsMapTPActions(); err != nil {
-		return nil, err
-	} else {
-		for _, tp := range atps {
-			result = append(result, tp)
-		}
-		return result, nil
+func (tps ActionMdls) AsTPActions() (result []*utils.TPActions) {
+	for _, tp := range tps.AsMapTPActions() {
+		result = append(result, tp)
 	}
+	return result
 }
 
 func MapTPActions(s []*utils.TPActions) map[string][]*utils.TPAction {
@@ -816,8 +796,8 @@ func APItoModelActions(as []*utils.TPActions) (result ActionMdls) {
 
 type ActionPlanMdls []ActionPlanMdl
 
-func (tps ActionPlanMdls) AsMapTPActionPlans() (map[string]*utils.TPActionPlan, error) {
-	result := make(map[string]*utils.TPActionPlan)
+func (tps ActionPlanMdls) AsMapTPActionPlans() (result map[string]*utils.TPActionPlan) {
+	result = make(map[string]*utils.TPActionPlan)
 	for _, tp := range tps {
 		as := &utils.TPActionPlan{
 			TPid: tp.Tpid,
@@ -835,18 +815,14 @@ func (tps ActionPlanMdls) AsMapTPActionPlans() (map[string]*utils.TPActionPlan, 
 			existing.ActionPlan = append(existing.ActionPlan, a)
 		}
 	}
-	return result, nil
+	return
 }
 
-func (tps ActionPlanMdls) AsTPActionPlans() (result []*utils.TPActionPlan, err error) {
-	if atps, err := tps.AsMapTPActionPlans(); err != nil {
-		return nil, err
-	} else {
-		for _, tp := range atps {
-			result = append(result, tp)
-		}
-		return result, nil
+func (tps ActionPlanMdls) AsTPActionPlans() (result []*utils.TPActionPlan) {
+	for _, tp := range tps.AsMapTPActionPlans() {
+		result = append(result, tp)
 	}
+	return
 }
 
 func MapTPActionTimings(s []*utils.TPActionPlan) map[string][]*utils.TPActionTiming {
@@ -895,8 +871,8 @@ func APItoModelActionPlans(aps []*utils.TPActionPlan) (result ActionPlanMdls) {
 
 type ActionTriggerMdls []ActionTriggerMdl
 
-func (tps ActionTriggerMdls) AsMapTPActionTriggers() (map[string]*utils.TPActionTriggers, error) {
-	result := make(map[string]*utils.TPActionTriggers)
+func (tps ActionTriggerMdls) AsMapTPActionTriggers() (result map[string]*utils.TPActionTriggers) {
+	result = make(map[string]*utils.TPActionTriggers)
 	for _, tp := range tps {
 		ats := &utils.TPActionTriggers{
 			TPid: tp.Tpid,
@@ -932,18 +908,14 @@ func (tps ActionTriggerMdls) AsMapTPActionTriggers() (map[string]*utils.TPAction
 			existing.ActionTriggers = append(existing.ActionTriggers, at)
 		}
 	}
-	return result, nil
+	return
 }
 
-func (tps ActionTriggerMdls) AsTPActionTriggers() (result []*utils.TPActionTriggers, err error) {
-	if atps, err := tps.AsMapTPActionTriggers(); err != nil {
-		return nil, err
-	} else {
-		for _, tp := range atps {
-			result = append(result, tp)
-		}
-		return result, nil
+func (tps ActionTriggerMdls) AsTPActionTriggers() (result []*utils.TPActionTriggers) {
+	for _, tp := range tps.AsMapTPActionTriggers() {
+		result = append(result, tp)
 	}
+	return
 }
 
 func MapTPActionTriggers(s []*utils.TPActionTriggers) map[string][]*utils.TPActionTrigger {
@@ -1027,15 +999,12 @@ func (tps AccountActionMdls) AsMapTPAccountActions() (map[string]*utils.TPAccoun
 	return result, nil
 }
 
-func (tps AccountActionMdls) AsTPAccountActions() (result []*utils.TPAccountActions, err error) {
-	if atps, err := tps.AsMapTPAccountActions(); err != nil {
-		return nil, err
-	} else {
-		for _, tp := range atps {
-			result = append(result, tp)
-		}
-		return result, nil
+func (tps AccountActionMdls) AsTPAccountActions() (result []*utils.TPAccountActions) {
+	atps, _ := tps.AsMapTPAccountActions()
+	for _, tp := range atps {
+		result = append(result, tp)
 	}
+	return result
 }
 
 func MapTPAccountActions(s []*utils.TPAccountActions) (map[string]*utils.TPAccountActions, error) {

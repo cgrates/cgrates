@@ -1261,14 +1261,11 @@ func (self *SQLStorage) GetTPDestinationRates(tpid, id string, pagination *utils
 	if err := q.Find(&tpDestinationRates).Error; err != nil {
 		return nil, err
 	}
-	if drs, err := tpDestinationRates.AsTPDestinationRates(); err != nil {
-		return nil, err
-	} else {
-		if len(drs) == 0 {
-			return drs, utils.ErrNotFound
-		}
-		return drs, nil
+	drs := tpDestinationRates.AsTPDestinationRates()
+	if len(drs) == 0 {
+		return drs, utils.ErrNotFound
 	}
+	return drs, nil
 }
 
 func (self *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
@@ -1304,14 +1301,12 @@ func (self *SQLStorage) GetTPRatingPlans(tpid, id string, pagination *utils.Pagi
 			q = q.Offset(*pagination.Offset)
 		}
 	}
-	if rps, err := tpRatingPlans.AsTPRatingPlans(); err != nil {
-		return nil, err
-	} else {
-		if len(rps) == 0 {
-			return rps, utils.ErrNotFound
-		}
-		return rps, nil
+	rps := tpRatingPlans.AsTPRatingPlans()
+
+	if len(rps) == 0 {
+		return rps, utils.ErrNotFound
 	}
+	return rps, nil
 }
 
 func (self *SQLStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
@@ -1332,14 +1327,11 @@ func (self *SQLStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*u
 	if err := q.Find(&tpRpfs).Error; err != nil {
 		return nil, err
 	}
-	if rps, err := tpRpfs.AsTPRatingProfiles(); err != nil {
-		return nil, err
-	} else {
-		if len(rps) == 0 {
-			return rps, utils.ErrNotFound
-		}
-		return rps, nil
+	rps := tpRpfs.AsTPRatingProfiles()
+	if len(rps) == 0 {
+		return rps, utils.ErrNotFound
 	}
+	return rps, nil
 }
 
 func (self *SQLStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
@@ -1351,14 +1343,12 @@ func (self *SQLStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGro
 	if err := q.Find(&tpShareGroups).Error; err != nil {
 		return nil, err
 	}
-	if sgs, err := tpShareGroups.AsTPSharedGroups(); err != nil {
-		return nil, err
-	} else {
-		if len(sgs) == 0 {
-			return sgs, utils.ErrNotFound
-		}
-		return sgs, nil
+	sgs := tpShareGroups.AsTPSharedGroups()
+
+	if len(sgs) == 0 {
+		return sgs, utils.ErrNotFound
 	}
+	return sgs, nil
 }
 
 func (self *SQLStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
@@ -1370,14 +1360,11 @@ func (self *SQLStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error
 	if err := q.Find(&tpActions).Error; err != nil {
 		return nil, err
 	}
-	if as, err := tpActions.AsTPActions(); err != nil {
-		return nil, err
-	} else {
-		if len(as) == 0 {
-			return as, utils.ErrNotFound
-		}
-		return as, nil
+	as := tpActions.AsTPActions()
+	if len(as) == 0 {
+		return as, utils.ErrNotFound
 	}
+	return as, nil
 }
 
 func (self *SQLStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionTriggers, error) {
@@ -1389,14 +1376,11 @@ func (self *SQLStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionT
 	if err := q.Find(&tpActionTriggers).Error; err != nil {
 		return nil, err
 	}
-	if ats, err := tpActionTriggers.AsTPActionTriggers(); err != nil {
-		return nil, err
-	} else {
-		if len(ats) == 0 {
-			return ats, utils.ErrNotFound
-		}
-		return ats, nil
+	ats := tpActionTriggers.AsTPActionTriggers()
+	if len(ats) == 0 {
+		return ats, utils.ErrNotFound
 	}
+	return ats, nil
 }
 
 func (self *SQLStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan, error) {
@@ -1408,14 +1392,11 @@ func (self *SQLStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan
 	if err := q.Find(&tpActionPlans).Error; err != nil {
 		return nil, err
 	}
-	if aps, err := tpActionPlans.AsTPActionPlans(); err != nil {
-		return nil, err
-	} else {
-		if len(aps) == 0 {
-			return aps, utils.ErrNotFound
-		}
-		return aps, nil
+	aps := tpActionPlans.AsTPActionPlans()
+	if len(aps) == 0 {
+		return aps, utils.ErrNotFound
 	}
+	return aps, nil
 }
 
 func (self *SQLStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*utils.TPAccountActions, error) {
@@ -1433,14 +1414,11 @@ func (self *SQLStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*
 	if err := q.Find(&tpAccActs).Error; err != nil {
 		return nil, err
 	}
-	if aas, err := tpAccActs.AsTPAccountActions(); err != nil {
-		return nil, err
-	} else {
-		if len(aas) == 0 {
-			return aas, utils.ErrNotFound
-		}
-		return aas, nil
+	aas := tpAccActs.AsTPAccountActions()
+	if len(aas) == 0 {
+		return aas, utils.ErrNotFound
 	}
+	return aas, nil
 }
 
 func (self *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {
