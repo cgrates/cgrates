@@ -80,6 +80,11 @@
 },
 
 
+"actions": {
+	"enabled": true,
+},
+
+
 "cdrs": {
 	"enabled": true,	
 	"chargers_conns":["*internal"],
