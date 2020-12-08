@@ -813,7 +813,27 @@ const CGRATES_CFG_JSON = `
 					{"tag": "RateValue", "path": "RateValue", "type": "*variable", "value": "~*req.17"},
 					{"tag": "RateUnit", "path": "RateUnit", "type": "*variable", "value": "~*req.18"},
 					{"tag": "RateIncrement", "path": "RateIncrement", "type": "*variable", "value": "~*req.19"},
-					
+				],
+			},
+			{
+				"type": "*action_profiles",						// data source type
+				"file_name": "ActionProfiles.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.4"},
+					{"tag": "Schedule", "path": "Schedule", "type": "*variable", "value": "~*req.5"},
+					{"tag": "AccountIDs", "path": "AccountIDs", "type": "*variable", "value": "~*req.6"},
+					{"tag": "ActionID", "path": "ActionID", "type": "*variable", "value": "~*req.7"},
+					{"tag": "ActionFilterIDs", "path": "ActionFilterIDs", "type": "*variable", "value": "~*req.8"},
+					{"tag": "ActionBlocker", "path": "ActionBlocker", "type": "*variable", "value": "~*req.9"},
+					{"tag": "ActionTTL", "path": "ActionTTL", "type": "*variable", "value": "~*req.10"},
+					{"tag": "ActionType", "path": "ActionType", "type": "*variable", "value": "~*req.11"},
+					{"tag": "ActionOpts", "path": "ActionOpts", "type": "*variable", "value": "~*req.12"},
+					{"tag": "ActionPath", "path": "ActionPath", "type": "*variable", "value": "~*req.13"},
+					{"tag": "ActionValue", "path": "ActionValue", "type": "*variable", "value": "~*req.14"},
 				],
 			},
 		],

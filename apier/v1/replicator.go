@@ -286,6 +286,15 @@ func (rplSv1 *ReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithOpts, reply
 	return nil
 }
 
+func (rplSv1 *ReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithOpts, reply *engine.ActionProfile) error {
+	if rcv, err := rplSv1.dm.DataDB().GetActionProfileDrv(tntID.Tenant, tntID.ID); err != nil {
+		return err
+	} else {
+		*reply = *rcv
+	}
+	return nil
+}
+
 //GetResourceProfile
 func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithOpts, reply *map[string]int64) error {
 	if rcv, err := rplSv1.dm.DataDB().GetItemLoadIDsDrv(itemID.Arg); err != nil {
@@ -511,6 +520,14 @@ func (rplSv1 *ReplicatorSv1) SetRateProfile(dpp *engine.RateProfileWithOpts, rep
 	return nil
 }
 
+func (rplSv1 *ReplicatorSv1) SetActionProfile(acp *engine.ActionProfileWithOpts, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetActionProfileDrv(acp.ActionProfile); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
 // RemoveThreshold
 func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithOpts, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveThresholdDrv(args.Tenant, args.ID); err != nil {
@@ -700,6 +717,14 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithOpt
 
 func (rplSv1 *ReplicatorSv1) RemoveRateProfile(args *utils.TenantIDWithOpts, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveRateProfileDrv(args.Tenant, args.ID); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+func (rplSv1 *ReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithOpts, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveActionProfileDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
 	*reply = utils.OK

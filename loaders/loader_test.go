@@ -2027,18 +2027,19 @@ func TestNewLoaderWithMultiFiles(t *testing.T) {
 		}
 	}
 	expected := utils.StringSet{
-		"Attributes.csv":         {},
-		"Chargers.csv":           {},
-		"DispatcherHosts.csv":    {},
-		"DispatcherProfiles.csv": {},
-		"File1.csv":              {},
-		"File2.csv":              {},
-		"Filters.csv":            {},
-		"RateProfiles.csv":       {},
-		"Resources.csv":          {},
-		"Routes.csv":             {},
-		"Stats.csv":              {},
-		"Thresholds.csv":         {},
+		utils.AttributesCsv:         {},
+		utils.ChargersCsv:           {},
+		utils.DispatcherHostsCsv:    {},
+		utils.DispatcherProfilesCsv: {},
+		"File1.csv":                 {},
+		"File2.csv":                 {},
+		utils.FiltersCsv:            {},
+		utils.RateProfilesCsv:       {},
+		utils.ResourcesCsv:          {},
+		utils.RoutesCsv:             {},
+		utils.StatsCsv:              {},
+		utils.ThresholdsCsv:         {},
+		utils.ActionProfilesCsv:     {},
 	}
 	if !reflect.DeepEqual(expected, openRdrs) {
 		t.Errorf("Expected %s,received %s", utils.ToJSON(expected), utils.ToJSON(openRdrs))
