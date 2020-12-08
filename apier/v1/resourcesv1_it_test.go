@@ -558,11 +558,7 @@ func testV1RsReleaseResource(t *testing.T) {
 		t.Errorf("Resources: %+v", rs)
 	}
 	if rs == nil {
-		t.Errorf("Expecting rs to not be nil")
-		// rs shoud not be nil so exit function
-		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
-		return
+		t.Fatal("Expecting rs to not be nil")
 	}
 	// make sure Resource1 have no more active resources
 	for _, r := range *rs {
@@ -636,11 +632,7 @@ func testV1RsDBStore(t *testing.T) {
 		t.Errorf("Resources: %+v", rs)
 	}
 	if rs == nil {
-		t.Errorf("Expecting rs to not be nil")
-		// rs shoud not be nil so exit function
-		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
-		return
+		t.Fatal("Expecting rs to not be nil")
 	}
 	// count resources before restart
 	for _, r := range *rs {
@@ -690,7 +682,7 @@ func testV1RsDBStore(t *testing.T) {
 				t.Errorf("Unexpected resource: %+v", r)
 			}
 		case "ResGroup2":
-			if len(r.Usages) != 3 || len(r.TTLIdx) != 3 {
+			if len(r.Usages) != 4 || len(r.TTLIdx) != 4 {
 				t.Errorf("Unexpected resource: %s", utils.ToJSON(r))
 			}
 		}
@@ -914,7 +906,7 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RES_ULTIMITED",
 		Usages: map[string]*engine.ResourceUsage{
-			"651a8db2-4f67-4cf8-b622-169e8a482e51": &engine.ResourceUsage{
+			"651a8db2-4f67-4cf8-b622-169e8a482e51": {
 				Tenant: "cgrates.org",
 				ID:     "651a8db2-4f67-4cf8-b622-169e8a482e51",
 				Units:  1,

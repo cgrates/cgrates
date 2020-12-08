@@ -677,7 +677,7 @@ func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 func testInternalRemoteITGetRouteProfile(t *testing.T) {
 	var rcv *engine.RateProfile
 	if err := internalRPC.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "RP1"},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
 		&rcv); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -754,7 +754,7 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 
 	var rPfrg *engine.RateProfile
 	if err := internalRPC.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "RP1"},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
 		&rPfrg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rPrf.RateProfileWithOpts.RateProfile, rPfrg) {

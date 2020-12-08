@@ -200,7 +200,7 @@ func testPosterITAMQPv1(t *testing.T) {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	// verify if acction was executed
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(150 * time.Millisecond)
 	ev, err := testPosterReadFolder(utils.MetaAMQPV1jsonMap)
 	if err != nil {
 		t.Fatal(err)
