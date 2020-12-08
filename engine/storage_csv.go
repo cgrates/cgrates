@@ -462,7 +462,7 @@ func (csvs *CSVStorage) GetTPDestinationRates(tpid, id string, p *utils.Paginato
 	}); err != nil {
 		return nil, err
 	}
-	return tpDestinationRates.AsTPDestinationRates()
+	return tpDestinationRates.AsTPDestinationRates(), nil
 }
 
 func (csvs *CSVStorage) GetTPRatingPlans(tpid, id string, p *utils.Paginator) ([]*utils.TPRatingPlan, error) {
@@ -474,7 +474,7 @@ func (csvs *CSVStorage) GetTPRatingPlans(tpid, id string, p *utils.Paginator) ([
 	}); err != nil {
 		return nil, err
 	}
-	return tpRatingPlans.AsTPRatingPlans()
+	return tpRatingPlans.AsTPRatingPlans(), nil
 }
 
 func (csvs *CSVStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
@@ -489,7 +489,7 @@ func (csvs *CSVStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*u
 	}); err != nil {
 		return nil, err
 	}
-	return tpRatingProfiles.AsTPRatingProfiles()
+	return tpRatingProfiles.AsTPRatingProfiles(), nil
 }
 
 func (csvs *CSVStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
@@ -501,7 +501,7 @@ func (csvs *CSVStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGro
 	}); err != nil {
 		return nil, err
 	}
-	return tpSharedGroups.AsTPSharedGroups()
+	return tpSharedGroups.AsTPSharedGroups(), nil
 }
 
 func (csvs *CSVStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
@@ -513,7 +513,7 @@ func (csvs *CSVStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error
 	}); err != nil {
 		return nil, err
 	}
-	return tpActions.AsTPActions()
+	return tpActions.AsTPActions(), nil
 }
 
 func (csvs *CSVStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan, error) {
@@ -525,7 +525,7 @@ func (csvs *CSVStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan
 	}); err != nil {
 		return nil, err
 	}
-	return tpActionPlans.AsTPActionPlans()
+	return tpActionPlans.AsTPActionPlans(), nil
 }
 
 func (csvs *CSVStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionTriggers, error) {
@@ -537,7 +537,7 @@ func (csvs *CSVStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionT
 	}); err != nil {
 		return nil, err
 	}
-	return tpActionTriggers.AsTPActionTriggers()
+	return tpActionTriggers.AsTPActionTriggers(), nil
 }
 
 func (csvs *CSVStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*utils.TPAccountActions, error) {
@@ -552,7 +552,7 @@ func (csvs *CSVStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*
 	}); err != nil {
 		return nil, err
 	}
-	return tpAccountActions.AsTPAccountActions()
+	return tpAccountActions.AsTPAccountActions(), nil
 }
 
 func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {

@@ -612,9 +612,8 @@ func TestAPItoModelDestinationRates(t *testing.T) {
 func TestTpDestinationRatesAsTPDestinationRates(t *testing.T) {
 	pts := DestinationRateMdls{}
 	eOut := []*utils.TPDestinationRate{}
-	if rcv, err := pts.AsTPDestinationRates(); err != nil {
-		t.Error(err)
-	} else if rcv != nil {
+	rcv := pts.AsTPDestinationRates()
+	if rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", utils.ToJSON(rcv))
 	}
 
@@ -647,9 +646,8 @@ func TestTpDestinationRatesAsTPDestinationRates(t *testing.T) {
 			},
 		},
 	}
-	if rcv, err := pts.AsTPDestinationRates(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eOut, rcv) {
+	rcv = pts.AsTPDestinationRates()
+	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
@@ -6659,5 +6657,285 @@ func TestModelHelpersResourceProfileToAPICase2(t *testing.T) {
 	result := ResourceProfileToAPI(testStruct)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersAPItoResourceError1(t *testing.T) {
+	testStruct := &utils.TPResourceProfile{
+		TPid:               "",
+		Tenant:             "",
+		ID:                 "",
+		FilterIDs:          nil,
+		ActivationInterval: nil,
+		UsageTTL:           "cat",
+		Limit:              "",
+		AllocationMessage:  "",
+		Blocker:            false,
+		Stored:             false,
+		Weight:             0,
+		ThresholdIDs:       nil,
+	}
+	_, err := APItoResource(testStruct, "")
+	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
+		t.Errorf("\nExpecting <time: invalid duration \"cat\">,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoResourceError2(t *testing.T) {
+	testStruct := &utils.TPResourceProfile{
+		TPid:      "",
+		Tenant:    "",
+		ID:        "",
+		FilterIDs: nil,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "cat",
+		},
+		UsageTTL:          "",
+		Limit:             "",
+		AllocationMessage: "",
+		Blocker:           false,
+		Stored:            false,
+		Weight:            0,
+		ThresholdIDs:      nil,
+	}
+	_, err := APItoResource(testStruct, "")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersAPItoResourceError3(t *testing.T) {
+	testStruct := &utils.TPResourceProfile{
+		TPid:              "",
+		Tenant:            "",
+		ID:                "",
+		FilterIDs:         nil,
+		UsageTTL:          "",
+		Limit:             "cat",
+		AllocationMessage: "",
+		Blocker:           false,
+		Stored:            false,
+		Weight:            0,
+		ThresholdIDs:      nil,
+	}
+	_, err := APItoResource(testStruct, "")
+	if err == nil || err.Error() != "strconv.ParseFloat: parsing \"cat\": invalid syntax" {
+		t.Errorf("\nExpecting <strconv.ParseFloat: parsing \"cat\": invalid syntax>,\n Received <%+v>", err)
+	}
+}
+
+func TestTpResourcesAsTpResources2(t *testing.T) {
+	testStruct := []*ResourceMdl{
+		{
+			Tpid:               "TEST_TPID",
+			Tenant:             "cgrates.org",
+			ID:                 "ResGroup1",
+			FilterIDs:          "FLTR_RES_GR1",
+			ActivationInterval: "2014-07-27T15:00:00Z;2014-07-28T15:00:00Z",
+			ThresholdIDs:       "WARN_RES1",
+		},
+	}
+	expStruct := []*utils.TPResourceProfile{
+		{
+			TPid:      "TEST_TPID",
+			Tenant:    "cgrates.org",
+			ID:        "ResGroup1",
+			FilterIDs: []string{"FLTR_RES_GR1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-27T15:00:00Z",
+				ExpiryTime:     "2014-07-28T15:00:00Z",
+			},
+			ThresholdIDs: []string{"WARN_RES1"},
+		},
+	}
+	result := ResourceMdls(testStruct).AsTPResources()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersMapTPAccountActionsError(t *testing.T) {
+	testStruct := []*utils.TPAccountActions{
+		{
+			TPid:             "ee",
+			LoadId:           "ee",
+			Tenant:           "",
+			Account:          "",
+			ActionPlanId:     "",
+			ActionTriggersId: "",
+			AllowNegative:    false,
+			Disabled:         false,
+		},
+		{
+			TPid:             "ee",
+			LoadId:           "ee",
+			Tenant:           "",
+			Account:          "",
+			ActionPlanId:     "",
+			ActionTriggersId: "",
+			AllowNegative:    false,
+			Disabled:         false,
+		},
+	}
+
+	_, err := MapTPAccountActions(testStruct)
+	if err == nil || err.Error() != "Non unique ID :" {
+		t.Errorf("\nExpecting <Non unique ID :>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersMapTPSharedGroup2(t *testing.T) {
+	testStruct := []*utils.TPSharedGroups{
+		{
+			TPid: "",
+			ID:   "2",
+			SharedGroups: []*utils.TPSharedGroup{
+				{
+					Account:       "",
+					Strategy:      "",
+					RatingSubject: "",
+				},
+			},
+		},
+		{
+			TPid: "",
+			ID:   "2",
+			SharedGroups: []*utils.TPSharedGroup{
+				{
+					Account:       "",
+					Strategy:      "",
+					RatingSubject: "",
+				},
+			},
+		},
+	}
+	expStruct := map[string][]*utils.TPSharedGroup{
+		"2": []*utils.TPSharedGroup{
+			{
+				Account:       "",
+				Strategy:      "",
+				RatingSubject: "",
+			},
+			{
+				Account:       "",
+				Strategy:      "",
+				RatingSubject: "",
+			},
+		},
+	}
+	result := MapTPSharedGroup(testStruct)
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+
+}
+
+func TestSharedGroupMdlsAsMapTPSharedGroups2(t *testing.T) {
+	testStruct := SharedGroupMdls{
+		{
+			Id:            2,
+			Tpid:          "2",
+			Tag:           "",
+			Account:       "",
+			Strategy:      "",
+			RatingSubject: "",
+		},
+		{
+			Id:            2,
+			Tpid:          "2",
+			Tag:           "",
+			Account:       "",
+			Strategy:      "",
+			RatingSubject: "",
+		},
+	}
+	expStruct := map[string]*utils.TPSharedGroups{
+		"": &utils.TPSharedGroups{
+			TPid: "2",
+			ID:   "",
+			SharedGroups: []*utils.TPSharedGroup{
+				{
+					Account:       "",
+					Strategy:      "",
+					RatingSubject: "",
+				},
+				{
+					Account:       "",
+					Strategy:      "",
+					RatingSubject: "",
+				},
+			},
+		},
+	}
+	result := testStruct.AsMapTPSharedGroups()
+	if !reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+	}
+}
+
+func TestModelHelpersMapTPRatingProfilesError(t *testing.T) {
+	testStruct := []*utils.TPRatingProfile{
+		{
+			TPid:                  "2",
+			LoadId:                "",
+			Tenant:                "",
+			Category:              "",
+			Subject:               "",
+			RatingPlanActivations: nil,
+		},
+		{
+			TPid:                  "2",
+			LoadId:                "",
+			Tenant:                "",
+			Category:              "",
+			Subject:               "",
+			RatingPlanActivations: nil,
+		},
+	}
+	_, err := MapTPRatingProfiles(testStruct)
+	if err == nil || err.Error() != "Non unique id :*out:::" {
+		t.Errorf("\nExpecting <Non unique id :*out:::>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersCSVLoadErrorInt(t *testing.T) {
+	type testStruct struct {
+		Id        int64
+		Tpid      string
+		Tag       int `index:"0" re:"\w+\s*,\s*"`
+		CreatedAt time.Time
+	}
+
+	_, err := csvLoad(testStruct{}, []string{"TEST_DEST"})
+	if err == nil || err.Error() != "invalid value \"TEST_DEST\" for field testStruct.Tag" {
+		t.Errorf("\nExpecting <invalid value \"TEST_DEST\" for field testStruct.Tag>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersCSVLoadErrorFloat64(t *testing.T) {
+	type testStruct struct {
+		Id        int64
+		Tpid      string
+		Tag       float64 `index:"0" re:"\w+\s*,\s*"`
+		CreatedAt time.Time
+	}
+
+	_, err := csvLoad(testStruct{}, []string{"TEST_DEST"})
+	if err == nil || err.Error() != "invalid value \"TEST_DEST\" for field testStruct.Tag" {
+		t.Errorf("\nExpecting <invalid value \"TEST_DEST\" for field testStruct.Tag>,\n Received <%+v>", err)
+	}
+}
+
+func TestModelHelpersCSVLoadErrorBool(t *testing.T) {
+	type testStruct struct {
+		Id        int64
+		Tpid      string
+		Tag       bool `index:"0" re:"\w+\s*,\s*"`
+		CreatedAt time.Time
+	}
+
+	_, err := csvLoad(testStruct{}, []string{"TEST_DEST"})
+	if err == nil || err.Error() != "invalid value \"TEST_DEST\" for field testStruct.Tag" {
+		t.Errorf("\nExpecting <invalid value \"TEST_DEST\" for field testStruct.Tag>,\n Received <%+v>", err)
 	}
 }
