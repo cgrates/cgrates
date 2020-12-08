@@ -222,7 +222,6 @@ func TestSetCloneEmpty(t *testing.T) {
 func TestGetOne(t *testing.T) {
 	set := StringSet{
 		"test1": struct{}{},
-		"test2": struct{}{},
 	}
 	value := set.GetOne()
 	expected := "test1"
