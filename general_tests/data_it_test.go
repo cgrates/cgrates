@@ -318,7 +318,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 		&engine.UsageRecordWithOpts{UsageRecord: usageRecord}, &reply); err != nil {
 		t.Error(err)
 	}
-	if time.Now().Sub(tStart) > 50*time.Millisecond {
+	if time.Now().Sub(tStart) > 100*time.Millisecond {
 		t.Errorf("Take's too long for GetDataCost : %+v", time.Now().Sub(tStart))
 	}
 
