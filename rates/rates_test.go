@@ -212,3 +212,166 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func BenchmarkRateS_V1CostForEvent(b *testing.B) {
+	defaultCfg := config.NewDefaultCGRConfig()
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	rateS := RateS{
+		cfg:     defaultCfg,
+		filterS: filters,
+		dm:      dm,
+	}
+
+	rPrf := &engine.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RateChristmas",
+		FilterIDs: []string{"*string:~*req.Subject:1010"},
+		Weight:    50,
+		Rates: map[string]*engine.Rate{
+			"RATE1": &engine.Rate{
+				ID:              "RATE1",
+				Weight:          0,
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*engine.IntervalRate{
+					{
+						IntervalStart: 0,
+						RecurrentFee:  0.20,
+						Unit:          time.Minute,
+						Increment:     time.Minute,
+					},
+					{
+						IntervalStart: time.Minute,
+						RecurrentFee:  0.10,
+						Unit:          time.Minute,
+						Increment:     time.Second,
+					},
+				},
+			},
+			"RATE_CHRISTMAS": &engine.Rate{
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
+				IntervalRates: []*engine.IntervalRate{{
+					IntervalStart: 0,
+					RecurrentFee:  0.06,
+					Unit:          time.Minute,
+					Increment:     time.Second,
+				}},
+			},
+		},
+	}
+	if err := dm.SetRateProfile(rPrf, true); err != nil {
+		b.Error(err)
+	}
+	if err := rPrf.Compile(); err != nil {
+		b.Fatal(err)
+	}
+	if rcv, err := dm.GetRateProfile("cgrates.org", "RateChristmas",
+		true, true, utils.NonTransactional); err != nil {
+		b.Error(err)
+	} else if !reflect.DeepEqual(rPrf, rcv) {
+		b.Errorf("Expecting: %v, received: %v", rPrf, rcv)
+	}
+	rply := new(engine.RateProfileCost)
+	argsRt := &utils.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesStartTime: time.Date(2020, 12, 23, 59, 0, 0, 0, time.UTC),
+				utils.OptsRatesUsage:     "2h",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1010",
+				},
+			},
+		},
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if err := rateS.V1CostForEvent(argsRt, rply); err != nil {
+			b.Error(err)
+		}
+	}
+	b.StopTimer()
+}
+
+func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
+	defaultCfg := config.NewDefaultCGRConfig()
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	rateS := RateS{
+		cfg:     defaultCfg,
+		filterS: filters,
+		dm:      dm,
+	}
+
+	rPrf := &engine.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RateAlways",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weight:    50,
+		Rates: map[string]*engine.Rate{
+			"RATE1": &engine.Rate{
+				ID:              "RATE1",
+				Weight:          0,
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*engine.IntervalRate{
+					{
+						IntervalStart: 0,
+						RecurrentFee:  0.20,
+						Unit:          time.Minute,
+						Increment:     time.Minute,
+					},
+					{
+						IntervalStart: time.Minute,
+						RecurrentFee:  0.10,
+						Unit:          time.Minute,
+						Increment:     time.Second,
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetRateProfile(rPrf, true); err != nil {
+		b.Error(err)
+	}
+	if err := rPrf.Compile(); err != nil {
+		b.Fatal(err)
+	}
+	if rcv, err := dm.GetRateProfile("cgrates.org", "RateAlways",
+		true, true, utils.NonTransactional); err != nil {
+		b.Error(err)
+	} else if !reflect.DeepEqual(rPrf, rcv) {
+		b.Errorf("Expecting: %v, received: %v", rPrf, rcv)
+	}
+	rply := new(engine.RateProfileCost)
+	argsRt := &utils.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesStartTime: time.Date(2020, 12, 23, 59, 0, 0, 0, time.UTC),
+				utils.OptsRatesUsage:     "2h",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if err := rateS.V1CostForEvent(argsRt, rply); err != nil {
+			b.Error(err)
+		}
+	}
+	b.StopTimer()
+}
