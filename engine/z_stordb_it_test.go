@@ -42,6 +42,7 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitFlush,
 	testStorDBitIsDBEmpty,
 	testStorDBitCRUDVersions,
+	testStorDBitCRUDTPActionProfiles,
 	testStorDBitCRUDTpTimings,
 	testStorDBitCRUDTpDestinations,
 	testStorDBitCRUDTpRates,
@@ -132,6 +133,78 @@ func testStorDBitIsDBEmpty(t *testing.T) {
 		} else if test != false {
 			t.Errorf("Expecting: false got :%+v", test)
 		}
+	}
+}
+
+func testStorDBitCRUDTPActionProfiles(t *testing.T) {
+	//READ
+	if _, err := storDB.GetTPActionProfiles("sub_ID1", utils.EmptyString, "TEST_ID1"); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//WRITE
+	var actPrf = []*utils.TPActionProfile{
+		{
+			Tenant:    "cgrates.org",
+			TPid:      "TEST_ID1",
+			ID:        "sub_id1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Weight:    20,
+			Schedule:  utils.ASAP,
+			Actions: []*utils.TPAPAction{
+				{
+					ID:        "TOPUP",
+					FilterIDs: []string{},
+					Type:      "*topup",
+					Path:      "~*balance.TestBalance.Value",
+				},
+			},
+		},
+		{
+			Tenant:    "cgrates.org",
+			TPid:      "TEST_ID1",
+			ID:        "sub_id2",
+			FilterIDs: []string{"*string:~*req.Destination:10"},
+			Weight:    10,
+			Schedule:  utils.ASAP,
+			Actions: []*utils.TPAPAction{
+				{
+					ID:        "TOPUP",
+					FilterIDs: []string{},
+					Type:      "*topup",
+					Path:      "~*balance.TestBalance.Value",
+				},
+			},
+		},
+	}
+	if err := storDB.SetTPActionProfiles(actPrf); err != nil {
+		t.Error("Unable to set TPActionProfile")
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPActionProfiles(actPrf[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(rcv[0], actPrf[0]) || reflect.DeepEqual(rcv[1], actPrf[0])) {
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToJSON(actPrf[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
+	}
+
+	//UPDATE AND READ
+	actPrf[0].FilterIDs = []string{"*string:~*req.Account:1007"}
+	actPrf[1].Weight = 20
+	if err := storDB.SetTPActionProfiles(actPrf); err != nil {
+		t.Error(err)
+	} else if rcv, err := storDB.GetTPActionProfiles(actPrf[0].TPid,
+		utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(rcv[0], actPrf[0]) || reflect.DeepEqual(rcv[1], actPrf[0])) {
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToJSON(actPrf[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
+	}
+
+	//REMOVE AND READ
+	if err := storDB.RemTpData(utils.EmptyString, actPrf[0].TPid, nil); err != nil {
+		t.Error(err)
+	} else if _, err := storDB.GetTPActionProfiles(actPrf[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
 
