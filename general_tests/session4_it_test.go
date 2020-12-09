@@ -109,7 +109,7 @@ func testSes4ItLoadFromFolder(t *testing.T) {
 	if err := ses4RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testSes4SetAccount(t *testing.T) {

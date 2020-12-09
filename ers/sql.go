@@ -105,6 +105,8 @@ func (rdr *SQLEventReader) Serve() (err error) {
 }
 
 func (rdr *SQLEventReader) readLoop(db *gorm.DB) {
+	defer db.Close()
+	tm := time.NewTimer(0)
 	for {
 		if db = db.Table(rdr.tableName).Select("*"); db.Error != nil {
 			rdr.rdrErr <- db.Error
@@ -126,7 +128,6 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB) {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s> stop monitoring sql DB <%s>",
 						utils.ERs, rdr.Config().SourcePath))
-				db.Close()
 				return
 			default:
 			}
@@ -172,7 +173,16 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB) {
 		if rdr.Config().RunDelay < 0 {
 			return
 		}
-		time.Sleep(rdr.Config().RunDelay)
+		tm.Reset(rdr.Config().RunDelay)
+		select {
+		case <-rdr.rdrExit:
+			tm.Stop()
+			utils.Logger.Info(
+				fmt.Sprintf("<%s> stop monitoring sql DB <%s>",
+					utils.ERs, rdr.Config().SourcePath))
+			return
+		case <-tm.C:
+		}
 	}
 }
 
@@ -294,11 +304,13 @@ func (rdr *SQLEventReader) postCDR(in []interface{}) (err error) {
 	if db, err = gorm.Open(rdr.expConnType, rdr.expConnString); err != nil {
 		return
 	}
+	defer db.Close()
 	if err = db.DB().Ping(); err != nil {
 		return
 	}
 	tx := db.Begin()
-	_, err = db.DB().Exec(sqlStatement, in...)
+	defer tx.Close()
+	_, err = tx.DB().Exec(sqlStatement, in...)
 	if err != nil {
 		tx.Rollback()
 		if strings.Contains(err.Error(), "1062") || strings.Contains(err.Error(), "duplicate key") { // returns 1062/pq when key is duplicated

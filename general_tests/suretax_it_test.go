@@ -141,7 +141,7 @@ func testSTIProcessExternalCdr(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(2 * time.Second)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testSTIGetCdrs(t *testing.T) {

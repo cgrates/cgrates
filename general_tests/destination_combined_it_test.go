@@ -103,7 +103,7 @@ func testDestinationFromFolder(t *testing.T) {
 	if err := tutorialRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testDestinationGetCostFor1002(t *testing.T) {

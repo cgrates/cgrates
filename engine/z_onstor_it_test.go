@@ -31,11 +31,10 @@ import (
 )
 
 var (
-	rdsITdb    *RedisStorage
-	mgoITdb    *MongoStorage
-	onStor     *DataManager
-	onStorCfg  string
-	sleepDelay time.Duration
+	rdsITdb   *RedisStorage
+	mgoITdb   *MongoStorage
+	onStor    *DataManager
+	onStorCfg string
 
 	// subtests to be executed for each confDIR
 	sTestsOnStorIT = []func(t *testing.T){
@@ -87,7 +86,6 @@ var (
 func TestOnStorIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		sleepDelay = 10 * time.Millisecond
 		onStor = NewDataManager(NewInternalDB(nil, nil, true),
 			config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMySQL:
@@ -102,7 +100,6 @@ func TestOnStorIT(t *testing.T) {
 		onStorCfg = cfg.DataDbCfg().DataDbName
 		onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMongo:
-		sleepDelay = 500 * time.Millisecond
 		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
 		mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
 		if err != nil {
@@ -493,7 +490,7 @@ func testOnStorITRatingPlan(t *testing.T) {
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from cache
 	if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -573,7 +570,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
 		//get from cache
 		if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
@@ -860,7 +857,7 @@ func testOnStorITActions(t *testing.T) {
 		acts, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
 		//get from cache
 		if rcv, err := onStor.GetActions(acts[0].Id,
@@ -1212,7 +1209,7 @@ func testOnStorITResourceProfile(t *testing.T) {
 	if err := onStor.SetResourceProfile(rL, false); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from database
 	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID,
 		false, false, utils.NonTransactional); err != nil {
@@ -1270,7 +1267,7 @@ func testOnStorITResource(t *testing.T) {
 	if err := onStor.SetResource(res, nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from database
 	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
 		false, false, utils.NonTransactional); err != nil {
@@ -1331,7 +1328,7 @@ func testOnStorITTiming(t *testing.T) {
 	if err := onStor.SetTiming(tmg); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from cache
 	if rcv, err := onStor.GetTiming(tmg.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1478,7 +1475,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 	if err := onStor.SetStatQueueProfile(sq, false); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from database
 	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
@@ -1554,7 +1551,7 @@ func testOnStorITStatQueue(t *testing.T) {
 	if err := onStor.SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from database
 	if rcv, err := onStor.GetStatQueue(sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
@@ -1628,7 +1625,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	if err := onStor.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from database
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		false, false, utils.NonTransactional); err != nil {
@@ -1679,7 +1676,7 @@ func testOnStorITThreshold(t *testing.T) {
 	if err := onStor.SetThreshold(th, 0, true); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from database
 	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1",
 		false, false, utils.NonTransactional); err != nil {
@@ -1762,7 +1759,7 @@ func testOnStorITFilter(t *testing.T) {
 	if err := onStor.SetFilter(fp, true); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from cache
 	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); err != nil {
@@ -1869,7 +1866,7 @@ func testOnStorITRouteProfile(t *testing.T) {
 	if err := onStor.SetRouteProfile(splProfile, false); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from cache
 	if rcv, err := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); err != nil {
@@ -1949,7 +1946,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); err != nil {
@@ -2082,7 +2079,7 @@ func testOnStorITChargerProfile(t *testing.T) {
 	if err := onStor.SetChargerProfile(cpp, false); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from database
 	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
 		false, false, utils.NonTransactional); err != nil {
@@ -2138,7 +2135,7 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 	if err := onStor.SetDispatcherProfile(dpp, false); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from database
 	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
 		false, false, utils.NonTransactional); err != nil {
@@ -2225,7 +2222,7 @@ func testOnStorITRateProfile(t *testing.T) {
 	if err := onStor.SetRateProfile(rPrf, false); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(sleepDelay)
+
 	//get from database
 	if rcv, err := onStor.GetRateProfile("cgrates.org", "RP1",
 		false, false, utils.NonTransactional); err != nil {

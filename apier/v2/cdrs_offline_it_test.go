@@ -211,7 +211,6 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsOfflineExpiryBalance(t *testing.T) {
@@ -247,7 +246,6 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		t.Errorf("Calling APIerSv2.SetAccount received: %s", reply)
 	}
 
-	time.Sleep(50 * time.Millisecond)
 	var acnt *engine.Account
 	//verify if the third balance was added
 	if err := cdrsOfflineRpc.Call(utils.APIerSv2GetAccount,
@@ -330,7 +328,6 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsBalancesWithSameWeight(t *testing.T) {
@@ -387,7 +384,6 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsOfflineKillEngine(t *testing.T) {

@@ -178,7 +178,6 @@ func testEEsAddCDRs(t *testing.T) {
 			t.Error("Unexpected reply received: ", reply)
 		}
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testEEsExportCDRs(t *testing.T) {
@@ -190,7 +189,6 @@ func testEEsExportCDRs(t *testing.T) {
 	if err := eeSRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
-	time.Sleep(2 * time.Second)
 	if len(rply) != 1 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(rply))
 	} else {
@@ -220,6 +218,7 @@ func testEEsExportCDRs(t *testing.T) {
 }
 
 func testEEsVerifyExports(t *testing.T) {
+	time.Sleep(time.Second)
 	var files []string
 	err := filepath.Walk("/tmp/testCSV/", func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, utils.CSVSuffix) {
@@ -254,7 +253,6 @@ func testEEsExportCDRsMultipleExporters(t *testing.T) {
 	if err := eeSRPC.Call(utils.APIerSv1ExportCDRs, &attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
-	time.Sleep(2 * time.Second)
 	if len(rply) != 2 {
 		t.Errorf("Expected %+v, received: %+v", 1, len(rply))
 	} else {
@@ -286,6 +284,7 @@ func testEEsExportCDRsMultipleExporters(t *testing.T) {
 }
 
 func testEEsVerifyExportsMultipleExporters(t *testing.T) {
+	time.Sleep(time.Second)
 	var files []string
 	err := filepath.Walk("/tmp/testCSV2/", func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, utils.CSVSuffix) {

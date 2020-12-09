@@ -126,7 +126,7 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 	if err := attrRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 }
 
 func testAttributeSProcessEvent(t *testing.T) {

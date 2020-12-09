@@ -125,10 +125,10 @@ func testDspITLoadData(t *testing.T) {
 	}()
 	select {
 	case <-wchan:
-	case <-time.After(5 * time.Second):
+	case <-time.After(time.Second):
 		t.Errorf("cgr-loader failed: ")
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testDspDspv1GetProfileForEvent(t *testing.T) {

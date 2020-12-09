@@ -26,7 +26,6 @@ import (
 	"path"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -272,7 +271,6 @@ func testTPRatingProfilesRemoveTPRatingProfile(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testTPRatingProfilesGetTPRatingProfileAfterRemove(t *testing.T) {

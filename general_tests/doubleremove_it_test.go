@@ -141,7 +141,6 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(50 * time.Millisecond)
 	//check
 	if err := sesRPC.Call(utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "TEST_PROFILE1"}, &reply); err != nil {
@@ -167,7 +166,6 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	time.Sleep(50 * time.Millisecond)
 	// check
 	if err := sesRPC.Call(utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "TEST_PROFILE1"}, &reply); err == nil ||

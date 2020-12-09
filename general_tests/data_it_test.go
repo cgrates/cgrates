@@ -130,7 +130,7 @@ func testV1DataLoadTarrifPlans(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {

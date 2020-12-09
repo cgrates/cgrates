@@ -110,7 +110,7 @@ func testPreloadITStartEngine(t *testing.T) {
 	if !connected {
 		t.Errorf("engine did not open port <%s>", preloadCfg.ListenCfg().RPCJSONListen)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testPreloadITRpcConn(t *testing.T) {

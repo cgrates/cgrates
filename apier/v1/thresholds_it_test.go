@@ -311,7 +311,7 @@ func testV1TSFromFolder(t *testing.T) {
 	if err := tSv1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testV1TSGetThresholds(t *testing.T) {

@@ -113,7 +113,7 @@ func testTPImportTPFromFolderPath(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.ImportTarrifPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testTPExportTPToFolder(t *testing.T) {

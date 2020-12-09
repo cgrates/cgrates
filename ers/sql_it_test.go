@@ -33,6 +33,10 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+type nopLogger struct{}
+
+func (nopLogger) Print(values ...interface{}) {}
+
 var (
 	sqlCfgPath string
 	sqlCfg     *config.CGRConfig
@@ -145,6 +149,7 @@ func testSQLInitDBs(t *testing.T) {
 	if db2, err = gorm.Open("mysql", fmt.Sprintf(dbConnString, "cgrates")); err != nil {
 		t.Fatal(err)
 	}
+	db2.SetLogger(new(nopLogger))
 
 	if _, err = db2.DB().Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`); err != nil {
 		t.Fatal(err)
@@ -157,6 +162,7 @@ func testSQLInitDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	db.SetLogger(new(nopLogger))
 	tx := db.Begin()
 	if !tx.HasTable("cdrs") {
 		tx = tx.CreateTable(new(engine.CDRsql))

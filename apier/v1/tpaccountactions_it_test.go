@@ -26,7 +26,6 @@ import (
 	"path"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -215,7 +214,6 @@ func testTPAccActionsRemTPAccAction(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testTPAccActionsGetTPAccActionAfterRemove(t *testing.T) {

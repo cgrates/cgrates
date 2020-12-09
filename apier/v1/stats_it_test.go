@@ -155,7 +155,7 @@ func testV1STSFromFolder(t *testing.T) {
 	if err := stsV1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testV1STSGetStats(t *testing.T) {

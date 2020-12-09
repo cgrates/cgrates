@@ -114,7 +114,6 @@ func testInternalReplicateITDataFlush(t *testing.T) {
 	if err := engine.InitDataDb(engineOneCfg); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 	if err := engine.InitDataDb(engineTwoCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -139,12 +138,10 @@ func testInternalReplicateITRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
 	engineTwoRPC, err = newRPCClient(engineTwoCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
 	internalRPC, err = newRPCClient(internalCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
@@ -158,7 +155,7 @@ func testInternalReplicateLoadDataInInternalEngine(t *testing.T) {
 	if err := internalRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testInternalReplicateITDestination(t *testing.T) {
@@ -522,7 +519,6 @@ func testInternalReplicateITDispatcherProfile(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
 	}
-	time.Sleep(20 * time.Millisecond)
 	// check
 	var dsp *engine.DispatcherProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetDispatcherProfile,

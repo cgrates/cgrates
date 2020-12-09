@@ -210,10 +210,6 @@ func testCDRsOnExpLoadDefaultCharger(t *testing.T) {
 
 // Disable ExportCDR
 func testCDRsOnExpDisableOnlineExport(t *testing.T) {
-	// stop RabbitMQ server so we can test reconnects
-	if err := exec.Command("service", "rabbitmq-server", "stop").Run(); err != nil {
-		t.Error(err)
-	}
 	testCdr := &engine.CDR{
 		CGRID:       utils.Sha1("NoOnlineExport", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		ToR:         utils.VOICE,
@@ -254,11 +250,6 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 	if len(filesInDir) != 0 {
 		t.Fatalf("Should be no files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	}
-	// start RabbitMQ server so we can test reconnects
-	if err := exec.Command("service", "rabbitmq-server", "start").Run(); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(5 * time.Second)
 }
 
 func testCDRsOnExpHttpCdrReplication(t *testing.T) {
@@ -381,7 +372,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 	if err := exec.Command("service", "rabbitmq-server", "restart").Run(); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(5 * time.Second)
+	time.Sleep(2 * time.Second)
 	testCdr := &engine.CDR{
 		CGRID:       amqpCGRID,
 		ToR:         utils.VOICE,

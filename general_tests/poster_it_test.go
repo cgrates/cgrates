@@ -314,7 +314,7 @@ func testPosterITKafka(t *testing.T) {
 		t.Errorf("Calling APIerSv1.ExecuteAction received: %s", reply)
 	}
 	// verify if acction was executed
-	time.Sleep(time.Second)
+	time.Sleep(500 * time.Millisecond)
 	ev, err := testPosterReadFolder(utils.MetaKafkajsonMap)
 	if err != nil {
 		t.Fatal(err)

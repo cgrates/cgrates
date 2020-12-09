@@ -179,7 +179,7 @@ func testPartITHandleCdr3File(t *testing.T) {
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/partErs2/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
-	time.Sleep(3 * time.Second)
+	time.Sleep(time.Second)
 }
 
 func testPartITVerifyFiles(t *testing.T) {
