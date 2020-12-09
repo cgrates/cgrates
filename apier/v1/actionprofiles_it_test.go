@@ -51,6 +51,7 @@ var (
 		testActionSPing,
 		testActionSSettActionProfile,
 		testActionSGetActionProfileIDs,
+		testActionSGetActionProfileIDsCount,
 		testActionSUpdateActionProfile,
 		testActionSRemoveActionProfile,
 		testActionSKillEngine,
@@ -270,6 +271,17 @@ func testActionSGetActionProfileIDs(t *testing.T) {
 		t.Error(err)
 	} else if 1 != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+
+}
+
+func testActionSGetActionProfileIDsCount(t *testing.T) {
+	var reply int
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfileIDsCount,
+		&utils.TenantWithOpts{Tenant: "tenant_test"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 1 {
+		t.Errorf("Expecting: 1, received: %+v", reply)
 	}
 
 }

@@ -1736,10 +1736,11 @@ const (
 
 // ActionProfile APIs
 const (
-	APIerSv1SetActionProfile    = "APIerSv1.SetActionProfile"
-	APIerSv1GetActionProfile    = "APIerSv1.GetActionProfile"
-	APIerSv1GetActionProfileIDs = "APIerSv1.GetActionProfileIDs"
-	APIerSv1RemoveActionProfile = "APIerSv1.RemoveActionProfile"
+	APIerSv1SetActionProfile         = "APIerSv1.SetActionProfile"
+	APIerSv1GetActionProfile         = "APIerSv1.GetActionProfile"
+	APIerSv1GetActionProfileIDs      = "APIerSv1.GetActionProfileIDs"
+	APIerSv1GetActionProfileIDsCount = "APIerSv1.GetActionProfileIDsCount"
+	APIerSv1RemoveActionProfile      = "APIerSv1.RemoveActionProfile"
 )
 
 //cgr_ variables
