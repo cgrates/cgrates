@@ -1298,8 +1298,8 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 				Path:  "RateFilterIDs",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP)},
-			{Tag: "RateActivationStart",
-				Path:  "RateActivationStart",
+			{Tag: "RateActivationTimes",
+				Path:  "RateActivationTimes",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP)},
 			{Tag: "RateWeight",
@@ -1482,8 +1482,8 @@ func TestLoaderProcessRateProfileRates(t *testing.T) {
 				Path:  "RateFilterIDs",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP)},
-			{Tag: "RateActivationStart",
-				Path:  "RateActivationStart",
+			{Tag: "RateActivationTimes",
+				Path:  "RateActivationTimes",
 				Type:  utils.META_COMPOSED,
 				Value: config.NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP)},
 			{Tag: "RateWeight",
@@ -1517,12 +1517,12 @@ func TestLoaderProcessRateProfileRates(t *testing.T) {
 		},
 	}
 	ratePrfCnt1 := `
-#Tenant,ID,FilterIDs,ActivationInterval,Weight,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeight,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeight,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
 cgrates.org,RP1,*string:~*req.Subject:1001,,0,*up,4,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",0,false,0s,0.4,0.12,1m,1m
 cgrates.org,RP1,,,,,,,,,RT_WEEK,,,,,1m,,0.06,1m,1s
 `
 	ratePrfCnt2 := `
-#Tenant,ID,FilterIDs,ActivationInterval,Weight,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeight,RateBlocker,RateIntervalStart,RateValue,RateUnit,RateIncrement
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeight,RateBlocker,RateIntervalStart,RateValue,RateUnit,RateIncrement
 cgrates.org,RP1,,,,,,,,,RT_WEEKEND,,"* * * * 0,6",10,false,0s,,0.06,1m,1s
 cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 `
