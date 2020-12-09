@@ -226,6 +226,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.RateProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetRateProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+		case utils.ActionProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetActionProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
@@ -280,6 +283,12 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 				return
 			}
 			_, err = dm.GetIndexes(utils.CacheRateFilterIndexes, tntCtx, idxKey, false, true)
+		case utils.ActionProfilesFilterIndexPrfx:
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheActionProfilesFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.FilterIndexPrfx:
 			idx := strings.LastIndexByte(dataID, utils.InInFieldSep[0])
 			if idx < 0 {

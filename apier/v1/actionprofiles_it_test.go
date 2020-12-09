@@ -37,7 +37,7 @@ var (
 	actPrfCfg       *config.CGRConfig
 	actSRPC         *rpc.Client
 	actPrfDataDir   = "/usr/share/cgrates"
-	actPrf          *AttributeWithCache
+	actPrf          *ActionProfileWithCache
 	actPrfConfigDIR string //run tests for specific configuration
 
 	sTestsActPrf = []func(t *testing.T){
@@ -49,13 +49,16 @@ var (
 		testActionSLoadFromFolder,
 		testActionSGetActionProfile,
 		testActionSPing,
+		testActionSSettActionProfile,
+		testActionSGetActionProfileIDs,
+		testActionSUpdateActionProfile,
+		testActionSRemoveActionProfile,
 		testActionSKillEngine,
 	}
 )
 
 //Test start here
 func TestActionSIT(t *testing.T) {
-	actsTests := sTestsActPrf
 	switch *dbType {
 	case utils.MetaInternal:
 		actPrfConfigDIR = "tutinternal"
@@ -68,7 +71,7 @@ func TestActionSIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range actsTests {
+	for _, stest := range sTestsActPrf {
 		t.Run(actPrfConfigDIR, stest)
 	}
 }
@@ -186,6 +189,121 @@ func testActionSPing(t *testing.T) {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
+	}
+}
+
+func testActionSSettActionProfile(t *testing.T) {
+	actPrf = &ActionProfileWithCache{
+		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
+			&engine.ActionProfile{
+				Tenant:             "tenant_test",
+				ID:                 "id_test",
+				FilterIDs:          nil,
+				ActivationInterval: nil,
+				Weight:             0,
+				Schedule:           "",
+				AccountIDs:         utils.StringSet{},
+				Actions: []*engine.APAction{
+					{
+						ID:        "test_action_id",
+						FilterIDs: nil,
+						Blocker:   false,
+						TTL:       0,
+						Type:      "",
+						Opts:      nil,
+						Path:      "",
+						Value:     nil,
+					},
+					{
+						ID:        "test_action_id2",
+						FilterIDs: nil,
+						Blocker:   false,
+						TTL:       0,
+						Type:      "",
+						Opts:      nil,
+						Path:      "",
+						Value:     nil,
+					},
+				},
+			},
+			map[string]interface{}{},
+		},
+	}
+	var result string
+	expErr := utils.ErrNotFound.Error()
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}, &result); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error: %v received: %v", expErr, err)
+	}
+	var reply string
+	if err := actSRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var reply2 *engine.ActionProfile
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply2) {
+		t.Errorf("Expecting : %+v, received: %+v", actPrf.ActionProfile, reply2)
+	}
+
+}
+
+func testActionSGetActionProfileIDs(t *testing.T) {
+
+	expected := []string{"id_test"}
+	var result []string
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfileIDs, utils.PaginatorWithTenant{}, &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfileIDs, utils.PaginatorWithTenant{Tenant: "tenant_test"}, &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfileIDs, utils.PaginatorWithTenant{
+		Tenant:    "tenant_test",
+		Paginator: utils.Paginator{Limit: utils.IntPointer(1)},
+	}, &result); err != nil {
+		t.Error(err)
+	} else if 1 != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+
+}
+
+func testActionSUpdateActionProfile(t *testing.T) {
+	var reply string
+	actPrf.Weight = 2
+	if err := actSRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var reply2 *engine.ActionProfile
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply2) {
+		t.Errorf("Expecting : %+v, received: %+v", actPrf.ActionProfile, reply2)
+	}
+}
+
+func testActionSRemoveActionProfile(t *testing.T) {
+	var reply string
+	if err := actSRPC.Call(utils.APIerSv1RemoveActionProfile, &utils.TenantIDWithCache{Tenant: "tenant_test", ID: "id_test"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var reply2 *engine.ActionProfile
+	expErr := utils.ErrNotFound.Error()
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}, &reply2); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error: %v received: %v", expErr, err)
+	}
+	if err := actSRPC.Call(utils.APIerSv1RemoveActionProfile, &utils.TenantIDWithCache{Tenant: "tenant_test", ID: "id_test"}, &reply2); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error: %v received: %v", expErr, err)
 	}
 }
 
