@@ -183,6 +183,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPsharedgroups()
 		case utils.MetaTpRatingProfiles:
 			err = m.migrateTPratingprofiles()
+		case utils.MetaTpRateProfiles:
+			err = m.migrateTPRateProfiles()
 		case utils.MetaTpActionProfiles:
 			err = m.migrateTPActionProfiles()
 		case utils.MetaTpResources:

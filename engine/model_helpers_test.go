@@ -4365,9 +4365,9 @@ func TestRateProfileToAPI(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
-				ID:             "RT_WEEK",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
@@ -4385,9 +4385,9 @@ func TestRateProfileToAPI(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": {
-				ID:             "RT_WEEKEND",
-				Weight:         10,
-				ActivationTime: "* * * * 0,6",
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
@@ -4398,9 +4398,9 @@ func TestRateProfileToAPI(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:             "RT_CHRISTMAS",
-				Weight:         30,
-				ActivationTime: "* * 24 12 *",
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
@@ -4490,9 +4490,9 @@ func TestAPIToRateProfile(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
-				ID:             "RT_WEEK",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
@@ -4510,9 +4510,9 @@ func TestAPIToRateProfile(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": {
-				ID:             "RT_WEEKEND",
-				Weight:         10,
-				ActivationTime: "* * * * 0,6",
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
@@ -4523,9 +4523,9 @@ func TestAPIToRateProfile(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:             "RT_CHRISTMAS",
-				Weight:         30,
-				ActivationTime: "* * 24 12 *",
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
@@ -4558,9 +4558,9 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
-				ID:             "RT_WEEK",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
@@ -4595,7 +4595,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			MaxCostStrategy:     "*free",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
-			RateActivationStart: "* * * * 1-5",
+			RateActivationTimes: "* * * * 1-5",
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "1m",
@@ -4619,7 +4619,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			MaxCostStrategy:     "",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
-			RateActivationStart: "",
+			RateActivationTimes: "",
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "0s",
@@ -4645,7 +4645,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			MaxCostStrategy:     "*free",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
-			RateActivationStart: "* * * * 1-5",
+			RateActivationTimes: "* * * * 1-5",
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "0s",
@@ -4669,7 +4669,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			MaxCostStrategy:     "",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
-			RateActivationStart: "",
+			RateActivationTimes: "",
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "1m",
@@ -4702,7 +4702,7 @@ func TestAsTPRateProfile(t *testing.T) {
 			MaxCostStrategy:     "*free",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
-			RateActivationStart: "* * * * 1-5",
+			RateActivationTimes: "* * * * 1-5",
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "1m",
@@ -4726,7 +4726,7 @@ func TestAsTPRateProfile(t *testing.T) {
 			MaxCostStrategy:     "",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
-			RateActivationStart: "",
+			RateActivationTimes: "",
 			RateWeight:          0,
 			RateBlocker:         false,
 			RateIntervalStart:   "0s",
@@ -4750,9 +4750,9 @@ func TestAsTPRateProfile(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
-				ID:             "RT_WEEK",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "1m",
@@ -5106,9 +5106,9 @@ func TestModelHelpersAPItoRateProfileError1(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
-				ID:             "RT_WEEK",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "cat",
@@ -5141,9 +5141,9 @@ func TestModelHelpersAPItoRateProfileError2(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
-				ID:             "RT_WEEK",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
@@ -5176,9 +5176,9 @@ func TestModelHelpersAPItoRateProfileError3(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
-				ID:             "RT_WEEK",
-				Weight:         0,
-				ActivationTime: "* * * * 1-5",
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
 						IntervalStart: "0s",
@@ -5215,10 +5215,10 @@ func TestAPItoModelTPRateProfileCase2(t *testing.T) {
 			ExpiryTime:     "2014-08-29T15:00:00Z",
 		},
 		Rates: map[string]*utils.TPRate{"RT_CHRISTMAS": {
-			ID:             "RT_CHRISTMAS",
-			FilterIDs:      []string{"test_string1", "test_string2"},
-			Weight:         30,
-			ActivationTime: "* * 24 12 *",
+			ID:              "RT_CHRISTMAS",
+			FilterIDs:       []string{"test_string1", "test_string2"},
+			Weight:          30,
+			ActivationTimes: "* * 24 12 *",
 			IntervalRates: []*utils.TPIntervalRate{
 				{
 					IntervalStart: "0s",
@@ -5236,7 +5236,7 @@ func TestAPItoModelTPRateProfileCase2(t *testing.T) {
 		RateID:              "RT_CHRISTMAS",
 		RateFilterIDs:       "test_string1;test_string2",
 		RateWeight:          30,
-		RateActivationStart: "* * 24 12 *",
+		RateActivationTimes: "* * 24 12 *",
 		RateIntervalStart:   "0s",
 		RateRecurrentFee:    0.06,
 		RateUnit:            "1m0s",

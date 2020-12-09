@@ -1563,6 +1563,7 @@ func (ms *MongoStorage) SetTPRateProfiles(tpDPPs []*utils.TPRateProfile) (err er
 	if len(tpDPPs) == 0 {
 		return
 	}
+
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tpDPPs {
 			_, err = ms.getCol(utils.TBLTPRateProfiles).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},

@@ -526,7 +526,7 @@ type RateProfileMdl struct {
 	MaxCostStrategy     string  `index:"9" re:""`
 	RateID              string  `index:"10" re:""`
 	RateFilterIDs       string  `index:"11" re:""`
-	RateActivationStart string  `index:"12" re:""`
+	RateActivationTimes string  `index:"12" re:""`
 	RateWeight          float64 `index:"13" re:"\d+\.?\d*"`
 	RateBlocker         bool    `index:"14" re:""`
 	RateIntervalStart   string  `index:"15" re:""`

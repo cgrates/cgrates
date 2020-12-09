@@ -3019,8 +3019,8 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 				rateFilterSplit := strings.Split(tp.RateFilterIDs, utils.INFIELD_SEP)
 				rate.FilterIDs = append(rate.FilterIDs, rateFilterSplit...)
 			}
-			if tp.RateActivationStart != utils.EmptyString {
-				rate.ActivationTime = tp.RateActivationStart
+			if tp.RateActivationTimes != utils.EmptyString {
+				rate.ActivationTimes = tp.RateActivationTimes
 			}
 			if tp.RateWeight != 0 {
 				rate.Weight = tp.RateWeight
@@ -3142,7 +3142,7 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 					mdl.RateFilterIDs += val
 				}
 				mdl.RateWeight = rate.Weight
-				mdl.RateActivationStart = rate.ActivationTime
+				mdl.RateActivationTimes = rate.ActivationTimes
 				mdl.RateBlocker = rate.Blocker
 
 			}
@@ -3186,7 +3186,7 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 			Weight:          rate.Weight,
 			Blocker:         rate.Blocker,
 			FilterIDs:       rate.FilterIDs,
-			ActivationTimes: rate.ActivationTime,
+			ActivationTimes: rate.ActivationTimes,
 			IntervalRates:   make([]*IntervalRate, len(rate.IntervalRates)),
 		}
 		for i, iRate := range rate.IntervalRates {
@@ -3224,12 +3224,12 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 
 	for key, rate := range rp.Rates {
 		tpRp.Rates[key] = &utils.TPRate{
-			ID:             rate.ID,
-			Weight:         rate.Weight,
-			Blocker:        rate.Blocker,
-			FilterIDs:      rate.FilterIDs,
-			ActivationTime: rate.ActivationTimes,
-			IntervalRates:  make([]*utils.TPIntervalRate, len(rate.IntervalRates)),
+			ID:              rate.ID,
+			Weight:          rate.Weight,
+			Blocker:         rate.Blocker,
+			FilterIDs:       rate.FilterIDs,
+			ActivationTimes: rate.ActivationTimes,
+			IntervalRates:   make([]*utils.TPIntervalRate, len(rate.IntervalRates)),
 		}
 		for i, iRate := range rate.IntervalRates {
 			tpRp.Rates[key].IntervalRates[i] = &utils.TPIntervalRate{
