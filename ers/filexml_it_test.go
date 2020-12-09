@@ -117,7 +117,7 @@ func testXMLITLoadTPFromFolder(t *testing.T) {
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>

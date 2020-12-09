@@ -141,7 +141,6 @@ func testInternalRemoteITDataFlush(t *testing.T) {
 	if err := engine.InitDataDb(engineOneCfg); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 	if err := engine.InitDataDb(engineTwoCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +183,7 @@ func testInternalRemoteLoadDataInEngineTwo(t *testing.T) {
 	if err := engineTwoRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testInternalRemoteITGetAccount(t *testing.T) {

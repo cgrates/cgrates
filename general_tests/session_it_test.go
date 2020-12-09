@@ -111,7 +111,7 @@ func testSesItLoadFromFolder(t *testing.T) {
 	if err := sesRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testAccountBalance2(t *testing.T, sracc, srten, balType string, expected float64) {

@@ -132,7 +132,7 @@ func testAPIerLoadFromFolder(t *testing.T) {
 	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
@@ -194,7 +194,7 @@ func testAPIerRemoveTPFromFolder(t *testing.T) {
 	if err := apierRPC.Call(utils.APIerSv1RemoveTPFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testAPIerAfterDelete(t *testing.T) {
@@ -643,7 +643,7 @@ func testAPIerLoadFromFolderAccountAction(t *testing.T) {
 	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	attrs2 := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "account_action_from_tutorial")}
 	if err := apierRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs2, &reply); err != nil {
 		t.Error(err)

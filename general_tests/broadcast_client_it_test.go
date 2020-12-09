@@ -129,7 +129,7 @@ func testbrodcastItLoadFromFolder(t *testing.T) {
 	if err := brodcastInternalRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 }
 
 func testbrodcastItProccessEvent(t *testing.T) {
@@ -159,7 +159,7 @@ func testbrodcastItProccessEvent(t *testing.T) {
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 }
 func testbrodcastItGetCDRs(t *testing.T) {
 	eCDR := &engine.CDR{

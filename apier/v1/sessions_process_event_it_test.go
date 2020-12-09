@@ -472,7 +472,6 @@ func testSSv1ItProcessCDRForSessionFromProcessEvent(t *testing.T) {
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testSSv1ItGetCDRs(t *testing.T) {
@@ -743,7 +742,6 @@ func testSSv1ItProcessEventWithCDR(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testSSv1ItGetCDRsFromProcessEvent(t *testing.T) {
@@ -823,7 +821,6 @@ func testSSv1ItProcessEventWithCDRResourceError(t *testing.T) {
 		args, &rply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Error(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testSSv1ItGetCDRsFromProcessEventResourceError(t *testing.T) {
@@ -904,7 +901,6 @@ func testSSv1ItProcessEventWithCDRResourceErrorBlockError(t *testing.T) {
 		args, &rply); err == nil || err.Error() != "RESOURCES_ERROR:cannot find usage record with id: testSSv1ItProcessEventWithCDRResourceErrorBlockError" {
 		t.Error(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testSSv1ItGetCDRsFromProcessEventResourceErrorBlockError(t *testing.T) {

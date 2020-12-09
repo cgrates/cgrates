@@ -1553,7 +1553,7 @@ func testApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 // For now just test that they execute without errors
@@ -1939,7 +1939,7 @@ func testApierImportTPFromFolderPath(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.ImportTarrifPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testApierLoadTariffPlanFromStorDbDryRun(t *testing.T) {

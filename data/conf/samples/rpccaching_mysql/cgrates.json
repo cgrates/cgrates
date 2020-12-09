@@ -19,7 +19,7 @@
 
 "caches":{
 	"partitions": {
-		"*rpc_responses": {"limit": -1, "ttl": "1s"}
+		"*rpc_responses": {"limit": -1, "ttl": "500ms"}
 	},
 },
 

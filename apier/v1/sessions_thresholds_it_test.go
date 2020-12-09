@@ -144,7 +144,7 @@ func testSessionSv1ItTPFromFolder(t *testing.T) {
 	if err := sSApierRpc2.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testSessionSv1ItGetThreshold(t *testing.T) {

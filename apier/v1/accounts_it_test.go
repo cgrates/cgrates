@@ -296,13 +296,12 @@ func testAccITDebitBalance(t *testing.T) {
 		if !accExist {
 			exstr = "not "
 		}
-		t.Fatalf("Balance with ID %s should %sexist", accBallID, exstr)
+		t.Fatalf("Balance with ID %s should %s exist", accBallID, exstr)
 	}
 	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 0) })
 }
 
 func testAccITDebitBalanceWithoutTenant(t *testing.T) {
-	time.Sleep(5 * time.Second)
 	var reply string
 	if err := accRPC.Call(utils.APIerSv1DebitBalance, &AttrAddBalance{
 		Account:     accAcount,
@@ -318,7 +317,7 @@ func testAccITDebitBalanceWithoutTenant(t *testing.T) {
 		if !accExist {
 			exstr = "not "
 		}
-		t.Fatalf("Balance with ID %s should %sexist", accBallID, exstr)
+		t.Fatalf("Balance with ID %s should %s exist", accBallID, exstr)
 	}
 	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 0) })
 }
@@ -838,7 +837,7 @@ func testAccITTPFromFolder(t *testing.T) {
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testAccITAddBalanceWithDestinations(t *testing.T) {

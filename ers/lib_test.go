@@ -32,7 +32,7 @@ import (
 
 var (
 	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
+	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 )

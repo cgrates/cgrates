@@ -132,7 +132,7 @@ func testV1AccLoadTarrifPlans(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 }
 
 func testV1AccGetAccountAfterLoad(t *testing.T) {
@@ -248,7 +248,6 @@ func testV1AccSendToThreshold(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
-	time.Sleep(10 * time.Millisecond)
 
 	tPrfl := &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{

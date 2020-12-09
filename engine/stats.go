@@ -512,7 +512,7 @@ func (sS *StatService) StartLoop() {
 func (sS *StatService) V1ResetStatQueue(tntID *utils.TenantID, rply *string) (err error) {
 	var sq *StatQueue
 	if sq, err = sS.dm.GetStatQueue(tntID.Tenant, tntID.ID,
-		true, false, utils.NonTransactional); err != nil {
+		true, true, utils.NonTransactional); err != nil {
 		return
 	}
 	sq.Lock()

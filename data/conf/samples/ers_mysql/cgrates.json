@@ -259,7 +259,7 @@
 			"source_path": "/tmp/partErs1/in",
 			"flags": ["*cdrs"],
 			"processed_path": "/tmp/partErs1/out",
-			"partial_record_cache": "2s",
+			"partial_record_cache": "500ms",
 			"partial_cache_expiry_action": "*dump_to_file",
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -300,7 +300,7 @@
 			"source_path": "/tmp/partErs2/in",
 			"processed_path": "/tmp/partErs2/out",
 			"flags": ["*cdrs"],
-			"partial_record_cache": "1s",
+			"partial_record_cache": "500ms",
 			"partial_cache_expiry_action": "*post_cdr",
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -332,7 +332,7 @@
 			"processed_path": "/tmp/flatstoreErs/out",
 			"failed_calls_prefix": "missed_calls",
 			"flags": ["*cdrs"],
-			"partial_record_cache": "2s",
+			"partial_record_cache": "500ms",
 			"fields":[
 				{"tag": "Tor", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable","value":"~*req.3;~*req.1;~*req.2", "mandatory": true},

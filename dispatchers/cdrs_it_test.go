@@ -148,7 +148,6 @@ func testDspCDRsProcessEvent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testDspCDRsCountCDR(t *testing.T) {
@@ -238,7 +237,6 @@ func testDspCDRsProcessCDR(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testDspCDRsGetCDR2(t *testing.T) {
@@ -292,7 +290,6 @@ func testDspCDRsProcessExternalCDR(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testDspCDRsGetCDR3(t *testing.T) {
@@ -439,7 +436,6 @@ func testDspCDRsProcessEventNoAuth(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testDspCDRsCountCDRNoAuth(t *testing.T) {
@@ -517,7 +513,6 @@ func testDspCDRsProcessCDRNoAuth(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testDspCDRsGetCDR2NoAuth(t *testing.T) {
@@ -565,7 +560,6 @@ func testDspCDRsProcessExternalCDRNoAuth(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testDspCDRsGetCDR3NoAuth(t *testing.T) {

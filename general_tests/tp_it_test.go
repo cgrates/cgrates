@@ -300,23 +300,6 @@ func testTpExecuteActionCgrRpcAcc(t *testing.T) {
 	}
 }
 
-// Deprecated
-// func //(t *testing.T) {
-// 	var reply string
-// 	if err := tpRPC.Call(utils.APIerSv2ExecuteAction, utils.AttrExecuteAction{
-// 		ActionsId: "RPC_CDRSTATS",
-// 	}, &reply); err != nil {
-// 		t.Error("Got error on APIerSv2.ExecuteAction: ", err.Error())
-// 	} else if reply != utils.OK {
-// 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
-// 	}
-// 	var queue engine.CDRStatsQueue
-// 	time.Sleep(20 * time.Millisecond)
-// 	if err := tpRPC.Call(utils.CDRStatsV1GetQueue, "qtest", &queue); err != nil {
-// 		t.Error("Got error on CDRStatsV1.GetQueue: ", err.Error())
-// 	}
-// }
-
 func testTpCreateExecuteActionMatch(t *testing.T) {
 	var reply string
 	if err := tpRPC.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{

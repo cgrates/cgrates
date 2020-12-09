@@ -117,7 +117,7 @@ func testActionSLoadFromFolder(t *testing.T) {
 	if err := actSRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, acts, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testActionSGetActionProfile(t *testing.T) {

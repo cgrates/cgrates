@@ -287,7 +287,6 @@ func memProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg 
 			return
 		case <-tm.C:
 		}
-		time.Sleep(interval)
 		memPath := path.Join(memProfDir, fmt.Sprintf("mem%v.prof", i))
 		if !memProfFile(memPath) {
 			shdChan.CloseOnce()

@@ -168,7 +168,7 @@ func testFlatstoreITHandleCdr1File(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	time.Sleep(3 * time.Second)
+	time.Sleep(time.Second)
 	// check the files to be processed
 	filesInDir, _ := ioutil.ReadDir("/tmp/flatstoreErs/in")
 	if len(filesInDir) != 0 {

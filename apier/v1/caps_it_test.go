@@ -95,12 +95,6 @@ func testCapsStartEngine(t *testing.T) {
 	}
 }
 
-func handlePing(clnt *rpc2.Client, arg *utils.DurationArgs, reply *string) error {
-	time.Sleep(arg.Duration)
-	*reply = utils.OK
-	return nil
-}
-
 // Connect rpc client to rater
 func testCapsRPCConn(t *testing.T) {
 	var err error
@@ -276,7 +270,6 @@ func testCapsOnBiJSONQueue(t *testing.T) {
 }
 
 func testCapsKillEngine(t *testing.T) {
-	time.Sleep(100 * time.Millisecond)
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

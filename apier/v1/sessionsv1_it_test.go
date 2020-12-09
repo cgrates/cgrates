@@ -196,7 +196,7 @@ func testSSv1ItTPFromFolder(t *testing.T) {
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testSSv1ItAuth(t *testing.T) {
@@ -598,7 +598,6 @@ func testSSv1ItProcessCDR(t *testing.T) {
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 // TestSSv1ItProcessEvent processes individual event and also checks it's CDRs
@@ -685,7 +684,6 @@ func testSSv1ItProcessEvent(t *testing.T) {
 	if rplyCDR != utils.OK {
 		t.Errorf("Unexpected reply: %s", rplyCDR)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testSSv1ItCDRsGetCdrs(t *testing.T) {
@@ -865,7 +863,6 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal { // no monetary change bacause the sessin was terminated
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-	time.Sleep(100 * time.Millisecond)
 	var cdrs []*engine.CDR
 	argsCDR := &utils.RPCCDRsFilterWithOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{

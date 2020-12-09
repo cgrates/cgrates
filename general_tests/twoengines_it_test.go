@@ -163,7 +163,6 @@ func testTwoEnginesSetThreshold(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(50 * time.Millisecond)
 	if err := engineOneRpc.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &reply); err != nil {
 		t.Error(err)
@@ -250,7 +249,6 @@ func testTwoEnginesUpdateThreshold(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(50 * time.Millisecond)
 	if err := engineOneRpc.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
 		t.Error(err)

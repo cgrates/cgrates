@@ -156,7 +156,7 @@ func testDsp(t *testing.T, tests []func(t *testing.T), testName, all, all2, disp
 	dispEngine.loadData2(t, path.Join(dspDataDir, "tariffplans", attrTF))
 	allEngine.loadData(t, path.Join(dspDataDir, "tariffplans", allTF))
 	allEngine2.loadData(t, path.Join(dspDataDir, "tariffplans", all2TF))
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	for _, stest := range tests {
 		t.Run(testName, stest)
 	}

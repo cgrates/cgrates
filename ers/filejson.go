@@ -84,15 +84,17 @@ func (rdr *JSONFileER) Serve() (err error) {
 			utils.ERs, rdr.rdrExit)
 	default:
 		go func() {
+			tm := time.NewTimer(0)
 			for {
 				// Not automated, process and sleep approach
 				select {
 				case <-rdr.rdrExit:
+					tm.Stop()
 					utils.Logger.Info(
 						fmt.Sprintf("<%s> stop monitoring path <%s>",
 							utils.ERs, rdr.rdrDir))
 					return
-				default:
+				case <-tm.C:
 				}
 				filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
 				for _, file := range filesInDir {
@@ -107,7 +109,7 @@ func (rdr *JSONFileER) Serve() (err error) {
 						}
 					}(file.Name())
 				}
-				time.Sleep(rdr.Config().RunDelay)
+				tm.Reset(rdr.Config().RunDelay)
 			}
 		}()
 	}

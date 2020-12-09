@@ -145,7 +145,7 @@ func testCsvITLoadTPFromFolder(t *testing.T) {
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 // The default scenario, out of ers defined in .cfg file
@@ -236,7 +236,7 @@ func testCsvITProcessCDR(t *testing.T) {
 }
 
 func testCsvITAnalyseCDRs(t *testing.T) {
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
 	var cdrs []*engine.CDR
 	args := &utils.RPCCDRsFilterWithOpts{
@@ -288,7 +288,7 @@ func testCsvITProcessFilteredCDR(t *testing.T) {
 }
 
 func testCsvITAnalyzeFilteredCDR(t *testing.T) {
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
 	var cdrs []*engine.CDR
 	args := &utils.RPCCDRsFilterWithOpts{
@@ -309,7 +309,7 @@ func testCsvITAnalyzeFilteredCDR(t *testing.T) {
 }
 
 func testCsvITProcessedFiles(t *testing.T) {
-	time.Sleep(time.Second)
+	time.Sleep(500 * time.Millisecond)
 	if outContent1, err := ioutil.ReadFile("/tmp/ers/out/file1.csv"); err != nil {
 		t.Error(err)
 	} else if fileContent1 != string(outContent1) {
@@ -344,7 +344,7 @@ func testCsvITReaderWithFilter(t *testing.T) {
 }
 
 func testCsvITAnalyzeReaderWithFilter(t *testing.T) {
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
 	var cdrs []*engine.CDR
 	args := &utils.RPCCDRsFilterWithOpts{

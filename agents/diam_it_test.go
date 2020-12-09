@@ -252,7 +252,7 @@ func testDiamItTPFromFolder(t *testing.T) {
 	if isDispatcherActive {
 		testDiamItTPLoadData(t)
 	}
-	time.Sleep(time.Second) // Give time for scheduler to execute topups
+	time.Sleep(100 * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testDiamItTPLoadData(t *testing.T) {
@@ -272,7 +272,7 @@ func testDiamItTPLoadData(t *testing.T) {
 	}()
 	select {
 	case <-wchan:
-	case <-time.After(5 * time.Second):
+	case <-time.After(time.Second):
 		t.Errorf("cgr-loader failed: ")
 	}
 }

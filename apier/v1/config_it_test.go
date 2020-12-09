@@ -431,7 +431,7 @@ func testConfigStartEngineFromHTTP(t *testing.T) {
 	if !connected {
 		t.Errorf("engine did not open port <%s>", "localhost:2012")
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	var rply map[string]interface{}
 	if err := jsonClnt.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
 		t.Error(err)

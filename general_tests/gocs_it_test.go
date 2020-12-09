@@ -104,7 +104,6 @@ func testGOCSResetDB(t *testing.T) {
 		t.Fatal(err)
 	}
 	// give some time to flush DataDB and StorDB for all 3 engines
-	time.Sleep(100 * time.Millisecond)
 }
 
 // Start CGR Engine

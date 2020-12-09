@@ -1133,7 +1133,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, utils.ToJSON(aSessions))
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, DestinationPrefixes: []string{"1009"}}
 	if err := sessionsRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
