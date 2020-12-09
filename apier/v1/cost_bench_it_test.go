@@ -85,6 +85,15 @@ func testCostBenchLoadFromFolder(b *testing.B) {
 	time.Sleep(500 * time.Millisecond)
 }
 
+func testCostBenchLoadFromFolder2(b *testing.B) {
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial2")}
+	if err := costBenchRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+		b.Error(err)
+	}
+	time.Sleep(500 * time.Millisecond)
+}
+
 func testCostBenchSetRateProfile(b *testing.B) {
 	rate1 := &engine.Rate{
 		ID:              "RATE1",
@@ -114,6 +123,58 @@ func testCostBenchSetRateProfile(b *testing.B) {
 				Weight:    10,
 				Rates: map[string]*engine.Rate{
 					"RATE1": rate1,
+				},
+			},
+		},
+	}
+	var reply string
+	if err := costBenchRPC.Call(utils.APIerSv1SetRateProfile, rPrf, &reply); err != nil {
+		b.Error(err)
+	} else if reply != utils.OK {
+		b.Error("Unexpected reply returned", reply)
+	}
+}
+
+func testCostBenchSetRateProfile2(b *testing.B) {
+	rate1 := &engine.Rate{
+		ID:              "RATE1",
+		Weight:          0,
+		ActivationTimes: "* * * * *",
+		IntervalRates: []*engine.IntervalRate{
+			{
+				IntervalStart: 0,
+				RecurrentFee:  0.20,
+				Unit:          time.Minute,
+				Increment:     time.Minute,
+			},
+			{
+				IntervalStart: time.Minute,
+				RecurrentFee:  0.10,
+				Unit:          time.Minute,
+				Increment:     time.Second,
+			},
+		},
+	}
+	rtChristmas := &engine.Rate{
+		ID:              "RT_CHRISTMAS",
+		Weight:          30,
+		ActivationTimes: "* * 24 12 *",
+		IntervalRates: []*engine.IntervalRate{{
+			IntervalStart: 0,
+			RecurrentFee:  0.06,
+			Unit:          time.Minute,
+			Increment:     time.Second,
+		}},
+	}
+	rPrf := &RateProfileWithCache{
+		RateProfileWithOpts: &engine.RateProfileWithOpts{
+			RateProfile: &engine.RateProfile{
+				ID:        "RateChristmas",
+				FilterIDs: []string{"*string:~*req.Subject:1010"},
+				Weight:    50,
+				Rates: map[string]*engine.Rate{
+					"RATE1":          rate1,
+					"RATE_CHRISTMAS": rtChristmas,
 				},
 			},
 		},
@@ -159,6 +220,39 @@ func BenchmarkCostWithRALs(b *testing.B) {
 	testCostBenchKillEngine(b)
 }
 
+func BenchmarkCostDiffPeriodWithRALs(b *testing.B) {
+	costBenchConfigDIR = "tutinternal"
+	testCostBenchInitCfg(b)
+	testCostBenchInitDataDb(b)
+	testCostBenchResetStorDb(b)
+	testCostBenchStartEngine(b)
+	testCostBenchRPCConn(b)
+	testCostBenchLoadFromFolder2(b)
+
+	tStart, _ := utils.ParseTimeDetectLayout("2020-12-09T07:00:00Z", utils.EmptyString)
+	tEnd, _ := utils.ParseTimeDetectLayout("2020-12-09T09:00:00Z", utils.EmptyString)
+	cd := &engine.CallDescriptorWithOpts{
+		CallDescriptor: &engine.CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1010",
+			Destination:   "1012",
+			DurationIndex: tEnd.Sub(tStart),
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var cc engine.CallCost
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if err := costBenchRPC.Call(utils.ResponderGetCost, cd, &cc); err != nil {
+			b.Error("Got error on Responder.GetCost: ", err.Error())
+		}
+	}
+	b.StopTimer()
+	testCostBenchKillEngine(b)
+}
+
 func BenchmarkCostWithRateS(b *testing.B) {
 	costBenchConfigDIR = "tutinternal"
 	testCostBenchInitCfg(b)
@@ -178,6 +272,40 @@ func BenchmarkCostWithRateS(b *testing.B) {
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
 					utils.Subject: "1001",
+				},
+			},
+		},
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if err := costBenchRPC.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err != nil {
+			b.Error(err)
+		}
+	}
+	b.StopTimer()
+	testCostBenchKillEngine(b)
+}
+
+func BenchmarkCostDiffPeriodWithRateS(b *testing.B) {
+	costBenchConfigDIR = "tutinternal"
+	testCostBenchInitCfg(b)
+	testCostBenchInitDataDb(b)
+	testCostBenchResetStorDb(b)
+	testCostBenchStartEngine(b)
+	testCostBenchRPCConn(b)
+	testCostBenchSetRateProfile2(b)
+	var rply *engine.RateProfileCost
+	argsRt := &utils.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			Opts: map[string]interface{}{
+				utils.OptsRatesStartTime: time.Date(2020, 12, 23, 59, 0, 0, 0, time.UTC),
+				utils.OptsRatesUsage:     "2h",
+			},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Event: map[string]interface{}{
+					utils.Subject: "1010",
 				},
 			},
 		},
