@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -18,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"flag"
 	"path"
 	"reflect"
 	"testing"
@@ -35,7 +36,6 @@ var (
 	tpActPrfCfgIn    *config.CGRConfig
 	tpActPrfCfgOut   *config.CGRConfig
 	tpActPrfMigrator *Migrator
-	newDataDir       = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	actPrf           []*utils.TPActionProfile
 )
 
@@ -56,12 +56,12 @@ func TestTpActPrfMove(t *testing.T) {
 
 func testTpActPrfConnect(t *testing.T) {
 	var err error
-	tpActPrfPathIn = path.Join(*newDataDir, "conf", "samples", "tutmongo")
+	tpActPrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	tpActPrfCfgIn, err = config.NewCGRConfigFromPath(tpActPrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tpActPrfPathOut = path.Join(*newDataDir, "conf", "samples", "tutmysql")
+	tpActPrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	tpActPrfCfgOut, err = config.NewCGRConfigFromPath(tpActPrfPathOut)
 	if err != nil {
 		t.Fatal(err)
