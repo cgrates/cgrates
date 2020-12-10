@@ -74,6 +74,7 @@ var (
 		testAccITMultipleBalance,
 		testAccITMultipleBalanceWithoutTenant,
 		testAccITRemoveBalances,
+		testAccITAddVoiceBalanceWithDestinations,
 		testAccITStopCgrEngine,
 	}
 )
@@ -1272,5 +1273,77 @@ func testAccITRemoveBalances(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
+	}
+}
+
+func testAccITAddVoiceBalanceWithDestinations(t *testing.T) {
+	var reply string
+	args := &utils.AttrSetBalance{
+		Tenant:      "cgrates.com",
+		Account:     "testAccITAddVoiceBalanceWithDestinations",
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:             "testAccITAddVoiceBalanceWithDestinations",
+			utils.DestinationIDs: "DST_1002",
+			utils.RatingSubject:  "RP_1001",
+			utils.Weight:         10,
+			utils.Value:          time.Hour,
+		},
+	}
+	if err := accRPC.Call(utils.APIerSv1SetBalance, args, &reply); err != nil {
+		t.Error("Got error on SetBalance: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling SetBalance received: %s", reply)
+	}
+
+	var acnt engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.com",
+		Account: "testAccITAddVoiceBalanceWithDestinations",
+	}
+	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, value := range acnt.BalanceMap[utils.VOICE] {
+		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
+		if value.ID == "testAccITAddVoiceBalanceWithDestinations" {
+			if value.GetValue() != 3.6e+12 {
+				t.Errorf("Expecting %+v, received: %+v", 3.6e+12, value.GetValue())
+			}
+			if value.Weight != 10 {
+				t.Errorf("Expecting %+v, received: %+v", 10, value.Weight)
+			}
+			if value.RatingSubject != "RP_1001" {
+				t.Errorf("Expecting %+v, received: %+v", "RP_1001", value.Weight)
+			}
+			dstMp := utils.StringMap{
+				"DST_1002": true,
+			}
+			if !reflect.DeepEqual(value.DestinationIDs, dstMp) {
+				t.Errorf("Expecting %+v, received: %+v", dstMp, value.DestinationIDs)
+			}
+			break
+		}
+	}
+
+	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
+	cd := &engine.CallDescriptorWithOpts{
+		CallDescriptor: &engine.CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.com",
+			Subject:       "testAccITAddVoiceBalanceWithDestinations",
+			Account:       "testAccITAddVoiceBalanceWithDestinations",
+			Destination:   "1002",
+			DurationIndex: time.Minute,
+			TimeStart:     tStart,
+			TimeEnd:       tStart.Add(time.Minute),
+		},
+	}
+	var rply time.Duration
+	if err := accRPC.Call(utils.ResponderGetMaxSessionTime, cd, &rply); err != nil {
+		t.Error("Got error on Responder.Debit: ", err.Error())
+	} else if rply != 0 {
+		t.Errorf("Expecting %+v, received: %+v", 0, rply)
 	}
 }
