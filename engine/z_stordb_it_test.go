@@ -43,6 +43,8 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitIsDBEmpty,
 	testStorDBitCRUDVersions,
 	testStorDBitCRUDTPActionProfiles,
+	testStorDBitCRUDTPDispatcherS,
+	testStorDBitCRUDTPFilters,
 	testStorDBitCRUDTpTimings,
 	testStorDBitCRUDTpDestinations,
 	testStorDBitCRUDTpRates,
@@ -204,6 +206,153 @@ func testStorDBitCRUDTPActionProfiles(t *testing.T) {
 	if err := storDB.RemTpData(utils.EmptyString, actPrf[0].TPid, nil); err != nil {
 		t.Error(err)
 	} else if _, err := storDB.GetTPActionProfiles(actPrf[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func testStorDBitCRUDTPDispatcherS(t *testing.T) {
+	//READ
+	if _, err := storDB.GetTPDispatcherProfiles("TP1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//WRITE
+	var dsp = []*utils.TPDispatcherProfile{
+		{
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "Dsp1",
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			Strategy: utils.MetaFirst,
+			Weight:   10,
+		},
+		{
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "Dsp2",
+			FilterIDs: []string{"*string:~*req.Destination:10"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-08-15T14:00:00Z",
+			},
+			Strategy: utils.MetaFirst,
+			Weight:   20,
+		},
+	}
+	if err := storDB.SetTPDispatcherProfiles(dsp); err != nil {
+		t.Errorf("Unable to set TPDispatcherProfile")
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPDispatcherProfiles(dsp[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(dsp[0], rcv[0]) ||
+		reflect.DeepEqual(dsp[0], rcv[1])) {
+		t.Errorf("Expected: \n%+v\n, received: \n%+v\n || \n%+v",
+			utils.ToJSON(dsp[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
+	}
+
+	//UPDATE and WRITE
+	dsp[0].FilterIDs = []string{"*prefix:~*Account:1005"}
+	dsp[1].FilterIDs = []string{"*prefix:~*Account:1005"}
+	if err := storDB.SetTPDispatcherProfiles(dsp); err != nil {
+		t.Errorf("Unable to set TPDispatcherProfile")
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPDispatcherProfiles(dsp[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(dsp[0], rcv[0]) ||
+		reflect.DeepEqual(dsp[0], rcv[1])) {
+		t.Errorf("Expected: \n%+v\n, received: \n%+v\n || \n%+v",
+			utils.ToJSON(dsp[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
+	}
+
+	//REMOVE and READ
+	if err := storDB.RemTpData(utils.EmptyString, dsp[0].TPid, nil); err != nil {
+		t.Error(err)
+	} else if _, err := storDB.GetTPDispatcherProfiles(dsp[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func testStorDBitCRUDTPFilters(t *testing.T) {
+	//READ
+	if _, err := storDB.GetTPFilters("TP1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//WRITE
+	tpFilters := []*utils.TPFilterProfile{
+		{
+			TPid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "Filter1",
+			Filters: []*utils.TPFilter{
+				{
+					Type:    utils.MetaString,
+					Element: "Account",
+					Values:  []string{"1001", "1002"},
+				},
+			},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+		},
+		{
+			TPid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "Filter2",
+			Filters: []*utils.TPFilter{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "Destination",
+					Values:  []string{"10"},
+				},
+			},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2015-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+		},
+	}
+	if err := storDB.SetTPFilters(tpFilters); err != nil {
+		t.Errorf("Unable to set TPFilters")
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPFilters(tpFilters[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(tpFilters[0], rcv[0]) ||
+		reflect.DeepEqual(tpFilters[0], rcv[1])) {
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+			utils.ToIJSON(tpFilters[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+	}
+
+	//UPDATE and WRITE
+	tpFilters[0].Filters[0].Element = "Account"
+	tpFilters[1].Filters[0].Element = "Account"
+	if err := storDB.SetTPFilters(tpFilters); err != nil {
+		t.Errorf("Unable to set TPFilters")
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPFilters(tpFilters[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(tpFilters[0], rcv[0]) ||
+		reflect.DeepEqual(tpFilters[0], rcv[1])) {
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+			utils.ToIJSON(tpFilters[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+	}
+
+	//REMOVE and READ
+	if err := storDB.RemTpData(utils.EmptyString, tpFilters[0].TPid, nil); err != nil {
+		t.Error(err)
+	} else if _, err := storDB.GetTPFilters(tpFilters[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
