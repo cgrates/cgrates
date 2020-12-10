@@ -2302,7 +2302,6 @@ func testOnStorITActionProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(actPrf, rcv) {
 		t.Errorf("Expecting: %v, received: %v", actPrf, rcv)
 	}
-	time.Sleep(sleepDelay)
 
 	//remove from database
 	if err := onStor.RemoveActionProfile("cgrates.org", "TEST_ID1",
