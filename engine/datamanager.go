@@ -1995,9 +1995,6 @@ func (dm *DataManager) SetActions(key string, as Actions, transactionID string) 
 	if err = dm.DataDB().SetActionsDrv(key, as); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.ACTION_PREFIX, []string{key}, true); err != nil {
-		return
-	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1SetActions,
@@ -2022,10 +2019,6 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 	}
 	if err = dm.DataDB().RemoveActionsDrv(key); err != nil {
 		return
-	}
-	if errCh := Cache.Remove(utils.CacheActions, key,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return errCh
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
 		var reply string
@@ -2410,9 +2403,6 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 	if err = dm.DataDB().SetRatingProfileDrv(rpf); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, true); err != nil {
-		return
-	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; itm.Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
@@ -2439,10 +2429,6 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 	}
 	if err = dm.DataDB().RemoveRatingProfileDrv(key); err != nil {
 		return
-	}
-	if errCh := Cache.Remove(utils.CacheRatingProfiles, key,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return errCh
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; itm.Replicate {
 		var reply string

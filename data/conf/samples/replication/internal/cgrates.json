@@ -13,10 +13,6 @@
 
 
 "rpc_conns": {
-	"conn1": {
-		"strategy": "*first",
-		"conns": [{"address": "127.0.0.1:2032", "transport":"*json"}],
-	},
 	"conn2": {
 		"strategy": "*broadcast_sync",
 		"conns": [
@@ -25,7 +21,7 @@
 		],
 	},
 	"connCache": {
-		"strategy": "*broadcast",
+		"strategy": "*broadcast_sync",// be brodcast sync in test
 		"conns": [
 			{"address": "127.0.0.1:2022", "transport":"*json"},
 			{"address": "127.0.0.1:2032", "transport":"*json"}
@@ -37,7 +33,6 @@
 
 "data_db": {
 	"db_type": "*internal",
-	"remote_conns": ["conn1"],
 	"replication_conns": ["conn2"],
 	"items":{
 		"*accounts":{"remote":false,"replicate":true},

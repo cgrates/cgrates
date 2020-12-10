@@ -76,20 +76,51 @@ type AttrRemoveDestination struct {
 
 func (apierSv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *string) (err error) {
 	for _, dstID := range attr.DestinationIDs {
-		if len(attr.Prefixes) == 0 {
-			if err = apierSv1.DataManager.RemoveDestination(dstID, utils.NonTransactional); err != nil {
-				*reply = err.Error()
-				break
-			} else {
-				*reply = utils.OK
+		var oldDst *engine.Destination
+		if oldDst, err = apierSv1.DataManager.GetDestination(dstID, true, true,
+			utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return
+		}
+		if len(attr.Prefixes) != 0 {
+			newDst := &engine.Destination{
+				Id:       dstID,
+				Prefixes: make([]string, 0, len(oldDst.Prefixes)),
 			}
-			// TODO list
-			// get destination
-			// remove prefixes
-			// handle reverse destination
-			// set destinastion
+			toRemove := utils.NewStringSet(attr.Prefixes)
+			for _, prfx := range oldDst.Prefixes {
+				if !toRemove.Has(prfx) {
+					newDst.Prefixes = append(newDst.Prefixes, prfx)
+				}
+			}
+			if len(newDst.Prefixes) != 0 { // only update the current destination
+				if err = apierSv1.DataManager.SetDestination(newDst, utils.NonTransactional); err != nil {
+					return
+				}
+				if err = apierSv1.DataManager.UpdateReverseDestination(oldDst, newDst, utils.NonTransactional); err != nil {
+					return
+				}
+				if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+						ArgsCache: map[string][]string{utils.ReverseDestinationIDs: oldDst.Prefixes,
+							utils.DestinationIDs: {dstID}},
+					}, reply); err != nil {
+					return
+				}
+				continue
+			}
+		}
+		if err = apierSv1.DataManager.RemoveDestination(dstID, utils.NonTransactional); err != nil {
+			return
+		}
+		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+				ArgsCache: map[string][]string{utils.ReverseDestinationIDs: oldDst.Prefixes,
+					utils.DestinationIDs: {dstID}},
+			}, reply); err != nil {
+			return
 		}
 	}
+	*reply = utils.OK
 	return
 }
 
@@ -184,6 +215,12 @@ func (apierSv1 *APIerSv1) RemoveRatingPlan(ID *string, reply *string) error {
 	err := apierSv1.DataManager.RemoveRatingPlan(*ID, utils.NonTransactional)
 	if err != nil {
 		return utils.NewErrServerError(err)
+	}
+	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			ArgsCache: map[string][]string{utils.RatingPlanIDs: {*ID}},
+		}, reply); err != nil {
+		return err
 	}
 	//generate a loadID for CacheRatingPlans and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingPlans: time.Now().UnixNano()}); err != nil {
@@ -286,6 +323,12 @@ func (apierSv1 *APIerSv1) LoadRatingProfile(attrs *utils.TPRatingProfile, reply 
 		return utils.NewErrServerError(err)
 	}
 	if err := dbReader.LoadRatingProfilesFiltered(attrs); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]interface{})); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -404,7 +447,7 @@ func (apierSv1 *APIerSv1) ImportTariffPlanFromFolder(attrs *utils.AttrImportTPFr
 	return nil
 }
 
-// Sets a specific rating profile working with data directly in the DataDB without involving storDb
+// SetRatingProfile sets a specific rating profile working with data directly in the DataDB without involving storDb
 func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{"ToR", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -452,7 +495,12 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 		return utils.NewErrServerError(err)
 	}
 	//CacheReload
-
+	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			ArgsCache: map[string][]string{utils.RatingProfileIDs: {rpfl.Id}},
+		}, reply); err != nil {
+		return err
+	}
 	//generate a loadID for CacheRatingProfiles and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
@@ -596,6 +644,13 @@ func (apierSv1 *APIerSv1) SetActions(attrs *V1AttrSetActions, reply *string) (er
 	}
 	if err := apierSv1.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
+	}
+	//CacheReload
+	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			ArgsCache: map[string][]string{utils.ActionIDs: {attrs.ActionsId}},
+		}, reply); err != nil {
+		return err
 	}
 	//generate a loadID for CacheActions and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
@@ -1202,6 +1257,12 @@ func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, rep
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
 	}
+	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			ArgsCache: map[string][]string{utils.RatingProfileIDs: {attr.GetId()}},
+		}, reply); err != nil {
+		return err
+	}
 	//generate a loadID for CacheActionPlans and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
@@ -1291,6 +1352,13 @@ func (apierSv1 *APIerSv1) RemoveActions(attr *AttrRemoveActions, reply *string) 
 			*reply = err.Error()
 			return err
 		}
+	}
+	//CacheReload
+	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			ArgsCache: map[string][]string{utils.ActionIDs: attr.ActionIDs},
+		}, reply); err != nil {
+		return err
 	}
 	//generate a loadID for CacheActions and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
