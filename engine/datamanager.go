@@ -743,16 +743,9 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
 			return
 		}
 		if err == utils.ErrNotFound {
-			sq = &StatQueue{Tenant: tnt, ID: id, SQMetrics: make(map[string]StatMetric)}
 			// if the statQueue didn't exists simply initiate all the metrics
-			for _, metric := range metrics {
-				var stsMetric StatMetric
-				if stsMetric, err = NewStatMetric(metric.MetricID,
-					minItems,
-					metric.FilterIDs); err != nil {
-					return
-				}
-				sq.SQMetrics[metric.MetricID] = stsMetric
+			if sq, err = NewStatQueue(tnt, id, metrics, minItems); err != nil {
+				return
 			}
 		} else {
 			for sqMetricID := range sq.SQMetrics {
@@ -764,20 +757,24 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
 						needsRemove = false
 						break
 					}
-					if _, has := sq.SQMetrics[metric.MetricID]; !has {
-						var stsMetric StatMetric
-						if stsMetric, err = NewStatMetric(metric.MetricID,
-							minItems,
-							metric.FilterIDs); err != nil {
-							return
-						}
-						sq.SQMetrics[metric.MetricID] = stsMetric
-					}
 				}
 				if needsRemove {
 					delete(sq.SQMetrics, sqMetricID)
 				}
 			}
+
+			for _, metric := range metrics {
+				if _, has := sq.SQMetrics[metric.MetricID]; !has {
+					var stsMetric StatMetric
+					if stsMetric, err = NewStatMetric(metric.MetricID,
+						minItems,
+						metric.FilterIDs); err != nil {
+						return
+					}
+					sq.SQMetrics[metric.MetricID] = stsMetric
+				}
+			}
+
 			// if the user define a statQueue with an existing metric check if we need to update it based on queue length
 			sq.ttl = ttl
 			if _, err = sq.remExpired(); err != nil {

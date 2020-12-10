@@ -137,8 +137,12 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 	if arg.UsageTTL > 0 {
 		ttl = &arg.UsageTTL
 	}
-	if err = apierSv1.DataManager.SetResource(&engine.Resource{Tenant: arg.Tenant, ID: arg.ID},
-		ttl, arg.Limit, false); err != nil {
+	// for non stored we do not save the metrics
+	if err = apierSv1.DataManager.SetResource(&engine.Resource{
+		Tenant: arg.Tenant,
+		ID:     arg.ID,
+		Usages: make(map[string]*engine.ResourceUsage),
+	}, ttl, arg.Limit, !arg.Stored); err != nil {
 		return
 	}
 	//handle caching for Resource
