@@ -909,6 +909,15 @@ const (
 	ActionTTL                = "ActionTTL"
 	ActionOpts               = "ActionOpts"
 	ActionPath               = "ActionPath"
+	TPid                     = "TPid"
+	LoadId                   = "LoadId"
+	ActionPlanId             = "ActionPlanId"
+	AccountActionsId         = "AccountActionsId"
+	Loadid                   = "loadid"
+	AccountLowerCase         = "account"
+	ActionPlan               = "ActionPlan"
+	ActionsId                = "ActionsId"
+	TimingId                 = "TimingId"
 )
 
 // Migrator Action

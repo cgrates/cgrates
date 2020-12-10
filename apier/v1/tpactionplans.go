@@ -26,11 +26,11 @@ import (
 
 // SetTPActionPlan creates a new ActionTimings profile within a tariff plan
 func (apierSv1 *APIerSv1) SetTPActionPlan(attrs *utils.TPActionPlan, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID", "ActionPlan"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.ActionPlan}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, at := range attrs.ActionPlan {
-		requiredFields := []string{"ActionsId", "TimingId", "Weight"}
+		requiredFields := []string{utils.ActionsId, utils.TimingId, utils.Weight}
 		if missing := utils.MissingStructFields(at, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Action:%s:%v", utils.ErrMandatoryIeMissing.Error(), at.ActionsId, missing)
 		}
@@ -49,7 +49,7 @@ type AttrGetTPActionPlan struct {
 
 // GetTPActionPlan queries specific ActionPlan profile on tariff plan
 func (apierSv1 *APIerSv1) GetTPActionPlan(attrs *AttrGetTPActionPlan, reply *utils.TPActionPlan) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	aps, err := apierSv1.StorDb.GetTPActionPlans(attrs.TPid, attrs.ID)
@@ -70,11 +70,11 @@ type AttrGetTPActionPlanIds struct {
 
 // GetTPActionPlanIds queries ActionPlan identities on specific tariff plan.
 func (apierSv1 *APIerSv1) GetTPActionPlanIds(attrs *AttrGetTPActionPlanIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPActionPlans,
-		utils.TPDistinctIds{"tag"}, nil, &attrs.PaginatorWithSearch)
+		utils.TPDistinctIds{utils.TagCfg}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -87,11 +87,11 @@ func (apierSv1 *APIerSv1) GetTPActionPlanIds(attrs *AttrGetTPActionPlanIds, repl
 
 // RemoveTPActionPlan removes specific ActionPlan on Tariff plan
 func (apierSv1 *APIerSv1) RemoveTPActionPlan(attrs *AttrGetTPActionPlan, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPActionPlans,
-		attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
+		attrs.TPid, map[string]string{utils.TagCfg: attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
