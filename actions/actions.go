@@ -154,7 +154,7 @@ func (aS *ActionS) asapExecuteActions(sActs *scheduledActs) {
 					utils.ActionS, sActs.tenant, sActs.apID, err))
 		}
 		return
-	}, aS.cfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sActs.apID) // fixme with actionProfilePrefix
+	}, aS.cfg.GeneralCfg().LockingTimeout, utils.ActionProfilePrefix+sActs.apID)
 }
 
 // scheduleActions is responsible for scheduling the actions needing execution
