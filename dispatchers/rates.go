@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func (dS *DispatcherService) RateSv1Ping(args *utils.CGREventWithOpts, rpl *string) (err error) {
 	if args == nil {
@@ -32,4 +35,18 @@ func (dS *DispatcherService) RateSv1Ping(args *utils.CGREventWithOpts, rpl *stri
 		}
 	}
 	return dS.Dispatch(args, utils.RateS, utils.RateSv1Ping, args, rpl)
+}
+
+func (dS *DispatcherService) RateSV1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) (err error) {
+	if args == nil {
+		args = new(utils.ArgsCostForEvent)
+	}
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.RateSv1CostForEvent, args.CGREvent.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CGREventWithOpts, utils.RateS, utils.RateSv1CostForEvent, args, rpCost)
 }
