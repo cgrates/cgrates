@@ -1300,6 +1300,10 @@ func (dR *DispatcherRateSv1) Ping(args *utils.CGREventWithOpts, reply *string) e
 	return dR.dR.RateSv1Ping(args, reply)
 }
 
+func (dR *DispatcherRateSv1) CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) error {
+	return dR.dR.RateSV1CostForEvent(args, rpCost)
+}
+
 func NewDispatcherActionSv1(dps *dispatchers.DispatcherService) *DispatcherActionSv1 {
 	return &DispatcherActionSv1{dR: dps}
 }
