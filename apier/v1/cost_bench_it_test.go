@@ -187,6 +187,7 @@ func testCostBenchSetRateProfile2(b *testing.B) {
 	}
 }
 
+// go test -run=^$ -tags=integration -v -bench=BenchmarkCostWithRALs -benchtime=5s
 func BenchmarkCostWithRALs(b *testing.B) {
 	costBenchConfigDIR = "tutinternal"
 	testCostBenchInitCfg(b)
@@ -220,6 +221,7 @@ func BenchmarkCostWithRALs(b *testing.B) {
 	testCostBenchKillEngine(b)
 }
 
+// go test -run=^$ -tags=integration -v -bench=BenchmarkCostDiffPeriodWithRALs -benchtime=5s
 func BenchmarkCostDiffPeriodWithRALs(b *testing.B) {
 	costBenchConfigDIR = "tutinternal"
 	testCostBenchInitCfg(b)
@@ -253,6 +255,7 @@ func BenchmarkCostDiffPeriodWithRALs(b *testing.B) {
 	testCostBenchKillEngine(b)
 }
 
+// go test -run=^$ -tags=integration -v -bench=BenchmarkCostWithRateS -benchtime=5s
 func BenchmarkCostWithRateS(b *testing.B) {
 	costBenchConfigDIR = "tutinternal"
 	testCostBenchInitCfg(b)
@@ -286,6 +289,7 @@ func BenchmarkCostWithRateS(b *testing.B) {
 	testCostBenchKillEngine(b)
 }
 
+// go test -run=^$ -tags=integration -v -bench=BenchmarkCostDiffPeriodWithRateS -benchtime=5s
 func BenchmarkCostDiffPeriodWithRateS(b *testing.B) {
 	costBenchConfigDIR = "tutinternal"
 	testCostBenchInitCfg(b)

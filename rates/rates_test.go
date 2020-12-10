@@ -213,6 +213,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 	}
 }
 
+// go test -run=^$ -v -bench=BenchmarkRateS_V1CostForEvent -benchtime=5s
 func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 	defaultCfg := config.NewDefaultCGRConfig()
 
@@ -300,6 +301,7 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 	b.StopTimer()
 }
 
+// go test -run=^$ -v -bench=BenchmarkRateS_V1CostForEventSingleRate -benchtime=5s
 func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 	defaultCfg := config.NewDefaultCGRConfig()
 
