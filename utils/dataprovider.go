@@ -39,6 +39,14 @@ type DataProvider interface {
 	RemoteHost() net.Addr
 }
 
+// RWDataProvider is a DataProvider with write methods on it
+type RWDataProvider interface {
+	DataProvider
+
+	Set(fldPath []string, val interface{}) (err error)
+	Remove(fldPath []string) (err error)
+}
+
 // NavigableMapper is the interface supported by replies convertible to CGRReply
 type NavigableMapper interface {
 	AsNavigableMap() NavigableMap2
