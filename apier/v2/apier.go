@@ -64,6 +64,12 @@ func (apiv2 *APIerSv2) LoadRatingProfile(attrs *AttrLoadRatingProfile, reply *st
 	if err := dbReader.LoadRatingProfilesFiltered(&utils.TPRatingProfile{TPid: attrs.TPid}); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	if err := apiv2.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]interface{})); err != nil {
+		return utils.NewErrServerError(err)
+	}
 	*reply = utils.OK
 	return nil
 }
@@ -346,6 +352,13 @@ func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) er
 	}
 	if err := apiv2.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
+	}
+	//CacheReload
+	if err := apiv2.ConnMgr.Call(apiv2.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			ArgsCache: map[string][]string{utils.ActionIDs: {attrs.ActionsId}},
+		}, reply); err != nil {
+		return err
 	}
 	//generate a loadID for CacheActions and store it in database
 	if err := apiv2.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {

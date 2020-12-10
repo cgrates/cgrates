@@ -356,6 +356,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 		if err := tpr.dm.SetRatingProfile(resultRatingProfile, utils.NonTransactional); err != nil {
 			return err
 		}
+		tpr.ratingProfiles[tpRpf.KeyId()] = resultRatingProfile
 	}
 	return nil
 }
@@ -901,8 +902,8 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 
 		// actions
 		facts := make(map[string][]*Action)
-		for _, actId := range actionIDs {
-			tpas, err := tpr.lr.GetTPActions(tpr.tpid, actId)
+		for _, actID := range actionIDs {
+			tpas, err := tpr.lr.GetTPActions(tpr.tpid, actID)
 			if err != nil {
 				return err
 			}
@@ -1003,8 +1004,10 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		}
 		// write actions
 		for k, as := range facts {
-			err = tpr.dm.SetActions(k, as, utils.NonTransactional)
-			if err != nil {
+			if err = tpr.dm.SetActions(k, as, utils.NonTransactional); err != nil {
+				return err
+			}
+			if err = dm.CacheDataFromDB(utils.ACTION_PREFIX, []string{k}, true); err != nil {
 				return err
 			}
 		}

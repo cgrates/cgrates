@@ -99,7 +99,6 @@ func testInternalReplicateITInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	engineOneCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 
 	// prepare config for engine2
 	engineTwoCfgPath = path.Join(*dataDir, "conf", "samples", "replication", engineTwoCfgDirPath)
@@ -107,7 +106,6 @@ func testInternalReplicateITInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	engineTwoCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 }
 
 func testInternalReplicateITDataFlush(t *testing.T) {
@@ -117,7 +115,6 @@ func testInternalReplicateITDataFlush(t *testing.T) {
 	if err := engine.InitDataDb(engineTwoCfg); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testInternalReplicateITStartEngine(t *testing.T) {
@@ -146,7 +143,6 @@ func testInternalReplicateITRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(200 * time.Millisecond)
 }
 
 func testInternalReplicateLoadDataInInternalEngine(t *testing.T) {
@@ -292,9 +288,10 @@ func testInternalReplicateITRatingProfile(t *testing.T) {
 	// set
 	var reply string
 	attrSetRatingProfile := &utils.AttrSetRatingProfile{
-		Tenant:   "cgrates.org",
-		Category: "call",
-		Subject:  "Subject",
+		Overwrite: true,
+		Tenant:    "cgrates.org",
+		Category:  "call",
+		Subject:   "Subject",
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			{
 				ActivationTime:   "2012-01-01T00:00:00Z",

@@ -535,6 +535,15 @@ func testOnStorITRatingProfile(t *testing.T) {
 	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+
+	//get from database
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, true,
+		utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rpf, rcv) {
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
+	}
+
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
 		//get from cache
 		if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
@@ -543,14 +552,6 @@ func testOnStorITRatingProfile(t *testing.T) {
 		} else if !reflect.DeepEqual(rpf, rcv) {
 			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
 		}
-	}
-
-	//get from database
-	if rcv, err := onStor.GetRatingProfile(rpf.Id, true,
-		utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rpf, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
 	}
 
 	expectedCRPl := []string{"rpf_*out:test:1:trp"}
@@ -570,7 +571,13 @@ func testOnStorITRatingProfile(t *testing.T) {
 	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-
+	//get from database
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, true,
+		utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rpf, rcv) {
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
+	}
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
 		//get from cache
 		if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
@@ -580,23 +587,17 @@ func testOnStorITRatingProfile(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
 		}
 	}
-	//get from database
-	if rcv, err := onStor.GetRatingProfile(rpf.Id, true,
-		utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rpf, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
-	}
+
 	if err = onStor.RemoveRatingProfile(rpf.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, false,
+	//check database if removed
+	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, true,
 		utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	//check database if removed
-	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, true,
+	//check cache if removed
+	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, false,
 		utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -752,6 +753,13 @@ func testOnStorITActions(t *testing.T) {
 	} else if rcv != true {
 		t.Errorf("Expecting: true, received: %v", rcv)
 	}
+	//get from database
+	if rcv, err := onStor.GetActions(acts[0].Id,
+		true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(acts[0], rcv[0]) {
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(acts[0]), utils.ToJSON(rcv[0]))
+	}
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
 		//get from cache
 		if rcv, err := onStor.GetActions(acts[0].Id,
@@ -760,13 +768,6 @@ func testOnStorITActions(t *testing.T) {
 		} else if !reflect.DeepEqual(acts[0], rcv[0]) {
 			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(acts[0]), utils.ToJSON(rcv[0]))
 		}
-	}
-	//get from database
-	if rcv, err := onStor.GetActions(acts[0].Id,
-		true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(acts[0], rcv[0]) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(acts[0]), utils.ToJSON(rcv[0]))
 	}
 	expectedCA := []string{"act_MINI"}
 	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
@@ -858,6 +859,13 @@ func testOnStorITActions(t *testing.T) {
 		t.Error(err)
 	}
 
+	//get from database
+	if rcv, err := onStor.GetActions(acts[0].Id,
+		true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(acts[0], rcv[0]) {
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(acts[0]), utils.ToJSON(rcv[0]))
+	}
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
 		//get from cache
 		if rcv, err := onStor.GetActions(acts[0].Id,
@@ -867,24 +875,17 @@ func testOnStorITActions(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(acts[0]), utils.ToJSON(rcv[0]))
 		}
 	}
-	//get from database
-	if rcv, err := onStor.GetActions(acts[0].Id,
-		true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(acts[0], rcv[0]) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(acts[0]), utils.ToJSON(rcv[0]))
-	}
 	if err := onStor.RemoveActions(acts[0].Id, utils.NonTransactional); err != nil {
 		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetActions(acts[0].Id,
-		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetActions(acts[0].Id,
 		true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	//check cache if removed
+	if _, rcvErr := onStor.GetActions(acts[0].Id,
+		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

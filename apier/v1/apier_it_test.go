@@ -825,6 +825,7 @@ func testApierLoadRatingProfileWithoutTenant(t *testing.T) {
 func testApierLoadAccountActions(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats() // Make sure nothing in cache so far
+	expectedStats[utils.CacheLoadIDs].Items = 4         // we loaded the ratingprofiles
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -841,7 +842,7 @@ func testApierLoadAccountActions(t *testing.T) {
 	expectedStats[utils.CacheAccountActionPlans].Items = 1
 	expectedStats[utils.CacheActionPlans].Items = 1
 	expectedStats[utils.CacheActions].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 2
+	expectedStats[utils.CacheLoadIDs].Items = 6
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
@@ -879,7 +880,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	expectedStats[utils.CacheActions].Items = 1
 	expectedStats[utils.CacheRatingProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 2
+	expectedStats[utils.CacheLoadIDs].Items = 6
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -1030,7 +1031,7 @@ func testApierReloadCache(t *testing.T) {
 	expectedStats[utils.CacheRatingProfiles].Items = 3
 	expectedStats[utils.CacheRatingPlans].Items = 1
 	expectedStats[utils.CacheReverseDestinations].Items = 10
-	expectedStats[utils.CacheLoadIDs].Items = 2
+	expectedStats[utils.CacheLoadIDs].Items = 6
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
