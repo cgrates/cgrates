@@ -45,6 +45,9 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTPActionProfiles,
 	testStorDBitCRUDTPDispatcherS,
 	testStorDBitCRUDTPFilters,
+	testStorDBitCRUDTPRateProfiles,
+	testStorDBitCRUDTPRoutes,
+	testSTORDBitCRUDTPThresholds,
 	testStorDBitCRUDTpTimings,
 	testStorDBitCRUDTpDestinations,
 	testStorDBitCRUDTpRates,
@@ -353,6 +356,253 @@ func testStorDBitCRUDTPFilters(t *testing.T) {
 	if err := storDB.RemTpData(utils.EmptyString, tpFilters[0].TPid, nil); err != nil {
 		t.Error(err)
 	} else if _, err := storDB.GetTPFilters(tpFilters[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func testStorDBitCRUDTPRateProfiles(t *testing.T) {
+	//READ
+	if _, err := storDB.GetTPRateProfiles("ID_RP1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//WRITE
+	tpr := []*utils.TPRateProfile{
+		{
+			TPid:             "id_RP1",
+			Tenant:           "cgrates.org",
+			ID:               "RP1",
+			FilterIDs:        []string{"*string:~*req.Subject:1001"},
+			Weight:           0,
+			RoundingMethod:   "*up",
+			RoundingDecimals: 4,
+			MinCost:          0.1,
+			MaxCost:          0.6,
+			MaxCostStrategy:  "*free",
+			Rates: map[string]*utils.TPRate{
+				"FIRST_GI": {
+					ID:        "FIRST_GI",
+					FilterIDs: []string{"*gi:~*req.Usage:0"},
+					Weight:    0,
+					IntervalRates: []*utils.TPIntervalRate{
+						{
+							RecurrentFee: 0.12,
+							Unit:         "1m",
+							Increment:    "1m",
+						},
+					},
+					Blocker: false,
+				},
+			},
+		},
+	}
+	if err := storDB.SetTPRateProfiles(tpr); err != nil {
+		t.Error(err)
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPRateProfiles(tpr[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv[0], tpr[0]) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(tpr[0]), utils.ToJSON(rcv[0]))
+	}
+
+	//UPDATE and WRITE
+	tpr[0].MaxCost = 2.0
+	tpr[0].MinCost = 0.2
+	if err := storDB.SetTPRateProfiles(tpr); err != nil {
+		t.Error(err)
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPRateProfiles(tpr[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv[0], tpr[0]) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(tpr[0]), utils.ToJSON(rcv[0]))
+	}
+
+	//REMOVE AND READ
+	if err := storDB.RemTpData(utils.EmptyString, tpr[0].TPid, nil); err != nil {
+		t.Error(err)
+	} else if _, err := storDB.GetTPRateProfiles(tpr[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func testStorDBitCRUDTPRoutes(t *testing.T) {
+	//READ
+	if _, err := storDB.GetTPRoutes("TP1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//WRITE
+	tpRoutes := []*utils.TPRouteProfile{
+		{
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "SUPL_1",
+			FilterIDs: []string{"*string:~*req.Accout:1007"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			Sorting:           "*lowest_cost",
+			SortingParameters: []string{},
+			Routes: []*utils.TPRoute{
+				{
+					ID:              "supplier1",
+					FilterIDs:       []string{"FLTR_1"},
+					AccountIDs:      []string{"Acc1", "Acc2"},
+					RatingPlanIDs:   []string{"RPL_1"},
+					ResourceIDs:     []string{"ResGroup1"},
+					StatIDs:         []string{"Stat1"},
+					Weight:          10,
+					Blocker:         false,
+					RouteParameters: "SortingParam1",
+				},
+			},
+			Weight: 20,
+		},
+		{
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "SUPL_2",
+			FilterIDs: []string{"*string:~*req.Destination:100"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2015-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			Sorting:           "*lowest_cost",
+			SortingParameters: []string{},
+			Routes: []*utils.TPRoute{
+				{
+					ID:              "supplier1",
+					FilterIDs:       []string{"FLTR_1"},
+					AccountIDs:      []string{"Acc1", "Acc2"},
+					RatingPlanIDs:   []string{"RPL_1"},
+					ResourceIDs:     []string{"ResGroup1"},
+					StatIDs:         []string{"Stat1"},
+					Weight:          10,
+					Blocker:         false,
+					RouteParameters: "SortingParam2",
+				},
+			},
+			Weight: 10,
+		},
+	}
+	if err := storDB.SetTPRoutes(tpRoutes); err != nil {
+		t.Errorf("Unable to set TPRoutes")
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPRoutes(tpRoutes[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(rcv[0], tpRoutes[0]) ||
+		reflect.DeepEqual(tpRoutes[0], rcv[1])) {
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+			utils.ToIJSON(tpRoutes[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+	}
+
+	//UPDATE
+	tpRoutes[0].Sorting = "*higher_cost"
+	tpRoutes[1].Sorting = "*higher_cost"
+	if err := storDB.SetTPRoutes(tpRoutes); err != nil {
+		t.Errorf("Unable to set TPRoutes")
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPRoutes(tpRoutes[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(rcv[0], tpRoutes[0]) ||
+		reflect.DeepEqual(tpRoutes[0], rcv[1])) {
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+			utils.ToIJSON(tpRoutes[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+	}
+
+	//REMOVE and READ
+	if err := storDB.RemTpData(utils.EmptyString, tpRoutes[0].TPid, nil); err != nil {
+		t.Error(err)
+	} else if _, err := storDB.GetTPRoutes(tpRoutes[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func testSTORDBitCRUDTPThresholds(t *testing.T) {
+	//READ
+	if _, err := storDB.GetTPThresholds("TH1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//WRITE
+	tpThresholds := []*utils.TPThresholdProfile{
+		{
+			TPid:      "TH1",
+			Tenant:    "cgrates.org",
+			ID:        "Threshold1",
+			FilterIDs: []string{"*string:~*req.Account:1002", "*string:~*req.DryRun:*default"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			MaxHits:   -1,
+			MinSleep:  "1s",
+			Blocker:   true,
+			Weight:    10,
+			ActionIDs: []string{"Thresh1", "Thresh2"},
+			Async:     true,
+		},
+		{
+			TPid:      "TH1",
+			Tenant:    "cgrates.org",
+			ID:        "Threshold2",
+			FilterIDs: []string{"*string:~*req.Destination:10"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2015-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			MaxHits:   -1,
+			MinSleep:  "1s",
+			Blocker:   true,
+			Weight:    20,
+			ActionIDs: []string{"Thresh1"},
+			Async:     true,
+		},
+	}
+	if err := storDB.SetTPThresholds(tpThresholds); err != nil {
+		t.Errorf("Unable to set TPThresholds")
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPThresholds(tpThresholds[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(tpThresholds[0], rcv[0]) ||
+		reflect.DeepEqual(tpThresholds[0], rcv[1])) {
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+			utils.ToIJSON(tpThresholds[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+
+	}
+
+	//UPDATE
+	tpThresholds[0].FilterIDs = []string{"*string:~*req.Destination:101"}
+	tpThresholds[1].FilterIDs = []string{"*string:~*req.Destination:101"}
+	if err := storDB.SetTPThresholds(tpThresholds); err != nil {
+		t.Errorf("Unable to set TPThresholds")
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPThresholds(tpThresholds[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(tpThresholds[0], rcv[0]) ||
+		reflect.DeepEqual(tpThresholds[0], rcv[1])) {
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+			utils.ToIJSON(tpThresholds[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+
+	}
+
+	//REMOVE and READ
+	if err := storDB.RemTpData(utils.EmptyString, tpThresholds[0].TPid, nil); err != nil {
+		t.Error(err)
+	} else if _, err := storDB.GetTPRoutes(tpThresholds[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
