@@ -1615,8 +1615,13 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 				return
 			}
 		}
+		// for non stored we do not save the resource
 		if err = tpr.dm.SetResource(
-			&Resource{Tenant: rTid.Tenant, ID: rTid.ID}, ttl, limit, false); err != nil {
+			&Resource{
+				Tenant: rTid.Tenant,
+				ID:     rTid.ID,
+				Usages: make(map[string]*ResourceUsage),
+			}, ttl, limit, !tpr.resProfiles[*rTid].Stored); err != nil {
 			return
 		}
 		if verbose {
@@ -1665,8 +1670,21 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 				FilterIDs: metric.FilterIDs,
 			}
 		}
-		if err = tpr.dm.SetStatQueue(&StatQueue{Tenant: sqTntID.Tenant, ID: sqTntID.ID}, metrics,
-			tpr.sqProfiles[*sqTntID].MinItems, ttl, tpr.sqProfiles[*sqTntID].QueueLength, false); err != nil {
+		sq := &StatQueue{
+			Tenant: sqTntID.Tenant,
+			ID:     sqTntID.ID,
+		}
+		if !tpr.sqProfiles[*sqTntID].Stored { //for not stored queues create the metrics
+			if sq, err = NewStatQueue(sqTntID.Tenant, sqTntID.ID, metrics,
+				tpr.sqProfiles[*sqTntID].MinItems); err != nil {
+				return
+			}
+		}
+		// for non stored we do not save the metrics
+		if err = tpr.dm.SetStatQueue(sq, metrics,
+			tpr.sqProfiles[*sqTntID].MinItems,
+			ttl, tpr.sqProfiles[*sqTntID].QueueLength,
+			!tpr.sqProfiles[*sqTntID].Stored); err != nil {
 			return err
 		}
 		if verbose {

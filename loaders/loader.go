@@ -340,9 +340,13 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if res.UsageTTL > 0 {
 					ttl = &res.UsageTTL
 				}
+				// for non stored we do not save the resource
 				if err := ldr.dm.SetResource(
-					&engine.Resource{Tenant: res.Tenant,
-						ID: res.ID}, ttl, res.Limit, false); err != nil {
+					&engine.Resource{
+						Tenant: res.Tenant,
+						ID:     res.ID,
+						Usages: make(map[string]*engine.ResourceUsage),
+					}, ttl, res.Limit, !res.Stored); err != nil {
 					return err
 				}
 				cacheArgs[utils.ResourceProfileIDs] = ids
@@ -416,8 +420,20 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if stsPrf.TTL > 0 {
 					ttl = &stsPrf.TTL
 				}
-				if err := ldr.dm.SetStatQueue(&engine.StatQueue{Tenant: stsPrf.Tenant, ID: stsPrf.ID}, stsPrf.Metrics,
-					stsPrf.MinItems, ttl, stsPrf.QueueLength, false); err != nil {
+				sq := &engine.StatQueue{
+					Tenant: stsPrf.Tenant,
+					ID:     stsPrf.ID,
+				}
+				if !stsPrf.Stored { // for not stored queues create the metrics
+					if sq, err = engine.NewStatQueue(stsPrf.Tenant, stsPrf.ID, stsPrf.Metrics,
+						stsPrf.MinItems); err != nil {
+						return err
+					}
+				}
+				// for non stored we do not save the metrics
+				if err := ldr.dm.SetStatQueue(sq, stsPrf.Metrics,
+					stsPrf.MinItems, ttl, stsPrf.QueueLength,
+					!stsPrf.Stored); err != nil {
 					return err
 				}
 				cacheArgs[utils.StatsQueueProfileIDs] = ids

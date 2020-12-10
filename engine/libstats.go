@@ -141,6 +141,22 @@ type SQItem struct {
 	ExpiryTime *time.Time // Used to auto-expire events
 }
 
+func NewStatQueue(tnt, id string, metrics []*MetricWithFilters, minItems int) (sq *StatQueue, err error) {
+	sq = &StatQueue{
+		Tenant:    tnt,
+		ID:        id,
+		SQMetrics: make(map[string]StatMetric),
+	}
+
+	for _, metric := range metrics {
+		if sq.SQMetrics[metric.MetricID], err = NewStatMetric(metric.MetricID,
+			minItems, metric.FilterIDs); err != nil {
+			return
+		}
+	}
+	return
+}
+
 // StatQueue represents an individual stats instance
 type StatQueue struct {
 	lk        sync.RWMutex // protect the elements from within

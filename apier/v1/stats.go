@@ -91,8 +91,20 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 	if arg.TTL > 0 {
 		ttl = &arg.TTL
 	}
-	if err = apierSv1.DataManager.SetStatQueue(&engine.StatQueue{Tenant: arg.Tenant, ID: arg.ID}, arg.Metrics,
-		arg.MinItems, ttl, arg.QueueLength, false); err != nil {
+	sq := &engine.StatQueue{
+		Tenant: arg.Tenant,
+		ID:     arg.ID,
+	}
+	if !arg.Stored { // for not stored queues create the metrics
+		if sq, err = engine.NewStatQueue(arg.Tenant, arg.ID, arg.Metrics,
+			arg.MinItems); err != nil {
+			return err
+		}
+	}
+	// for non stored we do not save the metrics
+	if err = apierSv1.DataManager.SetStatQueue(sq,
+		arg.Metrics, arg.MinItems, ttl, arg.QueueLength,
+		!arg.Stored); err != nil {
 		return err
 	}
 	//handle caching for StatQueues
