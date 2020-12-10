@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -58,6 +59,8 @@ var (
 		testExpVerifyResources,
 		testExpVerifyStats,
 		testExpVerifyRoutes,
+		testExpVerifyRateProfiles,
+		testExpVerifyActionProfiles,
 		testExpCleanFiles,
 		testExpStopCgrEngine,
 	}
@@ -117,7 +120,7 @@ func testExpRPCConn(t *testing.T) {
 
 func testExpLoadTPFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	if err := expRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -150,41 +153,24 @@ func testExpLoadTPFromExported(t *testing.T) {
 func testExpVerifyAttributes(t *testing.T) {
 	exp := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
-		ID:        "ATTR_1003_SESSIONAUTH",
-		FilterIDs: []string{"*string:~*req.Account:1003"},
+		ID:        "ATTR_ACNT_1001",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
 		Contexts:  []string{utils.MetaSessionS},
 		Attributes: []*engine.Attribute{
 			{
-				Path:      utils.MetaReq + utils.NestingSep + "Password",
+				Path:      utils.MetaReq + utils.NestingSep + "OfficeGroup",
 				FilterIDs: []string{},
 				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.INFIELD_SEP),
-			},
-			{
-				Path:      utils.MetaReq + utils.NestingSep + utils.RequestType,
-				FilterIDs: []string{},
-				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("*prepaid", utils.INFIELD_SEP),
-			},
-			{
-				Path:      utils.MetaReq + utils.NestingSep + "PaypalAccount",
-				FilterIDs: []string{},
-				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("cgrates@paypal.com", utils.INFIELD_SEP),
-			},
-			{
-				Path:      utils.MetaReq + utils.NestingSep + "LCRProfile",
-				FilterIDs: []string{},
-				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("premium_cli", utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("Marketing", utils.INFIELD_SEP),
 			},
 		},
-		Weight: 10.0,
+		Blocker: false,
+		Weight:  10.0,
 	}
 	var reply *engine.AttributeProfile
 	if err := expRpc.Call(utils.APIerSv1GetAttributeProfile,
 		utils.TenantIDWithOpts{
-			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1003_SESSIONAUTH"}}, &reply); err != nil {
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -201,22 +187,12 @@ func testExpVerifyAttributes(t *testing.T) {
 func testExpVerifyFilters(t *testing.T) {
 	exp := &engine.Filter{
 		Tenant: "cgrates.org",
-		ID:     "FLTR_ACNT_1001_1002",
+		ID:     "FLTR_ACCOUNT_1001",
 		Rules: []*engine.FilterRule{
 			{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.MetaDynReq + utils.NestingSep + "Account",
 				Type:    utils.MetaString,
-				Values:  []string{"1001", "1002"},
-			},
-			{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.RunID,
-				Type:    utils.MetaString,
-				Values:  []string{utils.MetaDefault},
-			},
-			{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
-				Type:    utils.MetaString,
-				Values:  []string{"1001", "1002", "1003"},
+				Values:  []string{"1001"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -225,7 +201,7 @@ func testExpVerifyFilters(t *testing.T) {
 	}
 	var reply *engine.Filter
 	if err := expRpc.Call(utils.APIerSv1GetFilter,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001_1002"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACCOUNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, reply) {
 		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(exp), utils.ToJSON(reply))
@@ -238,17 +214,17 @@ func testExpVerifyThresholds(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_ACNT_1001",
-			FilterIDs: []string{"FLTR_ACNT_1001"},
+			FilterIDs: []string{"FLTR_ACCOUNT_1001"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 			},
-			MaxHits:   1,
-			MinHits:   1,
-			MinSleep:  time.Second,
+			MaxHits:   -1,
+			MinHits:   0,
+			MinSleep:  0,
 			Blocker:   false,
 			Weight:    10.0,
-			ActionIDs: []string{"ACT_LOG_WARNING"},
-			Async:     true,
+			ActionIDs: []string{"TOPUP_MONETARY_10"},
+			Async:     false,
 		},
 	}
 	var reply *engine.ThresholdProfile
@@ -262,22 +238,19 @@ func testExpVerifyThresholds(t *testing.T) {
 
 func testExpVerifyResources(t *testing.T) {
 	rPrf := &engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ResGroup1",
-		FilterIDs: []string{"FLTR_RES"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-		},
-		UsageTTL:     -1,
-		Limit:        7,
+		Tenant:       "cgrates.org",
+		ID:           "RES_ACNT_1001",
+		FilterIDs:    []string{"FLTR_ACCOUNT_1001"},
+		UsageTTL:     time.Hour,
+		Limit:        1,
 		Blocker:      false,
-		Stored:       true,
+		Stored:       false,
 		Weight:       10,
-		ThresholdIDs: []string{utils.META_NONE},
+		ThresholdIDs: []string{},
 	}
 	var reply *engine.ResourceProfile
 	if err := expRpc.Call(utils.APIerSv1GetResourceProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rPrf), utils.ToJSON(reply))
@@ -287,16 +260,19 @@ func testExpVerifyResources(t *testing.T) {
 func testExpVerifyStats(t *testing.T) {
 	sPrf := &engine.StatQueueProfile{
 		Tenant:    "cgrates.org",
-		ID:        "Stats2",
-		FilterIDs: []string{"FLTR_ACNT_1001_1002"},
+		ID:        "Stat_1",
+		FilterIDs: []string{"FLTR_STAT_1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
 		QueueLength: 100,
-		TTL:         -1,
+		TTL:         10 * time.Second,
 		Metrics: []*engine.MetricWithFilters{
 			{
-				MetricID: utils.MetaTCC,
+				MetricID: utils.MetaACD,
+			},
+			{
+				MetricID: utils.MetaASR,
 			},
 			{
 				MetricID: utils.MetaTCD,
@@ -308,64 +284,38 @@ func testExpVerifyStats(t *testing.T) {
 		MinItems:     0,
 		ThresholdIDs: []string{utils.META_NONE},
 	}
-
-	sPrf2 := &engine.StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Stats2",
-		FilterIDs: []string{"FLTR_ACNT_1001_1002"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-		},
-		QueueLength: 100,
-		TTL:         -1,
-		Metrics: []*engine.MetricWithFilters{
-			{
-				MetricID: utils.MetaTCD,
-			},
-			{
-				MetricID: utils.MetaTCC,
-			},
-		},
-		Blocker:      true,
-		Stored:       false,
-		Weight:       30,
-		MinItems:     0,
-		ThresholdIDs: []string{utils.META_NONE},
-	}
-
 	var reply *engine.StatQueueProfile
 	if err := expRpc.Call(utils.APIerSv1GetStatQueueProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(sPrf, reply) && !reflect.DeepEqual(sPrf2, reply) {
-		t.Errorf("Expecting: %+v \n or %+v \n ,\n received: %+v",
-			utils.ToJSON(sPrf), utils.ToJSON(sPrf2), utils.ToJSON(reply))
+	}
+	sort.Slice(reply.Metrics, func(i, j int) bool {
+		return reply.Metrics[i].MetricID < reply.Metrics[j].MetricID
+	})
+	if !reflect.DeepEqual(sPrf, reply) {
+		t.Errorf("Expecting: %+v \n  ,\n received: %+v",
+			utils.ToJSON(sPrf), utils.ToJSON(reply))
 	}
 }
 
 func testExpVerifyRoutes(t *testing.T) {
 	var reply *engine.RouteProfile
 	splPrf := &engine.RouteProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ROUTE_ACNT_1002",
-		FilterIDs: []string{"FLTR_ACNT_1002"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
-		},
-		Sorting:           utils.MetaLC,
+		Tenant:            "cgrates.org",
+		ID:                "ROUTE_ACNT_1001",
+		FilterIDs:         []string{"FLTR_ACCOUNT_1001"},
+		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
 				ID:              "route1",
-				RatingPlanIDs:   []string{"RP_1002_LOW"},
-				Weight:          10,
+				Weight:          20,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 			{
 				ID:              "route2",
-				RatingPlanIDs:   []string{"RP_1002"},
-				Weight:          20,
+				Weight:          10,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
@@ -374,26 +324,22 @@ func testExpVerifyRoutes(t *testing.T) {
 	}
 
 	splPrf2 := &engine.RouteProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ROUTE_ACNT_1002",
-		FilterIDs: []string{"FLTR_ACNT_1002"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
-		},
-		Sorting:           utils.MetaLC,
+		Tenant:            "cgrates.org",
+		ID:                "ROUTE_ACNT_1001",
+		FilterIDs:         []string{"FLTR_ACCOUNT_1001"},
+		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID:              "route2",
-				RatingPlanIDs:   []string{"RP_1002"},
-				Weight:          20,
+				ID: "route2",
+
+				Weight:          10,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 			{
 				ID:              "route1",
-				RatingPlanIDs:   []string{"RP_1002_LOW"},
-				Weight:          10,
+				Weight:          20,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
@@ -401,7 +347,7 @@ func testExpVerifyRoutes(t *testing.T) {
 		Weight: 10,
 	}
 	if err := expRpc.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1002"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if *encoding == utils.MetaGOB {
@@ -414,6 +360,109 @@ func testExpVerifyRoutes(t *testing.T) {
 	}
 }
 
+func testExpVerifyRateProfiles(t *testing.T) {
+	var reply *engine.RateProfile
+	splPrf := &engine.RateProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "RT_SPECIAL_1002",
+		FilterIDs:          []string{},
+		ActivationInterval: nil,
+		Weight:             0,
+		RoundingDecimals:   4,
+		RoundingMethod:     utils.ROUNDING_UP,
+		MinCost:            0,
+		MaxCost:            0,
+		MaxCostStrategy:    utils.MAX_COST_FREE,
+		Rates: map[string]*engine.Rate{
+			"RT_ALWAYS": {
+				ID:              "RT_ALWAYS",
+				FilterIDs:       nil,
+				ActivationTimes: "* * * * *",
+				Weight:          0,
+				Blocker:         false,
+				IntervalRates: []*engine.IntervalRate{
+					{
+						IntervalStart: 0 * time.Second,
+						RecurrentFee:  0.01,
+						Unit:          time.Minute,
+						Increment:     time.Second,
+					},
+				},
+			},
+		},
+	}
+
+	if err := expRpc.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "RT_SPECIAL_1002"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(splPrf, reply) {
+		t.Errorf("Expecting: %+v,\n received: %+v",
+			utils.ToJSON(splPrf), utils.ToJSON(reply))
+	}
+}
+
+func testExpVerifyActionProfiles(t *testing.T) {
+	var reply *engine.ActionProfile
+	actPrf := &engine.ActionProfile{
+		Tenant:     "cgrates.org",
+		ID:         "ONE_TIME_ACT",
+		FilterIDs:  []string{},
+		Weight:     10,
+		Schedule:   utils.ASAP,
+		AccountIDs: utils.StringSet{"1001": {}, "1002": {}},
+		Actions: []*engine.APAction{
+			&engine.APAction{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      utils.TOPUP,
+				Path:      utils.DynamicDataPrefix + utils.COUNTER_BALANCE + utils.NestingSep + "TestBalance" + utils.NestingSep + utils.Value,
+				Value:     config.NewRSRParsersMustCompile("10", utils.INFIELD_SEP),
+			},
+
+			&engine.APAction{
+				ID:        "SET_BALANCE_TEST_DATA",
+				FilterIDs: []string{},
+				Type:      utils.SET_BALANCE,
+				Path:      utils.DynamicDataPrefix + utils.COUNTER_BALANCE + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Type,
+				Value:     config.NewRSRParsersMustCompile(utils.DATA, utils.INFIELD_SEP),
+			},
+			&engine.APAction{
+				ID:        "TOPUP_TEST_DATA",
+				FilterIDs: []string{},
+				Type:      utils.TOPUP,
+				Path:      utils.DynamicDataPrefix + utils.COUNTER_BALANCE + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Value,
+				Value:     config.NewRSRParsersMustCompile("1024", utils.INFIELD_SEP),
+			},
+			&engine.APAction{
+				ID:        "SET_BALANCE_TEST_VOICE",
+				FilterIDs: []string{},
+				Type:      utils.SET_BALANCE,
+				Path:      utils.DynamicDataPrefix + utils.COUNTER_BALANCE + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Type,
+				Value:     config.NewRSRParsersMustCompile(utils.VOICE, utils.INFIELD_SEP),
+			},
+			&engine.APAction{
+				ID:        "TOPUP_TEST_VOICE",
+				FilterIDs: []string{},
+				Type:      utils.TOPUP,
+				Path:      utils.DynamicDataPrefix + utils.COUNTER_BALANCE + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Value,
+				Value:     config.NewRSRParsersMustCompile("15m15s", utils.INFIELD_SEP),
+			},
+		},
+	}
+
+	if err := expRpc.Call(utils.APIerSv1GetActionProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}, &reply); err != nil {
+		t.Fatal(err)
+	} else {
+		for _, act := range reply.Actions { // the path variable from RSRParsers is with lower letter and need to be compiled manually in tests to pass reflect.DeepEqual
+			act.Value.Compile()
+		}
+		if !reflect.DeepEqual(actPrf, reply) {
+			t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(actPrf), utils.ToJSON(reply))
+		}
+	}
+}
 func testExpCleanFiles(t *testing.T) {
 	if err := os.RemoveAll("/tmp/tp/"); err != nil {
 		t.Error(err)
