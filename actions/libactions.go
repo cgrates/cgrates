@@ -49,7 +49,8 @@ func (s *scheduledActs) ScheduledExecute() {
 func (s *scheduledActs) Execute() (err error) {
 	var partExec bool
 	for _, act := range s.acts {
-		if err := act.execute(nil, s.data); err != nil {
+		//ctx, cancel := context.WithTimeout(s.ctx, act.cfg().TTL)
+		if err := act.execute(s.ctx, s.data); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("executing action: <%s>, error: <%s>", act.id(), err))
 			partExec = true
 		}
@@ -88,6 +89,7 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 // actioner is implemented by each action type
 type actioner interface {
 	id() string
+	cfg() *engine.APAction
 	execute(ctx context.Context, data utils.RWDataProvider) (err error)
 }
 
@@ -98,6 +100,10 @@ type actLog struct {
 
 func (aL *actLog) id() string {
 	return aL.aCfg.ID
+}
+
+func (aL *actLog) cfg() *engine.APAction {
+	return aL.aCfg
 }
 
 // execute implements actioner interface

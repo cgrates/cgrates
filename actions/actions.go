@@ -170,22 +170,36 @@ func (aS *ActionS) scheduleActions(tnt string, aPrflIDs []string, cgrEv *utils.C
 	for _, aPf := range aPfs {
 		ctx := context.Background()
 		var acts []actioner
-		for acntID := range aPf.AccountIDs {
+		// actsExec will be used bellow as common code block
+		actsExec := func(acntID string) (errExec error) {
 			if len(acts) == 0 { // not yet initialized
-				if acts, err = newActionersFromActions(aS.cfg, aS.fltrS, aS.dm, aPf.Actions); err != nil {
+				if acts, errExec = newActionersFromActions(aS.cfg, aS.fltrS, aS.dm, aPf.Actions); errExec != nil {
 					return
 				}
 			}
 			sActs := newScheduledActs(aPf.Tenant, aPf.ID, acntID, ctx, evNm, acts)
 			if aPf.Schedule == utils.ASAP {
 				go aS.asapExecuteActions(sActs)
-				continue
+				return
 			}
-			if _, err = aS.crn.AddFunc(aPf.Schedule, sActs.ScheduledExecute); err != nil {
+			if _, errExec = aS.crn.AddFunc(aPf.Schedule, sActs.ScheduledExecute); errExec != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf(
 						"<%s> scheduling ActionProfile with id: <%s:%s>, error: <%s>",
-						utils.ActionS, sActs.tenant, sActs.apID, err))
+						utils.ActionS, sActs.tenant, sActs.apID, errExec))
+				errExec = nil
+			}
+			return
+		}
+		if len(aPf.AccountIDs) == 0 { // no accounts, other acts
+			if err = actsExec(utils.EmptyString); err != nil {
+				return err
+			}
+			continue
+		}
+		for acntID := range aPf.AccountIDs {
+			if err = actsExec(acntID); err != nil {
+				return err
 			}
 		}
 	}
