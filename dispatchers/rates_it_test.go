@@ -21,13 +21,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"reflect"
 	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 var sTestsDspRPrf = []func(t *testing.T){
 	testDspRPrfPing,
+	testDspRPrfCostForEvent,
+	testDspRPrfCostForEventWithoutFilters,
 }
 
 //Test start here
@@ -75,5 +81,144 @@ func testDspRPrfPing(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
+	}
+}
+
+func testDspRPrfCostForEvent(t *testing.T) {
+	rPrf := &engine.RateProfile{
+		ID:        "DefaultRate",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weight:    10,
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*engine.IntervalRate{
+					{
+						IntervalStart: 0,
+						RecurrentFee:  0.12,
+						Unit:          time.Minute,
+						Increment:     time.Minute,
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := allEngine.RPC.Call(utils.APIerSv1SetRateProfile, rPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK, received %+v", reply)
+	}
+	var rply *engine.RateProfile
+	if err := allEngine.RPC.Call(utils.APIerSv1GetRateProfile, &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "DefaultRate",
+	}, &rply); err != nil {
+		t.Error(err)
+	}
+	exp := &engine.RateProfileCost{
+		ID:   "DefaultRate",
+		Cost: 0.12,
+		RateSIntervals: []*engine.RateSInterval{{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{{
+				UsageStart:        0,
+				Usage:             time.Minute,
+				Rate:              rPrf.Rates["RT_WEEK"],
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+			}},
+			CompressFactor: 1,
+		}},
+	}
+
+	var rpCost *engine.RateProfileCost
+	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "DefaultRate",
+				Event: map[string]interface{}{
+					utils.Subject: "1001",
+				},
+			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "rPrf12345",
+			}}}, &rpCost); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rpCost, exp) {
+		t.Errorf("Expected %+v, received %+v", exp, rpCost)
+	}
+}
+
+func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
+	rPrf := &engine.RateProfile{
+		ID:     "ID_RP",
+		Tenant: "cgrates.org",
+		Weight: 10,
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*engine.IntervalRate{
+					{
+						IntervalStart: 0,
+						RecurrentFee:  0.25,
+						Unit:          time.Minute,
+						Increment:     time.Second,
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := allEngine.RPC.Call(utils.APIerSv1SetRateProfile, rPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK, received %+v", reply)
+	}
+	var rply *engine.RateProfile
+	if err := allEngine.RPC.Call(utils.APIerSv1GetRateProfile, &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "ID_RP",
+	}, &rply); err != nil {
+		t.Error(err)
+	}
+	exp := &engine.RateProfileCost{
+		ID:   "ID_RP",
+		Cost: 0.25,
+		RateSIntervals: []*engine.RateSInterval{{
+			UsageStart: 0,
+			Increments: []*engine.RateSIncrement{{
+				UsageStart:        0,
+				Usage:             time.Minute,
+				Rate:              rPrf.Rates["RT_WEEK"],
+				IntervalRateIndex: 0,
+				CompressFactor:    60,
+			}},
+			CompressFactor: 1,
+		}},
+	}
+
+	var rpCost *engine.RateProfileCost
+	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.ArgsCostForEvent{
+		CGREventWithOpts: &utils.CGREventWithOpts{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "EVENT_RATE",
+				Event: map[string]interface{}{
+					utils.Subject: "1002",
+				},
+			},
+			Opts: map[string]interface{}{
+				utils.OptsAPIKey: "rPrf12345",
+			}}}, &rpCost); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rpCost, exp) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rpCost))
 	}
 }

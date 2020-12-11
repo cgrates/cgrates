@@ -37,7 +37,7 @@ func (dS *DispatcherService) RateSv1Ping(args *utils.CGREventWithOpts, rpl *stri
 	return dS.Dispatch(args, utils.RateS, utils.RateSv1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) RateSV1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) (err error) {
+func (dS *DispatcherService) RateSv1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) (err error) {
 	if args == nil {
 		args = new(utils.ArgsCostForEvent)
 	}
