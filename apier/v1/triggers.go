@@ -402,40 +402,45 @@ type AttrRemoveActionTrigger struct {
 	UniqueID string
 }
 
-func (apierSv1 *APIerSv1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attr.UniqueID == "" {
-		err := apierSv1.DataManager.RemoveActionTriggers(attr.GroupID, utils.NonTransactional)
+		err = apierSv1.DataManager.RemoveActionTriggers(attr.GroupID, utils.NonTransactional)
 		if err != nil {
-			*reply = err.Error()
-		} else {
-			*reply = utils.OK
+			return
 		}
-		return err
-	} else {
-		atrs, err := apierSv1.DataManager.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
-		if err != nil {
-			*reply = err.Error()
-			return err
-		}
-		var remainingAtrs engine.ActionTriggers
-		for _, atr := range atrs {
-			if atr.UniqueID == attr.UniqueID {
-				continue
-			}
+		*reply = utils.OK
+		return
+	}
+	var atrs engine.ActionTriggers
+	if atrs, err = apierSv1.DataManager.GetActionTriggers(attr.GroupID, false, utils.NonTransactional); err != nil {
+		return
+	}
+	remainingAtrs := make(engine.ActionTriggers, 0, len(atrs))
+	for _, atr := range atrs {
+		if atr.UniqueID != attr.UniqueID {
 			remainingAtrs = append(remainingAtrs, atr)
 		}
-		// set the cleared list back
-		err = apierSv1.DataManager.SetActionTriggers(attr.GroupID, remainingAtrs, utils.NonTransactional)
-		if err != nil {
-			*reply = err.Error()
-		} else {
-			*reply = utils.OK
-		}
-		return err
 	}
+	// set the cleared list back
+	if err = apierSv1.DataManager.SetActionTriggers(attr.GroupID, remainingAtrs, utils.NonTransactional); err != nil {
+		return
+	}
+	// CacheReload
+	if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			ArgsCache: map[string][]string{utils.ActionTriggerIDs: {attr.GroupID}},
+		}, reply); err != nil {
+		return
+	}
+	// generate a loadID for CacheActionTriggers and store it in database
+	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionTriggers: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return
 }
 
 // SetActionTrigger updates a ActionTrigger
@@ -446,7 +451,7 @@ func (apierSv1 *APIerSv1) SetActionTrigger(attr AttrSetActionTrigger, reply *str
 
 	atrs, _ := apierSv1.DataManager.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
 	var newAtr *engine.ActionTrigger
-	if attr.UniqueID != "" {
+	if attr.UniqueID != utils.EmptyString {
 		//search for exiting one
 		for _, atr := range atrs {
 			if atr.UniqueID == attr.UniqueID {
@@ -473,7 +478,17 @@ func (apierSv1 *APIerSv1) SetActionTrigger(attr AttrSetActionTrigger, reply *str
 	if err = apierSv1.DataManager.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
 		return
 	}
-	//no cache for action triggers
+	// CacheReload
+	if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			ArgsCache: map[string][]string{utils.ActionTriggerIDs: {attr.GroupID}},
+		}, reply); err != nil {
+		return
+	}
+	// generate a loadID for CacheActionTriggers and store it in database
+	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionTriggers: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	*reply = utils.OK
 	return
 }

@@ -31,15 +31,18 @@ import (
 A unit in which a call will be split that has a specific price related interval attached to it.
 */
 type TimeSpan struct {
-	TimeStart, TimeEnd                                         time.Time
-	Cost                                                       float64
-	RateInterval                                               *RateInterval
-	DurationIndex                                              time.Duration // the call duration so far till TimeEnd
-	Increments                                                 Increments
-	RoundIncrement                                             *Increment
-	MatchedSubject, MatchedPrefix, MatchedDestId, RatingPlanId string
-	CompressFactor                                             int
-	ratingInfo                                                 *RatingInfo
+	TimeStart, TimeEnd time.Time
+	Cost               float64
+	RateInterval       *RateInterval
+	DurationIndex      time.Duration // the call duration so far till TimeEnd
+	Increments         Increments
+	RoundIncrement     *Increment
+	MatchedSubject     string
+	MatchedPrefix      string
+	MatchedDestId      string
+	RatingPlanId       string
+	CompressFactor     int
+	ratingInfo         *RatingInfo
 }
 
 type Increment struct {

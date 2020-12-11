@@ -192,7 +192,7 @@ func testActionSGetActionProfile(t *testing.T) {
 
 func testActionSPing(t *testing.T) {
 	var resp string
-	if err := actSRPC.Call(utils.ActionSv1Ping, new(utils.CGREvent), &resp); err != nil {
+	if err := actSRPC.Call(utils.ActionSv1Ping, new(utils.CGREventWithOpts), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
@@ -202,7 +202,7 @@ func testActionSPing(t *testing.T) {
 func testActionSSettActionProfile(t *testing.T) {
 	actPrf = &ActionProfileWithCache{
 		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
-			&engine.ActionProfile{
+			ActionProfile: &engine.ActionProfile{
 				Tenant:             "tenant_test",
 				ID:                 "id_test",
 				FilterIDs:          nil,
@@ -233,12 +233,13 @@ func testActionSSettActionProfile(t *testing.T) {
 					},
 				},
 			},
-			map[string]interface{}{},
+			Opts: map[string]interface{}{},
 		},
 	}
 	var result string
 	expErr := utils.ErrNotFound.Error()
-	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}, &result); err == nil || err.Error() != expErr {
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}}, &result); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %v received: %v", expErr, err)
 	}
 	var reply string
@@ -248,7 +249,8 @@ func testActionSSettActionProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var reply2 *engine.ActionProfile
-	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}, &reply2); err != nil {
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply2) {
 		t.Errorf("Expecting : %+v, received: %+v", actPrf.ActionProfile, reply2)
@@ -301,7 +303,8 @@ func testActionSUpdateActionProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var reply2 *engine.ActionProfile
-	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}, &reply2); err != nil {
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply2) {
 		t.Errorf("Expecting : %+v, received: %+v", actPrf.ActionProfile, reply2)
@@ -317,7 +320,8 @@ func testActionSRemoveActionProfile(t *testing.T) {
 	}
 	var reply2 *engine.ActionProfile
 	expErr := utils.ErrNotFound.Error()
-	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}, &reply2); err == nil || err.Error() != expErr {
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}}, &reply2); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %v received: %v", expErr, err)
 	}
 	if err := actSRPC.Call(utils.APIerSv1RemoveActionProfile, &utils.TenantIDWithCache{Tenant: "tenant_test", ID: "id_test"}, &reply2); err == nil || err.Error() != expErr {

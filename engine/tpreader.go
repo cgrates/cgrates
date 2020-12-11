@@ -894,9 +894,18 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				actionIDs = append(actionIDs, atr.ActionsID)
 			}
 			// write action triggers
-			err = tpr.dm.SetActionTriggers(accountAction.ActionTriggersId, actionTriggers, utils.NonTransactional)
-			if err != nil {
+			if err = tpr.dm.SetActionTriggers(accountAction.ActionTriggersId,
+				actionTriggers, utils.NonTransactional); err != nil {
 				return errors.New(err.Error() + " (SetActionTriggers): " + accountAction.ActionTriggersId)
+			}
+			var reply string
+			if err := connMgr.Call(tpr.cacheConns, nil,
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+					ArgsCache: map[string][]string{
+						utils.ActionTriggerIDs: {accountAction.ActionTriggersId},
+					},
+				}, &reply); err != nil {
+				return err
 			}
 		}
 
@@ -1007,7 +1016,13 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			if err = tpr.dm.SetActions(k, as, utils.NonTransactional); err != nil {
 				return err
 			}
-			if err = dm.CacheDataFromDB(utils.ACTION_PREFIX, []string{k}, true); err != nil {
+			var reply string
+			if err := connMgr.Call(tpr.cacheConns, nil,
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+					ArgsCache: map[string][]string{
+						utils.ActionIDs: {k},
+					},
+				}, &reply); err != nil {
 				return err
 			}
 		}
