@@ -83,6 +83,10 @@ func (apierSv1 *APIerSv1) GetTPAccountActions(attrs *AttrGetTPAccountActions, re
 	if err := filter.SetAccountActionsId(attrs.AccountActionsId); err != nil {
 		return err
 	}
+	tnt := filter.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	aas, err := apierSv1.StorDb.GetTPAccountActions(filter)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -142,6 +146,10 @@ func (apierSv1 *APIerSv1) RemoveTPAccountActions(attrs *AttrGetTPAccountActions,
 	aa := engine.AccountActionMdl{Tpid: attrs.TPid}
 	if err := aa.SetAccountActionId(attrs.AccountActionsId); err != nil {
 		return err
+	}
+	tnt := aa.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPAccountActions, aa.Tpid,
 		map[string]string{utils.Loadid: aa.Loadid, utils.TenantCfg: aa.Tenant, utils.AccountLowerCase: aa.Account}); err != nil {
