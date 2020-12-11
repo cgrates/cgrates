@@ -597,4 +597,13 @@ func testGOCSStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
+	if err = auEngine.Process.Kill(); err != nil {
+		t.Error(err)
+	}
+	if err = usEngine.Process.Kill(); err != nil {
+		t.Error(err)
+	}
+	if err = dspEngine.Process.Kill(); err != nil {
+		t.Error(err)
+	}
 }

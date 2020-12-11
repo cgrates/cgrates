@@ -20,6 +20,7 @@ package engine
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/rpc/jsonrpc"
@@ -374,12 +375,33 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	return engine, nil
 }
 
-func KillEngine(waitEngine int) error {
-	if err := exec.Command("pkill", "cgr-engine").Run(); err != nil {
-		return err
+// StartEngineWithContext return reference towards the command started so we can stop it if necessary
+func StartEngineWithContext(ctx context.Context, cfgPath string, waitEngine int) (engine *exec.Cmd, err error) {
+	engine = exec.CommandContext(ctx, "cgr-engine", "-config_path", cfgPath)
+	if err = engine.Start(); err != nil {
+		return nil, err
 	}
-	time.Sleep(time.Duration(waitEngine) * time.Millisecond)
-	return nil
+	var cfg *config.CGRConfig
+	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
+		return
+	}
+	fib := utils.Fib()
+	for i := 0; i < 200; i++ {
+		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		if _, err = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err != nil {
+			continue
+		}
+		time.Sleep(time.Duration(waitEngine) * time.Millisecond) // wait for rater to register all subsystems
+		return
+	}
+	utils.Logger.Warning(fmt.Sprintf("Error <%s> when opening test connection to: <%s>",
+		err.Error(), cfg.ListenCfg().RPCJSONListen))
+	err = fmt.Errorf("engine did not open port <%s>", cfg.ListenCfg().RPCJSONListen)
+	return
+}
+
+func KillEngine(waitEngine int) error {
+	return KillProcName("cgr-engine", waitEngine)
 }
 
 func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
@@ -453,12 +475,12 @@ func PjsuaCallUri(acnt *PjsuaAccount, dstUri, outboundUri string, callDur time.D
 	return nil
 }
 
-func KillProcName(procName string, waitMs int) error {
-	if err := exec.Command("pkill", procName).Run(); err != nil {
-		return err
+func KillProcName(procName string, waitMs int) (err error) {
+	if err = exec.Command("pkill", procName).Run(); err != nil {
+		return
 	}
 	time.Sleep(time.Duration(waitMs) * time.Millisecond)
-	return nil
+	return
 }
 
 func ForceKillProcName(procName string, waitMs int) error {
