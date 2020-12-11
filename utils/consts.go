@@ -918,6 +918,13 @@ const (
 	ActionPlan               = "ActionPlan"
 	ActionsId                = "ActionsId"
 	TimingId                 = "TimingId"
+	Prefixes                 = "Prefixes"
+	RateSlots                = "RateSlots"
+	RatingPlanBindings       = "RatingPlanBindings"
+	RatingPlanActivations    = "RatingPlanActivations"
+	CategoryLowerCase        = "category"
+	SubjectLowerCase         = "subject"
+	RatingProfileID          = "RatingProfileID"
 )
 
 // Migrator Action
@@ -1429,6 +1436,10 @@ const (
 	APIerSv1SetTPActionProfile          = "APIerSv1.SetTPActionProfile"
 	APIerSv1GetTPActionProfileIDs       = "APIerSv1.GetTPActionProfileIDs"
 	APIerSv1RemoveTPActionProfile       = "APIerSv1.RemoveTPActionProfile"
+	APIerSv1GetTPRateProfile            = "APIerSv1.GetTPRateProfile"
+	APIerSv1SetTPRateProfile            = "APIerSv1.SetTPRateProfile"
+	APIerSv1GetTPRateProfileIds         = "APIerSv1.GetTPRateProfileIds"
+	APIerSv1RemoveTPRateProfile         = "APIerSv1.RemoveTPRateProfile"
 )
 
 // APIerSv1 TP APIs
