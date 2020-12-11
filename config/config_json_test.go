@@ -2053,6 +2053,7 @@ func TestDfRateSJsonCfg(t *testing.T) {
 		Rate_prefix_indexed_fields: &[]string{},
 		Rate_suffix_indexed_fields: &[]string{},
 		Rate_nested_fields:         utils.BoolPointer(false),
+		Verbosity:                  utils.IntPointer(1000),
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

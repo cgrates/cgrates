@@ -638,6 +638,7 @@ type RateSJsonCfg struct {
 	Rate_prefix_indexed_fields *[]string
 	Rate_suffix_indexed_fields *[]string
 	Rate_nested_fields         *bool // applies when indexed fields is not defined
+	Verbosity                  *int
 }
 
 // SIPAgentJsonCfg

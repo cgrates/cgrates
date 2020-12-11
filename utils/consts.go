@@ -2255,6 +2255,7 @@ const (
 	RateStringIndexedFieldsCfg = "rate_string_indexed_fields"
 	RatePrefixIndexedFieldsCfg = "rate_prefix_indexed_fields"
 	RateSuffixIndexedFieldsCfg = "rate_suffix_indexed_fields"
+	Verbosity                  = "verbosity"
 
 	// AnalyzerSCfg
 	CleanupIntervalCfg = "cleanup_interval"

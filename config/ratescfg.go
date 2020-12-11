@@ -35,6 +35,7 @@ type RateSCfg struct {
 	RatePrefixIndexedFields *[]string
 	RateSuffixIndexedFields *[]string
 	RateNestedFields        bool
+	Verbosity               int
 }
 
 func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
@@ -99,6 +100,9 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 	if jsnCfg.Rate_nested_fields != nil {
 		rCfg.RateNestedFields = *jsnCfg.Rate_nested_fields
 	}
+	if jsnCfg.Verbosity != nil {
+		rCfg.Verbosity = *jsnCfg.Verbosity
+	}
 	return
 }
 
@@ -110,6 +114,7 @@ func (rCfg *RateSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.NestedFieldsCfg:       rCfg.NestedFields,
 		utils.RateIndexedSelectsCfg: rCfg.RateIndexedSelects,
 		utils.RateNestedFieldsCfg:   rCfg.RateNestedFields,
+		utils.Verbosity:             rCfg.Verbosity,
 	}
 	if rCfg.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*rCfg.StringIndexedFields))
@@ -164,6 +169,7 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 		NestedFields:       rCfg.NestedFields,
 		RateIndexedSelects: rCfg.RateIndexedSelects,
 		RateNestedFields:   rCfg.RateNestedFields,
+		Verbosity:          rCfg.Verbosity,
 	}
 	if rCfg.StringIndexedFields != nil {
 		idx := make([]string, len(*rCfg.StringIndexedFields))
