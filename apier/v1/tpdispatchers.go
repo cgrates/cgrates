@@ -24,8 +24,12 @@ import (
 
 // SetTPDispatcherProfile creates a new DispatcherProfile within a tariff plan
 func (apierSv1 *APIerSv1) SetTPDispatcherProfile(attr *utils.TPDispatcherProfile, reply *string) error {
-	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPDispatcherProfiles([]*utils.TPDispatcherProfile{attr}); err != nil {
 		return utils.APIErrorHandler(err)
@@ -36,8 +40,12 @@ func (apierSv1 *APIerSv1) SetTPDispatcherProfile(attr *utils.TPDispatcherProfile
 
 // GetTPDispatcherProfile queries specific DispatcherProfile on Tariff plan
 func (apierSv1 *APIerSv1) GetTPDispatcherProfile(attr *utils.TPTntID, reply *utils.TPDispatcherProfile) error {
-	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	rls, err := apierSv1.StorDb.GetTPDispatcherProfiles(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
@@ -57,10 +65,10 @@ type AttrGetTPDispatcherIds struct {
 
 // GetTPDispatcherProfileIDs queries dispatcher identities on specific tariff plan.
 func (apierSv1 *APIerSv1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatchers, utils.TPDistinctIds{"tenant", "id"},
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatchers, utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg},
 		nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -74,11 +82,15 @@ func (apierSv1 *APIerSv1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherId
 
 // RemoveTPDispatcherProfile removes specific DispatcherProfile on Tariff plan
 func (apierSv1 *APIerSv1) RemoveTPDispatcherProfile(attrs *utils.TPTntID, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	tnt := attrs.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPDispatchers, attrs.TPid,
-		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+		map[string]string{utils.TenantCfg: attrs.Tenant, utils.IDCfg: attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -87,8 +99,12 @@ func (apierSv1 *APIerSv1) RemoveTPDispatcherProfile(attrs *utils.TPTntID, reply 
 
 // SetTPDispatcherHost creates a new DispatcherHost within a tariff plan
 func (apierSv1 *APIerSv1) SetTPDispatcherHost(attr *utils.TPDispatcherHost, reply *string) error {
-	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPDispatcherHosts([]*utils.TPDispatcherHost{attr}); err != nil {
 		return utils.APIErrorHandler(err)
@@ -99,8 +115,12 @@ func (apierSv1 *APIerSv1) SetTPDispatcherHost(attr *utils.TPDispatcherHost, repl
 
 // GetTPDispatcherHost queries specific DispatcherHosts on Tariff plan
 func (apierSv1 *APIerSv1) GetTPDispatcherHost(attr *utils.TPTntID, reply *utils.TPDispatcherHost) error {
-	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	rls, err := apierSv1.StorDb.GetTPDispatcherHosts(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
@@ -115,10 +135,10 @@ func (apierSv1 *APIerSv1) GetTPDispatcherHost(attr *utils.TPTntID, reply *utils.
 
 // GetTPDispatcherHostIDs queries dispatcher host identities on specific tariff plan.
 func (apierSv1 *APIerSv1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatcherHosts, utils.TPDistinctIds{"tenant", "id"},
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatcherHosts, utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg},
 		nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -132,11 +152,15 @@ func (apierSv1 *APIerSv1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, 
 
 // RemoveTPDispatcherHost removes specific DispatcherHost on Tariff plan
 func (apierSv1 *APIerSv1) RemoveTPDispatcherHost(attrs *utils.TPTntID, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	tnt := attrs.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPDispatcherHosts, attrs.TPid,
-		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+		map[string]string{utils.TenantCfg: attrs.Tenant, utils.IDCfg: attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
