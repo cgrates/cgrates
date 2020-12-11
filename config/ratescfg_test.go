@@ -38,6 +38,7 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		Rate_prefix_indexed_fields: &[]string{"*req.index1"},
 		Rate_suffix_indexed_fields: &[]string{"*req.index1"},
 		Rate_nested_fields:         utils.BoolPointer(true),
+		Verbosity:                  utils.IntPointer(20),
 	}
 	expected := &RateSCfg{
 		Enabled:                 true,
@@ -51,6 +52,7 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		RatePrefixIndexedFields: &[]string{"*req.index1"},
 		RateSuffixIndexedFields: &[]string{"*req.index1"},
 		RateNestedFields:        true,
+		Verbosity:               20,
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.rateSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -74,6 +76,7 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.RatePrefixIndexedFieldsCfg: []string{},
 		utils.RateSuffixIndexedFieldsCfg: []string{},
 		utils.RateNestedFieldsCfg:        false,
+		utils.Verbosity:                  1000,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -110,6 +113,7 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.RatePrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.RateSuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2", "*req.index3"},
 		utils.RateNestedFieldsCfg:        true,
+		utils.Verbosity:                  1000,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -131,6 +135,7 @@ func TestRateSCfgClone(t *testing.T) {
 		RatePrefixIndexedFields: &[]string{"*req.index1"},
 		RateSuffixIndexedFields: &[]string{"*req.index1"},
 		RateNestedFields:        true,
+		Verbosity:               20,
 	}
 	rcv := sa.Clone()
 	if !reflect.DeepEqual(sa, rcv) {

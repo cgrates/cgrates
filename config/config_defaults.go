@@ -969,6 +969,7 @@ const CGRATES_CFG_JSON = `
 	"rate_prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+    "verbosity": 1000,                      // number of increment iterations allowed
 },
 
 
