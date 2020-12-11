@@ -24,8 +24,12 @@ import (
 
 // SetTPActionProfile creates a new TPActionProfile within a tariff plan
 func (apierSv1 *APIerSv1) SetTPActionProfile(attrs *utils.TPActionProfile, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := attrs.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPActionProfiles([]*utils.TPActionProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
@@ -36,8 +40,12 @@ func (apierSv1 *APIerSv1) SetTPActionProfile(attrs *utils.TPActionProfile, reply
 
 // GetTPActionProfile queries specific TPActionProfile on tariff plan
 func (apierSv1 *APIerSv1) GetTPActionProfile(attr *utils.TPTntID, reply *utils.TPActionProfile) error {
-	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := attr.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	spp, err := apierSv1.StorDb.GetTPActionProfiles(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
@@ -57,7 +65,7 @@ type AttrGetTPActionProfileIDs struct {
 
 // GetTPRouteProfileIDs queries TPActionProfiles identities on specific tariff plan.
 func (apierSv1 *APIerSv1) GetTPActionProfileIDs(attrs *AttrGetTPActionProfileIDs, reply *[]string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPActionProfiles,
@@ -74,11 +82,15 @@ func (apierSv1 *APIerSv1) GetTPActionProfileIDs(attrs *AttrGetTPActionProfileIDs
 
 // RemoveTPActionProfile removes specific TPActionProfile on Tariff plan
 func (apierSv1 *APIerSv1) RemoveTPActionProfile(attrs *utils.TPTntID, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	tnt := attrs.Tenant
+	if tnt == utils.EmptyString {
+		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPActionProfiles, attrs.TPid,
-		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+		map[string]string{utils.TenantCfg: attrs.Tenant, utils.IDCfg: attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
