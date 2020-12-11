@@ -349,7 +349,7 @@
 		{
 			"id": "JSONReader",
 			"run_delay":  "-1",
-			"type": "*json",
+			"type": "*file_json",
 			"source_path": "/tmp/ErsJSON/in",
 			"flags": ["*cdrs"],
 			"processed_path": "/tmp/ErsJSON/out",

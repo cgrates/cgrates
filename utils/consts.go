@@ -346,6 +346,7 @@ const (
 	ZERO_RATING_SUBJECT_PREFIX   = "*zero"
 	OK                           = "OK"
 	MetaFileXML                  = "*file_xml"
+	MetaFileJSON                 = "*file_json"
 	MASK_CHAR                    = "*"
 	CONCATENATED_KEY_SEP         = ":"
 	UNIT_TEST                    = "UNIT_TEST"
