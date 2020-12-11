@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"database/sql"
 	"fmt"
+	"io"
 	"net/url"
 	"strings"
 	"time"
@@ -30,9 +32,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 
 	// libs for sql DBs
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
-	_ "github.com/lib/pq"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 // NewSQLEventReader return a new sql event reader
@@ -90,22 +92,36 @@ func (rdr *SQLEventReader) Config() *config.EventReaderCfg {
 
 // Serve will start the gorutines needed to watch the sql topic
 func (rdr *SQLEventReader) Serve() (err error) {
+	var dialect gorm.Dialector
+	switch rdr.connType {
+	case utils.MySQL:
+		dialect = mysql.Open(rdr.connString)
+	case utils.Postgres:
+		dialect = postgres.Open(rdr.connString)
+	default:
+		return fmt.Errorf("db type <%s> not supported", rdr.connType)
+	}
 	var db *gorm.DB
-	if db, err = gorm.Open(rdr.connType, rdr.connString); err != nil {
+	if db, err = gorm.Open(dialect, &gorm.Config{}); err != nil {
 		return
 	}
-	if err = db.DB().Ping(); err != nil {
+	var sqlDB *sql.DB
+	if sqlDB, err = db.DB(); err != nil {
+		return
+	}
+	// sqlDB.SetMaxOpenConns(10)
+	if err = sqlDB.Ping(); err != nil {
 		return
 	}
 	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
 		return
 	}
-	go rdr.readLoop(db) // read until the connection is closed
+	go rdr.readLoop(db, sqlDB) // read until the connection is closed
 	return
 }
 
-func (rdr *SQLEventReader) readLoop(db *gorm.DB) {
-	defer db.Close()
+func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
+	defer sqlDB.Close()
 	tm := time.NewTimer(0)
 	for {
 		if db = db.Table(rdr.tableName).Select("*"); db.Error != nil {
@@ -300,17 +316,31 @@ func (rdr *SQLEventReader) postCDR(in []interface{}) (err error) {
 		sqlValues[i] = "?"
 	}
 	sqlStatement := fmt.Sprintf("INSERT INTO %s VALUES (%s); ", rdr.expTableName, strings.Join(sqlValues, ","))
+	var dialect gorm.Dialector
+	switch rdr.expConnType {
+	case utils.MySQL:
+		dialect = mysql.Open(rdr.expConnString)
+	case utils.Postgres:
+		dialect = postgres.Open(rdr.expConnString)
+	default:
+		return fmt.Errorf("db type <%s> not supported", rdr.expConnType)
+	}
 	var db *gorm.DB
-	if db, err = gorm.Open(rdr.expConnType, rdr.expConnString); err != nil {
+	if db, err = gorm.Open(dialect, &gorm.Config{}); err != nil {
 		return
 	}
-	defer db.Close()
-	if err = db.DB().Ping(); err != nil {
+	var sqlDB *sql.DB
+	if sqlDB, err = db.DB(); err != nil {
+		return
+	}
+	defer sqlDB.Close()
+	// sqlDB.SetMaxOpenConns(10)
+	if err = sqlDB.Ping(); err != nil {
 		return
 	}
 	tx := db.Begin()
-	defer tx.Close()
-	_, err = tx.DB().Exec(sqlStatement, in...)
+	d := tx.Exec(sqlStatement, in...)
+	d.Error
 	if err != nil {
 		tx.Rollback()
 		if strings.Contains(err.Error(), "1062") || strings.Contains(err.Error(), "duplicate key") { // returns 1062/pq when key is duplicated

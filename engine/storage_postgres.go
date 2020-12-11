@@ -23,29 +23,35 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/jinzhu/gorm"
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 // NewPostgresStorage returns the posgres storDB
 func NewPostgresStorage(host, port, name, user, password, sslmode string, maxConn, maxIdleConn, connMaxLifetime int) (*SQLStorage, error) {
 	connectString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", host, port, name, user, password, sslmode)
-	db, err := gorm.Open("postgres", connectString)
+	db, err := gorm.Open(postgres.Open(connectString), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
-	err = db.DB().Ping()
-	if err != nil {
-		return nil, err
-	}
-	db.DB().SetMaxIdleConns(maxIdleConn)
-	db.DB().SetMaxOpenConns(maxConn)
-	db.DB().SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
-	//db.LogMode(true)
 	postgressStorage := new(PostgresStorage)
+	if postgressStorage.Db, err = db.DB(); err != nil {
+		return nil, err
+	}
+	if err = postgressStorage.Db.Ping(); err != nil {
+		return nil, err
+	}
+	postgressStorage.Db.SetMaxIdleConns(maxIdleConn)
+	postgressStorage.Db.SetMaxOpenConns(maxConn)
+	postgressStorage.Db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
+	//db.LogMode(true)
 	postgressStorage.db = db
-	postgressStorage.Db = db.DB()
-	return &SQLStorage{db.DB(), db, postgressStorage, postgressStorage}, nil
+	return &SQLStorage{
+		Db:      postgressStorage.Db,
+		db:      postgressStorage.db,
+		StorDB:  postgressStorage,
+		SQLImpl: postgressStorage,
+	}, nil
 }
 
 type PostgresStorage struct {
