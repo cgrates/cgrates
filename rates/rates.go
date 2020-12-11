@@ -123,7 +123,7 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *
 }
 
 // costForEvent computes the cost for an event based on a preselected rating profile
-func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.ArgsCostForEvent) (rpCost *engine.RateProfileCost, err error) {
+func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.ArgsCostForEvent, verbosity int) (rpCost *engine.RateProfileCost, err error) {
 	var rtIDs utils.StringSet
 	if rtIDs, err = engine.MatchingItemIDsForEvent(
 		args.CGREventWithOpts.CGREvent.Event,
@@ -159,7 +159,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 		return
 	}
 	var ordRts []*orderedRate
-	if ordRts, err = orderRatesOnIntervals(aRates, sTime, usage, true, 1000000); err != nil {
+	if ordRts, err = orderRatesOnIntervals(aRates, sTime, usage, true, verbosity); err != nil {
 		return
 	}
 	rpCost = &engine.RateProfileCost{
@@ -187,7 +187,7 @@ func (rS *RateS) V1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.Rat
 	if rtPrl, err = rS.matchingRateProfileForEvent(args.CGREventWithOpts.Tenant, rPfIDs, args); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if rcvCost, errCost := rS.rateProfileCostForEvent(rtPrl, args); errCost != nil {
+	if rcvCost, errCost := rS.rateProfileCostForEvent(rtPrl, args, rS.cfg.RateSCfg().Verbosity); errCost != nil {
 		return utils.NewErrServerError(errCost)
 	} else {
 		*rpCost = *rcvCost
