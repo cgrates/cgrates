@@ -23,8 +23,8 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type MySQLStorage struct {
@@ -34,21 +34,29 @@ type MySQLStorage struct {
 func NewMySQLStorage(host, port, name, user, password string,
 	maxConn, maxIdleConn, connMaxLifetime int) (*SQLStorage, error) {
 	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'", user, password, host, port, name)
-	db, err := gorm.Open("mysql", connectString)
+	db, err := gorm.Open(mysql.Open(connectString), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
-	if err = db.DB().Ping(); err != nil {
+
+	mySQLStorage := new(MySQLStorage)
+	if mySQLStorage.Db, err = db.DB(); err != nil {
 		return nil, err
 	}
-	db.DB().SetMaxIdleConns(maxIdleConn)
-	db.DB().SetMaxOpenConns(maxConn)
-	db.DB().SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
+	if mySQLStorage.Db.Ping(); err != nil {
+		return nil, err
+	}
+	mySQLStorage.Db.SetMaxIdleConns(maxIdleConn)
+	mySQLStorage.Db.SetMaxOpenConns(maxConn)
+	mySQLStorage.Db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
 	//db.LogMode(true)
-	mySQLStorage := new(MySQLStorage)
 	mySQLStorage.db = db
-	mySQLStorage.Db = db.DB()
-	return &SQLStorage{db.DB(), db, mySQLStorage, mySQLStorage}, nil
+	return &SQLStorage{
+		Db:      mySQLStorage.Db,
+		db:      mySQLStorage.db,
+		StorDB:  mySQLStorage,
+		SQLImpl: mySQLStorage,
+	}, nil
 }
 
 // SetVersions will set a slice of versions, updating existing
