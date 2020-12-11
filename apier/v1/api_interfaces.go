@@ -182,6 +182,11 @@ type CoreSv1Interface interface {
 
 type RateSv1Interface interface {
 	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) error
+}
+
+type RateProfileSv1Interface interface {
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
 }
 
 type ReplicatorSv1Interface interface {
