@@ -47,6 +47,7 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		anz:         anz,
 		srvDep:      srvDep,
+		rldChan:     make(chan struct{}),
 	}
 }
 
@@ -58,6 +59,9 @@ type ActionService struct {
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
+
+	rldChan  chan struct{}
+	stopChan chan struct{}
 
 	acts     *actions.ActionS
 	rpc      *v1.ActionSv1                  // useful on restart
@@ -84,6 +88,8 @@ func (acts *ActionService) Start() (err error) {
 	acts.Lock()
 	defer acts.Unlock()
 	acts.acts = actions.NewActionS(acts.cfg, filterS, datadb)
+	acts.stopChan = make(chan struct{})
+	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	acts.rpc = v1.NewActionSv1(acts.acts)
@@ -96,6 +102,7 @@ func (acts *ActionService) Start() (err error) {
 
 // Reload handles the change of config
 func (acts *ActionService) Reload() (err error) {
+	acts.rldChan <- struct{}{}
 	return // for the moment nothing to reload
 }
 
@@ -103,6 +110,7 @@ func (acts *ActionService) Reload() (err error) {
 func (acts *ActionService) Shutdown() (err error) {
 	acts.Lock()
 	defer acts.Unlock()
+	close(acts.stopChan)
 	if err = acts.acts.Shutdown(); err != nil {
 		return
 	}

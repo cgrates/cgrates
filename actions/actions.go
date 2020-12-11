@@ -35,6 +35,7 @@ func NewActionS(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMan
 		cfg:   cfg,
 		fltrS: fltrS,
 		dm:    dm,
+		crn:   cron.New(),
 	}
 }
 
@@ -50,7 +51,6 @@ type ActionS struct {
 func (aS *ActionS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s>",
 		utils.CoreS, utils.ActionS))
-	aS.crn = cron.New()
 	aS.crn.Start()
 	for {
 		select {

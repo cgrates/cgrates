@@ -248,6 +248,9 @@ func testExpVerifyResources(t *testing.T) {
 		Weight:       10,
 		ThresholdIDs: []string{},
 	}
+	if *encoding == utils.MetaGOB {
+		rPrf.ThresholdIDs = nil
+	}
 	var reply *engine.ResourceProfile
 	if err := expRpc.Call(utils.APIerSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}, &reply); err != nil {
@@ -392,8 +395,11 @@ func testExpVerifyRateProfiles(t *testing.T) {
 		},
 	}
 
-	if err := expRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "RT_SPECIAL_1002"}, &reply); err != nil {
+	if *encoding == utils.MetaGOB {
+		splPrf.FilterIDs = nil
+	}
+	if err := expRpc.Call(utils.APIerSv1GetRateProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RT_SPECIAL_1002"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(splPrf, reply) {
@@ -412,7 +418,7 @@ func testExpVerifyActionProfiles(t *testing.T) {
 		Schedule:   utils.ASAP,
 		AccountIDs: utils.StringSet{"1001": {}, "1002": {}},
 		Actions: []*engine.APAction{
-			&engine.APAction{
+			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.TOPUP,
@@ -420,28 +426,28 @@ func testExpVerifyActionProfiles(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("10", utils.INFIELD_SEP),
 			},
 
-			&engine.APAction{
+			{
 				ID:        "SET_BALANCE_TEST_DATA",
 				FilterIDs: []string{},
 				Type:      utils.SET_BALANCE,
 				Path:      utils.DynamicDataPrefix + utils.COUNTER_BALANCE + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Type,
 				Value:     config.NewRSRParsersMustCompile(utils.DATA, utils.INFIELD_SEP),
 			},
-			&engine.APAction{
+			{
 				ID:        "TOPUP_TEST_DATA",
 				FilterIDs: []string{},
 				Type:      utils.TOPUP,
 				Path:      utils.DynamicDataPrefix + utils.COUNTER_BALANCE + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Value,
 				Value:     config.NewRSRParsersMustCompile("1024", utils.INFIELD_SEP),
 			},
-			&engine.APAction{
+			{
 				ID:        "SET_BALANCE_TEST_VOICE",
 				FilterIDs: []string{},
 				Type:      utils.SET_BALANCE,
 				Path:      utils.DynamicDataPrefix + utils.COUNTER_BALANCE + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Type,
 				Value:     config.NewRSRParsersMustCompile(utils.VOICE, utils.INFIELD_SEP),
 			},
-			&engine.APAction{
+			{
 				ID:        "TOPUP_TEST_VOICE",
 				FilterIDs: []string{},
 				Type:      utils.TOPUP,
@@ -450,9 +456,14 @@ func testExpVerifyActionProfiles(t *testing.T) {
 			},
 		},
 	}
-
-	if err := expRpc.Call(utils.APIerSv1GetActionProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}, &reply); err != nil {
+	if *encoding == utils.MetaGOB {
+		actPrf.FilterIDs = nil
+		for _, act := range actPrf.Actions {
+			act.FilterIDs = nil
+		}
+	}
+	if err := expRpc.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else {
 		for _, act := range reply.Actions { // the path variable from RSRParsers is with lower letter and need to be compiled manually in tests to pass reflect.DeepEqual

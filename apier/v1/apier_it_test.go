@@ -760,7 +760,7 @@ func testApierTPAccountActions(t *testing.T) {
 	// Check missing params
 	if err := rater.Call(utils.APIerSv1SetTPAccountActions, new(utils.TPAccountActions), &reply); err == nil {
 		t.Error("Calling APIerSv1.SetTPAccountActions, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid LoadId Tenant Account ActionPlanId]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid LoadId Account ActionPlanId]" {
 		t.Error("Calling APIerSv1.SetTPAccountActions got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -842,7 +842,7 @@ func testApierLoadAccountActions(t *testing.T) {
 	expectedStats[utils.CacheAccountActionPlans].Items = 1
 	expectedStats[utils.CacheActionPlans].Items = 1
 	expectedStats[utils.CacheActions].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 6
+	expectedStats[utils.CacheLoadIDs].Items = 8
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
@@ -880,7 +880,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	expectedStats[utils.CacheActions].Items = 1
 	expectedStats[utils.CacheRatingProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 6
+	expectedStats[utils.CacheLoadIDs].Items = 8
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -1031,7 +1031,7 @@ func testApierReloadCache(t *testing.T) {
 	expectedStats[utils.CacheRatingProfiles].Items = 3
 	expectedStats[utils.CacheRatingPlans].Items = 1
 	expectedStats[utils.CacheReverseDestinations].Items = 10
-	expectedStats[utils.CacheLoadIDs].Items = 6
+	expectedStats[utils.CacheLoadIDs].Items = 8
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())

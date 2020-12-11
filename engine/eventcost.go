@@ -182,7 +182,8 @@ func (ec *EventCost) ratingIDForRateInterval(ri *RateInterval, rf RatingMatchedF
 			MaxCostStrategy:  ri.Rating.MaxCostStrategy,
 			TimingID:         tmID,
 			RatesID:          rtUUID,
-			RatingFiltersID:  rfUUID})
+			RatingFiltersID:  rfUUID,
+		})
 }
 
 func (ec *EventCost) rateIntervalForRatingID(ratingID string) (ri *RateInterval) {
