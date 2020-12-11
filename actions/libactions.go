@@ -25,19 +25,23 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func newScheduledActs(tenant, apID, acntID string, ctx context.Context,
-	data utils.RWDataProvider, acts []actioner) (sActs *scheduledActs) {
-	return &scheduledActs{tenant, apID, acntID, ctx, data, acts}
+	data *ActData, acts []actioner) (sActs *scheduledActs) {
+	return &scheduledActs{tenant, apID, acntID, ctx, data, acts,
+		ltcache.NewTransCache(map[string]*ltcache.CacheConfig{})}
 }
 
 // scheduled is a set of actions which will be executed directly or by the cron.schedule
 type scheduledActs struct {
 	tenant, apID, acntID string
 	ctx                  context.Context
-	data                 utils.RWDataProvider
+	data                 *ActData
 	acts                 []actioner
+
+	cch *ltcache.TransCache // cache data between actions here
 }
 
 // Execute is called when we want the ActionProfile to be executed
@@ -55,9 +59,15 @@ func (s *scheduledActs) Execute() (err error) {
 			partExec = true
 		}
 	}
+	// postexec here
 	if partExec {
 		err = utils.ErrPartiallyExecuted
 	}
+	return
+}
+
+// postExec will save data which was modified in actions and unlock guardian
+func (s *scheduledActs) postExec() (err error) {
 	return
 }
 
@@ -90,7 +100,7 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 type actioner interface {
 	id() string
 	cfg() *engine.APAction
-	execute(ctx context.Context, data utils.RWDataProvider) (err error)
+	execute(ctx context.Context, data *ActData) (err error)
 }
 
 // actLogger will log data to CGRateS logger
@@ -107,6 +117,6 @@ func (aL *actLog) cfg() *engine.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actLog) execute(ctx context.Context, data utils.RWDataProvider) (err error) {
+func (aL *actLog) execute(ctx context.Context, data *ActData) (err error) {
 	return
 }

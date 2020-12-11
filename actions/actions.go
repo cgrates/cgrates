@@ -129,25 +129,26 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string, aPrflIDs []string,
 
 // asapExecuteActions executes the scheduledActs and removes the executed from database
 // uses locks to avoid concurrent access
-func (aS *ActionS) asapExecuteActions(sActs *scheduledActs) {
-	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
-		ap, err := aS.dm.GetActionProfile(sActs.tenant, sActs.apID, true, true, utils.NonTransactional)
-		if err != nil {
+func (aS *ActionS) asapExecuteActions(sActs *scheduledActs) (err error) {
+	_, err = guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		var ap *engine.ActionProfile
+		if ap, gErr = aS.dm.GetActionProfile(sActs.tenant, sActs.apID, true, true, utils.NonTransactional); gErr != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> querying ActionProfile with id: <%s:%s>, error: <%s>",
 					utils.ActionS, sActs.tenant, sActs.apID, err))
+			return
 		}
-		if err = sActs.Execute(); err != nil { // cannot remove due to errors on execution
+		if gErr = sActs.Execute(); gErr != nil { // cannot remove due to errors on execution
 			return
 		}
 		delete(ap.AccountIDs, sActs.apID)
 		if len(ap.AccountIDs) == 0 {
-			err = aS.dm.RemoveActionProfile(sActs.tenant, sActs.apID, utils.NonTransactional, true)
+			gErr = aS.dm.RemoveActionProfile(sActs.tenant, sActs.apID, utils.NonTransactional, true)
 		} else {
-			err = aS.dm.SetActionProfile(ap, true)
+			gErr = aS.dm.SetActionProfile(ap, true)
 		}
-		if err != nil {
+		if gErr != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> saving ActionProfile with id: <%s:%s>, error: <%s>",
@@ -155,6 +156,7 @@ func (aS *ActionS) asapExecuteActions(sActs *scheduledActs) {
 		}
 		return
 	}, aS.cfg.GeneralCfg().LockingTimeout, utils.ActionProfilePrefix+sActs.apID)
+	return
 }
 
 // scheduleActions is responsible for scheduling the actions needing execution
@@ -162,10 +164,6 @@ func (aS *ActionS) scheduleActions(tnt string, aPrflIDs []string, cgrEv *utils.C
 	var aPfs engine.ActionProfiles
 	if aPfs, err = aS.matchingActionProfilesForEvent(tnt, aPrflIDs, cgrEv); err != nil {
 		return
-	}
-	evNm := utils.MapStorage{
-		utils.MetaReq:  cgrEv.CGREvent.Event,
-		utils.MetaOpts: cgrEv.Opts,
 	}
 	for _, aPf := range aPfs {
 		ctx := context.Background()
@@ -177,7 +175,8 @@ func (aS *ActionS) scheduleActions(tnt string, aPrflIDs []string, cgrEv *utils.C
 					return
 				}
 			}
-			sActs := newScheduledActs(aPf.Tenant, aPf.ID, acntID, ctx, evNm, acts)
+			sActs := newScheduledActs(aPf.Tenant, aPf.ID, acntID, ctx,
+				&ActData{cgrEv.CGREvent.Event, cgrEv.Opts}, acts)
 			if aPf.Schedule == utils.ASAP {
 				go aS.asapExecuteActions(sActs)
 				return
@@ -203,5 +202,60 @@ func (aS *ActionS) scheduleActions(tnt string, aPrflIDs []string, cgrEv *utils.C
 			}
 		}
 	}
+	return
+}
+
+type ArgActionSv1ExecuteActions struct {
+	*utils.CGREventWithOpts
+	ActionProfileIDs []string
+}
+
+// V1ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
+func (aS *ActionS) V1ExecuteActions(args *ArgActionSv1ExecuteActions, rpl *string) (err error) {
+	var aPfs engine.ActionProfiles
+	if aPfs, err = aS.matchingActionProfilesForEvent(args.Tenant, args.ActionProfileIDs,
+		args.CGREventWithOpts); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	var partExec bool
+	for _, aPf := range aPfs {
+		ctx := context.Background()
+		var acts []actioner
+		// actsExec will be used bellow as common code block
+		actsExec := func(acntID string) (errExec error) {
+			if len(acts) == 0 { // not yet initialized
+				if acts, errExec = newActionersFromActions(aS.cfg, aS.fltrS, aS.dm, aPf.Actions); errExec != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf(
+							"<%s> creating actions for ActionProfile with id: <%s:%s>, error: <%s>",
+							utils.ActionS, args.Tenant, aPf.ID, errExec))
+					partExec = true
+					return
+				}
+			}
+			sActs := newScheduledActs(aPf.Tenant, aPf.ID, acntID, ctx,
+				&ActData{args.CGREvent.Event, args.Opts}, acts)
+			if errExec = aS.asapExecuteActions(sActs); errExec != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf(
+						"<%s> executing ActionProfile with id: <%s:%s>, error: <%s>",
+						utils.ActionS, sActs.tenant, sActs.apID, errExec))
+				partExec = true
+				return
+			}
+			return
+		}
+		if len(aPf.AccountIDs) == 0 { // no accounts, other acts
+			actsExec(utils.EmptyString)
+			continue
+		}
+		for acntID := range aPf.AccountIDs {
+			actsExec(acntID)
+		}
+	}
+	if partExec {
+		return utils.ErrPartiallyExecuted
+	}
+	*rpl = utils.OK
 	return
 }
