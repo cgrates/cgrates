@@ -122,11 +122,15 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *
 	return
 }
 
-// costForEvent computes the cost for an event based on a preselected rating profile
+// rateProfileCostForEvent computes the rateProfileCost for an event based on a preselected rate profile
 func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.ArgsCostForEvent, verbosity int) (rpCost *engine.RateProfileCost, err error) {
+	evNm := utils.MapStorage{
+		utils.MetaReq:  args.CGREvent.Event,
+		utils.MetaOpts: args.Opts,
+	}
 	var rtIDs utils.StringSet
 	if rtIDs, err = engine.MatchingItemIDsForEvent(
-		args.CGREventWithOpts.CGREvent.Event,
+		evNm,
 		rS.cfg.RateSCfg().RateStringIndexedFields,
 		rS.cfg.RateSCfg().RatePrefixIndexedFields,
 		rS.cfg.RateSCfg().RateSuffixIndexedFields,
@@ -139,7 +143,6 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 		return
 	}
 	aRates := make([]*engine.Rate, 0, len(rtIDs))
-	evNm := utils.MapStorage{utils.MetaReq: args.CGREventWithOpts.CGREvent.Event}
 	for rtID := range rtIDs {
 		rt := rtPfl.Rates[rtID] // pick the rate directly from map based on matched ID
 		var pass bool
