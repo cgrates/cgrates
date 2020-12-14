@@ -1,0 +1,52 @@
+{
+"general": {
+	"log_level": 7,
+	"node_id": "Engine2"
+},
+
+
+"listen": {
+	"rpc_json": ":2022",
+	"rpc_gob": ":2023",
+	"http": ":2280",
+},
+
+"data_db": {
+	"db_type": "redis",
+	"db_port": 6379,
+	"db_name": "10",
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"rates": {
+	"enabled": true,
+},
+
+
+"schedulers": {
+	"enabled": true,
+},
+
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+
+}

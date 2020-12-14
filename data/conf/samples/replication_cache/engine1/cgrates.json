@@ -1,0 +1,75 @@
+{
+"general": {
+	"log_level": 7,
+	"node_id": "Engine1"
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2180"
+},
+
+"data_db": {
+	"db_type": "redis",
+	"db_port": 6379,
+	"db_name": "10"
+},
+
+"stor_db": {
+	"db_password": "CGRateS.org"
+},
+
+
+"rpc_conns": {
+	"connCache": {
+		"strategy": "*broadcast_sync",
+		"conns": [
+			{"address": "127.0.0.1:2013", "transport":"*gob"},
+			{"address": "127.0.0.1:2023", "transport":"*gob"}
+		]
+	}
+},
+
+
+"caches":{
+	"partitions": {
+		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": true},
+		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": true},
+		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": true},
+		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": true},
+		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": true}
+	},
+	"replication_conns": ["connCache"]
+},
+
+
+"rals": {
+	"enabled": true
+},
+
+
+"attributes": {
+	"enabled": true
+},
+
+
+"rates": {
+	"enabled": true
+},
+
+
+"schedulers": {
+	"enabled": true
+},
+
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"]
+},
+
+
+
+},

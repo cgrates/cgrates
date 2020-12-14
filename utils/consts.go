@@ -506,6 +506,7 @@ const (
 	MetaEEs                     = "*ees"
 	MetaRateS                   = "*rates"
 	MetaContinue                = "*continue"
+	MetaUp                      = "*up"
 	Migrator                    = "migrator"
 	UnsupportedMigrationTask    = "unsupported migration task"
 	NoStorDBConnection          = "not connected to StorDB"
