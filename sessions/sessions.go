@@ -1501,8 +1501,10 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 						fmt.Sprintf("<%s> failed rounding  session cost for <%s>, srIdx: <%d>, error: <%s>",
 							utils.SessionS, s.CGRID, sRunIdx, err.Error()))
 				}
-
 			}
+			// compute the event cost before saving the SessionCost
+			// add here to be applied for messages also
+			sr.EventCost.Compute()
 			if sS.cgrCfg.SessionSCfg().StoreSCosts {
 				if err := sS.storeSCost(s, sRunIdx); err != nil {
 					utils.Logger.Warning(
