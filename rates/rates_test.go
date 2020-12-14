@@ -194,6 +194,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 		t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(expectedRPCost), utils.ToJSON(rcv))
 	}
 
+	expRpCostAfterV1 := expectedRPCost
 	if err := rateS.V1CostForEvent(&utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
@@ -202,7 +203,10 @@ func TestRateProfileCostForEvent(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account: "1001"}}}}, expectedRPCost); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(expectedRPCost, expRpCostAfterV1) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRpCostAfterV1), utils.ToJSON(expectedRPCost))
 	}
+
 	err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true)
 	if err != nil {
 		t.Error(err)
