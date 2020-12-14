@@ -29,9 +29,9 @@ func (apierSv1 *APIerSv1) SetTPAccountActions(attrs *utils.TPAccountActions, rep
 		[]string{utils.TPid, utils.LoadId, utils.Account, utils.ActionPlanId}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPAccountActions([]*utils.TPAccountActions{attrs}); err != nil {
 		return utils.NewErrServerError(err)

@@ -27,9 +27,9 @@ func (apierSv1 *APIerSv1) SetTPAttributeProfile(attrs *utils.TPAttributeProfile,
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPAttributes([]*utils.TPAttributeProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
@@ -47,7 +47,7 @@ func (apierSv1 *APIerSv1) GetTPAttributeProfile(attr *utils.TPTntID, reply *util
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	als, err := apierSv1.StorDb.GetTPAttributes(attr.TPid, attr.Tenant, attr.ID)
+	als, err := apierSv1.StorDb.GetTPAttributes(attr.TPid, tnt, attr.ID)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
