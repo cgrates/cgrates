@@ -716,6 +716,12 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 		if cdrs[0].Cost != 0.198 {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
+		if cdrs[0].CostDetails.Usage == nil || *cdrs[0].CostDetails.Usage != 10*time.Minute {
+			t.Errorf("Unexpected usage from CostDetails for CDR: %+v", cdrs[0].CostDetails.Usage)
+		}
+		if cdrs[0].CostDetails.Cost == nil || *cdrs[0].CostDetails.Cost != 0.198 {
+			t.Errorf("Unexpected cost from CostDetails for CDR: %+v", cdrs[0].CostDetails.Cost)
+		}
 	}
 	args = &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
 		OriginIDs: []string{"TestSSv1It1"}}}
@@ -726,6 +732,12 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 	} else {
 		if cdrs[0].Cost != 0.102 {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+		if cdrs[0].CostDetails.Usage == nil || *cdrs[0].CostDetails.Usage != 10*time.Minute {
+			t.Errorf("Unexpected usage from CostDetails for CDR: %+v", cdrs[0].CostDetails.Usage)
+		}
+		if cdrs[0].CostDetails.Cost == nil || *cdrs[0].CostDetails.Cost != 0.102 {
+			t.Errorf("Unexpected cost from CostDetails for CDR: %+v", cdrs[0].CostDetails.Cost)
 		}
 	}
 
@@ -739,6 +751,12 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 		if cdrs[0].Cost != 0.099 {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
+		if cdrs[0].CostDetails.Usage == nil || *cdrs[0].CostDetails.Usage != 5*time.Minute {
+			t.Errorf("Unexpected usage from CostDetails for CDR: %+v", cdrs[0].CostDetails.Usage)
+		}
+		if cdrs[0].CostDetails.Cost == nil || *cdrs[0].CostDetails.Cost != 0.099 {
+			t.Errorf("Unexpected cost from CostDetails for CDR: %+v", cdrs[0].CostDetails.Cost)
+		}
 	}
 	args = &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
 		OriginIDs: []string{"TestSSv1It2"}}}
@@ -749,6 +767,12 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 	} else {
 		if cdrs[0].Cost != 0.051 {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+		if cdrs[0].CostDetails.Usage == nil || *cdrs[0].CostDetails.Usage != 5*time.Minute {
+			t.Errorf("Unexpected usage from CostDetails for CDR: %+v", cdrs[0].CostDetails.Usage)
+		}
+		if cdrs[0].CostDetails.Cost == nil || *cdrs[0].CostDetails.Cost != 0.051 {
+			t.Errorf("Unexpected cost from CostDetails for CDR: %+v", cdrs[0].CostDetails.Cost)
 		}
 	}
 }
