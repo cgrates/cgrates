@@ -27,9 +27,8 @@ func (apierSv1 *APIerSv1) SetTPActionProfile(attrs *utils.TPActionProfile, reply
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPActionProfiles([]*utils.TPActionProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
@@ -43,9 +42,8 @@ func (apierSv1 *APIerSv1) GetTPActionProfile(attr *utils.TPTntID, reply *utils.T
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attr.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attr.Tenant == utils.EmptyString {
+		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	spp, err := apierSv1.StorDb.GetTPActionProfiles(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
@@ -82,12 +80,11 @@ func (apierSv1 *APIerSv1) GetTPActionProfileIDs(attrs *AttrGetTPActionProfileIDs
 
 // RemoveTPActionProfile removes specific TPActionProfile on Tariff plan
 func (apierSv1 *APIerSv1) RemoveTPActionProfile(attrs *utils.TPTntID, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPActionProfiles, attrs.TPid,
 		map[string]string{utils.TenantCfg: attrs.Tenant, utils.IDCfg: attrs.ID}); err != nil {

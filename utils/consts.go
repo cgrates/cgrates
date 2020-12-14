@@ -927,6 +927,7 @@ const (
 	CategoryLowerCase        = "category"
 	SubjectLowerCase         = "subject"
 	RatingProfileID          = "RatingProfileID"
+	Time                     = "Time"
 )
 
 // Migrator Action

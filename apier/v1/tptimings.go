@@ -24,7 +24,7 @@ import (
 
 // SetTPTiming creates a new timing within a tariff plan
 func (apierSv1 *APIerSv1) SetTPTiming(attrs *utils.ApierTPTiming, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID", "Years", "Months", "MonthDays", "WeekDays", "Time"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.YearsFieldName, utils.MonthsFieldName, utils.MonthDaysFieldName, utils.WeekDaysFieldName, utils.Time}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := apierSv1.StorDb.SetTPTimings([]*utils.ApierTPTiming{attrs}); err != nil {
@@ -41,7 +41,7 @@ type AttrGetTPTiming struct {
 
 // GetTPTiming queries specific Timing on Tariff plan
 func (apierSv1 *APIerSv1) GetTPTiming(attrs *AttrGetTPTiming, reply *utils.ApierTPTiming) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tms, err := apierSv1.StorDb.GetTPTimings(attrs.TPid, attrs.ID)
@@ -62,11 +62,11 @@ type AttrGetTPTimingIds struct {
 
 // GetTPTimingIds queries timing identities on specific tariff plan.
 func (apierSv1 *APIerSv1) GetTPTimingIds(attrs *AttrGetTPTimingIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPTimings,
-		utils.TPDistinctIds{"tag"}, nil, &attrs.PaginatorWithSearch)
+		utils.TPDistinctIds{utils.TagCfg}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -79,10 +79,10 @@ func (apierSv1 *APIerSv1) GetTPTimingIds(attrs *AttrGetTPTimingIds, reply *[]str
 
 // RemoveTPTiming removes specific Timing on Tariff plan
 func (apierSv1 *APIerSv1) RemoveTPTiming(attrs AttrGetTPTiming, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.StorDb.RemTpData(utils.TBLTPTimings, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
+	if err := apierSv1.StorDb.RemTpData(utils.TBLTPTimings, attrs.TPid, map[string]string{utils.TagCfg: attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

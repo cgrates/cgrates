@@ -27,9 +27,8 @@ func (apierSv1 *APIerSv1) SetTPCharger(attr *utils.TPChargerProfile, reply *stri
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attr.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attr.Tenant == utils.EmptyString {
+		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPChargers([]*utils.TPChargerProfile{attr}); err != nil {
 		return utils.APIErrorHandler(err)
@@ -43,9 +42,8 @@ func (apierSv1 *APIerSv1) GetTPCharger(attr *utils.TPTntID, reply *utils.TPCharg
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attr.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attr.Tenant == utils.EmptyString {
+		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	rls, err := apierSv1.StorDb.GetTPChargers(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
@@ -85,9 +83,8 @@ func (apierSv1 *APIerSv1) RemoveTPCharger(attrs *utils.TPTntID, reply *string) e
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPChargers, attrs.TPid,
 		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {

@@ -30,9 +30,8 @@ func (apierSv1 *APIerSv1) SetTPRatingProfile(attrs *utils.TPRatingProfile, reply
 		[]string{utils.TPid, utils.LoadId, utils.Category, utils.Subject, utils.RatingPlanActivations}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPRatingProfiles([]*utils.TPRatingProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
@@ -50,9 +49,8 @@ func (apierSv1 *APIerSv1) GetTPRatingProfilesByLoadID(attrs *utils.TPRatingProfi
 	if missing := utils.MissingStructFields(attrs, mndtryFlds); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	rps, err := apierSv1.StorDb.GetTPRatingProfiles(attrs)
 	if err != nil {
@@ -70,9 +68,8 @@ func (apierSv1 *APIerSv1) GetTPRatingProfileLoadIds(attrs *utils.AttrTPRatingPro
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRatingProfiles,
 		utils.TPDistinctIds{utils.Loadid}, map[string]string{
@@ -104,10 +101,6 @@ func (apierSv1 *APIerSv1) GetTPRatingProfile(attrs *AttrGetTPRatingProfile, repl
 	tmpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
 	if err := tmpRpf.SetRatingProfileID(attrs.RatingProfileID); err != nil {
 		return err
-	}
-	tnt := tmpRpf.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	rpfs, err := apierSv1.StorDb.GetTPRatingProfiles(tmpRpf)
 	if err != nil {
@@ -152,10 +145,6 @@ func (apierSv1 *APIerSv1) RemoveTPRatingProfile(attrs *AttrGetTPRatingProfile, r
 	tmpRpf := new(utils.TPRatingProfile)
 	if err = tmpRpf.SetRatingProfileID(attrs.RatingProfileID); err != nil {
 		return
-	}
-	tnt := tmpRpf.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	err = apierSv1.StorDb.RemTpData(utils.TBLTPRatingProfiles,
 		attrs.TPid, map[string]string{

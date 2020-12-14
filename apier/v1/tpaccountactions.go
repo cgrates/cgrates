@@ -29,7 +29,6 @@ func (apierSv1 *APIerSv1) SetTPAccountActions(attrs *utils.TPAccountActions, rep
 		[]string{utils.TPid, utils.LoadId, utils.Account, utils.ActionPlanId}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-
 	if attrs.Tenant == utils.EmptyString {
 		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
@@ -54,9 +53,8 @@ func (apierSv1 *APIerSv1) GetTPAccountActionsByLoadId(attrs *utils.TPAccountActi
 	if missing := utils.MissingStructFields(attrs, mndtryFlds); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	aas, err := apierSv1.StorDb.GetTPAccountActions(attrs)
 	if err != nil {
@@ -82,10 +80,6 @@ func (apierSv1 *APIerSv1) GetTPAccountActions(attrs *AttrGetTPAccountActions, re
 	filter := &utils.TPAccountActions{TPid: attrs.TPid}
 	if err := filter.SetAccountActionsId(attrs.AccountActionsId); err != nil {
 		return err
-	}
-	tnt := filter.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	aas, err := apierSv1.StorDb.GetTPAccountActions(filter)
 	if err != nil {
@@ -139,17 +133,12 @@ func (apierSv1 *APIerSv1) GetTPAccountActionIds(attrs *AttrGetTPAccountActionIds
 
 // RemoveTPAccountActions removes specific AccountActions on Tariff plan
 func (apierSv1 *APIerSv1) RemoveTPAccountActions(attrs *AttrGetTPAccountActions, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.LoadId, utils.Account}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.AccountActionsId}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-
 	aa := engine.AccountActionMdl{Tpid: attrs.TPid}
 	if err := aa.SetAccountActionId(attrs.AccountActionsId); err != nil {
 		return err
-	}
-	tnt := aa.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPAccountActions, aa.Tpid,
 		map[string]string{utils.Loadid: aa.Loadid, utils.TenantCfg: aa.Tenant, utils.AccountLowerCase: aa.Account}); err != nil {

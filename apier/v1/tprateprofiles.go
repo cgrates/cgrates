@@ -27,9 +27,8 @@ func (apierSv1 *APIerSv1) SetTPRateProfile(attrs *utils.TPRateProfile, reply *st
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPRateProfiles([]*utils.TPRateProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
@@ -43,9 +42,8 @@ func (apierSv1 *APIerSv1) GetTPRateProfile(attr *utils.TPTntID, reply *utils.TPR
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attr.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attr.Tenant == utils.EmptyString {
+		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	filter, err := apierSv1.StorDb.GetTPRateProfiles(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
@@ -85,9 +83,8 @@ func (apierSv1 *APIerSv1) RemoveTPRateProfile(attrs *utils.TPTntID, reply *strin
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPRateProfiles, attrs.TPid,
 		map[string]string{utils.TenantCfg: attrs.Tenant, utils.IDCfg: attrs.ID}); err != nil {

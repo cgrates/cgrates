@@ -24,7 +24,7 @@ import (
 
 // SetTPSharedGroups creates a new SharedGroups profile within a tariff plan
 func (apierSv1 *APIerSv1) SetTPSharedGroups(attrs *utils.TPSharedGroups, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID", "SharedGroups"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID, utils.SharedGroups}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := apierSv1.StorDb.SetTPSharedGroups([]*utils.TPSharedGroups{attrs}); err != nil {
@@ -41,7 +41,7 @@ type AttrGetTPSharedGroups struct {
 
 // GetTPSharedGroups queries specific SharedGroup on tariff plan
 func (apierSv1 *APIerSv1) GetTPSharedGroups(attrs *AttrGetTPSharedGroups, reply *utils.TPSharedGroups) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	sgs, err := apierSv1.StorDb.GetTPSharedGroups(attrs.TPid, attrs.ID)
@@ -62,11 +62,11 @@ type AttrGetTPSharedGroupIds struct {
 
 // GetTPSharedGroupIds queries SharedGroups identities on specific tariff plan.
 func (apierSv1 *APIerSv1) GetTPSharedGroupIds(attrs *AttrGetTPSharedGroupIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPSharedGroups,
-		utils.TPDistinctIds{"tag"}, nil, &attrs.PaginatorWithSearch)
+		utils.TPDistinctIds{utils.TagCfg}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -79,10 +79,10 @@ func (apierSv1 *APIerSv1) GetTPSharedGroupIds(attrs *AttrGetTPSharedGroupIds, re
 
 // RemoveTPSharedGroups removes specific SharedGroups on Tariff plan
 func (apierSv1 *APIerSv1) RemoveTPSharedGroups(attrs *AttrGetTPSharedGroups, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierSv1.StorDb.RemTpData(utils.TBLTPSharedGroups, attrs.TPid, map[string]string{"tag": attrs.ID}); err != nil {
+	if err := apierSv1.StorDb.RemTpData(utils.TBLTPSharedGroups, attrs.TPid, map[string]string{utils.TagCfg: attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
