@@ -36,6 +36,8 @@ var Cache *CacheS
 
 func init() {
 	Cache = NewCacheS(config.CgrConfig(), nil, nil)
+	gob.Register(new(AttributeProfile))
+	gob.Register(new(AttributeProfileWithOpts))
 	// Threshold
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))
@@ -96,6 +98,11 @@ func init() {
 	gob.Register(url.Values{})
 	gob.Register(json.RawMessage{})
 	gob.Register(BalanceSummaries{})
+
+	gob.Register(new(utils.ArgCacheReplicateSet))
+	gob.Register(new(utils.ArgCacheReplicateRemove))
+
+	gob.Register(utils.StringSet{})
 }
 
 //SetCache shared the cache from other subsystems

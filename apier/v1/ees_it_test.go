@@ -218,7 +218,7 @@ func testEEsExportCDRs(t *testing.T) {
 }
 
 func testEEsVerifyExports(t *testing.T) {
-	time.Sleep(time.Second)
+	time.Sleep(time.Second + 600*time.Millisecond)
 	var files []string
 	err := filepath.Walk("/tmp/testCSV/", func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, utils.CSVSuffix) {

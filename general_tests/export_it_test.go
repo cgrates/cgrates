@@ -368,9 +368,9 @@ func testExpVerifyRateProfiles(t *testing.T) {
 	splPrf := &engine.RateProfile{
 		Tenant:             "cgrates.org",
 		ID:                 "RT_SPECIAL_1002",
-		FilterIDs:          []string{},
+		FilterIDs:          []string{"*string:~*req.Account:1002"},
 		ActivationInterval: nil,
-		Weight:             0,
+		Weight:             10,
 		RoundingDecimals:   4,
 		RoundingMethod:     utils.ROUNDING_UP,
 		MinCost:            0,
