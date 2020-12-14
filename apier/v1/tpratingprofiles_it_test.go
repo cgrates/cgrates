@@ -189,7 +189,7 @@ func testTPRatingProfilesGetTPRatingProfileLoadIds(t *testing.T) {
 func testTPRatingProfilesGetTPRatingProfilesByLoadID(t *testing.T) {
 	var respond *[]*utils.TPRatingProfile
 	if err := tpRatingProfileRPC.Call(utils.APIerSv1GetTPRatingProfilesByLoadID,
-		&utils.TPRatingProfile{TPid: "TPRProf1", LoadId: "RPrf"}, &respond); err != nil {
+		&utils.TPRatingProfile{TPid: "TPRProf1", LoadId: "RPrf", Tenant: "Tenant1"}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRatingProfile.TPid, (*respond)[0].TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.TPid, (*respond)[0].TPid)

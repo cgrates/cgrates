@@ -2614,6 +2614,9 @@ const (
 	Opts             = "Opts"
 )
 
+//cgr-console constants
+const ()
+
 var (
 	// AnzIndexType are the analyzers possible index types
 	AnzIndexType = StringSet{

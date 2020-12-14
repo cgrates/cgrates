@@ -529,7 +529,7 @@ func testApierTPRatingProfile(t *testing.T) {
 	// Check missing params
 	if err := rater.Call(utils.APIerSv1SetTPRatingProfile, new(utils.TPRatingProfile), &reply); err == nil {
 		t.Error("Calling APIerSv1.SetTPRatingProfile, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid LoadId Tenant Category Subject RatingPlanActivations]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid LoadId Category Subject RatingPlanActivations]" {
 		t.Error("Calling APIerSv1.SetTPRatingProfile got unexpected error: ", err.Error())
 	}
 	// Test get
