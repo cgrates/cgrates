@@ -27,9 +27,8 @@ func (apierSv1 *APIerSv1) SetTPFilterProfile(attrs *utils.TPFilterProfile, reply
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPFilters([]*utils.TPFilterProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
@@ -43,9 +42,8 @@ func (apierSv1 *APIerSv1) GetTPFilterProfile(attr *utils.TPTntID, reply *utils.T
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attr.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attr.Tenant == utils.EmptyString {
+		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	filter, err := apierSv1.StorDb.GetTPFilters(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
@@ -85,9 +83,8 @@ func (apierSv1 *APIerSv1) RemoveTPFilterProfile(attrs *utils.TPTntID, reply *str
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPFilters, attrs.TPid,
 		map[string]string{utils.TenantCfg: attrs.Tenant, utils.IDCfg: attrs.ID}); err != nil {

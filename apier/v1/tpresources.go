@@ -27,9 +27,8 @@ func (apierSv1 *APIerSv1) SetTPResource(attr *utils.TPResourceProfile, reply *st
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID, utils.Limit}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attr.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attr.Tenant == utils.EmptyString {
+		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.SetTPResources([]*utils.TPResourceProfile{attr}); err != nil {
 		return utils.APIErrorHandler(err)
@@ -43,9 +42,8 @@ func (apierSv1 *APIerSv1) GetTPResource(attr *utils.TPTntID, reply *utils.TPReso
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attr.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attr.Tenant == utils.EmptyString {
+		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	rls, err := apierSv1.StorDb.GetTPResources(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
@@ -85,9 +83,8 @@ func (apierSv1 *APIerSv1) RemoveTPResource(attrs *utils.TPTntID, reply *string) 
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
+	if attrs.Tenant == utils.EmptyString {
+		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.StorDb.RemTpData(utils.TBLTPResources, attrs.TPid, map[string]string{utils.TenantCfg: attrs.Tenant, utils.IDCfg: attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)

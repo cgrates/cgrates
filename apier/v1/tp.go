@@ -105,7 +105,7 @@ type AttrRemTp struct {
 
 func (apierSv1 *APIerSv1) RemTP(attrs *AttrRemTp, reply *string) error {
 	if len(attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
+		return utils.NewErrMandatoryIeMissing(utils.TPid)
 	}
 	if err := apierSv1.StorDb.RemTpData("", attrs.TPid, nil); err != nil {
 		return utils.NewErrServerError(err)
@@ -117,7 +117,7 @@ func (apierSv1 *APIerSv1) RemTP(attrs *AttrRemTp, reply *string) error {
 
 func (apierSv1 *APIerSv1) ExportTPToFolder(attrs *utils.AttrDirExportTP, exported *utils.ExportedTPStats) error {
 	if attrs.TPid == nil || *attrs.TPid == "" {
-		return utils.NewErrMandatoryIeMissing("TPid")
+		return utils.NewErrMandatoryIeMissing(utils.TPid)
 	}
 	dir := apierSv1.Config.GeneralCfg().TpExportPath
 	if attrs.ExportPath != nil {
@@ -149,10 +149,10 @@ func (apierSv1 *APIerSv1) ExportTPToFolder(attrs *utils.AttrDirExportTP, exporte
 }
 
 func (apierSv1 *APIerSv1) ExportTPToZipString(attrs *utils.AttrDirExportTP, reply *string) error {
-	if attrs.TPid == nil || *attrs.TPid == "" {
-		return utils.NewErrMandatoryIeMissing("TPid")
+	if attrs.TPid == nil || *attrs.TPid == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing(utils.TPid)
 	}
-	dir := ""
+	dir := utils.EmptyString
 	fileFormat := utils.CSV
 	if attrs.FileFormat != nil {
 		fileFormat = *attrs.FileFormat
