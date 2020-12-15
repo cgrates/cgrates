@@ -165,6 +165,20 @@ func TestStructMatcherKeyValue(t *testing.T) {
 	}
 }
 
+func TestParseAndMatchError(t *testing.T) {
+	sMatch := &StructMatcher{}
+	expected := "invalid character 'C' looking for beginning of value"
+	err := sMatch.Parse("Can't unmarshal this")
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	matchStr := &struct{}{}
+	_, err = sMatch.Match(matchStr)
+	if err == nil || err.Error() != ErrParserError.Error() {
+		t.Errorf("Expected %+v, received %+v", ErrParserError, err)
+	}
+}
+
 func TestStructMatcherKeyValuePointer(t *testing.T) {
 	o := &struct {
 		Test  string
