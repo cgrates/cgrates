@@ -2353,22 +2353,23 @@ const (
 
 // MigratorCgrCfg
 const (
-	OutDataDBTypeCfg     = "out_datadb_type"
-	OutDataDBHostCfg     = "out_datadb_host"
-	OutDataDBPortCfg     = "out_datadb_port"
-	OutDataDBNameCfg     = "out_datadb_name"
-	OutDataDBUserCfg     = "out_datadb_user"
-	OutDataDBPasswordCfg = "out_datadb_password"
-	OutDataDBEncodingCfg = "out_datadb_encoding"
-	OutStorDBTypeCfg     = "out_stordb_type"
-	OutStorDBHostCfg     = "out_stordb_host"
-	OutStorDBPortCfg     = "out_stordb_port"
-	OutStorDBNameCfg     = "out_stordb_name"
-	OutStorDBUserCfg     = "out_stordb_user"
-	OutStorDBPasswordCfg = "out_stordb_password"
-	OutStorDBOptsCfg     = "out_stordb_opts"
-	OutDataDBOptsCfg     = "out_datadb_opts"
-	UsersFiltersCfg      = "users_filters"
+	OutDataDBTypeCfg       = "out_datadb_type"
+	OutDataDBHostCfg       = "out_datadb_host"
+	OutDataDBPortCfg       = "out_datadb_port"
+	OutDataDBNameCfg       = "out_datadb_name"
+	OutDataDBUserCfg       = "out_datadb_user"
+	OutDataDBPasswordCfg   = "out_datadb_password"
+	OutDataDBEncodingCfg   = "out_datadb_encoding"
+	OutDataDBRedisSentinel = "out_redis_sentinel"
+	OutStorDBTypeCfg       = "out_stordb_type"
+	OutStorDBHostCfg       = "out_stordb_host"
+	OutStorDBPortCfg       = "out_stordb_port"
+	OutStorDBNameCfg       = "out_stordb_name"
+	OutStorDBUserCfg       = "out_stordb_user"
+	OutStorDBPasswordCfg   = "out_stordb_password"
+	OutStorDBOptsCfg       = "out_stordb_opts"
+	OutDataDBOptsCfg       = "out_datadb_opts"
+	UsersFiltersCfg        = "users_filters"
 )
 
 // MailerCfg
@@ -2616,8 +2617,67 @@ const (
 	Opts             = "Opts"
 )
 
-//cgr-console constants
-const ()
+//CMD constants
+const (
+	//Common
+	VerboseCgr      = "verbose"
+	QuitCgr         = "quit"
+	ExitCgr         = "exit"
+	ByeCgr          = "bye"
+	CloseCgr        = "close"
+	CfgPathCgr      = "config_path"
+	DataDBTypeCgr   = "datadb_type"
+	DataDBHostCgr   = "datadb_host"
+	DataDBPortCgr   = "datadb_port"
+	DataDBNameCgr   = "datadb_name"
+	DataDBUserCgr   = "datadb_user"
+	DataDBPasswdCgr = "datadb_passwd"
+	//Cgr console
+	CgrConsole     = "cgr-console"
+	HomeCgr        = "HOME"
+	HistoryCgr     = "/.cgr_history"
+	RpcEncodingCgr = "rpc_encoding"
+	CertPathCgr    = "crt_path"
+	KeyPathCgr     = "key_path"
+	CAPathCgr      = "ca_path"
+	HelpCgr        = "help"
+	SepCgr         = " "
+	//Cgr engine
+	CgrEngine            = "cgr-engine"
+	CheckCfgCgr          = "check_config"
+	PidCgr               = "pid"
+	HttpPrfPthCgr        = "httprof_path"
+	CpuProfDirCgr        = "cpuprof_dir"
+	MemProfDirCgr        = "memprof_dir"
+	MemProfIntervalCgr   = "memprof_interval"
+	MemProfNrFilesCgr    = "memprof_nrfiles"
+	ScheduledShutdownCgr = "scheduled_shutdown"
+	SingleCpuCgr         = "singlecpu"
+	PreloadCgr           = "preload"
+	MemProfFileCgr       = "mem_final.prof"
+	CpuPathCgr           = "cpu.prof"
+	//Cgr loader
+	CgrLoader         = "cgr-loader"
+	StorDBTypeCgr     = "stordb_type"
+	StorDBHostCgr     = "stordb_host"
+	StorDBPortCgr     = "stordb_port"
+	StorDBNameCgr     = "stordb_name"
+	StorDBUserCgr     = "stordb_user"
+	StorDBPasswdCgr   = "stordb_passwd"
+	CachingArgCgr     = "caching"
+	FieldSepCgr       = "field_sep"
+	ImportIDCgr       = "import_id"
+	DisableReverseCgr = "disable_reverse_mappings"
+	FlushStorDB       = "flush_stordb"
+	RemoveCgr         = "remove"
+	FromStorDBCgr     = "from_stordb"
+	ToStorDBcgr       = "to_stordb"
+	CacheSAddress     = "caches_address"
+	SchedulerAddress  = "scheduler_address"
+	//Cgr migrator
+	CgrMigrator = "cgr-migrator"
+	ExecCgr     = "exec"
+)
 
 var (
 	// AnzIndexType are the analyzers possible index types
