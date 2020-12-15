@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -45,6 +46,7 @@ func TestVersionCompare(t *testing.T) {
 		utils.ActionTriggers: 2, utils.ActionPlans: 2,
 		utils.SharedGroups: 2, utils.CostDetails: 2,
 		utils.SessionSCosts: 2}
+
 	message1 := y.Compare(x, utils.MONGO, true)
 	if message1 != "cgr-migrator -exec=*accounts" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message1)
@@ -69,5 +71,62 @@ func TestVersionCompare(t *testing.T) {
 	if message6 != "cgr-migrator -exec=*sessions_costs" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*sessions_costs", message6)
 	}
+	message7 := y.Compare(x, utils.REDIS, true)
+	if message7 != "cgr-migrator -exec=*accounts" {
+		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message7)
+	}
 
+	y[utils.Accounts] = 2
+	message8 := y.Compare(x, utils.REDIS, true)
+	if message8 != utils.EmptyString {
+		t.Errorf("Expected %+v, received %+v", utils.EmptyString, message8)
+	}
+}
+
+func TestCurrentDBVersions(t *testing.T) {
+	expVersDataDB := Versions{
+		utils.StatS: 4, utils.Accounts: 3, utils.Actions: 2,
+		utils.ActionTriggers: 2, utils.ActionPlans: 3, utils.SharedGroups: 2,
+		utils.Thresholds: 4, utils.Routes: 2, utils.Attributes: 6,
+		utils.Timing: 1, utils.RQF: 5, utils.Resource: 1,
+		utils.Subscribers: 1, utils.Destinations: 1, utils.ReverseDestinations: 1,
+		utils.RatingPlan: 1, utils.RatingProfile: 1, utils.Chargers: 2,
+		utils.Dispatchers: 2, utils.LoadIDsVrs: 1, utils.RateProfiles: 1,
+		utils.ActionProfiles: 1,
+	}
+	expVersStorDB := Versions{
+		utils.CostDetails: 2, utils.SessionSCosts: 3, utils.CDRs: 2,
+		utils.TpRatingPlans: 1, utils.TpFilters: 1, utils.TpDestinationRates: 1,
+		utils.TpActionTriggers: 1, utils.TpAccountActionsV: 1, utils.TpActionPlans: 1,
+		utils.TpActions: 1, utils.TpThresholds: 1, utils.TpRoutes: 1,
+		utils.TpStats: 1, utils.TpSharedGroups: 1, utils.TpRatingProfiles: 1,
+		utils.TpResources: 1, utils.TpRates: 1, utils.TpTiming: 1,
+		utils.TpResource: 1, utils.TpDestinations: 1, utils.TpRatingPlan: 1,
+		utils.TpRatingProfile: 1, utils.TpChargers: 1, utils.TpDispatchers: 1,
+		utils.TpRateProfiles: 1, utils.TpActionProfiles: 1,
+	}
+	if vrs := CurrentDBVersions(utils.MONGO, true); !reflect.DeepEqual(expVersDataDB, vrs) {
+		t.Errorf("Expectred %+v, received %+v", expVersDataDB, vrs)
+	}
+
+	if vrs := CurrentDBVersions(utils.MONGO, false); !reflect.DeepEqual(expVersStorDB, vrs) {
+		t.Errorf("Expectred %+v, received %+v", expVersStorDB, vrs)
+	}
+
+	if vrs := CurrentDBVersions(utils.POSTGRES, false); !reflect.DeepEqual(expVersStorDB, vrs) {
+		t.Errorf("Expectred %+v, received %+v", expVersStorDB, vrs)
+	}
+
+	if vrs := CurrentDBVersions(utils.REDIS, true); !reflect.DeepEqual(expVersDataDB, vrs) {
+		t.Errorf("Expectred %+v, received %+v", expVersDataDB, vrs)
+	}
+
+	if vrs := CurrentDBVersions("NOT_A_DB", true); vrs != nil {
+		t.Error(vrs)
+	}
+
+	//Compare AllVersions
+	if rcv := expVersDataDB.Compare(expVersStorDB, utils.INTERNAL, true); rcv != "cgr-migrator -exec=*accounts" {
+		t.Error(rcv)
+	}
 }
