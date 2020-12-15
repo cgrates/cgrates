@@ -5649,8 +5649,8 @@ func TestActionProfileMdlsCSVHeader(t *testing.T) {
 		},
 	}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.ActivationIntervalString, utils.Weight, utils.Schedule, utils.AccountIDs,
-		utils.ActionID, utils.ActionFilterIDs, utils.ActionBlocker, utils.ActionTTL,
+		utils.ActivationIntervalString, utils.Weight, utils.Schedule, utils.TargetType,
+		utils.TargetIDs, utils.ActionID, utils.ActionFilterIDs, utils.ActionBlocker, utils.ActionTTL,
 		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
 	}
 	result := testStruct.CSVHeader()
@@ -5698,7 +5698,6 @@ func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
 	}
 }
 
-//teo
 func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 	testStruct := ActionProfileMdls{
 		{
@@ -5709,7 +5708,8 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
 			Weight:             1,
 			Schedule:           "test_schedule",
-			AccountIDs:         "test_account_id1;test_account_id2",
+			TargetType:         utils.MetaAccounts,
+			TargetIDs:          "test_account_id1;test_account_id2",
 			ActionID:           "test_action_id",
 			ActionFilterIDs:    "test_action_filter_ids",
 		},
@@ -5724,9 +5724,14 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "2014-08-29T15:00:00Z",
 			},
-			Weight:     1,
-			Schedule:   "test_schedule",
-			AccountIDs: []string{"test_account_id1", "test_account_id2"},
+			Weight:   1,
+			Schedule: "test_schedule",
+			Targets: []*utils.TPActionTarget{
+				&utils.TPActionTarget{
+					TargetType: utils.MetaAccounts,
+					TargetIDs:  []string{"test_account_id1", "test_account_id2"},
+				},
+			},
 			Actions: []*utils.TPAPAction{
 				{
 					ID:        "test_action_id",
@@ -5735,8 +5740,11 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			},
 		},
 	}
+
 	result := testStruct.AsTPActionProfile()
-	sort.Strings(result[0].AccountIDs)
+	sort.Slice(result[0].Targets[0].TargetIDs, func(i, j int) bool {
+		return result[0].Targets[0].TargetIDs[i] < result[0].Targets[0].TargetIDs[j]
+	})
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
@@ -5762,9 +5770,14 @@ func TestAPItoModelTPActionProfileTPActionProfile(t *testing.T) {
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "2014-08-29T15:00:00Z",
 		},
-		Weight:     1,
-		Schedule:   "test_schedule",
-		AccountIDs: []string{"test_account_id1", "test_account_id2"},
+		Weight:   1,
+		Schedule: "test_schedule",
+		Targets: []*utils.TPActionTarget{
+			&utils.TPActionTarget{
+				TargetType: utils.MetaAccounts,
+				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
+			},
+		},
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
@@ -5781,7 +5794,8 @@ func TestAPItoModelTPActionProfileTPActionProfile(t *testing.T) {
 		ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
 		Weight:             1,
 		Schedule:           "test_schedule",
-		AccountIDs:         "test_account_id1;test_account_id2",
+		TargetType:         utils.MetaAccounts,
+		TargetIDs:          "test_account_id1;test_account_id2",
 		ActionID:           "test_action_id",
 		ActionFilterIDs:    "test_action_filter_id1;test_action_filter_id2",
 	}}
@@ -5800,9 +5814,18 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 			ActivationTime: "2014-07-14T14:25:00Z",
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
-		Weight:     1,
-		Schedule:   "test_schedule",
-		AccountIDs: []string{},
+		Weight:   1,
+		Schedule: "test_schedule",
+		Targets: []*utils.TPActionTarget{
+			&utils.TPActionTarget{
+				TargetType: utils.MetaAccounts,
+				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
+			},
+			&utils.TPActionTarget{
+				TargetType: utils.MetaResources,
+				TargetIDs:  []string{"test_ID1", "test_ID2"},
+			},
+		},
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
@@ -5821,9 +5844,12 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
 		},
-		Weight:     1,
-		Schedule:   "test_schedule",
-		AccountIDs: utils.StringSet{},
+		Weight:   1,
+		Schedule: "test_schedule",
+		Targets: map[string]utils.StringSet{
+			utils.MetaAccounts:  utils.NewStringSet([]string{"test_account_id1", "test_account_id2"}),
+			utils.MetaResources: utils.NewStringSet([]string{"test_ID1", "test_ID2"}),
+		},
 		Actions: []*APAction{
 			{
 				ID:        "test_action_id",
@@ -5853,9 +5879,8 @@ func TestModelHelpersAPItoActionProfileError1(t *testing.T) {
 			ActivationTime: "cat",
 			ExpiryTime:     "cat",
 		},
-		Weight:     1,
-		Schedule:   "test_schedule",
-		AccountIDs: []string{},
+		Weight:   1,
+		Schedule: "test_schedule",
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
@@ -5880,9 +5905,8 @@ func TestModelHelpersAPItoActionProfileError2(t *testing.T) {
 			ActivationTime: "2014-07-14T14:25:00Z",
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
-		Weight:     1,
-		Schedule:   "test_schedule",
-		AccountIDs: []string{},
+		Weight:   1,
+		Schedule: "test_schedule",
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
@@ -5907,9 +5931,8 @@ func TestModelHelpersAPItoActionProfileError3(t *testing.T) {
 			ActivationTime: "2014-07-14T14:25:00Z",
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
-		Weight:     1,
-		Schedule:   "test_schedule",
-		AccountIDs: []string{},
+		Weight:   1,
+		Schedule: "test_schedule",
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
@@ -5935,9 +5958,8 @@ func TestModelHelpersAPItoActionProfileError4(t *testing.T) {
 			ActivationTime: "2014-07-14T14:25:00Z",
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
-		Weight:     1,
-		Schedule:   "test_schedule",
-		AccountIDs: []string{},
+		Weight:   1,
+		Schedule: "test_schedule",
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
@@ -5963,9 +5985,8 @@ func TestModelHelpersAPItoActionProfileError5(t *testing.T) {
 			ActivationTime: "2014-07-14T14:25:00Z",
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
-		Weight:     1,
-		Schedule:   "test_schedule",
-		AccountIDs: []string{},
+		Weight:   1,
+		Schedule: "test_schedule",
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
@@ -5991,9 +6012,8 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
 		},
-		Weight:     1,
-		Schedule:   "test_schedule",
-		AccountIDs: utils.StringSet{},
+		Weight:   1,
+		Schedule: "test_schedule",
 		Actions: []*APAction{
 			{
 				ID:        "test_action_id",
@@ -6014,9 +6034,9 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 			ActivationTime: "2014-07-14T14:25:00Z",
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
-		Weight:     1,
-		Schedule:   "test_schedule",
-		AccountIDs: []string{},
+		Weight:   1,
+		Schedule: "test_schedule",
+		Targets:  []*utils.TPActionTarget{},
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
