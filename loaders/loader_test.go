@@ -2213,3 +2213,820 @@ func TestLoaderActionProfile(t *testing.T) {
 			utils.ToJSON(expected), utils.ToJSON(aps))
 	}
 }
+
+func TestLoaderWrongCsv(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoaderWrongCsv",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaActionProfiles: {
+			{Tag: "Tenant",
+				Path:      "Tenant",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true,
+				Layout:    time.RFC3339},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true,
+				Layout:    time.RFC3339},
+			{Tag: "FilterIDs",
+				Path:   "FilterIDs",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActivationInterval",
+				Path:   "ActivationInterval",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "Weight",
+				Path:   "Weight",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "Schedule",
+				Path:   "Schedule",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "AccountIDs",
+				Path:   "AccountIDs",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionID",
+				Path:   "ActionID",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionFilterIDs",
+				Path:   "ActionFilterIDs",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionBlocker",
+				Path:   "ActionBlocker",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionTTL",
+				Path:   "ActionTTL",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionType",
+				Path:   "ActionType",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionOpts",
+				Path:   "ActionOpts",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.12", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionPath",
+				Path:   "ActionPath",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.13", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+			{Tag: "ActionValue",
+				Path:   "ActionValue",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.14", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+		},
+	}
+
+	//Not a valid comment beginning of csv
+	newCSVContentMiss := `
+//Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionBLocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ONE_TIME_ACT,,,10,*asap,1001;1002,TOPUP,,false,0s,*topup,,~*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,~*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*topup,,~*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,~*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*topup,,~*balance.TestVoiceBalance.Value,15m15s
+`
+
+	rdr := ioutil.NopCloser(strings.NewReader(newCSVContentMiss))
+	csvRdr := csv.NewReader(rdr)
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{
+				fileName: utils.ActionProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expectedErr := "invalid syntax"
+	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || !strings.Contains(err.Error(), expectedErr) {
+		t.Errorf("Expected %+q, received %+q", expectedErr, err)
+	}
+
+	//Missing fields in csv eg:ActionBLocker
+	newCSVContent := `
+//Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ONE_TIME_ACT,,,10,*asap,1001;1002,TOPUP,,false,0s,*topup,,~*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,~*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*topup,,~*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,~*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*topup,,~*balance.TestVoiceBalance.Value,15m15s
+`
+	rdr = ioutil.NopCloser(strings.NewReader(newCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{
+				fileName: utils.ActionProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expectedErr = "invalid syntax"
+	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || !strings.Contains(err.Error(), expectedErr) {
+		t.Errorf("Expected %+q, received %+q", expectedErr, err)
+	}
+}
+
+func TestLoaderActionProfileAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoaderActionProfileAsStructErrType",
+		bufLoaderData: map[string][]LoaderData{},
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaActionProfiles: {
+			{Tag: "Tenant",
+				Path:      "Tenant",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true,
+				Layout:    time.RFC3339},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true,
+				Layout:    time.RFC3339},
+			{Tag: "ActionBlocker",
+				Path:   "ActionBlocker",
+				Type:   utils.MetaVariable,
+				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP),
+				Layout: time.RFC3339},
+		},
+	}
+	actPrfCsv := `
+#Tenant,ID,ActionBlocker
+cgrates.org,12,NOT_A_BOOLEAN
+`
+	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{fileName: utils.ActionProfilesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	expErr := `strconv.ParseBool: parsing "NOT_A_BOOLEAN": invalid syntax`
+	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+v, received %+v", expErr, err)
+	}
+}
+
+func TestLoaderActionProfileAsStructErrTConversion(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoaderActionProfileAsStructErrType",
+		bufLoaderData: map[string][]LoaderData{},
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaActionProfiles: {
+			{Tag: "ActivationInterval",
+				Path:      "ActivationInterval",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true,
+				Layout:    time.RFC3339},
+		},
+	}
+	actPrfCsv := `
+#ActivationInterval
+* * * * * *
+`
+	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{fileName: utils.ActionProfilesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	expErr := `Unsupported time format`
+	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+v, received %+v", expErr, err)
+	}
+}
+
+func TestLoaderAttributesAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoaderAttributesAsStructErrType",
+		bufLoaderData: map[string][]LoaderData{},
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaAttributes: {
+			{Tag: "Weight",
+				Path:  "Weight",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	attributeCsv := `
+#Weight
+true
+`
+	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{fileName: utils.AttributesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	expectedErr := "strconv.ParseFloat: parsing \"true\": invalid syntax"
+	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Error(err)
+	}
+}
+
+func TestLoaderAttributesAsStructErrConversion(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoaderAttributesAsStructErrConversion",
+		bufLoaderData: map[string][]LoaderData{},
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaAttributes: {
+			{Tag: "ActivationInterval",
+				Path:  "ActivationInterval",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	attributeCsv := `
+#ActivationInterval
+* * * * * *
+`
+	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{fileName: utils.AttributesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	expectedErr := "Unsupported time format"
+	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadResourcesAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadResourcesAsStructErr",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaResources: {
+			{Tag: "Blocker",
+				Path:  "Blocker",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	resourcesCsv := `
+#Blocker
+NOT_A_BOOLEAN
+`
+	rdr := ioutil.NopCloser(strings.NewReader(resourcesCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaResources: {
+			utils.ResourcesCsv: &openedCSVFile{fileName: utils.ResourcesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	expectedErr := "strconv.ParseBool: parsing \"NOT_A_BOOLEAN\": invalid syntax"
+	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadResourcesAsStructErrConversion(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadResourcesAsStructErrConversion",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaResources: {
+			{Tag: "UsageTTL",
+				Path:  "UsageTTL",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	resourcesCsv := `
+#UsageTTL
+12ss
+`
+	rdr := ioutil.NopCloser(strings.NewReader(resourcesCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaResources: {
+			utils.ResourcesCsv: &openedCSVFile{fileName: utils.ResourcesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	expectedErr := "time: unknown unit \"ss\" in duration \"12ss\""
+	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadFiltersAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadFiltersAsStructErrType",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaFilters: {
+			{Tag: "PK",
+				Path:  "PK",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	filtersCsv := `
+#PK
+NOT_UINT
+`
+	rdr := ioutil.NopCloser(strings.NewReader(filtersCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaFilters: {
+			utils.FiltersCsv: &openedCSVFile{
+				fileName: utils.FiltersCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "cannot update unsupported struct field: 0"
+	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadFiltersAsStructErrConversion(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadFiltersAsStructErrConversion",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaFilters: {
+			{Tag: "ActivationInterval",
+				Path:  "ActivationInterval",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	filtersCsv := `
+#ActivationInterval
+* * * * * *
+`
+	rdr := ioutil.NopCloser(strings.NewReader(filtersCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaFilters: {
+			utils.FiltersCsv: &openedCSVFile{
+				fileName: utils.FiltersCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "Unsupported time format"
+	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadStatsAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadStatsAsStructErrType",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaStats: {
+			{Tag: "PK",
+				Path:  "PK",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	statsCsv := `
+#PK
+NOT_UINT
+`
+	rdr := ioutil.NopCloser(strings.NewReader(statsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaStatS: {
+			utils.StatsCsv: &openedCSVFile{
+				fileName: utils.StatsCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "cannot update unsupported struct field: 0"
+	if err := ldr.processContent(utils.MetaStatS, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadStatsAsStructErrConversion(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadStatsAsStructErrType",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaStats: {
+			{Tag: "ActivationInterval",
+				Path:  "ActivationInterval",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	statsCsv := `
+#ActivationInterval
+* * * * * *
+`
+	rdr := ioutil.NopCloser(strings.NewReader(statsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaStatS: {
+			utils.StatsCsv: &openedCSVFile{
+				fileName: utils.StatsCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "Unsupported time format"
+	if err := ldr.processContent(utils.MetaStatS, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadThresholdsAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadThresholdsAsStructErrType",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaThresholds: {
+			{Tag: "PK",
+				Path:  "PK",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#PK
+NOT_UINT
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaThresholds: {
+			utils.ThresholdsCsv: &openedCSVFile{
+				fileName: utils.ThresholdsCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "cannot update unsupported struct field: 0"
+	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadThresholdsAsStructErrConversion(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadThresholdsAsStructErrConversion",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaThresholds: {
+			{Tag: "ActivationInterval",
+				Path:  "ActivationInterval",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#ActivationInterval
+* * * * * *
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaThresholds: {
+			utils.ThresholdsCsv: &openedCSVFile{
+				fileName: utils.ThresholdsCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "Unsupported time format"
+	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadRoutesAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadRoutesAsStructErrType",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRoutes: {
+			{Tag: "PK",
+				Path:  "PK",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#PK
+NOT_UINT
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRoutes: {
+			utils.RoutesCsv: &openedCSVFile{
+				fileName: utils.RoutesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "cannot update unsupported struct field: 0"
+	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadRoutesAsStructErrConversion(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadRoutesAsStructErrConversion",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRoutes: {
+			{Tag: "ActivationInterval",
+				Path:  "ActivationInterval",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#ActivationInterval
+* * * * * *
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRoutes: {
+			utils.RoutesCsv: &openedCSVFile{
+				fileName: utils.RoutesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "Unsupported time format"
+	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadChargersAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadChargersAsStructErrType",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaChargers: {
+			{Tag: "PK",
+				Path:  "PK",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#PK
+NOT_UINT
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaChargers: {
+			utils.ChargersCsv: &openedCSVFile{
+				fileName: utils.ChargersCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "cannot update unsupported struct field: 0"
+	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadChargersAsStructErrConversion(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadChargersAsStructErrConversion",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaChargers: {
+			{Tag: "ActivationInterval",
+				Path:  "ActivationInterval",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#ActivationInterval
+* * * * * *
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaChargers: {
+			utils.ChargersCsv: &openedCSVFile{
+				fileName: utils.ChargersCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "Unsupported time format"
+	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadDispatchersAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadDispatchersAsStructErrType",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaDispatchers: {
+			{Tag: "PK",
+				Path:  "PK",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#PK
+NOT_UINT
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatchers: {
+			utils.DispatcherProfilesCsv: &openedCSVFile{
+				fileName: utils.DispatcherProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "cannot update unsupported struct field: 0"
+	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadDispatchersAsStructErrConversion(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadDispatchersAsStructErrConversion",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaDispatchers: {
+			{Tag: "ActivationInterval",
+				Path:  "ActivationInterval",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#ActivationInterval
+* * * * * *
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatchers: {
+			utils.DispatcherProfilesCsv: &openedCSVFile{
+				fileName: utils.DispatcherProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "Unsupported time format"
+	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
