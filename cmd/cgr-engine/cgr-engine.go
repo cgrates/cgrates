@@ -48,22 +48,22 @@ import (
 )
 
 var (
-	cgrEngineFlags    = flag.NewFlagSet("cgr-engine", flag.ContinueOnError)
-	cfgPath           = cgrEngineFlags.String("config_path", utils.CONFIG_PATH, "Configuration directory path.")
-	version           = cgrEngineFlags.Bool("version", false, "Prints the application version.")
-	checkConfig       = cgrEngineFlags.Bool("check_config", false, "Verify the config without starting the engine")
-	pidFile           = cgrEngineFlags.String("pid", "", "Write pid file")
-	httpPprofPath     = cgrEngineFlags.String("httprof_path", "", "http address used for program profiling")
-	cpuProfDir        = cgrEngineFlags.String("cpuprof_dir", "", "write cpu profile to files")
-	memProfDir        = cgrEngineFlags.String("memprof_dir", "", "write memory profile to file")
-	memProfInterval   = cgrEngineFlags.Duration("memprof_interval", 5*time.Second, "Time betwen memory profile saves")
-	memProfNrFiles    = cgrEngineFlags.Int("memprof_nrfiles", 1, "Number of memory profile to write")
-	scheduledShutdown = cgrEngineFlags.String("scheduled_shutdown", "", "shutdown the engine after this duration")
-	singlecpu         = cgrEngineFlags.Bool("singlecpu", false, "Run on single CPU core")
-	syslogger         = cgrEngineFlags.String("logger", "", "logger <*syslog|*stdout>")
-	nodeID            = cgrEngineFlags.String("node_id", "", "The node ID of the engine")
-	logLevel          = cgrEngineFlags.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
-	preload           = cgrEngineFlags.String("preload", "", "LoaderIDs used to load the data before the engine starts")
+	cgrEngineFlags    = flag.NewFlagSet(utils.CgrEngine, flag.ContinueOnError)
+	cfgPath           = cgrEngineFlags.String(utils.CfgPathCgr, utils.CONFIG_PATH, "Configuration directory path.")
+	version           = cgrEngineFlags.Bool(utils.ElsVersionLow, false, "Prints the application version.")
+	checkConfig       = cgrEngineFlags.Bool(utils.CheckCfgCgr, false, "Verify the config without starting the engine")
+	pidFile           = cgrEngineFlags.String(utils.PidCgr, utils.EmptyString, "Write pid file")
+	httpPprofPath     = cgrEngineFlags.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling")
+	cpuProfDir        = cgrEngineFlags.String(utils.CpuProfDirCgr, utils.EmptyString, "write cpu profile to files")
+	memProfDir        = cgrEngineFlags.String(utils.MemProfDirCgr, utils.EmptyString, "write memory profile to file")
+	memProfInterval   = cgrEngineFlags.Duration(utils.MemProfIntervalCgr, 5*time.Second, "Time betwen memory profile saves")
+	memProfNrFiles    = cgrEngineFlags.Int(utils.MemProfNrFilesCgr, 1, "Number of memory profile to write")
+	scheduledShutdown = cgrEngineFlags.String(utils.ScheduledShutdownCgr, utils.EmptyString, "shutdown the engine after this duration")
+	singlecpu         = cgrEngineFlags.Bool(utils.SingleCpuCgr, false, "Run on single CPU core")
+	syslogger         = cgrEngineFlags.String(utils.LoggerCfg, utils.EmptyString, "logger <*syslog|*stdout>")
+	nodeID            = cgrEngineFlags.String(utils.NodeIDCfg, utils.EmptyString, "The node ID of the engine")
+	logLevel          = cgrEngineFlags.Int(utils.LogLevelCfg, -1, "Log level (0-emergency to 7-debug)")
+	preload           = cgrEngineFlags.String(utils.PreloadCgr, utils.EmptyString, "LoaderIDs used to load the data before the engine starts")
 
 	cfg *config.CGRConfig
 )
@@ -210,7 +210,7 @@ func startRPC(server *cores.Server, internalRaterChan,
 		utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
 		return
 	}
-	if cfg.ListenCfg().RPCGOBTLSListen != "" {
+	if cfg.ListenCfg().RPCGOBTLSListen != utils.EmptyString {
 		go server.ServeGOBTLS(
 			cfg.ListenCfg().RPCGOBTLSListen,
 			cfg.TLSCfg().ServerCerificate,
@@ -221,7 +221,7 @@ func startRPC(server *cores.Server, internalRaterChan,
 			shdChan,
 		)
 	}
-	if cfg.ListenCfg().RPCJSONTLSListen != "" {
+	if cfg.ListenCfg().RPCJSONTLSListen != utils.EmptyString {
 		go server.ServeJSONTLS(
 			cfg.ListenCfg().RPCJSONTLSListen,
 			cfg.TLSCfg().ServerCerificate,
@@ -232,7 +232,7 @@ func startRPC(server *cores.Server, internalRaterChan,
 			shdChan,
 		)
 	}
-	if cfg.ListenCfg().HTTPTLSListen != "" {
+	if cfg.ListenCfg().HTTPTLSListen != utils.EmptyString {
 		go server.ServeHTTPTLS(
 			cfg.ListenCfg().HTTPTLSListen,
 			cfg.TLSCfg().ServerCerificate,
@@ -301,7 +301,7 @@ func memProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg 
 }
 
 func startCPUProfiling(cpuProfDir string) (f io.WriteCloser, err error) {
-	cpuPath := path.Join(cpuProfDir, "cpu.prof")
+	cpuPath := path.Join(cpuProfDir, utils.CpuPathCgr)
 	if f, err = os.Create(cpuPath); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<cpuProfiling>could not create cpu profile file: %s", err))
 		return
@@ -589,7 +589,7 @@ func main() {
 	if cfg.ConfigSCfg().Enabled {
 		server.RegisterHttpFunc(cfg.ConfigSCfg().URL, config.HandlerConfigS)
 	}
-	if *httpPprofPath != "" {
+	if *httpPprofPath != utils.EmptyString {
 		server.RegisterProfiler(*httpPprofPath)
 	}
 
@@ -736,10 +736,10 @@ func main() {
 			utils.ServiceManager))
 	}
 
-	if *memProfDir != "" { // write last memory profiling
-		memProfFile(path.Join(*memProfDir, "mem_final.prof"))
+	if *memProfDir != utils.EmptyString { // write last memory profiling
+		memProfFile(path.Join(*memProfDir, utils.MemProfFileCgr))
 	}
-	if *pidFile != "" {
+	if *pidFile != utils.EmptyString {
 		if err := os.Remove(*pidFile); err != nil {
 			utils.Logger.Warning("Could not remove pid file: " + err.Error())
 		}

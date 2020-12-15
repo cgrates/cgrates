@@ -36,82 +36,84 @@ var (
 	dataDB engine.DataDB
 	storDB engine.LoadStorage
 
-	cgrLoaderFlags = flag.NewFlagSet("cgr-loader", flag.ContinueOnError)
+	cgrLoaderFlags = flag.NewFlagSet(utils.CgrLoader, flag.ContinueOnError)
 	dfltCfg        = config.CgrConfig()
-	cfgPath        = cgrLoaderFlags.String("config_path", utils.EmptyString,
+	cfgPath        = cgrLoaderFlags.String(utils.CfgPathCgr, utils.EmptyString,
 		"Configuration directory path.")
 
-	dataDBType = cgrLoaderFlags.String("datadb_type", dfltCfg.DataDbCfg().DataDbType,
+	dataDBType = cgrLoaderFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().DataDbType,
 		"The type of the DataDB database <*redis|*mongo>")
-	dataDBHost = cgrLoaderFlags.String("datadb_host", dfltCfg.DataDbCfg().DataDbHost,
+
+	dataDBHost = cgrLoaderFlags.String(utils.DataDBHostCgr, dfltCfg.DataDbCfg().DataDbHost,
 		"The DataDb host to connect to.")
-	dataDBPort = cgrLoaderFlags.String("datadb_port", dfltCfg.DataDbCfg().DataDbPort,
+
+	dataDBPort = cgrLoaderFlags.String(utils.DataDBPortCgr, dfltCfg.DataDbCfg().DataDbPort,
 		"The DataDb port to bind to.")
-	dataDBName = cgrLoaderFlags.String("datadb_name", dfltCfg.DataDbCfg().DataDbName,
+	dataDBName = cgrLoaderFlags.String(utils.DataDBNameCgr, dfltCfg.DataDbCfg().DataDbName,
 		"The name/number of the DataDb to connect to.")
-	dataDBUser = cgrLoaderFlags.String("datadb_user", dfltCfg.DataDbCfg().DataDbUser,
+	dataDBUser = cgrLoaderFlags.String(utils.DataDBUserCgr, dfltCfg.DataDbCfg().DataDbUser,
 		"The DataDb user to sign in as.")
-	dataDBPasswd = cgrLoaderFlags.String("datadb_passwd", dfltCfg.DataDbCfg().DataDbPass,
+	dataDBPasswd = cgrLoaderFlags.String(utils.DataDBPasswdCgr, dfltCfg.DataDbCfg().DataDbPass,
 		"The DataDb user's password.")
-	dbDataEncoding = cgrLoaderFlags.String("dbdata_encoding", dfltCfg.GeneralCfg().DBDataEncoding,
+	dbDataEncoding = cgrLoaderFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
 		"The encoding used to store object data in strings")
-	dbRedisSentinel = cgrLoaderFlags.String("redis_sentinel", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg]),
+	dbRedisSentinel = cgrLoaderFlags.String(utils.RedisSentinelNameCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg]),
 		"The name of redis sentinel")
-	dbRedisCluster = cgrLoaderFlags.Bool("redis_cluster", false,
+	dbRedisCluster = cgrLoaderFlags.Bool(utils.RedisClusterCfg, false,
 		"Is the redis datadb a cluster")
-	dbRedisClusterSync = cgrLoaderFlags.String("redis_cluster_sync", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg]),
+	dbRedisClusterSync = cgrLoaderFlags.String(utils.RedisClusterSyncCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg]),
 		"The sync interval for the redis cluster")
-	dbRedisClusterDownDelay = cgrLoaderFlags.String("redis_cluster_ondown_delay", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
+	dbRedisClusterDownDelay = cgrLoaderFlags.String(utils.RedisClusterOnDownDelayCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
-	dbQueryTimeout = cgrLoaderFlags.String("query_timeout", utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
+	dbQueryTimeout = cgrLoaderFlags.String(utils.QueryTimeoutCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
 		"The timeout for queries")
 	dbRedisTls               = cgrLoaderFlags.Bool(utils.RedisTLS, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrLoaderFlags.String(utils.RedisClientCertificate, utils.EmptyString, "Path to the client certificate")
 	dbRedisClientKey         = cgrLoaderFlags.String(utils.RedisClientKey, utils.EmptyString, "Path to the client key")
 	dbRedisCACertificate     = cgrLoaderFlags.String(utils.RedisCACertificate, utils.EmptyString, "Path to the CA certificate")
 
-	storDBType = cgrLoaderFlags.String("stordb_type", dfltCfg.StorDbCfg().Type,
+	storDBType = cgrLoaderFlags.String(utils.StorDBTypeCgr, dfltCfg.StorDbCfg().Type,
 		"The type of the storDb database <*mysql|*postgres|*mongo>")
-	storDBHost = cgrLoaderFlags.String("stordb_host", dfltCfg.StorDbCfg().Host,
+	storDBHost = cgrLoaderFlags.String(utils.StorDBHostCgr, dfltCfg.StorDbCfg().Host,
 		"The storDb host to connect to.")
-	storDBPort = cgrLoaderFlags.String("stordb_port", dfltCfg.StorDbCfg().Port,
+	storDBPort = cgrLoaderFlags.String(utils.StorDBPortCgr, dfltCfg.StorDbCfg().Port,
 		"The storDb port to bind to.")
-	storDBName = cgrLoaderFlags.String("stordb_name", dfltCfg.StorDbCfg().Name,
+	storDBName = cgrLoaderFlags.String(utils.StorDBNameCgr, dfltCfg.StorDbCfg().Name,
 		"The name/number of the storDb to connect to.")
-	storDBUser = cgrLoaderFlags.String("stordb_user", dfltCfg.StorDbCfg().User,
+	storDBUser = cgrLoaderFlags.String(utils.StorDBUserCgr, dfltCfg.StorDbCfg().User,
 		"The storDb user to sign in as.")
-	storDBPasswd = cgrLoaderFlags.String("stordb_passwd", dfltCfg.StorDbCfg().Password,
+	storDBPasswd = cgrLoaderFlags.String(utils.StorDBPasswdCgr, dfltCfg.StorDbCfg().Password,
 		"The storDb user's password.")
 
-	cachingArg = cgrLoaderFlags.String("caching", utils.EmptyString,
+	cachingArg = cgrLoaderFlags.String(utils.CachingArgCgr, utils.EmptyString,
 		"Caching strategy used when loading TP")
-	tpid = cgrLoaderFlags.String("tpid", dfltCfg.LoaderCgrCfg().TpID,
+	tpid = cgrLoaderFlags.String(utils.TpIDCfg, dfltCfg.LoaderCgrCfg().TpID,
 		"The tariff plan ID from the database")
-	dataPath = cgrLoaderFlags.String("path", dfltCfg.LoaderCgrCfg().DataPath,
+	dataPath = cgrLoaderFlags.String(utils.PathCfg, dfltCfg.LoaderCgrCfg().DataPath,
 		"The path to folder containing the data files")
-	version = cgrLoaderFlags.Bool("version", false,
+	version = cgrLoaderFlags.Bool(utils.ElsVersionLow, false,
 		"Prints the application version.")
-	verbose = cgrLoaderFlags.Bool("verbose", false,
+	verbose = cgrLoaderFlags.Bool(utils.VerboseCgr, false,
 		"Enable detailed verbose logging output")
-	dryRun = cgrLoaderFlags.Bool("dry_run", false,
+	dryRun = cgrLoaderFlags.Bool(utils.DryRunCfg, false,
 		"When true will not save loaded data to dataDb but just parse it for consistency and errors.")
-	fieldSep = cgrLoaderFlags.String("field_sep", ",",
+	fieldSep = cgrLoaderFlags.String(utils.FieldSepCgr, ",",
 		`Separator for csv file (by default "," is used)`)
 
-	importID       = cgrLoaderFlags.String("import_id", utils.EmptyString, "Uniquely identify an import/load, postpended to some automatic fields")
-	timezone       = cgrLoaderFlags.String("timezone", dfltCfg.GeneralCfg().DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
-	disableReverse = cgrLoaderFlags.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
-	flushStorDB    = cgrLoaderFlags.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
-	remove         = cgrLoaderFlags.Bool("remove", false, "Will remove instead of adding data from DB")
-	apiKey         = cgrLoaderFlags.String("api_key", utils.EmptyString, "Api Key used to comosed ArgDispatcher")
-	routeID        = cgrLoaderFlags.String("route_id", utils.EmptyString, "RouteID used to comosed ArgDispatcher")
+	importID       = cgrLoaderFlags.String(utils.ImportIDCgr, utils.EmptyString, "Uniquely identify an import/load, postpended to some automatic fields")
+	timezone       = cgrLoaderFlags.String(utils.TimezoneCfg, dfltCfg.GeneralCfg().DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
+	disableReverse = cgrLoaderFlags.Bool(utils.DisableReverseCgr, false, "Will disable reverse mappings rebuilding")
+	flushStorDB    = cgrLoaderFlags.Bool(utils.FlushStorDB, false, "Remove tariff plan data for id from the database")
+	remove         = cgrLoaderFlags.Bool(utils.RemoveCgr, false, "Will remove instead of adding data from DB")
+	apiKey         = cgrLoaderFlags.String(utils.APIKeyCfg, utils.EmptyString, "Api Key used to comosed ArgDispatcher")
+	routeID        = cgrLoaderFlags.String(utils.RouteIDCfg, utils.EmptyString, "RouteID used to comosed ArgDispatcher")
 
-	fromStorDB    = cgrLoaderFlags.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
-	toStorDB      = cgrLoaderFlags.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
-	cacheSAddress = cgrLoaderFlags.String("caches_address", dfltCfg.LoaderCgrCfg().CachesConns[0],
+	fromStorDB    = cgrLoaderFlags.Bool(utils.FromStorDBCgr, false, "Load the tariff plan from storDb to dataDb")
+	toStorDB      = cgrLoaderFlags.Bool(utils.ToStorDBcgr, false, "Import the tariff plan from files to storDb")
+	cacheSAddress = cgrLoaderFlags.String(utils.CacheSAddress, dfltCfg.LoaderCgrCfg().CachesConns[0],
 		"CacheS component to contact for cache reloads, empty to disable automatic cache reloads")
-	schedulerAddress = cgrLoaderFlags.String("scheduler_address", dfltCfg.LoaderCgrCfg().SchedulerConns[0], "")
-	rpcEncoding      = cgrLoaderFlags.String("rpc_encoding", rpcclient.JSONrpc, "RPC encoding used <*gob|*json>")
+	schedulerAddress = cgrLoaderFlags.String(utils.SchedulerAddress, dfltCfg.LoaderCgrCfg().SchedulerConns[0], "")
+	rpcEncoding      = cgrLoaderFlags.String(utils.RpcEncodingCgr, rpcclient.JSONrpc, "RPC encoding used <*gob|*json>")
 )
 
 func loadConfig() (ldrCfg *config.CGRConfig) {
