@@ -40,13 +40,10 @@ var (
 	dfltCfg        = config.CgrConfig()
 	cfgPath        = cgrLoaderFlags.String(utils.CfgPathCgr, utils.EmptyString,
 		"Configuration directory path.")
-
 	dataDBType = cgrLoaderFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().DataDbType,
 		"The type of the DataDB database <*redis|*mongo>")
-
 	dataDBHost = cgrLoaderFlags.String(utils.DataDBHostCgr, dfltCfg.DataDbCfg().DataDbHost,
 		"The DataDb host to connect to.")
-
 	dataDBPort = cgrLoaderFlags.String(utils.DataDBPortCgr, dfltCfg.DataDbCfg().DataDbPort,
 		"The DataDb port to bind to.")
 	dataDBName = cgrLoaderFlags.String(utils.DataDBNameCgr, dfltCfg.DataDbCfg().DataDbName,
