@@ -19,6 +19,7 @@ package engine
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -126,7 +127,8 @@ func TestCurrentDBVersions(t *testing.T) {
 	}
 
 	//Compare AllVersions
-	if rcv := expVersDataDB.Compare(expVersStorDB, utils.INTERNAL, true); rcv != "cgr-migrator -exec=*accounts" {
-		t.Error(rcv)
+	expStr := "cgr-migrator"
+	if rcv := expVersDataDB.Compare(expVersStorDB, utils.INTERNAL, true); !strings.Contains(rcv, expStr) {
+		t.Errorf("Expected %+v, received %+v", expStr, rcv)
 	}
 }
