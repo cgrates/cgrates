@@ -19,12 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cron"
 )
@@ -127,6 +125,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string, aPrflIDs []string,
 	return
 }
 
+/*
 // asapExecuteActions executes the scheduledActs and removes the executed from database
 // uses locks to avoid concurrent access
 func (aS *ActionS) asapExecuteActions(sActs *scheduledActs) (err error) {
@@ -259,3 +258,4 @@ func (aS *ActionS) V1ExecuteActions(args *ArgActionSv1ExecuteActions, rpl *strin
 	*rpl = utils.OK
 	return
 }
+*/

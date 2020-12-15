@@ -34,7 +34,7 @@ type ActionProfile struct {
 	ActivationInterval *utils.ActivationInterval
 	Weight             float64
 	Schedule           string
-	AccountIDs         utils.StringSet
+	Targets            map[string]utils.StringSet
 
 	Actions []*APAction
 }

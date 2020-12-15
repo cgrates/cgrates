@@ -2249,8 +2249,8 @@ func testOnStorITActionProfile(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Weight:    20,
 		Schedule:  utils.ASAP,
-		AccountIDs: map[string]struct{}{
-			"1001": {},
+		Targets: map[string]utils.StringSet{
+			utils.MetaAccounts: utils.NewStringSet([]string{"acc1", "acc2", "acc3"}),
 		},
 		Actions: []*APAction{
 			{

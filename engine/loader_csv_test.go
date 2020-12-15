@@ -1479,13 +1479,18 @@ func TestLoadRateProfiles(t *testing.T) {
 
 func TestLoadActionProfiles(t *testing.T) {
 	expected := &utils.TPActionProfile{
-		TPid:       testTPID,
-		Tenant:     "cgrates.org",
-		ID:         "ONE_TIME_ACT",
-		FilterIDs:  nil,
-		Weight:     10,
-		Schedule:   utils.ASAP,
-		AccountIDs: []string{"1001", "1002"},
+		TPid:      testTPID,
+		Tenant:    "cgrates.org",
+		ID:        "ONE_TIME_ACT",
+		FilterIDs: nil,
+		Weight:    10,
+		Schedule:  utils.ASAP,
+		Targets: []*utils.TPActionTarget{
+			&utils.TPActionTarget{
+				TargetType: utils.MetaAccounts,
+				TargetIDs:  []string{"1001", "1002"},
+			},
+		},
 		Actions: []*utils.TPAPAction{
 			&utils.TPAPAction{
 				ID:        "TOPUP",
@@ -1537,13 +1542,11 @@ func TestLoadActionProfiles(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "ONE_TIME_ACT",
 	}
-	sort.Strings(expected.AccountIDs)
-	sort.Strings(csvr.actionProfiles[actPrfKey].AccountIDs)
 	sort.Slice(expected.Actions, func(i, j int) bool {
 		return false
 	})
-	sort.Slice(csvr.actionProfiles[actPrfKey].AccountIDs, func(i, j int) bool {
-		return false
+	sort.Slice(expected.Targets[0].TargetIDs, func(i, j int) bool {
+		return expected.Targets[0].TargetIDs[i] < expected.Targets[0].TargetIDs[j]
 	})
 
 	if !reflect.DeepEqual(csvr.actionProfiles[actPrfKey], expected) {

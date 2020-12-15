@@ -126,12 +126,14 @@ func testActionSLoadFromFolder(t *testing.T) {
 
 func testActionSGetActionProfile(t *testing.T) {
 	expected := &engine.ActionProfile{
-		Tenant:     "cgrates.org",
-		ID:         "ONE_TIME_ACT",
-		FilterIDs:  []string{},
-		Weight:     10,
-		Schedule:   utils.ASAP,
-		AccountIDs: utils.StringSet{"1001": {}, "1002": {}},
+		Tenant:    "cgrates.org",
+		ID:        "ONE_TIME_ACT",
+		FilterIDs: []string{},
+		Weight:    10,
+		Schedule:  utils.ASAP,
+		Targets: map[string]utils.StringSet{
+			utils.MetaAccounts: utils.StringSet{"1001": {}, "1002": {}},
+		},
 		Actions: []*engine.APAction{
 			{
 				ID:        "TOPUP",
@@ -209,7 +211,6 @@ func testActionSSettActionProfile(t *testing.T) {
 				ActivationInterval: nil,
 				Weight:             0,
 				Schedule:           "",
-				AccountIDs:         utils.StringSet{},
 				Actions: []*engine.APAction{
 					{
 						ID:        "test_action_id",

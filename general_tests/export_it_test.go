@@ -411,12 +411,14 @@ func testExpVerifyRateProfiles(t *testing.T) {
 func testExpVerifyActionProfiles(t *testing.T) {
 	var reply *engine.ActionProfile
 	actPrf := &engine.ActionProfile{
-		Tenant:     "cgrates.org",
-		ID:         "ONE_TIME_ACT",
-		FilterIDs:  []string{},
-		Weight:     10,
-		Schedule:   utils.ASAP,
-		AccountIDs: utils.StringSet{"1001": {}, "1002": {}},
+		Tenant:    "cgrates.org",
+		ID:        "ONE_TIME_ACT",
+		FilterIDs: []string{},
+		Weight:    10,
+		Schedule:  utils.ASAP,
+		Targets: map[string]utils.StringSet{
+			utils.MetaAccounts: utils.StringSet{"1001": {}, "1002": {}},
+		},
 		Actions: []*engine.APAction{
 			{
 				ID:        "TOPUP",

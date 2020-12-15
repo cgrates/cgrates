@@ -928,6 +928,8 @@ const (
 	SubjectLowerCase         = "subject"
 	RatingProfileID          = "RatingProfileID"
 	Time                     = "Time"
+	TargetIDs                = "TargetIDs"
+	TargetType               = "TargetType"
 )
 
 // Migrator Action

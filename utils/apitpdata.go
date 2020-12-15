@@ -1522,8 +1522,13 @@ type TPActionProfile struct {
 	ActivationInterval *TPActivationInterval
 	Weight             float64
 	Schedule           string
-	AccountIDs         []string
+	Targets            []*TPActionTarget
 	Actions            []*TPAPAction
+}
+
+type TPActionTarget struct {
+	TargetType string
+	TargetIDs  []string
 }
 
 type TPAPAction struct {
