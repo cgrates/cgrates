@@ -85,6 +85,14 @@ func TestChargerSReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := chrS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = chrS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.ChargerSCfg().Enabled = false
 	cfg.GetReloadChan(config.ChargerSCfgJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)

@@ -78,6 +78,10 @@ func TestAsteriskAgentReload(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := srv.Start()
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
 	cfg.AsteriskAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.AsteriskAgentJSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
