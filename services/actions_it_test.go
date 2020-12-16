@@ -20,10 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"reflect"
 	"sync"
 	"testing"
+
+	"github.com/cgrates/cgrates/actions"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -32,7 +33,8 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestNewActionService(t *testing.T) {
+//TestNewActionService for cover testing
+func TestActionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
@@ -50,52 +52,33 @@ func TestNewActionService(t *testing.T) {
 	actS := NewActionService(cfg, db,
 		chS, filterSChan, server, actRPC,
 		anz, srvDep)
-	expected := &ActionService{
-		connChan:    actRPC,
+	if actS == nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(actS))
+	}
+	actS2 := &ActionService{
 		cfg:         cfg,
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
 		server:      server,
+		rldChan:     make(chan struct{}),
+		connChan:    actRPC,
 		anz:         anz,
 		srvDep:      srvDep,
-		rldChan:     make(chan struct{}),
 	}
-	fmt.Println(reflect.TypeOf(actS))
-	if !reflect.DeepEqual(utils.ToJSON(actS), utils.ToJSON(expected)) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expected), utils.ToJSON(actS))
+	if actS2.IsRunning() {
+		t.Errorf("Expected service to be down")
 	}
-}
+	actS2.acts = actions.NewActionS(cfg, &engine.FilterS{}, &engine.DataManager{})
+	if !actS2.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
 
-func TestActionSNotRunning(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
-	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	close(chS.GetPrecacheChannel(utils.CacheActionProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheActionProfilesFilterIndexes))
-	server := cores.NewServer(nil)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
-	actRPC := make(chan rpcclient.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	actS := NewActionService(cfg, db,
-		chS, filterSChan, server, actRPC,
-		anz, srvDep)
-	if actS.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	serviceName := actS.ServiceName()
+	serviceName := actS2.ServiceName()
 	if !reflect.DeepEqual(serviceName, utils.ActionS) {
-		t.Errorf("\nExpecting <ActionS>,\n Received <%+v>", serviceName)
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ActionS, serviceName)
 	}
-	shouldRun := actS.ShouldRun()
+	shouldRun := actS2.ShouldRun()
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
