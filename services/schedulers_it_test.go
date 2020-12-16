@@ -21,6 +21,7 @@ package services
 
 import (
 	"path"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -77,6 +78,18 @@ func TestSchedulerSReload(t *testing.T) {
 	}
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
+	}
+	err := schS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = schS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	getScheduler := schS.GetScheduler()
+	if !reflect.DeepEqual(schS.schS, getScheduler) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(schS.schS), utils.ToJSON(getScheduler))
 	}
 	cfg.SchedulerCfg().Enabled = false
 	cfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}

@@ -87,6 +87,14 @@ func TestStatSReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := sS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = sS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.StatSCfg().Enabled = false
 	cfg.GetReloadChan(config.STATS_JSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)

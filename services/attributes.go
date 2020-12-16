@@ -65,7 +65,7 @@ type AttributeService struct {
 	srvDep   map[string]*sync.WaitGroup
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (attrS *AttributeService) Start() (err error) {
 	if attrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning

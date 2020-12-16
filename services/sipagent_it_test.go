@@ -78,6 +78,10 @@ func TestSIPAgentReload(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <err>,\n Received <%+v>", err)
+	}
 	cfg.SIPAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.SIPAgentJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)

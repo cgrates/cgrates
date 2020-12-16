@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -18,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"fmt"
 	"reflect"
 	"sync"
 	"testing"
@@ -58,6 +61,7 @@ func TestNewActionService(t *testing.T) {
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}),
 	}
+	fmt.Println(reflect.TypeOf(actS))
 	if !reflect.DeepEqual(utils.ToJSON(actS), utils.ToJSON(expected)) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expected), utils.ToJSON(actS))
 	}

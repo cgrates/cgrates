@@ -90,12 +90,23 @@ func TestAttributeSReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := attrS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = attrS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.AttributeSCfg().Enabled = false
 	cfg.GetReloadChan(config.ATTRIBUTE_JSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
+
 	if attrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
+
 }
