@@ -1363,6 +1363,11 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 			utils.ToJSON(ap), utils.ToJSON(rcv))
 	}
 
+	//now should be empty, nothing to remove
+	if err := ldr.removeContent(utils.MetaAttributes, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
 	//cannot remove when dryrun is true
 	ldr.dryRun = true
 	rdr = ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
@@ -3428,6 +3433,225 @@ cgrates.org,NewRes1
 
 	//nothing to remove
 	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func TestRemoveFilterContent(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveFilterContents",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaFilters: {
+			{Tag: "Tenant",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	filtersCsv := `
+#Tenant[0],ID[0]
+cgrates.org,FILTERS_REM_1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(filtersCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaFilters: {
+			utils.FiltersCsv: &openedCSVFile{
+				fileName: utils.FiltersCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	eFltr1 := &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FILTERS_REM_1",
+	}
+	if err := ldr.dm.SetFilter(eFltr1, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.removeContent(utils.MetaFilters, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//nothing to remove from database
+	if err := ldr.removeContent(utils.MetaFilters, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//cannot remove Filter when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(filtersCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaFilters: {
+			utils.FiltersCsv: &openedCSVFile{
+				fileName: utils.FiltersCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.removeContent(utils.MetaFilters, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveStatsContent(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaStats: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	statsCsv := `
+#Tenant[0],ProfileID[1]
+cgrates.org,REM_STATS_1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(statsCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaStatS: {
+			utils.StatsCsv: &openedCSVFile{
+				fileName: utils.StatsCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expStats := &engine.StatQueueProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_STATS_1",
+	}
+	if err := ldr.dm.SetStatQueueProfile(expStats, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//nothing to remove from database
+	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//cannot remove statsQueueProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(statsCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaStatS: {
+			utils.StatsCsv: &openedCSVFile{
+				fileName: utils.StatsCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveThresholdsContent(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveThresholdsContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaThresholds: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	thresholdsCsv := `
+#Tenant[0],ID[1]
+cgrates.org,REM_THRESHOLDS_1,
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaThresholds: {
+			utils.ThresholdsCsv: &openedCSVFile{
+				fileName: utils.ThresholdsCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expThresholdPrf := &engine.ThresholdProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_THRESHOLDS_1",
+	}
+	if err := ldr.dm.SetThresholdProfile(expThresholdPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//nothing to remove from database
+	if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//cannot remove statsQueueProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaThresholds: {
+			utils.ThresholdsCsv: &openedCSVFile{
+				fileName: utils.ThresholdsCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
