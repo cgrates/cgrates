@@ -202,6 +202,105 @@
 			],
 		},
 		{
+			"id": "VoiceEventAuthForceDuration",
+			"filters": [
+				"*string:~*vars.*cmd:CCR",
+				"*string:~*req.CC-Request-Type:1",
+				"*string:~*req.Service-Context-Id:EventVoiceForceDuration@DiamItCCRAuth"
+			],
+			"flags": ["*event", "*rals:*authorize;*fd", "*attributes"],
+			"request_fields":[
+				{
+					"tag": "ToR",
+					"path": "*cgreq.ToR",
+					"type": "*constant",
+					"value": "*voice"
+				},
+				{
+					"tag": "OriginID",
+					"path": "*cgreq.OriginID",
+					"type": "*variable",
+					"value": "~*req.Session-Id",
+					"mandatory": true
+				},
+				{
+					"tag": "OriginHost",
+					"path": "*cgreq.OriginHost",
+					"type": "*remote_host",
+					"mandatory": true
+				},
+				{
+					"tag": "RequestType",
+					"path": "*cgreq.RequestType",
+					"type": "*constant",
+					"value": "*attributes"
+				},
+				{
+					"tag": "Category",
+					"path": "*cgreq.Category",
+					"type": "*constant",
+					"value": "call"
+				},
+				{
+					"tag": "Account",
+					"path": "*cgreq.Account",
+					"type": "*constant",
+					"value": "*attributes"
+				},
+				{
+					"tag": "Destination",
+					"path": "*cgreq.Destination",
+					"type": "*variable",
+					"value": "~*req.Service-Information.IN-Information.Real-Called-Number",
+					"mandatory": true
+				},
+				{
+					"tag": "AnswerTime",
+					"path": "*cgreq.AnswerTime",
+					"type": "*variable",
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
+				},
+				{
+					"tag": "Usage",
+					"path": "*cgreq.Usage",
+					"type": "*variable",
+					"value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/",
+					"mandatory": true
+				},
+				{
+					"tag": "SubscriberID",
+					"path": "*cgreq.SubscriberId",
+					"type": "*variable",
+					"value": "~*req.Subscription-Id.Subscription-Id-Data",
+					"mandatory": true
+				},
+			],
+			"reply_fields":[
+				{
+					"tag": "ResultCode",
+					"filters": ["*notempty:~*cgrep.Error:"],
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "5030",
+					"blocker": true
+				},
+				{
+					"tag": "ResultCode",
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "2001"
+				},
+				{
+					"tag": "GrantedUnits",
+					"path": "*rep.Granted-Service-Unit.CC-Time",
+					"type": "*variable",
+					"value": "~*cgrep.MaxUsage{*duration_seconds}",
+					"mandatory": true
+				},
+			],
+		},
+		{
 			"id": "VoiceInit",
 			"filters": [
 				"*string:~*vars.*cmd:CCR",
