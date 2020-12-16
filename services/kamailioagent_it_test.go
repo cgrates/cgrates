@@ -76,6 +76,7 @@ func TestKamailioAgentReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+
 	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	// the engine should be stoped as we could not connect to kamailio

@@ -78,6 +78,14 @@ func TestDiameterAgentReload(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := srv.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.DiameterAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DA_JSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)

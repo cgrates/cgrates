@@ -82,6 +82,14 @@ func TestEventReaderSReload(t *testing.T) {
 	if !attrS.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := attrS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = attrS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.ERsCfg().Enabled = false
 	cfg.GetReloadChan(config.ERsJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)

@@ -110,13 +110,20 @@ func TestRalsReload(t *testing.T) {
 	if !stordb.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := ralS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = ralS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.RalsCfg().Enabled = false
 	cfg.GetReloadChan(config.RALS_JSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if ralS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-
 	if resp := ralS.GetResponder(); resp.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}

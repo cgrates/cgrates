@@ -85,6 +85,14 @@ func TestSupplierSReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := supS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = supS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.RouteSCfg().Enabled = false
 	cfg.GetReloadChan(config.RouteSJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
