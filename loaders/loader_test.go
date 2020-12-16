@@ -98,9 +98,27 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
+
+	//cannot set AttributeProfile when dryrun is true
+	ldr.dryRun = true
 	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
+
+	//processContent successfully when dryrun is false
+	ldr.dryRun = false
+	rdr = ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
 	eAP := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
@@ -381,9 +399,27 @@ func TestLoaderProcessFilters(t *testing.T) {
 			"Filters.csv": &openedCSVFile{fileName: "Filters.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
+
+	//Cannot set filterProfile when dryrun is true
+	ldr.dryRun = true
 	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
+
+	//processContent when dryrun is false
+	ldr.dryRun = false
+	rdr = ioutil.NopCloser(strings.NewReader(engine.FiltersCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaFilters: {
+			"Filters.csv": &openedCSVFile{fileName: "Filters.csv",
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
 	eFltr1 := &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_1",
@@ -556,6 +592,20 @@ func TestLoaderProcessThresholds(t *testing.T) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eTh1), utils.ToJSON(aps))
 	}
+
+	//cannot set thresholdProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaThresholds: {
+			"Thresholds.csv": &openedCSVFile{fileName: "Thresholds.csv",
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestLoaderProcessStats(t *testing.T) {
@@ -677,6 +727,20 @@ func TestLoaderProcessStats(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSt1, aps) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eSt1), utils.ToJSON(aps))
+	}
+
+	//cannot set statsProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(engine.StatsCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaStats: {
+			"Stats.csv": &openedCSVFile{fileName: "Stats.csv",
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -840,6 +904,20 @@ func TestLoaderProcessRoutes(t *testing.T) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eSp), utils.ToJSON(aps))
 	}
+
+	//cannot set RoutesProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(engine.RoutesCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRoutes: {
+			utils.RoutesCsv: &openedCSVFile{fileName: utils.RoutesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestLoaderProcessChargers(t *testing.T) {
@@ -918,6 +996,19 @@ func TestLoaderProcessChargers(t *testing.T) {
 			utils.ToJSON(eCharger1), utils.ToJSON(rcv))
 	}
 
+	//cannot set chargerProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(engine.ChargersCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaChargers: {
+			utils.ChargersCsv: &openedCSVFile{fileName: utils.ChargersCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestLoaderProcessDispatches(t *testing.T) {
@@ -1070,6 +1161,23 @@ func TestLoaderProcessDispatches(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eDisp), utils.ToJSON(rcv))
 	}
 
+	//cannot set DispatchersProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatchers: {
+			utils.DispatcherProfilesCsv: &openedCSVFile{
+				fileName: utils.DispatcherProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestLoaderProcessDispatcheHosts(t *testing.T) {
@@ -1151,6 +1259,24 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 	}
 	if !reflect.DeepEqual(eDispHost, rcv) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eDispHost), utils.ToJSON(rcv))
+	}
+
+	//cannot set DispatcherHostProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatcherHosts: {
+			utils.DispatcherProfilesCsv: &openedCSVFile{
+				fileName: utils.DispatcherProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -1235,6 +1361,20 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 	} else if !reflect.DeepEqual(ap, rcv) {
 		t.Errorf("expecting: %s, \n received: %s",
 			utils.ToJSON(ap), utils.ToJSON(rcv))
+	}
+
+	//cannot remove when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.removeContent(utils.MetaAttributes, utils.EmptyString); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -1417,6 +1557,20 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 	eRatePrf.Compile()
 	if !reflect.DeepEqual(rcv, eRatePrf) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
+	}
+
+	//cannot set RateProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
+			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
 	}
 
 }
@@ -2205,6 +2359,20 @@ func TestLoaderActionProfile(t *testing.T) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(expected), utils.ToJSON(aps))
 	}
+
+	//cannot set ActionProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(engine.ActionProfileCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{fileName: utils.ActionProfilesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestLoaderWrongCsv(t *testing.T) {
@@ -2986,10 +3154,10 @@ NOT_UINT
 	}
 }
 
-func TestLoadDispatchersAsStructErrConversion(t *testing.T) {
+func TestLoadDispatcherAsStructErrConversion(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
-		ldrID:         "TestLoadDispatchersAsStructErrConversion",
+		ldrID:         "TestLoadDispatcherHostsAsStructErrConversion",
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
@@ -3021,5 +3189,238 @@ func TestLoadDispatchersAsStructErrConversion(t *testing.T) {
 	expectedErr := "Unsupported time format"
 	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadDispatcherHostsAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadDispatcherHostsAsStructErrType",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaDispatcherHosts: {
+			{Tag: "PK",
+				Path:  "PK",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#PK
+NOT_UINT
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatcherHosts: {
+			utils.DispatcherHostsCsv: &openedCSVFile{
+				fileName: utils.DispatcherHostsCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "cannot update unsupported struct field: 0"
+	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadRateProfilesAsStructErrType(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadRateProfilesAsStructErrType",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRateProfiles: {
+			{Tag: "PK",
+				Path:  "PK",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#PK
+NOT_UINT
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
+			utils.RateProfilesCsv: &openedCSVFile{
+				fileName: utils.RateProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "cannot update unsupported struct field: 0"
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadRateProfilesAsStructErrConversion(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadRateProfilesAsStructErrConversion",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRateProfiles: {
+			{Tag: "ActivationInterval",
+				Path:  "ActivationInterval",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+		},
+	}
+	thresholdsCsv := `
+#ActivationInterval
+* * * * * *
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
+			utils.RateProfilesCsv: &openedCSVFile{
+				fileName: utils.RateProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "Unsupported time format"
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestLoadAndRemoveResources(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadAndRemoveResources",
+		bufLoaderData: make(map[string][]LoaderData),
+		dryRun:        true,
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaResources: {
+			{Tag: "Tenant",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	resourcesCSV := `
+#Tenant[0],ID[1]
+cgrates.org,NewRes1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaResources: {
+			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
+				rdr: rdr, csvRdr: rdrCsv}},
+	}
+	//empty database
+	if _, err := ldr.dm.GetResourceProfile("cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//because of dryrun, database will be empty again
+	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	ldr.dryRun = false
+	//reinitialized reader because after first process the reader is at the end of the file
+	rdr = ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaResources: {
+			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
+				rdr: rdr, csvRdr: rdrCsv}},
+	}
+
+	resPrf := &engine.ResourceProfile{
+		Tenant:       "cgrates.org",
+		ID:           "NewRes1",
+		FilterIDs:    []string{},
+		ThresholdIDs: []string{},
+	}
+	//NOT_FOUND because is resourceProfile is not set
+	if _, err := ldr.dm.GetResourceProfile("cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	rcv, err := ldr.dm.GetResourceProfile("cgrates.org", "NewRes1", false, false, utils.NonTransactional)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(resPrf, rcv) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(resPrf), utils.ToJSON(rcv))
+	}
+
+	//reinitialized reader because seeker it s at the end of the file
+	rdr = ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaResources: {
+			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
+				rdr: rdr, csvRdr: rdrCsv}},
+	}
+
+	//cannot remove when dryrun is on true
+	ldr.dryRun = true
+	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//remove successfully when dryrun is false
+	ldr.dryRun = false
+	rdr = ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaResources: {
+			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
+				rdr: rdr, csvRdr: rdrCsv}},
+	}
+	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//nothing in database
+	if _, err := ldr.dm.GetResourceProfile("cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//nothing to remove
+	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
