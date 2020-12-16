@@ -21,9 +21,12 @@ package services
 
 import (
 	"path"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -101,6 +104,27 @@ func TestApiersReload(t *testing.T) {
 	}
 	if !stordb.IsRunning() {
 		t.Errorf("Expected service to be running")
+	}
+	err := apiSv1.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err2 := apiSv2.Start()
+	if err2 == nil || err2 != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err2)
+	}
+	err = apiSv1.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	err2 = apiSv2.Reload()
+	if err2 != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err2)
+	}
+	expected := &v1.APIerSv1{}
+	getAPIerSv1 := apiSv1.GetAPIerSv1()
+	if reflect.DeepEqual(expected, getAPIerSv1) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, utils.ToJSON(getAPIerSv1))
 	}
 	cfg.ApierCfg().Enabled = false
 	cfg.GetReloadChan(config.ApierS) <- struct{}{}

@@ -24,6 +24,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/cgrates/analyzers"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -31,21 +33,22 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestNewAnalyzerService(t *testing.T) {
+//TestNewActionService for cover testing
+func TestNewAnalyzerCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	close(chS.GetPrecacheChannel(utils.CacheActionProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheActionProfilesFilterIndexes))
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	connChan := make(chan rpcclient.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, connChan, srvDep)
-	expected := &AnalyzerService{
+	if anz == nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(anz))
+	}
+	anz2 := &AnalyzerService{
 		connChan:    connChan,
 		cfg:         cfg,
 		server:      server,
@@ -53,38 +56,27 @@ func TestNewAnalyzerService(t *testing.T) {
 		shdChan:     shdChan,
 		srvDep:      srvDep,
 	}
-	if !reflect.DeepEqual(anz, expected) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expected), utils.ToJSON(anz))
-	}
-}
-
-func TestAnalyzerSNotRunning(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
-	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	close(chS.GetPrecacheChannel(utils.CacheActionProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheActionProfilesFilterIndexes))
-	server := cores.NewServer(nil)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	connChan := make(chan rpcclient.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, connChan, srvDep)
-	if anz.IsRunning() {
+	if anz2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	serviceName := anz.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.AnalyzerS) {
-		t.Errorf("\nExpecting <ActionS>,\n Received <%+v>", serviceName)
+	anz2.anz = &analyzers.AnalyzerService{}
+	if !anz2.IsRunning() {
+		t.Errorf("Expected service to be running")
 	}
-	shouldRun := anz.ShouldRun()
+	err := anz2.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	serviceName := anz2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.AnalyzerS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.AnalyzerS, serviceName)
+	}
+	shouldRun := anz2.ShouldRun()
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
-	getAnalyzerS := anz.GetAnalyzerS()
-	if !reflect.DeepEqual(anz.anz, getAnalyzerS) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(anz.anz), utils.ToJSON(getAnalyzerS))
+	getAnalyzerS := anz2.GetAnalyzerS()
+	if !reflect.DeepEqual(anz2.anz, getAnalyzerS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(anz2.anz), utils.ToJSON(getAnalyzerS))
 	}
 }

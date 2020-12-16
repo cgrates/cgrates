@@ -73,7 +73,6 @@ func TestActionSCoverage(t *testing.T) {
 	if !actS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-
 	serviceName := actS2.ServiceName()
 	if !reflect.DeepEqual(serviceName, utils.ActionS) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ActionS, serviceName)
@@ -82,4 +81,5 @@ func TestActionSCoverage(t *testing.T) {
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
+
 }
