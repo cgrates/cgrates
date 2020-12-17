@@ -2504,6 +2504,16 @@ const (
 	ElsVersionLow          = "version"
 	ElsVersionType         = "version_type"
 	ElsWaitForActiveShards = "wait_for_active_shards"
+	// SQLEe options
+	SQLUser            = "user"
+	SQLPassword        = "password"
+	SQLHost            = "host"
+	SQLPort            = "port"
+	SQLName            = "name"
+	SQLMaxIdleConns    = "maxIdleConns"
+	SQLMaxOpenConns    = "maxOpenConns"
+	SQLMaxConnLifetime = "maxConnLifetime"
+
 	// Others
 	OptsContext               = "*context"
 	Subsys                    = "*subsys"
