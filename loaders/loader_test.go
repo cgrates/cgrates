@@ -3655,3 +3655,436 @@ cgrates.org,REM_THRESHOLDS_1,
 		t.Error(err)
 	}
 }
+
+func TestRemoveRoutesContent(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveRoutesContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRoutes: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	routesCsv := `
+#Tenant[0],ID[1]
+cgrates.org,ROUTES_REM_1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(routesCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRoutes: {
+			utils.RoutesCsv: &openedCSVFile{
+				fileName: routesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expRoutes := &engine.RouteProfile{
+		Tenant: "cgrates.org",
+		ID:     "ROUTES_REM_1",
+	}
+	if err := ldr.dm.SetRouteProfile(expRoutes, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.removeContent(utils.MetaRoutes, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//nothing to remove from database
+	if err := ldr.removeContent(utils.MetaRoutes, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//cannot remove routeProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(routesCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRoutes: {
+			utils.RoutesCsv: &openedCSVFile{
+				fileName: routesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	if err := ldr.removeContent(utils.MetaRoutes, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveChargersContent(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveChargersContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaChargers: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	routesCsv := `
+#Tenant[0],ID[1]
+cgrates.org,REM_ROUTES_1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(routesCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaChargers: {
+			utils.ChargersCsv: &openedCSVFile{
+				fileName: utils.ChargersCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expChargers := &engine.ChargerProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_ROUTES_1",
+	}
+	if err := ldr.dm.SetChargerProfile(expChargers, true); err != nil {
+		t.Error(err)
+	} else if err := ldr.removeContent(utils.MetaChargers, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//nothing to remvoe from database
+	if err := ldr.removeContent(utils.MetaChargers, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//cannot remove ChargersProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(routesCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaChargers: {
+			utils.ChargersCsv: &openedCSVFile{
+				fileName: utils.ChargersCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.removeContent(utils.MetaChargers, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveDispatchersContent(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveDispatchersContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaDispatchers: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	dispatchersCsv := `
+#Tenant[0],ID[1]
+cgrates.org,REM_DISPATCHERS_1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(dispatchersCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatchers: {
+			utils.DispatcherProfilesCsv: &openedCSVFile{
+				fileName: utils.DispatcherProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expDispatchers := &engine.DispatcherProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_DISPATCHERS_1",
+	}
+	if err := ldr.dm.SetDispatcherProfile(expDispatchers, true); err != nil {
+		t.Error(err)
+	} else if err := ldr.removeContent(utils.MetaDispatchers, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//nothing to remvoe from database
+	if err := ldr.removeContent(utils.MetaDispatchers, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//cannot remove DispatchersProfile when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(dispatchersCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatchers: {
+			utils.DispatcherProfilesCsv: &openedCSVFile{
+				fileName: utils.DispatcherProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.removeContent(utils.MetaDispatchers, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveDispatcherHostsContent(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveDispatcherHostsContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaDispatcherHosts: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	dispatchersHostsCsv := `
+#Tenant[0],ID[1]
+cgrates.org,REM_DISPATCHERH_1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(dispatchersHostsCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatcherHosts: {
+			utils.DispatcherHostsCsv: &openedCSVFile{
+				fileName: utils.DispatcherHostsCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expDispatchers := &engine.DispatcherHost{
+		Tenant: "cgrates.org",
+		ID:     "REM_DISPATCHERH_1",
+	}
+	if err := ldr.dm.SetDispatcherHost(expDispatchers); err != nil {
+		t.Error(err)
+	} else if err := ldr.removeContent(utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//nothing to remvoe from database
+	if err := ldr.removeContent(utils.MetaDispatcherHosts, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//cannot remove DispatcherHosts when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(dispatchersHostsCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatcherHosts: {
+			utils.DispatcherHostsCsv: &openedCSVFile{
+				fileName: utils.DispatcherHostsCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.removeContent(utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveRateProfileContent(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveRateProfileContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRateProfiles: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	rtPrfCsv := `
+#Tenant[0],ID[1]
+cgrates.org,REM_RATEPROFILE_1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(rtPrfCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
+			utils.RateProfilesCsv: &openedCSVFile{
+				fileName: utils.RateProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expRtPrf := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_RATEPROFILE_1",
+	}
+	if err := ldr.dm.SetRateProfile(expRtPrf, true); err != nil {
+		t.Error(err)
+	} else if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//nothing to remvoe from database
+	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//cannot remove DispatcherHosts when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(rtPrfCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
+			utils.RateProfilesCsv: &openedCSVFile{
+				fileName: utils.RateProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveActionProfileContent(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveActionProfileContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaActionProfiles: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	actPrfCsv := `
+#Tenant[0],ID[1]
+cgrates.org,REM_ACTPROFILE_1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{
+				fileName: utils.ActionProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	actRtPrf := &engine.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_ACTPROFILE_1",
+	}
+	if err := ldr.dm.SetActionProfile(actRtPrf, true); err != nil {
+		t.Error(err)
+	} else if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	//nothing to remvoe from database
+	if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//cannot remove DispatcherHosts when dryrun is true
+	ldr.dryRun = true
+	rdr = ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{
+				fileName: utils.ActionProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
