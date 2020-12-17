@@ -77,6 +77,10 @@ func TestDataDBReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	getDm := db.GetDM()
+	if !reflect.DeepEqual(getDm, db.dm) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", db.dm, getDm)
+	}
 	oldcfg := &config.DataDbCfg{
 		DataDbType: utils.MONGO,
 		DataDbHost: "127.0.0.1",

@@ -105,6 +105,7 @@ func TestApiersReload(t *testing.T) {
 	if !stordb.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+
 	err := apiSv1.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
