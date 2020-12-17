@@ -122,12 +122,17 @@ func testTPActPrfGetTPActPrfBeforeSet(t *testing.T) {
 
 func testTPActPrfSetTPActPrf(t *testing.T) {
 	tpActPrf = &utils.TPActionProfile{
-		TPid:       "TP1",
-		Tenant:     "cgrates.org",
-		ID:         "ONE_TIME_ACT",
-		Weight:     10,
-		Schedule:   utils.ASAP,
-		AccountIDs: []string{"1001"},
+		TPid:     "TP1",
+		Tenant:   "cgrates.org",
+		ID:       "ONE_TIME_ACT",
+		Weight:   10,
+		Schedule: utils.ASAP,
+		Targets: []*utils.TPActionTarget{
+			&utils.TPActionTarget{
+				TargetType: utils.MetaAccounts,
+				TargetIDs:  []string{"1001"},
+			},
+		},
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "TOPUP",
@@ -191,12 +196,17 @@ func testTPActPrfUpdateTPActPrf(t *testing.T) {
 func testTPActPrfGetTPActPrfAfterUpdate(t *testing.T) {
 	var reply *utils.TPActionProfile
 	revTPActPrf := &utils.TPActionProfile{
-		TPid:       "TP1",
-		Tenant:     "cgrates.org",
-		ID:         "ONE_TIME_ACT",
-		Weight:     10,
-		Schedule:   utils.ASAP,
-		AccountIDs: []string{"1001"},
+		TPid:     "TP1",
+		Tenant:   "cgrates.org",
+		ID:       "ONE_TIME_ACT",
+		Weight:   10,
+		Schedule: utils.ASAP,
+		Targets: []*utils.TPActionTarget{
+			&utils.TPActionTarget{
+				TargetType: utils.MetaAccounts,
+				TargetIDs:  []string{"1001"},
+			},
+		},
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "new_TOPUP",
