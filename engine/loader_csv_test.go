@@ -1548,6 +1548,9 @@ func TestLoadActionProfiles(t *testing.T) {
 	sort.Slice(expected.Targets[0].TargetIDs, func(i, j int) bool {
 		return expected.Targets[0].TargetIDs[i] < expected.Targets[0].TargetIDs[j]
 	})
+	sort.Slice(csvr.actionProfiles[actPrfKey].Targets[0].TargetIDs, func(i, j int) bool {
+		return csvr.actionProfiles[actPrfKey].Targets[0].TargetIDs[i] < csvr.actionProfiles[actPrfKey].Targets[0].TargetIDs[j]
+	})
 
 	if !reflect.DeepEqual(csvr.actionProfiles[actPrfKey], expected) {
 		t.Errorf("Expecting: %+v,\n received: %+v",
