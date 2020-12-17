@@ -304,7 +304,7 @@ func (srvMngr *ServiceManager) ShutdownServices() {
 
 // Service interface that describes what functions should a service implement
 type Service interface {
-	// Start should handle the sercive start
+	// Start should handle the service start
 	Start() error
 	// Reload handles the change of config
 	Reload() error

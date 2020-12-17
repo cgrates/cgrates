@@ -87,6 +87,14 @@ func TestResourceSReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := reS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = reS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.ResourceSCfg().Enabled = false
 	cfg.GetReloadChan(config.RESOURCES_JSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)

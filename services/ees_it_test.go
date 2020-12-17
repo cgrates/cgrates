@@ -96,6 +96,14 @@ func TestEventExporterSReload(t *testing.T) {
 	if !ees.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := ees.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = ees.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.EEsCfg().Enabled = false
 	cfg.GetReloadChan(config.EEsJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)

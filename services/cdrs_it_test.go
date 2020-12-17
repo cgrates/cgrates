@@ -90,6 +90,7 @@ func TestCdrsReload(t *testing.T) {
 	if stordb.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+
 	cfg.RalsCfg().Enabled = true
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
@@ -114,6 +115,14 @@ func TestCdrsReload(t *testing.T) {
 	}
 	if !stordb.IsRunning() {
 		t.Errorf("Expected service to be running")
+	}
+	err := cdrS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = cdrS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.CdrsCfg().Enabled = false
 	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}

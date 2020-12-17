@@ -78,6 +78,14 @@ func TestDNSAgentReload(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := srv.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.DNSAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)

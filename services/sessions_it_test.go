@@ -113,6 +113,14 @@ func TestSessionSReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := srv.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.SessionSCfg().Enabled = false
 	cfg.GetReloadChan(config.SessionSJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)

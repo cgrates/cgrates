@@ -20,69 +20,66 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"path"
-	"runtime"
+	"reflect"
 	"sync"
 	"testing"
-	"time"
+
+	"github.com/cgrates/cgrates/actions"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
-func TestKamailioAgentReload(t *testing.T) {
+//TestNewActionService for cover testing
+func TestActionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
-	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
-
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-	cacheSChan <- chS
-
+	close(chS.GetPrecacheChannel(utils.CacheActionProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheActionProfilesFilterIndexes))
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
+	actRPC := make(chan rpcclient.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, nil, anz, srvDep)
-	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
+	actS := NewActionService(cfg, db,
+		chS, filterSChan, server, actRPC,
+		anz, srvDep)
+	if actS == nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(actS))
 	}
-	if srv.IsRunning() {
+	actS2 := &ActionService{
+		cfg:         cfg,
+		dm:          db,
+		cacheS:      chS,
+		filterSChan: filterSChan,
+		server:      server,
+		rldChan:     make(chan struct{}),
+		connChan:    actRPC,
+		anz:         anz,
+		srvDep:      srvDep,
+	}
+	if actS2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "kamevapi", "cgrates", "etc", "cgrates"),
-		Section: config.KamailioAgentJSN,
-	}, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
+	actS2.acts = actions.NewActionS(cfg, &engine.FilterS{}, &engine.DataManager{})
+	if !actS2.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	serviceName := actS2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.ActionS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ActionS, serviceName)
+	}
+	shouldRun := actS2.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
 
-	runtime.Gosched()
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	// the engine should be stoped as we could not connect to kamailio
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }

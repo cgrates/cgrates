@@ -81,6 +81,14 @@ func TestThresholdSReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := tS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = tS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.ThresholdSCfg().Enabled = false
 	cfg.GetReloadChan(config.THRESHOLDS_JSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
