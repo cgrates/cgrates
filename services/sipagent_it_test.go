@@ -78,6 +78,10 @@ func TestSIPAgentReload(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	srvStart := srv.Start()
+	if srvStart != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, srvStart)
+	}
 	err := srv.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <err>,\n Received <%+v>", err)
