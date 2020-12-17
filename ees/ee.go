@@ -56,6 +56,8 @@ func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 		return NewVirtualExporter(cgrCfg, cfgIdx, filterS, dc)
 	case utils.MetaElastic:
 		return NewElasticExporter(cgrCfg, cfgIdx, filterS, dc)
+	case utils.MetaSQL:
+		return NewSQLEe(cgrCfg, cfgIdx, filterS, dc)
 	default:
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cgrCfg.EEsCfg().Exporters[cfgIdx].Type)
 	}

@@ -386,7 +386,30 @@
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
-		}
+		},
+		{
+			"id": "SQLExporter",
+			"type": "*sql",
+			"tenant": "cgrates.org",
+			"attempts": 1,
+			"opts": {
+				"user": "cgrates",
+				"password": "CGRateS.org",
+				"host": "127.0.0.1",
+				"port": "3306",
+				"name": "exportedDatabase",
+				"tableName": "expTable",
+				"maxIdleConns": "10",
+				"maxOpenConns": "100",
+				"maxConnLifetime": "0",
+			},
+			"fields":[
+				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime"},
+				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
+				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
+			]
+		},
 	]
 },
 
