@@ -31,48 +31,47 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestCoreSCoverage for cover testing
-func TestCoreSCoverage(t *testing.T) {
+//TestHTTPAgent for cover testing
+func TestHTTPAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	caps := engine.NewCaps(1, "test_caps")
 	server := cores.NewServer(nil)
-	internalCoreSChan := make(chan rpcclient.ClientConnector, 1)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	srv := NewCoreService(cfg, caps, server,
-		internalCoreSChan, anz, srvDep)
+	rpcInternal := map[string]chan rpcclient.ClientConnector{}
+	cM := engine.NewConnManager(cfg, rpcInternal)
+	srv := NewHTTPAgent(cfg, filterSChan, server, cM, srvDep)
 	if srv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
 	}
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	srv.cS = &cores.CoreService{}
-	if !srv.IsRunning() {
+	srv2 := &HTTPAgent{
+		cfg:         cfg,
+		filterSChan: filterSChan,
+		server:      server,
+		started:     true,
+		connMgr:     cM,
+		srvDep:      srvDep,
+	}
+	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := srv.Start()
+	err := srv2.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	serviceName := srv.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.CoreS) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.CoreS, serviceName)
+	serviceName := srv2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.HTTPAgent) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.HTTPAgent, serviceName)
 	}
-	shouldRun := srv.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, true) {
-		t.Errorf("\nExpecting <true>,\n Received <%+v>", shouldRun)
+	shouldRun := srv2.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
 	rld := srv.Reload()
 	if rld != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", rld)
 	}
-	getCoreS := srv.GetCoreS()
-	if getCoreS == nil {
-		t.Errorf("\nExpecting not <nil>,\n Received <%+v>", getCoreS)
-	}
-
 }
