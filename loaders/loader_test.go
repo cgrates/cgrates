@@ -4088,3 +4088,107 @@ cgrates.org,REM_ACTPROFILE_1
 		t.Error(err)
 	}
 }
+
+func TestRemoveContentError1(t *testing.T) {
+	//use actionProfile to generate an error by giving a wrong csv
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveActionProfileContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaActionProfiles: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	//wrong start at the beginning of csv
+	actPrfCsv := `
+//Tenant[0]
+cgrates.org,REM_ACTPROFILE_s
+`
+	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{
+				fileName: utils.ActionProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	actRtPrf := &engine.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_ACTPROFILE_s",
+	}
+	expectedErr := "NOT_FOUND"
+	if err := ldr.dm.SetActionProfile(actRtPrf, true); err != nil {
+		t.Error(err)
+	} else if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestRemoveContentError2(t *testing.T) {
+	//use actionProfile to generate an error by giving a wrong csv
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveActionProfileContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaActionProfiles: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	//wrong start at the beginning of csv
+	actPrfCsv := `
+Tenant[0],ID[1]
+cgrates.org,REM_ACTPROFILE_s
+`
+	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{
+				fileName: utils.ActionProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	actRtPrf := &engine.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_ACTPROFILE_s",
+	}
+	expectedErr := "NOT_FOUND"
+	if err := ldr.dm.SetActionProfile(actRtPrf, true); err != nil {
+		t.Error(err)
+	} else if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
