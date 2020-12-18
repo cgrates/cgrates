@@ -78,6 +78,10 @@ func TestAsteriskAgentReload(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	srvReload := srv.Reload()
+	if srvReload != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", srvReload)
+	}
 	err := srv.Start()
 	if err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)

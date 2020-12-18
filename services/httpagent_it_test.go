@@ -74,4 +74,11 @@ func TestHTTPAgentCoverage(t *testing.T) {
 	if rld != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", rld)
 	}
+	shutdownError := srv.Shutdown()
+	if shutdownError != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutdownError)
+	}
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
 }

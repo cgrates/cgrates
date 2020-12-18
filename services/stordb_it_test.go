@@ -23,6 +23,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -32,8 +34,29 @@ func TestStorDBServiceCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewStorDBService(cfg, srvDep)
-	if srv.IsRunning() {
+	err := srv.IsRunning()
+	if err == true {
+		t.Errorf("Expected service to be down")
+	}
+	srv.db = engine.NewInternalDB([]string{"test"}, []string{"test2"}, true)
+	err = srv.IsRunning()
+	if err == false {
 		t.Errorf("Expected service to be running")
 	}
-
+	err2 := srv.Start()
+	if err2 == nil || err2 != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err2)
+	}
+	srv.oldDBCfg = &config.StorDbCfg{
+		Type:     utils.INTERNAL,
+		Host:     "test_host",
+		Port:     "test_port",
+		Name:     "test_name",
+		User:     "test_user",
+		Password: "test_pass",
+	}
+	err2 = srv.Reload()
+	if err2 == nil {
+		t.Errorf("\nExpecting <Error 1045: Access denied for user 'cgrates'@'localhost' (using password: NO)>,\n Received <%+v>", err2)
+	}
 }
