@@ -388,28 +388,46 @@
 			"attempts": 1,
 		},
 		{
-			"id": "SQLExporter",
+			"id": "SQLExporterFull",
 			"type": "*sql",
 			"tenant": "cgrates.org",
+			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
-				"user": "cgrates",
-				"password": "CGRateS.org",
-				"host": "127.0.0.1",
-				"port": "3306",
-				"name": "exportedDatabase",
-				"tableName": "expTable",
+				"dbName": "exportedDatabase", // if dbName is not present "cgrates" will be used as default
+				"tableName": "expTable", // tableName is mandatory in opts for sql exporter
+				"sslmode": "disable",
 				"maxIdleConns": "10",
 				"maxOpenConns": "100",
 				"maxConnLifetime": "0",
 			},
-			"fields":[
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
-				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime"},
-				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
-				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
+			"fields":[ // in case that the path is *exp.*row user must complete all the fields one to one with his sql schema in the correct order
+				{"tag": "CGRID", "path": "*exp.*row", "type": "*group", "value": "~*req.CGRID"},
+				{"tag": "AnswerTime", "path": "*exp.*row", "type": "*group", "value": "~*req.AnswerTime"},
+				{"tag": "Usage", "path": "*exp.*row", "type": "*group", "value": "~*req.Usage"},
+				{"tag": "Cost", "path": "*exp.*row", "type": "*group", "value": "~*req.Cost{*round:4}"},
 			]
 		},
+		{
+			"id": "SQLExporterPartial",
+			"type": "*sql",
+			"tenant": "cgrates.org",
+			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"attempts": 1,
+			"opts": {
+				"dbName": "exportedDatabase",
+				"tableName": "expTable",
+				"sslmode": "disable",
+				"maxIdleConns": "10",
+				"maxOpenConns": "100",
+				"maxConnLifetime": "0",
+			},
+			"fields":[ // the path constains *exp.columnName
+				{"tag": "CGRID", "path": "*exp.cgrid", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "AnswerTime", "path": "*exp.answer_time", "type": "*variable", "value": "~*req.AnswerTime"},
+				{"tag": "Cost", "path": "*exp.cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
+			]
+		}
 	]
 },
 

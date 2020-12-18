@@ -172,6 +172,8 @@ func (eeR *EventExporterRequest) SetFields(tplFlds []*config.FCTemplate) (err er
 		switch tplFld.Type {
 		case utils.META_COMPOSED:
 			err = utils.ComposeNavMapVal(eeR, fullPath, nMItm)
+		case utils.MetaGroup: // in case of *group type simply append to valSet
+			err = utils.AppendNavMapVal(eeR, fullPath, nMItm)
 		default:
 			_, err = eeR.Set(fullPath, &utils.NMSlice{nMItm})
 		}
@@ -188,6 +190,7 @@ func (eeR *EventExporterRequest) SetFields(tplFlds []*config.FCTemplate) (err er
 
 // Set implements utils.NMInterface
 func (eeR *EventExporterRequest) Set(fullPath *utils.FullPath, nm utils.NMInterface) (added bool, err error) {
+
 	switch fullPath.PathItems[0].Field {
 	default:
 		return false, fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0].Field)
@@ -231,7 +234,7 @@ func (eeR *EventExporterRequest) ParseField(
 	case utils.MetaRemoteHost:
 		out = eeR.RemoteHost().String()
 		isString = true
-	case utils.MetaVariable, utils.META_COMPOSED:
+	case utils.MetaVariable, utils.META_COMPOSED, utils.MetaGroup:
 		out, err = cfgFld.Value.ParseDataProvider(eeR)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:

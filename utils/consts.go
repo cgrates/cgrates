@@ -930,6 +930,7 @@ const (
 	Time                     = "Time"
 	TargetIDs                = "TargetIDs"
 	TargetType               = "TargetType"
+	MetaRow                  = "*row"
 )
 
 // Migrator Action
