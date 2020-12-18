@@ -74,5 +74,16 @@ func TestCoreSCoverage(t *testing.T) {
 	if getCoreS == nil {
 		t.Errorf("\nExpecting not <nil>,\n Received <%+v>", getCoreS)
 	}
+	//populates connChan with something in order to call the shutdown function
+	chS := engine.NewCacheS(cfg, nil, nil)
+	srv.connChan <- chS
+	srv.stopChan = make(chan struct{})
+	getShut := srv.Shutdown()
+	if getShut != nil {
+		t.Errorf("\nExpecting not <nil>,\n Received <%+v>", getShut)
+	}
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
 
 }
