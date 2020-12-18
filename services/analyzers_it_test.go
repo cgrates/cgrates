@@ -55,6 +55,7 @@ func TestNewAnalyzerCoverage(t *testing.T) {
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
 		srvDep:      srvDep,
+		stopChan:    make(chan struct{}, 1),
 	}
 	if anz2.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -63,7 +64,14 @@ func TestNewAnalyzerCoverage(t *testing.T) {
 	if !anz2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := anz2.Reload()
+	if !anz2.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	err := anz2.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = anz2.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}

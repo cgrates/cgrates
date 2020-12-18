@@ -46,7 +46,6 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
-
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
 	cacheSChan <- chS
 
@@ -81,7 +80,6 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-
 	shdChan.CloseOnce()
 	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond)

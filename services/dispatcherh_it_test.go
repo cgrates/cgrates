@@ -75,4 +75,16 @@ func TestDispatcherHCoverage(t *testing.T) {
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
+	if !srv2.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	srv2.stopChan = make(chan struct{}, 1)
+	srv2.dspS = dispatcherh.NewDispatcherHService(cfg, cM)
+	shutdownSrv := srv2.Shutdown()
+	if shutdownSrv != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutdownSrv)
+	}
+	if srv2.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
 }
