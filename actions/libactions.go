@@ -28,18 +28,27 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
-func newScheduledActs(tenant, apID, acntID string, ctx context.Context,
-	data *ActData, acts []actioner) (sActs *scheduledActs) {
-	return &scheduledActs{tenant, apID, acntID, ctx, data, acts,
+// actionTarget returns the target attached to an action
+func actionTarget(act string) (trgt string) {
+	switch act {
+	default:
+		trgt = utils.META_NONE
+	}
+	return
+}
+
+func newScheduledActs(tenant, apID, trgTyp, trgID string,
+	ctx context.Context, data *ActData, acts []actioner) (sActs *scheduledActs) {
+	return &scheduledActs{tenant, apID, trgTyp, trgID, ctx, data, acts,
 		ltcache.NewTransCache(map[string]*ltcache.CacheConfig{})}
 }
 
 // scheduled is a set of actions which will be executed directly or by the cron.schedule
 type scheduledActs struct {
-	tenant, apID, acntID string
-	ctx                  context.Context
-	data                 *ActData
-	acts                 []actioner
+	tenant, apID, trgTyp, trgID string
+	ctx                         context.Context
+	data                        *ActData
+	acts                        []actioner
 
 	cch *ltcache.TransCache // cache data between actions here
 }
