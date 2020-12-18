@@ -56,7 +56,7 @@ func TestStorDBServiceCoverage(t *testing.T) {
 		Password: "test_pass",
 	}
 	err2 = srv.Reload()
-	if err2 != nil {
+	if err2 == nil {
 		t.Errorf("\nExpecting <Error 1045: Access denied for user 'cgrates'@'localhost' (using password: NO)>,\n Received <%+v>", err2)
 	}
 }
