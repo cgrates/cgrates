@@ -24,6 +24,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/cgrates/loaders"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -53,8 +55,20 @@ func TestLoaderSCoverage(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-
+	srv.ldrs = loaders.NewLoaderService(&engine.DataManager{}, []*config.LoaderSCfg{{
+		ID:      "test_id",
+		Enabled: true,
+	}},
+		"test", &engine.FilterS{}, &engine.ConnManager{})
+	if !srv.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
 	if !reflect.DeepEqual(srv.GetLoaderS(), srv.ldrs) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", srv.ldrs, srv.GetLoaderS())
 	}
+	errStart := srv.Start()
+	if errStart == nil || errStart != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, errStart)
+	}
+
 }
