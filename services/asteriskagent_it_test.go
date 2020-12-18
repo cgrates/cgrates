@@ -25,6 +25,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/agents"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -94,4 +96,38 @@ func TestAsteriskAgentReload(t *testing.T) {
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
+}
+
+//TestAsteriskAgentCoverage for cover testing
+func TestAsteriskAgentCoverage(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := &AsteriskAgent{
+		RWMutex:  sync.RWMutex{},
+		cfg:      cfg,
+		shdChan:  shdChan,
+		stopChan: nil,
+		smas:     nil,
+		connMgr:  nil,
+		srvDep:   srvDep,
+	}
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	srv.smas = []*agents.AsteriskAgent{}
+	if !srv.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	err := srv.Start()
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+
 }
