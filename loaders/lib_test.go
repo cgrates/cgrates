@@ -69,8 +69,104 @@ func (s *testMockCacheConn) Call(method string, arg interface{}, rply interface{
 	}
 }
 
-func TestProcessContentCalls(t *testing.T) {
+func TestProcessContentCallsLoadCache(t *testing.T) {
 	sMock := &testMockCacheConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.CacheSv1LoadCache: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type: %T", rply)
+				}
+				*prply = utils.OK
+				return nil
+			},
+			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+		},
+	}
+	internalCacheSChann := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChann <- sMock
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestProcessContentCallsLoadCache",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChann,
+		}),
+		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		timezone:   "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRateProfiles: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "Weight",
+				Path:  "Weight",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
+		},
+	}
+	ratePrfCsv := `
+#Tenant[0],ID[1],Weight[2]
+cgrates.org,MOCK_RELOAD_ID,20
+`
+	rdr := ioutil.NopCloser(strings.NewReader(ratePrfCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
+			utils.RateProfilesCsv: &openedCSVFile{
+				fileName: utils.RateProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.MetaLoad); err != nil {
+		t.Error(err)
+	}
+
+	// Calling the method again while cacheConnsID is not valid
+	ldr.cacheConns = []string{utils.MetaInternal}
+	rdr = ioutil.NopCloser(strings.NewReader(ratePrfCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
+			utils.RateProfilesCsv: &openedCSVFile{
+				fileName: utils.RateProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expected := "UNSUPPORTED_SERVICE_METHOD"
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.MetaLoad); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestProcessContentCallsReloadCache(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+
+	sMock2 := &testMockCacheConn{
 		calls: map[string]func(arg interface{}, rply interface{}) error{
 			utils.CacheSv1ReloadCache: func(arg interface{}, rply interface{}) error {
 				prply, can := rply.(*string)
@@ -95,7 +191,7 @@ func TestProcessContentCalls(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 
 	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
-	internalCacheSChan <- sMock
+	internalCacheSChan <- sMock2
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCalls",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -124,11 +220,11 @@ func TestProcessContentCalls(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
 		},
 	}
-	thresholdsCsv := `
+	ratePrfCsv := `
 #Tenant[0],ID[1],Weight[2]
 cgrates.org,MOCK_RELOAD_ID,20
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := ioutil.NopCloser(strings.NewReader(ratePrfCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -142,5 +238,695 @@ cgrates.org,MOCK_RELOAD_ID,20
 	}
 	if err := ldr.processContent(utils.MetaRateProfiles, utils.MetaReload); err != nil {
 		t.Error(err)
+	}
+
+	// Calling the method again while cacheConnsID is not valid
+	ldr.cacheConns = []string{utils.MetaInternal}
+	rdr = ioutil.NopCloser(strings.NewReader(ratePrfCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
+			utils.RateProfilesCsv: &openedCSVFile{
+				fileName: utils.RateProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expected := "UNSUPPORTED_SERVICE_METHOD"
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.MetaReload); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestProcessContentCallsRemoveItems(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+
+	sMock := &testMockCacheConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.CacheSv1RemoveItems: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+
+	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan <- sMock
+	ldr := &Loader{
+		ldrID:         "TestProcessContentCallsRemoveItems",
+		bufLoaderData: make(map[string][]LoaderData),
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
+		}),
+		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		timezone:   "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaAttributes: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	attributeCsv := `
+#Tenant[0],ID[1]
+cgrates.org,MOCK_RELOAD_ID
+`
+	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	if err := ldr.processContent(utils.MetaAttributes, utils.MetaRemove); err != nil {
+		t.Error(err)
+	}
+
+	// Calling the method again while cacheConnsID is not valid
+	ldr.cacheConns = []string{utils.MetaInternal}
+	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expected := "UNSUPPORTED_SERVICE_METHOD"
+	if err := ldr.processContent(utils.MetaAttributes, utils.MetaRemove); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	// Calling the method again while caching method is invalid
+	ldr.cacheConns = []string{utils.MetaInternal}
+	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expected = "UNSUPPORTED_SERVICE_METHOD"
+	if err := ldr.processContent(utils.MetaAttributes, "invalid_caching_api"); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestProcessContentCallsClear(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+
+	sMock := &testMockCacheConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+
+	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan <- sMock
+	ldr := &Loader{
+		ldrID:         "TestProcessContentCallsClear",
+		bufLoaderData: make(map[string][]LoaderData),
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
+		}),
+		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		timezone:   "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaAttributes: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	attributeCsv := `
+#Tenant[0],ID[1]
+cgrates.org,MOCK_RELOAD_ID
+`
+	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	if err := ldr.processContent(utils.MetaAttributes, utils.MetaClear); err != nil {
+		t.Error(err)
+	}
+
+	//inexisting method(*none) of cache and reinitialized the reader will do nothing
+	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	if err := ldr.processContent(utils.MetaAttributes, utils.META_NONE); err != nil {
+		t.Error(err)
+	}
+
+	// Calling the method again while cacheConnsID is not valid
+	ldr.cacheConns = []string{utils.MetaInternal}
+	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expected := "UNSUPPORTED_SERVICE_METHOD"
+	if err := ldr.processContent(utils.MetaAttributes, utils.MetaClear); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestRemoveContentCallsReload(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+
+	sMock := &testMockCacheConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.CacheSv1ReloadCache: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+
+	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan <- sMock
+	ldr := &Loader{
+		ldrID:         "TestRemoveContentCallsReload",
+		bufLoaderData: make(map[string][]LoaderData),
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
+		}),
+		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:   "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaAttributes: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	attributeCsv := `
+#Tenant[0],ID[1]
+cgrates.org,MOCK_RELOAD_2
+`
+	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	attrPrf := &engine.AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "MOCK_RELOAD_2",
+	}
+	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaReload); err != nil {
+		t.Error(err)
+	}
+
+	//Calling the method again while cacheConnsID is not valid
+	ldr.cacheConns = []string{utils.MetaInternal}
+	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+
+	//set and remove again from database
+	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	expected := "UNSUPPORTED_SERVICE_METHOD"
+	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaReload); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestRemoveContentCallsLoad(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+
+	sMock := &testMockCacheConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.CacheSv1LoadCache: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+
+	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan <- sMock
+	ldr := &Loader{
+		ldrID:         "TestRemoveContentCallsReload",
+		bufLoaderData: make(map[string][]LoaderData),
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
+		}),
+		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:   "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaAttributes: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	attributeCsv := `
+#Tenant[0],ID[1]
+cgrates.org,MOCK_RELOAD_3
+`
+	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	attrPrf := &engine.AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "MOCK_RELOAD_3",
+	}
+	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaLoad); err != nil {
+		t.Error(err)
+	}
+
+	//Calling the method again while cacheConnsID is not valid
+	ldr.cacheConns = []string{utils.MetaInternal}
+	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+
+	//set and remove again from database
+	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	expected := "UNSUPPORTED_SERVICE_METHOD"
+	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaLoad); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestRemoveContentCallsRemove(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+
+	sMock := &testMockCacheConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.CacheSv1RemoveItems: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+
+	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan <- sMock
+	ldr := &Loader{
+		ldrID:         "TestRemoveContentCallsReload",
+		bufLoaderData: make(map[string][]LoaderData),
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
+		}),
+		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:   "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaAttributes: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	attributeCsv := `
+#Tenant[0],ID[1]
+cgrates.org,MOCK_RELOAD_4
+`
+	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	attrPrf := &engine.AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "MOCK_RELOAD_4",
+	}
+	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaRemove); err != nil {
+		t.Error(err)
+	}
+
+	//Calling the method again while cacheConnsID is not valid
+	ldr.cacheConns = []string{utils.MetaInternal}
+	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+
+	//set and remove again from database
+	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	expected := "UNSUPPORTED_SERVICE_METHOD"
+	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaRemove); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	//inexisting method(*none) of cache and reinitialized the reader will do nothing
+	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.removeContent(utils.MetaAttributes, utils.META_NONE); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveContentCallsClear(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+
+	sMock := &testMockCacheConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+				prply, can := rply.(*string)
+				if !can {
+					t.Errorf("Wrong argument type : %T", rply)
+					return nil
+				}
+				*prply = utils.OK
+				return nil
+			},
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+
+	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan <- sMock
+	ldr := &Loader{
+		ldrID:         "TestRemoveContentCallsReload",
+		bufLoaderData: make(map[string][]LoaderData),
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
+		}),
+		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:   "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaAttributes: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	attributeCsv := `
+#Tenant[0],ID[1]
+cgrates.org,MOCK_RELOAD_3
+`
+	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	attrPrf := &engine.AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "MOCK_RELOAD_3",
+	}
+	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaClear); err != nil {
+		t.Error(err)
+	}
+
+	//Calling the method again while cacheConnsID is not valid
+	ldr.cacheConns = []string{utils.MetaInternal}
+	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+
+	//set and remove again from database
+	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	expected := "UNSUPPORTED_SERVICE_METHOD"
+	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaClear); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	// Calling the method again while caching method is invalid
+	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{
+				fileName: utils.AttributesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	expected = "UNSUPPORTED_SERVICE_METHOD"
+	if err := ldr.removeContent(utils.MetaAttributes, "invalid_caching_api"); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
