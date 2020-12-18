@@ -4427,3 +4427,26 @@ cgrates.org,REM_ACTPROFILE_s
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
+
+func TestLoaderListenAndServe(t *testing.T) {
+	ldr := &Loader{}
+	stopChan := make(chan struct{}, 1)
+	go func() {
+		time.Sleep(10)
+		stopChan <- struct{}{}
+	}()
+
+	if err := ldr.ListenAndServe(stopChan); err != nil {
+		t.Error(err)
+	}
+
+	ldr.runDelay = -1
+	if err := ldr.ListenAndServe(stopChan); err != nil {
+		t.Error(err)
+	}
+
+	ldr.runDelay = 1
+	if err := ldr.ListenAndServe(stopChan); err != nil {
+		t.Error(err)
+	}
+}
