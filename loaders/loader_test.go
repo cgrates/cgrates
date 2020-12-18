@@ -27,8 +27,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,8 +37,8 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -151,6 +152,22 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
 		t.Errorf("expecting: %s, \n received: %s",
 			utils.ToJSON(eAP), utils.ToJSON(ap))
+	}
+
+	//cannot set AttributeProfile when dataManager is nil
+	ldr.dm = nil
+	ldr.dryRun = false
+	rdr = ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: {
+			utils.AttributesCsv: &openedCSVFile{fileName: utils.AttributesCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	expectedErr := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
 
@@ -3435,6 +3452,21 @@ cgrates.org,NewRes1
 	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
+
+	//cannot set again ResourceProfile when dataManager is nil
+	ldr.dm = nil
+	rdr = ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaResources: {
+			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
+				rdr: rdr, csvRdr: rdrCsv}},
+	}
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
 }
 
 func TestRemoveFilterContent(t *testing.T) {
@@ -3507,6 +3539,26 @@ cgrates.org,FILTERS_REM_1
 	}
 	if err := ldr.removeContent(utils.MetaFilters, utils.EmptyString); err != nil {
 		t.Error(err)
+	}
+
+	//cannot set again FiltersProfile when dataManager is nil
+	ldr.dm = nil
+	ldr.dryRun = false
+	rdr = ioutil.NopCloser(strings.NewReader(filtersCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaFilters: {
+			utils.FiltersCsv: &openedCSVFile{
+				fileName: utils.FiltersCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
@@ -3581,6 +3633,26 @@ cgrates.org,REM_STATS_1
 	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
+
+	//cannot set again StatsProfile when dataManager is nil
+	ldr.dm = nil
+	ldr.dryRun = false
+	rdr = ioutil.NopCloser(strings.NewReader(statsCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaStatS: {
+			utils.StatsCsv: &openedCSVFile{
+				fileName: utils.StatsCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
 }
 
 func TestRemoveThresholdsContent(t *testing.T) {
@@ -3653,6 +3725,26 @@ cgrates.org,REM_THRESHOLDS_1,
 	}
 	if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err != nil {
 		t.Error(err)
+	}
+
+	//cannot set again ThresholdsProfile when dataManager is nil
+	ldr.dm = nil
+	ldr.dryRun = false
+	rdr = ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaThresholds: {
+			utils.ThresholdsCsv: &openedCSVFile{
+				fileName: utils.ThresholdsCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
@@ -3727,6 +3819,26 @@ cgrates.org,ROUTES_REM_1
 	if err := ldr.removeContent(utils.MetaRoutes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
+
+	//cannot set again RoutesProfile when dataManager is nil
+	ldr.dm = nil
+	ldr.dryRun = false
+	rdr = ioutil.NopCloser(strings.NewReader(routesCsv))
+	rdrCsv = csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRoutes: {
+			utils.RoutesCsv: &openedCSVFile{
+				fileName: routesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
 }
 
 func TestRemoveChargersContent(t *testing.T) {
@@ -3798,6 +3910,27 @@ cgrates.org,REM_ROUTES_1
 	}
 	if err := ldr.removeContent(utils.MetaChargers, utils.EmptyString); err != nil {
 		t.Error(err)
+	}
+
+	//cannot set again ChargersProfile when dataManager is nil
+	ldr.dm = nil
+	ldr.dryRun = false
+	rdr = ioutil.NopCloser(strings.NewReader(routesCsv))
+	rdr = ioutil.NopCloser(strings.NewReader(routesCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaChargers: {
+			utils.ChargersCsv: &openedCSVFile{
+				fileName: utils.ChargersCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
@@ -3871,6 +4004,26 @@ cgrates.org,REM_DISPATCHERS_1
 	if err := ldr.removeContent(utils.MetaDispatchers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
+
+	//cannot set again DispatchersProfile when dataManager is nil
+	ldr.dm = nil
+	ldr.dryRun = false
+	rdr = ioutil.NopCloser(strings.NewReader(dispatchersCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatchers: {
+			utils.DispatcherProfilesCsv: &openedCSVFile{
+				fileName: utils.DispatcherProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
 }
 
 func TestRemoveDispatcherHostsContent(t *testing.T) {
@@ -3921,7 +4074,7 @@ cgrates.org,REM_DISPATCHERH_1
 		t.Error(err)
 	}
 
-	//nothing to remvoe from database
+	//nothing to remove from database
 	if err := ldr.removeContent(utils.MetaDispatcherHosts, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -3942,6 +4095,67 @@ cgrates.org,REM_DISPATCHERH_1
 	}
 	if err := ldr.removeContent(utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestProcessContentEmptyDataBase(t *testing.T) {
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            nil,
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaDispatcherHosts: {
+			{
+				Tag:       "Tenant",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+			{
+				Tag:       "ID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+			{
+				Tag:   "Address",
+				Path:  "Address",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP),
+			},
+			{
+				Tag:   "Transport",
+				Path:  "Transport",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP),
+			},
+			{
+				Tag:   "TLS",
+				Path:  "TLS",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP),
+			},
+		},
+	}
+	rdr := ioutil.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatcherHosts: {
+			utils.DispatcherProfilesCsv: &openedCSVFile{
+				fileName: utils.DispatcherProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expectedErr := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
 
@@ -4022,7 +4236,6 @@ func TestRemoveActionProfileContent(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestRemoveActionProfileContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -4055,6 +4268,28 @@ cgrates.org,REM_ACTPROFILE_1
 			},
 		},
 	}
+
+	//cannot set ActionProfile when dataManager is nil
+	ldr.dm = nil
+	rdr = ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{
+				fileName: utils.ActionProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	//set dataManager
+	ldr.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	actRtPrf := &engine.ActionProfile{
 		Tenant: "cgrates.org",
 		ID:     "REM_ACTPROFILE_1",
@@ -4065,7 +4300,7 @@ cgrates.org,REM_ACTPROFILE_1
 		t.Error(err)
 	}
 
-	//nothing to remvoe from database
+	//nothing to remove from database
 	if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
