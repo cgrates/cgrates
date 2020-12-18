@@ -20,6 +20,7 @@ package ees
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"sync"
 
@@ -35,25 +36,44 @@ func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	sqlEe = &SQLEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 
-	// take the connection parameters from opts
-	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
-		utils.IfaceAsString(cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLUser]),
-		utils.IfaceAsString(cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLPassword]),
-		utils.IfaceAsString(cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLHost]),
-		utils.IfaceAsString(cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLPort]),
-		utils.IfaceAsString(cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLName]))
-	db, err := gorm.Open("mysql", connectString)
-	if err != nil {
-		return nil, err
+	var u *url.URL
+	if u, err = url.Parse(strings.TrimPrefix(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath, utils.Meta)); err != nil {
+		return
 	}
-	if err = db.DB().Ping(); err != nil {
-		return nil, err
+	password, _ := u.User.Password()
+
+	dbname := utils.SQLDefaultDBName
+	if vals, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLDBName]; has {
+		dbname = utils.IfaceAsString(vals)
+	}
+	ssl := utils.SQLDefaultSSLMode
+	if vals, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLSSLMode]; has {
+		ssl = utils.IfaceAsString(vals)
 	}
 	// tableName is mandatory in opts
 	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLTableName]; !has {
 		return nil, utils.NewErrMandatoryIeMissing(utils.SQLTableName)
 	} else {
 		sqlEe.tableName = utils.IfaceAsString(iface)
+	}
+
+	var connString string
+	switch u.Scheme {
+	case utils.MYSQL:
+		connString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
+			u.User.Username(), password, u.Hostname(), u.Port(), dbname)
+	case utils.POSTGRES:
+		connString = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", u.Hostname(), u.Port(), dbname, u.User.Username(), password, ssl)
+	default:
+		return nil, fmt.Errorf("unknown db_type %s", u.Scheme)
+	}
+
+	db, err := gorm.Open(u.Scheme, connString)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.DB().Ping(); err != nil {
+		return nil, err
 	}
 
 	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLMaxIdleConns]; has {
@@ -120,7 +140,7 @@ func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	sqlEe.dc[utils.NumberOfEvents] = sqlEe.dc[utils.NumberOfEvents].(int64) + 1
 
 	var vals []interface{}
-
+	var colNames []string
 	req := utils.MapStorage(cgrEv.Event)
 	eeReq := NewEventExporterRequest(req, sqlEe.dc, cgrEv.Opts,
 		sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Tenant,
@@ -131,10 +151,15 @@ func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	if err = eeReq.SetFields(sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].ContentFields()); err != nil {
 		return
 	}
+
 	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
 		var iface interface{}
 		if iface, err = eeReq.cnt.FieldAsInterface(el.Value.Slice()); err != nil {
 			return
+		}
+		pathWithoutIndex := utils.GetPathWithoutIndex(el.Value.String())
+		if pathWithoutIndex != utils.MetaRow {
+			colNames = append(colNames, pathWithoutIndex)
 		}
 		vals = append(vals, iface)
 	}
@@ -143,24 +168,16 @@ func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
 	for i := range vals {
 		sqlValues[i] = "?"
 	}
-	utils.Logger.Debug(fmt.Sprintf("Test??"))
-	utils.Logger.Debug(fmt.Sprintf("%+v", sqlValues))
-	utils.Logger.Debug(fmt.Sprintf("%+v", vals))
-	sqlStatement := fmt.Sprintf("INSERT INTO %s VALUES (%s); ", sqlEe.tableName, strings.Join(sqlValues, ","))
-	utils.Logger.Debug(fmt.Sprintf("%+v", sqlStatement))
-	tx := sqlEe.db.Begin()
-	utils.Logger.Debug(fmt.Sprintf("TestDaca ajunge aici ???? "))
-	res, err := tx.DB().Exec(sqlStatement, vals...)
-	utils.Logger.Debug(fmt.Sprintf("ALO %+v", res))
-	utils.Logger.Debug(fmt.Sprintf("ALO2 %+v", err))
-	if err != nil {
-		utils.Logger.Debug(fmt.Sprintf("%+v", err))
-		tx.Rollback()
-		return err
+
+	var sqlQuery string
+	if len(colNames) != len(vals) {
+		sqlQuery = fmt.Sprintf("INSERT INTO %s VALUES (%s); ", sqlEe.tableName, strings.Join(sqlValues, ","))
+	} else {
+		colNamesStr := "(" + strings.Join(colNames, ", ") + ")"
+		sqlQuery = fmt.Sprintf("INSERT INTO %s %s VALUES (%s); ", sqlEe.tableName, colNamesStr, strings.Join(sqlValues, ","))
 	}
 
-	tx.Commit()
-	defer tx.Close()
+	sqlEe.db.Table(sqlEe.tableName).Exec(sqlQuery, vals...)
 	updateEEMetrics(sqlEe.dc, cgrEv.Event, utils.FirstNonEmpty(sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Timezone,
 		sqlEe.cgrCfg.GeneralCfg().DefaultTimezone))
 
