@@ -102,3 +102,44 @@ func TestChargerSReload(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+
+//TestAttributeSCoverage for cover testing
+func TestChargerSCoverage(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AttributeSCfg().Enabled = true
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	server := cores.NewServer(nil)
+	db := NewDataDBService(cfg, nil, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS := &ChargerService{
+		connChan:    make(chan rpcclient.ClientConnector, 1),
+		cfg:         cfg,
+		dm:          db,
+		cacheS:      chS,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     nil,
+		anz:         anz,
+		srvDep:      srvDep,
+	}
+	if chrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	chrS.chrS = &engine.ChargerService{}
+	if !chrS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	err := chrS.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = chrS.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+}
