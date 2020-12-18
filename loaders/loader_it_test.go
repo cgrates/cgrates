@@ -52,7 +52,11 @@ var (
 		testLoaderPopulateData,
 		testLoadFromFilesCsvActionProfile,
 		testLoadFromFilesCsvActionProfileOpenError,
+		testProcessFolderRemoveContent,
 		testLoadFromFilesCsvActionProfileLockFolderError,
+		testLoaderMoveFiles,
+		testLoaderMoveFilesMatchingFiles,
+		testLoaderMoveFilesRenameError,
 		testLoaderLoadAttributes,
 		testLoaderVerifyOutDir,
 		testLoaderCheckAttributes,
@@ -531,6 +535,104 @@ func testLoadFromFilesCsvActionProfileOpenError(t *testing.T) {
 	}
 }
 
+func testProcessFolderRemoveContent(t *testing.T) {
+	flPath := "/tmp/TestLoadFromFilesCsvActionProfile"
+	if err := os.MkdirAll(flPath, 0777); err != nil {
+		t.Error(err)
+	}
+	newFile, err := os.Create(path.Join(flPath, "ActionProfiles.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	newFile.Write([]byte(`
+#Tenant[0],ID[1]
+cgrates.org,SET_ACTPROFILE_3
+`))
+	content, err := ioutil.ReadFile(path.Join(flPath, "ActionProfiles.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	newFile.Close()
+
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveActionProfileContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		tpInDir:       flPath,
+		tpOutDir:      utils.EmptyString,
+		lockFilename:  "ActionProfiles.csv",
+		fieldSep:      ",",
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaActionProfiles: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+
+	rdr := ioutil.NopCloser(strings.NewReader(string(content)))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{
+				fileName: utils.ActionProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expACtPrf := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SET_ACTPROFILE_3",
+		FilterIDs: []string{},
+		Targets:   map[string]utils.StringSet{},
+		Actions:   []*engine.APAction{},
+	}
+	if err := ldr.dm.SetActionProfile(expACtPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.ProcessFolder(utils.EmptyString, utils.MetaRemove, true); err != nil {
+		t.Error(err)
+	}
+	//nothing to get from database
+	if _, err := ldr.dm.GetActionProfile(expACtPrf.Tenant, expACtPrf.ID,
+		true, true, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//checking the error by adding a caching method
+	ldr.cacheConns = []string{utils.MetaInternal}
+	rdr = ioutil.NopCloser(strings.NewReader(string(content)))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaActionProfiles: {
+			utils.ActionProfilesCsv: &openedCSVFile{
+				fileName: utils.ActionProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.dm.SetActionProfile(expACtPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := ldr.ProcessFolder(utils.MetaReload, utils.MetaRemove, true); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
 func testLoadFromFilesCsvActionProfileLockFolderError(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
@@ -549,5 +651,81 @@ func testLoadFromFilesCsvActionProfileLockFolderError(t *testing.T) {
 	expectedErr := "open : no such file or directory"
 	if err := ldr.ProcessFolder(utils.EmptyString, utils.MetaStore, true); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func testLoaderMoveFiles(t *testing.T) {
+	flPath := "/tmp/TestLoadFromFilesCsvActionProfile"
+	if err := os.MkdirAll(flPath, 0777); err != nil {
+		t.Error(err)
+	}
+	newFile, err := os.Create(path.Join(flPath, "ActionProfiles.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	newFile.Close()
+
+	ldr := &Loader{
+		tpInDir:  flPath,
+		tpOutDir: "/tmp",
+	}
+	if err := ldr.moveFiles(); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.Remove("/tmp/ActionProfiles.csv"); err != nil {
+		t.Error(err)
+	} else if err := os.Remove("/tmp/TestLoadFromFilesCsvActionProfile"); err != nil {
+		t.Error(err)
+	}
+}
+
+func testLoaderMoveFilesMatchingFiles(t *testing.T) {
+	flPath := "/tmp/TestLoaderMoveFilesMatchingFiles"
+	ldr := &Loader{
+		tpInDir:      flPath,
+		tpOutDir:     "/tmp",
+		lockFilename: "ActionProfiles.csv",
+	}
+	if err := os.MkdirAll(flPath, 0777); err != nil {
+		t.Error(err)
+	}
+	newFile, err := os.Create(path.Join(flPath, "ActionProfiles.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	newFile.Close()
+
+	if err := ldr.moveFiles(); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.Remove(path.Join(flPath, "ActionProfiles.csv")); err != nil {
+		t.Error(err)
+	} else if err := os.Remove(flPath); err != nil {
+		t.Error(err)
+	}
+}
+
+func testLoaderMoveFilesRenameError(t *testing.T) {
+	flPath := "/tmp"
+	ldr := &Loader{
+		tpInDir:      flPath,
+		tpOutDir:     "/tmp",
+		lockFilename: "ActionProfiles.csv",
+	}
+	newFile, err := os.Create(path.Join(flPath, "ActionProfiles.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	newFile.Close()
+
+	expected := "rename /tmp/.ICE-unix /tmp/.ICE-unix: file exists"
+	if err := ldr.moveFiles(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	if err := os.Remove(path.Join(flPath, "ActionProfiles.csv")); err != nil {
+		t.Error(err)
 	}
 }
