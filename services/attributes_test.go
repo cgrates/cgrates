@@ -1,5 +1,3 @@
-// +build integration
-
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -20,10 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"path"
+	"reflect"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -33,65 +30,68 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestAsteriskAgentReload(t *testing.T) {
+//TestAttributeSCoverage for cover testing
+func TestAttributeSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
-	cfg.SessionSCfg().Enabled = true
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
 	chS := engine.NewCacheS(cfg, nil, nil)
-
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-	cacheSChan <- chS
-
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	attrRPC := make(chan rpcclient.ClientConnector, 1)
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, nil, anz, srvDep)
-	srv := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
+	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, attrRPC, anz, srvDep)
+	if attrS == nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(attrS))
 	}
-	if srv.IsRunning() {
+	attrS2 := &AttributeService{
+		connChan:    make(chan rpcclient.ClientConnector, 1),
+		cfg:         cfg,
+		dm:          db,
+		cacheS:      chS,
+		filterSChan: filterSChan,
+		server:      server,
+		anz:         anz,
+		srvDep:      srvDep,
+	}
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
+	}
+	if attrS2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "asterisk_ari", "cgrates", "etc", "cgrates"),
-		Section: config.AsteriskAgentJSN,
-	}, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !srv.IsRunning() {
+
+	attrS2.attrS = &engine.AttributeService{}
+	if !attrS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	srvReload := srv.Reload()
-	if srvReload != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", srvReload)
-	}
-	err := srv.Start()
-	if err != utils.ErrServiceAlreadyRunning {
+	err := attrS2.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	cfg.AsteriskAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.AsteriskAgentJSN) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
-	if srv.IsRunning() {
+	err = attrS2.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	shouldRun := attrS2.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
+	}
+	serviceName := attrS2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.AttributeS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.AttributeS, serviceName)
+	}
+	chS = engine.NewCacheS(cfg, nil, nil)
+	attrS2.connChan <- chS
+	shutdownErr := attrS2.Shutdown()
+	if shutdownErr != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutdownErr)
+	}
+	if attrS2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }
