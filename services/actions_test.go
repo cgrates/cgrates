@@ -1,5 +1,3 @@
-// +build integration
-
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -33,11 +31,9 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestNewActionService for cover testing
+//TestActionSCoverage for cover testing
 func TestActionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	shdChan := utils.NewSyncedChan()
 	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
