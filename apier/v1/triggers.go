@@ -478,6 +478,9 @@ func (api *APIerSv1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.
 		if err != nil {
 			return err
 		}
+		if len(keys) == 0 {
+			return utils.ErrNotFound
+		}
 		for _, key := range keys {
 			getAttrs, err := api.DataManager.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):], false, utils.NonTransactional)
 			if err != nil {
