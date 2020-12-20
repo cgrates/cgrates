@@ -22,6 +22,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -267,5 +269,128 @@ func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
 	}
 	if !reflect.DeepEqual(eLData, lData) {
 		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
+	}
+}
+
+func TestRemoteHostLoaderData(t *testing.T) {
+	record := []string{"ignored", "ignored", "Subject", "*any", "1001"}
+	fNmae := "File1.csv"
+	csvProv := newCsvProvider(record, fNmae)
+	exp := "local"
+	rcv := csvProv.RemoteHost()
+	rcvStr := rcv.String()
+	if !reflect.DeepEqual(exp, rcvStr) {
+		t.Errorf("Expected %+v, received %+v", exp, rcv)
+	}
+}
+
+func TestGetRateIDsLoaderData(t *testing.T) {
+	ldrData := LoaderData{
+		"File1.csv": []string{"Subject", "*any", "1001"},
+	}
+	expected := "cannot find RateIDs in <map[File1.csv:[Subject *any 1001]]>"
+	if _, err := ldrData.GetRateIDs(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestUpdateFromCsvParseValueError(t *testing.T) {
+	ldrData := LoaderData{
+		"File1.csv": []string{"Subject", "*any", "1001"},
+	}
+	tnt := config.NewRSRParsersMustCompile("asd{*duration_seconds}", utils.INFIELD_SEP)
+	expected := "time: invalid duration \"asd\""
+	if err := ldrData.UpdateFromCSV("File1.csv", nil, nil, tnt, nil); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestUpdateFromCsvWithFiltersError(t *testing.T) {
+	attrSFlds := []*config.FCTemplate{
+		{Tag: "TenantID",
+			Path:      "Tenant",
+			Type:      utils.MetaString,
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			Filters:   []string{"*string:~*req.Account:10"},
+			Mandatory: true},
+		{Tag: "ProfileID",
+			Path:      "ID",
+			Type:      utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.INFIELD_SEP),
+			Filters:   []string{"*string:~*req.Account:10"},
+			Mandatory: true},
+	}
+	loadRunStr := map[string][]string{
+		"File1.csv": {"cgrates.org", "TEST_1"},
+	}
+	lData := make(LoaderData)
+
+	dftCfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(dftCfg, nil, dm)
+
+	for fName, record := range loadRunStr {
+		expected := "Ignoring record: [\"cgrates.org\" \"TEST_1\"] with error : strconv.Atoi: parsing \"Account\": invalid syntax"
+		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
+			config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP), filterS); err == nil || err.Error() != expected {
+			t.Errorf("Expected %+v, received %+v", expected, err)
+		}
+	}
+}
+
+func TestUpdateFromCsvWithFiltersContinue(t *testing.T) {
+	attrSFlds := []*config.FCTemplate{
+		{Tag: "TenantID",
+			Path:      "Tenant",
+			Type:      utils.MetaString,
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			Filters:   []string{`*string:~*req.2:10`},
+			Mandatory: true},
+		{Tag: "ProfileID",
+			Path:      "ID",
+			Type:      utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.INFIELD_SEP),
+			Filters:   []string{`*string:~*req.2:10`},
+			Mandatory: true},
+	}
+	loadRunStr := map[string][]string{
+		"File1.csv": {"Subject", "*any", "1001"},
+	}
+	lData := make(LoaderData)
+
+	dftCfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(dftCfg, nil, dm)
+
+	for fName, record := range loadRunStr {
+		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
+			config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP), filterS); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestLoadersFieldAsInterfaceError(t *testing.T) {
+	loadRun1 := map[string][]string{
+		"File1.csv": {"ignored", "ignored", "ignored", "ignored", "ignored", "Subject", "*any", "1001", "ignored", "ignored"},
+	}
+	csvProv := newCsvProvider(loadRun1["File1.csv"], "File1.csv")
+	csvProv.String()
+
+	expected := "invalid prefix for : [File2.csv]"
+	if _, err := csvProv.FieldAsInterface([]string{"File2.csv"}); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	expected = "filter rule <[*file() ]> needs to end in )"
+	if _, err := csvProv.FieldAsInterface([]string{"*file()", ""}); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+q", expected, err)
+	}
+
+	expected = "filter rule <[*file() File1.csv]> needs to end in )"
+	if _, err := csvProv.FieldAsInterface([]string{"*file()", "File1.csv"}); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+q", expected, err)
 	}
 }
