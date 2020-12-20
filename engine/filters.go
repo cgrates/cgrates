@@ -224,16 +224,19 @@ var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
-	utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan})
+	utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
+	utils.MetaActivationInterval})
 var needsFieldName utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
 	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
-	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan})
+	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
+	utils.MetaActivationInterval})
 var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
 	utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
-	utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan})
+	utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
+	utils.MetaActivationInterval})
 
 // NewFilterRule returns a new filter
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
@@ -294,6 +297,19 @@ func (fltr *FilterRule) CompileValues() (err error) {
 		} else if fltr.rsrElement == nil {
 			return fmt.Errorf("emtpy RSRParser in rule: <%s>", fltr.Element)
 		}
+	case utils.MetaActivationInterval, utils.MetaNotActivationInterval:
+		if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
+			return
+		} else if fltr.rsrElement == nil {
+			return fmt.Errorf("emtpy RSRParser in rule: <%s>", fltr.Element)
+		}
+		for _, strVal := range fltr.Values {
+			rsrPrsr, err := config.NewRSRParser(strVal)
+			if err != nil {
+				return err
+			}
+			fltr.rsrValues = append(fltr.rsrValues, rsrPrsr)
+		}
 	default:
 		if fltr.rsrValues, err = config.NewRSRParsersFromSlice(fltr.Values); err != nil {
 			return
@@ -338,6 +354,8 @@ func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 		result, err = fltr.passIPNet(dDP)
 	case utils.MetaAPIBan, utils.MetaNotAPIBan:
 		result, err = fltr.passAPIBan(dDP)
+	case utils.MetaActivationInterval, utils.MetaNotActivationInterval:
+		result, err = fltr.passActivationInterval(dDP)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
@@ -613,6 +631,52 @@ func (fltr *FilterRule) passAPIBan(dDP utils.DataProvider) (bool, error) {
 		return false, fmt.Errorf("invalid value for apiban filter: <%s>", fltr.Values[0])
 	}
 	return dm.GetAPIBan(strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
+}
+
+func (fltr *FilterRule) passActivationInterval(dDp utils.DataProvider) (bool, error) {
+	strVal, err := fltr.rsrElement.ParseDataProvider(dDp)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	timeStrVal, err := utils.ParseTimeDetectLayout(strVal, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	if err != nil {
+		return false, err
+	}
+	if len(fltr.rsrValues) == 2 {
+		val2, err := fltr.rsrValues[1].CompileDynRule(dDp)
+		if err != nil {
+			return false, err
+		}
+		endTime, err := utils.ParseTimeDetectLayout(val2, config.CgrConfig().GeneralCfg().DefaultTimezone)
+		if err != nil {
+			return false, err
+		}
+		if fltr.rsrValues[0] == nil {
+			return timeStrVal.Before(endTime), nil
+		}
+		val1, err := fltr.rsrValues[0].CompileDynRule(dDp)
+		if err != nil {
+			return false, err
+		}
+		startTime, err := utils.ParseTimeDetectLayout(val1, config.CgrConfig().GeneralCfg().DefaultTimezone)
+		if err != nil {
+			return false, err
+		}
+		return startTime.Before(timeStrVal) && timeStrVal.Before(endTime), nil
+	} else {
+		val1, err := fltr.rsrValues[0].CompileDynRule(dDp)
+		if err != nil {
+			return false, err
+		}
+		startTime, err := utils.ParseTimeDetectLayout(val1, config.CgrConfig().GeneralCfg().DefaultTimezone)
+		if err != nil {
+			return false, err
+		}
+		return startTime.Before(timeStrVal), nil
+	}
 }
 
 func verifyInlineFilterS(fltrs []string) (err error) {
