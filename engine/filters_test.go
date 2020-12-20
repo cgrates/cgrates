@@ -47,6 +47,7 @@ func TestFilterPassString(t *testing.T) {
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
+
 	rf = &FilterRule{Type: utils.MetaString,
 		Element: "~Category", Values: []string{"cal"}}
 	if err := rf.CompileValues(); err != nil {
@@ -1369,6 +1370,62 @@ func TestVerifyInlineFilterS(t *testing.T) {
 	}
 	if err := verifyInlineFilterS([]string{"ATTR", "*string:~*req,Acoount1001"}); err == nil {
 		t.Errorf("Expected error received nil")
+	}
+}
+
+func TestActivationIntervalPass(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	passEvent := map[string]interface{}{
+		"CustomTime": time.Date(2013, time.July, 1, 0, 0, 0, 0, time.UTC),
+	}
+	fEv := utils.MapStorage{}
+	fEv.Set([]string{utils.MetaReq}, passEvent)
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*ai:~*req.CustomTime:2013-06-01T00:00:00Z"}, fEv); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*ai:~*req.CustomTime:2013-09-01T00:00:00Z"}, fEv); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*ai:~*req.CustomTime:;2013-09-01T00:00:00Z"}, fEv); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*ai:~*req.CustomTime:;2013-06-01T00:00:00Z"}, fEv); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*ai:~*req.CustomTime:2013-06-01T00:00:00Z;2013-09-01T00:00:00Z"}, fEv); err != nil {
+		t.Error(err)
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*ai:~*req.CustomTime:2013-08-01T00:00:00Z;2013-09-01T00:00:00Z"}, fEv); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 }
 
