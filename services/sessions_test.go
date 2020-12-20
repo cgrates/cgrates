@@ -1,5 +1,3 @@
-// +build integration
-
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -33,10 +31,13 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestAsteriskAgentReload(t *testing.T) {
+//TestSessionSCoverage for cover testing
+func TestSessionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
-	cfg.SessionSCfg().Enabled = true
+	cfg.ChargerSCfg().Enabled = true
+	cfg.RalsCfg().Enabled = true
+	cfg.CdrsCfg().Enabled = true
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -45,6 +46,22 @@ func TestAsteriskAgentReload(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 
+	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
+
+	close(chS.GetPrecacheChannel(utils.CacheDestinations))
+	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
+	close(chS.GetPrecacheChannel(utils.CacheRatingPlans))
+	close(chS.GetPrecacheChannel(utils.CacheRatingProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheActions))
+	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
+	close(chS.GetPrecacheChannel(utils.CacheAccountActionPlans))
+	close(chS.GetPrecacheChannel(utils.CacheActionTriggers))
+	close(chS.GetPrecacheChannel(utils.CacheSharedGroups))
+	close(chS.GetPrecacheChannel(utils.CacheTimings))
+
+	internalChan := make(chan rpcclient.ClientConnector, 1)
+	internalChan <- nil
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
 	cacheSChan <- chS
 
@@ -52,25 +69,39 @@ func TestAsteriskAgentReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Type = utils.INTERNAL
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, nil, anz, srvDep)
-	srv := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
+	stordb := NewStorDBService(cfg, srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	ralS := NewRalService(cfg, chS, server,
+		make(chan rpcclient.ClientConnector, 1), make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+		make(chan rpcclient.ClientConnector, 1),
+		nil, anz, srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+	srvMngr.AddServices(srv, chrS, schS, ralS, cdrS,
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
 	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+	if db.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	if stordb.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "asterisk_ari", "cgrates", "etc", "cgrates"),
-		Section: config.AsteriskAgentJSN,
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongonew"),
+		Section: config.SessionSJson,
 	}, &reply); err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
@@ -78,16 +109,19 @@ func TestAsteriskAgentReload(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	srvReload := srv.Reload()
-	if srvReload != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", srvReload)
+	if !db.IsRunning() {
+		t.Errorf("Expected service to be running")
 	}
 	err := srv.Start()
-	if err != utils.ErrServiceAlreadyRunning {
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	cfg.AsteriskAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.AsteriskAgentJSN) <- struct{}{}
+	err = srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	cfg.SessionSCfg().Enabled = false
+	cfg.GetReloadChan(config.SessionSJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
