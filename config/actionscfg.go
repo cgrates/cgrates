@@ -23,6 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 // ActionSCfg is the configuration of ActionS
 type ActionSCfg struct {
 	Enabled             bool
+	Tenants             *[]string
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string

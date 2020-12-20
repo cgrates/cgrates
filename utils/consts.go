@@ -2525,6 +2525,7 @@ const (
 	OptsDispatcherMethod      = "*method"
 	MetaEventType             = "*eventType"
 	EventType                 = "EventType"
+	SchedulerInit             = "SchedulerInit"
 )
 
 // Event Flags

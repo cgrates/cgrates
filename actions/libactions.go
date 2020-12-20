@@ -37,15 +37,16 @@ func actionTarget(act string) (trgt string) {
 	return
 }
 
-func newScheduledActs(tenant, apID, trgTyp, trgID string,
+func newScheduledActs(tenant, apID, trgTyp, trgID, schedule string,
 	ctx context.Context, data *ActData, acts []actioner) (sActs *scheduledActs) {
-	return &scheduledActs{tenant, apID, trgTyp, trgID, ctx, data, acts,
+	return &scheduledActs{tenant, apID, trgTyp, trgID, schedule, ctx, data, acts,
 		ltcache.NewTransCache(map[string]*ltcache.CacheConfig{})}
 }
 
 // scheduled is a set of actions which will be executed directly or by the cron.schedule
 type scheduledActs struct {
 	tenant, apID, trgTyp, trgID string
+	schedule                    string
 	ctx                         context.Context
 	data                        *ActData
 	acts                        []actioner
