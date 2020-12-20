@@ -5,6 +5,7 @@ cgrates (0.10.3~dev) UNRELEASED; urgency=medium
   * [SupplierS] SupplierS require a connection to rals when give
     AccountIDs and RatingPlanIDs to calculate
   * [SessionS] Compile the SRun.EventCost before store it and send it further
+  * [ApierS] Correct handle error in case of APIerSv1.GetActionTriggers
 
  -- DanB <danb@cgrates.org>  Thu, 08 Oct 2020 16:23:58 +0300
 
