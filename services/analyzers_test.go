@@ -1,5 +1,3 @@
-// +build integration
-
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -33,10 +31,9 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestNewAnalyzerReload(t *testing.T) {
+//TestNewAnalyzerCoverage for cover testing
+func TestAnalyzerCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
@@ -48,25 +45,29 @@ func TestNewAnalyzerReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(anz))
 	}
 	anz2 := &AnalyzerService{
-		connChan:    connChan,
+		RWMutex:     sync.RWMutex{},
 		cfg:         cfg,
 		server:      server,
 		filterSChan: filterSChan,
-		shdChan:     shdChan,
-		srvDep:      srvDep,
 		stopChan:    make(chan struct{}, 1),
+		shdChan:     shdChan,
+		connChan:    connChan,
+		srvDep:      srvDep,
 	}
 	if anz2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	anz2.anz = &analyzers.AnalyzerService{}
+	var rpcClientCnctr rpcclient.ClientConnector
+	getIntrnCdc := anz2.GetInternalCodec(rpcClientCnctr, utils.EmptyString)
+	if !reflect.DeepEqual(getIntrnCdc, rpcClientCnctr) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(rpcClientCnctr), utils.ToJSON(getIntrnCdc))
+	}
+	var err error
+	anz2.anz, _ = analyzers.NewAnalyzerService(cfg)
 	if !anz2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	if !anz2.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	err := anz2.Start()
+	err = anz2.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
@@ -85,6 +86,12 @@ func TestNewAnalyzerReload(t *testing.T) {
 	getAnalyzerS := anz2.GetAnalyzerS()
 	if !reflect.DeepEqual(anz2.anz, getAnalyzerS) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(anz2.anz), utils.ToJSON(getAnalyzerS))
+	}
+	var rpcClientCnctr2 rpcclient.ClientConnector
+	getIntrnCdc2 := anz2.GetInternalCodec(rpcClientCnctr2, utils.EmptyString)
+	expected2 := anz2.anz.NewAnalyzerConnector(nil, utils.MetaInternal, utils.EmptyString, utils.EmptyString)
+	if !reflect.DeepEqual(getIntrnCdc2, expected2) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expected2), utils.ToJSON(getIntrnCdc2))
 	}
 
 }
