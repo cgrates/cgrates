@@ -513,6 +513,9 @@ func (apierSv1 *APIerSv1) GetActionTriggers(attr *AttrGetActionTriggers, atrs *e
 		if err != nil {
 			return err
 		}
+		if len(keys) == 0 {
+			return utils.ErrNotFound
+		}
 		for _, key := range keys {
 			getAttrs, err := apierSv1.DataManager.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):], false, utils.NonTransactional)
 			if err != nil {
