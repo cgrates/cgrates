@@ -530,6 +530,7 @@ const (
 	MetaFile                    = "*file"
 	Accounts                    = "Accounts"
 	AccountService              = "AccountS"
+	AccountS                    = "AccountS"
 	Actions                     = "Actions"
 	ActionPlans                 = "ActionPlans"
 	ActionTriggers              = "ActionTriggers"

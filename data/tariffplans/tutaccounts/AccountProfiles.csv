@@ -1,2 +1,2 @@
-#Tenant,ID,FilterIDs,ActivationInterval,Weight,BalanceID,BalanceFilterIDs,BalanceType,BalanceOpts,BalanceWeight,BalanceValue
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,BalanceID,BalanceFilterIDs,BalanceWeight,BalanceBlocker,BalanceType,BalanceOpts,BalanceValue
 
