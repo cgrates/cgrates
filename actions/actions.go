@@ -37,6 +37,7 @@ func NewActionS(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMan
 		cfg:   cfg,
 		fltrS: fltrS,
 		dm:    dm,
+		crnLk: new(sync.RWMutex),
 	}
 }
 
