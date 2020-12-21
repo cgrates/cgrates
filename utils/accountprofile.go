@@ -66,3 +66,8 @@ type Account struct {
 func (ac *Account) TenantID() string {
 	return ConcatenatedKey(ac.Tenant, ac.ID)
 }
+
+type AccountWithOpts struct {
+	*Account
+	Opts map[string]interface{}
+}

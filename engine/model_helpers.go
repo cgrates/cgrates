@@ -3499,3 +3499,213 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 	}
 	return
 }
+
+type AccountProfileMdls []*AccountProfileMdl
+
+// CSVHeader return the header for csv fields as a slice of string
+func (apm AccountProfileMdls) CSVHeader() (result []string) {
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
+		utils.ActivationIntervalString, utils.Weight, utils.BalanceID,
+		utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
+		utils.BalanceType, utils.BalanceOpts, utils.BalanceValue,
+	}
+}
+
+func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountProfile) {
+	filterIDsMap := make(map[string]utils.StringMap)
+
+	actPrfMap := make(map[string]*utils.TPAccountProfile)
+	for _, tp := range tps {
+		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
+		aPrf, found := actPrfMap[tenID]
+		if !found {
+			aPrf = &utils.TPAccountProfile{
+				TPid:   tp.Tpid,
+				Tenant: tp.Tenant,
+				ID:     tp.ID,
+			}
+		}
+		if tp.FilterIDs != utils.EmptyString {
+			if _, has := filterIDsMap[tenID]; !has {
+				filterIDsMap[tenID] = make(utils.StringMap)
+			}
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, filter := range filterSplit {
+				filterIDsMap[tenID][filter] = true
+			}
+		}
+		if tp.ActivationInterval != utils.EmptyString {
+			aPrf.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				aPrf.ActivationInterval.ActivationTime = aiSplt[0]
+				aPrf.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				aPrf.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
+		if tp.Weight != 0 {
+			aPrf.Weight = tp.Weight
+		}
+
+		if tp.BalanceID != utils.EmptyString {
+			filterIDs := make([]string, 0)
+			if tp.BalanceFilterIDs != utils.EmptyString {
+				filterAttrSplit := strings.Split(tp.BalanceFilterIDs, utils.INFIELD_SEP)
+				for _, filterAttr := range filterAttrSplit {
+					filterIDs = append(filterIDs, filterAttr)
+				}
+			}
+			aPrf.Balances = append(aPrf.Balances, &utils.TPAccountBalance{
+				ID:        tp.BalanceID,
+				FilterIDs: filterIDs,
+				Weight:    tp.BalanceWeight,
+				Blocker:   tp.BalanceBlocker,
+				Type:      tp.BalanceType,
+				Opts:      tp.BalanceOpts,
+				Value:     tp.BalanceValue,
+			})
+		}
+		actPrfMap[tenID] = aPrf
+	}
+	result = make([]*utils.TPAccountProfile, len(actPrfMap))
+	i := 0
+	for tntID, th := range actPrfMap {
+		result[i] = th
+		for filterID := range filterIDsMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
+		}
+		i++
+	}
+	return
+}
+
+func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfileMdls) {
+	if len(tPrf.Balances) == 0 {
+		return
+	}
+	i := 0
+	for _, balance := range tPrf.Balances {
+		mdl := &AccountProfileMdl{
+			Tenant: tPrf.Tenant,
+			Tpid:   tPrf.TPid,
+			ID:     tPrf.ID,
+		}
+		if i == 0 {
+			for i, val := range tPrf.FilterIDs {
+				if i != 0 {
+					mdl.FilterIDs += utils.INFIELD_SEP
+				}
+				mdl.FilterIDs += val
+			}
+
+			if tPrf.ActivationInterval != nil {
+				if tPrf.ActivationInterval.ActivationTime != utils.EmptyString {
+					mdl.ActivationInterval = tPrf.ActivationInterval.ActivationTime
+				}
+				if tPrf.ActivationInterval.ExpiryTime != utils.EmptyString {
+					mdl.ActivationInterval += utils.INFIELD_SEP + tPrf.ActivationInterval.ExpiryTime
+				}
+			}
+			mdl.Weight = tPrf.Weight
+		}
+		mdl.BalanceID = balance.ID
+		for i, val := range balance.FilterIDs {
+			if i != 0 {
+				mdl.BalanceFilterIDs += utils.INFIELD_SEP
+			}
+			mdl.BalanceFilterIDs += val
+		}
+		mdl.BalanceBlocker = balance.Blocker
+		mdl.BalanceWeight = balance.Weight
+		mdl.BalanceType = balance.Type
+		mdl.BalanceOpts = balance.Opts
+		mdl.BalanceValue = balance.Value
+		mdls = append(mdls, mdl)
+		i++
+	}
+	return
+}
+
+func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *utils.AccountProfile, err error) {
+	ap = &utils.AccountProfile{
+		Tenant:    tpAp.Tenant,
+		ID:        tpAp.ID,
+		FilterIDs: make([]string, len(tpAp.FilterIDs)),
+		Weight:    tpAp.Weight,
+
+		Balances: make([]*utils.Balance, len(tpAp.Balances)),
+	}
+	for i, stp := range tpAp.FilterIDs {
+		ap.FilterIDs[i] = stp
+	}
+	if tpAp.ActivationInterval != nil {
+		if ap.ActivationInterval, err = tpAp.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return
+		}
+	}
+
+	for i, bal := range tpAp.Balances {
+		ap.Balances[i] = &utils.Balance{
+			ID:        bal.ID,
+			FilterIDs: bal.FilterIDs,
+			Weight:    bal.Weight,
+			Blocker:   bal.Blocker,
+			Type:      bal.Type,
+			Value:     bal.Value,
+		}
+		if bal.Opts != utils.EmptyString {
+			ap.Balances[i].Opts = make(map[string]interface{})
+			for _, opt := range strings.Split(bal.Opts, utils.INFIELD_SEP) { // example of opts: key1:val1;key2:val2;key3:val3
+				keyValSls := utils.SplitConcatenatedKey(opt)
+				if len(keyValSls) != 2 {
+					err = fmt.Errorf("malformed option for ActionProfile <%s> for action <%s>", ap.TenantID(), bal.ID)
+					return
+				}
+				ap.Balances[i].Opts[keyValSls[0]] = keyValSls[1]
+			}
+		}
+	}
+	return
+}
+
+func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile) {
+	tpAp = &utils.TPAccountProfile{
+		Tenant:             ap.Tenant,
+		ID:                 ap.ID,
+		FilterIDs:          make([]string, len(ap.FilterIDs)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		Weight:             ap.Weight,
+
+		Balances: make([]*utils.TPAccountBalance, len(ap.Balances)),
+	}
+	for i, fli := range ap.FilterIDs {
+		tpAp.FilterIDs[i] = fli
+	}
+	if ap.ActivationInterval != nil {
+		if !ap.ActivationInterval.ActivationTime.IsZero() {
+			tpAp.ActivationInterval.ActivationTime = ap.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !ap.ActivationInterval.ExpiryTime.IsZero() {
+			tpAp.ActivationInterval.ExpiryTime = ap.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
+	}
+
+	for i, bal := range ap.Balances {
+		tpAp.Balances[i] = &utils.TPAccountBalance{
+			ID:        bal.ID,
+			FilterIDs: bal.FilterIDs,
+			Weight:    bal.Weight,
+			Blocker:   bal.Blocker,
+			Type:      bal.Type,
+			Value:     bal.Value,
+		}
+
+		elems := make([]string, 0, len(bal.Opts))
+		for k, v := range bal.Opts {
+			elems = append(elems, utils.ConcatenatedKey(k, utils.IfaceAsString(v)))
+		}
+		tpAp.Balances[i].Opts = strings.Join(elems, utils.INFIELD_SEP)
+	}
+	return
+}
