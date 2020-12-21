@@ -158,6 +158,12 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheActionProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
+			utils.CacheAccountProfiles: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
+			utils.CacheAccounts2: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheDispatcherHosts: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
@@ -189,6 +195,9 @@ func TestCacheJsonCfg(t *testing.T) {
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheActionProfilesFilterIndexes: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheAccountProfilesFilterIndexes: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheReverseFilterIndexes: {Limit: utils.IntPointer(-1),
@@ -312,6 +321,9 @@ func TestCacheJsonCfg(t *testing.T) {
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPActionProfiles: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPAccountProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.MetaAPIBan: {Limit: utils.IntPointer(-1),
@@ -466,6 +478,14 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
+			utils.MetaAccountProfiles: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.MetaAccounts2: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
 			utils.MetaChargerProfiles: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
@@ -491,7 +511,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJSONCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(cfg))
+		t.Errorf("expecting: %s, \nreceived: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 
@@ -602,6 +622,10 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 				Remote:    utils.BoolPointer(false),
 			},
 			utils.CacheTBLTPActionProfiles: {
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false),
+			},
+			utils.CacheTBLTPAccountProfiles: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
