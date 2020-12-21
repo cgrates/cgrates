@@ -679,3 +679,13 @@ type ActionSJsonCfg struct {
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 }
+
+// Account service config section
+type AccountSJsonCfg struct {
+	Enabled               *bool
+	Indexed_selects       *bool
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
+}
