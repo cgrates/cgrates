@@ -192,6 +192,7 @@ type LoadReader interface {
 	GetTPDispatcherHosts(string, string, string) ([]*utils.TPDispatcherHost, error)
 	GetTPRateProfiles(string, string, string) ([]*utils.TPRateProfile, error)
 	GetTPActionProfiles(string, string, string) ([]*utils.TPActionProfile, error)
+	GetTPAccountProfiles(string, string, string) ([]*utils.TPAccountProfile, error)
 }
 
 type LoadWriter interface {
@@ -218,6 +219,7 @@ type LoadWriter interface {
 	SetTPDispatcherHosts([]*utils.TPDispatcherHost) error
 	SetTPRateProfiles([]*utils.TPRateProfile) error
 	SetTPActionProfiles([]*utils.TPActionProfile) error
+	SetTPAccountProfiles([]*utils.TPAccountProfile) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr

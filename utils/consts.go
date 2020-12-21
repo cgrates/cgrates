@@ -563,6 +563,7 @@ const (
 	DispatcherHosts             = "DispatcherHosts"
 	RateProfiles                = "RateProfiles"
 	ActionProfiles              = "ActionProfiles"
+	AccountProfilesString       = "AccountProfiles"
 	MetaEveryMinute             = "*every_minute"
 	MetaHourly                  = "*hourly"
 	ID                          = "ID"
@@ -1143,6 +1144,7 @@ const (
 	TpDispatcherHosts    = "TpDispatcherHosts"
 	TpRateProfiles       = "TpRateProfiles"
 	TpActionProfiles     = "TpActionProfiles"
+	TpAccountProfiles    = "TpAccountProfiles"
 )
 
 // Dispatcher Const
@@ -1840,6 +1842,7 @@ const (
 	DispatcherHostsCsv    = "DispatcherHosts.csv"
 	RateProfilesCsv       = "RateProfiles.csv"
 	ActionProfilesCsv     = "ActionProfiles.csv"
+	AccountProfilesCsv    = "AccountProfiles.csv"
 )
 
 // Table Name

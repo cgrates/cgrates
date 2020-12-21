@@ -66,7 +66,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	csvr, err := engine.NewTpReader(dataDB2.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans,
 		actionTriggers, accountActions, resLimits,
-		stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, "", utils.EmptyString, utils.EmptyString), "", "", nil, nil, false)
+		stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, "", utils.EmptyString, utils.EmptyString, utils.EmptyString), "", "", nil, nil, false)
 	if err != nil {
 		t.Error(err)
 	}

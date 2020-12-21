@@ -607,6 +607,28 @@ func (iDB *InternalDB) GetTPActionProfiles(tpid, tenant, id string) (tpPrfs []*u
 	return
 }
 
+func (iDB *InternalDB) GetTPAccountProfiles(tpid, tenant, id string) (tpPrfs []*utils.TPAccountProfile, err error) {
+	key := tpid
+	if tenant != utils.EmptyString {
+		key += utils.CONCATENATED_KEY_SEP + tenant
+	}
+	if id != utils.EmptyString {
+		key += utils.CONCATENATED_KEY_SEP + id
+	}
+	ids := Cache.GetItemIDs(utils.CacheTBLTPAccountProfiles, key)
+	for _, id := range ids {
+		x, ok := Cache.Get(utils.CacheTBLTPAccountProfiles, id)
+		if !ok || x == nil {
+			return nil, utils.ErrNotFound
+		}
+		tpPrfs = append(tpPrfs, x.(*utils.TPAccountProfile))
+	}
+	if len(tpPrfs) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
 //implement LoadWriter interface
 func (iDB *InternalDB) RemTpData(table, tpid string, args map[string]string) (err error) {
 	if table == utils.EmptyString {
@@ -875,6 +897,17 @@ func (iDB *InternalDB) SetTPActionProfiles(tpPrfs []*utils.TPActionProfile) (err
 	}
 	for _, tpPrf := range tpPrfs {
 		Cache.SetWithoutReplicate(utils.CacheTBLTPActionProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	}
+	return
+}
+
+func (iDB *InternalDB) SetTPAccountProfiles(tpPrfs []*utils.TPAccountProfile) (err error) {
+	if len(tpPrfs) == 0 {
+		return nil
+	}
+	for _, tpPrf := range tpPrfs {
+		Cache.SetWithoutReplicate(utils.CacheTBLTPAccountProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return

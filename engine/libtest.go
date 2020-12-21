@@ -296,6 +296,10 @@ cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,false,0s,*topup,,~*balance.TestD
 cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,~*balance.TestVoiceBalance.Type,*voice
 cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,false,0s,*topup,,~*balance.TestVoiceBalance.Value,15m15s
 `
+
+	AccountProfileCSVContent = `
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,BalanceID,BalanceFilterIDs,BalanceWeight,BalanceBlocker,BalanceType,BalanceOpts,BalanceValue
+`
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
