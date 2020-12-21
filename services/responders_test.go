@@ -17,7 +17,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"reflect"
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestResponderCoverage for cover testing
 func TestResponderCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -58,4 +69,3 @@ func TestResponderCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
 	}
 }
-*/

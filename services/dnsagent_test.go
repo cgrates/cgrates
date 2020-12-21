@@ -43,13 +43,14 @@ func TestDNSAgentCoverage(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+	dns, _ := agents.NewDNSAgent(cfg, &engine.FilterS{}, nil)
 	srv2 := DNSAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
 		connMgr:     nil,
 		srvDep:      srvDep,
-		dns:         &agents.DNSAgent{},
+		dns:         dns,
 	}
 
 	if !srv2.IsRunning() {
@@ -59,5 +60,17 @@ func TestDNSAgentCoverage(t *testing.T) {
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-
+	serviceName := srv2.ServiceName()
+	if serviceName != utils.DNSAgent {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.DNSAgent, serviceName)
+	}
+	shouldRun := srv2.ShouldRun()
+	if shouldRun != false {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
+	}
+	srv2.Reload()
+	srv2.Shutdown()
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
 }
