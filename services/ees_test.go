@@ -17,78 +17,74 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"reflect"
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/ees"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestEventExporterSCoverage for cover testing
 func TestEventExporterSCoverage(t *testing.T) {
+
 	cfg := config.NewDefaultCGRConfig()
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
+	chS := engine.NewCacheS(cfg, nil, nil)
 	cfg.AttributeSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
-	chS := engine.NewCacheS(cfg, nil, nil)
-	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	attrS := NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1),
-		anz, srvDep)
-	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil), server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
-	srvMngr.AddServices(ees, attrS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
-	if ees.IsRunning() {
+	srv := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil), server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
+	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	fcTmp := &config.FCTemplate{Tag: "TenantID",
-		Path:      "Tenant",
-		Type:      utils.MetaVariable,
-		Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
-		Mandatory: true,
-		Layout:    time.RFC3339,
+	srv2 := &EventExporterService{
+		cfg:         cfg,
+		filterSChan: filterSChan,
+		connMgr:     engine.NewConnManager(cfg, nil),
+		server:      server,
+		intConnChan: make(chan rpcclient.ClientConnector, 1),
+		anz:         anz,
+		srvDep:      srvDep,
+		rldChan:     make(chan struct{}, 1),
+		eeS:         &ees.EventExporterS{},
+		stopChan:    make(chan struct{}, 1),
 	}
-	fcTmp.ComputePath()
-	cfg.TemplatesCfg()["requiredFields"] = []*config.FCTemplate{fcTmp}
+	if !srv2.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	serviceName := srv2.ServiceName()
+	if serviceName != utils.EventExporterS {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.EventExporterS, serviceName)
+	}
+	shouldRun := srv2.ShouldRun()
+	if shouldRun != false {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
+	}
 
-		var reply string
-		if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ees"),
-			Section: config.EEsJson,
-		}, &reply); err != nil {
-			t.Error(err)
-		} else if reply != utils.OK {
-			t.Errorf("Expecting OK ,received %s", reply)
-		}
-
-			time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-			if !ees.IsRunning() {
-				t.Errorf("Expected service to be running")
-			}
-
-				err := ees.Start()
-				if err == nil || err != utils.ErrServiceAlreadyRunning {
-					t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-				}
-				err = ees.Reload()
-				if err != nil {
-					t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-				}
-				cfg.EEsCfg().Enabled = false
-				cfg.GetReloadChan(config.EEsJson) <- struct{}{}
-				time.Sleep(10 * time.Millisecond)
-				if ees.IsRunning() {
-					t.Errorf("Expected service to be down")
-				}
-				shdChan.CloseOnce()
-				time.Sleep(10 * time.Millisecond)
-
+	rld := srv2.Reload()
+	if rld != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", rld)
+	}
+	startErr := srv2.Start()
+	if !reflect.DeepEqual(startErr, utils.ErrServiceAlreadyRunning) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, startErr)
+	}
+	srv2.intConnChan <- chS
+	shutErr := srv2.Shutdown()
+	if shutErr != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutErr)
+	}
+	if srv2.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
 }
-*/
