@@ -28,6 +28,8 @@ type AccountProfile struct {
 	Weight             float64
 
 	Balances []*Balance
+
+	ThresholdIDs []string
 }
 
 type Balance struct {

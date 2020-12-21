@@ -3507,13 +3507,13 @@ func (apm AccountProfileMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
 		utils.ActivationIntervalString, utils.Weight, utils.BalanceID,
 		utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
-		utils.BalanceType, utils.BalanceOpts, utils.BalanceValue,
+		utils.BalanceType, utils.BalanceOpts, utils.BalanceValue, utils.ThresholdIDs,
 	}
 }
 
 func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountProfile) {
 	filterIDsMap := make(map[string]utils.StringMap)
-
+	thresholdIDsMap := make(map[string]utils.StringMap)
 	actPrfMap := make(map[string]*utils.TPAccountProfile)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
@@ -3532,6 +3532,15 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
 				filterIDsMap[tenID][filter] = true
+			}
+		}
+		if tp.ThresholdIDs != utils.EmptyString {
+			if _, has := thresholdIDsMap[tenID]; !has {
+				thresholdIDsMap[tenID] = make(utils.StringMap)
+			}
+			thresholdSplit := strings.Split(tp.ThresholdIDs, utils.INFIELD_SEP)
+			for _, thresholdID := range thresholdSplit {
+				thresholdIDsMap[tenID][thresholdID] = true
 			}
 		}
 		if tp.ActivationInterval != utils.EmptyString {
@@ -3575,6 +3584,9 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 		for filterID := range filterIDsMap[tntID] {
 			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
 		}
+		for thresholdID := range thresholdIDsMap[tntID] {
+			result[i].ThresholdIDs = append(result[i].ThresholdIDs, thresholdID)
+		}
 		i++
 	}
 	return
@@ -3598,7 +3610,12 @@ func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfi
 				}
 				mdl.FilterIDs += val
 			}
-
+			for i, val := range tPrf.ThresholdIDs {
+				if i != 0 {
+					mdl.ThresholdIDs += utils.INFIELD_SEP
+				}
+				mdl.ThresholdIDs += val
+			}
 			if tPrf.ActivationInterval != nil {
 				if tPrf.ActivationInterval.ActivationTime != utils.EmptyString {
 					mdl.ActivationInterval = tPrf.ActivationInterval.ActivationTime
@@ -3634,7 +3651,8 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 		FilterIDs: make([]string, len(tpAp.FilterIDs)),
 		Weight:    tpAp.Weight,
 
-		Balances: make([]*utils.Balance, len(tpAp.Balances)),
+		Balances:     make([]*utils.Balance, len(tpAp.Balances)),
+		ThresholdIDs: make([]string, len(tpAp.ThresholdIDs)),
 	}
 	for i, stp := range tpAp.FilterIDs {
 		ap.FilterIDs[i] = stp
@@ -3666,6 +3684,9 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 			}
 		}
 	}
+	for i, stp := range tpAp.ThresholdIDs {
+		ap.ThresholdIDs[i] = stp
+	}
 	return
 }
 
@@ -3676,8 +3697,8 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 		FilterIDs:          make([]string, len(ap.FilterIDs)),
 		ActivationInterval: new(utils.TPActivationInterval),
 		Weight:             ap.Weight,
-
-		Balances: make([]*utils.TPAccountBalance, len(ap.Balances)),
+		Balances:           make([]*utils.TPAccountBalance, len(ap.Balances)),
+		ThresholdIDs:       make([]string, len(ap.ThresholdIDs)),
 	}
 	for i, fli := range ap.FilterIDs {
 		tpAp.FilterIDs[i] = fli
@@ -3706,6 +3727,9 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 			elems = append(elems, utils.ConcatenatedKey(k, utils.IfaceAsString(v)))
 		}
 		tpAp.Balances[i].Opts = strings.Join(elems, utils.INFIELD_SEP)
+	}
+	for i, fli := range ap.ThresholdIDs {
+		tpAp.ThresholdIDs[i] = fli
 	}
 	return
 }

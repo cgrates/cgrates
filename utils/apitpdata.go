@@ -1550,6 +1550,7 @@ type TPAccountProfile struct {
 	ActivationInterval *TPActivationInterval
 	Weight             float64
 	Balances           []*TPAccountBalance
+	ThresholdIDs       []string
 }
 
 type TPAccountBalance struct {

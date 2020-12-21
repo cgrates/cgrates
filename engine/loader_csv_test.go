@@ -1648,6 +1648,7 @@ func TestLoadAccountProfiles(t *testing.T) {
 				Value:     3600000000000,
 			},
 		},
+		ThresholdIDs: []string{utils.META_NONE},
 	}
 
 	if len(csvr.accountProfiles) != 1 {
