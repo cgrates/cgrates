@@ -769,6 +769,28 @@ func (self *SQLStorage) SetTPActionProfiles(tpAps []*utils.TPActionProfile) erro
 	return nil
 }
 
+func (self *SQLStorage) SetTPAccountProfiles(tpAps []*utils.TPAccountProfile) error {
+	if len(tpAps) == 0 {
+		return nil
+	}
+	tx := self.db.Begin()
+	for _, tpAp := range tpAps {
+		// Remove previous
+		if err := tx.Where(&AccountProfileMdl{Tpid: tpAp.TPid, Tenant: tpAp.Tenant, ID: tpAp.ID}).Delete(AccountProfileMdl{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, mst := range APItoModelTPAccountProfile(tpAp) {
+			if err := tx.Save(&mst).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
@@ -1624,6 +1646,25 @@ func (self *SQLStorage) GetTPActionProfiles(tpid, tenant, id string) ([]*utils.T
 		return nil, err
 	}
 	arls := dpps.AsTPActionProfile()
+	if len(arls) == 0 {
+		return arls, utils.ErrNotFound
+	}
+	return arls, nil
+}
+
+func (self *SQLStorage) GetTPAccountProfiles(tpid, tenant, id string) ([]*utils.TPAccountProfile, error) {
+	var dpps AccountProfileMdls
+	q := self.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("id = ?", id)
+	}
+	if len(tenant) != 0 {
+		q = q.Where("tenant = ?", tenant)
+	}
+	if err := q.Find(&dpps).Error; err != nil {
+		return nil, err
+	}
+	arls := dpps.AsTPAccountProfile()
 	if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}

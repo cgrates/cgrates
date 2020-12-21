@@ -334,13 +334,25 @@ func (self *TPExporter) Run() error {
 
 	storDataActionProfiles, err := self.storDb.GetTPActionProfiles(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpRateProfiles))
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpActionProfiles))
 		withError = true
 	}
 	for _, sd := range storDataActionProfiles {
 		sdModels := APItoModelTPActionProfile(sd)
 		for _, sdModel := range sdModels {
 			toExportMap[utils.ActionProfilesCsv] = append(toExportMap[utils.ActionProfilesCsv], sdModel)
+		}
+	}
+
+	storDataAccountProfiles, err := self.storDb.GetTPAccountProfiles(self.tpID, "", "")
+	if err != nil && err.Error() != utils.ErrNotFound.Error() {
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpAccountProfiles))
+		withError = true
+	}
+	for _, sd := range storDataAccountProfiles {
+		sdModels := APItoModelTPAccountProfile(sd)
+		for _, sdModel := range sdModels {
+			toExportMap[utils.AccountProfilesCsv] = append(toExportMap[utils.AccountProfilesCsv], sdModel)
 		}
 	}
 
