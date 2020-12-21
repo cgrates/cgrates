@@ -56,7 +56,7 @@ func TestStripIdxFromLastPathElm(t *testing.T) {
 
 func TestNewPathItems(t *testing.T) {
 	pathSlice := strings.Split("*req.Field1[0].Account", NestingSep)
-	expected := PathItems{{Field: MetaReq}, {Field: "Field1", Index: StringPointer("0")}, {Field: Account}}
+	expected := PathItems{{Field: MetaReq}, {Field: "Field1", Index: StringPointer("0")}, {Field: AccountField}}
 	if rply := NewPathItems(pathSlice); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
 	}

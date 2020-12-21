@@ -360,10 +360,10 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account:    "1001",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      11 * time.Second,
-					utils.COST:       10.0,
+					utils.AccountField: "1001",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        11 * time.Second,
+					utils.COST:         10.0,
 				},
 			},
 		},
@@ -379,10 +379,10 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
-			utils.Account:    "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      11 * time.Second,
-			utils.COST:       10.5,
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        11 * time.Second,
+			utils.COST:         10.5,
 		},
 	}
 	if err := attrRPC.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {

@@ -24,7 +24,7 @@ import (
 
 var (
 	MainCDRFields = NewStringSet([]string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
-		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
+		AccountField, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID})
 	PostPaidRatedSlice = []string{META_POSTPAID, META_RATED}
 
@@ -304,7 +304,7 @@ const (
 	Tenant                       = "Tenant"
 	Category                     = "Category"
 	Contexts                     = "Contexts"
-	Account                      = "Account"
+	AccountField                 = "Account"
 	Balances                     = "Balances"
 	Subject                      = "Subject"
 	Destination                  = "Destination"
@@ -391,6 +391,8 @@ const (
 	DispatcherProfilePrefix      = "dpp_"
 	RateProfilePrefix            = "rtp_"
 	ActionProfilePrefix          = "acp_"
+	AccountProfilePrefix         = "anp_"
+	Account2Prefix               = "ant_"
 	DispatcherHostPrefix         = "dph_"
 	ThresholdProfilePrefix       = "thp_"
 	StatQueuePrefix              = "stq_"
@@ -653,7 +655,7 @@ const (
 	Charges                  = "Charges"
 	CompressFactor           = "CompressFactor"
 	Increments               = "Increments"
-	Balance                  = "Balance"
+	BalanceField             = "Balance"
 	BalanceSummaries         = "BalanceSummaries"
 	Type                     = "Type"
 	Element                  = "Element"
@@ -1880,6 +1882,8 @@ const (
 	CacheDispatcherLoads             = "*dispatcher_loads"
 	CacheRateProfiles                = "*rate_profiles"
 	CacheActionProfiles              = "*action_profiles"
+	CacheAccountProfiles             = "*account_profiles"
+	CacheAccounts2                   = "*accounts2"
 	CacheResourceFilterIndexes       = "*resource_filter_indexes"
 	CacheStatFilterIndexes           = "*stat_filter_indexes"
 	CacheThresholdFilterIndexes      = "*threshold_filter_indexes"
@@ -1947,6 +1951,7 @@ const (
 	RateProfilesFilterIndexPrfx   = "rpi_"
 	RateFilterIndexPrfx           = "rri_"
 	ActionProfilesFilterIndexPrfx = "aci_"
+	AccountProfileFilterIndexPrfx = "ani_"
 	FilterIndexPrfx               = "fii_"
 )
 

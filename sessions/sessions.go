@@ -1153,7 +1153,7 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREventWithOpts, resID, clntConnID 
 		}
 		subject := me.GetStringIgnoreErrors(utils.Subject)
 		if len(subject) == 0 {
-			subject = me.GetStringIgnoreErrors(utils.Account)
+			subject = me.GetStringIgnoreErrors(utils.AccountField)
 		}
 		s.SRuns[i] = &SRun{
 			Event: me,
@@ -1164,7 +1164,7 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREventWithOpts, resID, clntConnID 
 				Tenant:        s.Tenant,
 				Category:      category,
 				Subject:       subject,
-				Account:       me.GetStringIgnoreErrors(utils.Account),
+				Account:       me.GetStringIgnoreErrors(utils.AccountField),
 				Destination:   me.GetStringIgnoreErrors(utils.Destination),
 				TimeStart:     startTime,
 				TimeEnd:       startTime.Add(s.EventStart.GetDurationIgnoreErrors(utils.Usage)),
@@ -3234,7 +3234,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				stirMaxDur = sS.cgrCfg.SessionSCfg().STIRCfg.PayloadMaxduration
 			}
 			if err = AuthStirShaken(opts.GetStringIgnoreErrors(utils.OptsStirIdentity),
-				utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.OptsStirOriginatorTn), ev.GetStringIgnoreErrors(utils.Account)),
+				utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.OptsStirOriginatorTn), ev.GetStringIgnoreErrors(utils.AccountField)),
 				opts.GetStringIgnoreErrors(utils.OptsStirOriginatorURI),
 				utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.OptsStirDestinationTn), ev.GetStringIgnoreErrors(utils.Destination)),
 				opts.GetStringIgnoreErrors(utils.OptsStirDestinationURI),
@@ -3263,7 +3263,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			} else {
 				orig = utils.NewPASSporTOriginsIdentity(
 					utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.OptsStirOriginatorTn),
-						ev.GetStringIgnoreErrors(utils.Account)),
+						ev.GetStringIgnoreErrors(utils.AccountField)),
 					utils.EmptyString)
 			}
 			pubkeyPath := utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.OptsStirPublicKeyPath), sS.cgrCfg.SessionSCfg().STIRCfg.PublicKeyPath)
@@ -3365,7 +3365,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					}
 					subject := ev.GetStringIgnoreErrors(utils.Subject)
 					if len(subject) == 0 {
-						subject = ev.GetStringIgnoreErrors(utils.Account)
+						subject = ev.GetStringIgnoreErrors(utils.AccountField)
 					}
 
 					cd := &engine.CallDescriptor{
@@ -3375,7 +3375,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						Tenant:        cgrEv.CGREvent.Tenant,
 						Category:      category,
 						Subject:       subject,
-						Account:       ev.GetStringIgnoreErrors(utils.Account),
+						Account:       ev.GetStringIgnoreErrors(utils.AccountField),
 						Destination:   ev.GetStringIgnoreErrors(utils.Destination),
 						TimeStart:     startTime,
 						TimeEnd:       startTime.Add(ev.GetDurationIgnoreErrors(utils.Usage)),
@@ -3582,7 +3582,7 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 	}
 	subject := me.GetStringIgnoreErrors(utils.Subject)
 	if len(subject) == 0 {
-		subject = me.GetStringIgnoreErrors(utils.Account)
+		subject = me.GetStringIgnoreErrors(utils.AccountField)
 	}
 
 	cd := &engine.CallDescriptor{
@@ -3592,7 +3592,7 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 		Tenant:      args.CGREvent.Tenant,
 		Category:    category,
 		Subject:     subject,
-		Account:     me.GetStringIgnoreErrors(utils.Account),
+		Account:     me.GetStringIgnoreErrors(utils.AccountField),
 		Destination: me.GetStringIgnoreErrors(utils.Destination),
 		TimeStart:   startTime,
 		TimeEnd:     startTime.Add(me.GetDurationIgnoreErrors(utils.Usage)),

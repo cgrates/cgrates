@@ -1954,7 +1954,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 			Value: utils.StringPointer("~*req.6"), Mandatory: utils.BoolPointer(true)},
 		{Tag: utils.StringPointer(utils.Category), Path: utils.StringPointer(utils.MetaCgreq + utils.NestingSep + utils.Category), Type: utils.StringPointer(utils.MetaVariable),
 			Value: utils.StringPointer("~*req.7"), Mandatory: utils.BoolPointer(true)},
-		{Tag: utils.StringPointer(utils.Account), Path: utils.StringPointer(utils.MetaCgreq + utils.NestingSep + utils.Account), Type: utils.StringPointer(utils.MetaVariable),
+		{Tag: utils.StringPointer(utils.AccountField), Path: utils.StringPointer(utils.MetaCgreq + utils.NestingSep + utils.AccountField), Type: utils.StringPointer(utils.MetaVariable),
 			Value: utils.StringPointer("~*req.8"), Mandatory: utils.BoolPointer(true)},
 		{Tag: utils.StringPointer(utils.Subject), Path: utils.StringPointer(utils.MetaCgreq + utils.NestingSep + utils.Subject), Type: utils.StringPointer(utils.MetaVariable),
 			Value: utils.StringPointer("~*req.9"), Mandatory: utils.BoolPointer(true)},

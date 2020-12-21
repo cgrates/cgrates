@@ -129,13 +129,13 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		return fmt.Errorf("No connection with CDR Server")
 	}
 	defaultTemplate := map[string]config.RSRParsers{
-		utils.ToR:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.BalanceType, utils.INFIELD_SEP),
-		utils.OriginHost:  config.NewRSRParsersMustCompile("127.0.0.1", utils.INFIELD_SEP),
-		utils.RequestType: config.NewRSRParsersMustCompile(utils.META_NONE, utils.INFIELD_SEP),
-		utils.Tenant:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Tenant, utils.INFIELD_SEP),
-		utils.Account:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Account, utils.INFIELD_SEP),
-		utils.Subject:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Account, utils.INFIELD_SEP),
-		utils.COST:        config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.INFIELD_SEP),
+		utils.ToR:          config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.BalanceType, utils.INFIELD_SEP),
+		utils.OriginHost:   config.NewRSRParsersMustCompile("127.0.0.1", utils.INFIELD_SEP),
+		utils.RequestType:  config.NewRSRParsersMustCompile(utils.META_NONE, utils.INFIELD_SEP),
+		utils.Tenant:       config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Tenant, utils.INFIELD_SEP),
+		utils.AccountField: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.INFIELD_SEP),
+		utils.Subject:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.INFIELD_SEP),
+		utils.COST:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)
 	// overwrite default template
@@ -838,7 +838,7 @@ func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}
 					}
 				}
 				data = tntAcnt.Tenant
-			case utils.Account:
+			case utils.AccountField:
 				tntAcnt := new(utils.TenantAccount) // Init with empty values
 				if cdrP.acnt != nil {
 					if tntAcnt, err = utils.NewTAFromAccountKey(cdrP.acnt.ID); err != nil {
@@ -1020,7 +1020,7 @@ func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err err
 				Tenant: utils.NewTenantID(ub.ID).Tenant,
 				ID:     utils.GenUUID(),
 				Event: map[string]interface{}{
-					utils.Account:        ub.ID,
+					utils.AccountField:   ub.ID,
 					utils.EventType:      utils.AccountUpdate,
 					utils.EventSource:    utils.AccountService,
 					utils.AllowNegative:  ub.AllowNegative,

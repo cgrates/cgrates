@@ -443,7 +443,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Values:  []string{"1001", "1002"},
 			},
 			{

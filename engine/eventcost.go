@@ -1108,7 +1108,7 @@ func (ec *EventCost) getAcountingForPath(fldPath []string, bc *BalanceCharge) (v
 		return bc, nil
 	}
 
-	if fldPath[0] == utils.Balance {
+	if fldPath[0] == utils.BalanceField {
 		bl := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(bc.BalanceUUID)
 		if bl == nil {
 			return nil, utils.ErrNotFound

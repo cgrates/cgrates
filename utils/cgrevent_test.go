@@ -231,7 +231,7 @@ func TestCGREventFieldAsFloat64(t *testing.T) {
 	if _, err := se.FieldAsFloat64(AnswerTime); err == nil || !strings.HasPrefix(err.Error(), "cannot convert field") {
 		t.Errorf("Unexpected error : %+v", err)
 	}
-	if _, err := se.FieldAsFloat64(Account); err == nil || err.Error() != ErrNotFound.Error() {
+	if _, err := se.FieldAsFloat64(AccountField); err == nil || err.Error() != ErrNotFound.Error() {
 		t.Errorf("Expected %s, received %s", ErrNotFound, err)
 	}
 	// }
@@ -457,7 +457,7 @@ func TestCGREventFieldAsInt64(t *testing.T) {
 	if _, err := se.FieldAsInt64(AnswerTime); err == nil || !strings.HasPrefix(err.Error(), "cannot convert field") {
 		t.Errorf("Unexpected error : %+v", err)
 	}
-	if _, err := se.FieldAsInt64(Account); err == nil || err.Error() != ErrNotFound.Error() {
+	if _, err := se.FieldAsInt64(AccountField); err == nil || err.Error() != ErrNotFound.Error() {
 		t.Errorf("Expected %s, received %s", ErrNotFound, err)
 	}
 	// }

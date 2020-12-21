@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
-	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 var attrs = &engine.AttrSProcessEventReply{
@@ -41,18 +41,18 @@ var attrs = &engine.AttrSProcessEventReply{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{
-				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				"OfficeGroup":     "Marketing",
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   "2018-01-07T17:00:00Z",
-				utils.Usage:       300000000000.0,
+				utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.ToR:          utils.VOICE,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				"OfficeGroup":      "Marketing",
+				utils.OriginID:     "TestSSv1It1",
+				utils.RequestType:  utils.META_PREPAID,
+				utils.SetupTime:    "2018-01-07T17:00:00Z",
+				utils.Usage:        300000000000.0,
 			},
 		},
 	},
@@ -100,7 +100,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
-		utils.Account:          "account1",
+		utils.AccountField:     "account1",
 		utils.Subject:          "subject1",
 		utils.Destination:      "+4986517174963",
 		utils.Category:         "call",
@@ -179,13 +179,13 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	}
 	// Index second session
 	sSEv2 := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT2",
-		utils.OriginID:    "12346",
-		utils.Account:     "account2",
-		utils.Destination: "+4986517174964",
-		utils.Tenant:      "itsyscom.com",
-		"Extra3":          "",
-		"Extra4":          "info2",
+		utils.EVENT_NAME:   "TEST_EVENT2",
+		utils.OriginID:     "12346",
+		utils.AccountField: "account2",
+		utils.Destination:  "+4986517174964",
+		utils.Tenant:       "itsyscom.com",
+		"Extra3":           "",
+		"Extra4":           "info2",
 	})
 	cgrID2 := GetSetCGRID(sSEv2)
 	session2 := &Session{
@@ -202,11 +202,11 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	}
 	sS.indexSession(session2, false)
 	sSEv3 := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME: "TEST_EVENT3",
-		utils.Tenant:     "cgrates.org",
-		utils.OriginID:   "12347",
-		utils.Account:    "account2",
-		"Extra5":         "info5",
+		utils.EVENT_NAME:   "TEST_EVENT3",
+		utils.Tenant:       "cgrates.org",
+		utils.OriginID:     "12347",
+		utils.AccountField: "account2",
+		"Extra5":           "info5",
 	})
 	cgrID3 := GetSetCGRID(sSEv3)
 	session3 := &Session{
@@ -417,22 +417,22 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         "*voice",
-		utils.OriginID:    "111",
-		utils.Account:     "account1",
-		utils.Subject:     "subject1",
-		utils.Destination: "+4986517174963",
-		utils.Category:    "call",
-		utils.Tenant:      "cgrates.org",
-		utils.RequestType: "*prepaid",
-		utils.SetupTime:   "2015-11-09T14:21:24Z",
-		utils.AnswerTime:  "2015-11-09T14:22:02Z",
-		utils.Usage:       "1m23s",
-		utils.LastUsed:    "21s",
-		utils.PDD:         "300ms",
-		utils.ROUTE:       "supplier1",
-		utils.OriginHost:  "127.0.0.1",
+		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.ToR:          "*voice",
+		utils.OriginID:     "111",
+		utils.AccountField: "account1",
+		utils.Subject:      "subject1",
+		utils.Destination:  "+4986517174963",
+		utils.Category:     "call",
+		utils.Tenant:       "cgrates.org",
+		utils.RequestType:  "*prepaid",
+		utils.SetupTime:    "2015-11-09T14:21:24Z",
+		utils.AnswerTime:   "2015-11-09T14:22:02Z",
+		utils.Usage:        "1m23s",
+		utils.LastUsed:     "21s",
+		utils.PDD:          "300ms",
+		utils.ROUTE:        "supplier1",
+		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
 		CGRID:      "session1",
@@ -477,20 +477,20 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	}
 
 	sSEv2 := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         "*voice",
-		utils.OriginID:    "222",
-		utils.Account:     "account2",
-		utils.Destination: "+4986517174963",
-		utils.Category:    "call",
-		utils.Tenant:      "itsyscom.com",
-		utils.RequestType: "*prepaid",
-		utils.AnswerTime:  "2015-11-09T14:22:02Z",
-		utils.Usage:       "1m23s",
-		utils.LastUsed:    "21s",
-		utils.PDD:         "300ms",
-		utils.ROUTE:       "supplier2",
-		utils.OriginHost:  "127.0.0.1",
+		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.ToR:          "*voice",
+		utils.OriginID:     "222",
+		utils.AccountField: "account2",
+		utils.Destination:  "+4986517174963",
+		utils.Category:     "call",
+		utils.Tenant:       "itsyscom.com",
+		utils.RequestType:  "*prepaid",
+		utils.AnswerTime:   "2015-11-09T14:22:02Z",
+		utils.Usage:        "1m23s",
+		utils.LastUsed:     "21s",
+		utils.PDD:          "300ms",
+		utils.ROUTE:        "supplier2",
+		utils.OriginHost:   "127.0.0.1",
 	})
 	s2 := &Session{
 		CGRID:      "session2",
@@ -546,7 +546,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "111",
-		utils.Account:          "account3",
+		utils.AccountField:     "account3",
 		utils.Destination:      "+4986517174963",
 		utils.Category:         "call",
 		utils.Tenant:           "itsyscom.com",
@@ -635,22 +635,22 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         "*voice",
-		utils.OriginID:    "111",
-		utils.Account:     "account1",
-		utils.Subject:     "subject1",
-		utils.Destination: "+4986517174963",
-		utils.Category:    "call",
-		utils.Tenant:      "cgrates.org",
-		utils.RequestType: "*prepaid",
-		utils.SetupTime:   "2015-11-09T14:21:24Z",
-		utils.AnswerTime:  "2015-11-09T14:22:02Z",
-		utils.Usage:       "1m23s",
-		utils.LastUsed:    "21s",
-		utils.PDD:         "300ms",
-		utils.ROUTE:       "supplier1",
-		utils.OriginHost:  "127.0.0.1",
+		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.ToR:          "*voice",
+		utils.OriginID:     "111",
+		utils.AccountField: "account1",
+		utils.Subject:      "subject1",
+		utils.Destination:  "+4986517174963",
+		utils.Category:     "call",
+		utils.Tenant:       "cgrates.org",
+		utils.RequestType:  "*prepaid",
+		utils.SetupTime:    "2015-11-09T14:21:24Z",
+		utils.AnswerTime:   "2015-11-09T14:22:02Z",
+		utils.Usage:        "1m23s",
+		utils.LastUsed:     "21s",
+		utils.PDD:          "300ms",
+		utils.ROUTE:        "supplier1",
+		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
 		CGRID:      "session1",
@@ -698,20 +698,20 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	}
 
 	sSEv2 := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         "*voice",
-		utils.OriginID:    "222",
-		utils.Account:     "account2",
-		utils.Destination: "+4986517174963",
-		utils.Category:    "call",
-		utils.Tenant:      "itsyscom.com",
-		utils.RequestType: "*prepaid",
-		utils.AnswerTime:  "2015-11-09T14:22:02Z",
-		utils.Usage:       "1m23s",
-		utils.LastUsed:    "21s",
-		utils.PDD:         "300ms",
-		utils.ROUTE:       "supplier2",
-		utils.OriginHost:  "127.0.0.1",
+		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.ToR:          "*voice",
+		utils.OriginID:     "222",
+		utils.AccountField: "account2",
+		utils.Destination:  "+4986517174963",
+		utils.Category:     "call",
+		utils.Tenant:       "itsyscom.com",
+		utils.RequestType:  "*prepaid",
+		utils.AnswerTime:   "2015-11-09T14:22:02Z",
+		utils.Usage:        "1m23s",
+		utils.LastUsed:     "21s",
+		utils.PDD:          "300ms",
+		utils.ROUTE:        "supplier2",
+		utils.OriginHost:   "127.0.0.1",
 	})
 	s2 := &Session{
 		CGRID:      "session2",
@@ -767,7 +767,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "111",
-		utils.Account:          "account3",
+		utils.AccountField:     "account3",
 		utils.Destination:      "+4986517174963",
 		utils.Category:         "call",
 		utils.Tenant:           "itsyscom.com",
@@ -850,8 +850,8 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
 		},
 	}
 	expected := &V1AuthorizeArgs{
@@ -977,8 +977,8 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
 		},
 	}
 	expected := &V1UpdateSessionArgs{
@@ -1019,8 +1019,8 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
 		},
 	}
 	expected := &V1TerminateSessionArgs{
@@ -1068,8 +1068,8 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
 		},
 	}
 	expected := &V1ProcessMessageArgs{
@@ -1136,8 +1136,8 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
 		},
 	}
 	attributeIDs := []string{"ATTR1", "ATTR2"}
@@ -1167,8 +1167,8 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
 		},
 	}
 	expected = &V1InitSessionArgs{
@@ -1419,22 +1419,22 @@ func TestSessionStransitSState(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         "*voice",
-		utils.OriginID:    "111",
-		utils.Account:     "account1",
-		utils.Subject:     "subject1",
-		utils.Destination: "+4986517174963",
-		utils.Category:    "call",
-		utils.Tenant:      "cgrates.org",
-		utils.RequestType: "*prepaid",
-		utils.SetupTime:   "2015-11-09T14:21:24Z",
-		utils.AnswerTime:  "2015-11-09T14:22:02Z",
-		utils.Usage:       "1m23s",
-		utils.LastUsed:    "21s",
-		utils.PDD:         "300ms",
-		utils.ROUTE:       "supplier1",
-		utils.OriginHost:  "127.0.0.1",
+		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.ToR:          "*voice",
+		utils.OriginID:     "111",
+		utils.AccountField: "account1",
+		utils.Subject:      "subject1",
+		utils.Destination:  "+4986517174963",
+		utils.Category:     "call",
+		utils.Tenant:       "cgrates.org",
+		utils.RequestType:  "*prepaid",
+		utils.SetupTime:    "2015-11-09T14:21:24Z",
+		utils.AnswerTime:   "2015-11-09T14:22:02Z",
+		utils.Usage:        "1m23s",
+		utils.LastUsed:     "21s",
+		utils.PDD:          "300ms",
+		utils.ROUTE:        "supplier1",
+		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
 		CGRID:      "session1",
@@ -1465,22 +1465,22 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         "*voice",
-		utils.OriginID:    "111",
-		utils.Account:     "account1",
-		utils.Subject:     "subject1",
-		utils.Destination: "+4986517174963",
-		utils.Category:    "call",
-		utils.Tenant:      "cgrates.org",
-		utils.RequestType: "*prepaid",
-		utils.SetupTime:   "2015-11-09T14:21:24Z",
-		utils.AnswerTime:  "2015-11-09T14:22:02Z",
-		utils.Usage:       "1m23s",
-		utils.LastUsed:    "21s",
-		utils.PDD:         "300ms",
-		utils.ROUTE:       "supplier1",
-		utils.OriginHost:  "127.0.0.1",
+		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.ToR:          "*voice",
+		utils.OriginID:     "111",
+		utils.AccountField: "account1",
+		utils.Subject:      "subject1",
+		utils.Destination:  "+4986517174963",
+		utils.Category:     "call",
+		utils.Tenant:       "cgrates.org",
+		utils.RequestType:  "*prepaid",
+		utils.SetupTime:    "2015-11-09T14:21:24Z",
+		utils.AnswerTime:   "2015-11-09T14:22:02Z",
+		utils.Usage:        "1m23s",
+		utils.LastUsed:     "21s",
+		utils.PDD:          "300ms",
+		utils.ROUTE:        "supplier1",
+		utils.OriginHost:   "127.0.0.1",
 	})
 	initialCGRID := GetSetCGRID(sSEv)
 	s := &Session{
@@ -1521,8 +1521,8 @@ func TestSessionSNewV1AuthorizeArgsWithOpts(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
 		},
 	}
 	expected := &V1AuthorizeArgs{
@@ -1570,8 +1570,8 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
 		},
 	}
 	expected := &V1AuthorizeArgs{
@@ -1674,7 +1674,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
-		utils.Account:          "account1",
+		utils.AccountField:     "account1",
 		utils.Subject:          "subject1",
 		utils.Destination:      "+4986517174963",
 		utils.Category:         "call",
@@ -1947,22 +1947,22 @@ func TestSessionSgetSession(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         "*voice",
-		utils.OriginID:    "111",
-		utils.Account:     "account1",
-		utils.Subject:     "subject1",
-		utils.Destination: "+4986517174963",
-		utils.Category:    "call",
-		utils.Tenant:      "cgrates.org",
-		utils.RequestType: "*prepaid",
-		utils.SetupTime:   "2015-11-09T14:21:24Z",
-		utils.AnswerTime:  "2015-11-09T14:22:02Z",
-		utils.Usage:       "1m23s",
-		utils.LastUsed:    "21s",
-		utils.PDD:         "300ms",
-		utils.ROUTE:       "supplier1",
-		utils.OriginHost:  "127.0.0.1",
+		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.ToR:          "*voice",
+		utils.OriginID:     "111",
+		utils.AccountField: "account1",
+		utils.Subject:      "subject1",
+		utils.Destination:  "+4986517174963",
+		utils.Category:     "call",
+		utils.Tenant:       "cgrates.org",
+		utils.RequestType:  "*prepaid",
+		utils.SetupTime:    "2015-11-09T14:21:24Z",
+		utils.AnswerTime:   "2015-11-09T14:22:02Z",
+		utils.Usage:        "1m23s",
+		utils.LastUsed:     "21s",
+		utils.PDD:          "300ms",
+		utils.ROUTE:        "supplier1",
+		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
 		CGRID:      "session1",
@@ -1997,7 +1997,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
-		utils.Account:          "account1",
+		utils.AccountField:     "account1",
 		utils.Subject:          "subject1",
 		utils.Destination:      "+4986517174963",
 		utils.Category:         "call",
@@ -2173,7 +2173,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
-		utils.Account:          "account1",
+		utils.AccountField:     "account1",
 		utils.Subject:          "subject1",
 		utils.Destination:      "+4986517174963",
 		utils.Category:         "call",

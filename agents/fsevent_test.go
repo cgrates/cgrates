@@ -513,7 +513,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Category), ""); parsed != "call" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Account), ""); parsed != "1001" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.AccountField), ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Subject), ""); parsed != "1001" {
@@ -592,7 +592,7 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	expectedMap[utils.Destination] = "1003"
 	expectedMap[utils.Usage] = 66 * time.Second
 	expectedMap[utils.Tenant] = "cgrates.org"
-	expectedMap[utils.Account] = "1001"
+	expectedMap[utils.AccountField] = "1001"
 	expectedMap[utils.Subject] = "1001"
 	expectedMap[utils.Cost] = -1.0
 	expectedMap[utils.PDD] = 28 * time.Millisecond

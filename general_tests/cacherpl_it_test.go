@@ -471,9 +471,9 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     "testCacheRplAACheckLoadReplication",
 					Event: map[string]interface{}{
-						utils.Account:     "1007",
-						utils.Destination: "+491511231234",
-						"EventName":       "TestLoad",
+						utils.AccountField: "1007",
+						utils.Destination:  "+491511231234",
+						"EventName":        "TestLoad",
 					},
 				},
 				Opts: map[string]interface{}{
@@ -493,9 +493,9 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     "testCacheRplAACheckLoadReplication",
 					Event: map[string]interface{}{
-						utils.Account:     "1007",
-						utils.Destination: "+491511231234",
-						"EventName":       "TestLoad",
+						utils.AccountField: "1007",
+						utils.Destination:  "+491511231234",
+						"EventName":        "TestLoad",
 					},
 				},
 				Opts: map[string]interface{}{
@@ -584,9 +584,9 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     "testCacheRplCheckLoadReplication",
 					Event: map[string]interface{}{
-						utils.Account:     "1007",
-						utils.Destination: "+491511231234",
-						"EventName":       "TestLoad",
+						utils.AccountField: "1007",
+						utils.Destination:  "+491511231234",
+						"EventName":        "TestLoad",
 					},
 				},
 				Opts: map[string]interface{}{

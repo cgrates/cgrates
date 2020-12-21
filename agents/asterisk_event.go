@@ -256,7 +256,7 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 		mp[utils.Subject] = smaEv.Subject()
 	}
 	mp[utils.OriginHost] = utils.FirstNonEmpty(smaEv.OriginHost(), smaEv.asteriskAlias, smaEv.OriginatorIP())
-	mp[utils.Account] = smaEv.Account()
+	mp[utils.AccountField] = smaEv.Account()
 	mp[utils.Destination] = smaEv.Destination()
 	mp[utils.SetupTime] = smaEv.SetupTime()
 	if smaEv.Route() != "" {

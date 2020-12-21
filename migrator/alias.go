@@ -92,7 +92,7 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 	}
 	if len(alias.Account) != 0 && alias.Account != utils.META_ANY {
 		out.FilterIDs = append(out.FilterIDs,
-			fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Account, alias.Account))
+			fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.AccountField, alias.Account))
 	}
 	if len(alias.Subject) != 0 && alias.Subject != utils.META_ANY {
 		out.FilterIDs = append(out.FilterIDs,
@@ -130,7 +130,7 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 				if fieldName == utils.Category && alias.Category == initial {
 					continue
 				}
-				if fieldName == utils.Account && alias.Account == initial {
+				if fieldName == utils.AccountField && alias.Account == initial {
 					continue
 				}
 				if fieldName == utils.Subject && alias.Subject == initial {

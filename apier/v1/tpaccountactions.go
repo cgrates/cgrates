@@ -26,7 +26,7 @@ import (
 // SetTPAccountActions creates a new AccountActions profile within a tariff plan
 func (apierSv1 *APIerSv1) SetTPAccountActions(attrs *utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(attrs,
-		[]string{utils.TPid, utils.LoadId, utils.Account, utils.ActionPlanId}); len(missing) != 0 {
+		[]string{utils.TPid, utils.LoadId, utils.AccountField, utils.ActionPlanId}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attrs.Tenant == utils.EmptyString {
@@ -48,7 +48,7 @@ type AttrGetTPAccountActionsByLoadId struct {
 func (apierSv1 *APIerSv1) GetTPAccountActionsByLoadId(attrs *utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
 	mndtryFlds := []string{utils.TPid, utils.LoadId}
 	if len(attrs.Account) != 0 { // If account provided as filter, make all related fields mandatory
-		mndtryFlds = append(mndtryFlds, utils.Account)
+		mndtryFlds = append(mndtryFlds, utils.AccountField)
 	}
 	if missing := utils.MissingStructFields(attrs, mndtryFlds); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

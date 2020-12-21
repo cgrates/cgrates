@@ -211,12 +211,12 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs, rtPrfIDs []string) (costData map[string]interface{}, err error) {
 	costData = make(map[string]interface{})
-	if err = ev.CheckMandatoryFields([]string{utils.Account,
+	if err = ev.CheckMandatoryFields([]string{utils.AccountField,
 		utils.Destination, utils.SetupTime}); err != nil {
 		return
 	}
 	var acnt, subj, dst string
-	if acnt, err = ev.FieldAsString(utils.Account); err != nil {
+	if acnt, err = ev.FieldAsString(utils.AccountField); err != nil {
 		return
 	}
 	if subj, err = ev.FieldAsString(utils.Subject); err != nil {
@@ -618,7 +618,7 @@ func (attr *ArgsGetRoutes) Clone() *ArgsGetRoutes {
 func (attr *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
 	opts = &optsGetRoutes{ignoreErrors: attr.IgnoreErrors}
 	if attr.MaxCost == utils.MetaEventCost { // dynamic cost needs to be calculated from event
-		if err = attr.CGREvent.CheckMandatoryFields([]string{utils.Account,
+		if err = attr.CGREvent.CheckMandatoryFields([]string{utils.AccountField,
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
 			return
 		}

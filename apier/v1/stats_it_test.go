@@ -45,24 +45,24 @@ var (
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
-				utils.Account:    "1001",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      135 * time.Second,
-				utils.COST:       123.0}},
+				utils.AccountField: "1001",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        135 * time.Second,
+				utils.COST:         123.0}},
 		{
 			Tenant: "cgrates.org",
 			ID:     "event2",
 			Event: map[string]interface{}{
-				utils.Account:    "1002",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      45 * time.Second}},
+				utils.AccountField: "1002",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        45 * time.Second}},
 		{
 			Tenant: "cgrates.org",
 			ID:     "event3",
 			Event: map[string]interface{}{
-				utils.Account:   "1002",
-				utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:     0}},
+				utils.AccountField: "1002",
+				utils.SetupTime:    time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        0}},
 	}
 
 	sTestsStatSV1 = []func(t *testing.T){
@@ -251,11 +251,11 @@ func testV1STSProcessEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account:    "1001",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      135 * time.Second,
-					utils.COST:       123.0,
-					utils.PDD:        12 * time.Second,
+					utils.AccountField: "1001",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        135 * time.Second,
+					utils.COST:         123.0,
+					utils.PDD:          12 * time.Second,
 				},
 			},
 		},
@@ -309,10 +309,10 @@ func testV1STSProcessEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event2",
 				Event: map[string]interface{}{
-					utils.Account:    "1002",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      45 * time.Second,
-					utils.Cost:       12.1,
+					utils.AccountField: "1002",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        45 * time.Second,
+					utils.Cost:         12.1,
 				},
 			},
 		},
@@ -328,10 +328,10 @@ func testV1STSProcessEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event3",
 				Event: map[string]interface{}{
-					utils.Account:   "1002",
-					utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:     0,
-					utils.Cost:      0,
+					utils.AccountField: "1002",
+					utils.SetupTime:    time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        0,
+					utils.Cost:         0,
 				},
 			},
 		},
@@ -467,7 +467,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
@@ -525,7 +525,7 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
@@ -1359,12 +1359,12 @@ func testV1STSV1GetStatQueuesForEventWithoutTenant(t *testing.T) {
 				CGREvent: &utils.CGREvent{
 					ID: "GetStats",
 					Event: map[string]interface{}{
-						utils.Account:     "1002",
-						utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-						utils.Usage:       45 * time.Second,
-						utils.RunID:       utils.MetaDefault,
-						utils.COST:        10.0,
-						utils.Destination: "1001",
+						utils.AccountField: "1002",
+						utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+						utils.Usage:        45 * time.Second,
+						utils.RunID:        utils.MetaDefault,
+						utils.COST:         10.0,
+						utils.Destination:  "1001",
 					},
 				},
 				Opts: map[string]interface{}{

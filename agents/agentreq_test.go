@@ -47,7 +47,7 @@ func TestAgReqSetFields(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathItems: utils.PathItems{{Field: utils.CGRID}}}, utils.NewNMData(
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
@@ -68,7 +68,7 @@ func TestAgReqSetFields(t *testing.T) {
 			Path: utils.MetaRep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaRep + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaRep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 		{Tag: "Destination",
 			Path: utils.MetaRep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
@@ -114,8 +114,8 @@ func TestAgReqSetFields(t *testing.T) {
 	eMp.Set(&utils.FullPath{Path: utils.Tenant, PathItems: utils.PathItems{{Field: utils.Tenant}}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, &utils.NMSlice{
-		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+	eMp.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.AccountField},
 			Config: tplFlds[1]}})
 	eMp.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, &utils.NMSlice{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
@@ -139,8 +139,8 @@ func TestAgReqSetFields(t *testing.T) {
 
 func TestAgentRequestSetFields(t *testing.T) {
 	req := map[string]interface{}{
-		utils.Account: 1009,
-		utils.Tenant:  "cgrates.org",
+		utils.AccountField: 1009,
+		utils.Tenant:       "cgrates.org",
 	}
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
@@ -741,7 +741,7 @@ func TestAgReqEmptyFilter(t *testing.T) {
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathItems: utils.PathItems{{Field: utils.CGRID}}}, utils.NewNMData(
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 
 	tplFlds := []*config.FCTemplate{
@@ -750,7 +750,7 @@ func TestAgReqEmptyFilter(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 
 		{Tag: "Account", Filters: []string{},
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 		{Tag: "Destination", Filters: []string{},
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
@@ -763,8 +763,8 @@ func TestAgReqEmptyFilter(t *testing.T) {
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set(utils.PathItems{{Field: utils.Account}}, &utils.NMSlice{
-		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+	eMp.Set(utils.PathItems{{Field: utils.AccountField}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.AccountField},
 			Config: tplFlds[1]}})
 	eMp.Set(utils.PathItems{{Field: utils.Destination}}, &utils.NMSlice{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
@@ -812,7 +812,7 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 
 	tplFlds := []*config.FCTemplate{
@@ -820,7 +820,7 @@ func TestAgReqFieldAsNone(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 		{Type: utils.META_NONE, Blocker: true},
 		{Tag: "Destination",
@@ -834,8 +834,8 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set(utils.PathItems{{Field: utils.Account}}, &utils.NMSlice{
-		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+	eMp.Set(utils.PathItems{{Field: utils.AccountField}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.AccountField},
 			Config: tplFlds[1]}})
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -852,7 +852,7 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 
 	tplFlds := []*config.FCTemplate{
@@ -860,7 +860,7 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 		{Type: utils.META_NONE},
 		{Tag: "Destination",
@@ -874,8 +874,8 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set(utils.PathItems{{Field: utils.Account}}, &utils.NMSlice{
-		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+	eMp.Set(utils.PathItems{{Field: utils.AccountField}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.AccountField},
 			Config: tplFlds[1]}})
 	eMp.Set(utils.PathItems{{Field: utils.Destination}}, &utils.NMSlice{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
@@ -895,7 +895,7 @@ func TestAgReqSetField2(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
@@ -908,7 +908,7 @@ func TestAgReqSetField2(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 		{Tag: "Destination",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.META_COMPOSED,
@@ -928,8 +928,8 @@ func TestAgReqSetField2(t *testing.T) {
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set(utils.PathItems{{Field: utils.Account}}, &utils.NMSlice{
-		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+	eMp.Set(utils.PathItems{{Field: utils.AccountField}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.AccountField},
 			Config: tplFlds[1]}})
 	eMp.Set(utils.PathItems{{Field: utils.Destination}}, &utils.NMSlice{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
@@ -958,7 +958,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	agReq.CGRRequest = utils.NewOrderedNavigableMap()
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: utils.PathItems{{Field: utils.Usage}}}, &utils.NMSlice{&config.NMItem{Data: 3 * time.Minute}})
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, &utils.NMSlice{&config.NMItem{Data: utils.VOICE}})
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 
 	path := []string{utils.MetaCgreq, utils.Usage}
@@ -978,7 +978,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
 	}
 
-	path = []string{utils.MetaCgreq, utils.Account}
+	path = []string{utils.MetaCgreq, utils.AccountField}
 	expVal = "1001"
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
@@ -1541,7 +1541,7 @@ func TestAgReqOverwrite(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
@@ -1551,19 +1551,19 @@ func TestAgReqOverwrite(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile(":", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("OverwrittenAccount", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("WithComposed", utils.INFIELD_SEP)},
 	}
 	for _, v := range tplFlds {
@@ -1573,7 +1573,7 @@ func TestAgReqOverwrite(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rcv, err := agReq.CGRReply.Field(utils.PathItems{{Field: utils.Account}}); err != nil {
+	if rcv, err := agReq.CGRReply.Field(utils.PathItems{{Field: utils.AccountField}}); err != nil {
 		t.Error(err)
 	} else if sls, canCast := rcv.(*utils.NMSlice); !canCast {
 		t.Errorf("Cannot cast to &utils.NMSlice %+v", rcv)
@@ -1593,7 +1593,7 @@ func TestAgReqGroupType(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
@@ -1603,10 +1603,10 @@ func TestAgReqGroupType(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.MetaGroup,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaGroup,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.MetaGroup,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaGroup,
 			Value: config.NewRSRParsersMustCompile("test", utils.INFIELD_SEP)},
 	}
 	for _, v := range tplFlds {
@@ -1616,7 +1616,7 @@ func TestAgReqGroupType(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rcv, err := agReq.CGRReply.Field(utils.PathItems{{Field: utils.Account}}); err != nil {
+	if rcv, err := agReq.CGRReply.Field(utils.PathItems{{Field: utils.AccountField}}); err != nil {
 		t.Error(err)
 	} else if sls, canCast := rcv.(*utils.NMSlice); !canCast {
 		t.Errorf("Cannot cast to &utils.NMSlice %+v", rcv)
@@ -1635,14 +1635,14 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
 			Path: utils.MetaTmp + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaTmp + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaTmp + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 	}
 	for _, v := range tplFlds {
@@ -1652,8 +1652,8 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set(utils.PathItems{{Field: utils.Account}}, &utils.NMSlice{
-		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+	eMp.Set(utils.PathItems{{Field: utils.AccountField}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.AccountField},
 			Config: tplFlds[1]}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
@@ -1729,7 +1729,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathItems: utils.PathItems{{Field: utils.CGRID}}}, utils.NewNMData(
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
@@ -1749,7 +1749,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 			Path: utils.MetaRep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaRep + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaRep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 		{Tag: "Destination",
 			Path: utils.MetaRep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
@@ -1794,8 +1794,8 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	eMp.Set(&utils.FullPath{Path: utils.Tenant, PathItems: utils.PathItems{{Field: utils.Tenant}}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, &utils.NMSlice{
-		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+	eMp.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.AccountField},
 			Config: tplFlds[1]}})
 	eMp.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, &utils.NMSlice{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
@@ -1820,7 +1820,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 		{Tag: "Tenant",
 			Path: utils.MetaRep + utils.NestingSep + utils.Tenant, Type: utils.MetaRemove},
 		{Tag: "Account",
-			Path: utils.MetaRep + utils.NestingSep + utils.Account, Type: utils.MetaRemove},
+			Path: utils.MetaRep + utils.NestingSep + utils.AccountField, Type: utils.MetaRemove},
 	}
 	for _, v := range tplFldsRemove {
 		v.ComputePath()
@@ -1864,14 +1864,14 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	engine.NewCacheS(cfg, dm, nil)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
 			Path: utils.MetaUCH + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaUCH + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaUCH + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 	}
 	for _, v := range tplFlds {
@@ -1887,7 +1887,7 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", utils.ToJSON(val))
 	}
 
-	if val, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Account}); err != nil {
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.AccountField}); err != nil {
 		t.Error(err)
 	} else if val != "1001" {
 		t.Errorf("expecting: %+v, \n received: %+v ", "1001", utils.ToJSON(val))
@@ -1907,14 +1907,14 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = time.Second
 	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
 			Path: utils.MetaUCH + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaUCH + utils.NestingSep + utils.Account, Type: utils.MetaVariable,
+			Path: utils.MetaUCH + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 	}
 	for _, v := range tplFlds {
@@ -1930,7 +1930,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 		t.Errorf("expecting: %+v, \n received: %+v ", "cgrates.org", utils.ToJSON(val))
 	}
 
-	if val, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Account}); err != nil {
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.AccountField}); err != nil {
 		t.Error(err)
 	} else if val != "1001" {
 		t.Errorf("expecting: %+v, \n received: %+v ", "1001", utils.ToJSON(val))
@@ -1944,7 +1944,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Tenant}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Account}); err == nil || err != utils.ErrNotFound {
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.AccountField}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -2032,7 +2032,7 @@ func TestAgReqDynamicPath(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
@@ -2051,7 +2051,7 @@ func TestAgReqDynamicPath(t *testing.T) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 		{Tag: "Destination",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.META_COMPOSED,
@@ -2075,8 +2075,8 @@ func TestAgReqDynamicPath(t *testing.T) {
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set(utils.PathItems{{Field: utils.Account}}, &utils.NMSlice{
-		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+	eMp.Set(utils.PathItems{{Field: utils.AccountField}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.AccountField},
 			Config: tplFlds[1]}})
 	eMp.Set(utils.PathItems{{Field: utils.Destination}}, &utils.NMSlice{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
@@ -2106,7 +2106,7 @@ func TestAgReqRoundingDecimals(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
@@ -2160,10 +2160,10 @@ func BenchmarkAgReqSetField(b *testing.B) {
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account + "[0].ID", Type: utils.MetaVariable,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField + "[0].ID", Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
 		{Tag: "Account2",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Account + "[1].ID", Type: utils.META_CONSTANT,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField + "[1].ID", Type: utils.META_CONSTANT,
 			Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP)},
 	}
 	for _, v := range tplFlds {
@@ -2173,11 +2173,11 @@ func BenchmarkAgReqSetField(b *testing.B) {
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set(utils.PathItems{{Field: utils.Account, Index: utils.StringPointer("0")}, {Field: "ID"}}, &utils.NMSlice{
-		&config.NMItem{Data: "1001", Path: []string{utils.Account + "[0]", "ID"},
+	eMp.Set(utils.PathItems{{Field: utils.AccountField, Index: utils.StringPointer("0")}, {Field: "ID"}}, &utils.NMSlice{
+		&config.NMItem{Data: "1001", Path: []string{utils.AccountField + "[0]", "ID"},
 			Config: tplFlds[1]}})
-	eMp.Set(utils.PathItems{{Field: utils.Account, Index: utils.StringPointer("1")}, {Field: "ID"}}, &utils.NMSlice{
-		&config.NMItem{Data: "1003", Path: []string{utils.Account + "[1]", "ID"},
+	eMp.Set(utils.PathItems{{Field: utils.AccountField, Index: utils.StringPointer("1")}, {Field: "ID"}}, &utils.NMSlice{
+		&config.NMItem{Data: "1003", Path: []string{utils.AccountField + "[1]", "ID"},
 			Config: tplFlds[2]}})
 
 	b.ResetTimer()
@@ -2185,7 +2185,7 @@ func BenchmarkAgReqSetField(b *testing.B) {
 		agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 		// populate request, emulating the way will be done in HTTPAgent
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
-		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Account, PathItems: utils.PathItems{{Field: utils.Account}}}, utils.NewNMData("1001"))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 			time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))

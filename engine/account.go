@@ -555,11 +555,11 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 						Tenant: acntTnt.Tenant,
 						ID:     utils.GenUUID(),
 						Event: map[string]interface{}{
-							utils.EventType:   utils.BalanceUpdate,
-							utils.EventSource: utils.AccountService,
-							utils.Account:     acntTnt.ID,
-							utils.BalanceID:   defaultBalance.ID,
-							utils.Units:       defaultBalance.Value,
+							utils.EventType:    utils.BalanceUpdate,
+							utils.EventSource:  utils.AccountService,
+							utils.AccountField: acntTnt.ID,
+							utils.BalanceID:    defaultBalance.ID,
+							utils.Units:        defaultBalance.Value,
 						},
 					},
 					Opts: map[string]interface{}{

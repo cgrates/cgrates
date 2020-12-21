@@ -135,6 +135,7 @@ func (aS *ActionS) schedInit() (err error) {
 	if aS.crn != nil {
 		aS.crn.Stop()
 	}
+	aS.crn = cron.New()
 	aS.crn.Start()
 	return
 }

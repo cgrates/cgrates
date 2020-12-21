@@ -1710,11 +1710,11 @@ func testApierMaxDebitInexistentAcnt(t *testing.T) {
 func testApierCdrServer(t *testing.T) {
 	httpClient := new(http.Client)
 	cdrForm1 := url.Values{utils.OriginID: []string{"dsafdsaf"}, utils.OriginHost: []string{"192.168.1.1"}, utils.RequestType: []string{utils.META_RATED},
-		utils.Tenant: []string{"cgrates.org"}, utils.Category: []string{"call"}, utils.Account: []string{"1001"}, utils.Subject: []string{"1001"}, utils.Destination: []string{"1002"},
+		utils.Tenant: []string{"cgrates.org"}, utils.Category: []string{"call"}, utils.AccountField: []string{"1001"}, utils.Subject: []string{"1001"}, utils.Destination: []string{"1002"},
 		utils.SetupTime:  []string{"2013-11-07T08:42:22Z"},
 		utils.AnswerTime: []string{"2013-11-07T08:42:26Z"}, utils.Usage: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	cdrForm2 := url.Values{utils.OriginID: []string{"adsafdsaf"}, utils.OriginHost: []string{"192.168.1.1"}, utils.RequestType: []string{utils.META_RATED},
-		utils.Tenant: []string{"cgrates.org"}, utils.Category: []string{"call"}, utils.Account: []string{"1001"}, utils.Subject: []string{"1001"}, utils.Destination: []string{"1002"},
+		utils.Tenant: []string{"cgrates.org"}, utils.Category: []string{"call"}, utils.AccountField: []string{"1001"}, utils.Subject: []string{"1001"}, utils.Destination: []string{"1002"},
 		utils.SetupTime:  []string{"2013-11-07T08:42:23Z"},
 		utils.AnswerTime: []string{"2013-11-07T08:42:26Z"}, utils.Usage: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {

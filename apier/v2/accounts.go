@@ -127,7 +127,7 @@ type AttrSetAccount struct {
 }
 
 func (apiv2 *APIerSv2) SetAccount(attr *AttrSetAccount, reply *string) error {
-	if missing := utils.MissingStructFields(attr, []string{utils.Account}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant

@@ -1194,7 +1194,7 @@ func testITTestIndexingThresholds(t *testing.T) {
 	}
 	if rcvMp, err := dataManager.GetIndexes(
 		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.ConcatenatedKey(utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Account, "1001"),
+		utils.ConcatenatedKey(utils.MetaString, utils.MetaReq+utils.NestingSep+utils.AccountField, "1001"),
 		true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
@@ -1254,7 +1254,7 @@ func testITTestIndexingMetaNot(t *testing.T) {
 	}
 	if rcvMp, err := dataManager.GetIndexes(
 		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.ConcatenatedKey(utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Account, "1001"),
+		utils.ConcatenatedKey(utils.MetaString, utils.MetaReq+utils.NestingSep+utils.AccountField, "1001"),
 		true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {

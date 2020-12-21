@@ -109,7 +109,7 @@ func derivedChargers2AttributeProfile(dc *v1DerivedCharger, tenant, key string, 
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Direction, dc.DirectionField) //still in use?
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Tenant, dc.TenantField)
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Category, dc.CategoryField)
-	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Account, dc.AccountField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.AccountField, dc.AccountField)
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Subject, dc.SubjectField)
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Destination, dc.DestinationField)
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.SetupTime, dc.SetupTimeField)
@@ -169,7 +169,7 @@ func (m *Migrator) derivedChargers2Chargers(dck *v1DerivedChargersWithKey) (err 
 		filter = append(filter, fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Category, skey[2]))
 	}
 	if len(skey[3]) != 0 && skey[3] != utils.META_ANY {
-		filter = append(filter, fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Account, skey[3]))
+		filter = append(filter, fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.AccountField, skey[3]))
 	}
 	if len(skey[4]) != 0 && skey[4] != utils.META_ANY {
 		filter = append(filter, fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Subject, skey[4]))

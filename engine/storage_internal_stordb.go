@@ -903,7 +903,7 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 		idxs.Add(utils.ConcatenatedKey(utils.RequestType, cdr.RequestType))
 		idxs.Add(utils.ConcatenatedKey(utils.Tenant, cdr.Tenant))
 		idxs.Add(utils.ConcatenatedKey(utils.Category, cdr.Category))
-		idxs.Add(utils.ConcatenatedKey(utils.Account, cdr.Account))
+		idxs.Add(utils.ConcatenatedKey(utils.AccountField, cdr.Account))
 		idxs.Add(utils.ConcatenatedKey(utils.Subject, cdr.Subject))
 		idxs.Add(utils.ConcatenatedKey(utils.Destination, cdr.Destination)) // include the whole Destination
 		for i := len(cdr.Destination) - 1; i > 0; i-- {                     // add destination as prefix
@@ -1076,9 +1076,9 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				notPairSlice = append(notPairSlice, filterPair{utils.Category, filter.NotCategories})
 				filter.NotCategories = nil
 				filter.Categories = nil
-			case utils.Account:
-				pairSlice = append(pairSlice, filterPair{utils.Account, filter.Accounts})
-				notPairSlice = append(notPairSlice, filterPair{utils.Account, filter.NotAccounts})
+			case utils.AccountField:
+				pairSlice = append(pairSlice, filterPair{utils.AccountField, filter.Accounts})
+				notPairSlice = append(notPairSlice, filterPair{utils.AccountField, filter.NotAccounts})
 				filter.NotAccounts = nil
 				filter.Accounts = nil
 			case utils.Subject:
@@ -1126,7 +1126,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			{utils.RequestType, filter.RequestTypes},
 			{utils.Tenant, filter.Tenants},
 			{utils.Category, filter.Categories},
-			{utils.Account, filter.Accounts},
+			{utils.AccountField, filter.Accounts},
 			{utils.Subject, filter.Subjects},
 			{utils.Destination, filter.DestinationPrefixes},
 		}
@@ -1140,7 +1140,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			{utils.RequestType, filter.NotRequestTypes},
 			{utils.Tenant, filter.NotTenants},
 			{utils.Category, filter.NotCategories},
-			{utils.Account, filter.NotAccounts},
+			{utils.AccountField, filter.NotAccounts},
 			{utils.Subject, filter.NotSubjects},
 			{utils.Destination, filter.NotDestinationPrefixes},
 		}

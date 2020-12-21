@@ -77,33 +77,32 @@ const (
 	ColRpp  = "rate_profiles"
 	ColApp  = "action_profiles"
 	ColLID  = "load_ids"
+	ColAnp  = "account_profiles"
+	colAnt  = "accounts2"
 )
 
 var (
-	CGRIDLow           = strings.ToLower(utils.CGRID)
-	RunIDLow           = strings.ToLower(utils.RunID)
-	OrderIDLow         = strings.ToLower(utils.OrderID)
-	OriginHostLow      = strings.ToLower(utils.OriginHost)
-	OriginIDLow        = strings.ToLower(utils.OriginID)
-	ToRLow             = strings.ToLower(utils.ToR)
-	CDRHostLow         = strings.ToLower(utils.OriginHost)
-	CDRSourceLow       = strings.ToLower(utils.Source)
-	RequestTypeLow     = strings.ToLower(utils.RequestType)
-	TenantLow          = strings.ToLower(utils.Tenant)
-	CategoryLow        = strings.ToLower(utils.Category)
-	AccountLow         = strings.ToLower(utils.Account)
-	SubjectLow         = strings.ToLower(utils.Subject)
-	DisconnectCauseLow = strings.ToLower(utils.DISCONNECT_CAUSE)
-	SetupTimeLow       = strings.ToLower(utils.SetupTime)
-	AnswerTimeLow      = strings.ToLower(utils.AnswerTime)
-	CreatedAtLow       = strings.ToLower(utils.CreatedAt)
-	UpdatedAtLow       = strings.ToLower(utils.UpdatedAt)
-	UsageLow           = strings.ToLower(utils.Usage)
-	PDDLow             = strings.ToLower(utils.PDD)
-	CostDetailsLow     = strings.ToLower(utils.CostDetails)
-	DestinationLow     = strings.ToLower(utils.Destination)
-	CostLow            = strings.ToLower(utils.COST)
-	CostSourceLow      = strings.ToLower(utils.CostSource)
+	CGRIDLow       = strings.ToLower(utils.CGRID)
+	RunIDLow       = strings.ToLower(utils.RunID)
+	OrderIDLow     = strings.ToLower(utils.OrderID)
+	OriginHostLow  = strings.ToLower(utils.OriginHost)
+	OriginIDLow    = strings.ToLower(utils.OriginID)
+	ToRLow         = strings.ToLower(utils.ToR)
+	CDRHostLow     = strings.ToLower(utils.OriginHost)
+	CDRSourceLow   = strings.ToLower(utils.Source)
+	RequestTypeLow = strings.ToLower(utils.RequestType)
+	TenantLow      = strings.ToLower(utils.Tenant)
+	CategoryLow    = strings.ToLower(utils.Category)
+	AccountLow     = strings.ToLower(utils.AccountField)
+	SubjectLow     = strings.ToLower(utils.Subject)
+	SetupTimeLow   = strings.ToLower(utils.SetupTime)
+	AnswerTimeLow  = strings.ToLower(utils.AnswerTime)
+	CreatedAtLow   = strings.ToLower(utils.CreatedAt)
+	UpdatedAtLow   = strings.ToLower(utils.UpdatedAt)
+	UsageLow       = strings.ToLower(utils.Usage)
+	DestinationLow = strings.ToLower(utils.Destination)
+	CostLow        = strings.ToLower(utils.COST)
+	CostSourceLow  = strings.ToLower(utils.CostSource)
 
 	tTime = reflect.TypeOf(time.Time{})
 )
@@ -2161,6 +2160,78 @@ func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err
 	//inside bson.RegEx add carrot to match the prefix (optimization)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColIndx).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, utils.EmptyString)})
+		return err
+	})
+}
+
+func (ms *MongoStorage) GetAccountProfileDrv(tenant, id string) (ap *utils.AccountProfile, err error) {
+	ap = new(utils.AccountProfile)
+	err = ms.query(func(sctx mongo.SessionContext) (err error) {
+		cur := ms.getCol(ColAnp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if err := cur.Decode(ap); err != nil {
+			ap = nil
+			if err == mongo.ErrNoDocuments {
+				return utils.ErrNotFound
+			}
+			return err
+		}
+		return nil
+	})
+	return
+}
+
+func (ms *MongoStorage) SetAccountProfileDrv(ap *utils.AccountProfile) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		_, err = ms.getCol(ColAnp).UpdateOne(sctx, bson.M{"tenant": ap.Tenant, "id": ap.ID},
+			bson.M{"$set": ap},
+			options.Update().SetUpsert(true),
+		)
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemoveAccountProfileDrv(tenant, id string) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		dr, err := ms.getCol(ColAnp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
+}
+
+func (ms *MongoStorage) GetAccount2Drv(tenant, id string) (ap *utils.Account, err error) {
+	ap = new(utils.Account)
+	err = ms.query(func(sctx mongo.SessionContext) (err error) {
+		cur := ms.getCol(colAnt).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if err := cur.Decode(ap); err != nil {
+			ap = nil
+			if err == mongo.ErrNoDocuments {
+				return utils.ErrNotFound
+			}
+			return err
+		}
+		return nil
+	})
+	return
+}
+
+func (ms *MongoStorage) SetAccount2Drv(ap *utils.Account) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		_, err = ms.getCol(colAnt).UpdateOne(sctx, bson.M{"tenant": ap.Tenant, "id": ap.ID},
+			bson.M{"$set": ap},
+			options.Update().SetUpsert(true),
+		)
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemoveAccount2Drv(tenant, id string) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		dr, err := ms.getCol(colAnt).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
 		return err
 	})
 }

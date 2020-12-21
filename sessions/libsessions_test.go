@@ -25,7 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 func TestLibSessionSGetSetCGRID(t *testing.T) {
@@ -33,7 +33,7 @@ func TestLibSessionSGetSetCGRID(t *testing.T) {
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
-		utils.Account:          "account1",
+		utils.AccountField:     "account1",
 		utils.Subject:          "subject1",
 		utils.Destination:      "+4986517174963",
 		utils.Category:         "call",

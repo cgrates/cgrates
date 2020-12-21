@@ -112,8 +112,8 @@ func testDspThProcessEventFailover(t *testing.T) {
 				ID:     utils.UUIDSha1Prefix(),
 				Time:   &nowTime,
 				Event: map[string]interface{}{
-					utils.EVENT_NAME: "Event1",
-					utils.Account:    "1001"},
+					utils.EVENT_NAME:   "Event1",
+					utils.AccountField: "1001"},
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "thr12345",
@@ -165,7 +165,7 @@ func testDspThTestAuthKey(t *testing.T) {
 				ID:     utils.UUIDSha1Prefix(),
 				Time:   &nowTime,
 				Event: map[string]interface{}{
-					utils.Account: "1002"},
+					utils.AccountField: "1002"},
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
@@ -195,7 +195,7 @@ func testDspThTestAuthKey2(t *testing.T) {
 				ID:     utils.UUIDSha1Prefix(),
 				Time:   &nowTime,
 				Event: map[string]interface{}{
-					utils.Account: "1002"},
+					utils.AccountField: "1002"},
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "thr12345",

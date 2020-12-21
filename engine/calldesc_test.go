@@ -1879,7 +1879,7 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 		TimeEnd:      time.Date(2015, 3, 23, 6, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	if err := cd.UpdateFromCGREvent(cgrEv, []string{utils.Account, utils.Subject}); err != nil {
+	if err := cd.UpdateFromCGREvent(cgrEv, []string{utils.AccountField, utils.Subject}); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(cd, cdExpected) {
@@ -1900,7 +1900,7 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 			"Usage":       40 * time.Minute,
 		},
 	}
-	if err := cd.UpdateFromCGREvent(cgrEv, []string{utils.Account, utils.Subject}); err != nil {
+	if err := cd.UpdateFromCGREvent(cgrEv, []string{utils.AccountField, utils.Subject}); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(cd, cdExpected) {

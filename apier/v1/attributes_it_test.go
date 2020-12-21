@@ -177,8 +177,8 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "1007",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1007",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -193,7 +193,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
 			{
-				Path:      utils.MetaReq + utils.NestingSep + utils.Account,
+				Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				Type:      utils.META_CONSTANT,
 				FilterIDs: []string{},
@@ -244,8 +244,8 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
 				Event: map[string]interface{}{
-					utils.Account:     "dan",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "dan",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -260,7 +260,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 			},
@@ -298,8 +298,8 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
 				Event: map[string]interface{}{
-					utils.Account:     "dan",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "dan",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -314,7 +314,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 			},
@@ -356,24 +356,24 @@ func testAttributeSProcessEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "1007",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1007",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Account,
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.AccountField,
 			utils.MetaReq + utils.NestingSep + utils.Subject},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "1001",
-					utils.Subject:     "1001",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1001",
+					utils.Subject:      "1001",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -415,8 +415,8 @@ func testAttributeSProcessEventNotFound(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEventNotFound",
 				Event: map[string]interface{}{
-					utils.Account:     "Inexistent",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "Inexistent",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -437,9 +437,9 @@ func testAttributeSProcessEventMissing(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "NonExist",
-					utils.Category:    "*attributes",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "NonExist",
+					utils.Category:     "*attributes",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -460,8 +460,8 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSWithNoneSubstitute",
 				Event: map[string]interface{}{
-					utils.Account:     "1008",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1008",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -479,7 +479,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
-					Path:      utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 				{
@@ -499,15 +499,15 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
-		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Account,
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.AccountField,
 			utils.MetaReq + utils.NestingSep + utils.Subject},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSWithNoneSubstitute",
 				Event: map[string]interface{}{
-					utils.Account:     "1001",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1001",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -533,9 +533,9 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSWithNoneSubstitute",
 				Event: map[string]interface{}{
-					utils.Account:     "1008",
-					utils.Subject:     "1008",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1008",
+					utils.Subject:      "1008",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -553,7 +553,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
-					Path:      utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 				{
@@ -578,8 +578,8 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSWithNoneSubstitute",
 				Event: map[string]interface{}{
-					utils.Account:     "1001",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1001",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -587,14 +587,14 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 	eRply2 := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Subject,
-			utils.MetaReq + utils.NestingSep + utils.Account},
+			utils.MetaReq + utils.NestingSep + utils.AccountField},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSWithNoneSubstitute",
 				Event: map[string]interface{}{
-					utils.Account:     "1001",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1001",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -618,9 +618,9 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSWithNoneSubstitute",
 				Event: map[string]interface{}{
-					utils.Account:     "1008",
-					utils.Subject:     "1001",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1008",
+					utils.Subject:      "1001",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -638,7 +638,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
-					Path:      utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 				{
@@ -664,9 +664,9 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSWithNoneSubstitute",
 				Event: map[string]interface{}{
-					utils.Account:     "1001",
-					utils.Subject:     "1001",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1001",
+					utils.Subject:      "1001",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},

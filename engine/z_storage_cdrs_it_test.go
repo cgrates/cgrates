@@ -229,7 +229,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	cfg.StorDbCfg().StringIndexedFields = []string{utils.CGRID,
 		utils.RunID, utils.OriginHost, utils.Source, utils.OriginID,
 		utils.ToR, utils.RequestType, utils.Tenant,
-		utils.Category, utils.Account, utils.Subject,
+		utils.Category, utils.AccountField, utils.Subject,
 		"Service-Context-Id",
 	}
 	cfg.StorDbCfg().PrefixIndexedFields = []string{
