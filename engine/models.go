@@ -584,6 +584,7 @@ type AccountProfileMdl struct {
 	BalanceType        string  `index:"9" re:""`
 	BalanceOpts        string  `index:"10" re:""`
 	BalanceValue       float64 `index:"11" re:"\d+\.?\d*"`
+	ThresholdIDs       string  `index:"12" re:""`
 
 	CreatedAt time.Time
 }

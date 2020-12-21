@@ -298,9 +298,9 @@ cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,false,0s,*topup,,~*balance.Test
 `
 
 	AccountProfileCSVContent = `
-#Tenant,ID,FilterIDs,ActivationInterval,Weight,BalanceID,BalanceFilterIDs,BalanceWeight,BalanceBlocker,BalanceType,BalanceOpts,BalanceValue
-cgrates.org,1001,,,20,MonetaryBalance,,10,,*monetary,,14
-cgrates.org,1001,,,,VoiceBalance,,10,,*voice,,3600000000000
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,BalanceID,BalanceFilterIDs,BalanceWeight,BalanceBlocker,BalanceType,BalanceOpts,BalanceValue,ThresholdIDs
+cgrates.org,1001,,,20,MonetaryBalance,,10,,*monetary,,14,*none
+cgrates.org,1001,,,,VoiceBalance,,10,,*voice,,3600000000000,
 `
 )
 
