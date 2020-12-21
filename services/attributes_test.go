@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
 import (
 	"reflect"
 	"sync"
@@ -89,4 +88,3 @@ func TestAttributeSCoverage(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 }
-*/

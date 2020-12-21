@@ -17,8 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
 import (
+	"reflect"
 	"sync"
 	"testing"
 
@@ -39,10 +39,141 @@ func TestDataDBCoverage(t *testing.T) {
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	db.dm = &engine.DataManager{}
+	//populates dataDb with something in order to call the close function
+	dataDb := new(engine.RedisStorage)
+	db.dm = engine.NewDataManager(dataDb,
+		&config.CacheCfg{}, nil)
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	errStart := db.Start()
+	if errStart == nil || errStart != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, errStart)
+	}
+	oldcfg := &config.DataDbCfg{
+		DataDbType: utils.MONGO,
+		DataDbHost: "127.0.0.1",
+		DataDbPort: "27017",
+		DataDbName: "10",
+		DataDbUser: "cgrates",
+		Opts: map[string]interface{}{
+			utils.QueryTimeoutCfg:            "10s",
+			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisClusterSyncCfg:        "5s",
+			utils.RedisClusterCfg:            false,
+			utils.RedisSentinelNameCfg:       "",
+			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
+		},
+		RmtConns: []string{},
+		RplConns: []string{},
+		Items: map[string]*config.ItemOpt{
+			utils.MetaAccounts: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaReverseDestinations: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaDestinations: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaRatingPlans: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaRatingProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaActions: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaActionPlans: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaAccountActionPlans: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaActionTriggers: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaSharedGroups: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaTimings: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaResourceProfile: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaStatQueues: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaResources: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaStatQueueProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaThresholds: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaThresholdProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaFilters: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaRouteProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaAttributeProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaDispatcherHosts: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaChargerProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaDispatcherProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaLoadIDs: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaIndexes: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaRateProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaActionProfiles: {
+				Replicate: false,
+				Remote:    false},
+		},
+	}
+	db.oldDBCfg = oldcfg
+	err := db.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	serviceName := db.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.DataDB) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.DataDB, serviceName)
+	}
+	shouldRun := db.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+	}
+	getDMChan := db.GetDMChan()
+	if !reflect.DeepEqual(getDMChan, db.dbchan) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", db.dbchan, getDMChan)
+	}
+	db.dm = &engine.DataManager{}
+	getDM := db.GetDM()
+	if !reflect.DeepEqual(getDM, db.dm) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", db.dm, getDM)
+	}
 
 }
-*/
