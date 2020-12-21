@@ -23,7 +23,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// AttributeSv1Ping interogates AttributeS server responsible to process the event
+// AttributeSv1Ping interrogates AttributeS server responsible to process the event
 func (dS *DispatcherService) AttributeSv1Ping(args *utils.CGREventWithOpts,
 	reply *string) (err error) {
 	if args == nil {

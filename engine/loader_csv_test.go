@@ -1625,3 +1625,41 @@ func TestLoadThresholds(t *testing.T) {
 		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
 	}
 }
+
+func TestLoadAccountProfiles(t *testing.T) {
+	expected := &utils.TPAccountProfile{
+		TPid:   testTPID,
+		Tenant: "cgrates.org",
+		ID:     "1001",
+		Weight: 20,
+		Balances: []*utils.TPAccountBalance{
+			&utils.TPAccountBalance{
+				ID:        "MonetaryBalance",
+				FilterIDs: []string{},
+				Weight:    10,
+				Type:      utils.MONETARY,
+				Value:     14,
+			},
+			&utils.TPAccountBalance{
+				ID:        "VoiceBalance",
+				FilterIDs: []string{},
+				Weight:    10,
+				Type:      utils.VOICE,
+				Value:     3600000000000,
+			},
+		},
+	}
+
+	if len(csvr.accountProfiles) != 1 {
+		t.Fatalf("Failed to load ActionProfiles: %s", utils.ToJSON(csvr.actionProfiles))
+	}
+	accPrfKey := utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "1001",
+	}
+
+	if !reflect.DeepEqual(csvr.accountProfiles[accPrfKey], expected) {
+		t.Errorf("Expecting: %+v,\n received: %+v",
+			utils.ToJSON(expected), utils.ToJSON(csvr.accountProfiles[accPrfKey]))
+	}
+}
