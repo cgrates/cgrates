@@ -112,6 +112,9 @@ func init() {
 	if err := csvr.LoadActionProfiles(); err != nil {
 		log.Print("error in LoadActionProfiles: ", err)
 	}
+	if err := csvr.LoadAccountProfiles(); err != nil {
+		log.Print("error in LoadActionProfiles: ", err)
+	}
 	if err := csvr.WriteToDatabase(false, false); err != nil {
 		log.Print("error when writing into database", err)
 	}
