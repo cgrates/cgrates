@@ -17,8 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
 import (
+	"reflect"
 	"sync"
 	"testing"
 
@@ -42,6 +42,12 @@ func TestChargerSCoverage(t *testing.T) {
 	server := cores.NewServer(nil)
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS1 := NewChargerService(cfg, db, chS,
+		filterSChan, server, make(chan rpcclient.ClientConnector, 1),
+		nil, anz, srvDep)
+	if chrS1.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
 	chrS := &ChargerService{
 		connChan:    make(chan rpcclient.ClientConnector, 1),
 		cfg:         cfg,
@@ -69,5 +75,19 @@ func TestChargerSCoverage(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
+	serviceName := chrS.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.ChargerS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ChargerS, serviceName)
+	}
+	shouldRun := chrS.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+	}
+	chrS.connChan = make(chan rpcclient.ClientConnector, 1)
+	chrS.connChan <- chS
+	shutErr := chrS.Shutdown()
+	if shutErr != nil {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, shutErr)
+	}
+
 }
-*/

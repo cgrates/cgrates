@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
 import (
 	"reflect"
 	"sync"
@@ -32,7 +31,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-//TestNewAnalyzerCoverage for cover testing
+//TestAnalyzerCoverage for cover testing
 func TestAnalyzerCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	shdChan := utils.NewSyncedChan()
@@ -96,4 +95,3 @@ func TestAnalyzerCoverage(t *testing.T) {
 	}
 
 }
-*/
