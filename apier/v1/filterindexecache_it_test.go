@@ -149,8 +149,8 @@ func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType: utils.BalanceUpdate,
-					utils.Account:   "1001",
+					utils.EventType:    utils.BalanceUpdate,
+					utils.AccountField: "1001",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -171,7 +171,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 			ID:     "TestFilter",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
@@ -222,8 +222,8 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType: utils.BalanceUpdate,
-					utils.Account:   "1001",
+					utils.EventType:    utils.BalanceUpdate,
+					utils.AccountField: "1001",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -251,10 +251,10 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType: utils.BalanceUpdate,
-					utils.Account:   "1001",
-					utils.BalanceID: utils.MetaDefault,
-					utils.Units:     12.3,
+					utils.EventType:    utils.BalanceUpdate,
+					utils.AccountField: "1001",
+					utils.BalanceID:    utils.MetaDefault,
+					utils.Units:        12.3,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -281,7 +281,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 			ID:     "TestFilter2",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1002"},
 				},
@@ -328,8 +328,8 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType: utils.AccountUpdate,
-					utils.Account:   "1001",
+					utils.EventType:    utils.AccountUpdate,
+					utils.AccountField: "1001",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -351,8 +351,8 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType: utils.AccountUpdate,
-					utils.Account:   "1002",
+					utils.EventType:    utils.AccountUpdate,
+					utils.AccountField: "1002",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -377,7 +377,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 			ID:     "TestFilter3",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1003"},
 				},
@@ -423,8 +423,8 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account:   "1002",
-					utils.EventType: utils.BalanceUpdate,
+					utils.AccountField: "1002",
+					utils.EventType:    utils.BalanceUpdate,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -444,8 +444,8 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event3",
 				Event: map[string]interface{}{
-					utils.Account:   "1003",
-					utils.EventType: utils.BalanceUpdate,
+					utils.AccountField: "1003",
+					utils.EventType:    utils.BalanceUpdate,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -470,8 +470,8 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event8",
 				Event: map[string]interface{}{
-					utils.Account:   "1002",
-					utils.EventType: utils.AccountUpdate,
+					utils.AccountField: "1002",
+					utils.EventType:    utils.AccountUpdate,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -493,8 +493,8 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event9",
 				Event: map[string]interface{}{
-					utils.Account:   "1003",
-					utils.EventType: utils.BalanceUpdate,
+					utils.AccountField: "1003",
+					utils.EventType:    utils.BalanceUpdate,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -554,8 +554,8 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType: utils.AccountUpdate,
-					utils.Account:   "1001",
+					utils.EventType:    utils.AccountUpdate,
+					utils.AccountField: "1001",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -583,7 +583,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
@@ -639,9 +639,9 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType: utils.AccountUpdate,
-					utils.Account:   "1001",
-					"Val":           10,
+					utils.EventType:    utils.AccountUpdate,
+					utils.AccountField: "1001",
+					"Val":              10,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -668,10 +668,10 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event2",
 				Event: map[string]interface{}{
-					utils.Account:    "1002",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      45 * time.Second,
-					utils.Cost:       12.1,
+					utils.AccountField: "1002",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        45 * time.Second,
+					utils.Cost:         12.1,
 				},
 			},
 		},
@@ -687,10 +687,10 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event3",
 				Event: map[string]interface{}{
-					utils.Account:    "1002",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      45 * time.Second,
-					utils.Cost:       12.1,
+					utils.AccountField: "1002",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        45 * time.Second,
+					utils.Cost:         12.1,
 				},
 			},
 		},
@@ -707,11 +707,11 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType:  utils.AccountUpdate,
-					utils.Account:    "1001",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      45 * time.Second,
-					utils.Cost:       12.1,
+					utils.EventType:    utils.AccountUpdate,
+					utils.AccountField: "1001",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        45 * time.Second,
+					utils.Cost:         12.1,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -730,11 +730,11 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType:  utils.AccountUpdate,
-					utils.Account:    "1001",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      45 * time.Second,
-					utils.Cost:       12.1,
+					utils.EventType:    utils.AccountUpdate,
+					utils.AccountField: "1001",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        45 * time.Second,
+					utils.Cost:         12.1,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -756,7 +756,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1003"},
 				},
@@ -812,9 +812,9 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType: utils.BalanceUpdate,
-					utils.Account:   "1003",
-					"Val":           10,
+					utils.EventType:    utils.BalanceUpdate,
+					utils.AccountField: "1003",
+					"Val":              10,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -836,7 +836,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 			ID:     "FLTR_3",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1003"},
 				},
@@ -876,11 +876,11 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType:  utils.AccountUpdate,
-					utils.Account:    "1003",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      45 * time.Second,
-					utils.Cost:       12.1,
+					utils.EventType:    utils.AccountUpdate,
+					utils.AccountField: "1003",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        45 * time.Second,
+					utils.Cost:         12.1,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -907,9 +907,9 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType: utils.BalanceUpdate,
-					utils.Account:   "1003",
-					"Val":           10,
+					utils.EventType:    utils.BalanceUpdate,
+					utils.AccountField: "1003",
+					"Val":              10,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -929,11 +929,11 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.EventType:  utils.AccountUpdate,
-					utils.Account:    "1003",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      45 * time.Second,
-					utils.Cost:       12.1,
+					utils.EventType:    utils.AccountUpdate,
+					utils.AccountField: "1003",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        45 * time.Second,
+					utils.Cost:         12.1,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -994,8 +994,8 @@ func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "3009",
-					utils.Destination: "+492511231234",
+					utils.AccountField: "3009",
+					utils.Destination:  "+492511231234",
 				},
 			},
 		},
@@ -1014,7 +1014,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			ID:     "TestFilter",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1009"},
 				},
@@ -1046,7 +1046,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 				{
@@ -1070,8 +1070,8 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "1009",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1009",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -1092,8 +1092,8 @@ func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "1007",
-					utils.Destination: "+491511231234",
+					utils.AccountField: "1007",
+					utils.Destination:  "+491511231234",
 				},
 			},
 		},
@@ -1111,7 +1111,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			ID:     "TestFilter2",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"2009"},
 				},
@@ -1143,7 +1143,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 				{
@@ -1167,8 +1167,8 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "2009",
-					utils.Destination: "+492511231234",
+					utils.AccountField: "2009",
+					utils.Destination:  "+492511231234",
 				},
 			},
 		},
@@ -1186,7 +1186,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 			ID:     "TestFilter3",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"3009"},
 				},
@@ -1227,8 +1227,8 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "3009",
-					utils.Destination: "+492511231234",
+					utils.AccountField: "3009",
+					utils.Destination:  "+492511231234",
 				},
 			},
 		},
@@ -1248,8 +1248,8 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "3009",
-					utils.Destination: "+492511231234",
+					utils.AccountField: "3009",
+					utils.Destination:  "+492511231234",
 				},
 			},
 		},
@@ -1266,8 +1266,8 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:     "2009",
-					utils.Destination: "+492511231234",
+					utils.AccountField: "2009",
+					utils.Destination:  "+492511231234",
 				},
 			},
 		},
@@ -1324,9 +1324,9 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account:     "1002",
-					utils.Subject:     "1001",
-					utils.Destination: "1002"},
+					utils.AccountField: "1002",
+					utils.Subject:      "1001",
+					utils.Destination:  "1002"},
 			},
 		},
 		Units: 6,
@@ -1358,7 +1358,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 			ID:     "FLTR_RES_RCFG1",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
@@ -1413,9 +1413,9 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account:     "1001",
-					utils.Subject:     "1002",
-					utils.Destination: "1001"},
+					utils.AccountField: "1001",
+					utils.Subject:      "1002",
+					utils.Destination:  "1001"},
 			},
 		},
 		Units: 6,
@@ -1444,9 +1444,9 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account:     "1001",
-					utils.Subject:     "1002",
-					utils.Destination: "1001"},
+					utils.AccountField: "1001",
+					utils.Subject:      "1002",
+					utils.Destination:  "1001"},
 			},
 		},
 		Units: 6,
@@ -1471,9 +1471,9 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account:     "1002",
-					utils.Subject:     "1001",
-					utils.Destination: "1002"},
+					utils.AccountField: "1002",
+					utils.Subject:      "1001",
+					utils.Destination:  "1002"},
 			},
 		},
 		Units: 6,
@@ -1493,7 +1493,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 			ID:     "FLTR_RES_RCFG2",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"2002"},
 				},
@@ -1549,9 +1549,9 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account:     "2002",
-					utils.Subject:     "2001",
-					utils.Destination: "2002"},
+					utils.AccountField: "2002",
+					utils.Subject:      "2001",
+					utils.Destination:  "2002"},
 			},
 		},
 		Units: 6,
@@ -1571,7 +1571,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 			ID:     "FLTR_RES_RCFG3",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1002"},
 				},
@@ -1617,9 +1617,9 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account:     "1002",
-					utils.Subject:     "1001",
-					utils.Destination: "1002"},
+					utils.AccountField: "1002",
+					utils.Subject:      "1001",
+					utils.Destination:  "1002"},
 			},
 		},
 		Units: 6,
@@ -1640,9 +1640,9 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account:     "2002",
-					utils.Subject:     "2001",
-					utils.Destination: "2002"},
+					utils.AccountField: "2002",
+					utils.Subject:      "2001",
+					utils.Destination:  "2002"},
 			},
 		},
 		Units: 6,
@@ -1664,9 +1664,9 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account:     "1002",
-					utils.Subject:     "1001",
-					utils.Destination: "1002"},
+					utils.AccountField: "1002",
+					utils.Subject:      "1001",
+					utils.Destination:  "1002"},
 			},
 		},
 		Units: 6,

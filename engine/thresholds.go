@@ -98,7 +98,7 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 	if utils.IfaceAsString(args.Opts[utils.MetaEventType]) == utils.AccountUpdate {
 		acnt, _ = args.FieldAsString(utils.ID)
 	} else {
-		acnt, _ = args.FieldAsString(utils.Account)
+		acnt, _ = args.FieldAsString(utils.AccountField)
 	}
 	if acnt != utils.EmptyString {
 		tntAcnt = utils.ConcatenatedKey(args.Tenant, acnt)

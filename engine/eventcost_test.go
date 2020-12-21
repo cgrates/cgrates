@@ -3242,14 +3242,14 @@ func TestEventCostgetAcountingForPath(t *testing.T) {
 		ID: "ID",
 	}
 	//len(fldPath) == 1
-	if rcv, err := eventCost.getAcountingForPath([]string{utils.Balance}, balanceCharge); err != nil {
+	if rcv, err := eventCost.getAcountingForPath([]string{utils.BalanceField}, balanceCharge); err != nil {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if !reflect.DeepEqual(eBalanceSummaries, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eBalanceSummaries, rcv)
 	}
 	// bl == nil
 	eventCost = &EventCost{AccountSummary: &AccountSummary{}}
-	if rcv, err := eventCost.getAcountingForPath([]string{utils.Balance}, balanceCharge); err == nil || err != utils.ErrNotFound {
+	if rcv, err := eventCost.getAcountingForPath([]string{utils.BalanceField}, balanceCharge); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", rcv)
@@ -3264,7 +3264,7 @@ func TestEventCostgetAcountingForPath(t *testing.T) {
 			},
 		},
 	}
-	if rcv, err := eventCost.getAcountingForPath([]string{utils.Balance, "ID"}, balanceCharge); err != nil {
+	if rcv, err := eventCost.getAcountingForPath([]string{utils.BalanceField, "ID"}, balanceCharge); err != nil {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if !reflect.DeepEqual("ID", rcv) {
 		t.Errorf("Expecting: \"ID\", received: %+v", rcv)

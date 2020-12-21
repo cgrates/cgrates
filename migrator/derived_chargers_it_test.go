@@ -156,7 +156,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:  utils.MetaVariable,
 				Value: config.NewRSRParsersMustCompile("1004", utils.INFIELD_SEP),
 			},

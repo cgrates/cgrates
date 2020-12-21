@@ -28,7 +28,7 @@ func init() {
 		name:      "maxusage",
 		rpcMethod: utils.APIerSv1GetMaxUsage,
 		clientArgs: []string{utils.ToR, utils.RequestType, utils.Tenant,
-			utils.Category, utils.Account, utils.Subject, utils.Destination,
+			utils.Category, utils.AccountField, utils.Subject, utils.Destination,
 			utils.SetupTime, utils.AnswerTime, utils.Usage, utils.ExtraFields},
 	}
 	commands[c.Name()] = c

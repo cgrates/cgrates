@@ -36,24 +36,24 @@ func TestFieldinfo2Attribute(t *testing.T) {
 	}
 	tests := []testA{
 		{
-			Path:      utils.Account,
+			Path:      utils.AccountField,
 			FieldInfo: utils.MetaDefault,
 			Initial:   make([]*engine.Attribute, 0),
 			Expected:  make([]*engine.Attribute, 0),
 		},
 		{
-			Path:      utils.Account,
+			Path:      utils.AccountField,
 			FieldInfo: "",
 			Initial:   make([]*engine.Attribute, 0),
 			Expected:  make([]*engine.Attribute, 0),
 		},
 		{
-			Path:      utils.Account,
+			Path:      utils.AccountField,
 			FieldInfo: "^1003",
 			Initial:   make([]*engine.Attribute, 0),
 			Expected: []*engine.Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:  utils.MetaVariable,
 					Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP),
 				},
@@ -76,14 +76,14 @@ func TestFieldinfo2Attribute(t *testing.T) {
 			FieldInfo: "^call_1003",
 			Initial: []*engine.Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:  utils.MetaVariable,
 					Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP),
 				},
 			},
 			Expected: []*engine.Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:  utils.MetaVariable,
 					Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP),
 				},
@@ -133,7 +133,7 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 						Value: config.NewRSRParsersMustCompile("*voice", utils.INFIELD_SEP),
 					},
 					{
-						Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+						Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 						Type:  utils.MetaVariable,
 						Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP),
 					},
@@ -166,7 +166,7 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 						Value: config.NewRSRParsersMustCompile("*voice", utils.INFIELD_SEP),
 					},
 					{
-						Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+						Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 						Type:  utils.MetaVariable,
 						Value: config.NewRSRParsersMustCompile("1003", utils.INFIELD_SEP),
 					},

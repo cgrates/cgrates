@@ -197,7 +197,7 @@ func TestNewRSRParsersParseDataProviderWithInterfaces(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if out, err := rsrParsers.ParseDataProviderWithInterfaces(
 		utils.MapStorage{
-			utils.MetaReq: utils.MapStorage{utils.Account: "1001"},
+			utils.MetaReq: utils.MapStorage{utils.AccountField: "1001"},
 		}); err != nil {
 		t.Error(err)
 	} else if expected := "~*accounts.1001"; out != expected {

@@ -230,7 +230,7 @@ func TestMigratorCgrCfgClone(t *testing.T) {
 		OutStorDBName:     utils.CGRATES,
 		OutStorDBUser:     utils.CGRATES,
 		OutStorDBPassword: utils.EmptyString,
-		UsersFilters:      []string{utils.Account},
+		UsersFilters:      []string{utils.AccountField},
 		OutDataDBOpts: map[string]interface{}{
 			utils.RedisSentinelNameCfg:       utils.EmptyString,
 			utils.RedisClusterCfg:            true,
@@ -249,7 +249,7 @@ func TestMigratorCgrCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(sa, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(sa), utils.ToJSON(rcv))
 	}
-	if rcv.UsersFilters[0] = ""; sa.UsersFilters[0] != utils.Account {
+	if rcv.UsersFilters[0] = ""; sa.UsersFilters[0] != utils.AccountField {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.OutDataDBOpts[utils.RedisSentinelNameCfg] = "1"; sa.OutDataDBOpts[utils.RedisSentinelNameCfg] != "" {

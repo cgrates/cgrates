@@ -96,14 +96,14 @@ func (kev KamEvent) MissingParameter() bool {
 			kev[KamHashID],
 			kev[utils.OriginID],
 			kev[utils.AnswerTime],
-			kev[utils.Account],
+			kev[utils.AccountField],
 			kev[utils.Destination],
 		}, "")
 	case CGR_CALL_END:
 		return utils.IsSliceMember([]string{
 			kev[utils.OriginID],
 			kev[utils.AnswerTime],
-			kev[utils.Account],
+			kev[utils.AccountField],
 			kev[utils.Destination],
 		}, "")
 	case CGR_PROCESS_MESSAGE:
@@ -115,7 +115,7 @@ func (kev KamEvent) MissingParameter() bool {
 		if has {
 			mndPrm = append(mndPrm, kev[utils.OriginID],
 				kev[utils.AnswerTime],
-				kev[utils.Account],
+				kev[utils.AccountField],
 				kev[utils.Destination])
 		}
 		return utils.IsSliceMember(mndPrm, "")

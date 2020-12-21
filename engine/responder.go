@@ -356,9 +356,9 @@ func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnA
 					utils.Responder, anctID, err.Error()))
 		} else {
 			*reply = map[string]interface{}{
-				utils.CapMaxUsage: maxDur,
-				utils.Cost:        0.0,
-				utils.Account:     anctID,
+				utils.CapMaxUsage:  maxDur,
+				utils.Cost:         0.0,
+				utils.AccountField: anctID,
 			}
 			return nil
 		}

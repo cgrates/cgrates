@@ -46,7 +46,7 @@ var (
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 			Opts: map[string]interface{}{utils.OptsContext: "simpleauth"},
@@ -56,8 +56,8 @@ var (
 				Tenant: "cgrates.org",
 				ID:     "event2",
 				Event: map[string]interface{}{
-					utils.Account:   "1010",
-					"DistinctMatch": "cgrates",
+					utils.AccountField: "1010",
+					"DistinctMatch":    "cgrates",
 				},
 			},
 		},
@@ -66,7 +66,7 @@ var (
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account: "1007",
+					utils.AccountField: "1007",
 				},
 			},
 			Opts: map[string]interface{}{utils.OptsContext: "simpleauth"},
@@ -306,8 +306,8 @@ func testChargerSGetChargersForEvent2(t *testing.T) {
 				Tenant: utils.EmptyString,
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account: "1015",
-					utils.Usage:   1,
+					utils.AccountField: "1015",
+					utils.Usage:        1,
 				},
 			},
 		}, &result); err == nil ||
@@ -328,9 +328,9 @@ func testChargerSProcessEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
-					"Password":    "CGRateS.org",
-					"RunID":       utils.MetaDefault,
+					utils.AccountField: "1001",
+					"Password":         "CGRateS.org",
+					"RunID":            utils.MetaDefault,
 				},
 			},
 		},
@@ -356,10 +356,10 @@ func testChargerSProcessEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account:     "1007",
-					utils.RequestType: "*rated",
-					utils.Category:    "call",
-					utils.RunID:       utils.MetaDefault,
+					utils.AccountField: "1007",
+					utils.RequestType:  "*rated",
+					utils.Category:     "call",
+					utils.RunID:        utils.MetaDefault,
 				},
 			},
 		},
@@ -518,8 +518,8 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "CustomEvent",
 			Event: map[string]interface{}{
-				utils.Account: "Random",
-				"CustomField": "WithoutAttributes",
+				utils.AccountField: "Random",
+				"CustomField":      "WithoutAttributes",
 			},
 		},
 	}
@@ -533,9 +533,9 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "CustomEvent",
 				Event: map[string]interface{}{
-					utils.Account: "Random",
-					"CustomField": "WithoutAttributes",
-					"RunID":       "CustomRun",
+					utils.AccountField: "Random",
+					"CustomField":      "WithoutAttributes",
+					"RunID":            "CustomRun",
 				},
 			},
 		},
@@ -599,8 +599,8 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account: "1002",
-					utils.RunID:   "*default",
+					utils.AccountField: "1002",
+					utils.RunID:        "*default",
 				},
 			},
 		},
@@ -610,7 +610,7 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
-				utils.Account: "1010",
+				utils.AccountField: "1010",
 			},
 		},
 		Opts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1.},

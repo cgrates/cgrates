@@ -168,7 +168,7 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 
 func (fsev FSEvent) MissingParameter(timezone string) string {
 	if strings.TrimSpace(fsev.GetAccount(utils.MetaDefault)) == "" {
-		return utils.Account
+		return utils.AccountField
 	}
 	if strings.TrimSpace(fsev.GetSubject(utils.MetaDefault)) == "" {
 		return utils.Subject
@@ -315,7 +315,7 @@ func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (
 		return rsrFld.ParseValue(fsev.GetTenant(""))
 	case utils.Category:
 		return rsrFld.ParseValue(fsev.GetCategory(""))
-	case utils.Account:
+	case utils.AccountField:
 		return rsrFld.ParseValue(fsev.GetAccount(""))
 	case utils.Subject:
 		return rsrFld.ParseValue(fsev.GetSubject(""))
@@ -377,7 +377,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.RequestType] = fsev.GetReqType(utils.MetaDefault)
 	mp[utils.Tenant] = fsev.GetTenant(utils.MetaDefault)
 	mp[utils.Category] = fsev.GetCategory(utils.MetaDefault)
-	mp[utils.Account] = fsev.GetAccount(utils.MetaDefault)
+	mp[utils.AccountField] = fsev.GetAccount(utils.MetaDefault)
 	mp[utils.Subject] = fsev.GetSubject(utils.MetaDefault)
 	mp[utils.Destination] = fsev.GetDestination(utils.MetaDefault)
 	mp[utils.SetupTime], _ = fsev.GetSetupTime(utils.MetaDefault, timezone)

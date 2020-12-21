@@ -125,8 +125,8 @@ func initSession(i int) {
 	}
 	initArgs.ID = utils.UUIDSha1Prefix()
 	initArgs.Event[utils.OriginID] = utils.UUIDSha1Prefix()
-	initArgs.Event[utils.Account] = fmt.Sprintf("1001%v", i)
-	initArgs.Event[utils.Subject] = "1001" //initArgs.Event[utils.Account]
+	initArgs.Event[utils.AccountField] = fmt.Sprintf("1001%v", i)
+	initArgs.Event[utils.Subject] = "1001" //initArgs.Event[utils.AccountField]
 	initArgs.Event[utils.Destination] = fmt.Sprintf("1002%v", i)
 
 	var initRpl *V1InitSessionReply

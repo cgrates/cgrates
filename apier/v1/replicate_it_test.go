@@ -1213,7 +1213,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 				ID:     "event1",
 				Event: map[string]interface{}{
 					utils.EventType:     utils.AccountUpdate,
-					utils.Account:       "1005",
+					utils.AccountField:  "1005",
 					utils.AllowNegative: true,
 					utils.Disabled:      false,
 					utils.Units:         12.3},
@@ -1469,7 +1469,7 @@ func testInternalReplicateITLoadIds(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
-					Path:      utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
 				},
 				{

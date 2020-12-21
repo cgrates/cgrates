@@ -692,13 +692,13 @@ func testStorDBitCRUDTPAttributes(t *testing.T) {
 			Attributes: []*utils.TPAttribute{
 				{
 					Type:      utils.MetaString,
-					Path:      utils.MetaReq + utils.Account + utils.InInFieldSep,
+					Path:      utils.MetaReq + utils.AccountField + utils.InInFieldSep,
 					Value:     "102",
 					FilterIDs: []string{"*string:~*req.Account:102"},
 				},
 				{
 					Type:      utils.MetaString,
-					Path:      utils.MetaReq + utils.Account + utils.InInFieldSep,
+					Path:      utils.MetaReq + utils.AccountField + utils.InInFieldSep,
 					Value:     "101",
 					FilterIDs: []string{"*string:~*req.Account:101"},
 				},

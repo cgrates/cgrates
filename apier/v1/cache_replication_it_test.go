@@ -131,7 +131,7 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testCacheSReplicateProcessAttributes",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 		},
@@ -144,8 +144,8 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testCacheSReplicateProcessAttributes",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
-					"OfficeGroup": "Marketing",
+					utils.AccountField: "1001",
+					"OfficeGroup":      "Marketing",
 				},
 			},
 		},
@@ -183,7 +183,7 @@ func testCacheSReplicateProcessRateProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account: "1002",
+					utils.AccountField: "1002",
 				},
 			},
 		},

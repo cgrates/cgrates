@@ -935,3 +935,43 @@ func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err 
 	Cache.RemoveWithoutReplicate(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
+func (iDB *InternalDB) GetAccountProfileDrv(tenant, id string) (ap *utils.AccountProfile, err error) {
+	x, ok := Cache.Get(utils.CacheAccountProfiles, utils.ConcatenatedKey(tenant, id))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*utils.AccountProfile), nil
+}
+
+func (iDB *InternalDB) SetAccountProfileDrv(ap *utils.AccountProfile) (err error) {
+	Cache.SetWithoutReplicate(utils.CacheAccountProfiles, ap.TenantID(), ap, nil,
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
+}
+
+func (iDB *InternalDB) RemoveAccountProfileDrv(tenant, id string) (err error) {
+	Cache.RemoveWithoutReplicate(utils.CacheAccountProfiles, utils.ConcatenatedKey(tenant, id),
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
+}
+
+func (iDB *InternalDB) GetAccount2Drv(tenant, id string) (ap *utils.Account, err error) {
+	x, ok := Cache.Get(utils.CacheAccounts2, utils.ConcatenatedKey(tenant, id))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*utils.Account), nil
+}
+
+func (iDB *InternalDB) SetAccount2Drv(ap *utils.Account) (err error) {
+	Cache.SetWithoutReplicate(utils.CacheAccounts2, ap.TenantID(), ap, nil,
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
+}
+
+func (iDB *InternalDB) RemoveAccount2Drv(tenant, id string) (err error) {
+	Cache.RemoveWithoutReplicate(utils.CacheAccounts2, utils.ConcatenatedKey(tenant, id),
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
+}

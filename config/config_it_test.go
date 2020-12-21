@@ -149,7 +149,7 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		ApierSConns:         []string{},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
+		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
@@ -194,7 +194,7 @@ func testCGRConfigReloadChargerS(t *testing.T) {
 	}
 	expAttr := &ChargerSCfg{
 		Enabled:             true,
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
+		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
@@ -219,7 +219,7 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 	}
 	expAttr := &ThresholdSCfg{
 		Enabled:             true,
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
+		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
@@ -243,7 +243,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 	}
 	expAttr := &StatSCfg{
 		Enabled:             true,
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
+		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
@@ -268,7 +268,7 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 	}
 	expAttr := &ResourceSConfig{
 		Enabled:             true,
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Account},
+		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
@@ -513,7 +513,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 		{Tag: utils.RequestType, Path: utils.MetaCgreq + utils.NestingSep + utils.RequestType, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 		{Tag: utils.Tenant, Path: utils.MetaCgreq + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 		{Tag: utils.Category, Path: utils.MetaCgreq + utils.NestingSep + utils.Category, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
-		{Tag: utils.Account, Path: utils.MetaCgreq + utils.NestingSep + utils.Account, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
+		{Tag: utils.AccountField, Path: utils.MetaCgreq + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 		{Tag: utils.Subject, Path: utils.MetaCgreq + utils.NestingSep + utils.Subject, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 		{Tag: utils.Destination, Path: utils.MetaCgreq + utils.NestingSep + utils.Destination, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.10", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},
 		{Tag: utils.SetupTime, Path: utils.MetaCgreq + utils.NestingSep + utils.SetupTime, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.11", utils.INFIELD_SEP), Mandatory: true, Layout: time.RFC3339},

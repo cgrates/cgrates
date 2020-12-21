@@ -143,7 +143,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAPIerAfterDelete",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 		},
@@ -221,7 +221,7 @@ func testAPIerVerifyAttributesAfterDelete(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAPIerAfterDelete",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 		},

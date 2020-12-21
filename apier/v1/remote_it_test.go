@@ -473,7 +473,7 @@ func testInternalRemoteITGetFilter(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Values:  []string{"1001"},
 			},
 		},
@@ -897,7 +897,7 @@ func testInternalMatchThreshold(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event2",
 				Event: map[string]interface{}{
-					utils.Account: "1002",
+					utils.AccountField: "1002",
 				},
 			},
 		},
@@ -915,7 +915,7 @@ func testInternalMatchThreshold(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event2",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 		},
@@ -932,7 +932,7 @@ func testInternalMatchThreshold(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event3",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 		},

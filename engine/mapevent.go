@@ -230,7 +230,7 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err 
 			cdr.Tenant = utils.IfaceAsString(v)
 		case utils.Category:
 			cdr.Category = utils.IfaceAsString(v)
-		case utils.Account:
+		case utils.AccountField:
 			cdr.Account = utils.IfaceAsString(v)
 		case utils.Subject:
 			cdr.Subject = utils.IfaceAsString(v)

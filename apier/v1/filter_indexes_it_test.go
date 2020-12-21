@@ -158,7 +158,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 			Tenant: tenant,
 			ID:     "TestFilter",
 			Rules: []*engine.FilterRule{{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
@@ -253,7 +253,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 			Tenant: tenant,
 			ID:     "TestFilter2",
 			Rules: []*engine.FilterRule{{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:    utils.MetaString,
 				Values:  []string{"1002"},
 			}},
@@ -418,7 +418,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
@@ -521,7 +521,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
@@ -667,7 +667,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_RES_RCFG1",
 			Rules: []*engine.FilterRule{{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
@@ -760,7 +760,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
@@ -896,7 +896,7 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Type:    utils.MetaString,
 					Values:  []string{"1001"},
 				},
@@ -995,7 +995,7 @@ func testV1FIdxSetSecondRouteProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
@@ -1138,7 +1138,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
@@ -1246,7 +1246,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{{
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},

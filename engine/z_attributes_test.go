@@ -96,7 +96,7 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value: config.NewRSRParsersMustCompile("1010", utils.INFIELD_SEP),
 				},
 			},
@@ -113,7 +113,7 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value: config.NewRSRParsersMustCompile("1010", utils.INFIELD_SEP),
 				},
 			},
@@ -130,7 +130,7 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value: config.NewRSRParsersMustCompile("1010", utils.INFIELD_SEP),
 				},
 			},
@@ -147,7 +147,7 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 					Value: config.NewRSRParsersMustCompile("1010", utils.INFIELD_SEP),
 				},
 			},
@@ -355,13 +355,13 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 func TestAttributeEventReplyDigest(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{utils.Account, utils.Subject},
+		AlteredFields:   []string{utils.AccountField, utils.Subject},
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:      "1001",
+					utils.AccountField: "1001",
 					utils.Subject:      "1001",
 					utils.Destinations: "+491511231234",
 				},
@@ -384,7 +384,7 @@ func TestAttributeEventReplyDigest2(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:      "1001",
+					utils.AccountField: "1001",
 					utils.Subject:      "1001",
 					utils.Destinations: "+491511231234",
 				},
@@ -407,7 +407,7 @@ func TestAttributeEventReplyDigest3(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:      "1001",
+					utils.AccountField: "1001",
 					utils.Subject:      "1001",
 					utils.Destinations: "+491511231234",
 				},
@@ -430,7 +430,7 @@ func TestAttributeEventReplyDigest4(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.Account:      "1001",
+					utils.AccountField: "1001",
 					utils.Destinations: "+491511231234",
 				},
 			},
@@ -464,7 +464,7 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Value: config.NewRSRParsersMustCompile("1010", utils.INFIELD_SEP),
 			},
 		},
@@ -2785,7 +2785,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Value: config.NewRSRParsersMustCompile("1010", utils.INFIELD_SEP),
 			},
 		},

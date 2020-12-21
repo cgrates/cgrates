@@ -38,7 +38,7 @@ type AccountActionTiming struct {
 }
 
 func (apierSv1 *APIerSv1) GetAccountActionPlan(attrs *utils.TenantAccount, reply *[]*AccountActionTiming) error {
-	if missing := utils.MissingStructFields(attrs, []string{utils.Account}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
 	tnt := attrs.Tenant
@@ -95,7 +95,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 	}
 	var accID string
 	if len(attrs.Account) != 0 { // Presence of Account requires complete account details to be provided
-		if missing := utils.MissingStructFields(attrs, []string{utils.Account}); len(missing) != 0 {
+		if missing := utils.MissingStructFields(attrs, []string{utils.AccountField}); len(missing) != 0 {
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 		tnt := attrs.Tenant
@@ -181,7 +181,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 
 // SetAccount adds a new account into dataDb. If already defined, returns success.
 func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{utils.Account}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant
@@ -306,7 +306,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 }
 
 func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{utils.Account}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant
@@ -449,7 +449,7 @@ func (apierSv1 *APIerSv1) DebitBalance(attr *AttrAddBalance, reply *string) erro
 }
 
 func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{utils.Account, utils.BalanceType, utils.Value}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField, utils.BalanceType, utils.Value}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var balance *engine.BalanceFilter
@@ -526,7 +526,7 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 // SetBalance sets the balance for the given account
 // if the account is not already created it will create the account also
 func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{utils.Account, utils.BalanceType}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField, utils.BalanceType}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var balance *engine.BalanceFilter
@@ -604,7 +604,7 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 // SetBalances sets multiple balances for the given account
 // if the account is not already created it will create the account also
 func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{utils.Account, utils.Balances}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField, utils.Balances}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant
@@ -687,7 +687,7 @@ func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string
 
 // RemoveBalances remove the matching balances for the account
 func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{utils.Account, utils.BalanceType}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField, utils.BalanceType}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var balance *engine.BalanceFilter

@@ -31,7 +31,7 @@ import (
 
 // Returns a list of ActionTriggers on an account
 func (apierSv1 *APIerSv1) GetAccountActionTriggers(attrs *utils.TenantAccount, reply *engine.ActionTriggers) error {
-	if missing := utils.MissingStructFields(attrs, []string{utils.Account}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attrs.Tenant
@@ -60,7 +60,7 @@ type AttrAddAccountActionTriggers struct {
 }
 
 func (apierSv1 *APIerSv1) AddAccountActionTriggers(attr *AttrAddAccountActionTriggers, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{utils.Account}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant
@@ -119,7 +119,7 @@ type AttrRemoveAccountActionTriggers struct {
 }
 
 func (apierSv1 *APIerSv1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTriggers, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{utils.Account}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant
@@ -165,7 +165,7 @@ type AttrResetAccountActionTriggers struct {
 
 func (apierSv1 *APIerSv1) ResetAccountActionTriggers(attr AttrResetAccountActionTriggers, reply *string) error {
 
-	if missing := utils.MissingStructFields(&attr, []string{utils.Account}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant
@@ -353,7 +353,7 @@ func (attr *AttrSetActionTrigger) UpdateActionTrigger(at *engine.ActionTrigger, 
 
 // SetAccountActionTriggers updates or creates if not present the ActionTrigger for an Account
 func (apierSv1 *APIerSv1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{utils.Account}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant
@@ -547,7 +547,7 @@ type AttrAddActionTrigger struct {
 
 // Deprecated in rc8, replaced by AddAccountActionTriggers
 func (apierSv1 *APIerSv1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{utils.Account}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant

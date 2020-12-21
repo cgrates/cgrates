@@ -222,8 +222,8 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account:    "1002",
-					utils.EVENT_NAME: "Event1",
+					utils.AccountField: "1002",
+					utils.EVENT_NAME:   "Event1",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -259,9 +259,9 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account:    "1002",
-					utils.EVENT_NAME: "Event1",
-					"Password":       "CGRateS.org",
+					utils.AccountField: "1002",
+					utils.EVENT_NAME:   "Event1",
+					"Password":         "CGRateS.org",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -341,7 +341,7 @@ func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 		},
@@ -361,7 +361,7 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 		},
@@ -381,7 +381,7 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -404,7 +404,7 @@ func testDspAttrTestAuthKey(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -427,7 +427,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
+					utils.AccountField: "1001",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -477,8 +477,8 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account: "1001",
-					"Password":    "CGRateS.org",
+					utils.AccountField: "1001",
+					"Password":         "CGRateS.org",
 				},
 			},
 		},
@@ -502,8 +502,8 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account:    "1001",
-					utils.EVENT_NAME: "Event1",
+					utils.AccountField: "1001",
+					utils.EVENT_NAME:   "Event1",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -526,8 +526,8 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account:    "1002",
-					utils.EVENT_NAME: "RoundRobin",
+					utils.AccountField: "1002",
+					utils.EVENT_NAME:   "RoundRobin",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -563,9 +563,9 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account:    "1002",
-					utils.EVENT_NAME: "RoundRobin",
-					"Password":       "CGRateS.org",
+					utils.AccountField: "1002",
+					utils.EVENT_NAME:   "RoundRobin",
+					"Password":         "CGRateS.org",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -621,8 +621,8 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME: "Internal",
-					utils.Account:    "1003",
+					utils.EVENT_NAME:   "Internal",
+					utils.AccountField: "1003",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -642,9 +642,9 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.Account:    "1003",
-					utils.EVENT_NAME: "Internal",
-					"Password":       "CGRateS.com",
+					utils.AccountField: "1003",
+					utils.EVENT_NAME:   "Internal",
+					"Password":         "CGRateS.com",
 				},
 			},
 		},

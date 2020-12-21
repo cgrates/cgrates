@@ -135,6 +135,12 @@ type DataDB interface {
 	GetActionProfileDrv(string, string) (*ActionProfile, error)
 	SetActionProfileDrv(*ActionProfile) error
 	RemoveActionProfileDrv(string, string) error
+	GetAccountProfileDrv(string, string) (*utils.AccountProfile, error)
+	SetAccountProfileDrv(profile *utils.AccountProfile) error
+	RemoveAccountProfileDrv(string, string) error
+	GetAccount2Drv(string, string) (*utils.Account, error)
+	SetAccount2Drv(*utils.Account) error
+	RemoveAccount2Drv(string, string) error
 }
 
 type StorDB interface {

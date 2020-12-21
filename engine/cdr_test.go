@@ -136,7 +136,7 @@ func TestFieldAsString(t *testing.T) {
 	} else if fldVal != eFldVal {
 		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account)
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField)
 	eFldVal = cdr.Account
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
@@ -358,8 +358,8 @@ func TestCDRAsHttpForm(t *testing.T) {
 	if cdrForm.Get(utils.Category) != "call" {
 		t.Errorf("Expected: %s, received: %s", "call", cdrForm.Get(utils.Category))
 	}
-	if cdrForm.Get(utils.ACCOUNT) != "1001" {
-		t.Errorf("Expected: %s, received: %s", "1001", cdrForm.Get(utils.ACCOUNT))
+	if cdrForm.Get(utils.AccountField) != "1001" {
+		t.Errorf("Expected: %s, received: %s", "1001", cdrForm.Get(utils.AccountField))
 	}
 	if cdrForm.Get(utils.Subject) != "1001" {
 		t.Errorf("Expected: %s, received: %s", "1001", cdrForm.Get(utils.Subject))
@@ -498,29 +498,29 @@ func TestCDRAsMapStringIface(t *testing.T) {
 	}
 
 	mp := map[string]interface{}{
-		"field_extr1":     "val_extr1",
-		"fieldextr2":      "valextr2",
-		utils.CGRID:       cdr.CGRID,
-		utils.RunID:       utils.MetaDefault,
-		utils.OrderID:     cdr.OrderID,
-		utils.OriginHost:  "192.168.1.1",
-		utils.Source:      utils.UNIT_TEST,
-		utils.OriginID:    "dsafdsaf",
-		utils.ToR:         utils.VOICE,
-		utils.RequestType: utils.META_RATED,
-		utils.Tenant:      "cgrates.org",
-		utils.Category:    "call",
-		utils.Account:     "1002",
-		utils.Subject:     "1001",
-		utils.Destination: "+4986517174963",
-		utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-		utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		utils.Usage:       10 * time.Second,
-		utils.CostSource:  cdr.CostSource,
-		utils.Cost:        1.01,
-		utils.PreRated:    false,
-		utils.Partial:     false,
-		utils.ExtraInfo:   cdr.ExtraInfo,
+		"field_extr1":      "val_extr1",
+		"fieldextr2":       "valextr2",
+		utils.CGRID:        cdr.CGRID,
+		utils.RunID:        utils.MetaDefault,
+		utils.OrderID:      cdr.OrderID,
+		utils.OriginHost:   "192.168.1.1",
+		utils.Source:       utils.UNIT_TEST,
+		utils.OriginID:     "dsafdsaf",
+		utils.ToR:          utils.VOICE,
+		utils.RequestType:  utils.META_RATED,
+		utils.Tenant:       "cgrates.org",
+		utils.Category:     "call",
+		utils.AccountField: "1002",
+		utils.Subject:      "1001",
+		utils.Destination:  "+4986517174963",
+		utils.SetupTime:    time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		utils.AnswerTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		utils.Usage:        10 * time.Second,
+		utils.CostSource:   cdr.CostSource,
+		utils.Cost:         1.01,
+		utils.PreRated:     false,
+		utils.Partial:      false,
+		utils.ExtraInfo:    cdr.ExtraInfo,
 	}
 	if cdrMp := cdr.AsMapStringIface(); !reflect.DeepEqual(mp, cdrMp) {
 		t.Errorf("Expecting: %+v, received: %+v", mp, cdrMp)
@@ -561,30 +561,30 @@ func TestCDRTestCDRAsMapStringIface2(t *testing.T) {
 	}
 
 	mp := map[string]interface{}{
-		"field_extr1":     "val_extr1",
-		"fieldextr2":      "valextr2",
-		utils.CGRID:       cdr.CGRID,
-		utils.RunID:       utils.MetaDefault,
-		utils.OrderID:     cdr.OrderID,
-		utils.OriginHost:  "192.168.1.1",
-		utils.Source:      utils.UNIT_TEST,
-		utils.OriginID:    "dsafdsaf",
-		utils.ToR:         utils.VOICE,
-		utils.RequestType: utils.META_RATED,
-		utils.Tenant:      "cgrates.org",
-		utils.Category:    "call",
-		utils.Account:     "1002",
-		utils.Subject:     "1001",
-		utils.Destination: "+4986517174963",
-		utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-		utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		utils.Usage:       10 * time.Second,
-		utils.CostSource:  cdr.CostSource,
-		utils.Cost:        1.01,
-		utils.PreRated:    false,
-		utils.Partial:     false,
-		utils.ExtraInfo:   cdr.ExtraInfo,
-		utils.CostDetails: cdr.CostDetails,
+		"field_extr1":      "val_extr1",
+		"fieldextr2":       "valextr2",
+		utils.CGRID:        cdr.CGRID,
+		utils.RunID:        utils.MetaDefault,
+		utils.OrderID:      cdr.OrderID,
+		utils.OriginHost:   "192.168.1.1",
+		utils.Source:       utils.UNIT_TEST,
+		utils.OriginID:     "dsafdsaf",
+		utils.ToR:          utils.VOICE,
+		utils.RequestType:  utils.META_RATED,
+		utils.Tenant:       "cgrates.org",
+		utils.Category:     "call",
+		utils.AccountField: "1002",
+		utils.Subject:      "1001",
+		utils.Destination:  "+4986517174963",
+		utils.SetupTime:    time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		utils.AnswerTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		utils.Usage:        10 * time.Second,
+		utils.CostSource:   cdr.CostSource,
+		utils.Cost:         1.01,
+		utils.PreRated:     false,
+		utils.Partial:      false,
+		utils.ExtraInfo:    cdr.ExtraInfo,
+		utils.CostDetails:  cdr.CostDetails,
 	}
 	if cdrMp := cdr.AsMapStringIface(); !reflect.DeepEqual(mp, cdrMp) {
 		t.Errorf("Expecting: %+v, received: %+v", mp, cdrMp)

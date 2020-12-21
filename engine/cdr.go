@@ -220,7 +220,7 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {
 	mp[utils.RequestType] = cdr.RequestType
 	mp[utils.Tenant] = cdr.Tenant
 	mp[utils.Category] = cdr.Category
-	mp[utils.Account] = cdr.Account
+	mp[utils.AccountField] = cdr.Account
 	mp[utils.Subject] = cdr.Subject
 	mp[utils.Destination] = cdr.Destination
 	mp[utils.SetupTime] = cdr.SetupTime

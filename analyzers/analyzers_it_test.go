@@ -142,9 +142,9 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
-				utils.Account:     "1010",
-				utils.Subject:     "Something_inter",
-				utils.Destination: "999",
+				utils.AccountField: "1010",
+				utils.Subject:      "Something_inter",
+				utils.Destination:  "999",
 			},
 		},
 	}

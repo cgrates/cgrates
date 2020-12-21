@@ -139,10 +139,10 @@ func testV1FltrAddStats(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account:    "1001",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      11 * time.Second,
-					utils.COST:       10.0,
+					utils.AccountField: "1001",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        11 * time.Second,
+					utils.COST:         10.0,
 				},
 			},
 		},
@@ -158,10 +158,10 @@ func testV1FltrAddStats(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
-			utils.Account:    "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      11 * time.Second,
-			utils.COST:       10.5,
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        11 * time.Second,
+			utils.COST:         10.5,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -175,10 +175,10 @@ func testV1FltrAddStats(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      5 * time.Second,
-			utils.COST:       12.5,
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        5 * time.Second,
+			utils.COST:         12.5,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -192,10 +192,10 @@ func testV1FltrAddStats(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      6 * time.Second,
-			utils.COST:       17.5,
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        6 * time.Second,
+			utils.COST:         17.5,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -209,10 +209,10 @@ func testV1FltrAddStats(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
-			utils.Account:    "1003",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      11 * time.Second,
-			utils.COST:       12.5,
+			utils.AccountField: "1003",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        11 * time.Second,
+			utils.COST:         12.5,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -331,7 +331,7 @@ func testV1FltrGetThresholdForEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account: "1010"},
+					utils.AccountField: "1010"},
 			},
 		},
 	}
@@ -396,7 +396,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account: "1010"},
+					utils.AccountField: "1010"},
 			},
 		},
 	}
@@ -508,7 +508,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account: "2020"},
+					utils.AccountField: "2020"},
 			},
 		},
 	}
@@ -627,7 +627,7 @@ func testV1FltrAccounts(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account: "1001"},
+					utils.AccountField: "1001"},
 			},
 		},
 	}
@@ -717,7 +717,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account: "1001"},
+					utils.AccountField: "1001"},
 			},
 		},
 	}
@@ -734,7 +734,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event2",
 				Event: map[string]interface{}{
-					utils.Account: "non"},
+					utils.AccountField: "non"},
 			},
 		},
 	}
@@ -798,10 +798,10 @@ func testV1FltrChargerSuffix(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account:     "1010",
-					utils.Subject:     "intraState",
-					utils.RunID:       "Intra",
-					utils.Destination: "999",
+					utils.AccountField: "1010",
+					utils.Subject:      "intraState",
+					utils.RunID:        "Intra",
+					utils.Destination:  "999",
 				},
 			},
 		},
@@ -811,9 +811,9 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
-				utils.Account:     "1010",
-				utils.Subject:     "Something_intra",
-				utils.Destination: "999",
+				utils.AccountField: "1010",
+				utils.Subject:      "Something_intra",
+				utils.Destination:  "999",
 			},
 		},
 	}
@@ -836,10 +836,10 @@ func testV1FltrChargerSuffix(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
-					utils.Account:     "1010",
-					utils.Subject:     "interState",
-					utils.RunID:       "Inter",
-					utils.Destination: "999",
+					utils.AccountField: "1010",
+					utils.Subject:      "interState",
+					utils.RunID:        "Inter",
+					utils.Destination:  "999",
 				},
 			},
 		},
@@ -849,9 +849,9 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
-				utils.Account:     "1010",
-				utils.Subject:     "Something_inter",
-				utils.Destination: "999",
+				utils.AccountField: "1010",
+				utils.Subject:      "Something_inter",
+				utils.Destination:  "999",
 			},
 		},
 	}

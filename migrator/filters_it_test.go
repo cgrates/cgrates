@@ -154,7 +154,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{{
 			Type:    utils.MetaPrefix,
-			Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+			Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 			Values:  []string{"1001"},
 		}},
 	}
@@ -339,7 +339,7 @@ func testFltrITMigratev2(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Values:  []string{"1001"},
 			},
 			{
@@ -508,7 +508,7 @@ func testFltrITMigratev3(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Values:  []string{"1001"},
 			},
 			{

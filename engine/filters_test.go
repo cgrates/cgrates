@@ -875,16 +875,16 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		dm:  dmFilterPass,
 	}
 	passEvent1 := map[string]interface{}{
-		utils.Tenant:      "cgrates.org",
-		utils.Account:     "1010",
-		utils.Destination: "+49",
-		utils.Weight:      10,
+		utils.Tenant:       "cgrates.org",
+		utils.AccountField: "1010",
+		utils.Destination:  "+49",
+		utils.Weight:       10,
 	}
 	passEvent2 := map[string]interface{}{
-		utils.Tenant:      "itsyscom.com",
-		utils.Account:     "dan",
-		utils.Destination: "+4986517174963",
-		utils.Weight:      20,
+		utils.Tenant:       "itsyscom.com",
+		utils.AccountField: "dan",
+		utils.Destination:  "+4986517174963",
+		utils.Weight:       20,
 	}
 	pEv1 := utils.MapStorage{}
 	pEv1.Set([]string{utils.MetaReq}, passEvent1)
@@ -953,11 +953,11 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	}
 
 	ev = map[string]interface{}{
-		utils.Account:     "1003",
-		utils.Subject:     "1003",
-		utils.Destination: "1002",
-		utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-		utils.Usage:       "1m20s",
+		utils.AccountField: "1003",
+		utils.Subject:      "1003",
+		utils.Destination:  "1002",
+		utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+		utils.Usage:        "1m20s",
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)

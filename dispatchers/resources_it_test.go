@@ -127,8 +127,8 @@ func testDspResTestAuthKey(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account:     "1001",
-					utils.Destination: "1002",
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -152,8 +152,8 @@ func testDspResTestAuthKey2(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.Account:     "1001",
-					utils.Destination: "1002",
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
 				},
 			},
 			Opts: map[string]interface{}{

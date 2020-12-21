@@ -82,7 +82,7 @@ func TestUpdateStructWithIfaceMap(t *testing.T) {
 func TestMissingMapFields(t *testing.T) {
 	var attr = map[string]interface{}{
 		Tenant:            "cgrates.org",
-		Account:           "1001",
+		AccountField:      "1001",
 		"Type":            META_PREPAID,
 		"ActionTimingsID": "*asap",
 	}
