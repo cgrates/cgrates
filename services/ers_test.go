@@ -17,19 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"sync"
-	"testing"
-
-	"github.com/cgrates/rpcclient"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 //TestEventReaderSCoverage for cover testing
 func TestEventReaderSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -57,7 +45,7 @@ func TestEventReaderSCoverage(t *testing.T) {
 	if attrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	/*
+
 		var reply string
 		if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_reload", "internal"),
@@ -87,5 +75,6 @@ func TestEventReaderSCoverage(t *testing.T) {
 		}
 		shdChan.CloseOnce()
 		time.Sleep(10 * time.Millisecond)
-	*/
+
 }
+*/

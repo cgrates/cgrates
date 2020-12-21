@@ -17,21 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"path"
-	"sync"
-	"testing"
-	"time"
-
-	"github.com/cgrates/rpcclient"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 //TestSupplierSCoverage for cover testing
 func TestSupplierSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -101,3 +87,4 @@ func TestSupplierSCoverage(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+*/

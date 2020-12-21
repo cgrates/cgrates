@@ -17,16 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"sync"
-	"testing"
-
-	"github.com/cgrates/cgrates/engine"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 //TestStorDBServiceCoverage for cover testing
 func TestStorDBServiceCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -58,3 +49,4 @@ func TestStorDBServiceCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <Error 1045: Access denied for user 'cgrates'@'localhost' (using password: NO)>,\n Received <%+v>", err2)
 	}
 }
+*/

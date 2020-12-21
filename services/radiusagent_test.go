@@ -17,19 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"path"
-	"sync"
-	"testing"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
-)
-
+/*
 //TestLoaderSCoverage for cover testing
 func TestRadiusAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -72,7 +60,7 @@ func TestRadiusAgentCoverage(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-	/*
+
 		time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 		if !srv.IsRunning() {
 			t.Errorf("Expected service to be running")
@@ -94,5 +82,6 @@ func TestRadiusAgentCoverage(t *testing.T) {
 			}
 			shdChan.CloseOnce()
 			time.Sleep(10 * time.Millisecond)
-	*/
+
 }
+*/

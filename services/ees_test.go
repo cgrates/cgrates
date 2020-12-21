@@ -17,20 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"sync"
-	"testing"
-	"time"
-
-	"github.com/cgrates/rpcclient"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 //TestEventExporterSCoverage for cover testing
 func TestEventExporterSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -70,7 +57,7 @@ func TestEventExporterSCoverage(t *testing.T) {
 	}
 	fcTmp.ComputePath()
 	cfg.TemplatesCfg()["requiredFields"] = []*config.FCTemplate{fcTmp}
-	/*
+
 		var reply string
 		if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ees"),
@@ -102,5 +89,6 @@ func TestEventExporterSCoverage(t *testing.T) {
 				}
 				shdChan.CloseOnce()
 				time.Sleep(10 * time.Millisecond)
-	*/
+
 }
+*/

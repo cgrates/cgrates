@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
+/*
 import (
 	"reflect"
 	"sync"
@@ -95,3 +96,4 @@ func TestAnalyzerCoverage(t *testing.T) {
 	}
 
 }
+*/
