@@ -568,3 +568,26 @@ type ActionProfileMdl struct {
 func (ActionProfileMdl) TableName() string {
 	return utils.TBLTPActionProfiles
 }
+
+type AccountProfileMdl struct {
+	PK                 uint `gorm:"primary_key"`
+	Tpid               string
+	Tenant             string  `index:"0" re:""`
+	ID                 string  `index:"1" re:""`
+	FilterIDs          string  `index:"2" re:""`
+	ActivationInterval string  `index:"3" re:""`
+	Weight             float64 `index:"4" re:"\d+\.?\d*"`
+	BalanceID          string  `index:"5" re:""`
+	BalanceFilterIDs   string  `index:"6" re:""`
+	BalanceWeight      float64 `index:"7" re:"\d+\.?\d*"`
+	BalanceBlocker     bool    `index:"8" re:""`
+	BalanceType        string  `index:"9" re:""`
+	BalanceOpts        string  `index:"10" re:""`
+	BalanceValue       float64 `index:"11" re:"\d+\.?\d*"`
+
+	CreatedAt time.Time
+}
+
+func (AccountProfileMdl) TableName() string {
+	return utils.TBLTPAccountProfiles
+}

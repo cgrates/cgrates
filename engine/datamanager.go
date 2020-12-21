@@ -40,6 +40,7 @@ var (
 		utils.RateFilterIndexPrfx:           {},
 		utils.ActionPlanIndexes:             {},
 		utils.FilterIndexPrfx:               {},
+		utils.AccountProfileFilterIndexPrfx: {},
 	}
 	cachePrefixMap = utils.StringSet{
 		utils.DESTINATION_PREFIX:            {},
@@ -78,6 +79,7 @@ var (
 		utils.RateFilterIndexPrfx:           {},
 		utils.FilterIndexPrfx:               {},
 		utils.MetaAPIBan:                    {}, // not realy a prefix as this is not stored in DB
+		utils.AccountProfilePrefix:          {},
 	}
 )
 
@@ -229,6 +231,12 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.ActionProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetActionProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+		case utils.AccountProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetAccountProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+		case utils.Account2Prefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetAccount2(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
@@ -289,6 +297,12 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 				return
 			}
 			_, err = dm.GetIndexes(utils.CacheActionProfilesFilterIndexes, tntCtx, idxKey, false, true)
+		case utils.AccountProfileFilterIndexPrfx:
+			var tntCtx, idxKey string
+			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
+				return
+			}
+			_, err = dm.GetIndexes(utils.CacheAccountProfilesFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.FilterIndexPrfx:
 			idx := strings.LastIndexByte(dataID, utils.InInFieldSep[0])
 			if idx < 0 {
@@ -3799,6 +3813,238 @@ func (dm *DataManager) checkFilters(tenant string, ids []string) (brokenReferenc
 				return id
 			}
 		}
+	}
+	return
+}
+
+func (dm *DataManager) GetAccountProfile(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (ap *utils.AccountProfile, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheAccountProfiles, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*utils.AccountProfile), nil
+		}
+	}
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	ap, err = dm.dataDB.GetAccountProfileDrv(tenant, id)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountProfiles]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetAccountProfile,
+				&utils.TenantIDWithOpts{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					Opts: map[string]interface{}{
+						utils.OptsAPIKey:  itm.APIKey,
+						utils.OptsRouteID: itm.RouteID,
+					}}, &ap); err == nil {
+				err = dm.dataDB.SetAccountProfileDrv(ap)
+			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(utils.CacheAccountProfiles, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+
+			}
+			return nil, err
+		}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(utils.CacheAccountProfiles, tntID, ap, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
+		}
+	}
+	return
+}
+
+func (dm *DataManager) SetAccountProfile(ap *utils.AccountProfile, withIndex bool) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	if withIndex {
+		if brokenReference := dm.checkFilters(ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
+			// if we get a broken filter do not set the profile
+			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
+				brokenReference, ap.TenantID())
+		}
+	}
+	oldRpp, err := dm.GetAccountProfile(ap.Tenant, ap.ID, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().SetAccountProfileDrv(ap); err != nil {
+		return err
+	}
+	if withIndex {
+		var oldFiltersIDs *[]string
+		if oldRpp != nil {
+			oldFiltersIDs = &oldRpp.FilterIDs
+		}
+		if err := updatedIndexes(dm, utils.CacheAccountProfilesFilterIndexes, ap.Tenant,
+			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs); err != nil {
+			return err
+		}
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountProfiles]; itm.Replicate {
+		var reply string
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetAccountProfile,
+			&utils.AccountProfileWithOpts{
+				AccountProfile: ap,
+				Opts: map[string]interface{}{
+					utils.OptsAPIKey:  itm.APIKey,
+					utils.OptsRouteID: itm.RouteID,
+				}}, &reply); err != nil {
+			err = utils.CastRPCErr(err)
+			return
+		}
+	}
+	return
+}
+
+func (dm *DataManager) RemoveAccountProfile(tenant, id string,
+	transactionID string, withIndex bool) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	oldRpp, err := dm.GetAccountProfile(tenant, id, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().RemoveAccountProfileDrv(tenant, id); err != nil {
+		return
+	}
+	if oldRpp == nil {
+		return utils.ErrNotFound
+	}
+	if withIndex {
+		if err = removeItemFromFilterIndex(dm, utils.CacheAccountProfilesFilterIndexes,
+			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
+			return
+		}
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountProfiles]; itm.Replicate {
+		var reply string
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveAccountProfile,
+			&utils.TenantIDWithOpts{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				Opts: map[string]interface{}{
+					utils.OptsAPIKey:  itm.APIKey,
+					utils.OptsRouteID: itm.RouteID,
+				}}, &reply)
+	}
+	return
+}
+
+func (dm *DataManager) GetAccount2(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (ap *utils.Account, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheAccounts2, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*utils.Account), nil
+		}
+	}
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	ap, err = dm.dataDB.GetAccount2Drv(tenant, id)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts2]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetAccount2,
+				&utils.TenantIDWithOpts{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					Opts: map[string]interface{}{
+						utils.OptsAPIKey:  itm.APIKey,
+						utils.OptsRouteID: itm.RouteID,
+					}}, &ap); err == nil {
+				err = dm.dataDB.SetAccount2Drv(ap)
+			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(utils.CacheAccounts2, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+
+			}
+			return nil, err
+		}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(utils.CacheAccounts2, tntID, ap, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
+		}
+	}
+	return
+}
+
+func (dm *DataManager) SetAccount2(ap *utils.Account, withIndex bool) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+
+	if err = dm.DataDB().SetAccount2Drv(ap); err != nil {
+		return err
+	}
+
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountProfiles]; itm.Replicate {
+		var reply string
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetAccount2,
+			&utils.AccountWithOpts{
+				Account: ap,
+				Opts: map[string]interface{}{
+					utils.OptsAPIKey:  itm.APIKey,
+					utils.OptsRouteID: itm.RouteID,
+				}}, &reply); err != nil {
+			err = utils.CastRPCErr(err)
+			return
+		}
+	}
+	return
+}
+
+func (dm *DataManager) RemoveAccount2(tenant, id string,
+	transactionID string, withIndex bool) (err error) {
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	if err = dm.DataDB().RemoveAccount2Drv(tenant, id); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts2]; itm.Replicate {
+		var reply string
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveAccount2,
+			&utils.TenantIDWithOpts{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				Opts: map[string]interface{}{
+					utils.OptsAPIKey:  itm.APIKey,
+					utils.OptsRouteID: itm.RouteID,
+				}}, &reply)
 	}
 	return
 }

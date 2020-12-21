@@ -280,7 +280,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		if err = ms.enusureIndex(col, true, "key"); err != nil {
 			return
 		}
-	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph, ColRpp, ColApp:
+	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph, ColRpp, ColApp, ColAnp, colAnt:
 		if err = ms.enusureIndex(col, true, "tenant", "id"); err != nil {
 			return
 		}
@@ -345,7 +345,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 		for _, col := range []string{ColAct, ColApl, ColAAp, ColAtr,
 			ColRpl, ColDst, ColRds, ColLht, ColIndx, ColRsP, ColRes, ColSqs, ColSqp,
 			ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColRpp, ColApp,
-			ColRpf, ColShg, ColAcc} {
+			ColRpf, ColShg, ColAcc, ColAnp, colAnt} {
 			if err = ms.ensureIndexesForCol(col); err != nil {
 				return
 			}
@@ -606,6 +606,10 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField2(sctx, ColRpp, utils.RateProfilePrefix, subject, tntID)
 		case utils.ActionProfilePrefix:
 			result, err = ms.getField2(sctx, ColApp, utils.ActionProfilePrefix, subject, tntID)
+		case utils.AccountProfilePrefix:
+			result, err = ms.getField2(sctx, ColAnp, utils.AccountProfilePrefix, subject, tntID)
+		case utils.Account2Prefix:
+			result, err = ms.getField2(sctx, colAnt, utils.Account2Prefix, subject, tntID)
 		case utils.DispatcherHostPrefix:
 			result, err = ms.getField2(sctx, ColDph, utils.DispatcherHostPrefix, subject, tntID)
 		case utils.AttributeFilterIndexes:
@@ -626,6 +630,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField3(sctx, ColIndx, utils.ActionPlanIndexes, "key")
 		case utils.ActionProfilesFilterIndexPrfx:
 			result, err = ms.getField3(sctx, ColIndx, utils.ActionProfilesFilterIndexPrfx, "key")
+		case utils.AccountProfileFilterIndexPrfx:
+			result, err = ms.getField3(sctx, ColIndx, utils.AccountProfileFilterIndexPrfx, "key")
 		case utils.RateProfilesFilterIndexPrfx:
 			result, err = ms.getField3(sctx, ColIndx, utils.RateProfilesFilterIndexPrfx, "key")
 		case utils.RateFilterIndexPrfx:
@@ -684,6 +690,10 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 			count, err = ms.getCol(ColRpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ActionProfilePrefix:
 			count, err = ms.getCol(ColApp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.AccountProfilePrefix:
+			count, err = ms.getCol(ColAnp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.Account2Prefix:
+			count, err = ms.getCol(colAnt).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		default:
 			err = fmt.Errorf("unsupported category in HasData: %s", category)
 		}

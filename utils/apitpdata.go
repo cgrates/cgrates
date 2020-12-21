@@ -1541,3 +1541,23 @@ type TPAPAction struct {
 	Path      string
 	Value     string
 }
+
+type TPAccountProfile struct {
+	TPid               string
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *TPActivationInterval
+	Weight             float64
+	Balances           []*TPAccountBalance
+}
+
+type TPAccountBalance struct {
+	ID        string
+	FilterIDs []string
+	Weight    float64
+	Blocker   bool
+	Type      string
+	Opts      string
+	Value     float64
+}
