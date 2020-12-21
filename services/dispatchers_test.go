@@ -17,77 +17,74 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/dispatchers"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestDispatcherSCoverage for cover testing
 func TestDispatcherSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	cfg.AttributeSCfg().Enabled = true
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
-	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
-	close(chS.GetPrecacheChannel(utils.CacheDispatcherProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheDispatcherHosts))
-	close(chS.GetPrecacheChannel(utils.CacheDispatcherFilterIndexes))
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
 	srv := NewDispatcherService(cfg, db, chS, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(attrS, srv,
-		NewLoaderService(cfg, db, filterSChan, server,
-			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
+	srv2 := DispatcherService{
+		RWMutex:     sync.RWMutex{},
+		cfg:         cfg,
+		dm:          db,
+		cacheS:      chS,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     nil,
+		connChan:    make(chan rpcclient.ClientConnector, 1),
+		anz:         anz,
+		srvDep:      srvDep,
 	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path: path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatchers", "dispatchers_mysql"),
-
-		Section: config.DispatcherSJson,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !srv.IsRunning() {
+	srv2.dspS = &dispatchers.DispatcherService{}
+	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	if !db.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	err := srv.Start()
+	err := srv2.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = srv.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	serviceName := srv2.ServiceName()
+	if serviceName != utils.DispatcherS {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.DispatcherS, serviceName)
 	}
-	cfg.DispatcherSCfg().Enabled = false
-	cfg.GetReloadChan(config.DispatcherSJson) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
-	if srv.IsRunning() {
+	shouldRun := srv2.ShouldRun()
+	if shouldRun != false {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
+	}
+	rld := srv2.Reload()
+	if rld != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", rld)
+	}
+	srv2.connChan <- chS
+	shutErr := srv2.Shutdown()
+	if shutErr != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutErr)
+	}
+	if srv2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }
-*/
