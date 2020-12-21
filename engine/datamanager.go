@@ -4027,7 +4027,7 @@ func (dm *DataManager) SetAccount2(ap *utils.Account, withIndex bool) (err error
 }
 
 func (dm *DataManager) RemoveAccount2(tenant, id string,
-	transactionID string, withIndex bool) (err error) {
+	transactionID string) (err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
