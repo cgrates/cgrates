@@ -67,6 +67,7 @@ const (
 	ConfigSJson        = "configs"
 	APIBanCfgJson      = "apiban"
 	CoreSCfgJson       = "cores"
+	AccountSCfgJson    = "accounts"
 )
 
 var (
@@ -75,7 +76,7 @@ var (
 		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
 		AnalyzerCfgJson, ApierS, EEsJson, RateSJson, SIPAgentJson, DispatcherHJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson,
-		ActionSJson}
+		ActionSJson, AccountSCfgJson}
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -592,6 +593,18 @@ func (self CgrJsonCfg) ActionSCfgJson() (*ActionSJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(ActionSJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) AccountSCfgJson() (*AccountSJsonCfg, error) {
+	rawCfg, hasKey := self[AccountSCfgJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(AccountSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

@@ -199,6 +199,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.configSCfg = new(ConfigSCfg)
 	cfg.apiBanCfg = new(APIBanCfg)
 	cfg.coreSCfg = new(CoreSCfg)
+	cfg.accountSCfg = new(AccountSCfg)
 
 	var cgrJSONCfg *CgrJsonCfg
 	if cgrJSONCfg, err = NewCgrJsonCfgFromBytes(config); err != nil {
@@ -332,6 +333,7 @@ type CGRConfig struct {
 	configSCfg       *ConfigSCfg       // ConfigS config
 	apiBanCfg        *APIBanCfg        // APIBan config
 	coreSCfg         *CoreSCfg         // CoreS config
+	accountSCfg      *AccountSCfg      // AccountS config
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -399,7 +401,8 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadDispatcherHCfg,
-		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg, cfg.loadActionSCfg} {
+		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg, cfg.loadActionSCfg,
+		cfg.loadAccountSCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -826,13 +829,22 @@ func (cfg *CGRConfig) loadConfigSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.configSCfg.loadFromJSONCfg(jsnConfigSCfg)
 }
 
-// loadActionSCfg loads the CoreS section of the configuration
+// loadActionSCfg loads the ActionS section of the configuration
 func (cfg *CGRConfig) loadActionSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	var jsnActionCfg *ActionSJsonCfg
 	if jsnActionCfg, err = jsnCfg.ActionSCfgJson(); err != nil {
 		return
 	}
 	return cfg.actionSCfg.loadFromJSONCfg(jsnActionCfg)
+}
+
+// loadAccountSCfg loads the AccountS section of the configuration
+func (cfg *CGRConfig) loadAccountSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnActionCfg *AccountSJsonCfg
+	if jsnActionCfg, err = jsnCfg.AccountSCfgJson(); err != nil {
+		return
+	}
+	return cfg.accountSCfg.loadFromJSONCfg(jsnActionCfg)
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
@@ -1106,6 +1118,13 @@ func (cfg *CGRConfig) ActionSCfg() *ActionSCfg {
 	return cfg.actionSCfg
 }
 
+// AccountSCfg reads the AccountS configuration
+func (cfg *CGRConfig) AccountSCfg() *AccountSCfg {
+	cfg.lks[AccountSCfgJson].RLock()
+	defer cfg.lks[AccountSCfgJson].RUnlock()
+	return cfg.accountSCfg
+}
+
 // SIPAgentCfg reads the Apier configuration
 func (cfg *CGRConfig) SIPAgentCfg() *SIPAgentCfg {
 	cfg.lks[SIPAgentJson].Lock()
@@ -1245,6 +1264,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		APIBanCfgJson:      cfg.loadAPIBanCgrCfg,
 		CoreSCfgJson:       cfg.loadCoreSCfg,
 		ActionSJson:        cfg.loadActionSCfg,
+		AccountSCfgJson:    cfg.loadAccountSCfg,
 	}
 }
 
@@ -1549,6 +1569,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		ConfigSJson:        cfg.configSCfg.AsMapInterface(),
 		CoreSCfgJson:       cfg.coreSCfg.AsMapInterface(),
 		ActionSJson:        cfg.actionSCfg.AsMapInterface(),
+		AccountSCfgJson:    cfg.accountSCfg.AsMapInterface(),
 	}
 }
 
@@ -1700,6 +1721,8 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithOpts, reply *map[string]inter
 		mp = cfg.CoreSCfg().AsMapInterface()
 	case ActionSJson:
 		mp = cfg.ActionSCfg().AsMapInterface()
+	case AccountSCfgJson:
+		mp = cfg.AccountSCfg().AsMapInterface()
 	default:
 		return errors.New("Invalid section")
 	}
@@ -1941,6 +1964,7 @@ func (cfg CGRConfig) Clone() (cln *CGRConfig) {
 		apiBanCfg:        cfg.apiBanCfg.Clone(),
 		coreSCfg:         cfg.coreSCfg.Clone(),
 		actionSCfg:       cfg.actionSCfg.Clone(),
+		accountSCfg:      cfg.accountSCfg.Clone(),
 	}
 	cln.initChanels()
 	return
