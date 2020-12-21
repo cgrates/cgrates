@@ -79,22 +79,16 @@ func (aS *ActionS) Call(serviceMethod string, args interface{}, reply interface{
 	return utils.RPCCall(aS, serviceMethod, args, reply)
 }
 
-// schedInit will set up cron and load the matching data
-func (aS *ActionS) schedInit() (err error) {
-	aS.crnLk.Lock() // make sure we don't have parallel processes running  setu
-	defer aS.crnLk.Unlock()
+// schedInit is called at service start
+func (aS *ActionS) schedInit() {
 	utils.Logger.Info(fmt.Sprintf("<%s> initializing scheduler.", utils.ActionS))
 	tnts := []string{aS.cfg.GeneralCfg().DefaultTenant}
 	if aS.cfg.ActionSCfg().Tenants != nil {
 		tnts = *aS.cfg.ActionSCfg().Tenants
 	}
-	if len(tnts) == 0 {
-		return utils.NewErrMandatoryIeMissing(utils.TenantCfg)
-	}
-	crn := cron.New()
-	var partExec bool
-	for _, tnt := range tnts {
-		cgrEv := &utils.CGREventWithOpts{
+	cgrEvs := make([]*utils.CGREventWithOpts, len(tnts))
+	for i, tnt := range tnts {
+		cgrEvs[i] = &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
 				Tenant: tnt,
 				ID:     utils.GenUUID(),
@@ -105,12 +99,26 @@ func (aS *ActionS) schedInit() (err error) {
 				utils.NodeID:    aS.cfg.GeneralCfg().NodeID,
 			},
 		}
+	}
+	aS.scheduleActions(cgrEvs, nil, true)
+}
+
+// scheduleActions will set up cron and load the matching data
+func (aS *ActionS) scheduleActions(cgrEvs []*utils.CGREventWithOpts, aPrflIDs []string, crnReset bool) (err error) {
+	aS.crnLk.Lock() // make sure we don't have parallel processes running  setu
+	defer aS.crnLk.Unlock()
+	crn := aS.crn
+	if crnReset {
+		crn = cron.New()
+	}
+	var partExec bool
+	for _, cgrEv := range cgrEvs {
 		var schedActSet []*scheduledActs
-		if schedActSet, err = aS.scheduledActions(tnt, nil, cgrEv, false); err != nil {
+		if schedActSet, err = aS.scheduledActions(cgrEv.Tenant, cgrEv, aPrflIDs, false); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> scheduler init, ignoring tenant: <%s>, error: <%s>",
-					utils.ActionS, tnt, err))
+					utils.ActionS, cgrEv.Tenant, err))
 			partExec = true
 			continue
 		}
@@ -132,17 +140,19 @@ func (aS *ActionS) schedInit() (err error) {
 	if partExec {
 		err = utils.ErrPartiallyExecuted
 	}
-	if aS.crn != nil {
-		aS.crn.Stop()
+	if crnReset {
+		if aS.crn != nil {
+			aS.crn.Stop()
+		}
+		aS.crn = crn
+		aS.crn.Start()
 	}
-	aS.crn = crn
-	aS.crn.Start()
 	return
 }
 
 // matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
-func (aS *ActionS) matchingActionProfilesForEvent(tnt string, aPrflIDs []string,
-	cgrEv *utils.CGREventWithOpts) (aPfs engine.ActionProfiles, err error) {
+func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
+	cgrEv *utils.CGREventWithOpts, aPrflIDs []string) (aPfs engine.ActionProfiles, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.CGREvent.Event,
 		utils.MetaOpts: cgrEv.Opts,
@@ -194,11 +204,11 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string, aPrflIDs []string,
 }
 
 // scheduledActions is responsible for scheduling the action profiles matching cgrEv
-func (aS *ActionS) scheduledActions(tnt string, aPrflIDs []string, cgrEv *utils.CGREventWithOpts,
+func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREventWithOpts, aPrflIDs []string,
 	forceASAP bool) (schedActs []*scheduledActs, err error) {
 	var partExec bool
 	var aPfs engine.ActionProfiles
-	if aPfs, err = aS.matchingActionProfilesForEvent(tnt, aPrflIDs, cgrEv); err != nil {
+	if aPfs, err = aS.matchingActionProfilesForEvent(tnt, cgrEv, aPrflIDs); err != nil {
 		return
 	}
 
@@ -281,8 +291,8 @@ type ArgActionSv1ExecuteActions struct {
 // V1ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
 func (aS *ActionS) V1ExecuteActions(args *ArgActionSv1ExecuteActions, rpl *string) (err error) {
 	var schedActSet []*scheduledActs
-	if schedActSet, err = aS.scheduledActions(args.CGREventWithOpts.Tenant, args.ActionProfileIDs,
-		args.CGREventWithOpts, true); err != nil {
+	if schedActSet, err = aS.scheduledActions(args.CGREventWithOpts.Tenant,
+		args.CGREventWithOpts, args.ActionProfileIDs, true); err != nil {
 		return
 	}
 	var partExec bool
@@ -294,6 +304,16 @@ func (aS *ActionS) V1ExecuteActions(args *ArgActionSv1ExecuteActions, rpl *strin
 	}
 	if partExec {
 		err = utils.ErrPartiallyExecuted
+		return
+	}
+	*rpl = utils.OK
+	return
+}
+
+// V1ExecuteActions will be called to schedule actions matching the arguments
+func (aS *ActionS) V1ScheduleActions(args *ArgActionSv1ExecuteActions, rpl *string) (err error) {
+	if err = aS.scheduleActions([]*utils.CGREventWithOpts{args.CGREventWithOpts},
+		args.ActionProfileIDs, false); err != nil {
 		return
 	}
 	*rpl = utils.OK
