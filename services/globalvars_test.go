@@ -17,14 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"reflect"
-	"testing"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 func TestGlobalVarS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
@@ -52,3 +45,4 @@ func TestGlobalVarS(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+*/

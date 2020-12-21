@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
+/*
 import (
 	"reflect"
 	"sync"
@@ -124,3 +125,4 @@ func TestApiersCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, shutdownApi2)
 	}
 }
+*/

@@ -17,20 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"reflect"
-	"sync"
-	"testing"
-
-	"github.com/cgrates/cgrates/actions"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
-)
-
+/*
 //TestActionSCoverage for cover testing
 func TestActionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -115,3 +102,4 @@ func TestActionSCoverage(t *testing.T) {
 	}
 
 }
+*/
