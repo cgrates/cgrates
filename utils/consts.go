@@ -2597,6 +2597,7 @@ const (
 	ActionProfileIDs              = "ActionProfileIDs"
 	TimingIDs                     = "TimingIDs"
 	AccountProfileIDs             = "AccountProfileIDs"
+	Account2IDs                   = "Account2IDs"
 	AttributeFilterIndexIDs       = "AttributeFilterIndexIDs"
 	ResourceFilterIndexIDs        = "ResourceFilterIndexIDs"
 	StatFilterIndexIDs            = "StatFilterIndexIDs"
