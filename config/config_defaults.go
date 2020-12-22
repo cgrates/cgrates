@@ -844,6 +844,25 @@ const CGRATES_CFG_JSON = `
 					{"tag": "ActionValue", "path": "ActionValue", "type": "*variable", "value": "~*req.15"},
 				],
 			},
+			{
+				"type": "*account_profiles",						// data source type
+				"file_name": "AccountProfiles.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.4"},
+					{"tag": "BalanceID", "path": "BalanceID", "type": "*variable", "value": "~*req.5"},
+					{"tag": "BalanceFilterIDs", "path": "BalanceFilterIDs", "type": "*variable", "value": "~*req.6"},
+					{"tag": "BalanceWeight", "path": "BalanceWeight", "type": "*variable", "value": "~*req.7"},
+					{"tag": "BalanceBlocker", "path": "BalanceBlocker", "type": "*variable", "value": "~*req.8"},
+					{"tag": "BalanceType", "path": "BalanceType", "type": "*variable", "value": "~*req.9"},
+					{"tag": "BalanceOpts", "path": "BalanceOpts", "type": "*variable", "value": "~*req.10"},
+					{"tag": "BalanceValue", "path": "BalanceValue", "type": "*variable", "value": "~*req.11"},
+					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.12"},
+				],
+			},
 		],
 	},
 ],

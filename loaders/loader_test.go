@@ -2216,6 +2216,7 @@ func TestNewLoaderWithMultiFiles(t *testing.T) {
 		utils.StatsCsv:              {},
 		utils.ThresholdsCsv:         {},
 		utils.ActionProfilesCsv:     {},
+		utils.AccountProfilesCsv:    {},
 	}
 	if !reflect.DeepEqual(expected, openRdrs) {
 		t.Errorf("Expected %s,received %s", utils.ToJSON(expected), utils.ToJSON(openRdrs))
