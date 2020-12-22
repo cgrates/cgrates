@@ -1548,11 +1548,6 @@ const (
 )
 
 const (
-	ActionSv1     = "ActionSv1"
-	ActionSv1Ping = "ActionSv1.Ping"
-)
-
-const (
 	AccountSv1     = "AccountSv1"
 	AccountSv1Ping = "AccountSv1.Ping"
 )
@@ -2742,6 +2737,14 @@ var (
 		MetaLeveldb: {},
 		MetaMoss:    {},
 	}
+)
+
+// ActionSv1
+const (
+	ActionSv1                = "ActionSv1"
+	ActionSv1Ping            = "ActionSv1.Ping"
+	ActionSv1ScheduleActions = "ActionSv1.ScheduleActions"
+	ActionSv1ExecuteActions  = "ActionSv1.ExecuteActions"
 )
 
 func buildCacheInstRevPrefixes() {

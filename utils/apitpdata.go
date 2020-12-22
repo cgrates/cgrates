@@ -1562,3 +1562,9 @@ type TPAccountBalance struct {
 	Opts      string
 	Value     float64
 }
+
+// ArgActionSv1ScheduleActions is used in ActionSv1 methods
+type ArgActionSv1ScheduleActions struct {
+	*CGREventWithOpts
+	ActionProfileIDs []string
+}
