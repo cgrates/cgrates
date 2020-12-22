@@ -1082,6 +1082,7 @@ const CGRATES_CFG_JSON = `
 "accounts": {								// AccountS config
 	"enabled": false,						// starts service: <true|false>
 	"indexed_selects": true,				// enable profile matching exclusively on indexes
+	"thresholds_conns": [],					// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing

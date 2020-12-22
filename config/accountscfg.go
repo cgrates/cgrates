@@ -24,6 +24,7 @@ import "github.com/cgrates/cgrates/utils"
 type AccountSCfg struct {
 	Enabled             bool
 	IndexedSelects      bool
+	ThresholdSConns     []string
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
@@ -39,6 +40,16 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 	}
 	if jsnCfg.Indexed_selects != nil {
 		acS.IndexedSelects = *jsnCfg.Indexed_selects
+	}
+	if jsnCfg.Thresholds_conns != nil {
+		acS.ThresholdSConns = make([]string, len(*jsnCfg.Thresholds_conns))
+		for idx, conn := range *jsnCfg.Thresholds_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			acS.ThresholdSConns[idx] = conn
+			if conn == utils.MetaInternal {
+				acS.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+			}
+		}
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.String_indexed_fields))
@@ -74,6 +85,16 @@ func (acS *AccountSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
 	}
+	if acS.ThresholdSConns != nil {
+		thresholdSConns := make([]string, len(acS.ThresholdSConns))
+		for i, item := range acS.ThresholdSConns {
+			thresholdSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+				thresholdSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.ThresholdSConnsCfg] = thresholdSConns
+	}
 	if acS.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*acS.StringIndexedFields))
 		for i, item := range *acS.StringIndexedFields {
@@ -104,6 +125,12 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 		Enabled:        acS.Enabled,
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
+	}
+	if acS.ThresholdSConns != nil {
+		cln.ThresholdSConns = make([]string, len(acS.ThresholdSConns))
+		for i, con := range acS.ThresholdSConns {
+			cln.ThresholdSConns[i] = con
+		}
 	}
 	if acS.StringIndexedFields != nil {
 		idx := make([]string, len(*acS.StringIndexedFields))
