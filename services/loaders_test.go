@@ -22,10 +22,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/cgrates/loaders"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -52,16 +53,41 @@ func TestLoaderSCoverage(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	srv.ldrs = loaders.NewLoaderService(&engine.DataManager{}, []*config.LoaderSCfg{{
-		ID:      "test_id",
-		Enabled: true,
-	}},
-		"test", &engine.FilterS{}, &engine.ConnManager{})
+	srv.ldrs = loaders.NewLoaderService(&engine.DataManager{},
+		[]*config.LoaderSCfg{{
+			ID:             "test_id",
+			Enabled:        true,
+			Tenant:         nil,
+			DryRun:         false,
+			RunDelay:       0,
+			LockFileName:   "",
+			CacheSConns:    nil,
+			FieldSeparator: "",
+			TpInDir:        "",
+			TpOutDir:       "",
+			Data:           nil,
+		}}, "",
+		&engine.FilterS{}, nil)
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	serviceName := srv.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.LoaderS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.LoaderS, serviceName)
+	}
+	shouldRun := srv.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+	}
 	if !reflect.DeepEqual(srv.GetLoaderS(), srv.ldrs) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", srv.ldrs, srv.GetLoaderS())
+	}
+	srv.stopChan = make(chan struct{}, 1)
+	chS := engine.NewCacheS(cfg, nil, nil)
+	srv.connChan <- chS
+	srv.Shutdown()
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
 	}
 
 }

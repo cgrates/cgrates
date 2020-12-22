@@ -17,63 +17,62 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"reflect"
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/rates"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestRateSCoverage for cover testing
 func TestRateSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	chS := engine.NewCacheS(cfg, nil, nil)
-	close(chS.GetPrecacheChannel(utils.CacheRateProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheRateProfilesFilterIndexes))
-	close(chS.GetPrecacheChannel(utils.CacheRateFilterIndexes))
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	rS := NewRateService(cfg, chS, filterSChan, db, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
-	srvMngr.AddServices(rS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+
 	if rS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "rates"),
-		Section: config.RateSJson,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
+	rS2 := RateService{
+		cfg:         cfg,
+		filterSChan: filterSChan,
+		dmS:         db,
+		cacheS:      chS,
+		server:      server,
+		stopChan:    make(chan struct{}),
+		intConnChan: make(chan rpcclient.ClientConnector, 1),
+		anz:         anz,
+		srvDep:      srvDep,
+		rateS:       &rates.RateS{},
 	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !rS.IsRunning() {
+	if !rS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := rS.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	serviceName := rS2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.RateS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.RateS, serviceName)
 	}
-	err = rS.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	shouldRun := rS2.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
-	cfg.RateSCfg().Enabled = false
-	cfg.GetReloadChan(config.RateSJson) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
+	rS2.intConnChan <- chS
+	rS2.Shutdown()
 	if rS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }
-*/

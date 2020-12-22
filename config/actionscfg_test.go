@@ -29,7 +29,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 	jsonCfg := &ActionSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
 		Indexed_selects:       utils.BoolPointer(false),
-		Tenants:               &[]string{"cgrates.org", "cgrates.com"},
+		Tenants:               &[]string{"itsyscom.com"},
 		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
@@ -38,7 +38,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 	expected := &ActionSCfg{
 		Enabled:             true,
 		IndexedSelects:      false,
-		Tenants:             &[]string{"cgrates.org", "cgrates.com"},
+		Tenants:             &[]string{"itsyscom.com"},
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
@@ -56,7 +56,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 "actions": {								
 	"enabled": true,
-	"tenants": ["cgrates.org", "cgrates.com"],
+	"tenants": ["itsyscom.com"],
 	"indexed_selects": false,
 	"string_indexed_fields": ["*req.index1"],			
 	"prefix_indexed_fields": ["*req.index1","*req.index2"],		
@@ -67,7 +67,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
-		utils.Tenants:                []string{"cgrates.org", "cgrates.com"},
+		utils.Tenants:                []string{"itsyscom.com"},
 		utils.IndexedSelectsCfg:      false,
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
@@ -84,7 +84,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 func TestActionSCfgClone(t *testing.T) {
 	ban := &ActionSCfg{
 		Enabled:             true,
-		Tenants:             &[]string{"cgrates.org", "cgrates.com"},
+		Tenants:             &[]string{"itsyscom.com"},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
@@ -95,7 +95,7 @@ func TestActionSCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if (*rcv.Tenants)[0] = ""; (*ban.Tenants)[0] != "cgrates.org" {
+	if (*rcv.Tenants)[0] = ""; (*ban.Tenants)[0] != "itsyscom.com" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {

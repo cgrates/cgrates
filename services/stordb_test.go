@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"reflect"
 	"sync"
 	"testing"
 
@@ -47,5 +48,17 @@ func TestStorDBServiceCoverage(t *testing.T) {
 		Name:     "test_name",
 		User:     "test_user",
 		Password: "test_pass",
+	}
+	serviceName := srv.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.StorDB) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.StorDB, serviceName)
+	}
+	shouldRun := srv.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+	}
+	srv.Shutdown()
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
 	}
 }
