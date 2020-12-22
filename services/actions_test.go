@@ -91,10 +91,6 @@ func TestActionSCoverage(t *testing.T) {
 	if !actS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	errStart := actS2.Start()
-	if errStart == nil || errStart != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, errStart)
-	}
 	serviceName := actS2.ServiceName()
 	if !reflect.DeepEqual(serviceName, utils.ActionS) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ActionS, serviceName)
@@ -104,10 +100,6 @@ func TestActionSCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
 	actS3.rldChan <- struct{}{}
-	err := actS2.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
 	if !reflect.DeepEqual(actS2.rldChan, actS3.rldChan) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(actS3.rldChan), utils.ToJSON(actS2.rldChan))
 	}

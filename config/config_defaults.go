@@ -1070,6 +1070,7 @@ const CGRATES_CFG_JSON = `
 
 "actions": {								// ActionS config
 	"enabled": false,						// starts attribute service: <true|false>
+	"tenants":[],							// List of tenants to operate on
 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing

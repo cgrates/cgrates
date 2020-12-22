@@ -63,9 +63,5 @@ func TestLoaderSCoverage(t *testing.T) {
 	if !reflect.DeepEqual(srv.GetLoaderS(), srv.ldrs) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", srv.ldrs, srv.GetLoaderS())
 	}
-	errStart := srv.Start()
-	if errStart == nil || errStart != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, errStart)
-	}
 
 }

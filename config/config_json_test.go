@@ -2263,6 +2263,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 func TestDfActionSJsonCfg(t *testing.T) {
 	eCfg := &ActionSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
+		Tenants:               &[]string{},
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
@@ -2276,6 +2277,6 @@ func TestDfActionSJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJSONCfg.ActionSCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", utils.ToJSON(cfg))
+		t.Errorf("\n Expected <%+v>,\nReceived:<%+v>", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }

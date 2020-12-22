@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"reflect"
 	"sync"
 	"testing"
 
@@ -69,15 +68,6 @@ func TestEventExporterSCoverage(t *testing.T) {
 	shouldRun := srv2.ShouldRun()
 	if shouldRun != false {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
-	}
-
-	rld := srv2.Reload()
-	if rld != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", rld)
-	}
-	startErr := srv2.Start()
-	if !reflect.DeepEqual(startErr, utils.ErrServiceAlreadyRunning) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, startErr)
 	}
 	srv2.intConnChan <- chS
 	shutErr := srv2.Shutdown()

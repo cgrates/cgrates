@@ -60,10 +60,6 @@ func TestAsteriskAgentCoverage(t *testing.T) {
 	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := srv2.Start()
-	if err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
 	astxAgent := srv2.ServiceName()
 	if !reflect.DeepEqual(astxAgent, utils.AsteriskAgent) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.AsteriskAgent, astxAgent)
@@ -75,11 +71,7 @@ func TestAsteriskAgentCoverage(t *testing.T) {
 
 	srv2.stopChan = make(chan struct{}, 1)
 	//no error for now
-	err2 := srv2.Reload()
-	if err2 != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err2)
-	}
-	err2 = srv2.Shutdown()
+	err2 := srv2.Shutdown()
 	if err2 != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err2)
 	}

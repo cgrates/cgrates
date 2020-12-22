@@ -52,10 +52,6 @@ func TestCoreSCoverage(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := srv.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
 	serviceName := srv.ServiceName()
 	if !reflect.DeepEqual(serviceName, utils.CoreS) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.CoreS, serviceName)
@@ -63,10 +59,6 @@ func TestCoreSCoverage(t *testing.T) {
 	shouldRun := srv.ShouldRun()
 	if !reflect.DeepEqual(shouldRun, true) {
 		t.Errorf("\nExpecting <true>,\n Received <%+v>", shouldRun)
-	}
-	rld := srv.Reload()
-	if rld != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", rld)
 	}
 	getCoreS := srv.GetCoreS()
 	if getCoreS == nil {

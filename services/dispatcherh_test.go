@@ -56,14 +56,7 @@ func TestDispatcherHCoverage(t *testing.T) {
 	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := srv2.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	rld := srv2.Reload()
-	if rld != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", rld)
-	}
+
 	serviceName := srv2.ServiceName()
 	if !reflect.DeepEqual(serviceName, utils.DispatcherH) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.DispatcherH, serviceName)

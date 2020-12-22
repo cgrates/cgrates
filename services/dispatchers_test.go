@@ -63,10 +63,7 @@ func TestDispatcherSCoverage(t *testing.T) {
 	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := srv2.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
+
 	serviceName := srv2.ServiceName()
 	if serviceName != utils.DispatcherS {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.DispatcherS, serviceName)
@@ -75,10 +72,7 @@ func TestDispatcherSCoverage(t *testing.T) {
 	if shouldRun != false {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
 	}
-	rld := srv2.Reload()
-	if rld != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", rld)
-	}
+
 	srv2.connChan <- chS
 	shutErr := srv2.Shutdown()
 	if shutErr != nil {

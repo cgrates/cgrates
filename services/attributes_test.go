@@ -62,14 +62,7 @@ func TestAttributeSCoverage(t *testing.T) {
 	if !attrS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := attrS2.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = attrS2.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
+
 	shouldRun := attrS2.ShouldRun()
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)

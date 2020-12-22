@@ -38,6 +38,13 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 	if jsnCfg.Enabled != nil {
 		acS.Enabled = *jsnCfg.Enabled
 	}
+	if jsnCfg.Tenants != nil {
+		tnt := make([]string, len(*jsnCfg.Tenants))
+		for i, fID := range *jsnCfg.Tenants {
+			tnt[i] = fID
+		}
+		acS.Tenants = &tnt
+	}
 	if jsnCfg.Indexed_selects != nil {
 		acS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
@@ -75,6 +82,13 @@ func (acS *ActionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
 	}
+	if acS.Tenants != nil {
+		Tenants := make([]string, len(*acS.Tenants))
+		for i, item := range *acS.Tenants {
+			Tenants[i] = item
+		}
+		initialMP[utils.Tenants] = Tenants
+	}
 	if acS.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*acS.StringIndexedFields))
 		for i, item := range *acS.StringIndexedFields {
@@ -105,6 +119,13 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 		Enabled:        acS.Enabled,
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
+	}
+	if acS.Tenants != nil {
+		tnt := make([]string, len(*acS.Tenants))
+		for i, dx := range *acS.Tenants {
+			tnt[i] = dx
+		}
+		cln.Tenants = &tnt
 	}
 	if acS.StringIndexedFields != nil {
 		idx := make([]string, len(*acS.StringIndexedFields))

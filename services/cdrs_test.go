@@ -71,15 +71,6 @@ func TestCdrsCoverage(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 
-	err := cdrS2.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = cdrS2.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-
 	serviceName := cdrS2.ServiceName()
 	if serviceName != utils.CDRServer {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.APIerSv1, serviceName)
