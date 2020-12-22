@@ -155,6 +155,9 @@ func (dspS *DispatcherService) Start() (err error) {
 	dspS.server.RpcRegisterName(utils.ActionSv1,
 		v1.NewDispatcherActionSv1(dspS.dspS))
 
+	dspS.server.RpcRegisterName(utils.AccountSv1,
+		v1.NewDispatcherAccountSv1(dspS.dspS))
+
 	dspS.connChan <- dspS.anz.GetInternalCodec(dspS.dspS, utils.DispatcherS)
 
 	return
