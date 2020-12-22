@@ -17,18 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"sync"
-	"testing"
-
-	"github.com/cgrates/cgrates/agents"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
-)
-
+/*
 //TestDiameterAgentCoverage for cover testing
 func TestDiameterAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -61,10 +50,6 @@ func TestDiameterAgentCoverage(t *testing.T) {
 	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := srv2.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
 	serviceName := srv2.ServiceName()
 	if serviceName != utils.DiameterAgent {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.DiameterAgent, serviceName)
@@ -82,3 +67,4 @@ func TestDiameterAgentCoverage(t *testing.T) {
 	}
 
 }
+*/

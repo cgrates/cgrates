@@ -67,14 +67,6 @@ func TestChargerSCoverage(t *testing.T) {
 	if !chrS.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := chrS.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = chrS.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
 	serviceName := chrS.ServiceName()
 	if !reflect.DeepEqual(serviceName, utils.ChargerS) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ChargerS, serviceName)

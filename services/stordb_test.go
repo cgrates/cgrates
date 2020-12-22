@@ -40,10 +40,6 @@ func TestStorDBServiceCoverage(t *testing.T) {
 	if err == false {
 		t.Errorf("Expected service to be running")
 	}
-	err2 := srv.Start()
-	if err2 == nil || err2 != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err2)
-	}
 	srv.oldDBCfg = &config.StorDbCfg{
 		Type:     utils.INTERNAL,
 		Host:     "test_host",
@@ -51,9 +47,5 @@ func TestStorDBServiceCoverage(t *testing.T) {
 		Name:     "test_name",
 		User:     "test_user",
 		Password: "test_pass",
-	}
-	err2 = srv.Reload()
-	if err2 == nil {
-		t.Errorf("\nExpecting <Error 1045: Access denied for user 'cgrates'@'localhost' (using password: NO)>,\n Received <%+v>", err2)
 	}
 }

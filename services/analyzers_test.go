@@ -62,18 +62,10 @@ func TestAnalyzerCoverage(t *testing.T) {
 	if !reflect.DeepEqual(getIntrnCdc, rpcClientCnctr) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(rpcClientCnctr), utils.ToJSON(getIntrnCdc))
 	}
-	var err error
+
 	anz2.anz, _ = analyzers.NewAnalyzerService(cfg)
 	if !anz2.IsRunning() {
 		t.Errorf("Expected service to be running")
-	}
-	err = anz2.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = anz2.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	serviceName := anz2.ServiceName()
 	if !reflect.DeepEqual(serviceName, utils.AnalyzerS) {

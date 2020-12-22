@@ -56,10 +56,6 @@ func TestHTTPAgentCoverage(t *testing.T) {
 	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := srv2.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
 	serviceName := srv2.ServiceName()
 	if !reflect.DeepEqual(serviceName, utils.HTTPAgent) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.HTTPAgent, serviceName)
@@ -67,10 +63,6 @@ func TestHTTPAgentCoverage(t *testing.T) {
 	shouldRun := srv2.ShouldRun()
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
-	}
-	rld := srv.Reload()
-	if rld != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", rld)
 	}
 	shutdownError := srv.Shutdown()
 	if shutdownError != nil {

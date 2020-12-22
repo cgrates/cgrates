@@ -673,6 +673,7 @@ type CoreSJsonCfg struct {
 // Action service config section
 type ActionSJsonCfg struct {
 	Enabled               *bool
+	Tenants               *[]string
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string

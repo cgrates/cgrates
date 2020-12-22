@@ -38,16 +38,10 @@ func TestGlobalVarS(t *testing.T) {
 	if !exp.ShouldRun() {
 		t.Errorf("This service should allways run")
 	}
-	if err := exp.Start(); err != nil {
-		t.Fatal(err)
-	}
 	if !exp.IsRunning() {
 		t.Errorf("This service needs to be running")
 	}
 	cfg.HTTPCfg().ClientOpts[utils.HTTPClientDialTimeoutCfg] = "30as"
-	if err := exp.Reload(); err == nil {
-		t.Error("Expected reload to not be succesfully finished")
-	}
 	if err := exp.Shutdown(); err != nil {
 		t.Fatal(err)
 	}

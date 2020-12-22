@@ -2051,6 +2051,7 @@ const (
 	SSLModeCfg             = "sslmode"
 	ItemsCfg               = "items"
 	OptsCfg                = "opts"
+	Tenants                = "tenants"
 )
 
 // DataDbCfg
