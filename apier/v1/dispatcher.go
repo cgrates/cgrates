@@ -1313,7 +1313,21 @@ type DispatcherActionSv1 struct {
 	dR *dispatchers.DispatcherService
 }
 
-// Ping implements RateSv1Ping
+// Ping implements ActionSv1Ping
 func (dR *DispatcherActionSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
 	return dR.dR.ActionSv1Ping(args, reply)
+}
+
+func NewDispatcherAccountSv1(dps *dispatchers.DispatcherService) *DispatcherAccountSv1 {
+	return &DispatcherAccountSv1{dR: dps}
+}
+
+// Exports RPC from RLs
+type DispatcherAccountSv1 struct {
+	dR *dispatchers.DispatcherService
+}
+
+// Ping implements AccountSv1Ping
+func (dR *DispatcherAccountSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+	return dR.dR.AccountSv1Ping(args, reply)
 }
