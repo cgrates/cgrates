@@ -144,7 +144,8 @@ func startRPC(server *cores.Server, internalRaterChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
-	internalEEsChan, internalRateSChan, internalActionSChan chan rpcclient.ClientConnector,
+	internalEEsChan, internalRateSChan, internalActionSChan,
+	internalAccountSChan chan rpcclient.ClientConnector,
 	shdChan *utils.SyncedChan) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
@@ -180,6 +181,8 @@ func startRPC(server *cores.Server, internalRaterChan,
 			internalRateSChan <- rateS
 		case actionS := <-internalActionSChan:
 			internalActionSChan <- actionS
+		case accountS := <-internalAccountSChan:
+			internalAccountSChan <- accountS
 		case <-shdChan.Done():
 			return
 		}
@@ -497,6 +500,7 @@ func main() {
 	internalEEsChan := make(chan rpcclient.ClientConnector, 1)
 	internalRateSChan := make(chan rpcclient.ClientConnector, 1)
 	internalActionSChan := make(chan rpcclient.ClientConnector, 1)
+	internalAccountSChan := make(chan rpcclient.ClientConnector, 1)
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
@@ -524,6 +528,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          internalRateSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions):        internalActionSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts):       internalAccountSChan,
 	})
 	srvDep := map[string]*sync.WaitGroup{
 		utils.AnalyzerS:       new(sync.WaitGroup),
@@ -559,6 +564,7 @@ func main() {
 		utils.StorDB:          new(sync.WaitGroup),
 		utils.ThresholdS:      new(sync.WaitGroup),
 		utils.ActionS:         new(sync.WaitGroup),
+		utils.AccountS:        new(sync.WaitGroup),
 	}
 	gvService := services.NewGlobalVarS(cfg, srvDep)
 	shdWg.Add(1)
@@ -673,6 +679,7 @@ func main() {
 			server, internalRateSChan, anz, srvDep),
 		services.NewSIPAgent(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewActionService(cfg, dmService, cacheS, filterSChan, server, internalActionSChan, anz, srvDep),
+		services.NewAccountService(cfg, dmService, cacheS, filterSChan, server, internalAccountSChan, anz, srvDep),
 	)
 	srvManager.StartServices()
 	// Start FilterS
@@ -708,6 +715,7 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.ActionSv1, internalActionSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.EeSv1, internalEEsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.DispatcherSv1, internalDispatcherSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.AccountSv1, internalAccountSChan)
 
 	initConfigSv1(internalConfigChan, server, anz)
 
@@ -721,7 +729,8 @@ func main() {
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
 		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,
-		internalCacheSChan, internalEEsChan, internalRateSChan, internalActionSChan, shdChan)
+		internalCacheSChan, internalEEsChan, internalRateSChan, internalActionSChan,
+		internalAccountSChan, shdChan)
 
 	<-shdChan.Done()
 	shtdDone := make(chan struct{})

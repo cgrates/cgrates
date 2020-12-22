@@ -1553,6 +1553,11 @@ const (
 )
 
 const (
+	AccountSv1     = "AccountSv1"
+	AccountSv1Ping = "AccountSv1.Ping"
+)
+
+const (
 	CoreS         = "CoreS"
 	CoreSv1       = "CoreSv1"
 	CoreSv1Status = "CoreSv1.Status"

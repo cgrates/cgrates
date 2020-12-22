@@ -44,8 +44,6 @@ type AccountS struct {
 
 // ListenAndServe keeps the service alive
 func (aS *AccountS) ListenAndServe(stopChan, cfgRld chan struct{}) {
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s>",
-		utils.CoreS, utils.AccountS))
 	for {
 		select {
 		case <-stopChan:
