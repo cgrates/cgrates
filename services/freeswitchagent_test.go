@@ -17,56 +17,52 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"reflect"
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestFreeSwitchAgentCoverage for cover testing
 func TestFreeSwitchAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
 	cacheSChan <- chS
-
-	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, nil, anz, srvDep)
+
 	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "fs_evsock", "cgrates", "etc", "cgrates"),
-		Section: config.FreeSWITCHAgentJSN,
-	}, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
+	srv2 := FreeswitchAgent{
+		cfg:     cfg,
+		shdChan: shdChan,
+		fS:      &agents.FSsessions{},
+		connMgr: nil,
+		srvDep:  srvDep,
 	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	// the engine should be stoped as we could not connect to freeswich
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
+	if !srv2.IsRunning() {
+		t.Errorf("Expected service to be running")
 	}
-	shdChan.CloseOnce()
-	runtime.Gosched()
-	time.Sleep(10 * time.Millisecond)
+	serviceName := srv2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.FreeSWITCHAgent) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.FreeSWITCHAgent, serviceName)
+	}
+	shouldRun := srv2.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+	}
 }
-*/

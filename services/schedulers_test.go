@@ -17,72 +17,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"reflect"
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/scheduler"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestSchedulerSCoverage for cover testing
 func TestSchedulerSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(schS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+
 	if schS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongonew"),
-		Section: config.SCHEDULER_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	schS.schS = &scheduler.Scheduler{}
 	if !schS.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	if !db.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	err := schS.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = schS.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	getScheduler := schS.GetScheduler()
-	if !reflect.DeepEqual(schS.schS, getScheduler) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(schS.schS), utils.ToJSON(getScheduler))
-	}
-	cfg.SchedulerCfg().Enabled = false
-	cfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
-	if schS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
+	serviceName := schS.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.SchedulerS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.SchedulerS, serviceName)
+	}
+	shouldRun := schS.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+	}
+	if !reflect.DeepEqual(schS.GetScheduler(), schS.schS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", schS.schS, schS.GetScheduler())
+	}
 }
-*/

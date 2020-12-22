@@ -18,6 +18,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 /*
+import (
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/agents"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestDiameterAgentCoverage for cover testing
 func TestDiameterAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

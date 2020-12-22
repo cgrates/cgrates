@@ -17,106 +17,65 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"reflect"
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/sessions"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestSessionSCoverage for cover testing
 func TestSessionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
 	cfg.ChargerSCfg().Enabled = true
 	cfg.RalsCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
-
-	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
-
-	close(chS.GetPrecacheChannel(utils.CacheDestinations))
-	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
-	close(chS.GetPrecacheChannel(utils.CacheRatingPlans))
-	close(chS.GetPrecacheChannel(utils.CacheRatingProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheActions))
-	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
-	close(chS.GetPrecacheChannel(utils.CacheAccountActionPlans))
-	close(chS.GetPrecacheChannel(utils.CacheActionTriggers))
-	close(chS.GetPrecacheChannel(utils.CacheSharedGroups))
-	close(chS.GetPrecacheChannel(utils.CacheTimings))
-
 	internalChan := make(chan rpcclient.ClientConnector, 1)
 	internalChan <- nil
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
 	cacheSChan <- chS
-
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	stordb := NewStorDBService(cfg, srvDep)
-	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	ralS := NewRalService(cfg, chS, server,
-		make(chan rpcclient.ClientConnector, 1), make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
-		make(chan rpcclient.ClientConnector, 1),
-		nil, anz, srvDep)
 	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, chrS, schS, ralS, cdrS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
+	srv2 := SessionService{
+		cfg:      cfg,
+		dm:       db,
+		server:   server,
+		shdChan:  shdChan,
+		connChan: make(chan rpcclient.ClientConnector, 1),
+		connMgr:  nil,
+		caps:     nil,
+		anz:      anz,
+		srvDep:   srvDep,
+		sm:       &sessions.SessionS{},
 	}
-	if stordb.IsRunning() {
-		t.Errorf("Expected service to be down")
+	if !srv2.IsRunning() {
+		t.Errorf("Expected service to be running")
 	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongonew"),
-		Section: config.SessionSJson,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
+	serviceName := srv2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.SessionS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.SessionS, serviceName)
 	}
-
-		time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-		if !srv.IsRunning() {
-			t.Errorf("Expected service to be running")
-		}
-		if !db.IsRunning() {
-			t.Errorf("Expected service to be running")
-		}
-
-			err := srv.Start()
-			if err == nil || err != utils.ErrServiceAlreadyRunning {
-				t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-			}
-			err = srv.Reload()
-			if err != nil {
-				t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-			}
-			cfg.SessionSCfg().Enabled = false
-			cfg.GetReloadChan(config.SessionSJson) <- struct{}{}
-			time.Sleep(10 * time.Millisecond)
-			if srv.IsRunning() {
-				t.Errorf("Expected service to be down")
-			}
-			shdChan.CloseOnce()
-			time.Sleep(10 * time.Millisecond)
-
+	shouldRun := srv2.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+	}
 }
-*/

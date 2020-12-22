@@ -17,74 +17,62 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"reflect"
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestSupplierSCoverage for cover testing
 func TestSupplierSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	cfg.StatSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
-	close(chS.GetPrecacheChannel(utils.CacheRouteProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheRouteFilterIndexes))
-	close(chS.GetPrecacheChannel(utils.CacheStatQueueProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheStatQueues))
-	close(chS.GetPrecacheChannel(utils.CacheStatFilterIndexes))
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	sts := NewStatService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
 	supS := NewRouteService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(supS, sts,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+
 	if supS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
+	supS2 := &RouteService{
+		cfg:         cfg,
+		dm:          db,
+		cacheS:      chS,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     nil,
+		routeS:      &engine.RouteService{},
+		rpc:         nil,
+		connChan:    make(chan rpcclient.ClientConnector, 1),
+		anz:         anz,
+		srvDep:      srvDep,
 	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongonew"),
-		Section: config.RouteSJson,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !supS.IsRunning() {
+	if !supS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	if !db.IsRunning() {
-		t.Errorf("Expected service to be running")
+	serviceName := supS2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.RouteS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.RouteS, serviceName)
 	}
-	err := supS.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	shouldRun := supS2.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
-	err = supS.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	cfg.RouteSCfg().Enabled = false
-	cfg.GetReloadChan(config.RouteSJson) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
+	supS2.connChan <- chS
+	supS2.Shutdown()
 	if supS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }
-*/

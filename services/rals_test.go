@@ -17,103 +17,72 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"reflect"
+	"sync"
+	"testing"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestRalsCoverage for cover testing
 func TestRalsCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
-	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheThresholds))
-	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
-
-	close(chS.GetPrecacheChannel(utils.CacheDestinations))
-	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
-	close(chS.GetPrecacheChannel(utils.CacheRatingPlans))
-	close(chS.GetPrecacheChannel(utils.CacheRatingProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheActions))
-	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
-	close(chS.GetPrecacheChannel(utils.CacheAccountActionPlans))
-	close(chS.GetPrecacheChannel(utils.CacheActionTriggers))
-	close(chS.GetPrecacheChannel(utils.CacheSharedGroups))
-	close(chS.GetPrecacheChannel(utils.CacheTimings))
-
 	cfg.ThresholdSCfg().Enabled = true
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	stordb := NewStorDBService(cfg, srvDep)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
 	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1),
 		make(chan rpcclient.ClientConnector, 1),
 		shdChan, nil, anz, srvDep)
-	srvMngr.AddServices(ralS, schS, tS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
 	if ralS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
+	ralS2 := RalService{
+		responder: &ResponderService{
+			cfg:      cfg,
+			server:   server,
+			shdChan:  shdChan,
+			resp:     &engine.Responder{},
+			connChan: make(chan rpcclient.ClientConnector, 1),
+			anz:      anz,
+			srvDep:   srvDep,
+		},
+		cfg:      cfg,
+		cacheS:   chS,
+		server:   server,
+		rals:     &v1.RALsV1{},
+		connChan: make(chan rpcclient.ClientConnector, 1),
 	}
-	if stordb.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.RALS_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !ralS.IsRunning() {
+	ralS2.responder.connChan <- chS
+	if !ralS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-
-	if resp := ralS.GetResponder(); !resp.IsRunning() {
-		t.Errorf("Expected service to be running")
+	serviceName := ralS2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.RALService) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.RALService, serviceName)
 	}
-
-	if !db.IsRunning() {
-		t.Errorf("Expected service to be running")
+	shouldRun := ralS2.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
-	if !stordb.IsRunning() {
-		t.Errorf("Expected service to be running")
+	if !reflect.DeepEqual(ralS2.GetResponder(), ralS2.responder) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", ralS2.responder, ralS2.GetResponder())
 	}
-	err := ralS.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = ralS.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	cfg.RalsCfg().Enabled = false
-	cfg.GetReloadChan(config.RALS_JSN) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
+	ralS2.connChan <- chS
+	ralS2.Shutdown()
 	if ralS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	if resp := ralS.GetResponder(); resp.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }
-*/

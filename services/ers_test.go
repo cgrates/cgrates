@@ -17,57 +17,56 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"reflect"
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/ers"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
 //TestEventReaderSCoverage for cover testing
 func TestEventReaderSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	cfg.SessionSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
-	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	db := NewDataDBService(cfg, nil, srvDep)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
-	attrS := NewEventReaderService(cfg, filterSChan, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(attrS, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
-	if attrS.IsRunning() {
+	srv := NewEventReaderService(cfg, filterSChan, shdChan, nil, srvDep)
+
+	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 
-		var reply string
-		if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_reload", "internal"),
-			Section: config.ERsJson,
-		}, &reply); err != nil {
-			t.Error(err)
-		} else if reply != utils.OK {
-			t.Errorf("Expecting OK ,received %s", reply)
-		}
-		time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-		if !attrS.IsRunning() {
-			t.Errorf("Expected service to be running")
-		}
-
-		cfg.ERsCfg().Enabled = false
-		cfg.GetReloadChan(config.ERsJson) <- struct{}{}
-		time.Sleep(10 * time.Millisecond)
-		if attrS.IsRunning() {
-			t.Errorf("Expected service to be down")
-		}
-		shdChan.CloseOnce()
-		time.Sleep(10 * time.Millisecond)
-
+	srv2 := EventReaderService{
+		RWMutex:     sync.RWMutex{},
+		cfg:         cfg,
+		filterSChan: filterSChan,
+		shdChan:     shdChan,
+		ers:         &ers.ERService{},
+		rldChan:     make(chan struct{}, 1),
+		stopChan:    make(chan struct{}, 1),
+		connMgr:     nil,
+		srvDep:      srvDep,
+	}
+	if !srv2.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	serviceName := srv2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.ERs) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ERs, serviceName)
+	}
+	shouldRun := srv2.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+	}
+	srv2.Shutdown()
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
 }
-*/

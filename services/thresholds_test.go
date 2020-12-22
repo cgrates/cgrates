@@ -17,67 +17,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"reflect"
+	"sync"
+	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 //TestThresholdSCoverage for cover testing
 func TestThresholdSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
-	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheThresholds))
-	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(tS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
+	thrs1, _ := engine.NewThresholdService(&engine.DataManager{}, &config.CGRConfig{}, &engine.FilterS{})
+	tS2 := &ThresholdService{
+		cfg:         cfg,
+		dm:          db,
+		cacheS:      chS,
+		filterSChan: filterSChan,
+		server:      server,
+		thrs:        thrs1,
+		connChan:    make(chan rpcclient.ClientConnector, 1),
+		anz:         anz,
+		srvDep:      srvDep,
 	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.THRESHOLDS_JSON,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !tS.IsRunning() {
+	if !tS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	if !db.IsRunning() {
-		t.Errorf("Expected service to be running")
+	serviceName := tS2.ServiceName()
+	if !reflect.DeepEqual(serviceName, utils.ThresholdS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ThresholdS, serviceName)
 	}
-	err := tS.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	shouldRun := tS2.ShouldRun()
+	if !reflect.DeepEqual(shouldRun, false) {
+		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
-	err = tS.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	cfg.ThresholdSCfg().Enabled = false
-	cfg.GetReloadChan(config.THRESHOLDS_JSON) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
-	if tS.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }
-*/
