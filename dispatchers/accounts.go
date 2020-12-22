@@ -17,3 +17,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package dispatchers
+
+import "github.com/cgrates/cgrates/utils"
+
+func (dS *DispatcherService) AccountSv1Ping(args *utils.CGREventWithOpts, rpl *string) (err error) {
+	if args == nil {
+		args = new(utils.CGREventWithOpts)
+	}
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.AccountSv1Ping, args.CGREvent.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args, utils.AccountS, utils.AccountSv1Ping, args, rpl)
+}

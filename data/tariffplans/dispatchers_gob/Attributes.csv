@@ -25,3 +25,4 @@ cgrates.org,ATTR_API_CDRSV2,*auth,*string:~*req.ApiKey:cdrsv212345,,,*req.APIMet
 cgrates.org,ATTR_API_RATES_AUTH,*auth,*string:~*req.ApiKey:rPrf12345,,,*req.APIMethods,*constant,RateSv1.Ping,false,20
 cgrates.org,ATTR_API_CORE_AUTH,*auth,*string:~*req.ApiKey:core12345,,,*req.APIMethods,*constant,CoreSv1.Status&CoreSv1.Ping&CoreSv1.Sleep,false,20
 cgrates.org,ATTR_API_ACTIONS_AUTH,*auth,*string:~*req.ApiKey:actPrf12345,,,*req.APIMethods,*constant,ActionSv1.Ping,false,20
+cgrates.org,ATTR_API_ACCOUNTS_AUTH,*auth,*string:~*req.ApiKey:accPrf12345,,,*req.APIMethods,*constant,AccountSv1.Ping,false,20
