@@ -166,7 +166,7 @@ func (aSv1 *ActionSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
 
 // ScheduleActions will be called to schedule actions matching the arguments
 func (aSv1 *ActionSv1) ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error {
-	return aSv1.aS.V1ExecuteActions(args, rpl)
+	return aSv1.aS.V1ScheduleActions(args, rpl)
 }
 
 // ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field

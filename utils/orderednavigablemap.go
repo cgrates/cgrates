@@ -154,7 +154,7 @@ func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err
 }
 
 // FieldAsInterface returns the interface at the path
-func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (str interface{}, err error) {
+func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (iface interface{}, err error) {
 	var val NMInterface
 	val, err = onm.nm.Field(NewPathItems(fldPath))
 	if err != nil {
@@ -169,10 +169,18 @@ func (OrderedNavigableMap) RemoteHost() net.Addr {
 }
 
 // GetOrder returns the elements order as a slice
-// use this only for testing
 func (onm *OrderedNavigableMap) GetOrder() (order []PathItems) {
 	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
 		order = append(order, el.Value)
+	}
+	return
+}
+
+// OrderedFields returns the elements in order they were inserted
+func (onm *OrderedNavigableMap) OrderedFields() (flds []interface{}) {
+	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
+		fld, _ := onm.Field(el.Value)
+		flds = append(flds, fld.Interface())
 	}
 	return
 }

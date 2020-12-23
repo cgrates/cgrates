@@ -34,6 +34,14 @@ func stripIdxFromLastPathElm(path string) string {
 	return path[:lastIdxStart]
 }
 
+// NewFullPath is a constructor for FullPath out of string and separator
+func NewFullPath(pth string, sep string) *FullPath {
+	return &FullPath{
+		Path:      pth,
+		PathItems: NewPathItems(strings.Split(pth, sep)),
+	}
+}
+
 // FullPath is the path to the item with all the needed fields
 type FullPath struct {
 	PathItems PathItems
