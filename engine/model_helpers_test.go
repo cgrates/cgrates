@@ -7291,29 +7291,8 @@ func TestApitoAccountProfileCaseTimeError2(t *testing.T) {
 	}
 }
 
-func TestActionProfileToAPICase2(t *testing.T) {
-	testStruct := &ActionProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
-		Actions: []*APAction{
-			{
-				ID:        "test_action_id",
-				FilterIDs: []string{"test_action_filter_id1"},
-				Path:      "test_path",
-				Opts: map[string]interface{}{
-					"key1": "val1",
-				},
-			},
-		},
-	}
-	exp := &utils.TPActionProfile{
+func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
+	testStruct := &utils.TPActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
@@ -7323,19 +7302,112 @@ func TestActionProfileToAPICase2(t *testing.T) {
 		},
 		Weight:   1,
 		Schedule: "test_schedule",
-		Targets:  []*utils.TPActionTarget{},
+		Targets: []*utils.TPActionTarget{
+			&utils.TPActionTarget{
+				TargetType: utils.MetaAccounts,
+				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
+			},
+			&utils.TPActionTarget{
+				TargetType: utils.MetaResources,
+				TargetIDs:  []string{"test_ID1", "test_ID2"},
+			},
+		},
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
-				Opts:      "key1:val1",
 				Path:      "test_path",
-				TTL:       "0s",
+				Opts:      "key1:val1;key2:val2",
 			},
 		},
 	}
-	result := ActionProfileToAPI(testStruct)
-	if !reflect.DeepEqual(exp, result) {
-		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
+
+	expStruct := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight:   1,
+		Schedule: "test_schedule",
+		Targets: []*utils.TPActionTarget{
+			&utils.TPActionTarget{
+				TargetType: utils.MetaAccounts,
+				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
+			},
+			&utils.TPActionTarget{
+				TargetType: utils.MetaResources,
+				TargetIDs:  []string{"test_ID1", "test_ID2"},
+			},
+		},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1"},
+				Path:      "test_path",
+				Opts:      "key1:val1;key2:val2",
+			},
+		},
+	}
+	result, err := APItoActionProfile(testStruct, "")
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	result2 := ActionProfileToAPI(result)
+	sort.Strings(result.FilterIDs)
+	if reflect.DeepEqual(result2, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result2))
+	}
+
+}
+
+func TestModelHelpersAccountProfileToAPI(t *testing.T) {
+	testStruct := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"test_filterId"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
+		},
+		Weight: 2,
+		Balances: []*utils.Balance{{
+			ID:        "VoiceBalance",
+			FilterIDs: []string{"FLTR_RES_GR2"},
+			Weight:    10,
+			Type:      utils.VOICE,
+			Value:     3600000000000,
+			Opts: map[string]interface{}{
+				"key1": "val1",
+			},
+		}},
+		ThresholdIDs: []string{"test_thrs"},
+	}
+	expStruct := utils.TPAccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"test_filterId"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight: 2,
+		Balances: []*utils.TPAccountBalance{
+			{
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"FLTR_RES_GR2"},
+				Weight:    10,
+				Type:      utils.VOICE,
+				Value:     3600000000000,
+				Opts:      "22:22:4fs",
+			},
+		},
+		ThresholdIDs: []string{"test_thrs"},
+	}
+	result := AccountProfileToAPI(testStruct)
+	if reflect.DeepEqual(result, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
