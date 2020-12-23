@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
 import (
 	"sync"
 	"testing"
@@ -79,4 +78,3 @@ func TestDiameterAgentCoverage(t *testing.T) {
 	}
 
 }
-*/

@@ -6959,3 +6959,383 @@ func TestModelHelpersCSVLoadErrorBool(t *testing.T) {
 		t.Errorf("\nExpecting <invalid value \"TEST_DEST\" for field testStruct.Tag>,\n Received <%+v>", err)
 	}
 }
+
+func TestResourceMdlsCSVHeader(t *testing.T) {
+	testStruct := AccountProfileMdls{{
+		Tpid:               "TEST_TPID",
+		Tenant:             "cgrates.org",
+		ID:                 "ResGroup1",
+		FilterIDs:          "FLTR_RES_GR1",
+		ActivationInterval: "2014-07-29T15:00:00Z",
+		Weight:             10.0,
+		ThresholdIDs:       "WARN_RES1;WARN_RES1",
+	},
+	}
+	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
+		utils.ActivationIntervalString, utils.Weight, utils.BalanceID,
+		utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
+		utils.BalanceType, utils.BalanceOpts, utils.BalanceValue, utils.ThresholdIDs}
+	result := testStruct.CSVHeader()
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
+
+func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
+	testStruct := AccountProfileMdls{{
+		PK:                 0,
+		Tpid:               "TEST_TPID",
+		Tenant:             "cgrates.org",
+		ID:                 "ResGroup1",
+		FilterIDs:          "FLTR_RES_GR1",
+		ActivationInterval: "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
+		Weight:             10.0,
+		BalanceID:          "VoiceBalance",
+		BalanceFilterIDs:   "FLTR_RES_GR2",
+		BalanceWeight:      10,
+		BalanceBlocker:     false,
+		BalanceType:        utils.VOICE,
+		BalanceValue:       3600000000000,
+		ThresholdIDs:       "WARN_RES1",
+	},
+	}
+	exp := []*utils.TPAccountProfile{
+		{
+			TPid:      "TEST_TPID",
+			Tenant:    "cgrates.org",
+			ID:        "ResGroup1",
+			FilterIDs: []string{"FLTR_RES_GR1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-24T15:00:00Z",
+				ExpiryTime:     "2014-07-25T15:00:00Z",
+			},
+			Weight: 10.0,
+			Balances: []*utils.TPAccountBalance{
+				{
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"FLTR_RES_GR2"},
+					Weight:    10,
+					Type:      utils.VOICE,
+					Value:     3600000000000,
+				},
+			},
+			ThresholdIDs: []string{"WARN_RES1"},
+		},
+	}
+	result := testStruct.AsTPAccountProfile()
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
+
+func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
+	testStruct := AccountProfileMdls{{
+		PK:                 0,
+		Tpid:               "TEST_TPID",
+		Tenant:             "cgrates.org",
+		ID:                 "ResGroup1",
+		FilterIDs:          "FLTR_RES_GR1",
+		ActivationInterval: "2014-07-24T15:00:00Z",
+		Weight:             10.0,
+		BalanceID:          "VoiceBalance",
+		BalanceFilterIDs:   "FLTR_RES_GR2",
+		BalanceWeight:      10,
+		BalanceBlocker:     false,
+		BalanceType:        utils.VOICE,
+		BalanceValue:       3600000000000,
+		ThresholdIDs:       "WARN_RES1",
+	},
+	}
+	exp := []*utils.TPAccountProfile{
+		{
+			TPid:      "TEST_TPID",
+			Tenant:    "cgrates.org",
+			ID:        "ResGroup1",
+			FilterIDs: []string{"FLTR_RES_GR1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-24T15:00:00Z",
+			},
+			Weight: 10.0,
+			Balances: []*utils.TPAccountBalance{
+				{
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"FLTR_RES_GR2"},
+					Weight:    10,
+					Type:      utils.VOICE,
+					Value:     3600000000000,
+				},
+			},
+			ThresholdIDs: []string{"WARN_RES1"},
+		},
+	}
+	result := testStruct.AsTPAccountProfile()
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
+
+func TestAPItoModelTPAccountProfile(t *testing.T) {
+	testStruct := &utils.TPAccountProfile{
+		TPid:      "TEST_TPID",
+		Tenant:    "cgrates.org",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_RES_GR1"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-24T15:00:00Z",
+			ExpiryTime:     "2014-07-25T15:00:00Z",
+		},
+		Weight: 10.0,
+		Balances: []*utils.TPAccountBalance{
+			{
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"FLTR_RES_GR2"},
+				Weight:    10,
+				Type:      utils.VOICE,
+				Value:     3600000000000,
+			},
+		},
+		ThresholdIDs: []string{"WARN_RES1"},
+	}
+	exp := AccountProfileMdls{{
+		Tpid:               "TEST_TPID",
+		Tenant:             "cgrates.org",
+		ID:                 "ResGroup1",
+		FilterIDs:          "FLTR_RES_GR1",
+		ActivationInterval: "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
+		Weight:             10.0,
+		BalanceID:          "VoiceBalance",
+		BalanceFilterIDs:   "FLTR_RES_GR2",
+		BalanceWeight:      10,
+		BalanceBlocker:     false,
+		BalanceType:        utils.VOICE,
+		BalanceValue:       3600000000000,
+		ThresholdIDs:       "WARN_RES1",
+	}}
+	result := APItoModelTPAccountProfile(testStruct)
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
+
+func TestAPItoModelTPAccountProfileNoBalance(t *testing.T) {
+	testStruct := &utils.TPAccountProfile{
+		TPid:      "TEST_TPID",
+		Tenant:    "cgrates.org",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_RES_GR1"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-24T15:00:00Z",
+			ExpiryTime:     "2014-07-25T15:00:00Z",
+		},
+		Weight:       10.0,
+		ThresholdIDs: []string{"WARN_RES1"},
+	}
+	exp := AccountProfileMdls{}
+	exp = nil
+	result := APItoModelTPAccountProfile(testStruct)
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
+
+func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
+	testStruct := &utils.TPAccountProfile{
+		TPid:      "TEST_TPID",
+		Tenant:    "cgrates.org",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR2"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-24T15:00:00Z",
+			ExpiryTime:     "2014-07-25T15:00:00Z",
+		},
+		Weight: 10.0,
+		Balances: []*utils.TPAccountBalance{
+			{
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR2"},
+				Weight:    10,
+				Type:      utils.VOICE,
+				Value:     3600000000000,
+			},
+		},
+		ThresholdIDs: []string{"WARN_RES1", "WARN_RES2"},
+	}
+	exp := AccountProfileMdls{{
+		Tpid:               "TEST_TPID",
+		Tenant:             "cgrates.org",
+		ID:                 "ResGroup1",
+		FilterIDs:          "FLTR_RES_GR1;FLTR_RES_GR2",
+		ActivationInterval: "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
+		Weight:             10.0,
+		BalanceID:          "VoiceBalance",
+		BalanceFilterIDs:   "FLTR_RES_GR1;FLTR_RES_GR2",
+		BalanceWeight:      10,
+		BalanceBlocker:     false,
+		BalanceType:        utils.VOICE,
+		BalanceValue:       3600000000000,
+		ThresholdIDs:       "WARN_RES1;WARN_RES2",
+	}}
+	sort.Strings(testStruct.FilterIDs)
+	sort.Strings(testStruct.ThresholdIDs)
+	sort.Strings(testStruct.Balances[0].FilterIDs)
+	result := APItoModelTPAccountProfile(testStruct)
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
+
+func TestApitoAccountProfileCase2(t *testing.T) {
+	testStruct := &utils.TPAccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_RES_GR1"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight: 10.0,
+		Balances: []*utils.TPAccountBalance{
+			{
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"FLTR_RES_GR2"},
+				Weight:    10,
+				Type:      utils.VOICE,
+				Value:     3600000000000,
+				Opts:      "key1:val1",
+			},
+		},
+		ThresholdIDs: []string{"WARN_RES1"},
+	}
+	exp := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_RES_GR1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
+		},
+		Weight: 10.0,
+		Balances: []*utils.Balance{{
+			ID:        "VoiceBalance",
+			FilterIDs: []string{"FLTR_RES_GR2"},
+			Weight:    10,
+			Type:      utils.VOICE,
+			Value:     3600000000000,
+			Opts: map[string]interface{}{
+				"key1": "val1",
+			},
+		}},
+		ThresholdIDs: []string{"WARN_RES1"},
+	}
+	result, err := APItoAccountProfile(testStruct, "")
+	if err != nil {
+		t.Errorf("Expecting: <nil>,\nreceived: <%+v>", err)
+	}
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
+
+func TestApitoAccountProfileCaseTimeError(t *testing.T) {
+	testStruct := &utils.TPAccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_RES_GR1"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "test_time",
+			ExpiryTime:     "test_time2",
+		},
+		Weight: 10.0,
+		Balances: []*utils.TPAccountBalance{
+			{
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"FLTR_RES_GR2"},
+				Weight:    10,
+				Type:      utils.VOICE,
+				Value:     3600000000000,
+			},
+		},
+		ThresholdIDs: []string{"WARN_RES1"},
+	}
+	_, err := APItoAccountProfile(testStruct, "")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("Expecting: <Unsupported time format>,\nreceived: <%+v>", err)
+	}
+}
+
+func TestApitoAccountProfileCaseTimeError2(t *testing.T) {
+	testStruct := &utils.TPAccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ResGroup1",
+		FilterIDs: []string{"FLTR_RES_GR1"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight: 10.0,
+		Balances: []*utils.TPAccountBalance{
+			{
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"FLTR_RES_GR2"},
+				Weight:    10,
+				Type:      utils.VOICE,
+				Value:     3600000000000,
+				Opts:      "22:22:4fs",
+			},
+		},
+		ThresholdIDs: []string{"WARN_RES1"},
+	}
+	_, err := APItoAccountProfile(testStruct, "")
+	if err == nil || err.Error() != "malformed option for ActionProfile <cgrates.org:ResGroup1> for action <VoiceBalance>" {
+		t.Errorf("Expecting: <malformed option for ActionProfile <cgrates.org:ResGroup1> for action <VoiceBalance>>,\nreceived: <%+v>", err)
+	}
+}
+
+func TestActionProfileToAPICase2(t *testing.T) {
+	testStruct := &ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
+		},
+		Weight:   1,
+		Schedule: "test_schedule",
+		Actions: []*APAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1"},
+				Path:      "test_path",
+				Opts: map[string]interface{}{
+					"key1": "val1",
+				},
+			},
+		},
+	}
+	exp := &utils.TPActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:25:00Z",
+			ExpiryTime:     "2014-07-15T14:25:00Z",
+		},
+		Weight:   1,
+		Schedule: "test_schedule",
+		Targets:  []*utils.TPActionTarget{},
+		Actions: []*utils.TPAPAction{
+			{
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1"},
+				Opts:      "key1:val1",
+				Path:      "test_path",
+				TTL:       "0s",
+			},
+		},
+	}
+	result := ActionProfileToAPI(testStruct)
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
