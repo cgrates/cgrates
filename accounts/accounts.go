@@ -64,3 +64,57 @@ func (aS *AccountS) Shutdown() (err error) {
 func (aS *AccountS) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(aS, serviceMethod, args, reply)
 }
+
+// matchingAccountForEvent returns the matched Account for the given event
+func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREventWithOpts, acntIDs []string) (acnt *utils.AccountProfile, err error) {
+	evNm := utils.MapStorage{
+		utils.MetaReq:  cgrEv.Event,
+		utils.MetaOpts: cgrEv.Opts,
+	}
+	if len(acntIDs) == 0 {
+		var actIDsMp utils.StringSet
+		if actIDsMp, err = engine.MatchingItemIDsForEvent(
+			evNm,
+			aS.cfg.AccountSCfg().StringIndexedFields,
+			aS.cfg.AccountSCfg().PrefixIndexedFields,
+			aS.cfg.AccountSCfg().SuffixIndexedFields,
+			aS.dm,
+			utils.CacheActionProfilesFilterIndexes,
+			tnt,
+			aS.cfg.AccountSCfg().IndexedSelects,
+			aS.cfg.AccountSCfg().NestedFields,
+		); err != nil {
+			return
+		}
+		acntIDs = actIDsMp.AsSlice()
+	}
+	for _, acntID := range acntIDs {
+		var qAcnt *utils.AccountProfile
+		if qAcnt, err = aS.dm.GetAccountProfile(tnt, acntID,
+			true, true, utils.NonTransactional); err != nil {
+			if err == utils.ErrNotFound {
+				err = nil
+				continue
+			}
+			return
+		}
+		if qAcnt.ActivationInterval != nil && cgrEv.CGREvent.Time != nil &&
+			!qAcnt.ActivationInterval.IsActiveAtTime(*cgrEv.CGREvent.Time) { // not active
+			continue
+		}
+		var pass bool
+		if pass, err = aS.fltrS.Pass(tnt, qAcnt.FilterIDs, evNm); err != nil {
+			return
+		} else if !pass {
+			continue
+		}
+		if acnt == nil || acnt.Weight < qAcnt.Weight {
+			acnt = qAcnt
+		}
+	}
+	if acnt == nil {
+		return nil, utils.ErrNotFound
+	}
+
+	return
+}

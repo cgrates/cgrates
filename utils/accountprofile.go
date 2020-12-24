@@ -73,3 +73,9 @@ type AccountWithOpts struct {
 	*Account
 	Opts map[string]interface{}
 }
+
+// ArgsAccountForEvent arguments used for process event
+type ArgsAccountForEvent struct {
+	*CGREventWithOpts
+	AccountIDs []string
+}
