@@ -116,7 +116,7 @@ func TestNewCapsGOBCodec(t *testing.T) {
 	if r := newCapsGOBCodec(conn, cr, nil); !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, r)
 	}
-	exp = analyzers.NewServerCodec(newGobServerCodec(conn), anz, utils.MetaGOB, utils.Local, utils.Local)
+	exp = analyzers.NewAnalyzerServerCodec(newGobServerCodec(conn), anz, utils.MetaGOB, utils.Local, utils.Local)
 	if r := newCapsGOBCodec(conn, cr, anz); !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, r)
 	}
@@ -130,7 +130,7 @@ func TestNewCapsJSONCodec(t *testing.T) {
 	if r := newCapsJSONCodec(conn, cr, nil); !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, r)
 	}
-	exp = analyzers.NewServerCodec(jsonrpc.NewServerCodec(conn), anz, utils.MetaJSON, utils.Local, utils.Local)
+	exp = analyzers.NewAnalyzerServerCodec(jsonrpc.NewServerCodec(conn), anz, utils.MetaJSON, utils.Local, utils.Local)
 	if r := newCapsJSONCodec(conn, cr, anz); !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, r)
 	}

@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func NewServerCodec(sc rpc.ServerCodec, aS *AnalyzerService, enc, from, to string) rpc.ServerCodec {
+func NewAnalyzerServerCodec(sc rpc.ServerCodec, aS *AnalyzerService, enc, from, to string) rpc.ServerCodec {
 	return &AnalyzerServerCodec{
 		sc:   sc,
 		reqs: make(map[uint64]*rpcAPI),
@@ -68,6 +68,7 @@ func (c *AnalyzerServerCodec) ReadRequestBody(x interface{}) (err error) {
 	c.reqsLk.Unlock()
 	return
 }
+
 func (c *AnalyzerServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
 	c.reqsLk.Lock()
 	api := c.reqs[c.reqIdx]
@@ -76,4 +77,5 @@ func (c *AnalyzerServerCodec) WriteResponse(r *rpc.Response, x interface{}) erro
 	go c.aS.logTrafic(api.ID, api.Method, api.Params, x, r.Error, c.enc, c.from, c.to, api.StartTime, time.Now())
 	return c.sc.WriteResponse(r, x)
 }
+
 func (c *AnalyzerServerCodec) Close() error { return c.sc.Close() }

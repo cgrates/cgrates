@@ -49,7 +49,7 @@ func newCapsGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerServic
 		if to != nil {
 			tostr = to.String()
 		}
-		return analyzers.NewServerCodec(r, anz, utils.MetaGOB, fromstr, tostr)
+		return analyzers.NewAnalyzerServerCodec(r, anz, utils.MetaGOB, fromstr, tostr)
 	}
 	return
 }
@@ -67,7 +67,7 @@ func newCapsJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerServi
 		if to != nil {
 			tostr = to.String()
 		}
-		return analyzers.NewServerCodec(r, anz, utils.MetaJSON, fromstr, tostr)
+		return analyzers.NewAnalyzerServerCodec(r, anz, utils.MetaJSON, fromstr, tostr)
 	}
 	return
 }
