@@ -315,7 +315,7 @@ const (
 	Category                     = "Category"
 	Contexts                     = "Contexts"
 	AccountField                 = "Account"
-	Balances                     = "Balances"
+	BalancesFld                  = "Balances"
 	Subject                      = "Subject"
 	Destination                  = "Destination"
 	SetupTime                    = "SetupTime"

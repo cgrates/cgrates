@@ -18,22 +18,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "sort"
+import (
+	"sort"
+	"time"
+)
 
+// AccountProfile represents one Account on a Tenant
 type AccountProfile struct {
 	Tenant             string
-	ID                 string
+	ID                 string // Account identificator, unique within the tenant
 	FilterIDs          []string
 	ActivationInterval *ActivationInterval
 	Weight             float64
-
-	Balances []*Balance
-
-	ThresholdIDs []string
+	Opts               map[string]interface{}
+	Balances           []*Balance
+	ThresholdIDs       []string
 }
 
+// Balance represents one Balance inside an Account
 type Balance struct {
-	ID        string
+	ID        string // Balance identificator, unique within an Account
 	FilterIDs []string
 	Weight    float64
 	Blocker   bool
@@ -46,12 +50,25 @@ func (aP *AccountProfile) TenantID() string {
 	return ConcatenatedKey(aP.Tenant, aP.ID)
 }
 
+// Clone returns a clone of the account
+func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
+	return
+}
+
 // ActionProfiles is a sortable list of ActionProfiles
 type AccountProfiles []*AccountProfile
 
 // Sort is part of sort interface, sort based on Weight
 func (aps AccountProfiles) Sort() {
 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
+}
+
+// Balances is a sortable list of Balances
+type Balances []*Balance
+
+// Sort is part of sort interface, sort based on Weight
+func (blcs Balances) Sort() {
+	sort.Slice(blcs, func(i, j int) bool { return blcs[i].Weight > blcs[j].Weight })
 }
 
 // AccountProfileWithOpts is used in API calls
@@ -78,4 +95,10 @@ type AccountWithOpts struct {
 type ArgsAccountForEvent struct {
 	*CGREventWithOpts
 	AccountIDs []string
+}
+
+type ReplyMaxUsage struct {
+	AccountID string
+	MaxUsage  time.Duration
+	Cost      *EventCharges
 }

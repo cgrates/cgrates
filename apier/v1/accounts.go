@@ -604,7 +604,7 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 // SetBalances sets multiple balances for the given account
 // if the account is not already created it will create the account also
 func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{utils.AccountField, utils.Balances}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField, utils.BalancesFld}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant

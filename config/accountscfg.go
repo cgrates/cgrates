@@ -23,8 +23,9 @@ import "github.com/cgrates/cgrates/utils"
 // AccountSCfg is the configuration of ActionS
 type AccountSCfg struct {
 	Enabled             bool
-	IndexedSelects      bool
+	RateSConns          []string
 	ThresholdSConns     []string
+	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string

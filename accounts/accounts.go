@@ -98,6 +98,9 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREventWit
 			}
 			return
 		}
+		if _, isDisabled := qAcnt.Opts[utils.Disabled]; isDisabled {
+			continue
+		}
 		if qAcnt.ActivationInterval != nil && cgrEv.CGREvent.Time != nil &&
 			!qAcnt.ActivationInterval.IsActiveAtTime(*cgrEv.CGREvent.Time) { // not active
 			continue
@@ -115,6 +118,31 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREventWit
 	if acnt == nil {
 		return nil, utils.ErrNotFound
 	}
+	return
+}
+
+// accountProcessEvent implements event processing by an Account
+func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
+	cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error) {
+	//var aBlncs *accountBalances
+	if _, err = newAccountBalances(acnt, aS.fltrS, aS.cfg.AccountSCfg().RateSConns); err != nil {
+		return
+	}
+	return
+}
+
+// V1MaxUsage returns the maximum usage for the event, based on matching Account
+func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, ec *utils.EventCharges) (err error) {
+	/*var acnt *utils.AccountProfile
+	if acnt, err = aS.matchingAccountForEvent(args.CGREventWithOpts.Tenant,
+		args.CGREventWithOpts, args.AccountIDs); err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return
+	}
+	*/
+	//if aS.accountProcessEvent(acnt, args)
 
 	return
 }

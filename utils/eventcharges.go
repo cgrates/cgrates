@@ -20,14 +20,13 @@ package utils
 
 import "time"
 
-type ChargedCost struct {
-	CGRID          string
-	RunID          string
-	StartTime      time.Time
-	Usage          *time.Duration
-	Cost           float64
-	Charges        []*ChargedInterval
-	AccountSummary ChargedAccount
-	Accounting     ChargedAccounting
-	Rating         ChargedRating
+// EventCharges records the charges applied to an Event
+type EventCharges struct {
+	StartTime  *time.Time
+	Usage      *time.Duration
+	Cost       *float64
+	Charges    []*ChargedInterval
+	Account    *AccountProfile
+	Accounting *ChargedAccounting
+	Rating     *ChargedRating
 }
