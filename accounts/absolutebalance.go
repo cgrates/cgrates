@@ -21,18 +21,22 @@ package accounts
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // newAbstractBalance constructs an abstractBalanceOperator
-func newAbstractBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []balanceOperator) balanceOperator {
-	return &abstractBalance{blnCfg, cncrtBlncs}
+func newAbstractBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []balanceOperator,
+	fltrS *engine.FilterS, ralsConns []string) balanceOperator {
+	return &abstractBalance{blnCfg, cncrtBlncs, fltrS, ralsConns}
 }
 
 // abstractBalance is the operator for *abstract balance type
 type abstractBalance struct {
 	blnCfg     *utils.Balance
 	cncrtBlncs []balanceOperator // paying balances
+	fltrS      *engine.FilterS
+	ralsConns  []string
 }
 
 // debit implements the balanceOperator interface

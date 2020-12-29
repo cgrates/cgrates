@@ -21,21 +21,32 @@ package accounts
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // newConcreteBalance constructs a concreteBalanceOperator
-func newConcreteBalanceOperator(blnCfg *utils.Balance) balanceOperator {
-	return &concreteBalance{blnCfg}
+func newConcreteBalanceOperator(blnCfg *utils.Balance,
+	fltrS *engine.FilterS, ralsConns []string) balanceOperator {
+	return &concreteBalance{blnCfg, fltrS, ralsConns}
 }
 
 // concreteBalance is the operator for *concrete balance type
 type concreteBalance struct {
-	blnCfg *utils.Balance
+	blnCfg    *utils.Balance
+	fltrS     *engine.FilterS
+	ralsConns []string
 }
 
 // debit implements the balanceOperator interface
 func (cb *concreteBalance) debit(cgrEv *utils.CGREventWithOpts,
 	startTime time.Time, usage float64) (ec *utils.EventCharges, err error) {
+	var uF float64
+	if uF, err = usageFactor(cb.blnCfg, cb.fltrS, cgrEv); err != nil {
+		return
+	}
+	if uF != 1.0 {
+		usage = usage * uF
+	}
 	return
 }

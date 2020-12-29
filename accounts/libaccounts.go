@@ -39,7 +39,7 @@ func newAccountBalances(acnt *utils.AccountProfile,
 	// populate cncrtBlncs
 	acntBlncs.cncrtBlncs = make([]balanceOperator, len(acntBlncs.typIdx[utils.MetaConcrete]))
 	for i, blncIdx := range acntBlncs.typIdx[utils.MetaConcrete] {
-		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx])
+		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx], fltrS, ralsConns)
 		acntBlncs.procs[acntBlncs.blnCfgs[blncIdx].ID] = acntBlncs.cncrtBlncs[i]
 	}
 	// populate procs
@@ -48,7 +48,7 @@ func newAccountBalances(acnt *utils.AccountProfile,
 			continue
 		}
 		if acntBlncs.procs[blnCfg.ID], err = newBalanceOperator(blnCfg,
-			acntBlncs.cncrtBlncs); err != nil {
+			acntBlncs.cncrtBlncs, fltrS, ralsConns); err != nil {
 			return
 		}
 	}
@@ -68,15 +68,15 @@ type accountBalances struct {
 
 // newBalanceOperator instantiates balanceOperator interface
 // cncrtBlncs are needed for abstract balance debits
-func newBalanceOperator(blncCfg *utils.Balance,
-	cncrtBlncs []balanceOperator) (bP balanceOperator, err error) {
+func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []balanceOperator,
+	fltrS *engine.FilterS, ralsConns []string) (bP balanceOperator, err error) {
 	switch blncCfg.Type {
 	default:
 		return nil, fmt.Errorf("unsupported balance type: <%s>", blncCfg.Type)
 	case utils.MetaConcrete:
-		return newConcreteBalanceOperator(blncCfg), nil
+		return newConcreteBalanceOperator(blncCfg, fltrS, ralsConns), nil
 	case utils.MetaAbstract:
-		return newAbstractBalanceOperator(blncCfg, cncrtBlncs), nil
+		return newAbstractBalanceOperator(blncCfg, cncrtBlncs, fltrS, ralsConns), nil
 	}
 }
 
@@ -84,4 +84,36 @@ func newBalanceOperator(blncCfg *utils.Balance,
 type balanceOperator interface {
 	debit(cgrEv *utils.CGREventWithOpts,
 		startTime time.Time, usage float64) (ec *utils.EventCharges, err error)
+}
+
+// usageFactor returns the usage factor for the debit
+//	includes event filtering to avoid code duplication
+func usageFactor(blnCfg *utils.Balance, fltrS *engine.FilterS, cgrEv *utils.CGREventWithOpts) (fctr float64, err error) {
+	fctr = 1.0
+	if len(blnCfg.FilterIDs) == 0 &&
+		len(blnCfg.UsageFactors) == 0 {
+		return
+	}
+	evNm := utils.MapStorage{
+		utils.MetaOpts: cgrEv.Opts,
+		utils.MetaReq:  cgrEv.Event,
+	}
+	// match the general balance filters
+	var pass bool
+	if pass, err = fltrS.Pass(cgrEv.CGREvent.Tenant, blnCfg.FilterIDs, evNm); err != nil {
+		return 0, err
+	} else if !pass {
+		return 0, utils.ErrFilterNotPassingNoCaps
+	}
+	// find out the factor
+	for _, uF := range blnCfg.UsageFactors {
+		if pass, err = fltrS.Pass(cgrEv.CGREvent.Tenant, uF.FilterIDs, evNm); err != nil {
+			return 0, err
+		} else if !pass {
+			continue
+		}
+		fctr = uF.Factor
+		break
+	}
+	return
 }
