@@ -37,9 +37,9 @@ func newAccountBalances(acnt *utils.AccountProfile,
 		acntBlncs.typIdx[blnCfg.Type] = append(acntBlncs.typIdx[blnCfg.Type], i)
 	}
 	// populate cncrtBlncs
-	acntBlncs.cncrtBlncs = make([]balanceProcessor, len(acntBlncs.typIdx[utils.MetaConcrete]))
+	acntBlncs.cncrtBlncs = make([]balanceOperator, len(acntBlncs.typIdx[utils.MetaConcrete]))
 	for i, blncIdx := range acntBlncs.typIdx[utils.MetaConcrete] {
-		acntBlncs.cncrtBlncs[i] = newConcreteBalanceProcessor(acntBlncs.blnCfgs[blncIdx])
+		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx])
 		acntBlncs.procs[acntBlncs.blnCfgs[blncIdx].ID] = acntBlncs.cncrtBlncs[i]
 	}
 	// populate procs
@@ -47,7 +47,7 @@ func newAccountBalances(acnt *utils.AccountProfile,
 		if blnCfg.Type == utils.MetaConcrete { // already computed above
 			continue
 		}
-		if acntBlncs.procs[blnCfg.ID], err = newBalanceProcessor(blnCfg,
+		if acntBlncs.procs[blnCfg.ID], err = newBalanceOperator(blnCfg,
 			acntBlncs.cncrtBlncs); err != nil {
 			return
 		}
@@ -57,64 +57,64 @@ func newAccountBalances(acnt *utils.AccountProfile,
 
 // accountBalances implements processing of the events centralized
 type accountBalances struct {
-	blnCfgs    []*utils.Balance            // ordered list of balance configurations
-	typIdx     map[string][]int            // index based on type
-	cncrtBlncs []balanceProcessor          // concrete balances so we can pass them to the newBalanceProcessor
-	procs      map[string]balanceProcessor // map[blncID]balanceProcessor
+	blnCfgs    []*utils.Balance           // ordered list of balance configurations
+	typIdx     map[string][]int           // index based on type
+	cncrtBlncs []balanceOperator          // concrete balances so we can pass them to the newBalanceOperator
+	procs      map[string]balanceOperator // map[blncID]balanceOperator
 
 	fltrS     *engine.FilterS
 	ralsConns []string
 }
 
-// newBalanceProcessor instantiates balanceProcessor interface
-// cncrtBlncs are needed for abstract debits
-func newBalanceProcessor(blncCfg *utils.Balance,
-	cncrtBlncs []balanceProcessor) (bP balanceProcessor, err error) {
+// newBalanceOperator instantiates balanceOperator interface
+// cncrtBlncs are needed for abstract balance debits
+func newBalanceOperator(blncCfg *utils.Balance,
+	cncrtBlncs []balanceOperator) (bP balanceOperator, err error) {
 	switch blncCfg.Type {
 	default:
 		return nil, fmt.Errorf("unsupported balance type: <%s>", blncCfg.Type)
 	case utils.MetaConcrete:
-		return newConcreteBalanceProcessor(blncCfg), nil
+		return newConcreteBalanceOperator(blncCfg), nil
 	case utils.MetaAbstract:
-		return newAbstractBalanceProcessor(blncCfg, cncrtBlncs), nil
+		return newAbstractBalanceOperator(blncCfg, cncrtBlncs), nil
 	}
 }
 
-// balanceProcessor is the implementation of a balance type
-type balanceProcessor interface {
-	process(cgrEv *utils.CGREventWithOpts,
-		startTime time.Time, usage time.Duration) (ec *utils.EventCharges, err error)
+// balanceOperator is the implementation of a balance type
+type balanceOperator interface {
+	debit(cgrEv *utils.CGREventWithOpts,
+		startTime time.Time, usage float64) (ec *utils.EventCharges, err error)
 }
 
-// newConcreteBalanceProcessor constructs a concreteBalanceProcessor
-func newConcreteBalanceProcessor(blnCfg *utils.Balance) balanceProcessor {
-	return &concreteBalanceProcessor{blnCfg}
+// newConcreteBalanceOperator constructs a concreteBalanceOperator
+func newConcreteBalanceOperator(blnCfg *utils.Balance) balanceOperator {
+	return &concreteBalanceOperator{blnCfg}
 }
 
-// concreteBalanceProcessor is the processor for *concrete balance type
-type concreteBalanceProcessor struct {
+// concreteBalanceOperator is the processor for *concrete balance type
+type concreteBalanceOperator struct {
 	blnCfg *utils.Balance
 }
 
-// process implements the balanceProcessor interface
-func (cb *concreteBalanceProcessor) process(cgrEv *utils.CGREventWithOpts,
-	startTime time.Time, usage time.Duration) (ec *utils.EventCharges, err error) {
+// process implements the balanceOperator interface
+func (cb *concreteBalanceOperator) debit(cgrEv *utils.CGREventWithOpts,
+	startTime time.Time, usage float64) (ec *utils.EventCharges, err error) {
 	return
 }
 
-// newAbstractBalanceProcessor constructs an abstractBalanceProcessor
-func newAbstractBalanceProcessor(blnCfg *utils.Balance, cncrtBlncs []balanceProcessor) balanceProcessor {
-	return &abstractBalanceProcessor{blnCfg, cncrtBlncs}
+// newAbstractBalanceOperator constructs an abstractBalanceOperator
+func newAbstractBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []balanceOperator) balanceOperator {
+	return &abstractBalanceOperator{blnCfg, cncrtBlncs}
 }
 
-// abstractBalanceProcessor is the processor for *abstract balance type
-type abstractBalanceProcessor struct {
+// abstractBalanceOperator is the processor for *abstract balance type
+type abstractBalanceOperator struct {
 	blnCfg     *utils.Balance
-	cncrtBlncs []balanceProcessor // paying balances
+	cncrtBlncs []balanceOperator // paying balances
 }
 
-// process implements the balanceProcessor interface
-func (ab *abstractBalanceProcessor) process(cgrEv *utils.CGREventWithOpts,
-	startTime time.Time, usage time.Duration) (ec *utils.EventCharges, err error) {
+// process implements the balanceOperator interface
+func (ab *abstractBalanceOperator) debit(cgrEv *utils.CGREventWithOpts,
+	startTime time.Time, usage float64) (ec *utils.EventCharges, err error) {
 	return
 }
