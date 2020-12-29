@@ -85,36 +85,3 @@ type balanceOperator interface {
 	debit(cgrEv *utils.CGREventWithOpts,
 		startTime time.Time, usage float64) (ec *utils.EventCharges, err error)
 }
-
-// newConcreteBalanceOperator constructs a concreteBalanceOperator
-func newConcreteBalanceOperator(blnCfg *utils.Balance) balanceOperator {
-	return &concreteBalanceOperator{blnCfg}
-}
-
-// concreteBalanceOperator is the processor for *concrete balance type
-type concreteBalanceOperator struct {
-	blnCfg *utils.Balance
-}
-
-// process implements the balanceOperator interface
-func (cb *concreteBalanceOperator) debit(cgrEv *utils.CGREventWithOpts,
-	startTime time.Time, usage float64) (ec *utils.EventCharges, err error) {
-	return
-}
-
-// newAbstractBalanceOperator constructs an abstractBalanceOperator
-func newAbstractBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []balanceOperator) balanceOperator {
-	return &abstractBalanceOperator{blnCfg, cncrtBlncs}
-}
-
-// abstractBalanceOperator is the processor for *abstract balance type
-type abstractBalanceOperator struct {
-	blnCfg     *utils.Balance
-	cncrtBlncs []balanceOperator // paying balances
-}
-
-// process implements the balanceOperator interface
-func (ab *abstractBalanceOperator) debit(cgrEv *utils.CGREventWithOpts,
-	startTime time.Time, usage float64) (ec *utils.EventCharges, err error) {
-	return
-}
