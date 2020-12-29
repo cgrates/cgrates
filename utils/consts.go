@@ -947,6 +947,8 @@ const (
 	MetaRow                  = "*row"
 	BalanceFilterIDs         = "BalanceFilterIDs"
 	BalanceOpts              = "BalanceOpts"
+	MetaConcrete             = "*concrete"
+	MetaAbstract             = "*abstract"
 )
 
 // Migrator Action

@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// newAccountBalances constructs accountBalances struct
+// newAccountBalances constructs accountBalances
 func newAccountBalances(acnt *utils.AccountProfile,
 	fltrS *engine.FilterS, ralsConns []string) (acntBlncs *accountBalances, err error) {
 	blncs := utils.Balances(acnt.Balances) // will be changed with using map so OK to reference for now
@@ -36,19 +36,19 @@ func newAccountBalances(acnt *utils.AccountProfile,
 	for i, blnCfg := range blncs {
 		acntBlncs.typIdx[blnCfg.Type] = append(acntBlncs.typIdx[blnCfg.Type], i)
 	}
-	// populate mntryBlncs
-	acntBlncs.mntryBlncs = make([]balanceProcessor, len(acntBlncs.typIdx[utils.MONETARY]))
-	for i, blncIdx := range acntBlncs.typIdx[utils.MONETARY] {
-		acntBlncs.mntryBlncs[i] = newMonetaryBalanceProcessor(acntBlncs.blnCfgs[blncIdx])
-		acntBlncs.procs[acntBlncs.blnCfgs[blncIdx].ID] = acntBlncs.mntryBlncs[i]
+	// populate cncrtBlncs
+	acntBlncs.cncrtBlncs = make([]balanceProcessor, len(acntBlncs.typIdx[utils.MetaConcrete]))
+	for i, blncIdx := range acntBlncs.typIdx[utils.MetaConcrete] {
+		acntBlncs.cncrtBlncs[i] = newConcreteBalanceProcessor(acntBlncs.blnCfgs[blncIdx])
+		acntBlncs.procs[acntBlncs.blnCfgs[blncIdx].ID] = acntBlncs.cncrtBlncs[i]
 	}
 	// populate procs
 	for _, blnCfg := range acntBlncs.blnCfgs {
-		if blnCfg.Type == utils.MONETARY { // already computed above
+		if blnCfg.Type == utils.MetaConcrete { // already computed above
 			continue
 		}
 		if acntBlncs.procs[blnCfg.ID], err = newBalanceProcessor(blnCfg,
-			acntBlncs.mntryBlncs); err != nil {
+			acntBlncs.cncrtBlncs); err != nil {
 			return
 		}
 	}
@@ -59,7 +59,7 @@ func newAccountBalances(acnt *utils.AccountProfile,
 type accountBalances struct {
 	blnCfgs    []*utils.Balance            // ordered list of balance configurations
 	typIdx     map[string][]int            // index based on type
-	mntryBlncs []balanceProcessor          // separate references so we can pass them to the newBalanceProcessor
+	cncrtBlncs []balanceProcessor          // concrete balances so we can pass them to the newBalanceProcessor
 	procs      map[string]balanceProcessor // map[blncID]balanceProcessor
 
 	fltrS     *engine.FilterS
@@ -67,14 +67,16 @@ type accountBalances struct {
 }
 
 // newBalanceProcessor instantiates balanceProcessor interface
-// mntBlncs are needed for combined debits
+// cncrtBlncs are needed for abstract debits
 func newBalanceProcessor(blncCfg *utils.Balance,
-	mntryBlncs []balanceProcessor) (bP balanceProcessor, err error) {
+	cncrtBlncs []balanceProcessor) (bP balanceProcessor, err error) {
 	switch blncCfg.Type {
 	default:
 		return nil, fmt.Errorf("unsupported balance type: <%s>", blncCfg.Type)
-	case utils.MONETARY:
-		return newMonetaryBalanceProcessor(blncCfg), nil
+	case utils.MetaConcrete:
+		return newConcreteBalanceProcessor(blncCfg), nil
+	case utils.MetaAbstract:
+		return newAbstractBalanceProcessor(blncCfg, cncrtBlncs), nil
 	}
 }
 
@@ -84,18 +86,35 @@ type balanceProcessor interface {
 		startTime time.Time, usage time.Duration) (ec *utils.EventCharges, err error)
 }
 
-// newMonetaryBalanceProcessor constructs a monetaryBalanceProcessor
-func newMonetaryBalanceProcessor(blnCfg *utils.Balance) balanceProcessor {
-	return &monetaryBalanceProcessor{blnCfg}
+// newConcreteBalanceProcessor constructs a concreteBalanceProcessor
+func newConcreteBalanceProcessor(blnCfg *utils.Balance) balanceProcessor {
+	return &concreteBalanceProcessor{blnCfg}
 }
 
-// monetaryBalanceProcessor is the processor for *monetary balance type
-type monetaryBalanceProcessor struct {
+// concreteBalanceProcessor is the processor for *concrete balance type
+type concreteBalanceProcessor struct {
 	blnCfg *utils.Balance
 }
 
 // process implements the balanceProcessor interface
-func (mb *monetaryBalanceProcessor) process(cgrEv *utils.CGREventWithOpts,
+func (cb *concreteBalanceProcessor) process(cgrEv *utils.CGREventWithOpts,
+	startTime time.Time, usage time.Duration) (ec *utils.EventCharges, err error) {
+	return
+}
+
+// newAbstractBalanceProcessor constructs an abstractBalanceProcessor
+func newAbstractBalanceProcessor(blnCfg *utils.Balance, cncrtBlncs []balanceProcessor) balanceProcessor {
+	return &abstractBalanceProcessor{blnCfg, cncrtBlncs}
+}
+
+// abstractBalanceProcessor is the processor for *abstract balance type
+type abstractBalanceProcessor struct {
+	blnCfg     *utils.Balance
+	cncrtBlncs []balanceProcessor // paying balances
+}
+
+// process implements the balanceProcessor interface
+func (ab *abstractBalanceProcessor) process(cgrEv *utils.CGREventWithOpts,
 	startTime time.Time, usage time.Duration) (ec *utils.EventCharges, err error) {
 	return
 }

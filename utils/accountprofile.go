@@ -37,20 +37,26 @@ type AccountProfile struct {
 
 // Balance represents one Balance inside an Account
 type Balance struct {
-	ID        string // Balance identificator, unique within an Account
+	ID           string // Balance identificator, unique within an Account
+	FilterIDs    []string
+	Weight       float64
+	Blocker      bool
+	Type         string
+	Opts         map[string]interface{}
+	UsageFactors []*UsageFactor
+	Value        float64
+}
+
+type UsageFactor struct {
 	FilterIDs []string
-	Weight    float64
-	Blocker   bool
-	Type      string
-	Opts      map[string]interface{}
-	Value     float64
+	Factor    float64
 }
 
 func (aP *AccountProfile) TenantID() string {
 	return ConcatenatedKey(aP.Tenant, aP.ID)
 }
 
-// Clone returns a clone of the account
+// Clone returns a clone of the Account
 func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
 	return
 }
