@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -46,5 +47,22 @@ func (cb *concreteBalance) debit(cgrEv *utils.CGREventWithOpts,
 	if _, err = usageWithFactor(usage, cb.blnCfg, cb.fltrS, cgrEv); err != nil {
 		return
 	}
+	return
+}
+
+// debitUnits is a direct debit of balance units
+func (cb *concreteBalance) debitUnits(unts *decimal.Big, incrm *decimal.Big) (dbted *decimal.Big, err error) {
+	// toDo: handle *balanceLimit
+	dbted = unts
+	if cb.blnCfg.DecimalValue().Cmp(unts) == -1 {
+		dbted = utils.DivideBig(cb.blnCfg.DecimalValue(), incrm).RoundToInt()
+	}
+	rmain := utils.SubstractBig(cb.blnCfg.DecimalValue(), dbted)
+	flt64, ok := rmain.Float64()
+	if !ok {
+		return nil, fmt.Errorf("failed representing decimal <%s> as float64", rmain)
+	}
+	cb.blnCfg.Value = flt64
+	cb.blnCfg.SetDecimalValue(rmain)
 	return
 }

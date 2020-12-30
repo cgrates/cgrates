@@ -31,3 +31,7 @@ func MultiplyBig(x, y *decimal.Big) *decimal.Big {
 func AddBig(x, y *decimal.Big) *decimal.Big {
 	return new(decimal.Big).Add(x, y)
 }
+
+func SubstractBig(x, y *decimal.Big) *decimal.Big {
+	return new(decimal.Big).Sub(x, y)
+}

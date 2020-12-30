@@ -87,6 +87,16 @@ func (b *Balance) Compile() (err error) {
 	return
 }
 
+// SetDecimalValue populates the internal decimal value
+func (b *Balance) SetDecimalValue(dVal *decimal.Big) {
+	b.val = dVal
+}
+
+// DecimalValue returns the internal decimal value
+func (b *Balance) DecimalValue() *decimal.Big {
+	return b.val
+}
+
 // ActionProfiles is a sortable list of ActionProfiles
 type AccountProfiles []*AccountProfile
 
