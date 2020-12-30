@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 // newConcreteBalance constructs a concreteBalanceOperator
@@ -40,13 +41,10 @@ type concreteBalance struct {
 
 // debit implements the balanceOperator interface
 func (cb *concreteBalance) debit(cgrEv *utils.CGREventWithOpts,
-	startTime time.Time, usage float64) (ec *utils.EventCharges, err error) {
-	var uF float64
-	if uF, err = usageFactor(cb.blnCfg, cb.fltrS, cgrEv); err != nil {
+	startTime time.Time, usage *decimal.Big) (ec *utils.EventCharges, err error) {
+	//var uF *utils.UsageFactor
+	if _, err = usageWithFactor(usage, cb.blnCfg, cb.fltrS, cgrEv); err != nil {
 		return
-	}
-	if uF != 1.0 {
-		usage = usage * uF
 	}
 	return
 }

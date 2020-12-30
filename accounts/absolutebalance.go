@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 // newAbstractBalance constructs an abstractBalanceOperator
@@ -41,6 +42,6 @@ type abstractBalance struct {
 
 // debit implements the balanceOperator interface
 func (ab *abstractBalance) debit(cgrEv *utils.CGREventWithOpts,
-	startTime time.Time, usage float64) (ec *utils.EventCharges, err error) {
+	startTime time.Time, usage *decimal.Big) (ec *utils.EventCharges, err error) {
 	return
 }

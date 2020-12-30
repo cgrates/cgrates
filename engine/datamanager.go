@@ -3858,6 +3858,9 @@ func (dm *DataManager) GetAccountProfile(tenant, id string, cacheRead, cacheWrit
 			return nil, err
 		}
 	}
+	if err = ap.Compile(); err != nil { // populate unexported vars
+		return nil, err
+	}
 	if cacheWrite {
 		if errCh := Cache.Set(utils.CacheAccountProfiles, tntID, ap, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {

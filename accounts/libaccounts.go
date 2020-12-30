@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 // newAccountBalances constructs accountBalances
@@ -83,13 +84,14 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []balanceOperator,
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
 	debit(cgrEv *utils.CGREventWithOpts,
-		startTime time.Time, usage float64) (ec *utils.EventCharges, err error)
+		startTime time.Time, usage *decimal.Big) (ec *utils.EventCharges, err error)
 }
 
-// usageFactor returns the usage factor for the debit
+// usagewithFactor returns the usage considering also factor for the debit
 //	includes event filtering to avoid code duplication
-func usageFactor(blnCfg *utils.Balance, fltrS *engine.FilterS, cgrEv *utils.CGREventWithOpts) (fctr float64, err error) {
-	fctr = 1.0
+func usageWithFactor(usage *decimal.Big, blnCfg *utils.Balance, fltrS *engine.FilterS,
+	cgrEv *utils.CGREventWithOpts) (mtchUF *utils.UsageFactor, err error) {
+	fctr := decimal.New(1, 0)
 	if len(blnCfg.FilterIDs) == 0 &&
 		len(blnCfg.UsageFactors) == 0 {
 		return
@@ -101,19 +103,26 @@ func usageFactor(blnCfg *utils.Balance, fltrS *engine.FilterS, cgrEv *utils.CGRE
 	// match the general balance filters
 	var pass bool
 	if pass, err = fltrS.Pass(cgrEv.CGREvent.Tenant, blnCfg.FilterIDs, evNm); err != nil {
-		return 0, err
+		return nil, err
 	} else if !pass {
-		return 0, utils.ErrFilterNotPassingNoCaps
+		return nil, utils.ErrFilterNotPassingNoCaps
 	}
 	// find out the factor
 	for _, uF := range blnCfg.UsageFactors {
 		if pass, err = fltrS.Pass(cgrEv.CGREvent.Tenant, uF.FilterIDs, evNm); err != nil {
-			return 0, err
+			return nil, err
 		} else if !pass {
 			continue
 		}
-		fctr = uF.Factor
+		fctr = uF.DecimalFactor()
+		mtchUF = uF
 		break
+	}
+	if mtchUF == nil {
+		return
+	}
+	if fctr.Cmp(decimal.New(1, 0)) == 0 {
+		*usage = *utils.MultiplyBig(usage, fctr)
 	}
 	return
 }

@@ -21,6 +21,8 @@ package utils
 import (
 	"sort"
 	"time"
+
+	"github.com/ericlagergren/decimal"
 )
 
 // AccountProfile represents one Account on a Tenant
@@ -45,11 +47,21 @@ type Balance struct {
 	Opts         map[string]interface{}
 	UsageFactors []*UsageFactor
 	Value        float64
+
+	val *decimal.Big
 }
 
+// UsageFactor is a multiplicator for the usage received
 type UsageFactor struct {
 	FilterIDs []string
 	Factor    float64
+
+	fct *decimal.Big
+}
+
+// DecimalFactor exports the decimal value of the factor
+func (uf *UsageFactor) DecimalFactor() *decimal.Big {
+	return uf.fct
 }
 
 func (aP *AccountProfile) TenantID() string {
@@ -58,6 +70,20 @@ func (aP *AccountProfile) TenantID() string {
 
 // Clone returns a clone of the Account
 func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
+	return
+}
+
+// Compile populates the internal data
+func (aP *AccountProfile) Compile() (err error) {
+	return
+}
+
+// Compile populates the internal data
+func (b *Balance) Compile() (err error) {
+	b.val = new(decimal.Big).SetFloat64(b.Value)
+	for _, uf := range b.UsageFactors {
+		uf.fct = new(decimal.Big).SetFloat64(uf.Factor)
+	}
 	return
 }
 
