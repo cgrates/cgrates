@@ -43,5 +43,9 @@ type abstractBalance struct {
 // debit implements the balanceOperator interface
 func (ab *abstractBalance) debit(cgrEv *utils.CGREventWithOpts,
 	startTime time.Time, usage *decimal.Big) (ec *utils.EventCharges, err error) {
+	//var uF *utils.UsageFactor
+	if _, err = usageWithFactor(usage, ab.blnCfg, ab.fltrS, cgrEv); err != nil {
+		return
+	}
 	return
 }

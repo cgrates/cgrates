@@ -150,6 +150,8 @@ type CGREvents struct {
 type CGREventWithOpts struct {
 	Opts map[string]interface{}
 	*CGREvent
+
+	cache map[string]interface{}
 }
 
 // Clone return a copy of the CGREventWithOpts
@@ -168,6 +170,34 @@ func (ev *CGREventWithOpts) Clone() (clned *CGREventWithOpts) {
 		}
 	}
 	return
+}
+
+// CacheInit will initialize the cache if not already done
+func (ev *CGREventWithOpts) CacheInit() {
+	if ev.cache == nil {
+		ev.cache = make(map[string]interface{})
+	}
+}
+
+// CacheClear will reset the cache
+func (ev *CGREventWithOpts) CacheClear() {
+	ev.cache = make(map[string]interface{})
+}
+
+// CacheGet will return a key from the cache
+func (ev *CGREventWithOpts) CacheGet(key string) (itm interface{}, has bool) {
+	itm, has = ev.cache[key]
+	return
+}
+
+// CacheSet will set data into the event's cache
+func (ev *CGREventWithOpts) CacheSet(key string, val interface{}) {
+	ev.cache[key] = val
+}
+
+// CacheRemove will remove data from cache
+func (ev *CGREventWithOpts) CacheRemove(key string) {
+	delete(ev.cache, key)
 }
 
 // EventWithFlags is used where flags are needed to mark processing
