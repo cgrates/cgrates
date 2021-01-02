@@ -74,7 +74,6 @@ func TestCBDebitUnits(t *testing.T) {
 	} else if dbted.Cmp(decimal.New(12, 1)) != 0 { // only 1.2 is possible due to increment
 		//} else if dbted.Cmp(new(decimal.Big).SetFloat64(1.2)) != 0 {
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
-
 	} else if cb.blnCfg.Value != 0.05 {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Value)
 	}

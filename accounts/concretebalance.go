@@ -28,21 +28,22 @@ import (
 )
 
 // newConcreteBalance constructs a concreteBalanceOperator
-func newConcreteBalanceOperator(blnCfg *utils.Balance,
+func newConcreteBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, ralsConns []string) balanceOperator {
-	return &concreteBalance{blnCfg, fltrS, ralsConns}
+	return &concreteBalance{blnCfg, cncrtBlncs, fltrS, ralsConns}
 }
 
 // concreteBalance is the operator for *concrete balance type
 type concreteBalance struct {
-	blnCfg    *utils.Balance
-	fltrS     *engine.FilterS
-	ralsConns []string
+	blnCfg     *utils.Balance
+	cncrtBlncs []*concreteBalance // paying balances
+	fltrS      *engine.FilterS
+	ralsConns  []string
 }
 
 // debit implements the balanceOperator interface
-func (cb *concreteBalance) debit(cgrEv *utils.CGREventWithOpts,
-	startTime time.Time, usage *decimal.Big) (ec *utils.EventCharges, err error) {
+func (cb *concreteBalance) debitUsage(usage *decimal.Big, startTime time.Time,
+	cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error) {
 	//var uF *utils.UsageFactor
 	if _, _, err = usageWithFactor(cb.blnCfg, cb.fltrS, cgrEv, usage); err != nil {
 		return

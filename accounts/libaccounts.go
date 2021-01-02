@@ -40,7 +40,7 @@ func newAccountBalances(acnt *utils.AccountProfile,
 	// populate cncrtBlncs
 	acntBlncs.cncrtBlncs = make([]*concreteBalance, len(acntBlncs.typIdx[utils.MetaConcrete]))
 	for i, blncIdx := range acntBlncs.typIdx[utils.MetaConcrete] {
-		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx], fltrS, ralsConns).(*concreteBalance)
+		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx], acntBlncs.cncrtBlncs, fltrS, ralsConns).(*concreteBalance)
 		acntBlncs.opers[acntBlncs.blnCfgs[blncIdx].ID] = acntBlncs.cncrtBlncs[i]
 	}
 	// populate opers
@@ -75,7 +75,7 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 	default:
 		return nil, fmt.Errorf("unsupported balance type: <%s>", blncCfg.Type)
 	case utils.MetaConcrete:
-		return newConcreteBalanceOperator(blncCfg, fltrS, ralsConns), nil
+		return newConcreteBalanceOperator(blncCfg, cncrtBlncs, fltrS, ralsConns), nil
 	case utils.MetaAbstract:
 		return newAbstractBalanceOperator(blncCfg, cncrtBlncs, fltrS, ralsConns), nil
 	}
@@ -83,8 +83,8 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
-	debit(cgrEv *utils.CGREventWithOpts,
-		startTime time.Time, usage *decimal.Big) (ec *utils.EventCharges, err error)
+	debitUsage(usage *decimal.Big, startTime time.Time,
+		cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error)
 }
 
 // usagewithFactor returns the usage considering also factor for the debit

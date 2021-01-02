@@ -40,9 +40,9 @@ type abstractBalance struct {
 	ralsConns  []string
 }
 
-// debit implements the balanceOperator interface
-func (ab *abstractBalance) debit(cgrEv *utils.CGREventWithOpts,
-	startTime time.Time, usage *decimal.Big) (ec *utils.EventCharges, err error) {
+// debitUsage implements the balanceOperator interface
+func (ab *abstractBalance) debitUsage(usage *decimal.Big, startTime time.Time,
+	cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error) {
 	//var uF *utils.UsageFactor
 	if _, _, err = usageWithFactor(ab.blnCfg, ab.fltrS, cgrEv, usage); err != nil {
 		return
