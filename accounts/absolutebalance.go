@@ -27,7 +27,7 @@ import (
 )
 
 // newAbstractBalance constructs an abstractBalanceOperator
-func newAbstractBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []balanceOperator,
+func newAbstractBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, ralsConns []string) balanceOperator {
 	return &abstractBalance{blnCfg, cncrtBlncs, fltrS, ralsConns}
 }
@@ -35,7 +35,7 @@ func newAbstractBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []balanceOpera
 // abstractBalance is the operator for *abstract balance type
 type abstractBalance struct {
 	blnCfg     *utils.Balance
-	cncrtBlncs []balanceOperator // paying balances
+	cncrtBlncs []*concreteBalance // paying balances
 	fltrS      *engine.FilterS
 	ralsConns  []string
 }
@@ -44,7 +44,7 @@ type abstractBalance struct {
 func (ab *abstractBalance) debit(cgrEv *utils.CGREventWithOpts,
 	startTime time.Time, usage *decimal.Big) (ec *utils.EventCharges, err error) {
 	//var uF *utils.UsageFactor
-	if _, err = usageWithFactor(usage, ab.blnCfg, ab.fltrS, cgrEv); err != nil {
+	if _, _, err = usageWithFactor(ab.blnCfg, ab.fltrS, cgrEv, usage); err != nil {
 		return
 	}
 	return

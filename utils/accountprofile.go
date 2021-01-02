@@ -39,20 +39,20 @@ type AccountProfile struct {
 
 // Balance represents one Balance inside an Account
 type Balance struct {
-	ID           string // Balance identificator, unique within an Account
-	FilterIDs    []string
-	Weight       float64
-	Blocker      bool
-	Type         string
-	Opts         map[string]interface{}
-	UsageFactors []*UsageFactor
-	Value        float64
+	ID          string // Balance identificator, unique within an Account
+	FilterIDs   []string
+	Weight      float64
+	Blocker     bool
+	Type        string
+	Opts        map[string]interface{}
+	UnitFactors []*UnitFactor
+	Value       float64
 
 	val *decimal.Big
 }
 
-// UsageFactor is a multiplicator for the usage received
-type UsageFactor struct {
+// UnitFactor is a multiplicator for the usage received
+type UnitFactor struct {
 	FilterIDs []string
 	Factor    float64
 
@@ -60,7 +60,7 @@ type UsageFactor struct {
 }
 
 // DecimalFactor exports the decimal value of the factor
-func (uf *UsageFactor) DecimalFactor() *decimal.Big {
+func (uf *UnitFactor) DecimalFactor() *decimal.Big {
 	return uf.fct
 }
 
@@ -81,7 +81,7 @@ func (aP *AccountProfile) Compile() (err error) {
 // Compile populates the internal data
 func (b *Balance) Compile() (err error) {
 	b.val = new(decimal.Big).SetFloat64(b.Value)
-	for _, uf := range b.UsageFactors {
+	for _, uf := range b.UnitFactors {
 		uf.fct = new(decimal.Big).SetFloat64(uf.Factor)
 	}
 	return

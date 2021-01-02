@@ -38,17 +38,17 @@ func newAccountBalances(acnt *utils.AccountProfile,
 		acntBlncs.typIdx[blnCfg.Type] = append(acntBlncs.typIdx[blnCfg.Type], i)
 	}
 	// populate cncrtBlncs
-	acntBlncs.cncrtBlncs = make([]balanceOperator, len(acntBlncs.typIdx[utils.MetaConcrete]))
+	acntBlncs.cncrtBlncs = make([]*concreteBalance, len(acntBlncs.typIdx[utils.MetaConcrete]))
 	for i, blncIdx := range acntBlncs.typIdx[utils.MetaConcrete] {
-		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx], fltrS, ralsConns)
-		acntBlncs.procs[acntBlncs.blnCfgs[blncIdx].ID] = acntBlncs.cncrtBlncs[i]
+		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx], fltrS, ralsConns).(*concreteBalance)
+		acntBlncs.opers[acntBlncs.blnCfgs[blncIdx].ID] = acntBlncs.cncrtBlncs[i]
 	}
-	// populate procs
+	// populate opers
 	for _, blnCfg := range acntBlncs.blnCfgs {
 		if blnCfg.Type == utils.MetaConcrete { // already computed above
 			continue
 		}
-		if acntBlncs.procs[blnCfg.ID], err = newBalanceOperator(blnCfg,
+		if acntBlncs.opers[blnCfg.ID], err = newBalanceOperator(blnCfg,
 			acntBlncs.cncrtBlncs, fltrS, ralsConns); err != nil {
 			return
 		}
@@ -60,8 +60,8 @@ func newAccountBalances(acnt *utils.AccountProfile,
 type accountBalances struct {
 	blnCfgs    []*utils.Balance           // ordered list of balance configurations
 	typIdx     map[string][]int           // index based on type
-	cncrtBlncs []balanceOperator          // concrete balances so we can pass them to the newBalanceOperator
-	procs      map[string]balanceOperator // map[blncID]balanceOperator
+	cncrtBlncs []*concreteBalance         // concrete balances so we can pass them to the newBalanceOperator
+	opers      map[string]balanceOperator // map[blncID]balanceOperator
 
 	fltrS     *engine.FilterS
 	ralsConns []string
@@ -69,7 +69,7 @@ type accountBalances struct {
 
 // newBalanceOperator instantiates balanceOperator interface
 // cncrtBlncs are needed for abstract balance debits
-func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []balanceOperator,
+func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, ralsConns []string) (bP balanceOperator, err error) {
 	switch blncCfg.Type {
 	default:
@@ -89,11 +89,12 @@ type balanceOperator interface {
 
 // usagewithFactor returns the usage considering also factor for the debit
 //	includes event filtering to avoid code duplication
-func usageWithFactor(usage *decimal.Big, blnCfg *utils.Balance, fltrS *engine.FilterS,
-	cgrEv *utils.CGREventWithOpts) (mtchUF *utils.UsageFactor, err error) {
+func usageWithFactor(blnCfg *utils.Balance, fltrS *engine.FilterS,
+	cgrEv *utils.CGREventWithOpts, usage *decimal.Big) (resUsage *decimal.Big, mtchedUF *utils.UnitFactor, err error) {
+	resUsage = usage
 	fctr := decimal.New(1, 0)
 	if len(blnCfg.FilterIDs) == 0 &&
-		len(blnCfg.UsageFactors) == 0 {
+		len(blnCfg.UnitFactors) == 0 {
 		return
 	}
 	evNm := utils.MapStorage{
@@ -103,26 +104,26 @@ func usageWithFactor(usage *decimal.Big, blnCfg *utils.Balance, fltrS *engine.Fi
 	// match the general balance filters
 	var pass bool
 	if pass, err = fltrS.Pass(cgrEv.CGREvent.Tenant, blnCfg.FilterIDs, evNm); err != nil {
-		return nil, err
+		return nil, nil, err
 	} else if !pass {
-		return nil, utils.ErrFilterNotPassingNoCaps
+		return nil, nil, utils.ErrFilterNotPassingNoCaps
 	}
 	// find out the factor
-	for _, uF := range blnCfg.UsageFactors {
+	for _, uF := range blnCfg.UnitFactors {
 		if pass, err = fltrS.Pass(cgrEv.CGREvent.Tenant, uF.FilterIDs, evNm); err != nil {
-			return nil, err
+			return nil, nil, err
 		} else if !pass {
 			continue
 		}
 		fctr = uF.DecimalFactor()
-		mtchUF = uF
+		mtchedUF = uF
 		break
 	}
-	if mtchUF == nil {
+	if mtchedUF == nil {
 		return
 	}
-	if fctr.Cmp(decimal.New(1, 0)) == 0 {
-		*usage = *utils.MultiplyBig(usage, fctr)
+	if fctr.Cmp(decimal.New(1, 0)) != 0 {
+		resUsage = utils.MultiplyBig(usage, fctr)
 	}
 	return
 }

@@ -44,7 +44,7 @@ type concreteBalance struct {
 func (cb *concreteBalance) debit(cgrEv *utils.CGREventWithOpts,
 	startTime time.Time, usage *decimal.Big) (ec *utils.EventCharges, err error) {
 	//var uF *utils.UsageFactor
-	if _, err = usageWithFactor(usage, cb.blnCfg, cb.fltrS, cgrEv); err != nil {
+	if _, _, err = usageWithFactor(cb.blnCfg, cb.fltrS, cgrEv, usage); err != nil {
 		return
 	}
 	return
