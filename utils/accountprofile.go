@@ -47,21 +47,12 @@ type Balance struct {
 	Opts        map[string]interface{}
 	UnitFactors []*UnitFactor
 	Value       float64
-
-	val *decimal.Big
 }
 
 // UnitFactor is a multiplicator for the usage received
 type UnitFactor struct {
 	FilterIDs []string
-	Factor    float64
-
-	fct *decimal.Big
-}
-
-// DecimalFactor exports the decimal value of the factor
-func (uf *UnitFactor) DecimalFactor() *decimal.Big {
-	return uf.fct
+	Factor    *decimal.Big
 }
 
 func (aP *AccountProfile) TenantID() string {
@@ -71,30 +62,6 @@ func (aP *AccountProfile) TenantID() string {
 // Clone returns a clone of the Account
 func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
 	return
-}
-
-// Compile populates the internal data
-func (aP *AccountProfile) Compile() (err error) {
-	return
-}
-
-// Compile populates the internal data
-func (b *Balance) Compile() (err error) {
-	b.val = new(decimal.Big).SetFloat64(b.Value)
-	for _, uf := range b.UnitFactors {
-		uf.fct = new(decimal.Big).SetFloat64(uf.Factor)
-	}
-	return
-}
-
-// SetDecimalValue populates the internal decimal value
-func (b *Balance) SetDecimalValue(dVal *decimal.Big) {
-	b.val = dVal
-}
-
-// DecimalValue returns the internal decimal value
-func (b *Balance) DecimalValue() *decimal.Big {
-	return b.val
 }
 
 // ActionProfiles is a sortable list of ActionProfiles

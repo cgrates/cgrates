@@ -115,7 +115,7 @@ func usageWithFactor(blnCfg *utils.Balance, fltrS *engine.FilterS,
 		} else if !pass {
 			continue
 		}
-		fctr = uF.DecimalFactor()
+		fctr = uF.Factor
 		mtchedUF = uF
 		break
 	}

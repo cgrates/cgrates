@@ -949,6 +949,7 @@ const (
 	BalanceOpts              = "BalanceOpts"
 	MetaConcrete             = "*concrete"
 	MetaAbstract             = "*abstract"
+	MetaBalanceLimit         = "*balanceLimit"
 )
 
 // Migrator Action

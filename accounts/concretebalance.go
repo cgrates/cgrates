@@ -51,18 +51,59 @@ func (cb *concreteBalance) debit(cgrEv *utils.CGREventWithOpts,
 }
 
 // debitUnits is a direct debit of balance units
-func (cb *concreteBalance) debitUnits(unts *decimal.Big, incrm *decimal.Big) (dbted *decimal.Big, err error) {
-	// toDo: handle *balanceLimit
-	dbted = unts
-	if cb.blnCfg.DecimalValue().Cmp(unts) == -1 {
-		dbted = utils.DivideBig(cb.blnCfg.DecimalValue(), incrm).RoundToInt()
+func (cb *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
+	cgrEv *utils.CGREventWithOpts) (dbted *decimal.Big, mtchedUF *utils.UnitFactor, err error) {
+	// *balanceLimit
+	blncLmt := decimal.New(0, 0)
+	if lmt, has := cb.blnCfg.Opts[utils.MetaBalanceLimit].(*decimal.Big); has {
+		blncLmt = lmt
 	}
-	rmain := utils.SubstractBig(cb.blnCfg.DecimalValue(), dbted)
-	flt64, ok := rmain.Float64()
+	blcVal := new(decimal.Big).SetFloat64(cb.blnCfg.Value)
+	var hasLmt bool
+	if blncLmt.Cmp(decimal.New(0, 0)) != 0 {
+		blcVal = utils.SubstractBig(blcVal, blncLmt)
+		hasLmt = true
+	}
+	// dynamic unit factor
+	fctr := decimal.New(1, 0)
+	evNm := utils.MapStorage{
+		utils.MetaOpts: cgrEv.Opts,
+		utils.MetaReq:  cgrEv.Event,
+	}
+	for _, uF := range cb.blnCfg.UnitFactors {
+		var pass bool
+		if pass, err = cb.fltrS.Pass(cgrEv.CGREvent.Tenant, uF.FilterIDs, evNm); err != nil {
+			return nil, nil, err
+		} else if !pass {
+			continue
+		}
+		fctr = uF.Factor
+		mtchedUF = uF
+		break
+	}
+	var hasUF bool
+	if fctr.Cmp(decimal.New(1, 0)) != 0 {
+		dUnts = utils.MultiplyBig(dUnts, fctr)
+		incrm = utils.MultiplyBig(incrm, fctr)
+		hasUF = true
+	}
+	if blcVal.Cmp(dUnts) == -1 { // balance smaller than debit
+		maxIncrm := utils.DivideBig(blcVal, incrm).RoundToInt()
+		dUnts = utils.MultiplyBig(incrm, maxIncrm)
+	}
+	rmain := utils.SubstractBig(blcVal, dUnts)
+	if hasLmt {
+		rmain = utils.AddBig(rmain, blncLmt)
+	}
+	if hasUF {
+		dbted = utils.DivideBig(dUnts, fctr)
+	} else {
+		dbted = dUnts
+	}
+	rmainFlt64, ok := rmain.Float64()
 	if !ok {
-		return nil, fmt.Errorf("failed representing decimal <%s> as float64", rmain)
+		return nil, nil, fmt.Errorf("failed representing decimal <%s> as float64", rmain)
 	}
-	cb.blnCfg.Value = flt64
-	cb.blnCfg.SetDecimalValue(rmain)
+	cb.blnCfg.Value = rmainFlt64
 	return
 }
