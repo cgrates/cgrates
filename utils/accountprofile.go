@@ -39,14 +39,52 @@ type AccountProfile struct {
 
 // Balance represents one Balance inside an Account
 type Balance struct {
-	ID          string // Balance identificator, unique within an Account
-	FilterIDs   []string
-	Weight      float64
-	Blocker     bool
-	Type        string
-	Opts        map[string]interface{}
-	UnitFactors []*UnitFactor
-	Value       float64
+	ID             string // Balance identificator, unique within an Account
+	FilterIDs      []string
+	Weight         float64
+	Blocker        bool
+	Type           string
+	Opts           map[string]interface{}
+	CostIncrements []*CostIncrement
+	CostAttributes []*CostAttributes
+	UnitFactors    []*UnitFactor
+	Value          float64
+}
+
+// CostAttributes will attach attribute profiles to cost events
+type CostAttributes struct {
+	FilterIDs           []string
+	AttributeProfileIDs []string
+}
+
+// CostIncrement enforces cost calculation to specific balance increments
+type CostIncrement struct {
+	FilterIDs    []string
+	Increment    *decimal.Big
+	FixedFee     *decimal.Big
+	RecurrentFee *decimal.Big
+}
+
+// Clone returns a copy of the CostIncrement
+func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
+	cIcln = new(CostIncrement)
+	if cI.FilterIDs != nil {
+		cIcln.FilterIDs = make([]string, len(cI.FilterIDs))
+		for i, fID := range cI.FilterIDs {
+			cIcln.FilterIDs[i] = fID
+		}
+	}
+	if cI.Increment != nil {
+		cIcln.Increment = new(decimal.Big).Copy(cI.Increment)
+	}
+	if cI.FixedFee != nil {
+		cIcln.FixedFee = new(decimal.Big).Copy(cI.FixedFee)
+	}
+	if cI.RecurrentFee != nil {
+		cIcln.RecurrentFee = new(decimal.Big).Copy(cI.RecurrentFee)
+	}
+	return
+
 }
 
 // UnitFactor is a multiplicator for the usage received

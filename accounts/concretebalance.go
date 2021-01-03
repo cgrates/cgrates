@@ -42,38 +42,39 @@ type concreteBalance struct {
 }
 
 // debit implements the balanceOperator interface
-func (cb *concreteBalance) debitUsage(usage *decimal.Big, startTime time.Time,
+func (cB *concreteBalance) debitUsage(usage *decimal.Big, startTime time.Time,
 	cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error) {
-	//var uF *utils.UsageFactor
-	if _, _, err = usageWithFactor(cb.blnCfg, cb.fltrS, cgrEv, usage); err != nil {
-		return
-	}
-	return
-}
 
-// debitUnits is a direct debit of balance units
-func (cb *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
-	cgrEv *utils.CGREventWithOpts) (dbted *decimal.Big, mtchedUF *utils.UnitFactor, err error) {
-	// *balanceLimit
-	blncLmt := decimal.New(0, 0)
-	if lmt, has := cb.blnCfg.Opts[utils.MetaBalanceLimit].(*decimal.Big); has {
-		blncLmt = lmt
-	}
-	blcVal := new(decimal.Big).SetFloat64(cb.blnCfg.Value)
-	var hasLmt bool
-	if blncLmt.Cmp(decimal.New(0, 0)) != 0 {
-		blcVal = utils.SubstractBig(blcVal, blncLmt)
-		hasLmt = true
-	}
-	// dynamic unit factor
-	fctr := decimal.New(1, 0)
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
 		utils.MetaReq:  cgrEv.Event,
 	}
-	for _, uF := range cb.blnCfg.UnitFactors {
+
+	// pass the general balance filters
+	var pass bool
+	if pass, err = cB.fltrS.Pass(cgrEv.CGREvent.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
+		return
+	} else if !pass {
+		return nil, utils.ErrFilterNotPassingNoCaps
+	}
+
+	return
+}
+
+// debitUnits is a direct debit of balance units
+func (cB *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
+	cgrEv *utils.CGREventWithOpts) (dbted *decimal.Big, mtchedUF *utils.UnitFactor, err error) {
+
+	evNm := utils.MapStorage{
+		utils.MetaOpts: cgrEv.Opts,
+		utils.MetaReq:  cgrEv.Event,
+	}
+
+	// dynamic unit factor
+	fctr := decimal.New(1, 0)
+	for _, uF := range cB.blnCfg.UnitFactors {
 		var pass bool
-		if pass, err = cb.fltrS.Pass(cgrEv.CGREvent.Tenant, uF.FilterIDs, evNm); err != nil {
+		if pass, err = cB.fltrS.Pass(cgrEv.CGREvent.Tenant, uF.FilterIDs, evNm); err != nil {
 			return nil, nil, err
 		} else if !pass {
 			continue
@@ -83,10 +84,23 @@ func (cb *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
 		break
 	}
 	var hasUF bool
-	if fctr.Cmp(decimal.New(1, 0)) != 0 {
+	if mtchedUF != nil && fctr.Cmp(decimal.New(1, 0)) != 0 {
 		dUnts = utils.MultiplyBig(dUnts, fctr)
 		incrm = utils.MultiplyBig(incrm, fctr)
 		hasUF = true
+	}
+
+	blcVal := new(decimal.Big).SetFloat64(cB.blnCfg.Value) // FixMe without float64
+
+	// *balanceLimit
+	var hasLmt bool
+	blncLmt := decimal.New(0, 0)
+	if lmt, has := cB.blnCfg.Opts[utils.MetaBalanceLimit].(*decimal.Big); has {
+		blncLmt = lmt
+	}
+	if blncLmt.Cmp(decimal.New(0, 0)) != 0 {
+		blcVal = utils.SubstractBig(blcVal, blncLmt)
+		hasLmt = true
 	}
 	if blcVal.Cmp(dUnts) == -1 { // balance smaller than debit
 		maxIncrm := utils.DivideBig(blcVal, incrm).RoundToInt()
@@ -105,6 +119,6 @@ func (cb *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
 	if !ok {
 		return nil, nil, fmt.Errorf("failed representing decimal <%s> as float64", rmain)
 	}
-	cb.blnCfg.Value = rmainFlt64
+	cB.blnCfg.Value = rmainFlt64
 	return
 }

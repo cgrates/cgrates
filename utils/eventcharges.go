@@ -18,13 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "time"
+import (
+	"time"
+
+	"github.com/ericlagergren/decimal"
+)
 
 // EventCharges records the charges applied to an Event
 type EventCharges struct {
 	StartTime  *time.Time
-	Usage      *time.Duration
-	Cost       *float64
+	Usage      *decimal.Big
+	Cost       *decimal.Big
 	Charges    []*ChargedInterval
 	Account    *AccountProfile
 	Accounting *ChargedAccounting
