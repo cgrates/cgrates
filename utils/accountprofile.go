@@ -46,15 +46,9 @@ type Balance struct {
 	Type           string
 	Opts           map[string]interface{}
 	CostIncrements []*CostIncrement
-	CostAttributes []*CostAttributes
+	CostAttributes []string
 	UnitFactors    []*UnitFactor
 	Value          float64
-}
-
-// CostAttributes will attach attribute profiles to cost events
-type CostAttributes struct {
-	FilterIDs           []string
-	AttributeProfileIDs []string
 }
 
 // CostIncrement enforces cost calculation to specific balance increments

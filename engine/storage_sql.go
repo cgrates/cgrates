@@ -238,7 +238,8 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
 			utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 			utils.TBLTPFilters, utils.TBLTPActionPlans, utils.TBLTPRoutes, utils.TBLTPAttributes,
-			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts} {
+			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts, utils.TBLTPAccountProfiles,
+			utils.TBLTPActionProfiles, utils.TBLTPRateProfiles} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1664,8 +1665,10 @@ func (self *SQLStorage) GetTPAccountProfiles(tpid, tenant, id string) ([]*utils.
 	if err := q.Find(&dpps).Error; err != nil {
 		return nil, err
 	}
-	arls := dpps.AsTPAccountProfile()
-	if len(arls) == 0 {
+	arls, err := dpps.AsTPAccountProfile()
+	if err != nil {
+		return nil, err
+	} else if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}
 	return arls, nil

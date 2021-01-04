@@ -21,6 +21,7 @@ package utils
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -1554,13 +1555,93 @@ type TPAccountProfile struct {
 }
 
 type TPAccountBalance struct {
-	ID        string
+	ID             string
+	FilterIDs      []string
+	Weight         float64
+	Blocker        bool
+	Type           string
+	Opts           string
+	CostIncrement  []*TPBalanceCostIncrement
+	CostAttributes []string
+	UnitFactors    []*TPBalanceUnitFactor
+	Value          float64
+}
+
+func NewTPBalanceCostIncrement(filtersStr, incrementStr, fixedFeeStr, recurrentFeeStr string) (costIncrement *TPBalanceCostIncrement, err error) {
+	costIncrement = &TPBalanceCostIncrement{
+		FilterIDs: strings.Split(filtersStr, ANDSep),
+	}
+	if incrementStr != EmptyString {
+		incr, err := strconv.ParseFloat(incrementStr, 64)
+		if err != nil {
+			return nil, err
+		}
+		costIncrement.Increment = Float64Pointer(incr)
+	}
+	if fixedFeeStr != EmptyString {
+		fixedFee, err := strconv.ParseFloat(fixedFeeStr, 64)
+		if err != nil {
+			return nil, err
+		}
+		costIncrement.FixedFee = Float64Pointer(fixedFee)
+	}
+	if recurrentFeeStr != EmptyString {
+		recFee, err := strconv.ParseFloat(recurrentFeeStr, 64)
+		if err != nil {
+			return nil, err
+		}
+		costIncrement.RecurrentFee = Float64Pointer(recFee)
+	}
+	return
+}
+
+type TPBalanceCostIncrement struct {
+	FilterIDs    []string
+	Increment    *float64
+	FixedFee     *float64
+	RecurrentFee *float64
+}
+
+func (costIncr *TPBalanceCostIncrement) AsString() (s string) {
+	if len(costIncr.FilterIDs) != 0 {
+		s = s + strings.Join(costIncr.FilterIDs, ANDSep)
+	}
+	s = s + INFIELD_SEP
+	if costIncr.Increment != nil {
+		s = s + strconv.FormatFloat(*costIncr.Increment, 'f', -1, 64)
+	}
+	s = s + INFIELD_SEP
+	if costIncr.FixedFee != nil {
+		s = s + strconv.FormatFloat(*costIncr.FixedFee, 'f', -1, 64)
+	}
+	s = s + INFIELD_SEP
+	if costIncr.RecurrentFee != nil {
+		s = s + strconv.FormatFloat(*costIncr.RecurrentFee, 'f', -1, 64)
+	}
+	return
+}
+
+func NewTPBalanceUnitFactor(filtersStr, factorStr string) (unitFactor *TPBalanceUnitFactor, err error) {
+	unitFactor = &TPBalanceUnitFactor{
+		FilterIDs: strings.Split(filtersStr, ANDSep),
+	}
+	if unitFactor.Factor, err = strconv.ParseFloat(factorStr, 64); err != nil {
+		return
+	}
+	return
+}
+
+type TPBalanceUnitFactor struct {
 	FilterIDs []string
-	Weight    float64
-	Blocker   bool
-	Type      string
-	Opts      string
-	Value     float64
+	Factor    float64
+}
+
+func (unitFactor *TPBalanceUnitFactor) AsString() (s string) {
+	if len(unitFactor.FilterIDs) != 0 {
+		s = s + strings.Join(unitFactor.FilterIDs, ANDSep)
+	}
+	s = s + INFIELD_SEP + strconv.FormatFloat(unitFactor.Factor, 'f', -1, 64)
+	return
 }
 
 // ArgActionSv1ScheduleActions is used in ActionSv1 methods

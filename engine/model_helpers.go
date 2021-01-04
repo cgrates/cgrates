@@ -27,6 +27,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ericlagergren/decimal"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -3511,7 +3513,7 @@ func (apm AccountProfileMdls) CSVHeader() (result []string) {
 	}
 }
 
-func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountProfile) {
+func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountProfile, err error) {
 	filterIDsMap := make(map[string]utils.StringMap)
 	thresholdIDsMap := make(map[string]utils.StringMap)
 	actPrfMap := make(map[string]*utils.TPAccountProfile)
@@ -3565,14 +3567,53 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 					filterIDs = append(filterIDs, filterAttr)
 				}
 			}
+			costIncrements := make([]*utils.TPBalanceCostIncrement, 0)
+			if tp.BalanceCostIncrements != utils.EmptyString {
+				sls := strings.Split(tp.BalanceCostIncrements, utils.INFIELD_SEP)
+				if len(sls)%4 != 0 {
+					return nil, fmt.Errorf("invlid key: <%s> for BalanceCostIncrements", tp.BalanceCostIncrements)
+				}
+				for j := 0; j < len(sls); j = j + 4 {
+					costIncrement, err := utils.NewTPBalanceCostIncrement(sls[j], sls[j+1], sls[j+2], sls[j+3])
+					if err != nil {
+						return nil, err
+					}
+					costIncrements = append(costIncrements, costIncrement)
+				}
+			}
+			costAttributes := make([]string, 0)
+			if tp.BalanceCostAttributes != utils.EmptyString {
+				costAttributeSplit := strings.Split(tp.BalanceCostAttributes, utils.INFIELD_SEP)
+				for _, costAttribute := range costAttributeSplit {
+					costAttributes = append(costAttributes, costAttribute)
+				}
+			}
+			unitFactors := make([]*utils.TPBalanceUnitFactor, 0)
+			if tp.BalanceUnitFactors != utils.EmptyString {
+				sls := strings.Split(tp.BalanceUnitFactors, utils.INFIELD_SEP)
+				if len(sls)%2 != 0 {
+					return nil, fmt.Errorf("invlid key: <%s> for BalanceUnitFactors", tp.BalanceUnitFactors)
+				}
+
+				for j := 0; j < len(sls); j = j + 2 {
+					unitFactor, err := utils.NewTPBalanceUnitFactor(sls[j], sls[j+1])
+					if err != nil {
+						return nil, err
+					}
+					unitFactors = append(unitFactors, unitFactor)
+				}
+			}
 			aPrf.Balances = append(aPrf.Balances, &utils.TPAccountBalance{
-				ID:        tp.BalanceID,
-				FilterIDs: filterIDs,
-				Weight:    tp.BalanceWeight,
-				Blocker:   tp.BalanceBlocker,
-				Type:      tp.BalanceType,
-				Opts:      tp.BalanceOpts,
-				Value:     tp.BalanceValue,
+				ID:             tp.BalanceID,
+				FilterIDs:      filterIDs,
+				Weight:         tp.BalanceWeight,
+				Blocker:        tp.BalanceBlocker,
+				Type:           tp.BalanceType,
+				Opts:           tp.BalanceOpts,
+				CostIncrement:  costIncrements,
+				CostAttributes: costAttributes,
+				UnitFactors:    unitFactors,
+				Value:          tp.BalanceValue,
 			})
 		}
 		actPrfMap[tenID] = aPrf
@@ -3637,6 +3678,24 @@ func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfi
 		mdl.BalanceWeight = balance.Weight
 		mdl.BalanceType = balance.Type
 		mdl.BalanceOpts = balance.Opts
+		for i, costIncr := range balance.CostIncrement {
+			if i != 0 {
+				mdl.BalanceCostIncrements += utils.INFIELD_SEP
+			}
+			mdl.BalanceCostIncrements += costIncr.AsString()
+		}
+		for i, costAttr := range balance.CostAttributes {
+			if i != 0 {
+				mdl.BalanceCostAttributes += utils.INFIELD_SEP
+			}
+			mdl.BalanceCostAttributes += costAttr
+		}
+		for i, unitFactor := range balance.UnitFactors {
+			if i != 0 {
+				mdl.BalanceUnitFactors += utils.INFIELD_SEP
+			}
+			mdl.BalanceUnitFactors += unitFactor.AsString()
+		}
 		mdl.BalanceValue = balance.Value
 		mdls = append(mdls, mdl)
 		i++
@@ -3646,11 +3705,10 @@ func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfi
 
 func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *utils.AccountProfile, err error) {
 	ap = &utils.AccountProfile{
-		Tenant:    tpAp.Tenant,
-		ID:        tpAp.ID,
-		FilterIDs: make([]string, len(tpAp.FilterIDs)),
-		Weight:    tpAp.Weight,
-
+		Tenant:       tpAp.Tenant,
+		ID:           tpAp.ID,
+		FilterIDs:    make([]string, len(tpAp.FilterIDs)),
+		Weight:       tpAp.Weight,
 		Balances:     make([]*utils.Balance, len(tpAp.Balances)),
 		ThresholdIDs: make([]string, len(tpAp.ThresholdIDs)),
 	}
@@ -3681,6 +3739,32 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 					return
 				}
 				ap.Balances[i].Opts[keyValSls[0]] = keyValSls[1]
+			}
+		}
+		if bal.CostIncrement != nil {
+			ap.Balances[i].CostIncrements = make([]*utils.CostIncrement, len(bal.CostIncrement))
+			for j, costIncrement := range bal.CostIncrement {
+				ap.Balances[i].CostIncrements[j] = &utils.CostIncrement{
+					FilterIDs:    costIncrement.FilterIDs,
+					Increment:    new(decimal.Big).SetFloat64(*costIncrement.Increment),
+					FixedFee:     new(decimal.Big).SetFloat64(*costIncrement.FixedFee),
+					RecurrentFee: new(decimal.Big).SetFloat64(*costIncrement.RecurrentFee),
+				}
+			}
+		}
+		if bal.CostAttributes != nil {
+			ap.Balances[i].CostAttributes = make([]string, len(bal.CostAttributes))
+			for j, costAttribute := range bal.CostAttributes {
+				ap.Balances[i].CostAttributes[j] = costAttribute
+			}
+		}
+		if bal.UnitFactors != nil {
+			ap.Balances[i].UnitFactors = make([]*utils.UnitFactor, len(bal.UnitFactors))
+			for j, unitFactor := range bal.UnitFactors {
+				ap.Balances[i].UnitFactors[j] = &utils.UnitFactor{
+					FilterIDs: unitFactor.FilterIDs,
+					Factor:    new(decimal.Big).SetFloat64(unitFactor.Factor),
+				}
 			}
 		}
 	}

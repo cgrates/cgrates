@@ -7012,18 +7012,23 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 			Weight: 10.0,
 			Balances: []*utils.TPAccountBalance{
 				{
-					ID:        "VoiceBalance",
-					FilterIDs: []string{"FLTR_RES_GR2"},
-					Weight:    10,
-					Type:      utils.VOICE,
-					Value:     3600000000000,
+					ID:             "VoiceBalance",
+					FilterIDs:      []string{"FLTR_RES_GR2"},
+					Weight:         10,
+					Type:           utils.VOICE,
+					CostIncrement:  []*utils.TPBalanceCostIncrement{},
+					CostAttributes: []string{},
+					UnitFactors:    []*utils.TPBalanceUnitFactor{},
+					Value:          3600000000000,
 				},
 			},
 			ThresholdIDs: []string{"WARN_RES1"},
 		},
 	}
-	result := testStruct.AsTPAccountProfile()
-	if !reflect.DeepEqual(exp, result) {
+	result, err := testStruct.AsTPAccountProfile()
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
 	}
 }
@@ -7058,18 +7063,23 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 			Weight: 10.0,
 			Balances: []*utils.TPAccountBalance{
 				{
-					ID:        "VoiceBalance",
-					FilterIDs: []string{"FLTR_RES_GR2"},
-					Weight:    10,
-					Type:      utils.VOICE,
-					Value:     3600000000000,
+					ID:             "VoiceBalance",
+					FilterIDs:      []string{"FLTR_RES_GR2"},
+					Weight:         10,
+					Type:           utils.VOICE,
+					CostIncrement:  []*utils.TPBalanceCostIncrement{},
+					CostAttributes: []string{},
+					UnitFactors:    []*utils.TPBalanceUnitFactor{},
+					Value:          3600000000000,
 				},
 			},
 			ThresholdIDs: []string{"WARN_RES1"},
 		},
 	}
-	result := testStruct.AsTPAccountProfile()
-	if !reflect.DeepEqual(exp, result) {
+	result, err := testStruct.AsTPAccountProfile()
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
 	}
 }
