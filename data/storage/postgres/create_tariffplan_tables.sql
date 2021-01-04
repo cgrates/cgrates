@@ -522,6 +522,29 @@ CREATE TABLE tp_action_profiles (
     "filter_ids", "action_id");
 
 
+DROP TABLE IF EXISTS tp_account_profiles;
+CREATE TABLE tp_account_profiles (
+  "pk" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tenant" varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
+  "filter_ids" varchar(64) NOT NULL,
+  "activation_interval" varchar(64) NOT NULL,
+  "weight" decimal(8,2) NOT NULL,
+  "balance_id" varchar(64) NOT NULL,
+  "balance_filter_ids" varchar(64) NOT NULL,
+  "balance_weight" decimal(8,2) NOT NULL,
+  "balance_blocker" BOOLEAN NOT NULL,
+  "balance_type" varchar(64) NOT NULL,
+  "balance_opts" varchar(64) NOT NULL,
+  "balance_value" decimal(8,2) NOT NULL,
+  "threshold_ids" varchar(64) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+);
+ CREATE INDEX tp_account_profiles_ids ON tp_account_profiles (tpid);
+ CREATE INDEX tp_account_profiles_unique ON tp_account_profiles  ("tpid",  "tenant", "id",
+   "filter_ids", "balance_id");
+
 --
 -- Table structure for table `versions`
 --
