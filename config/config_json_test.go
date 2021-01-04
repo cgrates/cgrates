@@ -161,9 +161,6 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheAccountProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheAccounts2: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheDispatcherHosts: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
@@ -479,10 +476,6 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Remote:    utils.BoolPointer(false),
 			},
 			utils.MetaAccountProfiles: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.MetaAccounts2: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},

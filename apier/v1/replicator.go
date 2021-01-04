@@ -304,15 +304,6 @@ func (rplSv1 *ReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithOpts, re
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) GetAccount2(tntID *utils.TenantIDWithOpts, reply *utils.Account) error {
-	if rcv, err := rplSv1.dm.DataDB().GetAccount2Drv(tntID.Tenant, tntID.ID); err != nil {
-		return err
-	} else {
-		*reply = *rcv
-	}
-	return nil
-}
-
 //GetResourceProfile
 func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithOpts, reply *map[string]int64) error {
 	if rcv, err := rplSv1.dm.DataDB().GetItemLoadIDsDrv(itemID.Arg); err != nil {
@@ -554,14 +545,6 @@ func (rplSv1 *ReplicatorSv1) SetAccountProfile(acp *utils.AccountProfileWithOpts
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) SetAccount2(acp *utils.AccountWithOpts, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetAccount2Drv(acp.Account); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
-}
-
 // RemoveThreshold
 func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithOpts, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveThresholdDrv(args.Tenant, args.ID); err != nil {
@@ -767,14 +750,6 @@ func (rplSv1 *ReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithOpts, r
 
 func (rplSv1 *ReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithOpts, reply *string) error {
 	if err := rplSv1.dm.DataDB().RemoveAccountProfileDrv(args.Tenant, args.ID); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
-}
-
-func (rplSv1 *ReplicatorSv1) RemoveAccount2(args *utils.TenantIDWithOpts, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveAccount2Drv(args.Tenant, args.ID); err != nil {
 		return err
 	}
 	*reply = utils.OK

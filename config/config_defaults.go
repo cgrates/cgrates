@@ -107,7 +107,6 @@ const CGRATES_CFG_JSON = `
 		"*rate_profiles":{"remote":false, "replicate":false},
 		"*action_profiles":{"remote":false, "replicate":false},
 		"*account_profiles":{"remote":false, "replicate":false},
-		"*accounts2":{"remote":false, "replicate":false},
 		"*load_ids":{"remote":false, "replicate":false}, 
 		"*indexes":{"remote":false, "replicate":false}, 
 	},
@@ -259,7 +258,6 @@ const CGRATES_CFG_JSON = `
 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control rate profile caching
 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control action profile caching
 		"*account_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control account profile caching
-		"*accounts2": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control new accounts2 caching
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control resource filter indexes caching
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control stat filter indexes caching
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control threshold filter indexes caching

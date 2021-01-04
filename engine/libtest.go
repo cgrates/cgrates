@@ -561,7 +561,6 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheActionProfilesFilterIndexes:  {},
 		utils.CacheAccountProfiles:              {},
 		utils.CacheAccountProfilesFilterIndexes: {},
-		utils.CacheAccounts2:                    {},
 
 		utils.CacheAccounts:              {},
 		utils.CacheVersions:              {},
