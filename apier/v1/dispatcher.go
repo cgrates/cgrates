@@ -1286,6 +1286,36 @@ func (dS *DispatcherReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, repl
 	return dS.dS.ReplicatorSv1RemoveIndexes(args, reply)
 }
 
+// GetAccountProfile .
+func (dS *DispatcherReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithOpts, reply *utils.AccountProfile) error {
+	return dS.dS.ReplicatorSv1GetAccountProfile(tntID, reply)
+}
+
+// SetAccountProfile .
+func (dS *DispatcherReplicatorSv1) SetAccountProfile(args *utils.AccountProfileWithOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetAccountProfile(args, reply)
+}
+
+// RemoveAccountProfile .
+func (dS *DispatcherReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveAccountProfile(args, reply)
+}
+
+// GetActionProfile .
+func (dS *DispatcherReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithOpts, reply *engine.ActionProfile) error {
+	return dS.dS.ReplicatorSv1GetActionProfile(tntID, reply)
+}
+
+// SetActionProfile .
+func (dS *DispatcherReplicatorSv1) SetActionProfile(args *engine.ActionProfileWithOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetActionProfile(args, reply)
+}
+
+//  RemoveActionProfile .
+func (dS *DispatcherReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveActionProfile(args, reply)
+}
+
 func NewDispatcherRateSv1(dps *dispatchers.DispatcherService) *DispatcherRateSv1 {
 	return &DispatcherRateSv1{dR: dps}
 }
