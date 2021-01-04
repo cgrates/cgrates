@@ -56,7 +56,7 @@ var (
 		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
 		CacheUCH, CacheSTIR, CacheEventCharges, CacheRateProfiles, CacheRateProfilesFilterIndexes,
 		CacheRateFilterIndexes, CacheActionProfilesFilterIndexes, CacheAccountProfilesFilterIndexes,
-		CacheAccountProfiles, CacheAccounts2, CacheReverseFilterIndexes, MetaAPIBan, CacheCapsEvents,
+		CacheAccountProfiles, CacheReverseFilterIndexes, MetaAPIBan, CacheCapsEvents,
 		// only internalDB
 		CacheVersions, CacheAccounts,
 		CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
@@ -91,7 +91,6 @@ var (
 		CacheRateProfiles:                 RateProfilePrefix,
 		CacheActionProfiles:               ActionProfilePrefix,
 		CacheAccountProfiles:              AccountProfilePrefix,
-		CacheAccounts2:                    Account2Prefix,
 		CacheResourceFilterIndexes:        ResourceFilterIndexes,
 		CacheStatFilterIndexes:            StatFilterIndexes,
 		CacheThresholdFilterIndexes:       ThresholdFilterIndexes,
@@ -402,7 +401,6 @@ const (
 	RateProfilePrefix            = "rtp_"
 	ActionProfilePrefix          = "acp_"
 	AccountProfilePrefix         = "anp_"
-	Account2Prefix               = "ant_"
 	DispatcherHostPrefix         = "dph_"
 	ThresholdProfilePrefix       = "thp_"
 	StatQueuePrefix              = "stq_"
@@ -413,7 +411,6 @@ const (
 	TEST_SQL                     = "TEST_SQL"
 	META_CONSTANT                = "*constant"
 	META_FILLER                  = "*filler"
-	META_HANDLER                 = "*handler"
 	MetaHTTPPost                 = "*http_post"
 	MetaHTTPjson                 = "*http_json"
 	MetaHTTPjsonCDR              = "*http_json_cdr"
@@ -983,7 +980,6 @@ const (
 	MetaAttributes          = "*attributes"
 	MetaActionProfiles      = "*action_profiles"
 	MetaAccountProfiles     = "*account_profiles"
-	MetaAccounts2           = "*accounts2"
 	MetaLoadIDs             = "*load_ids"
 )
 
@@ -1241,7 +1237,6 @@ const (
 	ReplicatorSv1GetActionProfile        = "ReplicatorSv1.GetActionProfile"
 	ReplicatorSv1GetDispatcherHost       = "ReplicatorSv1.GetDispatcherHost"
 	ReplicatorSv1GetAccountProfile       = "ReplicatorSv1.GetAccountProfile"
-	ReplicatorSv1GetAccount2             = "ReplicatorSv1.GetAccount2"
 	ReplicatorSv1GetItemLoadIDs          = "ReplicatorSv1.GetItemLoadIDs"
 	ReplicatorSv1SetThresholdProfile     = "ReplicatorSv1.SetThresholdProfile"
 	ReplicatorSv1SetThreshold            = "ReplicatorSv1.SetThreshold"
@@ -1268,7 +1263,6 @@ const (
 	ReplicatorSv1SetRateProfile          = "ReplicatorSv1.SetRateProfile"
 	ReplicatorSv1SetActionProfile        = "ReplicatorSv1.SetActionProfile"
 	ReplicatorSv1SetAccountProfile       = "ReplicatorSv1.SetAccountProfile"
-	ReplicatorSv1SetAccount2             = "ReplicatorSv1.SetAccount2"
 	ReplicatorSv1SetDispatcherHost       = "ReplicatorSv1.SetDispatcherHost"
 	ReplicatorSv1SetLoadIDs              = "ReplicatorSv1.SetLoadIDs"
 	ReplicatorSv1RemoveThreshold         = "ReplicatorSv1.RemoveThreshold"
@@ -1296,7 +1290,6 @@ const (
 	ReplicatorSv1RemoveActionProfile     = "ReplicatorSv1.RemoveActionProfile"
 	ReplicatorSv1RemoveDispatcherHost    = "ReplicatorSv1.RemoveDispatcherHost"
 	ReplicatorSv1RemoveAccountProfile    = "ReplicatorSv1.RemoveAccountProfile"
-	ReplicatorSv1RemoveAccount2          = "ReplicatorSv1.RemoveAccount2"
 	ReplicatorSv1GetIndexes              = "ReplicatorSv1.GetIndexes"
 	ReplicatorSv1SetIndexes              = "ReplicatorSv1.SetIndexes"
 	ReplicatorSv1RemoveIndexes           = "ReplicatorSv1.RemoveIndexes"
@@ -1910,7 +1903,6 @@ const (
 	CacheRateProfiles                 = "*rate_profiles"
 	CacheActionProfiles               = "*action_profiles"
 	CacheAccountProfiles              = "*account_profiles"
-	CacheAccounts2                    = "*accounts2"
 	CacheResourceFilterIndexes        = "*resource_filter_indexes"
 	CacheStatFilterIndexes            = "*stat_filter_indexes"
 	CacheThresholdFilterIndexes       = "*threshold_filter_indexes"
@@ -2601,7 +2593,6 @@ const (
 	ActionProfileIDs              = "ActionProfileIDs"
 	TimingIDs                     = "TimingIDs"
 	AccountProfileIDs             = "AccountProfileIDs"
-	Account2IDs                   = "Account2IDs"
 	AttributeFilterIndexIDs       = "AttributeFilterIndexIDs"
 	ResourceFilterIndexIDs        = "ResourceFilterIndexIDs"
 	StatFilterIndexIDs            = "StatFilterIndexIDs"

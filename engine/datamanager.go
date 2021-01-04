@@ -234,9 +234,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.AccountProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetAccountProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-		case utils.Account2Prefix:
-			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetAccount2(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
@@ -3939,106 +3936,6 @@ func (dm *DataManager) RemoveAccountProfile(tenant, id string,
 		var reply string
 		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
 			utils.ReplicatorSv1RemoveAccountProfile,
-			&utils.TenantIDWithOpts{
-				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
-				Opts: map[string]interface{}{
-					utils.OptsAPIKey:  itm.APIKey,
-					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
-	}
-	return
-}
-
-func (dm *DataManager) GetAccount2(tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (ap *utils.Account, err error) {
-	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheAccounts2, tntID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*utils.Account), nil
-		}
-	}
-	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
-	}
-	ap, err = dm.dataDB.GetAccount2Drv(tenant, id)
-	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts2]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetAccount2,
-				&utils.TenantIDWithOpts{
-					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
-					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
-					}}, &ap); err == nil {
-				err = dm.dataDB.SetAccount2Drv(ap)
-			}
-		}
-		if err != nil {
-			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(utils.CacheAccounts2, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID); errCh != nil {
-					return nil, errCh
-				}
-
-			}
-			return nil, err
-		}
-	}
-	if cacheWrite {
-		if errCh := Cache.Set(utils.CacheAccounts2, tntID, ap, nil,
-			cacheCommit(transactionID), transactionID); errCh != nil {
-			return nil, errCh
-		}
-	}
-	return
-}
-
-func (dm *DataManager) SetAccount2(ap *utils.Account, withIndex bool) (err error) {
-	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
-	}
-
-	if err = dm.DataDB().SetAccount2Drv(ap); err != nil {
-		return err
-	}
-
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetAccount2,
-			&utils.AccountWithOpts{
-				Account: ap,
-				Opts: map[string]interface{}{
-					utils.OptsAPIKey:  itm.APIKey,
-					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
-	}
-	return
-}
-
-func (dm *DataManager) RemoveAccount2(tenant, id string,
-	transactionID string) (err error) {
-	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
-	}
-	if err = dm.DataDB().RemoveAccount2Drv(tenant, id); err != nil {
-		return
-	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts2]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveAccount2,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{

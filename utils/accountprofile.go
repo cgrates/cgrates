@@ -124,20 +124,6 @@ type AccountProfileWithOpts struct {
 	Opts map[string]interface{}
 }
 
-type Account struct {
-	Tenant string
-	ID     string
-}
-
-func (ac *Account) TenantID() string {
-	return ConcatenatedKey(ac.Tenant, ac.ID)
-}
-
-type AccountWithOpts struct {
-	*Account
-	Opts map[string]interface{}
-}
-
 // ArgsAccountForEvent arguments used for process event
 type ArgsAccountForEvent struct {
 	*CGREventWithOpts

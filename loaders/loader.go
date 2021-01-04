@@ -1023,7 +1023,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		}
 	case utils.MetaAccountProfiles:
-		cacheIDs = []string{utils.CacheAccountProfiles, utils.CacheAccounts2, utils.CacheAccountProfilesFilterIndexes}
+		cacheIDs = []string{utils.CacheAccountProfiles, utils.CacheAccountProfilesFilterIndexes}
 		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
@@ -1037,11 +1037,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}
-				if err := ldr.dm.RemoveAccount2(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
-					return err
-				}
 				cacheArgs[utils.AccountProfileIDs] = ids
-				cacheArgs[utils.Account2IDs] = ids
 			}
 		}
 	}
