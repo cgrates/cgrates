@@ -43,6 +43,26 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 	if jsnCfg.Indexed_selects != nil {
 		acS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
+	if jsnCfg.Attributes_conns != nil {
+		acS.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
+		for idx, conn := range *jsnCfg.Attributes_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			acS.AttributeSConns[idx] = conn
+			if conn == utils.MetaInternal {
+				acS.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+			}
+		}
+	}
+	if jsnCfg.Rates_conns != nil {
+		acS.RateSConns = make([]string, len(*jsnCfg.Rates_conns))
+		for idx, conn := range *jsnCfg.Rates_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			acS.RateSConns[idx] = conn
+			if conn == utils.MetaInternal {
+				acS.RateSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)
+			}
+		}
+	}
 	if jsnCfg.Thresholds_conns != nil {
 		acS.ThresholdSConns = make([]string, len(*jsnCfg.Thresholds_conns))
 		for idx, conn := range *jsnCfg.Thresholds_conns {
@@ -87,6 +107,26 @@ func (acS *AccountSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
 	}
+	if acS.AttributeSConns != nil {
+		attributeSConns := make([]string, len(acS.AttributeSConns))
+		for i, item := range acS.AttributeSConns {
+			attributeSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
+				attributeSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.AttributeSConnsCfg] = attributeSConns
+	}
+	if acS.RateSConns != nil {
+		rateSConns := make([]string, len(acS.RateSConns))
+		for i, item := range acS.RateSConns {
+			rateSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS) {
+				rateSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.RateSConnsCfg] = rateSConns
+	}
 	if acS.ThresholdSConns != nil {
 		thresholdSConns := make([]string, len(acS.ThresholdSConns))
 		for i, item := range acS.ThresholdSConns {
@@ -127,6 +167,18 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 		Enabled:        acS.Enabled,
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
+	}
+	if acS.AttributeSConns != nil {
+		cln.AttributeSConns = make([]string, len(acS.AttributeSConns))
+		for i, con := range acS.AttributeSConns {
+			cln.AttributeSConns[i] = con
+		}
+	}
+	if acS.RateSConns != nil {
+		cln.RateSConns = make([]string, len(acS.RateSConns))
+		for i, con := range acS.RateSConns {
+			cln.RateSConns[i] = con
+		}
 	}
 	if acS.ThresholdSConns != nil {
 		cln.ThresholdSConns = make([]string, len(acS.ThresholdSConns))
