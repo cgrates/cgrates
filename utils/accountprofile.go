@@ -84,7 +84,39 @@ func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
 		cIcln.RecurrentFee = new(decimal.Big).Copy(cI.RecurrentFee)
 	}
 	return
+}
 
+//Clone return a copy of the CostAttributes
+func (cA *CostAttributes) Clone() (cstAtr *CostAttributes) {
+	cstAtr = new(CostAttributes)
+	if cA.FilterIDs != nil {
+		cstAtr.FilterIDs = make([]string, len(cA.FilterIDs))
+		for i, value := range cA.FilterIDs {
+			cstAtr.FilterIDs[i] = value
+		}
+	}
+	if cA.AttributeProfileIDs != nil {
+		cstAtr.AttributeProfileIDs = make([]string, len(cA.AttributeProfileIDs))
+		for i, value := range cA.AttributeProfileIDs {
+			cstAtr.AttributeProfileIDs[i] = value
+		}
+	}
+	return
+}
+
+//Clone return a copy of the UnitFactor
+func (uF *UnitFactor) Clone() (untFct *UnitFactor) {
+	untFct = new(UnitFactor)
+	if uF.FilterIDs != nil {
+		untFct.FilterIDs = make([]string, len(uF.FilterIDs))
+		for i, value := range uF.FilterIDs {
+			untFct.FilterIDs[i] = value
+		}
+	}
+	if uF.Factor != nil {
+		untFct.Factor = new(decimal.Big).Copy(uF.Factor)
+	}
+	return
 }
 
 // UnitFactor is a multiplicator for the usage received
@@ -99,6 +131,82 @@ func (aP *AccountProfile) TenantID() string {
 
 // Clone returns a clone of the Account
 func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
+	acnt = &AccountProfile{
+		Tenant:             aP.Tenant,
+		ID:                 aP.ID,
+		Weight:             aP.Weight,
+		Opts:               make(map[string]interface{}),
+		ActivationInterval: aP.ActivationInterval.Clone(),
+	}
+	if aP.FilterIDs != nil {
+		acnt.FilterIDs = make([]string, len(aP.FilterIDs))
+		for i, value := range aP.FilterIDs {
+			acnt.FilterIDs[i] = value
+		}
+	}
+	for key, value := range aP.Opts {
+		acnt.Opts[key] = value
+	}
+	if aP.ThresholdIDs != nil {
+		acnt.ThresholdIDs = make([]string, len(aP.ThresholdIDs))
+		for i, value := range aP.ThresholdIDs {
+			acnt.ThresholdIDs[i] = value
+		}
+	}
+	if aP.Balances != nil {
+		acnt.Balances = make([]*Balance, len(aP.Balances))
+		for i, value := range aP.Balances {
+			acnt.Balances[i] = value.Clone()
+		}
+	}
+	return
+}
+
+//Clone returns a clone of the ActivationInterval
+func (aI *ActivationInterval) Clone() *ActivationInterval {
+	return &ActivationInterval{
+		ActivationTime: aI.ActivationTime,
+		ExpiryTime:     aI.ExpiryTime,
+	}
+}
+
+//Clone return a clone of the Balance
+func (bL *Balance) Clone() (blnc *Balance) {
+	blnc = &Balance{
+		ID:      bL.ID,
+		Weight:  bL.Weight,
+		Blocker: bL.Blocker,
+		Type:    bL.Type,
+		Opts:    make(map[string]interface{}),
+		Value:   bL.Value,
+	}
+	if bL.FilterIDs != nil {
+		blnc.FilterIDs = make([]string, len(bL.FilterIDs))
+		for i, value := range bL.FilterIDs {
+			blnc.FilterIDs[i] = value
+		}
+	}
+	for key, value := range bL.Opts {
+		blnc.Opts[key] = value
+	}
+	if bL.CostIncrements != nil {
+		blnc.CostIncrements = make([]*CostIncrement, len(bL.CostIncrements))
+		for i, value := range bL.CostIncrements {
+			blnc.CostIncrements[i] = value.Clone()
+		}
+	}
+	if bL.CostAttributes != nil {
+		blnc.CostAttributes = make([]*CostAttributes, len(bL.CostAttributes))
+		for i, value := range bL.CostAttributes {
+			blnc.CostAttributes[i] = value.Clone()
+		}
+	}
+	if bL.UnitFactors != nil {
+		blnc.UnitFactors = make([]*UnitFactor, len(bL.UnitFactors))
+		for i, value := range bL.UnitFactors {
+			blnc.UnitFactors[i] = value.Clone()
+		}
+	}
 	return
 }
 
