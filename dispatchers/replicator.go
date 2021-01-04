@@ -1575,3 +1575,61 @@ func (dS *DispatcherService) ReplicatorSv1RemoveIndexes(args *utils.GetIndexesAr
 		Opts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveIndexes, args, reply)
 }
+
+func (dS *DispatcherService) ReplicatorSv1GetAccountProfile(args *utils.TenantIDWithOpts, reply *utils.AccountProfile) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
+		tnt = args.TenantID.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ReplicatorSv1GetAccountProfile, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: tnt,
+			ID:     args.ID,
+		},
+		Opts: args.Opts,
+	}, utils.MetaReplicator, utils.ReplicatorSv1GetAccountProfile, args, reply)
+}
+
+func (dS *DispatcherService) ReplicatorSv1SetAccountProfile(args *utils.AccountProfileWithOpts, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.AccountProfileWithOpts{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ReplicatorSv1SetAccountProfile, args.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: args.Tenant,
+		},
+		Opts: args.Opts,
+	}, utils.MetaReplicator, utils.ReplicatorSv1SetAccountProfile, args, rpl)
+}
+
+func (dS *DispatcherService) ReplicatorSv1RemoveAccountProfile(args *utils.TenantIDWithOpts, rpl *string) (err error) {
+	if args == nil {
+		args = &utils.TenantIDWithOpts{}
+	}
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ReplicatorSv1RemoveAccountProfile, args.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: args.Tenant,
+		},
+		Opts: args.Opts,
+	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveAccountProfile, args, rpl)
+}
