@@ -42,6 +42,7 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitFlush,
 	testStorDBitIsDBEmpty,
 	testStorDBitCRUDVersions,
+	testStorDBitCRUDTPAccountProfiles,
 	testStorDBitCRUDTPActionProfiles,
 	testStorDBitCRUDTPDispatcherProfiles,
 	testStorDBitCRUDTPDispatcherHosts,
@@ -50,7 +51,7 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTPRoutes,
 	testStorDBitCRUDTPThresholds,
 	testStorDBitCRUDTPAttributes,
-	testStorDVitCRUDTPChargers,
+	testStorDBitCRUDTPChargers,
 	testStorDBitCRUDTpTimings,
 	testStorDBitCRUDTpDestinations,
 	testStorDBitCRUDTpRates,
@@ -117,7 +118,7 @@ func TestStorDBit(t *testing.T) {
 		split := strings.Split(stestFullName, ".")
 		stestName := split[len(split)-1]
 		// Fixme: Implement mongo needed versions methods
-		if (*dbType == utils.MetaMongo || *dbType == utils.MetaInternal) && stestName != "testStorDBitCRUDVersions" {
+		if stestName != "testStorDBitCRUDVersions" {
 			stestName := split[len(split)-1]
 			t.Run(stestName, stest)
 		}
@@ -141,6 +142,80 @@ func testStorDBitIsDBEmpty(t *testing.T) {
 		} else if test != false {
 			t.Errorf("Expecting: false got :%+v", test)
 		}
+	}
+}
+
+func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
+	//READ
+	if _, err := storDB.GetTPAccountProfiles("sub_ID1", utils.EmptyString, "TEST_ID1"); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//WRITE
+	var actPrf = []*utils.TPAccountProfile{
+		&utils.TPAccountProfile{
+			TPid:   testTPID,
+			Tenant: "cgrates.org",
+			ID:     "1001",
+			Weight: 20,
+			Balances: []*utils.TPAccountBalance{
+				&utils.TPAccountBalance{
+					ID:        "MonetaryBalance",
+					FilterIDs: []string{},
+					Weight:    10,
+					Type:      utils.MONETARY,
+					CostIncrement: []*utils.TPBalanceCostIncrement{
+						&utils.TPBalanceCostIncrement{
+							FilterIDs:    []string{"fltr1", "fltr2"},
+							Increment:    utils.Float64Pointer(1.3),
+							FixedFee:     utils.Float64Pointer(2.3),
+							RecurrentFee: utils.Float64Pointer(3.3),
+						},
+					},
+					CostAttributes: []string{"attr1", "attr2"},
+					UnitFactors: []*utils.TPBalanceUnitFactor{
+						&utils.TPBalanceUnitFactor{
+							FilterIDs: []string{"fltr1", "fltr2"},
+							Factor:    100,
+						},
+						&utils.TPBalanceUnitFactor{
+							FilterIDs: []string{"fltr3"},
+							Factor:    200,
+						},
+					},
+					Value: 14,
+				},
+			},
+			ThresholdIDs: []string{utils.META_NONE},
+		},
+	}
+	if err := storDB.SetTPAccountProfiles(actPrf); err != nil {
+		t.Error(err)
+	}
+
+	//READ
+	if rcv, err := storDB.GetTPAccountProfiles(actPrf[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(rcv[0], actPrf[0])) {
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n", utils.ToJSON(actPrf[0]), utils.ToJSON(rcv[0]))
+	}
+
+	//UPDATE AND READ
+	actPrf[0].FilterIDs = []string{"*string:~*req.Account:1007"}
+	if err := storDB.SetTPAccountProfiles(actPrf); err != nil {
+		t.Error(err)
+	} else if rcv, err := storDB.GetTPAccountProfiles(actPrf[0].TPid,
+		utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(rcv[0], actPrf[0])) {
+		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n", utils.ToJSON(actPrf[0]), utils.ToJSON(rcv[0]))
+	}
+
+	//REMOVE AND READ
+	if err := storDB.RemTpData(utils.EmptyString, actPrf[0].TPid, nil); err != nil {
+		t.Error(err)
+	} else if _, err := storDB.GetTPActionProfiles(actPrf[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
 
@@ -618,7 +693,7 @@ func testStorDBitCRUDTPThresholds(t *testing.T) {
 			MinSleep:  "1s",
 			Blocker:   true,
 			Weight:    10,
-			ActionIDs: []string{"Thresh1", "Thresh2"},
+			ActionIDs: []string{"Thresh1"},
 			Async:     true,
 		},
 		{
@@ -662,10 +737,10 @@ func testStorDBitCRUDTPThresholds(t *testing.T) {
 	//READ
 	if rcv, err := storDB.GetTPThresholds(tpThresholds[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(tpThresholds[0], rcv[0]) ||
-		reflect.DeepEqual(tpThresholds[0], rcv[1])) {
+	} else if !reflect.DeepEqual(tpThresholds[0], rcv[0]) &&
+		!reflect.DeepEqual(tpThresholds[0], rcv[1]) {
 		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
-			utils.ToIJSON(tpThresholds[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			utils.ToIJSON(tpThresholds[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
 
 	}
 
@@ -692,13 +767,13 @@ func testStorDBitCRUDTPAttributes(t *testing.T) {
 			Attributes: []*utils.TPAttribute{
 				{
 					Type:      utils.MetaString,
-					Path:      utils.MetaReq + utils.AccountField + utils.InInFieldSep,
+					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField + utils.InInFieldSep,
 					Value:     "102",
 					FilterIDs: []string{"*string:~*req.Account:102"},
 				},
 				{
 					Type:      utils.MetaString,
-					Path:      utils.MetaReq + utils.AccountField + utils.InInFieldSep,
+					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField + utils.InInFieldSep,
 					Value:     "101",
 					FilterIDs: []string{"*string:~*req.Account:101"},
 				},
@@ -711,13 +786,13 @@ func testStorDBitCRUDTPAttributes(t *testing.T) {
 			Attributes: []*utils.TPAttribute{
 				{
 					Type:      utils.MetaString,
-					Path:      utils.MetaReq + utils.Destination + utils.InInFieldSep,
+					Path:      utils.MetaReq + utils.NestingSep + utils.Destination + utils.InInFieldSep,
 					Value:     "11",
 					FilterIDs: []string{"*string:~*req.Destination:11"},
 				},
 				{
 					Type:      utils.MetaString,
-					Path:      utils.MetaReq + utils.Destination + utils.InInFieldSep,
+					Path:      utils.MetaReq + utils.NestingSep + utils.Destination + utils.InInFieldSep,
 					Value:     "11",
 					FilterIDs: []string{"*string:~*req.Destination:10"},
 				},
@@ -734,7 +809,7 @@ func testStorDBitCRUDTPAttributes(t *testing.T) {
 	} else if !(reflect.DeepEqual(rcv[0], tpAProfile[0]) ||
 		reflect.DeepEqual(rcv[1], tpAProfile[0])) {
 		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
-			utils.ToIJSON(tpAProfile[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			utils.ToIJSON(tpAProfile[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
 	}
 
 	//UPDATE
@@ -761,7 +836,7 @@ func testStorDBitCRUDTPAttributes(t *testing.T) {
 	}
 }
 
-func testStorDVitCRUDTPChargers(t *testing.T) {
+func testStorDBitCRUDTPChargers(t *testing.T) {
 	//READ
 	if _, err := storDB.GetTPChargers("TP_ID", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)

@@ -662,8 +662,11 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return
 				}
 			}
-
-			for _, tpAcp := range acpsModels.AsTPAccountProfile() {
+			accountTPModels, err := acpsModels.AsTPAccountProfile()
+			if err != nil {
+				return err
+			}
+			for _, tpAcp := range accountTPModels {
 				acp, err := engine.APItoAccountProfile(tpAcp, ldr.timezone)
 				if err != nil {
 					return err

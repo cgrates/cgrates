@@ -707,7 +707,7 @@ func (csvs *CSVStorage) GetTPAccountProfiles(tpid, tenant, id string) ([]*utils.
 	}); err != nil {
 		return nil, err
 	}
-	return tpDPPs.AsTPAccountProfile(), nil
+	return tpDPPs.AsTPAccountProfile()
 }
 
 func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {
