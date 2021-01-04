@@ -685,6 +685,8 @@ type ActionSJsonCfg struct {
 type AccountSJsonCfg struct {
 	Enabled               *bool
 	Indexed_selects       *bool
+	Attributes_conns      *[]string
+	Rates_conns           *[]string
 	Thresholds_conns      *[]string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
