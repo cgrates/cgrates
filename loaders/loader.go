@@ -984,7 +984,6 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-
 				if ldr.flagsTpls[loaderType].GetBool(utils.MetaPartial) {
 					rateIDs, err := ldData[0].GetRateIDs()
 					if err != nil {
