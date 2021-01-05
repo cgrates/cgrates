@@ -30,9 +30,9 @@ import (
 )
 
 var unratedReqs = engine.MapEvent{
-	utils.META_POSTPAID:      struct{}{},
+	utils.MetaPostpaid:       struct{}{},
 	utils.META_PSEUDOPREPAID: struct{}{},
-	utils.META_RATED:         struct{}{},
+	utils.MetaRated:          struct{}{},
 }
 
 var authReqs = engine.MapEvent{

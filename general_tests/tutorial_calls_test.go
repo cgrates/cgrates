@@ -549,7 +549,7 @@ func testCall1002Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].RequestType != utils.META_POSTPAID {
+		if reply[0].RequestType != utils.MetaPostpaid {
 			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0].RequestType)
 		}
 		// in case of Asterisk take the integer part from usage

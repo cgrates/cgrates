@@ -43,7 +43,7 @@ var (
 		utils.AccountProfileFilterIndexPrfx: {},
 	}
 	cachePrefixMap = utils.StringSet{
-		utils.DESTINATION_PREFIX:            {},
+		utils.DestinationPrefix:             {},
 		utils.REVERSE_DESTINATION_PREFIX:    {},
 		utils.RATING_PLAN_PREFIX:            {},
 		utils.RATING_PROFILE_PREFIX:         {},
@@ -169,7 +169,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			}
 		}
 		switch prfx {
-		case utils.DESTINATION_PREFIX:
+		case utils.DestinationPrefix:
 			_, err = dm.GetDestination(dataID, false, true, utils.NonTransactional)
 		case utils.REVERSE_DESTINATION_PREFIX:
 			_, err = dm.GetReverseDestination(dataID, false, true, utils.NonTransactional)
@@ -335,12 +335,12 @@ func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		var keys []string
-		if keys, err = dm.dataDB.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
+		if keys, err = dm.dataDB.GetKeysForPrefix(utils.DestinationPrefix); err != nil {
 			return
 		}
 		for _, key := range keys {
 			var dest *Destination
-			if dest, err = dm.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, true, utils.NonTransactional); err != nil {
+			if dest, err = dm.GetDestination(key[len(utils.DestinationPrefix):], false, true, utils.NonTransactional); err != nil {
 				return err
 			}
 			if err = dm.SetReverseDestination(dest.Id, dest.Prefixes, utils.NonTransactional); err != nil {

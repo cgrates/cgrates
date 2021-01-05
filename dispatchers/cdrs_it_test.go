@@ -127,7 +127,7 @@ func testDspCDRsProcessEvent(t *testing.T) {
 					utils.OriginID:     "testDspCDRsProcessEvent",
 					utils.OriginHost:   "192.168.1.1",
 					utils.Source:       "testDspCDRsProcessEvent",
-					utils.RequestType:  utils.META_RATED,
+					utils.RequestType:  utils.MetaRated,
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
 					utils.Destination:  "1002",
@@ -221,7 +221,7 @@ func testDspCDRsProcessCDR(t *testing.T) {
 			OriginID:    "testDspCDRsProcessCDR",
 			OriginHost:  "192.168.1.1",
 			Source:      "testDspCDRsProcessCDR",
-			RequestType: utils.META_RATED,
+			RequestType: utils.MetaRated,
 			Account:     "1001",
 			Subject:     "1001",
 			Destination: "1002",
@@ -270,7 +270,7 @@ func testDspCDRsProcessExternalCDR(t *testing.T) {
 			OriginID:    "testDspCDRsProcessExternalCDR",
 			OriginHost:  "127.0.0.1",
 			Source:      utils.UNIT_TEST,
-			RequestType: utils.META_RATED,
+			RequestType: utils.MetaRated,
 			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "1003",
@@ -326,7 +326,7 @@ func testDspCDRsV2ProcessEvent(t *testing.T) {
 					utils.OriginID:     "testDspCDRsV2ProcessEvent",
 					utils.OriginHost:   "192.168.1.1",
 					utils.Source:       "testDspCDRsV2ProcessEvent",
-					utils.RequestType:  utils.META_RATED,
+					utils.RequestType:  utils.MetaRated,
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
 					utils.Destination:  "1002",
@@ -344,7 +344,7 @@ func testDspCDRsV2ProcessEvent(t *testing.T) {
 		t.Error(err)
 	} else if len(reply) != 2 {
 		for _, procEv := range reply {
-			if procEv.Event[utils.RequestType] == utils.META_RATED && procEv.Event[utils.Cost] != 0.6 {
+			if procEv.Event[utils.RequestType] == utils.MetaRated && procEv.Event[utils.Cost] != 0.6 {
 				t.Errorf("Expected: %+v , received: %v", 0.6, procEv.Event[utils.Cost])
 			}
 		}
@@ -418,7 +418,7 @@ func testDspCDRsProcessEventNoAuth(t *testing.T) {
 					utils.OriginID:     "testDspCDRsProcessEvent",
 					utils.OriginHost:   "192.168.1.1",
 					utils.Source:       "testDspCDRsProcessEvent",
-					utils.RequestType:  utils.META_RATED,
+					utils.RequestType:  utils.MetaRated,
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
 					utils.Destination:  "1002",
@@ -500,7 +500,7 @@ func testDspCDRsProcessCDRNoAuth(t *testing.T) {
 			OriginID:    "testDspCDRsProcessCDR",
 			OriginHost:  "192.168.1.1",
 			Source:      "testDspCDRsProcessCDR",
-			RequestType: utils.META_RATED,
+			RequestType: utils.MetaRated,
 			Account:     "1001",
 			Subject:     "1001",
 			Destination: "1002",
@@ -543,7 +543,7 @@ func testDspCDRsProcessExternalCDRNoAuth(t *testing.T) {
 			OriginID:    "testDspCDRsProcessExternalCDR",
 			OriginHost:  "127.0.0.1",
 			Source:      utils.UNIT_TEST,
-			RequestType: utils.META_RATED,
+			RequestType: utils.MetaRated,
 			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "1003",
@@ -593,7 +593,7 @@ func testDspCDRsV2ProcessEventNoAuth(t *testing.T) {
 					utils.OriginID:     "testDspCDRsV2ProcessEventNoAuth",
 					utils.OriginHost:   "192.168.1.1",
 					utils.Source:       "testDspCDRsV2ProcessEventNoAuth",
-					utils.RequestType:  utils.META_RATED,
+					utils.RequestType:  utils.MetaRated,
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
 					utils.Destination:  "1002",
@@ -608,7 +608,7 @@ func testDspCDRsV2ProcessEventNoAuth(t *testing.T) {
 		t.Error(err)
 	} else if len(reply) != 2 {
 		for _, procEv := range reply {
-			if procEv.Event[utils.RequestType] == utils.META_RATED && procEv.Event[utils.Cost] != 0.6 {
+			if procEv.Event[utils.RequestType] == utils.MetaRated && procEv.Event[utils.Cost] != 0.6 {
 				t.Errorf("Expected: %+v , received: %v", 0.6, procEv.Event[utils.Cost])
 			}
 		}

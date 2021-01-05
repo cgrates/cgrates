@@ -28,12 +28,12 @@ import (
 
 func (m *Migrator) migrateCurrentDestinations() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DESTINATION_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DestinationPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.DESTINATION_PREFIX)
+		idg := strings.TrimPrefix(id, utils.DestinationPrefix)
 		dst, err := m.dmIN.DataManager().GetDestination(idg, false, true, utils.NonTransactional)
 		if err != nil {
 			return err

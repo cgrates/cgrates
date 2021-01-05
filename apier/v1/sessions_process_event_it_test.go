@@ -97,7 +97,7 @@ func TestSSv1ItProcessEventWithPostPaid(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
-	sSV1RequestType = utils.META_POSTPAID
+	sSV1RequestType = utils.MetaPostpaid
 	sTestSessionSv1ProcessEvent = append(sTestSessionSv1ProcessEvent[:len(sTestSessionSv1ProcessEvent)-7], testSSv1ItStopCgrEngine)
 	for _, stest := range sTestSessionSv1ProcessEvent {
 		t.Run(sessionsConfDIR+utils.EmptyString+sSV1RequestType, stest)
@@ -118,7 +118,7 @@ func TestSSv1ItProcessEventWithRated(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
-	sSV1RequestType = utils.META_RATED
+	sSV1RequestType = utils.MetaRated
 	sTestSessionSv1ProcessEvent = append(sTestSessionSv1ProcessEvent[:len(sTestSessionSv1ProcessEvent)-7], testSSv1ItStopCgrEngine)
 	for _, stest := range sTestSessionSv1ProcessEvent {
 		t.Run(sessionsConfDIR+utils.EmptyString+sSV1RequestType, stest)

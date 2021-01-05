@@ -594,7 +594,7 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 
 func GetDefaultEmptyArgCachePrefix() map[string][]string {
 	return map[string][]string{
-		utils.DESTINATION_PREFIX:            nil,
+		utils.DestinationPrefix:             nil,
 		utils.REVERSE_DESTINATION_PREFIX:    nil,
 		utils.RATING_PLAN_PREFIX:            nil,
 		utils.RATING_PROFILE_PREFIX:         nil,

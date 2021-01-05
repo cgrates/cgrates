@@ -422,7 +422,7 @@ func TestFsCdrCDRFields(t *testing.T) {
 		OriginHost:  "",
 		Source:      "freeswitch_json",
 		Category:    "call",
-		RequestType: utils.META_RATED,
+		RequestType: utils.MetaRated,
 		Tenant:      "cgrates.org",
 		Account:     "1001",
 		Subject:     "1001",

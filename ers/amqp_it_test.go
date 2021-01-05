@@ -94,7 +94,7 @@ func TestAMQPER(t *testing.T) {
 		false,           // mandatory
 		false,           // immediate
 		amqp.Publishing{
-			ContentType:  utils.CONTENT_JSON,
+			ContentType:  utils.ContentJSON,
 			Body:         []byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)),
 			DeliveryMode: amqp.Persistent, // 1=non-persistent, 2=persistent
 		},

@@ -83,7 +83,7 @@ func (iDB *InternalDB) SelectDatabase(string) (err error) {
 
 // GetKeysForPrefix returns the keys from cache that have the given prefix
 func (iDB *InternalDB) GetKeysForPrefix(prefix string) (ids []string, err error) {
-	keyLen := len(utils.DESTINATION_PREFIX)
+	keyLen := len(utils.DestinationPrefix)
 	if len(prefix) < keyLen {
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 		return
@@ -183,7 +183,7 @@ func (iDB *InternalDB) IsDBEmpty() (isEmpty bool, err error) {
 
 func (iDB *InternalDB) HasDataDrv(category, subject, tenant string) (bool, error) {
 	switch category {
-	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
+	case utils.DestinationPrefix, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX:
 		return Cache.HasItem(utils.CachePrefixToInstance[category], subject), nil
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,

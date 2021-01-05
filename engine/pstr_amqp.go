@@ -95,7 +95,7 @@ func (pstr *AMQPPoster) Post(content []byte, _ string) (err error) {
 			false,           // immediate
 			amqp.Publishing{
 				DeliveryMode: amqp.Persistent,
-				ContentType:  utils.CONTENT_JSON,
+				ContentType:  utils.ContentJSON,
 				Body:         content,
 			}); err == nil {
 			break

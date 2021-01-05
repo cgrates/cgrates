@@ -262,7 +262,7 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) (keys []string, err erro
 func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (exists bool, err error) {
 	var i int
 	switch category {
-	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
+	case utils.DestinationPrefix, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX:
 		err = rs.Cmd(&i, redis_EXISTS, category+subject)
 		return i == 1, err
@@ -362,7 +362,7 @@ func (rs *RedisStorage) RemoveRatingProfileDrv(key string) (err error) {
 // GetDestination retrieves a destination with id from  tp_db
 func (rs *RedisStorage) GetDestinationDrv(key, transactionID string) (dest *Destination, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redis_GET, utils.DESTINATION_PREFIX+key); err != nil {
+	if err = rs.Cmd(&values, redis_GET, utils.DestinationPrefix+key); err != nil {
 		return
 	} else if len(values) == 0 {
 		err = utils.ErrNotFound
@@ -391,7 +391,7 @@ func (rs *RedisStorage) SetDestinationDrv(dest *Destination, transactionID strin
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	err = rs.Cmd(nil, redis_SET, utils.DESTINATION_PREFIX+dest.Id, b.String())
+	err = rs.Cmd(nil, redis_SET, utils.DestinationPrefix+dest.Id, b.String())
 	return
 }
 
@@ -415,7 +415,7 @@ func (rs *RedisStorage) SetReverseDestinationDrv(destID string, prefixes []strin
 }
 
 func (rs *RedisStorage) RemoveDestinationDrv(destID, transactionID string) (err error) {
-	return rs.Cmd(nil, redis_DEL, utils.DESTINATION_PREFIX+destID)
+	return rs.Cmd(nil, redis_DEL, utils.DestinationPrefix+destID)
 }
 
 func (rs *RedisStorage) RemoveReverseDestinationDrv(dstID, prfx, transactionID string) (err error) {

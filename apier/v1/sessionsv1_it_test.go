@@ -114,7 +114,7 @@ func TestSSv1ItWithPostPaid(t *testing.T) {
 	if *dbType == utils.MetaPostgres {
 		t.SkipNow()
 	}
-	sSV1RequestType = utils.META_POSTPAID
+	sSV1RequestType = utils.MetaPostpaid
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
 	}
@@ -124,7 +124,7 @@ func TestSSv1ItWithRated(t *testing.T) {
 	if *dbType == utils.MetaPostgres {
 		t.SkipNow()
 	}
-	sSV1RequestType = utils.META_RATED
+	sSV1RequestType = utils.MetaRated
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
 	}

@@ -149,7 +149,7 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 					utils.OriginID:     "testCDRsPostFailoverProcessCDR",
 					utils.OriginHost:   "192.168.1.1",
 					utils.Source:       "testCDRsPostFailoverProcessCDR",
-					utils.RequestType:  utils.META_RATED,
+					utils.RequestType:  utils.MetaRated,
 					utils.Category:     "call",
 					utils.AccountField: "testCDRsPostFailoverProcessCDR",
 					utils.Subject:      "ANY2CNT",

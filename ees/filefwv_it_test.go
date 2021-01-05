@@ -110,7 +110,7 @@ func testFwvExportEvent(t *testing.T) {
 					utils.ToR:          utils.VOICE,
 					utils.OriginID:     "dsafdsaf",
 					utils.OriginHost:   "192.168.1.1",
-					utils.RequestType:  utils.META_RATED,
+					utils.RequestType:  utils.MetaRated,
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
 					utils.AccountField: "1001",

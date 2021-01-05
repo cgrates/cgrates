@@ -1709,11 +1709,11 @@ func testApierMaxDebitInexistentAcnt(t *testing.T) {
 
 func testApierCdrServer(t *testing.T) {
 	httpClient := new(http.Client)
-	cdrForm1 := url.Values{utils.OriginID: []string{"dsafdsaf"}, utils.OriginHost: []string{"192.168.1.1"}, utils.RequestType: []string{utils.META_RATED},
+	cdrForm1 := url.Values{utils.OriginID: []string{"dsafdsaf"}, utils.OriginHost: []string{"192.168.1.1"}, utils.RequestType: []string{utils.MetaRated},
 		utils.Tenant: []string{"cgrates.org"}, utils.Category: []string{"call"}, utils.AccountField: []string{"1001"}, utils.Subject: []string{"1001"}, utils.Destination: []string{"1002"},
 		utils.SetupTime:  []string{"2013-11-07T08:42:22Z"},
 		utils.AnswerTime: []string{"2013-11-07T08:42:26Z"}, utils.Usage: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
-	cdrForm2 := url.Values{utils.OriginID: []string{"adsafdsaf"}, utils.OriginHost: []string{"192.168.1.1"}, utils.RequestType: []string{utils.META_RATED},
+	cdrForm2 := url.Values{utils.OriginID: []string{"adsafdsaf"}, utils.OriginHost: []string{"192.168.1.1"}, utils.RequestType: []string{utils.MetaRated},
 		utils.Tenant: []string{"cgrates.org"}, utils.Category: []string{"call"}, utils.AccountField: []string{"1001"}, utils.Subject: []string{"1001"}, utils.Destination: []string{"1002"},
 		utils.SetupTime:  []string{"2013-11-07T08:42:23Z"},
 		utils.AnswerTime: []string{"2013-11-07T08:42:26Z"}, utils.Usage: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
@@ -1740,7 +1740,7 @@ func testApierITProcessCdr(t *testing.T) {
 	var reply string
 	cdr := &engine.CDRWithOpts{
 		CDR: &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
-			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
+			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.MetaRated, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 			Destination: "1002",
 			SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.MetaDefault,
 			Usage: 10 * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
@@ -1782,7 +1782,7 @@ func testApierGetCallCostLog(t *testing.T) {
 			OriginID:    "OriginCDR1",
 			OriginHost:  "192.168.1.1",
 			Source:      "test",
-			RequestType: utils.META_RATED,
+			RequestType: utils.MetaRated,
 			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "1001",

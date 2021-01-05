@@ -130,7 +130,7 @@ func testSTICacheStats(t *testing.T) {
 // Test CDR from external sources
 func testSTIProcessExternalCdr(t *testing.T) {
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
-		OriginID: "teststicdr1", OriginHost: "192.168.1.1", Source: "STI_TEST", RequestType: utils.META_RATED,
+		OriginID: "teststicdr1", OriginHost: "192.168.1.1", Source: "STI_TEST", RequestType: utils.MetaRated,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "+14082342500", Destination: "+16268412300", Supplier: "SUPPL1",
 		SetupTime: "2015-10-18T13:00:00Z", AnswerTime: "2015-10-18T13:00:00Z",
 		Usage: "15s", PDD: "7.0", ExtraFields: map[string]string{"CustomerNumber": "000000534", "ZipCode": ""},

@@ -146,7 +146,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 	if err := cdrStorage.SetCDR(ratedCDR, false); err == nil {
 		return fmt.Errorf("Duplicating ratedCDR: %+v works", ratedCDR)
 	}
-	ratedCDR.RequestType = utils.META_RATED
+	ratedCDR.RequestType = utils.MetaRated
 	ratedCDR.Cost = 0.34
 	if err := cdrStorage.SetCDR(ratedCDR, true); err != nil {
 		return fmt.Errorf("Rerating ratedCDR: %+v, SetCDR err: %s", ratedCDR, err.Error())
@@ -296,7 +296,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Source:      "testGetCDRs",
 			OriginID:    "testevent1",
 			ToR:         utils.VOICE,
-			RequestType: utils.META_RATED,
+			RequestType: utils.MetaRated,
 			Tenant:      "cgrates.org",
 			Category:    "call_derived",
 			Account:     "1001",
@@ -316,7 +316,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Source:      "testGetCDRs",
 			OriginID:    "testevent2",
 			ToR:         utils.VOICE,
-			RequestType: utils.META_POSTPAID,
+			RequestType: utils.MetaPostpaid,
 			Tenant:      "itsyscom.com",
 			Category:    "call",
 			Account:     "1004",
@@ -356,7 +356,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Source:      "testGetCDRs3",
 			OriginID:    "testevent3",
 			ToR:         utils.VOICE,
-			RequestType: utils.META_RATED,
+			RequestType: utils.MetaRated,
 			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "1002",
@@ -397,7 +397,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Source:      "testGetCDRs",
 			OriginID:    "testevent4",
 			ToR:         utils.VOICE,
-			RequestType: utils.META_RATED,
+			RequestType: utils.MetaRated,
 			Tenant:      "itsyscom.com",
 			Category:    "call",
 			Account:     "1003",
@@ -727,13 +727,13 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return fmt.Errorf("testGetCDRs #77, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Combined filter
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}, false); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.MetaRated}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #84, err: %v", err)
 	} else if len(CDRs) != 1 {
 		return fmt.Errorf("testGetCDRs #85, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Remove CDRs
-	if _, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}, true); err != nil {
+	if _, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.MetaRated}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}, true); err != nil {
 		return fmt.Errorf("testGetCDRs #86, err: %v", err)
 	}
 	// All CDRs, no filter

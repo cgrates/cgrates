@@ -51,7 +51,7 @@ func TestNewKamEvent(t *testing.T) {
 		"callid":                   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag":                 "bf71ad59",
 		"to_tag":                   "7351fecf",
-		"cgr_reqtype":              utils.META_POSTPAID,
+		"cgr_reqtype":              utils.MetaPostpaid,
 		"cgr_account":              "1001",
 		"cgr_destination":          "1002",
 		"cgr_answertime":           "1419839310",
@@ -72,7 +72,7 @@ func TestKamEvMissingParameter(t *testing.T) {
 	kamEv = KamEvent{EVENT: CGR_CALL_END,
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_answertime": "1419839310", "cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_ROUTE:            "supplier2",
 		utils.CGR_DISCONNECT_CAUSE: "200"}
@@ -85,7 +85,7 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_ROUTE:            "supplier2",
@@ -101,7 +101,7 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 	expMp["callid"] = "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0"
 	expMp["from_tag"] = "bf71ad59"
 	expMp["to_tag"] = "7351fecf"
-	expMp["cgr_reqtype"] = utils.META_POSTPAID
+	expMp["cgr_reqtype"] = utils.MetaPostpaid
 	expMp[utils.Source] = utils.KamailioAgent
 	rcv := kamEv.AsMapStringInterface()
 	if !reflect.DeepEqual(expMp, rcv) {
@@ -114,7 +114,7 @@ func TestKamEvAsCGREvent(t *testing.T) {
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_ROUTE:            "supplier2",
@@ -146,7 +146,7 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_ROUTE:            "supplier2",
@@ -198,7 +198,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_ROUTE:            "supplier2",
@@ -280,7 +280,7 @@ func TestKamEvV1InitSessionArgs(t *testing.T) {
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_ROUTE:            "supplier2",
@@ -320,7 +320,7 @@ func TestKamEvV1TerminateSessionArgs(t *testing.T) {
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_ROUTE:            "supplier2",
@@ -360,7 +360,7 @@ func TestKamEvV1ProcessMessageArgs(t *testing.T) {
 	kamEv := KamEvent{"event": "CGR_PROCESS_MESSAGE",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_ROUTE:            "supplier2",
@@ -397,7 +397,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	kamEv := KamEvent{"event": "CGR_PROCESS_MESSAGE",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_ROUTE:            "supplier2",
