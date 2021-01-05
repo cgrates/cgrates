@@ -100,7 +100,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheActionPlans].Items = 1
 	expStats[utils.CacheActions].Items = 1
 	expStats[utils.CacheDestinations].Items = 4
-	expStats[utils.CacheLoadIDs].Items = 17
+	expStats[utils.CacheLoadIDs].Items = 18
 	expStats[utils.CacheRPCConnections].Items = 2
 	args := utils.AttrCacheIDsWithOpts{
 		Opts: map[string]interface{}{
@@ -140,7 +140,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 3
 	expStats[utils.CacheThresholdProfiles].Items = 2
 	expStats[utils.CacheThresholds].Items = 2
-	expStats[utils.CacheLoadIDs].Items = 33
+	expStats[utils.CacheLoadIDs].Items = 34
 	expStats[utils.CacheTimings].Items = 10
 	expStats[utils.CacheThresholdFilterIndexes].Items = 2
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
@@ -166,56 +166,58 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 func testDspChcPrecacheStatus(t *testing.T) {
 	var reply map[string]string
 	expected := map[string]string{
-		utils.CacheDestinations:                utils.MetaReady,
-		utils.CacheReverseDestinations:         utils.MetaReady,
-		utils.CacheRatingPlans:                 utils.MetaReady,
-		utils.CacheRatingProfiles:              utils.MetaReady,
-		utils.CacheActions:                     utils.MetaReady,
-		utils.CacheActionPlans:                 utils.MetaReady,
-		utils.CacheAccountActionPlans:          utils.MetaReady,
-		utils.CacheActionTriggers:              utils.MetaReady,
-		utils.CacheSharedGroups:                utils.MetaReady,
-		utils.CacheResourceProfiles:            utils.MetaReady,
-		utils.CacheResources:                   utils.MetaReady,
-		utils.CacheTimings:                     utils.MetaReady,
-		utils.CacheStatQueueProfiles:           utils.MetaReady,
-		utils.CacheStatQueues:                  utils.MetaReady,
-		utils.CacheThresholdProfiles:           utils.MetaReady,
-		utils.CacheThresholds:                  utils.MetaReady,
-		utils.CacheFilters:                     utils.MetaReady,
-		utils.CacheRouteProfiles:               utils.MetaReady,
-		utils.CacheAttributeProfiles:           utils.MetaReady,
-		utils.CacheChargerProfiles:             utils.MetaReady,
-		utils.CacheDispatcherProfiles:          utils.MetaReady,
-		utils.CacheDispatcherHosts:             utils.MetaReady,
-		utils.CacheDiameterMessages:            utils.MetaReady,
-		utils.CacheAttributeFilterIndexes:      utils.MetaReady,
-		utils.CacheResourceFilterIndexes:       utils.MetaReady,
-		utils.CacheStatFilterIndexes:           utils.MetaReady,
-		utils.CacheThresholdFilterIndexes:      utils.MetaReady,
-		utils.CacheRouteFilterIndexes:          utils.MetaReady,
-		utils.CacheChargerFilterIndexes:        utils.MetaReady,
-		utils.CacheDispatcherFilterIndexes:     utils.MetaReady,
-		utils.CacheRateProfilesFilterIndexes:   utils.MetaReady,
-		utils.CacheRateFilterIndexes:           utils.MetaReady,
-		utils.CacheRateProfiles:                utils.MetaReady,
-		utils.CacheLoadIDs:                     utils.MetaReady,
-		utils.CacheCDRIDs:                      utils.MetaReady,
-		utils.CacheClosedSessions:              utils.MetaReady,
-		utils.CacheDispatcherRoutes:            utils.MetaReady,
-		utils.CacheEventResources:              utils.MetaReady,
-		utils.CacheRPCConnections:              utils.MetaReady,
-		utils.CacheRPCResponses:                utils.MetaReady,
-		utils.CacheRatingProfilesTmp:           utils.MetaReady,
-		utils.CacheUCH:                         utils.MetaReady,
-		utils.CacheSTIR:                        utils.MetaReady,
-		utils.CacheDispatcherLoads:             utils.MetaReady,
-		utils.CacheDispatchers:                 utils.MetaReady,
-		utils.CacheEventCharges:                utils.MetaReady,
-		utils.CacheReverseFilterIndexes:        utils.MetaReady,
-		utils.CacheCapsEvents:                  utils.MetaReady,
-		utils.CacheActionProfiles:              utils.MetaReady,
-		utils.CacheActionProfilesFilterIndexes: utils.MetaReady,
+		utils.CacheDestinations:                 utils.MetaReady,
+		utils.CacheReverseDestinations:          utils.MetaReady,
+		utils.CacheRatingPlans:                  utils.MetaReady,
+		utils.CacheRatingProfiles:               utils.MetaReady,
+		utils.CacheActions:                      utils.MetaReady,
+		utils.CacheActionPlans:                  utils.MetaReady,
+		utils.CacheAccountActionPlans:           utils.MetaReady,
+		utils.CacheActionTriggers:               utils.MetaReady,
+		utils.CacheSharedGroups:                 utils.MetaReady,
+		utils.CacheResourceProfiles:             utils.MetaReady,
+		utils.CacheResources:                    utils.MetaReady,
+		utils.CacheTimings:                      utils.MetaReady,
+		utils.CacheStatQueueProfiles:            utils.MetaReady,
+		utils.CacheStatQueues:                   utils.MetaReady,
+		utils.CacheThresholdProfiles:            utils.MetaReady,
+		utils.CacheThresholds:                   utils.MetaReady,
+		utils.CacheFilters:                      utils.MetaReady,
+		utils.CacheRouteProfiles:                utils.MetaReady,
+		utils.CacheAttributeProfiles:            utils.MetaReady,
+		utils.CacheChargerProfiles:              utils.MetaReady,
+		utils.CacheDispatcherProfiles:           utils.MetaReady,
+		utils.CacheDispatcherHosts:              utils.MetaReady,
+		utils.CacheDiameterMessages:             utils.MetaReady,
+		utils.CacheAttributeFilterIndexes:       utils.MetaReady,
+		utils.CacheResourceFilterIndexes:        utils.MetaReady,
+		utils.CacheStatFilterIndexes:            utils.MetaReady,
+		utils.CacheThresholdFilterIndexes:       utils.MetaReady,
+		utils.CacheRouteFilterIndexes:           utils.MetaReady,
+		utils.CacheChargerFilterIndexes:         utils.MetaReady,
+		utils.CacheDispatcherFilterIndexes:      utils.MetaReady,
+		utils.CacheRateProfilesFilterIndexes:    utils.MetaReady,
+		utils.CacheRateFilterIndexes:            utils.MetaReady,
+		utils.CacheRateProfiles:                 utils.MetaReady,
+		utils.CacheLoadIDs:                      utils.MetaReady,
+		utils.CacheCDRIDs:                       utils.MetaReady,
+		utils.CacheClosedSessions:               utils.MetaReady,
+		utils.CacheDispatcherRoutes:             utils.MetaReady,
+		utils.CacheEventResources:               utils.MetaReady,
+		utils.CacheRPCConnections:               utils.MetaReady,
+		utils.CacheRPCResponses:                 utils.MetaReady,
+		utils.CacheRatingProfilesTmp:            utils.MetaReady,
+		utils.CacheUCH:                          utils.MetaReady,
+		utils.CacheSTIR:                         utils.MetaReady,
+		utils.CacheDispatcherLoads:              utils.MetaReady,
+		utils.CacheDispatchers:                  utils.MetaReady,
+		utils.CacheEventCharges:                 utils.MetaReady,
+		utils.CacheReverseFilterIndexes:         utils.MetaReady,
+		utils.CacheCapsEvents:                   utils.MetaReady,
+		utils.CacheActionProfiles:               utils.MetaReady,
+		utils.CacheActionProfilesFilterIndexes:  utils.MetaReady,
+		utils.CacheAccountProfilesFilterIndexes: utils.MetaReady,
+		utils.CacheAccountProfiles:              utils.MetaReady,
 
 		utils.CacheAccounts:              utils.MetaReady,
 		utils.CacheVersions:              utils.MetaReady,
@@ -244,6 +246,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheTBLTPRateProfiles:     utils.MetaReady,
 		utils.MetaAPIBan:                 utils.MetaReady,
 		utils.CacheTBLTPActionProfiles:   utils.MetaReady,
+		utils.CacheTBLTPAccountProfiles:  utils.MetaReady,
 	}
 
 	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithOpts{
