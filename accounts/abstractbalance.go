@@ -81,9 +81,11 @@ func (aB *abstractBalance) unitFactor(tnt string, ev utils.DataProvider) (uF *ut
 
 // balanceLimit returns the balance's limit
 func (aB *abstractBalance) balanceLimit() (bL *decimal.Big) {
+	if _, isUnlimited := aB.blnCfg.Opts[utils.MetaBalanceUnlimited]; isUnlimited {
+		return
+	}
 	if lmtIface, has := aB.blnCfg.Opts[utils.MetaBalanceLimit]; has {
 		bL = lmtIface.(*decimal.Big)
-		return
 	}
 	// nothing matched, return default
 	bL = decimal.New(0, 0)
@@ -113,6 +115,12 @@ func (aB *abstractBalance) debitUsage(usage *decimal.Big, startTime time.Time,
 		return
 	}
 
+	// unitFactor
+	var uF *utils.UnitFactor
+	if uF, err = aB.unitFactor(cgrEv.CGREvent.Tenant, evNm); err != nil {
+		return
+	}
+
 	blcVal := new(decimal.Big).SetFloat64(aB.blnCfg.Value) // FixMe without float64
 
 	// balanceLimit
@@ -121,12 +129,6 @@ func (aB *abstractBalance) debitUsage(usage *decimal.Big, startTime time.Time,
 	if blncLmt.Cmp(decimal.New(0, 0)) != 0 {
 		blcVal = utils.SubstractBig(blcVal, blncLmt)
 		hasLmt = true
-	}
-
-	// unitFactor
-	var uF *utils.UnitFactor
-	if uF, err = aB.unitFactor(cgrEv.CGREvent.Tenant, evNm); err != nil {
-		return
 	}
 
 	fmt.Printf("costIcrm: %+v, blncLmt: %+v, hasLmt: %+v, uF: %+v", costIcrm, blncLmt, hasLmt, uF)

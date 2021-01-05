@@ -100,4 +100,26 @@ func TestCBDebitUnits(t *testing.T) {
 	} else if cb.blnCfg.Value != -1.25 {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Value)
 	}
+	//with increment and positive limit
+	cb = &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:   "TestCBDebitUnits",
+			Type: utils.MetaConcrete,
+			Opts: map[string]interface{}{
+				utils.MetaBalanceLimit: decimal.New(5, 1), // 0.5 as limit
+			},
+			Value: 1.25,
+		},
+		fltrS: new(engine.FilterS),
+	}
+	if dbted, _, err := cb.debitUnits(
+		new(decimal.Big).SetFloat64(2.5),
+		new(decimal.Big).SetFloat64(0.1),
+		&utils.CGREventWithOpts{CGREvent: &utils.CGREvent{Tenant: "cgrates.org"}}); err != nil {
+		t.Error(err)
+	} else if dbted.Cmp(decimal.New(7, 1)) != 0 { // only 1.2 is possible due to increment
+		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
+	} else if cb.blnCfg.Value != 0.55 {
+		t.Errorf("balance remaining: %f", cb.blnCfg.Value)
+	}
 }

@@ -81,6 +81,9 @@ func (cB *concreteBalance) unitFactor(tnt string, ev utils.DataProvider) (uF *ut
 
 // balanceLimit returns the balance's limit
 func (cB *concreteBalance) balanceLimit() (bL *decimal.Big) {
+	if _, isUnlimited := cB.blnCfg.Opts[utils.MetaBalanceUnlimited]; isUnlimited {
+		return
+	}
 	if lmtIface, has := cB.blnCfg.Opts[utils.MetaBalanceLimit]; has {
 		bL = lmtIface.(*decimal.Big)
 		return
@@ -144,14 +147,14 @@ func (cB *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
 	// balanceLimit
 	var hasLmt bool
 	blncLmt := cB.balanceLimit()
-	if blncLmt.Cmp(decimal.New(0, 0)) != 0 {
+	if blncLmt != nil && blncLmt.Cmp(decimal.New(0, 0)) != 0 {
 		blcVal = utils.SubstractBig(blcVal, blncLmt)
 		hasLmt = true
 	}
-
-	_, isUnlimited := cB.blnCfg.Opts[utils.MetaBalanceUnlimited]
-	if blcVal.Cmp(dUnts) == -1 && !isUnlimited { // balance smaller than debit
-		maxIncrm := utils.DivideBig(blcVal, incrm).RoundToInt()
+	if blcVal.Cmp(dUnts) == -1 && blncLmt != nil { // balance smaller than debit
+		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
+		maxIncrm := decimal.WithContext(
+			decimal.Context{RoundingMode: decimal.ToZero}).Quo(blcVal, incrm).RoundToInt()
 		dUnts = utils.MultiplyBig(incrm, maxIncrm)
 	}
 	rmain := utils.SubstractBig(blcVal, dUnts)

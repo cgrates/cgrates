@@ -1162,6 +1162,7 @@ func (ldr *Loader) allFilesPresent(ldrType string) bool {
 	return true
 }
 
+// getLdrType returns loaderType for the given fileName
 func (ldr *Loader) getLdrType(fName string) (ldrType string) {
 	for ldr, rdrs := range ldr.rdrs {
 		if _, has := rdrs[fName]; has {
