@@ -249,11 +249,11 @@ type AttrGetDestinations struct {
 func (apiv2 *APIerSv2) GetDestinations(attr *AttrGetDestinations, reply *[]*engine.Destination) (err error) {
 	if len(attr.DestinationIDs) == 0 {
 		// get all destination ids
-		if attr.DestinationIDs, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
+		if attr.DestinationIDs, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.DestinationPrefix); err != nil {
 			return
 		}
 		for i, destID := range attr.DestinationIDs {
-			attr.DestinationIDs[i] = destID[len(utils.DESTINATION_PREFIX):]
+			attr.DestinationIDs[i] = destID[len(utils.DestinationPrefix):]
 		}
 	}
 	dests := make([]*engine.Destination, len(attr.DestinationIDs))

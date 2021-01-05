@@ -157,13 +157,13 @@ func testOnStorITCacheDestinations(t *testing.T) {
 	if _, hasIt := Cache.Get(utils.CacheDestinations, dst.Id); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, true); err != nil { // Should not cache due to mustBeCached
+	if err := onStor.CacheDataFromDB(utils.DestinationPrefix, []string{dst.Id}, true); err != nil { // Should not cache due to mustBeCached
 		t.Error(err)
 	}
 	if _, hasIt := Cache.Get(utils.CacheDestinations, dst.Id); hasIt {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.DestinationPrefix, []string{dst.Id}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := Cache.Get(utils.CacheDestinations, dst.Id); !hasIt {

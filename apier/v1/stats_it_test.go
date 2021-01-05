@@ -990,7 +990,7 @@ func testV1STSProcessCDRStat(t *testing.T) {
 		OriginID:    "dsafdsaf",
 		OriginHost:  "192.168.1.1",
 		Source:      utils.UNIT_TEST,
-		RequestType: utils.META_RATED,
+		RequestType: utils.MetaRated,
 		Tenant:      "cgrates.org",
 		Category:    "call",
 		Account:     "1002",

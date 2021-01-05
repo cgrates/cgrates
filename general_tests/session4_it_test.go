@@ -136,7 +136,7 @@ func testSes4CDRsProcessCDR(t *testing.T) {
 					utils.OriginID:     "testV2CDRsProcessCDR1",
 					utils.OriginHost:   "192.168.1.1",
 					utils.Source:       "testV2CDRsProcessCDR",
-					utils.RequestType:  utils.META_POSTPAID,
+					utils.RequestType:  utils.MetaPostpaid,
 					utils.Category:     "free",
 					utils.AccountField: "dan7",
 					utils.Subject:      "RP_FREE",

@@ -195,7 +195,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 				_, destinationExists = tpr.destinations[dr.DestinationId]
 			}
 			if !destinationExists && tpr.dm.dataDB != nil {
-				if destinationExists, err = tpr.dm.HasData(utils.DESTINATION_PREFIX, dr.DestinationId, ""); err != nil {
+				if destinationExists, err = tpr.dm.HasData(utils.DestinationPrefix, dr.DestinationId, ""); err != nil {
 					return err
 				}
 			}
@@ -263,7 +263,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				if err != nil {
 					if err.Error() == utils.ErrNotFound.Error() { // if the destination doesn't exists in stordb check it in dataDB
 						if tpr.dm.dataDB != nil {
-							if dbExists, err := tpr.dm.HasData(utils.DESTINATION_PREFIX, drate.DestinationId, ""); err != nil {
+							if dbExists, err := tpr.dm.HasData(utils.DestinationPrefix, drate.DestinationId, ""); err != nil {
 								return false, err
 							} else if dbExists {
 								continue
@@ -2025,7 +2025,7 @@ func (tpr *TpReader) ShowStatistics() {
 // GetLoadedIds returns the identities loaded for a specific category, useful for cache reloads
 func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
-	case utils.DESTINATION_PREFIX:
+	case utils.DestinationPrefix:
 		keys := make([]string, len(tpr.destinations))
 		i := 0
 		for k := range tpr.destinations {
@@ -2576,7 +2576,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 		return
 	}
 	// take IDs for each type
-	dstIds, _ := tpr.GetLoadedIds(utils.DESTINATION_PREFIX)
+	dstIds, _ := tpr.GetLoadedIds(utils.DestinationPrefix)
 	revDstIDs, _ := tpr.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
 	rplIds, _ := tpr.GetLoadedIds(utils.RATING_PLAN_PREFIX)
 	rpfIds, _ := tpr.GetLoadedIds(utils.RATING_PROFILE_PREFIX)

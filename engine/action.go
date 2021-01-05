@@ -390,7 +390,7 @@ func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 		return err
 	}
 	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
-		utils.CONTENT_JSON, config.CgrConfig().GeneralCfg().PosterAttempts)
+		utils.ContentJSON, config.CgrConfig().GeneralCfg().PosterAttempts)
 	if err != nil {
 		return err
 	}
@@ -409,7 +409,7 @@ func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) er
 		return err
 	}
 	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
-		utils.CONTENT_JSON, config.CgrConfig().GeneralCfg().PosterAttempts)
+		utils.ContentJSON, config.CgrConfig().GeneralCfg().PosterAttempts)
 	if err != nil {
 		return err
 	}
@@ -518,7 +518,7 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 		if err = dm.SetDestination(newDest, utils.NonTransactional); err != nil {
 			return err
 		}
-		if err = dm.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestID}, true); err != nil {
+		if err = dm.CacheDataFromDB(utils.DestinationPrefix, []string{ddcDestID}, true); err != nil {
 			return err
 		}
 
@@ -953,7 +953,7 @@ func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error
 		return err
 	}
 	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
-		utils.CONTENT_JSON, config.CgrConfig().GeneralCfg().PosterAttempts)
+		utils.ContentJSON, config.CgrConfig().GeneralCfg().PosterAttempts)
 	if err != nil {
 		return err
 	}

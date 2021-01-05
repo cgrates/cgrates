@@ -140,7 +140,7 @@ func TestAuthPostpaidNoAcnt(t *testing.T) {
 
 func TestAuthPostpaidFallbackDest(t *testing.T) {
 	// Test subject which has fallback for destination
-	cdr := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_POSTPAID, Tenant: "cgrates.org",
+	cdr := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.MetaPostpaid, Tenant: "cgrates.org",
 		Category: "call", Account: "testauthpostpaid1", Subject: "testauthpostpaid2",
 		Destination: "441231234", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC).String()}
 	cd, err := cdr.AsCallDescriptor("", false)
@@ -157,7 +157,7 @@ func TestAuthPostpaidFallbackDest(t *testing.T) {
 
 func TestAuthPostpaidWithDestination(t *testing.T) {
 	// Test subject which does not have destination attached
-	cdr := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_POSTPAID, Tenant: "cgrates.org",
+	cdr := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.MetaPostpaid, Tenant: "cgrates.org",
 		Category: "call", Account: "testauthpostpaid1", Subject: "testauthpostpaid1",
 		Destination: "4986517174963", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC).String()}
 	cd, err := cdr.AsCallDescriptor("", false)

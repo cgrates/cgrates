@@ -556,7 +556,7 @@ func testDspSessionProcessCDR(t *testing.T) {
 				utils.Category:     "call",
 				utils.ToR:          utils.VOICE,
 				utils.OriginID:     "TestSSv1It1",
-				utils.RequestType:  utils.META_POSTPAID,
+				utils.RequestType:  utils.MetaPostpaid,
 				utils.AccountField: "1001",
 				utils.Destination:  "1002",
 				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),

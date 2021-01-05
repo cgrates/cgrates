@@ -396,7 +396,7 @@ func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
 func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) (err error) {
 	var colName string
 	switch prefix {
-	case utils.DESTINATION_PREFIX:
+	case utils.DestinationPrefix:
 		colName = ColDst
 	case utils.REVERSE_DESTINATION_PREFIX:
 		colName = ColRds
@@ -545,7 +545,7 @@ func (ms *MongoStorage) getField3(sctx mongo.SessionContext, col, prefix, field 
 // GetKeysForPrefix implementation
 func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err error) {
 	var category, subject string
-	keyLen := len(utils.DESTINATION_PREFIX)
+	keyLen := len(utils.DestinationPrefix)
 	if len(prefix) < keyLen {
 		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -554,8 +554,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	subject = fmt.Sprintf("^%s", prefix[keyLen:]) // old way, no tenant support
 	err = ms.query(func(sctx mongo.SessionContext) (err error) {
 		switch category {
-		case utils.DESTINATION_PREFIX:
-			result, err = ms.getField(sctx, ColDst, utils.DESTINATION_PREFIX, subject, "key")
+		case utils.DestinationPrefix:
+			result, err = ms.getField(sctx, ColDst, utils.DestinationPrefix, subject, "key")
 		case utils.REVERSE_DESTINATION_PREFIX:
 			result, err = ms.getField(sctx, ColRds, utils.REVERSE_DESTINATION_PREFIX, subject, "key")
 		case utils.RATING_PLAN_PREFIX:
@@ -647,7 +647,7 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 	err = ms.query(func(sctx mongo.SessionContext) (err error) {
 		var count int64
 		switch category {
-		case utils.DESTINATION_PREFIX:
+		case utils.DestinationPrefix:
 			count, err = ms.getCol(ColDst).CountDocuments(sctx, bson.M{"key": subject})
 		case utils.RATING_PLAN_PREFIX:
 			count, err = ms.getCol(ColRpl).CountDocuments(sctx, bson.M{"key": subject})

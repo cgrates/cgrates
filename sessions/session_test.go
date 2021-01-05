@@ -758,7 +758,7 @@ func TestUpdateSRuns(t *testing.T) {
 	updEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT2",
 		utils.Tenant:      "cgrates.org",
-		utils.RequestType: utils.META_POSTPAID,
+		utils.RequestType: utils.MetaPostpaid,
 	}
 	s.updateSRuns(updEv, utils.NewStringSet(nil))
 	if s.SRuns[0].Event[utils.RequestType] != utils.META_PREPAID {
@@ -769,8 +769,8 @@ func TestUpdateSRuns(t *testing.T) {
 		t.Errorf("Expected session to not change")
 	}
 	s.UpdateSRuns(updEv, utils.NewStringSet([]string{utils.RequestType}))
-	if s.SRuns[0].Event[utils.RequestType] != utils.META_POSTPAID {
+	if s.SRuns[0].Event[utils.RequestType] != utils.MetaPostpaid {
 		t.Errorf("Expected request type to be: %q, received: %q",
-			utils.META_POSTPAID, s.SRuns[0].Event[utils.RequestType])
+			utils.MetaPostpaid, s.SRuns[0].Event[utils.RequestType])
 	}
 }

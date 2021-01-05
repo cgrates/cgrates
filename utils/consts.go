@@ -26,20 +26,20 @@ var (
 	MainCDRFields = NewStringSet([]string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		AccountField, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID})
-	PostPaidRatedSlice = []string{META_POSTPAID, META_RATED}
+	PostPaidRatedSlice = []string{MetaPostpaid, MetaRated}
 
 	GitLastLog                  string // If set, it will be processed as part of versioning
 	PosterTransportContentTypes = map[string]string{
-		MetaHTTPjsonCDR:   CONTENT_JSON,
-		MetaHTTPjsonMap:   CONTENT_JSON,
-		MetaHTTPjson:      CONTENT_JSON,
-		MetaHTTPPost:      CONTENT_FORM,
-		MetaAMQPjsonCDR:   CONTENT_JSON,
-		MetaAMQPjsonMap:   CONTENT_JSON,
-		MetaAMQPV1jsonMap: CONTENT_JSON,
-		MetaSQSjsonMap:    CONTENT_JSON,
-		MetaKafkajsonMap:  CONTENT_JSON,
-		MetaS3jsonMap:     CONTENT_JSON,
+		MetaHTTPjsonCDR:   ContentJSON,
+		MetaHTTPjsonMap:   ContentJSON,
+		MetaHTTPjson:      ContentJSON,
+		MetaHTTPPost:      ContentJSON,
+		MetaAMQPjsonCDR:   ContentJSON,
+		MetaAMQPjsonMap:   ContentJSON,
+		MetaAMQPV1jsonMap: ContentJSON,
+		MetaSQSjsonMap:    ContentJSON,
+		MetaKafkajsonMap:  ContentJSON,
+		MetaS3jsonMap:     ContentJSON,
 	}
 
 	// CachePartitions enables creation of cache partitions
@@ -66,7 +66,7 @@ var (
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
 		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccountProfiles})
 	CacheInstanceToPrefix = map[string]string{
-		CacheDestinations:                 DESTINATION_PREFIX,
+		CacheDestinations:                 DestinationPrefix,
 		CacheReverseDestinations:          REVERSE_DESTINATION_PREFIX,
 		CacheRatingPlans:                  RATING_PLAN_PREFIX,
 		CacheRatingProfiles:               RATING_PROFILE_PREFIX,
@@ -141,7 +141,7 @@ var (
 	NonMonetaryBalances = NewStringSet([]string{VOICE, SMS, DATA, GENERIC})
 
 	// AccountableRequestTypes are the ones handled by Accounting subsystem
-	AccountableRequestTypes = NewStringSet([]string{META_PREPAID, META_POSTPAID, META_PSEUDOPREPAID})
+	AccountableRequestTypes = NewStringSet([]string{META_PREPAID, MetaPostpaid, META_PSEUDOPREPAID})
 
 	CacheStorDBPartitions = map[string]string{
 		TBLTPTimings:          CacheTBLTPTimings,
@@ -173,7 +173,7 @@ var (
 	// ProtectedSFlds are the fields that sessions should not alter
 	ProtectedSFlds   = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
 	ArgCacheToPrefix = map[string]string{
-		DestinationIDs:        DESTINATION_PREFIX,
+		DestinationIDs:        DestinationPrefix,
 		ReverseDestinationIDs: REVERSE_DESTINATION_PREFIX,
 		RatingPlanIDs:         RATING_PLAN_PREFIX,
 		RatingProfileIDs:      RATING_PROFILE_PREFIX,
@@ -273,10 +273,10 @@ const (
 	PREPAID                      = "prepaid"
 	META_PREPAID                 = "*prepaid"
 	POSTPAID                     = "postpaid"
-	META_POSTPAID                = "*postpaid"
+	MetaPostpaid                 = "*postpaid"
 	PSEUDOPREPAID                = "pseudoprepaid"
 	META_PSEUDOPREPAID           = "*pseudoprepaid"
-	META_RATED                   = "*rated"
+	MetaRated                    = "*rated"
 	META_NONE                    = "*none"
 	META_NOW                     = "*now"
 	ROUNDING_UP                  = "*up"
@@ -381,7 +381,7 @@ const (
 	ACTION_PREFIX                = "act_"
 	SHARED_GROUP_PREFIX          = "shg_"
 	ACCOUNT_PREFIX               = "acc_"
-	DESTINATION_PREFIX           = "dst_"
+	DestinationPrefix            = "dst_"
 	REVERSE_DESTINATION_PREFIX   = "rds_"
 	DERIVEDCHARGERS_PREFIX       = "dcs_"
 	USERS_PREFIX                 = "usr_"
@@ -526,7 +526,7 @@ const (
 	XMLSuffix                   = ".xml"
 	CSVSuffix                   = ".csv"
 	FWVSuffix                   = ".fwv"
-	CONTENT_JSON                = "json"
+	ContentJSON                 = "json"
 	CONTENT_FORM                = "form"
 	CONTENT_TEXT                = "text"
 	FileLockPrefix              = "file_"
@@ -852,7 +852,6 @@ const (
 	ActionsID                = "ActionsID"
 	MetaAct                  = "*act"
 	MetaAcnt                 = "*acnt"
-	DestinationPrefix        = "DestinationPrefix"
 	DestinationID            = "DestinationID"
 	ExportTemplate           = "ExportTemplate"
 	ExportFormat             = "ExportFormat"

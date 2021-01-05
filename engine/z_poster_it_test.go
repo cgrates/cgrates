@@ -68,14 +68,14 @@ func TestHttpJsonPoster(t *testing.T) {
 	config.CgrConfig().GeneralCfg().FailedPostsDir = "/tmp"
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
-	pstr, err := NewHTTPPoster(2*time.Second, "http://localhost:8080/invalid", utils.CONTENT_JSON, 3)
+	pstr, err := NewHTTPPoster(2*time.Second, "http://localhost:8080/invalid", utils.ContentJSON, 3)
 	if err != nil {
 		t.Error(err)
 	}
 	if err = pstr.PostValues(jsn, make(http.Header)); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test1", jsn, make(map[string]interface{}))
+	AddFailedPost("http://localhost:8080/invalid", utils.ContentJSON, "test1", jsn, make(map[string]interface{}))
 	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/test1*")
 	if err != nil {
@@ -108,7 +108,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	if err = pstr.PostValues(content, make(http.Header)); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test2", content, make(map[string]interface{}))
+	AddFailedPost("http://localhost:8080/invalid", utils.ContentJSON, "test2", content, make(map[string]interface{}))
 	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/test2*")
 	if err != nil {

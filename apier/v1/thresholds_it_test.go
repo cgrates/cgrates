@@ -200,7 +200,7 @@ var (
 						utils.Source:       utils.UNIT_TEST,
 						utils.OriginID:     "dsafdsaf",
 						utils.ToR:          utils.VOICE,
-						utils.RequestType:  utils.META_RATED,
+						utils.RequestType:  utils.MetaRated,
 						utils.Tenant:       "cgrates.org",
 						utils.Category:     "call",
 						utils.AccountField: "1007",

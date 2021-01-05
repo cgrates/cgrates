@@ -247,7 +247,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithOpts) ([]*CDR, error) {
 	return []*CDR{cdr.CDR}, nil
 }
 
-var reqTypes = utils.NewStringSet([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID,
+var reqTypes = utils.NewStringSet([]string{utils.META_PSEUDOPREPAID, utils.MetaPostpaid, utils.META_PREPAID,
 	utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID, utils.MetaDynaprepaid})
 
 // getCostFromRater will retrieve the cost from RALs
