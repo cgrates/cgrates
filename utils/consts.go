@@ -852,6 +852,7 @@ const (
 	ActionsID                = "ActionsID"
 	MetaAct                  = "*act"
 	MetaAcnt                 = "*acnt"
+	DestinationPrefixName    = "DestinationPrefix"
 	DestinationID            = "DestinationID"
 	ExportTemplate           = "ExportTemplate"
 	ExportFormat             = "ExportFormat"
