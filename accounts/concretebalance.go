@@ -149,7 +149,8 @@ func (cB *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
 		hasLmt = true
 	}
 
-	if blcVal.Cmp(dUnts) == -1 { // balance smaller than debit
+	_, isUnlimited := cB.blnCfg.Opts[utils.MetaBalanceUnlimited]
+	if blcVal.Cmp(dUnts) == -1 && !isUnlimited { // balance smaller than debit
 		maxIncrm := utils.DivideBig(blcVal, incrm).RoundToInt()
 		dUnts = utils.MultiplyBig(incrm, maxIncrm)
 	}

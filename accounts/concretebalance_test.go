@@ -68,15 +68,36 @@ func TestCBDebitUnits(t *testing.T) {
 		},
 		fltrS: new(engine.FilterS),
 	}
-	remBlnc, _ := new(decimal.Big).SetString("2.2")
 	if dbted, _, err := cb.debitUnits(
 		new(decimal.Big).SetFloat64(2.5),
 		new(decimal.Big).SetFloat64(0.1),
 		&utils.CGREventWithOpts{CGREvent: &utils.CGREvent{Tenant: "cgrates.org"}}); err != nil {
 		t.Error(err)
-	} else if dbted.Cmp(remBlnc) != 0 { // only 1.2 is possible due to increment
+	} else if dbted.Cmp(decimal.New(22, 1)) != 0 { // only 1.2 is possible due to increment
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
 	} else if cb.blnCfg.Value != -0.95 {
+		t.Errorf("balance remaining: %f", cb.blnCfg.Value)
+	}
+	//with increment and unlimited balance
+	cb = &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:   "TestCBDebitUnits",
+			Type: utils.MetaConcrete,
+			Opts: map[string]interface{}{
+				utils.MetaBalanceUnlimited: true,
+			},
+			Value: 1.25,
+		},
+		fltrS: new(engine.FilterS),
+	}
+	if dbted, _, err := cb.debitUnits(
+		new(decimal.Big).SetFloat64(2.5),
+		new(decimal.Big).SetFloat64(0.1),
+		&utils.CGREventWithOpts{CGREvent: &utils.CGREvent{Tenant: "cgrates.org"}}); err != nil {
+		t.Error(err)
+	} else if dbted.Cmp(decimal.New(25, 1)) != 0 { // only 1.2 is possible due to increment
+		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
+	} else if cb.blnCfg.Value != -1.25 {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Value)
 	}
 }
