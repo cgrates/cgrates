@@ -387,7 +387,7 @@ func (ec *EventCost) AsCallCost(tor string) *CallCost {
 			ec.Rating[cIl.RatingID].RatingFiltersID != "" {
 			rfs := ec.RatingFilters[ec.Rating[cIl.RatingID].RatingFiltersID]
 			ts.MatchedSubject = rfs[utils.Subject].(string)
-			ts.MatchedPrefix = rfs[utils.DestinationPrefix].(string)
+			ts.MatchedPrefix = rfs[utils.DestinationPrefixName].(string)
 			ts.MatchedDestId = rfs[utils.DestinationID].(string)
 			ts.RatingPlanId = rfs[utils.RatingPlanID].(string)
 		}
