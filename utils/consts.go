@@ -1470,6 +1470,10 @@ const (
 	APIerSv1SetTPRateProfile            = "APIerSv1.SetTPRateProfile"
 	APIerSv1GetTPRateProfileIds         = "APIerSv1.GetTPRateProfileIds"
 	APIerSv1RemoveTPRateProfile         = "APIerSv1.RemoveTPRateProfile"
+	APIerSv1GetTPAccountProfile         = "APIerSv1.GetTPAccountProfile"
+	APIerSv1SetTPAccountProfile         = "APIerSv1.SetTPAccountProfile"
+	APIerSv1RemoveTPAccountProfile      = "APIerSv1.RemoveTPAccountProfile"
+	APIerSv1GetTPAccountProfileIDs      = "APIerSv1.GetTPAccountProfileIDs"
 )
 
 // APIerSv1 TP APIs
