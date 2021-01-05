@@ -33,7 +33,7 @@ var (
 		MetaHTTPjsonCDR:   ContentJSON,
 		MetaHTTPjsonMap:   ContentJSON,
 		MetaHTTPjson:      ContentJSON,
-		MetaHTTPPost:      ContentJSON,
+		MetaHTTPPost:      CONTENT_FORM,
 		MetaAMQPjsonCDR:   ContentJSON,
 		MetaAMQPjsonMap:   ContentJSON,
 		MetaAMQPV1jsonMap: ContentJSON,
