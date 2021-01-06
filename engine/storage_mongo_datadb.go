@@ -29,6 +29,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ericlagergren/decimal"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -103,7 +105,8 @@ var (
 	CostLow        = strings.ToLower(utils.COST)
 	CostSourceLow  = strings.ToLower(utils.CostSource)
 
-	tTime = reflect.TypeOf(time.Time{})
+	tTime       = reflect.TypeOf(time.Time{})
+	decimalType = reflect.TypeOf(utils.Decimal{})
 )
 
 func TimeDecodeValue1(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
@@ -120,6 +123,33 @@ func TimeDecodeValue1(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val ref
 		return bsoncodec.ValueDecoderError{Name: "TimeDecodeValue", Types: []reflect.Type{tTime}, Received: val}
 	}
 	val.Set(reflect.ValueOf(time.Unix(dt/1000, dt%1000*1000000).UTC()))
+	return nil
+}
+
+func DecimalEncoder(ec bsoncodec.EncodeContext, vw bsonrw.ValueWriter, val reflect.Value) error {
+	if val.Kind() != reflect.Struct {
+		return bsoncodec.ValueEncoderError{Name: "DecimalEncoder", Kinds: []reflect.Kind{reflect.Struct}, Received: val}
+	}
+	d, ok := val.Interface().(utils.Decimal)
+	if !ok {
+		return fmt.Errorf("cannot cast <%+v> to <utild.Decimal>", val.Interface())
+	}
+	return vw.WriteString(d.String())
+}
+
+func DecimalDecoder(ec bsoncodec.DecodeContext, vw bsonrw.ValueReader, val reflect.Value) error {
+	if !val.CanSet() || val.Type() != decimalType {
+		return bsoncodec.ValueEncoderError{Name: "DecimalDecoder", Kinds: []reflect.Kind{reflect.Struct}, Received: val}
+	}
+	str, err := vw.ReadString()
+	if err != nil {
+		return err
+	}
+	dBig, ok := new(decimal.Big).SetString(str)
+	if !ok {
+		return fmt.Errorf("cannot set string: <%s> to decimal.Big", str)
+	}
+	val.Set(reflect.ValueOf(utils.Decimal{dBig}))
 	return nil
 }
 
@@ -140,10 +170,13 @@ func NewMongoStorage(host, port, db, user, pass, mrshlerStr, storageType string,
 	}
 	ctx := context.Background()
 	url = "mongodb://" + url
-	reg := bson.NewRegistryBuilder().RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1)).Build()
+	reg := bson.NewRegistryBuilder()
+	reg.RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1))
+	reg.RegisterTypeEncoder(decimalType, bsoncodec.ValueEncoderFunc(DecimalEncoder))
+	reg.RegisterTypeDecoder(decimalType, bsoncodec.ValueDecoderFunc(DecimalDecoder))
 	opt := options.Client().
 		ApplyURI(url).
-		SetRegistry(reg).
+		SetRegistry(reg.Build()).
 		SetServerSelectionTimeout(ttl).
 		SetRetryWrites(false) // set this option to false because as default it is on true
 

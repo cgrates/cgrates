@@ -125,6 +125,11 @@
 },
 
 
+"accounts": {
+	"enabled": true
+	},
+
+
 "filters": {								
 	"apiers_conns": ["*internal"],
 },

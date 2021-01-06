@@ -196,7 +196,6 @@ var (
 		DispatcherHostIDs:     DispatcherHostPrefix,
 		RateProfileIDs:        RateProfilePrefix,
 		ActionProfileIDs:      ActionProfilePrefix,
-		AccountProfileIDs:     AccountProfilePrefix,
 
 		TimingIDs:                     TimingsPrefix,
 		AttributeFilterIndexIDs:       AttributeFilterIndexes,
@@ -237,7 +236,6 @@ var (
 		DispatcherHostIDs:     CacheDispatcherHosts,
 		RateProfileIDs:        CacheRateProfiles,
 		ActionProfileIDs:      CacheActionProfiles,
-		AccountProfileIDs:     CacheAccountProfiles,
 
 		TimingIDs:                     CacheTimings,
 		AttributeFilterIndexIDs:       CacheAttributeFilterIndexes,
@@ -1470,9 +1468,11 @@ const (
 	APIerSv1SetTPRateProfile            = "APIerSv1.SetTPRateProfile"
 	APIerSv1GetTPRateProfileIds         = "APIerSv1.GetTPRateProfileIds"
 	APIerSv1RemoveTPRateProfile         = "APIerSv1.RemoveTPRateProfile"
-	APIerSv1GetTPAccountProfile         = "APIerSv1.GetTPAccountProfile"
-	APIerSv1SetTPAccountProfile         = "APIerSv1.SetTPAccountProfile"
-	APIerSv1RemoveTPAccountProfile      = "APIerSv1.RemoveTPAccountProfile"
+	APIerSv1SetAccountProfile           = "APIerSv1.SetAccountProfile"
+	APIerSv1GetAccountProfile           = "APIerSv1.GetAccountProfile"
+	APIerSv1GetAccountProfileIDs        = "APIerSv1.GetAccountProfileIDs"
+	APIerSv1RemoveAccountProfile        = "APIerSv1.RemoveAccountProfile"
+	APIerSv1GetAccountProfileIDsCount   = "APIerSv1.GetAccountProfileIDsCount"
 	APIerSv1GetTPAccountProfileIDs      = "APIerSv1.GetTPAccountProfileIDs"
 )
 
@@ -2597,7 +2597,6 @@ const (
 	RateProfileIDs                = "RateProfileIDs"
 	ActionProfileIDs              = "ActionProfileIDs"
 	TimingIDs                     = "TimingIDs"
-	AccountProfileIDs             = "AccountProfileIDs"
 	AttributeFilterIndexIDs       = "AttributeFilterIndexIDs"
 	ResourceFilterIndexIDs        = "ResourceFilterIndexIDs"
 	StatFilterIndexIDs            = "StatFilterIndexIDs"

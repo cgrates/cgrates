@@ -5,6 +5,7 @@
 
 "general": {
 	"log_level": 7,
+	//"dbdata_encoding": "*json",
 	"reply_timeout": "50s",
 },
 

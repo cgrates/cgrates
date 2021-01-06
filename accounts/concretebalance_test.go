@@ -38,7 +38,7 @@ func TestCBDebitUnits(t *testing.T) {
 			},
 			UnitFactors: []*utils.UnitFactor{
 				{
-					Factor: decimal.New(100, 0), // EuroCents
+					Factor: &utils.Decimal{decimal.New(100, 0)}, // EuroCents
 				},
 			},
 			Value: 500, // 500 EURcents

@@ -39,21 +39,16 @@ func TestCloneBalance(t *testing.T) {
 		CostIncrements: []*CostIncrement{
 			{
 				FilterIDs:    []string{"*string:~*req.Account:1001"},
-				Increment:    decimal.New(1, 1),
-				FixedFee:     decimal.New(75, 1),
-				RecurrentFee: decimal.New(20, 1),
+				Increment:    &Decimal{decimal.New(1, 1)},
+				FixedFee:     &Decimal{decimal.New(75, 1)},
+				RecurrentFee: &Decimal{decimal.New(20, 1)},
 			},
 		},
-		CostAttributes: []*CostAttributes{
-			{
-				FilterIDs:           []string{"*string:~*req.Account:1001"},
-				AttributeProfileIDs: []string{"ID1"},
-			},
-		},
+		CostAttributes: []string{"attr1", "attr2"},
 		UnitFactors: []*UnitFactor{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
-				Factor:    decimal.New(20, 2),
+				Factor:    &Decimal{decimal.New(20, 2)},
 			},
 		},
 		Value: 1.25,
@@ -89,21 +84,16 @@ func TestCloneAccountProfile(t *testing.T) {
 				CostIncrements: []*CostIncrement{
 					{
 						FilterIDs:    []string{"*string:~*req.Account:1001"},
-						Increment:    decimal.New(1, 1),
-						FixedFee:     decimal.New(75, 1),
-						RecurrentFee: decimal.New(20, 1),
+						Increment:    &Decimal{decimal.New(1, 1)},
+						FixedFee:     &Decimal{decimal.New(75, 1)},
+						RecurrentFee: &Decimal{decimal.New(20, 1)},
 					},
 				},
-				CostAttributes: []*CostAttributes{
-					{
-						FilterIDs:           []string{"*string:~*req.Account:1001"},
-						AttributeProfileIDs: []string{"ID1"},
-					},
-				},
+				CostAttributes: []string{"attr1", "attr2"},
 				UnitFactors: []*UnitFactor{
 					{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
-						Factor:    decimal.New(20, 2),
+						Factor:    &Decimal{decimal.New(20, 2)},
 					},
 				},
 				Value: 1.25,

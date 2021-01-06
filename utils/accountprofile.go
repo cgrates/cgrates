@@ -21,8 +21,6 @@ package utils
 import (
 	"sort"
 	"time"
-
-	"github.com/ericlagergren/decimal"
 )
 
 // AccountProfile represents one Account on a Tenant
@@ -54,9 +52,9 @@ type Balance struct {
 // CostIncrement enforces cost calculation to specific balance increments
 type CostIncrement struct {
 	FilterIDs    []string
-	Increment    *decimal.Big
-	FixedFee     *decimal.Big
-	RecurrentFee *decimal.Big
+	Increment    *Decimal
+	FixedFee     *Decimal
+	RecurrentFee *Decimal
 }
 
 // Clone returns a copy of the CostIncrement
@@ -69,31 +67,13 @@ func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
 		}
 	}
 	if cI.Increment != nil {
-		cIcln.Increment = new(decimal.Big).Copy(cI.Increment)
+		cIcln.Increment = new(Decimal).Copy(cI.Increment)
 	}
 	if cI.FixedFee != nil {
-		cIcln.FixedFee = new(decimal.Big).Copy(cI.FixedFee)
+		cIcln.FixedFee = new(Decimal).Copy(cI.FixedFee)
 	}
 	if cI.RecurrentFee != nil {
-		cIcln.RecurrentFee = new(decimal.Big).Copy(cI.RecurrentFee)
-	}
-	return
-}
-
-//Clone return a copy of the CostAttributes
-func (cA *CostAttributes) Clone() (cstAtr *CostAttributes) {
-	cstAtr = new(CostAttributes)
-	if cA.FilterIDs != nil {
-		cstAtr.FilterIDs = make([]string, len(cA.FilterIDs))
-		for i, value := range cA.FilterIDs {
-			cstAtr.FilterIDs[i] = value
-		}
-	}
-	if cA.AttributeProfileIDs != nil {
-		cstAtr.AttributeProfileIDs = make([]string, len(cA.AttributeProfileIDs))
-		for i, value := range cA.AttributeProfileIDs {
-			cstAtr.AttributeProfileIDs[i] = value
-		}
+		cIcln.RecurrentFee = new(Decimal).Copy(cI.RecurrentFee)
 	}
 	return
 }
@@ -108,7 +88,7 @@ func (uF *UnitFactor) Clone() (untFct *UnitFactor) {
 		}
 	}
 	if uF.Factor != nil {
-		untFct.Factor = new(decimal.Big).Copy(uF.Factor)
+		untFct.Factor = new(Decimal).Copy(uF.Factor)
 	}
 	return
 }
@@ -116,7 +96,7 @@ func (uF *UnitFactor) Clone() (untFct *UnitFactor) {
 // UnitFactor is a multiplicator for the usage received
 type UnitFactor struct {
 	FilterIDs []string
-	Factor    *decimal.Big
+	Factor    *Decimal
 }
 
 func (aP *AccountProfile) TenantID() string {
@@ -190,9 +170,9 @@ func (bL *Balance) Clone() (blnc *Balance) {
 		}
 	}
 	if bL.CostAttributes != nil {
-		blnc.CostAttributes = make([]*CostAttributes, len(bL.CostAttributes))
+		blnc.CostAttributes = make([]string, len(bL.CostAttributes))
 		for i, value := range bL.CostAttributes {
-			blnc.CostAttributes[i] = value.Clone()
+			blnc.CostAttributes[i] = value
 		}
 	}
 	if bL.UnitFactors != nil {

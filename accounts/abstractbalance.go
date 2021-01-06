@@ -55,8 +55,8 @@ func (aB *abstractBalance) costIncrement(tnt string, ev utils.DataProvider) (cos
 	}
 	// nothing matched, return default
 	costIcrm = &utils.CostIncrement{
-		Increment:    decimal.New(1, 0),
-		RecurrentFee: decimal.New(-1, 0)}
+		Increment:    &utils.Decimal{decimal.New(1, 0)},
+		RecurrentFee: &utils.Decimal{decimal.New(-1, 0)}}
 
 	return
 }
@@ -74,7 +74,7 @@ func (aB *abstractBalance) unitFactor(tnt string, ev utils.DataProvider) (uF *ut
 	}
 	// nothing matched, return default
 	uF = &utils.UnitFactor{
-		Factor: decimal.New(1, 0),
+		Factor: &utils.Decimal{decimal.New(1, 0)},
 	}
 	return
 }

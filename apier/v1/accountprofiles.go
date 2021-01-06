@@ -108,10 +108,6 @@ func (apierSv1 *APIerSv1) SetAccountProfile(ap *AccountProfileWithCache, reply *
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAccountProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(ap.Cache, ap.Tenant, utils.CacheAccountProfiles,
-		ap.TenantID(), &ap.FilterIDs, nil, ap.Opts); err != nil {
-		return utils.APIErrorHandler(err)
-	}
 	*reply = utils.OK
 	return nil
 }
@@ -131,10 +127,6 @@ func (apierSv1 *APIerSv1) RemoveAccountProfile(arg *utils.TenantIDWithCache, rep
 	}
 	//generate a loadID for CacheAccountProfiles and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAccountProfiles: time.Now().UnixNano()}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheAccountProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
