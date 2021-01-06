@@ -18,7 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "github.com/ericlagergren/decimal"
+import (
+	"bytes"
+	"fmt"
+	"strconv"
+
+	"github.com/ericlagergren/decimal"
+)
 
 func DivideBig(x, y *decimal.Big) *decimal.Big {
 	return new(decimal.Big).Quo(x, y)
@@ -34,4 +40,48 @@ func AddBig(x, y *decimal.Big) *decimal.Big {
 
 func SubstractBig(x, y *decimal.Big) *decimal.Big {
 	return new(decimal.Big).Sub(x, y)
+}
+
+func NewDecimalFromFloat64(f float64) (*Decimal, error) {
+	d, canSet := new(decimal.Big).SetString(strconv.FormatFloat(f, 'f', -1, 64))
+	if !canSet {
+		return nil, fmt.Errorf("cannot convert float64 to decimal.Big")
+	}
+	return &Decimal{d}, nil
+}
+
+type Decimal struct {
+	*decimal.Big
+}
+
+func (d *Decimal) UnmarshalBinary(data []byte) (err error) {
+	if d == nil {
+		d = &Decimal{new(decimal.Big)}
+	}
+	if d.Big == nil {
+		d.Big = new(decimal.Big)
+	}
+	return d.Big.UnmarshalText(data)
+}
+
+func (d *Decimal) MarshalBinary() ([]byte, error) {
+	if d.Big == nil {
+		d.Big = new(decimal.Big)
+	}
+	return d.Big.MarshalText()
+}
+
+func (d *Decimal) UnmarshalJSON(data []byte) (err error) {
+	return d.UnmarshalBinary(data)
+}
+
+func (d *Decimal) MarshalJSON() ([]byte, error) {
+	x, err := d.MarshalText()
+	return bytes.Trim(x, `"`), err
+}
+
+func (d *Decimal) Copy(d2 *Decimal) *Decimal {
+	d.Big = new(decimal.Big)
+	d.Big.Copy(d2.Big)
+	return d
 }

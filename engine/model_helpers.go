@@ -27,8 +27,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ericlagergren/decimal"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -3745,10 +3743,22 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 			ap.Balances[i].CostIncrements = make([]*utils.CostIncrement, len(bal.CostIncrement))
 			for j, costIncrement := range bal.CostIncrement {
 				ap.Balances[i].CostIncrements[j] = &utils.CostIncrement{
-					FilterIDs:    costIncrement.FilterIDs,
-					Increment:    new(decimal.Big).SetFloat64(*costIncrement.Increment),
-					FixedFee:     new(decimal.Big).SetFloat64(*costIncrement.FixedFee),
-					RecurrentFee: new(decimal.Big).SetFloat64(*costIncrement.RecurrentFee),
+					FilterIDs: costIncrement.FilterIDs,
+				}
+				if costIncrement.Increment != nil {
+					if ap.Balances[i].CostIncrements[j].Increment, err = utils.NewDecimalFromFloat64(*costIncrement.Increment); err != nil {
+						return
+					}
+				}
+				if costIncrement.FixedFee != nil {
+					if ap.Balances[i].CostIncrements[j].FixedFee, err = utils.NewDecimalFromFloat64(*costIncrement.FixedFee); err != nil {
+						return
+					}
+				}
+				if costIncrement.RecurrentFee != nil {
+					if ap.Balances[i].CostIncrements[j].RecurrentFee, err = utils.NewDecimalFromFloat64(*costIncrement.RecurrentFee); err != nil {
+						return
+					}
 				}
 			}
 		}
@@ -3763,7 +3773,9 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 			for j, unitFactor := range bal.UnitFactors {
 				ap.Balances[i].UnitFactors[j] = &utils.UnitFactor{
 					FilterIDs: unitFactor.FilterIDs,
-					Factor:    new(decimal.Big).SetFloat64(unitFactor.Factor),
+				}
+				if ap.Balances[i].UnitFactors[j].Factor, err = utils.NewDecimalFromFloat64(unitFactor.Factor); err != nil {
+					return
 				}
 			}
 		}

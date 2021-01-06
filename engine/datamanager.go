@@ -79,7 +79,6 @@ var (
 		utils.RateFilterIndexPrfx:           {},
 		utils.FilterIndexPrfx:               {},
 		utils.MetaAPIBan:                    {}, // not realy a prefix as this is not stored in DB
-		utils.AccountProfilePrefix:          {},
 	}
 )
 
@@ -231,9 +230,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.ActionProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetActionProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-		case utils.AccountProfilePrefix:
-			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetAccountProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
@@ -3816,15 +3812,6 @@ func (dm *DataManager) checkFilters(tenant string, ids []string) (brokenReferenc
 
 func (dm *DataManager) GetAccountProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (ap *utils.AccountProfile, err error) {
-	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheAccountProfiles, tntID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*utils.AccountProfile), nil
-		}
-	}
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -3844,21 +3831,7 @@ func (dm *DataManager) GetAccountProfile(tenant, id string, cacheRead, cacheWrit
 			}
 		}
 		if err != nil {
-			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(utils.CacheAccountProfiles, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID); errCh != nil {
-					return nil, errCh
-				}
-
-			}
 			return nil, err
-		}
-	}
-	if cacheWrite {
-		if errCh := Cache.Set(utils.CacheAccountProfiles, tntID, ap, nil,
-			cacheCommit(transactionID), transactionID); errCh != nil {
-			return nil, errCh
 		}
 	}
 	return

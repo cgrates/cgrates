@@ -2628,7 +2628,6 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 			utils.DispatcherHostIDs:     dphIDs,
 			utils.RateProfileIDs:        ratePrfIDs,
 			utils.ActionProfileIDs:      actionPrfIDs,
-			utils.AccountProfileIDs:     accountPrfIDs,
 		},
 	}
 

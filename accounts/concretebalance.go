@@ -55,8 +55,8 @@ func (cB *concreteBalance) costIncrement(tnt string, ev utils.DataProvider) (cos
 	}
 	// nothing matched, return default
 	costIcrm = &utils.CostIncrement{
-		Increment:    decimal.New(1, 0),
-		RecurrentFee: decimal.New(-1, 0)}
+		Increment:    &utils.Decimal{decimal.New(1, 0)},
+		RecurrentFee: &utils.Decimal{decimal.New(-1, 0)}}
 
 	return
 }
@@ -74,7 +74,7 @@ func (cB *concreteBalance) unitFactor(tnt string, ev utils.DataProvider) (uF *ut
 	}
 	// nothing matched, return default
 	uF = &utils.UnitFactor{
-		Factor: decimal.New(1, 0),
+		Factor: &utils.Decimal{decimal.New(1, 0)},
 	}
 	return
 }
@@ -137,8 +137,8 @@ func (cB *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
 
 	var hasUF bool
 	if uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
-		dUnts = utils.MultiplyBig(dUnts, uF.Factor)
-		incrm = utils.MultiplyBig(incrm, uF.Factor)
+		dUnts = utils.MultiplyBig(dUnts, uF.Factor.Big)
+		incrm = utils.MultiplyBig(incrm, uF.Factor.Big)
 		hasUF = true
 	}
 
@@ -162,7 +162,7 @@ func (cB *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
 		rmain = utils.AddBig(rmain, blncLmt)
 	}
 	if hasUF {
-		dbted = utils.DivideBig(dUnts, uF.Factor)
+		dbted = utils.DivideBig(dUnts, uF.Factor.Big)
 	} else {
 		dbted = dUnts
 	}

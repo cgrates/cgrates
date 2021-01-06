@@ -1,30 +1,135 @@
 {
-// CGRateS Configuration file
-//
+	// CGRateS Configuration file
 
 
-"general": {
-	"log_level": 7,
-	"dbdata_encoding": "json",							// encoding used to store object data in strings: <msgpack|json>
-},
+	"general": {
+		"log_level": 7,
+		"dbdata_encoding": "json",
+		"reply_timeout": "50s",
+	},
 
 
-"listen": {
-	"rpc_json": ":2012",
-	"rpc_gob": ":2013",
-	"http": ":2080",
-},
+	"listen": {
+		"rpc_json": ":2012",
+		"rpc_gob": ":2013",
+		"http": ":2080",
+	},
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "11", 						// data_db database name to connect to
-	
-},
+	"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+		"db_type": "redis",						// data_db type: <redis|mongo>
+		"db_port": 6379, 						// data_db port to reach the database
+		"db_name": "11", 						// data_db database name to connect to
+	},
 
-"stor_db": {
-	"db_password": "CGRateS.org",
-},
+	"stor_db": {
+		"db_password": "CGRateS.org",
+	},
+
+
+	"rals": {
+		"enabled": true,
+		"thresholds_conns": ["*internal"],
+		"max_increments":3000000,
+	},
+
+
+	"schedulers": {
+		"enabled": true,
+		"cdrs_conns": ["*internal"],
+		"stats_conns": ["*localhost"],
+	},
+
+
+	"cdrs": {
+		"enabled": true,
+		"chargers_conns":["*internal"],
+	},
+
+
+	"attributes": {
+		"enabled": true,
+		"stats_conns": ["*localhost"],
+		"resources_conns": ["*localhost"],
+		"apiers_conns": ["*localhost"]
+	},
+
+
+	"chargers": {
+		"enabled": true,
+		"attributes_conns": ["*internal"],
+	},
+
+
+	"resources": {
+		"enabled": true,
+		"store_interval": "1s",
+		"thresholds_conns": ["*internal"]
+	},
+
+
+	"stats": {
+		"enabled": true,
+		"store_interval": "1s",
+		"thresholds_conns": ["*internal"],
+	},
+
+	"thresholds": {
+		"enabled": true,
+		"store_interval": "1s",
+	},
+
+
+	"routes": {
+		"enabled": true,
+		"prefix_indexed_fields":["*req.Destination"],
+		"stats_conns": ["*internal"],
+		"resources_conns": ["*internal"],
+		"rals_conns": ["*internal"],
+	},
+
+
+	"sessions": {
+		"enabled": true,
+		"routes_conns": ["*internal"],
+		"resources_conns": ["*internal"],
+		"attributes_conns": ["*internal"],
+		"rals_conns": ["*internal"],
+		"cdrs_conns": ["*internal"],
+		"chargers_conns": ["*internal"],
+	},
+
+
+	"migrator":{
+		"out_stordb_password": "CGRateS.org",
+		"users_filters":["Account"],
+	},
+
+
+
+	"apiers": {
+		"enabled": true,
+		"scheduler_conns": ["*internal"],
+	},
+
+
+	"rates": {
+		"enabled": true
+	},
+
+
+	"actions": {
+		"enabled": true
+	},
+
+
+	"accounts": {
+		"enabled": true
+	},
+
+
+	"filters": {
+		"apiers_conns": ["*internal"],
+	},
 
 
 }
