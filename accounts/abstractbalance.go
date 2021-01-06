@@ -50,14 +50,13 @@ func (aB *abstractBalance) costIncrement(tnt string, ev utils.DataProvider) (cos
 		} else if !pass {
 			continue
 		}
-		costIcrm = cIcrm.Clone() // need clone since we might modify
+		costIcrm = cIcrm
 		return
 	}
 	// nothing matched, return default
 	costIcrm = &utils.CostIncrement{
 		Increment:    &utils.Decimal{decimal.New(1, 0)},
 		RecurrentFee: &utils.Decimal{decimal.New(-1, 0)}}
-
 	return
 }
 
@@ -71,10 +70,6 @@ func (aB *abstractBalance) unitFactor(tnt string, ev utils.DataProvider) (uF *ut
 			continue
 		}
 		return
-	}
-	// nothing matched, return default
-	uF = &utils.UnitFactor{
-		Factor: &utils.Decimal{decimal.New(1, 0)},
 	}
 	return
 }
@@ -109,6 +104,15 @@ func (aB *abstractBalance) debitUsage(usage *decimal.Big, startTime time.Time,
 		return nil, utils.ErrFilterNotPassingNoCaps
 	}
 
+	blcVal := new(decimal.Big).SetFloat64(aB.blnCfg.Units) // FixMe without float64
+	// balanceLimit
+	var hasLmt bool
+	blncLmt := aB.balanceLimit()
+	if blncLmt.Cmp(decimal.New(0, 0)) != 0 {
+		blcVal = utils.SubstractBig(blcVal, blncLmt)
+		hasLmt = true
+	}
+
 	// costIncrement
 	var costIcrm *utils.CostIncrement
 	if costIcrm, err = aB.costIncrement(cgrEv.CGREvent.Tenant, evNm); err != nil {
@@ -119,16 +123,6 @@ func (aB *abstractBalance) debitUsage(usage *decimal.Big, startTime time.Time,
 	var uF *utils.UnitFactor
 	if uF, err = aB.unitFactor(cgrEv.CGREvent.Tenant, evNm); err != nil {
 		return
-	}
-
-	blcVal := new(decimal.Big).SetFloat64(aB.blnCfg.Units) // FixMe without float64
-
-	// balanceLimit
-	var hasLmt bool
-	blncLmt := aB.balanceLimit()
-	if blncLmt.Cmp(decimal.New(0, 0)) != 0 {
-		blcVal = utils.SubstractBig(blcVal, blncLmt)
-		hasLmt = true
 	}
 
 	fmt.Printf("costIcrm: %+v, blncLmt: %+v, hasLmt: %+v, uF: %+v", costIcrm, blncLmt, hasLmt, uF)

@@ -72,10 +72,6 @@ func (cB *concreteBalance) unitFactor(tnt string, ev utils.DataProvider) (uF *ut
 		}
 		return
 	}
-	// nothing matched, return default
-	uF = &utils.UnitFactor{
-		Factor: &utils.Decimal{decimal.New(1, 0)},
-	}
 	return
 }
 
@@ -136,7 +132,7 @@ func (cB *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
 	}
 
 	var hasUF bool
-	if uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
+	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
 		dUnts = utils.MultiplyBig(dUnts, uF.Factor.Big)
 		incrm = utils.MultiplyBig(incrm, uF.Factor.Big)
 		hasUF = true
