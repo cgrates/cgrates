@@ -6960,7 +6960,7 @@ func TestModelHelpersCSVLoadErrorBool(t *testing.T) {
 	}
 }
 
-func TestResourceMdlsCSVHeader(t *testing.T) {
+func TestAccountProfileMdlsCSVHeader(t *testing.T) {
 	testStruct := AccountProfileMdls{{
 		Tpid:               "TEST_TPID",
 		Tenant:             "cgrates.org",
@@ -6974,7 +6974,7 @@ func TestResourceMdlsCSVHeader(t *testing.T) {
 	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
 		utils.ActivationIntervalString, utils.Weight, utils.BalanceID,
 		utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
-		utils.BalanceType, utils.BalanceOpts, utils.BalanceValue, utils.ThresholdIDs}
+		utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits, utils.ThresholdIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
@@ -6995,7 +6995,7 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 		BalanceWeight:      10,
 		BalanceBlocker:     false,
 		BalanceType:        utils.VOICE,
-		BalanceValue:       3600000000000,
+		BalanceUnits:       3600000000000,
 		ThresholdIDs:       "WARN_RES1",
 	},
 	}
@@ -7019,7 +7019,7 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 					CostIncrement:  []*utils.TPBalanceCostIncrement{},
 					CostAttributes: []string{},
 					UnitFactors:    []*utils.TPBalanceUnitFactor{},
-					Value:          3600000000000,
+					Units:          3600000000000,
 				},
 			},
 			ThresholdIDs: []string{"WARN_RES1"},
@@ -7047,7 +7047,7 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 		BalanceWeight:      10,
 		BalanceBlocker:     false,
 		BalanceType:        utils.VOICE,
-		BalanceValue:       3600000000000,
+		BalanceUnits:       3600000000000,
 		ThresholdIDs:       "WARN_RES1",
 	},
 	}
@@ -7070,7 +7070,7 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 					CostIncrement:  []*utils.TPBalanceCostIncrement{},
 					CostAttributes: []string{},
 					UnitFactors:    []*utils.TPBalanceUnitFactor{},
-					Value:          3600000000000,
+					Units:          3600000000000,
 				},
 			},
 			ThresholdIDs: []string{"WARN_RES1"},
@@ -7101,7 +7101,7 @@ func TestAPItoModelTPAccountProfile(t *testing.T) {
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weight:    10,
 				Type:      utils.VOICE,
-				Value:     3600000000000,
+				Units:     3600000000000,
 			},
 		},
 		ThresholdIDs: []string{"WARN_RES1"},
@@ -7118,7 +7118,7 @@ func TestAPItoModelTPAccountProfile(t *testing.T) {
 		BalanceWeight:      10,
 		BalanceBlocker:     false,
 		BalanceType:        utils.VOICE,
-		BalanceValue:       3600000000000,
+		BalanceUnits:       3600000000000,
 		ThresholdIDs:       "WARN_RES1",
 	}}
 	result := APItoModelTPAccountProfile(testStruct)
@@ -7165,7 +7165,7 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 				FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR2"},
 				Weight:    10,
 				Type:      utils.VOICE,
-				Value:     3600000000000,
+				Units:     3600000000000,
 			},
 		},
 		ThresholdIDs: []string{"WARN_RES1", "WARN_RES2"},
@@ -7182,7 +7182,7 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 		BalanceWeight:      10,
 		BalanceBlocker:     false,
 		BalanceType:        utils.VOICE,
-		BalanceValue:       3600000000000,
+		BalanceUnits:       3600000000000,
 		ThresholdIDs:       "WARN_RES1;WARN_RES2",
 	}}
 	sort.Strings(testStruct.FilterIDs)
@@ -7210,7 +7210,7 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weight:    10,
 				Type:      utils.VOICE,
-				Value:     3600000000000,
+				Units:     3600000000000,
 				Opts:      "key1:val1",
 			},
 		},
@@ -7230,7 +7230,7 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 			FilterIDs: []string{"FLTR_RES_GR2"},
 			Weight:    10,
 			Type:      utils.VOICE,
-			Value:     3600000000000,
+			Units:     3600000000000,
 			Opts: map[string]interface{}{
 				"key1": "val1",
 			},
@@ -7262,7 +7262,7 @@ func TestApitoAccountProfileCaseTimeError(t *testing.T) {
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weight:    10,
 				Type:      utils.VOICE,
-				Value:     3600000000000,
+				Units:     3600000000000,
 			},
 		},
 		ThresholdIDs: []string{"WARN_RES1"},
@@ -7289,7 +7289,7 @@ func TestApitoAccountProfileCaseTimeError2(t *testing.T) {
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weight:    10,
 				Type:      utils.VOICE,
-				Value:     3600000000000,
+				Units:     3600000000000,
 				Opts:      "22:22:4fs",
 			},
 		},
@@ -7388,7 +7388,7 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 			FilterIDs: []string{"FLTR_RES_GR2"},
 			Weight:    10,
 			Type:      utils.VOICE,
-			Value:     3600000000000,
+			Units:     3600000000000,
 			Opts: map[string]interface{}{
 				"key1": "val1",
 			},
@@ -7410,7 +7410,7 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weight:    10,
 				Type:      utils.VOICE,
-				Value:     3600000000000,
+				Units:     3600000000000,
 				Opts:      "22:22:4fs",
 			},
 		},

@@ -3507,7 +3507,7 @@ func (apm AccountProfileMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
 		utils.ActivationIntervalString, utils.Weight, utils.BalanceID,
 		utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
-		utils.BalanceType, utils.BalanceOpts, utils.BalanceValue, utils.ThresholdIDs,
+		utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits, utils.ThresholdIDs,
 	}
 }
 
@@ -3611,7 +3611,7 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 				CostIncrement:  costIncrements,
 				CostAttributes: costAttributes,
 				UnitFactors:    unitFactors,
-				Value:          tp.BalanceValue,
+				Units:          tp.BalanceUnits,
 			})
 		}
 		actPrfMap[tenID] = aPrf
@@ -3694,7 +3694,7 @@ func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfi
 			}
 			mdl.BalanceUnitFactors += unitFactor.AsString()
 		}
-		mdl.BalanceValue = balance.Value
+		mdl.BalanceUnits = balance.Units
 		mdls = append(mdls, mdl)
 		i++
 	}
@@ -3726,7 +3726,7 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 			Weight:    bal.Weight,
 			Blocker:   bal.Blocker,
 			Type:      bal.Type,
-			Value:     bal.Value,
+			Units:     bal.Units,
 		}
 		if bal.Opts != utils.EmptyString {
 			ap.Balances[i].Opts = make(map[string]interface{})
@@ -3815,7 +3815,7 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 			Weight:    bal.Weight,
 			Blocker:   bal.Blocker,
 			Type:      bal.Type,
-			Value:     bal.Value,
+			Units:     bal.Units,
 		}
 
 		elems := make([]string, 0, len(bal.Opts))

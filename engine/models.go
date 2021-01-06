@@ -586,7 +586,7 @@ type AccountProfileMdl struct {
 	BalanceCostIncrements string  `index:"11" re:""`
 	BalanceCostAttributes string  `index:"12" re:""`
 	BalanceUnitFactors    string  `index:"13" re:""`
-	BalanceValue          float64 `index:"14" re:"\d+\.?\d*"`
+	BalanceUnits          float64 `index:"14" re:"\d+\.?\d*"`
 	ThresholdIDs          string  `index:"15" re:""`
 	CreatedAt             time.Time
 }

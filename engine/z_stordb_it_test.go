@@ -183,7 +183,7 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 							Factor:    200,
 						},
 					},
-					Value: 14,
+					Units: 14,
 				},
 			},
 			ThresholdIDs: []string{utils.META_NONE},
