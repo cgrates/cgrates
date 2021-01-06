@@ -1564,7 +1564,7 @@ type TPAccountBalance struct {
 	CostIncrement  []*TPBalanceCostIncrement
 	CostAttributes []string
 	UnitFactors    []*TPBalanceUnitFactor
-	Value          float64
+	Units          float64
 }
 
 func NewTPBalanceCostIncrement(filtersStr, incrementStr, fixedFeeStr, recurrentFeeStr string) (costIncrement *TPBalanceCostIncrement, err error) {

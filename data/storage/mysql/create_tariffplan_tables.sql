@@ -556,7 +556,7 @@ CREATE TABLE tp_account_profiles (
   `balance_cost_increments` varchar(64) NOT NULL,
   `balance_cost_attributes` varchar(64) NOT NULL,
   `balance_unit_factors` varchar(64) NOT NULL,
-  `balance_value` decimal(16,4) NOT NULL,
+  `balance_units` decimal(16,4) NOT NULL,
   `threshold_ids` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),

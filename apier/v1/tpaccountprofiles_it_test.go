@@ -132,7 +132,7 @@ func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 				FilterIDs: []string{},
 				Weight:    10,
 				Type:      utils.MONETARY,
-				Value:     14,
+				Units:     14,
 			},
 		},
 		ThresholdIDs: []string{utils.META_NONE},
@@ -176,7 +176,7 @@ func testTPAcctPrfUpdateTPAcctBal(t *testing.T) {
 			FilterIDs: []string{},
 			Weight:    12,
 			Type:      utils.MONETARY,
-			Value:     16,
+			Units:     16,
 		},
 	}
 	var result string
@@ -200,7 +200,7 @@ func testTPAcctPrfGetTPAcctBalAfterUpdate(t *testing.T) {
 				FilterIDs: []string{},
 				Weight:    12,
 				Type:      utils.MONETARY,
-				Value:     16,
+				Units:     16,
 			},
 		},
 		ThresholdIDs: []string{utils.META_NONE},

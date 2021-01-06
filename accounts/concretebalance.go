@@ -142,7 +142,7 @@ func (cB *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
 		hasUF = true
 	}
 
-	blcVal := new(decimal.Big).SetFloat64(cB.blnCfg.Value) // FixMe without float64
+	blcVal := new(decimal.Big).SetFloat64(cB.blnCfg.Units) // FixMe without float64
 
 	// balanceLimit
 	var hasLmt bool
@@ -170,6 +170,6 @@ func (cB *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
 	if !ok {
 		return nil, nil, fmt.Errorf("failed representing decimal <%s> as float64", rmain)
 	}
-	cB.blnCfg.Value = rmainFlt64
+	cB.blnCfg.Units = rmainFlt64
 	return
 }

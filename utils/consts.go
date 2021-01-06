@@ -1078,6 +1078,7 @@ const (
 	ActionType                = "ActionType"
 	ActionValue               = "ActionValue"
 	BalanceValue              = "BalanceValue"
+	BalanceUnits              = "BalanceUnits"
 	ExtraParameters           = "ExtraParameters"
 )
 

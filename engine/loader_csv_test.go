@@ -1657,7 +1657,7 @@ func TestLoadAccountProfiles(t *testing.T) {
 						Factor:    200,
 					},
 				},
-				Value: 14,
+				Units: 14,
 			},
 			&utils.TPAccountBalance{
 				ID:             "VoiceBalance",
@@ -1667,7 +1667,7 @@ func TestLoadAccountProfiles(t *testing.T) {
 				CostIncrement:  []*utils.TPBalanceCostIncrement{},
 				CostAttributes: []string{},
 				UnitFactors:    []*utils.TPBalanceUnitFactor{},
-				Value:          3600000000000,
+				Units:          3600000000000,
 			},
 		},
 		ThresholdIDs: []string{utils.META_NONE},

@@ -46,7 +46,7 @@ type Balance struct {
 	CostIncrements []*CostIncrement
 	CostAttributes []string
 	UnitFactors    []*UnitFactor
-	Value          float64
+	Units          float64
 }
 
 // CostIncrement enforces cost calculation to specific balance increments
@@ -152,7 +152,7 @@ func (bL *Balance) Clone() (blnc *Balance) {
 		Blocker: bL.Blocker,
 		Type:    bL.Type,
 		Opts:    make(map[string]interface{}),
-		Value:   bL.Value,
+		Units:   bL.Units,
 	}
 	if bL.FilterIDs != nil {
 		blnc.FilterIDs = make([]string, len(bL.FilterIDs))
