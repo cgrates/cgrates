@@ -133,7 +133,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActions].Items = 5
 	expStats[utils.CacheDestinations].Items = 3
-	expStats[utils.CacheLoadIDs].Items = 18
+	expStats[utils.CacheLoadIDs].Items = 17
 	expStats[utils.CacheRPCConnections].Items = 2
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithOpts{}, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
@@ -161,7 +161,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 34
+	expStats[utils.CacheLoadIDs].Items = 33
 	expStats[utils.CacheTimings].Items = 12
 	expStats[utils.CacheThresholdFilterIndexes].Items = 5
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
