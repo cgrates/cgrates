@@ -576,7 +576,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaThresholds: {
-			"Thresholds.csv": &openedCSVFile{fileName: "Thresholds.csv",
+			utils.ThresholdsCsv: &openedCSVFile{fileName: utils.ThresholdsCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err != nil {
@@ -4782,6 +4782,225 @@ func TestLoaderListenAndServe(t *testing.T) {
 
 	ldr.runDelay = 1
 	if err := ldr.ListenAndServe(stopChan); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveRateProfileRatesError(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveRateProfileRatesMockError",
+		bufLoaderData: make(map[string][]LoaderData),
+		flagsTpls:     make(map[string]utils.FlagsWithParams),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaRateProfiles: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "RateIDs",
+				Path:  "RateIDs",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
+		},
+	}
+	rtPrfCsv := `
+#Tenant[0],ID[1],RateIDs[2]
+cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
+`
+	rdr := ioutil.NopCloser(strings.NewReader(rtPrfCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
+			utils.RateProfilesCsv: &openedCSVFile{
+				fileName: utils.RateProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expRtPrf := &engine.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_RATEPROFILE_1",
+	}
+	if err := ldr.dm.SetRateProfile(expRtPrf, true); err != nil {
+		t.Error(err)
+	}
+	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
+	ldr.dm = nil
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
+	}
+}
+
+func TestRemoveThresholdsMockError(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveThresholdsMockError",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaThresholds: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	thresholdsCsv := `
+#Tenant[0],ID[1]
+cgrates.org,REM_THRESHOLDS_1,
+`
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaThresholds: {
+			utils.ThresholdsCsv: &openedCSVFile{
+				fileName: utils.ThresholdsCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+
+	expThresholdPrf := &engine.ThresholdProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_THRESHOLDS_1",
+	}
+
+	if err := ldr.dm.SetThresholdProfile(expThresholdPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	newData := &dataDBMockError{}
+	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestRemoveStatQueueMockError(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestRemoveStatQueueError",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaStats: {
+			{Tag: "TenantID",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ProfileID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	statsCsv := `
+#Tenant[0],ProfileID[1]
+cgrates.org,REM_STATS_1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(statsCsv))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaStatS: {
+			utils.StatsCsv: &openedCSVFile{
+				fileName: utils.StatsCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	expStats := &engine.StatQueueProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_STATS_1",
+	}
+	if err := ldr.dm.SetStatQueueProfile(expStats, true); err != nil {
+		t.Error(err)
+	}
+	newData := &dataDBMockError{}
+	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
+	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestRemoveResourcesMockError(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadAndRemoveResources",
+		bufLoaderData: make(map[string][]LoaderData),
+		dryRun:        true,
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaResources: {
+			{Tag: "Tenant",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	resourcesCSV := `
+#Tenant[0],ID[1]
+cgrates.org,NewRes1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaResources: {
+			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
+				rdr: rdr, csvRdr: rdrCsv}},
+	}
+
+	resPrf := &engine.ResourceProfile{
+		Tenant: "cgrates.org",
+		ID:     "NewRes1",
+	}
+	if err := ldr.dm.SetResourceProfile(resPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	newData := &dataDBMockError{}
+	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
+	//expected := ""
+	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }

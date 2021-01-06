@@ -930,3 +930,60 @@ cgrates.org,MOCK_RELOAD_3
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
+
+//mocking in order to fail RemoveThreshold method for coverage
+type dataDBMockError struct {
+	*engine.DataDBMock
+}
+
+//For Threshold
+func (dbM *dataDBMockError) RemThresholdProfileDrv(tenant, id string) (err error) {
+	return nil
+}
+
+func (dbM *dataDBMockError) SetIndexesDrv(idxItmType, tntCtx string,
+	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+	return nil
+}
+
+func (dbM *dataDBMockError) RemoveThresholdDrv(string, string) error {
+	return utils.ErrNoDatabaseConn
+}
+
+func (dbM *dataDBMockError) GetThresholdProfileDrv(tenant string, ID string) (tp *engine.ThresholdProfile, err error) {
+	expThresholdPrf := &engine.ThresholdProfile{
+		Tenant: "cgrates.org",
+		ID:     "REM_THRESHOLDS_1",
+	}
+	return expThresholdPrf, nil
+}
+
+//For StatQueue
+func (dbM *dataDBMockError) GetStatQueueProfileDrv(tenant string, ID string) (sq *engine.StatQueueProfile, err error) {
+	return nil, nil
+}
+
+func (dbM *dataDBMockError) RemStatQueueProfileDrv(tenant, id string) (err error) {
+	return nil
+}
+
+func (dbM *dataDBMockError) RemStatQueueDrv(tenant, id string) (err error) {
+	return utils.ErrNoDatabaseConn
+}
+
+//For Resources
+func (dbM *dataDBMockError) GetResourceProfileDrv(string, string) (*engine.ResourceProfile, error) {
+	return nil, nil
+}
+
+func (dbM *dataDBMockError) RemoveResourceProfileDrv(string, string) error {
+	return nil
+}
+
+func (dbM *dataDBMockError) RemoveResourceDrv(tenant, id string) (err error) {
+	return utils.ErrNoDatabaseConn
+}
+
+func (dbM *dataDBMockError) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+	return nil, nil
+}
