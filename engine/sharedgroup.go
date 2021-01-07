@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -88,7 +88,7 @@ func (sp *SharingParameters) Clone() *SharingParameters {
 }
 
 func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc Balances) Balances {
-	sharingParameters := sg.AccountParameters[utils.ANY]
+	sharingParameters := sg.AccountParameters[utils.MetaAny]
 	if sp, hasParamsForAccount := sg.AccountParameters[myBalance.account.ID]; hasParamsForAccount {
 		sharingParameters = sp
 	}

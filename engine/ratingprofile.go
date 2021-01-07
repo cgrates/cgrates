@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -169,12 +169,12 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 		prefix := ""
 		destinationID := ""
 		var rps RateIntervalList
-		if cd.Destination == utils.ANY || cd.Destination == "" {
-			cd.Destination = utils.ANY
-			if _, ok := rpl.DestinationRates[utils.ANY]; ok {
-				rps = rpl.RateIntervalList(utils.ANY)
-				prefix = utils.ANY
-				destinationID = utils.ANY
+		if cd.Destination == utils.MetaAny || cd.Destination == "" {
+			cd.Destination = utils.MetaAny
+			if _, ok := rpl.DestinationRates[utils.MetaAny]; ok {
+				rps = rpl.RateIntervalList(utils.MetaAny)
+				prefix = utils.MetaAny
+				destinationID = utils.MetaAny
 			}
 		} else {
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
@@ -208,10 +208,10 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 				}
 			}
 			if rps == nil { // fallback on *any destination
-				if _, ok := rpl.DestinationRates[utils.ANY]; ok {
-					rps = rpl.RateIntervalList(utils.ANY)
-					prefix = utils.ANY
-					destinationID = utils.ANY
+				if _, ok := rpl.DestinationRates[utils.MetaAny]; ok {
+					rps = rpl.RateIntervalList(utils.MetaAny)
+					prefix = utils.MetaAny
+					destinationID = utils.MetaAny
 				}
 			}
 		}
@@ -260,7 +260,7 @@ type TenantRatingSubject struct {
 }
 
 func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err error) {
-	if !getRpSubjectPrefixMatching() || strings.HasSuffix(key, utils.ANY) {
+	if !getRpSubjectPrefixMatching() || strings.HasSuffix(key, utils.MetaAny) {
 		return dm.GetRatingProfile(key, false, utils.NonTransactional)
 	}
 	if rp, err = dm.GetRatingProfile(key, false, utils.NonTransactional); err == nil && rp != nil { // rp nil represents cached no-result

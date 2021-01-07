@@ -107,7 +107,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evT
 func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGREventWithOpts,
 	subsys string) (dPrlf *engine.DispatcherProfile, err error) {
 	// find out the matching profiles
-	anyIdxPrfx := utils.ConcatenatedKey(tnt, utils.META_ANY)
+	anyIdxPrfx := utils.ConcatenatedKey(tnt, utils.MetaAny)
 	idxKeyPrfx := anyIdxPrfx
 	if subsys != "" {
 		idxKeyPrfx = utils.ConcatenatedKey(tnt, subsys)
@@ -149,7 +149,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 			}
 			continue
 		}
-		if !(len(prfl.Subsystems) == 1 && prfl.Subsystems[0] == utils.META_ANY) &&
+		if !(len(prfl.Subsystems) == 1 && prfl.Subsystems[0] == utils.MetaAny) &&
 			!utils.IsSliceMember(prfl.Subsystems, subsys) {
 			continue
 		}

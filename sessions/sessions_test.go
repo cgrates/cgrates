@@ -2360,7 +2360,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		OverwriteIAT:   true,
 	}, &rcv); err != nil {
 		t.Error(err)
-	} else if err := AuthStirShaken(rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.META_ANY}), -1); err != nil {
+	} else if err := AuthStirShaken(rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
 		t.Fatal(err)
 	}
 }

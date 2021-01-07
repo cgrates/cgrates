@@ -54,7 +54,7 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 	attr = &engine.AttributeProfile{
 		Tenant:             config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:                 user.UserName,
-		Contexts:           []string{utils.META_ANY},
+		Contexts:           []string{utils.MetaAny},
 		FilterIDs:          make([]string, 0),
 		ActivationInterval: nil,
 		Attributes:         make([]*engine.Attribute, 0),

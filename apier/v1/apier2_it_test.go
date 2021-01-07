@@ -458,7 +458,7 @@ func testAPIerLoadRatingPlan(t *testing.T) {
 
 	rp := &utils.TPRatingPlan{TPid: "TP_SAMPLE", ID: "RPl_SAMPLE_RATING_PLAN",
 		RatingPlanBindings: []*utils.TPRatingPlanBinding{
-			{DestinationRatesId: "DR_SAMPLE_DESTINATION_RATE", TimingId: utils.META_ANY,
+			{DestinationRatesId: "DR_SAMPLE_DESTINATION_RATE", TimingId: utils.MetaAny,
 				Weight: 10},
 		}}
 
@@ -497,7 +497,7 @@ func testAPIerLoadRatingPlan2(t *testing.T) {
 
 	rp := &utils.TPRatingPlan{TPid: "TP_SAMPLE", ID: "RPL_WITH_ERROR",
 		RatingPlanBindings: []*utils.TPRatingPlanBinding{
-			{DestinationRatesId: "DR_WITH_ERROR", TimingId: utils.META_ANY,
+			{DestinationRatesId: "DR_WITH_ERROR", TimingId: utils.MetaAny,
 				Weight: 10},
 		}}
 
@@ -521,7 +521,7 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 		LoadId:   "TP_SAMPLE",
 		Tenant:   "cgrates.org",
 		Category: "call",
-		Subject:  utils.META_ANY,
+		Subject:  utils.MetaAny,
 		RatingPlanActivations: []*utils.TPRatingActivation{{
 			ActivationTime:   "2012-01-01T00:00:00Z",
 			RatingPlanId:     "RPl_SAMPLE_RATING_PLAN",
@@ -543,7 +543,7 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 	// verify if was added correctly
 	var rpl engine.RatingProfile
 	attrGetRatingPlan := &utils.AttrGetRatingProfile{
-		Tenant: "cgrates.org", Category: "call", Subject: utils.META_ANY}
+		Tenant: "cgrates.org", Category: "call", Subject: utils.MetaAny}
 	actTime, err := utils.ParseTimeDetectLayout("2012-01-01T00:00:00Z", utils.EmptyString)
 	if err != nil {
 		t.Error(err)
@@ -566,7 +566,7 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 	// add new RatingPlan
 	rp := &utils.TPRatingPlan{TPid: "TP_SAMPLE", ID: "RPl_SAMPLE_RATING_PLAN2",
 		RatingPlanBindings: []*utils.TPRatingPlanBinding{
-			{DestinationRatesId: "DR_SAMPLE_DESTINATION_RATE", TimingId: utils.META_ANY,
+			{DestinationRatesId: "DR_SAMPLE_DESTINATION_RATE", TimingId: utils.MetaAny,
 				Weight: 10},
 		}}
 
@@ -588,7 +588,7 @@ func testAPIerLoadRatingProfile(t *testing.T) {
 		LoadId:   "TP_SAMPLE",
 		Tenant:   "cgrates.org",
 		Category: "call",
-		Subject:  utils.META_ANY,
+		Subject:  utils.MetaAny,
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			{
 				ActivationTime:   "2012-01-01T00:00:00Z",

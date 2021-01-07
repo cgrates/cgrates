@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -34,7 +34,7 @@ const (
 	// these might be better in the confs under optimizations section
 	RECURSION_MAX_DEPTH = 3
 	MIN_PREFIX_MATCH    = 1
-	FALLBACK_SUBJECT    = utils.ANY
+	FALLBACK_SUBJECT    = utils.MetaAny
 )
 
 var (

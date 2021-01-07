@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -81,7 +81,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.cgrcfg.AttributeSCfg().SuffixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes,
-				utils.ConcatenatedKey(tnt, utils.META_ANY),
+				utils.ConcatenatedKey(tnt, utils.MetaAny),
 				alS.cgrcfg.AttributeSCfg().IndexedSelects,
 				alS.cgrcfg.AttributeSCfg().NestedFields); err != nil {
 				return nil, err
@@ -97,7 +97,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 			}
 			return nil, err
 		}
-		if !(len(aPrfl.Contexts) == 1 && aPrfl.Contexts[0] == utils.META_ANY) &&
+		if !(len(aPrfl.Contexts) == 1 && aPrfl.Contexts[0] == utils.MetaAny) &&
 			!utils.IsSliceMember(aPrfl.Contexts, contextVal) {
 			continue
 		}

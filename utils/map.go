@@ -87,7 +87,7 @@ func (sm StringMap) Slice() []string {
 func (sm StringMap) IsEmpty() bool {
 	return sm == nil ||
 		len(sm) == 0 ||
-		sm[ANY] == true
+		sm[MetaAny] == true
 }
 
 func StringMapFromSlice(s []string) StringMap {

@@ -309,7 +309,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_2",
 			FilterIDs: []string{"*string:~*req.Account:dan"},
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.Attribute{

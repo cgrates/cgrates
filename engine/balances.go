@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -52,10 +52,10 @@ type Balance struct {
 
 func (b *Balance) Equal(o *Balance) bool {
 	if len(b.DestinationIDs) == 0 {
-		b.DestinationIDs = utils.StringMap{utils.ANY: true}
+		b.DestinationIDs = utils.StringMap{utils.MetaAny: true}
 	}
 	if len(o.DestinationIDs) == 0 {
-		o.DestinationIDs = utils.StringMap{utils.ANY: true}
+		o.DestinationIDs = utils.StringMap{utils.MetaAny: true}
 	}
 	return b.Uuid == o.Uuid &&
 		b.ID == o.ID &&
@@ -149,7 +149,7 @@ func (b *Balance) MatchCategory(category string) bool {
 }
 
 func (b *Balance) HasDestination() bool {
-	return len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false
+	return len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.MetaAny] == false
 }
 
 func (b *Balance) MatchDestination(destinationID string) bool {
@@ -186,7 +186,7 @@ func (b *Balance) Clone() *Balance {
 }
 
 func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destID string) {
-	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.ANY] == false {
+	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.MetaAny] == false {
 		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
 			if destIDs, err := dm.GetReverseDestination(p, true, true, utils.NonTransactional); err == nil {
 				for _, dID := range destIDs {
@@ -328,7 +328,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			prefix = cd.Destination
 		}
 		if destid == "" {
-			destid = utils.ANY
+			destid = utils.MetaAny
 		}
 		ts.setRatingInfo(&RatingInfo{
 			MatchedSubject: b.Uuid,

@@ -231,7 +231,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "TestLoader2",
 		FilterIDs: []string{},
-		Contexts:  []string{utils.ANY},
+		Contexts:  []string{utils.MetaAny},
 		Attributes: []*engine.Attribute{
 			{
 				Path:      utils.MetaReq + utils.NestingSep + "Subject",

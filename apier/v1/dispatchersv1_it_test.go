@@ -141,14 +141,14 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			},
 		},
 		Opts: map[string]interface{}{
-			utils.Subsys: utils.META_ANY,
+			utils.Subsys: utils.MetaAny,
 		},
 	}
 	var reply engine.DispatcherProfile
 	expected := engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "EVENT1",
-		Subsystems:     []string{utils.META_ANY},
+		Subsystems:     []string{utils.MetaAny},
 		FilterIDs:      []string{"*string:~*req.EventName:Event1"},
 		StrategyParams: make(map[string]interface{}),
 		Strategy:       utils.MetaWeight,
@@ -189,7 +189,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			},
 		},
 		Opts: map[string]interface{}{
-			utils.Subsys: utils.META_ANY,
+			utils.Subsys: utils.MetaAny,
 		},
 	}
 	expected.Hosts.Sort()
@@ -210,7 +210,7 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 			Event:  map[string]interface{}{},
 		},
 		Opts: map[string]interface{}{
-			utils.Subsys:               utils.META_ANY,
+			utils.Subsys:               utils.MetaAny,
 			utils.OptsDispatcherMethod: utils.DispatcherSv1GetProfileForEvent,
 		},
 	}
@@ -218,7 +218,7 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 	expected := engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "EVENT6",
-		Subsystems:     []string{utils.META_ANY},
+		Subsystems:     []string{utils.MetaAny},
 		FilterIDs:      []string{"*string:~*opts.*method:DispatcherSv1.GetProfileForEvent"},
 		StrategyParams: make(map[string]interface{}),
 		Strategy:       utils.MetaWeight,

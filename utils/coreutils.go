@@ -375,10 +375,10 @@ func MinDuration(d1, d2 time.Duration) time.Duration {
 // returns error if not able to parse duration (ie: if ratingSubject is standard one)
 func ParseZeroRatingSubject(tor, rateSubj string, defaultRateSubj map[string]string) (time.Duration, error) {
 	rateSubj = strings.TrimSpace(rateSubj)
-	if rateSubj == "" || rateSubj == ANY {
+	if rateSubj == "" || rateSubj == MetaAny {
 		var hasToR bool
 		if rateSubj, hasToR = defaultRateSubj[tor]; !hasToR {
-			rateSubj = defaultRateSubj[META_ANY]
+			rateSubj = defaultRateSubj[MetaAny]
 		}
 	}
 	if !strings.HasPrefix(rateSubj, ZERO_RATING_SUBJECT_PREFIX) {

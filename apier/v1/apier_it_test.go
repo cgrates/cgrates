@@ -221,10 +221,10 @@ func testApierTPTiming(t *testing.T) {
 	// ALWAYS,*any,*any,*any,*any,00:00:00
 	tmAlways := &utils.ApierTPTiming{TPid: utils.TEST_SQL,
 		ID:        "ALWAYS",
-		Years:     utils.META_ANY,
-		Months:    utils.META_ANY,
-		MonthDays: utils.META_ANY,
-		WeekDays:  utils.META_ANY,
+		Years:     utils.MetaAny,
+		Months:    utils.MetaAny,
+		MonthDays: utils.MetaAny,
+		WeekDays:  utils.MetaAny,
 		Time:      "00:00:00",
 	}
 	tmAlways2 := new(utils.ApierTPTiming)
@@ -233,10 +233,10 @@ func testApierTPTiming(t *testing.T) {
 	tmAsap := &utils.ApierTPTiming{
 		TPid:      utils.TEST_SQL,
 		ID:        "ASAP",
-		Years:     utils.META_ANY,
-		Months:    utils.META_ANY,
-		MonthDays: utils.META_ANY,
-		WeekDays:  utils.META_ANY,
+		Years:     utils.MetaAny,
+		Months:    utils.MetaAny,
+		MonthDays: utils.MetaAny,
+		WeekDays:  utils.MetaAny,
 		Time:      "*asap",
 	}
 	var reply string
@@ -503,7 +503,7 @@ func testApierTPRatingProfile(t *testing.T) {
 		LoadId:   utils.TEST_SQL,
 		Tenant:   "cgrates.org",
 		Category: "call",
-		Subject:  utils.META_ANY,
+		Subject:  utils.MetaAny,
 		RatingPlanActivations: []*utils.TPRatingActivation{{
 			ActivationTime:   "2012-01-01T00:00:00Z",
 			RatingPlanId:     "RETAIL1",
@@ -561,7 +561,7 @@ func testApierTPActions(t *testing.T) {
 		ID: "PREPAID_10", Actions: []*utils.TPAction{
 			{Identifier: "*topup_reset", BalanceType: utils.MONETARY,
 				Units: "10", ExpiryTime: "*unlimited",
-				DestinationIds: utils.META_ANY, BalanceWeight: "10", Weight: 10},
+				DestinationIds: utils.MetaAny, BalanceWeight: "10", Weight: 10},
 		}}
 	actWarn := &utils.TPActions{TPid: utils.TEST_SQL, ID: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
 		{Identifier: "*http_post", ExtraParameters: "http://localhost:8000", Weight: 10},
@@ -1235,7 +1235,7 @@ func testApierAddTriggeredAction(t *testing.T) {
 	}
 	// Add balance to a previously known account
 	attrsAddTrigger := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan32", BalanceType: utils.MONETARY,
-		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationIds: utils.META_ANY, Weight: 10, ActionsId: "WARN_VIA_HTTP"}
+		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationIds: utils.MetaAny, Weight: 10, ActionsId: "WARN_VIA_HTTP"}
 	if err := rater.Call(utils.APIerSv1AddTriggeredAction, attrsAddTrigger, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddTriggeredAction: ", err.Error())
 	} else if reply != utils.OK {

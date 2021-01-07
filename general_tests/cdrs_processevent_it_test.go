@@ -178,7 +178,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Attributes: []*engine.Attribute{
 				{

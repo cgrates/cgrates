@@ -652,16 +652,16 @@ func TestDfRalsJsonCfg(t *testing.T) {
 		Rp_subject_prefix_matching: utils.BoolPointer(false),
 		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
-			utils.ANY:   "189h",
-			utils.VOICE: "72h",
-			utils.DATA:  "107374182400",
-			utils.SMS:   "10000",
-			utils.MMS:   "10000",
+			utils.MetaAny: "189h",
+			utils.VOICE:   "72h",
+			utils.DATA:    "107374182400",
+			utils.SMS:     "10000",
+			utils.MMS:     "10000",
 		},
 		Max_increments: utils.IntPointer(1000000),
 		Balance_rating_subject: &map[string]string{
-			utils.ANY:   "*zero1ns",
-			utils.VOICE: "*zero1s",
+			utils.MetaAny: "*zero1ns",
+			utils.VOICE:   "*zero1s",
 		},
 		Dynaprepaid_actionplans: &[]string{},
 	}
@@ -743,7 +743,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Terminate_attempts:    utils.IntPointer(5),
 		Alterable_fields:      &[]string{},
 		Stir: &STIRJsonCfg{
-			Allowed_attest:      &[]string{utils.META_ANY},
+			Allowed_attest:      &[]string{utils.MetaAny},
 			Payload_maxduration: utils.StringPointer("-1"),
 			Default_attest:      utils.StringPointer("A"),
 			Privatekey_path:     utils.StringPointer(""),

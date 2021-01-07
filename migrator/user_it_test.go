@@ -125,7 +125,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 	attrProf := &engine.AttributeProfile{
 		Tenant:             defaultTenant,
 		ID:                 "1001",
-		Contexts:           []string{utils.META_ANY},
+		Contexts:           []string{utils.MetaAny},
 		FilterIDs:          []string{"*string:~Account:1002"},
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
@@ -200,7 +200,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 	}
 	if usridx, err := usrMigrator.dmOut.DataManager().GetIndexes(
 		utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
+		utils.ConcatenatedKey("cgrates.org", utils.MetaAny),
 		"", true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expUsrIdx, usridx) {

@@ -403,11 +403,11 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RpSubjectPrefixMatching)
 	}
 	eMaxCU := map[string]time.Duration{
-		utils.ANY:   189 * time.Hour,
-		utils.VOICE: 72 * time.Hour,
-		utils.DATA:  107374182400,
-		utils.SMS:   10000,
-		utils.MMS:   10000,
+		utils.MetaAny: 189 * time.Hour,
+		utils.VOICE:   72 * time.Hour,
+		utils.DATA:    107374182400,
+		utils.SMS:     10000,
+		utils.MMS:     10000,
 	}
 	if !reflect.DeepEqual(eMaxCU, cgrCfg.RalsCfg().MaxComputedUsage) {
 		t.Errorf("Expecting: %+v , received: %+v", eMaxCU, cgrCfg.RalsCfg().MaxComputedUsage)
@@ -416,8 +416,8 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 		t.Errorf("Expecting: 1000000 , received: %+v", cgrCfg.RalsCfg().MaxIncrements)
 	}
 	eBalRatingSbj := map[string]string{
-		utils.ANY:   "*zero1ns",
-		utils.VOICE: "*zero1s",
+		utils.MetaAny: "*zero1ns",
+		utils.VOICE:   "*zero1s",
 	}
 	if !reflect.DeepEqual(eBalRatingSbj, cgrCfg.RalsCfg().BalanceRatingSubject) {
 		t.Errorf("Expecting: %+v , received: %+v", eBalRatingSbj, cgrCfg.RalsCfg().BalanceRatingSubject)
@@ -505,7 +505,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		TerminateAttempts:   5,
 		AlterableFields:     utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.NewStringSet([]string{utils.META_ANY}),
+			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
@@ -2179,7 +2179,7 @@ func TestSessionSConfig(t *testing.T) {
 		AlterableFields:     utils.StringSet{},
 		SchedulerConns:      []string{},
 		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.StringSet{utils.META_ANY: {}},
+			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "",

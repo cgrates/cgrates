@@ -168,7 +168,7 @@ func (pi *ProcessedStirIdentity) VerifySignature(timeoutVal time.Duration) (err 
 // VerifyPayload returns if the payload is corectly populated
 func (pi *ProcessedStirIdentity) VerifyPayload(originatorTn, originatorURI, destinationTn, destinationURI string,
 	hdrMaxDur time.Duration, attest utils.StringSet) (err error) {
-	if !attest.Has(utils.META_ANY) && !attest.Has(pi.Payload.ATTest) {
+	if !attest.Has(utils.MetaAny) && !attest.Has(pi.Payload.ATTest) {
 		return errors.New("wrong attest level")
 	}
 	if hdrMaxDur >= 0 && time.Now().After(time.Unix(pi.Payload.IAT, 0).Add(hdrMaxDur)) {

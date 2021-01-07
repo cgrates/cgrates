@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -190,7 +190,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 				return fmt.Errorf("could not find rate for tag %v", dr.RateId)
 			}
 			dr.Rate = rate
-			destinationExists := dr.DestinationId == utils.ANY
+			destinationExists := dr.DestinationId == utils.MetaAny
 			if !destinationExists {
 				_, destinationExists = tpr.destinations[dr.DestinationId]
 			}
@@ -255,7 +255,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 
 				drate.Rate = rt[drate.RateId]
 				ratingPlan.AddRateInterval(drate.DestinationId, GetRateInterval(rp, drate))
-				if drate.DestinationId == utils.ANY {
+				if drate.DestinationId == utils.MetaAny {
 					continue // no need of loading the destinations in this case
 				}
 
@@ -462,14 +462,14 @@ func (tpr *TpReader) LoadActions() (err error) {
 				Filter:           tpact.Filter,
 				Balance:          &BalanceFilter{},
 			}
-			if tpact.BalanceId != "" && tpact.BalanceId != utils.ANY {
+			if tpact.BalanceId != "" && tpact.BalanceId != utils.MetaAny {
 				acts[idx].Balance.ID = utils.StringPointer(tpact.BalanceId)
 			}
-			if tpact.BalanceType != "" && tpact.BalanceType != utils.ANY {
+			if tpact.BalanceType != "" && tpact.BalanceType != utils.MetaAny {
 				acts[idx].Balance.Type = utils.StringPointer(tpact.BalanceType)
 			}
 
-			if tpact.Units != "" && tpact.Units != utils.ANY {
+			if tpact.Units != "" && tpact.Units != utils.MetaAny {
 				vf, err := utils.ParseBalanceFilterValue(tpact.BalanceType, tpact.Units)
 				if err != nil {
 					return err
@@ -477,7 +477,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 				acts[idx].Balance.Value = vf
 			}
 
-			if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.ANY {
+			if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.MetaAny {
 				u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
 				if err != nil {
 					return err
@@ -485,30 +485,30 @@ func (tpr *TpReader) LoadActions() (err error) {
 				acts[idx].Balance.Weight = utils.Float64Pointer(u)
 			}
 
-			if tpact.RatingSubject != "" && tpact.RatingSubject != utils.ANY {
+			if tpact.RatingSubject != "" && tpact.RatingSubject != utils.MetaAny {
 				acts[idx].Balance.RatingSubject = utils.StringPointer(tpact.RatingSubject)
 			}
 
-			if tpact.Categories != "" && tpact.Categories != utils.ANY {
+			if tpact.Categories != "" && tpact.Categories != utils.MetaAny {
 				acts[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(tpact.Categories))
 			}
-			if tpact.DestinationIds != "" && tpact.DestinationIds != utils.ANY {
+			if tpact.DestinationIds != "" && tpact.DestinationIds != utils.MetaAny {
 				acts[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
 			}
-			if tpact.SharedGroups != "" && tpact.SharedGroups != utils.ANY {
+			if tpact.SharedGroups != "" && tpact.SharedGroups != utils.MetaAny {
 				acts[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(tpact.SharedGroups))
 			}
-			if tpact.TimingTags != "" && tpact.TimingTags != utils.ANY {
+			if tpact.TimingTags != "" && tpact.TimingTags != utils.MetaAny {
 				acts[idx].Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.TimingTags))
 			}
-			if tpact.BalanceBlocker != "" && tpact.BalanceBlocker != utils.ANY {
+			if tpact.BalanceBlocker != "" && tpact.BalanceBlocker != utils.MetaAny {
 				u, err := strconv.ParseBool(tpact.BalanceBlocker)
 				if err != nil {
 					return err
 				}
 				acts[idx].Balance.Blocker = utils.BoolPointer(u)
 			}
-			if tpact.BalanceDisabled != "" && tpact.BalanceDisabled != utils.ANY {
+			if tpact.BalanceDisabled != "" && tpact.BalanceDisabled != utils.MetaAny {
 				u, err := strconv.ParseBool(tpact.BalanceDisabled)
 				if err != nil {
 					return err
@@ -632,52 +632,52 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				Weight:         atr.Weight,
 				ActionsID:      atr.ActionsId,
 			}
-			if atr.BalanceId != "" && atr.BalanceId != utils.ANY {
+			if atr.BalanceId != "" && atr.BalanceId != utils.MetaAny {
 				atrs[idx].Balance.ID = utils.StringPointer(atr.BalanceId)
 			}
 
-			if atr.BalanceType != "" && atr.BalanceType != utils.ANY {
+			if atr.BalanceType != "" && atr.BalanceType != utils.MetaAny {
 				atrs[idx].Balance.Type = utils.StringPointer(atr.BalanceType)
 			}
 
-			if atr.BalanceWeight != "" && atr.BalanceWeight != utils.ANY {
+			if atr.BalanceWeight != "" && atr.BalanceWeight != utils.MetaAny {
 				u, err := strconv.ParseFloat(atr.BalanceWeight, 64)
 				if err != nil {
 					return err
 				}
 				atrs[idx].Balance.Weight = utils.Float64Pointer(u)
 			}
-			if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.ANY && atr.ExpirationDate != utils.UNLIMITED {
+			if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.MetaAny && atr.ExpirationDate != utils.UNLIMITED {
 				u, err := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
 				if err != nil {
 					return err
 				}
 				atrs[idx].Balance.ExpirationDate = utils.TimePointer(u)
 			}
-			if atr.BalanceRatingSubject != "" && atr.BalanceRatingSubject != utils.ANY {
+			if atr.BalanceRatingSubject != "" && atr.BalanceRatingSubject != utils.MetaAny {
 				atrs[idx].Balance.RatingSubject = utils.StringPointer(atr.BalanceRatingSubject)
 			}
 
-			if atr.BalanceCategories != "" && atr.BalanceCategories != utils.ANY {
+			if atr.BalanceCategories != "" && atr.BalanceCategories != utils.MetaAny {
 				atrs[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceCategories))
 			}
-			if atr.BalanceDestinationIds != "" && atr.BalanceDestinationIds != utils.ANY {
+			if atr.BalanceDestinationIds != "" && atr.BalanceDestinationIds != utils.MetaAny {
 				atrs[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))
 			}
-			if atr.BalanceSharedGroups != "" && atr.BalanceSharedGroups != utils.ANY {
+			if atr.BalanceSharedGroups != "" && atr.BalanceSharedGroups != utils.MetaAny {
 				atrs[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceSharedGroups))
 			}
-			if atr.BalanceTimingTags != "" && atr.BalanceTimingTags != utils.ANY {
+			if atr.BalanceTimingTags != "" && atr.BalanceTimingTags != utils.MetaAny {
 				atrs[idx].Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceTimingTags))
 			}
-			if atr.BalanceBlocker != "" && atr.BalanceBlocker != utils.ANY {
+			if atr.BalanceBlocker != "" && atr.BalanceBlocker != utils.MetaAny {
 				u, err := strconv.ParseBool(atr.BalanceBlocker)
 				if err != nil {
 					return err
 				}
 				atrs[idx].Balance.Blocker = utils.BoolPointer(u)
 			}
-			if atr.BalanceDisabled != "" && atr.BalanceDisabled != utils.ANY {
+			if atr.BalanceDisabled != "" && atr.BalanceDisabled != utils.MetaAny {
 				u, err := strconv.ParseBool(atr.BalanceDisabled)
 				if err != nil {
 					return err
@@ -835,52 +835,52 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 						Weight:         atr.Weight,
 						ActionsID:      atr.ActionsId,
 					}
-					if atr.BalanceId != "" && atr.BalanceId != utils.ANY {
+					if atr.BalanceId != "" && atr.BalanceId != utils.MetaAny {
 						atrs[idx].Balance.ID = utils.StringPointer(atr.BalanceId)
 					}
 
-					if atr.BalanceType != "" && atr.BalanceType != utils.ANY {
+					if atr.BalanceType != "" && atr.BalanceType != utils.MetaAny {
 						atrs[idx].Balance.Type = utils.StringPointer(atr.BalanceType)
 					}
 
-					if atr.BalanceWeight != "" && atr.BalanceWeight != utils.ANY {
+					if atr.BalanceWeight != "" && atr.BalanceWeight != utils.MetaAny {
 						u, err := strconv.ParseFloat(atr.BalanceWeight, 64)
 						if err != nil {
 							return err
 						}
 						atrs[idx].Balance.Weight = utils.Float64Pointer(u)
 					}
-					if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.ANY && atr.ExpirationDate != utils.UNLIMITED {
+					if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.MetaAny && atr.ExpirationDate != utils.UNLIMITED {
 						u, err := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
 						if err != nil {
 							return err
 						}
 						atrs[idx].Balance.ExpirationDate = utils.TimePointer(u)
 					}
-					if atr.BalanceRatingSubject != "" && atr.BalanceRatingSubject != utils.ANY {
+					if atr.BalanceRatingSubject != "" && atr.BalanceRatingSubject != utils.MetaAny {
 						atrs[idx].Balance.RatingSubject = utils.StringPointer(atr.BalanceRatingSubject)
 					}
 
-					if atr.BalanceCategories != "" && atr.BalanceCategories != utils.ANY {
+					if atr.BalanceCategories != "" && atr.BalanceCategories != utils.MetaAny {
 						atrs[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceCategories))
 					}
-					if atr.BalanceDestinationIds != "" && atr.BalanceDestinationIds != utils.ANY {
+					if atr.BalanceDestinationIds != "" && atr.BalanceDestinationIds != utils.MetaAny {
 						atrs[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))
 					}
-					if atr.BalanceSharedGroups != "" && atr.BalanceSharedGroups != utils.ANY {
+					if atr.BalanceSharedGroups != "" && atr.BalanceSharedGroups != utils.MetaAny {
 						atrs[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceSharedGroups))
 					}
-					if atr.BalanceTimingTags != "" && atr.BalanceTimingTags != utils.ANY {
+					if atr.BalanceTimingTags != "" && atr.BalanceTimingTags != utils.MetaAny {
 						atrs[idx].Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceTimingTags))
 					}
-					if atr.BalanceBlocker != "" && atr.BalanceBlocker != utils.ANY {
+					if atr.BalanceBlocker != "" && atr.BalanceBlocker != utils.MetaAny {
 						u, err := strconv.ParseBool(atr.BalanceBlocker)
 						if err != nil {
 							return err
 						}
 						atrs[idx].Balance.Blocker = utils.BoolPointer(u)
 					}
-					if atr.BalanceDisabled != "" && atr.BalanceDisabled != utils.ANY {
+					if atr.BalanceDisabled != "" && atr.BalanceDisabled != utils.MetaAny {
 						u, err := strconv.ParseBool(atr.BalanceDisabled)
 						if err != nil {
 							return err
@@ -938,14 +938,14 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 						Filter:           tpact.Filter,
 						Balance:          &BalanceFilter{},
 					}
-					if tpact.BalanceId != "" && tpact.BalanceId != utils.ANY {
+					if tpact.BalanceId != "" && tpact.BalanceId != utils.MetaAny {
 						acts[idx].Balance.ID = utils.StringPointer(tpact.BalanceId)
 					}
-					if tpact.BalanceType != "" && tpact.BalanceType != utils.ANY {
+					if tpact.BalanceType != "" && tpact.BalanceType != utils.MetaAny {
 						acts[idx].Balance.Type = utils.StringPointer(tpact.BalanceType)
 					}
 
-					if tpact.Units != "" && tpact.Units != utils.ANY {
+					if tpact.Units != "" && tpact.Units != utils.MetaAny {
 						vf, err := utils.ParseBalanceFilterValue(tpact.BalanceType, tpact.Units)
 						if err != nil {
 							return err
@@ -953,37 +953,37 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 						acts[idx].Balance.Value = vf
 					}
 
-					if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.ANY {
+					if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.MetaAny {
 						u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
 						if err != nil {
 							return err
 						}
 						acts[idx].Balance.Weight = utils.Float64Pointer(u)
 					}
-					if tpact.RatingSubject != "" && tpact.RatingSubject != utils.ANY {
+					if tpact.RatingSubject != "" && tpact.RatingSubject != utils.MetaAny {
 						acts[idx].Balance.RatingSubject = utils.StringPointer(tpact.RatingSubject)
 					}
 
-					if tpact.Categories != "" && tpact.Categories != utils.ANY {
+					if tpact.Categories != "" && tpact.Categories != utils.MetaAny {
 						acts[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(tpact.Categories))
 					}
-					if tpact.DestinationIds != "" && tpact.DestinationIds != utils.ANY {
+					if tpact.DestinationIds != "" && tpact.DestinationIds != utils.MetaAny {
 						acts[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
 					}
-					if tpact.SharedGroups != "" && tpact.SharedGroups != utils.ANY {
+					if tpact.SharedGroups != "" && tpact.SharedGroups != utils.MetaAny {
 						acts[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(tpact.SharedGroups))
 					}
-					if tpact.TimingTags != "" && tpact.TimingTags != utils.ANY {
+					if tpact.TimingTags != "" && tpact.TimingTags != utils.MetaAny {
 						acts[idx].Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.TimingTags))
 					}
-					if tpact.BalanceBlocker != "" && tpact.BalanceBlocker != utils.ANY {
+					if tpact.BalanceBlocker != "" && tpact.BalanceBlocker != utils.MetaAny {
 						u, err := strconv.ParseBool(tpact.BalanceBlocker)
 						if err != nil {
 							return err
 						}
 						acts[idx].Balance.Blocker = utils.BoolPointer(u)
 					}
-					if tpact.BalanceDisabled != "" && tpact.BalanceDisabled != utils.ANY {
+					if tpact.BalanceDisabled != "" && tpact.BalanceDisabled != utils.MetaAny {
 						u, err := strconv.ParseBool(tpact.BalanceDisabled)
 						if err != nil {
 							return err
@@ -2736,8 +2736,8 @@ func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) {
 }
 
 func (tpr *TpReader) addDefaultTimings() {
-	tpr.timings[utils.ANY] = &utils.TPTiming{
-		ID:        utils.ANY,
+	tpr.timings[utils.MetaAny] = &utils.TPTiming{
+		ID:        utils.MetaAny,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},

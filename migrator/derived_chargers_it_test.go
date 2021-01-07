@@ -129,7 +129,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		return keys
 	}
 	derivch := &v1DerivedChargersWithKey{
-		Key: utils.ConcatenatedKey("*out", defaultTenant, utils.META_ANY, "1003", utils.META_ANY),
+		Key: utils.ConcatenatedKey("*out", defaultTenant, utils.MetaAny, "1003", utils.MetaAny),
 		Value: &v1DerivedChargers{
 			DestinationIDs: utils.StringMap{"1001": true, "1002": true, "1003": true},
 			Chargers: []*v1DerivedCharger{

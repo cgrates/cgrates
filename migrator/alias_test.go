@@ -33,24 +33,24 @@ var defaultTenant = "cgrates.org"
 func TestAlias2AtttributeProfile(t *testing.T) {
 	aliases := map[int]*v1Alias{
 		0: {
-			Tenant:    utils.META_ANY,
+			Tenant:    utils.MetaAny,
 			Direction: utils.META_OUT,
-			Category:  utils.META_ANY,
-			Account:   utils.META_ANY,
-			Subject:   utils.META_ANY,
+			Category:  utils.MetaAny,
+			Account:   utils.MetaAny,
+			Subject:   utils.MetaAny,
 			Context:   "*rating",
 			Values:    v1AliasValues{},
 		},
 		1: {
-			Tenant:    utils.META_ANY,
+			Tenant:    utils.MetaAny,
 			Direction: utils.META_OUT,
-			Category:  utils.META_ANY,
-			Account:   utils.META_ANY,
-			Subject:   utils.META_ANY,
+			Category:  utils.MetaAny,
+			Account:   utils.MetaAny,
+			Subject:   utils.MetaAny,
 			Context:   "*rating",
 			Values: v1AliasValues{
 				&v1AliasValue{
-					DestinationId: utils.META_ANY,
+					DestinationId: utils.MetaAny,
 					Pairs: map[string]map[string]string{
 						"Account": map[string]string{
 							"1001": "1002",
@@ -61,15 +61,15 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			},
 		},
 		2: {
-			Tenant:    utils.META_ANY,
+			Tenant:    utils.MetaAny,
 			Direction: utils.META_OUT,
-			Category:  utils.META_ANY,
-			Account:   utils.META_ANY,
-			Subject:   utils.META_ANY,
+			Category:  utils.MetaAny,
+			Account:   utils.MetaAny,
+			Subject:   utils.MetaAny,
 			Context:   "*rating",
 			Values: v1AliasValues{
 				&v1AliasValue{
-					DestinationId: utils.META_ANY,
+					DestinationId: utils.MetaAny,
 					Pairs: map[string]map[string]string{
 						"Account": map[string]string{
 							"1001": "1002",
@@ -89,7 +89,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Context:   "",
 			Values: v1AliasValues{
 				&v1AliasValue{
-					DestinationId: utils.META_ANY,
+					DestinationId: utils.MetaAny,
 					Pairs: map[string]map[string]string{
 						"Account": map[string]string{
 							"1001": "1002",
@@ -105,7 +105,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Direction: "*out",
 			Category:  "*voice",
 			Account:   "1001",
-			Subject:   utils.META_ANY,
+			Subject:   utils.MetaAny,
 			Context:   "*rated",
 			Values: v1AliasValues{
 				&v1AliasValue{
@@ -125,7 +125,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		5: {
 			Tenant:    "notDefaultTenant",
 			Direction: "*out",
-			Category:  utils.META_ANY,
+			Category:  utils.MetaAny,
 			Account:   "1001",
 			Subject:   "call_1001",
 			Context:   "*rated",
@@ -145,10 +145,10 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			},
 		},
 		6: {
-			Tenant:   utils.META_ANY,
+			Tenant:   utils.MetaAny,
 			Category: "somecateg_5141",
-			Account:  utils.META_ANY,
-			Subject:  utils.META_ANY,
+			Account:  utils.MetaAny,
+			Subject:  utils.MetaAny,
 			Context:  "*rated",
 			Values: v1AliasValues{
 				&v1AliasValue{
@@ -165,7 +165,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		0: {
 			Tenant:             defaultTenant,
 			ID:                 aliases[0].GetId(),
-			Contexts:           []string{utils.META_ANY},
+			Contexts:           []string{utils.MetaAny},
 			FilterIDs:          make([]string, 0),
 			ActivationInterval: nil,
 			Attributes:         make([]*engine.Attribute, 0),
@@ -175,7 +175,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		1: {
 			Tenant:             defaultTenant,
 			ID:                 aliases[1].GetId(),
-			Contexts:           []string{utils.META_ANY},
+			Contexts:           []string{utils.MetaAny},
 			FilterIDs:          make([]string, 0),
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
@@ -192,7 +192,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		2: {
 			Tenant:             defaultTenant,
 			ID:                 aliases[2].GetId(),
-			Contexts:           []string{utils.META_ANY},
+			Contexts:           []string{utils.MetaAny},
 			FilterIDs:          make([]string, 0),
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
@@ -215,7 +215,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		3: {
 			Tenant:             defaultTenant,
 			ID:                 aliases[3].GetId(),
-			Contexts:           []string{utils.META_ANY},
+			Contexts:           []string{utils.MetaAny},
 			FilterIDs:          make([]string, 0),
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
@@ -238,7 +238,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		4: {
 			Tenant:   "notDefaultTenant",
 			ID:       aliases[4].GetId(),
-			Contexts: []string{utils.META_ANY},
+			Contexts: []string{utils.MetaAny},
 			FilterIDs: []string{
 				"*string:~*req.Category:*voice",
 				"*string:~*req.Account:1001",
@@ -263,7 +263,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		5: {
 			Tenant:   "notDefaultTenant",
 			ID:       aliases[5].GetId(),
-			Contexts: []string{utils.META_ANY},
+			Contexts: []string{utils.MetaAny},
 			FilterIDs: []string{
 				"*string:~*req.Account:1001",
 				"*string:~*req.Subject:call_1001",
@@ -289,7 +289,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		6: {
 			Tenant:   "cgrates.org",
 			ID:       aliases[6].GetId(),
-			Contexts: []string{utils.META_ANY},
+			Contexts: []string{utils.MetaAny},
 			FilterIDs: []string{
 				"*string:~*req.Category:somecateg_5141",
 			},

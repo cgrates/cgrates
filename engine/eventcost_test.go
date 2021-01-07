@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -1559,7 +1559,7 @@ func TestECMergeGT(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"216b0a5": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -1617,7 +1617,7 @@ func TestECMergeGT(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"17f7216": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -1676,7 +1676,7 @@ func TestECMergeGT(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"216b0a5": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -1731,7 +1731,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"216b0a5": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -1775,7 +1775,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"17f7216": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -1820,7 +1820,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"216b0a5": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -1869,7 +1869,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"216b0a5": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -1913,7 +1913,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"17f7216": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -1969,7 +1969,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"216b0a5": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -2029,7 +2029,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"216b0a5": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -2078,7 +2078,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"17f7216": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -2161,7 +2161,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"216b0a5": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -2210,7 +2210,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"216b0a5": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -2254,7 +2254,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"17f7216": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
@@ -2299,7 +2299,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		},
 		RatingFilters: RatingFilters{
 			"216b0a5": RatingMatchedFilters{
-				"DestinationID":     utils.META_ANY,
+				"DestinationID":     utils.MetaAny,
 				"DestinationPrefix": "42502",
 				"RatingPlanID":      utils.MetaNone,
 				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",

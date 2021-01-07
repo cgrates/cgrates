@@ -120,9 +120,9 @@ func testAlsITFlush(t *testing.T) {
 
 func testAlsITMigrateAndMove(t *testing.T) {
 	alias := &v1Alias{
-		Tenant:    utils.META_ANY,
+		Tenant:    utils.MetaAny,
 		Direction: "*out",
-		Category:  utils.META_ANY,
+		Category:  utils.MetaAny,
 		Account:   "1001",
 		Subject:   "call_1001",
 		Context:   "*rated",
@@ -144,7 +144,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 	attrProf := &engine.AttributeProfile{
 		Tenant:   "cgrates.org",
 		ID:       alias.GetId(),
-		Contexts: []string{utils.META_ANY},
+		Contexts: []string{utils.MetaAny},
 		FilterIDs: []string{
 			"*string:~*req.Account:1001",
 			"*string:~*req.Subject:call_1001",
@@ -226,7 +226,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		},
 	}
 	if alsidx, err := alsMigrator.dmOut.DataManager().GetIndexes(
-		utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
+		utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey("cgrates.org", utils.MetaAny),
 		"", false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expAlsIdx, alsidx) {

@@ -129,7 +129,7 @@ func testSCncrLoadTP(t *testing.T) {
 		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
 			Tenant:   "cgrates.org",
 			ID:       "AttrConcurrentSessions",
-			Contexts: []string{utils.ANY},
+			Contexts: []string{utils.MetaAny},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "TestType",

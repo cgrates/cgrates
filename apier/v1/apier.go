@@ -1225,18 +1225,18 @@ type AttrRemoveRatingProfile struct {
 
 func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 	result = utils.META_OUT + utils.CONCATENATED_KEY_SEP
-	if arrp.Tenant != "" && arrp.Tenant != utils.ANY {
+	if arrp.Tenant != "" && arrp.Tenant != utils.MetaAny {
 		result += arrp.Tenant + utils.CONCATENATED_KEY_SEP
 	} else {
 		return
 	}
 
-	if arrp.Category != "" && arrp.Category != utils.ANY {
+	if arrp.Category != "" && arrp.Category != utils.MetaAny {
 		result += arrp.Category + utils.CONCATENATED_KEY_SEP
 	} else {
 		return
 	}
-	if arrp.Subject != "" && arrp.Subject != utils.ANY {
+	if arrp.Subject != "" && arrp.Subject != utils.MetaAny {
 		result += arrp.Subject
 	}
 	return
