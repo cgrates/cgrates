@@ -615,7 +615,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// StorDB sanity checks
-	if cfg.storDbCfg.Type == utils.POSTGRES {
+	if cfg.storDbCfg.Type == utils.Postgres {
 		if !utils.IsSliceMember([]string{utils.PostgressSSLModeDisable, utils.PostgressSSLModeAllow,
 			utils.PostgressSSLModePrefer, utils.PostgressSSLModeRequire, utils.PostgressSSLModeVerifyCa,
 			utils.PostgressSSLModeVerifyFull}, utils.IfaceAsString(cfg.storDbCfg.Opts[utils.SSLModeCfg])) {

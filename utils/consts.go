@@ -141,7 +141,7 @@ var (
 	NonMonetaryBalances = NewStringSet([]string{VOICE, SMS, DATA, GENERIC})
 
 	// AccountableRequestTypes are the ones handled by Accounting subsystem
-	AccountableRequestTypes = NewStringSet([]string{META_PREPAID, MetaPostpaid, META_PSEUDOPREPAID})
+	AccountableRequestTypes = NewStringSet([]string{MetaPrepaid, MetaPostpaid, META_PSEUDOPREPAID})
 
 	CacheStorDBPartitions = map[string]string{
 		TBLTPTimings:          CacheTBLTPTimings,
@@ -261,16 +261,16 @@ const (
 	DiameterFirmwareRevision     = 918
 	RedisMaxConns                = 10
 	CGRateSLwr                   = "cgrates"
-	POSTGRES                     = "postgres"
-	MYSQL                        = "mysql"
-	MONGO                        = "mongo"
-	REDIS                        = "redis"
+	Postgres                     = "postgres"
+	MySQL                        = "mysql"
+	Mongo                        = "mongo"
+	Redis                        = "redis"
 	INTERNAL                     = "internal"
 	DataManager                  = "DataManager"
 	LOCALHOST                    = "127.0.0.1"
 	PREPAID                      = "prepaid"
-	META_PREPAID                 = "*prepaid"
-	POSTPAID                     = "postpaid"
+	MetaPrepaid                  = "*prepaid"
+	Postpaid                     = "postpaid"
 	MetaPostpaid                 = "*postpaid"
 	PSEUDOPREPAID                = "pseudoprepaid"
 	META_PSEUDOPREPAID           = "*pseudoprepaid"

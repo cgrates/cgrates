@@ -148,7 +148,7 @@ func testTLSPing(t *testing.T) {
 					utils.Category:     "call",
 					utils.ToR:          utils.VOICE,
 					utils.OriginID:     "TestSSv1It1",
-					utils.RequestType:  utils.META_PREPAID,
+					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",

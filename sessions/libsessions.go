@@ -36,7 +36,7 @@ var unratedReqs = engine.MapEvent{
 }
 
 var authReqs = engine.MapEvent{
-	utils.META_PREPAID:       struct{}{},
+	utils.MetaPrepaid:        struct{}{},
 	utils.META_PSEUDOPREPAID: struct{}{},
 }
 

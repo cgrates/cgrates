@@ -33,7 +33,7 @@ import (
 func NewDataDBConn(dbType, host, port, name, user,
 	pass, marshaler string, opts map[string]interface{}) (d DataDB, err error) {
 	switch dbType {
-	case utils.REDIS:
+	case utils.Redis:
 		var dbNo int
 		dbNo, err = strconv.Atoi(name)
 		if err != nil {
@@ -64,7 +64,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 			utils.IfaceAsString(opts[utils.RedisClientCertificate]),
 			utils.IfaceAsString(opts[utils.RedisClientKey]),
 			utils.IfaceAsString(opts[utils.RedisCACertificate]))
-	case utils.MONGO:
+	case utils.Mongo:
 		var ttl time.Duration
 		if ttl, err = utils.IfaceAsDuration(opts[utils.QueryTimeoutCfg]); err != nil {
 			return
@@ -83,13 +83,13 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	stringIndexedFields, prefixIndexedFields []string,
 	opts map[string]interface{}) (db StorDB, err error) {
 	switch dbType {
-	case utils.MONGO:
+	case utils.Mongo:
 		var ttl time.Duration
 		if ttl, err = utils.IfaceAsDuration(opts[utils.QueryTimeoutCfg]); err != nil {
 			return nil, err
 		}
 		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, ttl)
-	case utils.POSTGRES:
+	case utils.Postgres:
 		var maxConn, maxIdleConn, connMaxLifetime int64
 		if maxConn, err = utils.IfaceAsTInt64(opts[utils.MaxOpenConnsCfg]); err != nil {
 			return
@@ -102,7 +102,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 		}
 		db, err = NewPostgresStorage(host, port, name, user, pass, utils.IfaceAsString(opts[utils.SSLModeCfg]),
 			int(maxConn), int(maxIdleConn), int(connMaxLifetime))
-	case utils.MYSQL:
+	case utils.MySQL:
 		var maxConn, maxIdleConn, connMaxLifetime int64
 		if maxConn, err = utils.IfaceAsTInt64(opts[utils.MaxOpenConnsCfg]); err != nil {
 			return
@@ -118,7 +118,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			dbType, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
+			dbType, utils.MySQL, utils.Mongo, utils.Postgres, utils.INTERNAL)
 	}
 	return
 }

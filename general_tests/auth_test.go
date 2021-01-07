@@ -125,7 +125,7 @@ cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,`
 }
 
 func TestAuthPostpaidNoAcnt(t *testing.T) {
-	cdr := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Tenant: "cgrates.org",
+	cdr := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.MetaPrepaid, Tenant: "cgrates.org",
 		Category: "call", Account: "nonexistent", Subject: "testauthpostpaid1",
 		Destination: "4986517174963", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC).String()}
 	cd, err := cdr.AsCallDescriptor("", false)

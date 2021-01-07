@@ -97,7 +97,7 @@ func (db *StorDBService) Reload() (err error) {
 		db.sync() // sync only if needed
 		return
 	}
-	if db.cfg.StorDbCfg().Type == utils.MONGO {
+	if db.cfg.StorDbCfg().Type == utils.Mongo {
 		mgo, canCast := db.db.(*engine.MongoStorage)
 		if !canCast {
 			return fmt.Errorf("can't conver StorDB of type %s to MongoStorage",
@@ -108,8 +108,8 @@ func (db *StorDBService) Reload() (err error) {
 			return
 		}
 		mgo.SetTTL(ttl)
-	} else if db.cfg.StorDbCfg().Type == utils.POSTGRES ||
-		db.cfg.StorDbCfg().Type == utils.MYSQL {
+	} else if db.cfg.StorDbCfg().Type == utils.Postgres ||
+		db.cfg.StorDbCfg().Type == utils.MySQL {
 		msql, canCast := db.db.(*engine.SQLStorage)
 		if !canCast {
 			return fmt.Errorf("can't conver StorDB of type %s to SQLStorage",
@@ -205,6 +205,6 @@ func (db *StorDBService) needsConnectionReload() bool {
 		db.oldDBCfg.Password != db.cfg.StorDbCfg().Password {
 		return true
 	}
-	return db.cfg.StorDbCfg().Type == utils.POSTGRES &&
+	return db.cfg.StorDbCfg().Type == utils.Postgres &&
 		utils.IfaceAsString(db.oldDBCfg.Opts[utils.SSLModeCfg]) != utils.IfaceAsString(db.cfg.StorDbCfg().Opts[utils.SSLModeCfg])
 }

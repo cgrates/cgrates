@@ -167,7 +167,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithOpts) ([]*CDR, error) {
 	cdr.ExtraInfo = "" // Clean previous ExtraInfo, useful when re-rating
 	var cdrsRated []*CDR
 	_, hasLastUsed := cdr.ExtraFields[utils.LastUsed]
-	if utils.SliceHasMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) &&
+	if utils.SliceHasMember([]string{utils.MetaPrepaid, utils.PREPAID}, cdr.RequestType) &&
 		(cdr.Usage != 0 || hasLastUsed) && cdr.CostDetails == nil {
 		// ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
@@ -247,8 +247,8 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithOpts) ([]*CDR, error) {
 	return []*CDR{cdr.CDR}, nil
 }
 
-var reqTypes = utils.NewStringSet([]string{utils.META_PSEUDOPREPAID, utils.MetaPostpaid, utils.META_PREPAID,
-	utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID, utils.MetaDynaprepaid})
+var reqTypes = utils.NewStringSet([]string{utils.META_PSEUDOPREPAID, utils.MetaPostpaid, utils.MetaPrepaid,
+	utils.PSEUDOPREPAID, utils.Postpaid, utils.PREPAID, utils.MetaDynaprepaid})
 
 // getCostFromRater will retrieve the cost from RALs
 func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithOpts) (*CallCost, error) {

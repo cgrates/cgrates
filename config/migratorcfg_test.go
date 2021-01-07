@@ -26,14 +26,14 @@ import (
 
 func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &MigratorCfgJson{
-		Out_dataDB_type:     utils.StringPointer(utils.REDIS),
+		Out_dataDB_type:     utils.StringPointer(utils.Redis),
 		Out_dataDB_host:     utils.StringPointer("127.0.0.1"),
 		Out_dataDB_port:     utils.StringPointer("6379"),
 		Out_dataDB_name:     utils.StringPointer("10"),
 		Out_dataDB_user:     utils.StringPointer(utils.CGRateSLwr),
 		Out_dataDB_password: utils.StringPointer(utils.EmptyString),
 		Out_dataDB_encoding: utils.StringPointer(utils.MSGPACK),
-		Out_storDB_type:     utils.StringPointer(utils.MYSQL),
+		Out_storDB_type:     utils.StringPointer(utils.MySQL),
 		Out_storDB_host:     utils.StringPointer("127.0.0.1"),
 		Out_storDB_port:     utils.StringPointer("3306"),
 		Out_storDB_name:     utils.StringPointer(utils.CGRateSLwr),
@@ -48,14 +48,14 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := &MigratorCgrCfg{
-		OutDataDBType:     utils.REDIS,
+		OutDataDBType:     utils.Redis,
 		OutDataDBHost:     "127.0.0.1",
 		OutDataDBPort:     "6379",
 		OutDataDBName:     "10",
 		OutDataDBUser:     utils.CGRateSLwr,
 		OutDataDBPassword: utils.EmptyString,
 		OutDataDBEncoding: utils.MSGPACK,
-		OutStorDBType:     utils.MYSQL,
+		OutStorDBType:     utils.MySQL,
 		OutStorDBHost:     "127.0.0.1",
 		OutStorDBPort:     "3306",
 		OutStorDBName:     utils.CGRateSLwr,
@@ -217,14 +217,14 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 
 func TestMigratorCgrCfgClone(t *testing.T) {
 	sa := &MigratorCgrCfg{
-		OutDataDBType:     utils.REDIS,
+		OutDataDBType:     utils.Redis,
 		OutDataDBHost:     "127.0.0.1",
 		OutDataDBPort:     "6379",
 		OutDataDBName:     "10",
 		OutDataDBUser:     utils.CGRateSLwr,
 		OutDataDBPassword: utils.EmptyString,
 		OutDataDBEncoding: utils.MSGPACK,
-		OutStorDBType:     utils.MYSQL,
+		OutStorDBType:     utils.MySQL,
 		OutStorDBHost:     "127.0.0.1",
 		OutStorDBPort:     "3306",
 		OutStorDBName:     utils.CGRateSLwr,

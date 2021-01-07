@@ -233,10 +233,10 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interfac
 		rdr.tableName = utils.IfaceAsString(vals)
 	}
 	switch rdr.connType {
-	case utils.MYSQL:
+	case utils.MySQL:
 		rdr.connString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 			u.User.Username(), password, u.Hostname(), u.Port(), dbname)
-	case utils.POSTGRES:
+	case utils.Postgres:
 		rdr.connString = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", u.Hostname(), u.Port(), dbname, u.User.Username(), password, ssl)
 	default:
 		return fmt.Errorf("unknown db_type %s", rdr.connType)
@@ -282,10 +282,10 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interfac
 	}
 
 	switch rdr.expConnType {
-	case utils.MYSQL:
+	case utils.MySQL:
 		rdr.expConnString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 			outUser, outPassword, outHost, outPort, outDBname)
-	case utils.POSTGRES:
+	case utils.Postgres:
 		rdr.expConnString = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
 			outHost, outPort, outDBname, outUser, outPassword, outSSL)
 	default:

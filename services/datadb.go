@@ -94,7 +94,7 @@ func (db *DataDBService) Reload() (err error) {
 		db.oldDBCfg = db.cfg.DataDbCfg().Clone()
 		return
 	}
-	if db.cfg.DataDbCfg().DataDbType == utils.MONGO {
+	if db.cfg.DataDbCfg().DataDbType == utils.Mongo {
 		var ttl time.Duration
 		if ttl, err = utils.IfaceAsDuration(db.cfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]); err != nil {
 			return
@@ -161,7 +161,7 @@ func (db *DataDBService) needsConnectionReload() bool {
 		db.oldDBCfg.DataDbPass != db.cfg.DataDbCfg().DataDbPass {
 		return true
 	}
-	return db.oldDBCfg.DataDbType == utils.REDIS &&
+	return db.oldDBCfg.DataDbType == utils.Redis &&
 		(db.oldDBCfg.Opts[utils.RedisSentinelNameCfg] != db.cfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] ||
 			db.oldDBCfg.Opts[utils.RedisClusterCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterCfg] ||
 			db.oldDBCfg.Opts[utils.RedisClusterSyncCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] ||

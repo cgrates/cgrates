@@ -92,5 +92,5 @@ func (self *PostgresStorage) notExtraFieldsValueQry(field, value string) string 
 }
 
 func (self *PostgresStorage) GetStorageType() string {
-	return utils.POSTGRES
+	return utils.Postgres
 }

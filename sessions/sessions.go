@@ -1373,8 +1373,8 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 	}
 	for i, sr := range s.SRuns {
 		if s.DebitInterval != 0 &&
-			sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.META_PREPAID {
-			if s.debitStop == nil { // init the debitStop only for the first sRun with DebitInterval and RequestType META_PREPAID
+			sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.MetaPrepaid {
+			if s.debitStop == nil { // init the debitStop only for the first sRun with DebitInterval and RequestType MetaPrepaid
 				s.debitStop = make(chan struct{})
 			}
 			go sS.debitLoopSession(s, i, s.DebitInterval)
@@ -1476,7 +1476,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 			continue
 		}
 		var rplyMaxUsage time.Duration
-		if reqType != utils.META_PREPAID || s.debitStop != nil {
+		if reqType != utils.MetaPrepaid || s.debitStop != nil {
 			rplyMaxUsage = reqMaxUsage
 		} else if rplyMaxUsage, err = sS.debitSession(s, i, reqMaxUsage,
 			updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {

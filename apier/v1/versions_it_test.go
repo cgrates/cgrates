@@ -61,10 +61,10 @@ func TestVrsIT(t *testing.T) {
 		t.SkipNow() // as is commented below
 	case utils.MetaMySQL:
 		vrsConfigDIR = "tutmysql"
-		vrsStorageType = utils.REDIS
+		vrsStorageType = utils.Redis
 	case utils.MetaMongo:
 		vrsConfigDIR = "tutmongo"
-		vrsStorageType = utils.MONGO
+		vrsStorageType = utils.Mongo
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:

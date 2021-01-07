@@ -42,9 +42,9 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	dm := engine.NewDataManager(dbCon, cacheCfg, nil)
 	var d MigratorDataDB
 	switch db_type {
-	case utils.REDIS:
+	case utils.Redis:
 		d = newRedisMigrator(dm)
-	case utils.MONGO:
+	case utils.Mongo:
 		d = newMongoMigrator(dm)
 		db = d.(MigratorDataDB)
 	case utils.INTERNAL:
@@ -52,7 +52,7 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 		db = d.(MigratorDataDB)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
-			db_type, utils.REDIS, utils.MONGO, utils.INTERNAL)
+			db_type, utils.Redis, utils.Mongo, utils.INTERNAL)
 	}
 	return d, nil
 }
@@ -67,13 +67,13 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
 		return nil, err
 	}
 	switch db_type {
-	case utils.MONGO:
+	case utils.Mongo:
 		d = newMongoStorDBMigrator(storDb)
 		db = d.(MigratorStorDB)
-	case utils.MYSQL:
+	case utils.MySQL:
 		d = newMigratorSQL(storDb)
 		db = d.(MigratorStorDB)
-	case utils.POSTGRES:
+	case utils.Postgres:
 		d = newMigratorSQL(storDb)
 		db = d.(MigratorStorDB)
 	case utils.INTERNAL:
@@ -81,7 +81,7 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
 		db = d.(MigratorStorDB)
 	default:
 		err = fmt.Errorf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
+			db_type, utils.MySQL, utils.Mongo, utils.Postgres, utils.INTERNAL)
 	}
 	return d, nil
 }
