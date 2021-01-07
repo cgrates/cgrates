@@ -76,16 +76,16 @@ func (cB *concreteBalance) unitFactor(tnt string, ev utils.DataProvider) (uF *ut
 }
 
 // balanceLimit returns the balance's limit
-func (cB *concreteBalance) balanceLimit() (bL *decimal.Big) {
+func (cB *concreteBalance) balanceLimit() (bL *utils.Decimal) {
 	if _, isUnlimited := cB.blnCfg.Opts[utils.MetaBalanceUnlimited]; isUnlimited {
 		return
 	}
 	if lmtIface, has := cB.blnCfg.Opts[utils.MetaBalanceLimit]; has {
-		bL = lmtIface.(*decimal.Big)
+		bL = lmtIface.(*utils.Decimal)
 		return
 	}
 	// nothing matched, return default
-	bL = decimal.New(0, 0)
+	bL = utils.NewDecimal(0, 0)
 	return
 }
 
@@ -110,8 +110,8 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 }
 
 // debitUnits is a direct debit of balance units
-func (cB *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
-	cgrEv *utils.CGREventWithOpts) (dbted *decimal.Big, uF *utils.UnitFactor, err error) {
+func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, incrm *utils.Decimal,
+	cgrEv *utils.CGREventWithOpts) (dbted *utils.Decimal, uF *utils.UnitFactor, err error) {
 
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
@@ -133,32 +133,34 @@ func (cB *concreteBalance) debitUnits(dUnts *decimal.Big, incrm *decimal.Big,
 
 	var hasUF bool
 	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
-		dUnts = utils.MultiplyBig(dUnts, uF.Factor.Big)
-		incrm = utils.MultiplyBig(incrm, uF.Factor.Big)
+		dUnts = &utils.Decimal{utils.MultiplyBig(dUnts.Big, uF.Factor.Big)}
+		incrm = &utils.Decimal{utils.MultiplyBig(incrm.Big, uF.Factor.Big)}
 		hasUF = true
 	}
 
-	blcVal := cB.blnCfg.Units.Big
+	blcVal := cB.blnCfg.Units
 
 	// balanceLimit
 	var hasLmt bool
 	blncLmt := cB.balanceLimit()
-	if blncLmt != nil && blncLmt.Cmp(decimal.New(0, 0)) != 0 {
-		blcVal = utils.SubstractBig(blcVal, blncLmt)
+	if blncLmt != nil && blncLmt.Big.Cmp(decimal.New(0, 0)) != 0 {
+		blcVal = &utils.Decimal{utils.SubstractBig(blcVal.Big, blncLmt.Big)}
 		hasLmt = true
 	}
-	if blcVal.Cmp(dUnts) == -1 && blncLmt != nil { // balance smaller than debit
+	if blcVal.Compare(dUnts) == -1 && blncLmt != nil { // balance smaller than debit
 		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
-		maxIncrm := decimal.WithContext(
-			decimal.Context{RoundingMode: decimal.ToZero}).Quo(blcVal, incrm).RoundToInt()
-		dUnts = utils.MultiplyBig(incrm, maxIncrm)
+		maxIncrm := &utils.Decimal{
+			decimal.WithContext(
+				decimal.Context{RoundingMode: decimal.ToZero}).Quo(blcVal.Big,
+				incrm.Big).RoundToInt()}
+		dUnts = utils.MultiplyDecimal(incrm, maxIncrm)
 	}
-	rmain := utils.SubstractBig(blcVal, dUnts)
+	rmain := &utils.Decimal{utils.SubstractBig(blcVal.Big, dUnts.Big)}
 	if hasLmt {
-		rmain = utils.AddBig(rmain, blncLmt)
+		rmain = &utils.Decimal{utils.AddBig(rmain.Big, blncLmt.Big)}
 	}
 	if hasUF {
-		dbted = utils.DivideBig(dUnts, uF.Factor.Big)
+		dbted = &utils.Decimal{utils.DivideBig(dUnts.Big, uF.Factor.Big)}
 	} else {
 		dbted = dUnts
 	}

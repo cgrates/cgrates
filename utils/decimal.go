@@ -70,7 +70,7 @@ type Decimal struct {
 	*decimal.Big
 }
 
-//UnmarshalBinary implements the method for binaryUnmarshal interface for Msgpack encoding
+// UnmarshalBinary implements the method for binaryUnmarshal interface for Msgpack encoding
 func (d *Decimal) UnmarshalBinary(data []byte) (err error) {
 	if d == nil {
 		d = &Decimal{new(decimal.Big)}
@@ -81,7 +81,7 @@ func (d *Decimal) UnmarshalBinary(data []byte) (err error) {
 	return d.Big.UnmarshalText(data)
 }
 
-//MarshalBinary implements the method for binaryMarshal interface for Msgpack encoding
+// MarshalBinary implements the method for binaryMarshal interface for Msgpack encoding
 func (d *Decimal) MarshalBinary() ([]byte, error) {
 	if d.Big == nil {
 		d.Big = new(decimal.Big)
@@ -89,7 +89,7 @@ func (d *Decimal) MarshalBinary() ([]byte, error) {
 	return d.Big.MarshalText()
 }
 
-//UnmarshalJSON implements the method for jsonUnmarshal for JSON encoding
+// UnmarshalJSON implements the method for jsonUnmarshal for JSON encoding
 func (d *Decimal) UnmarshalJSON(data []byte) (err error) {
 	if d == nil {
 		d = &Decimal{new(decimal.Big)}
@@ -100,16 +100,18 @@ func (d *Decimal) UnmarshalJSON(data []byte) (err error) {
 	return d.Big.UnmarshalText(data)
 }
 
-//MarshalJSON implements the method for jsonMarshal for JSON encoding
+// MarshalJSON implements the method for jsonMarshal for JSON encoding
 func (d *Decimal) MarshalJSON() ([]byte, error) {
 	x, err := d.MarshalText()
 	return bytes.Trim(x, `"`), err
 }
 
-//Clone return a copy of the Decimal
-func (d *Decimal) Clone() (d2 *Decimal) {
-	d2 = new(Decimal)
-	d2.Big = new(decimal.Big)
-	d2.Big.Copy(d.Big)
-	return
+// Clone returns a copy of the Decimal
+func (d *Decimal) Clone() *Decimal {
+	return &Decimal{new(decimal.Big).Copy(d.Big)}
+}
+
+// Compare wraps the decimal.Big.Cmp function. It does not handle nil d2
+func (d *Decimal) Compare(d2 *Decimal) int {
+	return d.Big.Cmp(d2.Big)
 }
