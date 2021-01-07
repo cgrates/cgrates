@@ -1472,7 +1472,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 	maxUsage = make(map[string]time.Duration)
 	for i, sr := range s.SRuns {
 		reqType := sr.Event.GetStringIgnoreErrors(utils.RequestType)
-		if reqType == utils.META_NONE {
+		if reqType == utils.MetaNone {
 			continue
 		}
 		var rplyMaxUsage time.Duration

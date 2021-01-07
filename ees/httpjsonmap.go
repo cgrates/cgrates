@@ -122,7 +122,7 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREventWithOpts) (err err
 		return
 	}
 	if err = httpEE.pstr.PostValues(body, hdr); err != nil &&
-		httpEE.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
+		httpEE.cgrCfg.GeneralCfg().FailedPostsDir != utils.MetaNone {
 		engine.AddFailedPost(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].ExportPath,
 			httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Type, utils.EventExporterS,
 			&engine.HTTPPosterRequest{Header: hdr, Body: body},

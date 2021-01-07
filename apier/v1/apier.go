@@ -1407,13 +1407,13 @@ func (apierSv1 *APIerSv1) ReplayFailedPosts(args *ArgsReplyFailedPosts, reply *s
 			return utils.NewErrServerError(err)
 		}
 
-		failoverPath := utils.META_NONE
-		if failedReqsOutDir != utils.META_NONE {
+		failoverPath := utils.MetaNone
+		if failedReqsOutDir != utils.MetaNone {
 			failoverPath = path.Join(failedReqsOutDir, file.Name())
 		}
 
 		failedPosts, err := expEv.ReplayFailedPosts(apierSv1.Config.GeneralCfg().PosterAttempts)
-		if err != nil && failedReqsOutDir != utils.META_NONE { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
+		if err != nil && failedReqsOutDir != utils.MetaNone { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
 			if err = failedPosts.WriteToFile(failoverPath); err != nil {
 				return utils.NewErrServerError(err)
 			}

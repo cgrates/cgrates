@@ -183,7 +183,7 @@ func testRtPlITMigrateAndMove(t *testing.T) {
 		Ratings: map[string]*engine.RIRate{
 			"asjkilj": &engine.RIRate{
 				ConnectFee:       10,
-				RoundingMethod:   utils.ROUNDING_UP,
+				RoundingMethod:   utils.MetaRoundingUp,
 				RoundingDecimals: 1,
 				MaxCost:          10,
 			},

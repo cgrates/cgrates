@@ -253,7 +253,7 @@ func TestRirStrigyfy(t *testing.T) {
 				RateUnit:           time.Minute,
 			},
 		},
-		RoundingMethod:   utils.ROUNDING_MIDDLE,
+		RoundingMethod:   utils.MetaRoundingMiddle,
 		RoundingDecimals: 4,
 	}
 	rir2 := &RIRate{
@@ -272,7 +272,7 @@ func TestRirStrigyfy(t *testing.T) {
 				RateUnit:           time.Minute,
 			},
 		},
-		RoundingMethod:   utils.ROUNDING_MIDDLE,
+		RoundingMethod:   utils.MetaRoundingMiddle,
 		RoundingDecimals: 4,
 	}
 	if rir1.Stringify() != rir2.Stringify() {

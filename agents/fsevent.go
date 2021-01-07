@@ -155,9 +155,9 @@ func (fsev FSEvent) GetTenant(fieldName string) string {
 func (fsev FSEvent) GetReqType(fieldName string) string {
 	var reqTypeDetected = ""                     // Used to automatically disable processing of the request
 	if fsev["variable_process_cdr"] == "false" { // FS will not generated CDR here
-		reqTypeDetected = utils.META_NONE
+		reqTypeDetected = utils.MetaNone
 	} else if fsev["Caller-Dialplan"] == "inline" { // Used for internally generated dialplan, eg refer coming from another box, not in our control
-		reqTypeDetected = utils.META_NONE
+		reqTypeDetected = utils.MetaNone
 	}
 	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
 		return fieldName[len(utils.StaticValuePrefix):]

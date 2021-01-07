@@ -66,7 +66,7 @@ func TestERSClone(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
-				Type:             utils.META_NONE,
+				Type:             utils.MetaNone,
 				FieldSep:         ",",
 				HeaderDefineChar: ":",
 				RunDelay:         0,
@@ -217,7 +217,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
-				Type:             utils.META_NONE,
+				Type:             utils.MetaNone,
 				FieldSep:         ",",
 				HeaderDefineChar: ":",
 				RunDelay:         0,
@@ -438,7 +438,7 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
-				Type:             utils.META_NONE,
+				Type:             utils.MetaNone,
 				FieldSep:         ",",
 				HeaderDefineChar: ":",
 				RunDelay:         0,
@@ -569,7 +569,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
-				Type:             utils.META_NONE,
+				Type:             utils.MetaNone,
 				FieldSep:         ",",
 				HeaderDefineChar: ":",
 				RunDelay:         0,
@@ -688,7 +688,7 @@ func TestEventReaderSameID(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
-				Type:             utils.META_NONE,
+				Type:             utils.MetaNone,
 				FieldSep:         ",",
 				HeaderDefineChar: ":",
 				RunDelay:         0,
@@ -1043,7 +1043,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
-				Type:             utils.META_NONE,
+				Type:             utils.MetaNone,
 				FieldSep:         ",",
 				HeaderDefineChar: ":",
 				RunDelay:         0,

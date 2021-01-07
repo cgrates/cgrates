@@ -30,14 +30,14 @@ import (
 )
 
 var unratedReqs = engine.MapEvent{
-	utils.MetaPostpaid:       struct{}{},
-	utils.META_PSEUDOPREPAID: struct{}{},
-	utils.MetaRated:          struct{}{},
+	utils.MetaPostpaid:      struct{}{},
+	utils.MetaPseudoPrepaid: struct{}{},
+	utils.MetaRated:         struct{}{},
 }
 
 var authReqs = engine.MapEvent{
-	utils.MetaPrepaid:        struct{}{},
-	utils.META_PSEUDOPREPAID: struct{}{},
+	utils.MetaPrepaid:       struct{}{},
+	utils.MetaPseudoPrepaid: struct{}{},
 }
 
 // BiRPClient is the interface implemented by Agents which are able to

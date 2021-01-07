@@ -336,7 +336,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Source:      "testGetCDRs3",
 			OriginID:    "testevent3",
 			ToR:         utils.VOICE,
-			RequestType: utils.META_PSEUDOPREPAID,
+			RequestType: utils.MetaPseudoPrepaid,
 			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "1002",
@@ -377,7 +377,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Source:      "testGetCDRs",
 			OriginID:    "testevent4",
 			ToR:         utils.VOICE,
-			RequestType: utils.META_PSEUDOPREPAID,
+			RequestType: utils.MetaPseudoPrepaid,
 			Tenant:      "itsyscom.com",
 			Category:    "call",
 			Account:     "1003",
@@ -584,7 +584,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return fmt.Errorf("testGetCDRs #33, unexpected number of CDRs returned: %+v", len(CDRs))
 	}
 	// Filter on multiple reqType
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.MetaPrepaid, utils.META_PSEUDOPREPAID}}, false); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.MetaPrepaid, utils.MetaPseudoPrepaid}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #34 err: %v", err)
 	} else if len(CDRs) != 6 {
 		return fmt.Errorf("testGetCDRs #35, unexpected number of CDRs returned: %+v", CDRs)

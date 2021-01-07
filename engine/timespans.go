@@ -402,7 +402,7 @@ func (incs Increments) GetTotalCost() float64 {
 	for _, increment := range incs {
 		cost += increment.GetCost()
 	}
-	return utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+	return utils.Round(cost, globalRoundingDecimals, utils.MetaRoundingMiddle)
 }
 
 func (incs Increments) Length() (length int) {
@@ -477,7 +477,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 		return
 	}
 	incrementCost := ts.CalculateCost() / float64(nbIncrements)
-	incrementCost = utils.Round(incrementCost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+	incrementCost = utils.Round(incrementCost, globalRoundingDecimals, utils.MetaRoundingMiddle)
 	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{
 			Duration:    rateIncrement,

@@ -328,7 +328,7 @@ func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent
 				return
 			}
 			substitute = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
-				alS.cgrcfg.GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+				alS.cgrcfg.GeneralCfg().RoundingDecimals, utils.MetaRoundingMiddle), 'f', -1, 64)
 		case utils.MetaUnixTimestamp:
 			var val string
 			if val, err = attribute.Value.ParseDataProvider(dynDP); err != nil {

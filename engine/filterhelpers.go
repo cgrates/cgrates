@@ -51,15 +51,15 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 			itemIDs = utils.NewStringSet(sliceIDs)
 			return
 		}
-		stringFieldVals := map[string]string{utils.ANY: utils.ANY}                                          // cache here field string values, start with default one
-		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix, utils.META_NONE} // the META_NONE is used for all items that do not have filters
-		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, suffixFldIDs, {utils.ANY}} {       // same routine for both string and prefix filter types
+		stringFieldVals := map[string]string{utils.ANY: utils.ANY}                                         // cache here field string values, start with default one
+		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix, utils.MetaNone} // the MetaNone is used for all items that do not have filters
+		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, suffixFldIDs, {utils.ANY}} {      // same routine for both string and prefix filter types
 			if fieldIDs == nil {
 				fieldIDs = &allFieldIDs
 			}
 			for _, fldName := range *fieldIDs {
 				fieldValIf, err := ev.FieldAsInterface(strings.Split(fldName, utils.NestingSep))
-				if err != nil && filterIndexTypes[i] != utils.META_NONE {
+				if err != nil && filterIndexTypes[i] != utils.MetaNone {
 					continue
 				}
 				if _, cached := stringFieldVals[fldName]; !cached {

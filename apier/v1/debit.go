@@ -66,7 +66,7 @@ func (apierSv1 *APIerSv1) DebitUsageWithOptions(args *AttrDebitUsageWithOptions,
 		usageRecord.Subject = usageRecord.Account
 	}
 	if usageRecord.AnswerTime == "" {
-		usageRecord.AnswerTime = utils.META_NOW
+		usageRecord.AnswerTime = utils.MetaNow
 	}
 
 	// Get the call descriptor from the usage record

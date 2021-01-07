@@ -157,7 +157,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 	metricsMap := make(map[string]utils.MapStorage)
 	_, hasVerbose := cgrEv.Opts[utils.OptsEEsVerbose]
 	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
-		if eeCfg.Type == utils.META_NONE || // ignore *none type exporter
+		if eeCfg.Type == utils.MetaNone || // ignore *none type exporter
 			(lenExpIDs != 0 && !expIDs.Has(eeCfg.ID)) {
 			continue
 		}

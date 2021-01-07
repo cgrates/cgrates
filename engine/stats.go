@@ -314,7 +314,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 		if len(sS.cgrcfg.StatSCfg().ThresholdSConns) != 0 {
 			var thIDs []string
 			if len(sq.sqPrfl.ThresholdIDs) != 0 {
-				if len(sq.sqPrfl.ThresholdIDs) == 1 && sq.sqPrfl.ThresholdIDs[0] == utils.META_NONE {
+				if len(sq.sqPrfl.ThresholdIDs) == 1 && sq.sqPrfl.ThresholdIDs[0] == utils.MetaNone {
 					continue
 				}
 				thIDs = sq.sqPrfl.ThresholdIDs

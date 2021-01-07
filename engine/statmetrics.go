@@ -105,7 +105,7 @@ func (asr *StatASR) getValue(roundingDecimal int) float64 {
 			asr.val = utils.Float64Pointer(utils.StatsNA)
 		} else {
 			asr.val = utils.Float64Pointer(utils.Round((asr.Answered / float64(asr.Count) * 100.0),
-				roundingDecimal, utils.ROUNDING_MIDDLE))
+				roundingDecimal, utils.MetaRoundingMiddle))
 		}
 	}
 	return *asr.val
@@ -207,7 +207,7 @@ func (asr *StatASR) Compress(queueLen int64, defaultID string, roundingDecimal i
 	}
 	stat := &StatWithCompress{
 		Stat: utils.Round(asr.Answered/float64(asr.Count),
-			roundingDecimal, utils.ROUNDING_MIDDLE),
+			roundingDecimal, utils.MetaRoundingMiddle),
 		CompressFactor: int(asr.Count),
 	}
 	asr.Events = map[string]*StatWithCompress{defaultID: stat}
@@ -522,7 +522,7 @@ func (acc *StatACC) getValue(roundingDecimal int) float64 {
 			acc.val = utils.Float64Pointer(utils.StatsNA)
 		} else {
 			acc.val = utils.Float64Pointer(utils.Round(acc.Sum/float64(acc.Count),
-				roundingDecimal, utils.ROUNDING_MIDDLE))
+				roundingDecimal, utils.MetaRoundingMiddle))
 		}
 	}
 	return *acc.val
@@ -611,7 +611,7 @@ func (acc *StatACC) Compress(queueLen int64, defaultID string, roundingDecimal i
 	}
 	stat := &StatWithCompress{
 		Stat: utils.Round(acc.Sum/float64(acc.Count),
-			roundingDecimal, utils.ROUNDING_MIDDLE),
+			roundingDecimal, utils.MetaRoundingMiddle),
 		CompressFactor: int(acc.Count),
 	}
 	acc.Events = map[string]*StatWithCompress{defaultID: stat}
@@ -653,7 +653,7 @@ func (tcc *StatTCC) getValue(roundingDecimal int) float64 {
 		} else {
 			tcc.val = utils.Float64Pointer(utils.Round(tcc.Sum,
 				roundingDecimal,
-				utils.ROUNDING_MIDDLE))
+				utils.MetaRoundingMiddle))
 		}
 	}
 	return *tcc.val
@@ -743,7 +743,7 @@ func (tcc *StatTCC) Compress(queueLen int64, defaultID string, roundingDecimal i
 	}
 	stat := &StatWithCompress{
 		Stat: utils.Round((tcc.Sum / float64(tcc.Count)),
-			roundingDecimal, utils.ROUNDING_MIDDLE),
+			roundingDecimal, utils.MetaRoundingMiddle),
 		CompressFactor: int(tcc.Count),
 	}
 	tcc.Events = map[string]*StatWithCompress{defaultID: stat}
@@ -1064,7 +1064,7 @@ func (sum *StatSum) getValue(roundingDecimal int) float64 {
 		} else {
 			sum.val = utils.Float64Pointer(utils.Round(sum.Sum,
 				roundingDecimal,
-				utils.ROUNDING_MIDDLE))
+				utils.MetaRoundingMiddle))
 		}
 	}
 	return *sum.val
@@ -1154,7 +1154,7 @@ func (sum *StatSum) Compress(queueLen int64, defaultID string, roundingDecimal i
 	}
 	stat := &StatWithCompress{
 		Stat: utils.Round((sum.Sum / float64(sum.Count)),
-			roundingDecimal, utils.ROUNDING_MIDDLE),
+			roundingDecimal, utils.MetaRoundingMiddle),
 		CompressFactor: int(sum.Count),
 	}
 	sum.Events = map[string]*StatWithCompress{defaultID: stat}
@@ -1197,7 +1197,7 @@ func (avg *StatAverage) getValue(roundingDecimal int) float64 {
 			avg.val = utils.Float64Pointer(utils.StatsNA)
 		} else {
 			avg.val = utils.Float64Pointer(utils.Round((avg.Sum / float64(avg.Count)),
-				roundingDecimal, utils.ROUNDING_MIDDLE))
+				roundingDecimal, utils.MetaRoundingMiddle))
 		}
 	}
 	return *avg.val
@@ -1288,7 +1288,7 @@ func (avg *StatAverage) Compress(queueLen int64, defaultID string, roundingDecim
 	}
 	stat := &StatWithCompress{
 		Stat: utils.Round((avg.Sum / float64(avg.Count)),
-			roundingDecimal, utils.ROUNDING_MIDDLE),
+			roundingDecimal, utils.MetaRoundingMiddle),
 		CompressFactor: int(avg.Count),
 	}
 	avg.Events = map[string]*StatWithCompress{defaultID: stat}

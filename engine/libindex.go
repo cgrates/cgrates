@@ -40,7 +40,7 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 	}
 	indexes = make(map[string]utils.StringSet)
 	if len(filterIDs) == 0 { // in case of None
-		idxKey := utils.ConcatenatedKey(utils.META_NONE, utils.META_ANY, utils.META_ANY)
+		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.META_ANY, utils.META_ANY)
 		var rcvIndx map[string]utils.StringSet
 		if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
 			idxKey,

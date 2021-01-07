@@ -146,7 +146,7 @@ func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 				},
 			},
 		},
-		ThresholdIDs: []string{utils.META_NONE},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 	sort.Strings(tpAcctPrf.FilterIDs)
 	var result string
@@ -236,7 +236,7 @@ func testTPAcctPrfGetTPAcctBalAfterUpdate(t *testing.T) {
 				},
 			},
 		},
-		ThresholdIDs: []string{utils.META_NONE},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 	sort.Strings(revTPAcctPrf.FilterIDs)
 	sort.Slice(revTPAcctPrf.Balances, func(i, j int) bool {

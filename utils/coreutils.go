@@ -163,15 +163,15 @@ func Round(x float64, prec int, method string) float64 {
 	_, frac := math.Modf(intermed)
 
 	switch method {
-	case ROUNDING_UP:
+	case MetaRoundingUp:
 		if frac >= math.Pow10(-maxPrec) { // Max precision we go, rest is float chaos
 			rounder = math.Ceil(intermed)
 		} else {
 			rounder = math.Floor(intermed)
 		}
-	case ROUNDING_DOWN:
+	case MetaRoundingDown:
 		rounder = math.Floor(intermed)
-	case ROUNDING_MIDDLE:
+	case MetaRoundingMiddle:
 		if frac >= 0.5 {
 			rounder = math.Ceil(intermed)
 		} else {

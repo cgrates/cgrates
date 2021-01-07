@@ -858,7 +858,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Synced_conn_requests: utils.BoolPointer(false),
 		Asr_template:         utils.StringPointer(""),
 		Rar_template:         utils.StringPointer(""),
-		Forced_disconnect:    utils.StringPointer(utils.META_NONE),
+		Forced_disconnect:    utils.StringPointer(utils.MetaNone),
 		Request_processors:   &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -2062,7 +2062,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				Id:                      utils.StringPointer(utils.MetaDefault),
-				Type:                    utils.StringPointer(utils.META_NONE),
+				Type:                    utils.StringPointer(utils.MetaNone),
 				Row_length:              utils.IntPointer(0),
 				Field_separator:         utils.StringPointer(","),
 				Header_define_character: utils.StringPointer(":"),
@@ -2106,7 +2106,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 		Exporters: &[]*EventExporterJsonCfg{
 			{
 				Id:                utils.StringPointer(utils.MetaDefault),
-				Type:              utils.StringPointer(utils.META_NONE),
+				Type:              utils.StringPointer(utils.MetaNone),
 				Field_separator:   utils.StringPointer(","),
 				Export_path:       utils.StringPointer("/var/spool/cgrates/ees"),
 				Attribute_context: utils.StringPointer(utils.EmptyString),

@@ -289,21 +289,21 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for prf, tmp := range cfg.templates {
 			for _, field := range tmp {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for template %s at %s", utils.DiameterAgent, utils.NewErrMandatoryIeMissing(utils.Path), prf, field.Tag)
 				}
 			}
 		}
 		for _, req := range cfg.diameterAgentCfg.RequestProcessors {
 			for _, field := range req.RequestFields {
-				if field.Type != utils.META_NONE &&
+				if field.Type != utils.MetaNone &&
 					field.Type != utils.MetaTemplate &&
 					field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
 			}
 			for _, field := range req.ReplyFields {
-				if field.Type != utils.META_NONE &&
+				if field.Type != utils.MetaNone &&
 					field.Type != utils.MetaTemplate &&
 					field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
@@ -327,12 +327,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for _, req := range cfg.radiusAgentCfg.RequestProcessors {
 			for _, field := range req.RequestFields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
 			}
 			for _, field := range req.ReplyFields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
 			}
@@ -354,12 +354,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for _, req := range cfg.dnsAgentCfg.RequestProcessors {
 			for _, field := range req.RequestFields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
 			}
 			for _, field := range req.ReplyFields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
 			}
@@ -384,12 +384,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for _, req := range httpAgentCfg.RequestProcessors {
 			for _, field := range req.RequestFields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
 			}
 			for _, field := range req.ReplyFields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
 			}
@@ -412,12 +412,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for _, req := range cfg.sipAgentCfg.RequestProcessors {
 			for _, field := range req.RequestFields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
 			}
 			for _, field := range req.ReplyFields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
 			}
@@ -560,12 +560,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 			}
 			for _, field := range rdr.CacheDumpFields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, utils.NewErrMandatoryIeMissing(utils.Path), rdr.ID, field.Tag)
 				}
 			}
 			for _, field := range rdr.Fields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, utils.NewErrMandatoryIeMissing(utils.Path), rdr.ID, field.Tag)
 				}
 			}
@@ -608,7 +608,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 			}
 			for _, field := range exp.Fields {
-				if field.Type != utils.META_NONE && field.Path == utils.EmptyString {
+				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.EEs, utils.NewErrMandatoryIeMissing(utils.Path), exp.ID, field.Tag)
 				}
 			}

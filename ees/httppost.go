@@ -113,7 +113,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error)
 	updateEEMetrics(httpPost.dc, cgrEv.Event, utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
 		httpPost.cgrCfg.GeneralCfg().DefaultTimezone))
 	if err = httpPost.httpPoster.PostValues(urlVals, hdr); err != nil &&
-		httpPost.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
+		httpPost.cgrCfg.GeneralCfg().FailedPostsDir != utils.MetaNone {
 		engine.AddFailedPost(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ExportPath,
 			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Type, utils.EventExporterS,
 			&engine.HTTPPosterRequest{

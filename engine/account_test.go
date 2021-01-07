@@ -1847,7 +1847,7 @@ func TestDebitDataUnits(t *testing.T) {
 	// test rating information
 	ts := cc.Timespans[0]
 	if ts.MatchedSubject != "testm" || ts.MatchedPrefix != "0723" ||
-		ts.MatchedDestId != "NAT" || ts.RatingPlanId != utils.META_NONE {
+		ts.MatchedDestId != "NAT" || ts.RatingPlanId != utils.MetaNone {
 		t.Errorf("Error setting rating info: %+v", ts.ratingInfo)
 	}
 	if err != nil {

@@ -1449,7 +1449,7 @@ func testAttributeSCachingMetaNone(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		Cache: utils.StringPointer(utils.META_NONE),
+		Cache: utils.StringPointer(utils.MetaNone),
 	}
 	// set the profile
 	var result string

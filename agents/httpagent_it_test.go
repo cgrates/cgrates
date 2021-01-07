@@ -299,7 +299,7 @@ func testHAitCDRmtcall(t *testing.T) {
 		if cdrs[0].Usage != "3m5s" { // should be 1 but maxUsage returns rounded version
 			t.Errorf("Unexpected CDR Usage received, cdr: %s ", utils.ToJSON(cdrs[0]))
 		}
-		if utils.Round(cdrs[0].Cost, 4, utils.ROUNDING_MIDDLE) != 0.2188 { // sql have only 4 digits after decimal point
+		if utils.Round(cdrs[0].Cost, 4, utils.MetaRoundingMiddle) != 0.2188 { // sql have only 4 digits after decimal point
 			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0].Cost)
 		}
 		if cdrs[0].OriginHost != "127.0.0.1" {

@@ -689,7 +689,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	if len(ldr.cacheConns) != 0 {
 		var reply string
 		switch caching {
-		case utils.META_NONE:
+		case utils.MetaNone:
 			return
 		case utils.MetaReload:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
@@ -1045,7 +1045,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 	if len(ldr.cacheConns) != 0 {
 		var reply string
 		switch caching {
-		case utils.META_NONE:
+		case utils.MetaNone:
 			return
 		case utils.MetaReload:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,

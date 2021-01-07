@@ -153,13 +153,13 @@ func NewRoundConverter(params string) (hdlr DataConverter, err error) {
 	}
 	switch len(paramsSplt) {
 	case 0:
-		rc.Method = ROUNDING_MIDDLE
+		rc.Method = MetaRoundingMiddle
 	case 1:
 		if rc.Decimals, err = strconv.Atoi(paramsSplt[0]); err != nil {
 			return nil, fmt.Errorf("%s converter needs integer as decimals, have: <%s>",
 				MetaRound, paramsSplt[0])
 		}
-		rc.Method = ROUNDING_MIDDLE
+		rc.Method = MetaRoundingMiddle
 	case 2:
 		rc.Method = paramsSplt[1]
 		if rc.Decimals, err = strconv.Atoi(paramsSplt[0]); err != nil {

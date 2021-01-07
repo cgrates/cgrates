@@ -975,8 +975,8 @@ func TestDbDefaultsMetaDynamic(t *testing.T) {
 	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.INTERNAL}
 	for _, dbtype := range dbs {
 		host := dbdf.dbHost(dbtype, flagInput)
-		if host != utils.LOCALHOST {
-			t.Errorf("received: %+v, expecting: %+v", host, utils.LOCALHOST)
+		if host != utils.Localhost {
+			t.Errorf("received: %+v, expecting: %+v", host, utils.Localhost)
 		}
 		user := dbdf.dbUser(dbtype, flagInput)
 		if user != utils.CGRateSLwr {
@@ -2393,7 +2393,7 @@ func TestERSConfig(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
-				Type:             utils.META_NONE,
+				Type:             utils.MetaNone,
 				RowLength:        0,
 				FieldSep:         ",",
 				HeaderDefineChar: ":",
@@ -2437,7 +2437,7 @@ func TestEEsNoLksConfig(t *testing.T) {
 		Exporters: []*EventExporterCfg{
 			{
 				ID:            utils.MetaDefault,
-				Type:          utils.META_NONE,
+				Type:          utils.MetaNone,
 				FieldSep:      ",",
 				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",
@@ -4664,7 +4664,7 @@ func TestV1GetConfigSectionEES(t *testing.T) {
 			utils.ExportersCfg: []map[string]interface{}{
 				{
 					utils.IDCfg:               utils.MetaDefault,
-					utils.TypeCfg:             utils.META_NONE,
+					utils.TypeCfg:             utils.MetaNone,
 					utils.ExportPathCfg:       "/var/spool/cgrates/ees",
 					utils.OptsCfg:             map[string]interface{}{},
 					utils.TenantCfg:           utils.EmptyString,
@@ -4711,7 +4711,7 @@ func TestV1GetConfigSectionERS(t *testing.T) {
 					utils.XMLRootPathCfg:              []string{utils.EmptyString},
 					utils.CacheDumpFieldsCfg:          []map[string]interface{}{},
 					utils.ConcurrentRequestsCfg:       1024,
-					utils.TypeCfg:                     utils.META_NONE,
+					utils.TypeCfg:                     utils.MetaNone,
 					utils.FailedCallsPrefixCfg:        utils.EmptyString,
 					utils.FieldSepCfg:                 ",",
 					utils.HeaderDefCharCfg:            ":",
@@ -5592,7 +5592,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
-				Type:             utils.META_NONE,
+				Type:             utils.MetaNone,
 				FieldSep:         ",",
 				HeaderDefineChar: ":",
 				RunDelay:         0,
@@ -5657,7 +5657,7 @@ func TestCgrCdfEventExporter(t *testing.T) {
 		Exporters: []*EventExporterCfg{
 			{
 				ID:            utils.MetaDefault,
-				Type:          utils.META_NONE,
+				Type:          utils.MetaNone,
 				FieldSep:      ",",
 				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",
@@ -5682,7 +5682,7 @@ func TestCgrCdfEventExporter(t *testing.T) {
 func TestCgrCfgEventReaderDefault(t *testing.T) {
 	eCfg := &EventReaderCfg{
 		ID:               utils.MetaDefault,
-		Type:             utils.META_NONE,
+		Type:             utils.MetaNone,
 		FieldSep:         ",",
 		HeaderDefineChar: ":",
 		RunDelay:         0,
@@ -5733,7 +5733,7 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 func TestCgrCfgEventExporterDefault(t *testing.T) {
 	eCfg := &EventExporterCfg{
 		ID:            utils.MetaDefault,
-		Type:          utils.META_NONE,
+		Type:          utils.MetaNone,
 		FieldSep:      ",",
 		Tenant:        nil,
 		ExportPath:    "/var/spool/cgrates/ees",

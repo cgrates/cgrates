@@ -276,7 +276,7 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 			if newBalKey == utils.VOICE {
 				balVal = utils.Round(balVal/float64(time.Second),
 					config.CgrConfig().GeneralCfg().RoundingDecimals,
-					utils.ROUNDING_MIDDLE)
+					utils.MetaRoundingMiddle)
 			}
 			// check default to set new id
 			ac.BalanceMap[newBalKey][index] = &engine.Balance{
@@ -411,7 +411,7 @@ func (v2Acc v2Account) V2toV3Account() (ac *engine.Account) {
 			if balType == utils.VOICE {
 				balVal = utils.Round(balVal*float64(time.Second),
 					config.CgrConfig().GeneralCfg().RoundingDecimals,
-					utils.ROUNDING_MIDDLE)
+					utils.MetaRoundingMiddle)
 			}
 			// check default to set new id
 			ac.BalanceMap[balType][index] = &engine.Balance{

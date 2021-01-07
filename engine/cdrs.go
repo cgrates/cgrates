@@ -158,7 +158,7 @@ func (cdrS *CDRServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
 func (cdrS *CDRServer) rateCDR(cdr *CDRWithOpts) ([]*CDR, error) {
 	var qryCC *CallCost
 	var err error
-	if cdr.RequestType == utils.META_NONE {
+	if cdr.RequestType == utils.MetaNone {
 		return nil, nil
 	}
 	if cdr.Usage < 0 {
@@ -167,9 +167,9 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithOpts) ([]*CDR, error) {
 	cdr.ExtraInfo = "" // Clean previous ExtraInfo, useful when re-rating
 	var cdrsRated []*CDR
 	_, hasLastUsed := cdr.ExtraFields[utils.LastUsed]
-	if utils.SliceHasMember([]string{utils.MetaPrepaid, utils.PREPAID}, cdr.RequestType) &&
+	if utils.SliceHasMember([]string{utils.MetaPrepaid, utils.Prepaid}, cdr.RequestType) &&
 		(cdr.Usage != 0 || hasLastUsed) && cdr.CostDetails == nil {
-		// ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
+		// ToDo: Get rid of Prepaid as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		fib := utils.Fib()
 		var smCosts []*SMCost
@@ -247,8 +247,8 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithOpts) ([]*CDR, error) {
 	return []*CDR{cdr.CDR}, nil
 }
 
-var reqTypes = utils.NewStringSet([]string{utils.META_PSEUDOPREPAID, utils.MetaPostpaid, utils.MetaPrepaid,
-	utils.PSEUDOPREPAID, utils.Postpaid, utils.PREPAID, utils.MetaDynaprepaid})
+var reqTypes = utils.NewStringSet([]string{utils.MetaPseudoPrepaid, utils.MetaPostpaid, utils.MetaPrepaid,
+	utils.PseudoPrepaid, utils.Postpaid, utils.Prepaid, utils.MetaDynaprepaid})
 
 // getCostFromRater will retrieve the cost from RALs
 func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithOpts) (*CallCost, error) {

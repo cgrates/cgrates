@@ -260,7 +260,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 			Limit:        10,
 			Stored:       true,
 			Weight:       20,
-			ThresholdIDs: []string{utils.META_NONE},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 
@@ -283,7 +283,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 			Limit:        10,
 			Stored:       true,
 			Weight:       30,
-			ThresholdIDs: []string{utils.META_NONE},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 
@@ -306,7 +306,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 			Limit:        10,
 			Stored:       true,
 			Weight:       20,
-			ThresholdIDs: []string{utils.META_NONE},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 
@@ -329,7 +329,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 			Limit:        10,
 			Stored:       true,
 			Weight:       20,
-			ThresholdIDs: []string{utils.META_NONE},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 

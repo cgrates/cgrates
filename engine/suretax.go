@@ -40,7 +40,7 @@ func NewSureTaxRequest(cdr *CDR, stCfg *config.SureTaxCfg) (*SureTaxRequest, err
 		return nil, errors.New("invalid SureTax config")
 	}
 	aTimeLoc := cdr.AnswerTime.In(stCfg.Timezone)
-	revenue := utils.Round(cdr.Cost, 4, utils.ROUNDING_MIDDLE)
+	revenue := utils.Round(cdr.Cost, 4, utils.MetaRoundingMiddle)
 	unts, err := strconv.ParseInt(cdr.FieldsAsString(stCfg.Units), 10, 64)
 	if err != nil {
 		return nil, err
@@ -225,11 +225,11 @@ func SureTaxProcessCdr(cdr *CDR) error {
 	if !stCfg.IncludeLocalCost {
 		cdr.Cost = utils.Round(totalTax,
 			config.CgrConfig().GeneralCfg().RoundingDecimals,
-			utils.ROUNDING_MIDDLE)
+			utils.MetaRoundingMiddle)
 	} else {
 		cdr.Cost = utils.Round(cdr.Cost+totalTax,
 			config.CgrConfig().GeneralCfg().RoundingDecimals,
-			utils.ROUNDING_MIDDLE)
+			utils.MetaRoundingMiddle)
 	}
 	// Add response into extra fields to be available for later review
 	cdr.ExtraFields[utils.META_SURETAX] = respFull.D

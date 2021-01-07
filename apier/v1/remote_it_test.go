@@ -338,7 +338,7 @@ func testInternalRemoteITGetResourceProfile(t *testing.T) {
 			AllocationMessage: "",
 			Stored:            true,
 			Weight:            10,
-			ThresholdIDs:      []string{utils.META_NONE},
+			ThresholdIDs:      []string{utils.MetaNone},
 		},
 	}
 	var reply *engine.ResourceProfile
@@ -372,7 +372,7 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 		Stored:       false,
 		Blocker:      true,
 		Weight:       30,
-		ThresholdIDs: []string{utils.META_NONE},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 	//reverse metric order
 	expStq2 := &engine.StatQueueProfile{
@@ -396,7 +396,7 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 		Stored:       false,
 		Blocker:      true,
 		Weight:       30,
-		ThresholdIDs: []string{utils.META_NONE},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var reply *engine.StatQueueProfile
 	if err := internalRPC.Call(utils.APIerSv1GetStatQueueProfile,
@@ -586,7 +586,7 @@ func testInternalRemoteITGetChargerProfile(t *testing.T) {
 		ID:           "DEFAULT",
 		FilterIDs:    []string{},
 		RunID:        utils.MetaDefault,
-		AttributeIDs: []string{utils.META_NONE},
+		AttributeIDs: []string{utils.MetaNone},
 		Weight:       0,
 	}
 	if *encoding == utils.MetaGOB {

@@ -118,7 +118,7 @@ func testV1RsSetProfile(t *testing.T) {
 			Limit:             2,
 			AllocationMessage: "Account1Channels",
 			Weight:            20,
-			ThresholdIDs:      []string{utils.META_NONE},
+			ThresholdIDs:      []string{utils.MetaNone},
 		},
 	}
 	var result string

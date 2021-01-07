@@ -451,7 +451,7 @@ cgrates.org,MOCK_RELOAD_ID
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaAttributes, utils.META_NONE); err != nil {
+	if err := ldr.processContent(utils.MetaAttributes, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 
@@ -808,7 +808,7 @@ cgrates.org,MOCK_RELOAD_4
 	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaAttributes, utils.META_NONE); err != nil {
+	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 }

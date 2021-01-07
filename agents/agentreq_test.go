@@ -153,8 +153,8 @@ func TestAgentRequestSetFields(t *testing.T) {
 	if err := ar.SetFields(input); err != nil {
 		t.Error(err)
 	}
-	// tplFld.Type == utils.META_NONE
-	input = []*config.FCTemplate{{Type: utils.META_NONE}}
+	// tplFld.Type == utils.MetaNone
+	input = []*config.FCTemplate{{Type: utils.MetaNone}}
 	if err := ar.SetFields(input); err != nil {
 		t.Error(err)
 	}
@@ -822,7 +822,7 @@ func TestAgReqFieldAsNone(t *testing.T) {
 		{Tag: "Account",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
-		{Type: utils.META_NONE, Blocker: true},
+		{Type: utils.MetaNone, Blocker: true},
 		{Tag: "Destination",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", utils.INFIELD_SEP)},
@@ -862,7 +862,7 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 		{Tag: "Account",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.INFIELD_SEP)},
-		{Type: utils.META_NONE},
+		{Type: utils.MetaNone},
 		{Tag: "Destination",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", utils.INFIELD_SEP)},

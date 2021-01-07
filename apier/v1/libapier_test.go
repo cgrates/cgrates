@@ -125,7 +125,7 @@ func TestCallCache(t *testing.T) {
 		ConnMgr: cn,
 		Config:  config.CgrConfig(),
 	}
-	if err := apv1.CallCache(utils.StringPointer(utils.META_NONE), "", "", "", nil, nil, nil); err != nil {
+	if err := apv1.CallCache(utils.StringPointer(utils.MetaNone), "", "", "", nil, nil, nil); err != nil {
 		t.Fatal(err)
 	} else if len(cache) != 0 {
 		t.Fatal("Expected call cache to not be called")

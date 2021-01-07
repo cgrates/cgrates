@@ -177,7 +177,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		utils.MetaDryRun, utils.MetaAuthorize,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE, utils.MetaRadauth} {
+		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone, utils.MetaRadauth} {
 		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -201,7 +201,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	switch reqType {
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
-	case utils.META_NONE: // do nothing on CGRateS side
+	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",

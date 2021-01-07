@@ -132,7 +132,7 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREventWithOpts) (err e
 		return
 	}
 	if err = pstrEE.poster.Post(body, utils.ConcatenatedKey(cgrID, runID)); err != nil &&
-		pstrEE.cgrCfg.GeneralCfg().FailedPostsDir != utils.META_NONE {
+		pstrEE.cgrCfg.GeneralCfg().FailedPostsDir != utils.MetaNone {
 		engine.AddFailedPost(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ExportPath,
 			pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Type, utils.EventExporterS, body,
 			pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Opts)
