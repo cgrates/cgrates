@@ -87,21 +87,24 @@ func (apierSv1 *APIerSv1) GetAccountProfileIDsCount(args *utils.TenantWithOpts, 
 	return
 }
 
-type AccountProfileWithCache struct {
-	*utils.AccountProfileWithOpts
+type APIAccountProfileWithCache struct {
+	*utils.APIAccountProfileWithOpts
 	Cache *string
 }
 
 //SetAccountProfile add/update a new Account Profile
-func (apierSv1 *APIerSv1) SetAccountProfile(ap *AccountProfileWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(ap.AccountProfile, []string{utils.ID}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) SetAccountProfile(extAp *APIAccountProfileWithCache, reply *string) error {
+	if missing := utils.MissingStructFields(extAp.APIAccountProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ap.Tenant == utils.EmptyString {
-		ap.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	if extAp.Tenant == utils.EmptyString {
+		extAp.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-
-	if err := apierSv1.DataManager.SetAccountProfile(ap.AccountProfile, true); err != nil {
+	ap, err := extAp.AsAccountProfile()
+	if err != nil {
+		return err
+	}
+	if err := apierSv1.DataManager.SetAccountProfile(ap, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAccountProfiles and store it in database

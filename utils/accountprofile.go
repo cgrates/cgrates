@@ -46,7 +46,7 @@ type Balance struct {
 	CostIncrements []*CostIncrement
 	CostAttributes []string
 	UnitFactors    []*UnitFactor
-	Units          float64
+	Units          *Decimal
 }
 
 // CostIncrement enforces cost calculation to specific balance increments
@@ -152,7 +152,6 @@ func (bL *Balance) Clone() (blnc *Balance) {
 		Blocker: bL.Blocker,
 		Type:    bL.Type,
 		Opts:    make(map[string]interface{}),
-		Units:   bL.Units,
 	}
 	if bL.FilterIDs != nil {
 		blnc.FilterIDs = make([]string, len(bL.FilterIDs))
@@ -181,6 +180,9 @@ func (bL *Balance) Clone() (blnc *Balance) {
 			blnc.UnitFactors[i] = value.Clone()
 		}
 	}
+	if bL.Units != nil {
+		blnc.Units = new(Decimal).Copy(bL.Units)
+	}
 	return
 }
 
@@ -200,6 +202,12 @@ func (blcs Balances) Sort() {
 	sort.Slice(blcs, func(i, j int) bool { return blcs[i].Weight > blcs[j].Weight })
 }
 
+// APIAccountProfileWithOpts is used in API calls
+type APIAccountProfileWithOpts struct {
+	*APIAccountProfile
+	Opts map[string]interface{}
+}
+
 // AccountProfileWithOpts is used in API calls
 type AccountProfileWithOpts struct {
 	*AccountProfile
@@ -216,4 +224,131 @@ type ReplyMaxUsage struct {
 	AccountID string
 	MaxUsage  time.Duration
 	Cost      *EventCharges
+}
+
+// APIAccountProfile represents one APIAccount on a Tenant
+type APIAccountProfile struct {
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *ActivationInterval
+	Weight             float64
+	Opts               map[string]interface{}
+	Balances           []*APIBalance
+	ThresholdIDs       []string
+}
+
+func (ext *APIAccountProfile) AsAccountProfile() (profile *AccountProfile, err error) {
+	profile = &AccountProfile{
+		Tenant:             ext.Tenant,
+		ID:                 ext.ID,
+		FilterIDs:          ext.FilterIDs,
+		ActivationInterval: ext.ActivationInterval,
+		Weight:             ext.Weight,
+		Opts:               ext.Opts,
+		ThresholdIDs:       ext.ThresholdIDs,
+	}
+	if len(ext.Balances) != 0 {
+		profile.Balances = make([]*Balance, len(ext.Balances))
+		for i, bal := range ext.Balances {
+			if profile.Balances[i], err = bal.AsBalance(); err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+// APIBalance represents one APIBalance inside an APIAccount
+type APIBalance struct {
+	ID             string // Balance identificator, unique within an Account
+	FilterIDs      []string
+	Weight         float64
+	Blocker        bool
+	Type           string
+	Opts           map[string]interface{}
+	CostIncrements []*APICostIncrement
+	CostAttributes []string
+	UnitFactors    []*APIUnitFactor
+	Units          float64
+}
+
+func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
+	balance = &Balance{
+		ID:             ext.ID,
+		FilterIDs:      ext.FilterIDs,
+		Weight:         ext.Weight,
+		Blocker:        ext.Blocker,
+		Type:           ext.Type,
+		Opts:           ext.Opts,
+		CostAttributes: ext.CostAttributes,
+	}
+	if len(ext.CostIncrements) != 0 {
+		balance.CostIncrements = make([]*CostIncrement, len(ext.CostIncrements))
+		for i, cIncr := range ext.CostIncrements {
+			if balance.CostIncrements[i], err = cIncr.AsCostIncrement(); err != nil {
+				return
+			}
+		}
+	}
+	if len(ext.UnitFactors) != 0 {
+		balance.UnitFactors = make([]*UnitFactor, len(ext.UnitFactors))
+		for i, uFct := range ext.UnitFactors {
+			if balance.UnitFactors[i], err = uFct.AsUnitFactor(); err != nil {
+				return
+			}
+		}
+	}
+	if balance.Units, err = NewDecimalFromFloat64(ext.Units); err != nil {
+		return
+	}
+	return
+
+}
+
+// APICostIncrement represent one CostIncrement inside an APIBalance
+type APICostIncrement struct {
+	FilterIDs    []string
+	Increment    *float64
+	FixedFee     *float64
+	RecurrentFee *float64
+}
+
+func (ext *APICostIncrement) AsCostIncrement() (cIncr *CostIncrement, err error) {
+	cIncr = &CostIncrement{
+		FilterIDs: ext.FilterIDs,
+	}
+	if ext.Increment != nil {
+		if cIncr.Increment, err = NewDecimalFromFloat64(*ext.Increment); err != nil {
+			return
+		}
+	}
+	if ext.FixedFee != nil {
+		if cIncr.FixedFee, err = NewDecimalFromFloat64(*ext.FixedFee); err != nil {
+			return
+		}
+	}
+	if ext.RecurrentFee != nil {
+		if cIncr.RecurrentFee, err = NewDecimalFromFloat64(*ext.RecurrentFee); err != nil {
+			return
+		}
+	}
+	return
+}
+
+// APIUnitFactor represent one UnitFactor inside an APIBalance
+type APIUnitFactor struct {
+	FilterIDs []string
+	Factor    float64
+}
+
+func (ext *APIUnitFactor) AsUnitFactor() (uFac *UnitFactor, err error) {
+	uFac = &UnitFactor{
+		FilterIDs: ext.FilterIDs,
+	}
+	if uFac.Factor, err = NewDecimalFromFloat64(ext.Factor); err != nil {
+		return
+	}
+	return
+
 }

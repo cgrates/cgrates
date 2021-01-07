@@ -51,7 +51,7 @@ func TestCloneBalance(t *testing.T) {
 				Factor:    &Decimal{decimal.New(20, 2)},
 			},
 		},
-		Units: 1.25,
+		Units: &Decimal{decimal.New(125, 3)},
 	}
 	if rcv := expBlc.Clone(); !reflect.DeepEqual(rcv, expBlc) {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(expBlc), ToJSON(rcv))
@@ -96,7 +96,7 @@ func TestCloneAccountProfile(t *testing.T) {
 						Factor:    &Decimal{decimal.New(20, 2)},
 					},
 				},
-				Units: 1.25,
+				Units: &Decimal{decimal.New(125, 3)},
 			},
 		},
 		ThresholdIDs: []string{"*none"},
