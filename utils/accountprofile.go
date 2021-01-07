@@ -67,13 +67,13 @@ func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
 		}
 	}
 	if cI.Increment != nil {
-		cIcln.Increment = new(Decimal).Copy(cI.Increment)
+		cIcln.Increment = cI.Increment.Clone()
 	}
 	if cI.FixedFee != nil {
-		cIcln.FixedFee = new(Decimal).Copy(cI.FixedFee)
+		cIcln.FixedFee = cI.FixedFee.Clone()
 	}
 	if cI.RecurrentFee != nil {
-		cIcln.RecurrentFee = new(Decimal).Copy(cI.RecurrentFee)
+		cIcln.RecurrentFee = cI.RecurrentFee.Clone()
 	}
 	return
 }
@@ -88,7 +88,7 @@ func (uF *UnitFactor) Clone() (untFct *UnitFactor) {
 		}
 	}
 	if uF.Factor != nil {
-		untFct.Factor = new(Decimal).Copy(uF.Factor)
+		untFct.Factor = uF.Factor.Clone()
 	}
 	return
 }
@@ -181,7 +181,7 @@ func (bL *Balance) Clone() (blnc *Balance) {
 		}
 	}
 	if bL.Units != nil {
-		blnc.Units = new(Decimal).Copy(bL.Units)
+		blnc.Units = bL.Units.Clone()
 	}
 	return
 }
@@ -238,6 +238,7 @@ type APIAccountProfile struct {
 	ThresholdIDs       []string
 }
 
+// AsAccountProfile convert APIAccountProfile struct to AccountProfile struct
 func (ext *APIAccountProfile) AsAccountProfile() (profile *AccountProfile, err error) {
 	profile = &AccountProfile{
 		Tenant:             ext.Tenant,
@@ -273,6 +274,7 @@ type APIBalance struct {
 	Units          float64
 }
 
+// AsBalance convert APIBalance struct to Balance struct
 func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
 	balance = &Balance{
 		ID:             ext.ID,
@@ -314,6 +316,7 @@ type APICostIncrement struct {
 	RecurrentFee *float64
 }
 
+// AsCostIncrement convert APICostIncrement struct to CostIncrement struct
 func (ext *APICostIncrement) AsCostIncrement() (cIncr *CostIncrement, err error) {
 	cIncr = &CostIncrement{
 		FilterIDs: ext.FilterIDs,
@@ -342,6 +345,7 @@ type APIUnitFactor struct {
 	Factor    float64
 }
 
+// AsUnitFactor convert APIUnitFactor struct to UnitFactor struct
 func (ext *APIUnitFactor) AsUnitFactor() (uFac *UnitFactor, err error) {
 	uFac = &UnitFactor{
 		FilterIDs: ext.FilterIDs,
