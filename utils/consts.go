@@ -33,7 +33,7 @@ var (
 		MetaHTTPjsonCDR:   ContentJSON,
 		MetaHTTPjsonMap:   ContentJSON,
 		MetaHTTPjson:      ContentJSON,
-		MetaHTTPPost:      CONTENT_FORM,
+		MetaHTTPPost:      ContentForm,
 		MetaAMQPjsonCDR:   ContentJSON,
 		MetaAMQPjsonMap:   ContentJSON,
 		MetaAMQPV1jsonMap: ContentJSON,
@@ -340,11 +340,10 @@ const (
 	RATED                        = "rated"
 	Partial                      = "Partial"
 	PreRated                     = "PreRated"
-	STATIC_VALUE_PREFIX          = "^"
+	StaticValuePrefix            = "^"
 	CSV                          = "csv"
 	FWV                          = "fwv"
 	MetaPartialCSV               = "*partial_csv"
-	DRYRUN                       = "dry_run"
 	META_COMBIMED                = "*combimed"
 	MetaMongo                    = "*mongo"
 	MetaPostgres                 = "*postgres"
@@ -525,8 +524,8 @@ const (
 	CSVSuffix                   = ".csv"
 	FWVSuffix                   = ".fwv"
 	ContentJSON                 = "json"
-	CONTENT_FORM                = "form"
-	CONTENT_TEXT                = "text"
+	ContentForm                 = "form"
+	ContentText                 = "text"
 	FileLockPrefix              = "file_"
 	ActionsPoster               = "act"
 	CDRPoster                   = "cdr"

@@ -57,7 +57,7 @@ func HTTPPostJSON(url string, content []byte) (respBody []byte, err error) {
 // NewHTTPPoster return a new HTTP poster
 func NewHTTPPoster(replyTimeout time.Duration, addr, contentType string,
 	attempts int) (httposter *HTTPPoster, err error) {
-	if !utils.SliceHasMember([]string{utils.CONTENT_FORM, utils.ContentJSON, utils.CONTENT_TEXT}, contentType) {
+	if !utils.SliceHasMember([]string{utils.ContentForm, utils.ContentJSON, utils.ContentText}, contentType) {
 		return nil, fmt.Errorf("unsupported ContentType: %s", contentType)
 	}
 	return &HTTPPoster{
@@ -124,7 +124,7 @@ func (pstr *HTTPPoster) do(req *http.Request) (respBody []byte, err error) {
 
 func (pstr *HTTPPoster) getRequest(content interface{}, hdr http.Header) (req *http.Request, err error) {
 	var body io.Reader
-	if pstr.contentType == utils.CONTENT_FORM {
+	if pstr.contentType == utils.ContentForm {
 		body = strings.NewReader(content.(url.Values).Encode())
 	} else {
 		body = bytes.NewBuffer(content.([]byte))

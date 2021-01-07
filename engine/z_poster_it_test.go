@@ -101,7 +101,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	content := []byte(`Test
 		Test2
 		`)
-	pstr, err := NewHTTPPoster(2*time.Second, "http://localhost:8080/invalid", utils.CONTENT_TEXT, 3)
+	pstr, err := NewHTTPPoster(2*time.Second, "http://localhost:8080/invalid", utils.ContentText, 3)
 	if err != nil {
 		t.Error(err)
 	}
