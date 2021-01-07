@@ -3524,7 +3524,7 @@ func TestLoadAccountProfilesAsStructErrConversion(t *testing.T) {
 	}
 	actPrfCsv := `
 #ActivationInterval
-* * * * * *
+* * * * * * *
 `
 	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
 	rdrCsv := csv.NewReader(rdr)
@@ -3539,6 +3539,57 @@ func TestLoadAccountProfilesAsStructErrConversion(t *testing.T) {
 		},
 	}
 	expectedErr := "Unsupported time format"
+	if err := ldr.processContent(utils.MetaAccountProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func TestProcessContentAccountProfileAsTPError(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestProcessContentAccountProfileAsTPError",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaAccountProfiles: {
+			{Tag: "Tenant",
+				Path:  "Tenant",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+			{Tag: "ID",
+				Path:  "ID",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP)},
+			{Tag: "BalanceID",
+				Path:  "BalanceID",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
+			{Tag: "BalanceUnitFactors",
+				Path:  "BalanceUnitFactors",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
+		},
+	}
+
+	accPrfCSv := `
+#Tenant,ID,BalanceID,BalanceUnitFactors
+cgrates.org,1001,MonetaryBalance,fltr1&fltr2;100;fltr3
+`
+	rdr := ioutil.NopCloser(strings.NewReader(accPrfCSv))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAccountProfiles: {
+			utils.AccountProfilesCsv: &openedCSVFile{
+				fileName: utils.AccountProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   rdrCsv,
+			},
+		},
+	}
+	expectedErr := "invlid key: <fltr1&fltr2;100;fltr3> for BalanceUnitFactors"
 	if err := ldr.processContent(utils.MetaAccountProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -4833,12 +4884,39 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 		Tenant: "cgrates.org",
 		ID:     "REM_RATEPROFILE_1",
 	}
-	if err := ldr.dm.SetRateProfile(expRtPrf, true); err != nil {
-		t.Error(err)
-	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
 	ldr.dm = nil
 	expected := "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
+	}
+
+	rdr = ioutil.NopCloser(strings.NewReader(rtPrfCsv))
+	csvRdr = csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaRateProfiles: {
+			utils.RateProfilesCsv: &openedCSVFile{
+				fileName: utils.RateProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{"INVALID_FLAGS"})
+	expected = "NO_DATA_BASE_CONNECTION"
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
+	}
+
+	ldr.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	if err := ldr.dm.SetRateProfile(expRtPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	ldr.dm = nil
+	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
+	expected = "NO_DATA_BASE_CONNECTION"
 	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
 	}
@@ -4895,9 +4973,12 @@ cgrates.org,REM_THRESHOLDS_1,
 	newData := &dataDBMockError{}
 	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expected {
+	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	} else if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+
 }
 
 func TestRemoveStatQueueMockError(t *testing.T) {
@@ -4942,13 +5023,83 @@ cgrates.org,REM_STATS_1
 		Tenant: "cgrates.org",
 		ID:     "REM_STATS_1",
 	}
+
 	if err := ldr.dm.SetStatQueueProfile(expStats, true); err != nil {
 		t.Error(err)
 	}
+
 	newData := &dataDBMockError{}
 	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	expected := "NO_DATA_BASE_CONNECTION"
+
 	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
+	} else if err := ldr.processContent(utils.MetaStatS, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+}
+
+func TestRemoveResourcesMockError(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "TestLoadAndRemoveResources",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaResources: {
+			{Tag: "Tenant",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	resourcesCSV := `
+#Tenant[0],ID[1]
+cgrates.org,NewRes1
+`
+	rdr := ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdrCsv := csv.NewReader(rdr)
+	rdrCsv.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaResources: {
+			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
+				rdr: rdr, csvRdr: rdrCsv}},
+	}
+
+	resPrf := &engine.ResourceProfile{
+		Tenant: "cgrates.org",
+		ID:     "NewRes1",
+	}
+
+	if err := ldr.dm.SetResourceProfile(resPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	newData := &dataDBMockError{}
+	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
+	expected := "NO_DATA_BASE_CONNECTION"
+
+	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	} else if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestLoaderHandleFolder(t *testing.T) {
+	stopChan := make(chan struct{}, 1)
+	stopChan <- struct{}{}
+	ldr := &Loader{
+		ldrID:    "TestLoaderHandleFolder",
+		runDelay: 1,
+	}
+	ldr.handleFolder(stopChan)
 }

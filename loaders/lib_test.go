@@ -938,12 +938,12 @@ type dataDBMockError struct {
 
 //For Threshold
 func (dbM *dataDBMockError) RemThresholdProfileDrv(tenant, id string) (err error) {
-	return nil
+	return
 }
 
 func (dbM *dataDBMockError) SetIndexesDrv(idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
-	return nil
+	return
 }
 
 func (dbM *dataDBMockError) RemoveThresholdDrv(string, string) error {
@@ -958,6 +958,18 @@ func (dbM *dataDBMockError) GetThresholdProfileDrv(tenant string, ID string) (tp
 	return expThresholdPrf, nil
 }
 
+func (dbM *dataDBMockError) SetThresholdProfileDrv(tp *engine.ThresholdProfile) (err error) {
+	return
+}
+
+func (dbM *dataDBMockError) GetThresholdDrv(string, string) (*engine.Threshold, error) {
+	return nil, utils.ErrNoDatabaseConn
+}
+
+func (dbM *dataDBMockError) HasDataDrv(string, string, string) (bool, error) {
+	return false, nil
+}
+
 //For StatQueue
 func (dbM *dataDBMockError) GetStatQueueProfileDrv(tenant string, ID string) (sq *engine.StatQueueProfile, err error) {
 	return nil, nil
@@ -969,6 +981,18 @@ func (dbM *dataDBMockError) RemStatQueueProfileDrv(tenant, id string) (err error
 
 func (dbM *dataDBMockError) RemStatQueueDrv(tenant, id string) (err error) {
 	return utils.ErrNoDatabaseConn
+}
+
+func (dbM *dataDBMockError) GetStatQueueDrv(tenant, id string) (sq *engine.StatQueue, err error) {
+	return nil, utils.ErrNoDatabaseConn
+}
+
+func (dbM *dataDBMockError) SetStatQueueDrv(ssq *engine.StoredStatQueue, sq *engine.StatQueue) (err error) {
+	return utils.ErrNoDatabaseConn
+}
+
+func (dbM *dataDBMockError) SetStatQueueProfileDrv(sq *engine.StatQueueProfile) (err error) {
+	return nil
 }
 
 //For Resources
@@ -986,4 +1010,12 @@ func (dbM *dataDBMockError) RemoveResourceDrv(tenant, id string) (err error) {
 
 func (dbM *dataDBMockError) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
 	return nil, nil
+}
+
+func (dbM *dataDBMockError) SetResourceProfileDrv(*engine.ResourceProfile) error {
+	return nil
+}
+
+func (dbM *dataDBMockError) SetResourceDrv(*engine.Resource) error {
+	return utils.ErrNoDatabaseConn
 }
