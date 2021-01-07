@@ -42,12 +42,28 @@ func SubstractBig(x, y *decimal.Big) *decimal.Big {
 	return new(decimal.Big).Sub(x, y)
 }
 
+// MultiplyDecimal multiples two Decimals and returns the result
+func MultiplyDecimal(x, y *Decimal) *Decimal {
+	return &Decimal{new(decimal.Big).Mul(x.Big, y.Big)}
+}
+
+func SubstractDecimal(x, y *Decimal) *Decimal {
+	return &Decimal{new(decimal.Big).Sub(x.Big, y.Big)}
+}
+
+// NewDecimalFromFloat64 is a constructor for Decimal out of float64
+// passing through string is necessary due to differences between decimal and binary representation of float64
 func NewDecimalFromFloat64(f float64) (*Decimal, error) {
 	d, canSet := new(decimal.Big).SetString(strconv.FormatFloat(f, 'f', -1, 64))
 	if !canSet {
-		return nil, fmt.Errorf("cannot convert float64 to decimal.Big")
+		return nil, fmt.Errorf("cannot convert float64 to Decimal")
 	}
 	return &Decimal{d}, nil
+}
+
+// NewDecimal is a constructor for Decimal, following the one of decimal.Big
+func NewDecimal(value int64, scale int) *Decimal {
+	return &Decimal{decimal.New(value, scale)}
 }
 
 type Decimal struct {

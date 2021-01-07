@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 // newAccountBalances constructs accountBalances
@@ -83,6 +82,6 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
-	debitUsage(usage *decimal.Big, startTime time.Time,
+	debitUsage(usage *utils.Decimal, startTime time.Time,
 		cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error)
 }

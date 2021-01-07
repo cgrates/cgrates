@@ -90,7 +90,7 @@ func (cB *concreteBalance) balanceLimit() (bL *decimal.Big) {
 }
 
 // debit implements the balanceOperator interface
-func (cB *concreteBalance) debitUsage(usage *decimal.Big, startTime time.Time,
+func (cB *concreteBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 	cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{

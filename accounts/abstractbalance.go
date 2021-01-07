@@ -51,12 +51,14 @@ func (aB *abstractBalance) costIncrement(tnt string, ev utils.DataProvider) (cos
 			continue
 		}
 		costIcrm = cIcrm
-		return
+		break
 	}
-	// nothing matched, return default
-	costIcrm = &utils.CostIncrement{
-		Increment:    &utils.Decimal{decimal.New(1, 0)},
-		RecurrentFee: &utils.Decimal{decimal.New(-1, 0)}}
+	if costIcrm == nil {
+		costIcrm = new(utils.CostIncrement)
+	}
+	if costIcrm.Increment == nil {
+		costIcrm.Increment = utils.NewDecimal(1, 0)
+	}
 	return
 }
 
@@ -75,20 +77,20 @@ func (aB *abstractBalance) unitFactor(tnt string, ev utils.DataProvider) (uF *ut
 }
 
 // balanceLimit returns the balance's limit
-func (aB *abstractBalance) balanceLimit() (bL *decimal.Big) {
+func (aB *abstractBalance) balanceLimit() (bL *utils.Decimal) {
 	if _, isUnlimited := aB.blnCfg.Opts[utils.MetaBalanceUnlimited]; isUnlimited {
 		return
 	}
 	if lmtIface, has := aB.blnCfg.Opts[utils.MetaBalanceLimit]; has {
-		bL = lmtIface.(*decimal.Big)
+		bL = lmtIface.(*utils.Decimal)
 	}
 	// nothing matched, return default
-	bL = decimal.New(0, 0)
+	bL = utils.NewDecimal(0, 0)
 	return
 }
 
 // debitUsage implements the balanceOperator interface
-func (aB *abstractBalance) debitUsage(usage *decimal.Big, startTime time.Time,
+func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 	cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
@@ -104,12 +106,12 @@ func (aB *abstractBalance) debitUsage(usage *decimal.Big, startTime time.Time,
 		return nil, utils.ErrFilterNotPassingNoCaps
 	}
 
-	blcVal := aB.blnCfg.Units.Big
+	blcVal := &utils.Decimal{new(decimal.Big).SetFloat64(aB.blnCfg.Units)} // FixMe without float64
 	// balanceLimit
 	var hasLmt bool
 	blncLmt := aB.balanceLimit()
 	if blncLmt.Cmp(decimal.New(0, 0)) != 0 {
-		blcVal = utils.SubstractBig(blcVal, blncLmt)
+		blcVal = utils.SubstractDecimal(blcVal, blncLmt)
 		hasLmt = true
 	}
 
@@ -120,9 +122,17 @@ func (aB *abstractBalance) debitUsage(usage *decimal.Big, startTime time.Time,
 	}
 
 	// unitFactor
+	debUnts := usage
+
 	var uF *utils.UnitFactor
 	if uF, err = aB.unitFactor(cgrEv.CGREvent.Tenant, evNm); err != nil {
 		return
+	}
+	//var hasUF bool
+	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
+		debUnts = utils.MultiplyDecimal(debUnts, uF.Factor)
+		//incrm = utils.MultiplyBig(incrm, uF.Factor.Big)
+		//hasUF = true
 	}
 
 	fmt.Printf("costIcrm: %+v, blncLmt: %+v, hasLmt: %+v, uF: %+v", costIcrm, blncLmt, hasLmt, uF)
