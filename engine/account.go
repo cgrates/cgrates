@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -304,7 +304,7 @@ func (acc *Account) getBalancesForPrefix(prefix, category, tor,
 		}
 		b.account = acc
 
-		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false {
+		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.MetaAny] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if destIDs, err := dm.GetReverseDestination(p, true, true, utils.NonTransactional); err == nil {
 					foundResult := false

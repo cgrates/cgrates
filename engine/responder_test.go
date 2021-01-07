@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -127,8 +127,8 @@ func TestResponderGobSMCost(t *testing.T) {
 func TestResponderUsageAllow(t *testing.T) {
 	rsp := &Responder{
 		MaxComputedUsage: map[string]time.Duration{
-			utils.ANY:   10 * time.Second,
-			utils.VOICE: 20 * time.Second,
+			utils.MetaAny: 10 * time.Second,
+			utils.VOICE:   20 * time.Second,
 		},
 	}
 	if allow := rsp.usageAllowed(utils.VOICE, 17*time.Second); !allow {
@@ -147,8 +147,8 @@ func TestResponderUsageAllow(t *testing.T) {
 
 func TestResponderGetCostMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -157,7 +157,7 @@ func TestResponderGetCostMaxUsageANY(t *testing.T) {
 			Category:      "call",
 			Tenant:        "cgrates.org",
 			Subject:       "dan",
-			ToR:           utils.ANY,
+			ToR:           utils.MetaAny,
 			Account:       "dan",
 			Destination:   "+4917621621391",
 			DurationIndex: 9,
@@ -174,8 +174,8 @@ func TestResponderGetCostMaxUsageANY(t *testing.T) {
 
 func TestResponderGetCostMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
@@ -201,8 +201,8 @@ func TestResponderGetCostMaxUsageVOICE(t *testing.T) {
 
 func TestResponderDebitMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -211,7 +211,7 @@ func TestResponderDebitMaxUsageANY(t *testing.T) {
 			Category:      "call",
 			Tenant:        "cgrates.org",
 			Subject:       "dan",
-			ToR:           utils.ANY,
+			ToR:           utils.MetaAny,
 			Account:       "dan",
 			Destination:   "+4917621621391",
 			DurationIndex: 9,
@@ -228,8 +228,8 @@ func TestResponderDebitMaxUsageANY(t *testing.T) {
 
 func TestResponderDebitMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
@@ -255,8 +255,8 @@ func TestResponderDebitMaxUsageVOICE(t *testing.T) {
 
 func TestResponderMaxDebitMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -265,7 +265,7 @@ func TestResponderMaxDebitMaxUsageANY(t *testing.T) {
 			Category:      "call",
 			Tenant:        "cgrates.org",
 			Subject:       "dan",
-			ToR:           utils.ANY,
+			ToR:           utils.MetaAny,
 			Account:       "dan",
 			Destination:   "+4917621621391",
 			DurationIndex: 9,
@@ -282,8 +282,8 @@ func TestResponderMaxDebitMaxUsageANY(t *testing.T) {
 
 func TestResponderMaxDebitMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
@@ -309,8 +309,8 @@ func TestResponderMaxDebitMaxUsageVOICE(t *testing.T) {
 
 func TestResponderRefundIncrementsMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -319,7 +319,7 @@ func TestResponderRefundIncrementsMaxUsageANY(t *testing.T) {
 			Category:      "call",
 			Tenant:        "cgrates.org",
 			Subject:       "dan",
-			ToR:           utils.ANY,
+			ToR:           utils.MetaAny,
 			Account:       "dan",
 			Destination:   "+4917621621391",
 			DurationIndex: 9,
@@ -336,8 +336,8 @@ func TestResponderRefundIncrementsMaxUsageANY(t *testing.T) {
 
 func TestResponderRefundIncrementsMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
@@ -363,8 +363,8 @@ func TestResponderRefundIncrementsMaxUsageVOICE(t *testing.T) {
 
 func TestResponderRefundRoundingMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -373,7 +373,7 @@ func TestResponderRefundRoundingMaxUsageANY(t *testing.T) {
 			Category:      "call",
 			Tenant:        "cgrates.org",
 			Subject:       "dan",
-			ToR:           utils.ANY,
+			ToR:           utils.MetaAny,
 			Account:       "dan",
 			Destination:   "+4917621621391",
 			DurationIndex: 9,
@@ -390,8 +390,8 @@ func TestResponderRefundRoundingMaxUsageANY(t *testing.T) {
 
 func TestResponderRefundRoundingMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
@@ -417,8 +417,8 @@ func TestResponderRefundRoundingMaxUsageVOICE(t *testing.T) {
 
 func TestResponderGetMaxSessionTimeMaxUsageANY(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
@@ -427,7 +427,7 @@ func TestResponderGetMaxSessionTimeMaxUsageANY(t *testing.T) {
 			Category:      "call",
 			Tenant:        "cgrates.org",
 			Subject:       "dan",
-			ToR:           utils.ANY,
+			ToR:           utils.MetaAny,
 			Account:       "dan",
 			Destination:   "+4917621621391",
 			DurationIndex: 9,
@@ -444,8 +444,8 @@ func TestResponderGetMaxSessionTimeMaxUsageANY(t *testing.T) {
 
 func TestResponderGetMaxSessionTimeMaxUsageVOICE(t *testing.T) {
 	rsponder.MaxComputedUsage = map[string]time.Duration{
-		utils.ANY:   10 * time.Second,
-		utils.VOICE: 20 * time.Second,
+		utils.MetaAny: 10 * time.Second,
+		utils.VOICE:   20 * time.Second,
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")

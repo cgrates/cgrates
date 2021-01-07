@@ -10,7 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -144,7 +144,7 @@ func testITSetFilterIndexes(t *testing.T) {
 			"RL2": struct{}{},
 			"RL3": struct{}{},
 		},
-		utils.ConcatenatedKey(utils.MetaNone, utils.ANY, utils.ANY): {
+		utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny): {
 			"RL4": struct{}{},
 			"RL5": struct{}{},
 		},
@@ -171,7 +171,7 @@ func testITGetFilterIndexes(t *testing.T) {
 			"RL2": struct{}{},
 			"RL3": struct{}{},
 		},
-		utils.ConcatenatedKey(utils.MetaNone, utils.ANY, utils.ANY): {
+		utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny): {
 			"RL4": struct{}{},
 			"RL5": struct{}{},
 		},
@@ -910,7 +910,7 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 			"RL3": struct{}{},
 		},
 		utils.ConcatenatedKey(utils.MetaNone,
-			utils.ANY, utils.ANY): {
+			utils.MetaAny, utils.MetaAny): {
 			"RL4": struct{}{},
 			"RL5": struct{}{},
 		},
@@ -941,7 +941,7 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 			"RL3": struct{}{},
 		},
 		utils.ConcatenatedKey(utils.MetaNone,
-			utils.ANY, utils.ANY): {
+			utils.MetaAny, utils.MetaAny): {
 			"RL4": struct{}{},
 			"RL5": struct{}{},
 		},
@@ -1047,7 +1047,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 	}
 	if rcvMp, err := dataManager.GetIndexes(
 		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.ConcatenatedKey(utils.MetaNone, utils.META_ANY, utils.META_ANY),
+		utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny),
 		true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
@@ -1132,7 +1132,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	}
 	if rcvMp, err := dataManager.GetIndexes(
 		utils.CacheRouteFilterIndexes, splProfile.Tenant,
-		utils.ConcatenatedKey(utils.MetaNone, utils.META_ANY, utils.META_ANY),
+		utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny),
 		true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {

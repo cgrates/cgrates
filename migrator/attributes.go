@@ -311,7 +311,7 @@ func (v2AttrPrf v2AttributeProfile) AsAttributeProfile() (attrPrf *v3AttributePr
 		}
 		//Initial not *any translate to if value of fieldName = initial do stuff
 		initial := utils.IfaceAsString(attr.Initial)
-		if initial != utils.META_ANY {
+		if initial != utils.MetaAny {
 			filterIDs = append(filterIDs, utils.MetaString+utils.InInFieldSep+attr.FieldName+utils.InInFieldSep+initial)
 		}
 
@@ -343,7 +343,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfileV1To4() (attrPrf *v4Attrib
 				filterIDs = append(filterIDs, utils.MetaExists+utils.CONCATENATED_KEY_SEP+attr.FieldName+utils.CONCATENATED_KEY_SEP)
 			}
 			//Initial not *any translate to if value of fieldName = initial do stuff
-			if attr.Initial != utils.META_ANY {
+			if attr.Initial != utils.MetaAny {
 				filterIDs = append(filterIDs, utils.MetaString+utils.CONCATENATED_KEY_SEP+attr.FieldName+utils.CONCATENATED_KEY_SEP+attr.Initial)
 			}
 			// create RSRParser

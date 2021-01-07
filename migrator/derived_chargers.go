@@ -165,13 +165,13 @@ func (m *Migrator) derivedChargers2Chargers(dck *v1DerivedChargersWithKey) (err 
 	if len(destination) != 0 {
 		filter = append(filter, destination)
 	}
-	if len(skey[2]) != 0 && skey[2] != utils.META_ANY {
+	if len(skey[2]) != 0 && skey[2] != utils.MetaAny {
 		filter = append(filter, fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Category, skey[2]))
 	}
-	if len(skey[3]) != 0 && skey[3] != utils.META_ANY {
+	if len(skey[3]) != 0 && skey[3] != utils.MetaAny {
 		filter = append(filter, fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.AccountField, skey[3]))
 	}
-	if len(skey[4]) != 0 && skey[4] != utils.META_ANY {
+	if len(skey[4]) != 0 && skey[4] != utils.MetaAny {
 		filter = append(filter, fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Subject, skey[4]))
 	}
 	for i, dc := range dck.Value.Chargers {

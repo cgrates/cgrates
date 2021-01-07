@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -456,7 +456,7 @@ func TestAttributeIndexer(t *testing.T) {
 	attrPrf := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf",
-		Contexts:  []string{utils.META_ANY},
+		Contexts:  []string{utils.MetaAny},
 		FilterIDs: []string{"*string:~*req.Account:1007"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -479,7 +479,7 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dmAtr.GetIndexes(utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrPrf.Tenant, utils.META_ANY), "", false, false); err != nil {
+		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaAny), "", false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -503,7 +503,7 @@ func TestAttributeIndexer(t *testing.T) {
 	}
 	//verify if old index was deleted ( context *any)
 	if _, err := dmAtr.GetIndexes(utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrPrf.Tenant, utils.META_ANY), "", false, false); err != utils.ErrNotFound {
+		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaAny), "", false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1261,7 +1261,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 	attrPrf1 := &AttributeProfile{
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       "ATTR_1",
-		Contexts: []string{utils.META_ANY},
+		Contexts: []string{utils.MetaAny},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -1958,7 +1958,7 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 	expAttrPrf1 := &AttributeProfile{
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
-		Contexts: []string{utils.META_ANY},
+		Contexts: []string{utils.MetaAny},
 		Attributes: []*Attribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "Field2",
 			Type:  utils.MetaSum,

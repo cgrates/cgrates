@@ -160,7 +160,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		"stats_conns":           []interface{}{},
 		"min_dur_low_balance":   "0",
 		"stir": map[string]interface{}{
-			"allowed_attest":      []interface{}{utils.META_ANY},
+			"allowed_attest":      []interface{}{utils.MetaAny},
 			"default_attest":      "A",
 			"payload_maxduration": "-1",
 			"privatekey_path":     "",
@@ -194,7 +194,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 			"min_dur_low_balance":   "0",
 			"alterable_fields":      empty,
 			"stir": map[string]interface{}{
-				"allowed_attest":      []string{utils.META_ANY},
+				"allowed_attest":      []string{utils.MetaAny},
 				"default_attest":      "A",
 				"payload_maxduration": "-1",
 				"privatekey_path":     "",
@@ -240,7 +240,7 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 		"min_dur_low_balance":   "0",
 		"alterable_fields":      []interface{}{},
 		"stir": map[string]interface{}{
-			"allowed_attest":      []interface{}{utils.META_ANY},
+			"allowed_attest":      []interface{}{utils.MetaAny},
 			"default_attest":      "A",
 			"payload_maxduration": "-1",
 			"privatekey_path":     "",
@@ -272,7 +272,7 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 			"min_dur_low_balance":   "0",
 			"alterable_fields":      empty,
 			"stir": map[string]interface{}{
-				"allowed_attest":      []string{utils.META_ANY},
+				"allowed_attest":      []string{utils.MetaAny},
 				"default_attest":      "A",
 				"payload_maxduration": "-1",
 				"privatekey_path":     "",

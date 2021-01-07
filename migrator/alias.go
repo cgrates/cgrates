@@ -76,31 +76,31 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 	out := &engine.AttributeProfile{
 		Tenant:             alias.Tenant,
 		ID:                 alias.GetId(),
-		Contexts:           []string{utils.META_ANY},
+		Contexts:           []string{utils.MetaAny},
 		FilterIDs:          make([]string, 0),
 		ActivationInterval: nil,
 		Attributes:         make([]*engine.Attribute, 0),
 		Blocker:            false,
 		Weight:             20, // should have prio against attributes out of users
 	}
-	if len(out.Tenant) == 0 || out.Tenant == utils.META_ANY {
+	if len(out.Tenant) == 0 || out.Tenant == utils.MetaAny {
 		out.Tenant = defaultTenant
 	}
-	if len(alias.Category) != 0 && alias.Category != utils.META_ANY {
+	if len(alias.Category) != 0 && alias.Category != utils.MetaAny {
 		out.FilterIDs = append(out.FilterIDs,
 			fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Category, alias.Category))
 	}
-	if len(alias.Account) != 0 && alias.Account != utils.META_ANY {
+	if len(alias.Account) != 0 && alias.Account != utils.MetaAny {
 		out.FilterIDs = append(out.FilterIDs,
 			fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.AccountField, alias.Account))
 	}
-	if len(alias.Subject) != 0 && alias.Subject != utils.META_ANY {
+	if len(alias.Subject) != 0 && alias.Subject != utils.MetaAny {
 		out.FilterIDs = append(out.FilterIDs,
 			fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.MetaReq+utils.NestingSep+utils.Subject, alias.Subject))
 	}
 	var destination string
 	for _, av := range alias.Values {
-		if len(destination) == 0 || destination == utils.META_ANY {
+		if len(destination) == 0 || destination == utils.MetaAny {
 			destination = av.DestinationId
 		}
 		for fieldName, vals := range av.Pairs {
@@ -121,7 +121,7 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 				}
 				out.Attributes = append(out.Attributes, attr)
 				// Add attribute filters if needed
-				if initial == "" || initial == utils.META_ANY {
+				if initial == "" || initial == utils.MetaAny {
 					continue
 				}
 				if fieldName == utils.MetaTenant { // no filter for tenant
@@ -141,7 +141,7 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 			}
 		}
 	}
-	if len(destination) != 0 && destination != utils.META_ANY {
+	if len(destination) != 0 && destination != utils.MetaAny {
 		out.FilterIDs = append(out.FilterIDs,
 			fmt.Sprintf("%s:~%s:%s", utils.MetaDestinations, utils.MetaReq+utils.NestingSep+utils.Destination, destination))
 	}

@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -1579,7 +1579,7 @@ func TestCDGetCostANY(t *testing.T) {
 		Category:    "data",
 		Tenant:      "cgrates.org",
 		Subject:     "rif",
-		Destination: utils.ANY,
+		Destination: utils.MetaAny,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
 		ToR:         utils.DATA,
@@ -1595,7 +1595,7 @@ func TestCDSplitInDataSlots(t *testing.T) {
 		Category:      "data",
 		Tenant:        "cgrates.org",
 		Subject:       "rif",
-		Destination:   utils.ANY,
+		Destination:   utils.MetaAny,
 		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
 		ToR:           utils.DATA,
@@ -1614,7 +1614,7 @@ func TestCDDataGetCost(t *testing.T) {
 		Category:    "data",
 		Tenant:      "cgrates.org",
 		Subject:     "rif",
-		Destination: utils.ANY,
+		Destination: utils.MetaAny,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
 		ToR:         utils.DATA,

@@ -34,15 +34,15 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 		Rp_subject_prefix_matching: utils.BoolPointer(true),
 		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
-			utils.ANY:   "189h0m0s",
-			utils.VOICE: "72h0m0s",
-			utils.DATA:  "107374182400",
-			utils.SMS:   "5000",
-			utils.MMS:   "10000",
+			utils.MetaAny: "189h0m0s",
+			utils.VOICE:   "72h0m0s",
+			utils.DATA:    "107374182400",
+			utils.SMS:     "5000",
+			utils.MMS:     "10000",
 		},
 		Max_increments: utils.IntPointer(1000000),
 		Balance_rating_subject: &map[string]string{
-			utils.META_ANY:   "*zero1ns",
+			utils.MetaAny:    "*zero1ns",
 			utils.META_VOICE: "*zero1s",
 		},
 		Dynaprepaid_actionplans: &[]string{"randomPlans"},
@@ -55,15 +55,15 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 		RpSubjectPrefixMatching: true,
 		RemoveExpired:           true,
 		MaxComputedUsage: map[string]time.Duration{
-			utils.ANY:   189 * time.Hour,
-			utils.VOICE: 72 * time.Hour,
-			utils.DATA:  107374182400,
-			utils.SMS:   5000,
-			utils.MMS:   10000,
+			utils.MetaAny: 189 * time.Hour,
+			utils.VOICE:   72 * time.Hour,
+			utils.DATA:    107374182400,
+			utils.SMS:     5000,
+			utils.MMS:     10000,
 		},
 		MaxIncrements: 1000000,
 		BalanceRatingSubject: map[string]string{
-			utils.META_ANY:   "*zero1ns",
+			utils.MetaAny:    "*zero1ns",
 			utils.META_VOICE: "*zero1s",
 		},
 		DynaprepaidActionPlans: []string{"randomPlans"},
@@ -79,7 +79,7 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 func TestRalsCfgFromJsonCfgCase2(t *testing.T) {
 	cfgJSON := &RalsJsonCfg{
 		Max_computed_usage: &map[string]string{
-			utils.ANY: "189hh",
+			utils.MetaAny: "189hh",
 		},
 	}
 	expected := "time: unknown unit \"hh\" in duration \"189hh\""
@@ -175,15 +175,15 @@ func TestRalsCfgClone(t *testing.T) {
 		RpSubjectPrefixMatching: true,
 		RemoveExpired:           true,
 		MaxComputedUsage: map[string]time.Duration{
-			utils.ANY:   189 * time.Hour,
-			utils.VOICE: 72 * time.Hour,
-			utils.DATA:  107374182400,
-			utils.SMS:   5000,
-			utils.MMS:   10000,
+			utils.MetaAny: 189 * time.Hour,
+			utils.VOICE:   72 * time.Hour,
+			utils.DATA:    107374182400,
+			utils.SMS:     5000,
+			utils.MMS:     10000,
 		},
 		MaxIncrements: 1000000,
 		BalanceRatingSubject: map[string]string{
-			utils.META_ANY:   "*zero1ns",
+			utils.MetaAny:    "*zero1ns",
 			utils.META_VOICE: "*zero1s",
 		},
 		DynaprepaidActionPlans: []string{"randomPlans"},
@@ -201,10 +201,10 @@ func TestRalsCfgClone(t *testing.T) {
 	if rcv.CacheSConns[1] = ""; ban.CacheSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.MaxComputedUsage[utils.ANY] = 0; ban.MaxComputedUsage[utils.ANY] != 189*time.Hour {
+	if rcv.MaxComputedUsage[utils.MetaAny] = 0; ban.MaxComputedUsage[utils.MetaAny] != 189*time.Hour {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.BalanceRatingSubject[utils.META_ANY] = ""; ban.BalanceRatingSubject[utils.META_ANY] != "*zero1ns" {
+	if rcv.BalanceRatingSubject[utils.MetaAny] = ""; ban.BalanceRatingSubject[utils.MetaAny] != "*zero1ns" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

@@ -242,7 +242,7 @@ type v2Account struct {
 }
 
 func (b *v1Balance) IsDefault() bool {
-	return (b.DestinationIds == "" || b.DestinationIds == utils.ANY) &&
+	return (b.DestinationIds == "" || b.DestinationIds == utils.MetaAny) &&
 		b.RatingSubject == "" &&
 		b.Category == "" &&
 		b.ExpirationDate.IsZero() &&

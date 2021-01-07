@@ -472,7 +472,7 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.NewStringSet([]string{utils.META_ANY}),
+			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
@@ -838,7 +838,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.NewStringSet([]string{utils.META_ANY}),
+			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
@@ -888,7 +888,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.NewStringSet([]string{utils.META_ANY}),
+			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
@@ -940,7 +940,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.NewStringSet([]string{utils.META_ANY}),
+			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},

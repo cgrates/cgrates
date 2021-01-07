@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -53,7 +53,7 @@ func (rs *Responder) usageAllowed(tor string, reqUsage time.Duration) (allowed b
 	rs.maxComputedUsageMutex.RLock()
 	mcu, has := rs.MaxComputedUsage[tor]
 	if !has {
-		mcu = rs.MaxComputedUsage[utils.ANY]
+		mcu = rs.MaxComputedUsage[utils.MetaAny]
 	}
 	rs.maxComputedUsageMutex.RUnlock()
 	if reqUsage <= mcu {

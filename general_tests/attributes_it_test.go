@@ -178,7 +178,7 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_ACCOUNT",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddAccountInfo"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -262,7 +262,7 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_ACCOUNT2",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddFullAccount"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -396,7 +396,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_STATS",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddStatEvent"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -480,7 +480,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_STATS2",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddFullStats"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -628,7 +628,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_RESOURCE",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddResourceUsages"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -712,7 +712,7 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_RESOURCE2",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddFullResource"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -807,7 +807,7 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER2",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddDestinationCarrier"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -893,7 +893,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER_COMPOSED",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddComposedInfo"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -997,7 +997,7 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddDestinationDetails"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),

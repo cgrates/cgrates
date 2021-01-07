@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -127,7 +127,7 @@ func TestNewAttributeFromInline(t *testing.T) {
 	expAttrPrf1 := &AttributeProfile{
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
-		Contexts: []string{utils.META_ANY},
+		Contexts: []string{utils.MetaAny},
 		Attributes: []*Attribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "Field2",
 			Type:  utils.MetaSum,
@@ -147,7 +147,7 @@ func TestNewAttributeFromInlineWithMultipleRuns(t *testing.T) {
 	expAttrPrf1 := &AttributeProfile{
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
-		Contexts: []string{utils.META_ANY},
+		Contexts: []string{utils.MetaAny},
 		Attributes: []*Attribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "RequestType",
 			Type:  utils.META_CONSTANT,

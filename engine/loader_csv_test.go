@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT MetaAny WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -597,7 +597,7 @@ func TestLoadRatingPlans(t *testing.T) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", utils.ToIJSON(expected.Ratings), utils.ToIJSON(rplan.Ratings))
 	}
 	anyTiming := &RITiming{
-		ID:         utils.ANY,
+		ID:         utils.MetaAny,
 		Years:      utils.Years{},
 		Months:     utils.Months{},
 		MonthDays:  utils.MonthDays{},
@@ -605,7 +605,7 @@ func TestLoadRatingPlans(t *testing.T) {
 		StartTime:  "00:00:00",
 		EndTime:    "",
 		cronString: "",
-		tag:        utils.ANY,
+		tag:        utils.MetaAny,
 	}
 
 	if !reflect.DeepEqual(csvr.ratingPlans["ANY_PLAN"].Timings["b9b78731"], anyTiming) {

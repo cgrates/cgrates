@@ -1358,7 +1358,7 @@ func testV1FIdxComputeWithAnotherContext(t *testing.T) {
 	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
 		&utils.ArgsComputeFilterIndexes{
 			Tenant:     tenant,
-			Context:    utils.META_ANY,
+			Context:    utils.MetaAny,
 			AttributeS: true,
 		}, &result); err != nil {
 		t.Error(err)
@@ -1370,7 +1370,7 @@ func testV1FIdxComputeWithAnotherContext(t *testing.T) {
 		ItemType:   utils.MetaAttributes,
 		Tenant:     tenant,
 		FilterType: utils.MetaString,
-		Context:    utils.META_ANY}, &indexes); err == nil ||
+		Context:    utils.MetaAny}, &indexes); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 		t.Error(indexes)

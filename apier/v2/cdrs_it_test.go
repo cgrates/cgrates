@@ -418,7 +418,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.com",
 			ID:        "ATTR_Tenant",
-			Contexts:  []string{utils.META_ANY},
+			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.Tenant:cgrates.com"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -535,7 +535,7 @@ func testV2CDRsRemoveRatingProfiles(t *testing.T) {
 	if err := cdrsRpc.Call(utils.APIerSv1RemoveRatingProfile, &v1.AttrRemoveRatingProfile{
 		Tenant:   "cgrates.org",
 		Category: utils.CALL,
-		Subject:  utils.ANY,
+		Subject:  utils.MetaAny,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -652,7 +652,7 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 	rpf = &utils.AttrSetRatingProfile{
 		Tenant:   "cgrates.org",
 		Category: "call",
-		Subject:  utils.ANY,
+		Subject:  utils.MetaAny,
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			{
 				ActivationTime: "2018-01-01T00:00:00Z",

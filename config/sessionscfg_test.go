@@ -85,7 +85,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Min_dur_low_balance:   utils.StringPointer("1"),
 		Scheduler_conns:       &[]string{utils.MetaInternal, "*conn1"},
 		Stir: &STIRJsonCfg{
-			Allowed_attest:      &[]string{utils.META_ANY},
+			Allowed_attest:      &[]string{utils.MetaAny},
 			Payload_maxduration: utils.StringPointer("-1"),
 			Default_attest:      utils.StringPointer("A"),
 			Publickey_path:      utils.StringPointer("randomPath"),
@@ -115,7 +115,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		MinDurLowBalance:    1,
 		SchedulerConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
 		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.StringSet{utils.META_ANY: {}},
+			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "randomPath",
@@ -247,7 +247,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		MinDurLowBalance:    0,
 		SchedulerConns:      []string{},
 		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.StringSet{utils.META_ANY: {}},
+			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "",
@@ -839,7 +839,7 @@ func TestSessionSCfgClone(t *testing.T) {
 		SessionTTLUsage:     utils.DurationPointer(time.Second),
 		SessionTTLLastUsage: utils.DurationPointer(time.Second),
 		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.StringSet{utils.META_ANY: {}},
+			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "randomPath",

@@ -61,7 +61,7 @@ func (ys Years) Contains(year int) (result bool) {
 // Parse Years elements from string separated by sep.
 func (ys *Years) Parse(input, sep string) {
 	switch input {
-	case META_ANY, EmptyString:
+	case MetaAny, EmptyString:
 		*ys = []int{}
 	default:
 		elements := strings.Split(input, sep)
@@ -75,7 +75,7 @@ func (ys *Years) Parse(input, sep string) {
 
 func (ys Years) Serialize(sep string) string {
 	if len(ys) == 0 {
-		return META_ANY
+		return MetaAny
 	}
 	var yStr string
 	for idx, yr := range ys {
@@ -134,7 +134,7 @@ func (m Months) Contains(month time.Month) (result bool) {
 // Loades Month elemnents from a string separated by sep.
 func (m *Months) Parse(input, sep string) {
 	switch input {
-	case META_ANY, EmptyString: // Apier cannot receive empty string, hence using meta-tag
+	case MetaAny, EmptyString: // Apier cannot receive empty string, hence using meta-tag
 		*m = []time.Month{}
 	default:
 		elements := strings.Split(input, sep)
@@ -149,7 +149,7 @@ func (m *Months) Parse(input, sep string) {
 // Dumps the months in a serialized string, similar to the one parsed
 func (m Months) Serialize(sep string) string {
 	if len(m) == 0 {
-		return META_ANY
+		return MetaAny
 	}
 	var mStr string
 	for idx, mt := range m {
@@ -215,7 +215,7 @@ func (md MonthDays) Contains(monthDay int) (result bool) {
 // Parse MonthDay elements from string separated by sep.
 func (md *MonthDays) Parse(input, sep string) {
 	switch input {
-	case META_ANY, EmptyString:
+	case MetaAny, EmptyString:
 		*md = []int{}
 	default:
 		elements := strings.Split(input, sep)
@@ -230,7 +230,7 @@ func (md *MonthDays) Parse(input, sep string) {
 // Dumps the month days in a serialized string, similar to the one parsed
 func (md MonthDays) Serialize(sep string) string {
 	if len(md) == 0 {
-		return META_ANY
+		return MetaAny
 	}
 	var mdsStr string
 	for idx, mDay := range md {
@@ -289,7 +289,7 @@ func (wd WeekDays) Contains(weekDay time.Weekday) (result bool) {
 
 func (wd *WeekDays) Parse(input, sep string) {
 	switch input {
-	case META_ANY, EmptyString:
+	case MetaAny, EmptyString:
 		*wd = []time.Weekday{}
 	default:
 		elements := strings.Split(input, sep)
@@ -304,7 +304,7 @@ func (wd *WeekDays) Parse(input, sep string) {
 // Dumps the week days in a serialized string, similar to the one parsed
 func (wd WeekDays) Serialize(sep string) string {
 	if len(wd) == 0 {
-		return META_ANY
+		return MetaAny
 	}
 	var wdStr string
 	for idx, d := range wd {

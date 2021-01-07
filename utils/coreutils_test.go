@@ -693,8 +693,8 @@ func TestParseZeroRatingSubject(t *testing.T) {
 	dur := []time.Duration{time.Second, 1024,
 		time.Second, 5 * time.Minute, 10 * time.Hour}
 	dfltRatingSubject := map[string]string{
-		ANY:   "*zero1ns",
-		VOICE: "*zero1s",
+		MetaAny: "*zero1ns",
+		VOICE:   "*zero1s",
 	}
 	for i, s := range subj {
 		if d, err := ParseZeroRatingSubject(VOICE, s, dfltRatingSubject); err != nil || d != dur[i] {
