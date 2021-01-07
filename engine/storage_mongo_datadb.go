@@ -134,20 +134,24 @@ func DecimalEncoder(ec bsoncodec.EncodeContext, vw bsonrw.ValueWriter, val refle
 	if !ok {
 		return fmt.Errorf("cannot cast <%+v> to <utild.Decimal>", val.Interface())
 	}
-	return vw.WriteString(d.String())
+	sls, err := d.MarshalText()
+	if err != nil {
+		return err
+	}
+	return vw.WriteBinary(sls)
 }
 
 func DecimalDecoder(ec bsoncodec.DecodeContext, vw bsonrw.ValueReader, val reflect.Value) error {
 	if !val.CanSet() || val.Type() != decimalType {
 		return bsoncodec.ValueEncoderError{Name: "DecimalDecoder", Kinds: []reflect.Kind{reflect.Struct}, Received: val}
 	}
-	str, err := vw.ReadString()
+	data, _, err := vw.ReadBinary()
 	if err != nil {
 		return err
 	}
-	dBig, ok := new(decimal.Big).SetString(str)
-	if !ok {
-		return fmt.Errorf("cannot set string: <%s> to decimal.Big", str)
+	dBig := new(decimal.Big)
+	if err := dBig.UnmarshalText(data); err != nil {
+		return err
 	}
 	val.Set(reflect.ValueOf(utils.Decimal{dBig}))
 	return nil
