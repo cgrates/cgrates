@@ -210,7 +210,7 @@ func TestNewRoundConverter(t *testing.T) {
 		t.Error(err)
 	}
 	eOut := &RoundConverter{
-		Method: ROUNDING_MIDDLE,
+		Method: MetaRoundingMiddle,
 	}
 	if rcv, err := NewRoundConverter(EmptyString); err != nil {
 		t.Error(err)
@@ -219,7 +219,7 @@ func TestNewRoundConverter(t *testing.T) {
 	}
 	eOut = &RoundConverter{
 		Decimals: 12,
-		Method:   ROUNDING_UP,
+		Method:   MetaRoundingUp,
 	}
 	if rcv, err := NewRoundConverter("12:*up"); err != nil {
 		t.Error(err)
@@ -228,7 +228,7 @@ func TestNewRoundConverter(t *testing.T) {
 	}
 	eOut = &RoundConverter{
 		Decimals: 12,
-		Method:   ROUNDING_DOWN,
+		Method:   MetaRoundingDown,
 	}
 	if rcv, err := NewRoundConverter("12:*down"); err != nil {
 		t.Error(err)
@@ -237,7 +237,7 @@ func TestNewRoundConverter(t *testing.T) {
 	}
 	eOut = &RoundConverter{
 		Decimals: 12,
-		Method:   ROUNDING_MIDDLE,
+		Method:   MetaRoundingMiddle,
 	}
 	if rcv, err := NewRoundConverter("12:*middle"); err != nil {
 		t.Error(err)
@@ -404,7 +404,7 @@ func TestRoundConverterFloat64(t *testing.T) {
 	}
 	expData := &RoundConverter{
 		Decimals: 2,
-		Method:   ROUNDING_MIDDLE,
+		Method:   MetaRoundingMiddle,
 	}
 	if !reflect.DeepEqual(b, expData) {
 		t.Errorf("Expected %+v received: %+v", expData, b)
@@ -428,7 +428,7 @@ func TestRoundConverterString(t *testing.T) {
 	}
 	expData := &RoundConverter{
 		Decimals: 2,
-		Method:   ROUNDING_MIDDLE,
+		Method:   MetaRoundingMiddle,
 	}
 	if !reflect.DeepEqual(b, expData) {
 		t.Errorf("Expected %+v received: %+v", expData, b)
@@ -450,7 +450,7 @@ func TestRoundConverterInt64(t *testing.T) {
 	}
 	expData := &RoundConverter{
 		Decimals: 2,
-		Method:   ROUNDING_MIDDLE,
+		Method:   MetaRoundingMiddle,
 	}
 	if !reflect.DeepEqual(b, expData) {
 		t.Errorf("Expected %+v received: %+v", expData, b)
@@ -472,7 +472,7 @@ func TestRoundConverterTime(t *testing.T) {
 	}
 	expData := &RoundConverter{
 		Decimals: 2,
-		Method:   ROUNDING_MIDDLE,
+		Method:   MetaRoundingMiddle,
 	}
 	if !reflect.DeepEqual(b, expData) {
 		t.Errorf("Expected %+v received: %+v", expData, b)

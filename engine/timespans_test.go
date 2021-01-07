@@ -727,7 +727,7 @@ func TestTimespanCreateIncrements(t *testing.T) {
 		TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 100000000, time.UTC),
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
-				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingMethod:   utils.MetaRoundingMiddle,
 				RoundingDecimals: 2,
 				Rates: RateGroups{
 					&RGRate{
@@ -755,7 +755,7 @@ func TestTimespanSplitByIncrement(t *testing.T) {
 		ratingInfo:    &RatingInfo{},
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
-				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingMethod:   utils.MetaRoundingMiddle,
 				RoundingDecimals: 2,
 				Rates: RateGroups{
 					&RGRate{
@@ -789,7 +789,7 @@ func TestTimespanSplitByIncrementStart(t *testing.T) {
 		DurationIndex: 60 * time.Second,
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
-				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingMethod:   utils.MetaRoundingMiddle,
 				RoundingDecimals: 2,
 				Rates: RateGroups{
 					&RGRate{
@@ -823,7 +823,7 @@ func TestTimespanSplitByIncrementEnd(t *testing.T) {
 		DurationIndex: 60 * time.Second,
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
-				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingMethod:   utils.MetaRoundingMiddle,
 				RoundingDecimals: 2,
 				Rates: RateGroups{
 					&RGRate{
@@ -858,7 +858,7 @@ func TestTimespanSplitByDuration(t *testing.T) {
 		ratingInfo:    &RatingInfo{},
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
-				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingMethod:   utils.MetaRoundingMiddle,
 				RoundingDecimals: 2,
 				Rates: RateGroups{
 					&RGRate{
@@ -1856,7 +1856,7 @@ func TestMerge(t *testing.T) {
 		TimeEnd:   time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
-				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingMethod:   utils.MetaRoundingMiddle,
 				RoundingDecimals: 2,
 				Rates: RateGroups{
 					&RGRate{
@@ -1885,7 +1885,7 @@ func TestMerge(t *testing.T) {
 		TimeEnd:   time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC),
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
-				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingMethod:   utils.MetaRoundingMiddle,
 				RoundingDecimals: 2,
 				Rates: RateGroups{
 					&RGRate{
@@ -1921,7 +1921,7 @@ func TestMerge(t *testing.T) {
 		TimeEnd:   time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC),
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
-				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingMethod:   utils.MetaRoundingMiddle,
 				RoundingDecimals: 2,
 				Rates: RateGroups{
 					&RGRate{

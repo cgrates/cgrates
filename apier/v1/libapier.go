@@ -36,7 +36,7 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt *string, tnt, cacheID, itemID strin
 		cacheOpt = *cacheopt
 	}
 	switch cacheOpt {
-	case utils.META_NONE:
+	case utils.MetaNone:
 		return
 	case utils.MetaReload:
 		method = utils.CacheSv1ReloadCache
@@ -81,7 +81,7 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 	// popultate the indexes
 	idxCacheID := utils.CacheInstanceToArg[utils.CacheInstanceToCacheIndex[cacheID]]
 	if len(*filterIDs) == 0 { // in case we do not have any filters reload the *none filter indexes
-		indxID := utils.ConcatenatedKey(utils.META_NONE, utils.META_ANY, utils.META_ANY)
+		indxID := utils.ConcatenatedKey(utils.MetaNone, utils.META_ANY, utils.META_ANY)
 		if cacheID != utils.CacheAttributeProfiles &&
 			cacheID != utils.CacheDispatcherProfiles {
 			rpl.ArgsCache[idxCacheID] = []string{utils.ConcatenatedKey(tnt, indxID)}

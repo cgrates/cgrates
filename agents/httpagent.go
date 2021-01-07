@@ -143,7 +143,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	switch reqType {
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
-	case utils.META_NONE: // do nothing on CGRateS side
+	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",

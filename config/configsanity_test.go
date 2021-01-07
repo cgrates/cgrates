@@ -483,7 +483,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.META_NONE
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 
 	expected = "<DiameterAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -531,7 +531,7 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.META_NONE
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 
 	expected = "<RadiusAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -579,7 +579,7 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.META_NONE
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 
 	expected = "<DNSAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -638,7 +638,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Type = utils.META_NONE
+	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 	expected = "<HTTPAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -687,7 +687,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.META_NONE
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 	expected = "<SIPAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -957,7 +957,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	expected = "<ERs> MANDATORY_IE_MISSING: [Path] for  at SessionId"
-	cfg.ersCfg.Readers[0].CacheDumpFields[0].Type = utils.META_NONE
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Type = utils.MetaNone
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

@@ -384,7 +384,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		utils.MetaDryRun, utils.MetaAuthorize, /*
 			utils.MetaInitiate, utils.MetaUpdate,
 			utils.MetaTerminate, utils.MetaMessage,
-			utils.MetaCDRs, */utils.MetaEvent, utils.META_NONE} {
+			utils.MetaCDRs, */utils.MetaEvent, utils.MetaNone} {
 		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -408,7 +408,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	switch reqType {
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
-	case utils.META_NONE: // do nothing on CGRateS side
+	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",

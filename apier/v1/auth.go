@@ -47,7 +47,7 @@ func (apierSv1 *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithOpts, m
 		usageRecord.Subject = usageRecord.Account
 	}
 	if usageRecord.SetupTime == utils.EmptyString {
-		usageRecord.SetupTime = utils.META_NOW
+		usageRecord.SetupTime = utils.MetaNow
 	}
 	if usageRecord.Usage == utils.EmptyString {
 		usageRecord.Usage = strconv.FormatFloat(

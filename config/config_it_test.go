@@ -529,7 +529,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 		Readers: []*EventReaderCfg{
 			{
 				ID:               utils.MetaDefault,
-				Type:             utils.META_NONE,
+				Type:             utils.MetaNone,
 				RowLength:        0,
 				FieldSep:         ",",
 				HeaderDefineChar: ":",
@@ -735,7 +735,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"source_path":                 "/var/spool/cgrates/ers/in",
 				"tenant":                      "",
 				"timezone":                    "",
-				"type":                        utils.META_NONE,
+				"type":                        utils.MetaNone,
 				"xml_root_path":               []interface{}{utils.EmptyString},
 				"opts":                        make(map[string]interface{}),
 			},

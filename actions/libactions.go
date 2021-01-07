@@ -32,7 +32,7 @@ import (
 func actionTarget(act string) (trgt string) {
 	switch act {
 	default:
-		trgt = utils.META_NONE
+		trgt = utils.MetaNone
 	}
 	return
 }

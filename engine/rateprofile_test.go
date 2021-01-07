@@ -662,7 +662,7 @@ func TestRateProfileCostCorrectCost(t *testing.T) {
 		ID:   "Test1",
 		Cost: 0.234,
 	}
-	rPrfCost.CorrectCost(utils.IntPointer(2), utils.ROUNDING_UP)
+	rPrfCost.CorrectCost(utils.IntPointer(2), utils.MetaRoundingUp)
 	if rPrfCost.Cost != 0.24 {
 		t.Errorf("Expected: %+v, received: %+v", 0.24, rPrfCost.Cost)
 	}

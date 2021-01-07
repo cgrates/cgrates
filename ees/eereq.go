@@ -222,7 +222,7 @@ func (eeR *EventExporterRequest) ParseField(
 	switch cfgFld.Type {
 	default:
 		return utils.EmptyString, fmt.Errorf("unsupported type: <%s>", cfgFld.Type)
-	case utils.META_NONE:
+	case utils.MetaNone:
 		return
 	case utils.META_FILLER:
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
@@ -348,7 +348,7 @@ func (eeR *EventExporterRequest) ParseField(
 			return
 		}
 		out = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
-			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.MetaRoundingMiddle), 'f', -1, 64)
 	case utils.MetaUnixTimestamp:
 		var val string
 		if val, err = cfgFld.Value.ParseDataProvider(eeR); err != nil {

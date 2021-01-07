@@ -417,7 +417,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 		AllocationMessage: "MessageAllocation",
 		Stored:            true,
 		Weight:            20,
-		ThresholdIDs:      []string{utils.META_NONE},
+		ThresholdIDs:      []string{utils.MetaNone},
 	}
 
 	var result string

@@ -100,7 +100,7 @@ func (cIl *ChargingInterval) Cost() float64 {
 		for _, incr := range cIl.Increments {
 			cost += incr.Cost * float64(incr.CompressFactor)
 		}
-		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+		cost = utils.Round(cost, globalRoundingDecimals, utils.MetaRoundingMiddle)
 		cIl.cost = &cost
 	}
 	return *cIl.cost
@@ -109,7 +109,7 @@ func (cIl *ChargingInterval) Cost() float64 {
 // TotalCost returns the cost of charges
 func (cIl *ChargingInterval) TotalCost() float64 {
 	return utils.Round((cIl.Cost() * float64(cIl.CompressFactor)),
-		globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+		globalRoundingDecimals, utils.MetaRoundingMiddle)
 }
 
 // Clone returns a new instance of ChargingInterval with independent data
@@ -217,11 +217,11 @@ func (bc *BalanceCharge) FieldAsInterface(fldPath []string) (val interface{}, er
 func (bc *BalanceCharge) Equals(oBC *BalanceCharge) bool {
 	bcExtraChargeID := bc.ExtraChargeID
 	if bcExtraChargeID == "" {
-		bcExtraChargeID = utils.META_NONE
+		bcExtraChargeID = utils.MetaNone
 	}
 	oBCExtraChargerID := oBC.ExtraChargeID
 	if oBCExtraChargerID == "" { // so we can compare them properly
-		oBCExtraChargerID = utils.META_NONE
+		oBCExtraChargerID = utils.MetaNone
 	}
 	return bc.AccountID == oBC.AccountID &&
 		bc.BalanceUUID == oBC.BalanceUUID &&

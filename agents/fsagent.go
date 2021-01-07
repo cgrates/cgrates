@@ -134,7 +134,7 @@ func (fsa *FSsessions) unparkCall(uuid string, connIdx int, callDestNb, notify s
 }
 
 func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
-	if fsev.GetReqType(utils.MetaDefault) == utils.META_NONE { // Not for us
+	if fsev.GetReqType(utils.MetaDefault) == utils.MetaNone { // Not for us
 		return
 	}
 	if connIdx >= len(fsa.conns) { // protection against index out of range panic
@@ -208,7 +208,7 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 }
 
 func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
-	if fsev.GetReqType(utils.MetaDefault) == utils.META_NONE { // Do not process this request
+	if fsev.GetReqType(utils.MetaDefault) == utils.MetaNone { // Do not process this request
 		return
 	}
 	if connIdx >= len(fsa.conns) { // protection against index out of range panic
@@ -247,7 +247,7 @@ func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 }
 
 func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
-	if fsev.GetReqType(utils.MetaDefault) == utils.META_NONE { // Do not process this request
+	if fsev.GetReqType(utils.MetaDefault) == utils.MetaNone { // Do not process this request
 		return
 	}
 	if connIdx >= len(fsa.conns) { // protection against index out of range panic

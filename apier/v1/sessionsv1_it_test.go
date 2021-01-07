@@ -134,7 +134,7 @@ func TestSSv1ItWithPseudoPrepaid(t *testing.T) {
 	if *dbType == utils.MetaPostgres {
 		t.SkipNow()
 	}
-	sSV1RequestType = utils.META_PSEUDOPREPAID
+	sSV1RequestType = utils.MetaPseudoPrepaid
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
 	}

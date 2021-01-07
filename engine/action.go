@@ -131,7 +131,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 	defaultTemplate := map[string]config.RSRParsers{
 		utils.ToR:          config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.BalanceType, utils.INFIELD_SEP),
 		utils.OriginHost:   config.NewRSRParsersMustCompile("127.0.0.1", utils.INFIELD_SEP),
-		utils.RequestType:  config.NewRSRParsersMustCompile(utils.META_NONE, utils.INFIELD_SEP),
+		utils.RequestType:  config.NewRSRParsersMustCompile(utils.MetaNone, utils.INFIELD_SEP),
 		utils.Tenant:       config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Tenant, utils.INFIELD_SEP),
 		utils.AccountField: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.INFIELD_SEP),
 		utils.Subject:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.INFIELD_SEP),
@@ -395,7 +395,7 @@ func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 		return err
 	}
 	err = pstr.PostValues(body, make(http.Header))
-	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
+	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
 		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
 		err = nil
 	}
@@ -415,7 +415,7 @@ func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) er
 	}
 	go func() {
 		err := pstr.PostValues(body, make(http.Header))
-		if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
+		if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
 			AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
 		}
 	}()
@@ -958,7 +958,7 @@ func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error
 		return err
 	}
 	err = pstr.PostValues(body, make(http.Header))
-	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.META_NONE {
+	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
 		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
 		err = nil
 	}

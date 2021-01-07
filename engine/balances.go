@@ -288,7 +288,7 @@ func (b *Balance) SubstractValue(amount float64) {
 
 func (b *Balance) SetValue(amount float64) {
 	b.Value = amount
-	b.Value = utils.Round(b.GetValue(), globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+	b.Value = utils.Round(b.GetValue(), globalRoundingDecimals, utils.MetaRoundingMiddle)
 	b.dirty = true
 }
 
@@ -334,7 +334,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			MatchedSubject: b.Uuid,
 			MatchedPrefix:  prefix,
 			MatchedDestId:  destid,
-			RatingPlanId:   utils.META_NONE,
+			RatingPlanId:   utils.MetaNone,
 		})
 		ts.createIncrementsSlice()
 		//log.Printf("CC: %+v", ts)
@@ -344,7 +344,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			amount := float64(inc.Duration.Nanoseconds())
 			if b.Factor != nil {
 				amount = utils.Round(amount/b.Factor.GetValue(cd.ToR),
-					globalRoundingDecimals, utils.ROUNDING_UP)
+					globalRoundingDecimals, utils.MetaRoundingUp)
 			}
 			if b.GetValue() >= amount {
 				b.SubstractValue(amount)
@@ -435,7 +435,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				// debit minutes and money
 				amount := float64(inc.Duration.Nanoseconds())
 				if b.Factor != nil {
-					amount = utils.Round(amount/b.Factor.GetValue(cd.ToR), globalRoundingDecimals, utils.ROUNDING_UP)
+					amount = utils.Round(amount/b.Factor.GetValue(cd.ToR), globalRoundingDecimals, utils.MetaRoundingUp)
 				}
 				cost := inc.Cost
 				inc.paid = false
@@ -713,7 +713,7 @@ func (bc Balances) GetTotalValue() (total float64) {
 			total += b.GetValue()
 		}
 	}
-	total = utils.Round(total, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+	total = utils.Round(total, globalRoundingDecimals, utils.MetaRoundingMiddle)
 	return
 }
 

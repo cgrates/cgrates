@@ -1398,7 +1398,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 			Blocker:           true,
 			Stored:            true,
 			Weight:            20,
-			ThresholdIDs:      []string{utils.META_NONE},
+			ThresholdIDs:      []string{utils.MetaNone},
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
@@ -1533,7 +1533,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 			Blocker:           true,
 			Stored:            true,
 			Weight:            20,
-			ThresholdIDs:      []string{utils.META_NONE},
+			ThresholdIDs:      []string{utils.MetaNone},
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.APIerSv1SetResourceProfile,

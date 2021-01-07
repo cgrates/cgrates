@@ -234,7 +234,7 @@ func testCacheRplAddData(t *testing.T) {
 			Tenant:       "cgrates.org",
 			ID:           "DefaultCharger",
 			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{utils.META_NONE},
+			AttributeIDs: []string{utils.MetaNone},
 			Weight:       20,
 		},
 	}
@@ -293,7 +293,7 @@ func testCacheRplAAAddData(t *testing.T) {
 			Tenant:       "cgrates.org",
 			ID:           "DefaultCharger",
 			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{utils.META_NONE},
+			AttributeIDs: []string{utils.MetaNone},
 			Weight:       20,
 		},
 	}

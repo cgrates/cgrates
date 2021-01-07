@@ -121,31 +121,31 @@ func TestUUIDSha1Prefix(t *testing.T) {
 }
 
 func TestRound(t *testing.T) {
-	result := Round(12.49, 1, ROUNDING_UP)
+	result := Round(12.49, 1, MetaRoundingUp)
 	expected := 12.5
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
 	}
 
-	result = Round(12.21, 1, ROUNDING_UP)
+	result = Round(12.21, 1, MetaRoundingUp)
 	expected = 12.3
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
 	}
 
-	result = Round(0.0701, 2, ROUNDING_UP)
+	result = Round(0.0701, 2, MetaRoundingUp)
 	expected = 0.08
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
 	}
 
-	result = Round(12.49, 1, ROUNDING_DOWN)
+	result = Round(12.49, 1, MetaRoundingDown)
 	expected = 12.4
 	if result != expected {
 		t.Errorf("Error rounding down: sould be %v was %v", expected, result)
 	}
 
-	result = Round(12.21, 1, ROUNDING_DOWN)
+	result = Round(12.21, 1, MetaRoundingDown)
 	expected = 12.2
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
@@ -153,17 +153,17 @@ func TestRound(t *testing.T) {
 
 	//AlredyHavingPrecision
 	x := 0.07
-	if y := Round(x, 2, ROUNDING_UP); y != x {
+	if y := Round(x, 2, MetaRoundingUp); y != x {
 		t.Error("Error rounding when already has desired precision: ", y)
 	}
-	if y := Round(x, 2, ROUNDING_MIDDLE); y != x {
+	if y := Round(x, 2, MetaRoundingMiddle); y != x {
 		t.Error("Error rounding when already has desired precision: ", y)
 	}
-	if y := Round(x, 2, ROUNDING_DOWN); y != x {
+	if y := Round(x, 2, MetaRoundingDown); y != x {
 		t.Error("Error rounding when already has desired precision: ", y)
 	}
 
-	result = Round(14.37, 8, ROUNDING_DOWN)
+	result = Round(14.37, 8, MetaRoundingDown)
 	expected = 14.37
 	if result != expected {
 		t.Errorf("Expecting: %v, received:  %v", expected, result)
@@ -174,13 +174,13 @@ func TestRound(t *testing.T) {
 		t.Errorf("Expecting: %v, received:  %v", expected, result)
 	}
 
-	result = Round(14.37, 0, ROUNDING_MIDDLE)
+	result = Round(14.37, 0, MetaRoundingMiddle)
 	expected = 14
 	if result != expected {
 		t.Errorf("Expecting: %v, received:  %v", expected, result)
 	}
 
-	result = Round(14.37, -1, ROUNDING_MIDDLE)
+	result = Round(14.37, -1, MetaRoundingMiddle)
 	expected = 10
 	if result != expected {
 		t.Errorf("Expecting: %v, received:  %v", expected, result)
@@ -331,7 +331,7 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if !tsTm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", tsTm, expectedTime)
 	}
-	if nowTm, err := ParseTimeDetectLayout(META_NOW, ""); err != nil {
+	if nowTm, err := ParseTimeDetectLayout(MetaNow, ""); err != nil {
 		t.Error(err)
 	} else if time.Now().Sub(nowTm) > 10*time.Millisecond {
 		t.Errorf("Unexpected time parsed: %v", nowTm)

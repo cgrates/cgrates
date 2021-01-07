@@ -2636,7 +2636,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	}
 	var reply string
 	switch caching {
-	case utils.META_NONE:
+	case utils.MetaNone:
 		return
 	case utils.MetaReload:
 		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {

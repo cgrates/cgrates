@@ -171,7 +171,7 @@ func testAccountSGetAccountProfile(t *testing.T) {
 				Units:          &utils.Decimal{decimal.New(3600000000000, 0)},
 			},
 		},
-		ThresholdIDs: []string{utils.META_NONE},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 	if *encoding == utils.MetaGOB {
 		expected.FilterIDs = nil
@@ -239,7 +239,7 @@ func testAccountSSettAccountProfile(t *testing.T) {
 						Units:     3600000000000,
 					},
 				},
-				ThresholdIDs: []string{utils.META_NONE},
+				ThresholdIDs: []string{utils.MetaNone},
 			},
 			Opts: map[string]interface{}{},
 		},

@@ -217,7 +217,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREventWithOpts, a
 		var trgActs map[string][]actioner // build here the list of actioners based on the trgKey
 		var trgKey string
 		for _, aCfg := range aPf.Actions { // create actioners and attach them to the right target
-			if trgTyp := actionTarget(aCfg.Type); trgTyp != utils.META_NONE ||
+			if trgTyp := actionTarget(aCfg.Type); trgTyp != utils.MetaNone ||
 				trgKey == utils.EmptyString {
 				trgKey = trgTyp
 			}
@@ -236,7 +236,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREventWithOpts, a
 			continue // skip this profile from processing further
 		}
 		for trg, acts := range trgActs {
-			if trg == utils.META_NONE { // only one scheduledActs set
+			if trg == utils.MetaNone { // only one scheduledActs set
 				schedActs = append(schedActs, newScheduledActs(aPf.Tenant, aPf.ID, trg, utils.EmptyString, aPf.Schedule,
 					ctx, &ActData{cgrEv.CGREvent.Event, cgrEv.Opts}, acts))
 				continue

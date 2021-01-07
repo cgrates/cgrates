@@ -175,7 +175,7 @@ func (cc *CallCost) updateCost() {
 	for _, ts := range cc.Timespans {
 		ts.Cost = ts.CalculateCost()
 		cost += ts.Cost
-		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
+		cost = utils.Round(cost, globalRoundingDecimals, utils.MetaRoundingMiddle) // just get rid of the extra decimals
 	}
 	cc.Cost = cost
 }

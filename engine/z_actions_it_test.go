@@ -151,7 +151,7 @@ func testActionsitSetCdrlogDebit(t *testing.T) {
 	} else if rcvedCdrs[0].ToR != utils.MONETARY ||
 		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
 		rcvedCdrs[0].Source != utils.CDRLOG ||
-		rcvedCdrs[0].RequestType != utils.META_NONE ||
+		rcvedCdrs[0].RequestType != utils.MetaNone ||
 		rcvedCdrs[0].Tenant != "cgrates.org" ||
 		rcvedCdrs[0].Account != "dan2904" ||
 		rcvedCdrs[0].Subject != "dan2904" ||
@@ -194,7 +194,7 @@ func testActionsitSetCdrlogTopup(t *testing.T) {
 	} else if rcvedCdrs[0].ToR != utils.MONETARY ||
 		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
 		rcvedCdrs[0].Source != utils.CDRLOG ||
-		rcvedCdrs[0].RequestType != utils.META_NONE ||
+		rcvedCdrs[0].RequestType != utils.MetaNone ||
 		rcvedCdrs[0].Tenant != "cgrates.org" ||
 		rcvedCdrs[0].Account != "dan2905" ||
 		rcvedCdrs[0].Subject != "dan2905" ||
@@ -418,7 +418,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 	} else if rcvedCdrs[0].ToR != utils.MONETARY ||
 		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
 		rcvedCdrs[0].Source != utils.CDRLOG ||
-		rcvedCdrs[0].RequestType != utils.META_NONE ||
+		rcvedCdrs[0].RequestType != utils.MetaNone ||
 		rcvedCdrs[0].Tenant != "cgrates.org" ||
 		rcvedCdrs[0].Account != "th_acc" ||
 		rcvedCdrs[0].Subject != "th_acc" ||
@@ -753,7 +753,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 			Metrics: []*MetricWithFilters{{
 				MetricID: utils.MetaDDC,
 			}},
-			ThresholdIDs: []string{utils.META_NONE},
+			ThresholdIDs: []string{utils.MetaNone},
 			Stored:       true,
 			Weight:       20,
 		},

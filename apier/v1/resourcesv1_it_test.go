@@ -825,7 +825,7 @@ func testV1RsMatchNotFound(t *testing.T) {
 			AllocationMessage: "MessageAllocation",
 			Stored:            true,
 			Weight:            20,
-			ThresholdIDs:      []string{utils.META_NONE},
+			ThresholdIDs:      []string{utils.MetaNone},
 		},
 	}
 
@@ -871,7 +871,7 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 			AllocationMessage: "CustomUnlimitedMessage",
 			Stored:            true,
 			Weight:            20,
-			ThresholdIDs:      []string{utils.META_NONE},
+			ThresholdIDs:      []string{utils.MetaNone},
 		},
 	}
 

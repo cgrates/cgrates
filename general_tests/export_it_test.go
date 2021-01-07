@@ -285,7 +285,7 @@ func testExpVerifyStats(t *testing.T) {
 		Stored:       false,
 		Weight:       30,
 		MinItems:     0,
-		ThresholdIDs: []string{utils.META_NONE},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var reply *engine.StatQueueProfile
 	if err := expRpc.Call(utils.APIerSv1GetStatQueueProfile,
@@ -372,7 +372,7 @@ func testExpVerifyRateProfiles(t *testing.T) {
 		ActivationInterval: nil,
 		Weight:             10,
 		RoundingDecimals:   4,
-		RoundingMethod:     utils.ROUNDING_UP,
+		RoundingMethod:     utils.MetaRoundingUp,
 		MinCost:            0,
 		MaxCost:            0,
 		MaxCostStrategy:    utils.MAX_COST_FREE,

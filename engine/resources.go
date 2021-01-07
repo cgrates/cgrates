@@ -422,7 +422,7 @@ func (rS *ResourceService) processThresholds(r *Resource, opts map[string]interf
 	}
 	var thIDs []string
 	if len(r.rPrf.ThresholdIDs) != 0 {
-		if len(r.rPrf.ThresholdIDs) == 1 && r.rPrf.ThresholdIDs[0] == utils.META_NONE {
+		if len(r.rPrf.ThresholdIDs) == 1 && r.rPrf.ThresholdIDs[0] == utils.MetaNone {
 			return
 		}
 		thIDs = r.rPrf.ThresholdIDs

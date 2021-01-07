@@ -144,7 +144,7 @@ func testITSetFilterIndexes(t *testing.T) {
 			"RL2": struct{}{},
 			"RL3": struct{}{},
 		},
-		utils.ConcatenatedKey(utils.META_NONE, utils.ANY, utils.ANY): {
+		utils.ConcatenatedKey(utils.MetaNone, utils.ANY, utils.ANY): {
 			"RL4": struct{}{},
 			"RL5": struct{}{},
 		},
@@ -171,7 +171,7 @@ func testITGetFilterIndexes(t *testing.T) {
 			"RL2": struct{}{},
 			"RL3": struct{}{},
 		},
-		utils.ConcatenatedKey(utils.META_NONE, utils.ANY, utils.ANY): {
+		utils.ConcatenatedKey(utils.MetaNone, utils.ANY, utils.ANY): {
 			"RL4": struct{}{},
 			"RL5": struct{}{},
 		},
@@ -909,7 +909,7 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 			"RL2": struct{}{},
 			"RL3": struct{}{},
 		},
-		utils.ConcatenatedKey(utils.META_NONE,
+		utils.ConcatenatedKey(utils.MetaNone,
 			utils.ANY, utils.ANY): {
 			"RL4": struct{}{},
 			"RL5": struct{}{},
@@ -940,7 +940,7 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 			"RL2": struct{}{},
 			"RL3": struct{}{},
 		},
-		utils.ConcatenatedKey(utils.META_NONE,
+		utils.ConcatenatedKey(utils.MetaNone,
 			utils.ANY, utils.ANY): {
 			"RL4": struct{}{},
 			"RL5": struct{}{},
@@ -1047,7 +1047,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 	}
 	if rcvMp, err := dataManager.GetIndexes(
 		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.ConcatenatedKey(utils.META_NONE, utils.META_ANY, utils.META_ANY),
+		utils.ConcatenatedKey(utils.MetaNone, utils.META_ANY, utils.META_ANY),
 		true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
@@ -1132,7 +1132,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	}
 	if rcvMp, err := dataManager.GetIndexes(
 		utils.CacheRouteFilterIndexes, splProfile.Tenant,
-		utils.ConcatenatedKey(utils.META_NONE, utils.META_ANY, utils.META_ANY),
+		utils.ConcatenatedKey(utils.MetaNone, utils.META_ANY, utils.META_ANY),
 		true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {

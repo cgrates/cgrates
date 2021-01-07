@@ -134,7 +134,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREventWithOpts
 			AlteredFields:   []string{utils.MetaReqRunID},
 			Opts:            clonedEv.Opts,
 		}
-		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.META_NONE {
+		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.MetaNone {
 			continue // AttributeS disabled
 		}
 

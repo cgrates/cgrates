@@ -186,7 +186,7 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 					Units: 14,
 				},
 			},
-			ThresholdIDs: []string{utils.META_NONE},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 	if err := storDB.SetTPAccountProfiles(actPrf); err != nil {

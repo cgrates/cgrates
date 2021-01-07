@@ -751,7 +751,7 @@ func TestResourceCaching(t *testing.T) {
 		Limit:             10.00,
 		AllocationMessage: "AllocationMessage",
 		Weight:            20.00,
-		ThresholdIDs:      []string{utils.META_NONE},
+		ThresholdIDs:      []string{utils.MetaNone},
 	}
 
 	if err := Cache.Set(utils.CacheResourceProfiles, "cgrates.org:ResourceProfileCached",

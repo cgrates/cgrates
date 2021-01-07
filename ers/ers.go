@@ -66,7 +66,7 @@ type ERService struct {
 // ListenAndServe keeps the service alive
 func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err error) {
 	for cfgIdx, rdrCfg := range erS.cfg.ERsCfg().Readers {
-		if rdrCfg.Type == utils.META_NONE { // ignore *default reader
+		if rdrCfg.Type == utils.MetaNone { // ignore *default reader
 			continue
 		}
 		if err = erS.addReader(rdrCfg.ID, cfgIdx); err != nil {
@@ -121,7 +121,7 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err er
 					!pathReloaded.Has(id) {
 					continue
 				}
-				if erS.cfg.ERsCfg().Readers[rdrIdx].Type == utils.META_NONE { // ignore *default reader
+				if erS.cfg.ERsCfg().Readers[rdrIdx].Type == utils.MetaNone { // ignore *default reader
 					continue
 				}
 				if err := erS.addReader(id, rdrIdx); err != nil {
@@ -164,7 +164,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		utils.MetaDryRun, utils.MetaAuthorize,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE} {
+		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone} {
 		if rdrCfg.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -184,7 +184,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	switch reqType {
 	default:
 		return fmt.Errorf("unsupported reqType: <%s>", reqType)
-	case utils.META_NONE: // do nothing on CGRateS side
+	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRYRUN, reader: <%s>, CGREvent: <%s>",

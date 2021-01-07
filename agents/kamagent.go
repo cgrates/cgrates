@@ -121,7 +121,7 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 			utils.KamailioAgent, evData, err.Error()))
 		return
 	}
-	if kev[utils.RequestType] == utils.META_NONE { // Do not process this request
+	if kev[utils.RequestType] == utils.MetaNone { // Do not process this request
 		return
 	}
 	if kev.MissingParameter() {
@@ -166,7 +166,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 			utils.KamailioAgent, evData, err.Error()))
 		return
 	}
-	if kev[utils.RequestType] == utils.META_NONE { // Do not process this request
+	if kev[utils.RequestType] == utils.MetaNone { // Do not process this request
 		return
 	}
 	if kev.MissingParameter() {
@@ -208,7 +208,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 			utils.KamailioAgent, evData, err.Error()))
 		return
 	}
-	if kev[utils.RequestType] == utils.META_NONE { // Do not process this request
+	if kev[utils.RequestType] == utils.MetaNone { // Do not process this request
 		return
 	}
 	if kev.MissingParameter() {

@@ -105,7 +105,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 						RateUnit:           time.Second,
 					},
 				},
-				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingMethod:   utils.MetaRoundingMiddle,
 				RoundingDecimals: 4,
 			},
 		},

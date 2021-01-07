@@ -140,7 +140,7 @@ func testGOCSLoadData(t *testing.T) {
 			Tenant:       "cgrates.org",
 			ID:           "DEFAULT",
 			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{utils.META_NONE},
+			AttributeIDs: []string{utils.MetaNone},
 			Weight:       10,
 		},
 	}

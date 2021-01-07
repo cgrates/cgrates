@@ -76,7 +76,7 @@ func TestEESClone(t *testing.T) {
 		Exporters: []*EventExporterCfg{
 			{
 				ID:            utils.MetaDefault,
-				Type:          utils.META_NONE,
+				Type:          utils.MetaNone,
 				FieldSep:      ",",
 				Synchronous:   false,
 				Tenant:        NewRSRParsersMustCompile("", utils.INFIELD_SEP),
@@ -95,7 +95,7 @@ func TestEESClone(t *testing.T) {
 			},
 			{
 				ID:            utils.CGRateSLwr,
-				Type:          utils.META_NONE,
+				Type:          utils.MetaNone,
 				FieldSep:      ",",
 				Synchronous:   false,
 				Tenant:        NewRSRParsersMustCompile("~*req.Destination1", utils.INFIELD_SEP),
@@ -297,7 +297,7 @@ func TestEventExporterSameID(t *testing.T) {
 		Exporters: []*EventExporterCfg{
 			{
 				ID:            utils.MetaDefault,
-				Type:          utils.META_NONE,
+				Type:          utils.MetaNone,
 				FieldSep:      ",",
 				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",
@@ -422,7 +422,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 		Exporters: []*EventExporterCfg{
 			{
 				ID:            utils.MetaDefault,
-				Type:          utils.META_NONE,
+				Type:          utils.MetaNone,
 				FieldSep:      ",",
 				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",
@@ -539,7 +539,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 		Exporters: []*EventExporterCfg{
 			{
 				ID:            utils.MetaDefault,
-				Type:          utils.META_NONE,
+				Type:          utils.MetaNone,
 				FieldSep:      ",",
 				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",

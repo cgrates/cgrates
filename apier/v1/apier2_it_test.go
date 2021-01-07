@@ -238,7 +238,7 @@ func testAPIerGetRatingPlanCost(t *testing.T) {
 	arg := &utils.RatingPlanCostArg{
 		Destination:   "1002",
 		RatingPlanIDs: []string{"RP_1001", "RP_1002"},
-		SetupTime:     utils.META_NOW,
+		SetupTime:     utils.MetaNow,
 		Usage:         "1h",
 	}
 	var reply dispatchers.RatingPlanCost
@@ -260,7 +260,7 @@ func testAPIerGetRatingPlanCost2(t *testing.T) {
 	arg := &utils.RatingPlanCostArg{
 		Destination:   "1003",
 		RatingPlanIDs: []string{"RP_1001", "RP_1002"},
-		SetupTime:     utils.META_NOW,
+		SetupTime:     utils.MetaNow,
 		Usage:         "1h",
 	}
 	var reply dispatchers.RatingPlanCost
@@ -279,7 +279,7 @@ func testAPIerGetRatingPlanCost3(t *testing.T) {
 	arg := &utils.RatingPlanCostArg{
 		Destination:   "1001",
 		RatingPlanIDs: []string{"RP_1001", "RP_1002"},
-		SetupTime:     utils.META_NOW,
+		SetupTime:     utils.MetaNow,
 		Usage:         "1h",
 	}
 	var reply dispatchers.RatingPlanCost

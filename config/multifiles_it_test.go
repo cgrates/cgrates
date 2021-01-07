@@ -43,7 +43,7 @@ func TestMfInitConfig(t *testing.T) {
 }
 
 func TestMfGeneralItems(t *testing.T) {
-	if mfCgrCfg.GeneralCfg().DefaultReqType != utils.META_PSEUDOPREPAID { // Twice reconfigured
+	if mfCgrCfg.GeneralCfg().DefaultReqType != utils.MetaPseudoPrepaid { // Twice reconfigured
 		t.Error("DefaultReqType: ", mfCgrCfg.GeneralCfg().DefaultReqType)
 	}
 	if mfCgrCfg.GeneralCfg().DefaultCategory != "call" { // Not configred, should be inherited from default
@@ -61,7 +61,7 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		TpExportPath:     "/var/spool/cgrates/tpe",
 		PosterAttempts:   3,
 		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
-		DefaultReqType:   utils.META_PSEUDOPREPAID,
+		DefaultReqType:   utils.MetaPseudoPrepaid,
 		DefaultCategory:  "call",
 		DefaultTenant:    "cgrates.org",
 		DefaultCaching:   utils.MetaReload,

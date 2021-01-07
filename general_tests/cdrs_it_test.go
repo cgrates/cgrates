@@ -484,7 +484,7 @@ func testV2CDRsSetStats(t *testing.T) {
 			Metrics: []*engine.MetricWithFilters{{
 				MetricID: "*sum#~*req.Usage",
 			}},
-			ThresholdIDs: []string{utils.META_NONE},
+			ThresholdIDs: []string{utils.MetaNone},
 			Blocker:      true,
 			Stored:       true,
 			Weight:       20,

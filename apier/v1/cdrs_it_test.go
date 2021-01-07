@@ -174,7 +174,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RunID:        "testv1",
 					utils.OriginID:     "testV1CDRsProcessEventWithRefund",
-					utils.RequestType:  utils.META_PSEUDOPREPAID,
+					utils.RequestType:  utils.MetaPseudoPrepaid,
 					utils.AccountField: "testV1CDRsProcessEventWithRefund",
 					utils.Destination:  "+4986517174963",
 					utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
@@ -224,7 +224,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RunID:        "testv1",
 					utils.OriginID:     "testV1CDRsProcessEventWithRefund",
-					utils.RequestType:  utils.META_PSEUDOPREPAID,
+					utils.RequestType:  utils.MetaPseudoPrepaid,
 					utils.AccountField: "testV1CDRsProcessEventWithRefund",
 					utils.Destination:  "+4986517174963",
 					utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
@@ -439,7 +439,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RunID:        utils.MetaDefault,
 					utils.OriginID:     "testV1CDRsRefundCDR",
-					utils.RequestType:  utils.META_PSEUDOPREPAID,
+					utils.RequestType:  utils.MetaPseudoPrepaid,
 					utils.AccountField: "testV1CDRsRefundCDR",
 					utils.Destination:  "+4986517174963",
 					utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),

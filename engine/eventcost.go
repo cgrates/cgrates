@@ -86,7 +86,7 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 	//AccountingID
 	if incr.BalanceInfo.Unit != nil {
 		// 2 balances work-around
-		ecUUID := utils.META_NONE // populate no matter what due to Unit not nil
+		ecUUID := utils.MetaNone // populate no matter what due to Unit not nil
 		if incr.BalanceInfo.Monetary != nil {
 			if !roundedIncrement {
 				rateID = ec.ratingIDForRateInterval(incr.BalanceInfo.Monetary.RateInterval, rf)
@@ -275,7 +275,7 @@ func (ec *EventCost) GetCost() float64 {
 		for _, ci := range ec.Charges {
 			cost += ci.TotalCost()
 		}
-		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+		cost = utils.Round(cost, globalRoundingDecimals, utils.MetaRoundingMiddle)
 		ec.Cost = &cost
 	}
 	return *ec.Cost
@@ -341,7 +341,7 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
 						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{UUID: blncSmry.UUID}
 					}
-					if ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.META_NONE ||
+					if ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.MetaNone ||
 						ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.EmptyString {
 						iIdx++
 						continue
@@ -438,18 +438,18 @@ func (ec *EventCost) newIntervalFromCharge(cInc *ChargingIncrement) (incr *Incre
 		}
 	}
 	if utils.SliceHasMember([]string{utils.DATA, utils.VOICE}, balanceType) && cBC.ExtraChargeID == "" {
-		cBC.ExtraChargeID = utils.META_NONE // mark the balance to be exported as Unit type
+		cBC.ExtraChargeID = utils.MetaNone // mark the balance to be exported as Unit type
 	}
 	if cBC.ExtraChargeID != "" { // have both monetary and data
 		// Work around, enforce logic with 2 balances for *voice/*monetary combination
 		// so we can stay compatible with CallCost
 		incr.BalanceInfo.Unit = &UnitInfo{UUID: cBC.BalanceUUID, Consumed: cBC.Units}
 		incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
-		if cBC.ExtraChargeID != utils.META_NONE {
+		if cBC.ExtraChargeID != utils.MetaNone {
 			cBC = ec.Accounting[cBC.ExtraChargeID] // overwrite original balance so we can process it in one place
 		}
 	}
-	if cBC.ExtraChargeID != utils.META_NONE {
+	if cBC.ExtraChargeID != utils.MetaNone {
 		incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
 		incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
 	}
@@ -470,7 +470,7 @@ func (ec *EventCost) ratingGetIDFomEventCost(oEC *EventCost, oRatingID string) s
 
 // accountingGetIDFromEventCost retrieves UUID based on data from another EventCost
 func (ec *EventCost) accountingGetIDFromEventCost(oEC *EventCost, oAccountingID string) string {
-	if oAccountingID == "" || oAccountingID == utils.META_NONE {
+	if oAccountingID == "" || oAccountingID == utils.MetaNone {
 		return ""
 	}
 	oBC := oEC.Accounting[oAccountingID].Clone()

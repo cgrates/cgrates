@@ -101,7 +101,7 @@ func testCdrsIntTestTTL(t *testing.T) {
 					utils.OriginID:     "testCdrsIntTestTTL",
 					utils.OriginHost:   "192.168.1.1",
 					utils.Source:       "testCdrsIntTestTTL",
-					utils.RequestType:  utils.META_NONE,
+					utils.RequestType:  utils.MetaNone,
 					utils.Category:     "call",
 					utils.AccountField: "testCdrsIntTestTTL",
 					utils.Subject:      "ANY2CNT2",
