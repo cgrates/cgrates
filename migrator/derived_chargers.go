@@ -74,7 +74,7 @@ func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) 
 	if fieldInfo == utils.MetaDefault || len(fieldInfo) == 0 {
 		return attr
 	}
-	if strings.HasPrefix(fieldInfo, utils.STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(fieldInfo, utils.StaticValuePrefix) {
 		fieldInfo = fieldInfo[1:]
 	}
 	var err error
@@ -136,7 +136,7 @@ func derivedChargers2Charger(dc *v1DerivedCharger, tenant string, key string, fi
 
 	filter := dc.RunFilters
 	if len(filter) != 0 {
-		if strings.HasPrefix(filter, utils.STATIC_VALUE_PREFIX) {
+		if strings.HasPrefix(filter, utils.StaticValuePrefix) {
 			filter = filter[1:]
 		}
 		if strings.HasPrefix(filter, utils.DynamicDataPrefix) {

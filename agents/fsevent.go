@@ -98,24 +98,24 @@ func (fsev FSEvent) GetName() string {
 
 // Account calling
 func (fsev FSEvent) GetAccount(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		return fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[ACCOUNT], fsev[USERNAME])
 }
 
 // Rating subject being charged
 func (fsev FSEvent) GetSubject(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		return fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[SUBJECT], fsev.GetAccount(fieldName))
 }
 
 // Charging destination number
 func (fsev FSEvent) GetDestination(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		return fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[DESTINATION],
 		fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
@@ -123,14 +123,14 @@ func (fsev FSEvent) GetDestination(fieldName string) string {
 
 // Original dialed destination number, useful in case of unpark
 func (fsev FSEvent) GetCallDestNr(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		return fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
 }
 func (fsev FSEvent) GetCategory(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		return fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CATEGORY],
 		config.CgrConfig().GeneralCfg().DefaultCategory)
@@ -145,8 +145,8 @@ func (fsev FSEvent) GetSessionIds() []string {
 }
 
 func (fsev FSEvent) GetTenant(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		return fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CSTMID],
 		config.CgrConfig().GeneralCfg().DefaultTenant)
@@ -159,8 +159,8 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 	} else if fsev["Caller-Dialplan"] == "inline" { // Used for internally generated dialplan, eg refer coming from another box, not in our control
 		reqTypeDetected = utils.META_NONE
 	}
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		return fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE],
 		reqTypeDetected, config.CgrConfig().GeneralCfg().DefaultReqType)
@@ -198,8 +198,8 @@ func (fsev FSEvent) GetSetupTime(fieldName, timezone string) (t time.Time, err e
 		fsSTimeStr = fsSTimeStr[:len(fsSTimeStr)-6]
 	}
 	sTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsSTimeStr)
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		sTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		sTimeStr = fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.ParseTimeDetectLayout(sTimeStr, timezone)
 }
@@ -211,8 +211,8 @@ func (fsev FSEvent) GetAnswerTime(fieldName, timezone string) (t time.Time, err 
 		fsATimeStr = fsATimeStr[:len(fsATimeStr)-6]
 	}
 	aTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsATimeStr)
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		aTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		aTimeStr = fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.ParseTimeDetectLayout(aTimeStr, timezone)
 }
@@ -223,8 +223,8 @@ func (fsev FSEvent) GetEndTime(fieldName, timezone string) (t time.Time, err err
 
 func (fsev FSEvent) GetDuration(fieldName string) (time.Duration, error) {
 	durStr := utils.FirstNonEmpty(fsev[fieldName], fsev[DURATION])
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		durStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		durStr = fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.ParseDurationWithSecs(durStr)
 }
@@ -236,8 +236,8 @@ func (fsev FSEvent) GetPdd(fieldName string) (time.Duration, error) {
 		if len(PDDStr) != 0 {
 			PDDStr = PDDStr + "ms" // PDD is in milliseconds and CGR expects it in seconds
 		}
-	} else if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		PDDStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	} else if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		PDDStr = fieldName[len(utils.StaticValuePrefix):]
 	} else {
 		PDDStr = fsev[fieldName]
 	}
@@ -251,8 +251,8 @@ func (fsev FSEvent) GetADC(fieldName string) (time.Duration, error) {
 		if len(ACDStr) != 0 {
 			ACDStr = ACDStr + "s" //  ACD is in seconds and CGR expects it in seconds
 		}
-	} else if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		ACDStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	} else if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		ACDStr = fieldName[len(utils.StaticValuePrefix):]
 	} else {
 		ACDStr = fsev[fieldName]
 	}
@@ -260,22 +260,22 @@ func (fsev FSEvent) GetADC(fieldName string) (time.Duration, error) {
 }
 
 func (fsev FSEvent) GetRoute(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		return fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[VAR_CGR_ROUTE])
 }
 
 func (fsev FSEvent) GetDisconnectCause(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		return fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[VAR_CGR_DISCONNECT_CAUSE], fsev[HANGUP_CAUSE])
 }
 
 func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.StaticValuePrefix) { // Static value
+		return fieldName[len(utils.StaticValuePrefix):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[VarCGROriginHost], fsev[FS_IPv4])
 }

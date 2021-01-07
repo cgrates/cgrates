@@ -129,7 +129,7 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolde
 		return utils.NewErrServerError(err)
 	}
 	if attrs.DryRun {
-		*reply = utils.LoadInstance{RatingLoadID: utils.DRYRUN, AccountingLoadID: utils.DRYRUN}
+		*reply = utils.LoadInstance{RatingLoadID: utils.DryRunCfg, AccountingLoadID: utils.DryRunCfg}
 		return nil // Mission complete, no errors
 	}
 
