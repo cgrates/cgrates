@@ -62,6 +62,7 @@ var (
 		testProcessFileUnableToOpen,
 		testProcessFileRenameError,
 		testAllFilesPresentEmptyCSV,
+		testIsFolderLocked,
 		testLoaderLoadAttributes,
 		testLoaderVerifyOutDir,
 		testLoaderCheckAttributes,
@@ -977,5 +978,20 @@ func testAllFilesPresentEmptyCSV(t *testing.T) {
 	}
 	if rcv := ldr.allFilesPresent(utils.MetaResources); rcv {
 		t.Errorf("Expecting false")
+	}
+}
+
+func testIsFolderLocked(t *testing.T) {
+	flPath := "/tmp/testIsFolderLocked"
+	ldr := &Loader{
+		ldrID:         "TestLoadAndRemoveResources",
+		tpInDir:       flPath,
+		lockFilename:  utils.EmptyString,
+		bufLoaderData: make(map[string][]LoaderData),
+		timezone:      "UTC",
+	}
+	expected := "stat /\x00: invalid argument"
+	if _, err := ldr.isFolderLocked(); err != nil {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
