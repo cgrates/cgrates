@@ -59,10 +59,10 @@ func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 
 	var connString string
 	switch u.Scheme {
-	case utils.MYSQL:
+	case utils.MySQL:
 		connString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 			u.User.Username(), password, u.Hostname(), u.Port(), dbname)
-	case utils.POSTGRES:
+	case utils.Postgres:
 		connString = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", u.Hostname(), u.Port(), dbname, u.User.Username(), password, ssl)
 	default:
 		return nil, fmt.Errorf("unknown db_type %s", u.Scheme)

@@ -117,7 +117,7 @@ func initSession(i int) {
 					utils.ToR:         utils.VOICE,
 					utils.Category:    "call",
 					utils.Tenant:      "cgrates.org",
-					utils.RequestType: utils.META_PREPAID,
+					utils.RequestType: utils.MetaPrepaid,
 					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				},
 			},

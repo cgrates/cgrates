@@ -233,7 +233,7 @@ func testRunSession(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:       "cgrates.org",
 				utils.OriginID:     originID,
-				utils.RequestType:  utils.META_PREPAID,
+				utils.RequestType:  utils.MetaPrepaid,
 				utils.AccountField: acntID,
 				utils.Destination:  fmt.Sprintf("%s%s", acntID, acntID),
 				utils.SetupTime:    time.Now(),
@@ -258,7 +258,7 @@ func testRunSession(t *testing.T) {
 			ID:     fmt.Sprintf("TestSCncrInit%s", originID),
 			Event: map[string]interface{}{
 				utils.OriginID:     originID,
-				utils.RequestType:  utils.META_PREPAID,
+				utils.RequestType:  utils.MetaPrepaid,
 				utils.AccountField: acntID,
 				utils.Destination:  fmt.Sprintf("%s%s", acntID, acntID),
 				utils.AnswerTime:   time.Now(),

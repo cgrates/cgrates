@@ -870,14 +870,14 @@ func (self *SQLStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
 		q = q.Where("created_at < ?", qryFltr.CreatedAt.End)
 	}
 	if qryFltr.Usage.Min != nil {
-		if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
+		if self.db.Dialect().GetName() == utils.MySQL { // MySQL needs escaping for usage
 			q = q.Where("`usage` >= ?", qryFltr.Usage.Min.Nanoseconds())
 		} else {
 			q = q.Where("usage >= ?", qryFltr.Usage.Min.Nanoseconds())
 		}
 	}
 	if qryFltr.Usage.Max != nil {
-		if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
+		if self.db.Dialect().GetName() == utils.MySQL { // MySQL needs escaping for usage
 			q = q.Where("`usage` < ?", qryFltr.Usage.Max.Nanoseconds())
 		} else {
 			q = q.Where("usage < ?", qryFltr.Usage.Max.Nanoseconds())
@@ -1140,7 +1140,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		case utils.SetupTime:
 			orderVal = "setup_time"
 		case utils.Usage:
-			if self.db.Dialect().GetName() == utils.MYSQL {
+			if self.db.Dialect().GetName() == utils.MySQL {
 				orderVal = "`usage`"
 			} else {
 				orderVal = "usage"
@@ -1160,7 +1160,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		if err != nil {
 			return nil, 0, err
 		}
-		if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
+		if self.db.Dialect().GetName() == utils.MySQL { // MySQL needs escaping for usage
 			q = q.Where("`usage` >= ?", minUsage.Nanoseconds())
 		} else {
 			q = q.Where("usage >= ?", minUsage.Nanoseconds())
@@ -1171,7 +1171,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		if err != nil {
 			return nil, 0, err
 		}
-		if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
+		if self.db.Dialect().GetName() == utils.MySQL { // MySQL needs escaping for usage
 			q = q.Where("`usage` < ?", maxUsage.Nanoseconds())
 		} else {
 			q = q.Where("usage < ?", maxUsage.Nanoseconds())

@@ -104,7 +104,7 @@ func TestSSv1ItWithPrepaid(t *testing.T) {
 	if *dbType == utils.MetaPostgres {
 		t.SkipNow()
 	}
-	sSV1RequestType = utils.META_PREPAID
+	sSV1RequestType = utils.MetaPrepaid
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
 	}
@@ -778,7 +778,7 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 }
 
 func testSSv1ItForceUpdateSession(t *testing.T) {
-	if sSV1RequestType != utils.META_PREPAID {
+	if sSV1RequestType != utils.MetaPrepaid {
 		t.SkipNow()
 		return
 	}
@@ -921,7 +921,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 }
 
 func testSSv1ItDynamicDebit(t *testing.T) {
-	if sSV1RequestType != utils.META_PREPAID {
+	if sSV1RequestType != utils.MetaPrepaid {
 		t.SkipNow()
 		return
 	}

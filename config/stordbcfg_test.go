@@ -26,7 +26,7 @@ import (
 
 func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &DbJsonCfg{
-		Db_type:               utils.StringPointer(utils.MYSQL),
+		Db_type:               utils.StringPointer(utils.MySQL),
 		Db_host:               utils.StringPointer("127.0.0.1"),
 		Db_port:               utils.IntPointer(-1),
 		Db_name:               utils.StringPointer(utils.CGRateSLwr),
@@ -53,7 +53,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 	}
 	expected := &StorDbCfg{
-		Type:                utils.MYSQL,
+		Type:                utils.MySQL,
 		Host:                "127.0.0.1",
 		Port:                "-1",
 		Name:                utils.CGRateSLwr,
@@ -261,7 +261,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 
 func TestStorDbCfgClone(t *testing.T) {
 	ban := &StorDbCfg{
-		Type:                utils.MYSQL,
+		Type:                utils.MySQL,
 		Host:                "127.0.0.1",
 		Port:                "-1",
 		Name:                utils.CGRateSLwr,

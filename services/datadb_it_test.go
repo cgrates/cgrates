@@ -82,7 +82,7 @@ func TestDataDBReload(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", db.dm, getDm)
 	}
 	oldcfg := &config.DataDbCfg{
-		DataDbType: utils.MONGO,
+		DataDbType: utils.Mongo,
 		DataDbHost: "127.0.0.1",
 		DataDbPort: "27017",
 		DataDbName: "10",

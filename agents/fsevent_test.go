@@ -466,7 +466,7 @@ func TestParseFsHangup(t *testing.T) {
 	setupTime, _ := ev.GetSetupTime(utils.MetaDefault, "")
 	answerTime, _ := ev.GetAnswerTime(utils.MetaDefault, "")
 	dur, _ := ev.GetDuration(utils.MetaDefault)
-	if ev.GetReqType(utils.MetaDefault) != utils.META_PREPAID ||
+	if ev.GetReqType(utils.MetaDefault) != utils.MetaPrepaid ||
 		ev.GetTenant(utils.MetaDefault) != "cgrates.org" ||
 		ev.GetCategory(utils.MetaDefault) != "call" ||
 		ev.GetAccount(utils.MetaDefault) != "1001" ||
@@ -476,7 +476,7 @@ func TestParseFsHangup(t *testing.T) {
 		answerTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC) ||
 		dur != 66*time.Second {
 		t.Error("Default values not matching",
-			ev.GetReqType(utils.MetaDefault) != utils.META_PREPAID,
+			ev.GetReqType(utils.MetaDefault) != utils.MetaPrepaid,
 			ev.GetTenant(utils.MetaDefault) != "cgrates.org",
 			ev.GetCategory(utils.MetaDefault) != "call",
 			ev.GetAccount(utils.MetaDefault) != "1001",
@@ -504,7 +504,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Source), ""); parsed != "FS_EVENT" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RequestType), ""); parsed != utils.META_PREPAID {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RequestType), ""); parsed != utils.MetaPrepaid {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Tenant), ""); parsed != "cgrates.org" {
@@ -588,7 +588,7 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	expectedMap[utils.Category] = "call"
 	expectedMap[utils.SetupTime] = setupTime
 	expectedMap[utils.AnswerTime] = aTime
-	expectedMap[utils.RequestType] = utils.META_PREPAID
+	expectedMap[utils.RequestType] = utils.MetaPrepaid
 	expectedMap[utils.Destination] = "1003"
 	expectedMap[utils.Usage] = 66 * time.Second
 	expectedMap[utils.Tenant] = "cgrates.org"

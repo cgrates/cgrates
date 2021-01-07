@@ -509,7 +509,7 @@ func testCall1001Cdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		for _, cdr := range reply {
-			if cdr.RequestType != utils.META_PREPAID {
+			if cdr.RequestType != utils.MetaPrepaid {
 				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
 			}
 			if cdr.Destination == "1002" {
@@ -576,7 +576,7 @@ func testCall1003Cdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		for _, cdr := range reply {
-			if cdr.RequestType != utils.META_PREPAID {
+			if cdr.RequestType != utils.MetaPrepaid {
 				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
 			}
 			// in case of Asterisk take the integer part from usage

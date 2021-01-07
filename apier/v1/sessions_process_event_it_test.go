@@ -77,7 +77,7 @@ func TestSSv1ItProcessEventWithPrepaid(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
-	sSV1RequestType = utils.META_PREPAID
+	sSV1RequestType = utils.MetaPrepaid
 	for _, stest := range sTestSessionSv1ProcessEvent {
 		t.Run(sessionsConfDIR+utils.EmptyString+sSV1RequestType, stest)
 	}

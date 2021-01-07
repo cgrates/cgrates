@@ -148,7 +148,7 @@ func testSes2ItInitSession(t *testing.T) {
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
 					utils.Destination:  "1002",
-					utils.RequestType:  utils.META_PREPAID,
+					utils.RequestType:  utils.MetaPrepaid,
 					utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				},
 			},
@@ -199,7 +199,7 @@ func testSes2StirAuthenticate(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.ToR:          utils.VOICE,
 					utils.OriginID:     "testSes2StirAuthorize",
-					utils.RequestType:  utils.META_PREPAID,
+					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",
@@ -242,7 +242,7 @@ func testSes2StirInit(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.ToR:          utils.VOICE,
 					utils.OriginID:     "testSes2StirInit",
-					utils.RequestType:  utils.META_PREPAID,
+					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",

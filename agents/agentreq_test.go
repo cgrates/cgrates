@@ -51,7 +51,7 @@ func TestAgReqSetFields(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: utils.PathItems{{Field: utils.Usage}}}, utils.NewNMData(3*time.Minute))
 
 	cgrRply := utils.NavigableMap2{
@@ -899,7 +899,7 @@ func TestAgReqSetField2(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 
 	agReq.CGRReply = &utils.NavigableMap2{}
 
@@ -1545,7 +1545,7 @@ func TestAgReqOverwrite(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 
 	agReq.CGRReply = &utils.NavigableMap2{}
 
@@ -1597,7 +1597,7 @@ func TestAgReqGroupType(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 
 	agReq.CGRReply = &utils.NavigableMap2{}
 
@@ -1733,7 +1733,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: utils.PathItems{{Field: utils.Usage}}}, utils.NewNMData(3*time.Minute))
 
 	agReq.CGRReply = &utils.NavigableMap2{
@@ -2036,7 +2036,7 @@ func TestAgReqDynamicPath(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: "Routes.CGR_ROUTE1", PathItems: utils.PathItems{{Field: "Routes"}, {Field: "CGR_ROUTE1"}}}, utils.NewNMData(1001))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: "Routes.CGR_ROUTE2", PathItems: utils.PathItems{{Field: "Routes"}, {Field: "CGR_ROUTE2"}}}, utils.NewNMData(1002))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: "BestRoute", PathItems: utils.PathItems{{Field: "BestRoute"}}}, utils.NewNMData("ROUTE1"))
@@ -2110,7 +2110,7 @@ func TestAgReqRoundingDecimals(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Cost, PathItems: utils.PathItems{{Field: utils.Cost}}}, utils.NewNMData(12.12645))
 
 	agReq.CGRReply = &utils.NavigableMap2{}
@@ -2189,7 +2189,7 @@ func BenchmarkAgReqSetField(b *testing.B) {
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 			time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.META_PREPAID))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 		agReq.CGRReply = &utils.NavigableMap2{}
 
 		if err := agReq.SetFields(tplFlds); err != nil {

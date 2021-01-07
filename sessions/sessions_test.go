@@ -50,7 +50,7 @@ var attrs = &engine.AttrSProcessEventReply{
 				utils.Destination:  "1002",
 				"OfficeGroup":      "Marketing",
 				utils.OriginID:     "TestSSv1It1",
-				utils.RequestType:  utils.META_PREPAID,
+				utils.RequestType:  utils.MetaPrepaid,
 				utils.SetupTime:    "2018-01-07T17:00:00Z",
 				utils.Usage:        300000000000.0,
 			},

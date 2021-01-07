@@ -30,7 +30,7 @@ func TestMissingStructFieldsCorrect(t *testing.T) {
 		Account         string
 		Type            string
 		ActionTimingsID string
-	}{"bevoip.eu", "danconns0001", META_PREPAID, "mama"}
+	}{"bevoip.eu", "danconns0001", MetaPrepaid, "mama"}
 	if missing := MissingStructFields(&attr,
 		[]string{"Tenant", "Account", "Type", "ActionTimingsID"}); len(missing) != 0 {
 		t.Error("Found missing field on correct struct", missing)
@@ -83,7 +83,7 @@ func TestMissingMapFields(t *testing.T) {
 	var attr = map[string]interface{}{
 		Tenant:            "cgrates.org",
 		AccountField:      "1001",
-		"Type":            META_PREPAID,
+		"Type":            MetaPrepaid,
 		"ActionTimingsID": "*asap",
 	}
 	if missing := MissingMapFields(attr,
@@ -107,7 +107,7 @@ func TestMissingStructFieldsAppend(t *testing.T) {
 		Account         string
 		Type            string
 		ActionTimingsID string
-	}{"", "", META_PREPAID, ""}
+	}{"", "", MetaPrepaid, ""}
 	missing := MissingStructFields(&attr,
 		[]string{"Tenant", "Account", "Type", "ActionTimingsID"})
 	if len(missing) == 0 {

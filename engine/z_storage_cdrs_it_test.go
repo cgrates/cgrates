@@ -84,7 +84,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		Source:      "testSetCDRs",
 		OriginID:    "testevent1",
 		ToR:         utils.VOICE,
-		RequestType: utils.META_PREPAID,
+		RequestType: utils.MetaPrepaid,
 		Tenant:      "cgrates.org",
 		Category:    "call",
 		Account:     "1004",
@@ -111,7 +111,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		Source:      "testSetCDRs",
 		OriginID:    "testevent1",
 		ToR:         utils.VOICE,
-		RequestType: utils.META_PREPAID,
+		RequestType: utils.MetaPrepaid,
 		Tenant:      "cgrates.org",
 		Category:    "call",
 		Account:     "1004",
@@ -256,7 +256,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Source:      "testGetCDRs",
 			OriginID:    "testevent1",
 			ToR:         utils.VOICE,
-			RequestType: utils.META_PREPAID,
+			RequestType: utils.MetaPrepaid,
 			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "1001",
@@ -276,7 +276,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Source:      "testGetCDRs",
 			OriginID:    "testevent1",
 			ToR:         utils.VOICE,
-			RequestType: utils.META_PREPAID,
+			RequestType: utils.MetaPrepaid,
 			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "1001",
@@ -417,7 +417,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Source:      "testGetCDRs5",
 			OriginID:    "testevent5",
 			ToR:         utils.SMS,
-			RequestType: utils.META_PREPAID,
+			RequestType: utils.MetaPrepaid,
 			Tenant:      "cgrates.org",
 			Category:    "sms",
 			Account:     "1001",
@@ -437,7 +437,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			Source:      "testGetCDRs5",
 			OriginID:    "testevent5",
 			ToR:         utils.SMS,
-			RequestType: utils.META_PREPAID,
+			RequestType: utils.MetaPrepaid,
 			Tenant:      "cgrates.org",
 			Category:    "sms",
 			Account:     "1001",
@@ -514,7 +514,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{
 		utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
 		utils.Sha1("testevent3", time.Date(2015, 12, 28, 12, 58, 0, 0, time.UTC).String()),
-	}, RequestTypes: []string{utils.META_PREPAID}}, false); err != nil {
+	}, RequestTypes: []string{utils.MetaPrepaid}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #18 err: %v", err)
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("testGetCDRs #19, unexpected number of CDRs returned: %+v", CDRs)
@@ -523,7 +523,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if _, count, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{
 		utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
 		utils.Sha1("testevent3", time.Date(2015, 12, 28, 12, 58, 0, 0, time.UTC).String()),
-	}, RequestTypes: []string{utils.META_PREPAID}, Count: true}, false); err != nil {
+	}, RequestTypes: []string{utils.MetaPrepaid}, Count: true}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #20 err: %v", err)
 	} else if count != 2 {
 		return fmt.Errorf("testGetCDRs #21, unexpected count of CDRs returned: %d", count)
@@ -578,13 +578,13 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return fmt.Errorf("testGetCDRs #33, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on reqType
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_PREPAID}}, false); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.MetaPrepaid}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #32 err: %v", err)
 	} else if len(CDRs) != 4 {
 		return fmt.Errorf("testGetCDRs #33, unexpected number of CDRs returned: %+v", len(CDRs))
 	}
 	// Filter on multiple reqType
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}}, false); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.MetaPrepaid, utils.META_PSEUDOPREPAID}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #34 err: %v", err)
 	} else if len(CDRs) != 6 {
 		return fmt.Errorf("testGetCDRs #35, unexpected number of CDRs returned: %+v", CDRs)

@@ -30,7 +30,7 @@ import (
 
 var kamEv = KamEvent{KamTRIndex: "29223", KamTRLabel: "698469260",
 	"callid": "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", "from_tag": "eb082607", "to_tag": "4ea9687f", "cgr_account": "dan",
-	"cgr_reqtype": utils.META_PREPAID, "cgr_subject": "dan", "cgr_destination": "+4986517174963", "cgr_tenant": "itsyscom.com",
+	"cgr_reqtype": utils.MetaPrepaid, "cgr_subject": "dan", "cgr_destination": "+4986517174963", "cgr_tenant": "itsyscom.com",
 	"cgr_duration": "20", utils.CGR_ROUTE: "suppl2", utils.CGR_DISCONNECT_CAUSE: "200", "extra1": "val1", "extra2": "val2"}
 
 func TestNewKamEvent(t *testing.T) {
@@ -258,7 +258,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 						utils.Tenant:       "cgrates.org",
 						utils.AccountField: "1001",
 						"Password":         "check123",
-						utils.RequestType:  utils.META_PREPAID,
+						utils.RequestType:  utils.MetaPrepaid,
 					},
 				},
 			},
@@ -457,7 +457,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 						utils.Tenant:       "cgrates.org",
 						utils.AccountField: "1001",
 						"Password":         "check123",
-						utils.RequestType:  utils.META_PREPAID,
+						utils.RequestType:  utils.MetaPrepaid,
 					},
 				},
 			},

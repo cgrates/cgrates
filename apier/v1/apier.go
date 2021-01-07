@@ -1456,7 +1456,7 @@ func (apierSv1 *APIerSv1) GetLoadTimes(args *LoadTimeArgs, reply *map[string]str
 }
 
 func (apierSv1 *APIerSv1) ComputeActionPlanIndexes(_ string, reply *string) (err error) {
-	if apierSv1.DataManager.DataDB().GetStorageType() != utils.REDIS {
+	if apierSv1.DataManager.DataDB().GetStorageType() != utils.Redis {
 		return utils.ErrNotImplemented
 	}
 	redisDB, can := apierSv1.DataManager.DataDB().(*engine.RedisStorage)

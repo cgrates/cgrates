@@ -88,22 +88,22 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 					fmt.Sprintf("error: <%s> when seting versions for StorDB", err.Error())), nil
 			}
 		case utils.MetaEnsureIndexes:
-			if m.storDBOut.StorDB().GetStorageType() == utils.MONGO {
+			if m.storDBOut.StorDB().GetStorageType() == utils.Mongo {
 				mgo := m.storDBOut.StorDB().(*engine.MongoStorage)
 				if err = mgo.EnsureIndexes(); err != nil {
 					return
 				}
 			} else {
-				log.Printf("The StorDB type has to be %s .\n ", utils.MONGO)
+				log.Printf("The StorDB type has to be %s .\n ", utils.Mongo)
 			}
 
-			if m.dmOut.DataManager().DataDB().GetStorageType() == utils.MONGO {
+			if m.dmOut.DataManager().DataDB().GetStorageType() == utils.Mongo {
 				mgo := m.dmOut.DataManager().DataDB().(*engine.MongoStorage)
 				if err = mgo.EnsureIndexes(); err != nil {
 					return
 				}
 			} else {
-				log.Printf("The DataDB type has to be %s .\n ", utils.MONGO)
+				log.Printf("The DataDB type has to be %s .\n ", utils.Mongo)
 			}
 		case utils.MetaCDRs:
 			err = m.migrateCDRs()
@@ -344,7 +344,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 }
 
 func (m *Migrator) ensureIndexesDataDB(cols ...string) error {
-	if m.dmOut.DataManager().DataDB().GetStorageType() != utils.MONGO {
+	if m.dmOut.DataManager().DataDB().GetStorageType() != utils.Mongo {
 		return nil
 	}
 	mgo := m.dmOut.DataManager().DataDB().(*engine.MongoStorage)
@@ -352,7 +352,7 @@ func (m *Migrator) ensureIndexesDataDB(cols ...string) error {
 }
 
 func (m *Migrator) ensureIndexesStorDB(cols ...string) error {
-	if m.storDBOut.StorDB().GetStorageType() != utils.MONGO {
+	if m.storDBOut.StorDB().GetStorageType() != utils.Mongo {
 		return nil
 	}
 	mgo := m.storDBOut.StorDB().(*engine.MongoStorage)

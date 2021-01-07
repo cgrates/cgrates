@@ -88,5 +88,5 @@ func (self *MySQLStorage) notExtraFieldsValueQry(field, value string) string {
 }
 
 func (self *MySQLStorage) GetStorageType() string {
-	return utils.MYSQL
+	return utils.MySQL
 }
