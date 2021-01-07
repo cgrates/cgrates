@@ -104,7 +104,7 @@ func (aB *abstractBalance) debitUsage(usage *decimal.Big, startTime time.Time,
 		return nil, utils.ErrFilterNotPassingNoCaps
 	}
 
-	blcVal := new(decimal.Big).SetFloat64(aB.blnCfg.Units) // FixMe without float64
+	blcVal := aB.blnCfg.Units.Big
 	// balanceLimit
 	var hasLmt bool
 	blncLmt := aB.balanceLimit()
