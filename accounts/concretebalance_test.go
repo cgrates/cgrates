@@ -53,7 +53,7 @@ func TestCBDebitUnits(t *testing.T) {
 		t.Errorf("received unit factor: %+v", uFctr)
 	} else if dbted.Cmp(toDebit) != 0 {
 		t.Errorf("debited: %s", dbted)
-	} else if cb.blnCfg.Units.String() != "-100" {
+	} else if cb.blnCfg.Units.Cmp(decimal.New(-100, 0)) != 0 {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
 	}
 	//with increment and not enough balance
@@ -75,7 +75,7 @@ func TestCBDebitUnits(t *testing.T) {
 		t.Error(err)
 	} else if dbted.Cmp(decimal.New(22, 1)) != 0 { // only 1.2 is possible due to increment
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
-	} else if cb.blnCfg.Units.String() != "-0.95" {
+	} else if cb.blnCfg.Units.Cmp(decimal.New(-95, 2)) != 0 {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
 	}
 	//with increment and unlimited balance
@@ -97,7 +97,7 @@ func TestCBDebitUnits(t *testing.T) {
 		t.Error(err)
 	} else if dbted.Cmp(decimal.New(25, 1)) != 0 { // only 1.2 is possible due to increment
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
-	} else if cb.blnCfg.Units.String() != "-1.25" {
+	} else if cb.blnCfg.Units.Cmp(decimal.New(-125, 2)) != 0 {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
 	}
 	//with increment and positive limit
@@ -119,7 +119,7 @@ func TestCBDebitUnits(t *testing.T) {
 		t.Error(err)
 	} else if dbted.Cmp(decimal.New(7, 1)) != 0 { // only 1.2 is possible due to increment
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
-	} else if cb.blnCfg.Units.String() != "0.55" {
+	} else if cb.blnCfg.Units.Cmp(decimal.New(55, 2)) != 0 {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
 	}
 }
