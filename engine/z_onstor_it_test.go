@@ -77,7 +77,7 @@ var (
 		testOnStorITDispatcherProfile,
 		testOnStorITRateProfile,
 		testOnStorITActionProfile,
-
+		testOnStorITAccountProfile,
 		//testOnStorITCacheActionTriggers,
 		//testOnStorITCRUDActionTriggers,
 	}
@@ -2309,6 +2309,75 @@ func testOnStorITActionProfile(t *testing.T) {
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	} else if _, err := onStor.GetActionProfile("cgrates.org", "TEST_ID1",
+		false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func testOnStorITAccountProfile(t *testing.T) {
+	acctPrf := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"test_filterId"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
+		},
+		Weight: 2,
+		Balances: []*utils.Balance{{
+			ID:        "VoiceBalance",
+			FilterIDs: []string{"FLTR_RES_GR2"},
+			Weight:    10,
+			Type:      utils.VOICE,
+			Units:     3600,
+			Opts: map[string]interface{}{
+				"key1": "val1",
+			},
+		}},
+		ThresholdIDs: []string{"test_thrs"},
+	}
+
+	//empty in database
+	if _, err := onStor.GetAccountProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	//get from database
+	if err := onStor.SetAccountProfile(acctPrf, false); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetAccountProfile("cgrates.org", "RP1",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, acctPrf) {
+		t.Errorf("Expecting: %v, received: %v", acctPrf, rcv)
+	}
+
+	//craft akeysFromPrefix
+	expectedKey := []string{"anp_cgrates.org:RP1"}
+	if rcv, err := onStor.DataDB().GetKeysForPrefix(utils.AccountProfilePrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedKey, rcv) {
+		t.Errorf("Expecting: %v, received: %v", expectedKey, rcv)
+	}
+
+	//updateFilters
+	acctPrf.FilterIDs = []string{"*prefix:~*req.Destination:10"}
+	if err := onStor.SetAccountProfile(acctPrf, false); err != nil {
+		t.Error(err)
+	} else if rcv, err := onStor.GetAccountProfile("cgrates.org", "RP1",
+		false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(acctPrf, rcv) {
+		t.Errorf("Expecting: %v, received: %v", acctPrf, rcv)
+	}
+
+	//remove from database
+	if err := onStor.RemoveAccountProfile("cgrates.org", "RP1",
+		utils.NonTransactional, false); err != nil {
+		t.Error(err)
+	} else if _, err := onStor.GetAccountProfile("cgrates.org", "RP1",
 		false, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
