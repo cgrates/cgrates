@@ -979,8 +979,8 @@ func TestDbDefaultsMetaDynamic(t *testing.T) {
 			t.Errorf("received: %+v, expecting: %+v", host, utils.LOCALHOST)
 		}
 		user := dbdf.dbUser(dbtype, flagInput)
-		if user != utils.CGRATES {
-			t.Errorf("received: %+v, expecting: %+v", user, utils.CGRATES)
+		if user != utils.CGRateSLwr {
+			t.Errorf("received: %+v, expecting: %+v", user, utils.CGRateSLwr)
 		}
 		port := dbdf.dbPort(dbtype, flagInput)
 		if port != dbdf[dbtype]["DbPort"] {
@@ -1014,9 +1014,9 @@ func TestDbDefaults(t *testing.T) {
 		if port != "1234" {
 			t.Errorf("Expected %+v, received %+v", "1234", port)
 		}
-		name := dbdf.dbName(dbtype, utils.CGRATES)
-		if name != utils.CGRATES {
-			t.Errorf("Expected %+v, received %+v", utils.CGRATES, name)
+		name := dbdf.dbName(dbtype, utils.CGRateSLwr)
+		if name != utils.CGRateSLwr {
+			t.Errorf("Expected %+v, received %+v", utils.CGRateSLwr, name)
 		}
 		pass := dbdf.dbPass(dbtype, utils.EmptyString)
 		if pass != utils.EmptyString {

@@ -128,7 +128,7 @@ func (da *DiameterAgent) handlers() diam.Handler {
 		OriginRealm:      datatype.DiameterIdentity(da.cgrCfg.DiameterAgentCfg().OriginRealm),
 		VendorID:         datatype.Unsigned32(da.cgrCfg.DiameterAgentCfg().VendorID),
 		ProductName:      datatype.UTF8String(da.cgrCfg.DiameterAgentCfg().ProductName),
-		FirmwareRevision: datatype.Unsigned32(utils.DIAMETER_FIRMWARE_REVISION),
+		FirmwareRevision: datatype.Unsigned32(utils.DiameterFirmwareRevision),
 	}
 	hosts := disectDiamListen(da.cgrCfg.DiameterAgentCfg().Listen)
 	if len(hosts) == 0 {

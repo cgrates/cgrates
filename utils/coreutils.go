@@ -687,7 +687,7 @@ func (slc Int64Slice) Less(i, j int) bool {
 }
 
 func GetCGRVersion() (vers string, err error) {
-	vers = fmt.Sprintf("%s@%s", CGRateS, VERSION)
+	vers = fmt.Sprintf("%s@%s", CGRateS, Version)
 	if GitLastLog == "" {
 		return vers, nil
 	}
@@ -724,7 +724,7 @@ func GetCGRVersion() (vers string, err error) {
 		return vers, fmt.Errorf("Cannot find commitHash or commitDate information")
 	}
 	//CGRateS@v0.11.0~dev-20200110075344-7572e7b11e00
-	return fmt.Sprintf("%s@%s-%s-%s", CGRateS, VERSION, commitDate.UTC().Format("20060102150405"), commitHash[:12]), nil
+	return fmt.Sprintf("%s@%s-%s-%s", CGRateS, Version, commitDate.UTC().Format("20060102150405"), commitHash[:12]), nil
 }
 
 func NewTenantID(tntID string) *TenantID {

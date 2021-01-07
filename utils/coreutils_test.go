@@ -1176,7 +1176,7 @@ Date:   Fri Dec 30 19:48:09 2016 +0100
 
 	Fixes for db driver to avoid returning new values in case of errors
 `
-	expVers := "CGRateS@" + VERSION
+	expVers := "CGRateS@" + Version
 	eVers := expVers + "-20161230184809-73014daa0c1d"
 	if vers, err := GetCGRVersion(); err != nil {
 		t.Error(err)

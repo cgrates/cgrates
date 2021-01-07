@@ -43,7 +43,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		Forced_disconnect:    utils.StringPointer("forced"),
 		Request_processors: &[]*ReqProcessorJsnCfg{
 			{
-				ID:       utils.StringPointer(utils.CGRATES),
+				ID:       utils.StringPointer(utils.CGRateSLwr),
 				Timezone: utils.StringPointer("Local"),
 			},
 		},
@@ -162,7 +162,7 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		utils.VendorIDCfg:           0,
 		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
-				utils.IDCfg:       utils.CGRATES,
+				utils.IDCfg:       utils.CGRateSLwr,
 				utils.TenantCfg:   "1",
 				utils.FiltersCfg:  []string{},
 				utils.FlagsCfg:    []string{"1"},

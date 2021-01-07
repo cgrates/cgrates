@@ -257,10 +257,10 @@ var (
 
 const (
 	CGRateS                      = "CGRateS"
-	VERSION                      = "v0.11.0~dev"
-	DIAMETER_FIRMWARE_REVISION   = 918
-	REDIS_MAX_CONNS              = 10
-	CGRATES                      = "cgrates"
+	Version                      = "v0.11.0~dev"
+	DiameterFirmwareRevision     = 918
+	RedisMaxConns                = 10
+	CGRateSLwr                   = "cgrates"
 	POSTGRES                     = "postgres"
 	MYSQL                        = "mysql"
 	MONGO                        = "mongo"
@@ -792,7 +792,7 @@ const (
 	TCP                      = "tcp"
 	UDP                      = "udp"
 	CGRDebitInterval         = "CGRDebitInterval"
-	Version                  = "Version"
+	VersionName              = "Version"
 	MetaTenant               = "*tenant"
 	ResourceUsage            = "ResourceUsage"
 	MetaDuration             = "*duration"
