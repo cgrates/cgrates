@@ -94,7 +94,7 @@ func TestEESClone(t *testing.T) {
 				Opts:          make(map[string]interface{}),
 			},
 			{
-				ID:            utils.CGRATES,
+				ID:            utils.CGRateSLwr,
 				Type:          utils.META_NONE,
 				FieldSep:      ",",
 				Synchronous:   false,

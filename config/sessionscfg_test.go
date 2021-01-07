@@ -651,7 +651,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 			{
 				Alias:            utils.StringPointer("127.0.0.1:8448"),
 				Address:          utils.StringPointer("127.0.0.1:8088"),
-				User:             utils.StringPointer(utils.CGRATES),
+				User:             utils.StringPointer(utils.CGRateSLwr),
 				Password:         utils.StringPointer("CGRateS.org"),
 				Connect_attempts: utils.IntPointer(3),
 				Reconnects:       utils.IntPointer(5),

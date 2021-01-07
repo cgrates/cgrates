@@ -110,7 +110,7 @@ func (iDB *InternalDB) RemoveKeysForPrefix(prefix string) (err error) {
 }
 
 func (iDB *InternalDB) GetVersions(itm string) (vrs Versions, err error) {
-	x, ok := Cache.Get(utils.CacheVersions, utils.Version)
+	x, ok := Cache.Get(utils.CacheVersions, utils.VersionName)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
@@ -130,9 +130,9 @@ func (iDB *InternalDB) SetVersions(vrs Versions, overwrite bool) (err error) {
 			return
 		}
 	}
-	x, ok := Cache.Get(utils.CacheVersions, utils.Version)
+	x, ok := Cache.Get(utils.CacheVersions, utils.VersionName)
 	if !ok || x == nil {
-		Cache.SetWithoutReplicate(utils.CacheVersions, utils.Version, vrs, nil,
+		Cache.SetWithoutReplicate(utils.CacheVersions, utils.VersionName, vrs, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		return
 	}
@@ -140,7 +140,7 @@ func (iDB *InternalDB) SetVersions(vrs Versions, overwrite bool) (err error) {
 	for key, val := range vrs {
 		provVrs[key] = val
 	}
-	Cache.SetWithoutReplicate(utils.CacheVersions, utils.Version, provVrs, nil,
+	Cache.SetWithoutReplicate(utils.CacheVersions, utils.VersionName, provVrs, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -148,7 +148,7 @@ func (iDB *InternalDB) SetVersions(vrs Versions, overwrite bool) (err error) {
 func (iDB *InternalDB) RemoveVersions(vrs Versions) (err error) {
 	if len(vrs) != 0 {
 		var internalVersions Versions
-		x, ok := Cache.Get(utils.CacheVersions, utils.Version)
+		x, ok := Cache.Get(utils.CacheVersions, utils.VersionName)
 		if !ok || x == nil {
 			return utils.ErrNotFound
 		}
@@ -156,11 +156,11 @@ func (iDB *InternalDB) RemoveVersions(vrs Versions) (err error) {
 		for key := range vrs {
 			delete(internalVersions, key)
 		}
-		Cache.SetWithoutReplicate(utils.CacheVersions, utils.Version, internalVersions, nil,
+		Cache.SetWithoutReplicate(utils.CacheVersions, utils.VersionName, internalVersions, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		return
 	}
-	Cache.RemoveWithoutReplicate(utils.CacheVersions, utils.Version,
+	Cache.RemoveWithoutReplicate(utils.CacheVersions, utils.VersionName,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }

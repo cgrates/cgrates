@@ -292,7 +292,7 @@ func (sa *SIPAgent) answerMessage(messageStr, addr string, write func(ans []byte
 
 func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string) (sipAnswer sipingo.Message) {
 	if sipMessage[userAgentHeader] != "" {
-		sipMessage[userAgentHeader] = fmt.Sprintf("%s@%s", utils.CGRateS, utils.VERSION)
+		sipMessage[userAgentHeader] = fmt.Sprintf("%s@%s", utils.CGRateS, utils.Version)
 	}
 	sipMessageIface := make(map[string]interface{})
 	for k, v := range sipMessage {

@@ -133,6 +133,17 @@ func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 				Weight:    10,
 				Type:      utils.MONETARY,
 				Units:     14,
+				CostIncrement: []*utils.TPBalanceCostIncrement{
+					{
+						FilterIDs: []string{"test_filter_id"},
+					},
+				},
+				CostAttributes: []string{"test_cost_attribute"},
+				UnitFactors: []*utils.TPBalanceUnitFactor{
+					{
+						FilterIDs: []string{"test_filter_id"},
+					},
+				},
 			},
 		},
 		ThresholdIDs: []string{utils.META_NONE},
@@ -171,12 +182,23 @@ func testTPAcctPrfGetTPAcctPrfIDs(t *testing.T) {
 
 func testTPAcctPrfUpdateTPAcctBal(t *testing.T) {
 	tpAcctPrf.Balances = []*utils.TPAccountBalance{
-		{
+		&utils.TPAccountBalance{
 			ID:        "MonetaryBalance2",
 			FilterIDs: []string{},
 			Weight:    12,
 			Type:      utils.MONETARY,
 			Units:     16,
+			CostIncrement: []*utils.TPBalanceCostIncrement{
+				{
+					FilterIDs: []string{"test_filter_id2"},
+				},
+			},
+			CostAttributes: []string{"test_cost_attribute2"},
+			UnitFactors: []*utils.TPBalanceUnitFactor{
+				{
+					FilterIDs: []string{"test_filter_id2"},
+				},
+			},
 		},
 	}
 	var result string
@@ -201,6 +223,17 @@ func testTPAcctPrfGetTPAcctBalAfterUpdate(t *testing.T) {
 				Weight:    12,
 				Type:      utils.MONETARY,
 				Units:     16,
+				CostIncrement: []*utils.TPBalanceCostIncrement{
+					{
+						FilterIDs: []string{"test_filter_id"},
+					},
+				},
+				CostAttributes: []string{"test_cost_attribute"},
+				UnitFactors: []*utils.TPBalanceUnitFactor{
+					{
+						FilterIDs: []string{"test_filter_id"},
+					},
+				},
 			},
 		},
 		ThresholdIDs: []string{utils.META_NONE},

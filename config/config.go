@@ -92,7 +92,7 @@ func (dbDefaults) dbUser(dbType string, flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput
 	}
-	return utils.CGRATES
+	return utils.CGRateSLwr
 }
 
 func (dbDefaults) dbHost(dbType string, flagInput string) string {
