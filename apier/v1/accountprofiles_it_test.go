@@ -39,7 +39,8 @@ var (
 	accPrfCfg       *config.CGRConfig
 	accSRPC         *rpc.Client
 	accPrfDataDir   = "/usr/share/cgrates"
-	accPrf          *AccountProfileWithCache
+	apiAccPrf       *APIAccountProfileWithCache
+	accPrf          *utils.AccountProfile
 	accPrfConfigDIR string //run tests for specific configuration
 
 	sTestsAccPrf = []func(t *testing.T){
@@ -157,7 +158,7 @@ func testAccountSGetAccountProfile(t *testing.T) {
 						Factor:    &utils.Decimal{decimal.New(200, 0)},
 					},
 				},
-				Units: 14,
+				Units: &utils.Decimal{decimal.New(14, 0)},
 			},
 			&utils.Balance{
 				ID:             "VoiceBalance",
@@ -167,7 +168,7 @@ func testAccountSGetAccountProfile(t *testing.T) {
 				CostIncrements: []*utils.CostIncrement{},
 				CostAttributes: []string{},
 				UnitFactors:    []*utils.UnitFactor{},
-				Units:          3600000000000,
+				Units:          &utils.Decimal{decimal.New(3600000000000, 0)},
 			},
 		},
 		ThresholdIDs: []string{utils.META_NONE},
@@ -197,48 +198,45 @@ func testAccountSPing(t *testing.T) {
 }
 
 func testAccountSSettAccountProfile(t *testing.T) {
-	accPrf = &AccountProfileWithCache{
-		AccountProfileWithOpts: &utils.AccountProfileWithOpts{
-			AccountProfile: &utils.AccountProfile{
+	apiAccPrf = &APIAccountProfileWithCache{
+		APIAccountProfileWithOpts: &utils.APIAccountProfileWithOpts{
+			APIAccountProfile: &utils.APIAccountProfile{
 				Tenant: "cgrates.org",
 				ID:     "id_test",
 				Weight: 10,
-				Balances: []*utils.Balance{
-					&utils.Balance{
+				Balances: []*utils.APIBalance{
+					&utils.APIBalance{
 						ID:        "MonetaryBalance",
 						FilterIDs: []string{},
 						Weight:    10,
 						Type:      utils.MONETARY,
-						CostIncrements: []*utils.CostIncrement{
-							&utils.CostIncrement{
+						CostIncrements: []*utils.APICostIncrement{
+							&utils.APICostIncrement{
 								FilterIDs:    []string{"fltr1", "fltr2"},
-								Increment:    &utils.Decimal{decimal.New(13, 1)},
-								FixedFee:     &utils.Decimal{decimal.New(23, 1)},
-								RecurrentFee: &utils.Decimal{decimal.New(33, 1)},
+								Increment:    utils.Float64Pointer(1.3),
+								FixedFee:     utils.Float64Pointer(2.3),
+								RecurrentFee: utils.Float64Pointer(3.3),
 							},
 						},
 						CostAttributes: []string{"attr1", "attr2"},
-						UnitFactors: []*utils.UnitFactor{
-							&utils.UnitFactor{
+						UnitFactors: []*utils.APIUnitFactor{
+							&utils.APIUnitFactor{
 								FilterIDs: []string{"fltr1", "fltr2"},
-								Factor:    &utils.Decimal{decimal.New(100, 0)},
+								Factor:    100,
 							},
-							&utils.UnitFactor{
+							&utils.APIUnitFactor{
 								FilterIDs: []string{"fltr3"},
-								Factor:    &utils.Decimal{decimal.New(200, 0)},
+								Factor:    200,
 							},
 						},
 						Units: 14,
 					},
-					&utils.Balance{
-						ID:             "VoiceBalance",
-						FilterIDs:      []string{},
-						Weight:         10,
-						Type:           utils.VOICE,
-						CostIncrements: []*utils.CostIncrement{},
-						CostAttributes: []string{},
-						UnitFactors:    []*utils.UnitFactor{},
-						Units:          3600000000000,
+					&utils.APIBalance{
+						ID:        "VoiceBalance",
+						FilterIDs: []string{},
+						Weight:    10,
+						Type:      utils.VOICE,
+						Units:     3600000000000,
 					},
 				},
 				ThresholdIDs: []string{utils.META_NONE},
@@ -253,17 +251,21 @@ func testAccountSSettAccountProfile(t *testing.T) {
 		t.Errorf("Expected error: %v received: %v", expErr, err)
 	}
 	var reply string
-	if err := accSRPC.Call(utils.APIerSv1SetAccountProfile, accPrf, &reply); err != nil {
+	if err := accSRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
+	}
+	var err error
+	if accPrf, err = apiAccPrf.AsAccountProfile(); err != nil {
+		t.Error(err)
 	}
 	var reply2 *utils.AccountProfile
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply2); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(accPrf.AccountProfile, reply2) {
-		t.Errorf("Expecting : %+v, received: %+v", accPrf.AccountProfile, reply2)
+	} else if !reflect.DeepEqual(accPrf, reply2) {
+		t.Errorf("Expecting : %+v, received: %+v", accPrf, reply2)
 	}
 
 }
@@ -305,19 +307,23 @@ func testAccountSGetAccountProfileIDsCount(t *testing.T) {
 
 func testAccountSUpdateAccountProfile(t *testing.T) {
 	var reply string
-	accPrf.Weight = 2
-	accPrf.Balances[0].CostIncrements[0].FixedFee = &utils.Decimal{decimal.New(1234, 1)}
-	if err := accSRPC.Call(utils.APIerSv1SetAccountProfile, accPrf, &reply); err != nil {
+	apiAccPrf.Weight = 2
+	apiAccPrf.Balances[0].CostIncrements[0].FixedFee = utils.Float64Pointer(123.5)
+	if err := accSRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
+	}
+	var err error
+	if accPrf, err = apiAccPrf.AsAccountProfile(); err != nil {
+		t.Error(err)
 	}
 	var reply2 *utils.AccountProfile
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply2); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(accPrf.AccountProfile, reply2) {
-		t.Errorf("Expecting : %+v, received: %+v", accPrf.AccountProfile, reply2)
+	} else if !reflect.DeepEqual(accPrf, reply2) {
+		t.Errorf("Expecting : %+v, received: %+v", accPrf, reply2)
 	}
 }
 

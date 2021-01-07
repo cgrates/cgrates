@@ -41,7 +41,7 @@ func TestCBDebitUnits(t *testing.T) {
 					Factor: &utils.Decimal{decimal.New(100, 0)}, // EuroCents
 				},
 			},
-			Units: 500, // 500 EURcents
+			Units: &utils.Decimal{decimal.New(500, 0)}, // 500 EURcents
 		},
 		fltrS: new(engine.FilterS),
 	}
@@ -53,7 +53,7 @@ func TestCBDebitUnits(t *testing.T) {
 		t.Errorf("received unit factor: %+v", uFctr)
 	} else if dbted.Cmp(toDebit) != 0 {
 		t.Errorf("debited: %s", dbted)
-	} else if cb.blnCfg.Units != -100.0 {
+	} else if cb.blnCfg.Units.String() != "-100" {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
 	}
 	//with increment and not enough balance
@@ -64,7 +64,7 @@ func TestCBDebitUnits(t *testing.T) {
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: decimal.New(-1, 0),
 			},
-			Units: 1.25,
+			Units: &utils.Decimal{decimal.New(125, 2)},
 		},
 		fltrS: new(engine.FilterS),
 	}
@@ -75,7 +75,7 @@ func TestCBDebitUnits(t *testing.T) {
 		t.Error(err)
 	} else if dbted.Cmp(decimal.New(22, 1)) != 0 { // only 1.2 is possible due to increment
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
-	} else if cb.blnCfg.Units != -0.95 {
+	} else if cb.blnCfg.Units.String() != "-0.95" {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
 	}
 	//with increment and unlimited balance
@@ -86,7 +86,7 @@ func TestCBDebitUnits(t *testing.T) {
 			Opts: map[string]interface{}{
 				utils.MetaBalanceUnlimited: true,
 			},
-			Units: 1.25,
+			Units: &utils.Decimal{decimal.New(125, 2)},
 		},
 		fltrS: new(engine.FilterS),
 	}
@@ -97,7 +97,7 @@ func TestCBDebitUnits(t *testing.T) {
 		t.Error(err)
 	} else if dbted.Cmp(decimal.New(25, 1)) != 0 { // only 1.2 is possible due to increment
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
-	} else if cb.blnCfg.Units != -1.25 {
+	} else if cb.blnCfg.Units.String() != "-1.25" {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
 	}
 	//with increment and positive limit
@@ -108,7 +108,7 @@ func TestCBDebitUnits(t *testing.T) {
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: decimal.New(5, 1), // 0.5 as limit
 			},
-			Units: 1.25,
+			Units: &utils.Decimal{decimal.New(125, 2)},
 		},
 		fltrS: new(engine.FilterS),
 	}
@@ -119,7 +119,7 @@ func TestCBDebitUnits(t *testing.T) {
 		t.Error(err)
 	} else if dbted.Cmp(decimal.New(7, 1)) != 0 { // only 1.2 is possible due to increment
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
-	} else if cb.blnCfg.Units != 0.55 {
+	} else if cb.blnCfg.Units.String() != "0.55" {
 		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
 	}
 }

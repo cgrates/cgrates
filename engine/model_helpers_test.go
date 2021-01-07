@@ -25,6 +25,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ericlagergren/decimal"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -7230,7 +7232,7 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 			FilterIDs: []string{"FLTR_RES_GR2"},
 			Weight:    10,
 			Type:      utils.VOICE,
-			Units:     3600000000000,
+			Units:     &utils.Decimal{decimal.New(3600000000000, 0)},
 			Opts: map[string]interface{}{
 				"key1": "val1",
 			},
@@ -7388,7 +7390,7 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 			FilterIDs: []string{"FLTR_RES_GR2"},
 			Weight:    10,
 			Type:      utils.VOICE,
-			Units:     3600000000000,
+			Units:     &utils.Decimal{decimal.New(3600000000000, 0)},
 			Opts: map[string]interface{}{
 				"key1": "val1",
 			},

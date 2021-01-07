@@ -3726,7 +3726,9 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 			Weight:    bal.Weight,
 			Blocker:   bal.Blocker,
 			Type:      bal.Type,
-			Units:     bal.Units,
+		}
+		if ap.Balances[i].Units, err = utils.NewDecimalFromFloat64(bal.Units); err != nil {
+			return
 		}
 		if bal.Opts != utils.EmptyString {
 			ap.Balances[i].Opts = make(map[string]interface{})
@@ -3815,9 +3817,8 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 			Weight:    bal.Weight,
 			Blocker:   bal.Blocker,
 			Type:      bal.Type,
-			Units:     bal.Units,
 		}
-
+		tpAp.Balances[i].Units, _ = bal.Units.Float64()
 		elems := make([]string, 0, len(bal.Opts))
 		for k, v := range bal.Opts {
 			elems = append(elems, utils.ConcatenatedKey(k, utils.IfaceAsString(v)))
