@@ -5103,3 +5103,11 @@ func TestLoaderHandleFolder(t *testing.T) {
 	}
 	ldr.handleFolder(stopChan)
 }
+
+func TestLoaderServiceEnabled(t *testing.T) {
+	//THis is an empty loader, so there is not an active loader
+	ldrs := &LoaderService{}
+	if rcv := ldrs.Enabled(); rcv {
+		t.Errorf("Expected false, received %+v", rcv)
+	}
+}
