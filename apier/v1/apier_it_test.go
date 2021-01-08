@@ -1230,7 +1230,7 @@ func testApierExecuteActionWithoutTenant(t *testing.T) {
 }
 
 func testApierSetActions(t *testing.T) {
-	act1 := &V1TPAction{Identifier: utils.TOPUP_RESET, BalanceType: utils.MetaMonetary, Units: 75.0, ExpiryTime: utils.UNLIMITED, Weight: 20.0}
+	act1 := &V1TPAction{Identifier: utils.MetaTopUpReset, BalanceType: utils.MetaMonetary, Units: 75.0, ExpiryTime: utils.MetaUnlimited, Weight: 20.0}
 	attrs1 := &V1AttrSetActions{ActionsId: "ACTS_1", Actions: []*V1TPAction{act1}}
 	reply1 := utils.EmptyString
 	if err := rater.Call(utils.APIerSv1SetActions, &attrs1, &reply1); err != nil {
@@ -1246,9 +1246,9 @@ func testApierSetActions(t *testing.T) {
 
 func testApierGetActions(t *testing.T) {
 	expectActs := []*utils.TPAction{
-		{Identifier: utils.TOPUP_RESET, BalanceType: utils.MetaMonetary,
+		{Identifier: utils.MetaTopUpReset, BalanceType: utils.MetaMonetary,
 			Units: "75", BalanceWeight: "0", BalanceBlocker: "false",
-			BalanceDisabled: "false", ExpiryTime: utils.UNLIMITED, Weight: 20.0}}
+			BalanceDisabled: "false", ExpiryTime: utils.MetaUnlimited, Weight: 20.0}}
 
 	var reply []*utils.TPAction
 	if err := rater.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply); err != nil {

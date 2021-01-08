@@ -665,7 +665,7 @@ func TestParseDurationWithNanosecs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 	eOut, _ = time.ParseDuration("-1ns")
-	if rcv, err := ParseDurationWithNanosecs(UNLIMITED); err != nil {
+	if rcv, err := ParseDurationWithNanosecs(MetaUnlimited); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)

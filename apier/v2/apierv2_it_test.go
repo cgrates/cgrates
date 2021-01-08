@@ -154,7 +154,7 @@ func testAPIerSv2itAddBalance(t *testing.T) {
 
 func testAPIerSv2itSetAction(t *testing.T) {
 	attrs := utils.AttrSetActions{ActionsId: "DISABLE_ACCOUNT", Actions: []*utils.TPAction{
-		{Identifier: utils.DISABLE_ACCOUNT, Weight: 10.0},
+		{Identifier: utils.MetaDisableAccount, Weight: 10.0},
 	}}
 	var reply string
 	if err := apierRPC.Call(utils.APIerSv2SetActions, &attrs, &reply); err != nil {
@@ -249,7 +249,7 @@ func testAPIerSv2itFraudMitigation(t *testing.T) {
 func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 	argActs1 := utils.AttrSetActions{ActionsId: "TestAPIerSv2itSetAccountWithAP_ACT_1",
 		Actions: []*utils.TPAction{
-			{Identifier: utils.TOPUP_RESET,
+			{Identifier: utils.MetaTopUpReset,
 				BalanceType: utils.MetaMonetary, Units: "5.0", Weight: 20.0},
 		}}
 	var reply string
@@ -369,7 +369,7 @@ func testAPIerSv2itSetActionWithCategory(t *testing.T) {
 
 	argActs1 := utils.AttrSetActions{ActionsId: "TestAPIerSv2itSetActionWithCategory_ACT",
 		Actions: []*utils.TPAction{
-			{Identifier: utils.TOPUP_RESET,
+			{Identifier: utils.MetaTopUpReset,
 				BalanceType: utils.MetaMonetary, Categories: "test", Units: "5.0", Weight: 20.0},
 		}}
 
@@ -527,7 +527,7 @@ func testAPIerSv2itGetActionsCount(t *testing.T) {
 		t.Errorf("Expecting: 3, received : %+v", reply1)
 	}
 	attrs := utils.AttrSetActions{ActionsId: "DISABLE_ACCOUNT2", Actions: []*utils.TPAction{
-		{Identifier: utils.DISABLE_ACCOUNT, Weight: 0.7},
+		{Identifier: utils.MetaDisableAccount, Weight: 0.7},
 	}}
 	var reply string
 	if err := apierRPC.Call(utils.APIerSv2SetActions, &attrs, &reply); err != nil {
@@ -560,7 +560,7 @@ func testAPIerSv2itGetActionsCount(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ErrNotFound, err)
 	}
 	attrs = utils.AttrSetActions{ActionsId: "Test", Actions: []*utils.TPAction{
-		{Identifier: utils.DISABLE_ACCOUNT, Weight: 0.7},
+		{Identifier: utils.MetaDisableAccount, Weight: 0.7},
 	}}
 	if err := apierRPC.Call(utils.APIerSv2SetActions, &attrs, &reply); err != nil {
 		t.Error(err)

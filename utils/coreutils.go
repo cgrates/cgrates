@@ -201,7 +201,7 @@ func getAddDuration(tmStr string) (addDur time.Duration, err error) {
 func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	tmStr = strings.TrimSpace(tmStr)
 	var nilTime time.Time
-	if len(tmStr) == 0 || tmStr == UNLIMITED {
+	if len(tmStr) == 0 || tmStr == MetaUnlimited {
 		return nilTime, nil
 	}
 	loc, err := time.LoadLocation(timezone)
@@ -209,7 +209,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 		return nilTime, err
 	}
 	switch {
-	case tmStr == UNLIMITED || tmStr == "":
+	case tmStr == MetaUnlimited || tmStr == "":
 	// leave it at zero
 	case tmStr == "*daily":
 		return time.Now().AddDate(0, 0, 1), nil // add one day
@@ -353,7 +353,7 @@ func ParseDurationWithNanosecs(durStr string) (d time.Duration, err error) {
 	if durStr == "" {
 		return
 	}
-	if durStr == UNLIMITED {
+	if durStr == MetaUnlimited {
 		durStr = "-1"
 	}
 	if _, err = strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered

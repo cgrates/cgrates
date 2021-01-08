@@ -549,11 +549,11 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
 func TestFsCdrFirstDefined(t *testing.T) {
 	newReader := bytes.NewReader(body)
 	fsCdr, _ := NewFSCdr(newReader, fsCdrCfg)
-	value := fsCdr.firstDefined([]string{utils.CGR_SUBJECT, utils.CGR_ACCOUNT, FS_USERNAME}, FsUsername)
+	value := fsCdr.firstDefined([]string{utils.CGRSubject, utils.CGRAccount, FS_USERNAME}, FsUsername)
 	if value != "1001" {
 		t.Errorf("Expecting: 1001, received: %s", value)
 	}
-	value = fsCdr.firstDefined([]string{utils.CGR_ACCOUNT, FS_USERNAME}, FsUsername)
+	value = fsCdr.firstDefined([]string{utils.CGRAccount, FS_USERNAME}, FsUsername)
 	if value != "1001" {
 		t.Errorf("Expecting: 1001, received: %s", value)
 	}

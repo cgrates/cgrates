@@ -120,7 +120,7 @@ func (smaEv *SMAsteriskEvent) SetupTime() string {
 }
 
 func (smaEv *SMAsteriskEvent) Account() string {
-	cachedKey := utils.CGR_ACCOUNT
+	cachedKey := utils.CGRAccount
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
 		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
@@ -132,7 +132,7 @@ func (smaEv *SMAsteriskEvent) Account() string {
 }
 
 func (smaEv *SMAsteriskEvent) Destination() string {
-	cachedKey := utils.CGR_DESTINATION
+	cachedKey := utils.CGRDestination
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
 		channelData, _ := smaEv.ariEv["channel"].(map[string]interface{})
@@ -144,27 +144,27 @@ func (smaEv *SMAsteriskEvent) Destination() string {
 }
 
 func (smaEv *SMAsteriskEvent) RequestType() string {
-	return smaEv.cachedFields[utils.CGR_REQTYPE]
+	return smaEv.cachedFields[utils.CGRReqType]
 }
 
 func (smaEv *SMAsteriskEvent) Tenant() string {
-	return smaEv.cachedFields[utils.CGR_TENANT]
+	return smaEv.cachedFields[utils.CGRTenant]
 }
 
 func (smaEv *SMAsteriskEvent) Category() string {
-	return smaEv.cachedFields[utils.CGR_CATEGORY]
+	return smaEv.cachedFields[utils.CGRCategory]
 }
 
 func (smaEv *SMAsteriskEvent) Subject() string {
-	return smaEv.cachedFields[utils.CGR_SUBJECT]
+	return smaEv.cachedFields[utils.CGRSubject]
 }
 
 func (smaEv *SMAsteriskEvent) PDD() string {
-	return smaEv.cachedFields[utils.CGR_PDD]
+	return smaEv.cachedFields[utils.CGRPdd]
 }
 
 func (smaEv *SMAsteriskEvent) Route() string {
-	return smaEv.cachedFields[utils.CGR_ROUTE]
+	return smaEv.cachedFields[utils.CGRRoute]
 }
 
 func (smaEv *SMAsteriskEvent) Subsystems() string {
@@ -176,7 +176,7 @@ func (smaEv *SMAsteriskEvent) OriginHost() string {
 }
 
 func (smaEv *SMAsteriskEvent) DisconnectCause() string {
-	cachedKey := utils.CGR_DISCONNECT_CAUSE
+	cachedKey := utils.CGRDisconnectCause
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
 	if !hasIt {
 		cachedVal, _ = smaEv.ariEv["cause_txt"].(string)
@@ -188,8 +188,8 @@ func (smaEv *SMAsteriskEvent) DisconnectCause() string {
 	return cachedVal
 }
 
-var primaryFields = utils.NewStringSet([]string{eventType, channelID, timestamp, utils.SetupTime, utils.CGR_ACCOUNT, utils.CGR_DESTINATION, utils.CGR_REQTYPE,
-	utils.CGR_TENANT, utils.CGR_CATEGORY, utils.CGR_SUBJECT, utils.CGR_PDD, utils.CGR_ROUTE, utils.CGR_DISCONNECT_CAUSE})
+var primaryFields = utils.NewStringSet([]string{eventType, channelID, timestamp, utils.SetupTime, utils.CGRAccount, utils.CGRDestination, utils.CGRReqType,
+	utils.CGRTenant, utils.CGRCategory, utils.CGRSubject, utils.CGRPdd, utils.CGRRoute, utils.CGRDisconnectCause})
 
 func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) {
 	extraParams = make(map[string]string)

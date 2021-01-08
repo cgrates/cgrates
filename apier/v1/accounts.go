@@ -442,10 +442,10 @@ type AttrAddBalance struct {
 }
 
 func (apierSv1 *APIerSv1) AddBalance(attr *AttrAddBalance, reply *string) error {
-	return apierSv1.modifyBalance(utils.TOPUP, attr, reply)
+	return apierSv1.modifyBalance(utils.MetaTopUp, attr, reply)
 }
 func (apierSv1 *APIerSv1) DebitBalance(attr *AttrAddBalance, reply *string) error {
-	return apierSv1.modifyBalance(utils.DEBIT, attr, reply)
+	return apierSv1.modifyBalance(utils.MetaDebit, attr, reply)
 }
 
 func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) (err error) {
@@ -512,7 +512,7 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 	acts := engine.Actions{a, publishAction}
 	if attr.Cdrlog {
 		acts = engine.Actions{a, publishAction, &engine.Action{
-			ActionType: utils.CDRLOG,
+			ActionType: utils.CDRLog,
 		}}
 	}
 	at.SetActions(acts)
@@ -581,7 +581,7 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 	}
 
 	a := &engine.Action{
-		ActionType: utils.SET_BALANCE,
+		ActionType: utils.MetaSetBalance,
 		Balance:    balance,
 	}
 	publishAction := &engine.Action{
@@ -590,7 +590,7 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 	acts := engine.Actions{a, publishAction}
 	if attr.Cdrlog {
 		acts = engine.Actions{a, publishAction, &engine.Action{
-			ActionType: utils.CDRLOG,
+			ActionType: utils.CDRLog,
 		}}
 	}
 	at.SetActions(acts)
@@ -663,7 +663,7 @@ func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string
 		}
 
 		a := &engine.Action{
-			ActionType: utils.SET_BALANCE,
+			ActionType: utils.MetaSetBalance,
 			Balance:    balFltr,
 		}
 		publishAction := &engine.Action{
@@ -672,7 +672,7 @@ func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string
 		acts := engine.Actions{a, publishAction}
 		if bal.Cdrlog {
 			acts = engine.Actions{a, publishAction, &engine.Action{
-				ActionType: utils.CDRLOG,
+				ActionType: utils.CDRLog,
 			}}
 		}
 		at.SetActions(acts)
@@ -712,7 +712,7 @@ func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *stri
 	}
 	at.SetAccountIDs(utils.StringMap{accID: true})
 	a := &engine.Action{
-		ActionType: utils.REMOVE_BALANCE,
+		ActionType: utils.MetaRemoveBalance,
 		Balance:    balance,
 	}
 	at.SetActions(engine.Actions{a})

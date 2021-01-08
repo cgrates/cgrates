@@ -143,7 +143,7 @@ func testRPCMethodsAddData(t *testing.T) {
 	var reply string
 	// Add a disable and log action
 	attrsAA := &utils.AttrSetActions{ActionsId: "DISABLE_LOG", Actions: []*utils.TPAction{
-		{Identifier: utils.DISABLE_ACCOUNT},
+		{Identifier: utils.MetaDisableAccount},
 		{Identifier: utils.MetaLog},
 	}}
 	if err := rpcRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
@@ -153,7 +153,7 @@ func testRPCMethodsAddData(t *testing.T) {
 	}
 	// Add an enable and log action
 	attrsAA2 := &utils.AttrSetActions{ActionsId: "ENABLE_LOG", Actions: []*utils.TPAction{
-		{Identifier: utils.ENABLE_ACCOUNT},
+		{Identifier: utils.MetaEnableAccount},
 		{Identifier: utils.MetaLog},
 	}}
 	if err := rpcRpc.Call(utils.APIerSv2SetActions, attrsAA2, &reply); err != nil && err.Error() != utils.ErrExists.Error() {

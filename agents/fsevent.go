@@ -35,14 +35,14 @@ import (
 const (
 	varPrefix = "variable_"
 	// Freswitch event proprities names
-	SUBJECT                  = varPrefix + utils.CGR_SUBJECT
-	ACCOUNT                  = varPrefix + utils.CGR_ACCOUNT
-	DESTINATION              = varPrefix + utils.CGR_DESTINATION
-	REQTYPE                  = varPrefix + utils.CGR_REQTYPE //prepaid or postpaid
-	CATEGORY                 = varPrefix + utils.CGR_CATEGORY
-	VAR_CGR_ROUTE            = varPrefix + utils.CGR_ROUTE
+	SUBJECT                  = varPrefix + utils.CGRSubject
+	ACCOUNT                  = varPrefix + utils.CGRAccount
+	DESTINATION              = varPrefix + utils.CGRDestination
+	REQTYPE                  = varPrefix + utils.CGRReqType //prepaid or postpaid
+	CATEGORY                 = varPrefix + utils.CGRCategory
+	VAR_CGR_ROUTE            = varPrefix + utils.CGRRoute
 	UUID                     = "Unique-ID" // -Unique ID for this call leg
-	CSTMID                   = varPrefix + utils.CGR_TENANT
+	CSTMID                   = varPrefix + utils.CGRTenant
 	CALL_DEST_NR             = "Caller-Destination-Number"
 	SIP_REQ_USER             = "variable_sip_req_user"
 	PARK_TIME                = "Caller-Profile-Created-Time"
@@ -68,8 +68,8 @@ const (
 	VarCGRFlags              = varPrefix + utils.CGRFlags
 	VarCGROpts               = varPrefix + utils.CGROpts
 	CGRResourceAllocation    = "cgr_resource_allocation"
-	VAR_CGR_DISCONNECT_CAUSE = varPrefix + utils.CGR_DISCONNECT_CAUSE
-	VAR_CGR_CMPUTELCR        = varPrefix + utils.CGR_COMPUTELCR
+	VAR_CGR_DISCONNECT_CAUSE = varPrefix + utils.CGRDisconnectCause
+	VAR_CGR_CMPUTELCR        = varPrefix + utils.CGRComputeLCR
 	FsConnID                 = "FsConnID" // used to share connID info in event for remote disconnects
 	VarAnswerEpoch           = "variable_answer_epoch"
 	VarCGRACD                = varPrefix + utils.CgrAcd

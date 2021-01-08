@@ -248,7 +248,7 @@ func testActionsUpdateBalance(t *testing.T) {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
 	}
 	topupAction := &utils.AttrSetActions{ActionsId: "ACT_TOPUP_RST", Actions: []*utils.TPAction{
-		{Identifier: utils.TOPUP, BalanceId: "test", BalanceType: utils.MetaMonetary, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
+		{Identifier: utils.MetaTopUp, BalanceId: "test", BalanceType: utils.MetaMonetary, Units: "5", ExpiryTime: utils.MetaUnlimited, Weight: 20.0},
 	}}
 	if err := actsRPC.Call(utils.APIerSv2SetActions, topupAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
@@ -256,7 +256,7 @@ func testActionsUpdateBalance(t *testing.T) {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 	changeBlockerAction := &utils.AttrSetActions{ActionsId: "ACT_BAL_UPDT", Actions: []*utils.TPAction{
-		{Identifier: utils.SET_BALANCE, BalanceId: "test", BalanceBlocker: "true"},
+		{Identifier: utils.MetaSetBalance, BalanceId: "test", BalanceBlocker: "true"},
 	}}
 	if err := actsRPC.Call(utils.APIerSv2SetActions, changeBlockerAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())

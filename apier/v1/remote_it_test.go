@@ -525,9 +525,9 @@ func testInternalRemoteITGetRatingProfile(t *testing.T) {
 
 func testInternalRemoteITGetAction(t *testing.T) {
 	expectActs := []*utils.TPAction{
-		{Identifier: utils.TOPUP_RESET, BalanceId: "test", BalanceType: utils.MetaMonetary,
+		{Identifier: utils.MetaTopUpReset, BalanceId: "test", BalanceType: utils.MetaMonetary,
 			Units: "10", BalanceWeight: "10", BalanceBlocker: "false",
-			BalanceDisabled: "false", ExpiryTime: utils.UNLIMITED, Weight: 10.0}}
+			BalanceDisabled: "false", ExpiryTime: utils.MetaUnlimited, Weight: 10.0}}
 
 	var reply []*utils.TPAction
 	if err := internalRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACT_TOPUP_RST_10"), &reply); err != nil {

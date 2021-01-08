@@ -830,10 +830,10 @@ func testInternalReplicateITActions(t *testing.T) {
 	attrs1 := &V1AttrSetActions{
 		ActionsId: "ACTS_1",
 		Actions: []*V1TPAction{{
-			Identifier:  utils.TOPUP_RESET,
+			Identifier:  utils.MetaTopUpReset,
 			BalanceType: utils.MetaMonetary,
 			Units:       75.0,
-			ExpiryTime:  utils.UNLIMITED,
+			ExpiryTime:  utils.MetaUnlimited,
 			Weight:      20.0}}}
 	var reply string
 	if err := internalRPC.Call(utils.APIerSv1SetActions, &attrs1, &reply); err != nil {
@@ -846,13 +846,13 @@ func testInternalReplicateITActions(t *testing.T) {
 	}
 	// check
 	eOut := []*utils.TPAction{{
-		Identifier:      utils.TOPUP_RESET,
+		Identifier:      utils.MetaTopUpReset,
 		BalanceType:     utils.MetaMonetary,
 		Units:           "75",
 		BalanceWeight:   "0",
 		BalanceBlocker:  "false",
 		BalanceDisabled: "false",
-		ExpiryTime:      utils.UNLIMITED,
+		ExpiryTime:      utils.MetaUnlimited,
 		Weight:          20.0,
 	}}
 	if err := internalRPC.Call(utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err != nil {

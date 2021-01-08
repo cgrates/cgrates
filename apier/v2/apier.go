@@ -332,7 +332,7 @@ func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) er
 			ExtraParameters:  apiAct.ExtraParameters,
 			Filter:           apiAct.Filter,
 		}
-		if apiAct.Identifier != utils.RESET_TRIGGERS { // add an exception for ResetTriggers
+		if apiAct.Identifier != utils.MetaResetTriggers { // add an exception for ResetTriggers
 			a.Balance = &engine.BalanceFilter{ // TODO: update this part
 				Uuid:           utils.StringPointer(apiAct.BalanceUuid),
 				ID:             utils.StringPointer(apiAct.BalanceId),
