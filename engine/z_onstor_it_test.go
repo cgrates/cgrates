@@ -2329,7 +2329,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 			FilterIDs: []string{"FLTR_RES_GR2"},
 			Weight:    10,
 			Type:      utils.VOICE,
-			Units:     3600,
+			Units:     utils.NewDecimal(3600, 0),
 			Opts: map[string]interface{}{
 				"key1": "val1",
 			},
