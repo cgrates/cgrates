@@ -31,7 +31,7 @@ import (
 var kamEv = KamEvent{KamTRIndex: "29223", KamTRLabel: "698469260",
 	"callid": "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", "from_tag": "eb082607", "to_tag": "4ea9687f", "cgr_account": "dan",
 	"cgr_reqtype": utils.MetaPrepaid, "cgr_subject": "dan", "cgr_destination": "+4986517174963", "cgr_tenant": "itsyscom.com",
-	"cgr_duration": "20", utils.CGR_ROUTE: "suppl2", utils.CGR_DISCONNECT_CAUSE: "200", "extra1": "val1", "extra2": "val2"}
+	"cgr_duration": "20", utils.CGRRoute: "suppl2", utils.CGRDisconnectCause: "200", "extra1": "val1", "extra2": "val2"}
 
 func TestNewKamEvent(t *testing.T) {
 	evStr := `{"event":"CGR_CALL_END",
@@ -47,19 +47,19 @@ func TestNewKamEvent(t *testing.T) {
 		"cgr_disconnectcause": "200",
 		"cgr_pdd": "4"}`
 	eKamEv := KamEvent{
-		"event":                    "CGR_CALL_END",
-		"callid":                   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
-		"from_tag":                 "bf71ad59",
-		"to_tag":                   "7351fecf",
-		"cgr_reqtype":              utils.MetaPostpaid,
-		"cgr_account":              "1001",
-		"cgr_destination":          "1002",
-		"cgr_answertime":           "1419839310",
-		"cgr_duration":             "3",
-		"cgr_pdd":                  "4",
-		utils.CGR_ROUTE:            "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200",
-		utils.OriginHost:           utils.KamailioAgent,
+		"event":                  "CGR_CALL_END",
+		"callid":                 "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
+		"from_tag":               "bf71ad59",
+		"to_tag":                 "7351fecf",
+		"cgr_reqtype":            utils.MetaPostpaid,
+		"cgr_account":            "1001",
+		"cgr_destination":        "1002",
+		"cgr_answertime":         "1419839310",
+		"cgr_duration":           "3",
+		"cgr_pdd":                "4",
+		utils.CGRRoute:           "supplier2",
+		utils.CGRDisconnectCause: "200",
+		utils.OriginHost:         utils.KamailioAgent,
 	}
 	if kamEv, err := NewKamEvent([]byte(evStr), utils.KamailioAgent, ""); err != nil {
 		t.Error(err)
@@ -74,8 +74,8 @@ func TestKamEvMissingParameter(t *testing.T) {
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
 		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_answertime": "1419839310", "cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGR_ROUTE:            "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
+		utils.CGRRoute:           "supplier2",
+		utils.CGRDisconnectCause: "200"}
 	if missingParam := kamEv.MissingParameter(); missingParam != true {
 		t.Errorf("Expecting: true, received:%+v ", missingParam)
 	}
@@ -88,16 +88,16 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGR_ROUTE:            "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
+		utils.CGRRoute:           "supplier2",
+		utils.CGRDisconnectCause: "200"}
 	expMp := make(map[string]interface{})
 	expMp["cgr_account"] = "1001"
 	expMp["cgr_duration"] = "3"
 	expMp["cgr_pdd"] = "4"
 	expMp["cgr_destination"] = "1002"
-	expMp[utils.CGR_ROUTE] = "supplier2"
+	expMp[utils.CGRRoute] = "supplier2"
 	expMp["cgr_answertime"] = "1419839310"
-	expMp[utils.CGR_DISCONNECT_CAUSE] = "200"
+	expMp[utils.CGRDisconnectCause] = "200"
 	expMp["callid"] = "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0"
 	expMp["from_tag"] = "bf71ad59"
 	expMp["to_tag"] = "7351fecf"
@@ -117,8 +117,8 @@ func TestKamEvAsCGREvent(t *testing.T) {
 		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGR_ROUTE:            "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
+		utils.CGRRoute:           "supplier2",
+		utils.CGRDisconnectCause: "200"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return
@@ -149,9 +149,9 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGR_ROUTE:            "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200",
-		utils.CGRFlags:             "*accounts,*routes,*routes_event_cost,*routes_ignore_errors"}
+		utils.CGRRoute:           "supplier2",
+		utils.CGRDisconnectCause: "200",
+		utils.CGRFlags:           "*accounts,*routes,*routes_event_cost,*routes_ignore_errors"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return
@@ -201,8 +201,8 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGR_ROUTE:            "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
+		utils.CGRRoute:           "supplier2",
+		utils.CGRDisconnectCause: "200"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return
@@ -283,8 +283,8 @@ func TestKamEvV1InitSessionArgs(t *testing.T) {
 		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGR_ROUTE:            "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
+		utils.CGRRoute:           "supplier2",
+		utils.CGRDisconnectCause: "200"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return
@@ -323,8 +323,8 @@ func TestKamEvV1TerminateSessionArgs(t *testing.T) {
 		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGR_ROUTE:            "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
+		utils.CGRRoute:           "supplier2",
+		utils.CGRDisconnectCause: "200"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return
@@ -363,8 +363,8 @@ func TestKamEvV1ProcessMessageArgs(t *testing.T) {
 		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGR_ROUTE:            "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
+		utils.CGRRoute:           "supplier2",
+		utils.CGRDisconnectCause: "200"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return
@@ -400,8 +400,8 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGR_ROUTE:            "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
+		utils.CGRRoute:           "supplier2",
+		utils.CGRDisconnectCause: "200"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return

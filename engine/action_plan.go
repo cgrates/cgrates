@@ -263,7 +263,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 				if successActions != nil {
 					go func(a *Action) { successActions <- a }(a)
 				}
-				if a.ActionType == utils.REMOVE_ACCOUNT {
+				if a.ActionType == utils.MetaRemoveAccount {
 					removeAccountActionFound = true
 				}
 			}

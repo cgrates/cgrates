@@ -452,7 +452,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 		Actions: []*utils.TPAction{
 			{Identifier: utils.MetaLog},
 			{
-				Identifier: utils.TOPUP_RESET, BalanceType: utils.MetaVoice,
+				Identifier: utils.MetaTopUpReset, BalanceType: utils.MetaVoice,
 				Units: "10", ExpiryTime: "*unlimited",
 				DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
 		},

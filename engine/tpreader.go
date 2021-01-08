@@ -647,7 +647,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				}
 				atrs[idx].Balance.Weight = utils.Float64Pointer(u)
 			}
-			if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.MetaAny && atr.ExpirationDate != utils.UNLIMITED {
+			if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.MetaAny && atr.ExpirationDate != utils.MetaUnlimited {
 				u, err := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
 				if err != nil {
 					return err
@@ -850,7 +850,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 						}
 						atrs[idx].Balance.Weight = utils.Float64Pointer(u)
 					}
-					if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.MetaAny && atr.ExpirationDate != utils.UNLIMITED {
+					if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.MetaAny && atr.ExpirationDate != utils.MetaUnlimited {
 						u, err := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
 						if err != nil {
 							return err

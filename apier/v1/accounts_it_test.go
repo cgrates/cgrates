@@ -342,7 +342,7 @@ func testAccITAddBalance(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLog}}
 	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -366,7 +366,7 @@ func testAccITAddBalanceWithoutTenant(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLog}}
 	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
@@ -394,7 +394,7 @@ func testAccITSetBalance(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLog}}
 	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
@@ -421,7 +421,7 @@ func testAccITSetBalanceWithoutTenant(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLog}}
 	if err := accRPC.Call(utils.APIerSv1GetCDRs, &req, &cdrs); err != nil {
 		t.Error(err)
 	} else if len(cdrs) != 4 {
@@ -455,7 +455,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}, Accounts: []string{"testAccITSetBalanceWithExtraData"}}
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLog}, Accounts: []string{"testAccITSetBalanceWithExtraData"}}
 	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -490,7 +490,7 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}, Accounts: []string{"testAccITSetBalanceWithExtraData2"}}
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLog}, Accounts: []string{"testAccITSetBalanceWithExtraData2"}}
 	if err := accRPC.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -951,9 +951,9 @@ func testAccITAccountWithTriggers(t *testing.T) {
 
 	// add an action that contains topup and reset_triggers
 	topupAction := &utils.AttrSetActions{ActionsId: "TOPUP_WITH_RESET_TRIGGER", Actions: []*utils.TPAction{
-		{Identifier: utils.TOPUP_RESET, BalanceId: "testAccITAccountWithTriggers",
+		{Identifier: utils.MetaTopUpReset, BalanceId: "testAccITAccountWithTriggers",
 			BalanceType: utils.MetaMonetary, Units: "5", Weight: 10.0},
-		{Identifier: utils.RESET_TRIGGERS},
+		{Identifier: utils.MetaResetTriggers},
 	}}
 
 	if err := accRPC.Call(utils.APIerSv2SetActions, topupAction, &reply); err != nil {
@@ -964,7 +964,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 
 	// add an action to be executed when the trigger is triggered
 	actTrigger := &utils.AttrSetActions{ActionsId: "ACT_TRIGGER", Actions: []*utils.TPAction{
-		{Identifier: utils.TOPUP, BalanceId: "CustomBanalce",
+		{Identifier: utils.MetaTopUp, BalanceId: "CustomBanalce",
 			BalanceType: utils.MetaMonetary, Units: "5", Weight: 10.0},
 	}}
 
@@ -1085,7 +1085,7 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 	var reply string
 	// add an action that contains topup
 	topupAction := &utils.AttrSetActions{ActionsId: "TOPUP_ACTION", Actions: []*utils.TPAction{
-		{Identifier: utils.TOPUP_RESET, BalanceId: "testAccITAccountMonthlyEstimated",
+		{Identifier: utils.MetaTopUpReset, BalanceId: "testAccITAccountMonthlyEstimated",
 			BalanceType: utils.MetaMonetary, Units: "5", Weight: 10.0},
 	}}
 
