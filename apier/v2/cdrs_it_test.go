@@ -426,7 +426,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaTenant,
-					Type: utils.META_CONSTANT,
+					Type: utils.MetaConstant,
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules: "CustomTenant",
@@ -435,7 +435,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 				},
 				{
 					Path: utils.MetaReq + utils.NestingSep + utils.Tenant,
-					Type: utils.META_CONSTANT,
+					Type: utils.MetaConstant,
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules: "CustomTenant",
@@ -534,7 +534,7 @@ func testV2CDRsRemoveRatingProfiles(t *testing.T) {
 	var reply string
 	if err := cdrsRpc.Call(utils.APIerSv1RemoveRatingProfile, &v1.AttrRemoveRatingProfile{
 		Tenant:   "cgrates.org",
-		Category: utils.CALL,
+		Category: utils.Call,
 		Subject:  utils.MetaAny,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -543,7 +543,7 @@ func testV2CDRsRemoveRatingProfiles(t *testing.T) {
 	}
 	if err := cdrsRpc.Call(utils.APIerSv1RemoveRatingProfile, &v1.AttrRemoveRatingProfile{
 		Tenant:   "cgrates.org",
-		Category: utils.CALL,
+		Category: utils.Call,
 		Subject:  "SUPPLIER1",
 	}, &reply); err != nil {
 		t.Error(err)
@@ -728,7 +728,7 @@ func testV2CDRsSetThreshold(t *testing.T) {
 	var reply string
 	if err := cdrsRpc.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "ACT_LOG",
-		Actions:   []*utils.TPAction{{Identifier: utils.LOG}},
+		Actions:   []*utils.TPAction{{Identifier: utils.MetaLog}},
 	}, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -765,7 +765,7 @@ func testV2CDRsSetThreshold(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1005",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       1,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
@@ -826,7 +826,7 @@ func testv2CDRsGetCDRsDest(t *testing.T) {
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{
 					utils.CGRID:        "9b3cd5e698af94f8916220866c831a982ed16318",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.RunID:        "raw",
 					utils.OriginID:     "25160047719:0",
 					utils.OriginHost:   "192.168.1.1",
@@ -897,7 +897,7 @@ func testV2CDRsRerate(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "voiceAccount",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       600000000000,
 		Balance: map[string]interface{}{
 			utils.ID:        utils.MetaDefault,
@@ -913,8 +913,8 @@ func testV2CDRsRerate(t *testing.T) {
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "voiceAccount"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 600000000000 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaVoice][0].Value != 600000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaVoice][0])
 	}
 
 	args := &engine.ArgV1ProcessEvent{
@@ -947,8 +947,8 @@ func testV2CDRsRerate(t *testing.T) {
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "voiceAccount"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 480000000000 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaVoice][0].Value != 480000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaVoice][0])
 	}
 
 	args2 := &engine.ArgV1ProcessEvent{
@@ -980,8 +980,8 @@ func testV2CDRsRerate(t *testing.T) {
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "voiceAccount"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 540000000000 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaVoice][0].Value != 540000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaVoice][0])
 	}
 }
 
@@ -1023,8 +1023,8 @@ func testv2CDRsDynaPrepaid(t *testing.T) {
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY][0].Value != 9.9694 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
+	} else if acnt.BalanceMap[utils.MetaMonetary][0].Value != 9.9694 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaMonetary][0])
 	}
 }
 
@@ -1067,7 +1067,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV2CDRsDuplicateCDRs",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       600000000000,
 		Balance: map[string]interface{}{
 			utils.ID:        utils.MetaDefault,
@@ -1083,8 +1083,8 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV2CDRsDuplicateCDRs"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 600000000000 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaVoice][0].Value != 600000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaVoice][0])
 	}
 
 	args := &engine.ArgV1ProcessEvent{
@@ -1117,8 +1117,8 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV2CDRsDuplicateCDRs"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 480000000000 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaVoice][0].Value != 480000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaVoice][0])
 	}
 
 	var wg sync.WaitGroup
@@ -1158,8 +1158,8 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV2CDRsDuplicateCDRs"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 540000000000 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaVoice][0].Value != 540000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaVoice][0])
 	}
 }
 

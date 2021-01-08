@@ -68,7 +68,7 @@ func (rsv1 *RALsV1) GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *disp
 	}
 	for _, rp := range arg.RatingPlanIDs { // loop through RatingPlans until we find one without errors
 		rPrfl := &engine.RatingProfile{
-			Id: utils.ConcatenatedKey(utils.META_OUT,
+			Id: utils.ConcatenatedKey(utils.MetaOut,
 				tenant, category, subject),
 			RatingPlanActivations: engine.RatingPlanActivations{
 				&engine.RatingPlanActivation{

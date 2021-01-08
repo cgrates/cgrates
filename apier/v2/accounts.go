@@ -36,7 +36,7 @@ func (apiv2 *APIerSv2) GetAccounts(attr *utils.AttrGetAccounts, reply *[]*engine
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIDs) == 0 {
-		if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + tnt); err != nil {
+		if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix + tnt); err != nil {
 			return err
 		}
 	} else {
@@ -44,7 +44,7 @@ func (apiv2 *APIerSv2) GetAccounts(attr *utils.AttrGetAccounts, reply *[]*engine
 			if len(acntID) == 0 { // Source of error returned from redis (key not found)
 				continue
 			}
-			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(tnt, acntID))
+			accountKeys = append(accountKeys, utils.AccountPrefix+utils.ConcatenatedKey(tnt, acntID))
 		}
 	}
 	if len(accountKeys) == 0 {
@@ -65,7 +65,7 @@ func (apiv2 *APIerSv2) GetAccounts(attr *utils.AttrGetAccounts, reply *[]*engine
 	}
 	retAccounts := make([]*engine.Account, 0)
 	for _, acntKey := range limitedAccounts {
-		if acnt, err := apiv2.DataManager.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
+		if acnt, err := apiv2.DataManager.GetAccount(acntKey[len(utils.AccountPrefix):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
 			if alNeg, has := attr.Filter[utils.AllowNegative]; has && alNeg != acnt.AllowNegative {
@@ -89,7 +89,7 @@ func (apiv2 *APIerSv2) GetAccountsCount(attr *utils.AttrGetAccountsCount, reply 
 		tnt = apiv2.Config.GeneralCfg().DefaultTenant
 	}
 	var accountKeys []string
-	if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + tnt); err != nil {
+	if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix + tnt); err != nil {
 		return err
 	}
 	if len(accountKeys) == 0 {
@@ -221,7 +221,7 @@ func (apiv2 *APIerSv2) SetAccount(attr *AttrSetAccount, reply *string) error {
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
 					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: {accID}, utils.ActionPlanIDs: apIDs},
 				}, reply)
-		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
 		if err != nil {
 			return 0, err
 		}
@@ -257,7 +257,7 @@ func (apiv2 *APIerSv2) SetAccount(attr *AttrSetAccount, reply *string) error {
 		}
 		// All prepared, save account
 		return 0, apiv2.DataManager.SetAccount(ub)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

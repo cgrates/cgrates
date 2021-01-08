@@ -115,7 +115,7 @@ func testCsvExportEvent(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "dsafdsaf",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -143,7 +143,7 @@ func testCsvExportEvent(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.DATA,
+					utils.ToR:          utils.MetaData,
 					utils.OriginID:     "abcdef",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -171,7 +171,7 @@ func testCsvExportEvent(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.SMS,
+					utils.ToR:          utils.MetaSMS,
 					utils.OriginID:     "sdfwer",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -240,7 +240,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:         utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:           utils.VOICE,
+					utils.ToR:           utils.MetaVoice,
 					"ComposedOriginID1": "dsaf",
 					"ComposedOriginID2": "dsaf",
 					utils.OriginHost:    "192.168.1.1",
@@ -271,7 +271,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:         utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:           utils.SMS,
+					utils.ToR:           utils.MetaSMS,
 					"ComposedOriginID1": "sdf",
 					"ComposedOriginID2": "wer",
 					utils.OriginHost:    "192.168.1.1",
@@ -346,7 +346,7 @@ func testCsvExportMaskedDestination(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "dsafdsaf",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -403,7 +403,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "dsafdsaf",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -433,7 +433,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.DATA,
+					utils.ToR:          utils.MetaData,
 					utils.OriginID:     "abcdef",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -463,7 +463,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.SMS,
+					utils.ToR:          utils.MetaSMS,
 					utils.OriginID:     "sdfwer",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -533,7 +533,7 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "dsafdsaf",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,

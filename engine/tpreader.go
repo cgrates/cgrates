@@ -340,7 +340,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists && tpr.dm.dataDB != nil {
-				if exists, err = tpr.dm.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId, ""); err != nil {
+				if exists, err = tpr.dm.HasData(utils.RatingPlanPrefix, tpRa.RatingPlanId, ""); err != nil {
 					return err
 				}
 			}
@@ -381,7 +381,7 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists && tpr.dm.dataDB != nil { // Only query if there is a connection, eg on dry run there is none
-				if exists, err = tpr.dm.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId, ""); err != nil {
+				if exists, err = tpr.dm.HasData(utils.RatingPlanPrefix, tpRa.RatingPlanId, ""); err != nil {
 					return err
 				}
 			}
@@ -556,7 +556,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 
 			_, exists := tpr.actions[at.ActionsId]
 			if !exists && tpr.dm.dataDB != nil {
-				if exists, err = tpr.dm.HasData(utils.ACTION_PREFIX, at.ActionsId, ""); err != nil {
+				if exists, err = tpr.dm.HasData(utils.ActionPrefix, at.ActionsId, ""); err != nil {
 					return fmt.Errorf("[ActionPlans] Error querying actions: %v - %s", at.ActionsId, err.Error())
 				}
 			}
@@ -2033,7 +2033,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.REVERSE_DESTINATION_PREFIX:
+	case utils.ReverseDestinationPrefix:
 		keys := utils.StringSet{}
 		for _, dst := range tpr.destinations {
 			for _, prfx := range dst.Prefixes {
@@ -2041,7 +2041,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			}
 		}
 		return keys.AsSlice(), nil
-	case utils.RATING_PLAN_PREFIX:
+	case utils.RatingPlanPrefix:
 		keys := make([]string, len(tpr.ratingPlans))
 		i := 0
 		for k := range tpr.ratingPlans {
@@ -2049,7 +2049,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.RATING_PROFILE_PREFIX:
+	case utils.RatingProfilePrefix:
 		keys := make([]string, len(tpr.ratingProfiles))
 		i := 0
 		for k := range tpr.ratingProfiles {
@@ -2057,7 +2057,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ACTION_PREFIX:
+	case utils.ActionPrefix:
 		keys := make([]string, len(tpr.actions))
 		i := 0
 		for k := range tpr.actions {
@@ -2065,7 +2065,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ACTION_PLAN_PREFIX: // actionPlans
+	case utils.ActionPlanPrefix: // actionPlans
 		keys := make([]string, len(tpr.actionPlans))
 		i := 0
 		for k := range tpr.actionPlans {
@@ -2081,7 +2081,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.SHARED_GROUP_PREFIX:
+	case utils.SharedGroupPrefix:
 		keys := make([]string, len(tpr.sharedGroups))
 		i := 0
 		for k := range tpr.sharedGroups {
@@ -2097,7 +2097,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ACTION_TRIGGER_PREFIX:
+	case utils.ActionTriggerPrefix:
 		keys := make([]string, len(tpr.actionsTriggers))
 		i := 0
 		for k := range tpr.actionsTriggers {
@@ -2465,7 +2465,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 			if verbose {
 				log.Print("Removing reverse destinations")
 			}
-			if err = tpr.dm.DataDB().RemoveKeysForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+			if err = tpr.dm.DataDB().RemoveKeysForPrefix(utils.ReverseDestinationPrefix); err != nil {
 				return
 			}
 		}
@@ -2577,15 +2577,15 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	}
 	// take IDs for each type
 	dstIds, _ := tpr.GetLoadedIds(utils.DestinationPrefix)
-	revDstIDs, _ := tpr.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
-	rplIds, _ := tpr.GetLoadedIds(utils.RATING_PLAN_PREFIX)
-	rpfIds, _ := tpr.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
-	actIds, _ := tpr.GetLoadedIds(utils.ACTION_PREFIX)
+	revDstIDs, _ := tpr.GetLoadedIds(utils.ReverseDestinationPrefix)
+	rplIds, _ := tpr.GetLoadedIds(utils.RatingPlanPrefix)
+	rpfIds, _ := tpr.GetLoadedIds(utils.RatingProfilePrefix)
+	actIds, _ := tpr.GetLoadedIds(utils.ActionPrefix)
 	aapIDs, _ := tpr.GetLoadedIds(utils.AccountActionPlansPrefix)
-	shgIds, _ := tpr.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
+	shgIds, _ := tpr.GetLoadedIds(utils.SharedGroupPrefix)
 	rspIDs, _ := tpr.GetLoadedIds(utils.ResourceProfilesPrefix)
 	resIDs, _ := tpr.GetLoadedIds(utils.ResourcesPrefix)
-	aatIDs, _ := tpr.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
+	aatIDs, _ := tpr.GetLoadedIds(utils.ActionTriggerPrefix)
 	stqIDs, _ := tpr.GetLoadedIds(utils.StatQueuePrefix)
 	stqpIDs, _ := tpr.GetLoadedIds(utils.StatQueueProfilePrefix)
 	trsIDs, _ := tpr.GetLoadedIds(utils.ThresholdPrefix)
@@ -2598,7 +2598,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	dphIDs, _ := tpr.GetLoadedIds(utils.DispatcherHostPrefix)
 	ratePrfIDs, _ := tpr.GetLoadedIds(utils.RateProfilePrefix)
 	actionPrfIDs, _ := tpr.GetLoadedIds(utils.ActionProfilePrefix)
-	aps, _ := tpr.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+	aps, _ := tpr.GetLoadedIds(utils.ActionPlanPrefix)
 	accountPrfIDs, _ := tpr.GetLoadedIds(utils.AccountProfilePrefix)
 
 	//compose Reload Cache argument
@@ -2720,7 +2720,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 
 func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) {
 	var reply string
-	aps, _ := tpr.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+	aps, _ := tpr.GetLoadedIds(utils.ActionPlanPrefix)
 	// in case we have action plans reload the scheduler
 	if len(aps) == 0 {
 		return

@@ -34,7 +34,7 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.AnswerTime: tnow,
 		utils.OrderID:    1,
 		utils.Cost:       5.5,
-		utils.ToR:        utils.VOICE,
+		utils.ToR:        utils.MetaVoice,
 		utils.Usage:      time.Second,
 	}
 	exp, _ := newEEMetrics(utils.EmptyString)
@@ -54,7 +54,7 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.AnswerTime: tnow,
 		utils.OrderID:    2,
 		utils.Cost:       5.5,
-		utils.ToR:        utils.SMS,
+		utils.ToR:        utils.MetaSMS,
 		utils.Usage:      time.Second,
 	}
 	exp[utils.LastEventATime] = tnow
@@ -70,7 +70,7 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.AnswerTime: tnow,
 		utils.OrderID:    3,
 		utils.Cost:       5.5,
-		utils.ToR:        utils.MMS,
+		utils.ToR:        utils.MetaMMS,
 		utils.Usage:      time.Second,
 	}
 	exp[utils.LastEventATime] = tnow
@@ -86,7 +86,7 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.AnswerTime: tnow,
 		utils.OrderID:    4,
 		utils.Cost:       5.5,
-		utils.ToR:        utils.GENERIC,
+		utils.ToR:        utils.MetaGeneric,
 		utils.Usage:      time.Second,
 	}
 	exp[utils.LastEventATime] = tnow
@@ -102,7 +102,7 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.AnswerTime: tnow,
 		utils.OrderID:    5,
 		utils.Cost:       5.5,
-		utils.ToR:        utils.DATA,
+		utils.ToR:        utils.MetaData,
 		utils.Usage:      time.Second,
 	}
 	exp[utils.LastEventATime] = tnow

@@ -132,7 +132,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       120000000000,
 		Balance: map[string]interface{}{
 			utils.ID:     "BALANCE1",
@@ -148,7 +148,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	attrSetBalance = utils.AttrSetBalance{
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       180000000000,
 		Balance: map[string]interface{}{
 			utils.ID:     "BALANCE2",
@@ -163,7 +163,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	expectedVoice := 300000000000.0
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
 	}
 	argsEv := &engine.ArgV1ProcessEvent{
@@ -200,9 +200,9 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	}
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if blc1 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE1"); blc1.Value != 0 {
+	} else if blc1 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE1"); blc1.Value != 0 {
 		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
-	} else if blc2 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE2"); blc2.Value != 120000000000 {
+	} else if blc2 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE2"); blc2.Value != 120000000000 {
 		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
 	}
 	// without re-rate we should be denied
@@ -211,9 +211,9 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	}
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if blc1 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE1"); blc1.Value != 0 {
+	} else if blc1 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE1"); blc1.Value != 0 {
 		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
-	} else if blc2 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE2"); blc2.Value != 120000000000 {
+	} else if blc2 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE2"); blc2.Value != 120000000000 {
 		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
 	}
 	argsEv = &engine.ArgV1ProcessEvent{
@@ -240,9 +240,9 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	}
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if blc1 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE1"); blc1.Value != 120000000000 { // refund is done after debit
+	} else if blc1 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE1"); blc1.Value != 120000000000 { // refund is done after debit
 		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
-	} else if blc2 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE2"); blc2.Value != 120000000000 {
+	} else if blc2 := acnt.GetBalanceWithID(utils.MetaVoice, "BALANCE2"); blc2.Value != 120000000000 {
 		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
 	}
 	return
@@ -257,7 +257,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       123,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
@@ -274,10 +274,10 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 	exp := 123.0
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
 	}
-	balanceUuid := acnt.BalanceMap[utils.MONETARY][0].Uuid
+	balanceUuid := acnt.BalanceMap[utils.MetaMonetary][0].Uuid
 
 	attr := &engine.AttrCDRSStoreSMCost{
 		Cost: &engine.SMCost{
@@ -318,7 +318,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 					BalanceSummaries: []*engine.BalanceSummary{
 						{
 							UUID:  balanceUuid,
-							Type:  utils.MONETARY,
+							Type:  utils.MetaMonetary,
 							Value: 50,
 						},
 					},
@@ -394,7 +394,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 	exp = 124.0454
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
 	}
 }
@@ -408,7 +408,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       123,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
@@ -425,11 +425,11 @@ func testV1CDRsRefundCDR(t *testing.T) {
 	exp := 123.0
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
 	}
 
-	balanceUuid := acnt.BalanceMap[utils.MONETARY][0].Uuid
+	balanceUuid := acnt.BalanceMap[utils.MetaMonetary][0].Uuid
 
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRefund},
@@ -476,7 +476,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 							BalanceSummaries: []*engine.BalanceSummary{
 								{
 									UUID:  balanceUuid,
-									Type:  utils.MONETARY,
+									Type:  utils.MetaMonetary,
 									Value: 50,
 								},
 							},
@@ -529,7 +529,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 	exp = 125.3
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != exp {
 		t.Errorf("Expecting: %v, received: %v", exp, rply)
 	}
 }
@@ -549,7 +549,7 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 	attrs := &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1CDRsAddBalanceForSMS",
-		BalanceType: utils.SMS,
+		BalanceType: utils.MetaSMS,
 		Value:       1000,
 	}
 	if err := cdrsRpc.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
@@ -561,7 +561,7 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 	attrs = &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1CDRsAddBalanceForSMS",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       10,
 	}
 	if err := cdrsRpc.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
@@ -578,14 +578,14 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap[utils.SMS]) != 1 {
-		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.SMS]))
-	} else if acnt.BalanceMap[utils.SMS].GetTotalValue() != 1000 {
-		t.Errorf("Expecting: %v, received: %v", 1000, acnt.BalanceMap[utils.SMS].GetTotalValue())
-	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
-		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.MONETARY]))
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 10 {
-		t.Errorf("Expecting: %v, received: %v", 10, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MetaSMS]) != 1 {
+		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.MetaSMS]))
+	} else if acnt.BalanceMap[utils.MetaSMS].GetTotalValue() != 1000 {
+		t.Errorf("Expecting: %v, received: %v", 1000, acnt.BalanceMap[utils.MetaSMS].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MetaMonetary]) != 1 {
+		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.MetaMonetary]))
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10 {
+		t.Errorf("Expecting: %v, received: %v", 10, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	argsEv := &engine.ArgV1ProcessEvent{
@@ -595,7 +595,7 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{
 					utils.CGRID:        "asdfas",
-					utils.ToR:          utils.SMS,
+					utils.ToR:          utils.MetaSMS,
 					utils.Category:     "sms",
 					utils.RunID:        utils.MetaDefault,
 					utils.OriginID:     "testV1CDRsAddBalanceForSMS",
@@ -616,14 +616,14 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 
 	if err := cdrsRpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap[utils.SMS]) != 1 {
-		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.SMS]))
-	} else if acnt.BalanceMap[utils.SMS].GetTotalValue() != 999 {
-		t.Errorf("Expecting: %v, received: %v", 999, acnt.BalanceMap[utils.SMS].GetTotalValue())
-	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
-		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.MONETARY]))
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 10 {
-		t.Errorf("Expecting: %v, received: %v", 10, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MetaSMS]) != 1 {
+		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.MetaSMS]))
+	} else if acnt.BalanceMap[utils.MetaSMS].GetTotalValue() != 999 {
+		t.Errorf("Expecting: %v, received: %v", 999, acnt.BalanceMap[utils.MetaSMS].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MetaMonetary]) != 1 {
+		t.Errorf("Expecting: %v, received: %v", 1, len(acnt.BalanceMap[utils.MetaMonetary]))
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10 {
+		t.Errorf("Expecting: %v, received: %v", 10, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 }

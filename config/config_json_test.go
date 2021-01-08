@@ -652,16 +652,16 @@ func TestDfRalsJsonCfg(t *testing.T) {
 		Rp_subject_prefix_matching: utils.BoolPointer(false),
 		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
-			utils.MetaAny: "189h",
-			utils.VOICE:   "72h",
-			utils.DATA:    "107374182400",
-			utils.SMS:     "10000",
-			utils.MMS:     "10000",
+			utils.MetaAny:   "189h",
+			utils.MetaVoice: "72h",
+			utils.MetaData:  "107374182400",
+			utils.MetaSMS:   "10000",
+			utils.MetaMMS:   "10000",
 		},
 		Max_increments: utils.IntPointer(1000000),
 		Balance_rating_subject: &map[string]string{
-			utils.MetaAny: "*zero1ns",
-			utils.VOICE:   "*zero1s",
+			utils.MetaAny:   "*zero1ns",
+			utils.MetaVoice: "*zero1s",
 		},
 		Dynaprepaid_actionplans: &[]string{},
 	}
@@ -2165,7 +2165,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 			{
 				Tag:       utils.StringPointer("Request"),
 				Path:      utils.StringPointer(fmt.Sprintf("%s.Request", utils.MetaRep)),
-				Type:      utils.StringPointer(utils.META_CONSTANT),
+				Type:      utils.StringPointer(utils.MetaConstant),
 				Value:     utils.StringPointer("SIP/2.0 500 Internal Server Error"),
 				Mandatory: utils.BoolPointer(true)},
 		},
@@ -2199,7 +2199,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 			{
 				Tag:   utils.StringPointer("ResultCode"),
 				Path:  utils.StringPointer(fmt.Sprintf("%s.Result-Code", utils.MetaRep)),
-				Type:  utils.StringPointer(utils.META_CONSTANT),
+				Type:  utils.StringPointer(utils.MetaConstant),
 				Value: utils.StringPointer("2001")},
 			{
 				Tag:       utils.StringPointer("OriginHost"),
@@ -2310,7 +2310,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 			{
 				Tag:   utils.StringPointer("ReAuthRequestType"),
 				Path:  utils.StringPointer(fmt.Sprintf("%s.Re-Auth-Request-Type", utils.MetaDiamreq)),
-				Type:  utils.StringPointer(utils.META_CONSTANT),
+				Type:  utils.StringPointer(utils.MetaConstant),
 				Value: utils.StringPointer("0")},
 		},
 	}

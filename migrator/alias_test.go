@@ -34,7 +34,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 	aliases := map[int]*v1Alias{
 		0: {
 			Tenant:    utils.MetaAny,
-			Direction: utils.META_OUT,
+			Direction: utils.MetaOut,
 			Category:  utils.MetaAny,
 			Account:   utils.MetaAny,
 			Subject:   utils.MetaAny,
@@ -43,7 +43,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		},
 		1: {
 			Tenant:    utils.MetaAny,
-			Direction: utils.META_OUT,
+			Direction: utils.MetaOut,
 			Category:  utils.MetaAny,
 			Account:   utils.MetaAny,
 			Subject:   utils.MetaAny,
@@ -62,7 +62,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		},
 		2: {
 			Tenant:    utils.MetaAny,
-			Direction: utils.META_OUT,
+			Direction: utils.MetaOut,
 			Category:  utils.MetaAny,
 			Account:   utils.MetaAny,
 			Subject:   utils.MetaAny,

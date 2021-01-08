@@ -125,7 +125,7 @@ cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,`
 }
 
 func TestAuthPostpaidNoAcnt(t *testing.T) {
-	cdr := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.MetaPrepaid, Tenant: "cgrates.org",
+	cdr := &engine.UsageRecord{ToR: utils.MetaVoice, RequestType: utils.MetaPrepaid, Tenant: "cgrates.org",
 		Category: "call", Account: "nonexistent", Subject: "testauthpostpaid1",
 		Destination: "4986517174963", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC).String()}
 	cd, err := cdr.AsCallDescriptor("", false)
@@ -140,7 +140,7 @@ func TestAuthPostpaidNoAcnt(t *testing.T) {
 
 func TestAuthPostpaidFallbackDest(t *testing.T) {
 	// Test subject which has fallback for destination
-	cdr := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.MetaPostpaid, Tenant: "cgrates.org",
+	cdr := &engine.UsageRecord{ToR: utils.MetaVoice, RequestType: utils.MetaPostpaid, Tenant: "cgrates.org",
 		Category: "call", Account: "testauthpostpaid1", Subject: "testauthpostpaid2",
 		Destination: "441231234", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC).String()}
 	cd, err := cdr.AsCallDescriptor("", false)
@@ -157,7 +157,7 @@ func TestAuthPostpaidFallbackDest(t *testing.T) {
 
 func TestAuthPostpaidWithDestination(t *testing.T) {
 	// Test subject which does not have destination attached
-	cdr := &engine.UsageRecord{ToR: utils.VOICE, RequestType: utils.MetaPostpaid, Tenant: "cgrates.org",
+	cdr := &engine.UsageRecord{ToR: utils.MetaVoice, RequestType: utils.MetaPostpaid, Tenant: "cgrates.org",
 		Category: "call", Account: "testauthpostpaid1", Subject: "testauthpostpaid1",
 		Destination: "4986517174963", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC).String()}
 	cd, err := cdr.AsCallDescriptor("", false)

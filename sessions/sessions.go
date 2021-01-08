@@ -632,7 +632,7 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		Subject:     sr.CD.Subject,
 		Account:     sr.CD.Account,
 		Destination: sr.CD.Destination,
-		ToR:         utils.FirstNonEmpty(sr.CD.ToR, utils.VOICE),
+		ToR:         utils.FirstNonEmpty(sr.CD.ToR, utils.MetaVoice),
 		Increments:  incrmts,
 	}
 	var acnt engine.Account
@@ -851,7 +851,7 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 		for _, sr := range s.SRuns {
 			fieldVal, err := sr.Event.GetString(fieldName) // the only error from GetString is ErrNotFound
 			if err != nil {
-				fieldVal = utils.NOT_AVAILABLE
+				fieldVal = utils.NotAvailable
 			}
 			if fieldVal == "" {
 				fieldVal = utils.MetaEmpty
@@ -1815,7 +1815,7 @@ type V1AuthorizeArgs struct {
 
 // ParseFlags will populate the V1AuthorizeArgs flags
 func (args *V1AuthorizeArgs) ParseFlags(flags string) {
-	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
+	for _, subsystem := range strings.Split(flags, utils.FieldsSep) {
 		switch {
 		case subsystem == utils.MetaAccounts:
 			args.GetMaxUsage = true
@@ -2054,11 +2054,11 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.ClientConnect
 	}
 	if args.ProcessThresholds {
 		authReply.Thresholds = utils.StringPointer(
-			strings.Join(*initAuthRply.ThresholdIDs, utils.FIELDS_SEP))
+			strings.Join(*initAuthRply.ThresholdIDs, utils.FieldsSep))
 	}
 	if args.ProcessStats {
 		authReply.StatQueues = utils.StringPointer(
-			strings.Join(*initAuthRply.StatQueueIDs, utils.FIELDS_SEP))
+			strings.Join(*initAuthRply.StatQueueIDs, utils.FieldsSep))
 	}
 	return nil
 }
@@ -2108,7 +2108,7 @@ type V1InitSessionArgs struct {
 
 // ParseFlags will populate the V1InitSessionArgs flags
 func (args *V1InitSessionArgs) ParseFlags(flags string) {
-	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
+	for _, subsystem := range strings.Split(flags, utils.FieldsSep) {
 		switch {
 		case subsystem == utils.MetaAccounts:
 			args.InitSession = true
@@ -2348,11 +2348,11 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.ClientConnec
 
 	if args.ProcessThresholds {
 		initReply.Thresholds = utils.StringPointer(
-			strings.Join(*initSessionRply.ThresholdIDs, utils.FIELDS_SEP))
+			strings.Join(*initSessionRply.ThresholdIDs, utils.FieldsSep))
 	}
 	if args.ProcessStats {
 		initReply.StatQueues = utils.StringPointer(
-			strings.Join(*initSessionRply.StatQueueIDs, utils.FIELDS_SEP))
+			strings.Join(*initSessionRply.StatQueueIDs, utils.FieldsSep))
 	}
 	return nil
 }
@@ -2538,7 +2538,7 @@ type V1TerminateSessionArgs struct {
 
 // ParseFlags will populate the V1TerminateSessionArgs flags
 func (args *V1TerminateSessionArgs) ParseFlags(flags string) {
-	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
+	for _, subsystem := range strings.Split(flags, utils.FieldsSep) {
 		switch {
 		case subsystem == utils.MetaAccounts:
 			args.TerminateSession = true
@@ -2785,7 +2785,7 @@ type V1ProcessMessageArgs struct {
 
 // ParseFlags will populate the V1ProcessMessageArgs flags
 func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
-	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
+	for _, subsystem := range strings.Split(flags, utils.FieldsSep) {
 		switch {
 		case subsystem == utils.MetaAccounts:
 			args.Debit = true

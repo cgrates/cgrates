@@ -92,7 +92,7 @@ func TestYearsParse(t *testing.T) {
 	if reflect.DeepEqual(ys2, ys1) != false {
 		t.Errorf("Expected: %+v, received: %+v", Years{}, ys1)
 	}
-	ys1.Parse(in, FIELDS_SEP)
+	ys1.Parse(in, FieldsSep)
 	if !reflect.DeepEqual(ys2, ys1) {
 		t.Errorf("Expected: %+v, received: %+v", ys2, ys1)
 	}
@@ -187,7 +187,7 @@ func TestMonthsParse(t *testing.T) {
 	m1 := Months{}
 	m1.Parse(MetaAny, EmptyString)
 	eOut := Months{time.May, time.June, time.July, time.August}
-	if m1.Parse("5,6,7,8", FIELDS_SEP); !reflect.DeepEqual(eOut, m1) {
+	if m1.Parse("5,6,7,8", FieldsSep); !reflect.DeepEqual(eOut, m1) {
 		t.Errorf("Expected: %+v, received: %+v", eOut, m1)
 	}
 }
@@ -385,7 +385,7 @@ func TestWeekDaysParse(t *testing.T) {
 	wd := WeekDays{}
 	wd.Parse(MetaAny, EmptyString)
 	eOut := WeekDays{time.Monday, time.Tuesday, time.Wednesday}
-	wd.Parse("1,2,3", FIELDS_SEP)
+	wd.Parse("1,2,3", FieldsSep)
 	if !reflect.DeepEqual(eOut, wd) {
 		t.Errorf("Expected: %+v, received: %+v", eOut, wd)
 	}

@@ -112,7 +112,7 @@ func testDspThProcessEventFailover(t *testing.T) {
 				ID:     utils.UUIDSha1Prefix(),
 				Time:   &nowTime,
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "Event1",
+					utils.EventName:    "Event1",
 					utils.AccountField: "1001"},
 			},
 			Opts: map[string]interface{}{

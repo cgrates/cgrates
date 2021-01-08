@@ -69,7 +69,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 	cgrAcnt1 := &engine.Account{
 		ID: utils.ConcatenatedKey(cgrTenant, "account1"),
 		BalanceMap: map[string]engine.Balances{
-			utils.MONETARY: {b10},
+			utils.MetaMonetary: {b10},
 		},
 	}
 	if err := apierDebitStorage.SetAccountDrv(cgrAcnt1); err != nil {
@@ -139,7 +139,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 		Account:     "account1",
 		Destination: "*any",
 		Usage:       "1",
-		ToR:         utils.MONETARY,
+		ToR:         utils.MetaMonetary,
 		Category:    "call",
 		SetupTime:   time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
 		AnswerTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
@@ -158,8 +158,8 @@ func TestDebitUsageWithOptions(t *testing.T) {
 		t.Error(err)
 	}
 	eAcntVal := 9.0
-	if resolvedAccount.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+	if resolvedAccount.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal,
-			resolvedAccount.BalanceMap[utils.MONETARY].GetTotalValue())
+			resolvedAccount.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }

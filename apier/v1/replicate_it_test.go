@@ -831,7 +831,7 @@ func testInternalReplicateITActions(t *testing.T) {
 		ActionsId: "ACTS_1",
 		Actions: []*V1TPAction{{
 			Identifier:  utils.TOPUP_RESET,
-			BalanceType: utils.MONETARY,
+			BalanceType: utils.MetaMonetary,
 			Units:       75.0,
 			ExpiryTime:  utils.UNLIMITED,
 			Weight:      20.0}}}
@@ -847,7 +847,7 @@ func testInternalReplicateITActions(t *testing.T) {
 	// check
 	eOut := []*utils.TPAction{{
 		Identifier:      utils.TOPUP_RESET,
-		BalanceType:     utils.MONETARY,
+		BalanceType:     utils.MetaMonetary,
 		Units:           "75",
 		BalanceWeight:   "0",
 		BalanceBlocker:  "false",
@@ -892,7 +892,7 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 	var reply string
 	if err := internalRPC.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "ACTS_1",
-		Actions:   []*utils.TPAction{{Identifier: utils.LOG}},
+		Actions:   []*utils.TPAction{{Identifier: utils.MetaLog}},
 	}, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1227,7 +1227,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	var reply string
 	if err := internalRPC.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "ACT_LOG",
-		Actions:   []*utils.TPAction{{Identifier: utils.LOG}},
+		Actions:   []*utils.TPAction{{Identifier: utils.MetaLog}},
 	}, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1275,7 +1275,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      tenant,
 		Account:     "1005",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       1,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,

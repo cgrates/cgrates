@@ -181,7 +181,7 @@ func (apiv2 *APIerSv2) GetActions(attr *AttrGetActions, reply *map[string]engine
 	var actionKeys []string
 	var err error
 	if len(attr.ActionIDs) == 0 {
-		if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
+		if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ActionPrefix); err != nil {
 			return err
 		}
 	} else {
@@ -189,7 +189,7 @@ func (apiv2 *APIerSv2) GetActions(attr *AttrGetActions, reply *map[string]engine
 			if len(accID) == 0 { // Source of error returned from redis (key not found)
 				continue
 			}
-			actionKeys = append(actionKeys, utils.ACCOUNT_PREFIX+accID)
+			actionKeys = append(actionKeys, utils.AccountPrefix+accID)
 		}
 	}
 	if len(actionKeys) == 0 {
@@ -210,7 +210,7 @@ func (apiv2 *APIerSv2) GetActions(attr *AttrGetActions, reply *map[string]engine
 	}
 	retActions := make(map[string]engine.Actions)
 	for _, accKey := range limitedActions {
-		key := accKey[len(utils.ACTION_PREFIX):]
+		key := accKey[len(utils.ActionPrefix):]
 		acts, err := apiv2.DataManager.GetActions(key, false, utils.NonTransactional)
 		if err != nil {
 			return utils.NewErrServerError(err)
@@ -231,7 +231,7 @@ type AttrGetActionsCount struct{}
 // returns ErrNotFound in case of 0 actions
 func (apiv2 *APIerSv2) GetActionsCount(attr *AttrGetActionsCount, reply *int) (err error) {
 	var actionKeys []string
-	if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
+	if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ActionPrefix); err != nil {
 		return err
 	}
 	*reply = len(actionKeys)
@@ -280,7 +280,7 @@ func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) er
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := apiv2.DataManager.HasData(utils.ACTION_PREFIX, attrs.ActionsId, ""); err != nil {
+		if exists, err := apiv2.DataManager.HasData(utils.ActionPrefix, attrs.ActionsId, ""); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
 			return utils.ErrExists

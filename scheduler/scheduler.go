@@ -268,7 +268,7 @@ func (s *Scheduler) GetScheduledActions(fltr ArgsGetScheduledActions) (schedActi
 		if fltr.Tenant != nil || fltr.Account != nil {
 			found := false
 			for accID := range at.GetAccountIDs() {
-				split := strings.Split(accID, utils.CONCATENATED_KEY_SEP)
+				split := strings.Split(accID, utils.ConcatenatedKeySep)
 				if len(split) != 2 {
 					continue // malformed account id
 				}

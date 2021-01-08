@@ -1077,7 +1077,7 @@ func testDspRplActions(t *testing.T) {
 		Acs: engine.Actions{
 			&engine.Action{
 				Id:         "Action1",
-				ActionType: utils.LOG,
+				ActionType: utils.MetaLog,
 			},
 		},
 		Key:    "KeyActions",

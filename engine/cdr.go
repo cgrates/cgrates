@@ -106,7 +106,7 @@ func (cdr *CDR) AddDefaults(cfg *config.CGRConfig) {
 		cdr.RunID = utils.MetaDefault
 	}
 	if cdr.ToR == utils.EmptyString {
-		cdr.ToR = utils.VOICE
+		cdr.ToR = utils.MetaVoice
 	}
 	if cdr.RequestType == utils.EmptyString {
 		cdr.RequestType = cfg.GeneralCfg().DefaultReqType
@@ -240,7 +240,7 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {
 func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 	var usageStr string
 	switch cdr.ToR {
-	case utils.VOICE: // usage as time
+	case utils.MetaVoice: // usage as time
 		usageStr = cdr.Usage.String()
 	default: // usage as units
 		usageStr = strconv.FormatInt(cdr.Usage.Nanoseconds(), 10)
@@ -303,7 +303,7 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 		var cdrVal string
 		var roundDec int
 		switch cfgCdrFld.Path {
-		case utils.MetaExp + utils.NestingSep + utils.COST:
+		case utils.MetaExp + utils.NestingSep + utils.Cost:
 			roundDec = config.CgrConfig().GeneralCfg().RoundingDecimals
 			if cfgCdrFld.RoundingDecimals != nil {
 				roundDec = *cfgCdrFld.RoundingDecimals
@@ -336,10 +336,10 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 func (cdr *CDR) formatField(cfgFld *config.FCTemplate, groupedCDRs []*CDR,
 	filterS *FilterS) (outVal string, err error) {
 	switch cfgFld.Type {
-	case utils.META_FILLER:
+	case utils.MetaFiller:
 		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		cfgFld.Padding = utils.MetaRight
-	case utils.META_CONSTANT:
+	case utils.MetaConstant:
 		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
 	case utils.MetaDateTime: // Convert the requested field value into datetime with layout
 		rawVal, err := cdr.exportFieldValue(cfgFld, filterS)
@@ -369,9 +369,9 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, groupedCDRs []*CDR,
 				err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
 			}
 		}
-	case utils.META_COMBIMED:
+	case utils.MetaCombimed:
 		outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs, filterS)
-	case utils.META_COMPOSED, utils.MetaVariable:
+	case utils.MetaComposed, utils.MetaVariable:
 		outVal, err = cdr.exportFieldValue(cfgFld, filterS)
 	case utils.MetaMaskedDestination:
 		if len(cfgFld.MaskDestID) != 0 && CachedDestHasPrefix(cfgFld.MaskDestID, cdr.Destination) {

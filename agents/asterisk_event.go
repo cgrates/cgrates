@@ -205,11 +205,11 @@ func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREventWithOpts) erro
 	resCGREv := *cgrEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:
-		resCGREv.Event[utils.EVENT_NAME] = SMASessionStart
+		resCGREv.Event[utils.EventName] = SMASessionStart
 		resCGREv.Event[utils.AnswerTime] = smaEv.Timestamp()
 	case ARIChannelDestroyed:
-		resCGREv.Event[utils.EVENT_NAME] = SMASessionTerminate
-		resCGREv.Event[utils.DISCONNECT_CAUSE] = smaEv.DisconnectCause()
+		resCGREv.Event[utils.EventName] = SMASessionTerminate
+		resCGREv.Event[utils.DisconnectCause] = smaEv.DisconnectCause()
 		if _, hasIt := resCGREv.Event[utils.AnswerTime]; !hasIt {
 			resCGREv.Event[utils.Usage] = "0s"
 		} else if aTime, err := utils.IfaceAsTime(resCGREv.Event[utils.AnswerTime],
@@ -236,11 +236,11 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	mp = make(map[string]interface{})
 	switch smaEv.EventType() {
 	case ARIStasisStart:
-		mp[utils.EVENT_NAME] = SMAAuthorization
+		mp[utils.EventName] = SMAAuthorization
 	case ARIChannelStateChange:
-		mp[utils.EVENT_NAME] = SMASessionStart
+		mp[utils.EventName] = SMASessionStart
 	case ARIChannelDestroyed:
-		mp[utils.EVENT_NAME] = SMASessionTerminate
+		mp[utils.EventName] = SMASessionTerminate
 	}
 	mp[utils.OriginID] = smaEv.ChannelID()
 	if smaEv.RequestType() != "" {
@@ -260,7 +260,7 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	mp[utils.Destination] = smaEv.Destination()
 	mp[utils.SetupTime] = smaEv.SetupTime()
 	if smaEv.Route() != "" {
-		mp[utils.ROUTE] = smaEv.Route()
+		mp[utils.Route] = smaEv.Route()
 	}
 	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
 		mp[extraKey] = extraVal

@@ -40,7 +40,7 @@ func (ud *v1UserProfile) GetId() string {
 }
 
 func (ud *v1UserProfile) SetId(id string) error {
-	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	vals := strings.Split(id, utils.ConcatenatedKeySep)
 	if len(vals) != 2 {
 		return utils.ErrInvalidKey
 	}
@@ -65,7 +65,7 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
 			Path:  utils.MetaTenant,
 			Value: config.NewRSRParsersMustCompile(user.Tenant, utils.InfieldSep),
-			Type:  utils.META_CONSTANT,
+			Type:  utils.MetaConstant,
 		})
 	}
 	for fieldName, substitute := range user.Profile {

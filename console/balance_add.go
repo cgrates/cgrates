@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apier/v1"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -50,7 +50,7 @@ func (self *CmdAddBalance) RpcMethod() string {
 
 func (self *CmdAddBalance) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrAddBalance{BalanceType: utils.MONETARY, Overwrite: false}
+		self.rpcParams = &v1.AttrAddBalance{BalanceType: utils.MetaMonetary, Overwrite: false}
 	}
 	return self.rpcParams
 }

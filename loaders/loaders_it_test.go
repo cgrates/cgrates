@@ -78,7 +78,7 @@ cgrates.org,NewRes1
 	cfgLdr[0] = &config.LoaderSCfg{
 		ID:             "testV1LoadResource",
 		Enabled:        true,
-		FieldSeparator: utils.FIELDS_SEP,
+		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
 		LockFileName:   utils.ResourcesCsv,
@@ -89,12 +89,12 @@ cgrates.org,NewRes1
 		utils.MetaResources: {
 			{Tag: "Tenant",
 				Path:      "Tenant",
-				Type:      utils.META_COMPOSED,
+				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
 			{Tag: "ID",
 				Path:      "ID",
-				Type:      utils.META_COMPOSED,
+				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
 		},
@@ -170,7 +170,7 @@ cgrates.org,NewRes1
 	cfgLdr[0] = &config.LoaderSCfg{
 		ID:             "testV1LoadDefaultIDError",
 		Enabled:        true,
-		FieldSeparator: utils.FIELDS_SEP,
+		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
 		LockFileName:   utils.ResourcesCsv,
@@ -207,7 +207,7 @@ func testV1LoadUnableToDeleteFile(t *testing.T) {
 	cfgLdr[0] = &config.LoaderSCfg{
 		ID:             "testV1LoadUnableToDeleteFile",
 		Enabled:        true,
-		FieldSeparator: utils.FIELDS_SEP,
+		FieldSeparator: utils.FieldsSep,
 		TpInDir:        "/\x00",
 		TpOutDir:       "/tmp",
 		LockFileName:   utils.ResourcesCsv,
@@ -250,7 +250,7 @@ NOT_UINT
 	cfgLdr[0] = &config.LoaderSCfg{
 		ID:             "testV1LoadResource",
 		Enabled:        true,
-		FieldSeparator: utils.FIELDS_SEP,
+		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
 		LockFileName:   utils.ResourcesCsv,
@@ -261,8 +261,8 @@ NOT_UINT
 		utils.MetaFilters: {
 			{Tag: "PK",
 				Path:  "PK",
-				Type:  utils.META_COMPOSED,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP)},
+				Type:  utils.utils.MetaComposed,
+				Value: config.NewRSRParsersMustCompile("~*req.0", utils.FieldsSep)},
 		},
 	}
 	resCsv := `
@@ -319,7 +319,7 @@ cgrates.org,NewRes1
 	cfgLdr[0] = &config.LoaderSCfg{
 		ID:             "testV1RemoveResource",
 		Enabled:        true,
-		FieldSeparator: utils.FIELDS_SEP,
+		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
 		LockFileName:   utils.ResourcesCsv,
@@ -330,13 +330,13 @@ cgrates.org,NewRes1
 		utils.MetaResources: {
 			{Tag: "Tenant",
 				Path:      "Tenant",
-				Type:      utils.META_COMPOSED,
+				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
 			{Tag: "ID",
 				Path:      "ID",
-				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
 		},
 	}
@@ -415,7 +415,7 @@ cgrates.org,NewRes1
 	cfgLdr[0] = &config.LoaderSCfg{
 		ID:             "testV1RemoveDefaultIDError",
 		Enabled:        true,
-		FieldSeparator: utils.FIELDS_SEP,
+		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
 		LockFileName:   utils.ResourcesCsv,
@@ -453,7 +453,7 @@ func testV1RemoveUnableToDeleteFile(t *testing.T) {
 	cfgLdr[0] = &config.LoaderSCfg{
 		ID:             "testV1RemoveUnableToDeleteFile",
 		Enabled:        true,
-		FieldSeparator: utils.FIELDS_SEP,
+		FieldSeparator: utils.FieldsSep,
 		TpInDir:        "/\x00",
 		TpOutDir:       "/tmp",
 		LockFileName:   utils.ResourcesCsv,
@@ -491,7 +491,7 @@ func testV1LoadAndRemoveProcessRemoveFolderError(t *testing.T) {
 	cfgLdr[0] = &config.LoaderSCfg{
 		ID:             "testV1RemoveProcessFolderError",
 		Enabled:        true,
-		FieldSeparator: utils.FIELDS_SEP,
+		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
 		Data:           nil,
@@ -549,7 +549,7 @@ func testV1RemoveProcessFolderError(t *testing.T) {
 	cfgLdr[0] = &config.LoaderSCfg{
 		ID:             "testV1RemoveProcessFolderError",
 		Enabled:        true,
-		FieldSeparator: utils.FIELDS_SEP,
+		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
 		LockFileName:   "notResource.csv",
@@ -613,7 +613,7 @@ func testLoaderServiceReload(t *testing.T) {
 	cfgLdr[0] = &config.LoaderSCfg{
 		ID:             "testV1LoadResource",
 		Enabled:        true,
-		FieldSeparator: utils.FIELDS_SEP,
+		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
 		LockFileName:   utils.ResourcesCsv,

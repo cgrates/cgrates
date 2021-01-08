@@ -93,7 +93,7 @@ func testDspSessionAddBalacne(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1001",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       float64(initUsage),
 		Balance: map[string]interface{}{
 			utils.ID:            "SessionBalance",
@@ -114,9 +114,9 @@ func testDspSessionAddBalacne(t *testing.T) {
 	eAcntVal := float64(initUsage)
 	if err := allEngine.RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
-			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
+			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.MetaVoice].GetTotalValue()))
 	}
 	if err := allEngine2.RPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -125,9 +125,9 @@ func testDspSessionAddBalacne(t *testing.T) {
 	}
 	if err := allEngine2.RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
-			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
+			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.MetaVoice].GetTotalValue()))
 	}
 }
 
@@ -200,7 +200,7 @@ func testDspSessionTestAuthKey(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -236,7 +236,7 @@ func testDspSessionAuthorize(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -289,7 +289,7 @@ func testDspSessionInit(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -366,7 +366,7 @@ func testDspSessionUpdate(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -400,7 +400,7 @@ func testDspSessionUpdate(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
 					"OfficeGroup":      "Marketing",
@@ -441,7 +441,7 @@ func testDspSessionUpdate2(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -476,7 +476,7 @@ func testDspSessionUpdate2(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
 					"LCRProfile":       "premium_cli",
@@ -521,7 +521,7 @@ func testDspSessionTerminate(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -554,7 +554,7 @@ func testDspSessionProcessCDR(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
-				utils.ToR:          utils.VOICE,
+				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It1",
 				utils.RequestType:  utils.MetaPostpaid,
 				utils.AccountField: "1001",
@@ -593,7 +593,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebac",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginHost:   "disp",
 					utils.OriginID:     "TestSSv1It2",
 					utils.RequestType:  utils.MetaPrepaid,
@@ -635,7 +635,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebac",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
 					"OfficeGroup":      "Marketing",
@@ -674,7 +674,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It2",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -682,7 +682,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 					utils.Usage:        initUsage,
-					utils.EVENT_NAME:   "Internal",
+					utils.EventName:    "Internal",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -716,7 +716,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
 					"Password":         "CGRateS.org",
@@ -826,7 +826,7 @@ func testDspSessionPassive(t *testing.T) {
 			utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     "call",
-			utils.ToR:          utils.VOICE,
+			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "TestSSv1It1",
 			utils.RequestType:  utils.MetaPrepaid,
 			utils.AccountField: "1001",
@@ -842,7 +842,7 @@ func testDspSessionPassive(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -949,7 +949,7 @@ func testDspSessionProcessEvent3(t *testing.T) {
 				ID:     "testSSv1ItProcessEventTerminateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It2",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -995,7 +995,7 @@ func testDspSessionGetCost(t *testing.T) {
 				ID:     "testSSv1ItGetCost",
 				Event: map[string]interface{}{
 					utils.Tenant:      "cgrates.org",
-					utils.ToR:         utils.MONETARY,
+					utils.ToR:         utils.MetaMonetary,
 					utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
 					utils.RequestType: utils.MetaPrepaid,
 					utils.Subject:     "ANY2CNT",

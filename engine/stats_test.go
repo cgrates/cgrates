@@ -111,7 +111,7 @@ var (
 						"PddInterval":    "1s",
 						"Weight":         "9.0",
 						utils.Usage:      135 * time.Second,
-						utils.COST:       123.0,
+						utils.Cost:       123.0,
 					},
 				},
 			},

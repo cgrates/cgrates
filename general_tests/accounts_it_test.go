@@ -223,13 +223,13 @@ func testV1AccMonthly(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"},
 		&reply); err != nil {
 		t.Error(err)
-	} else if _, has := reply.BalanceMap[utils.DATA]; !has {
-		t.Error("Unexpected balance returned: ", utils.ToJSON(reply.BalanceMap[utils.DATA]))
-	} else if len(reply.BalanceMap[utils.DATA]) != 1 {
-		t.Error("Unexpected number of balances returned: ", len(reply.BalanceMap[utils.DATA]))
-	} else if reply.BalanceMap[utils.DATA][0].ExpirationDate.After(timeAfter) &&
-		reply.BalanceMap[utils.DATA][0].ExpirationDate.Before(timeBefore) {
-		t.Error("Unexpected expiration date returned: ", reply.BalanceMap[utils.DATA][0].ExpirationDate)
+	} else if _, has := reply.BalanceMap[utils.MetaData]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(reply.BalanceMap[utils.MetaData]))
+	} else if len(reply.BalanceMap[utils.MetaData]) != 1 {
+		t.Error("Unexpected number of balances returned: ", len(reply.BalanceMap[utils.MetaData]))
+	} else if reply.BalanceMap[utils.MetaData][0].ExpirationDate.After(timeAfter) &&
+		reply.BalanceMap[utils.MetaData][0].ExpirationDate.Before(timeBefore) {
+		t.Error("Unexpected expiration date returned: ", reply.BalanceMap[utils.MetaData][0].ExpirationDate)
 	}
 
 }
@@ -241,7 +241,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 	// Add a disable and log action
 	attrsAA := &utils.AttrSetActions{ActionsId: "DISABLE_LOG", Actions: []*utils.TPAction{
 		{Identifier: utils.DISABLE_ACCOUNT},
-		{Identifier: utils.LOG},
+		{Identifier: utils.MetaLog},
 	}}
 	if err := accRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())

@@ -137,8 +137,8 @@ func testAttributeSProcessEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME: "VariableTest",
-					utils.ToR:        utils.VOICE,
+					utils.EventName: "VariableTest",
+					utils.ToR:       utils.MetaVoice,
 				},
 			},
 		},
@@ -151,9 +151,9 @@ func testAttributeSProcessEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSProcessEvent",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME: "VariableTest",
-					utils.Category:   utils.VOICE,
-					utils.ToR:        utils.VOICE,
+					utils.EventName: "VariableTest",
+					utils.Category:  utils.MetaVoice,
+					utils.ToR:       utils.MetaVoice,
 				},
 			},
 		},
@@ -363,7 +363,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 					utils.AccountField: "1001",
 					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 					utils.Usage:        11 * time.Second,
-					utils.COST:         10.0,
+					utils.Cost:         10.0,
 				},
 			},
 		},
@@ -382,7 +382,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        11 * time.Second,
-			utils.COST:         10.5,
+			utils.Cost:         10.5,
 		},
 	}
 	if err := attrRPC.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -902,7 +902,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
-					Type: utils.META_COMPOSED,
+					Type: utils.MetaComposed,
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules: "~*libphonenumber.<~*req.Destination>.Carrier",
@@ -911,7 +911,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 				},
 				{
 					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
-					Type: utils.META_COMPOSED,
+					Type: utils.MetaComposed,
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules: ";",
@@ -920,7 +920,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 				},
 				{
 					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
-					Type: utils.META_COMPOSED,
+					Type: utils.MetaComposed,
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules: "~*libphonenumber.<~*req.Destination>.CountryCode",

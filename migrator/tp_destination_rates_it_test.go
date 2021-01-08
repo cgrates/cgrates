@@ -106,7 +106,7 @@ func testTpDstRtITFlush(t *testing.T) {
 func testTpDstRtITPopulate(t *testing.T) {
 	tpDestinationRate = []*utils.TPDestinationRate{
 		{
-			TPid: utils.TEST_SQL,
+			TPid: utils.TestSQL,
 			ID:   "DR_FREESWITCH_USERS",
 			DestinationRates: []*utils.DestinationRate{
 				{

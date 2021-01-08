@@ -141,7 +141,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 			},
 			{
 				Path:  utils.MetaTenant,
-				Type:  utils.META_CONSTANT,
+				Type:  utils.MetaConstant,
 				Value: config.NewRSRParsersMustCompile("cgrates.com", utils.InfieldSep),
 			},
 		},

@@ -35,8 +35,8 @@ func TestSchedulerUpdateActStats(t *testing.T) {
 	if len(sched.actSuccessStats[utils.REMOVE_ACCOUNT]) != 2 {
 		t.Errorf("Wrong stats: %+v", sched.actSuccessStats[utils.REMOVE_ACCOUNT])
 	}
-	sched.updateActStats(&engine.Action{Id: "LOG1", ActionType: utils.LOG}, false)
-	if len(sched.actSuccessStats[utils.LOG]) != 1 ||
+	sched.updateActStats(&engine.Action{Id: "LOG1", ActionType: utils.MetaLog}, false)
+	if len(sched.actSuccessStats[utils.MetaLog]) != 1 ||
 		len(sched.actSuccessStats[utils.REMOVE_ACCOUNT]) != 2 {
 		t.Errorf("Wrong stats: %+v", sched.actSuccessStats)
 	}

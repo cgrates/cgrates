@@ -183,8 +183,8 @@ func (iDB *InternalDB) IsDBEmpty() (isEmpty bool, err error) {
 
 func (iDB *InternalDB) HasDataDrv(category, subject, tenant string) (bool, error) {
 	switch category {
-	case utils.DestinationPrefix, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX:
+	case utils.DestinationPrefix, utils.RatingPlanPrefix, utils.RatingProfilePrefix,
+		utils.ActionPrefix, utils.ActionPlanPrefix, utils.AccountPrefix:
 		return Cache.HasItem(utils.CachePrefixToInstance[category], subject), nil
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
@@ -398,18 +398,18 @@ func (iDB *InternalDB) RemoveActionPlanDrv(key string, transactionID string) (er
 
 func (iDB *InternalDB) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err error) {
 	var keys []string
-	if keys, err = iDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+	if keys, err = iDB.GetKeysForPrefix(utils.ActionPlanPrefix); err != nil {
 		return
 	}
 
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
 		var ap *ActionPlan
-		if ap, err = iDB.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], false, utils.NonTransactional); err != nil {
+		if ap, err = iDB.GetActionPlanDrv(key[len(utils.ActionPlanPrefix):], false, utils.NonTransactional); err != nil {
 			ats = nil
 			return
 		}
-		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = ap
+		ats[key[len(utils.ActionPlanPrefix):]] = ap
 	}
 	return
 }
@@ -874,7 +874,7 @@ func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes
 			if !ok || x == nil {
 				continue
 			}
-			dbKey = strings.TrimPrefix(dbKey, tntCtx+utils.CONCATENATED_KEY_SEP)
+			dbKey = strings.TrimPrefix(dbKey, tntCtx+utils.ConcatenatedKeySep)
 			indexes[dbKey] = x.(utils.StringSet).Clone()
 		}
 		if len(indexes) == 0 {
@@ -905,7 +905,7 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 			}
 			Cache.RemoveWithoutReplicate(idxItmType, dbKey,
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
-			key := strings.TrimSuffix(strings.TrimPrefix(dbKey, "tmp_"), utils.CONCATENATED_KEY_SEP+transactionID)
+			key := strings.TrimSuffix(strings.TrimPrefix(dbKey, "tmp_"), utils.ConcatenatedKeySep+transactionID)
 			Cache.SetWithoutReplicate(idxItmType, key, x, []string{tntCtx},
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		}

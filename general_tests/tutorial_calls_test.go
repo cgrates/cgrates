@@ -264,30 +264,30 @@ func testCallAccountsBefore(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
-		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
+		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	var reply2 *engine.Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"}
 	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs2, &reply2); err != nil {
 		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
-	} else if reply2.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
-		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply2.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if reply2.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
+		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply2.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	var reply3 *engine.Account
 	attrs3 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003"}
 	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs3, &reply3); err != nil {
 		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
-	} else if reply3.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
-		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply3.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if reply3.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
+		t.Errorf("Calling APIerSv1.GetBalance received: %f", reply3.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
 func testCallStatMetricsBefore(t *testing.T) {
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.MetaTCC: utils.NOT_AVAILABLE,
-		utils.MetaTCD: utils.NOT_AVAILABLE,
+		utils.MetaTCC: utils.NotAvailable,
+		utils.MetaTCD: utils.NotAvailable,
 	}
 	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
@@ -492,8 +492,8 @@ func testCallAccount1001(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutorialCallsRpc.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error(err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() == 10.0 { // Make sure we debitted
-		t.Errorf("Expected: 10, received: %+v", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() == 10.0 { // Make sure we debitted
+		t.Errorf("Expected: 10, received: %+v", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	} else if reply.Disabled == true {
 		t.Error("Account disabled")
 	}

@@ -90,7 +90,7 @@ func GetRemoteIP(r *http.Request) (ip string, err error) {
 	if net.ParseIP(ip) != nil {
 		return
 	}
-	for _, ip = range strings.Split(r.Header.Get("X-FORWARDED-FOR"), FIELDS_SEP) {
+	for _, ip = range strings.Split(r.Header.Get("X-FORWARDED-FOR"), FieldsSep) {
 		if net.ParseIP(ip) != nil {
 			return
 		}

@@ -72,7 +72,7 @@ type actionTypeFunc func(*Account, *Action, Actions, interface{}) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
 	actionFuncMap := map[string]actionTypeFunc{
-		utils.LOG:                       logAction,
+		utils.MetaLog:                   logAction,
 		utils.RESET_TRIGGERS:            resetTriggersAction,
 		utils.CDRLOG:                    cdrLogAction,
 		utils.SET_RECURRENT:             setRecurrentAction,
@@ -135,7 +135,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		utils.Tenant:       config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Tenant, utils.InfieldSep),
 		utils.AccountField: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.InfieldSep),
 		utils.Subject:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.InfieldSep),
-		utils.COST:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.InfieldSep),
+		utils.Cost:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.InfieldSep),
 	}
 	template := make(map[string]string)
 	// overwrite default template
@@ -396,7 +396,7 @@ func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	}
 	err = pstr.PostValues(body, make(http.Header))
 	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
-		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
+		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+a.ActionType, body, make(map[string]interface{}))
 		err = nil
 	}
 	return err
@@ -416,7 +416,7 @@ func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) er
 	go func() {
 		err := pstr.PostValues(body, make(http.Header))
 		if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
-			AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
+			AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+a.ActionType, body, make(map[string]interface{}))
 		}
 	}()
 	return nil
@@ -576,7 +576,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 				return 0, err
 			}
 		}
-		if err = dm.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, acntAPids, true); err != nil {
+		if err = dm.CacheDataFromDB(utils.ActionPlanPrefix, acntAPids, true); err != nil {
 			return 0, err
 		}
 		if err = dm.RemAccountActionPlans(accID, nil); err != nil {
@@ -587,7 +587,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 		}
 		return 0, nil
 
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
 	if err != nil {
 		return err
 	}
@@ -631,11 +631,11 @@ func transferMonetaryDefaultAction(ub *Account, a *Action, acs Actions, extraDat
 		utils.Logger.Err("*transfer_monetary_default called without account")
 		return utils.ErrAccountNotFound
 	}
-	if _, exists := ub.BalanceMap[utils.MONETARY]; !exists {
+	if _, exists := ub.BalanceMap[utils.MetaMonetary]; !exists {
 		return utils.ErrNotFound
 	}
 	defaultBalance := ub.GetDefaultMoneyBalance()
-	bChain := ub.BalanceMap[utils.MONETARY]
+	bChain := ub.BalanceMap[utils.MetaMonetary]
 	for _, balance := range bChain {
 		if balance.Uuid != defaultBalance.Uuid &&
 			balance.ID != defaultBalance.ID && // extra caution
@@ -959,7 +959,7 @@ func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	}
 	err = pstr.PostValues(body, make(http.Header))
 	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
-		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HIERARCHY_SEP+a.ActionType, body, make(map[string]interface{}))
+		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+a.ActionType, body, make(map[string]interface{}))
 		err = nil
 	}
 	return err

@@ -72,7 +72,7 @@ const (
 	VAR_CGR_CMPUTELCR        = varPrefix + utils.CGR_COMPUTELCR
 	FsConnID                 = "FsConnID" // used to share connID info in event for remote disconnects
 	VarAnswerEpoch           = "variable_answer_epoch"
-	VarCGRACD                = varPrefix + utils.CGR_ACD
+	VarCGRACD                = varPrefix + utils.CgrAcd
 	VarCGROriginHost         = varPrefix + utils.CGROriginHost
 )
 
@@ -302,7 +302,7 @@ func (fsev FSEvent) GetExtraFields() map[string]string {
 func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (parsed string, err error) {
 	switch rsrFld.AttrName() {
 	case utils.ToR:
-		return rsrFld.ParseValue(utils.VOICE)
+		return rsrFld.ParseValue(utils.MetaVoice)
 	case utils.OriginID:
 		return rsrFld.ParseValue(fsev.GetUUID())
 	case utils.OriginHost:
@@ -333,9 +333,9 @@ func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (
 	case utils.PDD:
 		PDD, _ := fsev.GetPdd(utils.MetaDefault)
 		return rsrFld.ParseValue(strconv.FormatFloat(PDD.Seconds(), 'f', -1, 64))
-	case utils.ROUTE:
+	case utils.Route:
 		return rsrFld.ParseValue(fsev.GetRoute(""))
-	case utils.DISCONNECT_CAUSE:
+	case utils.DisconnectCause:
 		return rsrFld.ParseValue(fsev.GetDisconnectCause(""))
 	case utils.RunID:
 		return rsrFld.ParseValue(utils.MetaDefault)
@@ -370,7 +370,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	for fld, val := range fsev.GetExtraFields() {
 		mp[fld] = val
 	}
-	mp[utils.ToR] = utils.VOICE
+	mp[utils.ToR] = utils.MetaVoice
 	mp[utils.OriginID] = fsev.GetUUID()
 	mp[utils.OriginHost] = fsev.GetOriginHost()
 	mp[utils.Source] = "FS_" + fsev.GetName()
@@ -385,9 +385,9 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.Usage], _ = fsev.GetDuration(utils.MetaDefault)
 	mp[utils.PDD], _ = fsev.GetPdd(utils.MetaDefault)
 	mp[utils.ACD], _ = fsev.GetADC(utils.MetaDefault)
-	mp[utils.COST] = -1.0
-	mp[utils.ROUTE] = fsev.GetRoute(utils.MetaDefault)
-	mp[utils.DISCONNECT_CAUSE] = fsev.GetDisconnectCause(utils.MetaDefault)
+	mp[utils.Cost] = -1.0
+	mp[utils.Route] = fsev.GetRoute(utils.MetaDefault)
+	mp[utils.DisconnectCause] = fsev.GetDisconnectCause(utils.MetaDefault)
 	return mp
 }
 
@@ -474,7 +474,7 @@ func (fsev FSEvent) GetOptions() (mp map[string]interface{}) {
 	if !has {
 		return
 	}
-	for _, opt := range strings.Split(opts, utils.FIELDS_SEP) {
+	for _, opt := range strings.Split(opts, utils.FieldsSep) {
 		spltOpt := strings.SplitN(opt, utils.InInFieldSep, 2)
 		if len(spltOpt) != 2 {
 			continue

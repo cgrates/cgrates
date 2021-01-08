@@ -106,17 +106,17 @@ var testEC = &EventCost{
 		BalanceSummaries: []*BalanceSummary{
 			{
 				UUID:  "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-				Type:  utils.MONETARY,
+				Type:  utils.MetaMonetary,
 				Value: 50,
 			},
 			{
 				UUID:  "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
-				Type:  utils.MONETARY,
+				Type:  utils.MetaMonetary,
 				Value: 25,
 			},
 			{
 				UUID:  "4b8b53d7-c1a1-4159-b845-4623a00a0165",
-				Type:  utils.VOICE,
+				Type:  utils.MetaVoice,
 				Value: 200,
 			},
 		},
@@ -322,7 +322,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		Subject:     "dan",
 		Account:     "dan",
 		Destination: "+4986517174963",
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 		Cost:        0.75,
 		RatedUsage:  120.0,
 		Timespans: TimeSpans{
@@ -384,7 +384,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 								ID:       "free_mins",
 								Value:    0,
 								Consumed: 1.0,
-								ToR:      utils.VOICE,
+								ToR:      utils.MetaVoice,
 							},
 							AccountID: "cgrates.org:dan",
 						},
@@ -399,7 +399,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 								ID:       "discounted_mins",
 								Value:    0,
 								Consumed: 1.0,
-								ToR:      utils.VOICE,
+								ToR:      utils.MetaVoice,
 								RateInterval: &RateInterval{
 									Timing: &RITiming{
 										StartTime: "00:00:00",
@@ -731,7 +731,7 @@ func TestECAsRefundIncrements(t *testing.T) {
 	eCD := &CallDescriptor{
 		CgrID:         "164b0422fdc6a5117031b427439482c6a4f90e41",
 		RunID:         utils.MetaDefault,
-		ToR:           utils.VOICE,
+		ToR:           utils.MetaVoice,
 		TimeStart:     time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 		TimeEnd:       time.Date(2017, 1, 9, 16, 28, 21, 0, time.UTC),
 		DurationIndex: 10 * time.Minute,
@@ -958,7 +958,7 @@ func TestECAsRefundIncrements(t *testing.T) {
 		},
 	}
 
-	if cd := testEC.Clone().AsRefundIncrements(utils.VOICE); !reflect.DeepEqual(eCD, cd) {
+	if cd := testEC.Clone().AsRefundIncrements(utils.MetaVoice); !reflect.DeepEqual(eCD, cd) {
 		t.Errorf("expecting: %s\n\n, received: %s", utils.ToIJSON(eCD), utils.ToIJSON(cd))
 	}
 }
@@ -1114,7 +1114,7 @@ func TestECAsCallCost(t *testing.T) {
 		},
 	}
 	eCC := &CallCost{
-		ToR:            utils.VOICE,
+		ToR:            utils.MetaVoice,
 		Cost:           0.85,
 		RatedUsage:     120000000000,
 		AccountSummary: acntSummary,
@@ -1539,7 +1539,7 @@ func TestECMergeGT(t *testing.T) {
 				{
 					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
 					ID:    "addon_data",
-					Type:  utils.DATA,
+					Type:  utils.MetaData,
 					Value: 10726871040},
 			},
 		},
@@ -1597,7 +1597,7 @@ func TestECMergeGT(t *testing.T) {
 				{
 					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
 					ID:    "addon_data",
-					Type:  utils.DATA,
+					Type:  utils.MetaData,
 					Value: 10718269440},
 			},
 		},
@@ -1656,7 +1656,7 @@ func TestECMergeGT(t *testing.T) {
 				{
 					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
 					ID:    "addon_data",
-					Type:  utils.DATA,
+					Type:  utils.MetaData,
 					Value: 10718269440},
 			},
 		},
@@ -2455,12 +2455,12 @@ func TestECSyncKeys(t *testing.T) {
 			BalanceSummaries: []*BalanceSummary{
 				{
 					UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-					Type:     utils.MONETARY,
+					Type:     utils.MetaMonetary,
 					Value:    50,
 					Disabled: false},
 				{
 					UUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
-					Type:     utils.MONETARY,
+					Type:     utils.MetaMonetary,
 					Value:    25,
 					Disabled: false},
 				{

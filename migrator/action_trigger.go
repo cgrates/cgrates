@@ -54,12 +54,12 @@ type v1ActionTriggers []*v1ActionTrigger
 
 func (m *Migrator) migrateCurrentActionTrigger() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ACTION_TRIGGER_PREFIX)
+		idg := strings.TrimPrefix(id, utils.ActionTriggerPrefix)
 		acts, err := m.dmIN.DataManager().GetActionTriggers(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err

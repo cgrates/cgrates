@@ -303,13 +303,13 @@ func testTutAccounts(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(acnt.BalanceMap) != 4 ||
-		len(acnt.BalanceMap[utils.MONETARY]) != 1 ||
-		acnt.BalanceMap[utils.MONETARY][0].Value != 10 ||
-		len(acnt.BalanceMap[utils.VOICE]) != 2 ||
-		len(acnt.BalanceMap[utils.SMS]) != 1 ||
-		acnt.BalanceMap[utils.SMS][0].Value != 100 ||
-		len(acnt.BalanceMap[utils.DATA]) != 1 ||
-		acnt.BalanceMap[utils.DATA][0].Value != 1024 ||
+		len(acnt.BalanceMap[utils.MetaMonetary]) != 1 ||
+		acnt.BalanceMap[utils.MetaMonetary][0].Value != 10 ||
+		len(acnt.BalanceMap[utils.MetaVoice]) != 2 ||
+		len(acnt.BalanceMap[utils.MetaSMS]) != 1 ||
+		acnt.BalanceMap[utils.MetaSMS][0].Value != 100 ||
+		len(acnt.BalanceMap[utils.MetaData]) != 1 ||
+		acnt.BalanceMap[utils.MetaData][0].Value != 1024 ||
 		len(acnt.ActionTriggers) != 2 ||
 		acnt.Disabled {
 		t.Errorf("received account: %s", utils.ToIJSON(acnt))
@@ -319,7 +319,7 @@ func testTutAccounts(t *testing.T) {
 	attrBlc := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1001",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       1,
 		Balance: map[string]interface{}{
 			utils.ID: utils.MetaDefault,
@@ -333,14 +333,14 @@ func testTutAccounts(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"},
 		&acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap[utils.SMS]) != 2 ||
-		acnt.GetBalanceWithID(utils.SMS, "BONUS_SMSes").Value != 10 {
+	} else if len(acnt.BalanceMap[utils.MetaSMS]) != 2 ||
+		acnt.GetBalanceWithID(utils.MetaSMS, "BONUS_SMSes").Value != 10 {
 		t.Errorf("account: %s", utils.ToIJSON(acnt))
 	}
 	attrBlc = utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1001",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       101,
 		Balance: map[string]interface{}{
 			utils.ID: utils.MetaDefault,

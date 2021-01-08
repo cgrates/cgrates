@@ -27,7 +27,7 @@ import (
 func TestTPDistinctIdsString(t *testing.T) {
 	eIn1 := []string{"1", "2", "3", "4"}
 	eIn2 := TPDistinctIds(eIn1)
-	expected := strings.Join(eIn1, FIELDS_SEP)
+	expected := strings.Join(eIn1, FieldsSep)
 	received := eIn2.String()
 
 	if !reflect.DeepEqual(expected, received) {
@@ -315,7 +315,7 @@ func TestFallbackSubjKeys(t *testing.T) {
 	}
 	//check with test vars
 	eOut := []string{"*out:cgrates.org:*voice:1001", "*out:cgrates.org:*voice:1002", "*out:cgrates.org:*voice:1003"}
-	rcv = FallbackSubjKeys("cgrates.org", VOICE, "1001;1003;1002")
+	rcv = FallbackSubjKeys("cgrates.org", MetaVoice, "1001;1003;1002")
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expected %+v, received %+v", eOut, rcv)
 	}
@@ -375,7 +375,7 @@ func TestAttrGetCdrsAsCDRsFilter(t *testing.T) {
 		TimeEnd:   "2019-04-04T11:46:26.371Z",
 		SkipRated: true,
 		CgrIds:    []string{"CGRID"},
-		TORs:      []string{VOICE},
+		TORs:      []string{MetaVoice},
 		Accounts:  []string{"1001"},
 		Subjects:  []string{"1001"},
 	}

@@ -117,7 +117,7 @@ func ToJSON(line string) (jsn []byte) {
 			jsn = append(jsn, []byte(fmt.Sprintf("\"%s\":%s,", group[1], group[2]))...)
 		}
 	}
-	jsn = bytes.TrimRight(jsn, utils.FIELDS_SEP)
+	jsn = bytes.TrimRight(jsn, utils.FieldsSep)
 	jsn = append(jsn, '}')
 	return
 }
@@ -159,7 +159,7 @@ func getSliceAsString(mp []interface{}, defaultDurationFields utils.StringSet) (
 	for _, v := range mp {
 		out += fmt.Sprintf(`%s,`, getStringValue(v, defaultDurationFields))
 	}
-	return strings.TrimSuffix(out, utils.FIELDS_SEP) + utils.IdxEnd
+	return strings.TrimSuffix(out, utils.FieldsSep) + utils.IdxEnd
 }
 
 func getMapAsString(mp map[string]interface{}, defaultDurationFields utils.StringSet) (out string) {
@@ -175,7 +175,7 @@ func getMapAsString(mp map[string]interface{}, defaultDurationFields utils.Strin
 		keylist = append(keylist, fmt.Sprintf(`"%s":%s`, k, getStringValue(v, defaultDurationFields)))
 	}
 	sort.Strings(keylist)
-	return fmt.Sprintf(`{%s}`, strings.Join(keylist, utils.FIELDS_SEP))
+	return fmt.Sprintf(`{%s}`, strings.Join(keylist, utils.FieldsSep))
 }
 
 func GetFormatedResult(result interface{}, defaultDurationFields utils.StringSet) string {

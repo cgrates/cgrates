@@ -44,7 +44,7 @@ var attrs = &engine.AttrSProcessEventReply{
 				utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
-				utils.ToR:          utils.VOICE,
+				utils.ToR:          utils.MetaVoice,
 				utils.AccountField: "1001",
 				utils.Subject:      "ANY2CNT",
 				utils.Destination:  "1002",
@@ -97,26 +97,26 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	}
 	sS := NewSessionS(sSCfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.ToR:              "*voice",
-		utils.OriginID:         "12345",
-		utils.AccountField:     "account1",
-		utils.Subject:          "subject1",
-		utils.Destination:      "+4986517174963",
-		utils.Category:         "call",
-		utils.Tenant:           "cgrates.org",
-		utils.RequestType:      "*prepaid",
-		utils.SetupTime:        "2015-11-09T14:21:24Z",
-		utils.AnswerTime:       "2015-11-09T14:22:02Z",
-		utils.Usage:            "1m23s",
-		utils.LastUsed:         "21s",
-		utils.PDD:              "300ms",
-		utils.ROUTE:            "supplier1",
-		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
-		utils.OriginHost:       "127.0.0.1",
-		"Extra1":               "Value1",
-		"Extra2":               5,
-		"Extra3":               "",
+		utils.EventName:       "TEST_EVENT",
+		utils.ToR:             "*voice",
+		utils.OriginID:        "12345",
+		utils.AccountField:    "account1",
+		utils.Subject:         "subject1",
+		utils.Destination:     "+4986517174963",
+		utils.Category:        "call",
+		utils.Tenant:          "cgrates.org",
+		utils.RequestType:     "*prepaid",
+		utils.SetupTime:       "2015-11-09T14:21:24Z",
+		utils.AnswerTime:      "2015-11-09T14:22:02Z",
+		utils.Usage:           "1m23s",
+		utils.LastUsed:        "21s",
+		utils.PDD:             "300ms",
+		utils.Route:           "supplier1",
+		utils.DisconnectCause: "NORMAL_DISCONNECT",
+		utils.OriginHost:      "127.0.0.1",
+		"Extra1":              "Value1",
+		"Extra2":              5,
+		"Extra3":              "",
 	})
 	// Index first session
 	session := &Session{
@@ -155,7 +155,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			},
 		},
 		"Extra4": {
-			utils.NOT_AVAILABLE: map[string]utils.StringSet{
+			utils.NotAvailable: map[string]utils.StringSet{
 				cgrID: {utils.MetaDefault: {}},
 			},
 		},
@@ -169,7 +169,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
 			&riFieldNameVal{fieldName: "Account", fieldValue: "account1"},
 			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NotAvailable},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12345"},
 		},
 	}
@@ -179,7 +179,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	}
 	// Index second session
 	sSEv2 := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:   "TEST_EVENT2",
+		utils.EventName:    "TEST_EVENT2",
 		utils.OriginID:     "12346",
 		utils.AccountField: "account2",
 		utils.Destination:  "+4986517174964",
@@ -202,7 +202,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	}
 	sS.indexSession(session2, false)
 	sSEv3 := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:   "TEST_EVENT3",
+		utils.EventName:    "TEST_EVENT3",
 		utils.Tenant:       "cgrates.org",
 		utils.OriginID:     "12347",
 		utils.AccountField: "account2",
@@ -257,12 +257,12 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 				cgrID:  {utils.MetaDefault: {}},
 				cgrID2: {utils.MetaDefault: {}},
 			},
-			utils.NOT_AVAILABLE: map[string]utils.StringSet{
+			utils.NotAvailable: map[string]utils.StringSet{
 				cgrID3: {utils.MetaDefault: {}},
 			},
 		},
 		"Extra4": {
-			utils.NOT_AVAILABLE: map[string]utils.StringSet{
+			utils.NotAvailable: map[string]utils.StringSet{
 				cgrID:  {utils.MetaDefault: {}},
 				cgrID3: {utils.MetaDefault: {}},
 			},
@@ -279,7 +279,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
 			&riFieldNameVal{fieldName: "Account", fieldValue: "account1"},
 			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NotAvailable},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12345"},
 		},
 		cgrID2: {
@@ -292,8 +292,8 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		cgrID3: {
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
 			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.NotAvailable},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NotAvailable},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12347"},
 		},
 	}
@@ -331,7 +331,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			utils.MetaEmpty: map[string]utils.StringSet{
 				cgrID2: {utils.MetaDefault: {}},
 			},
-			utils.NOT_AVAILABLE: map[string]utils.StringSet{
+			utils.NotAvailable: map[string]utils.StringSet{
 				cgrID3: {utils.MetaDefault: {}},
 			},
 		},
@@ -339,7 +339,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			"info2": map[string]utils.StringSet{
 				cgrID2: {utils.MetaDefault: {}},
 			},
-			utils.NOT_AVAILABLE: map[string]utils.StringSet{
+			utils.NotAvailable: map[string]utils.StringSet{
 				cgrID3: {utils.MetaDefault: {}},
 			},
 		},
@@ -358,8 +358,8 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		cgrID3: {
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
 			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.NotAvailable},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NotAvailable},
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12347"},
 		},
 	}
@@ -417,7 +417,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "111",
 		utils.AccountField: "account1",
@@ -431,7 +431,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		utils.Usage:        "1m23s",
 		utils.LastUsed:     "21s",
 		utils.PDD:          "300ms",
-		utils.ROUTE:        "supplier1",
+		utils.Route:        "supplier1",
 		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
@@ -477,7 +477,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	}
 
 	sSEv2 := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "222",
 		utils.AccountField: "account2",
@@ -489,7 +489,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		utils.Usage:        "1m23s",
 		utils.LastUsed:     "21s",
 		utils.PDD:          "300ms",
-		utils.ROUTE:        "supplier2",
+		utils.Route:        "supplier2",
 		utils.OriginHost:   "127.0.0.1",
 	})
 	s2 := &Session{
@@ -543,21 +543,21 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	}
 
 	sSEv3 := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.ToR:              "*voice",
-		utils.OriginID:         "111",
-		utils.AccountField:     "account3",
-		utils.Destination:      "+4986517174963",
-		utils.Category:         "call",
-		utils.Tenant:           "itsyscom.com",
-		utils.RequestType:      "*prepaid",
-		utils.AnswerTime:       "2015-11-09T14:22:02Z",
-		utils.Usage:            "1m23s",
-		utils.LastUsed:         "21s",
-		utils.PDD:              "300ms",
-		utils.ROUTE:            "supplier2",
-		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
-		utils.OriginHost:       "127.0.0.1",
+		utils.EventName:       "TEST_EVENT",
+		utils.ToR:             "*voice",
+		utils.OriginID:        "111",
+		utils.AccountField:    "account3",
+		utils.Destination:     "+4986517174963",
+		utils.Category:        "call",
+		utils.Tenant:          "itsyscom.com",
+		utils.RequestType:     "*prepaid",
+		utils.AnswerTime:      "2015-11-09T14:22:02Z",
+		utils.Usage:           "1m23s",
+		utils.LastUsed:        "21s",
+		utils.PDD:             "300ms",
+		utils.Route:           "supplier2",
+		utils.DisconnectCause: "NORMAL_DISCONNECT",
+		utils.OriginHost:      "127.0.0.1",
 	})
 	s3 := &Session{
 		CGRID:      "session1",
@@ -635,7 +635,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "111",
 		utils.AccountField: "account1",
@@ -649,7 +649,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		utils.Usage:        "1m23s",
 		utils.LastUsed:     "21s",
 		utils.PDD:          "300ms",
-		utils.ROUTE:        "supplier1",
+		utils.Route:        "supplier1",
 		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
@@ -698,7 +698,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	}
 
 	sSEv2 := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "222",
 		utils.AccountField: "account2",
@@ -710,7 +710,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		utils.Usage:        "1m23s",
 		utils.LastUsed:     "21s",
 		utils.PDD:          "300ms",
-		utils.ROUTE:        "supplier2",
+		utils.Route:        "supplier2",
 		utils.OriginHost:   "127.0.0.1",
 	})
 	s2 := &Session{
@@ -764,21 +764,21 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	}
 
 	sSEv3 := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.ToR:              "*voice",
-		utils.OriginID:         "111",
-		utils.AccountField:     "account3",
-		utils.Destination:      "+4986517174963",
-		utils.Category:         "call",
-		utils.Tenant:           "itsyscom.com",
-		utils.RequestType:      "*prepaid",
-		utils.AnswerTime:       "2015-11-09T14:22:02Z",
-		utils.Usage:            "1m23s",
-		utils.LastUsed:         "21s",
-		utils.PDD:              "300ms",
-		utils.ROUTE:            "supplier2",
-		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
-		utils.OriginHost:       "127.0.0.1",
+		utils.EventName:       "TEST_EVENT",
+		utils.ToR:             "*voice",
+		utils.OriginID:        "111",
+		utils.AccountField:    "account3",
+		utils.Destination:     "+4986517174963",
+		utils.Category:        "call",
+		utils.Tenant:          "itsyscom.com",
+		utils.RequestType:     "*prepaid",
+		utils.AnswerTime:      "2015-11-09T14:22:02Z",
+		utils.Usage:           "1m23s",
+		utils.LastUsed:        "21s",
+		utils.PDD:             "300ms",
+		utils.Route:           "supplier2",
+		utils.DisconnectCause: "NORMAL_DISCONNECT",
+		utils.OriginHost:      "127.0.0.1",
 	})
 	s3 := &Session{
 		CGRID:      "session1",
@@ -1419,7 +1419,7 @@ func TestSessionStransitSState(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "111",
 		utils.AccountField: "account1",
@@ -1433,7 +1433,7 @@ func TestSessionStransitSState(t *testing.T) {
 		utils.Usage:        "1m23s",
 		utils.LastUsed:     "21s",
 		utils.PDD:          "300ms",
-		utils.ROUTE:        "supplier1",
+		utils.Route:        "supplier1",
 		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
@@ -1465,7 +1465,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "111",
 		utils.AccountField: "account1",
@@ -1479,7 +1479,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 		utils.Usage:        "1m23s",
 		utils.LastUsed:     "21s",
 		utils.PDD:          "300ms",
-		utils.ROUTE:        "supplier1",
+		utils.Route:        "supplier1",
 		utils.OriginHost:   "127.0.0.1",
 	})
 	initialCGRID := GetSetCGRID(sSEv)
@@ -1620,7 +1620,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		{
 			Type:    utils.MetaString,
 			Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR,
-			Values:  []string{utils.VOICE},
+			Values:  []string{utils.MetaVoice},
 		},
 	}
 	if err := expUindx[0].CompileValues(); err != nil {
@@ -1636,7 +1636,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		"ToR": {},
 	}
 	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
-	expIndx = map[string][]string{(utils.ToR): {utils.VOICE}}
+	expIndx = map[string][]string{(utils.ToR): {utils.MetaVoice}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
@@ -1671,26 +1671,26 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	}
 	sS := NewSessionS(sSCfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.ToR:              "*voice",
-		utils.OriginID:         "12345",
-		utils.AccountField:     "account1",
-		utils.Subject:          "subject1",
-		utils.Destination:      "+4986517174963",
-		utils.Category:         "call",
-		utils.Tenant:           "cgrates.org",
-		utils.RequestType:      "*prepaid",
-		utils.SetupTime:        "2015-11-09T14:21:24Z",
-		utils.AnswerTime:       "2015-11-09T14:22:02Z",
-		utils.Usage:            "1m23s",
-		utils.LastUsed:         "21s",
-		utils.PDD:              "300ms",
-		utils.ROUTE:            "supplier1",
-		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
-		utils.OriginHost:       "127.0.0.1",
-		"Extra1":               "Value1",
-		"Extra2":               5,
-		"Extra3":               "",
+		utils.EventName:       "TEST_EVENT",
+		utils.ToR:             "*voice",
+		utils.OriginID:        "12345",
+		utils.AccountField:    "account1",
+		utils.Subject:         "subject1",
+		utils.Destination:     "+4986517174963",
+		utils.Category:        "call",
+		utils.Tenant:          "cgrates.org",
+		utils.RequestType:     "*prepaid",
+		utils.SetupTime:       "2015-11-09T14:21:24Z",
+		utils.AnswerTime:      "2015-11-09T14:22:02Z",
+		utils.Usage:           "1m23s",
+		utils.LastUsed:        "21s",
+		utils.PDD:             "300ms",
+		utils.Route:           "supplier1",
+		utils.DisconnectCause: "NORMAL_DISCONNECT",
+		utils.OriginHost:      "127.0.0.1",
+		"Extra1":              "Value1",
+		"Extra2":              5,
+		"Extra3":              "",
 	})
 	// Index first session
 	session := &Session{
@@ -1707,7 +1707,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	}
 	cgrID := GetSetCGRID(sEv)
 	sS.indexSession(session, false)
-	indx := map[string][]string{"ToR": {utils.VOICE, utils.DATA}}
+	indx := map[string][]string{"ToR": {utils.MetaVoice, utils.MetaData}}
 	expCGRIDs := []string{cgrID}
 	expmatchingSRuns := map[string]utils.StringSet{cgrID: {
 		"RunID": {},
@@ -1724,7 +1724,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.indexSession(session, false)
 	indx = map[string][]string{
-		"ToR":    {utils.VOICE, utils.DATA},
+		"ToR":    {utils.MetaVoice, utils.MetaData},
 		"Extra2": {"55"},
 	}
 	expCGRIDs = []string{}
@@ -1744,8 +1744,8 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		},
 		{
 			Event: engine.NewMapEvent(map[string]interface{}{
-				utils.EVENT_NAME: "TEST_EVENT",
-				utils.ToR:        "*voice"}),
+				utils.EventName: "TEST_EVENT",
+				utils.ToR:       "*voice"}),
 			CD: &engine.CallDescriptor{
 				RunID: "RunID2",
 			},
@@ -1758,7 +1758,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.indexSession(session, true)
 	indx = map[string][]string{
-		"ToR":    {utils.VOICE, utils.DATA},
+		"ToR":    {utils.MetaVoice, utils.MetaData},
 		"Extra2": {"5"},
 	}
 
@@ -1947,7 +1947,7 @@ func TestSessionSgetSession(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:   "TEST_EVENT",
+		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
 		utils.OriginID:     "111",
 		utils.AccountField: "account1",
@@ -1961,7 +1961,7 @@ func TestSessionSgetSession(t *testing.T) {
 		utils.Usage:        "1m23s",
 		utils.LastUsed:     "21s",
 		utils.PDD:          "300ms",
-		utils.ROUTE:        "supplier1",
+		utils.Route:        "supplier1",
 		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
@@ -1994,26 +1994,26 @@ func TestSessionSfilterSessions(t *testing.T) {
 	}
 	sS := NewSessionS(sSCfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.ToR:              "*voice",
-		utils.OriginID:         "12345",
-		utils.AccountField:     "account1",
-		utils.Subject:          "subject1",
-		utils.Destination:      "+4986517174963",
-		utils.Category:         "call",
-		utils.Tenant:           "cgrates.org",
-		utils.RequestType:      "*prepaid",
-		utils.SetupTime:        "2015-11-09T14:21:24Z",
-		utils.AnswerTime:       "2015-11-09T14:22:02Z",
-		utils.Usage:            "1m23s",
-		utils.LastUsed:         "21s",
-		utils.PDD:              "300ms",
-		utils.ROUTE:            "supplier1",
-		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
-		utils.OriginHost:       "127.0.0.1",
-		"Extra1":               "Value1",
-		"Extra2":               5,
-		"Extra3":               "",
+		utils.EventName:       "TEST_EVENT",
+		utils.ToR:             "*voice",
+		utils.OriginID:        "12345",
+		utils.AccountField:    "account1",
+		utils.Subject:         "subject1",
+		utils.Destination:     "+4986517174963",
+		utils.Category:        "call",
+		utils.Tenant:          "cgrates.org",
+		utils.RequestType:     "*prepaid",
+		utils.SetupTime:       "2015-11-09T14:21:24Z",
+		utils.AnswerTime:      "2015-11-09T14:22:02Z",
+		utils.Usage:           "1m23s",
+		utils.LastUsed:        "21s",
+		utils.PDD:             "300ms",
+		utils.Route:           "supplier1",
+		utils.DisconnectCause: "NORMAL_DISCONNECT",
+		utils.OriginHost:      "127.0.0.1",
+		"Extra1":              "Value1",
+		"Extra2":              5,
+		"Extra3":              "",
 	})
 	sr2 := sEv.Clone()
 	// Index first session
@@ -2035,7 +2035,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 			},
 		},
 	}
-	sr2[utils.ToR] = utils.SMS
+	sr2[utils.ToR] = utils.MetaSMS
 	sr2[utils.Subject] = "subject2"
 	sr2[utils.CGRID] = GetSetCGRID(sEv)
 	sS.registerSession(session, false)
@@ -2068,13 +2068,13 @@ func TestSessionSfilterSessions(t *testing.T) {
 			"Extra3":          "",
 			"LastUsed":        "21s",
 			"PDD":             "300ms",
-			utils.ROUTE:       "supplier1",
+			utils.Route:       "supplier1",
 		},
 		NodeID: sSCfg.GeneralCfg().NodeID,
 	}
 	eses2 := &ExternalSession{
 		CGRID:       "cade401f46f046311ed7f62df3dfbb84adb98aad",
-		ToR:         utils.SMS,
+		ToR:         utils.MetaSMS,
 		OriginID:    "12345",
 		OriginHost:  "127.0.0.1",
 		Source:      "SessionS_TEST_EVENT",
@@ -2093,14 +2093,14 @@ func TestSessionSfilterSessions(t *testing.T) {
 			"Extra3":          "",
 			"LastUsed":        "21s",
 			"PDD":             "300ms",
-			utils.ROUTE:       "supplier1",
+			utils.Route:       "supplier1",
 		},
 		NodeID: sSCfg.GeneralCfg().NodeID,
 	}
 	expSess := []*ExternalSession{
 		eses1,
 	}
-	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.DATA)}}
+	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.MetaVoice, utils.MetaData)}}
 	if sess := sS.filterSessions(fltrs, true); len(sess) != 0 {
 		t.Errorf("Expected no session, received: %s", utils.ToJSON(sess))
 	}
@@ -2155,7 +2155,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 	} else if !reflect.DeepEqual(expSess[0], eses1) && !reflect.DeepEqual(expSess[0], eses2) {
 		t.Errorf("Expected %s or %s, received: %s", utils.ToJSON(eses1), utils.ToJSON(eses2), utils.ToJSON(sess[0]))
 	}
-	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.SMS)}, Limit: utils.IntPointer(1)}
+	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.MetaVoice, utils.MetaSMS)}, Limit: utils.IntPointer(1)}
 	if sess := sS.filterSessions(fltrs, false); len(sess) != 1 {
 		t.Errorf("Expected one session, received: %s", utils.ToJSON(sess))
 	} else if !reflect.DeepEqual(expSess[0], eses1) && !reflect.DeepEqual(expSess[0], eses2) {
@@ -2170,26 +2170,26 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	}
 	sS := NewSessionS(sSCfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.ToR:              "*voice",
-		utils.OriginID:         "12345",
-		utils.AccountField:     "account1",
-		utils.Subject:          "subject1",
-		utils.Destination:      "+4986517174963",
-		utils.Category:         "call",
-		utils.Tenant:           "cgrates.org",
-		utils.RequestType:      "*prepaid",
-		utils.SetupTime:        "2015-11-09T14:21:24Z",
-		utils.AnswerTime:       "2015-11-09T14:22:02Z",
-		utils.Usage:            "1m23s",
-		utils.LastUsed:         "21s",
-		utils.PDD:              "300ms",
-		utils.ROUTE:            "supplier1",
-		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
-		utils.OriginHost:       "127.0.0.1",
-		"Extra1":               "Value1",
-		"Extra2":               5,
-		"Extra3":               "",
+		utils.EventName:       "TEST_EVENT",
+		utils.ToR:             "*voice",
+		utils.OriginID:        "12345",
+		utils.AccountField:    "account1",
+		utils.Subject:         "subject1",
+		utils.Destination:     "+4986517174963",
+		utils.Category:        "call",
+		utils.Tenant:          "cgrates.org",
+		utils.RequestType:     "*prepaid",
+		utils.SetupTime:       "2015-11-09T14:21:24Z",
+		utils.AnswerTime:      "2015-11-09T14:22:02Z",
+		utils.Usage:           "1m23s",
+		utils.LastUsed:        "21s",
+		utils.PDD:             "300ms",
+		utils.Route:           "supplier1",
+		utils.DisconnectCause: "NORMAL_DISCONNECT",
+		utils.OriginHost:      "127.0.0.1",
+		"Extra1":              "Value1",
+		"Extra2":              5,
+		"Extra3":              "",
 	})
 	sr2 := sEv.Clone()
 	// Index first session
@@ -2211,10 +2211,10 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 			},
 		},
 	}
-	sEv[utils.ToR] = utils.DATA
+	sEv[utils.ToR] = utils.MetaData
 	sr2[utils.CGRID] = GetSetCGRID(sEv)
 	sS.registerSession(session, false)
-	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.DATA)}}
+	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.MetaVoice, utils.MetaData)}}
 
 	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 2 {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
@@ -2255,7 +2255,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	}
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.registerSession(session, true)
-	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.DATA)}}
+	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.MetaVoice, utils.MetaData)}}
 	if noSess := sS.filterSessionsCount(fltrs, true); noSess != 2 {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
 	}

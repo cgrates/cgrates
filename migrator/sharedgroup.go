@@ -34,12 +34,12 @@ type v1SharedGroup struct {
 
 func (m *Migrator) migrateCurrentSharedGroups() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SHARED_GROUP_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SharedGroupPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.SHARED_GROUP_PREFIX)
+		idg := strings.TrimPrefix(id, utils.SharedGroupPrefix)
 		sgs, err := m.dmIN.DataManager().GetSharedGroup(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err

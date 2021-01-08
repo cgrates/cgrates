@@ -139,8 +139,8 @@ func testbrodcastItProccessEvent(t *testing.T) {
 			ID:     "TestSSv1ItProcessCDR",
 			Event: map[string]interface{}{
 				utils.Tenant:       "cgrates.org",
-				utils.Category:     utils.CALL,
-				utils.ToR:          utils.VOICE,
+				utils.Category:     utils.Call,
+				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It1Brodcast",
 				utils.RequestType:  utils.MetaPostpaid,
 				utils.AccountField: "1001",

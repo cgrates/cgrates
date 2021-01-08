@@ -95,12 +95,12 @@ func (m *Migrator) migrateDestinations() (err error) {
 
 func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.REVERSE_DESTINATION_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ReverseDestinationPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		id := strings.TrimPrefix(id, utils.REVERSE_DESTINATION_PREFIX)
+		id := strings.TrimPrefix(id, utils.ReverseDestinationPrefix)
 		rdst, err := m.dmIN.DataManager().GetReverseDestination(id, false, true, utils.NonTransactional)
 		if err != nil {
 			return err

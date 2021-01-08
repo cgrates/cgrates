@@ -126,8 +126,8 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 	eAcntVal := 10.0
 	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	usage := 2 * time.Minute
@@ -141,8 +141,8 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testSessionsItTerminatNonexist",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TerminateEvent",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TerminateEvent",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123451",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -167,8 +167,8 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 	eAcntVal = 9.299800
 	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	time.Sleep(100 * time.Millisecond)
 	if err := sItRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithOpts{CGREvent: termArgs.CGREvent}, &rpl); err != nil {
@@ -203,8 +203,8 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 	eAcntVal := 9.299800
 	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	usage := 2 * time.Minute
@@ -218,8 +218,8 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testSessionsItUpdateNonexist",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "UpdateEvent",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "UpdateEvent",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123789",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -248,8 +248,8 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 	eAcntVal = 8.599600
 	if err := sItRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	var rpl string
 	termArgs := &V1TerminateSessionArgs{
@@ -259,8 +259,8 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testSessionsItTerminatNonexist",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TerminateEvent",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TerminateEvent",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123789",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -284,8 +284,8 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 func testSessionsItTerminatePassive(t *testing.T) {
 	//create the event for session
 	sEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:   "UpdateEvent",
-		utils.ToR:          utils.VOICE,
+		utils.EventName:    "UpdateEvent",
+		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "123789",
 		utils.AccountField: "1001",
 		utils.Subject:      "1001",
@@ -341,8 +341,8 @@ func testSessionsItTerminatePassive(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testSessionsItTerminatNonexist",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TerminateEvent",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TerminateEvent",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123789",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -382,7 +382,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "TestSessionsItEventCostCompressing",
 		Value:       float64(5) * float64(time.Second),
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Balance: map[string]interface{}{
 			utils.ID:            "TestSessionsItEventCostCompressing",
 			utils.RatingSubject: "*zero50ms",

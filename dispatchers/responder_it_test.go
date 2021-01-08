@@ -98,7 +98,7 @@ func getNodeWithRoute(route string, t *testing.T) string {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				utils.EVENT_NAME: "Random",
+				utils.EventName: "Random",
 			},
 		},
 		Opts: map[string]interface{}{
@@ -172,7 +172,7 @@ func testDspResponderBroadcast(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				utils.EVENT_NAME: "Broadcast",
+				utils.EventName: "Broadcast",
 			},
 		},
 		Opts: map[string]interface{}{
@@ -209,7 +209,7 @@ func testDspResponderInternal(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				utils.EVENT_NAME: "Internal",
+				utils.EventName: "Internal",
 			},
 		},
 		Opts: map[string]interface{}{

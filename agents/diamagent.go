@@ -144,7 +144,7 @@ func (da *DiameterAgent) handlers() diam.Handler {
 				continue
 			}
 			for _, iAddr := range addrs {
-				hosts = append(hosts, net.ParseIP(strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0])) // address came in form x.y.z.t/24
+				hosts = append(hosts, net.ParseIP(strings.Split(iAddr.String(), utils.HDRValSep)[0])) // address came in form x.y.z.t/24
 			}
 		}
 	}
@@ -657,7 +657,7 @@ func (da *DiameterAgent) handleRAA(c diam.Conn, m *diam.Message) {
 func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
 	for c := range peers {
 		meta, _ := smpeer.FromContext(c.Context())
-		key := string(meta.OriginHost + utils.CONCATENATED_KEY_SEP + meta.OriginRealm)
+		key := string(meta.OriginHost + utils.ConcatenatedKeySep + meta.OriginRealm)
 		da.peersLck.Lock()
 		da.peers[key] = c // store in peers table
 		da.peersLck.Unlock()
@@ -674,7 +674,7 @@ func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
 // handleDPA is used to handle all DisconnectPeer Answers that are received
 func (da *DiameterAgent) handleDPA(c diam.Conn, m *diam.Message) {
 	meta, _ := smpeer.FromContext(c.Context())
-	key := string(meta.OriginHost + utils.CONCATENATED_KEY_SEP + meta.OriginRealm)
+	key := string(meta.OriginHost + utils.ConcatenatedKeySep + meta.OriginRealm)
 
 	da.dpaLck.Lock()
 	ch, has := da.dpa[key]
@@ -704,7 +704,7 @@ func (da *DiameterAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (e
 	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(args.OriginRealm))
 	m.NewAVP(avp.DisconnectCause, avp.Mbit, 0, datatype.Enumerated(args.DisconnectCause))
 
-	key := args.OriginHost + utils.CONCATENATED_KEY_SEP + args.OriginRealm
+	key := args.OriginHost + utils.ConcatenatedKeySep + args.OriginRealm
 
 	dpaCh := make(chan *diam.Message, 1)
 	da.dpaLck.Lock()

@@ -107,7 +107,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
-				utils.EVENT_NAME:   "Event1",
+				utils.EventName:    "Event1",
 				utils.AccountField: "1001",
 			},
 		},
@@ -259,7 +259,7 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
-				utils.EVENT_NAME:   "RoundRobin",
+				utils.EventName:    "RoundRobin",
 				utils.AccountField: "1001",
 			},
 		},

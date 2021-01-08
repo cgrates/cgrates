@@ -221,9 +221,9 @@ func testAccITMigrateAndMove(t *testing.T) {
 	v1Acc := &v1Account{
 		Id: "*OUT:CUSTOMER_1:rif",
 		BalanceMap: map[string]v1BalanceChain{
-			utils.DATA:  {v1b},
-			utils.VOICE: {v1b},
-			utils.MONETARY: {
+			utils.MetaData:  {v1b},
+			utils.MetaVoice: {v1b},
+			utils.MetaMonetary: {
 				&v1Balance{Value: 21,
 					ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 					Timings:        timingSlice}}}}
@@ -267,9 +267,9 @@ func testAccITMigrateAndMove(t *testing.T) {
 	testAccount := &engine.Account{
 		ID: "CUSTOMER_1:rif",
 		BalanceMap: map[string]engine.Balances{
-			utils.DATA:     {v2d},
-			utils.VOICE:    {v2b},
-			utils.MONETARY: {m2}},
+			utils.MetaData:     {v2d},
+			utils.MetaVoice:    {v2b},
+			utils.MetaMonetary: {m2}},
 		UnitCounters:   engine.UnitCounters{},
 		ActionTriggers: engine.ActionTriggers{},
 	}

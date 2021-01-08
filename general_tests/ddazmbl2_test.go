@@ -133,10 +133,10 @@ func TestExecuteActions2(t *testing.T) {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
-	} else if acnt.BalanceMap[utils.VOICE][0].Value != 40*float64(time.Second) {
-		t.Error("Account does not have enough minutes in balance", acnt.BalanceMap[utils.VOICE][0].Value)
-	} else if acnt.BalanceMap[utils.MONETARY][0].Value != 0 {
-		t.Error("Account does not have enough monetary balance", acnt.BalanceMap[utils.MONETARY][0].Value)
+	} else if acnt.BalanceMap[utils.MetaVoice][0].Value != 40*float64(time.Second) {
+		t.Error("Account does not have enough minutes in balance", acnt.BalanceMap[utils.MetaVoice][0].Value)
+	} else if acnt.BalanceMap[utils.MetaMonetary][0].Value != 0 {
+		t.Error("Account does not have enough monetary balance", acnt.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 }
 
@@ -162,10 +162,10 @@ func TestDebit2(t *testing.T) {
 	if len(acnt.BalanceMap) != 2 {
 		t.Error("Wrong number of user balances found", acnt.BalanceMap)
 	}
-	if acnt.BalanceMap[utils.VOICE][0].Value != 20*float64(time.Second) {
-		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[utils.VOICE][0].Value)
+	if acnt.BalanceMap[utils.MetaVoice][0].Value != 20*float64(time.Second) {
+		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[utils.MetaVoice][0].Value)
 	}
-	for _, blnc := range acnt.BalanceMap[utils.MONETARY] { // Test negative balance for default one
+	for _, blnc := range acnt.BalanceMap[utils.MetaMonetary] { // Test negative balance for default one
 		if blnc.Weight == 10 && blnc.Value != 0 {
 			t.Errorf("Balance with weight: %f, having value: %f  ", blnc.Weight, blnc.Value)
 		} else if blnc.Weight == 0 && blnc.Value != -0.01 {

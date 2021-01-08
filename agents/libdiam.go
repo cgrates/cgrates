@@ -490,7 +490,7 @@ func disectDiamListen(addrs string) (ipAddrs []net.IP) {
 	if ipPort[0] == "" {
 		return
 	}
-	ips := strings.Split(ipPort[0], utils.HDR_VAL_SEP)
+	ips := strings.Split(ipPort[0], utils.HDRValSep)
 	ipAddrs = make([]net.IP, len(ips))
 	for i, ip := range ips {
 		ipAddrs[i] = net.ParseIP(ip)

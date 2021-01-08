@@ -1354,7 +1354,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
-				Type:  utils.META_CONSTANT,
+				Type:  utils.MetaConstant,
 				Value: config.NewRSRParsersMustCompile("ConstVal", utils.InfieldSep),
 			},
 		},
@@ -1511,17 +1511,17 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
-				Type:  utils.META_COMPOSED,
+				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.Field1", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
-				Type:  utils.META_COMPOSED,
+				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("_", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
-				Type:  utils.META_COMPOSED,
+				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.TheField", utils.InfieldSep),
 			},
 		},
@@ -1677,7 +1677,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
-				Type:  utils.META_USAGE_DIFFERENCE,
+				Type:  utils.MetaUsageDifference,
 				Value: config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.UnixTimeStamp2", utils.InfieldSep),
 			},
 		},
@@ -1847,7 +1847,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
-				Type:  utils.META_CONSTANT,
+				Type:  utils.MetaConstant,
 				Value: config.NewRSRParsersMustCompile("ConstVal", utils.InfieldSep),
 			},
 		},
@@ -1987,7 +1987,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
-				Type:  utils.META_CONSTANT,
+				Type:  utils.MetaConstant,
 				Value: config.NewRSRParsersMustCompile("Val2", utils.InfieldSep),
 			},
 		},
@@ -2113,12 +2113,12 @@ func TestProcessAttributeComposed(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
-				Type:  utils.META_COMPOSED,
+				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
-				Type:  utils.META_COMPOSED,
+				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField2", utils.InfieldSep),
 			},
 		},
@@ -2183,7 +2183,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
-				Type:  utils.META_USAGE_DIFFERENCE,
+				Type:  utils.MetaUsageDifference,
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField;~*req.RandomField2", utils.InfieldSep),
 			},
 		},

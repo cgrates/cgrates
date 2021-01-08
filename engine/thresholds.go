@@ -432,7 +432,7 @@ func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (er
 	if tenant == utils.EmptyString {
 		tenant = tS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ThresholdPrefix + tenant + utils.CONCATENATED_KEY_SEP
+	prfx := utils.ThresholdPrefix + tenant + utils.ConcatenatedKeySep
 	keys, err := tS.dm.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err

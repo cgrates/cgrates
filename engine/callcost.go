@@ -104,7 +104,7 @@ func (cc *CallCost) IsPaid() bool {
 }
 
 func (cc *CallCost) ToDataCost() (*DataCost, error) {
-	if cc.ToR == utils.VOICE {
+	if cc.ToR == utils.MetaVoice {
 		return nil, errors.New("Not a data call!")
 	}
 	dc := &DataCost{

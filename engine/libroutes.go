@@ -179,7 +179,7 @@ func (sSpls *SortedRoutes) SortLoadDistribution() {
 // Digest returns list of routeIDs + parameters for easier outside access
 // format route1:route1params,route2:route2params
 func (sSpls *SortedRoutes) Digest() string {
-	return strings.Join(sSpls.RoutesWithParams(), utils.FIELDS_SEP)
+	return strings.Join(sSpls.RoutesWithParams(), utils.FieldsSep)
 }
 
 func (ss *SortedRoute) AsNavigableMap() (nm utils.NavigableMap2) {

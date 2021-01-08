@@ -150,7 +150,7 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	}
 	maxComputed := make(map[string]interface{})
 	for key, item := range ralsCfg.MaxComputedUsage {
-		if key == utils.MetaAny || key == utils.VOICE {
+		if key == utils.MetaAny || key == utils.MetaVoice {
 			maxComputed[key] = item.String()
 		} else {
 			maxComputed[key] = strconv.Itoa(int(item))

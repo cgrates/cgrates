@@ -403,11 +403,11 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RpSubjectPrefixMatching)
 	}
 	eMaxCU := map[string]time.Duration{
-		utils.MetaAny: 189 * time.Hour,
-		utils.VOICE:   72 * time.Hour,
-		utils.DATA:    107374182400,
-		utils.SMS:     10000,
-		utils.MMS:     10000,
+		utils.MetaAny:   189 * time.Hour,
+		utils.MetaVoice: 72 * time.Hour,
+		utils.MetaData:  107374182400,
+		utils.MetaSMS:   10000,
+		utils.MetaMMS:   10000,
 	}
 	if !reflect.DeepEqual(eMaxCU, cgrCfg.RalsCfg().MaxComputedUsage) {
 		t.Errorf("Expecting: %+v , received: %+v", eMaxCU, cgrCfg.RalsCfg().MaxComputedUsage)
@@ -416,8 +416,8 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 		t.Errorf("Expecting: 1000000 , received: %+v", cgrCfg.RalsCfg().MaxIncrements)
 	}
 	eBalRatingSbj := map[string]string{
-		utils.MetaAny: "*zero1ns",
-		utils.VOICE:   "*zero1s",
+		utils.MetaAny:   "*zero1ns",
+		utils.MetaVoice: "*zero1s",
 	}
 	if !reflect.DeepEqual(eBalRatingSbj, cgrCfg.RalsCfg().BalanceRatingSubject) {
 		t.Errorf("Expecting: %+v , received: %+v", eBalRatingSbj, cgrCfg.RalsCfg().BalanceRatingSubject)

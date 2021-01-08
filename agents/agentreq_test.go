@@ -46,7 +46,7 @@ func TestAgReqSetFields(t *testing.T) {
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathItems: utils.PathItems{{Field: utils.CGRID}}}, utils.NewNMData(
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
@@ -274,24 +274,24 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error("Expecting 1009, received: ", (*nm)[0].Interface())
 	}
 
-	//META_COMPOSED
+	//MetaComposed
 	input = []*config.FCTemplate{
 		{
 			Path:  fmt.Sprintf("%s.AccountID", utils.MetaVars),
 			Tag:   fmt.Sprintf("%s.AccountID", utils.MetaVars),
-			Type:  utils.META_COMPOSED,
+			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Tenant", utils.InfieldSep),
 		},
 		{
 			Path:  fmt.Sprintf("%s.AccountID", utils.MetaVars),
 			Tag:   fmt.Sprintf("%s.AccountID", utils.MetaVars),
-			Type:  utils.META_COMPOSED,
+			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile(":", utils.InfieldSep),
 		},
 		{
 			Path:  fmt.Sprintf("%s.AccountID", utils.MetaVars),
 			Tag:   fmt.Sprintf("%s.AccountID", utils.MetaVars),
-			Type:  utils.META_COMPOSED,
+			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", utils.InfieldSep),
 		},
 	}
@@ -311,12 +311,12 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error("Expecting 'cgrates.org:1009', received: ", (*nm)[0].Interface())
 	}
 
-	// META_CONSTANT
+	// MetaConstant
 	input = []*config.FCTemplate{
 		{
 			Path:  fmt.Sprintf("%s.Account", utils.MetaVars),
 			Tag:   fmt.Sprintf("%s.Account", utils.MetaVars),
-			Type:  utils.META_CONSTANT,
+			Type:  utils.MetaConstant,
 			Value: config.NewRSRParsersMustCompile("2020", utils.InfieldSep),
 		},
 	}
@@ -339,7 +339,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 			Path:    fmt.Sprintf("%s.AccountID", utils.MetaVars),
 			Tag:     fmt.Sprintf("%s.AccountID", utils.MetaVars),
 			Filters: []string{utils.MetaString + ":~" + utils.MetaVars + ".Account:1003"},
-			Type:    utils.META_CONSTANT,
+			Type:    utils.MetaConstant,
 			Value:   config.NewRSRParsersMustCompile("2021", utils.InfieldSep),
 		},
 	}
@@ -361,7 +361,7 @@ func TestAgentRequestSetFields(t *testing.T) {
 			Path:    fmt.Sprintf("%s.Account", utils.MetaVars),
 			Tag:     fmt.Sprintf("%s.Account", utils.MetaVars),
 			Filters: []string{"Not really a filter"},
-			Type:    utils.META_CONSTANT,
+			Type:    utils.MetaConstant,
 			Value:   config.NewRSRParsersMustCompile("2021", utils.InfieldSep),
 		},
 	}
@@ -545,15 +545,15 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "MandatoryFalse",
-			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Path: "MandatoryFalse", Type: utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", utils.InfieldSep),
 			Mandatory: false},
 		{Tag: "MandatoryTrue",
-			Path: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Path: "MandatoryTrue", Type: utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", utils.InfieldSep),
 			Mandatory: true},
 		{Tag: "Session-Id", Filters: []string{},
-			Path: "Session-Id", Type: utils.META_COMPOSED,
+			Path: "Session-Id", Type: utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep),
 			Mandatory: true},
 	}
@@ -597,11 +597,11 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "MandatoryFalse",
-			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Path: "MandatoryFalse", Type: utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", utils.InfieldSep),
 			Mandatory: false},
 		{Tag: "MandatoryTrue",
-			Path: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Path: "MandatoryTrue", Type: utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", utils.InfieldSep),
 			Mandatory: true},
 	}
@@ -640,11 +640,11 @@ Host: api.cgrates.org
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "MandatoryFalse",
-			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Path: "MandatoryFalse", Type: utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", utils.InfieldSep),
 			Mandatory: false},
 		{Tag: "MandatoryTrue",
-			Path: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Path: "MandatoryTrue", Type: utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", utils.InfieldSep),
 			Mandatory: true},
 	}
@@ -712,11 +712,11 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "MandatoryFalse",
-			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Path: "MandatoryFalse", Type: utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", utils.InfieldSep),
 			Mandatory: false},
 		{Tag: "MandatoryTrue",
-			Path: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Path: "MandatoryTrue", Type: utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", utils.InfieldSep),
 			Mandatory: true},
 	}
@@ -811,7 +811,7 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 
@@ -851,7 +851,7 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 
@@ -894,7 +894,7 @@ func TestAgReqSetField2(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
@@ -905,13 +905,13 @@ func TestAgReqSetField2(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
 		{Tag: "Destination",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
 		{Tag: "Usage",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Usage, Type: utils.MetaVariable,
@@ -957,7 +957,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest = utils.NewOrderedNavigableMap()
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: utils.PathItems{{Field: utils.Usage}}}, &utils.NMSlice{&config.NMItem{Data: 3 * time.Minute}})
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, &utils.NMSlice{&config.NMItem{Data: utils.VOICE}})
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, &utils.NMSlice{&config.NMItem{Data: utils.MetaVoice}})
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 
@@ -971,7 +971,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	}
 
 	path = []string{utils.MetaCgreq, utils.ToR}
-	expVal = utils.VOICE
+	expVal = utils.MetaVoice
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expVal) {
@@ -1247,7 +1247,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Usage", Filters: []string{},
-			Path: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Path: "Usage", Type: utils.MetaUsageDifference,
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep),
 			Mandatory: true},
 	}
@@ -1258,7 +1258,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		{Tag: "Usage", Filters: []string{},
-			Path: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Path: "Usage", Type: utils.MetaUsageDifference,
 			Value:     config.NewRSRParsersMustCompile("1560325161;~*req.Session-Id", utils.InfieldSep),
 			Mandatory: true},
 	}
@@ -1269,7 +1269,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		{Tag: "Usage", Filters: []string{},
-			Path: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Path: "Usage", Type: utils.MetaUsageDifference,
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id;1560325161", utils.InfieldSep),
 			Mandatory: true},
 	}
@@ -1280,7 +1280,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		{Tag: "Usage", Filters: []string{},
-			Path: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Path: "Usage", Type: utils.MetaUsageDifference,
 			Value:     config.NewRSRParsersMustCompile("1560325161;1560325151", utils.InfieldSep),
 			Mandatory: true},
 	}
@@ -1540,7 +1540,7 @@ func TestAgReqOverwrite(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
@@ -1551,19 +1551,19 @@ func TestAgReqOverwrite(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile(":", utils.InfieldSep)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
 		{Tag: "Account",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("OverwrittenAccount", utils.InfieldSep)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("WithComposed", utils.InfieldSep)},
 	}
 	for _, v := range tplFlds {
@@ -1592,7 +1592,7 @@ func TestAgReqGroupType(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
@@ -1728,7 +1728,7 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathItems: utils.PathItems{{Field: utils.CGRID}}}, utils.NewNMData(
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
@@ -2031,7 +2031,7 @@ func TestAgReqDynamicPath(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
@@ -2048,13 +2048,13 @@ func TestAgReqDynamicPath(t *testing.T) {
 	}
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
 		{Tag: "Account",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
 		{Tag: "Destination",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Destination, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", utils.InfieldSep)},
 		{Tag: "Usage",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.Usage, Type: utils.MetaVariable,
@@ -2105,7 +2105,7 @@ func TestAgReqRoundingDecimals(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.MetaVoice))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
@@ -2117,7 +2117,7 @@ func TestAgReqRoundingDecimals(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Cost",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Cost, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Cost, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Cost{*round:3}", utils.InfieldSep)},
 	}
 	for _, v := range tplFlds {
@@ -2157,13 +2157,13 @@ func BenchmarkAgReqSetField(b *testing.B) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.META_COMPOSED,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.Tenant, Type: utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
 		{Tag: "Account",
 			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField + "[0].ID", Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", utils.InfieldSep)},
 		{Tag: "Account2",
-			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField + "[1].ID", Type: utils.META_CONSTANT,
+			Path: utils.MetaCgrep + utils.NestingSep + utils.AccountField + "[1].ID", Type: utils.MetaConstant,
 			Value: config.NewRSRParsersMustCompile("1003", utils.InfieldSep)},
 	}
 	for _, v := range tplFlds {
@@ -2184,7 +2184,7 @@ func BenchmarkAgReqSetField(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 		// populate request, emulating the way will be done in HTTPAgent
-		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.VOICE))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: utils.PathItems{{Field: utils.ToR}}}, utils.NewNMData(utils.MetaVoice))
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: utils.PathItems{{Field: utils.AccountField}}}, utils.NewNMData("1001"))
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: utils.PathItems{{Field: utils.Destination}}}, utils.NewNMData("1002"))
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(

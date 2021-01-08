@@ -135,7 +135,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       120000000000,
 		Balance: map[string]interface{}{
 			utils.ID:     "BALANCE1",
@@ -151,7 +151,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 	expectedVoice := 120000000000.0
 	if err := pecdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
 	}
 	argsEv := &engine.ArgV1ProcessEvent{
@@ -334,7 +334,7 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "test4_processEvent",
 					utils.OriginHost:   "OriginHost4",
 					utils.RequestType:  utils.MetaPseudoPrepaid,
@@ -450,9 +450,9 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	if err := pecdrsRpc.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "ACT_LOG",
 		Actions: []*utils.TPAction{
-			{Identifier: utils.LOG},
+			{Identifier: utils.MetaLog},
 			{
-				Identifier: utils.TOPUP_RESET, BalanceType: utils.VOICE,
+				Identifier: utils.TOPUP_RESET, BalanceType: utils.MetaVoice,
 				Units: "10", ExpiryTime: "*unlimited",
 				DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
 		},
@@ -493,7 +493,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1005",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       1,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
@@ -553,7 +553,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	expectedVoice := 10.0
 	if err := pecdrsRpc.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
 	}
 }

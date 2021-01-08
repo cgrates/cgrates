@@ -120,7 +120,7 @@ func testSes2ItInitSession(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1001",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       float64(time.Hour),
 		Balance: map[string]interface{}{
 			utils.ID: "TestDynamicDebitBalance",
@@ -140,9 +140,9 @@ func testSes2ItInitSession(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
+					utils.EventName:    "TEST_EVENT",
 					utils.OriginID:     utils.UUIDSha1Prefix(),
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.Category:     "call",
 					utils.Tenant:       "cgrates.org",
 					utils.AccountField: "1001",
@@ -197,7 +197,7 @@ func testSes2StirAuthenticate(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testSes2StirAuthorize",
 				Event: map[string]interface{}{
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSes2StirAuthorize",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -240,7 +240,7 @@ func testSes2StirInit(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testSes2StirInit",
 				Event: map[string]interface{}{
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSes2StirInit",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",

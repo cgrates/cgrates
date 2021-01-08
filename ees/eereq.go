@@ -48,7 +48,7 @@ func NewEventExporterRequest(req utils.DataProvider, dc, opts utils.MapStorage,
 	}
 	if tntTpl != nil {
 		if tntIf, err := eeR.ParseField(
-			&config.FCTemplate{Type: utils.META_COMPOSED,
+			&config.FCTemplate{Type: utils.MetaComposed,
 				Value: tntTpl}); err == nil && tntIf.(string) != "" {
 			eeR.tnt = tntIf.(string)
 		}
@@ -170,7 +170,7 @@ func (eeR *EventExporterRequest) SetFields(tplFlds []*config.FCTemplate) (err er
 		}
 		nMItm := &config.NMItem{Data: out, Path: itmPath, Config: tplFld}
 		switch tplFld.Type {
-		case utils.META_COMPOSED:
+		case utils.MetaComposed:
 			err = utils.ComposeNavMapVal(eeR, fullPath, nMItm)
 		case utils.MetaGroup: // in case of *group type simply append to valSet
 			err = utils.AppendNavMapVal(eeR, fullPath, nMItm)
@@ -224,23 +224,23 @@ func (eeR *EventExporterRequest) ParseField(
 		return utils.EmptyString, fmt.Errorf("unsupported type: <%s>", cfgFld.Type)
 	case utils.MetaNone:
 		return
-	case utils.META_FILLER:
+	case utils.MetaFiller:
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		cfgFld.Padding = utils.MetaRight
 		isString = true
-	case utils.META_CONSTANT:
+	case utils.MetaConstant:
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		isString = true
 	case utils.MetaRemoteHost:
 		out = eeR.RemoteHost().String()
 		isString = true
-	case utils.MetaVariable, utils.META_COMPOSED, utils.MetaGroup:
+	case utils.MetaVariable, utils.MetaComposed, utils.MetaGroup:
 		out, err = cfgFld.Value.ParseDataProvider(eeR)
 		isString = true
-	case utils.META_USAGE_DIFFERENCE:
+	case utils.MetaUsageDifference:
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
-				utils.ToJSON(cfgFld.Value), utils.META_USAGE_DIFFERENCE)
+				utils.ToJSON(cfgFld.Value), utils.MetaUsageDifference)
 		}
 		var strVal1 string
 		if strVal1, err = cfgFld.Value[0].ParseDataProvider(eeR); err != nil {

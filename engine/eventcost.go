@@ -336,7 +336,7 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 						AccountID: ec.Accounting[cIcrm.AccountingID].AccountID,
 					}
 					blncSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(ec.Accounting[cIcrm.AccountingID].BalanceUUID)
-					if blncSmry.Type == utils.MONETARY {
+					if blncSmry.Type == utils.MetaMonetary {
 						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: blncSmry.UUID}
 					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
 						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{UUID: blncSmry.UUID}
@@ -349,7 +349,7 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 					// extra charges, ie: non-free *voice
 					extraSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(
 						ec.Accounting[ec.Accounting[cIcrm.AccountingID].ExtraChargeID].BalanceUUID)
-					if extraSmry.Type == utils.MONETARY {
+					if extraSmry.Type == utils.MetaMonetary {
 						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: extraSmry.UUID}
 					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
 						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{UUID: extraSmry.UUID}
@@ -365,7 +365,7 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 // AsCallCost converts an EventCost into a CallCost
 func (ec *EventCost) AsCallCost(tor string) *CallCost {
 	cc := &CallCost{
-		ToR:            utils.FirstNonEmpty(tor, utils.VOICE),
+		ToR:            utils.FirstNonEmpty(tor, utils.MetaVoice),
 		Cost:           ec.GetCost(),
 		RatedUsage:     float64(ec.GetUsage().Nanoseconds()),
 		AccountSummary: ec.AccountSummary,
@@ -437,7 +437,7 @@ func (ec *EventCost) newIntervalFromCharge(cInc *ChargingIncrement) (incr *Incre
 			}
 		}
 	}
-	if utils.SliceHasMember([]string{utils.DATA, utils.VOICE}, balanceType) && cBC.ExtraChargeID == "" {
+	if utils.SliceHasMember([]string{utils.MetaData, utils.MetaVoice}, balanceType) && cBC.ExtraChargeID == "" {
 		cBC.ExtraChargeID = utils.MetaNone // mark the balance to be exported as Unit type
 	}
 	if cBC.ExtraChargeID != "" { // have both monetary and data

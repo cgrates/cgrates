@@ -80,7 +80,7 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1005",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       5 * float64(time.Second), //value -> 20ms for future
 		Balance: map[string]interface{}{
 			utils.ID:            "TestDynamicDebitBalance",
@@ -101,7 +101,7 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 	//get balance
 	if err := smgRplcMstrRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(5*time.Second) {
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != float64(5*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",
 			float64(5*time.Second), rply)
 	}
@@ -179,10 +179,10 @@ func testSessionSRplInitiate(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionSRplInitiate",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
+					utils.EventName:    "TEST_EVENT",
 					utils.Tenant:       "cgrates.org",
 					utils.OriginID:     "123451",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1005",
 					utils.Subject:      "1005",
@@ -284,7 +284,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	if err := smgRplcMstrRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		// a tolerance of +/- 5ms is acceptable
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply < float64(5*time.Second-25*time.Millisecond) || rply > float64(5*time.Second-15*time.Millisecond) {
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply < float64(5*time.Second-25*time.Millisecond) || rply > float64(5*time.Second-15*time.Millisecond) {
 		t.Errorf("Expecting: ~%v, received: %v", float64(5*time.Second-20*time.Millisecond), rply)
 	}
 }
@@ -345,7 +345,7 @@ func testSessionSRplCheckAccount(t *testing.T) {
 	if err := smgRplcSlvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		// a tolerance of +/- 5ms is acceptable
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply < float64(5*time.Second-45*time.Millisecond) || rply > float64(5*time.Second-35*time.Millisecond) {
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply < float64(5*time.Second-45*time.Millisecond) || rply > float64(5*time.Second-35*time.Millisecond) {
 		t.Errorf("Expecting: ~%v, received: %v", float64(5*time.Second-40*time.Millisecond), rply)
 	}
 }
@@ -358,10 +358,10 @@ func testSessionSRplTerminate(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionSRplTerminate",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
+					utils.EventName:    "TEST_EVENT",
 					utils.Tenant:       "cgrates.org",
 					utils.OriginID:     "123451",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1005",
 					utils.Subject:      "1005",
@@ -402,7 +402,7 @@ func testSessionSRplTerminate(t *testing.T) {
 	if err := smgRplcSlvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		// a tolerance of +/- 5ms is acceptable
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(3*time.Second) {
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != float64(3*time.Second) {
 		t.Errorf("Expecting: ~%v, received: %v", 3*time.Second, rply)
 	}
 }

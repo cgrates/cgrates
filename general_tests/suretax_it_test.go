@@ -129,7 +129,7 @@ func testSTICacheStats(t *testing.T) {
 
 // Test CDR from external sources
 func testSTIProcessExternalCdr(t *testing.T) {
-	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
+	cdr := &engine.ExternalCDR{ToR: utils.MetaVoice,
 		OriginID: "teststicdr1", OriginHost: "192.168.1.1", Source: "STI_TEST", RequestType: utils.MetaRated,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "+14082342500", Destination: "+16268412300", Supplier: "SUPPL1",
 		SetupTime: "2015-10-18T13:00:00Z", AnswerTime: "2015-10-18T13:00:00Z",
@@ -156,7 +156,7 @@ func testSTIGetCdrs(t *testing.T) {
 			t.Errorf("Unexpected Cost for CDR: %+v", cdrs[0])
 		}
 	}
-	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_SURETAX}, Accounts: []string{"1001"}}
+	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaSureTax}, Accounts: []string{"1001"}}
 	if err := stiRpc.Call(utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

@@ -222,7 +222,7 @@ type LoadWriter interface {
 // NewMarshaler returns the marshaler type selected by mrshlerStr
 func NewMarshaler(mrshlerStr string) (ms Marshaler, err error) {
 	switch mrshlerStr {
-	case utils.MSGPACK:
+	case utils.MsgPack:
 		ms = NewCodecMsgpackMarshaler()
 	case utils.JSON:
 		ms = new(JSONMarshaler)

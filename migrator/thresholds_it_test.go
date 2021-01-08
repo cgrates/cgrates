@@ -194,7 +194,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 			ID:             utils.StringPointer("TESTZ"),
 			Timings:        []*engine.RITiming{},
 			ExpirationDate: utils.TimePointer(tim),
-			Type:           utils.StringPointer(utils.MONETARY),
+			Type:           utils.StringPointer(utils.MetaMonetary),
 		},
 		Weight:            0,
 		ActionsID:         "Action1",

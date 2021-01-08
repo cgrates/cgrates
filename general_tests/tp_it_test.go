@@ -151,7 +151,7 @@ func testTpBalanceCounter(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
-	} else if acnt.UnitCounters[utils.MONETARY][1].Counters[0].Value != 20.0 {
+	} else if acnt.UnitCounters[utils.MetaMonetary][1].Counters[0].Value != 20.0 {
 		t.Errorf("Calling APIerSv2.GetBalance received: %s", utils.ToIJSON(acnt))
 	}
 }
@@ -212,7 +212,7 @@ func testTpZeroCost(t *testing.T) {
 		// if this happens try to run this test manualy
 		return
 	}
-	balanceValueBefore := acnt.BalanceMap[utils.MONETARY][0].Value
+	balanceValueBefore := acnt.BalanceMap[utils.MetaMonetary][0].Value
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
 	cd := &engine.CallDescriptorWithOpts{
 		CallDescriptor: &engine.CallDescriptor{
@@ -234,7 +234,7 @@ func testTpZeroCost(t *testing.T) {
 	}
 	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
-	} else if acnt.BalanceMap[utils.MONETARY][0].Value != balanceValueBefore {
+	} else if acnt.BalanceMap[utils.MetaMonetary][0].Value != balanceValueBefore {
 		t.Errorf("Calling APIerSv2.GetAccount received: %s", utils.ToIJSON(acnt))
 	}
 }
@@ -263,7 +263,7 @@ func testTpZeroNegativeCost(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1013"}
 	if err := tpRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
-	} else if acnt.BalanceMap[utils.VOICE][0].Value != 100.0 {
+	} else if acnt.BalanceMap[utils.MetaVoice][0].Value != 100.0 {
 		t.Errorf("Calling APIerSv2.GetAccount received: %s", utils.ToIJSON(acnt))
 	}
 }
@@ -342,8 +342,8 @@ func testTpCreateExecuteActionMatch(t *testing.T) {
 		t.Error("Got error on APIerSv2.GetAccount: ", err.Error())
 	}
 	if len(acnt.BalanceMap) != 1 ||
-		len(acnt.BalanceMap[utils.MONETARY]) != 1 ||
-		acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 21 {
+		len(acnt.BalanceMap[utils.MetaMonetary]) != 1 ||
+		acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != 21 {
 		t.Error("error matching previous created balance: ", utils.ToIJSON(acnt.BalanceMap))
 	}
 }

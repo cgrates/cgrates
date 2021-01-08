@@ -137,7 +137,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataDataCost",
-		BalanceType: utils.DATA,
+		BalanceType: utils.MetaData,
 		Value:       356000000,
 		Balance: map[string]interface{}{
 			utils.Categories:    "data",
@@ -158,9 +158,9 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataCost"},
 		&acc); err != nil {
 		t.Error(err)
-	} else if _, has := acc.BalanceMap[utils.DATA]; !has {
-		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.DATA]))
-	} else if rply := acc.BalanceMap[utils.DATA].GetTotalValue(); rply != expected {
+	} else if _, has := acc.BalanceMap[utils.MetaData]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.MetaData]))
+	} else if rply := acc.BalanceMap[utils.MetaData].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
@@ -170,7 +170,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 		Account:     "testV1DataDataCost",
 		Destination: "*any",
 		Usage:       "256000000",
-		ToR:         utils.DATA,
+		ToR:         utils.MetaData,
 		Category:    "data",
 		SetupTime:   time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
 		AnswerTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
@@ -189,9 +189,9 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataCost"},
 		&acc); err != nil {
 		t.Error(err)
-	} else if _, has := acc.BalanceMap[utils.DATA]; !has {
-		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.DATA]))
-	} else if rply := acc.BalanceMap[utils.DATA].GetTotalValue(); rply != expected {
+	} else if _, has := acc.BalanceMap[utils.MetaData]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.MetaData]))
+	} else if rply := acc.BalanceMap[utils.MetaData].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
@@ -216,7 +216,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataDebitBalance",
-		BalanceType: utils.DATA,
+		BalanceType: utils.MetaData,
 		Value:       356000000,
 		Balance: map[string]interface{}{
 			utils.Categories:    "data",
@@ -237,9 +237,9 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance"},
 		&acc); err != nil {
 		t.Error(err)
-	} else if _, has := acc.BalanceMap[utils.DATA]; !has {
-		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.DATA]))
-	} else if rply := acc.BalanceMap[utils.DATA].GetTotalValue(); rply != expected {
+	} else if _, has := acc.BalanceMap[utils.MetaData]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.MetaData]))
+	} else if rply := acc.BalanceMap[utils.MetaData].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
@@ -247,7 +247,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 	if err := dataRpc.Call(utils.APIerSv1DebitBalance, &v1.AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataDebitBalance",
-		BalanceType: utils.DATA,
+		BalanceType: utils.MetaData,
 		Value:       256000000,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -263,9 +263,9 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance"},
 		&acc); err != nil {
 		t.Error(err)
-	} else if _, has := acc.BalanceMap[utils.DATA]; !has {
-		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.DATA]))
-	} else if rply := acc.BalanceMap[utils.DATA].GetTotalValue(); rply != expected {
+	} else if _, has := acc.BalanceMap[utils.MetaData]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.MetaData]))
+	} else if rply := acc.BalanceMap[utils.MetaData].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
@@ -275,7 +275,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataDataDebitUsage1G0",
-		BalanceType: utils.DATA,
+		BalanceType: utils.MetaData,
 		Value:       1100000000,
 		Balance: map[string]interface{}{
 			utils.Categories:    "data",
@@ -296,9 +296,9 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataDebitUsage1G0"},
 		&acc); err != nil {
 		t.Error(err)
-	} else if _, has := acc.BalanceMap[utils.DATA]; !has {
-		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.DATA]))
-	} else if rply := acc.BalanceMap[utils.DATA].GetTotalValue(); rply != expected {
+	} else if _, has := acc.BalanceMap[utils.MetaData]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.MetaData]))
+	} else if rply := acc.BalanceMap[utils.MetaData].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
@@ -308,7 +308,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 		Account:     "testV1DataDataDebitUsage1G0",
 		Destination: "*any",
 		Usage:       "1000000000",
-		ToR:         utils.DATA,
+		ToR:         utils.MetaData,
 		Category:    "data",
 		SetupTime:   time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
 		AnswerTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
@@ -327,9 +327,9 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataDebitUsage1G0"},
 		&acc); err != nil {
 		t.Error(err)
-	} else if _, has := acc.BalanceMap[utils.DATA]; !has {
-		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.DATA]))
-	} else if rply := acc.BalanceMap[utils.DATA].GetTotalValue(); rply != expected {
+	} else if _, has := acc.BalanceMap[utils.MetaData]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.MetaData]))
+	} else if rply := acc.BalanceMap[utils.MetaData].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
@@ -354,7 +354,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataDebitBalance1G0",
-		BalanceType: utils.DATA,
+		BalanceType: utils.MetaData,
 		Value:       1100000000,
 		Balance: map[string]interface{}{
 			utils.Categories:    "data",
@@ -375,9 +375,9 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance1G0"},
 		&acc); err != nil {
 		t.Error(err)
-	} else if _, has := acc.BalanceMap[utils.DATA]; !has {
-		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.DATA]))
-	} else if rply := acc.BalanceMap[utils.DATA].GetTotalValue(); rply != expected {
+	} else if _, has := acc.BalanceMap[utils.MetaData]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.MetaData]))
+	} else if rply := acc.BalanceMap[utils.MetaData].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
@@ -385,7 +385,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 	if err := dataRpc.Call(utils.APIerSv1DebitBalance, &v1.AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataDebitBalance1G0",
-		BalanceType: utils.DATA,
+		BalanceType: utils.MetaData,
 		Value:       1000000000,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -401,9 +401,9 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance1G0"},
 		&acc); err != nil {
 		t.Error(err)
-	} else if _, has := acc.BalanceMap[utils.DATA]; !has {
-		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.DATA]))
-	} else if rply := acc.BalanceMap[utils.DATA].GetTotalValue(); rply != expected {
+	} else if _, has := acc.BalanceMap[utils.MetaData]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.MetaData]))
+	} else if rply := acc.BalanceMap[utils.MetaData].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
@@ -413,7 +413,7 @@ func testV1DataInitSession(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataInitSession",
-		BalanceType: utils.DATA,
+		BalanceType: utils.MetaData,
 		Value:       1100000000,
 		Balance: map[string]interface{}{
 			utils.Categories:    "data",
@@ -434,9 +434,9 @@ func testV1DataInitSession(t *testing.T) {
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataInitSession"},
 		&acc); err != nil {
 		t.Error(err)
-	} else if _, has := acc.BalanceMap[utils.DATA]; !has {
-		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.DATA]))
-	} else if rply := acc.BalanceMap[utils.DATA].GetTotalValue(); rply != expected {
+	} else if _, has := acc.BalanceMap[utils.MetaData]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.MetaData]))
+	} else if rply := acc.BalanceMap[utils.MetaData].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
@@ -456,7 +456,7 @@ func testV1DataInitSession(t *testing.T) {
 				ID:     "testV1DataInitSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.DATA,
+					utils.ToR:          utils.MetaData,
 					utils.Category:     "data",
 					utils.OriginID:     "781512335",
 					utils.RequestType:  utils.MetaPrepaid,
@@ -501,7 +501,7 @@ func testV1DataUpdateWith1Mo(t *testing.T) {
 				ID:     "testV1DataUpdateWith1Mo",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.DATA,
+					utils.ToR:          utils.MetaData,
 					utils.Category:     "data",
 					"InitialOriginID":  "781512335",
 					"LastUsed":         0,
@@ -547,7 +547,7 @@ func testV1DataUpdateWith1Go(t *testing.T) {
 				ID:     "testV1DataUpdateWith1Go",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.DATA,
+					utils.ToR:          utils.MetaData,
 					utils.Category:     "data",
 					"InitialOriginID":  "781512335",
 					"LastUsed":         946405,

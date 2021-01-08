@@ -578,7 +578,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if err = dm.CacheDataFromDB(utils.ACTION_PLAN_PREFIX,
+	if err = dm.CacheDataFromDB(utils.ActionPlanPrefix,
 		[]string{ap1.Id, ap2.Id}, true); err != nil {
 		t.Error(err)
 	}
@@ -634,9 +634,9 @@ func TestActionPlansRemoveMember(t *testing.T) {
 func TestActionTriggerMatchNil(t *testing.T) {
 	at := &ActionTrigger{
 		Balance: &BalanceFilter{
-			Type: utils.StringPointer(utils.MONETARY),
+			Type: utils.StringPointer(utils.MetaMonetary),
 		},
-		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdType:  utils.TriggerMaxBalance,
 		ThresholdValue: 2,
 	}
 	var a *Action
@@ -648,9 +648,9 @@ func TestActionTriggerMatchNil(t *testing.T) {
 func TestActionTriggerMatchAllBlank(t *testing.T) {
 	at := &ActionTrigger{
 		Balance: &BalanceFilter{
-			Type: utils.StringPointer(utils.MONETARY),
+			Type: utils.StringPointer(utils.MetaMonetary),
 		},
-		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdType:  utils.TriggerMaxBalance,
 		ThresholdValue: 2,
 	}
 	a := &Action{}
@@ -662,12 +662,12 @@ func TestActionTriggerMatchAllBlank(t *testing.T) {
 func TestActionTriggerMatchMinuteBucketBlank(t *testing.T) {
 	at := &ActionTrigger{
 		Balance: &BalanceFilter{
-			Type: utils.StringPointer(utils.MONETARY),
+			Type: utils.StringPointer(utils.MetaMonetary),
 		},
-		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdType:  utils.TriggerMaxBalance,
 		ThresholdValue: 2,
 	}
-	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 		ExtraParameters: `{"BalanceDirections":"*out"}`}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
@@ -677,13 +677,13 @@ func TestActionTriggerMatchMinuteBucketBlank(t *testing.T) {
 func TestActionTriggerMatchMinuteBucketFull(t *testing.T) {
 	at := &ActionTrigger{
 		Balance: &BalanceFilter{
-			Type: utils.StringPointer(utils.MONETARY),
+			Type: utils.StringPointer(utils.MetaMonetary),
 		},
-		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdType:  utils.TriggerMaxBalance,
 		ThresholdValue: 2,
 	}
 	a := &Action{ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`,
-		utils.TRIGGER_MAX_BALANCE, 2)}
+		utils.TriggerMaxBalance, 2)}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -692,14 +692,14 @@ func TestActionTriggerMatchMinuteBucketFull(t *testing.T) {
 func TestActionTriggerMatchAllFull(t *testing.T) {
 	at := &ActionTrigger{
 		Balance: &BalanceFilter{
-			Type: utils.StringPointer(utils.MONETARY),
+			Type: utils.StringPointer(utils.MetaMonetary),
 		},
-		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdType:  utils.TriggerMaxBalance,
 		ThresholdValue: 2,
 	}
-	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 		ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`,
-			utils.TRIGGER_MAX_BALANCE, 2)}
+			utils.TriggerMaxBalance, 2)}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -708,14 +708,14 @@ func TestActionTriggerMatchAllFull(t *testing.T) {
 func TestActionTriggerMatchSomeFalse(t *testing.T) {
 	at := &ActionTrigger{
 		Balance: &BalanceFilter{
-			Type: utils.StringPointer(utils.MONETARY),
+			Type: utils.StringPointer(utils.MetaMonetary),
 		},
-		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdType:  utils.TriggerMaxBalance,
 		ThresholdValue: 2,
 	}
-	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 		ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%s"}`,
-			utils.TRIGGER_MAX_BALANCE_COUNTER)}
+			utils.TriggerMaxBalanceCounter)}
 	if at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -724,13 +724,13 @@ func TestActionTriggerMatchSomeFalse(t *testing.T) {
 func TestActionTriggerMatcBalanceFalse(t *testing.T) {
 	at := &ActionTrigger{
 		Balance: &BalanceFilter{
-			Type: utils.StringPointer(utils.MONETARY),
+			Type: utils.StringPointer(utils.MetaMonetary),
 		},
-		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdType:  utils.TriggerMaxBalance,
 		ThresholdValue: 2,
 	}
-	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
-		ExtraParameters: fmt.Sprintf(`{"GroupID":"%s", "ThresholdType":"%s"}`, "TEST", utils.TRIGGER_MAX_BALANCE)}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
+		ExtraParameters: fmt.Sprintf(`{"GroupID":"%s", "ThresholdType":"%s"}`, "TEST", utils.TriggerMaxBalance)}
 	if at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -739,14 +739,14 @@ func TestActionTriggerMatcBalanceFalse(t *testing.T) {
 func TestActionTriggerMatcAllFalse(t *testing.T) {
 	at := &ActionTrigger{
 		Balance: &BalanceFilter{
-			Type: utils.StringPointer(utils.MONETARY),
+			Type: utils.StringPointer(utils.MetaMonetary),
 		},
-		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdType:  utils.TriggerMaxBalance,
 		ThresholdValue: 2,
 	}
-	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 		ExtraParameters: fmt.Sprintf(`{"UniqueID":"ZIP", "GroupID":"%s", "ThresholdType":"%s"}`, "TEST",
-			utils.TRIGGER_MAX_BALANCE)}
+			utils.TriggerMaxBalance)}
 	if at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -758,7 +758,7 @@ func TestActionTriggerMatchAll(t *testing.T) {
 		UniqueID:      "ZIP",
 		ThresholdType: "TT",
 		Balance: &BalanceFilter{
-			Type:           utils.StringPointer(utils.MONETARY),
+			Type:           utils.StringPointer(utils.MetaMonetary),
 			RatingSubject:  utils.StringPointer("test1"),
 			Value:          &utils.ValueFormula{Static: 2},
 			Weight:         utils.Float64Pointer(1.0),
@@ -767,7 +767,7 @@ func TestActionTriggerMatchAll(t *testing.T) {
 		},
 	}
 	a := &Action{Balance: &BalanceFilter{
-		Type:           utils.StringPointer(utils.MONETARY),
+		Type:           utils.StringPointer(utils.MetaMonetary),
 		RatingSubject:  utils.StringPointer("test1"),
 		Value:          &utils.ValueFormula{Static: 2},
 		Weight:         utils.Float64Pointer(1.0),
@@ -795,16 +795,16 @@ func TestActionResetTriggres(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 10},
 			},
-			utils.VOICE: {
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")},
 			},
 		},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{
+			utils.MetaMonetary: []*UnitCounter{
 				{
 					Counters: CounterFilters{
 						&CounterFilter{Value: 1},
@@ -815,14 +815,14 @@ func TestActionResetTriggres(t *testing.T) {
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MONETARY)},
+					Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2,
 				ActionsID:      "TEST_ACTIONS",
 				Executed:       true,
 			},
 			&ActionTrigger{
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MONETARY)},
+					Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2,
 				ActionsID:      "TEST_ACTIONS",
 				Executed:       true,
@@ -839,19 +839,19 @@ func TestActionResetTriggresExecutesThem(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 10},
 			},
 		},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{
+			utils.MetaMonetary: []*UnitCounter{
 				{Counters: CounterFilters{&CounterFilter{Value: 1}}},
 			},
 		},
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MONETARY)},
+					Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2,
 				ActionsID:      "TEST_ACTIONS",
 				Executed:       true,
@@ -859,7 +859,7 @@ func TestActionResetTriggresExecutesThem(t *testing.T) {
 		},
 	}
 	resetTriggersAction(ub, nil, nil, nil)
-	if ub.ActionTriggers[0].Executed == true || ub.BalanceMap[utils.MONETARY][0].GetValue() == 12 {
+	if ub.ActionTriggers[0].Executed == true || ub.BalanceMap[utils.MetaMonetary][0].GetValue() == 12 {
 		t.Error("Reset triggers action failed!")
 	}
 }
@@ -868,36 +868,36 @@ func TestActionResetTriggresActionFilter(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 10},
 			},
-			utils.VOICE: {
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")},
 			},
 		},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{
+			utils.MetaMonetary: []*UnitCounter{
 				{Counters: CounterFilters{&CounterFilter{Value: 1}}},
 			},
 		},
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MONETARY),
+					Type: utils.StringPointer(utils.MetaMonetary),
 				},
 				ThresholdValue: 2,
 				ActionsID:      "TEST_ACTIONS",
 				Executed:       true},
 			&ActionTrigger{
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MONETARY),
+					Type: utils.StringPointer(utils.MetaMonetary),
 				},
 				ThresholdValue: 2,
 				ActionsID:      "TEST_ACTIONS",
 				Executed:       true}},
 	}
-	resetTriggersAction(ub, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)}}, nil, nil)
+	resetTriggersAction(ub, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaSMS)}}, nil, nil)
 	if ub.ActionTriggers[0].Executed == false || ub.ActionTriggers[1].Executed == false {
 		t.Error("Reset triggers action failed!")
 	}
@@ -907,30 +907,30 @@ func TestActionResetTriggresActionFilter2(t *testing.T) {
 	ub := &Account{
 		ID: "TestActionResetTriggresActionFilter2",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 10},
 			},
-			utils.VOICE: {
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")},
 			},
 		},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{
+			utils.MetaMonetary: []*UnitCounter{
 				{Counters: CounterFilters{&CounterFilter{Value: 1}}},
 			},
 		},
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MONETARY),
+					Type: utils.StringPointer(utils.MetaMonetary),
 				},
 				ThresholdValue: 2,
 				ActionsID:      "TEST_ACTIONS",
 				Executed:       true},
 			&ActionTrigger{
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MONETARY),
+					Type: utils.StringPointer(utils.MetaMonetary),
 				},
 				ThresholdValue: 2,
 				ActionsID:      "TEST_ACTIONS",
@@ -946,16 +946,16 @@ func TestActionSetPostpaid(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
-		UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{
+		UnitCounters: UnitCounters{utils.MetaMonetary: []*UnitCounter{
 			{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	allowNegativeAction(ub, nil, nil, nil)
@@ -969,16 +969,16 @@ func TestActionSetPrepaid(t *testing.T) {
 		ID:            "TEST_UB",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
-		UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{
+		UnitCounters: UnitCounters{utils.MetaMonetary: []*UnitCounter{
 			{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	denyNegativeAction(ub, nil, nil, nil)
@@ -992,23 +992,23 @@ func TestActionResetPrepaid(t *testing.T) {
 		ID:            "TEST_UB",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+			utils.MetaMonetary: []*UnitCounter{{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaSMS)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaSMS)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	resetAccountAction(ub, nil, nil, nil)
 	if !ub.AllowNegative ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 0 ||
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 0 ||
 		len(ub.UnitCounters) != 0 ||
-		ub.BalanceMap[utils.VOICE][0].GetValue() != 0 ||
+		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 0 ||
 		ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
 		t.Log(ub.BalanceMap)
 		t.Error("Reset account action failed!")
@@ -1019,22 +1019,22 @@ func TestActionResetPostpaid(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+			utils.MetaMonetary: []*UnitCounter{{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaSMS)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaSMS)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	resetAccountAction(ub, nil, nil, nil)
-	if ub.BalanceMap[utils.MONETARY].GetTotalValue() != 0 ||
+	if ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 0 ||
 		len(ub.UnitCounters) != 0 ||
-		ub.BalanceMap[utils.VOICE][0].GetValue() != 0 ||
+		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 0 ||
 		ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
 		t.Error("Reset account action failed!")
 	}
@@ -1044,27 +1044,27 @@ func TestActionTopupResetCredit(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 100}},
-			utils.VOICE: {
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{
+			utils.MetaMonetary: []*UnitCounter{
 				{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary),
 		Value: &utils.ValueFormula{Static: 10}}}
 	topupResetAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 10 ||
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10 ||
 		len(ub.UnitCounters) != 0 || // InitCounters finds no counters
-		len(ub.BalanceMap[utils.VOICE]) != 2 ||
+		len(ub.BalanceMap[utils.MetaVoice]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
 		t.Errorf("Topup reset action failed: %+s", utils.ToIJSON(ub))
 	}
@@ -1077,16 +1077,16 @@ func TestActionTopupValueFactor(t *testing.T) {
 	}
 	a := &Action{
 		Balance: &BalanceFilter{
-			Type:  utils.StringPointer(utils.MONETARY),
+			Type:  utils.StringPointer(utils.MetaMonetary),
 			Value: &utils.ValueFormula{Static: 10},
 		},
 		ExtraParameters: `{"*monetary":2.0}`,
 	}
 	topupResetAction(ub, a, nil, nil)
 	if len(ub.BalanceMap) != 1 ||
-		ub.BalanceMap[utils.MONETARY][0].Factor[utils.MONETARY] != 2.0 {
+		ub.BalanceMap[utils.MetaMonetary][0].Factor[utils.MetaMonetary] != 2.0 {
 		t.Errorf("Topup reset action failed to set Factor: %+v",
-			ub.BalanceMap[utils.MONETARY][0].Factor)
+			ub.BalanceMap[utils.MetaMonetary][0].Factor)
 	}
 }
 
@@ -1094,22 +1094,22 @@ func TestActionTopupResetCreditId(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 100},
 				&Balance{ID: "TEST_B", Value: 15},
 			},
 		},
 	}
 	a := &Action{Balance: &BalanceFilter{
-		Type:  utils.StringPointer(utils.MONETARY),
+		Type:  utils.StringPointer(utils.MetaMonetary),
 		ID:    utils.StringPointer("TEST_B"),
 		Value: &utils.ValueFormula{Static: 10}}}
 	topupResetAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 110 ||
-		len(ub.BalanceMap[utils.MONETARY]) != 2 {
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 110 ||
+		len(ub.BalanceMap[utils.MetaMonetary]) != 2 {
 		t.Errorf("Topup reset action failed: %+v",
-			ub.BalanceMap[utils.MONETARY][0])
+			ub.BalanceMap[utils.MetaMonetary][0])
 	}
 }
 
@@ -1117,20 +1117,20 @@ func TestActionTopupResetCreditNoId(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 100},
 				&Balance{ID: "TEST_B", Value: 15},
 			},
 		},
 	}
 	a := &Action{Balance: &BalanceFilter{
-		Type:  utils.StringPointer(utils.MONETARY),
+		Type:  utils.StringPointer(utils.MetaMonetary),
 		Value: &utils.ValueFormula{Static: 10}}}
 	topupResetAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 20 ||
-		len(ub.BalanceMap[utils.MONETARY]) != 2 {
-		t.Errorf("Topup reset action failed: %+v", ub.BalanceMap[utils.MONETARY][1])
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 20 ||
+		len(ub.BalanceMap[utils.MetaMonetary]) != 2 {
+		t.Errorf("Topup reset action failed: %+v", ub.BalanceMap[utils.MetaMonetary][1])
 	}
 }
 
@@ -1138,34 +1138,34 @@ func TestActionTopupResetMinutes(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {&Balance{Value: 10, Weight: 20,
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {&Balance{Value: 10, Weight: 20,
 				DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
-		UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{
+		UnitCounters: UnitCounters{utils.MetaMonetary: []*UnitCounter{
 			{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
-				Balance:        &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+				Balance:        &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
 			&ActionTrigger{
-				Balance:        &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+				Balance:        &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{
-		Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE),
+		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaVoice),
 			Value: &utils.ValueFormula{Static: 5}, Weight: utils.Float64Pointer(20),
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}}
 	topupResetAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
-		ub.BalanceMap[utils.VOICE].GetTotalValue() != 5 ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
+		ub.BalanceMap[utils.MetaVoice].GetTotalValue() != 5 ||
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 0 ||
-		len(ub.BalanceMap[utils.VOICE]) != 2 ||
+		len(ub.BalanceMap[utils.MetaVoice]) != 2 ||
 		ub.ActionTriggers[0].Executed != true ||
 		ub.ActionTriggers[1].Executed != true {
 		t.Errorf("Topup reset minutes action failed: %+v",
-			ub.BalanceMap[utils.VOICE][0])
+			ub.BalanceMap[utils.MetaVoice][0])
 	}
 }
 
@@ -1173,33 +1173,33 @@ func TestActionTopupCredit(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20,
 					DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10,
 					DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{
+			utils.MetaMonetary: []*UnitCounter{
 				{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{Balance: &BalanceFilter{
-		Type:  utils.StringPointer(utils.MONETARY),
+		Type:  utils.StringPointer(utils.MetaMonetary),
 		Value: &utils.ValueFormula{Static: 10}}}
 	topupAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 110 ||
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 110 ||
 		len(ub.UnitCounters) != 0 ||
-		len(ub.BalanceMap[utils.VOICE]) != 2 ||
+		len(ub.BalanceMap[utils.MetaVoice]) != 2 ||
 		ub.ActionTriggers[0].Executed != true ||
 		ub.ActionTriggers[1].Executed != true {
 		t.Error("Topup action failed!",
-			ub.BalanceMap[utils.MONETARY].GetTotalValue())
+			ub.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -1207,31 +1207,31 @@ func TestActionTopupMinutes(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 100}},
-			utils.VOICE: {&Balance{Value: 10, Weight: 20,
+			utils.MetaVoice: {&Balance{Value: 10, Weight: 20,
 				DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{
+			utils.MetaMonetary: []*UnitCounter{
 				{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE),
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaVoice),
 		Value: &utils.ValueFormula{Static: 5}, Weight: utils.Float64Pointer(20),
 		DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}}
 	topupAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
-		ub.BalanceMap[utils.VOICE].GetTotalValue() != 15 ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
+		ub.BalanceMap[utils.MetaVoice].GetTotalValue() != 15 ||
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 0 ||
-		len(ub.BalanceMap[utils.VOICE]) != 2 ||
+		len(ub.BalanceMap[utils.MetaVoice]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Error("Topup minutes action failed!", ub.BalanceMap[utils.VOICE])
+		t.Error("Topup minutes action failed!", ub.BalanceMap[utils.MetaVoice])
 	}
 }
 
@@ -1239,27 +1239,27 @@ func TestActionDebitCredit(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{
+			utils.MetaMonetary: []*UnitCounter{
 				{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{Balance: &BalanceFilter{
-		Type:  utils.StringPointer(utils.MONETARY),
+		Type:  utils.StringPointer(utils.MetaMonetary),
 		Value: &utils.ValueFormula{Static: 10}}}
 	debitAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 90 ||
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 90 ||
 		len(ub.UnitCounters) != 0 ||
-		len(ub.BalanceMap[utils.VOICE]) != 2 ||
+		len(ub.BalanceMap[utils.MetaVoice]) != 2 ||
 		ub.ActionTriggers[0].Executed != true ||
 		ub.ActionTriggers[1].Executed != true {
 		t.Error("Debit action failed!", utils.ToIJSON(ub))
@@ -1270,32 +1270,32 @@ func TestActionDebitMinutes(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20,
 					DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+			utils.MetaMonetary: []*UnitCounter{{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{Balance: &BalanceFilter{
-		Type:           utils.StringPointer(utils.VOICE),
+		Type:           utils.StringPointer(utils.MetaVoice),
 		Value:          &utils.ValueFormula{Static: 5},
 		Weight:         utils.Float64Pointer(20),
 		DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}}
 	debitAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
-		ub.BalanceMap[utils.VOICE][0].GetValue() != 5 ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
+		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 5 ||
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 0 ||
-		len(ub.BalanceMap[utils.VOICE]) != 2 ||
+		len(ub.BalanceMap[utils.MetaVoice]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Error("Debit minutes action failed!", ub.BalanceMap[utils.VOICE][0])
+		t.Error("Debit minutes action failed!", ub.BalanceMap[utils.MetaVoice][0])
 	}
 }
 
@@ -1304,14 +1304,14 @@ func TestActionResetAllCounters(t *testing.T) {
 		ID:            "TEST_UB",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {
 				&Balance{Value: 10, Weight: 20,
 					DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ThresholdValue: 2,
-				Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+			&ActionTrigger{ThresholdType: utils.TriggerMaxEventCounter, ThresholdValue: 2,
+				Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary),
 					DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 					Weight:         utils.Float64Pointer(20)},
 				ActionsID: "TEST_ACTIONS", Executed: true}},
@@ -1319,18 +1319,18 @@ func TestActionResetAllCounters(t *testing.T) {
 	ub.InitCounters()
 	resetCountersAction(ub, nil, nil, nil)
 	if !ub.AllowNegative ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
-		len(ub.UnitCounters[utils.MONETARY][0].Counters) != 1 ||
-		len(ub.BalanceMap[utils.MONETARY]) != 1 ||
+		len(ub.UnitCounters[utils.MetaMonetary][0].Counters) != 1 ||
+		len(ub.BalanceMap[utils.MetaMonetary]) != 1 ||
 		ub.ActionTriggers[0].Executed != true {
 		t.Errorf("Reset counters action failed: %+v %+v %+v", ub.UnitCounters,
-			ub.UnitCounters[utils.MONETARY][0], ub.UnitCounters[utils.MONETARY][0].Counters[0])
+			ub.UnitCounters[utils.MetaMonetary][0], ub.UnitCounters[utils.MetaMonetary][0].Counters[0])
 	}
 	if len(ub.UnitCounters) < 1 {
 		t.FailNow()
 	}
-	c := ub.UnitCounters[utils.MONETARY][0].Counters[0]
+	c := ub.UnitCounters[utils.MetaMonetary][0].Counters[0]
 	if c.Filter.GetWeight() != 20 || c.Value != 0 ||
 		c.Filter.GetDestinationIDs()["NAT"] == false {
 		t.Errorf("Balance cloned incorrectly: %+v", c)
@@ -1342,33 +1342,33 @@ func TestActionResetCounterOnlyDefault(t *testing.T) {
 		ID:            "TEST_UB",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {&Balance{Value: 10, Weight: 20,
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {&Balance{Value: 10, Weight: 20,
 				DestinationIDs: utils.NewStringMap("NAT")}, &Balance{Weight: 10,
 				DestinationIDs: utils.NewStringMap("RET")}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
-				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ThresholdValue: 2,
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
+				ThresholdType: utils.TriggerMaxEventCounter, ThresholdValue: 2,
 				ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)}}
 	ub.InitCounters()
 	resetCountersAction(ub, a, nil, nil)
 	if !ub.AllowNegative ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
-		len(ub.UnitCounters[utils.MONETARY][0].Counters) != 1 ||
-		len(ub.BalanceMap[utils.VOICE]) != 2 ||
+		len(ub.UnitCounters[utils.MetaMonetary][0].Counters) != 1 ||
+		len(ub.BalanceMap[utils.MetaVoice]) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
-		for _, b := range ub.UnitCounters[utils.MONETARY][0].Counters {
+		for _, b := range ub.UnitCounters[utils.MetaMonetary][0].Counters {
 			t.Logf("B: %+v", b)
 		}
 		t.Errorf("Reset counters action failed: %+v", ub.UnitCounters)
 	}
-	if len(ub.UnitCounters) < 1 || len(ub.UnitCounters[utils.MONETARY][0].Counters) < 1 {
+	if len(ub.UnitCounters) < 1 || len(ub.UnitCounters[utils.MetaMonetary][0].Counters) < 1 {
 		t.FailNow()
 	}
-	c := ub.UnitCounters[utils.MONETARY][0].Counters[0]
+	c := ub.UnitCounters[utils.MetaMonetary][0].Counters[0]
 	if c.Filter.GetWeight() != 0 || c.Value != 0 || len(c.Filter.GetDestinationIDs()) != 0 {
 		t.Errorf("Balance cloned incorrectly: %+v!", c)
 	}
@@ -1379,26 +1379,26 @@ func TestActionResetCounterCredit(t *testing.T) {
 		ID:            "TEST_UB",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 100}},
-			utils.VOICE: {&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
+			utils.MetaMonetary: {&Balance{Value: 100}},
+			utils.MetaVoice: {&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{
+			utils.MetaMonetary: []*UnitCounter{
 				{Counters: CounterFilters{
 					&CounterFilter{Value: 1, Filter: new(BalanceFilter)}}}},
-			utils.SMS: []*UnitCounter{
+			utils.MetaSMS: []*UnitCounter{
 				{Counters: CounterFilters{
 					&CounterFilter{Value: 1, Filter: new(BalanceFilter)}}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary)}}
 	resetCountersAction(ub, a, nil, nil)
 	if !ub.AllowNegative ||
-		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
+		ub.BalanceMap[utils.MetaMonetary].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 2 ||
-		len(ub.BalanceMap[utils.VOICE]) != 2 ||
+		len(ub.BalanceMap[utils.MetaVoice]) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
 		t.Error("Reset counters action failed!", ub.UnitCounters)
 	}
@@ -1439,7 +1439,7 @@ func TestActionTopup(t *testing.T) {
 	initialUb, _ := dm.GetAccount("vdf:minu")
 	a := &Action{
 		ActionType: utils.TOPUP,
-		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 25},
+		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary), Value: &utils.ValueFormula{Static: 25},
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")),
 			Weight:         utils.Float64Pointer(20)},
 	}
@@ -1451,8 +1451,8 @@ func TestActionTopup(t *testing.T) {
 
 	at.Execute(nil, nil)
 	afterUb, _ := dm.GetAccount("vdf:minu")
-	initialValue := initialUb.BalanceMap[utils.MONETARY].GetTotalValue()
-	afterValue := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
+	initialValue := initialUb.BalanceMap[utils.MetaMonetary].GetTotalValue()
+	afterValue := afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue()
 	if afterValue != initialValue+25 {
 		t.Error("Bad topup before and after: ", initialValue, afterValue)
 	}
@@ -1462,7 +1462,7 @@ func TestActionTopupLoaded(t *testing.T) {
 	initialUb, _ := dm.GetAccount("vdf:minitsboy")
 	a := &Action{
 		ActionType: utils.TOPUP,
-		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary),
 			Value:          &utils.ValueFormula{Static: 25},
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")),
 			Weight:         utils.Float64Pointer(20)},
@@ -1475,8 +1475,8 @@ func TestActionTopupLoaded(t *testing.T) {
 
 	at.Execute(nil, nil)
 	afterUb, _ := dm.GetAccount("vdf:minitsboy")
-	initialValue := initialUb.BalanceMap[utils.MONETARY].GetTotalValue()
-	afterValue := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
+	initialValue := initialUb.BalanceMap[utils.MetaMonetary].GetTotalValue()
+	afterValue := afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue()
 	if afterValue != initialValue+25 {
 		t.Logf("Initial: %+v", initialUb)
 		t.Logf("After: %+v", afterUb)
@@ -1488,7 +1488,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:trans",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{
+			utils.MetaMonetary: {&Balance{
 				Value: 10,
 			}},
 		},
@@ -1503,7 +1503,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 			{
 				ActionType: utils.TOPUP,
 				Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 1.1},
-					Type: utils.StringPointer(utils.MONETARY)},
+					Type: utils.StringPointer(utils.MetaMonetary)},
 			},
 			{
 				ActionType: "VALID_FUNCTION_TYPE",
@@ -1517,8 +1517,8 @@ func TestActionTransactionFuncType(t *testing.T) {
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
-	if acc.BalanceMap[utils.MONETARY][0].Value != 10 {
-		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+	if acc.BalanceMap[utils.MetaMonetary][0].Value != 10 {
+		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 }
 
@@ -1526,7 +1526,7 @@ func TestActionTransactionBalanceType(t *testing.T) {
 	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:trans",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{
+			utils.MetaMonetary: {&Balance{
 				Value: 10,
 			}},
 		},
@@ -1541,7 +1541,7 @@ func TestActionTransactionBalanceType(t *testing.T) {
 			{
 				ActionType: utils.TOPUP,
 				Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 1.1},
-					Type: utils.StringPointer(utils.MONETARY)},
+					Type: utils.StringPointer(utils.MetaMonetary)},
 			},
 			{
 				ActionType: utils.TOPUP,
@@ -1554,8 +1554,8 @@ func TestActionTransactionBalanceType(t *testing.T) {
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
-	if acc.BalanceMap[utils.MONETARY][0].Value != 11.1 {
-		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+	if acc.BalanceMap[utils.MetaMonetary][0].Value != 11.1 {
+		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 }
 
@@ -1563,7 +1563,7 @@ func TestActionTransactionBalanceNotType(t *testing.T) {
 	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:trans",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{
+			utils.MetaMonetary: {&Balance{
 				Value: 10,
 			}},
 		},
@@ -1578,7 +1578,7 @@ func TestActionTransactionBalanceNotType(t *testing.T) {
 			{
 				ActionType: utils.TOPUP,
 				Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 1.1},
-					Type: utils.StringPointer(utils.VOICE)},
+					Type: utils.StringPointer(utils.MetaVoice)},
 			},
 			{
 				ActionType: utils.TOPUP,
@@ -1591,8 +1591,8 @@ func TestActionTransactionBalanceNotType(t *testing.T) {
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
-	if acc.BalanceMap[utils.MONETARY][0].Value != 10.0 {
-		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+	if acc.BalanceMap[utils.MetaMonetary][0].Value != 10.0 {
+		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 }
 
@@ -1600,7 +1600,7 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:exp",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{
+			utils.MetaMonetary: {&Balance{
 				Value: 10,
 			}},
 		},
@@ -1615,14 +1615,14 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 			{
 				ActionType: utils.TOPUP,
 				Balance: &BalanceFilter{
-					Type:  utils.StringPointer(utils.VOICE),
+					Type:  utils.StringPointer(utils.MetaVoice),
 					Value: &utils.ValueFormula{Static: 15},
 				},
 			},
 			{
 				ActionType: utils.TOPUP,
 				Balance: &BalanceFilter{
-					Type:           utils.StringPointer(utils.VOICE),
+					Type:           utils.StringPointer(utils.MetaVoice),
 					Value:          &utils.ValueFormula{Static: 30},
 					ExpirationDate: utils.TimePointer(time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC)),
 				},
@@ -1635,8 +1635,8 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
 	}
 	if len(acc.BalanceMap) != 2 ||
-		len(acc.BalanceMap[utils.VOICE]) != 2 {
-		t.Errorf("Error debiting expir and unexpire: %+v", acc.BalanceMap[utils.VOICE][0])
+		len(acc.BalanceMap[utils.MetaVoice]) != 2 {
+		t.Errorf("Error debiting expir and unexpire: %+v", acc.BalanceMap[utils.MetaVoice][0])
 	}
 }
 
@@ -1644,7 +1644,7 @@ func TestActionRemoveBalance(t *testing.T) {
 	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:rembal",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{
 					Value: 10,
 				},
@@ -1670,7 +1670,7 @@ func TestActionRemoveBalance(t *testing.T) {
 			{
 				ActionType: utils.REMOVE_BALANCE,
 				Balance: &BalanceFilter{
-					Type:           utils.StringPointer(utils.MONETARY),
+					Type:           utils.StringPointer(utils.MetaMonetary),
 					DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT", "RET")),
 				},
 			},
@@ -1682,8 +1682,8 @@ func TestActionRemoveBalance(t *testing.T) {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
 	}
 	if len(acc.BalanceMap) != 1 ||
-		len(acc.BalanceMap[utils.MONETARY]) != 1 {
-		t.Errorf("Error removing balance: %+v", acc.BalanceMap[utils.MONETARY])
+		len(acc.BalanceMap[utils.MetaMonetary]) != 1 {
+		t.Errorf("Error removing balance: %+v", acc.BalanceMap[utils.MetaMonetary])
 	}
 }
 
@@ -1691,7 +1691,7 @@ func TestActionRemoveExpiredBalance(t *testing.T) {
 	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:rembal2",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{
 					Value: 10,
 				},
@@ -1724,7 +1724,7 @@ func TestActionRemoveExpiredBalance(t *testing.T) {
 			{
 				ActionType: utils.MetaRemoveExpired,
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MONETARY),
+					Type: utils.StringPointer(utils.MetaMonetary),
 				},
 			},
 		},
@@ -1735,8 +1735,8 @@ func TestActionRemoveExpiredBalance(t *testing.T) {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
 	}
 	if len(acc.BalanceMap) != 1 ||
-		len(acc.BalanceMap[utils.MONETARY]) != 2 {
-		t.Errorf("Error removing balance: %+v", utils.ToJSON(acc.BalanceMap[utils.MONETARY]))
+		len(acc.BalanceMap[utils.MetaMonetary]) != 2 {
+		t.Errorf("Error removing balance: %+v", utils.ToJSON(acc.BalanceMap[utils.MetaMonetary]))
 	}
 }
 
@@ -1745,7 +1745,7 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 		&Account{
 			ID: "cgrates.org:trans",
 			BalanceMap: map[string]Balances{
-				utils.MONETARY: {
+				utils.MetaMonetary: {
 					&Balance{
 						Uuid:  utils.GenUUID(),
 						ID:    utils.MetaDefault,
@@ -1784,15 +1784,15 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
-	if afterUb.BalanceMap[utils.MONETARY].GetTotalValue() != 17 ||
-		afterUb.BalanceMap[utils.MONETARY][0].Value != 19 ||
-		afterUb.BalanceMap[utils.MONETARY][1].Value != 0 ||
-		afterUb.BalanceMap[utils.MONETARY][2].Value != 0 ||
-		afterUb.BalanceMap[utils.MONETARY][3].Value != -2 {
-		for _, b := range afterUb.BalanceMap[utils.MONETARY] {
+	if afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue() != 17 ||
+		afterUb.BalanceMap[utils.MetaMonetary][0].Value != 19 ||
+		afterUb.BalanceMap[utils.MetaMonetary][1].Value != 0 ||
+		afterUb.BalanceMap[utils.MetaMonetary][2].Value != 0 ||
+		afterUb.BalanceMap[utils.MetaMonetary][3].Value != -2 {
+		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -1801,7 +1801,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 		&Account{
 			ID: "cgrates.org:trans",
 			BalanceMap: map[string]Balances{
-				utils.MONETARY: {
+				utils.MetaMonetary: {
 					&Balance{
 						Uuid:   utils.GenUUID(),
 						ID:     utils.MetaDefault,
@@ -1845,15 +1845,15 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
-	if afterUb.BalanceMap[utils.MONETARY].GetTotalValue() != 20 ||
-		afterUb.BalanceMap[utils.MONETARY][0].Value != 19 ||
-		afterUb.BalanceMap[utils.MONETARY][1].Value != 0 ||
-		afterUb.BalanceMap[utils.MONETARY][2].Value != 1 ||
-		afterUb.BalanceMap[utils.MONETARY][3].Value != 0 {
-		for _, b := range afterUb.BalanceMap[utils.MONETARY] {
+	if afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue() != 20 ||
+		afterUb.BalanceMap[utils.MetaMonetary][0].Value != 19 ||
+		afterUb.BalanceMap[utils.MetaMonetary][1].Value != 0 ||
+		afterUb.BalanceMap[utils.MetaMonetary][2].Value != 1 ||
+		afterUb.BalanceMap[utils.MetaMonetary][3].Value != 0 {
+		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -1862,7 +1862,7 @@ func TestActionConditionalTopup(t *testing.T) {
 		&Account{
 			ID: "cgrates.org:cond",
 			BalanceMap: map[string]Balances{
-				utils.MONETARY: {
+				utils.MetaMonetary: {
 					&Balance{
 						Uuid:   utils.GenUUID(),
 						ID:     utils.MetaDefault,
@@ -1895,7 +1895,7 @@ func TestActionConditionalTopup(t *testing.T) {
 		ActionType: utils.TOPUP,
 		Filter:     `{"Type":"*monetary","Value":1,"Weight":10}`,
 		Balance: &BalanceFilter{
-			Type:   utils.StringPointer(utils.MONETARY),
+			Type:   utils.StringPointer(utils.MetaMonetary),
 			Value:  &utils.ValueFormula{Static: 11},
 			Weight: utils.Float64Pointer(30),
 		},
@@ -1911,13 +1911,13 @@ func TestActionConditionalTopup(t *testing.T) {
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
-	if len(afterUb.BalanceMap[utils.MONETARY]) != 5 ||
-		afterUb.BalanceMap[utils.MONETARY].GetTotalValue() != 31 ||
-		afterUb.BalanceMap[utils.MONETARY][4].Value != 11 {
-		for _, b := range afterUb.BalanceMap[utils.MONETARY] {
+	if len(afterUb.BalanceMap[utils.MetaMonetary]) != 5 ||
+		afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue() != 31 ||
+		afterUb.BalanceMap[utils.MetaMonetary][4].Value != 11 {
+		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -1926,7 +1926,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 		&Account{
 			ID: "cgrates.org:cond",
 			BalanceMap: map[string]Balances{
-				utils.MONETARY: {
+				utils.MetaMonetary: {
 					&Balance{
 						Uuid:   utils.GenUUID(),
 						ID:     utils.MetaDefault,
@@ -1959,7 +1959,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 		ActionType: utils.TOPUP,
 		Filter:     `{"Type":"*monetary","Value":2,"Weight":10}`,
 		Balance: &BalanceFilter{
-			Type:   utils.StringPointer(utils.MONETARY),
+			Type:   utils.StringPointer(utils.MetaMonetary),
 			Value:  &utils.ValueFormula{Static: 11},
 			Weight: utils.Float64Pointer(30),
 		},
@@ -1975,12 +1975,12 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
-	if len(afterUb.BalanceMap[utils.MONETARY]) != 4 ||
-		afterUb.BalanceMap[utils.MONETARY].GetTotalValue() != 20 {
-		for _, b := range afterUb.BalanceMap[utils.MONETARY] {
+	if len(afterUb.BalanceMap[utils.MetaMonetary]) != 4 ||
+		afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue() != 20 {
+		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -1989,7 +1989,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 		&Account{
 			ID: "cgrates.org:cond",
 			BalanceMap: map[string]Balances{
-				utils.MONETARY: {
+				utils.MetaMonetary: {
 					&Balance{
 						Uuid:   utils.GenUUID(),
 						Value:  1,
@@ -2001,7 +2001,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 						Weight: 20,
 					},
 				},
-				utils.VOICE: {
+				utils.MetaVoice: {
 					&Balance{
 						Uuid:   utils.GenUUID(),
 						Value:  10,
@@ -2023,7 +2023,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 		ActionType: utils.TOPUP,
 		Filter:     `{"Type":"*voice","Value":{"*gte":100}}`,
 		Balance: &BalanceFilter{
-			Type:   utils.StringPointer(utils.MONETARY),
+			Type:   utils.StringPointer(utils.MetaMonetary),
 			Value:  &utils.ValueFormula{Static: 11},
 			Weight: utils.Float64Pointer(10),
 		},
@@ -2039,12 +2039,12 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
-	if len(afterUb.BalanceMap[utils.MONETARY]) != 2 ||
-		afterUb.BalanceMap[utils.MONETARY].GetTotalValue() != 18 {
-		for _, b := range afterUb.BalanceMap[utils.MONETARY] {
+	if len(afterUb.BalanceMap[utils.MetaMonetary]) != 2 ||
+		afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue() != 18 {
+		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -2191,7 +2191,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 
 	for btype, chain := range afterUb.BalanceMap {
-		if btype != utils.MONETARY {
+		if btype != utils.MetaMonetary {
 			for _, b := range chain {
 				if b.Disabled != true {
 					t.Errorf("Failed to disabled balance (%s): %+v", btype, b)
@@ -2206,7 +2206,7 @@ func TestActionSetBalance(t *testing.T) {
 		&Account{
 			ID: "cgrates.org:setb",
 			BalanceMap: map[string]Balances{
-				utils.MONETARY: {
+				utils.MetaMonetary: {
 					&Balance{
 						ID:     "m1",
 						Uuid:   utils.GenUUID(),
@@ -2220,7 +2220,7 @@ func TestActionSetBalance(t *testing.T) {
 						Weight: 20,
 					},
 				},
-				utils.VOICE: {
+				utils.MetaVoice: {
 					&Balance{
 						ID:     "v1",
 						Uuid:   utils.GenUUID(),
@@ -2244,7 +2244,7 @@ func TestActionSetBalance(t *testing.T) {
 		ActionType: utils.SET_BALANCE,
 		Balance: &BalanceFilter{
 			ID:     utils.StringPointer("m2"),
-			Type:   utils.StringPointer(utils.MONETARY),
+			Type:   utils.StringPointer(utils.MetaMonetary),
 			Value:  &utils.ValueFormula{Static: 11},
 			Weight: utils.Float64Pointer(10),
 		},
@@ -2260,13 +2260,13 @@ func TestActionSetBalance(t *testing.T) {
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
-	if len(afterUb.BalanceMap[utils.MONETARY]) != 2 ||
-		afterUb.BalanceMap[utils.MONETARY][1].Value != 11 ||
-		afterUb.BalanceMap[utils.MONETARY][1].Weight != 10 {
-		for _, b := range afterUb.BalanceMap[utils.MONETARY] {
+	if len(afterUb.BalanceMap[utils.MetaMonetary]) != 2 ||
+		afterUb.BalanceMap[utils.MetaMonetary][1].Value != 11 ||
+		afterUb.BalanceMap[utils.MetaMonetary][1].Weight != 10 {
+		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Errorf("Balance: %+v", afterUb.BalanceMap[utils.MONETARY][1])
+		t.Errorf("Balance: %+v", afterUb.BalanceMap[utils.MetaMonetary][1])
 	}
 }
 
@@ -2294,7 +2294,7 @@ func TestActionExpirationTime(t *testing.T) {
 		at.Execute(nil, nil)
 		afterUb, err := dm.GetAccount("cgrates.org:expo")
 		if err != nil ||
-			len(afterUb.BalanceMap[utils.VOICE]) != rep+1 {
+			len(afterUb.BalanceMap[utils.MetaVoice]) != rep+1 {
 			t.Error("error topuping expiration balance: ", utils.ToIJSON(afterUb))
 		}
 	}
@@ -2317,7 +2317,7 @@ func TestActionExpNoExp(t *testing.T) {
 	at.Execute(nil, nil)
 	afterUb, err := dm.GetAccount("cgrates.org:expnoexp")
 	if err != nil ||
-		len(afterUb.BalanceMap[utils.VOICE]) != 2 {
+		len(afterUb.BalanceMap[utils.MetaVoice]) != 2 {
 		t.Error("error topuping expiration balance: ", utils.ToIJSON(afterUb))
 	}
 }
@@ -2326,7 +2326,7 @@ func TestActionTopUpZeroNegative(t *testing.T) {
 	account := &Account{
 		ID: "cgrates.org:zeroNegative",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{
 					ID:    "Bal1",
 					Value: -10,
@@ -2350,7 +2350,7 @@ func TestActionTopUpZeroNegative(t *testing.T) {
 				Id:         "ZeroMonetary",
 				ActionType: utils.TopUpZeroNegative,
 				Balance: &BalanceFilter{
-					Type: utils.StringPointer(utils.MONETARY),
+					Type: utils.StringPointer(utils.MetaMonetary),
 				},
 			},
 		},
@@ -2361,12 +2361,12 @@ func TestActionTopUpZeroNegative(t *testing.T) {
 		t.Error("Error getting account: ", acc, err)
 	}
 	//Verify value for first balance(Bal1) should be 0 after execute action TopUpZeroNegative
-	if acc.BalanceMap[utils.MONETARY][0].Value != 0 {
-		t.Errorf("Expecting 0, received: %+v", acc.BalanceMap[utils.MONETARY][0].Value)
+	if acc.BalanceMap[utils.MetaMonetary][0].Value != 0 {
+		t.Errorf("Expecting 0, received: %+v", acc.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 	//Verify value for secound balance(Bal2) should be the same
-	if acc.BalanceMap[utils.MONETARY][1].Value != 5 {
-		t.Errorf("Expecting 5, received: %+v", acc.BalanceMap[utils.MONETARY][1].Value)
+	if acc.BalanceMap[utils.MetaMonetary][1].Value != 5 {
+		t.Errorf("Expecting 5, received: %+v", acc.BalanceMap[utils.MetaMonetary][1].Value)
 	}
 }
 
@@ -2375,7 +2375,7 @@ func TestActionSetExpiry(t *testing.T) {
 	account := &Account{
 		ID: "cgrates.org:zeroNegative",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{
 					ID:    "Bal1",
 					Value: -10,
@@ -2400,7 +2400,7 @@ func TestActionSetExpiry(t *testing.T) {
 				ActionType: utils.SetExpiry,
 				Balance: &BalanceFilter{
 					ID:             utils.StringPointer("Bal1"),
-					Type:           utils.StringPointer(utils.MONETARY),
+					Type:           utils.StringPointer(utils.MetaMonetary),
 					ExpirationDate: utils.TimePointer(timeNowPlus24h),
 				},
 			},
@@ -2412,8 +2412,8 @@ func TestActionSetExpiry(t *testing.T) {
 		t.Error("Error getting account: ", acc, err)
 	}
 	//Verify ExpirationDate for first balance(Bal1)
-	if !acc.BalanceMap[utils.MONETARY][0].ExpirationDate.Equal(timeNowPlus24h) {
-		t.Errorf("Expecting: %+v, received: %+v", timeNowPlus24h, acc.BalanceMap[utils.MONETARY][0].ExpirationDate)
+	if !acc.BalanceMap[utils.MetaMonetary][0].ExpirationDate.Equal(timeNowPlus24h) {
+		t.Errorf("Expecting: %+v, received: %+v", timeNowPlus24h, acc.BalanceMap[utils.MetaMonetary][0].ExpirationDate)
 	}
 }
 
@@ -2491,7 +2491,7 @@ func TestValueFormulaDebit(t *testing.T) {
 	at.Execute(nil, nil)
 	afterUb, err := dm.GetAccount("cgrates.org:vf")
 	// not an exact value, depends of month
-	v := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
+	v := afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue()
 	if err != nil || v > -0.30 || v < -0.36 {
 		t.Error("error debiting account: ", err, utils.ToIJSON(afterUb), v)
 	}
@@ -2504,7 +2504,7 @@ func TestClonedAction(t *testing.T) {
 		Balance: &BalanceFilter{
 			ID:    utils.StringPointer(utils.MetaDefault),
 			Value: &utils.ValueFormula{Static: 1},
-			Type:  utils.StringPointer(utils.MONETARY),
+			Type:  utils.StringPointer(utils.MetaMonetary),
 		},
 		Weight: float64(10),
 	}
@@ -2521,7 +2521,7 @@ func TestClonedActions(t *testing.T) {
 			Balance: &BalanceFilter{
 				ID:    utils.StringPointer(utils.MetaDefault),
 				Value: &utils.ValueFormula{Static: 1},
-				Type:  utils.StringPointer(utils.MONETARY),
+				Type:  utils.StringPointer(utils.MetaMonetary),
 			},
 			Weight: float64(30),
 		},
@@ -2531,7 +2531,7 @@ func TestClonedActions(t *testing.T) {
 			Balance: &BalanceFilter{
 				ID:    utils.StringPointer(utils.MetaDefault),
 				Value: &utils.ValueFormula{Static: 2},
-				Type:  utils.StringPointer(utils.MONETARY),
+				Type:  utils.StringPointer(utils.MetaMonetary),
 			},
 			Weight: float64(20),
 		},
@@ -2552,7 +2552,7 @@ func TestCacheGetClonedActions(t *testing.T) {
 			Balance: &BalanceFilter{
 				ID:    utils.StringPointer(utils.MetaDefault),
 				Value: &utils.ValueFormula{Static: 1},
-				Type:  utils.StringPointer(utils.MONETARY),
+				Type:  utils.StringPointer(utils.MetaMonetary),
 			},
 			Weight: float64(30),
 		},
@@ -2561,7 +2561,7 @@ func TestCacheGetClonedActions(t *testing.T) {
 			ActionType: utils.SET_BALANCE,
 			Balance: &BalanceFilter{
 				ID:    utils.StringPointer("for_v3hsillmill_sms_ill"),
-				Type:  utils.StringPointer(utils.SMS),
+				Type:  utils.StringPointer(utils.MetaSMS),
 				Value: &utils.ValueFormula{Static: 20000},
 				DestinationIDs: &utils.StringMap{
 					"FRANCE_NATIONAL":      true,
@@ -2628,12 +2628,12 @@ func TestCdrLogAction(t *testing.T) {
 	acc := &Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 20},
 			},
 		},
 		UnitCounters: UnitCounters{
-			utils.MONETARY: []*UnitCounter{
+			utils.MetaMonetary: []*UnitCounter{
 				{
 					Counters: CounterFilters{
 						&CounterFilter{Value: 1},
@@ -2656,7 +2656,7 @@ func TestCdrLogAction(t *testing.T) {
 			Balance: &BalanceFilter{
 				ID:     utils.StringPointer(utils.MetaDefault),
 				Value:  &utils.ValueFormula{Static: 9.95},
-				Type:   utils.StringPointer(utils.MONETARY),
+				Type:   utils.StringPointer(utils.MetaMonetary),
 				Weight: utils.Float64Pointer(0),
 			},
 			Weight:       float64(90),
@@ -2715,7 +2715,7 @@ func TestRemoteSetAccountAction(t *testing.T) {
 		ActionTriggers: ActionTriggers{{
 			Balance: &BalanceFilter{
 				Value: &utils.ValueFormula{
-					Params: map[string]interface{}{utils.VOICE: func() {}},
+					Params: map[string]interface{}{utils.MetaVoice: func() {}},
 				},
 			},
 		}},
@@ -2741,7 +2741,7 @@ func TestRemoteSetAccountAction(t *testing.T) {
 	exp = &Account{
 		ID: "1001",
 		BalanceMap: map[string]Balances{
-			utils.META_VOICE: {{
+			utils.MetaVoice: {{
 				ID:    "money",
 				Value: 15,
 			}},

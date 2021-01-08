@@ -117,15 +117,15 @@ func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *B
 			continue
 		}
 		if uc.CounterType == "" {
-			uc.CounterType = utils.COUNTER_EVENT
+			uc.CounterType = utils.MetaCounterEvent
 		}
 		for _, c := range uc.Counters {
-			if uc.CounterType == utils.COUNTER_EVENT && cc != nil && cc.MatchCCFilter(c.Filter) {
+			if uc.CounterType == utils.MetaCounterEvent && cc != nil && cc.MatchCCFilter(c.Filter) {
 				c.Value += amount
 				continue
 			}
 
-			if uc.CounterType == utils.COUNTER_BALANCE && b != nil && b.MatchFilter(c.Filter, true, false) {
+			if uc.CounterType == utils.MetaCounterBalance && b != nil && b.MatchFilter(c.Filter, true, false) {
 				c.Value += amount
 				continue
 			}

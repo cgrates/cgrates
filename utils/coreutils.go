@@ -381,10 +381,10 @@ func ParseZeroRatingSubject(tor, rateSubj string, defaultRateSubj map[string]str
 			rateSubj = defaultRateSubj[MetaAny]
 		}
 	}
-	if !strings.HasPrefix(rateSubj, ZERO_RATING_SUBJECT_PREFIX) {
+	if !strings.HasPrefix(rateSubj, MetaRatingSubjectPrefix) {
 		return 0, errors.New("malformed rating subject: " + rateSubj)
 	}
-	durStr := rateSubj[len(ZERO_RATING_SUBJECT_PREFIX):]
+	durStr := rateSubj[len(MetaRatingSubjectPrefix):]
 	if _, err := strconv.ParseFloat(durStr, 64); err == nil { // No time unit, postpend
 		durStr += "ns"
 	}
@@ -392,11 +392,11 @@ func ParseZeroRatingSubject(tor, rateSubj string, defaultRateSubj map[string]str
 }
 
 func ConcatenatedKey(keyVals ...string) string {
-	return strings.Join(keyVals, CONCATENATED_KEY_SEP)
+	return strings.Join(keyVals, ConcatenatedKeySep)
 }
 
 func SplitConcatenatedKey(key string) []string {
-	return strings.Split(key, CONCATENATED_KEY_SEP)
+	return strings.Split(key, ConcatenatedKeySep)
 }
 
 func InfieldJoin(vals ...string) string {
@@ -668,7 +668,7 @@ func MaskSuffix(dest string, maskLen int) string {
 	}
 	dest = dest[:destLen-maskLen]
 	for i := 0; i < maskLen; i++ {
-		dest += MASK_CHAR
+		dest += MaskChar
 	}
 	return dest
 }
@@ -728,10 +728,10 @@ func GetCGRVersion() (vers string, err error) {
 }
 
 func NewTenantID(tntID string) *TenantID {
-	if strings.Index(tntID, CONCATENATED_KEY_SEP) == -1 { // no :, ID without Tenant
+	if strings.Index(tntID, ConcatenatedKeySep) == -1 { // no :, ID without Tenant
 		return &TenantID{ID: tntID}
 	}
-	tIDSplt := strings.Split(tntID, CONCATENATED_KEY_SEP)
+	tIDSplt := strings.Split(tntID, ConcatenatedKeySep)
 	return &TenantID{Tenant: tIDSplt[0], ID: ConcatenatedKey(tIDSplt[1:]...)}
 }
 

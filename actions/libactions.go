@@ -97,7 +97,7 @@ func newActionersFromActions(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *e
 func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager,
 	aCfg *engine.APAction) (act actioner, err error) {
 	switch aCfg.Type {
-	case utils.LOG:
+	case utils.MetaLog:
 		return &actLog{aCfg}, nil
 	default:
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)

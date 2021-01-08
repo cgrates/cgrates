@@ -49,7 +49,7 @@ import (
 
 var (
 	cgrEngineFlags    = flag.NewFlagSet(utils.CgrEngine, flag.ContinueOnError)
-	cfgPath           = cgrEngineFlags.String(utils.CfgPathCgr, utils.CONFIG_PATH, "Configuration directory path.")
+	cfgPath           = cgrEngineFlags.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path.")
 	version           = cgrEngineFlags.Bool(utils.ElsVersionLow, false, "Prints the application version.")
 	checkConfig       = cgrEngineFlags.Bool(utils.CheckCfgCgr, false, "Verify the config without starting the engine")
 	pidFile           = cgrEngineFlags.String(utils.PidCgr, utils.EmptyString, "Write pid file")
@@ -362,7 +362,7 @@ func runPreload(loader *services.LoaderService, internalLoaderSChan chan rpcclie
 	internalLoaderSChan <- ldrs
 
 	var reply string
-	for _, loaderID := range strings.Split(*preload, utils.FIELDS_SEP) {
+	for _, loaderID := range strings.Split(*preload, utils.FieldsSep) {
 		if err := loader.GetLoaderS().V1Load(&loaders.ArgsProcessFolder{
 			ForceLock:   true, // force lock will unlock the file in case is locked and return error
 			LoaderID:    loaderID,

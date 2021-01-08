@@ -248,10 +248,10 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 	}
 
 	if authArgs.ProcessThresholds && authReply.ThresholdIDs != nil {
-		kar.Thresholds = strings.Join(*authReply.ThresholdIDs, utils.FIELDS_SEP)
+		kar.Thresholds = strings.Join(*authReply.ThresholdIDs, utils.FieldsSep)
 	}
 	if authArgs.ProcessStats && authReply.StatQueueIDs != nil {
-		kar.StatQueues = strings.Join(*authReply.StatQueueIDs, utils.FIELDS_SEP)
+		kar.StatQueues = strings.Join(*authReply.StatQueueIDs, utils.FieldsSep)
 	}
 	return
 }
@@ -339,10 +339,10 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessa
 	}
 
 	if procEvArgs.ProcessThresholds {
-		kar.Thresholds = strings.Join(*procEvReply.ThresholdIDs, utils.FIELDS_SEP)
+		kar.Thresholds = strings.Join(*procEvReply.ThresholdIDs, utils.FieldsSep)
 	}
 	if procEvArgs.ProcessStats {
-		kar.StatQueues = strings.Join(*procEvReply.StatQueueIDs, utils.FIELDS_SEP)
+		kar.StatQueues = strings.Join(*procEvReply.StatQueueIDs, utils.FieldsSep)
 	}
 	return
 }

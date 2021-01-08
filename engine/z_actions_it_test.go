@@ -128,7 +128,7 @@ func testActionsitSetCdrlogDebit(t *testing.T) {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{
-		{Identifier: utils.DEBIT, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
+		{Identifier: utils.DEBIT, BalanceType: utils.MetaMonetary, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		{Identifier: utils.CDRLOG},
 	}}
 	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
@@ -148,7 +148,7 @@ func testActionsitSetCdrlogDebit(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
-	} else if rcvedCdrs[0].ToR != utils.MONETARY ||
+	} else if rcvedCdrs[0].ToR != utils.MetaMonetary ||
 		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
 		rcvedCdrs[0].Source != utils.CDRLOG ||
 		rcvedCdrs[0].RequestType != utils.MetaNone ||
@@ -171,7 +171,7 @@ func testActionsitSetCdrlogTopup(t *testing.T) {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_2", Actions: []*utils.TPAction{
-		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
+		{Identifier: utils.TOPUP, BalanceType: utils.MetaMonetary, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		{Identifier: utils.CDRLOG},
 	}}
 	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
@@ -191,7 +191,7 @@ func testActionsitSetCdrlogTopup(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
-	} else if rcvedCdrs[0].ToR != utils.MONETARY ||
+	} else if rcvedCdrs[0].ToR != utils.MetaMonetary ||
 		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
 		rcvedCdrs[0].Source != utils.CDRLOG ||
 		rcvedCdrs[0].RequestType != utils.MetaNone ||
@@ -209,7 +209,7 @@ func testActionsitCdrlogEmpty(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_3", Actions: []*utils.TPAction{
-		{Identifier: utils.DEBIT, BalanceType: utils.MONETARY, DestinationIds: "RET",
+		{Identifier: utils.DEBIT, BalanceType: utils.MetaMonetary, DestinationIds: "RET",
 			Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		{Identifier: utils.CDRLOG},
 	}}
@@ -244,11 +244,11 @@ func testActionsitCdrlogWithParams(t *testing.T) {
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_4",
 		Actions: []*utils.TPAction{
-			{Identifier: utils.DEBIT, BalanceType: utils.MONETARY,
+			{Identifier: utils.DEBIT, BalanceType: utils.MetaMonetary,
 				DestinationIds: "RET", Units: "25", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 			{Identifier: utils.CDRLOG,
 				ExtraParameters: `{"RequestType":"*pseudoprepaid","Subject":"DifferentThanAccount", "ToR":"~ActionType:s/^\\*(.*)$/did_$1/"}`},
-			{Identifier: utils.DEBIT_RESET, BalanceType: utils.MONETARY,
+			{Identifier: utils.DEBIT_RESET, BalanceType: utils.MetaMonetary,
 				DestinationIds: "RET", Units: "25", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		},
 	}
@@ -284,7 +284,7 @@ func testActionsitCdrlogWithParams2(t *testing.T) {
 	attrsAA := &utils.AttrSetActions{
 		ActionsId: "CustomAction",
 		Actions: []*utils.TPAction{
-			{Identifier: utils.DEBIT, BalanceType: utils.MONETARY,
+			{Identifier: utils.DEBIT, BalanceType: utils.MetaMonetary,
 				DestinationIds: "RET", Units: "25", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 			{Identifier: utils.CDRLOG,
 				ExtraParameters: `{"RequestType":"*pseudoprepaid", "Usage":"10", "Subject":"testActionsitCdrlogWithParams2", "ToR":"~ActionType:s/^\\*(.*)$/did_$1/"}`},
@@ -325,7 +325,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_TH_CDRLOG", Actions: []*utils.TPAction{
-		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
+		{Identifier: utils.TOPUP, BalanceType: utils.MetaMonetary, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		{Identifier: utils.CDRLOG},
 	}}
 	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
@@ -380,9 +380,9 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 					utils.RunID:        utils.MetaRaw,
 					utils.OrderID:      123,
 					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       utils.UNIT_TEST,
+					utils.Source:       utils.UnitTest,
 					utils.OriginID:     "dsafdsaf",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.RequestType:  utils.MetaRated,
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
@@ -393,8 +393,8 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 					utils.PDD:          0 * time.Second,
 					utils.AnswerTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 					utils.Usage:        10 * time.Second,
-					utils.ROUTE:        "SUPPL1",
-					utils.COST:         -1.0,
+					utils.Route:        "SUPPL1",
+					utils.Cost:         -1.0,
 				},
 			},
 			Opts: map[string]interface{}{
@@ -415,7 +415,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
-	} else if rcvedCdrs[0].ToR != utils.MONETARY ||
+	} else if rcvedCdrs[0].ToR != utils.MetaMonetary ||
 		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
 		rcvedCdrs[0].Source != utils.CDRLOG ||
 		rcvedCdrs[0].RequestType != utils.MetaNone ||
@@ -445,7 +445,7 @@ func testActionsitCDRAccount(t *testing.T) {
 	attrs := &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     acnt,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       float64(30 * time.Second),
 		Balance: map[string]interface{}{
 			utils.UUID: "testUUID",
@@ -477,7 +477,7 @@ func testActionsitCDRAccount(t *testing.T) {
 	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
 	} else {
-		voice := acc.BalanceMap[utils.VOICE]
+		voice := acc.BalanceMap[utils.MetaVoice]
 		for _, u := range voice {
 			uuid = u.Uuid
 			break
@@ -508,7 +508,7 @@ func testActionsitCDRAccount(t *testing.T) {
 						{
 							UUID:  uuid,
 							ID:    "TestID",
-							Type:  utils.VOICE,
+							Type:  utils.MetaVoice,
 							Value: float64(10 * time.Second),
 						},
 					},
@@ -532,7 +532,7 @@ func testActionsitCDRAccount(t *testing.T) {
 
 	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
-	} else if tv := acc.BalanceMap[utils.VOICE].GetTotalValue(); tv != float64(10*time.Second) {
+	} else if tv := acc.BalanceMap[utils.MetaVoice].GetTotalValue(); tv != float64(10*time.Second) {
 		t.Errorf("Calling APIerSv1.GetBalance expected: %f, received: %f", float64(10*time.Second), tv)
 	}
 }
@@ -663,7 +663,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 				utils.RunID:       utils.MetaRaw,
 				utils.OrderID:     123,
 				utils.OriginHost:  "192.168.1.1",
-				utils.Source:      utils.UNIT_TEST,
+				utils.Source:      utils.UnitTest,
 				utils.OriginID:    "dsafdsaf",
 				utils.RequestType: utils.MetaRated,
 				utils.Tenant:      "cgrates.org",
@@ -671,8 +671,8 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 				utils.PDD:         0 * time.Second,
 				utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 				utils.Usage:       10 * time.Second,
-				utils.ROUTE:       "SUPPL1",
-				utils.COST:        -1.0,
+				utils.Route:       "SUPPL1",
+				utils.Cost:        -1.0,
 			},
 		},
 		Opts: map[string]interface{}{
@@ -702,7 +702,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_AddBalance", Actions: []*utils.TPAction{
-		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, DestinationIds: "*ddc_test",
+		{Identifier: utils.TOPUP, BalanceType: utils.MetaMonetary, DestinationIds: "*ddc_test",
 			Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 	}}
 	if err := actsLclRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
@@ -722,8 +722,8 @@ func testActionsitSetSDestinations(t *testing.T) {
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testAccSetDDestination"}
 	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error(err.Error())
-	} else if _, has := acc.BalanceMap[utils.MONETARY][0].DestinationIDs["*ddc_test"]; !has {
-		t.Errorf("Unexpected destinationIDs: %+v", acc.BalanceMap[utils.MONETARY][0].DestinationIDs)
+	} else if _, has := acc.BalanceMap[utils.MetaMonetary][0].DestinationIDs["*ddc_test"]; !has {
+		t.Errorf("Unexpected destinationIDs: %+v", acc.BalanceMap[utils.MetaMonetary][0].DestinationIDs)
 	}
 
 	if err := actsLclRpc.Call(utils.APIerSv1SetDestination,
@@ -865,7 +865,7 @@ func testActionsitresetAccountCDR(t *testing.T) {
 	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
 	} else {
-		voice := acc.BalanceMap[utils.VOICE]
+		voice := acc.BalanceMap[utils.MetaVoice]
 		for _, u := range voice {
 			uuid = u.Uuid
 			break
@@ -895,7 +895,7 @@ func testActionsitresetAccountCDR(t *testing.T) {
 						{
 							UUID:  uuid,
 							ID:    "ID",
-							Type:  utils.VOICE,
+							Type:  utils.MetaVoice,
 							Value: float64(10 * time.Second),
 						},
 					},
@@ -919,7 +919,7 @@ func testActionsitresetAccountCDR(t *testing.T) {
 
 	if err := actsLclRpc.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
-	} else if tv := acc.BalanceMap[utils.VOICE].GetTotalValue(); tv != float64(10*time.Second) {
+	} else if tv := acc.BalanceMap[utils.MetaVoice].GetTotalValue(); tv != float64(10*time.Second) {
 		t.Errorf("Calling APIerSv1.GetBalance expected: %f, received: %f", float64(10*time.Second), tv)
 	}
 }
@@ -940,7 +940,7 @@ func testActionsitremoteSetAccount(t *testing.T) {
 	exp := &Account{
 		ID: accID,
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: []*Balance{{
+			utils.MetaMonetary: []*Balance{{
 				Value:  20,
 				Weight: 10,
 			}},

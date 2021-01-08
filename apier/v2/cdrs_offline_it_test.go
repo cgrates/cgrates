@@ -123,7 +123,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "test",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       10.0,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
@@ -137,8 +137,8 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 	var acnt *engine.Account
 	if err := cdrsOfflineRpc.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "test"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 10.0 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaMonetary][0].Value != 10.0 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaMonetary][0])
 	}
 
 	var thReply *engine.ThresholdProfile
@@ -146,7 +146,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 
 	//create a log action
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_LOG", Actions: []*utils.TPAction{
-		{Identifier: utils.LOG},
+		{Identifier: utils.MetaLog},
 	}}
 	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
@@ -216,11 +216,11 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	var reply string
 	acc := &utils.AttrSetActions{ActionsId: "ACT_TOPUP_TEST2", Actions: []*utils.TPAction{
-		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, BalanceId: "BalanceExpired1", Units: "5",
+		{Identifier: utils.TOPUP, BalanceType: utils.MetaMonetary, BalanceId: "BalanceExpired1", Units: "5",
 			ExpiryTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC).String(), BalanceWeight: "10", Weight: 20.0},
-		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, BalanceId: "BalanceExpired2", Units: "10",
+		{Identifier: utils.TOPUP, BalanceType: utils.MetaMonetary, BalanceId: "BalanceExpired2", Units: "10",
 			ExpiryTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC).String(), BalanceWeight: "10", Weight: 20.0},
-		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, BalanceId: "NewBalance", Units: "10",
+		{Identifier: utils.TOPUP, BalanceType: utils.MetaMonetary, BalanceId: "NewBalance", Units: "10",
 			ExpiryTime: utils.UNLIMITED, BalanceWeight: "10", Weight: 20.0},
 	}}
 	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetActions, acc, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
@@ -251,7 +251,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	if err := cdrsOfflineRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "test2"}, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].Len() != 1 {
+	} else if acnt.BalanceMap[utils.MetaMonetary].Len() != 1 {
 		t.Errorf("Unexpected balance received: %+v", utils.ToIJSON(acnt))
 	}
 
@@ -260,7 +260,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 
 	//create a log action
 	attrsA := &utils.AttrSetActions{ActionsId: "ACT_LOG", Actions: []*utils.TPAction{
-		{Identifier: utils.LOG},
+		{Identifier: utils.MetaLog},
 	}}
 	if err := cdrsOfflineRpc.Call(utils.APIerSv2SetActions, attrsA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
@@ -335,7 +335,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "specialTest",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       10.0,
 		Balance: map[string]interface{}{
 			utils.ID:     "SpecialBalance1",
@@ -354,8 +354,8 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 	if err := cdrsOfflineRpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "specialTest"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || len(acnt.BalanceMap[utils.MONETARY]) != 2 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY])
+	} else if len(acnt.BalanceMap) != 1 || len(acnt.BalanceMap[utils.MetaMonetary]) != 2 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaMonetary])
 	}
 
 	cgrEv := &utils.CGREvent{

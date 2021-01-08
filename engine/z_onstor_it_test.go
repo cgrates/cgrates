@@ -186,7 +186,7 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 			t.Errorf("Prefix: %s already in cache", prfx)
 		}
 	}
-	if err := onStor.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dst.Prefixes, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ReverseDestinationPrefix, dst.Prefixes, false); err != nil {
 		t.Error(err)
 	}
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
@@ -239,7 +239,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCAp := []string{"apl_MORE_MINUTES"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCAp, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCAp, itm)
@@ -248,7 +248,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 		onStor.dataDB.GetStorageType() != utils.INTERNAL {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ActionPlanPrefix, []string{ap.Id}, false); err != nil {
 		t.Error(err)
 	}
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
@@ -292,10 +292,10 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 	ats := ActionTriggers{
 		&ActionTrigger{
 			ID: "testOnStorITCacheActionTrigger",
-			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary),
 				Timings: make([]*RITiming, 0)},
 			ThresholdValue:    2,
-			ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
+			ThresholdType:     utils.TriggerMaxEventCounter,
 			ActionsID:         "TEST_ACTIONS",
 			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -306,7 +306,7 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCAt := []string{"atr_testOnStorITCacheActionTrigger"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCAt, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCAt, itm)
@@ -315,7 +315,7 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 		onStor.dataDB.GetStorageType() != utils.INTERNAL {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{atsID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.ActionTriggerPrefix, []string{atsID}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := Cache.Get(utils.CacheActionTriggers, atsID); !hasIt {
@@ -366,12 +366,12 @@ func testOnStorITHasData(t *testing.T) {
 		t.Error(err)
 	}
 	expectedRP := []string{"rpl_HasData"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(len(expectedRP), len(itm)) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedRP), len(itm))
 	}
-	if rcv, err := onStor.HasData(utils.RATING_PLAN_PREFIX, rp.Id, ""); err != nil {
+	if rcv, err := onStor.HasData(utils.RatingPlanPrefix, rp.Id, ""); err != nil {
 		t.Error(err)
 	} else if rcv != true {
 		t.Errorf("Expecting: true, received: %v", rcv)
@@ -467,7 +467,7 @@ func testOnStorITRatingPlan(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", rp, rcv)
 	}
 	expectedRP := []string{"rpl_HasData", "rpl_CRUDRatingPlan"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RATING_PLAN_PREFIX); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(len(expectedRP), len(itm)) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedRP), len(itm))
@@ -557,7 +557,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 	}
 
 	expectedCRPl := []string{"rpf_*out:test:1:trp"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RATING_PROFILE_PREFIX); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RatingProfilePrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCRPl, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCRPl, itm)
@@ -697,7 +697,7 @@ func testOnStorITActions(t *testing.T) {
 			ExpirationString: utils.UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type: utils.StringPointer(utils.MONETARY),
+				Type: utils.StringPointer(utils.MetaMonetary),
 				Uuid: utils.StringPointer(utils.GenUUID()),
 				Value: &utils.ValueFormula{Static: 10,
 					Params: make(map[string]interface{})},
@@ -721,7 +721,7 @@ func testOnStorITActions(t *testing.T) {
 			ExpirationString: utils.UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type: utils.StringPointer(utils.VOICE),
+				Type: utils.StringPointer(utils.MetaVoice),
 				Uuid: utils.StringPointer(utils.GenUUID()),
 				Value: &utils.ValueFormula{Static: 100,
 					Params: make(map[string]interface{})},
@@ -750,7 +750,7 @@ func testOnStorITActions(t *testing.T) {
 		acts, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.HasData(utils.ACTION_PREFIX, acts[0].Id, ""); err != nil {
+	if rcv, err := onStor.HasData(utils.ActionPrefix, acts[0].Id, ""); err != nil {
 		t.Error(err)
 	} else if rcv != true {
 		t.Errorf("Expecting: true, received: %v", rcv)
@@ -772,7 +772,7 @@ func testOnStorITActions(t *testing.T) {
 		}
 	}
 	expectedCA := []string{"act_MINI"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ActionPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCA, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCA, itm)
@@ -785,7 +785,7 @@ func testOnStorITActions(t *testing.T) {
 			ExpirationString: utils.UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type: utils.StringPointer(utils.MONETARY),
+				Type: utils.StringPointer(utils.MetaMonetary),
 				Uuid: utils.StringPointer(utils.GenUUID()),
 				Value: &utils.ValueFormula{Static: 10,
 					Params: make(map[string]interface{})},
@@ -809,7 +809,7 @@ func testOnStorITActions(t *testing.T) {
 			ExpirationString: utils.UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type: utils.StringPointer(utils.VOICE),
+				Type: utils.StringPointer(utils.MetaVoice),
 				Uuid: utils.StringPointer(utils.GenUUID()),
 				Value: &utils.ValueFormula{Static: 100,
 					Params: make(map[string]interface{})},
@@ -835,7 +835,7 @@ func testOnStorITActions(t *testing.T) {
 			ExpirationString: utils.UNLIMITED,
 			Weight:           20,
 			Balance: &BalanceFilter{
-				Type: utils.StringPointer(utils.VOICE),
+				Type: utils.StringPointer(utils.MetaVoice),
 				Uuid: utils.StringPointer(utils.GenUUID()),
 				Value: &utils.ValueFormula{Static: 200,
 					Params: make(map[string]interface{})},
@@ -975,10 +975,10 @@ func testOnStorITCRUDActionTriggers(t *testing.T) {
 	ats := ActionTriggers{
 		&ActionTrigger{
 			ID: "testOnStorITCRUDActionTriggers",
-			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary),
 				Timings: make([]*RITiming, 0)},
 			ThresholdValue:    2,
-			ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
+			ThresholdType:     utils.TriggerMaxEventCounter,
 			ActionsID:         "TEST_ACTIONS",
 			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -1149,7 +1149,7 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 func testOnStorITCRUDAccount(t *testing.T) {
 	acc := &Account{
 		ID:         utils.ConcatenatedKey("cgrates.org", "account2"),
-		BalanceMap: map[string]Balances{utils.MONETARY: {&Balance{Value: 10, Weight: 10}}},
+		BalanceMap: map[string]Balances{utils.MetaMonetary: {&Balance{Value: 10, Weight: 10}}},
 	}
 	if _, rcvErr := onStor.GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
@@ -1161,10 +1161,10 @@ func testOnStorITCRUDAccount(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acc.ID, rcv.ID) {
 		t.Errorf("Expecting: %v, received: %v", acc.ID, rcv.ID)
-	} else if !reflect.DeepEqual(acc.BalanceMap[utils.MONETARY][0].Value, rcv.BalanceMap[utils.MONETARY][0].Value) {
-		t.Errorf("Expecting: %v, received: %v", acc.BalanceMap[utils.MONETARY][0].Value, rcv.BalanceMap[utils.MONETARY][0].Value)
-	} else if !reflect.DeepEqual(acc.BalanceMap[utils.MONETARY][0].Weight, rcv.BalanceMap[utils.MONETARY][0].Weight) {
-		t.Errorf("Expecting: %v, received: %v", acc.BalanceMap[utils.MONETARY][0].Weight, rcv.BalanceMap[utils.MONETARY][0].Weight)
+	} else if !reflect.DeepEqual(acc.BalanceMap[utils.MetaMonetary][0].Value, rcv.BalanceMap[utils.MetaMonetary][0].Value) {
+		t.Errorf("Expecting: %v, received: %v", acc.BalanceMap[utils.MetaMonetary][0].Value, rcv.BalanceMap[utils.MetaMonetary][0].Value)
+	} else if !reflect.DeepEqual(acc.BalanceMap[utils.MetaMonetary][0].Weight, rcv.BalanceMap[utils.MetaMonetary][0].Weight) {
+		t.Errorf("Expecting: %v, received: %v", acc.BalanceMap[utils.MetaMonetary][0].Weight, rcv.BalanceMap[utils.MetaMonetary][0].Weight)
 	}
 	if err := onStor.RemoveAccount(acc.ID); err != nil {
 		t.Error(err)
@@ -1412,7 +1412,7 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 	} else if !reflect.DeepEqual(eAcnts, rcv) {
 		t.Errorf("Expecting: %v, received: %v", eAcnts, rcv)
 	}
-	if _, err := onStor.DataDB().GetVersions(utils.NOT_AVAILABLE); err != utils.ErrNotFound { //query non-existent
+	if _, err := onStor.DataDB().GetVersions(utils.NotAvailable); err != utils.ErrNotFound { //query non-existent
 		t.Error(err)
 	}
 	eAcnts[utils.Accounts] = 2
@@ -2330,7 +2330,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 			ID:        "VoiceBalance",
 			FilterIDs: []string{"FLTR_RES_GR2"},
 			Weight:    10,
-			Type:      utils.VOICE,
+			Type:      utils.MetaVoice,
 			Units: &utils.Decimal{
 				new(decimal.Big).SetUint64(10),
 			},

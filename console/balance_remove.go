@@ -50,7 +50,7 @@ func (self *CmdRemoveBalance) RpcMethod() string {
 
 func (self *CmdRemoveBalance) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrAddBalance{BalanceType: utils.MONETARY, Overwrite: false}
+		self.rpcParams = &v1.AttrAddBalance{BalanceType: utils.MetaMonetary, Overwrite: false}
 	}
 	return self.rpcParams
 }

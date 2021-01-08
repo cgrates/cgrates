@@ -175,7 +175,7 @@ func testSessionSv1ItGetThreshold(t *testing.T) {
 	expectedAccount := &engine.Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
-			utils.MONETARY: []*engine.Balance{
+			utils.MetaMonetary: []*engine.Balance{
 				{
 					Value:  10,
 					Weight: 10,
@@ -194,11 +194,11 @@ func testSessionSv1ItGetThreshold(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s",
 			expectedAccount.ID, reply2.ID)
 	} else if !reflect.DeepEqual(
-		expectedAccount.BalanceMap[utils.MONETARY][0].Value,
-		reply2.BalanceMap[utils.MONETARY][0].Value) {
+		expectedAccount.BalanceMap[utils.MetaMonetary][0].Value,
+		reply2.BalanceMap[utils.MetaMonetary][0].Value) {
 		t.Errorf("Expecting: %f, received: %f",
-			expectedAccount.BalanceMap[utils.MONETARY][0].Value,
-			reply2.BalanceMap[utils.MONETARY][0].Value)
+			expectedAccount.BalanceMap[utils.MetaMonetary][0].Value,
+			reply2.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 }
 
@@ -236,7 +236,7 @@ func testSessionSv1ItAuth(t *testing.T) {
 	expectedAccount := &engine.Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
-			utils.MONETARY: []*engine.Balance{
+			utils.MetaMonetary: []*engine.Balance{
 				{
 					Value:  20,
 					Weight: 10,
@@ -255,11 +255,11 @@ func testSessionSv1ItAuth(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s",
 			expectedAccount.ID, reply.ID)
 	} else if !reflect.DeepEqual(
-		expectedAccount.BalanceMap[utils.MONETARY][0].Value,
-		reply.BalanceMap[utils.MONETARY][0].Value) {
+		expectedAccount.BalanceMap[utils.MetaMonetary][0].Value,
+		reply.BalanceMap[utils.MetaMonetary][0].Value) {
 		t.Errorf("Expecting: %f, received: %f",
-			expectedAccount.BalanceMap[utils.MONETARY][0].Value,
-			reply.BalanceMap[utils.MONETARY][0].Value)
+			expectedAccount.BalanceMap[utils.MetaMonetary][0].Value,
+			reply.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 }
 
@@ -276,7 +276,7 @@ func testSessionSv1ItInitiateSession(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -301,7 +301,7 @@ func testSessionSv1ItInitiateSession(t *testing.T) {
 	expectedAccount := &engine.Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
-			utils.MONETARY: []*engine.Balance{
+			utils.MetaMonetary: []*engine.Balance{
 				{
 					Value:  29.898000,
 					Weight: 10,
@@ -320,11 +320,11 @@ func testSessionSv1ItInitiateSession(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s",
 			expectedAccount.ID, reply.ID)
 	} else if !reflect.DeepEqual(
-		expectedAccount.BalanceMap[utils.MONETARY][0].Value,
-		reply.BalanceMap[utils.MONETARY][0].Value) {
+		expectedAccount.BalanceMap[utils.MetaMonetary][0].Value,
+		reply.BalanceMap[utils.MetaMonetary][0].Value) {
 		t.Errorf("Expecting: %f, received: %f",
-			expectedAccount.BalanceMap[utils.MONETARY][0].Value,
-			reply.BalanceMap[utils.MONETARY][0].Value)
+			expectedAccount.BalanceMap[utils.MetaMonetary][0].Value,
+			reply.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 }
 
@@ -360,7 +360,7 @@ func testSessionSv1ItTerminateSession(t *testing.T) {
 	expectedAccount := &engine.Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
-			utils.MONETARY: []*engine.Balance{
+			utils.MetaMonetary: []*engine.Balance{
 				{
 					Value:  39.796000,
 					Weight: 10,
@@ -379,11 +379,11 @@ func testSessionSv1ItTerminateSession(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s",
 			expectedAccount.ID, reply2.ID)
 	} else if !reflect.DeepEqual(
-		expectedAccount.BalanceMap[utils.MONETARY][0].Value,
-		reply2.BalanceMap[utils.MONETARY][0].Value) {
+		expectedAccount.BalanceMap[utils.MetaMonetary][0].Value,
+		reply2.BalanceMap[utils.MetaMonetary][0].Value) {
 		t.Errorf("Expecting: %f, received: %f",
-			expectedAccount.BalanceMap[utils.MONETARY][0].Value,
-			reply2.BalanceMap[utils.MONETARY][0].Value)
+			expectedAccount.BalanceMap[utils.MetaMonetary][0].Value,
+			reply2.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 }
 
@@ -434,7 +434,7 @@ func testSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.DATA,
+					utils.ToR:          utils.MetaData,
 					utils.OriginID:     "TestSessionSv1ItInitNotFoundThreshold",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1002",
@@ -487,7 +487,7 @@ func testSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.DATA,
+					utils.ToR:          utils.MetaData,
 					utils.OriginID:     "TestSessionSv1ItInitNotFoundThreshold",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1002",
@@ -573,7 +573,7 @@ func testSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.DATA,
+					utils.ToR:          utils.MetaData,
 					utils.OriginID:     "TestSessionSv1ItInitNotFoundThreshold",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1002",
@@ -627,7 +627,7 @@ func testSessionSv1ItTerminateNotFoundThresholdAndStats(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.DATA,
+					utils.ToR:          utils.MetaData,
 					utils.OriginID:     "TestSessionSv1ItInitNotFoundThreshold",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1002",

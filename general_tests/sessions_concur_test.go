@@ -157,7 +157,7 @@ func testSCncrRunSessions(t *testing.T) {
 			argsAddBalance := &v1.AttrAddBalance{
 				Tenant:      "cgrates.org",
 				Account:     acntID,
-				BalanceType: utils.VOICE,
+				BalanceType: utils.MetaVoice,
 				Value:       float64(bufferTopup.Nanoseconds()),
 				Balance: map[string]interface{}{
 					utils.ID: "BUFFER",
@@ -184,9 +184,9 @@ func testSCncrRunSessions(t *testing.T) {
 			Account: acntID}
 		if err = sCncrRPC.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 			return
-		} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 1000000.0 { // eliminate rounding errors
+		} else if vcBlnc := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 1000000.0 { // eliminate rounding errors
 			t.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
-		} else if mnBlnc := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); mnBlnc != 0 {
+		} else if mnBlnc := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); mnBlnc != 0 {
 			t.Errorf("unexpected monetary balance received: %+v", utils.ToIJSON(acnt))
 		}
 	}
@@ -208,7 +208,7 @@ func testRunSession(t *testing.T) {
 	argsAddBalance := &v1.AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     acntID,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       float64(mainTopup.Nanoseconds()),
 		Balance: map[string]interface{}{
 			utils.ID:     "MAIN",

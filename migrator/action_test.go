@@ -54,7 +54,7 @@ func TestV1ActionsAsActions2(t *testing.T) {
 	v1act := &v1Action{
 		Id:               "ID",
 		ActionType:       "*log",
-		BalanceType:      utils.MONETARY,
+		BalanceType:      utils.MetaMonetary,
 		ExtraParameters:  "",
 		ExpirationString: "",
 		Balance: &v1Balance{
@@ -62,7 +62,7 @@ func TestV1ActionsAsActions2(t *testing.T) {
 			Id:       utils.MetaDefault,
 			Value:    10,
 			Weight:   30,
-			Category: utils.CALL,
+			Category: utils.Call,
 		},
 	}
 
@@ -75,10 +75,10 @@ func TestV1ActionsAsActions2(t *testing.T) {
 		Balance: &engine.BalanceFilter{
 			Uuid:       utils.StringPointer("UUID1"),
 			ID:         utils.StringPointer(utils.MetaDefault),
-			Type:       utils.StringPointer(utils.MONETARY),
+			Type:       utils.StringPointer(utils.MetaMonetary),
 			Value:      &utils.ValueFormula{Static: 10},
 			Weight:     utils.Float64Pointer(30),
-			Categories: utils.StringMapPointer(utils.ParseStringMap(utils.CALL)),
+			Categories: utils.StringMapPointer(utils.ParseStringMap(utils.Call)),
 		},
 	}
 	newact := v1act.AsAction()

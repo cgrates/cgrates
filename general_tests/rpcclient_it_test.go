@@ -315,7 +315,7 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 	var stats utils.CacheStats
 	if err := rpcRAL1.Call(utils.APIerSv2GetCacheStats, utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
-	} else if stats.LastRatingLoadID != utils.NOT_AVAILABLE || stats.LastAccountingLoadID != utils.NOT_AVAILABLE {
+	} else if stats.LastRatingLoadID != utils.NotAvailable || stats.LastAccountingLoadID != utils.NotAvailable {
 		t.Errorf("Received unexpected stats: %+v", stats)
 	}
 	var loadInst utils.LoadInstance

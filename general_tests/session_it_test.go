@@ -132,7 +132,7 @@ func testSesItAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      sesTenant,
 		Account:     sesAccount,
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       0,
 		Balance: map[string]interface{}{
 			utils.ID:            "TestDynamicDebitBalance",
@@ -145,7 +145,7 @@ func testSesItAddVoiceBalance(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MONETARY, 0) })
+	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MetaMonetary, 0) })
 }
 
 func testSesItInitSession(t *testing.T) {
@@ -158,7 +158,7 @@ func testSesItInitSession(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       sesTenant,
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestRefund",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: sesAccount,
@@ -179,7 +179,7 @@ func testSesItInitSession(t *testing.T) {
 	} else if rply1.MaxUsage != nil && *rply1.MaxUsage != 0 {
 		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
 	}
-	t.Run("TestInitSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MONETARY, 0) })
+	t.Run("TestInitSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MetaMonetary, 0) })
 }
 
 func testSesItTerminateSession(t *testing.T) {
@@ -192,7 +192,7 @@ func testSesItTerminateSession(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       sesTenant,
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestRefund",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: sesAccount,
@@ -218,7 +218,7 @@ func testSesItTerminateSession(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	t.Run("TestTerminateSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MONETARY, 0) })
+	t.Run("TestTerminateSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MetaMonetary, 0) })
 }
 
 func testSesItStopCgrEngine(t *testing.T) {

@@ -212,7 +212,7 @@ func testCDRsOnExpLoadDefaultCharger(t *testing.T) {
 func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 	testCdr := &engine.CDR{
 		CGRID:       utils.Sha1("NoOnlineExport", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 		OriginID:    "TestCDRsOnExpDisableOnlineExport",
 		OriginHost:  "192.168.1.0",
 		Source:      "UNKNOWN",
@@ -255,7 +255,7 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	testCdr1 := &engine.CDR{
 		CGRID:       httpCGRID,
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 		OriginID:    "httpjsonrpc1",
 		OriginHost:  "192.168.1.1",
 		Source:      "UNKNOWN",
@@ -375,7 +375,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 	time.Sleep(2 * time.Second)
 	testCdr := &engine.CDR{
 		CGRID:       amqpCGRID,
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 		OriginID:    "amqpreconnect",
 		OriginHost:  "192.168.1.1",
 		Source:      "UNKNOWN",

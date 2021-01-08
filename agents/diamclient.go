@@ -56,7 +56,7 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		}
 		for _, iAddr := range addrs {
 			cfg.HostIPAddresses = append(cfg.HostIPAddresses, datatype.Address(
-				net.ParseIP(strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0]))) // address came in form x.y.z.t/24
+				net.ParseIP(strings.Split(iAddr.String(), utils.HDRValSep)[0]))) // address came in form x.y.z.t/24
 		}
 	}
 	dSM := sm.New(cfg)

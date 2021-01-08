@@ -220,7 +220,7 @@ func testApierRpcConn(t *testing.T) {
 // Test here TPTiming APIs
 func testApierTPTiming(t *testing.T) {
 	// ALWAYS,*any,*any,*any,*any,00:00:00
-	tmAlways := &utils.ApierTPTiming{TPid: utils.TEST_SQL,
+	tmAlways := &utils.ApierTPTiming{TPid: utils.TestSQL,
 		ID:        "ALWAYS",
 		Years:     utils.MetaAny,
 		Months:    utils.MetaAny,
@@ -232,7 +232,7 @@ func testApierTPTiming(t *testing.T) {
 	*tmAlways2 = *tmAlways
 	tmAlways2.ID = "ALWAYS2"
 	tmAsap := &utils.ApierTPTiming{
-		TPid:      utils.TEST_SQL,
+		TPid:      utils.TestSQL,
 		ID:        "ASAP",
 		Years:     utils.MetaAny,
 		Months:    utils.MetaAny,
@@ -289,9 +289,9 @@ func testApierTPTiming(t *testing.T) {
 // Test here TPTiming APIs
 func testApierTPDestination(t *testing.T) {
 	var reply string
-	dstDe := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "GERMANY", Prefixes: []string{"+49"}}
-	dstDeMobile := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "GERMANY_MOBILE", Prefixes: []string{"+4915", "+4916", "+4917"}}
-	dstFs := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "FS_USERS", Prefixes: []string{"10"}}
+	dstDe := &utils.TPDestination{TPid: utils.TestSQL, ID: "GERMANY", Prefixes: []string{"+49"}}
+	dstDeMobile := &utils.TPDestination{TPid: utils.TestSQL, ID: "GERMANY_MOBILE", Prefixes: []string{"+4915", "+4916", "+4917"}}
+	dstFs := &utils.TPDestination{TPid: utils.TestSQL, ID: "FS_USERS", Prefixes: []string{"10"}}
 	dstDe2 := new(utils.TPDestination)
 	*dstDe2 = *dstDe // Data which we use for remove, still keeping the sample data to check proper loading
 	dstDe2.ID = "GERMANY2"
@@ -343,7 +343,7 @@ func testApierTPDestination(t *testing.T) {
 // Test here TPRateRALs APIs
 func testApierTPRate(t *testing.T) {
 	var reply string
-	rt := &utils.TPRateRALs{TPid: utils.TEST_SQL, ID: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
+	rt := &utils.TPRateRALs{TPid: utils.TestSQL, ID: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
 		{ConnectFee: 0, Rate: 0, RateUnit: "60s", RateIncrement: "60s", GroupIntervalStart: "0s"},
 	}}
 	rt2 := new(utils.TPRateRALs)
@@ -394,15 +394,15 @@ func testApierTPRate(t *testing.T) {
 // Test here TPDestinationRate APIs
 func testApierTPDestinationRate(t *testing.T) {
 	var reply string
-	dr := &utils.TPDestinationRate{TPid: utils.TEST_SQL, ID: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
+	dr := &utils.TPDestinationRate{TPid: utils.TestSQL, ID: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
 		{DestinationId: "FS_USERS", RateId: "RT_FS_USERS", RoundingMethod: "*up", RoundingDecimals: 2},
 	}}
-	drDe := &utils.TPDestinationRate{TPid: utils.TEST_SQL, ID: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
+	drDe := &utils.TPDestinationRate{TPid: utils.TestSQL, ID: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
 		{DestinationId: "GERMANY_MOBILE", RateId: "RT_FS_USERS", RoundingMethod: "*up", RoundingDecimals: 2},
 	}}
 	dr2 := new(utils.TPDestinationRate)
 	*dr2 = *dr
-	dr2.ID = utils.TEST_SQL
+	dr2.ID = utils.TestSQL
 	for _, d := range []*utils.TPDestinationRate{dr, dr2, drDe} {
 		if err := rater.Call(utils.APIerSv1SetTPDestinationRate, d, &reply); err != nil {
 			t.Error("Got error on APIerSv1.SetTPDestinationRate: ", err.Error())
@@ -448,12 +448,12 @@ func testApierTPDestinationRate(t *testing.T) {
 // Test here TPRatingPlan APIs
 func testApierTPRatingPlan(t *testing.T) {
 	var reply string
-	rp := &utils.TPRatingPlan{TPid: utils.TEST_SQL, ID: "RETAIL1", RatingPlanBindings: []*utils.TPRatingPlanBinding{
+	rp := &utils.TPRatingPlan{TPid: utils.TestSQL, ID: "RETAIL1", RatingPlanBindings: []*utils.TPRatingPlanBinding{
 		{DestinationRatesId: "DR_FREESWITCH_USERS", TimingId: "ALWAYS", Weight: 10},
 	}}
 	rpTst := new(utils.TPRatingPlan)
 	*rpTst = *rp
-	rpTst.ID = utils.TEST_SQL
+	rpTst.ID = utils.TestSQL
 	for _, rpl := range []*utils.TPRatingPlan{rp, rpTst} {
 		if err := rater.Call(utils.APIerSv1SetTPRatingPlan, rpl, &reply); err != nil {
 			t.Error("Got error on APIerSv1.SetTPRatingPlan: ", err.Error())
@@ -500,8 +500,8 @@ func testApierTPRatingPlan(t *testing.T) {
 func testApierTPRatingProfile(t *testing.T) {
 	var reply string
 	rpf := &utils.TPRatingProfile{
-		TPid:     utils.TEST_SQL,
-		LoadId:   utils.TEST_SQL,
+		TPid:     utils.TestSQL,
+		LoadId:   utils.TestSQL,
 		Tenant:   "cgrates.org",
 		Category: "call",
 		Subject:  utils.MetaAny,
@@ -513,7 +513,7 @@ func testApierTPRatingProfile(t *testing.T) {
 	}
 	rpfTst := new(utils.TPRatingProfile)
 	*rpfTst = *rpf
-	rpfTst.Subject = utils.TEST_SQL
+	rpfTst.Subject = utils.TestSQL
 	for _, rp := range []*utils.TPRatingProfile{rpf, rpfTst} {
 		if err := rater.Call(utils.APIerSv1SetTPRatingProfile, rp, &reply); err != nil {
 			t.Error("Got error on APIerSv1.SetTPRatingProfile: ", err.Error())
@@ -548,7 +548,7 @@ func testApierTPRatingProfile(t *testing.T) {
 	}
 	// Test getLoadIds
 	var rplyRpIds []string
-	expectedRpIds := []string{utils.TEST_SQL}
+	expectedRpIds := []string{utils.TestSQL}
 	if err := rater.Call(utils.APIerSv1GetTPRatingProfileLoadIds, &utils.AttrTPRatingProfileIds{TPid: rpf.TPid}, &rplyRpIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPRatingProfileLoadIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds) {
@@ -558,21 +558,21 @@ func testApierTPRatingProfile(t *testing.T) {
 
 func testApierTPActions(t *testing.T) {
 	var reply string
-	act := &utils.TPActions{TPid: utils.TEST_SQL,
+	act := &utils.TPActions{TPid: utils.TestSQL,
 		ID: "PREPAID_10", Actions: []*utils.TPAction{
-			{Identifier: "*topup_reset", BalanceType: utils.MONETARY,
+			{Identifier: "*topup_reset", BalanceType: utils.MetaMonetary,
 				Units: "10", ExpiryTime: "*unlimited",
 				DestinationIds: utils.MetaAny, BalanceWeight: "10", Weight: 10},
 		}}
-	actWarn := &utils.TPActions{TPid: utils.TEST_SQL, ID: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
+	actWarn := &utils.TPActions{TPid: utils.TestSQL, ID: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
 		{Identifier: "*http_post", ExtraParameters: "http://localhost:8000", Weight: 10},
 	}}
-	actLog := &utils.TPActions{TPid: utils.TEST_SQL, ID: "LOG_BALANCE", Actions: []*utils.TPAction{
+	actLog := &utils.TPActions{TPid: utils.TestSQL, ID: "LOG_BALANCE", Actions: []*utils.TPAction{
 		{Identifier: "*log", Weight: 10},
 	}}
 	actTst := new(utils.TPActions)
 	*actTst = *act
-	actTst.ID = utils.TEST_SQL
+	actTst.ID = utils.TestSQL
 	for _, ac := range []*utils.TPActions{act, actWarn, actTst, actLog} {
 		if err := rater.Call(utils.APIerSv1SetTPActions, ac, &reply); err != nil {
 			t.Error("Got error on APIerSv1.SetTPActions: ", err.Error())
@@ -620,12 +620,12 @@ func testApierTPActions(t *testing.T) {
 
 func testApierTPActionPlan(t *testing.T) {
 	var reply string
-	at := &utils.TPActionPlan{TPid: utils.TEST_SQL, ID: "PREPAID_10", ActionPlan: []*utils.TPActionTiming{
+	at := &utils.TPActionPlan{TPid: utils.TestSQL, ID: "PREPAID_10", ActionPlan: []*utils.TPActionTiming{
 		{ActionsId: "PREPAID_10", TimingId: "ASAP", Weight: 10},
 	}}
 	atTst := new(utils.TPActionPlan)
 	*atTst = *at
-	atTst.ID = utils.TEST_SQL
+	atTst.ID = utils.TestSQL
 	for _, act := range []*utils.TPActionPlan{at, atTst} {
 		if err := rater.Call(utils.APIerSv1SetTPActionPlan, act, &reply); err != nil {
 			t.Error("Got error on APIerSv1.SetTPActionPlan: ", err.Error())
@@ -671,12 +671,12 @@ func testApierTPActionPlan(t *testing.T) {
 func testApierTPActionTriggers(t *testing.T) {
 	var reply string
 	at := &utils.TPActionTriggers{
-		TPid: utils.TEST_SQL,
+		TPid: utils.TestSQL,
 		ID:   "STANDARD_TRIGGERS",
 		ActionTriggers: []*utils.TPActionTrigger{{
 			Id:             "STANDARD_TRIGGERS",
 			UniqueID:       "MYFIRSTTRIGGER",
-			BalanceType:    utils.MONETARY,
+			BalanceType:    utils.MetaMonetary,
 			ThresholdType:  "*min_balance",
 			ThresholdValue: 2,
 			ActionsId:      "LOG_BALANCE",
@@ -685,8 +685,8 @@ func testApierTPActionTriggers(t *testing.T) {
 	}
 	atTst := new(utils.TPActionTriggers)
 	*atTst = *at
-	atTst.ID = utils.TEST_SQL
-	atTst.ActionTriggers[0].Id = utils.TEST_SQL
+	atTst.ID = utils.TestSQL
+	atTst.ActionTriggers[0].Id = utils.TestSQL
 	for _, act := range []*utils.TPActionTriggers{at, atTst} {
 		if err := rater.Call(utils.APIerSv1SetTPActionTriggers, act, &reply); err != nil {
 			t.Error("Got error on APIerSv1.SetTPActionTriggers: ", err.Error())
@@ -732,19 +732,19 @@ func testApierTPActionTriggers(t *testing.T) {
 // Test here TPAccountActions APIs
 func testApierTPAccountActions(t *testing.T) {
 	var reply string
-	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
+	aa1 := &utils.TPAccountActions{TPid: utils.TestSQL, LoadId: utils.TestSQL, Tenant: "cgrates.org",
 		Account: "1001", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	aa2 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
+	aa2 := &utils.TPAccountActions{TPid: utils.TestSQL, LoadId: utils.TestSQL, Tenant: "cgrates.org",
 		Account: "1002", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	aa3 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
+	aa3 := &utils.TPAccountActions{TPid: utils.TestSQL, LoadId: utils.TestSQL, Tenant: "cgrates.org",
 		Account: "1003", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	aa4 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
+	aa4 := &utils.TPAccountActions{TPid: utils.TestSQL, LoadId: utils.TestSQL, Tenant: "cgrates.org",
 		Account: "1004", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	aa5 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
+	aa5 := &utils.TPAccountActions{TPid: utils.TestSQL, LoadId: utils.TestSQL, Tenant: "cgrates.org",
 		Account: "1005", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aaTst := new(utils.TPAccountActions)
 	*aaTst = *aa1
-	aaTst.Account = utils.TEST_SQL
+	aaTst.Account = utils.TestSQL
 	for _, aact := range []*utils.TPAccountActions{aa1, aa2, aa3, aa4, aa5, aaTst} {
 		if err := rater.Call(utils.APIerSv1SetTPAccountActions, aact, &reply); err != nil {
 			t.Error("Got error on APIerSv1.SetTPAccountActions: ", err.Error())
@@ -779,7 +779,7 @@ func testApierTPAccountActions(t *testing.T) {
 	}
 	// Test getLoadIds
 	var rplyRpIds []string
-	expectedRpIds := []string{utils.TEST_SQL}
+	expectedRpIds := []string{utils.TestSQL}
 	if err := rater.Call(utils.APIerSv1GetTPAccountActionLoadIds, &AttrGetTPAccountActionIds{TPid: aaTst.TPid}, &rplyRpIds); err != nil {
 		t.Error("Calling APIerSv1.GetTPAccountActionLoadIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds) {
@@ -790,7 +790,7 @@ func testApierTPAccountActions(t *testing.T) {
 // Test here LoadRatingPlan
 func testApierLoadRatingPlan(t *testing.T) {
 	var reply string
-	if err := rater.Call(utils.APIerSv1LoadRatingPlan, &AttrLoadRatingPlan{TPid: utils.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1LoadRatingPlan, &AttrLoadRatingPlan{TPid: utils.TestSQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadRatingPlan got reply: ", reply)
@@ -801,7 +801,7 @@ func testApierLoadRatingPlan(t *testing.T) {
 func testApierLoadRatingProfile(t *testing.T) {
 	var reply string
 	rpf := &utils.TPRatingProfile{
-		TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL,
+		TPid: utils.TestSQL, LoadId: utils.TestSQL,
 		Tenant: "cgrates.org", Category: "call", Subject: "*any"}
 	if err := rater.Call(utils.APIerSv1LoadRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingProfile: ", err.Error())
@@ -813,7 +813,7 @@ func testApierLoadRatingProfile(t *testing.T) {
 func testApierLoadRatingProfileWithoutTenant(t *testing.T) {
 	var reply string
 	rpf := &utils.TPRatingProfile{
-		TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL,
+		TPid: utils.TestSQL, LoadId: utils.TestSQL,
 		Category: "call", Subject: "*any"}
 	if err := rater.Call(utils.APIerSv1LoadRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingProfile: ", err.Error())
@@ -833,7 +833,7 @@ func testApierLoadAccountActions(t *testing.T) {
 		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 	var reply string
-	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001"}
+	aa1 := &utils.TPAccountActions{TPid: utils.TestSQL, LoadId: utils.TestSQL, Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call(utils.APIerSv1LoadAccountActions, aa1, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadAccountActions: ", err.Error())
 	} else if reply != utils.OK {
@@ -1149,43 +1149,43 @@ func testApierRemoveRatingPlan(t *testing.T) {
 // Test here AddBalance
 func testApierAddBalance(t *testing.T) {
 	var reply string
-	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceType: utils.MONETARY, Value: 1.5}
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceType: utils.MetaMonetary, Value: 1.5}
 	if err := rater.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan", BalanceType: utils.MONETARY, Value: 1.5}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan", BalanceType: utils.MetaMonetary, Value: 1.5}
 	if err := rater.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan2", BalanceType: utils.MONETARY, Value: 1.5}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan2", BalanceType: utils.MetaMonetary, Value: 1.5}
 	if err := rater.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: utils.MONETARY, Value: 1.5}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: utils.MetaMonetary, Value: 1.5}
 	if err := rater.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: utils.MONETARY, Value: 2.1}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: utils.MetaMonetary, Value: 2.1}
 	if err := rater.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: utils.MONETARY, Value: 2.1}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: utils.MetaMonetary, Value: 2.1}
 	if err := rater.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: utils.MONETARY, Value: 1, Overwrite: true}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: utils.MetaMonetary, Value: 1, Overwrite: true}
 	if err := rater.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
@@ -1230,7 +1230,7 @@ func testApierExecuteActionWithoutTenant(t *testing.T) {
 }
 
 func testApierSetActions(t *testing.T) {
-	act1 := &V1TPAction{Identifier: utils.TOPUP_RESET, BalanceType: utils.MONETARY, Units: 75.0, ExpiryTime: utils.UNLIMITED, Weight: 20.0}
+	act1 := &V1TPAction{Identifier: utils.TOPUP_RESET, BalanceType: utils.MetaMonetary, Units: 75.0, ExpiryTime: utils.UNLIMITED, Weight: 20.0}
 	attrs1 := &V1AttrSetActions{ActionsId: "ACTS_1", Actions: []*V1TPAction{act1}}
 	reply1 := utils.EmptyString
 	if err := rater.Call(utils.APIerSv1SetActions, &attrs1, &reply1); err != nil {
@@ -1246,7 +1246,7 @@ func testApierSetActions(t *testing.T) {
 
 func testApierGetActions(t *testing.T) {
 	expectActs := []*utils.TPAction{
-		{Identifier: utils.TOPUP_RESET, BalanceType: utils.MONETARY,
+		{Identifier: utils.TOPUP_RESET, BalanceType: utils.MetaMonetary,
 			Units: "75", BalanceWeight: "0", BalanceBlocker: "false",
 			BalanceDisabled: "false", ExpiryTime: utils.UNLIMITED, Weight: 20.0}}
 
@@ -1276,14 +1276,14 @@ func testApierSetActionPlan(t *testing.T) {
 // Test here AddTriggeredAction
 func testApierAddTriggeredAction(t *testing.T) {
 	var reply string
-	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "dan32", BalanceType: utils.MONETARY, Value: 1.5}
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "dan32", BalanceType: utils.MetaMonetary, Value: 1.5}
 	if err := rater.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.AddBalance received: %s", reply)
 	}
 	// Add balance to a previously known account
-	attrsAddTrigger := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan32", BalanceType: utils.MONETARY,
+	attrsAddTrigger := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan32", BalanceType: utils.MetaMonetary,
 		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationIds: utils.MetaAny, Weight: 10, ActionsId: "WARN_VIA_HTTP"}
 	if err := rater.Call(utils.APIerSv1AddTriggeredAction, attrsAddTrigger, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddTriggeredAction: ", err.Error())
@@ -1516,33 +1516,33 @@ func testApierGetAccount(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
-		t.Errorf("Calling APIerSv1.GetBalance expected: 11.5, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
+		t.Errorf("Calling APIerSv1.GetBalance expected: 11.5, received: %f", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}
 	if err := rater.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 1.5 {
-		t.Errorf("Calling APIerSv1.GetAccount expected: 1.5, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() != 1.5 {
+		t.Errorf("Calling APIerSv1.GetAccount expected: 1.5, received: %f", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	// The one we have topped up though executeAction
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11.5 {
-		t.Errorf("Calling APIerSv1.GetAccount expected: 10, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() != 11.5 {
+		t.Errorf("Calling APIerSv1.GetAccount expected: 10, received: %f", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan3"}
 	if err := rater.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 3.6 {
-		t.Errorf("Calling APIerSv1.GetAccount expected: 3.6, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() != 3.6 {
+		t.Errorf("Calling APIerSv1.GetAccount expected: 3.6, received: %f", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan6"}
 	if err := rater.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 1 {
-		t.Errorf("Calling APIerSv1.GetAccount expected: 1, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() != 1 {
+		t.Errorf("Calling APIerSv1.GetAccount expected: 1, received: %f", reply.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -1555,7 +1555,7 @@ func testApierTriggersExecute(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
 	}
-	attrAddBlnc := &AttrAddBalance{Tenant: "cgrates.org", Account: "1008", BalanceType: utils.MONETARY, Value: 2}
+	attrAddBlnc := &AttrAddBalance{Tenant: "cgrates.org", Account: "1008", BalanceType: utils.MetaMonetary, Value: 2}
 	if err := rater.Call(utils.APIerSv1AddBalance, attrAddBlnc, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
 	} else if reply != utils.OK {
@@ -1705,8 +1705,8 @@ func testApierGetAccountAfterLoad(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call(utils.APIerSv2GetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 13 {
-		t.Errorf("Calling APIerSv1.GetBalance expected: 13, received: %v \n\n for:%s", reply.BalanceMap[utils.MONETARY].GetTotalValue(), utils.ToJSON(reply))
+	} else if reply.BalanceMap[utils.MetaMonetary].GetTotalValue() != 13 {
+		t.Errorf("Calling APIerSv1.GetBalance expected: 13, received: %v \n\n for:%s", reply.BalanceMap[utils.MetaMonetary].GetTotalValue(), utils.ToJSON(reply))
 	}
 }
 
@@ -1767,7 +1767,7 @@ func testApierCdrServer(t *testing.T) {
 		utils.SetupTime:  []string{"2013-11-07T08:42:23Z"},
 		utils.AnswerTime: []string{"2013-11-07T08:42:26Z"}, utils.Usage: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
-		cdrForm.Set(utils.Source, utils.TEST_SQL)
+		cdrForm.Set(utils.Source, utils.TestSQL)
 		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_http", "127.0.0.1:2080"), cdrForm); err != nil {
 			t.Error(err.Error())
 		}
@@ -1788,7 +1788,7 @@ func testApierITGetCdrs(t *testing.T) {
 func testApierITProcessCdr(t *testing.T) {
 	var reply string
 	cdr := &engine.CDRWithOpts{
-		CDR: &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
+		CDR: &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf",
 			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.MetaRated, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 			Destination: "1002",
 			SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.MetaDefault,
@@ -1827,7 +1827,7 @@ func testApierGetCallCostLog(t *testing.T) {
 		CDR: &engine.CDR{
 			CGRID:       "Cdr1",
 			OrderID:     123,
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			OriginID:    "OriginCDR1",
 			OriginHost:  "192.168.1.1",
 			Source:      "test",
@@ -2069,16 +2069,16 @@ func testApierStartStopServiceStatus(t *testing.T) {
 func testApierSetRatingProfileWithoutTenant(t *testing.T) {
 	var reply string
 	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan4"}
-	rpf := &utils.AttrSetRatingProfile{Category: utils.CALL, Subject: "dan3", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
+	rpf := &utils.AttrSetRatingProfile{Category: utils.Call, Subject: "dan3", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
 	if err := rater.Call(utils.APIerSv1SetRatingProfile, &rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.SetRatingProfile got reply: ", reply)
 	}
-	expectedID := utils.ConcatenatedKey(utils.META_OUT, "cgrates.org", utils.CALL, "dan3")
+	expectedID := utils.ConcatenatedKey(utils.MetaOut, "cgrates.org", utils.Call, "dan3")
 	var result *engine.RatingProfile
 	if err := rater.Call(utils.APIerSv1GetRatingProfile,
-		&utils.AttrGetRatingProfile{Category: utils.CALL, Subject: "dan3"},
+		&utils.AttrGetRatingProfile{Category: utils.Call, Subject: "dan3"},
 		&result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedID, result.Id) {
@@ -2089,7 +2089,7 @@ func testApierSetRatingProfileWithoutTenant(t *testing.T) {
 func testApierRemoveRatingProfilesWithoutTenant(t *testing.T) {
 	var reply string
 	if err := rater.Call(utils.APIerSv1RemoveRatingProfile, &AttrRemoveRatingProfile{
-		Category: utils.CALL,
+		Category: utils.Call,
 		Subject:  "dan3",
 	}, &reply); err != nil {
 		t.Error(err)
@@ -2098,7 +2098,7 @@ func testApierRemoveRatingProfilesWithoutTenant(t *testing.T) {
 	}
 	var result *engine.RatingProfile
 	if err := rater.Call(utils.APIerSv1GetRatingProfile,
-		&utils.AttrGetRatingProfile{Category: utils.CALL, Subject: "dan3"},
+		&utils.AttrGetRatingProfile{Category: utils.Call, Subject: "dan3"},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

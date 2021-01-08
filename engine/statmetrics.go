@@ -118,7 +118,7 @@ func (asr *StatASR) GetValue(roundingDecimal int) (v interface{}) {
 
 func (asr *StatASR) GetStringValue(roundingDecimal int) (valStr string) {
 	if val := asr.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NOT_AVAILABLE
+		valStr = utils.NotAvailable
 	} else {
 		valStr = fmt.Sprintf("%v%%", asr.getValue(roundingDecimal))
 	}
@@ -257,7 +257,7 @@ func (acd *StatACD) getValue(roundingDecimal int) time.Duration {
 
 func (acd *StatACD) GetStringValue(roundingDecimal int) (valStr string) {
 	if val := acd.getValue(roundingDecimal); val == -time.Nanosecond {
-		valStr = utils.NOT_AVAILABLE
+		valStr = utils.NotAvailable
 	} else {
 		valStr = fmt.Sprintf("%+v", acd.getValue(roundingDecimal))
 	}
@@ -394,7 +394,7 @@ func (tcd *StatTCD) getValue(roundingDecimal int) time.Duration {
 
 func (tcd *StatTCD) GetStringValue(roundingDecimal int) (valStr string) {
 	if val := tcd.getValue(roundingDecimal); val == -time.Nanosecond {
-		valStr = utils.NOT_AVAILABLE
+		valStr = utils.NotAvailable
 	} else {
 		valStr = fmt.Sprintf("%+v", tcd.getValue(roundingDecimal))
 	}
@@ -530,7 +530,7 @@ func (acc *StatACC) getValue(roundingDecimal int) float64 {
 
 func (acc *StatACC) GetStringValue(roundingDecimal int) (valStr string) {
 	if val := acc.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NOT_AVAILABLE
+		valStr = utils.NotAvailable
 	} else {
 		valStr = strconv.FormatFloat(acc.getValue(roundingDecimal), 'f', -1, 64)
 	}
@@ -549,9 +549,9 @@ func (acc *StatACC) GetFloat64Value(roundingDecimal int) (v float64) {
 func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var cost float64
 	var val interface{}
-	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.COST}); err != nil {
+	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost}); err != nil {
 		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.COST)
+			err = utils.ErrPrefix(err, utils.Cost)
 		}
 		return
 	} else if cost, err = utils.IfaceAsFloat64(val); err != nil {
@@ -661,7 +661,7 @@ func (tcc *StatTCC) getValue(roundingDecimal int) float64 {
 
 func (tcc *StatTCC) GetStringValue(roundingDecimal int) (valStr string) {
 	if val := tcc.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NOT_AVAILABLE
+		valStr = utils.NotAvailable
 	} else {
 		valStr = strconv.FormatFloat(tcc.getValue(roundingDecimal), 'f', -1, 64)
 	}
@@ -679,9 +679,9 @@ func (tcc *StatTCC) GetFloat64Value(roundingDecimal int) (v float64) {
 func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	var cost float64
 	var val interface{}
-	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.COST}); err != nil {
+	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost}); err != nil {
 		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.COST)
+			err = utils.ErrPrefix(err, utils.Cost)
 		}
 		return
 	} else if cost, err = utils.IfaceAsFloat64(val); err != nil {
@@ -793,7 +793,7 @@ func (pdd *StatPDD) getValue(roundingDecimal int) time.Duration {
 
 func (pdd *StatPDD) GetStringValue(roundingDecimal int) (valStr string) {
 	if val := pdd.getValue(roundingDecimal); val == -time.Nanosecond {
-		valStr = utils.NOT_AVAILABLE
+		valStr = utils.NotAvailable
 	} else {
 		valStr = fmt.Sprintf("%+v", pdd.getValue(roundingDecimal))
 	}
@@ -922,7 +922,7 @@ func (ddc *StatDDC) getValue(roundingDecimal int) float64 {
 
 func (ddc *StatDDC) GetStringValue(roundingDecimal int) (valStr string) {
 	if val := ddc.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NOT_AVAILABLE
+		valStr = utils.NotAvailable
 	} else {
 		valStr = strconv.FormatFloat(ddc.getValue(roundingDecimal), 'f', -1, 64)
 	}
@@ -1072,7 +1072,7 @@ func (sum *StatSum) getValue(roundingDecimal int) float64 {
 
 func (sum *StatSum) GetStringValue(roundingDecimal int) (valStr string) {
 	if val := sum.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NOT_AVAILABLE
+		valStr = utils.NotAvailable
 	} else {
 		valStr = strconv.FormatFloat(sum.getValue(roundingDecimal), 'f', -1, 64)
 	}
@@ -1205,7 +1205,7 @@ func (avg *StatAverage) getValue(roundingDecimal int) float64 {
 
 func (avg *StatAverage) GetStringValue(roundingDecimal int) (valStr string) {
 	if val := avg.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NOT_AVAILABLE
+		valStr = utils.NotAvailable
 	} else {
 		valStr = strconv.FormatFloat(avg.getValue(roundingDecimal), 'f', -1, 64)
 	}
@@ -1332,7 +1332,7 @@ func (dst *StatDistinct) getValue(roundingDecimal int) float64 {
 
 func (dst *StatDistinct) GetStringValue(roundingDecimal int) (valStr string) {
 	if val := dst.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NOT_AVAILABLE
+		valStr = utils.NotAvailable
 	} else {
 		valStr = strconv.FormatFloat(dst.getValue(roundingDecimal), 'f', -1, 64)
 	}
