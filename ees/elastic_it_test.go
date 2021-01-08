@@ -127,7 +127,7 @@ func testElasticExportEvents(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "dsafdsaf",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -157,7 +157,7 @@ func testElasticExportEvents(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.DATA,
+					utils.ToR:          utils.MetaData,
 					utils.OriginID:     "abcdef",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -187,7 +187,7 @@ func testElasticExportEvents(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.SMS,
+					utils.ToR:          utils.MetaSMS,
 					utils.OriginID:     "sdfwer",
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -217,7 +217,7 @@ func testElasticExportEvents(t *testing.T) {
 				Time:   utils.TimePointer(time.Now()),
 				Event: map[string]interface{}{
 					utils.CGRID:        utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.SMS,
+					utils.ToR:          utils.MetaSMS,
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
 					utils.AccountField: "1001",
@@ -333,7 +333,7 @@ func testElasticVerifyExports(t *testing.T) {
 		case utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()) + ":*default":
 			eMp := map[string]interface{}{
 				utils.CGRID:        utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
-				utils.ToR:          utils.SMS,
+				utils.ToR:          utils.MetaSMS,
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
 				utils.AccountField: "1001",

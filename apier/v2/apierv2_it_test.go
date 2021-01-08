@@ -133,7 +133,7 @@ func testAPIerSv2itAddBalance(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "dan",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       5.0,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
@@ -147,8 +147,8 @@ func testAPIerSv2itAddBalance(t *testing.T) {
 	var acnt engine.Account
 	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY][0].Value != 5.0 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
+	} else if acnt.BalanceMap[utils.MetaMonetary][0].Value != 5.0 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaMonetary][0])
 	}
 }
 
@@ -175,9 +175,9 @@ func testAPIerSv2itSetAccountActionTriggers(t *testing.T) {
 		AttrSetActionTrigger: v1.AttrSetActionTrigger{
 			GroupID: "MONITOR_MAX_BALANCE",
 			ActionTrigger: map[string]interface{}{
-				utils.ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+				utils.ThresholdType:  utils.TriggerMaxBalance,
 				utils.ThresholdValue: 50,
-				utils.BalanceType:    utils.MONETARY,
+				utils.BalanceType:    utils.MetaMonetary,
 				utils.ActionsID:      "DISABLE_ACCOUNT",
 			},
 		},
@@ -207,7 +207,7 @@ func testAPIerSv2itFraudMitigation(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "dan",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       60.0,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
@@ -221,8 +221,8 @@ func testAPIerSv2itFraudMitigation(t *testing.T) {
 	var acnt engine.Account
 	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 60.0 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaMonetary][0].Value != 60.0 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaMonetary][0])
 	} else if !acnt.Disabled {
 		t.Fatalf("Received account: %+v", acnt)
 	}
@@ -239,8 +239,8 @@ func testAPIerSv2itFraudMitigation(t *testing.T) {
 	acnt = engine.Account{} // gob doesn't update the fields with default values
 	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 60.0 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaMonetary][0].Value != 60.0 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaMonetary][0])
 	} else if acnt.Disabled {
 		t.Fatalf("Received account: %+v", acnt)
 	}
@@ -250,7 +250,7 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 	argActs1 := utils.AttrSetActions{ActionsId: "TestAPIerSv2itSetAccountWithAP_ACT_1",
 		Actions: []*utils.TPAction{
 			{Identifier: utils.TOPUP_RESET,
-				BalanceType: utils.MONETARY, Units: "5.0", Weight: 20.0},
+				BalanceType: utils.MetaMonetary, Units: "5.0", Weight: 20.0},
 		}}
 	var reply string
 	if err := apierRPC.Call(utils.APIerSv2SetActions, &argActs1, &reply); err != nil {
@@ -370,7 +370,7 @@ func testAPIerSv2itSetActionWithCategory(t *testing.T) {
 	argActs1 := utils.AttrSetActions{ActionsId: "TestAPIerSv2itSetActionWithCategory_ACT",
 		Actions: []*utils.TPAction{
 			{Identifier: utils.TOPUP_RESET,
-				BalanceType: utils.MONETARY, Categories: "test", Units: "5.0", Weight: 20.0},
+				BalanceType: utils.MetaMonetary, Categories: "test", Units: "5.0", Weight: 20.0},
 		}}
 
 	if err := apierRPC.Call(utils.APIerSv2SetActions, &argActs1, &reply); err != nil {
@@ -388,10 +388,10 @@ func testAPIerSv2itSetActionWithCategory(t *testing.T) {
 	if err := apierRPC.Call(utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org",
 		Account: "TestAPIerSv2itSetActionWithCategory"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 5.0 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
-	} else if len(acnt.BalanceMap[utils.MONETARY][0].Categories) != 1 &&
-		acnt.BalanceMap[utils.MONETARY][0].Categories["test"] != true {
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaMonetary][0].Value != 5.0 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaMonetary][0])
+	} else if len(acnt.BalanceMap[utils.MetaMonetary][0].Categories) != 1 &&
+		acnt.BalanceMap[utils.MetaMonetary][0].Categories["test"] != true {
 		t.Fatalf("Unexpected category received: %+v", utils.ToJSON(acnt))
 	}
 }

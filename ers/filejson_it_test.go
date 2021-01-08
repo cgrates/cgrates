@@ -159,7 +159,7 @@ func testJSONAddData(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "voiceAccount",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       600000000000,
 		Balance: map[string]interface{}{
 			utils.ID:        utils.MetaDefault,
@@ -175,8 +175,8 @@ func testJSONAddData(t *testing.T) {
 	if err := jsonRPC.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "voiceAccount"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 600000000000 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaVoice][0].Value != 600000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaVoice][0])
 	}
 }
 
@@ -214,8 +214,8 @@ func testJSONVerify(t *testing.T) {
 	if err := jsonRPC.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "voiceAccount"}, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.VOICE][0].Value != 480000000000 {
-		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.VOICE][0])
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MetaVoice][0].Value != 480000000000 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MetaVoice][0])
 	}
 }
 

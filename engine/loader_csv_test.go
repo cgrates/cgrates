@@ -645,7 +645,7 @@ func TestLoadActions(t *testing.T) {
 			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type:           utils.StringPointer(utils.MONETARY),
+				Type:           utils.StringPointer(utils.MetaMonetary),
 				Uuid:           as1[0].Balance.Uuid,
 				Value:          &utils.ValueFormula{Static: 10},
 				Weight:         utils.Float64Pointer(10),
@@ -664,7 +664,7 @@ func TestLoadActions(t *testing.T) {
 			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type:           utils.StringPointer(utils.VOICE),
+				Type:           utils.StringPointer(utils.MetaVoice),
 				Uuid:           as1[1].Balance.Uuid,
 				Value:          &utils.ValueFormula{Static: 100 * float64(time.Second)},
 				Weight:         utils.Float64Pointer(10),
@@ -690,7 +690,7 @@ func TestLoadActions(t *testing.T) {
 			ExpirationString: utils.UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type:           utils.StringPointer(utils.MONETARY),
+				Type:           utils.StringPointer(utils.MetaMonetary),
 				DestinationIDs: nil,
 				Uuid:           as2[0].Balance.Uuid,
 				Value:          &utils.ValueFormula{Static: 100},
@@ -738,7 +738,7 @@ func TestLoadActions(t *testing.T) {
 			ExpirationString: utils.UNLIMITED,
 			Balance: &BalanceFilter{
 				Uuid:     asGnrc[0].Balance.Uuid,
-				Type:     utils.StringPointer(utils.GENERIC),
+				Type:     utils.StringPointer(utils.MetaGeneric),
 				Value:    &utils.ValueFormula{Static: 1000},
 				Weight:   utils.Float64Pointer(20),
 				Disabled: utils.BoolPointer(false),
@@ -852,11 +852,11 @@ func TestLoadActionTriggers(t *testing.T) {
 	expected := &ActionTrigger{
 		ID:             "STANDARD_TRIGGER",
 		UniqueID:       "st0",
-		ThresholdType:  utils.TRIGGER_MIN_EVENT_COUNTER,
+		ThresholdType:  utils.TriggerMinEventCounter,
 		ThresholdValue: 10,
 		Balance: &BalanceFilter{
 			ID:             nil,
-			Type:           utils.StringPointer(utils.VOICE),
+			Type:           utils.StringPointer(utils.MetaVoice),
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
 			Categories:     nil,
 			TimingIDs:      nil,
@@ -875,10 +875,10 @@ func TestLoadActionTriggers(t *testing.T) {
 	expected = &ActionTrigger{
 		ID:             "STANDARD_TRIGGER",
 		UniqueID:       "st1",
-		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdType:  utils.TriggerMaxBalance,
 		ThresholdValue: 200,
 		Balance: &BalanceFilter{
-			Type:           utils.StringPointer(utils.VOICE),
+			Type:           utils.StringPointer(utils.MetaVoice),
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY")),
 			Categories:     nil,
 			TimingIDs:      nil,
@@ -901,7 +901,7 @@ func TestLoadAccountActions(t *testing.T) {
 	expected := &Account{
 		ID: "vdf:minitsboy",
 		UnitCounters: UnitCounters{
-			utils.VOICE: []*UnitCounter{
+			utils.MetaVoice: []*UnitCounter{
 				{
 					CounterType: "*event",
 					Counters: CounterFilters{
@@ -909,7 +909,7 @@ func TestLoadAccountActions(t *testing.T) {
 							Value: 0,
 							Filter: &BalanceFilter{
 								ID:             utils.StringPointer("st0"),
-								Type:           utils.StringPointer(utils.VOICE),
+								Type:           utils.StringPointer(utils.MetaVoice),
 								DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
 								SharedGroups:   nil,
 								Categories:     nil,
@@ -926,11 +926,11 @@ func TestLoadAccountActions(t *testing.T) {
 	for i, atr := range aa.ActionTriggers {
 		csvr.actionsTriggers["STANDARD_TRIGGER"][i].ID = atr.ID
 	}
-	for i, b := range aa.UnitCounters[utils.VOICE][0].Counters {
-		expected.UnitCounters[utils.VOICE][0].Counters[i].Filter.ID = b.Filter.ID
+	for i, b := range aa.UnitCounters[utils.MetaVoice][0].Counters {
+		expected.UnitCounters[utils.MetaVoice][0].Counters[i].Filter.ID = b.Filter.ID
 	}
-	if !reflect.DeepEqual(aa.UnitCounters[utils.VOICE][0].Counters[0], expected.UnitCounters[utils.VOICE][0].Counters[0]) {
-		t.Errorf("Error loading account action: %+v", utils.ToIJSON(aa.UnitCounters[utils.VOICE][0].Counters[0].Filter))
+	if !reflect.DeepEqual(aa.UnitCounters[utils.MetaVoice][0].Counters[0], expected.UnitCounters[utils.MetaVoice][0].Counters[0]) {
+		t.Errorf("Error loading account action: %+v", utils.ToIJSON(aa.UnitCounters[utils.MetaVoice][0].Counters[0].Filter))
 	}
 	// test that it does not overwrite balances
 	existing, err := dm.GetAccount(aa.ID)
@@ -1264,8 +1264,8 @@ func TestLoadRouteProfiles(t *testing.T) {
 		Weight: 20,
 	}
 	sort.Slice(eSppProfile.Routes, func(i, j int) bool {
-		return strings.Compare(eSppProfile.Routes[i].ID+strings.Join(eSppProfile.Routes[i].FilterIDs, utils.CONCATENATED_KEY_SEP),
-			eSppProfile.Routes[j].ID+strings.Join(eSppProfile.Routes[j].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
+		return strings.Compare(eSppProfile.Routes[i].ID+strings.Join(eSppProfile.Routes[i].FilterIDs, utils.ConcatenatedKeySep),
+			eSppProfile.Routes[j].ID+strings.Join(eSppProfile.Routes[j].FilterIDs, utils.ConcatenatedKeySep)) < 0
 	})
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "RoutePrf1"}
 	if len(csvr.routeProfiles) != 1 {
@@ -1276,8 +1276,8 @@ func TestLoadRouteProfiles(t *testing.T) {
 			t.Fatal("Missing route")
 		}
 		sort.Slice(rcvRoute.Routes, func(i, j int) bool {
-			return strings.Compare(rcvRoute.Routes[i].ID+strings.Join(rcvRoute.Routes[i].FilterIDs, utils.CONCATENATED_KEY_SEP),
-				rcvRoute.Routes[j].ID+strings.Join(rcvRoute.Routes[j].FilterIDs, utils.CONCATENATED_KEY_SEP)) < 0
+			return strings.Compare(rcvRoute.Routes[i].ID+strings.Join(rcvRoute.Routes[i].FilterIDs, utils.ConcatenatedKeySep),
+				rcvRoute.Routes[j].ID+strings.Join(rcvRoute.Routes[j].FilterIDs, utils.ConcatenatedKeySep)) < 0
 		})
 		if !reflect.DeepEqual(eSppProfile, rcvRoute) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eSppProfile), utils.ToJSON(rcvRoute))
@@ -1637,7 +1637,7 @@ func TestLoadAccountProfiles(t *testing.T) {
 				ID:        "MonetaryBalance",
 				FilterIDs: []string{},
 				Weight:    10,
-				Type:      utils.MONETARY,
+				Type:      utils.MetaMonetary,
 				CostIncrement: []*utils.TPBalanceCostIncrement{
 					&utils.TPBalanceCostIncrement{
 						FilterIDs:    []string{"fltr1", "fltr2"},
@@ -1663,7 +1663,7 @@ func TestLoadAccountProfiles(t *testing.T) {
 				ID:             "VoiceBalance",
 				FilterIDs:      []string{},
 				Weight:         10,
-				Type:           utils.VOICE,
+				Type:           utils.MetaVoice,
 				CostIncrement:  []*utils.TPBalanceCostIncrement{},
 				CostAttributes: []string{},
 				UnitFactors:    []*utils.TPBalanceUnitFactor{},

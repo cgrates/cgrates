@@ -170,7 +170,7 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 	if err != nil {
 		return err
 	}
-	loadId := utils.CSV_LOAD //Autogenerate rating profile id
+	loadId := utils.CSVLoad //Autogenerate rating profile id
 	if self.ImportId != "" {
 		loadId += "_" + self.ImportId
 	}
@@ -251,7 +251,7 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 	if err != nil {
 		return err
 	}
-	loadId := utils.CSV_LOAD //Autogenerate rating profile id
+	loadId := utils.CSVLoad //Autogenerate rating profile id
 	if self.ImportId != "" {
 		loadId += "_" + self.ImportId
 	}

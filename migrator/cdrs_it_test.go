@@ -128,15 +128,15 @@ func testCdrITMigrateAndMove(t *testing.T) {
 				},
 			},
 		},
-		ToR: utils.VOICE,
+		ToR: utils.MetaVoice,
 	}
 	v1Cdr := &v1Cdrs{
 		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OrderID:     123,
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 		OriginID:    "dsafdsaf",
 		OriginHost:  "192.168.1.1",
-		Source:      utils.UNIT_TEST,
+		Source:      utils.UnitTest,
 		RequestType: utils.MetaRated,
 		Tenant:      "cgrates.org",
 		Category:    "call",

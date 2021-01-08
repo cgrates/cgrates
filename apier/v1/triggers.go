@@ -103,7 +103,7 @@ func (apierSv1 *APIerSv1) AddAccountActionTriggers(attr *AttrAddAccountActionTri
 		}
 		account.InitCounters()
 		return 0, apierSv1.DataManager.SetAccount(account)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	if err != nil {
 		return
 	}
@@ -192,7 +192,7 @@ func (apierSv1 *APIerSv1) ResetAccountActionTriggers(attr AttrResetAccountAction
 			account.ExecuteActionTriggers(nil)
 		}
 		return 0, apierSv1.DataManager.SetAccount(account)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -388,7 +388,7 @@ func (apierSv1 *APIerSv1) SetAccountActionTriggers(attr AttrSetAccountActionTrig
 		}
 		account.ExecuteActionTriggers(nil)
 		return 0, apierSv1.DataManager.SetAccount(account)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -509,7 +509,7 @@ func (apierSv1 *APIerSv1) GetActionTriggers(attr *AttrGetActionTriggers, atrs *e
 		}
 
 	} else {
-		keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
+		keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix)
 		if err != nil {
 			return err
 		}
@@ -517,7 +517,7 @@ func (apierSv1 *APIerSv1) GetActionTriggers(attr *AttrGetActionTriggers, atrs *e
 			return utils.ErrNotFound
 		}
 		for _, key := range keys {
-			getAttrs, err := apierSv1.DataManager.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):], false, utils.NonTransactional)
+			getAttrs, err := apierSv1.DataManager.GetActionTriggers(key[len(utils.ActionTriggerPrefix):], false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -596,7 +596,7 @@ func (apierSv1 *APIerSv1) AddTriggeredAction(attr AttrAddActionTrigger, reply *s
 		acnt.ActionTriggers = append(acnt.ActionTriggers, at)
 
 		return 0, apierSv1.DataManager.SetAccount(acnt)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+acntID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+acntID)
 	if err != nil {
 		return err
 	}

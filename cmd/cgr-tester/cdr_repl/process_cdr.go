@@ -51,7 +51,7 @@ func main() {
 	cdrs := make([]*engine.CDR, 0)
 	for i := 0; i < 10000; i++ {
 		cdr := &engine.CDR{OriginID: fmt.Sprintf("httpjsonrpc_%d", i),
-			ToR: utils.VOICE, OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.MetaPseudoPrepaid,
+			ToR: utils.MetaVoice, OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.MetaPseudoPrepaid,
 			Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 			SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}

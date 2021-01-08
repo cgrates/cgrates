@@ -188,7 +188,7 @@ func testdoubleRemoveActions(t *testing.T) {
 		Actions: []*v1.V1TPAction{
 			{
 				Identifier:  utils.TOPUP_RESET,
-				BalanceType: utils.MONETARY,
+				BalanceType: utils.MetaMonetary,
 				Units:       75.0,
 				ExpiryTime:  utils.UNLIMITED,
 				Weight:      20.0}},
@@ -207,7 +207,7 @@ func testdoubleRemoveActions(t *testing.T) {
 	eOut := []*utils.TPAction{
 		{
 			Identifier:      utils.TOPUP_RESET,
-			BalanceType:     utils.MONETARY,
+			BalanceType:     utils.MetaMonetary,
 			Units:           "75",
 			BalanceWeight:   "0",
 			BalanceBlocker:  "false",
@@ -244,7 +244,7 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 	var reply string
 	if err := sesRPC.Call(utils.APIerSv2SetActions, &utils.AttrSetActions{
 		ActionsId: "ACTS_2",
-		Actions:   []*utils.TPAction{{Identifier: utils.LOG}},
+		Actions:   []*utils.TPAction{{Identifier: utils.MetaLog}},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

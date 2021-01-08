@@ -72,7 +72,7 @@ func (apierSv1 *APIerSv1) GetAccountActionPlan(attrs *utils.TenantAccount, reply
 			}
 		}
 		return accountATs, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 			}
 		}
 		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
 	if err != nil {
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
@@ -264,7 +264,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 					return 0, err
 				}
 				return 0, nil
-			}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
+			}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
 			if err != nil {
 				return 0, err
 			}
@@ -290,7 +290,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 			return 0, err
 		}
 		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -341,7 +341,7 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 				}
 			}
 			return 0, nil
-		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
 		if err != nil {
 			return 0, err
 		}
@@ -349,7 +349,7 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 			return 0, err
 		}
 		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -375,7 +375,7 @@ func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]inte
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIDs) == 0 {
-		if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + tnt); err != nil {
+		if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix + tnt); err != nil {
 			return err
 		}
 	} else {
@@ -383,7 +383,7 @@ func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]inte
 			if len(acntID) == 0 { // Source of error returned from redis (key not found)
 				continue
 			}
-			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(tnt, acntID))
+			accountKeys = append(accountKeys, utils.AccountPrefix+utils.ConcatenatedKey(tnt, acntID))
 		}
 	}
 	if len(accountKeys) == 0 {
@@ -398,7 +398,7 @@ func (apierSv1 *APIerSv1) GetAccounts(attr *utils.AttrGetAccounts, reply *[]inte
 	}
 	retAccounts := make([]interface{}, 0)
 	for _, acntKey := range limitedAccounts {
-		if acnt, err := apierSv1.DataManager.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
+		if acnt, err := apierSv1.DataManager.GetAccount(acntKey[len(utils.AccountPrefix):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
 			if alNeg, has := attr.Filter[utils.AllowNegative]; has && alNeg != acnt.AllowNegative {
@@ -730,7 +730,7 @@ func (apierSv1 *APIerSv1) GetAccountsCount(attr *utils.TenantWithOpts, reply *in
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var accountKeys []string
-	if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + tnt); err != nil {
+	if accountKeys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.AccountPrefix + tnt); err != nil {
 		return
 	}
 	*reply = len(accountKeys)

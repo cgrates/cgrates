@@ -29,7 +29,7 @@ func TestAccountNewObjectDPFieldAsInterface(t *testing.T) {
 	acc := &engine.Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
-			utils.MONETARY: []*engine.Balance{
+			utils.MetaMonetary: []*engine.Balance{
 				{
 					Value:  20,
 					Weight: 10,
@@ -57,7 +57,7 @@ func TestAccountNewObjectDPFieldAsInterfaceFromCache(t *testing.T) {
 	acc := &engine.Account{
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
-			utils.MONETARY: []*engine.Balance{
+			utils.MetaMonetary: []*engine.Balance{
 				{
 					Value:  20,
 					Weight: 10,
@@ -80,7 +80,7 @@ func TestAccountNewObjectDPFieldAsInterfaceFromCache(t *testing.T) {
 	}
 	if data, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[0]"}); err != nil {
 		t.Error(err)
-	} else if data != acc.BalanceMap[utils.MONETARY][0] {
-		t.Errorf("Expected: %+v ,received: %+v", acc.BalanceMap[utils.MONETARY][0], data)
+	} else if data != acc.BalanceMap[utils.MetaMonetary][0] {
+		t.Errorf("Expected: %+v ,received: %+v", acc.BalanceMap[utils.MetaMonetary][0], data)
 	}
 }

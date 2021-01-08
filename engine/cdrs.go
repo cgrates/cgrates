@@ -930,7 +930,7 @@ func (cdrS *CDRServer) V2ProcessEvent(arg *ArgV1ProcessEvent, evs *[]*utils.Even
 // V1StoreSessionCost handles storing of the cost into session_costs table
 func (cdrS *CDRServer) V1StoreSessionCost(attr *AttrCDRSStoreSMCost, reply *string) (err error) {
 	if attr.Cost.CGRID == "" {
-		return utils.NewCGRError(utils.CDRSCtx,
+		return utils.NewCGRError(utils.CDRsCtx,
 			utils.MandatoryIEMissingCaps, fmt.Sprintf("%s: CGRID", utils.MandatoryInfoMissing),
 			"SMCost: %+v with empty CGRID")
 	}
@@ -963,7 +963,7 @@ func (cdrS *CDRServer) V1StoreSessionCost(attr *AttrCDRSStoreSMCost, reply *stri
 // V2StoreSessionCost will store the SessionCost into session_costs table
 func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *string) (err error) {
 	if args.Cost.CGRID == "" {
-		return utils.NewCGRError(utils.CDRSCtx,
+		return utils.NewCGRError(utils.CDRsCtx,
 			utils.MandatoryIEMissingCaps, fmt.Sprintf("%s: CGRID", utils.MandatoryInfoMissing),
 			"SMCost: %+v with empty CGRID")
 	}

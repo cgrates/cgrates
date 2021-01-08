@@ -134,7 +134,7 @@ func (fsCdr FSCdr) AsCDR(timezone string) (storCdr *CDR, err error) {
 		OriginHost:  utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[FsIPv4]),
 		Source:      FS_CDR_SOURCE,
 		OriginID:    fsCdr.vars[FS_UUID],
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 		RequestType: utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.GeneralCfg().DefaultReqType),
 		Tenant:      utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.GeneralCfg().DefaultTenant),
 		Category:    utils.FirstNonEmpty(fsCdr.vars[utils.CGR_CATEGORY], fsCdr.cgrCfg.GeneralCfg().DefaultCategory),

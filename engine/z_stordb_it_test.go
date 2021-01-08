@@ -163,7 +163,7 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 					ID:        "MonetaryBalance",
 					FilterIDs: []string{},
 					Weight:    10,
-					Type:      utils.MONETARY,
+					Type:      utils.MetaMonetary,
 					CostIncrement: []*utils.TPBalanceCostIncrement{
 						&utils.TPBalanceCostIncrement{
 							FilterIDs:    []string{"fltr1", "fltr2"},

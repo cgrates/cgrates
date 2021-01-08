@@ -48,7 +48,7 @@ func (apierSv1 *APIerSv1) GetRouteProfileIDs(args *utils.PaginatorWithTenant, sp
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.RouteProfilePrefix + tnt + utils.CONCATENATED_KEY_SEP
+	prfx := utils.RouteProfilePrefix + tnt + utils.ConcatenatedKeySep
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err

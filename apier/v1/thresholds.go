@@ -88,7 +88,7 @@ func (apierSv1 *APIerSv1) GetThresholdProfileIDs(args *utils.PaginatorWithTenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ThresholdProfilePrefix + tnt + utils.CONCATENATED_KEY_SEP
+	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -112,7 +112,7 @@ func (apierSv1 *APIerSv1) GetThresholdProfileIDsCount(args *utils.TenantWithOpts
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var keys []string
-	prfx := utils.ThresholdProfilePrefix + tnt + utils.CONCATENATED_KEY_SEP
+	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
 	if keys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
 		return err
 	}

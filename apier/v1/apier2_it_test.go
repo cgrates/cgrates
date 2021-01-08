@@ -159,7 +159,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 				{
 					FilterIDs: []string{},
 					Path:      utils.MetaReq + utils.NestingSep + "Password",
-					Type:      utils.META_CONSTANT,
+					Type:      utils.MetaConstant,
 					Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 				},
 			},
@@ -656,7 +656,7 @@ func testAPIerLoadFromFolderAccountAction(t *testing.T) {
 	}
 	if err := apierRPC.Call(utils.APIerSv2GetAccount, attrAcnt, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10.0 {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != 10.0 {
 		t.Errorf("Expecting: %v, received: %v",
 			10.0, rply)
 	}

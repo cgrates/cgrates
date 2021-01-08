@@ -55,7 +55,7 @@ type v1AliasValue struct {
 type v1AliasPairs map[string]map[string]string
 
 func (al *v1Alias) SetId(id string) error {
-	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	vals := strings.Split(id, utils.ConcatenatedKeySep)
 	if len(vals) != 6 {
 		return utils.ErrInvalidKey
 	}

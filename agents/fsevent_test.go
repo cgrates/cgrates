@@ -492,7 +492,7 @@ func TestParseEventValue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
-	if tor, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.ToR), ""); tor != utils.VOICE {
+	if tor, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.ToR), ""); tor != utils.MetaVoice {
 		t.Errorf("Unexpected tor parsed %q", tor)
 	}
 	if accid, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OriginID), ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
@@ -536,13 +536,13 @@ func TestParseEventValue(t *testing.T) {
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.PDD), ""); parsed != "0.028" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.ROUTE), ""); parsed != "supplier1" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Route), ""); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RunID), ""); parsed != utils.MetaDefault {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.COST), ""); parsed != "-1" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Cost), ""); parsed != "-1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+"Hangup-Cause"), ""); parsed != "NORMAL_CLEARING" {
@@ -581,7 +581,7 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	expectedMap := make(map[string]interface{})
-	expectedMap[utils.ToR] = utils.VOICE
+	expectedMap[utils.ToR] = utils.MetaVoice
 	expectedMap[utils.OriginID] = "e3133bf7-dcde-4daf-9663-9a79ffcef5ad"
 	expectedMap[utils.OriginHost] = "10.0.3.15"
 	expectedMap[utils.Source] = "FS_CHANNEL_HANGUP_COMPLETE"
@@ -597,8 +597,8 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	expectedMap[utils.Cost] = -1.0
 	expectedMap[utils.PDD] = 28 * time.Millisecond
 	expectedMap[utils.ACD] = 30 * time.Second
-	expectedMap[utils.DISCONNECT_CAUSE] = "NORMAL_CLEARING"
-	expectedMap[utils.ROUTE] = "supplier1"
+	expectedMap[utils.DisconnectCause] = "NORMAL_CLEARING"
+	expectedMap[utils.Route] = "supplier1"
 	if storedMap := ev.AsMapStringInterface(""); !reflect.DeepEqual(expectedMap, storedMap) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expectedMap), utils.ToJSON(storedMap))
 	}

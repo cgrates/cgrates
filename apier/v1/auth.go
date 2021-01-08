@@ -32,7 +32,7 @@ func (apierSv1 *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithOpts, m
 		return utils.NewErrNotConnected(utils.RALService)
 	}
 	if usageRecord.ToR == utils.EmptyString {
-		usageRecord.ToR = utils.VOICE
+		usageRecord.ToR = utils.MetaVoice
 	}
 	if usageRecord.RequestType == utils.EmptyString {
 		usageRecord.RequestType = apierSv1.Config.GeneralCfg().DefaultReqType

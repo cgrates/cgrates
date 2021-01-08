@@ -509,7 +509,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 	var actreply string
 
 	// Set Action
-	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_THD_PoccessCDR", Actions: []*utils.TPAction{{Identifier: utils.LOG}}}
+	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_THD_PoccessCDR", Actions: []*utils.TPAction{{Identifier: utils.MetaLog}}}
 	if err := cdrsRpc.Call(utils.APIerSv2SetActions, attrsAA, &actreply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	} else if actreply != utils.OK {
@@ -593,7 +593,7 @@ func testV2CDRsGetStats1(t *testing.T) {
 	expectedIDs := []string{"STS_PoccessCDR"}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: utils.NOT_AVAILABLE,
+		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: utils.NotAvailable,
 	}
 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithOpts{

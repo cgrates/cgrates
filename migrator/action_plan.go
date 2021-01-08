@@ -49,12 +49,12 @@ func (at *v1ActionPlan) IsASAP() bool {
 
 func (m *Migrator) migrateCurrentActionPlans() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ActionPlanPrefix)
 	if err != nil {
 		return
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ACTION_PLAN_PREFIX)
+		idg := strings.TrimPrefix(id, utils.ActionPlanPrefix)
 		var acts *engine.ActionPlan
 		if acts, err = m.dmIN.DataManager().GetActionPlan(idg, true, utils.NonTransactional); err != nil {
 			return

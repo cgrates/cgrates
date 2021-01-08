@@ -191,7 +191,7 @@ func testAccITAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      accTenant,
 		Account:     accAcount,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       2 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            accBallID,
@@ -205,7 +205,9 @@ func testAccITAddVoiceBalance(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 2*float64(time.Second)) })
+	t.Run("TestAddVoiceBalance", func(t *testing.T) {
+		testAccountBalance(t, accAcount, accTenant, utils.MetaVoice, 2*float64(time.Second))
+	})
 }
 
 func testAccITSetBalanceTimingIds(t *testing.T) {
@@ -235,7 +237,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 	args := &utils.AttrSetBalance{
 		Tenant:      accTenant,
 		Account:     accAcount,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Balance: map[string]interface{}{
 			utils.ID:        "testBalanceID",
 			utils.TimingIDs: "Timing",
@@ -268,7 +270,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, value := range acnt.BalanceMap[utils.VOICE] {
+	for _, value := range acnt.BalanceMap[utils.MetaVoice] {
 		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
 		if value.ID == "testBalanceID" {
 			if !reflect.DeepEqual(eOut, value.Timings) {
@@ -285,42 +287,42 @@ func testAccITDebitBalance(t *testing.T) {
 	if err := accRPC.Call(utils.APIerSv1DebitBalance, &AttrAddBalance{
 		Tenant:      accTenant,
 		Account:     accAcount,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       0,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if has := testBalanceIfExists(t, accAcount, accTenant, utils.VOICE, accBallID); accExist != has {
+	if has := testBalanceIfExists(t, accAcount, accTenant, utils.MetaVoice, accBallID); accExist != has {
 		var exstr string
 		if !accExist {
 			exstr = "not "
 		}
 		t.Fatalf("Balance with ID %s should %s exist", accBallID, exstr)
 	}
-	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 0) })
+	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.MetaVoice, 0) })
 }
 
 func testAccITDebitBalanceWithoutTenant(t *testing.T) {
 	var reply string
 	if err := accRPC.Call(utils.APIerSv1DebitBalance, &AttrAddBalance{
 		Account:     accAcount,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       0,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if has := testBalanceIfExists(t, accAcount, accTenant, utils.VOICE, accBallID); accExist != has {
+	if has := testBalanceIfExists(t, accAcount, accTenant, utils.MetaVoice, accBallID); accExist != has {
 		var exstr string
 		if !accExist {
 			exstr = "not "
 		}
 		t.Fatalf("Balance with ID %s should %s exist", accBallID, exstr)
 	}
-	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 0) })
+	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.MetaVoice, 0) })
 }
 
 func testAccITAddBalance(t *testing.T) {
@@ -328,7 +330,7 @@ func testAccITAddBalance(t *testing.T) {
 	attrs := &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccAddBalance",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       1.5,
 		Cdrlog:      true,
 	}
@@ -352,7 +354,7 @@ func testAccITAddBalanceWithoutTenant(t *testing.T) {
 	var reply string
 	attrs := &AttrAddBalance{
 		Account:     "testAccAddBalance",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       1.5,
 		Cdrlog:      true,
 	}
@@ -437,7 +439,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccITSetBalanceWithExtraData",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       1.5,
 		Balance: map[string]interface{}{
 			utils.ID: "testAccITSetBalanceWithExtraData",
@@ -472,7 +474,7 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccITSetBalanceWithExtraData2",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       1.5,
 		Balance: map[string]interface{}{
 			utils.ID: "testAccITSetBalanceWithExtraData2",
@@ -516,7 +518,7 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 	attrs := &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "AddBalanceWithNegative",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       -3.5,
 	}
 	if err := accRPC.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
@@ -533,14 +535,14 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 3.5 {
-		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != 3.5 {
+		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	if err := accRPC.Call(utils.APIerSv1DebitBalance, &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "AddBalanceWithNegative",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       2,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -550,14 +552,14 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 
 	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 1.5 {
-		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != 1.5 {
+		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	if err := accRPC.Call(utils.APIerSv1DebitBalance, &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "AddBalanceWithNegative",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       -1,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -567,8 +569,8 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 
 	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 0.5 {
-		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != 0.5 {
+		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -705,7 +707,7 @@ func testAccITSetBalanceWithVaslue0(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, value := range acnt.BalanceMap[utils.MONETARY] {
+	for _, value := range acnt.BalanceMap[utils.MetaMonetary] {
 		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
 		if value.ID == "testAccSetBalance" {
 			if value.GetValue() != 1.5 {
@@ -746,7 +748,7 @@ func testAccITSetBalanceWithVaslueInMap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, value := range acnt.BalanceMap[utils.MONETARY] {
+	for _, value := range acnt.BalanceMap[utils.MetaMonetary] {
 		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
 		if value.ID == "testAccSetBalance" {
 			if value.GetValue() != 2 {
@@ -765,7 +767,7 @@ func testAccITAddBalanceWithValue0(t *testing.T) {
 	attrs := &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccAddBalance",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 	}
 	if err := accRPC.Call(utils.APIerSv1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddBalance: ", err.Error())
@@ -782,7 +784,7 @@ func testAccITAddBalanceWithValue0(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, value := range acnt.BalanceMap[utils.MONETARY] {
+	for _, value := range acnt.BalanceMap[utils.MetaMonetary] {
 		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
 		if value.ID == "testAccSetBalance" {
 			if value.GetValue() != 1.5 {
@@ -798,7 +800,7 @@ func testAccITAddBalanceWithValueInMap(t *testing.T) {
 	attrs := &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccAddBalance",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Balance: map[string]interface{}{
 			utils.Value: 1.5,
 		},
@@ -818,7 +820,7 @@ func testAccITAddBalanceWithValueInMap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, value := range acnt.BalanceMap[utils.MONETARY] {
+	for _, value := range acnt.BalanceMap[utils.MetaMonetary] {
 		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
 		if value.ID == "testAccSetBalance" {
 			if value.GetValue() != 3 {
@@ -846,7 +848,7 @@ func testAccITAddBalanceWithDestinations(t *testing.T) {
 	args := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccITAddBalanceWithDestinations",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Balance: map[string]interface{}{
 			utils.ID:             "testAccITAddBalanceWithDestinations",
 			utils.DestinationIDs: "DST_1002;!DST_1001;!DST_1003",
@@ -869,7 +871,7 @@ func testAccITAddBalanceWithDestinations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, value := range acnt.BalanceMap[utils.MONETARY] {
+	for _, value := range acnt.BalanceMap[utils.MetaMonetary] {
 		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
 		if value.ID == "testAccITAddBalanceWithDestinations" {
 			if value.GetValue() != 2 {
@@ -934,7 +936,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 	args := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccITAccountWithTriggers",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Balance: map[string]interface{}{
 			utils.ID:     "testAccITAccountWithTriggers",
 			utils.Weight: 10,
@@ -950,7 +952,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 	// add an action that contains topup and reset_triggers
 	topupAction := &utils.AttrSetActions{ActionsId: "TOPUP_WITH_RESET_TRIGGER", Actions: []*utils.TPAction{
 		{Identifier: utils.TOPUP_RESET, BalanceId: "testAccITAccountWithTriggers",
-			BalanceType: utils.MONETARY, Units: "5", Weight: 10.0},
+			BalanceType: utils.MetaMonetary, Units: "5", Weight: 10.0},
 		{Identifier: utils.RESET_TRIGGERS},
 	}}
 
@@ -963,7 +965,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 	// add an action to be executed when the trigger is triggered
 	actTrigger := &utils.AttrSetActions{ActionsId: "ACT_TRIGGER", Actions: []*utils.TPAction{
 		{Identifier: utils.TOPUP, BalanceId: "CustomBanalce",
-			BalanceType: utils.MONETARY, Units: "5", Weight: 10.0},
+			BalanceType: utils.MetaMonetary, Units: "5", Weight: 10.0},
 	}}
 
 	if err := accRPC.Call(utils.APIerSv2SetActions, actTrigger, &reply); err != nil {
@@ -972,7 +974,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 
-	attrsAddTrigger := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "testAccITAccountWithTriggers", BalanceType: utils.MONETARY,
+	attrsAddTrigger := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "testAccITAccountWithTriggers", BalanceType: utils.MetaMonetary,
 		ThresholdType: "*min_balance", ThresholdValue: 2, Weight: 10, ActionsId: "ACT_TRIGGER"}
 	if err := accRPC.Call(utils.APIerSv1AddTriggeredAction, attrsAddTrigger, &reply); err != nil {
 		t.Error("Got error on APIerSv1.AddTriggeredAction: ", err.Error())
@@ -989,7 +991,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Fatal(err)
 	} else {
-		for _, value := range acnt.BalanceMap[utils.MONETARY] {
+		for _, value := range acnt.BalanceMap[utils.MetaMonetary] {
 			if value.ID == "testAccITAccountWithTriggers" {
 				if value.GetValue() != 5 {
 					t.Errorf("Expecting %+v, received: %+v", 5, value.GetValue())
@@ -1013,7 +1015,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 	if err := accRPC.Call(utils.APIerSv1DebitBalance, &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccITAccountWithTriggers",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       3,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -1024,7 +1026,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Fatal(err)
 	} else {
-		for _, value := range acnt.BalanceMap[utils.MONETARY] {
+		for _, value := range acnt.BalanceMap[utils.MetaMonetary] {
 			if value.ID == "testAccITAccountWithTriggers" {
 				if value.GetValue() != 2 {
 					t.Errorf("Expecting %+v, received: %+v", 2, value.GetValue())
@@ -1057,7 +1059,7 @@ func testAccITAccountWithTriggers(t *testing.T) {
 	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Fatal(err)
 	} else {
-		for _, value := range acnt.BalanceMap[utils.MONETARY] {
+		for _, value := range acnt.BalanceMap[utils.MetaMonetary] {
 			if value.ID == "testAccITAccountWithTriggers" {
 				if value.GetValue() != 5 {
 					t.Errorf("Expecting %+v, received: %+v", 5, value.GetValue())
@@ -1084,7 +1086,7 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 	// add an action that contains topup
 	topupAction := &utils.AttrSetActions{ActionsId: "TOPUP_ACTION", Actions: []*utils.TPAction{
 		{Identifier: utils.TOPUP_RESET, BalanceId: "testAccITAccountMonthlyEstimated",
-			BalanceType: utils.MONETARY, Units: "5", Weight: 10.0},
+			BalanceType: utils.MetaMonetary, Units: "5", Weight: 10.0},
 	}}
 
 	if err := accRPC.Call(utils.APIerSv2SetActions, topupAction, &reply); err != nil {
@@ -1151,7 +1153,7 @@ func testAccITMultipleBalance(t *testing.T) {
 		Account: "testAccITMultipleBalance",
 		Balances: []*utils.AttrBalance{
 			{
-				BalanceType: utils.VOICE,
+				BalanceType: utils.MetaVoice,
 				Value:       2 * float64(time.Second),
 				Balance: map[string]interface{}{
 					utils.ID:            "Balance1",
@@ -1159,7 +1161,7 @@ func testAccITMultipleBalance(t *testing.T) {
 				},
 			},
 			{
-				BalanceType: utils.VOICE,
+				BalanceType: utils.MetaVoice,
 				Value:       10 * float64(time.Second),
 				Balance: map[string]interface{}{
 					utils.ID:            "Balance2",
@@ -1167,7 +1169,7 @@ func testAccITMultipleBalance(t *testing.T) {
 				},
 			},
 			{
-				BalanceType: utils.MONETARY,
+				BalanceType: utils.MetaMonetary,
 				Value:       10,
 				Balance: map[string]interface{}{
 					utils.ID: "MonBalance",
@@ -1189,14 +1191,14 @@ func testAccITMultipleBalance(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap[utils.VOICE]) != 2 {
-		t.Errorf("Expected %+v, received: %+v", 2, len(acnt.BalanceMap[utils.VOICE]))
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != float64(12*time.Second) {
-		t.Errorf("Expected %+v, received: %+v", float64(12*time.Second), acnt.BalanceMap[utils.VOICE].GetTotalValue())
-	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
-		t.Errorf("Expected %+v, received: %+v", 1, len(acnt.BalanceMap[utils.MONETARY]))
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
-		t.Errorf("Expected %+v, received: %+v", 10.0, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MetaVoice]) != 2 {
+		t.Errorf("Expected %+v, received: %+v", 2, len(acnt.BalanceMap[utils.MetaVoice]))
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != float64(12*time.Second) {
+		t.Errorf("Expected %+v, received: %+v", float64(12*time.Second), acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MetaMonetary]) != 1 {
+		t.Errorf("Expected %+v, received: %+v", 1, len(acnt.BalanceMap[utils.MetaMonetary]))
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
+		t.Errorf("Expected %+v, received: %+v", 10.0, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 }
@@ -1206,7 +1208,7 @@ func testAccITMultipleBalanceWithoutTenant(t *testing.T) {
 		Account: "testAccITMultipleBalance",
 		Balances: []*utils.AttrBalance{
 			{
-				BalanceType: utils.VOICE,
+				BalanceType: utils.MetaVoice,
 				Value:       2 * float64(time.Second),
 				Balance: map[string]interface{}{
 					utils.ID:            "Balance1",
@@ -1214,7 +1216,7 @@ func testAccITMultipleBalanceWithoutTenant(t *testing.T) {
 				},
 			},
 			{
-				BalanceType: utils.VOICE,
+				BalanceType: utils.MetaVoice,
 				Value:       10 * float64(time.Second),
 				Balance: map[string]interface{}{
 					utils.ID:            "Balance2",
@@ -1222,7 +1224,7 @@ func testAccITMultipleBalanceWithoutTenant(t *testing.T) {
 				},
 			},
 			{
-				BalanceType: utils.MONETARY,
+				BalanceType: utils.MetaMonetary,
 				Value:       10,
 				Balance: map[string]interface{}{
 					utils.ID: "MonBalance",
@@ -1243,21 +1245,21 @@ func testAccITMultipleBalanceWithoutTenant(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if len(acnt.BalanceMap[utils.VOICE]) != 2 {
-		t.Errorf("Expected %+v, received: %+v", 2, len(acnt.BalanceMap[utils.VOICE]))
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != float64(12*time.Second) {
-		t.Errorf("Expected %+v, received: %+v", float64(12*time.Second), acnt.BalanceMap[utils.VOICE].GetTotalValue())
-	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
-		t.Errorf("Expected %+v, received: %+v", 1, len(acnt.BalanceMap[utils.MONETARY]))
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
-		t.Errorf("Expected %+v, received: %+v", 10.0, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MetaVoice]) != 2 {
+		t.Errorf("Expected %+v, received: %+v", 2, len(acnt.BalanceMap[utils.MetaVoice]))
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != float64(12*time.Second) {
+		t.Errorf("Expected %+v, received: %+v", float64(12*time.Second), acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
+	} else if len(acnt.BalanceMap[utils.MetaMonetary]) != 1 {
+		t.Errorf("Expected %+v, received: %+v", 1, len(acnt.BalanceMap[utils.MetaMonetary]))
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != 10.0 {
+		t.Errorf("Expected %+v, received: %+v", 10.0, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
 func testAccITRemoveBalances(t *testing.T) {
 	var reply string
 	if err := accRPC.Call(utils.APIerSv1RemoveBalances,
-		&utils.AttrSetBalance{Account: "testAccITMultipleBalance", BalanceType: utils.VOICE},
+		&utils.AttrSetBalance{Account: "testAccITMultipleBalance", BalanceType: utils.MetaVoice},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1265,7 +1267,7 @@ func testAccITRemoveBalances(t *testing.T) {
 	}
 	attrs := &AttrAddBalance{
 		Account:     "testAccITMultipleBalance",
-		BalanceType: utils.MONETARY,
+		BalanceType: utils.MetaMonetary,
 		Value:       1.5,
 		Cdrlog:      true,
 	}
@@ -1281,7 +1283,7 @@ func testAccITAddVoiceBalanceWithDestinations(t *testing.T) {
 	args := &utils.AttrSetBalance{
 		Tenant:      "cgrates.com",
 		Account:     "testAccITAddVoiceBalanceWithDestinations",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Balance: map[string]interface{}{
 			utils.ID:             "testAccITAddVoiceBalanceWithDestinations",
 			utils.DestinationIDs: "DST_1002",
@@ -1305,7 +1307,7 @@ func testAccITAddVoiceBalanceWithDestinations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, value := range acnt.BalanceMap[utils.VOICE] {
+	for _, value := range acnt.BalanceMap[utils.MetaVoice] {
 		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
 		if value.ID == "testAccITAddVoiceBalanceWithDestinations" {
 			if value.GetValue() != 3.6e+12 {

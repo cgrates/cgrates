@@ -37,12 +37,12 @@ const (
 
 func (m *Migrator) migrateCurrentAccounts() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AccountPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ACCOUNT_PREFIX)
+		idg := strings.TrimPrefix(id, utils.AccountPrefix)
 		acc, err := m.dmIN.DataManager().GetAccount(idg)
 		if err != nil {
 			return err
@@ -261,7 +261,7 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 		AllowNegative:  v1Acc.AllowNegative,
 		Disabled:       v1Acc.Disabled,
 	}
-	idElements := strings.Split(ac.ID, utils.CONCATENATED_KEY_SEP)
+	idElements := strings.Split(ac.ID, utils.ConcatenatedKeySep)
 	if len(idElements) != 3 {
 		log.Printf("Malformed account ID %s", v1Acc.Id)
 	}
@@ -273,7 +273,7 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 		ac.BalanceMap[newBalKey] = make(engine.Balances, len(oldBalChain))
 		for index, oldBal := range oldBalChain {
 			balVal := oldBal.Value
-			if newBalKey == utils.VOICE {
+			if newBalKey == utils.MetaVoice {
 				balVal = utils.Round(balVal/float64(time.Second),
 					config.CgrConfig().GeneralCfg().RoundingDecimals,
 					utils.MetaRoundingMiddle)
@@ -408,7 +408,7 @@ func (v2Acc v2Account) V2toV3Account() (ac *engine.Account) {
 		ac.BalanceMap[balType] = make(engine.Balances, len(oldBalChain))
 		for index, oldBal := range oldBalChain {
 			balVal := oldBal.Value
-			if balType == utils.VOICE {
+			if balType == utils.MetaVoice {
 				balVal = utils.Round(balVal*float64(time.Second),
 					config.CgrConfig().GeneralCfg().RoundingDecimals,
 					utils.MetaRoundingMiddle)

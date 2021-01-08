@@ -139,7 +139,7 @@ func (apierSv1 *APIerSv1) GetReverseDestination(prefix *string, reply *[]string)
 
 // ComputeReverseDestinations will rebuild complete reverse destinations data
 func (apierSv1 *APIerSv1) ComputeReverseDestinations(ignr *string, reply *string) (err error) {
-	if err = apierSv1.DataManager.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+	if err = apierSv1.DataManager.RebuildReverseForPrefix(utils.ReverseDestinationPrefix); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -461,7 +461,7 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	keyID := utils.ConcatenatedKey(utils.META_OUT,
+	keyID := utils.ConcatenatedKey(utils.MetaOut,
 		tnt, attrs.Category, attrs.Subject)
 	var rpfl *engine.RatingProfile
 	if !attrs.Overwrite {
@@ -478,7 +478,7 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 		if err != nil {
 			return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ErrServerError.Error(), ra.ActivationTime))
 		}
-		if exists, err := apierSv1.DataManager.HasData(utils.RATING_PLAN_PREFIX,
+		if exists, err := apierSv1.DataManager.HasData(utils.RatingPlanPrefix,
 			ra.RatingPlanId, ""); err != nil {
 			return utils.NewErrServerError(err)
 		} else if !exists {
@@ -515,7 +515,7 @@ func (apierSv1 *APIerSv1) GetRatingProfileIDs(args *utils.PaginatorWithTenant, r
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.RATING_PROFILE_PREFIX + "*out:" + tnt + utils.CONCATENATED_KEY_SEP
+	prfx := utils.RatingProfilePrefix + "*out:" + tnt + utils.ConcatenatedKeySep
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -593,7 +593,7 @@ func (apierSv1 *APIerSv1) SetActions(attrs *V1AttrSetActions, reply *string) (er
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := apierSv1.DataManager.HasData(utils.ACTION_PREFIX, attrs.ActionsId, ""); err != nil {
+		if exists, err := apierSv1.DataManager.HasData(utils.ActionPrefix, attrs.ActionsId, ""); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
 			return utils.ErrExists
@@ -774,7 +774,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			Id: attrs.Id,
 		}
 		for _, apiAtm := range attrs.ActionPlan {
-			if exists, err := apierSv1.DataManager.HasData(utils.ACTION_PREFIX, apiAtm.ActionsId, ""); err != nil {
+			if exists, err := apierSv1.DataManager.HasData(utils.ActionPrefix, apiAtm.ActionsId, ""); err != nil {
 				return 0, utils.NewErrServerError(err)
 			} else if !exists {
 				return 0, fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
@@ -814,7 +814,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			}
 		}
 		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
 	if err != nil {
 		return err
 	}
@@ -1000,7 +1000,7 @@ func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *strin
 			}
 		}
 		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX); err != nil {
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -1224,15 +1224,15 @@ type AttrRemoveRatingProfile struct {
 }
 
 func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
-	result = utils.META_OUT + utils.CONCATENATED_KEY_SEP
+	result = utils.MetaOut + utils.ConcatenatedKeySep
 	if arrp.Tenant != "" && arrp.Tenant != utils.MetaAny {
-		result += arrp.Tenant + utils.CONCATENATED_KEY_SEP
+		result += arrp.Tenant + utils.ConcatenatedKeySep
 	} else {
 		return
 	}
 
 	if arrp.Category != "" && arrp.Category != utils.MetaAny {
-		result += arrp.Category + utils.CONCATENATED_KEY_SEP
+		result += arrp.Category + utils.ConcatenatedKeySep
 	} else {
 		return
 	}
@@ -1312,13 +1312,13 @@ func (apierSv1 *APIerSv1) RemoveActions(attr *AttrRemoveActions, reply *string) 
 	// The check could lead to very long execution time. So we decided to leave it at the user's risck.'
 	/*
 		stringMap := utils.NewStringMap(attr.ActionIDs...)
-		keys, err := apiv1.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX, true)
+		keys, err := apiv1.DataManager.DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix, true)
 		if err != nil {
 			*reply = err.Error()
 			return err
 		}
 		for _, key := range keys {
-			getAttrs, err := apiv1.DataManager.DataDB().GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):])
+			getAttrs, err := apiv1.DataManager.DataDB().GetActionTriggers(key[len(utils.ActionTriggerPrefix):])
 			if err != nil {
 				*reply = err.Error()
 				return err
@@ -1472,8 +1472,8 @@ func (apierSv1 *APIerSv1) ComputeActionPlanIndexes(_ string, reply *string) (err
 
 // GetActionPlanIDs returns list of ActionPlan IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetActionPlanIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
-	prfx := utils.ACTION_PLAN_PREFIX
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	prfx := utils.ActionPlanPrefix
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix)
 	if err != nil {
 		return err
 	}
@@ -1490,8 +1490,8 @@ func (apierSv1 *APIerSv1) GetActionPlanIDs(args *utils.PaginatorWithTenant, attr
 
 // GetRatingPlanIDs returns list of RatingPlan IDs registered for a tenant
 func (apierSv1 *APIerSv1) GetRatingPlanIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
-	prfx := utils.RATING_PLAN_PREFIX
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.RATING_PLAN_PREFIX)
+	prfx := utils.RatingPlanPrefix
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix)
 	if err != nil {
 		return err
 	}

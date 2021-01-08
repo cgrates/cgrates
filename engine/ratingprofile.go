@@ -266,7 +266,7 @@ func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err erro
 	if rp, err = dm.GetRatingProfile(key, false, utils.NonTransactional); err == nil && rp != nil { // rp nil represents cached no-result
 		return
 	}
-	lastIndex := strings.LastIndex(key, utils.CONCATENATED_KEY_SEP)
+	lastIndex := strings.LastIndex(key, utils.ConcatenatedKeySep)
 	baseKey := key[:lastIndex]
 	subject := key[lastIndex:]
 	lenSubject := len(subject)

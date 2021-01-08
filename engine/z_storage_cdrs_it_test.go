@@ -83,7 +83,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		OriginHost:  "127.0.0.1",
 		Source:      "testSetCDRs",
 		OriginID:    "testevent1",
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 		RequestType: utils.MetaPrepaid,
 		Tenant:      "cgrates.org",
 		Category:    "call",
@@ -110,7 +110,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		OriginHost:  "127.0.0.1",
 		Source:      "testSetCDRs",
 		OriginID:    "testevent1",
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 		RequestType: utils.MetaPrepaid,
 		Tenant:      "cgrates.org",
 		Category:    "call",
@@ -193,10 +193,10 @@ func testSMCosts(cfg *config.CGRConfig) error {
 					Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		ToR: utils.VOICE,
+		ToR: utils.MetaVoice,
 	}
 	if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
-		RunID: utils.MetaDefault, OriginHost: "localhost", OriginID: "12345", CostSource: utils.UNIT_TEST,
+		RunID: utils.MetaDefault, OriginHost: "localhost", OriginID: "12345", CostSource: utils.UnitTest,
 		CostDetails: NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e41", utils.MetaDefault)}); err != nil {
 		return fmt.Errorf("testSMCosts #3 err: %v", err)
 	}
@@ -209,7 +209,7 @@ func testSMCosts(cfg *config.CGRConfig) error {
 	for i := 0; i < 3; i++ {
 		if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e5" + strconv.Itoa(i),
 			RunID: utils.MetaDefault, OriginHost: "localhost", OriginID: "abc" + strconv.Itoa(i),
-			CostSource:  utils.UNIT_TEST,
+			CostSource:  utils.UnitTest,
 			CostDetails: NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e5"+strconv.Itoa(i), utils.MetaDefault)}); err != nil {
 			return fmt.Errorf("testSMCosts #7 err: %v", err)
 		}
@@ -255,7 +255,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			OriginHost:  "127.0.0.1",
 			Source:      "testGetCDRs",
 			OriginID:    "testevent1",
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			RequestType: utils.MetaPrepaid,
 			Tenant:      "cgrates.org",
 			Category:    "call",
@@ -275,7 +275,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			OriginHost:  "127.0.0.1",
 			Source:      "testGetCDRs",
 			OriginID:    "testevent1",
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			RequestType: utils.MetaPrepaid,
 			Tenant:      "cgrates.org",
 			Category:    "call",
@@ -295,7 +295,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			OriginHost:  "127.0.0.1",
 			Source:      "testGetCDRs",
 			OriginID:    "testevent1",
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			RequestType: utils.MetaRated,
 			Tenant:      "cgrates.org",
 			Category:    "call_derived",
@@ -315,7 +315,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			OriginHost:  "192.168.1.12",
 			Source:      "testGetCDRs",
 			OriginID:    "testevent2",
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			RequestType: utils.MetaPostpaid,
 			Tenant:      "itsyscom.com",
 			Category:    "call",
@@ -335,7 +335,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			OriginHost:  "192.168.1.13",
 			Source:      "testGetCDRs3",
 			OriginID:    "testevent3",
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			RequestType: utils.MetaPseudoPrepaid,
 			Tenant:      "cgrates.org",
 			Category:    "call",
@@ -355,7 +355,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			OriginHost:  "192.168.1.13",
 			Source:      "testGetCDRs3",
 			OriginID:    "testevent3",
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			RequestType: utils.MetaRated,
 			Tenant:      "cgrates.org",
 			Category:    "call",
@@ -376,7 +376,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			OriginHost:  "192.168.1.14",
 			Source:      "testGetCDRs",
 			OriginID:    "testevent4",
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			RequestType: utils.MetaPseudoPrepaid,
 			Tenant:      "itsyscom.com",
 			Category:    "call",
@@ -396,7 +396,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			OriginHost:  "192.168.1.14",
 			Source:      "testGetCDRs",
 			OriginID:    "testevent4",
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			RequestType: utils.MetaRated,
 			Tenant:      "itsyscom.com",
 			Category:    "call",
@@ -416,7 +416,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			OriginHost:  "127.0.0.1",
 			Source:      "testGetCDRs5",
 			OriginID:    "testevent5",
-			ToR:         utils.SMS,
+			ToR:         utils.MetaSMS,
 			RequestType: utils.MetaPrepaid,
 			Tenant:      "cgrates.org",
 			Category:    "sms",
@@ -436,7 +436,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 			OriginHost:  "127.0.0.1",
 			Source:      "testGetCDRs5",
 			OriginID:    "testevent5",
-			ToR:         utils.SMS,
+			ToR:         utils.MetaSMS,
 			RequestType: utils.MetaPrepaid,
 			Tenant:      "cgrates.org",
 			Category:    "sms",
@@ -542,13 +542,13 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return fmt.Errorf("testGetCDRs #23, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on ToR
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.SMS}}, false); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.MetaSMS}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #23 err: %v", err)
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("testGetCDRs #24, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on multiple ToR
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.SMS, utils.VOICE}}, false); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.MetaSMS, utils.MetaVoice}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #25 err: %v", err)
 	} else if len(CDRs) != 10 {
 		return fmt.Errorf("testGetCDRs #26, unexpected number of CDRs returned: %+v", CDRs)

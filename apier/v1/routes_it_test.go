@@ -535,7 +535,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 					utils.AccountField: "1001",
 					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 					utils.Usage:        11 * time.Second,
-					utils.COST:         10.0,
+					utils.Cost:         10.0,
 				},
 			},
 		},
@@ -556,7 +556,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 					utils.AccountField: "1001",
 					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 					utils.Usage:        11 * time.Second,
-					utils.COST:         10.5,
+					utils.Cost:         10.5,
 				},
 			},
 		},
@@ -577,7 +577,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 					utils.AccountField: "1002",
 					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 					utils.Usage:        5 * time.Second,
-					utils.COST:         12.5,
+					utils.Cost:         12.5,
 				},
 			},
 		},
@@ -598,7 +598,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 					utils.AccountField: "1002",
 					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 					utils.Usage:        6 * time.Second,
-					utils.COST:         17.5,
+					utils.Cost:         17.5,
 				},
 			},
 		},
@@ -619,7 +619,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 					utils.AccountField: "1003",
 					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 					utils.Usage:        11 * time.Second,
-					utils.COST:         12.5,
+					utils.Cost:         12.5,
 				},
 			},
 		},
@@ -640,7 +640,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 					"Stat":           "Stat1_1",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 					utils.Usage:      11 * time.Second,
-					utils.COST:       12.5,
+					utils.Cost:       12.5,
 					utils.PDD:        12 * time.Second,
 				},
 			},
@@ -662,7 +662,7 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 					"Stat":           "Stat1_1",
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 					utils.Usage:      15 * time.Second,
-					utils.COST:       15.5,
+					utils.Cost:       15.5,
 					utils.PDD:        15 * time.Second,
 				},
 			},
@@ -1366,7 +1366,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "AccWithVoice",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       30 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID: "VoiceBalance",
@@ -1385,8 +1385,8 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 	}
 	if err := routeSv1Rpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 30*float64(time.Second) {
-		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 30*float64(time.Second) {
+		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	// test for 30 seconds usage

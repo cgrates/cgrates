@@ -63,7 +63,7 @@ var (
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
 				utils.CGRID:        "TestCGRID",
-				utils.ToR:          utils.VOICE,
+				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestCDRsExp",
 				utils.OriginHost:   "192.168.1.0",
 				utils.RequestType:  utils.MetaRated,
@@ -82,7 +82,7 @@ var (
 
 	cdrsExpEvExp = map[string]interface{}{
 		utils.CGRID:        "TestCGRID",
-		utils.ToR:          utils.VOICE,
+		utils.ToR:          utils.MetaVoice,
 		utils.OriginID:     "TestCDRsExp",
 		utils.RequestType:  utils.MetaRated,
 		utils.Tenant:       "cgrates.org",

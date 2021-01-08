@@ -200,7 +200,7 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "AccWithVoice",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       30 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID: "VoiceBalance",
@@ -219,8 +219,8 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 	}
 	if err := routeSv1Rpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 30*float64(time.Second) {
-		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 30*float64(time.Second) {
+		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	// test for 30 seconds usage

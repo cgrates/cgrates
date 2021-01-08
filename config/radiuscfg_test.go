@@ -46,7 +46,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 					{
 						Tag:       utils.StringPointer("Allow"),
 						Path:      utils.StringPointer("*rep.response.Allow"),
-						Type:      utils.StringPointer(utils.META_CONSTANT),
+						Type:      utils.StringPointer(utils.MetaConstant),
 						Value:     utils.StringPointer("1"),
 						Mandatory: utils.BoolPointer(true),
 						Layout:    utils.StringPointer(string(time.RFC3339)),
@@ -75,7 +75,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 					{
 						Tag:       "Allow",
 						Path:      "*rep.response.Allow",
-						Type:      utils.META_CONSTANT,
+						Type:      utils.MetaConstant,
 						Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
 						Mandatory: true,
 						Layout:    time.RFC3339,
@@ -248,7 +248,7 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 					{
 						Tag:       "Allow",
 						Path:      "*rep.response.Allow",
-						Type:      utils.META_CONSTANT,
+						Type:      utils.MetaConstant,
 						Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
 						Mandatory: true,
 						Layout:    time.RFC3339,

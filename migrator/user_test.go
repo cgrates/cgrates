@@ -110,7 +110,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				},
 				{
 					Path:  utils.MetaTenant,
-					Type:  utils.META_CONSTANT,
+					Type:  utils.MetaConstant,
 					Value: config.NewRSRParsersMustCompile(usrTenant, utils.InfieldSep),
 				},
 			},
@@ -154,7 +154,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				},
 				{
 					Path:  utils.MetaTenant,
-					Type:  utils.META_CONSTANT,
+					Type:  utils.MetaConstant,
 					Value: config.NewRSRParsersMustCompile(usrTenant, utils.InfieldSep),
 				},
 			},
@@ -192,7 +192,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				},
 				{
 					Path:  utils.MetaTenant,
-					Type:  utils.META_CONSTANT,
+					Type:  utils.MetaConstant,
 					Value: config.NewRSRParsersMustCompile(usrTenant, utils.InfieldSep),
 				},
 			},

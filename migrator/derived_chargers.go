@@ -117,7 +117,7 @@ func derivedChargers2AttributeProfile(dc *v1DerivedCharger, tenant, key string, 
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.AnswerTime, dc.AnswerTimeField)
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Usage, dc.UsageField)
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, SUPPLIER, dc.SupplierField)
-	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.DISCONNECT_CAUSE, dc.DisconnectCauseField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.DisconnectCause, dc.DisconnectCauseField)
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Cost, dc.CostField)
 	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.PreRated, dc.PreRatedField)
 	return

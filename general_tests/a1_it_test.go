@@ -159,7 +159,7 @@ func testA1itAddBalance1(t *testing.T) {
 	argAdd := &v1.AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "rpdata1",
-		BalanceType: utils.DATA,
+		BalanceType: utils.MetaData,
 		Value:       10000000000,
 		Balance: map[string]interface{}{
 			utils.ID: "rpdata1_test",
@@ -175,8 +175,8 @@ func testA1itAddBalance1(t *testing.T) {
 	if err := a1rpc.Call(utils.APIerSv2GetAccount, argGet, &acnt); err != nil {
 		t.Error(err)
 	} else {
-		if acnt.BalanceMap[utils.DATA].GetTotalValue() != argAdd.Value { // We expect 11.5 since we have added in the previous test 1.5
-			t.Errorf("Received account value: %f", acnt.BalanceMap[utils.DATA].GetTotalValue())
+		if acnt.BalanceMap[utils.MetaData].GetTotalValue() != argAdd.Value { // We expect 11.5 since we have added in the previous test 1.5
+			t.Errorf("Received account value: %f", acnt.BalanceMap[utils.MetaData].GetTotalValue())
 		}
 	}
 }
@@ -195,8 +195,8 @@ func testA1itDataSession1(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestA1itDataSession1",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "INITIATE_SESSION",
-					utils.ToR:          utils.DATA,
+					utils.EventName:    "INITIATE_SESSION",
+					utils.ToR:          utils.MetaData,
 					utils.OriginID:     "504966119",
 					utils.AccountField: "rpdata1",
 					utils.Subject:      "rpdata1",
@@ -233,7 +233,7 @@ func testA1itDataSession1(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsed",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:      "UPDATE_SESSION",
+					utils.EventName:       "UPDATE_SESSION",
 					utils.AccountField:    "rpdata1",
 					utils.Category:        "data1",
 					utils.Destination:     "data",
@@ -243,7 +243,7 @@ func testA1itDataSession1(t *testing.T) {
 					utils.RequestType:     utils.MetaPrepaid,
 					utils.Subject:         "rpdata1",
 					utils.Tenant:          "cgrates.org",
-					utils.ToR:             utils.DATA,
+					utils.ToR:             utils.MetaData,
 					utils.SetupTime:       "2017-03-03 11:39:32 +0100 CET",
 					utils.AnswerTime:      "2017-03-03 11:39:32 +0100 CET",
 					utils.Usage:           "2097152",
@@ -269,7 +269,7 @@ func testA1itDataSession1(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsed",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:     "TERMINATE_SESSION",
+					utils.EventName:      "TERMINATE_SESSION",
 					utils.AccountField:   "rpdata1",
 					utils.Category:       "data1",
 					utils.Destination:    "data",
@@ -281,7 +281,7 @@ func testA1itDataSession1(t *testing.T) {
 					utils.AnswerTime:     "2017-03-03 11:39:32 +0100 CET",
 					utils.Subject:        "rpdata1",
 					utils.Tenant:         "cgrates.org",
-					utils.ToR:            utils.DATA,
+					utils.ToR:            utils.MetaData,
 				},
 			},
 		},
@@ -328,8 +328,8 @@ func testA1itDataSession1(t *testing.T) {
 	if err := a1rpc.Call(utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "rpdata1"}, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != expBalance { // We expect 11.5 since we have added in the previous test 1.5
-		t.Errorf("Expecting: %f, received: %f", expBalance, acnt.BalanceMap[utils.DATA].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaData].GetTotalValue() != expBalance { // We expect 11.5 since we have added in the previous test 1.5
+		t.Errorf("Expecting: %f, received: %f", expBalance, acnt.BalanceMap[utils.MetaData].GetTotalValue())
 	}
 }
 

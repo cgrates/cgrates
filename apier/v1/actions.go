@@ -53,7 +53,7 @@ func (apierSv1 *APIerSv1) GetActionProfileIDs(args *utils.PaginatorWithTenant, a
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ActionProfilePrefix + tnt + utils.CONCATENATED_KEY_SEP
+	prfx := utils.ActionProfilePrefix + tnt + utils.ConcatenatedKeySep
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func (apierSv1 *APIerSv1) GetActionProfileIDsCount(args *utils.TenantWithOpts, r
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var keys []string
-	prfx := utils.ActionProfilePrefix + tnt + utils.CONCATENATED_KEY_SEP
+	prfx := utils.ActionProfilePrefix + tnt + utils.ConcatenatedKeySep
 	if keys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
 		return err
 	}

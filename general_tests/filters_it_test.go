@@ -142,7 +142,7 @@ func testV1FltrAddStats(t *testing.T) {
 					utils.AccountField: "1001",
 					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 					utils.Usage:        11 * time.Second,
-					utils.COST:         10.0,
+					utils.Cost:         10.0,
 				},
 			},
 		},
@@ -161,7 +161,7 @@ func testV1FltrAddStats(t *testing.T) {
 			utils.AccountField: "1001",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        11 * time.Second,
-			utils.COST:         10.5,
+			utils.Cost:         10.5,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -178,7 +178,7 @@ func testV1FltrAddStats(t *testing.T) {
 			utils.AccountField: "1002",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        5 * time.Second,
-			utils.COST:         12.5,
+			utils.Cost:         12.5,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -195,7 +195,7 @@ func testV1FltrAddStats(t *testing.T) {
 			utils.AccountField: "1002",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        6 * time.Second,
-			utils.COST:         17.5,
+			utils.Cost:         17.5,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -212,7 +212,7 @@ func testV1FltrAddStats(t *testing.T) {
 			utils.AccountField: "1003",
 			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:        11 * time.Second,
-			utils.COST:         12.5,
+			utils.Cost:         12.5,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -229,7 +229,7 @@ func testV1FltrAddStats(t *testing.T) {
 			"Stat":           "Stat1_1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      11 * time.Second,
-			utils.COST:       12.5,
+			utils.Cost:       12.5,
 			utils.PDD:        12 * time.Second,
 		},
 	}
@@ -247,7 +247,7 @@ func testV1FltrAddStats(t *testing.T) {
 			"Stat":           "Stat1_1",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      15 * time.Second,
-			utils.COST:       15.5,
+			utils.Cost:       15.5,
 			utils.PDD:        15 * time.Second,
 		},
 	}
@@ -284,7 +284,7 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 
 	// Add a disable and log action
 	attrsAA := &utils.AttrSetActions{ActionsId: "LOG", Actions: []*utils.TPAction{
-		{Identifier: utils.LOG},
+		{Identifier: utils.MetaLog},
 	}}
 	if err := fltrRpc.Call(utils.APIerSv2SetActions, attrsAA, &result); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
@@ -588,7 +588,7 @@ func testV1FltrAccounts(t *testing.T) {
 	}
 	// Add a log action
 	attrsAA := &utils.AttrSetActions{ActionsId: "LOG", Actions: []*utils.TPAction{
-		{Identifier: utils.LOG},
+		{Identifier: utils.MetaLog},
 	}}
 	if err := fltrRpc.Call(utils.APIerSv2SetActions, attrsAA, &result); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
@@ -680,7 +680,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	var result string
 	// Add a log action
 	attrsAA := &utils.AttrSetActions{ActionsId: "LOG", Actions: []*utils.TPAction{
-		{Identifier: utils.LOG},
+		{Identifier: utils.MetaLog},
 	}}
 	if err := fltrRpc.Call(utils.APIerSv2SetActions, attrsAA, &result); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
@@ -873,7 +873,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 				{
 					FilterIDs: []string{},
 					Path:      utils.MetaReq + utils.NestingSep + "CustomField",
-					Type:      utils.META_CONSTANT,
+					Type:      utils.MetaConstant,
 					Value:     config.NewRSRParsersMustCompile("2007", utils.InfieldSep),
 				},
 			},

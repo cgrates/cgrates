@@ -30,7 +30,7 @@ import (
 type TPDistinctIds []string
 
 func (tpdi TPDistinctIds) String() string {
-	return strings.Join(tpdi, FIELDS_SEP)
+	return strings.Join(tpdi, FieldsSep)
 }
 
 type PaginatorWithSearch struct {
@@ -250,17 +250,17 @@ type TPRatingProfile struct {
 
 // Used as key in nosql db (eg: redis)
 func (rpf *TPRatingProfile) KeyId() string {
-	return ConcatenatedKey(META_OUT,
+	return ConcatenatedKey(MetaOut,
 		rpf.Tenant, rpf.Category, rpf.Subject)
 }
 
 func (rpf *TPRatingProfile) GetId() string {
-	return ConcatenatedKey(rpf.LoadId, META_OUT,
+	return ConcatenatedKey(rpf.LoadId, MetaOut,
 		rpf.Tenant, rpf.Category, rpf.Subject)
 }
 
 func (rpf *TPRatingProfile) SetRatingProfileID(id string) error {
-	ids := strings.Split(id, CONCATENATED_KEY_SEP)
+	ids := strings.Split(id, ConcatenatedKeySep)
 	if len(ids) != 4 {
 		return fmt.Errorf("Wrong TPRatingProfileId: %s", id)
 	}
@@ -286,7 +286,7 @@ type AttrGetRatingProfile struct {
 }
 
 func (self *AttrGetRatingProfile) GetID() string {
-	return ConcatenatedKey(META_OUT, self.Tenant, self.Category, self.Subject)
+	return ConcatenatedKey(MetaOut, self.Tenant, self.Category, self.Subject)
 }
 
 type TPRatingActivation struct {
@@ -300,7 +300,7 @@ func FallbackSubjKeys(tenant, tor, fallbackSubjects string) []string {
 	var sslice sort.StringSlice
 	if len(fallbackSubjects) != 0 {
 		for _, fbs := range strings.Split(fallbackSubjects, string(FallbackSep)) {
-			newKey := ConcatenatedKey(META_OUT, tenant, tor, fbs)
+			newKey := ConcatenatedKey(MetaOut, tenant, tor, fbs)
 			i := sslice.Search(newKey)
 			if i < len(sslice) && sslice[i] != newKey {
 				// not found so insert it
@@ -426,11 +426,11 @@ func (aa *TPAccountActions) KeyId() string {
 }
 
 func (aa *TPAccountActions) GetId() string {
-	return aa.LoadId + CONCATENATED_KEY_SEP + aa.Tenant + CONCATENATED_KEY_SEP + aa.Account
+	return aa.LoadId + ConcatenatedKeySep + aa.Tenant + ConcatenatedKeySep + aa.Account
 }
 
 func (aa *TPAccountActions) SetAccountActionsId(id string) error {
-	ids := strings.Split(id, CONCATENATED_KEY_SEP)
+	ids := strings.Split(id, ConcatenatedKeySep)
 	if len(ids) != 3 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}
@@ -543,7 +543,7 @@ type AttrImportTPFromFolder struct {
 }
 
 func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
-	accountSplt := strings.Split(accountKey, CONCATENATED_KEY_SEP)
+	accountSplt := strings.Split(accountKey, ConcatenatedKeySep)
 	if len(accountSplt) != 2 {
 		return nil, fmt.Errorf("Unsupported format for TenantAccount: %s", accountKey)
 	}

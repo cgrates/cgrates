@@ -779,7 +779,7 @@ func TestNewRSRParsers2(t *testing.T) {
 			Rules: "destination",
 		},
 	}
-	if parsedFields, err := NewRSRParsers(fields, utils.FIELDS_SEP); err != nil {
+	if parsedFields, err := NewRSRParsers(fields, utils.FieldsSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(parsedFields, expectParsedFields) {
 		t.Errorf("Expected: %s ,received: %s ", utils.ToJSON(expectParsedFields), utils.ToJSON(parsedFields))

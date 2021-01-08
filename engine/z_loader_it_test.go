@@ -508,25 +508,25 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 // Imports data from csv files in tpScenario to storDb
 func testLoaderITImportToStorDb(t *testing.T) {
 	csvImporter := TPCSVImporter{
-		TPid:     utils.TEST_SQL,
+		TPid:     utils.TestSQL,
 		StorDb:   storDb,
 		DirPath:  path.Join(*dataDir, "tariffplans", *tpCsvScenario),
 		Sep:      utils.CSVSep,
 		Verbose:  false,
-		ImportId: utils.TEST_SQL}
+		ImportId: utils.TestSQL}
 	if err := csvImporter.Run(); err != nil {
 		t.Error("Error when importing tpdata to storDb: ", err)
 	}
 	if tpids, err := storDb.GetTpIds(""); err != nil {
 		t.Error("Error when querying storDb for imported data: ", err)
-	} else if len(tpids) != 1 || tpids[0] != utils.TEST_SQL {
+	} else if len(tpids) != 1 || tpids[0] != utils.TestSQL {
 		t.Errorf("Data in storDb is different than expected %v", tpids)
 	}
 }
 
 // Loads data from storDb into dataDb
 func testLoaderITLoadFromStorDb(t *testing.T) {
-	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TEST_SQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
+	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TestSQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
 	if err := loader.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -560,9 +560,9 @@ func testLoaderITLoadFromStorDb(t *testing.T) {
 }
 
 func testLoaderITLoadIndividualProfiles(t *testing.T) {
-	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TEST_SQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
+	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TestSQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
 	// Load ratingPlans. This will also set destination keys
-	if rps, err := storDb.GetTPRatingPlans(utils.TEST_SQL, "", nil); err != nil {
+	if rps, err := storDb.GetTPRatingPlans(utils.TestSQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")
 	} else {
 		for _, r := range rps {
@@ -574,8 +574,8 @@ func testLoaderITLoadIndividualProfiles(t *testing.T) {
 		}
 	}
 	// Load rating profiles
-	loadId := utils.CSV_LOAD + "_" + utils.TEST_SQL
-	if rprs, err := storDb.GetTPRatingProfiles(&utils.TPRatingProfile{TPid: utils.TEST_SQL, LoadId: loadId}); err != nil {
+	loadId := utils.CSVLoad + "_" + utils.TestSQL
+	if rprs, err := storDb.GetTPRatingProfiles(&utils.TPRatingProfile{TPid: utils.TestSQL, LoadId: loadId}); err != nil {
 		t.Fatal("Could not retrieve rating profiles, error: ", err.Error())
 	} else if len(rprs) == 0 {
 		t.Fatal("Could not retrieve rating profiles")
@@ -588,7 +588,7 @@ func testLoaderITLoadIndividualProfiles(t *testing.T) {
 	}
 
 	// Load account actions
-	if aas, err := storDb.GetTPAccountActions(&utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: loadId}); err != nil {
+	if aas, err := storDb.GetTPAccountActions(&utils.TPAccountActions{TPid: utils.TestSQL, LoadId: loadId}); err != nil {
 		t.Fatal("Could not retrieve account action profiles, error: ", err.Error())
 	} else if len(aas) == 0 {
 		t.Error("No account actions")
@@ -619,7 +619,7 @@ func TestMatchLoadCsvWithStorRating(t *testing.T) {
 	for _, key := range keysCsv {
 		var refVal []byte
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
-			if key == utils.TASKS_KEY || strings.HasPrefix(key, utils.ACTION_PLAN_PREFIX) { // action plans are not consistent
+			if key == utils.TasksKey || strings.HasPrefix(key, utils.ActionPlanPrefix) { // action plans are not consistent
 				continue
 			}
 			qVal, err := rs.db.Cmd("GET", key).Bytes()

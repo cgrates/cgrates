@@ -138,7 +138,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It2",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -180,7 +180,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
 					"OfficeGroup":      "Marketing",
@@ -272,7 +272,7 @@ func testSes3ItAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1002",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       5 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestDynamicDebitBalance",
@@ -292,7 +292,7 @@ func testSes3ItAddVoiceBalance(t *testing.T) {
 	}
 	if err := ses3RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(5*time.Second) {
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != float64(5*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",
 			float64(5*time.Second), rply)
 	}
@@ -310,7 +310,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 					Event: map[string]interface{}{
 						utils.Tenant:       "cgrates.org",
 						utils.Category:     "call",
-						utils.ToR:          utils.VOICE,
+						utils.ToR:          utils.MetaVoice,
 						utils.OriginID:     "TestTerminate",
 						utils.RequestType:  utils.MetaPrepaid,
 						utils.AccountField: "1002",
@@ -346,7 +346,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestTerminate",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1002",
@@ -383,7 +383,7 @@ func testSes3ItBalance(t *testing.T) {
 	}
 	if err := ses3RPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(3*time.Second) {
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != float64(3*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",
 			3*time.Second, rply)
 	}
@@ -398,7 +398,7 @@ func testSes3ItCDRs(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
-				utils.ToR:          utils.VOICE,
+				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestTerminate",
 				utils.RequestType:  utils.MetaPrepaid,
 				utils.AccountField: "1002",

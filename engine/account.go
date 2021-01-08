@@ -52,7 +52,7 @@ type AccountWithOpts struct {
 
 // User's available minutes for the specified destination
 func (acc *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances Balances) {
-	creditBalances := acc.getBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY, "", cd.TimeStart)
+	creditBalances := acc.getBalancesForPrefix(cd.Destination, cd.Category, utils.MetaMonetary, "", cd.TimeStart)
 
 	unitBalances := acc.getBalancesForPrefix(cd.Destination, cd.Category, cd.ToR, "", cd.TimeStart)
 	// gather all balances from shared groups
@@ -61,7 +61,7 @@ func (acc *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Durati
 		if len(cb.SharedGroups) > 0 {
 			for sg := range cb.SharedGroups {
 				if sharedGroup, _ := dm.GetSharedGroup(sg, false, utils.NonTransactional); sharedGroup != nil {
-					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, utils.MONETARY, acc, cd.TimeStart)
+					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, utils.MetaMonetary, acc, cd.TimeStart)
 					sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
 					extendedCreditBalances = append(extendedCreditBalances, sgb...)
 				}
@@ -268,7 +268,7 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) e
 				}
 				i++
 			}
-			dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgs, true)
+			dm.CacheDataFromDB(utils.SharedGroupPrefix, sgs, true)
 			return 0, nil
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, bClone.SharedGroups.Slice()...)
 		if err != nil {
@@ -284,8 +284,8 @@ func (acc *Account) getBalancesForPrefix(prefix, category, tor,
 	sharedGroup string, aTime time.Time) Balances {
 	var balances Balances
 	balances = append(balances, acc.BalanceMap[tor]...)
-	if tor != utils.MONETARY && tor != utils.GENERIC {
-		balances = append(balances, acc.BalanceMap[utils.GENERIC]...)
+	if tor != utils.MetaMonetary && tor != utils.MetaGeneric {
+		balances = append(balances, acc.BalanceMap[utils.MetaGeneric]...)
 	}
 
 	var usefulBalances Balances
@@ -376,7 +376,7 @@ func (acc *Account) getAlldBalancesForPrefix(destination, category,
 
 func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
 	usefulUnitBalances := acc.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.ToR, cd.TimeStart)
-	usefulMoneyBalances := acc.getAlldBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY, cd.TimeStart)
+	usefulMoneyBalances := acc.getAlldBalancesForPrefix(cd.Destination, cd.Category, utils.MetaMonetary, cd.TimeStart)
 	var leftCC *CallCost
 	cc = cd.CreateCallCost()
 	var hadBalanceSubj bool
@@ -396,7 +396,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 					return nil, debitErr
 				}
 				if balance.RatingSubject != "" &&
-					!strings.HasPrefix(balance.RatingSubject, utils.ZERO_RATING_SUBJECT_PREFIX) {
+					!strings.HasPrefix(balance.RatingSubject, utils.MetaRatingSubjectPrefix) {
 					hadBalanceSubj = true
 				}
 				if partCC != nil {
@@ -535,7 +535,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 				if count {
 					acc.countUnits(
 						cost,
-						utils.MONETARY,
+						utils.MetaMonetary,
 						leftCC,
 						&Balance{
 							Value:          cost,
@@ -590,7 +590,7 @@ COMMIT:
 
 // GetDefaultMoneyBalance returns the defaultmoney balance
 func (acc *Account) GetDefaultMoneyBalance() *Balance {
-	for _, balance := range acc.BalanceMap[utils.MONETARY] {
+	for _, balance := range acc.BalanceMap[utils.MetaMonetary] {
 		if balance.IsDefault() {
 			return balance
 		}
@@ -603,7 +603,7 @@ func (acc *Account) GetDefaultMoneyBalance() *Balance {
 	if acc.BalanceMap == nil {
 		acc.BalanceMap = make(map[string]Balances)
 	}
-	acc.BalanceMap[utils.MONETARY] = append(acc.BalanceMap[utils.MONETARY], defaultBalance)
+	acc.BalanceMap[utils.MetaMonetary] = append(acc.BalanceMap[utils.MetaMonetary], defaultBalance)
 	return defaultBalance
 }
 
@@ -661,19 +661,19 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 			}
 		} else { // BALANCE
 			for _, b := range acc.BalanceMap[at.Balance.GetType()] {
-				if !b.dirty && at.ThresholdType != utils.TRIGGER_BALANCE_EXPIRED { // do not check clean balances
+				if !b.dirty && at.ThresholdType != utils.TriggerBalanceExpired { // do not check clean balances
 					continue
 				}
 				switch at.ThresholdType {
-				case utils.TRIGGER_MAX_BALANCE:
+				case utils.TriggerMaxBalance:
 					if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
 						at.Execute(acc)
 					}
-				case utils.TRIGGER_MIN_BALANCE:
+				case utils.TriggerMinBalance:
 					if b.MatchActionTrigger(at) && b.GetValue() <= at.ThresholdValue {
 						at.Execute(acc)
 					}
-				case utils.TRIGGER_BALANCE_EXPIRED:
+				case utils.TriggerBalanceExpired:
 					if b.MatchActionTrigger(at) && b.IsExpiredAt(time.Now()) {
 						at.Execute(acc)
 					}
@@ -722,9 +722,9 @@ func (acc *Account) InitCounters() {
 		if !strings.Contains(at.ThresholdType, "counter") {
 			continue
 		}
-		ct := utils.COUNTER_EVENT //default
+		ct := utils.MetaCounterEvent //default
 		if strings.Contains(at.ThresholdType, "balance") {
-			ct = utils.COUNTER_BALANCE
+			ct = utils.MetaCounterBalance
 		}
 		uc, exists := ucTempMap[at.Balance.GetType()+ct]
 		//log.Print("CT: ", at.Balance.GetType()+ct)
@@ -812,7 +812,7 @@ func (acc *Account) GetSharedGroups() (groups []string) {
 // GetUniqueSharedGroupMembers returns the acounts from the group
 func (acc *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) (utils.StringMap, error) { // ToDo: make sure we return accountIDs
 	var balances []*Balance
-	balances = append(balances, acc.getBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY, "", cd.TimeStart)...)
+	balances = append(balances, acc.getBalancesForPrefix(cd.Destination, cd.Category, utils.MetaMonetary, "", cd.TimeStart)...)
 	balances = append(balances, acc.getBalancesForPrefix(cd.Destination, cd.Category, cd.ToR, "", cd.TimeStart)...)
 	// gather all shared group ids
 	var sharedGroupIds []string
@@ -871,7 +871,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 				b.SubstractValue(connectFee)
 				// the conect fee is not refundable!
 				if count {
-					acc.countUnits(connectFee, utils.MONETARY, cc, b)
+					acc.countUnits(connectFee, utils.MetaMonetary, cc, b)
 				}
 				connectFeePaid = true
 				debitedBalance = *b
@@ -890,7 +890,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 			debitedBalance = *b
 			// the conect fee is not refundable!
 			if count {
-				acc.countUnits(connectFee, utils.MONETARY, cc, b)
+				acc.countUnits(connectFee, utils.MetaMonetary, cc, b)
 			}
 		}
 	}
@@ -924,7 +924,7 @@ func (acc *Account) matchActionFilter(condition string) (bool, error) {
 
 // GetID returns the account ID
 func (acc *Account) GetID() string {
-	split := strings.Split(acc.ID, utils.CONCATENATED_KEY_SEP)
+	split := strings.Split(acc.ID, utils.ConcatenatedKeySep)
 	if len(split) != 2 {
 		return ""
 	}
@@ -988,7 +988,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 
 	result := &Account{
-		Id:             utils.META_OUT + utils.CONCATENATED_KEY_SEP + acc.ID,
+		Id:             utils.MetaOut + utils.ConcatenatedKeySep + acc.ID,
 		BalanceMap:     make(map[string]Balances, len(acc.BalanceMap)),
 		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
 		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),
@@ -1050,7 +1050,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 	for key, values := range acc.BalanceMap {
 		if len(values) > 0 {
-			key += utils.META_OUT
+			key += utils.MetaOut
 			result.BalanceMap[key] = make(Balances, len(values))
 			for i, b := range values {
 				result.BalanceMap[key][i] = &Balance{
@@ -1075,7 +1075,7 @@ func (acc *Account) AsOldStructure() interface{} {
 
 // AsAccountSummary converts the account into AccountSummary
 func (acc *Account) AsAccountSummary() *AccountSummary {
-	idSplt := strings.Split(acc.ID, utils.CONCATENATED_KEY_SEP)
+	idSplt := strings.Split(acc.ID, utils.ConcatenatedKeySep)
 	ad := &AccountSummary{AllowNegative: acc.AllowNegative, Disabled: acc.Disabled}
 	if len(idSplt) == 1 {
 		ad.ID = idSplt[0]
@@ -1084,7 +1084,7 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 		ad.ID = idSplt[1]
 	}
 
-	for _, balanceType := range []string{utils.DATA, utils.SMS, utils.MMS, utils.VOICE, utils.GENERIC, utils.MONETARY} {
+	for _, balanceType := range []string{utils.MetaData, utils.MetaSMS, utils.MetaMMS, utils.MetaVoice, utils.MetaGeneric, utils.MetaMonetary} {
 		balances, has := acc.BalanceMap[balanceType]
 		if !has {
 			continue

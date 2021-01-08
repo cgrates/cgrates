@@ -62,19 +62,19 @@ func TestValueFormulaDayYear(t *testing.T) {
 
 func TestValueFormulaParseBalanceFilterValue(t *testing.T) {
 	eVF := &ValueFormula{Static: 10000000000.0}
-	if vf, err := ParseBalanceFilterValue(VOICE, "10s"); err != nil {
+	if vf, err := ParseBalanceFilterValue(MetaVoice, "10s"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eVF, vf) {
 		t.Errorf("Expecting: %+v, received: %+v", eVF, vf)
 	}
 	eVF = &ValueFormula{Static: 1024.0}
-	if vf, err := ParseBalanceFilterValue(DATA, "1024"); err != nil {
+	if vf, err := ParseBalanceFilterValue(MetaData, "1024"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eVF, vf) {
 		t.Errorf("Expecting: %+v, received: %+v", eVF, vf)
 	}
 	eVF = &ValueFormula{Static: 10.0}
-	if vf, err := ParseBalanceFilterValue(MONETARY, "10"); err != nil {
+	if vf, err := ParseBalanceFilterValue(MetaMonetary, "10"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eVF, vf) {
 		t.Errorf("Expecting: %+v, received: %+v", eVF, vf)
@@ -103,7 +103,7 @@ func TestParseBalanceFilterValue(t *testing.T) {
 	eOut := &ValueFormula{
 		Static: float64(d.Nanoseconds()),
 	}
-	if rcv, err := ParseBalanceFilterValue(VOICE, "18"); err != nil {
+	if rcv, err := ParseBalanceFilterValue(MetaVoice, "18"); err != nil {
 		t.Errorf("Expecting: nil, received: %+v", err)
 	} else if !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)

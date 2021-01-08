@@ -146,7 +146,7 @@ func testTLSPing(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",

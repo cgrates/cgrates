@@ -39,10 +39,10 @@ func init() {
 func populateDB() {
 	ats := []*Action{
 		{ActionType: "*topup",
-			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary),
 				Value: &utils.ValueFormula{Static: 10}}},
 		{ActionType: "*topup",
-			Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE),
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaVoice),
 				Weight:         utils.Float64Pointer(20),
 				Value:          &utils.ValueFormula{Static: 10 * float64(time.Second)},
 				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
@@ -51,7 +51,7 @@ func populateDB() {
 	ats1 := []*Action{
 		{ActionType: "*topup",
 			Balance: &BalanceFilter{
-				Type:  utils.StringPointer(utils.MONETARY),
+				Type:  utils.StringPointer(utils.MetaMonetary),
 				Value: &utils.ValueFormula{Static: 10}}, Weight: 10},
 		{ActionType: "*reset_account", Weight: 20},
 	}
@@ -59,8 +59,8 @@ func populateDB() {
 	minu := &Account{
 		ID: "vdf:minu",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {&Balance{Value: 50}},
-			utils.VOICE: {
+			utils.MetaMonetary: {&Balance{Value: 50}},
+			utils.MetaVoice: {
 				&Balance{Value: 200 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("NAT"), Weight: 10},
 				&Balance{Value: 100 * float64(time.Second),
@@ -70,7 +70,7 @@ func populateDB() {
 	broker := &Account{
 		ID: "vdf:broker",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: {
+			utils.MetaVoice: {
 				&Balance{Value: 20 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("NAT"),
 					Weight:         10, RatingSubject: "rif"},
@@ -81,7 +81,7 @@ func populateDB() {
 	luna := &Account{
 		ID: "vdf:luna",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 0, Weight: 20},
 			}},
 	}
@@ -89,14 +89,14 @@ func populateDB() {
 	minitsboy := &Account{
 		ID: "vdf:minitsboy",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: {
+			utils.MetaVoice: {
 				&Balance{Value: 20 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("NAT"),
 					Weight:         10, RatingSubject: "rif"},
 				&Balance{Value: 100 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			},
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 100, Weight: 10},
 			},
 		},
@@ -104,14 +104,14 @@ func populateDB() {
 	max := &Account{
 		ID: "cgrates.org:max",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
 	money := &Account{
 		ID: "cgrates.org:money",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: 10000, Weight: 10},
 			}},
 	}
@@ -149,7 +149,7 @@ func TestSerialDebit(t *testing.T) {
 	moneyConcurent := &Account{
 		ID: "cgrates.org:moneyp",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: initialBalance, Weight: 10},
 			}},
 	}
@@ -173,9 +173,9 @@ func TestSerialDebit(t *testing.T) {
 		t.Errorf("Error debiting balance: %+v", err)
 	}
 	expBalance := initialBalance - float64(debitsToDo*60)
-	if acc.BalanceMap[utils.MONETARY][0].GetValue() != expBalance {
+	if acc.BalanceMap[utils.MetaMonetary][0].GetValue() != expBalance {
 		t.Errorf("Balance does not match: %f, expected %f",
-			acc.BalanceMap[utils.MONETARY][0].GetValue(), expBalance)
+			acc.BalanceMap[utils.MetaMonetary][0].GetValue(), expBalance)
 	}
 
 }
@@ -186,7 +186,7 @@ func TestParallelDebit(t *testing.T) {
 	moneyConcurent := &Account{
 		ID: "cgrates.org:moneyp",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Value: initialBalance, Weight: 10},
 			}},
 	}
@@ -212,9 +212,9 @@ func TestParallelDebit(t *testing.T) {
 		t.Errorf("Error debiting balance: %+v", err)
 	}
 	expBalance := initialBalance - float64(debitsToDo*60)
-	if acc.BalanceMap[utils.MONETARY][0].GetValue() != expBalance {
+	if acc.BalanceMap[utils.MetaMonetary][0].GetValue() != expBalance {
 		t.Errorf("Balance does not match: %f, expected %f",
-			acc.BalanceMap[utils.MONETARY][0].GetValue(), expBalance)
+			acc.BalanceMap[utils.MetaMonetary][0].GetValue(), expBalance)
 	}
 
 }
@@ -223,7 +223,7 @@ func TestSplitSpans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Category: "0", Tenant: "vdf", Subject: "rif",
-		Destination: "0256", TimeStart: t1, TimeEnd: t2, ToR: utils.VOICE}
+		Destination: "0256", TimeStart: t1, TimeEnd: t2, ToR: utils.MetaVoice}
 
 	cd.LoadRatingPlans()
 	timespans := cd.splitInTimeSpans()
@@ -236,7 +236,7 @@ func TestSplitSpans(t *testing.T) {
 func TestSplitSpansWeekend(t *testing.T) {
 	cd := &CallDescriptor{
 		Category:        "postpaid",
-		ToR:             utils.VOICE,
+		ToR:             utils.MetaVoice,
 		Tenant:          "foehn",
 		Subject:         "foehn",
 		Account:         "foehn",
@@ -743,12 +743,12 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 	if err != nil {
 		t.Error("error getting account: ", err)
 	}
-	if len(acc.BalanceMap[utils.MONETARY]) != 2 ||
-		acc.BalanceMap[utils.MONETARY][0].Blocker != true {
-		for _, b := range acc.BalanceMap[utils.MONETARY] {
+	if len(acc.BalanceMap[utils.MetaMonetary]) != 2 ||
+		acc.BalanceMap[utils.MetaMonetary][0].Blocker != true {
+		for _, b := range acc.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("Error executing action  plan on account: ", acc.BalanceMap[utils.MONETARY])
+		t.Error("Error executing action  plan on account: ", acc.BalanceMap[utils.MetaMonetary])
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -792,12 +792,12 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 	if err != nil {
 		t.Error("error getting account: ", err)
 	}
-	if len(acc.BalanceMap[utils.MONETARY]) != 2 ||
-		acc.BalanceMap[utils.MONETARY][0].Blocker != true {
-		for _, b := range acc.BalanceMap[utils.MONETARY] {
+	if len(acc.BalanceMap[utils.MetaMonetary]) != 2 ||
+		acc.BalanceMap[utils.MetaMonetary][0].Blocker != true {
+		for _, b := range acc.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("Error executing action  plan on account: ", acc.BalanceMap[utils.MONETARY])
+		t.Error("Error executing action  plan on account: ", acc.BalanceMap[utils.MetaMonetary])
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -1000,7 +1000,7 @@ func TestMaxDebitRoundingIssue(t *testing.T) {
 		PerformRounding: true,
 	}
 	acc, err := dm.GetAccount("cgrates.org:dy")
-	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
+	if err != nil || acc.BalanceMap[utils.MetaMonetary][0].Value != 1 {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
 
@@ -1011,7 +1011,7 @@ func TestMaxDebitRoundingIssue(t *testing.T) {
 		t.Errorf("Expected %v was %+v (%v)", expected, cc, err)
 	}
 	acc, err = dm.GetAccount("cgrates.org:dy")
-	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
+	if err != nil || acc.BalanceMap[utils.MetaMonetary][0].Value != 1-expected {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
 }
@@ -1034,7 +1034,7 @@ func TestDebitRoundingRefund(t *testing.T) {
 		PerformRounding: true,
 	}
 	acc, err := dm.GetAccount("cgrates.org:dy")
-	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
+	if err != nil || acc.BalanceMap[utils.MetaMonetary][0].Value != 1 {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
 
@@ -1045,7 +1045,7 @@ func TestDebitRoundingRefund(t *testing.T) {
 		t.Errorf("Expected %v was %+v (%v)", expected, cc, err)
 	}
 	acc, err = dm.GetAccount("cgrates.org:dy")
-	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
+	if err != nil || acc.BalanceMap[utils.MetaMonetary][0].Value != 1-expected {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
 }
@@ -1186,13 +1186,13 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 		t.Errorf("Wrong callcost in shared debit: %+v, %v", cc, err)
 	}
 	acc, _ := cd.getAccount()
-	balanceMap := acc.BalanceMap[utils.MONETARY]
+	balanceMap := acc.BalanceMap[utils.MetaMonetary]
 	if len(balanceMap) != 1 || balanceMap[0].GetValue() != 0 {
 		t.Errorf("Wrong shared balance debited: %+v", balanceMap[0])
 	}
 	other, err := dm.GetAccount("vdf:empty10")
-	if err != nil || other.BalanceMap[utils.MONETARY][0].GetValue() != 7.5 {
-		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MONETARY][0])
+	if err != nil || other.BalanceMap[utils.MetaMonetary][0].GetValue() != 7.5 {
+		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MetaMonetary][0])
 	}
 }
 
@@ -1221,7 +1221,7 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 		Tenant:      "vdf",
 		Subject:     "broker",
 		Destination: "0723",
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 	}
 	result, err := cd.GetMaxSessionDuration()
 	if result != time.Minute || err != nil {
@@ -1241,7 +1241,7 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 		Account:       "minu",
 		Destination:   "0723",
 		DurationIndex: t2.Sub(t1),
-		ToR:           utils.VOICE,
+		ToR:           utils.MetaVoice,
 	}
 	initial := cd.Clone()
 	_, err := cd.GetMaxSessionDuration()
@@ -1393,7 +1393,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 	}
 	cc, err := cd.MaxDebit()
 	acc, _ := cd.getAccount()
-	balanceMap := acc.BalanceMap[utils.MONETARY]
+	balanceMap := acc.BalanceMap[utils.MetaMonetary]
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Debit from share and normal error: %+v, %v", cc, err)
 	}
@@ -1425,7 +1425,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
 	}
 	acc, _ := cd.getAccount()
-	balanceMap := acc.BalanceMap[utils.MONETARY]
+	balanceMap := acc.BalanceMap[utils.MetaMonetary]
 	if len(balanceMap) != 2 || balanceMap[0].GetValue() != 0 || balanceMap[1].GetValue() != -2.5 {
 		t.Errorf("Error debiting from empty share: %+v", balanceMap[1].GetValue())
 	}
@@ -1454,13 +1454,13 @@ func TestDebitNegatve(t *testing.T) {
 	}
 	acc, _ := cd.getAccount()
 	//utils.PrintFull(acc)
-	balanceMap := acc.BalanceMap[utils.MONETARY]
+	balanceMap := acc.BalanceMap[utils.MetaMonetary]
 	if len(balanceMap) != 1 || balanceMap[0].GetValue() != -2.5 {
 		t.Errorf("Error debiting from empty share: %+v", balanceMap[0].GetValue())
 	}
 	cc, err = cd.MaxDebit()
 	acc, _ = cd.getAccount()
-	balanceMap = acc.BalanceMap[utils.MONETARY]
+	balanceMap = acc.BalanceMap[utils.MetaMonetary]
 	//utils.LogFull(balanceMap)
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
@@ -1568,9 +1568,9 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 		LoopIndex:     0,
 		DurationIndex: 0}
 	cd1.MaxDebit()
-	if cd1.account.BalanceMap[utils.VOICE][0].GetValue() != 20*float64(time.Second) {
+	if cd1.account.BalanceMap[utils.MetaVoice][0].GetValue() != 20*float64(time.Second) {
 		t.Error("Error using minutes: ",
-			cd1.account.BalanceMap[utils.VOICE][0].GetValue())
+			cd1.account.BalanceMap[utils.MetaVoice][0].GetValue())
 	}
 }
 
@@ -1582,7 +1582,7 @@ func TestCDGetCostANY(t *testing.T) {
 		Destination: utils.MetaAny,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
-		ToR:         utils.DATA,
+		ToR:         utils.MetaData,
 	}
 	cc, err := cd1.GetCost()
 	if err != nil || cc.Cost != 60 {
@@ -1598,7 +1598,7 @@ func TestCDSplitInDataSlots(t *testing.T) {
 		Destination:   utils.MetaAny,
 		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
-		ToR:           utils.DATA,
+		ToR:           utils.MetaData,
 		DurationIndex: 65 * time.Second,
 	}
 	cd.LoadRatingPlans()
@@ -1617,7 +1617,7 @@ func TestCDDataGetCost(t *testing.T) {
 		Destination: utils.MetaAny,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
-		ToR:         utils.DATA,
+		ToR:         utils.MetaData,
 	}
 	cc, err := cd.GetCost()
 	if err != nil || cc.Cost != 65 {
@@ -1629,10 +1629,10 @@ func TestCDRefundIncrements(t *testing.T) {
 	ub := &Account{
 		ID: "test:ref",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Uuid: "moneya", Value: 100},
 			},
-			utils.VOICE: {
+			utils.MetaVoice: {
 				&Balance{Uuid: "minutea",
 					Value:          10 * float64(time.Second),
 					Weight:         20,
@@ -1653,12 +1653,12 @@ func TestCDRefundIncrements(t *testing.T) {
 		&Increment{Duration: 4 * time.Second, BalanceInfo: &DebitInfo{
 			Unit: &UnitInfo{UUID: "minuteb"}, AccountID: ub.ID}},
 	}
-	cd := &CallDescriptor{ToR: utils.VOICE, Increments: increments}
+	cd := &CallDescriptor{ToR: utils.MetaVoice, Increments: increments}
 	cd.RefundIncrements()
 	ub, _ = dm.GetAccount(ub.ID)
-	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 104 ||
-		ub.BalanceMap[utils.VOICE][0].GetValue() != 13*float64(time.Second) ||
-		ub.BalanceMap[utils.VOICE][1].GetValue() != 14*float64(time.Second) {
+	if ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 104 ||
+		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 13*float64(time.Second) ||
+		ub.BalanceMap[utils.MetaVoice][1].GetValue() != 14*float64(time.Second) {
 		t.Error("Error refunding money: ", utils.ToIJSON(ub.BalanceMap))
 	}
 }
@@ -1667,10 +1667,10 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 	ub := &Account{
 		ID: "test:ref",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: {
+			utils.MetaMonetary: {
 				&Balance{Uuid: "moneya", Value: 100},
 			},
-			utils.VOICE: {
+			utils.MetaVoice: {
 				&Balance{Uuid: "minutea", Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Uuid: "minuteb", Value: 10, DestinationIDs: utils.StringMap{"RET": true}},
 			},
@@ -1682,12 +1682,12 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 		&Increment{Cost: 0, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
 		&Increment{Cost: 0, Duration: 4 * time.Second, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
 	}
-	cd := &CallDescriptor{ToR: utils.VOICE, Increments: increments}
+	cd := &CallDescriptor{ToR: utils.MetaVoice, Increments: increments}
 	cd.RefundIncrements()
 	ub, _ = dm.GetAccount(ub.ID)
-	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 100 ||
-		ub.BalanceMap[utils.VOICE][0].GetValue() != 10 ||
-		ub.BalanceMap[utils.VOICE][1].GetValue() != 10 {
+	if ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 100 ||
+		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 10 ||
+		ub.BalanceMap[utils.MetaVoice][1].GetValue() != 10 {
 		t.Error("Error refunding money: ", utils.ToIJSON(ub.BalanceMap))
 	}
 }
@@ -1696,7 +1696,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	acnt := &Account{
 		ID: "TCDDBSWF:account1",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: {
+			utils.MetaVoice: {
 				&Balance{ID: "voice1", Value: 60 * float64(time.Second),
 					RatingSubject: "SubjTCDDBSWF"},
 			}},
@@ -1801,7 +1801,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		Destination: "1716",
 		TimeStart:   time.Date(2015, 01, 01, 9, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2015, 01, 01, 9, 2, 0, 0, time.UTC),
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 	}
 	if cc, err := cd1.GetCost(); err != nil || cc.Cost != 0 {
 		t.Errorf("Error getting *any dest: %+v %v", cc, err)
@@ -1813,7 +1813,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		Destination: "1716",
 		TimeStart:   time.Date(2015, 01, 01, 9, 1, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2015, 01, 01, 9, 2, 0, 0, time.UTC),
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 	}
 	if cc, err := cd2.GetCost(); err != nil || cc.Cost != 0.6 {
 		t.Errorf("Error getting *any dest: %+v %v", cc, err)
@@ -1826,7 +1826,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		Destination: "1716",
 		TimeStart:   time.Date(2015, 01, 01, 9, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2015, 01, 01, 9, 2, 0, 0, time.UTC),
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 	}
 	if cc, err := cd.Debit(); err != nil {
 		t.Error(err)
@@ -1835,12 +1835,12 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	}
 	if resAcnt, err := dm.GetAccount(acnt.ID); err != nil {
 		t.Error(err)
-	} else if resAcnt.BalanceMap[utils.VOICE][0].ID != "voice1" ||
-		resAcnt.BalanceMap[utils.VOICE][0].Value != 0 {
+	} else if resAcnt.BalanceMap[utils.MetaVoice][0].ID != "voice1" ||
+		resAcnt.BalanceMap[utils.MetaVoice][0].Value != 0 {
 		t.Errorf("Account: %v", resAcnt)
-	} else if len(resAcnt.BalanceMap[utils.MONETARY]) == 0 ||
-		resAcnt.BalanceMap[utils.MONETARY][0].ID != utils.MetaDefault ||
-		resAcnt.BalanceMap[utils.MONETARY][0].Value != -0.600013 { // rounding issue
+	} else if len(resAcnt.BalanceMap[utils.MetaMonetary]) == 0 ||
+		resAcnt.BalanceMap[utils.MetaMonetary][0].ID != utils.MetaDefault ||
+		resAcnt.BalanceMap[utils.MetaMonetary][0].Value != -0.600013 { // rounding issue
 		t.Errorf("Account: %s", utils.ToIJSON(resAcnt))
 	}
 }

@@ -248,7 +248,7 @@ func testActionsUpdateBalance(t *testing.T) {
 		t.Errorf("Calling APIerSv1.SetAccount received: %s", reply)
 	}
 	topupAction := &utils.AttrSetActions{ActionsId: "ACT_TOPUP_RST", Actions: []*utils.TPAction{
-		{Identifier: utils.TOPUP, BalanceId: "test", BalanceType: utils.MONETARY, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
+		{Identifier: utils.TOPUP, BalanceId: "test", BalanceType: utils.MetaMonetary, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 	}}
 	if err := actsRPC.Call(utils.APIerSv2SetActions, topupAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
@@ -280,10 +280,10 @@ func testActionsUpdateBalance(t *testing.T) {
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testAcc"}
 	if err := actsRPC.Call(utils.APIerSv2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on APIerSv1.GetAccount: ", err.Error())
-	} else if acc.BalanceMap[utils.MONETARY][0].ID != "test" {
-		t.Errorf("Expected test result received %v ", acc.BalanceMap[utils.MONETARY][0].ID)
-	} else if acc.BalanceMap[utils.MONETARY][0].Blocker != true {
-		t.Errorf("Expected true result received %v ", acc.BalanceMap[utils.MONETARY][0].Blocker)
+	} else if acc.BalanceMap[utils.MetaMonetary][0].ID != "test" {
+		t.Errorf("Expected test result received %v ", acc.BalanceMap[utils.MetaMonetary][0].ID)
+	} else if acc.BalanceMap[utils.MetaMonetary][0].Blocker != true {
+		t.Errorf("Expected true result received %v ", acc.BalanceMap[utils.MetaMonetary][0].Blocker)
 	}
 }
 

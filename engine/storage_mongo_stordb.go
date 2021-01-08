@@ -141,7 +141,7 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 					id += distinctValue.(string)
 				}
 				if i < last {
-					id += utils.CONCATENATED_KEY_SEP
+					id += utils.ConcatenatedKeySep
 				}
 			}
 			distinctIds[id] = true

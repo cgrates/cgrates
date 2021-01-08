@@ -102,7 +102,7 @@ var (
 	UpdatedAtLow   = strings.ToLower(utils.UpdatedAt)
 	UsageLow       = strings.ToLower(utils.Usage)
 	DestinationLow = strings.ToLower(utils.Destination)
-	CostLow        = strings.ToLower(utils.COST)
+	CostLow        = strings.ToLower(utils.Cost)
 	CostSourceLow  = strings.ToLower(utils.CostSource)
 
 	tTime       = reflect.TypeOf(time.Time{})
@@ -435,29 +435,29 @@ func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) (err error) {
 	switch prefix {
 	case utils.DestinationPrefix:
 		colName = ColDst
-	case utils.REVERSE_DESTINATION_PREFIX:
+	case utils.ReverseDestinationPrefix:
 		colName = ColRds
-	case utils.ACTION_PREFIX:
+	case utils.ActionPrefix:
 		colName = ColAct
-	case utils.ACTION_PLAN_PREFIX:
+	case utils.ActionPlanPrefix:
 		colName = ColApl
 	case utils.AccountActionPlansPrefix:
 		colName = ColAAp
-	case utils.TASKS_KEY:
+	case utils.TasksKey:
 		colName = ColTsk
-	case utils.ACTION_TRIGGER_PREFIX:
+	case utils.ActionTriggerPrefix:
 		colName = ColAtr
-	case utils.RATING_PLAN_PREFIX:
+	case utils.RatingPlanPrefix:
 		colName = ColRpl
-	case utils.RATING_PROFILE_PREFIX:
+	case utils.RatingProfilePrefix:
 		colName = ColRpf
-	case utils.ACCOUNT_PREFIX:
+	case utils.AccountPrefix:
 		colName = ColAcc
-	case utils.SHARED_GROUP_PREFIX:
+	case utils.SharedGroupPrefix:
 		colName = ColShg
-	case utils.LOADINST_KEY:
+	case utils.LoadInstKey:
 		colName = ColLht
-	case utils.VERSION_PREFIX:
+	case utils.VersionPrefix:
 		colName = ColVer
 	case utils.TimingsPrefix:
 		colName = ColTmg
@@ -593,25 +593,25 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		switch category {
 		case utils.DestinationPrefix:
 			result, err = ms.getField(sctx, ColDst, utils.DestinationPrefix, subject, "key")
-		case utils.REVERSE_DESTINATION_PREFIX:
-			result, err = ms.getField(sctx, ColRds, utils.REVERSE_DESTINATION_PREFIX, subject, "key")
-		case utils.RATING_PLAN_PREFIX:
-			result, err = ms.getField(sctx, ColRpl, utils.RATING_PLAN_PREFIX, subject, "key")
-		case utils.RATING_PROFILE_PREFIX:
-			if strings.HasPrefix(prefix[keyLen:], utils.META_OUT) {
+		case utils.ReverseDestinationPrefix:
+			result, err = ms.getField(sctx, ColRds, utils.ReverseDestinationPrefix, subject, "key")
+		case utils.RatingPlanPrefix:
+			result, err = ms.getField(sctx, ColRpl, utils.RatingPlanPrefix, subject, "key")
+		case utils.RatingProfilePrefix:
+			if strings.HasPrefix(prefix[keyLen:], utils.MetaOut) {
 				subject = fmt.Sprintf("^\\%s", prefix[keyLen:]) // rewrite the id cause it start with * from `*out`
 			}
-			result, err = ms.getField(sctx, ColRpf, utils.RATING_PROFILE_PREFIX, subject, "id")
-		case utils.ACTION_PREFIX:
-			result, err = ms.getField(sctx, ColAct, utils.ACTION_PREFIX, subject, "key")
-		case utils.ACTION_PLAN_PREFIX:
-			result, err = ms.getField(sctx, ColApl, utils.ACTION_PLAN_PREFIX, subject, "key")
-		case utils.ACTION_TRIGGER_PREFIX:
-			result, err = ms.getField(sctx, ColAtr, utils.ACTION_TRIGGER_PREFIX, subject, "key")
-		case utils.SHARED_GROUP_PREFIX:
-			result, err = ms.getField(sctx, ColShg, utils.SHARED_GROUP_PREFIX, subject, "id")
-		case utils.ACCOUNT_PREFIX:
-			result, err = ms.getField(sctx, ColAcc, utils.ACCOUNT_PREFIX, subject, "id")
+			result, err = ms.getField(sctx, ColRpf, utils.RatingProfilePrefix, subject, "id")
+		case utils.ActionPrefix:
+			result, err = ms.getField(sctx, ColAct, utils.ActionPrefix, subject, "key")
+		case utils.ActionPlanPrefix:
+			result, err = ms.getField(sctx, ColApl, utils.ActionPlanPrefix, subject, "key")
+		case utils.ActionTriggerPrefix:
+			result, err = ms.getField(sctx, ColAtr, utils.ActionTriggerPrefix, subject, "key")
+		case utils.SharedGroupPrefix:
+			result, err = ms.getField(sctx, ColShg, utils.SharedGroupPrefix, subject, "id")
+		case utils.AccountPrefix:
+			result, err = ms.getField(sctx, ColAcc, utils.AccountPrefix, subject, "id")
 		case utils.ResourceProfilesPrefix:
 			result, err = ms.getField2(sctx, ColRsP, utils.ResourceProfilesPrefix, subject, tntID)
 		case utils.ResourcesPrefix:
@@ -686,15 +686,15 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 		switch category {
 		case utils.DestinationPrefix:
 			count, err = ms.getCol(ColDst).CountDocuments(sctx, bson.M{"key": subject})
-		case utils.RATING_PLAN_PREFIX:
+		case utils.RatingPlanPrefix:
 			count, err = ms.getCol(ColRpl).CountDocuments(sctx, bson.M{"key": subject})
-		case utils.RATING_PROFILE_PREFIX:
+		case utils.RatingProfilePrefix:
 			count, err = ms.getCol(ColRpf).CountDocuments(sctx, bson.M{"key": subject})
-		case utils.ACTION_PREFIX:
+		case utils.ActionPrefix:
 			count, err = ms.getCol(ColAct).CountDocuments(sctx, bson.M{"key": subject})
-		case utils.ACTION_PLAN_PREFIX:
+		case utils.ActionPlanPrefix:
 			count, err = ms.getCol(ColApl).CountDocuments(sctx, bson.M{"key": subject})
-		case utils.ACCOUNT_PREFIX:
+		case utils.AccountPrefix:
 			count, err = ms.getCol(ColAcc).CountDocuments(sctx, bson.M{"id": subject})
 		case utils.ResourcesPrefix:
 			count, err = ms.getCol(ColRes).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
@@ -1079,7 +1079,7 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 		return nil, nil
 	}
 	if !skipCache {
-		if x, ok := Cache.Get(utils.LOADINST_KEY, ""); ok {
+		if x, ok := Cache.Get(utils.LoadInstKey, ""); ok {
 			if x != nil {
 				items := x.([]*utils.LoadInstance)
 				if len(items) < limit || limit == -1 {
@@ -1095,7 +1095,7 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 		Value []*utils.LoadInstance
 	}
 	err = ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColLht).FindOne(sctx, bson.M{"key": utils.LOADINST_KEY})
+		cur := ms.getCol(ColLht).FindOne(sctx, bson.M{"key": utils.LoadInstKey})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
@@ -1107,10 +1107,10 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 	cCommit := cacheCommit(transactionID)
 	if err == nil {
 		loadInsts = kv.Value
-		if errCh := Cache.Remove(utils.LOADINST_KEY, "", cCommit, transactionID); errCh != nil {
+		if errCh := Cache.Remove(utils.LoadInstKey, "", cCommit, transactionID); errCh != nil {
 			return nil, errCh
 		}
-		if errCh := Cache.Set(utils.LOADINST_KEY, "", loadInsts, nil, cCommit, transactionID); errCh != nil {
+		if errCh := Cache.Set(utils.LoadInstKey, "", loadInsts, nil, cCommit, transactionID); errCh != nil {
 			return nil, errCh
 		}
 	}
@@ -1133,7 +1133,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 		Value []*utils.LoadInstance
 	}
 	if err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColLht).FindOne(sctx, bson.M{"key": utils.LOADINST_KEY})
+		cur := ms.getCol(ColLht).FindOne(sctx, bson.M{"key": utils.LoadInstKey})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
 				return nil // utils.ErrNotFound
@@ -1159,18 +1159,18 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 			existingLoadHistory = existingLoadHistory[:loadHistSize]
 		}
 		return nil, ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColLht).UpdateOne(sctx, bson.M{"key": utils.LOADINST_KEY},
+			_, err = ms.getCol(ColLht).UpdateOne(sctx, bson.M{"key": utils.LoadInstKey},
 				bson.M{"$set": struct {
 					Key   string
 					Value []*utils.LoadInstance
-				}{Key: utils.LOADINST_KEY, Value: existingLoadHistory}},
+				}{Key: utils.LoadInstKey, Value: existingLoadHistory}},
 				options.Update().SetUpsert(true),
 			)
 			return err
 		})
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LOADINST_KEY)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
 
-	if errCh := Cache.Remove(utils.LOADINST_KEY, "",
+	if errCh := Cache.Remove(utils.LoadInstKey, "",
 		cacheCommit(transactionID), transactionID); errCh != nil {
 		return errCh
 	}
@@ -1339,7 +1339,7 @@ func (ms *MongoStorage) RemoveActionPlanDrv(key string, transactionID string) er
 }
 
 func (ms *MongoStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err error) {
-	keys, err := ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	keys, err := ms.GetKeysForPrefix(utils.ActionPlanPrefix)
 	if err != nil {
 		return nil, err
 	}
@@ -1348,12 +1348,12 @@ func (ms *MongoStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err 
 	}
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
-		ap, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):],
+		ap, err := ms.GetActionPlanDrv(key[len(utils.ActionPlanPrefix):],
 			false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
-		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = ap
+		ats[key[len(utils.ActionPlanPrefix):]] = ap
 	}
 	return
 }
@@ -2115,7 +2115,7 @@ func (ms *MongoStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexe
 			if len(elem.Value) == 0 {
 				continue
 			}
-			indexKey := strings.TrimPrefix(elem.Key, utils.CacheInstanceToPrefix[idxItmType]+tntCtx+utils.CONCATENATED_KEY_SEP)
+			indexKey := strings.TrimPrefix(elem.Key, utils.CacheInstanceToPrefix[idxItmType]+tntCtx+utils.ConcatenatedKeySep)
 			indexes[indexKey] = utils.NewStringSet(elem.Value)
 		}
 		return cur.Close(sctx)

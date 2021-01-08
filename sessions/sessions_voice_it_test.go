@@ -134,8 +134,8 @@ func testSessionsVoiceMonetaryRefund(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceMonetaryRefund",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123451",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -164,8 +164,8 @@ func testSessionsVoiceMonetaryRefund(t *testing.T) {
 	eAcntVal := 8.700010
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	usage = time.Minute
@@ -176,8 +176,8 @@ func testSessionsVoiceMonetaryRefund(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceMonetaryRefund",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123451",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -201,8 +201,8 @@ func testSessionsVoiceMonetaryRefund(t *testing.T) {
 	eAcntVal = 8.8
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -215,8 +215,8 @@ func testSessionsVoiceVoiceRefund(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceVoiceRefund",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123452",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -246,9 +246,9 @@ func testSessionsVoiceVoiceRefund(t *testing.T) {
 	eAcntVal := 120.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	usage = time.Minute
@@ -259,8 +259,8 @@ func testSessionsVoiceVoiceRefund(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceVoiceRefund",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123452",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -284,8 +284,8 @@ func testSessionsVoiceVoiceRefund(t *testing.T) {
 	eAcntVal = 150.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 }
 
@@ -304,8 +304,8 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceMixedRefund",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123453",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -336,11 +336,11 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 	eMoneyVal := 8.7399
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eVoiceVal ||
-		acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eMoneyVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eVoiceVal ||
+		acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eMoneyVal {
 		t.Errorf("Expected: %f, received: %f, expetced money: %f, recieved money : %f",
-			eVoiceVal, acnt.BalanceMap[utils.VOICE].GetTotalValue(),
-			eMoneyVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+			eVoiceVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue(),
+			eMoneyVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	usage = time.Minute
@@ -351,8 +351,8 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceMixedRefund",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123453",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -377,14 +377,14 @@ func testSessionsVoiceMixedRefund(t *testing.T) {
 	eMoneyVal = 8.79
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eVoiceVal ||
-		acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eMoneyVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eVoiceVal ||
+		acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eMoneyVal {
 		t.Errorf("Expected voice: %f, received voice : %f, expected money: %f, received money: %f",
-			eVoiceVal, acnt.BalanceMap[utils.VOICE].GetTotalValue(),
-			eMoneyVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+			eVoiceVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue(),
+			eMoneyVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
-	//t.Logf("After monetary: %f", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
-	//t.Logf("After voice: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	//t.Logf("After monetary: %f", acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
+	//t.Logf("After voice: %f", acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 }
 
 func testSessionsVoiceLastUsed(t *testing.T) {
@@ -393,8 +393,8 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 	eAcntVal := 8.790000
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	usage := 2 * time.Minute
@@ -405,8 +405,8 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsed",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "12350",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -434,8 +434,8 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 	eAcntVal = 7.39002
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	lastUsage := time.Minute + 30*time.Second
@@ -446,8 +446,8 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsed",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "Update1",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "Update1",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "12350",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -473,8 +473,8 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 	eAcntVal = 7.09005
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	lastUsage = 2*time.Minute + 30*time.Second
@@ -485,8 +485,8 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsed",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "Update2",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "Update2",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "12350",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -513,8 +513,8 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 	eAcntVal = 6.590100
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	usage = time.Minute
@@ -525,8 +525,8 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsed",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "12350",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -550,9 +550,9 @@ func testSessionsVoiceLastUsed(t *testing.T) {
 	eAcntVal = 7.59
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -562,8 +562,8 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 	eAcntVal := 7.59000
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	usage := 2 * time.Minute
@@ -574,8 +574,8 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsedEnd",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "1234911",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -603,8 +603,8 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 	eAcntVal = 6.190020
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	lastUsage := 30 * time.Second
@@ -615,8 +615,8 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsedEnd",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "1234911",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -643,9 +643,9 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 	eAcntVal = 6.090030
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	termArgs := &V1TerminateSessionArgs{
@@ -655,8 +655,8 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsedEnd",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "1234911",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -678,9 +678,9 @@ func testSessionsVoiceLastUsedEnd(t *testing.T) {
 	eAcntVal = 6.590000
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -690,8 +690,8 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	eAcntVal := 6.59000
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	usage := 2 * time.Minute
@@ -702,8 +702,8 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsedNotFixed",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "1234922",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -731,8 +731,8 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	eAcntVal = 5.190020
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	//Update
@@ -744,8 +744,8 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsedNotFixed",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "1234922",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -771,9 +771,9 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	eAcntVal = 5.123360
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	termArgs := &V1TerminateSessionArgs{
@@ -783,8 +783,8 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsedNotFixed",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "1234922",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -806,9 +806,9 @@ func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	eAcntVal = 5.590000
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -818,9 +818,9 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 	eAcntVal := 5.590000
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	usage := 2 * time.Minute
@@ -831,8 +831,8 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceSessionTTL",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT_SESSION_TTL",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT_SESSION_TTL",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "12360",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -888,8 +888,8 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 	eAcntVal = 4.190020
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	//Update
@@ -901,8 +901,8 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceSessionTTL",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT_SESSION_TTL",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT_SESSION_TTL",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "12360",
 					utils.AccountField: "1001",
 					utils.Subject:      "1001",
@@ -943,15 +943,15 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 	eAcntVal = 4.090030
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	time.Sleep(200 * time.Millisecond)
 	eAcntVal = 4.0566 // rounding issue; old values : 4.0565 , 4.0566
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	var cdrs []*engine.ExternalCDR
@@ -974,7 +974,7 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "TestTTLWithRelocate",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       300 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestTTLWithRelocate",
@@ -995,9 +995,9 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	eAcntVal := 300.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	usage := 2 * time.Minute
@@ -1008,8 +1008,8 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceSessionTTLWithRelocate",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT_SESSION_TTL_RELOCATE",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT_SESSION_TTL_RELOCATE",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "12361",
 					utils.AccountField: "TestTTLWithRelocate",
 					utils.Subject:      "TestTTLWithRelocate",
@@ -1052,9 +1052,9 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	eAcntVal = 180.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	//Update
@@ -1066,8 +1066,8 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceSessionTTLWithRelocate",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:      "TEST_EVENT_SESSION_TTL_RELOCATE",
-					utils.ToR:             utils.VOICE,
+					utils.EventName:       "TEST_EVENT_SESSION_TTL_RELOCATE",
+					utils.ToR:             utils.MetaVoice,
 					utils.InitialOriginID: "12361", //take the initial originID from init
 					utils.OriginID:        "12362",
 					utils.AccountField:    "TestTTLWithRelocate",
@@ -1111,18 +1111,18 @@ func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	eAcntVal = 150.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	time.Sleep(200 * time.Millisecond) // should trigger the TTL from config
 	eAcntVal = 149.95 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
@@ -1151,7 +1151,7 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "TestRelocateWithOriginIDPrefix",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       300 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestRelocateWithOriginIDPrefix",
@@ -1172,9 +1172,9 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	eAcntVal := 300.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal,
-			acnt.BalanceMap[utils.VOICE].GetTotalValue())
+			acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	usage := 2 * time.Minute
@@ -1185,8 +1185,8 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceRelocateWithOriginIDPrefix",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT_RELOCATE_ORIGPREFIX",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT_RELOCATE_ORIGPREFIX",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "12371",
 					utils.AccountField: attrSetBalance.Account,
 					utils.Subject:      attrSetBalance.Account,
@@ -1229,9 +1229,9 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	eAcntVal = 180.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal,
-			acnt.BalanceMap[utils.VOICE].GetTotalValue())
+			acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	//Update
@@ -1243,8 +1243,8 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceSessionTTLWithRelocate",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:      "TEST_EVENT_RELOCATE_ORIGPREFIX",
-					utils.ToR:             utils.VOICE,
+					utils.EventName:       "TEST_EVENT_RELOCATE_ORIGPREFIX",
+					utils.ToR:             utils.MetaVoice,
 					utils.InitialOriginID: "12371",
 					utils.OriginID:        "12372-1",
 					utils.AccountField:    attrSetBalance.Account,
@@ -1288,9 +1288,9 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	eAcntVal = 150.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	termArgs := &V1TerminateSessionArgs{
@@ -1300,8 +1300,8 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsVoiceLastUsedNotFixed",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT_RELOCATE_ORIGPREFIX",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT_RELOCATE_ORIGPREFIX",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "12372-1",
 					utils.AccountField: attrSetBalance.Account,
 					utils.Subject:      attrSetBalance.Account,
@@ -1338,9 +1338,9 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount,
 		attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f",
-			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+			eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	if err := sessionsRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithOpts{CGREvent: termArgs.CGREvent}, &reply); err != nil {
@@ -1371,12 +1371,12 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 	eAcntVal := 50000.0
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 	smgEv := map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         utils.VOICE,
+		utils.EventName:  "TEST_EVENT",
+		utils.ToR:         utils.MetaVoice,
 		utils.OriginID:       "1234967",
 		utils.AccountField:     "1011",
 		utils.Subject:     "1011",
@@ -1400,8 +1400,8 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 	eAcntVal = 50000.0
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 }
 */

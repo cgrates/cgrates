@@ -144,7 +144,7 @@ func testRPCMethodsAddData(t *testing.T) {
 	// Add a disable and log action
 	attrsAA := &utils.AttrSetActions{ActionsId: "DISABLE_LOG", Actions: []*utils.TPAction{
 		{Identifier: utils.DISABLE_ACCOUNT},
-		{Identifier: utils.LOG},
+		{Identifier: utils.MetaLog},
 	}}
 	if err := rpcRpc.Call(utils.APIerSv2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
@@ -154,7 +154,7 @@ func testRPCMethodsAddData(t *testing.T) {
 	// Add an enable and log action
 	attrsAA2 := &utils.AttrSetActions{ActionsId: "ENABLE_LOG", Actions: []*utils.TPAction{
 		{Identifier: utils.ENABLE_ACCOUNT},
-		{Identifier: utils.LOG},
+		{Identifier: utils.MetaLog},
 	}}
 	if err := rpcRpc.Call(utils.APIerSv2SetActions, attrsAA2, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
@@ -208,7 +208,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 				ID:     "testRPCMethodsAuthorizeSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testRPCMethodsAuthorizeSession",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -306,7 +306,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 				ID:     "testRPCMethodsInitSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testRPCMethodsInitSession",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -406,7 +406,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 				ID:     "testRPCMethodsUpdateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testRPCMethodsUpdateSession",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -504,7 +504,7 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 				ID:     "testRPCMethodsTerminateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testRPCMethodsTerminateSession",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -552,7 +552,7 @@ func testRPCMethodsProcessCDR(t *testing.T) {
 			ID:     "testRPCMethodsProcessCDR",
 			Event: map[string]interface{}{
 				utils.Tenant:       "cgrates.org",
-				utils.ToR:          utils.VOICE,
+				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "testRPCMethodsProcessCDR",
 				utils.RequestType:  utils.MetaPrepaid,
 				utils.AccountField: "1001",
@@ -627,7 +627,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 				ID:     "testRPCMethodsProcessEvent",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testRPCMethodsProcessEvent",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -724,7 +724,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 				ID:     "testRPCMethodsCdrsProcessCDR",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginHost:   "host",
 					utils.OriginID:     "testRPCMethodsCdrsProcessCDR",
 					utils.RequestType:  utils.MetaPrepaid,

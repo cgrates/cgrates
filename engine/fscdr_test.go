@@ -407,7 +407,7 @@ func TestFsCdrFirstNonEmpty(t *testing.T) {
 }
 
 func TestFsCdrCDRFields(t *testing.T) {
-	fsCdrCfg.CdrsCfg().ExtraFields = config.NewRSRParsersMustCompile("~*req.sip_user_agent", utils.FIELDS_SEP)
+	fsCdrCfg.CdrsCfg().ExtraFields = config.NewRSRParsersMustCompile("~*req.sip_user_agent", utils.FieldsSep)
 	reader := bytes.NewReader(body)
 	fsCdr, err := NewFSCdr(reader, fsCdrCfg)
 	if err != nil {
@@ -417,7 +417,7 @@ func TestFsCdrCDRFields(t *testing.T) {
 	answerTime, _ := utils.ParseTimeDetectLayout("1515666347", "")
 	expctCDR := &CDR{
 		CGRID:       "24b5766be325fa751fab5a0a06373e106f33a257",
-		ToR:         utils.VOICE,
+		ToR:         utils.MetaVoice,
 		OriginID:    "3da8bf84-c133-4959-9e24-e72875cb33a1",
 		OriginHost:  "",
 		Source:      "freeswitch_json",
@@ -575,7 +575,7 @@ func TestFscdrAsCDR(t *testing.T) {
 }`)
 	expectedCdr := &CDR{
 		OrderID: 123,
-		ToR:     utils.META_VOICE,
+		ToR:     utils.MetaVoice,
 		Source:  FS_CDR_SOURCE, Category: cgrCfg.GeneralCfg().DefaultCategory,
 		Tenant:      cgrCfg.GeneralCfg().DefaultTenant,
 		RequestType: cgrCfg.GeneralCfg().DefaultReqType,
@@ -710,7 +710,7 @@ func TestFscdrAsCdrFirstDefined(t *testing.T) {
       }
 }`)
 	expectedCdr := &CDR{
-		ToR:    utils.META_VOICE,
+		ToR:    utils.MetaVoice,
 		Source: FS_CDR_SOURCE, Category: cgrCfg.GeneralCfg().DefaultCategory,
 		Tenant:      cgrCfg.GeneralCfg().DefaultTenant,
 		RequestType: cgrCfg.GeneralCfg().DefaultReqType,

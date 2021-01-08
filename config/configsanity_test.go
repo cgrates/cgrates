@@ -211,7 +211,7 @@ func TestConfigSanityLoaders(t *testing.T) {
 			Data: []*LoaderDataType{{
 				Type: utils.MetaStats,
 				Fields: []*FCTemplate{{
-					Type: utils.META_COMPOSED,
+					Type: utils.MetaComposed,
 					Tag:  "test1",
 					Path: utils.EmptyString,
 				}},

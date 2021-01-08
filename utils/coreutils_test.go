@@ -693,28 +693,28 @@ func TestParseZeroRatingSubject(t *testing.T) {
 	dur := []time.Duration{time.Second, 1024,
 		time.Second, 5 * time.Minute, 10 * time.Hour}
 	dfltRatingSubject := map[string]string{
-		MetaAny: "*zero1ns",
-		VOICE:   "*zero1s",
+		MetaAny:   "*zero1ns",
+		MetaVoice: "*zero1s",
 	}
 	for i, s := range subj {
-		if d, err := ParseZeroRatingSubject(VOICE, s, dfltRatingSubject); err != nil || d != dur[i] {
+		if d, err := ParseZeroRatingSubject(MetaVoice, s, dfltRatingSubject); err != nil || d != dur[i] {
 			t.Error("Error parsing rating subject: ", s, d, err)
 		}
 	}
-	if d, err := ParseZeroRatingSubject(DATA, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
+	if d, err := ParseZeroRatingSubject(MetaData, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
 		t.Error("Error parsing rating subject: ", EmptyString, d, err)
 	}
-	if d, err := ParseZeroRatingSubject(SMS, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
+	if d, err := ParseZeroRatingSubject(MetaSMS, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
 		t.Error("Error parsing rating subject: ", EmptyString, d, err)
 	}
-	if d, err := ParseZeroRatingSubject(MMS, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
+	if d, err := ParseZeroRatingSubject(MetaMMS, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
 		t.Error("Error parsing rating subject: ", EmptyString, d, err)
 	}
-	if d, err := ParseZeroRatingSubject(MONETARY, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
+	if d, err := ParseZeroRatingSubject(MetaMonetary, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
 		t.Error("Error parsing rating subject: ", EmptyString, d, err)
 	}
 	expecting := "malformed rating subject: test"
-	if _, err := ParseZeroRatingSubject(MONETARY, "test", dfltRatingSubject); err == nil || err.Error() != expecting {
+	if _, err := ParseZeroRatingSubject(MetaMonetary, "test", dfltRatingSubject); err == nil || err.Error() != expecting {
 		t.Errorf("Expecting: %+v, received: %+v ", expecting, err)
 	}
 }
@@ -723,10 +723,10 @@ func TestConcatenatedKey(t *testing.T) {
 	if key := ConcatenatedKey("a"); key != "a" {
 		t.Error("Unexpected key value received: ", key)
 	}
-	if key := ConcatenatedKey("a", "b"); key != fmt.Sprintf("a%sb", CONCATENATED_KEY_SEP) {
+	if key := ConcatenatedKey("a", "b"); key != fmt.Sprintf("a%sb", ConcatenatedKeySep) {
 		t.Error("Unexpected key value received: ", key)
 	}
-	if key := ConcatenatedKey("a", "b", "c"); key != fmt.Sprintf("a%sb%sc", CONCATENATED_KEY_SEP, CONCATENATED_KEY_SEP) {
+	if key := ConcatenatedKey("a", "b", "c"); key != fmt.Sprintf("a%sb%sc", ConcatenatedKeySep, ConcatenatedKeySep) {
 		t.Error("Unexpected key value received: ", key)
 	}
 }

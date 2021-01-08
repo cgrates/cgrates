@@ -99,7 +99,7 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithOpts, reply *CallCost) (err 
 	}
 	r, e := guardian.Guardian.Guard(func() (interface{}, error) {
 		return arg.GetCost()
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+arg.GetAccountKey())
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+arg.GetAccountKey())
 	if r != nil {
 		*reply = *r.(*CallCost)
 	}
@@ -118,7 +118,7 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 	}
 	for _, rp := range arg.RatingPlanIDs { // loop through RatingPlans until we find one without errors
 		rPrfl := &RatingProfile{
-			Id: utils.ConcatenatedKey(utils.META_OUT,
+			Id: utils.ConcatenatedKey(utils.MetaOut,
 				tnt, utils.MetaTmp, arg.Subject),
 			RatingPlanActivations: RatingPlanActivations{
 				&RatingPlanActivation{

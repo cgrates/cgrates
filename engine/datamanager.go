@@ -44,14 +44,14 @@ var (
 	}
 	cachePrefixMap = utils.StringSet{
 		utils.DestinationPrefix:             {},
-		utils.REVERSE_DESTINATION_PREFIX:    {},
-		utils.RATING_PLAN_PREFIX:            {},
-		utils.RATING_PROFILE_PREFIX:         {},
-		utils.ACTION_PREFIX:                 {},
-		utils.ACTION_PLAN_PREFIX:            {},
+		utils.ReverseDestinationPrefix:      {},
+		utils.RatingPlanPrefix:              {},
+		utils.RatingProfilePrefix:           {},
+		utils.ActionPrefix:                  {},
+		utils.ActionPlanPrefix:              {},
 		utils.AccountActionPlansPrefix:      {},
-		utils.ACTION_TRIGGER_PREFIX:         {},
-		utils.SHARED_GROUP_PREFIX:           {},
+		utils.ActionTriggerPrefix:           {},
+		utils.SharedGroupPrefix:             {},
 		utils.ResourceProfilesPrefix:        {},
 		utils.TimingsPrefix:                 {},
 		utils.ResourcesPrefix:               {},
@@ -170,21 +170,21 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		switch prfx {
 		case utils.DestinationPrefix:
 			_, err = dm.GetDestination(dataID, false, true, utils.NonTransactional)
-		case utils.REVERSE_DESTINATION_PREFIX:
+		case utils.ReverseDestinationPrefix:
 			_, err = dm.GetReverseDestination(dataID, false, true, utils.NonTransactional)
-		case utils.RATING_PLAN_PREFIX:
+		case utils.RatingPlanPrefix:
 			_, err = dm.GetRatingPlan(dataID, true, utils.NonTransactional)
-		case utils.RATING_PROFILE_PREFIX:
+		case utils.RatingProfilePrefix:
 			_, err = dm.GetRatingProfile(dataID, true, utils.NonTransactional)
-		case utils.ACTION_PREFIX:
+		case utils.ActionPrefix:
 			_, err = dm.GetActions(dataID, true, utils.NonTransactional)
-		case utils.ACTION_PLAN_PREFIX:
+		case utils.ActionPlanPrefix:
 			_, err = dm.GetActionPlan(dataID, true, utils.NonTransactional)
 		case utils.AccountActionPlansPrefix:
 			_, err = dm.GetAccountActionPlans(dataID, true, utils.NonTransactional)
-		case utils.ACTION_TRIGGER_PREFIX:
+		case utils.ActionTriggerPrefix:
 			_, err = dm.GetActionTriggers(dataID, true, utils.NonTransactional)
-		case utils.SHARED_GROUP_PREFIX:
+		case utils.SharedGroupPrefix:
 			_, err = dm.GetSharedGroup(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
@@ -326,7 +326,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 
 func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
 	switch prefix {
-	case utils.REVERSE_DESTINATION_PREFIX:
+	case utils.ReverseDestinationPrefix:
 		if err = dm.dataDB.RemoveKeysForPrefix(prefix); err != nil {
 			return
 		}
@@ -348,12 +348,12 @@ func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		var keys []string
-		if keys, err = dm.dataDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
+		if keys, err = dm.dataDB.GetKeysForPrefix(utils.ActionPlanPrefix); err != nil {
 			return
 		}
 		for _, key := range keys {
 			var apl *ActionPlan
-			if apl, err = dm.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional); err != nil {
+			if apl, err = dm.GetActionPlan(key[len(utils.ActionPlanPrefix):], true, utils.NonTransactional); err != nil {
 				return err
 			}
 			for acntID := range apl.AccountIDs {
@@ -1811,7 +1811,7 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
 	if err = dm.DataDB().SetActionTriggersDrv(key, attr); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{key}, true); err != nil {
+	if err = dm.CacheDataFromDB(utils.ActionTriggerPrefix, []string{key}, true); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; itm.Replicate {
@@ -1888,7 +1888,7 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 	if err = dm.DataDB().SetSharedGroupDrv(sg); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX,
+	if err = dm.CacheDataFromDB(utils.SharedGroupPrefix,
 		[]string{sg.Id}, true); err != nil {
 		return
 	}
@@ -2302,7 +2302,7 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 	if err = dm.DataDB().SetRatingPlanDrv(rp); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{rp.Id}, true); err != nil {
+	if err = dm.CacheDataFromDB(utils.RatingPlanPrefix, []string{rp.Id}, true); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; itm.Replicate {

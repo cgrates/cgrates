@@ -41,12 +41,12 @@ type v1Actions []*v1Action
 
 func (m *Migrator) migrateCurrentActions() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ACTION_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ActionPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ACTION_PREFIX)
+		idg := strings.TrimPrefix(id, utils.ActionPrefix)
 		acts, err := m.dmIN.DataManager().GetActions(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err

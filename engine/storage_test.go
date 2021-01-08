@@ -141,9 +141,9 @@ func TestDifferentUuid(t *testing.T) {
 	if err != nil {
 		t.Error("Error getting account: ", err)
 	}
-	if a1.BalanceMap[utils.VOICE][0].Uuid == a2.BalanceMap[utils.VOICE][0].Uuid ||
-		a1.BalanceMap[utils.MONETARY][0].Uuid == a2.BalanceMap[utils.MONETARY][0].Uuid {
-		t.Errorf("Identical uuids in different accounts: %+v <-> %+v", a1.BalanceMap[utils.VOICE][0], a1.BalanceMap[utils.MONETARY][0])
+	if a1.BalanceMap[utils.MetaVoice][0].Uuid == a2.BalanceMap[utils.MetaVoice][0].Uuid ||
+		a1.BalanceMap[utils.MetaMonetary][0].Uuid == a2.BalanceMap[utils.MetaMonetary][0].Uuid {
+		t.Errorf("Identical uuids in different accounts: %+v <-> %+v", a1.BalanceMap[utils.MetaVoice][0], a1.BalanceMap[utils.MetaMonetary][0])
 	}
 
 }
@@ -193,7 +193,7 @@ func GetUB() *Account {
 		ID:             "some_uuid",
 		ThresholdValue: 100.0,
 		Balance: &BalanceFilter{
-			Type:           utils.StringPointer(utils.MONETARY),
+			Type:           utils.StringPointer(utils.MetaMonetary),
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 		},
 		Weight:    10.0,
@@ -205,11 +205,11 @@ func GetUB() *Account {
 		ID:            "rif",
 		AllowNegative: true,
 		BalanceMap: map[string]Balances{
-			utils.SMS:  {&Balance{Value: 14, ExpirationDate: zeroTime}},
-			utils.DATA: {&Balance{Value: 1024, ExpirationDate: zeroTime}},
-			utils.VOICE: {&Balance{Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
+			utils.MetaSMS:  {&Balance{Value: 14, ExpirationDate: zeroTime}},
+			utils.MetaData: {&Balance{Value: 1024, ExpirationDate: zeroTime}},
+			utils.MetaVoice: {&Balance{Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
 				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{utils.SMS: []*UnitCounter{uc, uc}},
+		UnitCounters:   UnitCounters{utils.MetaSMS: []*UnitCounter{uc, uc}},
 		ActionTriggers: ActionTriggers{at, at, at},
 	}
 	return ub

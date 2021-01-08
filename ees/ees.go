@@ -324,27 +324,27 @@ func updateEEMetrics(dc utils.MapStorage, ev engine.MapEvent, timezone string) {
 	if tor, err := ev.GetString(utils.ToR); err == nil {
 		if usage, err := ev.GetDuration(utils.Usage); err == nil {
 			switch tor {
-			case utils.VOICE:
+			case utils.MetaVoice:
 				if _, has := dc[utils.TotalDuration]; !has {
 					dc[utils.TotalDuration] = time.Duration(0)
 				}
 				dc[utils.TotalDuration] = dc[utils.TotalDuration].(time.Duration) + usage
-			case utils.SMS:
+			case utils.MetaSMS:
 				if _, has := dc[utils.TotalSMSUsage]; !has {
 					dc[utils.TotalSMSUsage] = time.Duration(0)
 				}
 				dc[utils.TotalSMSUsage] = dc[utils.TotalSMSUsage].(time.Duration) + usage
-			case utils.MMS:
+			case utils.MetaMMS:
 				if _, has := dc[utils.TotalMMSUsage]; !has {
 					dc[utils.TotalMMSUsage] = time.Duration(0)
 				}
 				dc[utils.TotalMMSUsage] = dc[utils.TotalMMSUsage].(time.Duration) + usage
-			case utils.GENERIC:
+			case utils.MetaGeneric:
 				if _, has := dc[utils.TotalGenericUsage]; !has {
 					dc[utils.TotalGenericUsage] = time.Duration(0)
 				}
 				dc[utils.TotalGenericUsage] = dc[utils.TotalGenericUsage].(time.Duration) + usage
-			case utils.DATA:
+			case utils.MetaData:
 				if _, has := dc[utils.TotalDataUsage]; !has {
 					dc[utils.TotalDataUsage] = time.Duration(0)
 				}

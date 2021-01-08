@@ -266,10 +266,10 @@ func testDspCDRsProcessExternalCDR(t *testing.T) {
 	var reply string
 	args := &engine.ExternalCDRWithOpts{
 		ExternalCDR: &engine.ExternalCDR{
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			OriginID:    "testDspCDRsProcessExternalCDR",
 			OriginHost:  "127.0.0.1",
-			Source:      utils.UNIT_TEST,
+			Source:      utils.UnitTest,
 			RequestType: utils.MetaRated,
 			Tenant:      "cgrates.org",
 			Category:    "call",
@@ -539,10 +539,10 @@ func testDspCDRsProcessExternalCDRNoAuth(t *testing.T) {
 	var reply string
 	args := &engine.ExternalCDRWithOpts{
 		ExternalCDR: &engine.ExternalCDR{
-			ToR:         utils.VOICE,
+			ToR:         utils.MetaVoice,
 			OriginID:    "testDspCDRsProcessExternalCDR",
 			OriginHost:  "127.0.0.1",
-			Source:      utils.UNIT_TEST,
+			Source:      utils.UnitTest,
 			RequestType: utils.MetaRated,
 			Tenant:      "cgrates.org",
 			Category:    "call",

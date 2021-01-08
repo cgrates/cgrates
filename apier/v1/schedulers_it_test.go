@@ -166,7 +166,7 @@ func testSchedVeifyAllAccounts(t *testing.T) {
 	}
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
 			10, rply)
 	}
@@ -176,7 +176,7 @@ func testSchedVeifyAllAccounts(t *testing.T) {
 	}
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
 			10, rply)
 	}
@@ -186,7 +186,7 @@ func testSchedVeifyAllAccounts(t *testing.T) {
 	}
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
 			10, rply)
 	}
@@ -203,7 +203,7 @@ func testSchedVeifyAccount1001(t *testing.T) {
 	}
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
 			10, rply)
 	}
@@ -215,7 +215,7 @@ func testSchedVeifyAccount1001(t *testing.T) {
 	}
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if lenBal := len(acnt.BalanceMap[utils.MONETARY]); lenBal != 0 {
+	} else if lenBal := len(acnt.BalanceMap[utils.MetaMonetary]); lenBal != 0 {
 		t.Errorf("Expecting: %v, received: %v",
 			0, lenBal)
 	}
@@ -226,7 +226,7 @@ func testSchedVeifyAccount1001(t *testing.T) {
 	}
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if lenBal := len(acnt.BalanceMap[utils.MONETARY]); lenBal != 0 {
+	} else if lenBal := len(acnt.BalanceMap[utils.MetaMonetary]); lenBal != 0 {
 		t.Errorf("Expecting: %v, received: %v",
 			0, lenBal)
 	}
@@ -244,7 +244,7 @@ func testSchedVeifyAccount1002and1003(t *testing.T) {
 	}
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if lenBal := len(acnt.BalanceMap[utils.MONETARY]); lenBal != 0 {
+	} else if lenBal := len(acnt.BalanceMap[utils.MetaMonetary]); lenBal != 0 {
 		t.Errorf("Expecting: %v, received: %v",
 			0, lenBal)
 	}
@@ -255,7 +255,7 @@ func testSchedVeifyAccount1002and1003(t *testing.T) {
 	}
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
 			10, rply)
 	}
@@ -266,7 +266,7 @@ func testSchedVeifyAccount1002and1003(t *testing.T) {
 	}
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
 			10, rply)
 	}
@@ -308,7 +308,7 @@ func testSchedExecuteAction(t *testing.T) {
 	expected := 0.0
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != expected {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
@@ -319,7 +319,7 @@ func testSchedExecuteAction(t *testing.T) {
 	expected = 10.0
 	if err := schedRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != expected {
+	} else if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}

@@ -54,7 +54,7 @@ func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct utils.TPDistin
 		// the retutned value may be only the loadID
 		case utils.TBLTPAccountActions, utils.TBLTPRatingProfiles:
 			if len(distinct) == 1 { // special case when to return only the loadID
-				sliceID := strings.Split(fullID[len(tpid)+1:], utils.CONCATENATED_KEY_SEP)
+				sliceID := strings.Split(fullID[len(tpid)+1:], utils.ConcatenatedKeySep)
 				idSet.Add(sliceID[0])
 				continue
 			}
@@ -70,7 +70,7 @@ func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct utils.TPDistin
 func (iDB *InternalDB) GetTPTimings(tpid, id string) (timings []*utils.ApierTPTiming, err error) {
 	key := tpid
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 
 	ids := Cache.GetItemIDs(utils.CacheTBLTPTimings, key)
@@ -90,7 +90,7 @@ func (iDB *InternalDB) GetTPTimings(tpid, id string) (timings []*utils.ApierTPTi
 func (iDB *InternalDB) GetTPDestinations(tpid, id string) (dsts []*utils.TPDestination, err error) {
 	key := tpid
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPDestinations, key)
 	for _, id := range ids {
@@ -110,7 +110,7 @@ func (iDB *InternalDB) GetTPDestinations(tpid, id string) (dsts []*utils.TPDesti
 func (iDB *InternalDB) GetTPRates(tpid, id string) (rates []*utils.TPRateRALs, err error) {
 	key := tpid
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPRates, key)
 	for _, id := range ids {
@@ -135,7 +135,7 @@ func (iDB *InternalDB) GetTPDestinationRates(tpid, id string,
 	paginator *utils.Paginator) (dRates []*utils.TPDestinationRate, err error) {
 	key := tpid
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPDestinationRates, key)
 	for _, id := range ids {
@@ -180,7 +180,7 @@ func (iDB *InternalDB) GetTPDestinationRates(tpid, id string,
 func (iDB *InternalDB) GetTPRatingPlans(tpid, id string, paginator *utils.Paginator) (rPlans []*utils.TPRatingPlan, err error) {
 	key := tpid
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPRatingPlans, key)
 	for _, id := range ids {
@@ -225,16 +225,16 @@ func (iDB *InternalDB) GetTPRatingProfiles(filter *utils.TPRatingProfile) (rProf
 	key := filter.TPid
 
 	if filter.LoadId != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + filter.LoadId
+		key += utils.ConcatenatedKeySep + filter.LoadId
 	}
 	if filter.Tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + filter.Tenant
+		key += utils.ConcatenatedKeySep + filter.Tenant
 	}
 	if filter.Category != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + filter.Category
+		key += utils.ConcatenatedKeySep + filter.Category
 	}
 	if filter.Subject != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + filter.Subject
+		key += utils.ConcatenatedKeySep + filter.Subject
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPRatingProfiles, key)
 	for _, id := range ids {
@@ -254,7 +254,7 @@ func (iDB *InternalDB) GetTPRatingProfiles(filter *utils.TPRatingProfile) (rProf
 func (iDB *InternalDB) GetTPSharedGroups(tpid, id string) (sGroups []*utils.TPSharedGroups, err error) {
 	key := tpid
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPSharedGroups, key)
 	for _, id := range ids {
@@ -274,7 +274,7 @@ func (iDB *InternalDB) GetTPSharedGroups(tpid, id string) (sGroups []*utils.TPSh
 func (iDB *InternalDB) GetTPActions(tpid, id string) (actions []*utils.TPActions, err error) {
 	key := tpid
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPActions, key)
 	for _, id := range ids {
@@ -294,7 +294,7 @@ func (iDB *InternalDB) GetTPActions(tpid, id string) (actions []*utils.TPActions
 func (iDB *InternalDB) GetTPActionPlans(tpid, id string) (aPlans []*utils.TPActionPlan, err error) {
 	key := tpid
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPActionPlans, key)
 	for _, id := range ids {
@@ -314,7 +314,7 @@ func (iDB *InternalDB) GetTPActionPlans(tpid, id string) (aPlans []*utils.TPActi
 func (iDB *InternalDB) GetTPActionTriggers(tpid, id string) (aTriggers []*utils.TPActionTriggers, err error) {
 	key := tpid
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPActionTriggers, key)
 	for _, id := range ids {
@@ -333,13 +333,13 @@ func (iDB *InternalDB) GetTPAccountActions(filter *utils.TPAccountActions) (acco
 	key := filter.TPid
 
 	if filter.LoadId != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + filter.LoadId
+		key += utils.ConcatenatedKeySep + filter.LoadId
 	}
 	if filter.Tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + filter.Tenant
+		key += utils.ConcatenatedKeySep + filter.Tenant
 	}
 	if filter.Account != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + filter.Account
+		key += utils.ConcatenatedKeySep + filter.Account
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPAccountActions, key)
 	for _, id := range ids {
@@ -359,10 +359,10 @@ func (iDB *InternalDB) GetTPAccountActions(filter *utils.TPAccountActions) (acco
 func (iDB *InternalDB) GetTPResources(tpid, tenant, id string) (resources []*utils.TPResourceProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPResources, key)
 	for _, id := range ids {
@@ -382,10 +382,10 @@ func (iDB *InternalDB) GetTPResources(tpid, tenant, id string) (resources []*uti
 func (iDB *InternalDB) GetTPStats(tpid, tenant, id string) (stats []*utils.TPStatProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPStats, key)
 	for _, id := range ids {
@@ -405,10 +405,10 @@ func (iDB *InternalDB) GetTPStats(tpid, tenant, id string) (stats []*utils.TPSta
 func (iDB *InternalDB) GetTPThresholds(tpid, tenant, id string) (ths []*utils.TPThresholdProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPThresholds, key)
 	for _, id := range ids {
@@ -428,10 +428,10 @@ func (iDB *InternalDB) GetTPThresholds(tpid, tenant, id string) (ths []*utils.TP
 func (iDB *InternalDB) GetTPFilters(tpid, tenant, id string) (fltrs []*utils.TPFilterProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPFilters, key)
 	for _, id := range ids {
@@ -451,10 +451,10 @@ func (iDB *InternalDB) GetTPFilters(tpid, tenant, id string) (fltrs []*utils.TPF
 func (iDB *InternalDB) GetTPRoutes(tpid, tenant, id string) (supps []*utils.TPRouteProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPRoutes, key)
 	for _, id := range ids {
@@ -474,10 +474,10 @@ func (iDB *InternalDB) GetTPRoutes(tpid, tenant, id string) (supps []*utils.TPRo
 func (iDB *InternalDB) GetTPAttributes(tpid, tenant, id string) (attrs []*utils.TPAttributeProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPAttributes, key)
 	for _, id := range ids {
@@ -497,10 +497,10 @@ func (iDB *InternalDB) GetTPAttributes(tpid, tenant, id string) (attrs []*utils.
 func (iDB *InternalDB) GetTPChargers(tpid, tenant, id string) (cpps []*utils.TPChargerProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPChargers, key)
 	for _, id := range ids {
@@ -520,10 +520,10 @@ func (iDB *InternalDB) GetTPChargers(tpid, tenant, id string) (cpps []*utils.TPC
 func (iDB *InternalDB) GetTPDispatcherProfiles(tpid, tenant, id string) (dpps []*utils.TPDispatcherProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPDispatchers, key)
 	for _, id := range ids {
@@ -543,10 +543,10 @@ func (iDB *InternalDB) GetTPDispatcherProfiles(tpid, tenant, id string) (dpps []
 func (iDB *InternalDB) GetTPDispatcherHosts(tpid, tenant, id string) (dpps []*utils.TPDispatcherHost, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPDispatcherHosts, key)
 	for _, id := range ids {
@@ -566,10 +566,10 @@ func (iDB *InternalDB) GetTPDispatcherHosts(tpid, tenant, id string) (dpps []*ut
 func (iDB *InternalDB) GetTPRateProfiles(tpid, tenant, id string) (tpPrfs []*utils.TPRateProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPRateProfiles, key)
 	for _, id := range ids {
@@ -588,10 +588,10 @@ func (iDB *InternalDB) GetTPRateProfiles(tpid, tenant, id string) (tpPrfs []*uti
 func (iDB *InternalDB) GetTPActionProfiles(tpid, tenant, id string) (tpPrfs []*utils.TPActionProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPActionProfiles, key)
 	for _, id := range ids {
@@ -610,10 +610,10 @@ func (iDB *InternalDB) GetTPActionProfiles(tpid, tenant, id string) (tpPrfs []*u
 func (iDB *InternalDB) GetTPAccountProfiles(tpid, tenant, id string) (tpPrfs []*utils.TPAccountProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + tenant
+		key += utils.ConcatenatedKeySep + tenant
 	}
 	if id != utils.EmptyString {
-		key += utils.CONCATENATED_KEY_SEP + id
+		key += utils.ConcatenatedKeySep + id
 	}
 	ids := Cache.GetItemIDs(utils.CacheTBLTPAccountProfiles, key)
 	for _, id := range ids {
@@ -637,19 +637,19 @@ func (iDB *InternalDB) RemTpData(table, tpid string, args map[string]string) (er
 	key := tpid
 	if args != nil {
 		if table == utils.TBLTPAccountActions {
-			key += utils.CONCATENATED_KEY_SEP + args["loadid"] +
-				utils.CONCATENATED_KEY_SEP + args["tenant"] +
-				utils.CONCATENATED_KEY_SEP + args["account"]
+			key += utils.ConcatenatedKeySep + args["loadid"] +
+				utils.ConcatenatedKeySep + args["tenant"] +
+				utils.ConcatenatedKeySep + args["account"]
 		} else if table == utils.TBLTPRatingProfiles {
-			key += utils.CONCATENATED_KEY_SEP + args["loadid"] +
-				utils.CONCATENATED_KEY_SEP + args["tenant"] +
-				utils.CONCATENATED_KEY_SEP + args["category"] +
-				utils.CONCATENATED_KEY_SEP + args["subject"]
+			key += utils.ConcatenatedKeySep + args["loadid"] +
+				utils.ConcatenatedKeySep + args["tenant"] +
+				utils.ConcatenatedKeySep + args["category"] +
+				utils.ConcatenatedKeySep + args["subject"]
 		} else if tag, has := args["tag"]; has {
-			key += utils.CONCATENATED_KEY_SEP + tag
+			key += utils.ConcatenatedKeySep + tag
 		} else if id, has := args["id"]; has {
-			key += utils.CONCATENATED_KEY_SEP + args["tenant"] +
-				utils.CONCATENATED_KEY_SEP + id
+			key += utils.ConcatenatedKeySep + args["tenant"] +
+				utils.ConcatenatedKeySep + id
 		}
 	}
 	ids := Cache.GetItemIDs(utils.CacheStorDBPartitions[table], key)

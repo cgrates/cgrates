@@ -212,7 +212,7 @@ func testSSv1ItAuth(t *testing.T) {
 				ID:     "TestSSv1ItAuth",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -267,7 +267,7 @@ func testSSv1ItAuth(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",
@@ -299,7 +299,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 				ID:     "TestSSv1ItAuth",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -345,7 +345,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 				ID:     "TestSSv1ItInitiateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -383,7 +383,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",
@@ -421,7 +421,7 @@ func testSSv1ItInitiateSessionWithDigest(t *testing.T) {
 				ID:     "TestSSv1ItInitiateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It2",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -472,7 +472,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 				ID:     "TestSSv1ItUpdateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -501,7 +501,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",
@@ -543,7 +543,7 @@ func testSSv1ItTerminateSession(t *testing.T) {
 				ID:     "TestSSv1ItUpdateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -578,7 +578,7 @@ func testSSv1ItProcessCDR(t *testing.T) {
 			ID:     "TestSSv1ItProcessCDR",
 			Event: map[string]interface{}{
 				utils.Tenant:       "cgrates.org",
-				utils.ToR:          utils.VOICE,
+				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "TestSSv1It1",
 				utils.RequestType:  sSV1RequestType,
 				utils.AccountField: "1001",
@@ -613,7 +613,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 				ID:     "TestSSv1ItProcessEvent",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It2",
 					utils.OriginHost:   "TestSSv1It3",
 					utils.RequestType:  sSV1RequestType,
@@ -652,7 +652,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.CGRID:        "f7f5cf1029905f9b98be1a608e4bd975b8e51413",
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",
@@ -791,8 +791,8 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	eAcntVal := 9.55
 	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 
 	reqUsage := 5 * time.Minute
@@ -806,7 +806,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -836,7 +836,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 					utils.CGRID:        "70876773b294f0e1476065f8d18bb9ec6bcb3d5f",
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",
@@ -867,8 +867,8 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	eAcntVal = 9.4
 	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	rplyt := ""
 	if err := sSv1BiRpc.Call(utils.SessionSv1ForceDisconnect,
@@ -884,8 +884,8 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	}
 	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal { // no monetary change bacause the sessin was terminated
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaMonetary].GetTotalValue() != eAcntVal { // no monetary change bacause the sessin was terminated
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	var cdrs []*engine.CDR
 	argsCDR := &utils.RPCCDRsFilterWithOpts{
@@ -928,7 +928,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "TestDynamicDebit",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       2 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestDynamicDebitBalance",
@@ -949,9 +949,9 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	eAcntVal := 2 * float64(time.Second)
 	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
-			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
+			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.MetaVoice].GetTotalValue()))
 	}
 
 	args1 := &sessions.V1InitSessionArgs{
@@ -967,7 +967,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
 					utils.Category:     "call",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestDynamicTDebit",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "TestDynamicDebit",
@@ -999,25 +999,25 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	eAcntVal -= float64(time.Millisecond) * 30 * 2 // 2 session
 	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
-			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
+			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.MetaVoice].GetTotalValue()))
 	}
 
 	time.Sleep(10 * time.Millisecond)
 	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
-			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
+			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.MetaVoice].GetTotalValue()))
 	}
 	time.Sleep(20 * time.Millisecond)
 	eAcntVal -= float64(time.Millisecond) * 30 * 2 // 2 session
 	if err := sSApierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
-			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
+			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.MetaVoice].GetTotalValue()))
 	}
 
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
@@ -1062,7 +1062,7 @@ func testSSv1ItDeactivateSessions(t *testing.T) {
 				ID:     "TestSSv1ItInitiateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "TestSSv1It1",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -1114,7 +1114,7 @@ func testSSv1ItAuthNotFoundCharger(t *testing.T) {
 				ID:     "testSSv1ItAuthNotFoundCharger",
 				Event: map[string]interface{}{
 					utils.Tenant:       "Unexist",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItAuthNotFoundCharger",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -1143,7 +1143,7 @@ func testSSv1ItInitiateSessionNotFoundCharger(t *testing.T) {
 				ID:     "testSSv1ItInitiateSessionNotFoundCharger",
 				Event: map[string]interface{}{
 					utils.Tenant:       "Unexist",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItInitiateSessionNotFoundCharger",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",

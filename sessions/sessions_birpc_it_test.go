@@ -139,7 +139,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	// Create a balance with 1 second inside and rating increments of 1ms (to be compatible with debit interval)
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
 		Account:     "TestSessionsBiRPCSessionAutomaticDisconnects",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       0.01 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestSessionsBiRPCSessionAutomaticDisconnects",
@@ -160,9 +160,9 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	eAcntVal := 0.01 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal,
-			acnt.BalanceMap[utils.VOICE].GetTotalValue())
+			acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	initArgs := &V1InitSessionArgs{
@@ -172,8 +172,8 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsBiRPCSessionAutomaticDisconnects",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123451",
 					utils.AccountField: attrSetBalance.Account,
 					utils.Subject:      attrSetBalance.Account,
@@ -216,8 +216,8 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsDataLastUsedData",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123451",
 					utils.AccountField: attrSetBalance.Account,
 					utils.Subject:      attrSetBalance.Account,
@@ -240,8 +240,8 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	time.Sleep(100 * time.Millisecond) // Give time for  debits to occur
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 0 {
-		t.Errorf("Balance should be empty, have: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 0 {
+		t.Errorf("Balance should be empty, have: %f", acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 	if err := sessionsBiRPC.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &reply); err != nil {
 		t.Error(err)
@@ -269,7 +269,7 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "TestSessionsBiRPCSessionOriginatorTerminate",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestSessionsBiRPCSessionOriginatorTerminate",
@@ -287,8 +287,8 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	eAcntVal := 1.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
-		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != eAcntVal {
+		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	initArgs := &V1InitSessionArgs{
@@ -298,8 +298,8 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsBiRPCSessionOriginatorTerminate",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123452",
 					utils.AccountField: attrSetBalance.Account,
 					utils.Subject:      attrSetBalance.Account,
@@ -335,8 +335,8 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSessionsBiRPCSessionOriginatorTerminate",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "TEST_EVENT",
-					utils.ToR:          utils.VOICE,
+					utils.EventName:    "TEST_EVENT",
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "123452",
 					utils.AccountField: attrSetBalance.Account,
 					utils.Subject:      attrSetBalance.Account,
@@ -360,8 +360,8 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	time.Sleep(50 * time.Millisecond) // Give time for  debits to occur
 	if err := sessionsRPC.Call(utils.APIerSv2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() > 0.995*float64(time.Second) { // FixMe: should be not 0.93?
-		t.Errorf("Balance value: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() > 0.995*float64(time.Second) { // FixMe: should be not 0.93?
+		t.Errorf("Balance value: %f", acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	if err := sessionsRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithOpts{CGREvent: termArgs.CGREvent}, &reply); err != nil {

@@ -122,7 +122,7 @@ func TestSessionSRace(t *testing.T) {
 	if err = dm.SetAccount(&engine.Account{
 		ID: utils.ConcatenatedKey("cgrates.org", "1001"),
 		// AllowNegative: true,
-		BalanceMap: map[string]engine.Balances{utils.VOICE: {{Value: float64(0 * time.Second), Weight: 10}}}}); err != nil {
+		BalanceMap: map[string]engine.Balances{utils.MetaVoice: {{Value: float64(0 * time.Second), Weight: 10}}}}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -140,7 +140,7 @@ func TestSessionSRace(t *testing.T) {
 				ID:     "testSSv1ItProcessEventInitiateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItProcessEvent",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",
@@ -167,7 +167,7 @@ func TestSessionSRace(t *testing.T) {
 				ID:     "testSSv1ItProcessEventInitiateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItProcessEvent",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.AccountField: "1001",

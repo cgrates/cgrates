@@ -33,7 +33,7 @@ type ValueFormula struct {
 }
 
 func ParseBalanceFilterValue(tor string, val string) (*ValueFormula, error) {
-	if tor == VOICE { // VOICE balance is parsed as nanoseconds with support for time duration strings
+	if tor == MetaVoice { // Voice balance is parsed as nanoseconds with support for time duration strings
 		if d, err := ParseDurationWithNanosecs(val); err == nil {
 			return &ValueFormula{Static: float64(d.Nanoseconds())}, err
 		}

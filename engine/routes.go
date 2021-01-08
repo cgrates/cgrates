@@ -72,7 +72,7 @@ func (rp *RouteProfile) compileCacheParameters() error {
 		ratioMap := make(map[string]int)
 		// []string{"routeID:Ratio"}
 		for _, splIDWithRatio := range rp.SortingParameters {
-			splitted := strings.Split(splIDWithRatio, utils.CONCATENATED_KEY_SEP)
+			splitted := strings.Split(splIDWithRatio, utils.ConcatenatedKeySep)
 			ratioVal, err := strconv.Atoi(splitted[1])
 			if err != nil {
 				return err

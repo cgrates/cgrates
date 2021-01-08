@@ -174,7 +174,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 				ID:     utils.UUIDSha1Prefix(),
 				Time:   &nowTime,
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "Event1",
+					utils.EventName:    "Event1",
 					utils.AccountField: "1002",
 					utils.Subject:      "1002",
 					utils.Destination:  "1001",
@@ -331,7 +331,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 				ID:     utils.UUIDSha1Prefix(),
 				Time:   &nowTime,
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "RoundRobin",
+					utils.EventName:    "RoundRobin",
 					utils.AccountField: "1002",
 					utils.Subject:      "1002",
 					utils.Destination:  "1001",

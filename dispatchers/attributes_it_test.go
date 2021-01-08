@@ -223,7 +223,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
 					utils.AccountField: "1002",
-					utils.EVENT_NAME:   "Event1",
+					utils.EventName:    "Event1",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -240,7 +240,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 			{
 				FilterIDs: []string{},
 				Path:      utils.MetaReq + utils.NestingSep + "Password",
-				Type:      utils.META_CONSTANT,
+				Type:      utils.MetaConstant,
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 			},
 		},
@@ -260,7 +260,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
 					utils.AccountField: "1002",
-					utils.EVENT_NAME:   "Event1",
+					utils.EventName:    "Event1",
 					"Password":         "CGRateS.org",
 				},
 			},
@@ -444,7 +444,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			{
 				FilterIDs: []string{},
 				Path:      utils.MetaReq + utils.NestingSep + "Password",
-				Type:      utils.META_CONSTANT,
+				Type:      utils.MetaConstant,
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 			},
 		},
@@ -503,7 +503,7 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
 					utils.AccountField: "1001",
-					utils.EVENT_NAME:   "Event1",
+					utils.EventName:    "Event1",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -527,7 +527,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
 					utils.AccountField: "1002",
-					utils.EVENT_NAME:   "RoundRobin",
+					utils.EventName:    "RoundRobin",
 				},
 			},
 			Opts: map[string]interface{}{
@@ -544,7 +544,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			{
 				FilterIDs: []string{},
 				Path:      utils.MetaReq + utils.NestingSep + "Password",
-				Type:      utils.META_CONSTANT,
+				Type:      utils.MetaConstant,
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 			},
 		},
@@ -564,7 +564,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
 					utils.AccountField: "1002",
-					utils.EVENT_NAME:   "RoundRobin",
+					utils.EventName:    "RoundRobin",
 					"Password":         "CGRateS.org",
 				},
 			},
@@ -621,7 +621,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:   "Internal",
+					utils.EventName:    "Internal",
 					utils.AccountField: "1003",
 				},
 			},
@@ -643,7 +643,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 				ID:     "testAttributeSGetAttributeForEvent",
 				Event: map[string]interface{}{
 					utils.AccountField: "1003",
-					utils.EVENT_NAME:   "Internal",
+					utils.EventName:    "Internal",
 					"Password":         "CGRateS.com",
 				},
 			},

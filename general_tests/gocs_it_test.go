@@ -195,7 +195,7 @@ func testGOCSLoadData(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       3540000000000,
 		Balance: map[string]interface{}{
 			utils.ID:     "BALANCE1",
@@ -212,7 +212,7 @@ func testGOCSLoadData(t *testing.T) {
 	expectedVoice := 3540000000000.0
 	if err := usRPC.Call(utils.APIerSv2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
-	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups on au_site
@@ -228,7 +228,7 @@ func testGOCSAuthSession(t *testing.T) {
 				ID:     "TestSSv1ItAuth",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testGOCS",
 					utils.Category:     "call",
 					utils.RequestType:  utils.MetaPrepaid,
@@ -260,7 +260,7 @@ func testGOCSInitSession(t *testing.T) {
 				ID:     "TestSSv1ItInitiateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testGOCS",
 					utils.Category:     "call",
 					utils.RequestType:  utils.MetaPrepaid,
@@ -316,14 +316,14 @@ func testGOCSInitSession(t *testing.T) {
 	// 59 mins - 5 mins = 54 mins
 	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 3240000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 3240000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	if err := usRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 3240000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 3240000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 }
@@ -338,7 +338,7 @@ func testGOCSUpdateSession(t *testing.T) {
 				ID:     "TestSSv1ItUpdateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testGOCS",
 					utils.Category:     "call",
 					utils.RequestType:  utils.MetaPrepaid,
@@ -381,8 +381,8 @@ func testGOCSUpdateSession(t *testing.T) {
 	// 54 min - 5 mins = 49 min
 	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 2940000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 }
@@ -396,14 +396,14 @@ func testGOCSVerifyAccountsAfterStart(t *testing.T) {
 	// because US_SITE was down we should notice a difference between balance from accounts from US_SITE and AU_SITE
 	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 2940000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	if err := usRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 3240000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 3240000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 }
 
@@ -417,7 +417,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 				ID:     "TestSSv1ItUpdateSession2",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testGOCS",
 					utils.Category:     "call",
 					utils.RequestType:  utils.MetaPrepaid,
@@ -470,14 +470,14 @@ func testGOCSUpdateSession2(t *testing.T) {
 
 	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 2940000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	if err := usRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 2940000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 }
 
@@ -490,7 +490,7 @@ func testGOCSTerminateSession(t *testing.T) {
 				ID:     "testGOCSTerminateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testGOCS",
 					utils.Category:     "call",
 					utils.RequestType:  utils.MetaPrepaid,
@@ -532,14 +532,14 @@ func testGOCSTerminateSession(t *testing.T) {
 
 	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 2640000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	if err := usRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 2640000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 }
 
@@ -550,7 +550,7 @@ func testGOCSProcessCDR(t *testing.T) {
 			ID:     "TestSSv1ItProcessCDR",
 			Event: map[string]interface{}{
 				utils.Tenant:       "cgrates.org",
-				utils.ToR:          utils.VOICE,
+				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "testGOCS",
 				utils.Category:     "call",
 				utils.RequestType:  utils.MetaPrepaid,
@@ -582,14 +582,14 @@ func testGOCSProcessCDR(t *testing.T) {
 
 	if err := auRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 2640000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	if err := usRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 2640000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 }
 

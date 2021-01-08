@@ -28,12 +28,12 @@ import (
 
 func (m *Migrator) migrateCurrentRatingProfiles() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RATING_PROFILE_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RatingProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.RATING_PROFILE_PREFIX)
+		idg := strings.TrimPrefix(id, utils.RatingProfilePrefix)
 		rp, err := m.dmIN.DataManager().GetRatingProfile(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err

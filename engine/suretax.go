@@ -232,6 +232,6 @@ func SureTaxProcessCdr(cdr *CDR) error {
 			utils.MetaRoundingMiddle)
 	}
 	// Add response into extra fields to be available for later review
-	cdr.ExtraFields[utils.META_SURETAX] = respFull.D
+	cdr.ExtraFields[utils.MetaSureTax] = respFull.D
 	return nil
 }

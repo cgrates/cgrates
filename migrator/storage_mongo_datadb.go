@@ -162,7 +162,7 @@ func (v1ms *mongoMigrator) getV1ActionPlans() (v1aps *v1ActionPlans, err error) 
 
 //set
 func (v1ms *mongoMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
-	key := utils.ACTION_PLAN_PREFIX + (*x)[0].Id
+	key := utils.ActionPlanPrefix + (*x)[0].Id
 	_, err = v1ms.mgoDB.DB().Collection("actiontimings").InsertOne(v1ms.mgoDB.GetContext(), &AtKeyValue{key, *x})
 	return
 }
@@ -199,7 +199,7 @@ func (v1ms *mongoMigrator) getV1Actions() (v1acs *v1Actions, err error) {
 
 //set
 func (v1ms *mongoMigrator) setV1Actions(x *v1Actions) (err error) {
-	key := utils.ACTION_PREFIX + (*x)[0].Id
+	key := utils.ActionPrefix + (*x)[0].Id
 	_, err = v1ms.mgoDB.DB().Collection("actions").InsertOne(v1ms.mgoDB.GetContext(), &AcKeyValue{key, *x})
 	return
 }
@@ -255,7 +255,7 @@ func (v1ms *mongoMigrator) remV1ActionTriggers(x *v1ActionTriggers) (err error) 
 //get
 func (v1ms *mongoMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.SHARED_GROUP_PREFIX).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.SharedGroupPrefix).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
@@ -274,7 +274,7 @@ func (v1ms *mongoMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 
 //set
 func (v1ms *mongoMigrator) setV1SharedGroup(x *v1SharedGroup) (err error) {
-	_, err = v1ms.mgoDB.DB().Collection(utils.SHARED_GROUP_PREFIX).InsertOne(v1ms.mgoDB.GetContext(), x)
+	_, err = v1ms.mgoDB.DB().Collection(utils.SharedGroupPrefix).InsertOne(v1ms.mgoDB.GetContext(), x)
 	return
 }
 
@@ -282,7 +282,7 @@ func (v1ms *mongoMigrator) setV1SharedGroup(x *v1SharedGroup) (err error) {
 //get
 func (v1ms *mongoMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.CDR_STATS_PREFIX).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.CDRsStatsPrefix).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
@@ -320,7 +320,7 @@ func (v1ms *mongoMigrator) getV3Stats() (v1st *engine.StatQueueProfile, err erro
 
 //set
 func (v1ms *mongoMigrator) setV1Stats(x *v1Stat) (err error) {
-	_, err = v1ms.mgoDB.DB().Collection(utils.CDR_STATS_PREFIX).InsertOne(v1ms.mgoDB.GetContext(), x)
+	_, err = v1ms.mgoDB.DB().Collection(utils.CDRsStatsPrefix).InsertOne(v1ms.mgoDB.GetContext(), x)
 	return
 }
 

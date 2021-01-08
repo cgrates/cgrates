@@ -195,13 +195,13 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			{
 				Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
-				Type:      utils.META_CONSTANT,
+				Type:      utils.MetaConstant,
 				FilterIDs: []string{},
 			},
 			{
 				Path:      utils.MetaReq + utils.NestingSep + utils.Subject,
 				Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
-				Type:      utils.META_CONSTANT,
+				Type:      utils.MetaConstant,
 				FilterIDs: []string{},
 			},
 		},

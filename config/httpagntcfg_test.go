@@ -44,7 +44,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 						{
 							Tag:       utils.StringPointer("Allow"),
 							Path:      utils.StringPointer("response.Allow"),
-							Type:      utils.StringPointer(utils.META_CONSTANT),
+							Type:      utils.StringPointer(utils.MetaConstant),
 							Value:     utils.StringPointer("1"),
 							Mandatory: utils.BoolPointer(true),
 							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
@@ -106,7 +106,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 						{
 							Tag:       utils.StringPointer("Allow"),
 							Path:      utils.StringPointer("response.Allow"),
-							Type:      utils.StringPointer(utils.META_CONSTANT),
+							Type:      utils.StringPointer(utils.MetaConstant),
 							Value:     utils.StringPointer("1"),
 							Mandatory: utils.BoolPointer(true),
 							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
@@ -122,7 +122,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 						{
 							Tag:       utils.StringPointer("RequestType"),
 							Path:      utils.StringPointer("RequestType"),
-							Type:      utils.StringPointer(utils.META_CONSTANT),
+							Type:      utils.StringPointer(utils.MetaConstant),
 							Value:     utils.StringPointer("*pseudoprepaid"),
 							Mandatory: utils.BoolPointer(true),
 							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
@@ -132,7 +132,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 						{
 							Tag:       utils.StringPointer("CDR_ID"),
 							Path:      utils.StringPointer("CDR_RESPONSE.CDR_ID"),
-							Type:      utils.StringPointer(utils.META_COMPOSED),
+							Type:      utils.StringPointer(utils.MetaComposed),
 							Value:     utils.StringPointer("~*req.CDR_ID"),
 							Mandatory: utils.BoolPointer(true),
 							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
@@ -174,7 +174,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 					ReplyFields: []*FCTemplate{{
 						Tag:       "Allow",
 						Path:      "response.Allow",
-						Type:      utils.META_CONSTANT,
+						Type:      utils.MetaConstant,
 						Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
 						Mandatory: true,
 						Layout:    time.RFC3339,
@@ -188,7 +188,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
 						Path:      "RequestType",
-						Type:      utils.META_CONSTANT,
+						Type:      utils.MetaConstant,
 						Value:     NewRSRParsersMustCompile("*pseudoprepaid", utils.InfieldSep),
 						Mandatory: true,
 						Layout:    time.RFC3339,
@@ -196,7 +196,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 					ReplyFields: []*FCTemplate{{
 						Tag:       "CDR_ID",
 						Path:      "CDR_RESPONSE.CDR_ID",
-						Type:      utils.META_COMPOSED,
+						Type:      utils.MetaComposed,
 						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", utils.InfieldSep),
 						Mandatory: true,
 						Layout:    time.RFC3339,
@@ -287,7 +287,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 						{
 							Tag:       utils.StringPointer("Allow"),
 							Path:      utils.StringPointer("response.Allow"),
-							Type:      utils.StringPointer(utils.META_CONSTANT),
+							Type:      utils.StringPointer(utils.MetaConstant),
 							Value:     utils.StringPointer("1"),
 							Mandatory: utils.BoolPointer(true),
 							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
@@ -303,7 +303,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 						{
 							Tag:       utils.StringPointer("RequestType"),
 							Path:      utils.StringPointer("RequestType"),
-							Type:      utils.StringPointer(utils.META_CONSTANT),
+							Type:      utils.StringPointer(utils.MetaConstant),
 							Value:     utils.StringPointer("*pseudoprepaid"),
 							Mandatory: utils.BoolPointer(true),
 							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),
@@ -313,7 +313,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 						{
 							Tag:       utils.StringPointer("CDR_ID"),
 							Path:      utils.StringPointer("CDR_RESPONSE.CDR_ID"),
-							Type:      utils.StringPointer(utils.META_COMPOSED),
+							Type:      utils.StringPointer(utils.MetaComposed),
 							Value:     utils.StringPointer("~*req.CDR_ID"),
 							Mandatory: utils.BoolPointer(true),
 							Layout:    utils.StringPointer("2006-01-02T15:04:05Z07:00"),

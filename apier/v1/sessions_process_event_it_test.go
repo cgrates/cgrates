@@ -169,7 +169,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 				ID:     "testSSv1ItProcessEventAuth",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItProcessEvent",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -230,7 +230,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.CGRID:        "4be779c004d9f784e836db9ffd41b50319d71fe8",
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",
@@ -263,7 +263,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 				ID:     "testSSv1ItProcessEventInitiateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItProcessEvent",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -307,7 +307,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.CGRID:        "4be779c004d9f784e836db9ffd41b50319d71fe8",
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",
@@ -345,7 +345,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 				ID:     "testSSv1ItProcessEventUpdateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItProcessEvent",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -374,7 +374,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.CGRID:        "4be779c004d9f784e836db9ffd41b50319d71fe8",
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.AccountField: "1001",
 					utils.Subject:      "ANY2CNT",
 					utils.Destination:  "1002",
@@ -422,7 +422,7 @@ func testSSv1ItProcessEventTerminateSession(t *testing.T) {
 				ID:     "testSSv1ItProcessEventTerminateSession",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItProcessEvent",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -453,7 +453,7 @@ func testSSv1ItProcessCDRForSessionFromProcessEvent(t *testing.T) {
 		ID:     "testSSv1ItProcessCDRForSessionFromProcessEvent",
 		Event: map[string]interface{}{
 			utils.Tenant:       "cgrates.org",
-			utils.ToR:          utils.VOICE,
+			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "testSSv1ItProcessEvent",
 			utils.RequestType:  sSV1RequestType,
 			utils.AccountField: "1001",
@@ -528,7 +528,7 @@ func testSSv1ItProcessEventWithGetCost(t *testing.T) {
 				ID:     "testSSv1ItProcessEventWithGetCost",
 				Event: map[string]interface{}{
 					utils.Tenant:      "cgrates.org",
-					utils.ToR:         utils.MONETARY,
+					utils.ToR:         utils.MetaMonetary,
 					utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
 					utils.RequestType: sSV1RequestType,
 					utils.Subject:     "*attributes",
@@ -569,7 +569,7 @@ func testSSv1ItProcessEventWithGetCost2(t *testing.T) {
 				ID:     "testSSv1ItProcessEventWithGetCost2",
 				Event: map[string]interface{}{
 					utils.Tenant:      "cgrates.org",
-					utils.ToR:         utils.MONETARY,
+					utils.ToR:         utils.MetaMonetary,
 					utils.OriginID:    "testSSv1ItProcessEventWithGetCost2",
 					utils.RequestType: sSV1RequestType,
 					utils.Subject:     "*attributes",
@@ -612,7 +612,7 @@ func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
 				ID:     "testSSv1ItProcessEventWithGetCost3",
 				Event: map[string]interface{}{
 					utils.Tenant:      "cgrates.org",
-					utils.ToR:         utils.MONETARY,
+					utils.ToR:         utils.MetaMonetary,
 					utils.OriginID:    "testSSv1ItProcessEventWithGetCost3",
 					utils.RequestType: sSV1RequestType,
 					utils.Subject:     "*attributes",
@@ -652,7 +652,7 @@ func testSSv1ItProcessEventWithGetCost4(t *testing.T) {
 				ID:     "testSSv1ItProcessEventWithGetCost4",
 				Event: map[string]interface{}{
 					utils.Tenant:      "cgrates.org",
-					utils.ToR:         utils.MONETARY,
+					utils.ToR:         utils.MetaMonetary,
 					utils.OriginID:    "testSSv1ItProcessEventWithGetCost4",
 					utils.RequestType: sSV1RequestType,
 					utils.Subject:     "*attributes",
@@ -682,7 +682,7 @@ func testSSv1ItGetCost(t *testing.T) {
 				ID:     "testSSv1ItGetCost",
 				Event: map[string]interface{}{
 					utils.Tenant:      "cgrates.org",
-					utils.ToR:         utils.MONETARY,
+					utils.ToR:         utils.MetaMonetary,
 					utils.OriginID:    "testSSv1ItProcessEventWithGetCost",
 					utils.RequestType: sSV1RequestType,
 					utils.Subject:     "*attributes",
@@ -724,7 +724,7 @@ func testSSv1ItProcessEventWithCDR(t *testing.T) {
 				ID:     "testSSv1ItProcessEventWithCDR",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItProcessEventWithCDR",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -803,7 +803,7 @@ func testSSv1ItProcessEventWithCDRResourceError(t *testing.T) {
 				ID:     "testSSv1ItProcessEventWithCDRResourceError",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItProcessEventWithCDRResourceError",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",
@@ -883,7 +883,7 @@ func testSSv1ItProcessEventWithCDRResourceErrorBlockError(t *testing.T) {
 				ID:     "testSSv1ItProcessEventWithCDRResourceErrorBlockError",
 				Event: map[string]interface{}{
 					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.VOICE,
+					utils.ToR:          utils.MetaVoice,
 					utils.OriginID:     "testSSv1ItProcessEventWithCDRResourceErrorBlockError",
 					utils.RequestType:  sSV1RequestType,
 					utils.AccountField: "1001",

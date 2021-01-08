@@ -297,7 +297,7 @@ func getLoader(cfg *config.CGRConfig) (loader engine.LoadReader, err error) {
 		loader = storDB
 		return
 	}
-	if gprefix := utils.MetaGoogleAPI + utils.CONCATENATED_KEY_SEP; strings.HasPrefix(*dataPath, gprefix) { // Default load from csv files to dataDb
+	if gprefix := utils.MetaGoogleAPI + utils.ConcatenatedKeySep; strings.HasPrefix(*dataPath, gprefix) { // Default load from csv files to dataDb
 		return engine.NewGoogleCSVStorage(cfg.LoaderCgrCfg().FieldSeparator, strings.TrimPrefix(*dataPath, gprefix))
 	}
 	if !utils.IsURL(*dataPath) {

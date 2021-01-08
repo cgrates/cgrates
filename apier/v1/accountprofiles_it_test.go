@@ -138,7 +138,7 @@ func testAccountSGetAccountProfile(t *testing.T) {
 				ID:        "MonetaryBalance",
 				FilterIDs: []string{},
 				Weight:    10,
-				Type:      utils.MONETARY,
+				Type:      utils.MetaMonetary,
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"fltr1", "fltr2"},
@@ -164,7 +164,7 @@ func testAccountSGetAccountProfile(t *testing.T) {
 				ID:             "VoiceBalance",
 				FilterIDs:      []string{},
 				Weight:         10,
-				Type:           utils.VOICE,
+				Type:           utils.MetaVoice,
 				CostIncrements: []*utils.CostIncrement{},
 				CostAttributes: []string{},
 				UnitFactors:    []*utils.UnitFactor{},
@@ -209,7 +209,7 @@ func testAccountSSettAccountProfile(t *testing.T) {
 						ID:        "MonetaryBalance",
 						FilterIDs: []string{},
 						Weight:    10,
-						Type:      utils.MONETARY,
+						Type:      utils.MetaMonetary,
 						CostIncrements: []*utils.APICostIncrement{
 							&utils.APICostIncrement{
 								FilterIDs:    []string{"fltr1", "fltr2"},
@@ -235,7 +235,7 @@ func testAccountSSettAccountProfile(t *testing.T) {
 						ID:        "VoiceBalance",
 						FilterIDs: []string{},
 						Weight:    10,
-						Type:      utils.VOICE,
+						Type:      utils.MetaVoice,
 						Units:     3600000000000,
 					},
 				},

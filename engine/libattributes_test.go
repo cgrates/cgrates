@@ -150,12 +150,12 @@ func TestNewAttributeFromInlineWithMultipleRuns(t *testing.T) {
 		Contexts: []string{utils.MetaAny},
 		Attributes: []*Attribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "RequestType",
-			Type:  utils.META_CONSTANT,
+			Type:  utils.MetaConstant,
 			Value: config.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
 		},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Category",
-				Type:  utils.META_CONSTANT,
+				Type:  utils.MetaConstant,
 				Value: config.NewRSRParsersMustCompile("call", utils.InfieldSep),
 			},
 		},

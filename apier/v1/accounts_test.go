@@ -45,21 +45,21 @@ func TestSetAccounts(t *testing.T) {
 	iscTenant := "itsyscom.com"
 	b10 := &engine.Balance{Value: 10, Weight: 10}
 	cgrAcnt1 := &engine.Account{ID: utils.ConcatenatedKey(cgrTenant, "account1"),
-		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.META_OUT: {b10}}}
+		BalanceMap: map[string]engine.Balances{utils.MetaMonetary + utils.MetaOut: {b10}}}
 	cgrAcnt2 := &engine.Account{ID: utils.ConcatenatedKey(cgrTenant, "account2"),
-		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.META_OUT: {b10}}}
+		BalanceMap: map[string]engine.Balances{utils.MetaMonetary + utils.MetaOut: {b10}}}
 	cgrAcnt3 := &engine.Account{ID: utils.ConcatenatedKey(cgrTenant, "account3"),
-		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.META_OUT: {b10}}}
+		BalanceMap: map[string]engine.Balances{utils.MetaMonetary + utils.MetaOut: {b10}}}
 	iscAcnt1 := &engine.Account{ID: utils.ConcatenatedKey(iscTenant, "account1"),
-		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.META_OUT: {b10}}}
+		BalanceMap: map[string]engine.Balances{utils.MetaMonetary + utils.MetaOut: {b10}}}
 	iscAcnt2 := &engine.Account{ID: utils.ConcatenatedKey(iscTenant, "account2"),
-		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.META_OUT: {b10}}}
+		BalanceMap: map[string]engine.Balances{utils.MetaMonetary + utils.MetaOut: {b10}}}
 	for _, account := range []*engine.Account{cgrAcnt1, cgrAcnt2, cgrAcnt3, iscAcnt1, iscAcnt2} {
 		if err := apierAcntsAcntStorage.SetAccountDrv(account); err != nil {
 			t.Error(err)
 		}
 	}
-	//apierAcntsAcntStorage.CacheRatingPrefixes(utils.ACTION_PREFIX)
+	//apierAcntsAcntStorage.CacheRatingPrefixes(utils.ActionPrefix)
 }
 
 /* This was a comment

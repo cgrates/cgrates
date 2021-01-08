@@ -252,7 +252,7 @@ func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCos
 	if cd.testCallcost != nil {
 		return cd.testCallcost, nil
 	}
-	if b.RatingSubject != "" && !strings.HasPrefix(b.RatingSubject, utils.ZERO_RATING_SUBJECT_PREFIX) {
+	if b.RatingSubject != "" && !strings.HasPrefix(b.RatingSubject, utils.MetaRatingSubjectPrefix) {
 		origSubject := cd.Subject
 		cd.Subject = b.RatingSubject
 		origAccount := cd.Account
@@ -439,7 +439,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				}
 				cost := inc.Cost
 				inc.paid = false
-				if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
+				if strategy == utils.MetaMaxCostDisconnect && cd.MaxCostSoFar >= maxCost {
 					// cut the entire current timespan
 					cc.maxCostDisconect = true
 					if dryRun {
@@ -453,7 +453,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 						return cc, nil
 					}
 				}
-				if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
+				if strategy == utils.MetaMaxCostFree && cd.MaxCostSoFar >= maxCost {
 					cost, inc.Cost = 0.0, 0.0
 					inc.BalanceInfo.Monetary = &MonetaryInfo{
 						UUID:         b.Uuid,
@@ -464,7 +464,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					inc.BalanceInfo.AccountID = ub.ID
 					inc.paid = true
 					if count {
-						ub.countUnits(cost, utils.MONETARY, cc, b)
+						ub.countUnits(cost, utils.MetaMonetary, cc, b)
 					}
 					// go to nextincrement
 					continue
@@ -505,7 +505,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					if count {
 						ub.countUnits(amount, cc.ToR, cc, b)
 						if cost != 0 {
-							ub.countUnits(cost, utils.MONETARY, cc, moneyBal)
+							ub.countUnits(cost, utils.MetaMonetary, cc, moneyBal)
 						}
 					}
 				} else {
@@ -600,7 +600,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 
 			amount := inc.Cost
 			inc.paid = false
-			if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
+			if strategy == utils.MetaMaxCostDisconnect && cd.MaxCostSoFar >= maxCost {
 				// cut the entire current timespan
 				cc.maxCostDisconect = true
 				if dryRun {
@@ -614,7 +614,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					return cc, nil
 				}
 			}
-			if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
+			if strategy == utils.MetaMaxCostFree && cd.MaxCostSoFar >= maxCost {
 				amount, inc.Cost = 0.0, 0.0
 				inc.BalanceInfo.Monetary = &MonetaryInfo{
 					UUID:  b.Uuid,
@@ -627,7 +627,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				}
 				inc.paid = true
 				if count {
-					ub.countUnits(amount, utils.MONETARY, cc, b)
+					ub.countUnits(amount, utils.MetaMonetary, cc, b)
 				}
 
 				//log.Printf("TS: %+v", cc.Cost)
@@ -649,7 +649,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				}
 				inc.paid = true
 				if count {
-					ub.countUnits(amount, utils.MONETARY, cc, b)
+					ub.countUnits(amount, utils.MetaMonetary, cc, b)
 				}
 			} else {
 				inc.paid = false

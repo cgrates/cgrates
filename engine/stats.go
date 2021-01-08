@@ -482,7 +482,7 @@ func (sS *StatService) V1GetQueueIDs(tenant string, qIDs *[]string) (err error) 
 	if tenant == utils.EmptyString {
 		tenant = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.StatQueuePrefix + tenant + utils.CONCATENATED_KEY_SEP
+	prfx := utils.StatQueuePrefix + tenant + utils.ConcatenatedKeySep
 	keys, err := sS.dm.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err

@@ -51,7 +51,7 @@ func (apierSv1 *APIerSv1) DebitUsageWithOptions(args *AttrDebitUsageWithOptions,
 
 	// Set values for optional parameters
 	if usageRecord.ToR == "" {
-		usageRecord.ToR = utils.VOICE
+		usageRecord.ToR = utils.MetaVoice
 	}
 	if usageRecord.RequestType == "" {
 		usageRecord.RequestType = apierSv1.Config.GeneralCfg().DefaultReqType

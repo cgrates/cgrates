@@ -1317,7 +1317,7 @@ func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *C
 			return utils.ErrPathNotReachable(path)
 		}
 		return
-	} else if !fi.IsDir() && path != utils.CONFIG_PATH { // If config dir defined, needs to exist, not checking for default
+	} else if !fi.IsDir() && path != utils.ConfigPath { // If config dir defined, needs to exist, not checking for default
 		return fmt.Errorf("path: %s not a directory", path)
 	}
 

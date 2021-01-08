@@ -137,7 +137,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "testDspv1",
 			Event: map[string]interface{}{
-				utils.EVENT_NAME: "Event1",
+				utils.EventName: "Event1",
 			},
 		},
 		Opts: map[string]interface{}{
@@ -185,7 +185,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID: "testDspvWithoutTenant",
 			Event: map[string]interface{}{
-				utils.EVENT_NAME: "Event1",
+				utils.EventName: "Event1",
 			},
 		},
 		Opts: map[string]interface{}{

@@ -136,12 +136,12 @@ func TestDZ1ExecuteActions(t *testing.T) {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
-	} else if acnt.BalanceMap[utils.VOICE][0].Value != 40000000000 {
+	} else if acnt.BalanceMap[utils.MetaVoice][0].Value != 40000000000 {
 		t.Error("Account does not have enough minutes in balance",
-			acnt.BalanceMap[utils.VOICE][0].Value)
-	} else if acnt.BalanceMap[utils.MONETARY][0].Value != 10 {
+			acnt.BalanceMap[utils.MetaVoice][0].Value)
+	} else if acnt.BalanceMap[utils.MetaMonetary][0].Value != 10 {
 		t.Error("Account does not have enough monetary balance",
-			acnt.BalanceMap[utils.MONETARY][0].Value)
+			acnt.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 }
 
@@ -164,12 +164,12 @@ func TestDZ1Debit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if acnt.BalanceMap[utils.VOICE][0].Value != 20000000000 {
+	if acnt.BalanceMap[utils.MetaVoice][0].Value != 20000000000 {
 		t.Error("Account does not have expected *voice units in balance",
-			acnt.BalanceMap[utils.VOICE][0].Value)
+			acnt.BalanceMap[utils.MetaVoice][0].Value)
 	}
-	if acnt.BalanceMap[utils.MONETARY][0].Value != 9.99 {
+	if acnt.BalanceMap[utils.MetaMonetary][0].Value != 9.99 {
 		t.Error("Account does not have expected *monetary units in balance",
-			acnt.BalanceMap[utils.MONETARY][0].Value)
+			acnt.BalanceMap[utils.MetaMonetary][0].Value)
 	}
 }

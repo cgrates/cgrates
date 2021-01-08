@@ -56,7 +56,7 @@ func (self *SQLStorage) ExportGormDB() *gorm.DB {
 }
 
 func (self *SQLStorage) Flush(scriptsPath string) (err error) {
-	for _, scriptName := range []string{utils.CREATE_CDRS_TABLES_SQL, utils.CREATE_TARIFFPLAN_TABLES_SQL} {
+	for _, scriptName := range []string{utils.CreateCDRsTablesSQL, utils.CreateTariffPlanTablesSQL} {
 		if err := self.CreateTablesFromScript(path.Join(scriptsPath, scriptName)); err != nil {
 			return err
 		}
@@ -219,7 +219,7 @@ func (self *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 		}
 		finalID := vals[0]
 		if len(vals) > 1 {
-			finalID = strings.Join(vals, utils.CONCATENATED_KEY_SEP)
+			finalID = strings.Join(vals, utils.ConcatenatedKeySep)
 		}
 		ids = append(ids, finalID)
 	}

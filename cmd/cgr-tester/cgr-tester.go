@@ -64,7 +64,7 @@ var (
 	dbQueryTimeout = cgrTesterFlags.String("query_timeout", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
 		"The timeout for queries")
 	raterAddress = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
-	tor          = cgrTesterFlags.String("tor", utils.VOICE, "The type of record to use in queries.")
+	tor          = cgrTesterFlags.String("tor", utils.MetaVoice, "The type of record to use in queries.")
 	category     = cgrTesterFlags.String("category", "call", "The Record category to test.")
 	tenant       = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
 	subject      = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")

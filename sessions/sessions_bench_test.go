@@ -76,7 +76,7 @@ func addBalance(sBenchRPC *rpc.Client, sraccount string) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     sraccount,
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       5 * float64(time.Hour),
 		Balance: map[string]interface{}{
 			utils.ID: "TestDynamicDebitBalance",
@@ -113,8 +113,8 @@ func initSession(i int) {
 				Tenant: "cgrates.org",
 				ID:     "",
 				Event: map[string]interface{}{
-					utils.EVENT_NAME:  "TEST_EVENT",
-					utils.ToR:         utils.VOICE,
+					utils.EventName:   "TEST_EVENT",
+					utils.ToR:         utils.MetaVoice,
 					utils.Category:    "call",
 					utils.Tenant:      "cgrates.org",
 					utils.RequestType: utils.MetaPrepaid,

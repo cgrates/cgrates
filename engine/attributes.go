@@ -140,7 +140,7 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 			continue //maybe removed
 		}
 		if i != 0 {
-			rplyDigest += utils.FIELDS_SEP
+			rplyDigest += utils.FieldsSep
 		}
 		fldStrVal, _ := attrReply.CGREvent.FieldAsString(fld)
 		rplyDigest += fld + utils.InInFieldSep + fldStrVal
@@ -225,11 +225,11 @@ func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent
 		}
 		var substitute string
 		switch attribute.Type {
-		case utils.META_CONSTANT:
+		case utils.MetaConstant:
 			substitute, err = attribute.Value.ParseValue(utils.EmptyString)
-		case utils.MetaVariable, utils.META_COMPOSED:
+		case utils.MetaVariable, utils.MetaComposed:
 			substitute, err = attribute.Value.ParseDataProvider(dynDP)
-		case utils.META_USAGE_DIFFERENCE:
+		case utils.MetaUsageDifference:
 			if len(attribute.Value) != 2 {
 				return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(attribute.Value))
 			}
@@ -390,7 +390,7 @@ func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent
 			rply.AlteredFields = append(rply.AlteredFields, attribute.Path)
 		}
 		if attribute.Path == utils.MetaTenant {
-			if attribute.Type == utils.META_COMPOSED {
+			if attribute.Type == utils.MetaComposed {
 				rply.CGREvent.Tenant += substitute
 			} else {
 				rply.CGREvent.Tenant = substitute
@@ -401,7 +401,7 @@ func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent
 			evNm.Remove(strings.Split(attribute.Path, utils.NestingSep))
 			continue
 		}
-		if attribute.Type == utils.META_COMPOSED {
+		if attribute.Type == utils.MetaComposed {
 			var val string
 			if val, err = evNm.FieldAsString(strings.Split(attribute.Path, utils.NestingSep)); err != nil && err != utils.ErrNotFound {
 				rply = nil

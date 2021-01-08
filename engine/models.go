@@ -211,7 +211,7 @@ func (AccountActionMdl) TableName() string {
 }
 
 func (aa *AccountActionMdl) SetAccountActionId(id string) error {
-	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	ids := strings.Split(id, utils.ConcatenatedKeySep)
 	if len(ids) != 3 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}

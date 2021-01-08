@@ -33,11 +33,11 @@ func TestASRGetStringValue(t *testing.T) {
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
-	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	asr.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
@@ -72,7 +72,7 @@ func TestASRGetStringValue(t *testing.T) {
 	}
 	asr.RemEvent(ev4.ID)
 	asr.RemEvent(ev5.ID)
-	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 }
@@ -328,13 +328,13 @@ func TestACDGetStringValue(t *testing.T) {
 			utils.Usage:  10 * time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		}}
-	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	if err := acd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event}); err != nil {
 		t.Error(err)
 	}
-	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
@@ -345,14 +345,14 @@ func TestACDGetStringValue(t *testing.T) {
 	if err := acd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event}); err == nil || err.Error() != "NOT_FOUND:Usage" {
 		t.Error(err)
 	}
-	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
-	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.RemEvent(ev.ID)
-	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -368,7 +368,7 @@ func TestACDGetStringValue(t *testing.T) {
 		},
 	}
 	acd.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
-	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
@@ -382,7 +382,7 @@ func TestACDGetStringValue(t *testing.T) {
 	acd.RemEvent(ev5.ID)
 	acd.RemEvent(ev4.ID)
 	acd.RemEvent(ev5.ID)
-	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 }
@@ -683,11 +683,11 @@ func TestTCDGetStringValue(t *testing.T) {
 			"Usage":      10 * time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		}}
-	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -702,11 +702,11 @@ func TestTCDGetStringValue(t *testing.T) {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.RemEvent(ev2.ID)
-	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.RemEvent(ev.ID)
-	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -727,12 +727,12 @@ func TestTCDGetStringValue(t *testing.T) {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.RemEvent(ev4.ID)
-	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.RemEvent(ev5.ID)
 	tcd.RemEvent(ev3.ID)
-	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 }
@@ -1007,11 +1007,11 @@ func TestACCGetStringValue(t *testing.T) {
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       12.3}}
-	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	acc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
@@ -1025,7 +1025,7 @@ func TestACCGetStringValue(t *testing.T) {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	acc.RemEvent(ev3.ID)
-	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -1048,7 +1048,7 @@ func TestACCGetStringValue(t *testing.T) {
 	}
 	acc.RemEvent(ev4.ID)
 	acc.RemEvent(ev5.ID)
-	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 }
@@ -1277,11 +1277,11 @@ func TestTCCGetStringValue(t *testing.T) {
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       12.3}}
-	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	tcc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
@@ -1295,7 +1295,7 @@ func TestTCCGetStringValue(t *testing.T) {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	tcc.RemEvent(ev3.ID)
-	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -1318,7 +1318,7 @@ func TestTCCGetStringValue(t *testing.T) {
 	}
 	tcc.RemEvent(ev4.ID)
 	tcc.RemEvent(ev5.ID)
-	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 }
@@ -1552,26 +1552,26 @@ func TestPDDGetStringValue(t *testing.T) {
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:    5 * time.Second,
 		}}
-	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	pdd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	pdd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev3.ID)
-	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev.ID)
-	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -1587,7 +1587,7 @@ func TestPDDGetStringValue(t *testing.T) {
 		},
 	}
 	pdd.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
-	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
@@ -1601,7 +1601,7 @@ func TestPDDGetStringValue(t *testing.T) {
 	pdd.RemEvent(ev5.ID)
 	pdd.RemEvent(ev4.ID)
 	pdd.RemEvent(ev5.ID)
-	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 }
@@ -1893,12 +1893,12 @@ func TestDDCGetStringValue(t *testing.T) {
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Destination: "1002"}}
-	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 
 	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -1920,11 +1920,11 @@ func TestDDCGetStringValue(t *testing.T) {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 	ddc.RemEvent(ev2.ID)
-	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 	ddc.RemEvent(ev3.ID)
-	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 }
@@ -1991,12 +1991,12 @@ func TestDDCGetStringValue2(t *testing.T) {
 	statDistinct, _ := NewDDC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Destination: "1001"}}
-	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 
 	statDistinct.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -2006,7 +2006,7 @@ func TestDDCGetStringValue2(t *testing.T) {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	statDistinct.RemEvent(ev.ID)
-	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 }
@@ -2173,12 +2173,12 @@ func TestStatSumGetStringValue(t *testing.T) {
 			"Cost":            "20",
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Destination: "1002"}}
-	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 
 	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2202,11 +2202,11 @@ func TestStatSumGetStringValue(t *testing.T) {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 	statSum.RemEvent(ev2.ID)
-	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 	statSum.RemEvent(ev3.ID)
-	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 }
@@ -2451,12 +2451,12 @@ func TestStatAverageGetStringValue(t *testing.T) {
 			"Cost":            "20",
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Destination: "1002"}}
-	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 
 	statAvg.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2480,11 +2480,11 @@ func TestStatAverageGetStringValue(t *testing.T) {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 	statAvg.RemEvent(ev2.ID)
-	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 	statAvg.RemEvent(ev3.ID)
-	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 }
@@ -2717,12 +2717,12 @@ func TestStatDistinctGetStringValue(t *testing.T) {
 	statDistinct, _ := NewStatDistinct(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": "20"}}
-	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 
 	statDistinct.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2739,11 +2739,11 @@ func TestStatDistinctGetStringValue(t *testing.T) {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	statDistinct.RemEvent(ev2.ID)
-	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	statDistinct.RemEvent(ev3.ID)
-	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 }
@@ -2752,12 +2752,12 @@ func TestStatDistinctGetStringValue2(t *testing.T) {
 	statDistinct, _ := NewStatDistinct(2, "~*req.Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": "20"}}
-	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 
 	statDistinct.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -2767,7 +2767,7 @@ func TestStatDistinctGetStringValue2(t *testing.T) {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	statDistinct.RemEvent(ev.ID)
-	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NOT_AVAILABLE {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 }

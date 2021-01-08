@@ -977,7 +977,7 @@ func testDiamItCCRSMS(t *testing.T) {
 	diamClnt.ReceivedMessage(rplyTimeout)
 
 	var cdrs []*engine.CDR
-	args := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.SMS}}}
+	args := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MetaSMS}}}
 	if err := apierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -1056,7 +1056,7 @@ func testDiamItCCRMMS(t *testing.T) {
 	diamClnt.ReceivedMessage(rplyTimeout)
 
 	var cdrs []*engine.CDR
-	args := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MMS}}}
+	args := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MetaMMS}}}
 	if err := apierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -1069,7 +1069,7 @@ func testDiamItCCRMMS(t *testing.T) {
 func testDiamInitWithSessionDisconnect(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
 		Account:     "testDiamInitWithSessionDisconnect",
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Value:       float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "testDiamInitWithSessionDisconnect",
@@ -1470,7 +1470,7 @@ func testDiamItEmulateTerminate(t *testing.T) {
 		Tenant:      "cgrates.com",
 		Account:     "testDiamItEmulateTerminate",
 		Value:       float64(1) * float64(time.Hour),
-		BalanceType: utils.VOICE,
+		BalanceType: utils.MetaVoice,
 		Balance: map[string]interface{}{
 			utils.ID:         "testDiamItEmulateTerminate",
 			utils.Categories: "custom_charger",
@@ -1486,8 +1486,8 @@ func testDiamItEmulateTerminate(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.com", Account: "testDiamItEmulateTerminate"}
 	if err := apierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != float64(time.Hour) {
-		t.Errorf("Expected: %f, received: %f", float64(time.Hour), acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != float64(time.Hour) {
+		t.Errorf("Expected: %f, received: %f", float64(time.Hour), acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 
 	m := diam.NewRequest(diam.CreditControl, 4, nil)
@@ -1578,7 +1578,7 @@ func testDiamItEmulateTerminate(t *testing.T) {
 
 	if err := apierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != float64(time.Hour) {
-		t.Errorf("Expected: %f, received: %f", float64(time.Hour), acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != float64(time.Hour) {
+		t.Errorf("Expected: %f, received: %f", float64(time.Hour), acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 	}
 }
