@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ericlagergren/decimal"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -2329,7 +2331,9 @@ func testOnStorITAccountProfile(t *testing.T) {
 			FilterIDs: []string{"FLTR_RES_GR2"},
 			Weight:    10,
 			Type:      utils.VOICE,
-			Units:     utils.NewDecimal(3600, 0),
+			Units: &utils.Decimal{
+				new(decimal.Big).SetUint64(10),
+			},
 			Opts: map[string]interface{}{
 				"key1": "val1",
 			},
