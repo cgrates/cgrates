@@ -213,7 +213,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 						Months:    utils.Months{},
 						MonthDays: utils.MonthDays{},
 						WeekDays:  utils.WeekDays{},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Weight:    10,
@@ -227,7 +227,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 						Months:    utils.Months{},
 						MonthDays: utils.MonthDays{},
 						WeekDays:  utils.WeekDays{},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Weight:    10,
@@ -709,7 +709,7 @@ func testOnStorITActions(t *testing.T) {
 						Months:    utils.Months{time.January, time.February, time.March},
 						MonthDays: utils.MonthDays{1, 2, 3, 4},
 						WeekDays:  utils.WeekDays{1, 2, 3},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Blocker: utils.BoolPointer(false),
@@ -735,7 +735,7 @@ func testOnStorITActions(t *testing.T) {
 						Months:    utils.Months{time.January, time.February, time.March},
 						MonthDays: utils.MonthDays{1, 2, 3, 4},
 						WeekDays:  utils.WeekDays{1, 2, 3},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Blocker: utils.BoolPointer(false),
@@ -797,7 +797,7 @@ func testOnStorITActions(t *testing.T) {
 						Months:    utils.Months{time.January, time.February, time.March},
 						MonthDays: utils.MonthDays{1, 2, 3, 4},
 						WeekDays:  utils.WeekDays{1, 2, 3},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Blocker: utils.BoolPointer(false),
@@ -823,7 +823,7 @@ func testOnStorITActions(t *testing.T) {
 						Months:    utils.Months{time.January, time.February, time.March},
 						MonthDays: utils.MonthDays{1, 2, 3, 4},
 						WeekDays:  utils.WeekDays{1, 2, 3},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Blocker: utils.BoolPointer(false),
@@ -849,7 +849,7 @@ func testOnStorITActions(t *testing.T) {
 						Months:    utils.Months{time.January, time.February, time.March},
 						MonthDays: utils.MonthDays{1, 2, 3, 4},
 						WeekDays:  utils.WeekDays{1, 2, 3},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Blocker: utils.BoolPointer(false),
@@ -1034,7 +1034,7 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 						Months:    utils.Months{},
 						MonthDays: utils.MonthDays{},
 						WeekDays:  utils.WeekDays{},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Weight:    10,
@@ -1048,7 +1048,7 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 						Months:    utils.Months{},
 						MonthDays: utils.MonthDays{},
 						WeekDays:  utils.WeekDays{},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Weight:    10,
@@ -1912,7 +1912,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FN1",
-				Value: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
 		Weight: 20,
@@ -1992,7 +1992,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FN1",
-				Value: config.NewRSRParsersMustCompile("Val1", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
 			},
 		},
 		Weight: 20,
@@ -2014,7 +2014,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	attrProfile.Attributes = []*Attribute{
 		{
 			Path:  utils.MetaReq + utils.NestingSep + "FN1",
-			Value: config.NewRSRParsersMustCompile("123.123", utils.INFIELD_SEP),
+			Value: config.NewRSRParsersMustCompile("123.123", utils.InfieldSep),
 		},
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
@@ -2030,7 +2030,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	attrProfile.Attributes = []*Attribute{
 		{
 			Path:  utils.MetaReq + utils.NestingSep + "FN1",
-			Value: config.NewRSRParsersMustCompile("true", utils.INFIELD_SEP),
+			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep),
 		},
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
@@ -2250,7 +2250,7 @@ func testOnStorITActionProfile(t *testing.T) {
 		ID:        "TEST_ID1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Weight:    20,
-		Schedule:  utils.ASAP,
+		Schedule:  utils.MetaASAP,
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts: utils.NewStringSet([]string{"acc1", "acc2", "acc3"}),
 		},

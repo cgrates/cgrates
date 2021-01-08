@@ -55,7 +55,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 	suppliers := ``
 	attrProfiles := ``
 	chargerProfiles := ``
-	csvr, err := engine.NewTpReader(dbAcntActs.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, destinations, timings,
+	csvr, err := engine.NewTpReader(dbAcntActs.DataDB(), engine.NewStringCSVStorage(utils.CSVSep, destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups,
 		actions, actionPlans, actionTriggers, accountActions,
 		resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, "", utils.EmptyString, utils.EmptyString, utils.EmptyString), "", "", nil, nil, false)

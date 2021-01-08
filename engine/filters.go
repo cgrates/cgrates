@@ -151,10 +151,10 @@ func splitDynFltrValues(val string) (vals []string) {
 	startIdx := strings.IndexByte(val, utils.RSRDynStartChar)
 	endIdx := strings.IndexByte(val, utils.RSRDynEndChar)
 	if startIdx == -1 || endIdx == -1 {
-		return strings.Split(val, utils.INFIELD_SEP)
+		return strings.Split(val, utils.InfieldSep)
 	}
 
-	vals = strings.Split(val[:startIdx], utils.INFIELD_SEP)
+	vals = strings.Split(val[:startIdx], utils.InfieldSep)
 	vals[len(vals)-1] += val[startIdx : endIdx+1]
 	val = val[endIdx+1:]
 	if len(val) == 0 {

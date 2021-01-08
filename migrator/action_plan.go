@@ -44,7 +44,7 @@ func (at *v1ActionPlan) IsASAP() bool {
 	if at.Timing == nil {
 		return false
 	}
-	return at.Timing.Timing.StartTime == utils.ASAP
+	return at.Timing.Timing.StartTime == utils.MetaASAP
 }
 
 func (m *Migrator) migrateCurrentActionPlans() (err error) {

@@ -835,7 +835,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 
 func verifyFormat(tStr string) bool {
 	if tStr == utils.EmptyString ||
-		tStr == utils.ASAP {
+		tStr == utils.MetaASAP {
 		return true
 	}
 
@@ -1051,7 +1051,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 
 	// create the TpReader
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath),
+		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath),
 		"", apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
 		apierSv1.Config.DataDbCfg().DataDbType == utils.INTERNAL)
@@ -1118,7 +1118,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 
 	// create the TpReader
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath), "", apierSv1.Config.GeneralCfg().DefaultTimezone,
+		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath), "", apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
 		apierSv1.Config.DataDbCfg().DataDbType == utils.INTERNAL)
 	if err != nil {
@@ -1558,7 +1558,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.AttributeMdls{}.CSVHeader()); err != nil {
 				return err
@@ -1596,7 +1596,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.ChargerMdls{}.CSVHeader()); err != nil {
 				return err
@@ -1634,7 +1634,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.DispatcherProfileMdls{}.CSVHeader()); err != nil {
 				return err
@@ -1672,7 +1672,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.DispatcherHostMdls{}.CSVHeader()); err != nil {
 				return err
@@ -1708,7 +1708,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.FilterMdls{}.CSVHeader()); err != nil {
 				return err
@@ -1746,7 +1746,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.ResourceMdls{}.CSVHeader()); err != nil {
 				return err
@@ -1784,7 +1784,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.StatMdls{}.CSVHeader()); err != nil {
 				return err
@@ -1822,7 +1822,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.RouteMdls{}.CSVHeader()); err != nil {
 				return err
@@ -1860,7 +1860,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.ThresholdMdls{}.CSVHeader()); err != nil {
 				return err
@@ -1898,7 +1898,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.RateProfileMdls{}.CSVHeader()); err != nil {
 				return err
@@ -1936,7 +1936,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			defer f.Close()
 
 			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSV_SEP
+			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
 			if err := csvWriter.Write(engine.ActionProfileMdls{}.CSVHeader()); err != nil {
 				return err

@@ -129,13 +129,13 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		return fmt.Errorf("No connection with CDR Server")
 	}
 	defaultTemplate := map[string]config.RSRParsers{
-		utils.ToR:          config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.BalanceType, utils.INFIELD_SEP),
-		utils.OriginHost:   config.NewRSRParsersMustCompile("127.0.0.1", utils.INFIELD_SEP),
-		utils.RequestType:  config.NewRSRParsersMustCompile(utils.MetaNone, utils.INFIELD_SEP),
-		utils.Tenant:       config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Tenant, utils.INFIELD_SEP),
-		utils.AccountField: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.INFIELD_SEP),
-		utils.Subject:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.INFIELD_SEP),
-		utils.COST:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.INFIELD_SEP),
+		utils.ToR:          config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.BalanceType, utils.InfieldSep),
+		utils.OriginHost:   config.NewRSRParsersMustCompile("127.0.0.1", utils.InfieldSep),
+		utils.RequestType:  config.NewRSRParsersMustCompile(utils.MetaNone, utils.InfieldSep),
+		utils.Tenant:       config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.Tenant, utils.InfieldSep),
+		utils.AccountField: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.InfieldSep),
+		utils.Subject:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAcnt+utils.NestingSep+utils.AccountField, utils.InfieldSep),
+		utils.COST:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaAct+utils.NestingSep+utils.ActionValue, utils.InfieldSep),
 	}
 	template := make(map[string]string)
 	// overwrite default template
@@ -425,11 +425,11 @@ func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) er
 // Mails the balance hitting the threshold towards predefined list of addresses
 func mailAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	cgrCfg := config.CgrConfig()
-	params := strings.Split(a.ExtraParameters, string(utils.CSV_SEP))
+	params := strings.Split(a.ExtraParameters, string(utils.CSVSep))
 	if len(params) == 0 {
 		return errors.New("Unconfigured parameters for mail action")
 	}
-	toAddrs := strings.Split(params[0], string(utils.FALLBACK_SEP))
+	toAddrs := strings.Split(params[0], string(utils.FallbackSep))
 	toAddrStr := ""
 	for idx, addr := range toAddrs {
 		if idx != 0 {
@@ -482,7 +482,7 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 	}
 	if ddcDestID != "" {
 		destinations := utils.NewStringSet(nil)
-		for _, statID := range strings.Split(a.ExtraParameters, utils.INFIELD_SEP) {
+		for _, statID := range strings.Split(a.ExtraParameters, utils.InfieldSep) {
 			if statID == utils.EmptyString {
 				continue
 			}
@@ -900,7 +900,7 @@ func (cdrP *cdrLogProvider) RemoteHost() net.Addr {
 func removeSessionCosts(_ *Account, action *Action, _ Actions, _ interface{}) error { // FiltersID;inlineFilter
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	smcFilter := new(utils.SMCostFilter)
-	for _, fltrID := range strings.Split(action.ExtraParameters, utils.INFIELD_SEP) {
+	for _, fltrID := range strings.Split(action.ExtraParameters, utils.InfieldSep) {
 		if len(fltrID) == 0 {
 			continue
 		}
@@ -977,7 +977,7 @@ func resetAccountCDR(ub *Account, action *Action, acts Actions, _ interface{}) e
 	filter := &utils.CDRsFilter{
 		Accounts:  []string{account},
 		NotCosts:  []float64{-1},
-		OrderBy:   fmt.Sprintf("%s%sdesc", utils.OrderID, utils.INFIELD_SEP),
+		OrderBy:   fmt.Sprintf("%s%sdesc", utils.OrderID, utils.InfieldSep),
 		Paginator: utils.Paginator{Limit: utils.IntPointer(1)},
 	}
 	cdrs, _, err := cdrStorage.GetCDRs(filter, false)
@@ -1045,7 +1045,7 @@ func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err err
 		return // nothing to post
 	}
 	args := &utils.CGREventWithEeIDs{
-		EeIDs:            strings.Split(a.ExtraParameters, utils.INFIELD_SEP),
+		EeIDs:            strings.Split(a.ExtraParameters, utils.InfieldSep),
 		CGREventWithOpts: cgrEv,
 	}
 	var rply map[string]map[string]interface{}

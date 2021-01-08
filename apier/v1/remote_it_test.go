@@ -244,7 +244,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 					Path:      utils.MetaReq + utils.NestingSep + "Password",
 					FilterIDs: []string{},
 					Type:      utils.META_CONSTANT,
-					Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 				},
 			},
 			Weight: 20,

@@ -49,7 +49,7 @@ func processFieldPath(fldPath string, dP DataProvider) (newPath string, err erro
 		return
 	}
 	newPath = fldPath[:startIdx]
-	for _, path := range strings.Split(fldPath[startIdx+1:endIdx], INFIELD_SEP) { // proccess the found path
+	for _, path := range strings.Split(fldPath[startIdx+1:endIdx], InfieldSep) { // proccess the found path
 		var val string
 		if val, err = DPDynamicString(path, dP); err != nil {
 			newPath = EmptyString

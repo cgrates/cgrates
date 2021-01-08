@@ -479,7 +479,7 @@ func TestFsCdrSearchExtraFieldInSlice(t *testing.T) {
 }
 
 func TestFsCdrSearchReplaceInExtraFields(t *testing.T) {
-	fsCdrCfg.CdrsCfg().ExtraFields = config.NewRSRParsersMustCompile(`~*req.read_codec;~*req.sip_user_agent:s/([A-Za-z]*).+/$1/;~*req.write_codec`, utils.INFIELD_SEP)
+	fsCdrCfg.CdrsCfg().ExtraFields = config.NewRSRParsersMustCompile(`~*req.read_codec;~*req.sip_user_agent:s/([A-Za-z]*).+/$1/;~*req.write_codec`, utils.InfieldSep)
 	newReader := bytes.NewReader(body)
 	fsCdr, err := NewFSCdr(newReader, fsCdrCfg)
 	if err != nil {
@@ -529,7 +529,7 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
 }`)
 	var err error
 	fsCdrCfg, err = config.NewCGRConfigFromJSONStringWithDefaults(eFieldsCfg)
-	expCdrExtra := config.NewRSRParsersMustCompile(`~*req.effective_caller_id_number:s/(\d+)/+$1/`, utils.INFIELD_SEP)
+	expCdrExtra := config.NewRSRParsersMustCompile(`~*req.effective_caller_id_number:s/(\d+)/+$1/`, utils.InfieldSep)
 	if err != nil {
 		t.Error("Could not parse the config", err.Error())
 	} else if !reflect.DeepEqual(expCdrExtra[0], fsCdrCfg.CdrsCfg().ExtraFields[0]) { // Kinda deepEqual bug since without index does not match

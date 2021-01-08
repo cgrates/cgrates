@@ -322,7 +322,7 @@ func (at *ActionTiming) IsASAP() bool {
 	if at.Timing == nil {
 		return false
 	}
-	return at.Timing.Timing.StartTime == utils.ASAP
+	return at.Timing.Timing.StartTime == utils.MetaASAP
 }
 
 // Structure to store actions according to execution time and weight

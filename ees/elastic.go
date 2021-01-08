@@ -58,7 +58,7 @@ func (eEe *ElasticEe) init() (err error) {
 	// create the client
 	if eEe.eClnt, err = elasticsearch.NewClient(
 		elasticsearch.Config{
-			Addresses: strings.Split(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ExportPath, utils.INFIELD_SEP),
+			Addresses: strings.Split(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ExportPath, utils.InfieldSep),
 		}); err != nil {
 		return
 	}

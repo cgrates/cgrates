@@ -1373,7 +1373,7 @@ func (cfg *CGRConfig) loadConfigFromFile(jsonFilePath string, loadFuncs []func(j
 }
 
 func (cfg *CGRConfig) loadConfigFromHTTP(urlPaths string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
-	for _, urlPath := range strings.Split(urlPaths, utils.INFIELD_SEP) {
+	for _, urlPath := range strings.Split(urlPaths, utils.InfieldSep) {
 		if _, err = url.ParseRequestURI(urlPath); err != nil {
 			return
 		}

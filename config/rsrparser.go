@@ -41,11 +41,11 @@ func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, 
 	} else if count != 0 {
 		var splitedRule []string
 		for idx := strings.IndexByte(parsersRules, utils.RSRConstChar); idx != -1; idx = strings.IndexByte(parsersRules, utils.RSRConstChar) {
-			insideARulePrefix := !strings.HasSuffix(parsersRules[:idx], utils.INFIELD_SEP) // if doesn't have ; we need to concatenate it with last rule
+			insideARulePrefix := !strings.HasSuffix(parsersRules[:idx], utils.InfieldSep) // if doesn't have ; we need to concatenate it with last rule
 			if insideARulePrefix {
-				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx], utils.INFIELD_SEP)...)
+				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx], utils.InfieldSep)...)
 			} else {
-				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx-1], utils.INFIELD_SEP)...)
+				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx-1], utils.InfieldSep)...)
 			}
 			parsersRules = parsersRules[idx+1:]
 			idx = strings.IndexByte(parsersRules, utils.RSRConstChar)
@@ -59,9 +59,9 @@ func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, 
 			if len(parsersRules) == 0 {
 				continue
 			}
-			insideARuleSufix := !strings.HasPrefix(parsersRules, utils.INFIELD_SEP) // if doesn't have ; we need to concatenate it with last rule
+			insideARuleSufix := !strings.HasPrefix(parsersRules, utils.InfieldSep) // if doesn't have ; we need to concatenate it with last rule
 			if insideARuleSufix {
-				idx = strings.IndexByte(parsersRules, utils.FALLBACK_SEP) // ';'
+				idx = strings.IndexByte(parsersRules, utils.FallbackSep) // ';'
 				if idx == -1 {
 					idx = len(parsersRules)
 					splitedRule[len(splitedRule)-1] += parsersRules[:idx]
@@ -76,7 +76,7 @@ func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, 
 				break
 			}
 			if count == 0 { // no more ` so add the rest
-				splitedRule = append(splitedRule, strings.Split(parsersRules, utils.INFIELD_SEP)...)
+				splitedRule = append(splitedRule, strings.Split(parsersRules, utils.InfieldSep)...)
 				break
 			}
 		}

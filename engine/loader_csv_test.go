@@ -36,7 +36,7 @@ var csvr *TpReader
 
 func init() {
 	var err error
-	csvr, err = NewTpReader(dm.dataDB, NewStringCSVStorage(utils.CSV_SEP,
+	csvr, err = NewTpReader(dm.dataDB, NewStringCSVStorage(utils.CSVSep,
 		DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
 		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent,
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
@@ -816,7 +816,7 @@ func TestLoadActionTimings(t *testing.T) {
 						Months:    utils.Months{},
 						MonthDays: utils.MonthDays{},
 						WeekDays:  utils.WeekDays{},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Weight:    10,
@@ -831,7 +831,7 @@ func TestLoadActionTimings(t *testing.T) {
 						Months:    utils.Months{},
 						MonthDays: utils.MonthDays{},
 						WeekDays:  utils.WeekDays{},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Weight:    10,
@@ -1487,7 +1487,7 @@ func TestLoadActionProfiles(t *testing.T) {
 		ID:        "ONE_TIME_ACT",
 		FilterIDs: nil,
 		Weight:    10,
-		Schedule:  utils.ASAP,
+		Schedule:  utils.MetaASAP,
 		Targets: []*utils.TPActionTarget{
 			&utils.TPActionTarget{
 				TargetType: utils.MetaAccounts,

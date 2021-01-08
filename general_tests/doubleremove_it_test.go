@@ -283,7 +283,7 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 		ActionPlan: []*v1.AttrActionPlan{
 			{
 				ActionsId: "ACTS_2",
-				Time:      utils.ASAP,
+				Time:      utils.MetaASAP,
 				Weight:    20.0},
 		},
 	}

@@ -50,11 +50,11 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 	],
 }`
-	val, err := NewRSRParsers("~req.0", utils.INFIELD_SEP)
+	val, err := NewRSRParsers("~req.0", utils.InfieldSep)
 	if err != nil {
 		t.Error(err)
 	}
-	ten, err := NewRSRParsers("cgrates.org", utils.INFIELD_SEP)
+	ten, err := NewRSRParsers("cgrates.org", utils.InfieldSep)
 	if err != nil {
 		t.Error(err)
 	}
@@ -176,7 +176,7 @@ func TestLoaderSCfgloadFromJsonCfgCase5(t *testing.T) {
 							Tag:       "TenantID",
 							Path:      "Tenant",
 							Type:      utils.MetaVariable,
-							Value:     NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+							Value:     NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 							Mandatory: true,
 						},
 					},
@@ -190,7 +190,7 @@ func TestLoaderSCfgloadFromJsonCfgCase5(t *testing.T) {
 				Tag:       "TenantID",
 				Path:      "Tenant",
 				Type:      utils.MetaVariable,
-				Value:     NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Value:     NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true,
 			},
 		},
@@ -407,7 +407,7 @@ func TestLoaderSCfgsClone(t *testing.T) {
 	ban := LoaderSCfgs{{
 		Enabled:        true,
 		ID:             utils.MetaDefault,
-		Tenant:         NewRSRParsersMustCompile("cgrate.org", utils.INFIELD_SEP),
+		Tenant:         NewRSRParsersMustCompile("cgrate.org", utils.InfieldSep),
 		LockFileName:   ".cgr.lck",
 		CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		FieldSeparator: ",",
@@ -424,7 +424,7 @@ func TestLoaderSCfgsClone(t *testing.T) {
 					pathSlice: []string{"Tenant"},
 					pathItems: utils.PathItems{{Field: "Tenant"}},
 					Type:      utils.META_COMPOSED,
-					Value:     NewRSRParsersMustCompile("cgrate.org", utils.INFIELD_SEP),
+					Value:     NewRSRParsersMustCompile("cgrate.org", utils.InfieldSep),
 					Mandatory: true,
 					Layout:    time.RFC3339,
 				},

@@ -233,7 +233,7 @@ func testStorDBitCRUDTPActionProfiles(t *testing.T) {
 			ID:        "sub_id1",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Weight:    20,
-			Schedule:  utils.ASAP,
+			Schedule:  utils.MetaASAP,
 			Actions: []*utils.TPAPAction{
 				{
 					ID:        "TOPUP",
@@ -249,7 +249,7 @@ func testStorDBitCRUDTPActionProfiles(t *testing.T) {
 			ID:        "sub_id2",
 			FilterIDs: []string{"*string:~*req.Destination:10"},
 			Weight:    10,
-			Schedule:  utils.ASAP,
+			Schedule:  utils.MetaASAP,
 			Actions: []*utils.TPAPAction{
 				{
 					ID:        "TOPUP",

@@ -569,7 +569,7 @@ func (apierSv1 *APIerSv1) AddTriggeredAction(attr AttrAddActionTrigger, reply *s
 		at.Balance.Type = utils.StringPointer(attr.BalanceType)
 	}
 	if attr.BalanceDestinationIds != "" {
-		dstIDsMp := utils.StringMapFromSlice(strings.Split(attr.BalanceDestinationIds, utils.INFIELD_SEP))
+		dstIDsMp := utils.StringMapFromSlice(strings.Split(attr.BalanceDestinationIds, utils.InfieldSep))
 		at.Balance.DestinationIDs = &dstIDsMp
 	}
 	if attr.BalanceRatingSubject != "" {

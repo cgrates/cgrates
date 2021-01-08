@@ -1118,7 +1118,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 
 	if qryFltr.OrderBy != "" {
 		var orderVal string
-		separateVals := strings.Split(qryFltr.OrderBy, utils.INFIELD_SEP)
+		separateVals := strings.Split(qryFltr.OrderBy, utils.InfieldSep)
 		ordVal := 1
 		if len(separateVals) == 2 && separateVals[1] == "desc" {
 			ordVal = -1

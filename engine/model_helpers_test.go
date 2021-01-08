@@ -2870,7 +2870,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
-				Value: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
 		Weight: 20,
@@ -2913,7 +2913,7 @@ func TestAttributeProfileToAPI(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
-				Value: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
 		Weight: 20,
@@ -2957,11 +2957,11 @@ func TestAttributeProfileToAPI2(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
-				Value: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Test",
-				Value: config.NewRSRParsersMustCompile("~*req.Account", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("~*req.Account", utils.InfieldSep),
 			},
 		},
 		Weight: 20,

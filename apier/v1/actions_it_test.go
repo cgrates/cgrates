@@ -130,7 +130,7 @@ func testActionSGetActionProfile(t *testing.T) {
 		ID:        "ONE_TIME_ACT",
 		FilterIDs: []string{},
 		Weight:    10,
-		Schedule:  utils.ASAP,
+		Schedule:  utils.MetaASAP,
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts: utils.StringSet{"1001": {}, "1002": {}},
 		},

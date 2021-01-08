@@ -27,7 +27,7 @@ func TestMapKeysStringMapParse(t *testing.T) {
 	if sm := ParseStringMap(EmptyString); len(sm) != 0 {
 		t.Errorf("Expecting %+v, received %+v", 0, len(sm))
 	}
-	if sm := ParseStringMap(ZERO); len(sm) != 0 {
+	if sm := ParseStringMap(MetaZero); len(sm) != 0 {
 		t.Errorf("Expecting %+v, received %+v", 0, len(sm))
 	}
 	if sm := ParseStringMap("1;2;3;4"); len(sm) != 4 {
@@ -49,7 +49,7 @@ func TestMapKeysStringMapParse(t *testing.T) {
 		t.Error("Error detecting missing: ", sm)
 	}
 	eOut := make(StringMap)
-	if rcv := ParseStringMap(ZERO); !reflect.DeepEqual(eOut, rcv) {
+	if rcv := ParseStringMap(MetaZero); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 }

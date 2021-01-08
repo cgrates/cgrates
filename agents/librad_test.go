@@ -81,10 +81,10 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 	rplyFlds := []*config.FCTemplate{
 		{Tag: "ReplyCode", Path: utils.MetaRep + utils.NestingSep + MetaRadReplyCode,
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", utils.InfieldSep)},
 		{Tag: "Acct-Session-Time", Path: utils.MetaRep + utils.NestingSep + "Acct-Session-Time",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", utils.InfieldSep)},
 	}
 	for _, v := range rplyFlds {
 		v.ComputePath()

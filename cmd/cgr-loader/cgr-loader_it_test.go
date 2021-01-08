@@ -285,7 +285,7 @@ func testLoadItCheckAttributes(t *testing.T) {
 				FilterIDs: []string{},
 				Path:      utils.MetaReq + utils.NestingSep + "Password",
 				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 			},
 		},
 		Weight: 20.0,

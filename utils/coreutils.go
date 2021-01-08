@@ -400,11 +400,11 @@ func SplitConcatenatedKey(key string) []string {
 }
 
 func InfieldJoin(vals ...string) string {
-	return strings.Join(vals, INFIELD_SEP)
+	return strings.Join(vals, InfieldSep)
 }
 
 func InfieldSplit(val string) []string {
-	return strings.Split(val, INFIELD_SEP)
+	return strings.Split(val, InfieldSep)
 }
 
 //Splited Unzip in small functions to have better coverage
@@ -468,7 +468,7 @@ func Fib() func() int {
 
 // Utilities to provide pointers where we need to define ad-hoc
 func StringPointer(str string) *string {
-	if str == ZERO {
+	if str == MetaZero {
 		str = EmptyString
 		return &str
 	}

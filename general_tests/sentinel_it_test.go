@@ -146,7 +146,7 @@ func testRedisSentinelSetGetAttribute(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
 		Weight: 20,
@@ -179,7 +179,7 @@ func testRedisSentinelInsertion(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
 		Weight: 20,
@@ -272,7 +272,7 @@ func testRedisSentinelGetAttrAfterFailover(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
 		Weight: 20,

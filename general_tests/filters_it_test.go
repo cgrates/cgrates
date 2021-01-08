@@ -874,7 +874,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 					FilterIDs: []string{},
 					Path:      utils.MetaReq + utils.NestingSep + "CustomField",
 					Type:      utils.META_CONSTANT,
-					Value:     config.NewRSRParsersMustCompile("2007", utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile("2007", utils.InfieldSep),
 				},
 			},
 			Weight: 20.0,

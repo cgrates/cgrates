@@ -33,45 +33,45 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 		{Tag: "TenantID",
 			Path:      "Tenant",
 			Type:      utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 			Mandatory: true},
 		{Tag: "ProfileID",
 			Path:      "ID",
 			Type:      utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 			Mandatory: true},
 		{Tag: "Contexts",
 			Path:  "Contexts",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
 		{Tag: "FilterIDs",
 			Path:  "FilterIDs",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 		{Tag: "ActivationInterval",
 			Path:  "ActivationInterval",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
 		{Tag: "Path",
 			Path:  "Path",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
 		{Tag: "Initial",
 			Path:  "Initial",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 		{Tag: "Substitute",
 			Path:  "Substitute",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
 		{Tag: "Append",
 			Path:  "Append",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
 		{Tag: "Weight",
 			Path:  "Weight",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 	}
 
 	rows := [][]string{
@@ -80,7 +80,7 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 	}
 	lData := make(LoaderData)
 	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds,
-		config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP), nil); err != nil {
+		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
 		t.Error(err)
 	}
 	eLData := LoaderData{"Tenant": "cgrates.org",
@@ -99,7 +99,7 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 	}
 	lData = make(LoaderData)
 	if err := lData.UpdateFromCSV("Attributes.csv", rows[1], attrSFlds,
-		config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP), nil); err != nil {
+		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
 		t.Error(err)
 	}
 	eLData = LoaderData{"Tenant": "cgrates.org",
@@ -123,45 +123,45 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 		{Tag: "TenantID",
 			Path:      "Tenant",
 			Type:      utils.MetaVariable,
-			Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 			Mandatory: true},
 		{Tag: "ProfileID",
 			Path:      "ID",
 			Type:      utils.MetaVariable,
-			Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 			Mandatory: true},
 		{Tag: "Contexts",
 			Path:  "Contexts",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.2", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
 		{Tag: "FilterIDs",
 			Path:  "FilterIDs",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.3", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 		{Tag: "ActivationInterval",
 			Path:  "ActivationInterval",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.4", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
 		{Tag: "Path",
 			Path:  "Path",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.5", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
 		{Tag: "Initial",
 			Path:  "Initial",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.6", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 		{Tag: "Substitute",
 			Path:  "Substitute",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.7", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
 		{Tag: "Append",
 			Path:  "Append",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.8", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
 		{Tag: "Weight",
 			Path:  "Weight",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.9", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 	}
 
 	rows := [][]string{
@@ -170,7 +170,7 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 	}
 	lData := make(LoaderData)
 	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds,
-		config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP), nil); err != nil {
+		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
 		t.Error(err)
 	}
 	eLData := LoaderData{"Tenant": "cgrates.org",
@@ -189,7 +189,7 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 	}
 	lData = make(LoaderData)
 	if err := lData.UpdateFromCSV("Attributes.csv", rows[1], attrSFlds,
-		config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP), nil); err != nil {
+		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
 		t.Error(err)
 	}
 	eLData = LoaderData{"Tenant": "cgrates.org",
@@ -213,37 +213,37 @@ func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
 		{Tag: "TenantID",
 			Path:      "Tenant",
 			Type:      utils.MetaString,
-			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Mandatory: true},
 		{Tag: "ProfileID",
 			Path:      "ID",
 			Type:      utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
 			Mandatory: true},
 		{Tag: "Contexts",
 			Path:  "Contexts",
 			Type:  utils.MetaString,
-			Value: config.NewRSRParsersMustCompile("*any", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("*any", utils.InfieldSep)},
 		{Tag: "Path",
 			Path:  "Path",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).5", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).5", utils.InfieldSep)},
 		{Tag: "Initial",
 			Path:  "Initial",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
 		{Tag: "Substitute",
 			Path:  "Substitute",
 			Type:  utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.InfieldSep)},
 		{Tag: "Append",
 			Path:  "Append",
 			Type:  utils.MetaString,
-			Value: config.NewRSRParsersMustCompile("true", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 		{Tag: "Weight",
 			Path:  "Weight",
 			Type:  utils.MetaString,
-			Value: config.NewRSRParsersMustCompile("10", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
 	}
 
 	loadRun1 := map[string][]string{
@@ -253,7 +253,7 @@ func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
 	lData := make(LoaderData)
 	for fName, record := range loadRun1 {
 		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
-			config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP), nil); err != nil {
+			config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
 			t.Error(err)
 		}
 	}
@@ -298,7 +298,7 @@ func TestUpdateFromCsvParseValueError(t *testing.T) {
 	ldrData := LoaderData{
 		"File1.csv": []string{"Subject", "*any", "1001"},
 	}
-	tnt := config.NewRSRParsersMustCompile("asd{*duration_seconds}", utils.INFIELD_SEP)
+	tnt := config.NewRSRParsersMustCompile("asd{*duration_seconds}", utils.InfieldSep)
 	expected := "time: invalid duration \"asd\""
 	if err := ldrData.UpdateFromCSV("File1.csv", nil, nil, tnt, nil); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -310,13 +310,13 @@ func TestUpdateFromCsvWithFiltersError(t *testing.T) {
 		{Tag: "TenantID",
 			Path:      "Tenant",
 			Type:      utils.MetaString,
-			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Filters:   []string{"*string:~*req.Account:10"},
 			Mandatory: true},
 		{Tag: "ProfileID",
 			Path:      "ID",
 			Type:      utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
 			Filters:   []string{"*string:~*req.Account:10"},
 			Mandatory: true},
 	}
@@ -333,7 +333,7 @@ func TestUpdateFromCsvWithFiltersError(t *testing.T) {
 	for fName, record := range loadRunStr {
 		expected := "Ignoring record: [\"cgrates.org\" \"TEST_1\"] with error : strconv.Atoi: parsing \"Account\": invalid syntax"
 		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
-			config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP), filterS); err == nil || err.Error() != expected {
+			config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), filterS); err == nil || err.Error() != expected {
 			t.Errorf("Expected %+v, received %+v", expected, err)
 		}
 	}
@@ -344,13 +344,13 @@ func TestUpdateFromCsvWithFiltersContinue(t *testing.T) {
 		{Tag: "TenantID",
 			Path:      "Tenant",
 			Type:      utils.MetaString,
-			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Filters:   []string{`*string:~*req.2:10`},
 			Mandatory: true},
 		{Tag: "ProfileID",
 			Path:      "ID",
 			Type:      utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
 			Filters:   []string{`*string:~*req.2:10`},
 			Mandatory: true},
 	}
@@ -366,7 +366,7 @@ func TestUpdateFromCsvWithFiltersContinue(t *testing.T) {
 
 	for fName, record := range loadRunStr {
 		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
-			config.NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP), filterS); err != nil {
+			config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), filterS); err != nil {
 			t.Error(err)
 		}
 	}

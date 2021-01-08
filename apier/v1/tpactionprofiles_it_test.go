@@ -126,7 +126,7 @@ func testTPActPrfSetTPActPrf(t *testing.T) {
 		Tenant:   "cgrates.org",
 		ID:       "ONE_TIME_ACT",
 		Weight:   10,
-		Schedule: utils.ASAP,
+		Schedule: utils.MetaASAP,
 		Targets: []*utils.TPActionTarget{
 			&utils.TPActionTarget{
 				TargetType: utils.MetaAccounts,
@@ -200,7 +200,7 @@ func testTPActPrfGetTPActPrfAfterUpdate(t *testing.T) {
 		Tenant:   "cgrates.org",
 		ID:       "ONE_TIME_ACT",
 		Weight:   10,
-		Schedule: utils.ASAP,
+		Schedule: utils.MetaASAP,
 		Targets: []*utils.TPActionTarget{
 			&utils.TPActionTarget{
 				TargetType: utils.MetaAccounts,

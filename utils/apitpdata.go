@@ -206,11 +206,11 @@ type TPTimingWithOpts struct {
 func NewTiming(ID, years, mounths, mounthdays, weekdays, time string) (rt *TPTiming) {
 	rt = &TPTiming{}
 	rt.ID = ID
-	rt.Years.Parse(years, INFIELD_SEP)
-	rt.Months.Parse(mounths, INFIELD_SEP)
-	rt.MonthDays.Parse(mounthdays, INFIELD_SEP)
-	rt.WeekDays.Parse(weekdays, INFIELD_SEP)
-	times := strings.Split(time, INFIELD_SEP)
+	rt.Years.Parse(years, InfieldSep)
+	rt.Months.Parse(mounths, InfieldSep)
+	rt.MonthDays.Parse(mounthdays, InfieldSep)
+	rt.WeekDays.Parse(weekdays, InfieldSep)
+	times := strings.Split(time, InfieldSep)
 	rt.StartTime = times[0]
 	if len(times) > 1 {
 		rt.EndTime = times[1]
@@ -299,7 +299,7 @@ type TPRatingActivation struct {
 func FallbackSubjKeys(tenant, tor, fallbackSubjects string) []string {
 	var sslice sort.StringSlice
 	if len(fallbackSubjects) != 0 {
-		for _, fbs := range strings.Split(fallbackSubjects, string(FALLBACK_SEP)) {
+		for _, fbs := range strings.Split(fallbackSubjects, string(FallbackSep)) {
 			newKey := ConcatenatedKey(META_OUT, tenant, tor, fbs)
 			i := sslice.Search(newKey)
 			if i < len(sslice) && sslice[i] != newKey {
@@ -1606,15 +1606,15 @@ func (costIncr *TPBalanceCostIncrement) AsString() (s string) {
 	if len(costIncr.FilterIDs) != 0 {
 		s = s + strings.Join(costIncr.FilterIDs, ANDSep)
 	}
-	s = s + INFIELD_SEP
+	s = s + InfieldSep
 	if costIncr.Increment != nil {
 		s = s + strconv.FormatFloat(*costIncr.Increment, 'f', -1, 64)
 	}
-	s = s + INFIELD_SEP
+	s = s + InfieldSep
 	if costIncr.FixedFee != nil {
 		s = s + strconv.FormatFloat(*costIncr.FixedFee, 'f', -1, 64)
 	}
-	s = s + INFIELD_SEP
+	s = s + InfieldSep
 	if costIncr.RecurrentFee != nil {
 		s = s + strconv.FormatFloat(*costIncr.RecurrentFee, 'f', -1, 64)
 	}
@@ -1640,7 +1640,7 @@ func (unitFactor *TPBalanceUnitFactor) AsString() (s string) {
 	if len(unitFactor.FilterIDs) != 0 {
 		s = s + strings.Join(unitFactor.FilterIDs, ANDSep)
 	}
-	s = s + INFIELD_SEP + strconv.FormatFloat(unitFactor.Factor, 'f', -1, 64)
+	s = s + InfieldSep + strconv.FormatFloat(unitFactor.Factor, 'f', -1, 64)
 	return
 }
 

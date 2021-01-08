@@ -78,7 +78,7 @@ func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) 
 		fieldInfo = fieldInfo[1:]
 	}
 	var err error
-	if rp, err = config.NewRSRParsers(fieldInfo, utils.INFIELD_SEP); err != nil {
+	if rp, err = config.NewRSRParsers(fieldInfo, utils.InfieldSep); err != nil {
 		utils.Logger.Err(fmt.Sprintf("On Migrating rule: <%s>, error: %s", fieldInfo, err.Error()))
 		return attr
 	}
@@ -158,7 +158,7 @@ func (m *Migrator) derivedChargers2Chargers(dck *v1DerivedChargersWithKey) (err 
 	if len(dck.Value.DestinationIDs) != 0 {
 		destination = fmt.Sprintf("%s:~%s:", utils.MetaDestinations, utils.MetaReq+utils.NestingSep+utils.Destination)
 		keys := dcGetMapKeys(dck.Value.DestinationIDs)
-		destination += strings.Join(keys, utils.INFIELD_SEP)
+		destination += strings.Join(keys, utils.InfieldSep)
 	}
 	filter := make([]string, 0)
 

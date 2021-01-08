@@ -64,14 +64,14 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 			RequestProcessors: []*RequestProcessor{{
 				ID:            "OutboundAUTHDryRun",
 				Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-				Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+				Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
 				RequestFields: []*FCTemplate{},
 				ReplyFields: []*FCTemplate{{
 					Tag:       "Allow",
 					Path:      "response.Allow",
 					Type:      "*constant",
-					Value:     NewRSRParsersMustCompile("1", utils.INFIELD_SEP),
+					Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
 					Mandatory: true,
 					Layout:    time.RFC3339,
 				}},
@@ -168,14 +168,14 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 				{
 					ID:            "OutboundAUTHDryRun",
 					Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-					Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+					Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 					Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
 					RequestFields: []*FCTemplate{},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "Allow",
 						Path:      "response.Allow",
 						Type:      utils.META_CONSTANT,
-						Value:     NewRSRParsersMustCompile("1", utils.INFIELD_SEP),
+						Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
 						Mandatory: true,
 						Layout:    time.RFC3339,
 					}},
@@ -183,13 +183,13 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 				{
 					ID:      "mtcall_cdr",
 					Filters: []string{"*string:*req.request_type:MTCALL_CDR"},
-					Tenant:  NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+					Tenant:  NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 					Flags:   utils.FlagsWithParams{utils.MetaCDRs: {}},
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
 						Path:      "RequestType",
 						Type:      utils.META_CONSTANT,
-						Value:     NewRSRParsersMustCompile("*pseudoprepaid", utils.INFIELD_SEP),
+						Value:     NewRSRParsersMustCompile("*pseudoprepaid", utils.InfieldSep),
 						Mandatory: true,
 						Layout:    time.RFC3339,
 					}},
@@ -197,7 +197,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 						Tag:       "CDR_ID",
 						Path:      "CDR_RESPONSE.CDR_ID",
 						Type:      utils.META_COMPOSED,
-						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", utils.INFIELD_SEP),
+						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", utils.InfieldSep),
 						Mandatory: true,
 						Layout:    time.RFC3339,
 					}},
@@ -210,7 +210,7 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 			ReplyPayload:   utils.MetaXml,
 			RequestProcessors: []*RequestProcessor{{
 				ID:            "cdr_from_xml",
-				Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+				Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 				Flags:         utils.FlagsWithParams{utils.MetaCDRs: {}},
 				RequestFields: []*FCTemplate{},
 				ReplyFields:   []*FCTemplate{},
@@ -254,14 +254,14 @@ func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 		RequestProcessors: []*RequestProcessor{{
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Flags:         utils.FlagsWithParams{"*dryrun": {}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields:   []*FCTemplate{},
 		}},
 	}
 	var httpcfg HTTPAgentCfg
-	if err = httpcfg.loadFromJSONCfg(jsnhttpCfg, utils.INFIELD_SEP); err != nil {
+	if err = httpcfg.loadFromJSONCfg(jsnhttpCfg, utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
 		t.Errorf("Expected: %+v \n, received: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
@@ -404,14 +404,14 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 		RequestProcessors: []*RequestProcessor{{
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Flags:         utils.FlagsWithParams{"*dryrun": {}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
 				Path:      "response.Allow",
 				Type:      "*constant",
-				Value:     NewRSRParsersMustCompile("1", utils.INFIELD_SEP),
+				Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
 				Mandatory: true,
 			}},
 		}},
@@ -454,28 +454,28 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 		RequestProcessors: []*RequestProcessor{{
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Flags:         utils.FlagsWithParams{"*dryrun": {}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
 				Path:      "response.Allow",
 				Type:      "*constant",
-				Value:     NewRSRParsersMustCompile("1", utils.INFIELD_SEP),
+				Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
 				Mandatory: false,
 				Layout:    time.RFC3339,
 			}},
 		}, {
 			ID:            "OutboundAUTHDryRun1",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+			Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Flags:         utils.FlagsWithParams{"*dryrun": {}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
 				Path:      "response.Allow",
 				Type:      "*constant",
-				Value:     NewRSRParsersMustCompile("1", utils.INFIELD_SEP),
+				Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
 				Mandatory: true,
 				Layout:    time.RFC3339,
 			}},
@@ -483,7 +483,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 	}
 	expected.RequestProcessors[0].ReplyFields[0].ComputePath()
 	expected.RequestProcessors[1].ReplyFields[0].ComputePath()
-	if err = initial.appendHTTPAgntProcCfgs(proceses, utils.INFIELD_SEP); err != nil {
+	if err = initial.appendHTTPAgntProcCfgs(proceses, utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, initial) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(initial))
@@ -568,14 +568,14 @@ func TestHTTPAgentCfgsClone(t *testing.T) {
 			RequestProcessors: []*RequestProcessor{{
 				ID:            "OutboundAUTHDryRun",
 				Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
-				Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+				Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
 				RequestFields: []*FCTemplate{},
 				ReplyFields: []*FCTemplate{{
 					Tag:       "Allow",
 					Path:      "response.Allow",
 					Type:      "*constant",
-					Value:     NewRSRParsersMustCompile("1", utils.INFIELD_SEP),
+					Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
 					Mandatory: true,
 					Layout:    time.RFC3339,
 				}},

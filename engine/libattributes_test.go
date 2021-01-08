@@ -59,7 +59,7 @@ func TestConvertExternalToProfile(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
-				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
 		Weight: 20,
@@ -131,7 +131,7 @@ func TestNewAttributeFromInline(t *testing.T) {
 		Attributes: []*Attribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "Field2",
 			Type:  utils.MetaSum,
-			Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", utils.INFIELD_SEP),
+			Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", utils.InfieldSep),
 		}},
 	}
 	attr, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID)
@@ -151,12 +151,12 @@ func TestNewAttributeFromInlineWithMultipleRuns(t *testing.T) {
 		Attributes: []*Attribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "RequestType",
 			Type:  utils.META_CONSTANT,
-			Value: config.NewRSRParsersMustCompile("*rated", utils.INFIELD_SEP),
+			Value: config.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
 		},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Category",
 				Type:  utils.META_CONSTANT,
-				Value: config.NewRSRParsersMustCompile("call", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("call", utils.InfieldSep),
 			},
 		},
 	}

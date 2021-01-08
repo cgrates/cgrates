@@ -41,7 +41,7 @@ func (ld LoaderData) GetRateIDs() ([]string, error) {
 		return nil, fmt.Errorf("cannot find RateIDs in <%+v>", ld)
 	}
 	if rateIDs := ld[utils.RateIDs].(string); len(rateIDs) != 0 {
-		return strings.Split(rateIDs, utils.INFIELD_SEP), nil
+		return strings.Split(rateIDs, utils.InfieldSep), nil
 	}
 	return []string{}, nil
 }

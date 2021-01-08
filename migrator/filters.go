@@ -896,7 +896,7 @@ func migrateInlineFilterV4(v4fltIDs []string) (fltrIDs []string, err error) {
 		} else {
 			fltrIDs = append(fltrIDs, v4flt)
 		}
-		for _, val := range strings.Split(v4flt, utils.INFIELD_SEP) {
+		for _, val := range strings.Split(v4flt, utils.InfieldSep) {
 			el, vals, err := migrateRSRFilterV4(val)
 			if err != nil {
 				return nil, err
@@ -906,7 +906,7 @@ func migrateInlineFilterV4(v4fltIDs []string) (fltrIDs []string, err error) {
 			}
 
 			fltrIDs = append(fltrIDs, fltr+el+utils.InInFieldSep+
-				strings.Join(vals, utils.INFIELD_SEP))
+				strings.Join(vals, utils.InfieldSep))
 		}
 	}
 	return
