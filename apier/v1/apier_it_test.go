@@ -93,6 +93,7 @@ var (
 		testAPIerSv1GetRatingProfileWithoutTenant,
 		testAPIerSv1GetRatingProfileIDsWithoutTenant,
 		testApierReloadCache,
+		testApierGetActionTrigger,
 		testApierGetDestination,
 		testApierGetRatingPlan,
 		testApierRemoveRatingPlan,
@@ -1010,6 +1011,54 @@ func testAPIerSv1GetRatingProfileWithoutTenant(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v \n, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
+	}
+}
+
+func testApierGetActionTrigger(t *testing.T) {
+	//nothing to get from database
+	var atrs *engine.ActionTriggers
+	if err := rater.Call(utils.APIerSv1GetActionTriggers,
+		&AttrGetActionTriggers{GroupIDs: []string{"TEST_ID1"}}, &atrs); err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	//set an ActionTrigger in database
+	var reply string
+	if err := rater.Call(utils.APIerSv1SetActionTrigger,
+		AttrSetActionTrigger{
+			GroupID:  "TEST_ID1",
+			UniqueID: "TEST_ID2",
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//get from database and compare
+	newActTrg := &engine.ActionTriggers{
+		{
+			ID:       "TEST_ID1",
+			UniqueID: "TEST_ID2",
+			Balance:  &engine.BalanceFilter{},
+		},
+	}
+	if err := rater.Call(utils.APIerSv1GetActionTriggers,
+		&AttrGetActionTriggers{GroupIDs: []string{"TEST_ID1"}}, &atrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(newActTrg, atrs) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(newActTrg), utils.ToJSON(atrs))
+	}
+
+	//remove the ActionTrigger from dataBase
+	if err := rater.Call(utils.APIerSv1RemoveActionTrigger,
+		&AttrRemoveActionTrigger{GroupID: "TEST_ID1"}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected result")
+	}
+
+	//nothing to get from dataBase
+	if err := rater.Call(utils.APIerSv1GetActionTriggers,
+		&AttrGetActionTriggers{GroupIDs: []string{"TEST_ID1"}}, &atrs); err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 
