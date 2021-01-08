@@ -1423,7 +1423,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 	}
 
 	if filter.OrderBy != utils.EmptyString {
-		separateVals := strings.Split(filter.OrderBy, utils.INFIELD_SEP)
+		separateVals := strings.Split(filter.OrderBy, utils.InfieldSep)
 		ascendent := !(len(separateVals) == 2 && separateVals[1] == "desc")
 		switch separateVals[0] {
 		case utils.OrderID:

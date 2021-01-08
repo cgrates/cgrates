@@ -101,17 +101,17 @@ func TestYearsParse(t *testing.T) {
 func TestYearsSerialize(t *testing.T) {
 	ys := &Years{}
 	eOut := MetaAny
-	if yString := ys.Serialize(INFIELD_SEP); eOut != yString {
+	if yString := ys.Serialize(InfieldSep); eOut != yString {
 		t.Errorf("Expected: %s, received: %s", eOut, yString)
 	}
 	ys = &Years{2012}
 	eOut = "2012"
-	if yString := ys.Serialize(INFIELD_SEP); eOut != yString {
+	if yString := ys.Serialize(InfieldSep); eOut != yString {
 		t.Errorf("Expected: %s, received: %s", eOut, yString)
 	}
 	ys = &Years{2013, 2014, 2015}
 	eOut = "2013;2014;2015"
-	if yString := ys.Serialize(INFIELD_SEP); eOut != yString {
+	if yString := ys.Serialize(InfieldSep); eOut != yString {
 		t.Errorf("Expected: %s, received: %s", eOut, yString)
 	}
 }
@@ -194,15 +194,15 @@ func TestMonthsParse(t *testing.T) {
 
 func TestMonthsSerialize(t *testing.T) {
 	mths := &Months{}
-	if rcv := mths.Serialize(INFIELD_SEP); !reflect.DeepEqual(MetaAny, rcv) {
+	if rcv := mths.Serialize(InfieldSep); !reflect.DeepEqual(MetaAny, rcv) {
 		t.Errorf("Expected: %s, received: %s", MetaAny, rcv)
 	}
 	mths = &Months{time.January}
-	if rcv := mths.Serialize(INFIELD_SEP); !reflect.DeepEqual("1", rcv) {
+	if rcv := mths.Serialize(InfieldSep); !reflect.DeepEqual("1", rcv) {
 		t.Errorf("Expected: '1', received: %s", rcv)
 	}
 	mths = &Months{time.January, time.December}
-	if rcv := mths.Serialize(INFIELD_SEP); !reflect.DeepEqual("1;12", rcv) {
+	if rcv := mths.Serialize(InfieldSep); !reflect.DeepEqual("1;12", rcv) {
 		t.Errorf("Expected: '1;12', received: %s", rcv)
 	}
 }
@@ -299,17 +299,17 @@ func TestMonthDaysParse(t *testing.T) {
 
 func TestMonthDaysSerialize(t *testing.T) {
 	md := &MonthDays{}
-	if rcv := md.Serialize(INFIELD_SEP); !reflect.DeepEqual(MetaAny, rcv) {
+	if rcv := md.Serialize(InfieldSep); !reflect.DeepEqual(MetaAny, rcv) {
 		t.Errorf("Expected: %s, received: %s", MetaAny, rcv)
 	}
 
 	md = &MonthDays{1}
-	if rcv := md.Serialize(INFIELD_SEP); !reflect.DeepEqual("1", rcv) {
+	if rcv := md.Serialize(InfieldSep); !reflect.DeepEqual("1", rcv) {
 		t.Errorf("Expected: '1', received: %s", rcv)
 	}
 
 	md = &MonthDays{1, 2, 3, 4, 5}
-	if rcv := md.Serialize(INFIELD_SEP); !reflect.DeepEqual("1;2;3;4;5", rcv) {
+	if rcv := md.Serialize(InfieldSep); !reflect.DeepEqual("1;2;3;4;5", rcv) {
 		t.Errorf("Expected: '1;2;3;4;5', received: %s", rcv)
 	}
 }
@@ -393,17 +393,17 @@ func TestWeekDaysParse(t *testing.T) {
 
 func TestWeekDaysSerialize(t *testing.T) {
 	wd := &WeekDays{}
-	if rcv := wd.Serialize(INFIELD_SEP); !reflect.DeepEqual(MetaAny, rcv) {
+	if rcv := wd.Serialize(InfieldSep); !reflect.DeepEqual(MetaAny, rcv) {
 		t.Errorf("Expected: %s, received: %s", MetaAny, rcv)
 	}
 
 	wd = &WeekDays{time.Monday}
-	if rcv := wd.Serialize(INFIELD_SEP); !reflect.DeepEqual("1", rcv) {
+	if rcv := wd.Serialize(InfieldSep); !reflect.DeepEqual("1", rcv) {
 		t.Errorf("Expected: '1', received: %s", rcv)
 	}
 
 	wd = &WeekDays{time.Monday, time.Saturday, time.Sunday}
-	if rcv := wd.Serialize(INFIELD_SEP); !reflect.DeepEqual("1;6;0", rcv) {
+	if rcv := wd.Serialize(InfieldSep); !reflect.DeepEqual("1;6;0", rcv) {
 		t.Errorf("Expected: '1;6;0', received: %s", rcv)
 	}
 }

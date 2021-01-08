@@ -58,7 +58,7 @@ type ArgStartServiceWithOpts struct {
 }
 
 func ParseStringMap(s string) utils.StringMap {
-	if s == utils.ZERO {
+	if s == utils.MetaZero {
 		return make(utils.StringMap)
 	}
 	return utils.StringMapFromSlice(strings.Split(s, utils.ANDSep))

@@ -435,7 +435,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 	cfg.templates = FcTemplates{
 		utils.MetaEEs: {
 			{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-				Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+				Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 		},
 	}
 	cfg.diameterAgentCfg = &DiameterAgentCfg{
@@ -446,11 +446,11 @@ func TestConfigSanityDAgent(t *testing.T) {
 				Timezone: "Local",
 				RequestFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				ReplyFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},
@@ -501,11 +501,11 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 				Timezone: "Local",
 				RequestFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				ReplyFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},
@@ -549,11 +549,11 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 				Timezone: "Local",
 				RequestFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				ReplyFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},
@@ -599,11 +599,11 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 					Timezone: "Local",
 					RequestFields: []*FCTemplate{
 						{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-							Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+							Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 					},
 					ReplyFields: []*FCTemplate{
 						{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-							Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+							Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 					},
 				},
 			},
@@ -656,11 +656,11 @@ func TestConfigSanitySipAgent(t *testing.T) {
 				Timezone: "Local",
 				RequestFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				ReplyFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},
@@ -943,11 +943,11 @@ func TestConfigSanityEventReader(t *testing.T) {
 				Type: utils.MetaKafkajsonMap,
 				CacheDumpFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				Fields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},
@@ -973,7 +973,7 @@ func TestConfigSanityEventExporter(t *testing.T) {
 			{
 				Fields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.INFIELD_SEP), Mandatory: true},
+						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},

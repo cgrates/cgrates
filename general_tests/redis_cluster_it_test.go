@@ -195,7 +195,7 @@ func testClsrSetGetAttribute(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
 		Weight: 20,
@@ -235,7 +235,7 @@ func testClsrSetGetAttribute2(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
 		Weight: 20,
@@ -280,7 +280,7 @@ func testClsrGetAttribute(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-				Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
 		Weight: 20,

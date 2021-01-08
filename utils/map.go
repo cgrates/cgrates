@@ -41,10 +41,10 @@ func NewStringMap(s ...string) StringMap {
 }
 
 func ParseStringMap(s string) StringMap {
-	if s == ZERO {
+	if s == MetaZero {
 		return make(StringMap)
 	}
-	return StringMapFromSlice(strings.Split(s, INFIELD_SEP))
+	return StringMapFromSlice(strings.Split(s, InfieldSep))
 }
 
 func (sm StringMap) Equal(om StringMap) bool {
@@ -118,7 +118,7 @@ func (sm StringMap) Clone() StringMap {
 }
 
 func (sm StringMap) String() string {
-	return strings.Join(sm.Slice(), INFIELD_SEP)
+	return strings.Join(sm.Slice(), InfieldSep)
 }
 
 func (sm StringMap) GetOne() string {
@@ -193,7 +193,7 @@ func (fWp FlagParams) SliceFlags() (sls []string) {
 			sls = append(sls, key)
 			continue
 		}
-		sls = append(sls, ConcatenatedKey(key, strings.Join(sub, INFIELD_SEP)))
+		sls = append(sls, ConcatenatedKey(key, strings.Join(sub, InfieldSep)))
 	}
 	return
 }
@@ -246,7 +246,7 @@ func (fWp FlagsWithParams) SliceFlags() (sls []string) {
 				sls = append(sls, ConcatenatedKey(key, opt))
 				continue
 			}
-			sls = append(sls, ConcatenatedKey(key, opt, strings.Join(values, INFIELD_SEP)))
+			sls = append(sls, ConcatenatedKey(key, opt, strings.Join(values, InfieldSep)))
 		}
 	}
 	return

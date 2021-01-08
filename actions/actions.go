@@ -123,7 +123,7 @@ func (aS *ActionS) scheduleActions(cgrEvs []*utils.CGREventWithOpts, aPrflIDs []
 			continue
 		}
 		for _, sActs := range schedActSet {
-			if sActs.schedule == utils.ASAP {
+			if sActs.schedule == utils.MetaASAP {
 				go aS.asapExecuteActions(sActs)
 				continue
 			}

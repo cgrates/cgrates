@@ -33,10 +33,10 @@ func TestUpdateSIPMsgFromNavMap(t *testing.T) {
 	rplyFlds := []*config.FCTemplate{
 		{Tag: "Request", Path: utils.MetaRep + utils.NestingSep + "Request",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.Request", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.Request", utils.InfieldSep)},
 		{Tag: "Contact", Path: utils.MetaRep + utils.NestingSep + "Contact",
 			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.Account", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.Account", utils.InfieldSep)},
 	}
 	for _, v := range rplyFlds {
 		v.ComputePath()

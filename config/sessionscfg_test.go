@@ -790,7 +790,7 @@ func TestFsAgentCfgClone(t *testing.T) {
 		SubscribePark:       true,
 		EmptyBalanceAnnFile: "file",
 		EmptyBalanceContext: "context",
-		ExtraFields:         NewRSRParsersMustCompile("tenant", utils.INFIELD_SEP),
+		ExtraFields:         NewRSRParsersMustCompile("tenant", utils.InfieldSep),
 		LowBalanceAnnFile:   "file2",
 		MaxWaitConnection:   time.Second,
 		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},

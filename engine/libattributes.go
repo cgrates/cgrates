@@ -115,7 +115,7 @@ func (ext *ExternalAttributeProfile) AsAttributeProfile() (attr *AttributeProfil
 			return nil, utils.NewErrMandatoryIeMissing("Value")
 		}
 		attr.Attributes[i] = new(Attribute)
-		if attr.Attributes[i].Value, err = config.NewRSRParsers(extAttr.Value, utils.INFIELD_SEP); err != nil {
+		if attr.Attributes[i].Value, err = config.NewRSRParsers(extAttr.Value, utils.InfieldSep); err != nil {
 			return nil, err
 		}
 		attr.Attributes[i].Type = extAttr.Type
@@ -139,7 +139,7 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 		ID:       inlnRule,
 		Contexts: []string{utils.MetaAny},
 	}
-	for _, rule := range strings.Split(inlnRule, utils.INFIELD_SEP) {
+	for _, rule := range strings.Split(inlnRule, utils.InfieldSep) {
 		ruleSplt := strings.SplitN(rule, utils.InInFieldSep, 3)
 		if len(ruleSplt) < 3 {
 			return nil, fmt.Errorf("inline parse error for string: <%s>", rule)

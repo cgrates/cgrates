@@ -67,7 +67,7 @@ func getFlagIDs(flag string) []string {
 	if len(flagWithIDs) <= 1 {
 		return nil
 	}
-	return strings.Split(flagWithIDs[1], utils.INFIELD_SEP)
+	return strings.Split(flagWithIDs[1], utils.InfieldSep)
 }
 
 // ProcessedStirIdentity the structure that keeps all the header information
@@ -82,7 +82,7 @@ type ProcessedStirIdentity struct {
 // NewProcessedIdentity creates a proccessed header
 func NewProcessedIdentity(identity string) (pi *ProcessedStirIdentity, err error) {
 	pi = new(ProcessedStirIdentity)
-	hdrtoken := strings.Split(utils.RemoveWhiteSpaces(identity), utils.INFIELD_SEP)
+	hdrtoken := strings.Split(utils.RemoveWhiteSpaces(identity), utils.InfieldSep)
 
 	if len(hdrtoken) == 1 {
 		err = errors.New("missing parts of the message header")

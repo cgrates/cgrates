@@ -64,7 +64,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	attrProfiles := ``
 	chargerProfiles := ``
 	csvr, err := engine.NewTpReader(dataDB.DataDB(),
-		engine.NewStringCSVStorage(utils.CSV_SEP, destinations, timings, rates,
+		engine.NewStringCSVStorage(utils.CSVSep, destinations, timings, rates,
 			destinationRates, ratingPlans, ratingProfiles,
 			sharedGroups, actions, actionPlans, actionTriggers, accountActions,
 			resLimits, stats, thresholds, filters, suppliers,

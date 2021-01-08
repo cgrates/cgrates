@@ -258,7 +258,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 	var actionProfilesPaths []string
 	var accountProfilesPaths []string
 
-	for _, baseURL := range strings.Split(dataPath, utils.INFIELD_SEP) {
+	for _, baseURL := range strings.Split(dataPath, utils.InfieldSep) {
 		if !strings.HasSuffix(baseURL, utils.CSVSuffix) {
 			destinationsPaths = append(destinationsPaths, joinURL(baseURL, utils.DestinationsCsv))
 			timingsPaths = append(timingsPaths, joinURL(baseURL, utils.TimingsCsv))
@@ -741,7 +741,7 @@ func (c *csvFile) Open(fn string, sep rune, nrFields int) (err error) {
 	}
 	c.csvReader = csv.NewReader(c.fp)
 	c.csvReader.Comma = sep
-	c.csvReader.Comment = utils.COMMENT_CHAR
+	c.csvReader.Comment = utils.CommentChar
 	c.csvReader.FieldsPerRecord = nrFields
 	c.csvReader.TrailingComma = true
 	return
@@ -768,7 +768,7 @@ type csvString struct {
 func (c *csvString) Open(data string, sep rune, nrFields int) (err error) {
 	c.csvReader = csv.NewReader(strings.NewReader(data))
 	c.csvReader.Comma = sep
-	c.csvReader.Comment = utils.COMMENT_CHAR
+	c.csvReader.Comment = utils.CommentChar
 	c.csvReader.FieldsPerRecord = nrFields
 	c.csvReader.TrailingComma = true
 	return
@@ -969,7 +969,7 @@ func (c *csvURL) Open(fn string, sep rune, nrFields int) (err error) {
 
 	c.csvReader = csv.NewReader(c.page)
 	c.csvReader.Comma = sep
-	c.csvReader.Comment = utils.COMMENT_CHAR
+	c.csvReader.Comment = utils.CommentChar
 	c.csvReader.FieldsPerRecord = nrFields
 	c.csvReader.TrailingComma = true
 	return

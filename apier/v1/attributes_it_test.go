@@ -194,13 +194,13 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
-				Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				Type:      utils.META_CONSTANT,
 				FilterIDs: []string{},
 			},
 			{
 				Path:      utils.MetaReq + utils.NestingSep + utils.Subject,
-				Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				Type:      utils.META_CONSTANT,
 				FilterIDs: []string{},
 			},
@@ -261,7 +261,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
-					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				},
 			},
 			Weight: 10.0,
@@ -315,7 +315,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
-					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				},
 			},
 			Weight: 10.0,
@@ -480,11 +480,11 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
 					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
-					Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value: config.NewRSRParsersMustCompile(utils.MetaRemove, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile(utils.MetaRemove, utils.InfieldSep),
 				},
 			},
 			Weight: 20,
@@ -554,11 +554,11 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
 					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
-					Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value: config.NewRSRParsersMustCompile(utils.MetaRemove, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile(utils.MetaRemove, utils.InfieldSep),
 				},
 			},
 			Weight: 20,
@@ -639,12 +639,12 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
 					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
-					Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				},
 				{
 					FilterIDs: []string{"*string:~*req.Subject:1008"},
 					Path:      utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value:     config.NewRSRParsersMustCompile(utils.MetaRemove, utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile(utils.MetaRemove, utils.InfieldSep),
 				},
 			},
 			Weight: 20,
@@ -694,7 +694,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
-					Value: config.NewRSRParsersMustCompile("~*req.Field1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("~*req.Field1", utils.InfieldSep),
 				},
 			},
 			Blocker: true,
@@ -781,7 +781,7 @@ func testAttributeSSetAlsPrfBrokenReference(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "FL1",
-					Value: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 				},
 			},
 			Weight: 20,
@@ -814,7 +814,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "FL1",
-					Value: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 				},
 			},
 			Weight: 20,
@@ -842,11 +842,11 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	alsPrf.Attributes = []*engine.Attribute{
 		{
 			Path:  utils.MetaReq + utils.NestingSep + "FL1",
-			Value: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+			Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 		},
 		{
 			Path:  utils.MetaReq + utils.NestingSep + "FL2",
-			Value: config.NewRSRParsersMustCompile("Al2", utils.INFIELD_SEP),
+			Value: config.NewRSRParsersMustCompile("Al2", utils.InfieldSep),
 		},
 	}
 	alsPrf.Compile()
@@ -1021,7 +1021,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Category",
-					Value: config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_suffix/", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_suffix/", utils.InfieldSep),
 				},
 			},
 			Blocker: true,
@@ -1083,7 +1083,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
 			Weight: 10,
@@ -1101,7 +1101,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
-					Value: config.NewRSRParsersMustCompile("Value2", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 				},
 			},
 			Weight: 20,
@@ -1119,7 +1119,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",
-					Value: config.NewRSRParsersMustCompile("Value3", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value3", utils.InfieldSep),
 				},
 			},
 			Weight: 30,
@@ -1199,7 +1199,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
 			Weight: 10,
@@ -1217,7 +1217,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
-					Value: config.NewRSRParsersMustCompile("Value2", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 				},
 			},
 			Weight: 20,
@@ -1235,7 +1235,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",
-					Value: config.NewRSRParsersMustCompile("Value3", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value3", utils.InfieldSep),
 				},
 			},
 			Weight: 30,
@@ -1444,7 +1444,7 @@ func testAttributeSCachingMetaNone(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
 			Weight: 10,
@@ -1503,7 +1503,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
 			Weight: 10,
@@ -1606,7 +1606,7 @@ func testAttributeSCachingMetaReload1(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
 			Weight: 10,
@@ -1665,7 +1665,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
 			Weight: 10,
@@ -1705,7 +1705,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
 			Weight: 10,
@@ -1744,7 +1744,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
 			Weight: 10,
@@ -1794,7 +1794,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
 			Weight: 10,
@@ -1842,7 +1842,7 @@ func testAttributeSSetAttributeWithEmptyPath(t *testing.T) {
 				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.Attribute{
 				{
-					Value: config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				},
 			},
 			Weight: 10.0,
@@ -1867,7 +1867,7 @@ func testAttributeSCacheOpts(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
-					Value: config.NewRSRParsersMustCompile("Value1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 				},
 			},
 			Weight: 10,
@@ -1900,7 +1900,7 @@ func testAttributeSSetAlsPrfWithoutTenant(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "FL1",
-					Value: config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 				},
 			},
 			Weight: 20,

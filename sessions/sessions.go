@@ -3227,7 +3227,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			opts := engine.MapEvent(cgrEv.Opts)
 			attest := sS.cgrCfg.SessionSCfg().STIRCfg.AllowedAttest
 			if uattest := opts.GetStringIgnoreErrors(utils.OptsStirATest); uattest != utils.EmptyString {
-				attest = utils.NewStringSet(strings.Split(uattest, utils.INFIELD_SEP))
+				attest = utils.NewStringSet(strings.Split(uattest, utils.InfieldSep))
 			}
 			var stirMaxDur time.Duration
 			if stirMaxDur, err = opts.GetDuration(utils.OptsStirPayloadMaxDuration); err != nil {
@@ -3255,7 +3255,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			destURI := opts.GetStringIgnoreErrors(utils.OptsStirDestinationTn)
 			destTn := utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.OptsStirDestinationTn), ev.GetStringIgnoreErrors(utils.Destination))
 
-			dest := utils.NewPASSporTDestinationsIdentity(strings.Split(destTn, utils.INFIELD_SEP), strings.Split(destURI, utils.INFIELD_SEP))
+			dest := utils.NewPASSporTDestinationsIdentity(strings.Split(destTn, utils.InfieldSep), strings.Split(destURI, utils.InfieldSep))
 
 			var orig *utils.PASSporTOriginsIdentity
 			if origURI := opts.GetStringIgnoreErrors(utils.OptsStirOriginatorURI); origURI != utils.EmptyString {

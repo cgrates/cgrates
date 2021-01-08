@@ -518,7 +518,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 
 			// load action timings from tags
 			if tpact.TimingTags != "" {
-				timingIds := strings.Split(tpact.TimingTags, utils.INFIELD_SEP)
+				timingIds := strings.Split(tpact.TimingTags, utils.InfieldSep)
 				for _, timingID := range timingIds {
 					timing, found := tpr.timings[timingID]
 					if !found {
@@ -730,7 +730,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					return fmt.Errorf("no action with id <%s>", at.ActionsId)
 				}
 				var t *utils.TPTiming
-				if at.TimingId != utils.ASAP {
+				if at.TimingId != utils.MetaASAP {
 					tptm, err := tpr.lr.GetTPTimings(tpr.tpid, at.TimingId)
 					if err != nil {
 						return errors.New(err.Error() + " (Timing): " + at.TimingId)
@@ -992,7 +992,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					}
 					// load action timings from tags
 					if tpact.TimingTags != "" {
-						timingIds := strings.Split(tpact.TimingTags, utils.INFIELD_SEP)
+						timingIds := strings.Split(tpact.TimingTags, utils.InfieldSep)
 						for _, timingID := range timingIds {
 							if timing, found := tpr.timings[timingID]; found {
 								acts[idx].Balance.Timings = append(acts[idx].Balance.Timings, &RITiming{
@@ -2745,13 +2745,13 @@ func (tpr *TpReader) addDefaultTimings() {
 		StartTime: "00:00:00",
 		EndTime:   "",
 	}
-	tpr.timings[utils.ASAP] = &utils.TPTiming{
-		ID:        utils.ASAP,
+	tpr.timings[utils.MetaASAP] = &utils.TPTiming{
+		ID:        utils.MetaASAP,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
 		WeekDays:  utils.WeekDays{},
-		StartTime: utils.ASAP,
+		StartTime: utils.MetaASAP,
 		EndTime:   "",
 	}
 	tpr.timings[utils.MetaEveryMinute] = &utils.TPTiming{

@@ -413,7 +413,7 @@ func TestActionPlanFirstMonthOfTheYearSecondDay(t *testing.T) {
 }
 
 func TestActionPlanCheckForASAP(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{StartTime: utils.ASAP}}}
+	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{StartTime: utils.MetaASAP}}}
 	if !at.IsASAP() {
 		t.Errorf("%v should be asap!", at)
 	}
@@ -540,7 +540,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 						Months:    utils.Months{},
 						MonthDays: utils.MonthDays{},
 						WeekDays:  utils.WeekDays{},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Weight:    10,
@@ -561,7 +561,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 						Months:    utils.Months{},
 						MonthDays: utils.MonthDays{},
 						WeekDays:  utils.WeekDays{},
-						StartTime: utils.ASAP,
+						StartTime: utils.MetaASAP,
 					},
 				},
 				Weight:    10,

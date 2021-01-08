@@ -335,7 +335,7 @@ func TestRSRFilterPass(t *testing.T) {
 
 func TestRSRFiltersPass(t *testing.T) {
 	rlStr := "~^C.+S$;CGRateS;ateS$"
-	fltrs, err := ParseRSRFilters(rlStr, INFIELD_SEP)
+	fltrs, err := ParseRSRFilters(rlStr, InfieldSep)
 	if err != nil {
 		t.Error(err)
 	}

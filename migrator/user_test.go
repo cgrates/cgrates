@@ -106,12 +106,12 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Subject",
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("call_1001", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("call_1001", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaTenant,
 					Type:  utils.META_CONSTANT,
-					Value: config.NewRSRParsersMustCompile(usrTenant, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile(usrTenant, utils.InfieldSep),
 				},
 			},
 			Blocker: false,
@@ -129,12 +129,12 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.RequestType,
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("*prepaid", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("*prepaid", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "msisdn",
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("123423534646752", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("123423534646752", utils.InfieldSep),
 				},
 			},
 			Blocker: false,
@@ -150,12 +150,12 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.RequestType,
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("*prepaid", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("*prepaid", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaTenant,
 					Type:  utils.META_CONSTANT,
-					Value: config.NewRSRParsersMustCompile(usrTenant, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile(usrTenant, utils.InfieldSep),
 				},
 			},
 			Blocker: false,
@@ -173,27 +173,27 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.RequestType,
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("*prepaid", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("*prepaid", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("acnt63", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("acnt63", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "imsi",
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("12345", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("12345", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "msisdn",
 					Type:  utils.MetaVariable,
-					Value: config.NewRSRParsersMustCompile("12345", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("12345", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaTenant,
 					Type:  utils.META_CONSTANT,
-					Value: config.NewRSRParsersMustCompile(usrTenant, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile(usrTenant, utils.InfieldSep),
 				},
 			},
 			Blocker: false,

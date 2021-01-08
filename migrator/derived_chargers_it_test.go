@@ -158,12 +158,12 @@ func testDCITMigrateAndMove(t *testing.T) {
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("1004", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("1004", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("call_1003", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("call_1003", utils.InfieldSep),
 			},
 		},
 		Blocker: false,

@@ -1173,7 +1173,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 				{
 					FilterIDs: []string{"*string:~*req.FL1:In1"},
 					Path:      "FL1",
-					Value:     config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 				},
 			},
 			Weight: 20,
@@ -1281,7 +1281,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 			Attributes: []*engine.Attribute{{
 				FilterIDs: []string{"*string:~*req.FL1:In1"},
 				Path:      "FL1",
-				Value:     config.NewRSRParsersMustCompile("Al1", utils.INFIELD_SEP),
+				Value:     config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			}},
 			Weight: 20,
 		},

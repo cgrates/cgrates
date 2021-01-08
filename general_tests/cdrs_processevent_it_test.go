@@ -183,7 +183,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value: config.NewRSRParsersMustCompile("1011", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("1011", utils.InfieldSep),
 				},
 			},
 			Weight: 20,

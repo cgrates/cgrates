@@ -191,7 +191,7 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		for _, v := range cgrCfg.diameterAgentCfg.RequestProcessors[0].RequestFields {
 			v.ComputePath()
 		}
-		rcv := cgrCfg.diameterAgentCfg.AsMapInterface(utils.INFIELD_SEP)
+		rcv := cgrCfg.diameterAgentCfg.AsMapInterface(utils.InfieldSep)
 		if !reflect.DeepEqual(rcv, eMap) {
 			fmt.Printf("%T \n", rcv[utils.RequestProcessorsCfg].([]map[string]interface{})[0][utils.FlagsCfg])
 			fmt.Printf("%T \n", eMap[utils.RequestProcessorsCfg].([]map[string]interface{})[0][utils.FlagsCfg])

@@ -132,17 +132,17 @@ func testUsrITMigrateAndMove(t *testing.T) {
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.RequestType,
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("*prepaid", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("*prepaid", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "msisdn",
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("123423534646752", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("123423534646752", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaTenant,
 				Type:  utils.META_CONSTANT,
-				Value: config.NewRSRParsersMustCompile("cgrates.com", utils.INFIELD_SEP),
+				Value: config.NewRSRParsersMustCompile("cgrates.com", utils.InfieldSep),
 			},
 		},
 		Blocker: false,

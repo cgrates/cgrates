@@ -218,11 +218,11 @@ func testInternalReplicateITAttributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value: config.NewRSRParsersMustCompile("ATTR_SUBJECT", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("ATTR_SUBJECT", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Category,
-					Value: config.NewRSRParsersMustCompile("ATTR_CATEGORY", utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile("ATTR_CATEGORY", utils.InfieldSep),
 				},
 			},
 			Weight: 20,
@@ -914,7 +914,7 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 		ActionPlan: []*AttrActionPlan{
 			{
 				ActionsId: "ACTS_1",
-				Time:      utils.ASAP,
+				Time:      utils.MetaASAP,
 				Weight:    20.0},
 		},
 	}
@@ -1470,11 +1470,11 @@ func testInternalReplicateITLoadIds(t *testing.T) {
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
 					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
-					Value:     config.NewRSRParsersMustCompile("1001", utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				},
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value: config.NewRSRParsersMustCompile(utils.MetaRemove, utils.INFIELD_SEP),
+					Value: config.NewRSRParsersMustCompile(utils.MetaRemove, utils.InfieldSep),
 				},
 			},
 			Weight: 20,

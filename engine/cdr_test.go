@@ -226,7 +226,7 @@ func TestFieldsAsString(t *testing.T) {
 	}
 	eVal := "call_from_1001"
 	if val := cdr.FieldsAsString(
-		config.NewRSRParsersMustCompile("~*req.Category;_from_;~*req.Account", utils.INFIELD_SEP)); val != eVal {
+		config.NewRSRParsersMustCompile("~*req.Category;_from_;~*req.Account", utils.InfieldSep)); val != eVal {
 		t.Errorf("Expecting : %s, received: %q", eVal, val)
 	}
 }
@@ -633,7 +633,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		CostDetails: eventCost,
 	}
 
-	prsr := config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Destination, utils.INFIELD_SEP)
+	prsr := config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Destination, utils.InfieldSep)
 	cfgCdrFld := &config.FCTemplate{
 		Tag:      "destination",
 		Path:     "*exp.Destination",
@@ -696,7 +696,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	}
 
 	// Test MetaDateTime
-	prsr = config.NewRSRParsersMustCompile("~*req.stop_time", utils.INFIELD_SEP)
+	prsr = config.NewRSRParsersMustCompile("~*req.stop_time", utils.InfieldSep)
 	layout := "2006-01-02 15:04:05"
 	cfgCdrFld = &config.FCTemplate{
 		Tag:      "stop_time",
@@ -728,7 +728,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		t.Error("failed using filter")
 	}
 
-	prsr = config.NewRSRParsersMustCompile("~*req.fieldextr2", utils.INFIELD_SEP)
+	prsr = config.NewRSRParsersMustCompile("~*req.fieldextr2", utils.InfieldSep)
 	cfgCdrFld = &config.FCTemplate{
 		Tag:      "stop_time",
 		Type:     utils.MetaDateTime,
@@ -741,7 +741,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		t.Error("Should give error here, got none.")
 	}
 
-	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.CGRID", utils.INFIELD_SEP)
+	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.CGRID", utils.InfieldSep)
 	cfgCdrFld = &config.FCTemplate{
 		Tag:   "CGRIDFromCostDetails",
 		Type:  utils.META_COMPOSED,
@@ -753,7 +753,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	} else if expRecord[0] != cdr.CostDetails.CGRID {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.CostDetails.CGRID, expRecord)
 	}
-	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.AccountSummary.ID", utils.INFIELD_SEP)
+	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.AccountSummary.ID", utils.InfieldSep)
 	cfgCdrFld = &config.FCTemplate{
 		Tag:   "AccountID",
 		Type:  utils.META_COMPOSED,
@@ -767,7 +767,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	}
 
 	expected := `{"3d99c91":{"DestinationID":"CustomDestination","DestinationPrefix":"26377","RatingPlanID":"RP_ZW_v1"}}`
-	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.RatingFilters", utils.INFIELD_SEP)
+	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.RatingFilters", utils.InfieldSep)
 	cfgCdrFld = &config.FCTemplate{
 		Tag:   "DestinationID",
 		Type:  utils.META_COMPOSED,
@@ -781,7 +781,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	}
 
 	expected = "RP_ZW_v1"
-	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.RatingFilters:s/RatingPlanID\"\\s?\\:\\s?\"([^\"]*)\".*/$1/", utils.INFIELD_SEP)
+	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.RatingFilters:s/RatingPlanID\"\\s?\\:\\s?\"([^\"]*)\".*/$1/", utils.InfieldSep)
 	cfgCdrFld = &config.FCTemplate{
 		Tag:   "DestinationID",
 		Type:  utils.META_COMPOSED,
@@ -795,7 +795,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	}
 
 	expected = "CustomDestination"
-	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.RatingFilters:s/DestinationID\"\\s?\\:\\s?\"([^\"]*)\".*/$1/", utils.INFIELD_SEP)
+	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.RatingFilters:s/DestinationID\"\\s?\\:\\s?\"([^\"]*)\".*/$1/", utils.InfieldSep)
 	cfgCdrFld = &config.FCTemplate{
 		Tag:   "DestinationID",
 		Type:  utils.META_COMPOSED,
@@ -809,7 +809,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	}
 
 	expected = "26377"
-	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.RatingFilters:s/DestinationPrefix\"\\s?\\:\\s?\"([^\"]*)\".*/$1/", utils.INFIELD_SEP)
+	prsr = config.NewRSRParsersMustCompile("~*req.CostDetails.RatingFilters:s/DestinationPrefix\"\\s?\\:\\s?\"([^\"]*)\".*/$1/", utils.InfieldSep)
 	cfgCdrFld = &config.FCTemplate{
 		Tag:   "DestinationID",
 		Type:  utils.META_COMPOSED,
@@ -1036,7 +1036,7 @@ func TestCDRexportFieldValue(t *testing.T) {
 	}
 
 	cfgCdrFld := &config.FCTemplate{Path: "*exp.SetupTime", Type: utils.META_COMPOSED,
-		Value: config.NewRSRParsersMustCompile("~SetupTime", utils.INFIELD_SEP), Layout: time.RFC3339}
+		Value: config.NewRSRParsersMustCompile("~SetupTime", utils.InfieldSep), Layout: time.RFC3339}
 
 	eVal := "2013-11-07T08:42:20Z"
 	if val, err := cdr.exportFieldValue(cfgCdrFld, nil); err != nil {
@@ -1072,7 +1072,7 @@ func TestCDReRoundingDecimals(t *testing.T) {
 	cfgCdrFld := &config.FCTemplate{
 		Path:  "*exp.Cost",
 		Type:  utils.META_COMPOSED,
-		Value: config.NewRSRParsersMustCompile("~SetupTime", utils.INFIELD_SEP),
+		Value: config.NewRSRParsersMustCompile("~SetupTime", utils.InfieldSep),
 	}
 
 	//5 is the default value for rounding decimals
@@ -1240,7 +1240,7 @@ func TestCDRcombimedCdrFieldVal(t *testing.T) {
 		Tag:     "TestCombiMed",
 		Type:    utils.META_COMBIMED,
 		Filters: []string{"*string:~*req.RunID:testRun1"},
-		Value:   config.NewRSRParsersMustCompile("~*req.Cost", utils.INFIELD_SEP),
+		Value:   config.NewRSRParsersMustCompile("~*req.Cost", utils.InfieldSep),
 	}
 	cfg := config.NewDefaultCGRConfig()
 

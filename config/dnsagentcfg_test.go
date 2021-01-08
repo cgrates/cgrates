@@ -77,12 +77,12 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 
 func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	var dareq, expected RequestProcessor
-	if err := dareq.loadFromJSONCfg(nil, utils.INFIELD_SEP); err != nil {
+	if err := dareq.loadFromJSONCfg(nil, utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, dareq)
 	}
-	if err := dareq.loadFromJSONCfg(new(ReqProcessorJsnCfg), utils.INFIELD_SEP); err != nil {
+	if err := dareq.loadFromJSONCfg(new(ReqProcessorJsnCfg), utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, dareq)
@@ -95,11 +95,11 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	}
 	expected = RequestProcessor{
 		ID:      "cgrates",
-		Tenant:  NewRSRParsersMustCompile("tenant", utils.INFIELD_SEP),
+		Tenant:  NewRSRParsersMustCompile("tenant", utils.InfieldSep),
 		Filters: []string{"filter1", "filter2"},
 		Flags:   utils.FlagsWithParams{"flag1": {}, "flag2": {}},
 	}
-	if err = dareq.loadFromJSONCfg(json, utils.INFIELD_SEP); err != nil {
+	if err = dareq.loadFromJSONCfg(json, utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dareq) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(dareq))
@@ -276,7 +276,7 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 func TestRequestProcessorClone(t *testing.T) {
 	rp := &RequestProcessor{
 		ID:            "cgrates",
-		Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.INFIELD_SEP),
+		Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 		Filters:       []string{"*string:~req.Account:1001"},
 		Flags:         utils.FlagsWithParams{utils.MetaAttributes: {}},
 		Timezone:      "UTC",

@@ -1131,7 +1131,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	}
 	if qryFltr.OrderBy != "" {
 		var orderVal string
-		separateVals := strings.Split(qryFltr.OrderBy, utils.INFIELD_SEP)
+		separateVals := strings.Split(qryFltr.OrderBy, utils.InfieldSep)
 		switch separateVals[0] {
 		case utils.OrderID:
 			orderVal = "id"
