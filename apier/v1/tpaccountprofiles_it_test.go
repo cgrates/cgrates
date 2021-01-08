@@ -26,7 +26,6 @@ import (
 	"path"
 	"reflect"
 	"sort"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -126,24 +125,16 @@ func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "1001",
 		Weight: 20,
-		Balances: []*utils.TPAccountBalance{
-			&utils.TPAccountBalance{
-				ID:        "MonetaryBalance",
-				FilterIDs: []string{},
-				Weight:    10,
-				Type:      utils.MONETARY,
-				Units:     14,
-				CostIncrement: []*utils.TPBalanceCostIncrement{
-					{
-						FilterIDs: []string{"test_filter_id"},
-					},
-				},
-				CostAttributes: []string{"test_cost_attribute"},
-				UnitFactors: []*utils.TPBalanceUnitFactor{
-					{
-						FilterIDs: []string{"test_filter_id"},
-					},
-				},
+		Balances: map[string]*utils.TPAccountBalance{
+			"MonetaryBalance": &utils.TPAccountBalance{
+				ID:             "MonetaryBalance",
+				FilterIDs:      []string{},
+				Weight:         10,
+				Type:           utils.MONETARY,
+				CostIncrement:  []*utils.TPBalanceCostIncrement{},
+				CostAttributes: []string{},
+				UnitFactors:    []*utils.TPBalanceUnitFactor{},
+				Units:          14,
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
@@ -181,24 +172,16 @@ func testTPAcctPrfGetTPAcctPrfIDs(t *testing.T) {
 }
 
 func testTPAcctPrfUpdateTPAcctBal(t *testing.T) {
-	tpAcctPrf.Balances = []*utils.TPAccountBalance{
-		&utils.TPAccountBalance{
-			ID:        "MonetaryBalance2",
-			FilterIDs: []string{},
-			Weight:    12,
-			Type:      utils.MONETARY,
-			Units:     16,
-			CostIncrement: []*utils.TPBalanceCostIncrement{
-				{
-					FilterIDs: []string{"test_filter_id2"},
-				},
-			},
-			CostAttributes: []string{"test_cost_attribute2"},
-			UnitFactors: []*utils.TPBalanceUnitFactor{
-				{
-					FilterIDs: []string{"test_filter_id2"},
-				},
-			},
+	tpAcctPrf.Balances = map[string]*utils.TPAccountBalance{
+		"MonetaryBalance2": {
+			ID:             "MonetaryBalance2",
+			FilterIDs:      []string{},
+			Weight:         12,
+			Type:           utils.MONETARY,
+			CostIncrement:  []*utils.TPBalanceCostIncrement{},
+			CostAttributes: []string{},
+			UnitFactors:    []*utils.TPBalanceUnitFactor{},
+			Units:          16,
 		},
 	}
 	var result string
@@ -216,40 +199,26 @@ func testTPAcctPrfGetTPAcctBalAfterUpdate(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "1001",
 		Weight: 20,
-		Balances: []*utils.TPAccountBalance{
-			&utils.TPAccountBalance{
-				ID:        "MonetaryBalance2",
-				FilterIDs: []string{},
-				Weight:    12,
-				Type:      utils.MONETARY,
-				Units:     16,
-				CostIncrement: []*utils.TPBalanceCostIncrement{
-					{
-						FilterIDs: []string{"test_filter_id"},
-					},
-				},
-				CostAttributes: []string{"test_cost_attribute"},
-				UnitFactors: []*utils.TPBalanceUnitFactor{
-					{
-						FilterIDs: []string{"test_filter_id"},
-					},
-				},
+		Balances: map[string]*utils.TPAccountBalance{
+			"MonetaryBalance2": &utils.TPAccountBalance{
+				ID:             "MonetaryBalance2",
+				FilterIDs:      []string{},
+				Weight:         12,
+				Type:           utils.MONETARY,
+				CostIncrement:  []*utils.TPBalanceCostIncrement{},
+				CostAttributes: []string{},
+				UnitFactors:    []*utils.TPBalanceUnitFactor{},
+				Units:          16,
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	sort.Strings(revTPAcctPrf.FilterIDs)
-	sort.Slice(revTPAcctPrf.Balances, func(i, j int) bool {
-		return strings.Compare(revTPAcctPrf.Balances[i].Type, revTPAcctPrf.Balances[j].Type) == -1
-	})
 	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	sort.Strings(reply.FilterIDs)
-	sort.Slice(reply.Balances, func(i, j int) bool {
-		return strings.Compare(reply.Balances[i].Type, reply.Balances[j].Type) == -1
-	})
 	if !reflect.DeepEqual(tpAcctPrf, reply) && !reflect.DeepEqual(revTPAcctPrf, reply) {
 		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(tpAcctPrf), utils.ToJSON(reply))
 	}

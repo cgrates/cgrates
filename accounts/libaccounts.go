@@ -29,7 +29,10 @@ import (
 // newAccountBalances constructs accountBalances
 func newAccountBalances(acnt *utils.AccountProfile,
 	fltrS *engine.FilterS, ralsConns []string) (acntBlncs *accountBalances, err error) {
-	blncs := utils.Balances(acnt.Balances) // will be changed with using map so OK to reference for now
+	blncs := make(utils.Balances, len(acnt.Balances)) // Temporary code to pass the build please update this accordingly
+	for _, bal := range acnt.Balances {
+		blncs = append(blncs, bal)
+	}
 	blncs.Sort()
 	acntBlncs = &accountBalances{blnCfgs: blncs}
 	// populate typIdx

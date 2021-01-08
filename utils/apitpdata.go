@@ -1550,7 +1550,7 @@ type TPAccountProfile struct {
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval
 	Weight             float64
-	Balances           []*TPAccountBalance
+	Balances           map[string]*TPAccountBalance
 	ThresholdIDs       []string
 }
 

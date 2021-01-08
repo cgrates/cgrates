@@ -3520,9 +3520,10 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 		aPrf, found := actPrfMap[tenID]
 		if !found {
 			aPrf = &utils.TPAccountProfile{
-				TPid:   tp.Tpid,
-				Tenant: tp.Tenant,
-				ID:     tp.ID,
+				TPid:     tp.Tpid,
+				Tenant:   tp.Tenant,
+				ID:       tp.ID,
+				Balances: make(map[string]*utils.TPAccountBalance),
 			}
 		}
 		if tp.FilterIDs != utils.EmptyString {
@@ -3601,7 +3602,7 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 					unitFactors = append(unitFactors, unitFactor)
 				}
 			}
-			aPrf.Balances = append(aPrf.Balances, &utils.TPAccountBalance{
+			aPrf.Balances[tp.BalanceID] = &utils.TPAccountBalance{
 				ID:             tp.BalanceID,
 				FilterIDs:      filterIDs,
 				Weight:         tp.BalanceWeight,
@@ -3612,7 +3613,7 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 				CostAttributes: costAttributes,
 				UnitFactors:    unitFactors,
 				Units:          tp.BalanceUnits,
-			})
+			}
 		}
 		actPrfMap[tenID] = aPrf
 	}
@@ -3707,7 +3708,7 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 		ID:           tpAp.ID,
 		FilterIDs:    make([]string, len(tpAp.FilterIDs)),
 		Weight:       tpAp.Weight,
-		Balances:     make([]*utils.Balance, len(tpAp.Balances)),
+		Balances:     make(map[string]*utils.Balance, len(tpAp.Balances)),
 		ThresholdIDs: make([]string, len(tpAp.ThresholdIDs)),
 	}
 	for i, stp := range tpAp.FilterIDs {
@@ -3719,64 +3720,64 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 		}
 	}
 
-	for i, bal := range tpAp.Balances {
-		ap.Balances[i] = &utils.Balance{
+	for id, bal := range tpAp.Balances {
+		ap.Balances[id] = &utils.Balance{
 			ID:        bal.ID,
 			FilterIDs: bal.FilterIDs,
 			Weight:    bal.Weight,
 			Blocker:   bal.Blocker,
 			Type:      bal.Type,
 		}
-		if ap.Balances[i].Units, err = utils.NewDecimalFromFloat64(bal.Units); err != nil {
+		if ap.Balances[id].Units, err = utils.NewDecimalFromFloat64(bal.Units); err != nil {
 			return
 		}
 		if bal.Opts != utils.EmptyString {
-			ap.Balances[i].Opts = make(map[string]interface{})
+			ap.Balances[id].Opts = make(map[string]interface{})
 			for _, opt := range strings.Split(bal.Opts, utils.INFIELD_SEP) { // example of opts: key1:val1;key2:val2;key3:val3
 				keyValSls := utils.SplitConcatenatedKey(opt)
 				if len(keyValSls) != 2 {
 					err = fmt.Errorf("malformed option for ActionProfile <%s> for action <%s>", ap.TenantID(), bal.ID)
 					return
 				}
-				ap.Balances[i].Opts[keyValSls[0]] = keyValSls[1]
+				ap.Balances[id].Opts[keyValSls[0]] = keyValSls[1]
 			}
 		}
 		if bal.CostIncrement != nil {
-			ap.Balances[i].CostIncrements = make([]*utils.CostIncrement, len(bal.CostIncrement))
+			ap.Balances[id].CostIncrements = make([]*utils.CostIncrement, len(bal.CostIncrement))
 			for j, costIncrement := range bal.CostIncrement {
-				ap.Balances[i].CostIncrements[j] = &utils.CostIncrement{
+				ap.Balances[id].CostIncrements[j] = &utils.CostIncrement{
 					FilterIDs: costIncrement.FilterIDs,
 				}
 				if costIncrement.Increment != nil {
-					if ap.Balances[i].CostIncrements[j].Increment, err = utils.NewDecimalFromFloat64(*costIncrement.Increment); err != nil {
+					if ap.Balances[id].CostIncrements[j].Increment, err = utils.NewDecimalFromFloat64(*costIncrement.Increment); err != nil {
 						return
 					}
 				}
 				if costIncrement.FixedFee != nil {
-					if ap.Balances[i].CostIncrements[j].FixedFee, err = utils.NewDecimalFromFloat64(*costIncrement.FixedFee); err != nil {
+					if ap.Balances[id].CostIncrements[j].FixedFee, err = utils.NewDecimalFromFloat64(*costIncrement.FixedFee); err != nil {
 						return
 					}
 				}
 				if costIncrement.RecurrentFee != nil {
-					if ap.Balances[i].CostIncrements[j].RecurrentFee, err = utils.NewDecimalFromFloat64(*costIncrement.RecurrentFee); err != nil {
+					if ap.Balances[id].CostIncrements[j].RecurrentFee, err = utils.NewDecimalFromFloat64(*costIncrement.RecurrentFee); err != nil {
 						return
 					}
 				}
 			}
 		}
 		if bal.CostAttributes != nil {
-			ap.Balances[i].CostAttributes = make([]string, len(bal.CostAttributes))
+			ap.Balances[id].CostAttributes = make([]string, len(bal.CostAttributes))
 			for j, costAttribute := range bal.CostAttributes {
-				ap.Balances[i].CostAttributes[j] = costAttribute
+				ap.Balances[id].CostAttributes[j] = costAttribute
 			}
 		}
 		if bal.UnitFactors != nil {
-			ap.Balances[i].UnitFactors = make([]*utils.UnitFactor, len(bal.UnitFactors))
+			ap.Balances[id].UnitFactors = make([]*utils.UnitFactor, len(bal.UnitFactors))
 			for j, unitFactor := range bal.UnitFactors {
-				ap.Balances[i].UnitFactors[j] = &utils.UnitFactor{
+				ap.Balances[id].UnitFactors[j] = &utils.UnitFactor{
 					FilterIDs: unitFactor.FilterIDs,
 				}
-				if ap.Balances[i].UnitFactors[j].Factor, err = utils.NewDecimalFromFloat64(unitFactor.Factor); err != nil {
+				if ap.Balances[id].UnitFactors[j].Factor, err = utils.NewDecimalFromFloat64(unitFactor.Factor); err != nil {
 					return
 				}
 			}
@@ -3795,7 +3796,7 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 		FilterIDs:          make([]string, len(ap.FilterIDs)),
 		ActivationInterval: new(utils.TPActivationInterval),
 		Weight:             ap.Weight,
-		Balances:           make([]*utils.TPAccountBalance, len(ap.Balances)),
+		Balances:           make(map[string]*utils.TPAccountBalance, len(ap.Balances)),
 		ThresholdIDs:       make([]string, len(ap.ThresholdIDs)),
 	}
 	for i, fli := range ap.FilterIDs {

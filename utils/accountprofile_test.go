@@ -71,8 +71,8 @@ func TestCloneAccountProfile(t *testing.T) {
 		Opts: map[string]interface{}{
 			"Destination": 10,
 		},
-		Balances: []*Balance{
-			{
+		Balances: map[string]*Balance{
+			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Weight:    1.1,

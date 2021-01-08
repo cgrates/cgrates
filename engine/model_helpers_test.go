@@ -7012,8 +7012,8 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 				ExpiryTime:     "2014-07-25T15:00:00Z",
 			},
 			Weight: 10.0,
-			Balances: []*utils.TPAccountBalance{
-				{
+			Balances: map[string]*utils.TPAccountBalance{
+				"VoiceBalance": {
 					ID:             "VoiceBalance",
 					FilterIDs:      []string{"FLTR_RES_GR2"},
 					Weight:         10,
@@ -7063,8 +7063,8 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 				ActivationTime: "2014-07-24T15:00:00Z",
 			},
 			Weight: 10.0,
-			Balances: []*utils.TPAccountBalance{
-				{
+			Balances: map[string]*utils.TPAccountBalance{
+				"VoiceBalance": {
 					ID:             "VoiceBalance",
 					FilterIDs:      []string{"FLTR_RES_GR2"},
 					Weight:         10,
@@ -7097,8 +7097,8 @@ func TestAPItoModelTPAccountProfile(t *testing.T) {
 			ExpiryTime:     "2014-07-25T15:00:00Z",
 		},
 		Weight: 10.0,
-		Balances: []*utils.TPAccountBalance{
-			{
+		Balances: map[string]*utils.TPAccountBalance{
+			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weight:    10,
@@ -7161,8 +7161,8 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 			ExpiryTime:     "2014-07-25T15:00:00Z",
 		},
 		Weight: 10.0,
-		Balances: []*utils.TPAccountBalance{
-			{
+		Balances: map[string]*utils.TPAccountBalance{
+			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR2"},
 				Weight:    10,
@@ -7189,7 +7189,7 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 	}}
 	sort.Strings(testStruct.FilterIDs)
 	sort.Strings(testStruct.ThresholdIDs)
-	sort.Strings(testStruct.Balances[0].FilterIDs)
+	sort.Strings(testStruct.Balances["VoiceBalance"].FilterIDs)
 	result := APItoModelTPAccountProfile(testStruct)
 	if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
@@ -7206,8 +7206,8 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
 		Weight: 10.0,
-		Balances: []*utils.TPAccountBalance{
-			{
+		Balances: map[string]*utils.TPAccountBalance{
+			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weight:    10,
@@ -7227,16 +7227,17 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
 		},
 		Weight: 10.0,
-		Balances: []*utils.Balance{{
-			ID:        "VoiceBalance",
-			FilterIDs: []string{"FLTR_RES_GR2"},
-			Weight:    10,
-			Type:      utils.VOICE,
-			Units:     &utils.Decimal{decimal.New(3600000000000, 0)},
-			Opts: map[string]interface{}{
-				"key1": "val1",
-			},
-		}},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"FLTR_RES_GR2"},
+				Weight:    10,
+				Type:      utils.VOICE,
+				Units:     &utils.Decimal{decimal.New(3600000000000, 0)},
+				Opts: map[string]interface{}{
+					"key1": "val1",
+				},
+			}},
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
 	result, err := APItoAccountProfile(testStruct, "")
@@ -7258,8 +7259,8 @@ func TestApitoAccountProfileCaseTimeError(t *testing.T) {
 			ExpiryTime:     "test_time2",
 		},
 		Weight: 10.0,
-		Balances: []*utils.TPAccountBalance{
-			{
+		Balances: map[string]*utils.TPAccountBalance{
+			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weight:    10,
@@ -7285,8 +7286,8 @@ func TestApitoAccountProfileCaseTimeError2(t *testing.T) {
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
 		Weight: 10.0,
-		Balances: []*utils.TPAccountBalance{
-			{
+		Balances: map[string]*utils.TPAccountBalance{
+			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weight:    10,
@@ -7385,16 +7386,17 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
 		},
 		Weight: 2,
-		Balances: []*utils.Balance{{
-			ID:        "VoiceBalance",
-			FilterIDs: []string{"FLTR_RES_GR2"},
-			Weight:    10,
-			Type:      utils.VOICE,
-			Units:     &utils.Decimal{decimal.New(3600000000000, 0)},
-			Opts: map[string]interface{}{
-				"key1": "val1",
-			},
-		}},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"FLTR_RES_GR2"},
+				Weight:    10,
+				Type:      utils.VOICE,
+				Units:     &utils.Decimal{decimal.New(3600000000000, 0)},
+				Opts: map[string]interface{}{
+					"key1": "val1",
+				},
+			}},
 		ThresholdIDs: []string{"test_thrs"},
 	}
 	expStruct := utils.TPAccountProfile{
@@ -7406,8 +7408,8 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
 		Weight: 2,
-		Balances: []*utils.TPAccountBalance{
-			{
+		Balances: map[string]*utils.TPAccountBalance{
+			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weight:    10,

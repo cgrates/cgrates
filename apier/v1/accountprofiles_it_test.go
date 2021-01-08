@@ -133,8 +133,8 @@ func testAccountSGetAccountProfile(t *testing.T) {
 		ID:        "1001",
 		FilterIDs: []string{},
 		Weight:    20,
-		Balances: []*utils.Balance{
-			&utils.Balance{
+		Balances: map[string]*utils.Balance{
+			"MonetaryBalance": &utils.Balance{
 				ID:        "MonetaryBalance",
 				FilterIDs: []string{},
 				Weight:    10,
@@ -160,7 +160,7 @@ func testAccountSGetAccountProfile(t *testing.T) {
 				},
 				Units: &utils.Decimal{decimal.New(14, 0)},
 			},
-			&utils.Balance{
+			"VoiceBalance": &utils.Balance{
 				ID:             "VoiceBalance",
 				FilterIDs:      []string{},
 				Weight:         10,
@@ -204,8 +204,8 @@ func testAccountSSettAccountProfile(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "id_test",
 				Weight: 10,
-				Balances: []*utils.APIBalance{
-					&utils.APIBalance{
+				Balances: map[string]*utils.APIBalance{
+					"MonetaryBalance": &utils.APIBalance{
 						ID:        "MonetaryBalance",
 						FilterIDs: []string{},
 						Weight:    10,
@@ -231,7 +231,7 @@ func testAccountSSettAccountProfile(t *testing.T) {
 						},
 						Units: 14,
 					},
-					&utils.APIBalance{
+					"VoiceBalance": &utils.APIBalance{
 						ID:        "VoiceBalance",
 						FilterIDs: []string{},
 						Weight:    10,
@@ -308,7 +308,7 @@ func testAccountSGetAccountProfileIDsCount(t *testing.T) {
 func testAccountSUpdateAccountProfile(t *testing.T) {
 	var reply string
 	apiAccPrf.Weight = 2
-	apiAccPrf.Balances[0].CostIncrements[0].FixedFee = utils.Float64Pointer(123.5)
+	apiAccPrf.Balances["MonetaryBalance"].CostIncrements[0].FixedFee = utils.Float64Pointer(123.5)
 	if err := accSRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
