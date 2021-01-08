@@ -158,8 +158,8 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "1001",
 			Weight: 20,
-			Balances: []*utils.TPAccountBalance{
-				&utils.TPAccountBalance{
+			Balances: map[string]*utils.TPAccountBalance{
+				"MonetaryBalance": &utils.TPAccountBalance{
 					ID:        "MonetaryBalance",
 					FilterIDs: []string{},
 					Weight:    10,

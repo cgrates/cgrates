@@ -31,7 +31,7 @@ type AccountProfile struct {
 	ActivationInterval *ActivationInterval
 	Weight             float64
 	Opts               map[string]interface{}
-	Balances           []*Balance
+	Balances           map[string]*Balance
 	ThresholdIDs       []string
 }
 
@@ -128,7 +128,7 @@ func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
 		}
 	}
 	if aP.Balances != nil {
-		acnt.Balances = make([]*Balance, len(aP.Balances))
+		acnt.Balances = make(map[string]*Balance, len(aP.Balances))
 		for i, value := range aP.Balances {
 			acnt.Balances[i] = value.Clone()
 		}
@@ -234,7 +234,7 @@ type APIAccountProfile struct {
 	ActivationInterval *ActivationInterval
 	Weight             float64
 	Opts               map[string]interface{}
-	Balances           []*APIBalance
+	Balances           map[string]*APIBalance
 	ThresholdIDs       []string
 }
 
@@ -250,7 +250,7 @@ func (ext *APIAccountProfile) AsAccountProfile() (profile *AccountProfile, err e
 		ThresholdIDs:       ext.ThresholdIDs,
 	}
 	if len(ext.Balances) != 0 {
-		profile.Balances = make([]*Balance, len(ext.Balances))
+		profile.Balances = make(map[string]*Balance, len(ext.Balances))
 		for i, bal := range ext.Balances {
 			if profile.Balances[i], err = bal.AsBalance(); err != nil {
 				return
