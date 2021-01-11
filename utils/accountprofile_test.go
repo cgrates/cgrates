@@ -116,3 +116,45 @@ func TestTenantIDAccountProfile(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", exp, rcv)
 	}
 }
+
+func TestAccountProfileAsAccountProfile(t *testing.T) {
+	apiAccPrf := &APIAccountProfile{
+		Tenant: "cgrates.org",
+		ID:     "test_ID1",
+		Balances: map[string]*APIBalance{
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weight:    1.1,
+				Blocker:   true,
+				Type:      "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": 10,
+				},
+				Units: 0,
+			},
+		},
+	}
+	expected := &AccountProfile{
+		Tenant: "cgrates.org",
+		ID:     "test_ID1",
+		Balances: map[string]*Balance{
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weight:    1.1,
+				Blocker:   true,
+				Type:      "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": 10,
+				},
+				Units: NewDecimal(0, 0),
+			},
+		},
+	}
+	if rcv, err := apiAccPrf.AsAccountProfile(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(expected), ToJSON(rcv))
+	}
+}
