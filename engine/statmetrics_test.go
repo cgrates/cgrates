@@ -3185,7 +3185,7 @@ func TestStatMetricsStatDistinctRemEventErr2(t *testing.T) {
 	}
 	err := dst.RemEvent("Event2")
 	if err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nExpecting <nil>,\n Recevied <%+v>", err)
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", utils.ErrNotFound, err)
 	}
 }
 
@@ -3260,5 +3260,98 @@ func TestStatMetricsStatDistinctRemEvent2(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expected, dst) {
 		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, dst)
+	}
+}
+
+func TestStatMetricsStatDistinctAddEventErr(t *testing.T) {
+	asr, _ := NewASR(2, "", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	dst := StatDistinct{
+		FilterIDs: []string{"Test_Filter_ID"},
+		FieldValues: map[string]utils.StringSet{
+			"FieldValue1": {},
+		},
+		Events: map[string]map[string]int64{
+			"Event1": {
+				"FieldValue1": 2,
+			},
+			"Event2": {},
+		},
+		MinItems:  3,
+		FieldName: "Test_Field_Name",
+		Count:     3,
+	}
+	err := dst.AddEvent("Event1", utils.MapStorage{utils.MetaReq: ev.Event})
+	if err == nil || err.Error() != "Invalid format for field <Test_Field_Name>" {
+		t.Errorf("\nExpecting <Invalid format for field <Test_Field_Name>>,\n Recevied <%+v>", err)
+	}
+}
+
+func TestStatMetricsStatDistinctGetValue(t *testing.T) {
+	dst := StatDistinct{
+		FilterIDs: []string{"Test_Filter_ID"},
+		FieldValues: map[string]utils.StringSet{
+			"FieldValue1": {},
+		},
+		Events: map[string]map[string]int64{
+			"Event1": {
+				"FieldValue1": 2,
+			},
+			"Event2": {},
+		},
+		MinItems:  3,
+		FieldName: "Test_Field_Name",
+		Count:     3,
+	}
+	result := dst.GetValue(10)
+	if !reflect.DeepEqual(result, 1.0) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", 1.0, result)
+	}
+}
+
+func TestStatMetricsStatAverageGetMinItems(t *testing.T) {
+	avg := StatAverage{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Sum:       10.0,
+		Count:     20,
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems:  10,
+		FieldName: "Test_Field_Name",
+		val:       nil,
+	}
+	result := avg.GetMinItems()
+	if !reflect.DeepEqual(result, 10) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", 10, result)
+	}
+}
+
+func TestStatMetricsStatAverageGetFilterIDs(t *testing.T) {
+	avg := StatAverage{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Sum:       10.0,
+		Count:     20,
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems:  10,
+		FieldName: "Test_Field_Name",
+		val:       nil,
+	}
+	result := avg.GetFilterIDs()
+	if !reflect.DeepEqual(result, avg.FilterIDs) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", avg.FilterIDs, result)
 	}
 }
