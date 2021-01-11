@@ -71,8 +71,8 @@ func (c *AnalyzerServerCodec) ReadRequestBody(x interface{}) (err error) {
 
 func (c *AnalyzerServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
 	c.reqsLk.Lock()
-	api := c.reqs[c.reqIdx]
-	delete(c.reqs, c.reqIdx)
+	api := c.reqs[r.Seq]
+	delete(c.reqs, r.Seq)
 	c.reqsLk.Unlock()
 	go c.aS.logTrafic(api.ID, api.Method, api.Params, x, r.Error, c.enc, c.from, c.to, api.StartTime, time.Now())
 	return c.sc.WriteResponse(r, x)
