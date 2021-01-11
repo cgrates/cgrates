@@ -178,6 +178,7 @@ func (onm *OrderedNavigableMap) GetOrder() (order []PathItems) {
 
 // OrderedFields returns the elements in order they were inserted
 func (onm *OrderedNavigableMap) OrderedFields() (flds []interface{}) {
+	flds = make([]interface{}, 0, onm.Len())
 	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
 		fld, _ := onm.Field(el.Value)
 		flds = append(flds, fld.Interface())

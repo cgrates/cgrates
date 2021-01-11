@@ -5275,6 +5275,8 @@ func TestModelHelpersAsTPDispatcherProfiles(t *testing.T) {
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "2014-08-29T15:00:00Z",
 		},
+		FilterIDs:      make([]string, 0),
+		Subsystems:     make([]string, 0),
 		StrategyParams: []interface{}{"Param1"},
 	},
 	}
@@ -6322,7 +6324,7 @@ func TestThresholdMdlsAsTPThresholdActivationTime(t *testing.T) {
 			TPid:      "",
 			Tenant:    "",
 			ID:        "",
-			FilterIDs: nil,
+			FilterIDs: make([]string, 0),
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-14T14:35:00Z",
 				ExpiryTime:     "2014-07-15T14:35:00Z",
@@ -6332,7 +6334,7 @@ func TestThresholdMdlsAsTPThresholdActivationTime(t *testing.T) {
 			MinSleep:  "",
 			Blocker:   false,
 			Weight:    0,
-			ActionIDs: nil,
+			ActionIDs: make([]string, 0),
 			Async:     false,
 		},
 	}
@@ -6494,12 +6496,14 @@ func TestStatMdlsAsTPStatsCase2(t *testing.T) {
 			ActivationTime: "2014-07-25T15:00:00Z",
 			ExpiryTime:     "2014-07-26T15:00:00Z",
 		},
+		FilterIDs: make([]string, 0),
 		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID:  "test_id",
 				FilterIDs: []string{"test_filter_id"},
 			},
 		},
+		ThresholdIDs: make([]string, 0),
 	}}
 	result := testStruct.AsTPStats()
 	if !reflect.DeepEqual(result, expStruct) {
@@ -7156,7 +7160,7 @@ func TestApitoAccountProfileCaseTimeError(t *testing.T) {
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weight:    10,				
+				Weight:    10,
 				Type:      utils.MetaVoice,
 				Units:     3600000000000,
 			},

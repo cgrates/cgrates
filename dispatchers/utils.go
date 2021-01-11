@@ -57,11 +57,11 @@ type ArgStartServiceWithOpts struct {
 	servmanager.ArgStartService
 }
 
-func ParseStringMap(s string) utils.StringMap {
+func ParseStringSet(s string) utils.StringSet {
 	if s == utils.MetaZero {
-		return make(utils.StringMap)
+		return make(utils.StringSet)
 	}
-	return utils.StringMapFromSlice(strings.Split(s, utils.ANDSep))
+	return utils.NewStringSet(strings.Split(s, utils.ANDSep))
 }
 
 type RatingPlanCost struct {

@@ -1052,8 +1052,8 @@ func (tps ResourceMdls) CSVHeader() (result []string) {
 
 func (tps ResourceMdls) AsTPResources() (result []*utils.TPResourceProfile) {
 	mrl := make(map[string]*utils.TPResourceProfile)
-	filterMap := make(map[string]utils.StringMap)
-	thresholdMap := make(map[string]utils.StringMap)
+	filterMap := make(map[string]utils.StringSet)
+	thresholdMap := make(map[string]utils.StringSet)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		rl, found := mrl[tenID]
@@ -1092,21 +1092,15 @@ func (tps ResourceMdls) AsTPResources() (result []*utils.TPResourceProfile) {
 		}
 		if tp.ThresholdIDs != utils.EmptyString {
 			if _, has := thresholdMap[tenID]; !has {
-				thresholdMap[tenID] = make(utils.StringMap)
+				thresholdMap[tenID] = make(utils.StringSet)
 			}
-			trshSplt := strings.Split(tp.ThresholdIDs, utils.InfieldSep)
-			for _, trsh := range trshSplt {
-				thresholdMap[tenID][trsh] = true
-			}
+			thresholdMap[tenID].AddSlice(strings.Split(tp.ThresholdIDs, utils.InfieldSep))
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
-				filterMap[tenID] = make(utils.StringMap)
+				filterMap[tenID] = make(utils.StringSet)
 			}
-			filterSplit := strings.Split(tp.FilterIDs, utils.InfieldSep)
-			for _, filter := range filterSplit {
-				filterMap[tenID][filter] = true
-			}
+			filterMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
 		mrl[tenID] = rl
 	}
@@ -1114,12 +1108,8 @@ func (tps ResourceMdls) AsTPResources() (result []*utils.TPResourceProfile) {
 	i := 0
 	for tntID, rl := range mrl {
 		result[i] = rl
-		for filter := range filterMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filter)
-		}
-		for threshold := range thresholdMap[tntID] {
-			result[i].ThresholdIDs = append(result[i].ThresholdIDs, threshold)
-		}
+		result[i].FilterIDs = filterMap[tntID].AsSlice()
+		result[i].ThresholdIDs = thresholdMap[tntID].AsSlice()
 		i++
 	}
 	return
@@ -1271,8 +1261,8 @@ func (tps StatMdls) CSVHeader() (result []string) {
 }
 
 func (models StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
-	filterMap := make(map[string]utils.StringMap)
-	thresholdMap := make(map[string]utils.StringMap)
+	filterMap := make(map[string]utils.StringSet)
+	thresholdMap := make(map[string]utils.StringSet)
 	statMetricsMap := make(map[string]map[string]*utils.MetricWithFilters)
 	mst := make(map[string]*utils.TPStatProfile)
 	for _, model := range models {
@@ -1311,12 +1301,9 @@ func (models StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
 		}
 		if model.ThresholdIDs != utils.EmptyString {
 			if _, has := thresholdMap[key.TenantID()]; !has {
-				thresholdMap[key.TenantID()] = make(utils.StringMap)
+				thresholdMap[key.TenantID()] = make(utils.StringSet)
 			}
-			trshSplt := strings.Split(model.ThresholdIDs, utils.InfieldSep)
-			for _, trsh := range trshSplt {
-				thresholdMap[key.TenantID()][trsh] = true
-			}
+			thresholdMap[key.TenantID()].AddSlice(strings.Split(model.ThresholdIDs, utils.InfieldSep))
 		}
 		if len(model.ActivationInterval) != 0 {
 			st.ActivationInterval = new(utils.TPActivationInterval)
@@ -1330,12 +1317,9 @@ func (models StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
 		}
 		if model.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[key.TenantID()]; !has {
-				filterMap[key.TenantID()] = make(utils.StringMap)
+				filterMap[key.TenantID()] = make(utils.StringSet)
 			}
-			filterSplit := strings.Split(model.FilterIDs, utils.InfieldSep)
-			for _, filter := range filterSplit {
-				filterMap[key.TenantID()][filter] = true
-			}
+			filterMap[key.TenantID()].AddSlice(strings.Split(model.FilterIDs, utils.InfieldSep))
 		}
 		if model.MetricIDs != utils.EmptyString {
 			if _, has := statMetricsMap[key.TenantID()]; !has {
@@ -1362,12 +1346,8 @@ func (models StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
 	i := 0
 	for tntID, st := range mst {
 		result[i] = st
-		for filter := range filterMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filter)
-		}
-		for threshold := range thresholdMap[tntID] {
-			result[i].ThresholdIDs = append(result[i].ThresholdIDs, threshold)
-		}
+		result[i].FilterIDs = filterMap[tntID].AsSlice()
+		result[i].ThresholdIDs = thresholdMap[tntID].AsSlice()
 		for _, metric := range statMetricsMap[tntID] {
 			result[i].Metrics = append(result[i].Metrics, metric)
 		}
@@ -1521,8 +1501,8 @@ func (tps ThresholdMdls) CSVHeader() (result []string) {
 
 func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 	mst := make(map[string]*utils.TPThresholdProfile)
-	filterMap := make(map[string]utils.StringMap)
-	actionMap := make(map[string]utils.StringMap)
+	filterMap := make(map[string]utils.StringSet)
+	actionMap := make(map[string]utils.StringSet)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		th, found := mst[tenID]
@@ -1540,12 +1520,9 @@ func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 		}
 		if tp.ActionIDs != utils.EmptyString {
 			if _, has := actionMap[tenID]; !has {
-				actionMap[tenID] = make(utils.StringMap)
+				actionMap[tenID] = make(utils.StringSet)
 			}
-			actionSplit := strings.Split(tp.ActionIDs, utils.InfieldSep)
-			for _, action := range actionSplit {
-				actionMap[tenID][action] = true
-			}
+			actionMap[tenID].AddSlice(strings.Split(tp.ActionIDs, utils.InfieldSep))
 		}
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
@@ -1562,12 +1539,9 @@ func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
-				filterMap[tenID] = make(utils.StringMap)
+				filterMap[tenID] = make(utils.StringSet)
 			}
-			filterSplit := strings.Split(tp.FilterIDs, utils.InfieldSep)
-			for _, filter := range filterSplit {
-				filterMap[tenID][filter] = true
-			}
+			filterMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
 
 		mst[tenID] = th
@@ -1576,12 +1550,8 @@ func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 	i := 0
 	for tntID, th := range mst {
 		result[i] = th
-		for filter := range filterMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filter)
-		}
-		for action := range actionMap[tntID] {
-			result[i].ActionIDs = append(result[i].ActionIDs, action)
-		}
+		result[i].FilterIDs = filterMap[tntID].AsSlice()
+		result[i].ActionIDs = actionMap[tntID].AsSlice()
 		i++
 	}
 	return
@@ -1874,10 +1844,10 @@ func (tps RouteMdls) CSVHeader() (result []string) {
 }
 
 func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
-	filterMap := make(map[string]utils.StringMap)
+	filterMap := make(map[string]utils.StringSet)
 	mst := make(map[string]*utils.TPRouteProfile)
 	routeMap := make(map[string]map[string]*utils.TPRoute)
-	sortingParameterMap := make(map[string]utils.StringMap)
+	sortingParameterMap := make(map[string]utils.StringSet)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		th, found := mst[tenID]
@@ -1938,12 +1908,9 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 		}
 		if tp.SortingParameters != utils.EmptyString {
 			if _, has := sortingParameterMap[tenID]; !has {
-				sortingParameterMap[tenID] = make(utils.StringMap)
+				sortingParameterMap[tenID] = make(utils.StringSet)
 			}
-			sortingParamSplit := strings.Split(tp.SortingParameters, utils.InfieldSep)
-			for _, sortingParam := range sortingParamSplit {
-				sortingParameterMap[tenID][sortingParam] = true
-			}
+			sortingParameterMap[tenID].AddSlice(strings.Split(tp.SortingParameters, utils.InfieldSep))
 		}
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
@@ -1960,12 +1927,9 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
-				filterMap[tenID] = make(utils.StringMap)
+				filterMap[tenID] = make(utils.StringSet)
 			}
-			filterSplit := strings.Split(tp.FilterIDs, utils.InfieldSep)
-			for _, filter := range filterSplit {
-				filterMap[tenID][filter] = true
-			}
+			filterMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
 		mst[tenID] = th
 	}
@@ -1976,12 +1940,8 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 		for _, supData := range routeMap[tntID] {
 			result[i].Routes = append(result[i].Routes, supData)
 		}
-		for filterData := range filterMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filterData)
-		}
-		for sortingParam := range sortingParameterMap[tntID] {
-			result[i].SortingParameters = append(result[i].SortingParameters, sortingParam)
-		}
+		result[i].FilterIDs = filterMap[tntID].AsSlice()
+		result[i].SortingParameters = sortingParameterMap[tntID].AsSlice()
 		i++
 	}
 	return
@@ -2157,8 +2117,8 @@ func (tps AttributeMdls) CSVHeader() (result []string) {
 
 func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	mst := make(map[string]*utils.TPAttributeProfile)
-	filterMap := make(map[string]utils.StringMap)
-	contextMap := make(map[string]utils.StringMap)
+	filterMap := make(map[string]utils.StringSet)
+	contextMap := make(map[string]utils.StringSet)
 	for _, tp := range tps {
 		key := &utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
@@ -2186,21 +2146,15 @@ func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[key.TenantID()]; !has {
-				filterMap[key.TenantID()] = make(utils.StringMap)
+				filterMap[key.TenantID()] = make(utils.StringSet)
 			}
-			filterSplit := strings.Split(tp.FilterIDs, utils.InfieldSep)
-			for _, filter := range filterSplit {
-				filterMap[key.TenantID()][filter] = true
-			}
+			filterMap[key.TenantID()].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
 		if tp.Contexts != utils.EmptyString {
 			if _, has := contextMap[tenID]; !has {
-				contextMap[key.TenantID()] = make(utils.StringMap)
+				contextMap[key.TenantID()] = make(utils.StringSet)
 			}
-			contextSplit := strings.Split(tp.Contexts, utils.InfieldSep)
-			for _, context := range contextSplit {
-				contextMap[key.TenantID()][context] = true
-			}
+			contextMap[key.TenantID()].AddSlice(strings.Split(tp.Contexts, utils.InfieldSep))
 		}
 		if tp.Path != utils.EmptyString {
 			filterIDs := make([]string, 0)
@@ -2223,12 +2177,8 @@ func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	i := 0
 	for tntID, th := range mst {
 		result[i] = th
-		for filterID := range filterMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
-		}
-		for context := range contextMap[tntID] {
-			result[i].Contexts = append(result[i].Contexts, context)
-		}
+		result[i].FilterIDs = filterMap[tntID].AsSlice()
+		result[i].Contexts = contextMap[tntID].AsSlice()
 		i++
 	}
 	return
@@ -2269,16 +2219,11 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls AttributeMdls) {
 			if th.Weight != 0 {
 				mdl.Weight = th.Weight
 			}
-			for i, val := range reqAttribute.FilterIDs {
-				if i != 0 {
-					mdl.AttributeFilterIDs += utils.InfieldSep
-				}
-				mdl.AttributeFilterIDs += val
-			}
 		}
 		mdl.Path = reqAttribute.Path
 		mdl.Value = reqAttribute.Value
 		mdl.Type = reqAttribute.Type
+		mdl.AttributeFilterIDs = strings.Join(reqAttribute.FilterIDs, utils.InfieldSep)
 		mdls = append(mdls, mdl)
 	}
 	return
@@ -2370,7 +2315,7 @@ func (tps ChargerMdls) CSVHeader() (result []string) {
 
 func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
 	mst := make(map[string]*utils.TPChargerProfile)
-	filterMap := make(map[string]utils.StringMap)
+	filterMap := make(map[string]utils.StringSet)
 	attributeMap := make(map[string][]string)
 	for _, tp := range tps {
 		tntID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
@@ -2397,12 +2342,9 @@ func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tntID]; !has {
-				filterMap[tntID] = make(utils.StringMap)
+				filterMap[tntID] = make(utils.StringSet)
 			}
-			filterSplit := strings.Split(tp.FilterIDs, utils.InfieldSep)
-			for _, filter := range filterSplit {
-				filterMap[tntID][filter] = true
-			}
+			filterMap[tntID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
 		if tp.RunID != utils.EmptyString {
 			tpCPP.RunID = tp.RunID
@@ -2432,10 +2374,7 @@ func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
 	i := 0
 	for tntID, tp := range mst {
 		result[i] = tp
-		result[i].FilterIDs = make([]string, 0, len(filterMap[tntID]))
-		for filterID := range filterMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
-		}
+		result[i].FilterIDs = filterMap[tntID].AsSlice()
 		result[i].AttributeIDs = make([]string, 0, len(attributeMap[tntID]))
 		for _, attributeID := range attributeMap[tntID] {
 			result[i].AttributeIDs = append(result[i].AttributeIDs, attributeID)
@@ -2588,10 +2527,10 @@ func (tps DispatcherProfileMdls) CSVHeader() (result []string) {
 
 func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDispatcherProfile) {
 	mst := make(map[string]*utils.TPDispatcherProfile)
-	filterMap := make(map[string]utils.StringMap)
-	contextMap := make(map[string]utils.StringMap)
+	filterMap := make(map[string]utils.StringSet)
+	contextMap := make(map[string]utils.StringSet)
 	connsMap := make(map[string]map[string]utils.TPDispatcherHostProfile)
-	connsFilterMap := make(map[string]map[string]utils.StringMap)
+	connsFilterMap := make(map[string]map[string]utils.StringSet)
 	for _, tp := range tps {
 		tenantID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		tpDPP, found := mst[tenantID]
@@ -2604,21 +2543,15 @@ func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDis
 		}
 		if tp.Subsystems != utils.EmptyString {
 			if _, has := contextMap[tenantID]; !has {
-				contextMap[tenantID] = make(utils.StringMap)
+				contextMap[tenantID] = make(utils.StringSet)
 			}
-			contextSplit := strings.Split(tp.Subsystems, utils.InfieldSep)
-			for _, context := range contextSplit {
-				contextMap[tenantID][context] = true
-			}
+			contextMap[tenantID].AddSlice(strings.Split(tp.Subsystems, utils.InfieldSep))
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenantID]; !has {
-				filterMap[tenantID] = make(utils.StringMap)
+				filterMap[tenantID] = make(utils.StringSet)
 			}
-			filterSplit := strings.Split(tp.FilterIDs, utils.InfieldSep)
-			for _, filter := range filterSplit {
-				filterMap[tenantID][filter] = true
-			}
+			filterMap[tenantID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
 		if len(tp.ActivationInterval) != 0 {
 			tpDPP.ActivationInterval = new(utils.TPActivationInterval)
@@ -2656,14 +2589,13 @@ func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDis
 			connsMap[tenantID][tp.ConnID] = conn
 
 			if dFilter, has := connsFilterMap[tenantID]; !has {
-				connsFilterMap[tenantID] = make(map[string]utils.StringMap)
-				connsFilterMap[tenantID][tp.ConnID] = make(utils.StringMap)
+				connsFilterMap[tenantID] = make(map[string]utils.StringSet)
+				connsFilterMap[tenantID][tp.ConnID] = make(utils.StringSet)
 			} else if _, has := dFilter[tp.ConnID]; !has {
-				connsFilterMap[tenantID][tp.ConnID] = make(utils.StringMap)
+				connsFilterMap[tenantID][tp.ConnID] = make(utils.StringSet)
 			}
-
-			for _, filter := range strings.Split(tp.ConnFilterIDs, utils.InfieldSep) {
-				connsFilterMap[tenantID][tp.ConnID][filter] = true
+			if tp.ConnFilterIDs != utils.EmptyString {
+				connsFilterMap[tenantID][tp.ConnID].AddSlice(strings.Split(tp.ConnFilterIDs, utils.InfieldSep))
 			}
 
 		}
@@ -2676,22 +2608,10 @@ func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDis
 	i := 0
 	for tntID, tp := range mst {
 		result[i] = tp
-		for filterID := range filterMap[tntID] {
-			if filterID != utils.EmptyString {
-				result[i].FilterIDs = append(result[i].FilterIDs, filterID)
-			}
-		}
-		for context := range contextMap[tntID] {
-			if context != utils.EmptyString {
-				result[i].Subsystems = append(result[i].Subsystems, context)
-			}
-		}
+		result[i].FilterIDs = filterMap[tntID].AsSlice()
+		result[i].Subsystems = contextMap[tntID].AsSlice()
 		for conID, conn := range connsMap[tntID] {
-			for filter := range connsFilterMap[tntID][conID] {
-				if filter != utils.EmptyString {
-					conn.FilterIDs = append(conn.FilterIDs, filter)
-				}
-			}
+			conn.FilterIDs = connsFilterMap[tntID][conID].AsSlice()
 			result[i].Hosts = append(result[i].Hosts,
 				&utils.TPDispatcherHostProfile{
 					ID:        conn.ID,
@@ -2990,7 +2910,7 @@ func (tps RateProfileMdls) CSVHeader() (result []string) {
 }
 
 func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
-	filterMap := make(map[string]utils.StringMap)
+	filterMap := make(map[string]utils.StringSet)
 	mst := make(map[string]*utils.TPRateProfile)
 	rateMap := make(map[string]map[string]*utils.TPRate)
 	for _, tp := range tps {
@@ -3076,12 +2996,9 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
-				filterMap[tenID] = make(utils.StringMap)
+				filterMap[tenID] = make(utils.StringSet)
 			}
-			filterSplit := strings.Split(tp.FilterIDs, utils.InfieldSep)
-			for _, filter := range filterSplit {
-				filterMap[tenID][filter] = true
-			}
+			filterMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
 		mst[tenID] = rPrf
 	}
@@ -3090,9 +3007,7 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 	for tntID, th := range mst {
 		result[i] = th
 		result[i].Rates = rateMap[tntID]
-		for filterData := range filterMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filterData)
-		}
+		result[i].FilterIDs = filterMap[tntID].AsSlice()
 		i++
 	}
 	return
@@ -3299,7 +3214,7 @@ func (apm ActionProfileMdls) CSVHeader() (result []string) {
 }
 
 func (tps ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfile) {
-	filterIDsMap := make(map[string]utils.StringMap)
+	filterIDsMap := make(map[string]utils.StringSet)
 	targetIDsMap := make(map[string]map[string]utils.StringSet)
 	actPrfMap := make(map[string]*utils.TPActionProfile)
 	for _, tp := range tps {
@@ -3314,12 +3229,9 @@ func (tps ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfil
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterIDsMap[tenID]; !has {
-				filterIDsMap[tenID] = make(utils.StringMap)
+				filterIDsMap[tenID] = make(utils.StringSet)
 			}
-			filterSplit := strings.Split(tp.FilterIDs, utils.InfieldSep)
-			for _, filter := range filterSplit {
-				filterIDsMap[tenID][filter] = true
-			}
+			filterIDsMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
 		if tp.ActivationInterval != utils.EmptyString {
 			aPrf.ActivationInterval = new(utils.TPActivationInterval)
@@ -3369,9 +3281,7 @@ func (tps ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfil
 	i := 0
 	for tntID, th := range actPrfMap {
 		result[i] = th
-		for filterID := range filterIDsMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
-		}
+		result[i].FilterIDs = filterIDsMap[tntID].AsSlice()
 		for targetType, targetIDs := range targetIDsMap[tntID] {
 			result[i].Targets = append(result[i].Targets, &utils.TPActionTarget{TargetType: targetType, TargetIDs: targetIDs.AsSlice()})
 		}
@@ -3544,8 +3454,8 @@ func (apm AccountProfileMdls) CSVHeader() (result []string) {
 }
 
 func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountProfile, err error) {
-	filterIDsMap := make(map[string]utils.StringMap)
-	thresholdIDsMap := make(map[string]utils.StringMap)
+	filterIDsMap := make(map[string]utils.StringSet)
+	thresholdIDsMap := make(map[string]utils.StringSet)
 	actPrfMap := make(map[string]*utils.TPAccountProfile)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
@@ -3560,21 +3470,15 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterIDsMap[tenID]; !has {
-				filterIDsMap[tenID] = make(utils.StringMap)
+				filterIDsMap[tenID] = make(utils.StringSet)
 			}
-			filterSplit := strings.Split(tp.FilterIDs, utils.InfieldSep)
-			for _, filter := range filterSplit {
-				filterIDsMap[tenID][filter] = true
-			}
+			filterIDsMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
 		if tp.ThresholdIDs != utils.EmptyString {
 			if _, has := thresholdIDsMap[tenID]; !has {
-				thresholdIDsMap[tenID] = make(utils.StringMap)
+				thresholdIDsMap[tenID] = make(utils.StringSet)
 			}
-			thresholdSplit := strings.Split(tp.ThresholdIDs, utils.InfieldSep)
-			for _, thresholdID := range thresholdSplit {
-				thresholdIDsMap[tenID][thresholdID] = true
-			}
+			thresholdIDsMap[tenID].AddSlice(strings.Split(tp.ThresholdIDs, utils.InfieldSep))
 		}
 		if tp.ActivationInterval != utils.EmptyString {
 			aPrf.ActivationInterval = new(utils.TPActivationInterval)
@@ -3653,12 +3557,8 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 	i := 0
 	for tntID, th := range actPrfMap {
 		result[i] = th
-		for filterID := range filterIDsMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
-		}
-		for thresholdID := range thresholdIDsMap[tntID] {
-			result[i].ThresholdIDs = append(result[i].ThresholdIDs, thresholdID)
-		}
+		result[i].FilterIDs = filterIDsMap[tntID].AsSlice()
+		result[i].ThresholdIDs = thresholdIDsMap[tntID].AsSlice()
 		i++
 	}
 	return

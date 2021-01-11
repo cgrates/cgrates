@@ -96,7 +96,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evT
 	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
 		return
 	}
-	if !ParseStringMap(apiMethods).HasKey(method) {
+	if !ParseStringSet(apiMethods).Has(method) {
 		return utils.ErrUnauthorizedApi
 	}
 	return

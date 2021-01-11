@@ -960,6 +960,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 			Limit:             "2",
 			Blocker:           true,
 			Stored:            true,
+			ThresholdIDs:      make([]string, 0),
 		},
 		{Tenant: "cgrates.org", ID: "ResGroup22"}: {
 			TPid:      testTPID,
@@ -975,13 +976,14 @@ func TestLoadResourceProfiles(t *testing.T) {
 			Stored:            true,
 			Weight:            10,
 			Limit:             "2",
+			ThresholdIDs:      make([]string, 0),
 		},
 	}
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup21"}
 	if len(csvr.resProfiles) != len(eResProfiles) {
 		t.Errorf("Failed to load ResourceProfiles: %s", utils.ToIJSON(csvr.resProfiles))
 	} else if !reflect.DeepEqual(eResProfiles[resKey], csvr.resProfiles[resKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eResProfiles[resKey], csvr.resProfiles[resKey])
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eResProfiles[resKey]), utils.ToJSON(csvr.resProfiles[resKey]))
 	}
 }
 
@@ -1485,17 +1487,17 @@ func TestLoadActionProfiles(t *testing.T) {
 		TPid:      testTPID,
 		Tenant:    "cgrates.org",
 		ID:        "ONE_TIME_ACT",
-		FilterIDs: nil,
+		FilterIDs: make([]string, 0),
 		Weight:    10,
 		Schedule:  utils.MetaASAP,
 		Targets: []*utils.TPActionTarget{
-			&utils.TPActionTarget{
+			{
 				TargetType: utils.MetaAccounts,
 				TargetIDs:  []string{"1001", "1002"},
 			},
 		},
 		Actions: []*utils.TPAPAction{
-			&utils.TPAPAction{
+			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				TTL:       "0s",
@@ -1503,7 +1505,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				Path:      "~*balance.TestBalance.Value",
 				Value:     "10",
 			},
-			&utils.TPAPAction{
+			{
 				ID:        "SET_BALANCE_TEST_DATA",
 				FilterIDs: []string{},
 				TTL:       "0s",
@@ -1511,7 +1513,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				Path:      "~*balance.TestDataBalance.Type",
 				Value:     "*data",
 			},
-			&utils.TPAPAction{
+			{
 				ID:        "TOPUP_TEST_DATA",
 				FilterIDs: []string{},
 				TTL:       "0s",
@@ -1519,7 +1521,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				Path:      "~*balance.TestDataBalance.Value",
 				Value:     "1024",
 			},
-			&utils.TPAPAction{
+			{
 				ID:        "SET_BALANCE_TEST_VOICE",
 				FilterIDs: []string{},
 				TTL:       "0s",
@@ -1527,7 +1529,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				Path:      "~*balance.TestVoiceBalance.Type",
 				Value:     "*voice",
 			},
-			&utils.TPAPAction{
+			{
 				ID:        "TOPUP_TEST_VOICE",
 				FilterIDs: []string{},
 				TTL:       "0s",
@@ -1584,14 +1586,8 @@ func TestLoadDispatcherHosts(t *testing.T) {
 
 func TestLoadResource(t *testing.T) {
 	eResources := []*utils.TenantID{
-		{
-			Tenant: "cgrates.org",
-			ID:     "ResGroup21",
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "ResGroup22",
-		},
+		{Tenant: "cgrates.org", ID: "ResGroup21"},
+		{Tenant: "cgrates.org", ID: "ResGroup22"},
 	}
 	if len(csvr.resources) != len(eResources) {
 		t.Errorf("Failed to load resources expecting 2 but received : %+v", len(csvr.resources))
@@ -1600,14 +1596,8 @@ func TestLoadResource(t *testing.T) {
 
 func TestLoadstatQueues(t *testing.T) {
 	eStatQueues := []*utils.TenantID{
-		{
-			Tenant: "cgrates.org",
-			ID:     "TestStats",
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "TestStats2",
-		},
+		{Tenant: "cgrates.org", ID: "TestStats"},
+		{Tenant: "cgrates.org", ID: "TestStats2"},
 	}
 	if len(csvr.statQueues) != len(eStatQueues) {
 		t.Errorf("Failed to load statQueues: %s", utils.ToIJSON(csvr.statQueues))
@@ -1616,10 +1606,7 @@ func TestLoadstatQueues(t *testing.T) {
 
 func TestLoadThresholds(t *testing.T) {
 	eThresholds := []*utils.TenantID{
-		{
-			Tenant: "cgrates.org",
-			ID:     "Threshold1",
-		},
+		{Tenant: "cgrates.org", ID: "Threshold1"},
 	}
 	if len(csvr.thresholds) != len(eThresholds) {
 		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
@@ -1628,18 +1615,19 @@ func TestLoadThresholds(t *testing.T) {
 
 func TestLoadAccountProfiles(t *testing.T) {
 	expected := &utils.TPAccountProfile{
-		TPid:   testTPID,
-		Tenant: "cgrates.org",
-		ID:     "1001",
-		Weight: 20,
+		TPid:      testTPID,
+		Tenant:    "cgrates.org",
+		ID:        "1001",
+		FilterIDs: make([]string, 0),
+		Weight:    20,
 		Balances: map[string]*utils.TPAccountBalance{
-			"MonetaryBalance": &utils.TPAccountBalance{
+			"MonetaryBalance": {
 				ID:        "MonetaryBalance",
 				FilterIDs: []string{},
 				Weight:    10,
 				Type:      utils.MetaMonetary,
 				CostIncrement: []*utils.TPBalanceCostIncrement{
-					&utils.TPBalanceCostIncrement{
+					{
 						FilterIDs:    []string{"fltr1", "fltr2"},
 						Increment:    utils.Float64Pointer(1.3),
 						FixedFee:     utils.Float64Pointer(2.3),
@@ -1648,18 +1636,18 @@ func TestLoadAccountProfiles(t *testing.T) {
 				},
 				CostAttributes: []string{"attr1", "attr2"},
 				UnitFactors: []*utils.TPBalanceUnitFactor{
-					&utils.TPBalanceUnitFactor{
+					{
 						FilterIDs: []string{"fltr1", "fltr2"},
 						Factor:    100,
 					},
-					&utils.TPBalanceUnitFactor{
+					{
 						FilterIDs: []string{"fltr3"},
 						Factor:    200,
 					},
 				},
 				Units: 14,
 			},
-			"VoiceBalance": &utils.TPAccountBalance{
+			"VoiceBalance": {
 				ID:             "VoiceBalance",
 				FilterIDs:      []string{},
 				Weight:         10,
