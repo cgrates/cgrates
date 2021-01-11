@@ -65,7 +65,6 @@ func NewDecimalFromFloat64(f float64) (*Decimal, error) {
 
 // NewDecimalFromUnit is a constructor for Decimal out of unit represents as string
 func NewDecimalFromUnit(u string) (*Decimal, error) {
-	d := new(decimal.Big)
 	switch {
 	//"ns", "us" (or "µs"), "ms", "s", "m", "h"
 	case strings.HasSuffix(u, "ns"), strings.HasSuffix(u, "us"), strings.HasSuffix(u, "µs"), strings.HasSuffix(u, "ms"), strings.HasSuffix(u, "s"), strings.HasSuffix(u, "m"), strings.HasSuffix(u, "h"):
@@ -73,10 +72,15 @@ func NewDecimalFromUnit(u string) (*Decimal, error) {
 		if err != nil {
 			return nil, err
 		}
-		d.SetUint64(uint64(tm))
+		return NewDecimal(int64(tm), 0), nil
+	default:
+		i, err := strconv.ParseInt(u, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return NewDecimal(i, 0), nil
 	}
 
-	return &Decimal{d}, nil
 }
 
 // NewDecimal is a constructor for Decimal, following the one of decimal.Big

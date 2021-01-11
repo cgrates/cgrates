@@ -3198,46 +3198,64 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 	}
 }
 
-/*
 func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("15m")
+	if err != nil {
+		t.Error(err)
+	}
+	fminDeminal, err := utils.NewDecimalFromUnit("5m")
+	if err != nil {
+		t.Error(err)
+	}
+	cDecimal, err := utils.NewDecimalFromUnit("1m30s")
+	if err != nil {
+		t.Error(err)
+	}
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
 				RecurrentFee:  utils.NewDecimal(5, 3),
-				Unit:          15 * time.Minute,
-				Increment:     15 * time.Minute,
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Hour,
-				RecurrentFee:  0.50,
-				Unit:          5 * time.Minute,
-				Increment:     time.Minute + 30*time.Second,
+				RecurrentFee:  utils.NewDecimal(5, 1),
+				Unit:          fminDeminal,
+				Increment:     cDecimal,
 			},
 		},
 	}
-
+	tminDeminal, err := utils.NewDecimalFromUnit("10m")
+	if err != nil {
+		t.Error(err)
+	}
+	ominDeminal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 	rt2 := &engine.Rate{
 		ID: "RATE2",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 15 * time.Minute,
 				RecurrentFee:  utils.NewDecimal(1, 1),
-				Unit:          10 * time.Minute,
-				Increment:     time.Minute,
+				Unit:          tminDeminal,
+				Increment:     ominDeminal,
 			},
 			{
 				IntervalStart: 30 * time.Minute,
-				RecurrentFee:  0.15,
-				Unit:          10 * time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(15, 2),
+				Unit:          tminDeminal,
+				Increment:     ominDeminal,
 			},
 			{
 				IntervalStart: 45 * time.Minute,
 				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          10 * time.Minute,
-				Increment:     time.Minute,
+				Unit:          tminDeminal,
+				Increment:     ominDeminal,
 			},
 		},
 	}
@@ -3333,6 +3351,15 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	if err != nil {
+		t.Error(err)
+	}
+
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
@@ -3436,14 +3463,36 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T) {
+	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	if err != nil {
+		t.Error(err)
+	}
+
+	tminDecimal, err := utils.NewDecimalFromUnit("10m")
+	if err != nil {
+		t.Error(err)
+	}
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
+	tensecDecimal, err := utils.NewDecimalFromUnit("10s")
+	if err != nil {
+		t.Error(err)
+	}
+
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.22,
+				RecurrentFee:  utils.NewDecimal(22, 2),
 				Unit:          minDecimal,
-				Increment:     time.Second,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -3454,10 +3503,18 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 			{
 				IntervalStart: 60 * time.Minute,
 				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          10 * time.Minute,
-				Increment:     10 * time.Second,
+				Unit:          tminDecimal,
+				Increment:     tensecDecimal,
 			},
 		},
+	}
+	twminDecimal, err := utils.NewDecimalFromUnit("20m")
+	if err != nil {
+		t.Error(err)
+	}
+	twsecDecimal, err := utils.NewDecimalFromUnit("20s")
+	if err != nil {
+		t.Error(err)
 	}
 
 	rt3 := &engine.Rate{
@@ -3465,11 +3522,15 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 120 * time.Minute,
-				RecurrentFee:  0.18,
-				Unit:          20 * time.Minute,
-				Increment:     20 * time.Second,
+				RecurrentFee:  utils.NewDecimal(18, 2),
+				Unit:          twminDecimal,
+				Increment:     twsecDecimal,
 			},
 		},
+	}
+	trminDecimal, err := utils.NewDecimalFromUnit("30m")
+	if err != nil {
+		t.Error(err)
 	}
 
 	rt4 := &engine.Rate{
@@ -3477,8 +3538,8 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 180 * time.Minute,
-				RecurrentFee:  0.16,
-				Unit:          30 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(16, 2),
+				Unit:          trminDecimal,
 				Increment:     tsecDecimal,
 			},
 		},
@@ -3580,31 +3641,63 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 }
 
 func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
+	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	if err != nil {
+		t.Error(err)
+	}
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
+	twsecDecimal, err := utils.NewDecimalFromUnit("20s")
+	if err != nil {
+		t.Error(err)
+	}
+	tssecDecimal, err := utils.NewDecimalFromUnit("10s")
+	if err != nil {
+		t.Error(err)
+	}
+	tminDecimal, err := utils.NewDecimalFromUnit("10m")
+	if err != nil {
+		t.Error(err)
+	}
+	twminDecimal, err := utils.NewDecimalFromUnit("20m")
+	if err != nil {
+		t.Error(err)
+	}
+	thminDecimal, err := utils.NewDecimalFromUnit("30m")
+	if err != nil {
+		t.Error(err)
+	}
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.22,
+				RecurrentFee:  utils.NewDecimal(22, 2),
 				Unit:          minDecimal,
-				Increment:     time.Second,
+				Increment:     secDecimal,
 			},
 			{
 				IntervalStart: 60 * time.Minute,
 				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          10 * time.Minute,
-				Increment:     10 * time.Second,
+				Unit:          tminDecimal,
+				Increment:     tssecDecimal,
 			},
 			{
 				IntervalStart: 120 * time.Minute,
-				RecurrentFee:  0.18,
-				Unit:          20 * time.Minute,
-				Increment:     20 * time.Second,
+				RecurrentFee:  utils.NewDecimal(18, 2),
+				Unit:          twminDecimal,
+				Increment:     twsecDecimal,
 			},
 			{
 				IntervalStart: 180 * time.Minute,
-				RecurrentFee:  0.16,
-				Unit:          30 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(16, 2),
+				Unit:          thminDecimal,
 				Increment:     tsecDecimal,
 			},
 		},
@@ -3794,20 +3887,37 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
+	twminDecimal, err := utils.NewDecimalFromUnit("30m")
+	if err != nil {
+		t.Error(err)
+	}
+
+	nminDecimal, err := utils.NewDecimalFromUnit("9m")
+	if err != nil {
+		t.Error(err)
+	}
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.50,
-				Unit:          30 * time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(5, 1),
+				Unit:          twminDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: 24 * time.Hour,
 				RecurrentFee:  utils.NewDecimal(1, 1),
-				Unit:          30 * time.Minute,
-				Increment:     time.Second,
+				Unit:          twminDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -3817,27 +3927,27 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 4*time.Hour + 30*time.Minute,
-				RecurrentFee:  0.45,
-				Unit:          30 * time.Minute,
-				Increment:     9 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(45, 2),
+				Unit:          twminDecimal,
+				Increment:     nminDecimal,
 			},
 			{
 				IntervalStart: 8*time.Hour + 30*time.Minute,
-				RecurrentFee:  0.40,
-				Unit:          30 * time.Minute,
-				Increment:     9 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(4, 1),
+				Unit:          twminDecimal,
+				Increment:     nminDecimal,
 			},
 			{
 				IntervalStart: 16*time.Hour + 30*time.Minute,
-				RecurrentFee:  0.35,
-				Unit:          30 * time.Minute,
-				Increment:     9 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(35, 2),
+				Unit:          twminDecimal,
+				Increment:     nminDecimal,
 			},
 			{
 				IntervalStart: 20*time.Hour + 30*time.Minute,
 				RecurrentFee:  utils.NewDecimal(3, 1),
-				Unit:          30 * time.Minute,
-				Increment:     9 * time.Minute,
+				Unit:          twminDecimal,
+				Increment:     nminDecimal,
 			},
 		},
 	}
@@ -3848,8 +3958,8 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 			{
 				IntervalStart: 12 * time.Hour,
 				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          30 * time.Minute,
-				Increment:     time.Second,
+				Unit:          twminDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -3987,21 +4097,41 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
+	fminDecimal, err := utils.NewDecimalFromUnit("15m")
+	if err != nil {
+		t.Error(err)
+	}
+	eminDecimal, err := utils.NewDecimalFromUnit("11m")
+	if err != nil {
+		t.Error(err)
+	}
+	nminDecimal, err := utils.NewDecimalFromUnit("9m")
+	if err != nil {
+		t.Error(err)
+	}
+	sminDecimal, err := utils.NewDecimalFromUnit("7m")
+	if err != nil {
+		t.Error(err)
+	}
+	fvminDecimal, err := utils.NewDecimalFromUnit("5m")
+	if err != nil {
+		t.Error(err)
+	}
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{},
 			{
 				IntervalStart: 15 * time.Minute,
-				RecurrentFee:  0.50,
-				Unit:          15 * time.Minute,
-				Increment:     11 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(5, 1),
+				Unit:          fminDecimal,
+				Increment:     eminDecimal,
 			},
 			{
 				IntervalStart: 30 * time.Minute,
-				RecurrentFee:  0.40,
-				Unit:          15 * time.Minute,
-				Increment:     9 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(4, 1),
+				Unit:          fminDecimal,
+				Increment:     nminDecimal,
 			},
 		},
 	}
@@ -4012,14 +4142,14 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 			{
 				IntervalStart: 45 * time.Minute,
 				RecurrentFee:  utils.NewDecimal(3, 1),
-				Unit:          15 * time.Minute,
-				Increment:     7 * time.Minute,
+				Unit:          fminDecimal,
+				Increment:     sminDecimal,
 			},
 			{
 				IntervalStart: time.Hour,
 				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          15 * time.Minute,
-				Increment:     5 * time.Minute,
+				Unit:          fminDecimal,
+				Increment:     fvminDecimal,
 			},
 		},
 	}
@@ -4098,26 +4228,50 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
+	tsecDecimal, err := utils.NewDecimalFromUnit("2s")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
+	tminDecimal, err := utils.NewDecimalFromUnit("2m")
+	if err != nil {
+		t.Error(err)
+	}
+	sminDecimal, err := utils.NewDecimalFromUnit("6m")
+	if err != nil {
+		t.Error(err)
+	}
+	nminDecimal, err := utils.NewDecimalFromUnit("9m")
+	if err != nil {
+		t.Error(err)
+	}
+	eminDecimal, err := utils.NewDecimalFromUnit("8m")
+	if err != nil {
+		t.Error(err)
+	}
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.50,
-				Unit:          2 * time.Minute,
-				Increment:     2 * time.Second,
+				RecurrentFee:  utils.NewDecimal(5, 1),
+				Unit:          tminDecimal,
+				Increment:     tsecDecimal,
 			},
 			{
 				IntervalStart: 12*time.Minute + 35*time.Second,
-				RecurrentFee:  0.40,
-				Unit:          6 * time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(4, 1),
+				Unit:          sminDecimal,
+				Increment:     secDecimal,
 			},
 			{
 				IntervalStart: time.Hour + 37*time.Minute + 19*time.Second,
 				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          9 * time.Minute,
-				Increment:     6 * time.Minute,
+				Unit:          nminDecimal,
+				Increment:     sminDecimal,
 			},
 		},
 	}
@@ -4129,8 +4283,8 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 			{
 				IntervalStart: 38*time.Minute + 15*time.Second,
 				RecurrentFee:  utils.NewDecimal(1, 1),
-				Unit:          8 * time.Minute,
-				Increment:     time.Second,
+				Unit:          eminDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -4208,14 +4362,34 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
+	tsecDecimal, err := utils.NewDecimalFromUnit("2s")
+	if err != nil {
+		t.Error(err)
+	}
+	tminDecimal, err := utils.NewDecimalFromUnit("2m")
+	if err != nil {
+		t.Error(err)
+	}
+	ttminDecimal, err := utils.NewDecimalFromUnit("10m")
+	if err != nil {
+		t.Error(err)
+	}
+	fsecDecimal, err := utils.NewDecimalFromUnit("4s")
+	if err != nil {
+		t.Error(err)
+	}
+	fminDecimal, err := utils.NewDecimalFromUnit("4m")
+	if err != nil {
+		t.Error(err)
+	}
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.50,
-				Unit:          2 * time.Minute,
-				Increment:     2 * time.Second,
+				RecurrentFee:  utils.NewDecimal(5, 1),
+				Unit:          tminDecimal,
+				Increment:     tsecDecimal,
 			},
 		},
 	}
@@ -4226,27 +4400,27 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 20 * time.Minute,
-				RecurrentFee:  0.40,
-				Unit:          10 * time.Minute,
-				Increment:     2 * time.Second,
+				RecurrentFee:  utils.NewDecimal(4, 1),
+				Unit:          ttminDecimal,
+				Increment:     tsecDecimal,
 			},
 			{
 				IntervalStart: 40 * time.Minute,
 				RecurrentFee:  utils.NewDecimal(3, 1),
-				Unit:          10 * time.Minute,
-				Increment:     4 * time.Second,
+				Unit:          ttminDecimal,
+				Increment:     fsecDecimal,
 			},
 			{
 				IntervalStart: time.Hour,
 				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          10 * time.Minute,
-				Increment:     2 * time.Minute,
+				Unit:          ttminDecimal,
+				Increment:     tminDecimal,
 			},
 			{
 				IntervalStart: 2 * time.Hour,
 				RecurrentFee:  utils.NewDecimal(1, 1),
-				Unit:          10 * time.Minute,
-				Increment:     4 * time.Minute,
+				Unit:          ttminDecimal,
+				Increment:     fminDecimal,
 			},
 		},
 	}
@@ -4419,14 +4593,26 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	hourDecimal, err := utils.NewDecimalFromUnit("1h")
+	if err != nil {
+		t.Error(err)
+	}
+	fminDecimal, err := utils.NewDecimalFromUnit("17m")
+	if err != nil {
+		t.Error(err)
+	}
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.50,
-				Unit:          time.Hour,
-				Increment:     17 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(5, 1),
+				Unit:          hourDecimal,
+				Increment:     fminDecimal,
 			},
 		},
 	}
@@ -4437,9 +4623,9 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 168 * time.Hour,
-				RecurrentFee:  0.50,
+				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          minDecimal,
-				Increment:     time.Minute,
+				Increment:     minDecimal,
 			},
 		},
 	}
@@ -4493,20 +4679,36 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
+	fminDecimal, err := utils.NewDecimalFromUnit("5m")
+	if err != nil {
+		t.Error(err)
+	}
+	tminDecimal, err := utils.NewDecimalFromUnit("10m")
+	if err != nil {
+		t.Error(err)
+	}
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
 				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          5 * time.Minute,
-				Increment:     time.Minute,
+				Unit:          fminDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: 20 * time.Minute,
-				RecurrentFee:  0.40,
+				RecurrentFee:  utils.NewDecimal(4, 1),
 				Unit:          minDecimal,
-				Increment:     time.Second,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -4517,14 +4719,14 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 			{
 				IntervalStart: 50 * time.Minute,
 				RecurrentFee:  utils.NewDecimal(1, 1),
-				Unit:          10 * time.Minute,
-				Increment:     time.Minute,
+				Unit:          tminDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Hour,
 				RecurrentFee:  utils.NewDecimal(5, 3),
-				Unit:          5 * time.Minute,
-				Increment:     time.Second,
+				Unit:          fminDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -4582,4 +4784,3 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
 	}
 }
-*/

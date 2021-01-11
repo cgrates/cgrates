@@ -3227,16 +3227,20 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile, err error) {
 		MaxCostStrategy:    rp.MaxCostStrategy,
 		Rates:              make(map[string]*utils.TPRate),
 	}
-	minCostF, ok := rp.MinCost.Float64()
-	if !ok {
-		return nil, fmt.Errorf("cannot convert <%+v> to float64", rp.MinCost)
+	if rp.MinCost != nil {
+		minCostF, ok := rp.MinCost.Float64()
+		if !ok {
+			return nil, fmt.Errorf("cannot convert <%+v> to float64", rp.MinCost)
+		}
+		tpRp.MinCost = minCostF
 	}
-	tpRp.MinCost = minCostF
-	maxCostF, ok := rp.MaxCost.Float64()
-	if !ok {
-		return nil, fmt.Errorf("cannot convert <%+v> to float64", rp.MaxCost)
+	if rp.MaxCost != nil {
+		maxCostF, ok := rp.MaxCost.Float64()
+		if !ok {
+			return nil, fmt.Errorf("cannot convert <%+v> to float64", rp.MaxCost)
+		}
+		tpRp.MaxCost = maxCostF
 	}
-	tpRp.MaxCost = maxCostF
 
 	for key, rate := range rp.Rates {
 		tpRp.Rates[key] = &utils.TPRate{
@@ -3495,7 +3499,7 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 		ActivationInterval: new(utils.TPActivationInterval),
 		Weight:             ap.Weight,
 		Schedule:           ap.Schedule,
-		Targets:            make([]*utils.TPActionTarget, len(ap.Targets)),
+		Targets:            make([]*utils.TPActionTarget, 0, len(ap.Targets)),
 		Actions:            make([]*utils.TPAPAction, len(ap.Actions)),
 	}
 	for i, fli := range ap.FilterIDs {
