@@ -1628,6 +1628,14 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	eRatePrf := &engine.RateProfile{
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
@@ -1635,8 +1643,8 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
+		MinCost:          utils.NewDecimal(1, 1),
+		MaxCost:          utils.NewDecimal(6, 1),
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
@@ -1646,17 +1654,17 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-
-						RecurrentFee: 0.12,
-						Unit:         time.Minute,
-						Increment:    time.Minute,
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						FixedFee:      1.234,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(1234, 3),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -1667,10 +1675,10 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						FixedFee:      0.089,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(89, 3),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -1681,10 +1689,10 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						FixedFee:      0.0564,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(564, 4),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -1836,6 +1844,14 @@ cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	eRatePrf := &engine.RateProfile{
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
@@ -1843,8 +1859,8 @@ cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
+		MinCost:          utils.NewDecimal(1, 1),
+		MaxCost:          utils.NewDecimal(6, 1),
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
@@ -1854,16 +1870,17 @@ cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						FixedFee:      0.4,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						FixedFee:      utils.NewDecimal(4, 1),
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -1902,8 +1919,8 @@ cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
+		MinCost:          utils.NewDecimal(1, 1),
+		MaxCost:          utils.NewDecimal(6, 1),
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
@@ -1913,16 +1930,17 @@ cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						FixedFee:      0.4,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						FixedFee:      utils.NewDecimal(4, 1),
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -1933,9 +1951,10 @@ cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -1946,9 +1965,10 @@ cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -2002,8 +2022,6 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
@@ -2013,15 +2031,9 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -2032,9 +2044,6 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -2045,9 +2054,6 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -2063,9 +2069,8 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -2074,15 +2079,9 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -2093,9 +2092,6 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -2106,9 +2102,6 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -2150,9 +2143,8 @@ cgrates.org,RP1,
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -2161,15 +2153,9 @@ cgrates.org,RP1,
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -2180,9 +2166,6 @@ cgrates.org,RP1,
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -2222,9 +2205,8 @@ cgrates.org,RP1,
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -2233,15 +2215,9 @@ cgrates.org,RP1,
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -2265,8 +2241,6 @@ cgrates.org,RP1,
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates:            map[string]*engine.Rate{},
 	}

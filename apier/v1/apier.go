@@ -1910,7 +1910,11 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 				if err != nil {
 					return err
 				}
-				for _, model := range engine.APItoModelTPRateProfile(engine.RateProfileToAPI(rPrf)) {
+				tpRP, err := engine.RateProfileToAPI(rPrf)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelTPRateProfile(tpRP) {
 					if record, err := engine.CsvDump(model); err != nil {
 						return err
 					} else if err := csvWriter.Write(record); err != nil {

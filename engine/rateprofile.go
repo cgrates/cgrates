@@ -38,13 +38,10 @@ type RateProfile struct {
 	Weight             float64
 	RoundingDecimals   int
 	RoundingMethod     string
-	MinCost            float64
-	MaxCost            float64
+	MinCost            *utils.Decimal
+	MaxCost            *utils.Decimal
 	MaxCostStrategy    string
 	Rates              map[string]*Rate
-
-	minCost *decimal.Big
-	maxCost *decimal.Big
 }
 
 func (rp *RateProfile) TenantID() string {
@@ -52,8 +49,6 @@ func (rp *RateProfile) TenantID() string {
 }
 
 func (rp *RateProfile) Compile() (err error) {
-	rp.minCost = new(decimal.Big).SetFloat64(rp.MinCost)
-	rp.maxCost = new(decimal.Big).SetFloat64(rp.MaxCost)
 	for _, rtP := range rp.Rates {
 		rtP.uID = utils.ConcatenatedKey(rp.Tenant, rp.ID, rtP.ID)
 		if err = rtP.Compile(); err != nil {
@@ -83,15 +78,10 @@ func (rt *Rate) UID() string {
 
 type IntervalRate struct {
 	IntervalStart time.Duration // Starting point when the Rate kicks in
-	FixedFee      float64
-	RecurrentFee  float64
-	Unit          time.Duration // RateUnit
-	Increment     time.Duration // RateIncrement
-
-	decFixedFee *decimal.Big // cached version of the FixedFee converted to Decimal for operations
-	decRecFee   *decimal.Big // cached version of the RecurrentFee converted to Decimal for operations
-	decUnit     *decimal.Big // cached version of the Unit converted to Decimal for operations
-	decIcrm     *decimal.Big // cached version of the Increment converted to Decimal for operations
+	FixedFee      *utils.Decimal
+	RecurrentFee  *utils.Decimal
+	Unit          *utils.Decimal // RateUnit
+	Increment     *utils.Decimal // RateIncrement
 }
 
 func (rt *Rate) Compile() (err error) {
@@ -101,12 +91,6 @@ func (rt *Rate) Compile() (err error) {
 	}
 	if rt.sched, err = cron.ParseStandard(aTime); err != nil {
 		return
-	}
-	for _, iRt := range rt.IntervalRates {
-		iRt.decFixedFee = new(decimal.Big).SetFloat64(iRt.FixedFee)
-		iRt.decRecFee = new(decimal.Big).SetFloat64(iRt.RecurrentFee)
-		iRt.decUnit = new(decimal.Big).SetUint64(uint64(iRt.Unit))
-		iRt.decIcrm = new(decimal.Big).SetUint64(uint64(iRt.Increment))
 	}
 	return
 }
@@ -133,26 +117,6 @@ func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time
 			"maximum runTime iterations reached for Rate: <%+v>, sTime: <%+v>, eTime: <%+v>",
 			rt, sTime, eTime))
 	return nil, utils.ErrMaxIterationsReached
-}
-
-// DecimalRecurrentFee exports the decRecFee variable
-func (rIt *IntervalRate) DecimalRecurrentFee() *decimal.Big {
-	return rIt.decRecFee
-}
-
-// DecimalFixedFee exports the decFixedFee variable
-func (rIt *IntervalRate) DecimalFixedFee() *decimal.Big {
-	return rIt.decFixedFee
-}
-
-// DecimalUnit exports the decUnit variable
-func (rIt *IntervalRate) DecimalUnit() *decimal.Big {
-	return rIt.decUnit
-}
-
-// DecimalIncrement exports the decUnit variable
-func (rIt *IntervalRate) DecimalIncrement() *decimal.Big {
-	return rIt.decIcrm
 }
 
 // RateProfileWithOpts is used in replicatorV1 for dispatcher
@@ -268,13 +232,13 @@ func (rIcr *RateSIncrement) Cost() *decimal.Big {
 	if rIcr.cost == nil {
 		icrRt := rIcr.Rate.IntervalRates[rIcr.IntervalRateIndex]
 		if rIcr.Usage == utils.InvalidDuration { // FixedFee
-			rIcr.cost = icrRt.DecimalFixedFee()
+			rIcr.cost = icrRt.FixedFee.Big
 		} else {
-			rIcr.cost = icrRt.DecimalRecurrentFee()
+			rIcr.cost = icrRt.RecurrentFee.Big
 			if icrRt.Unit != icrRt.Increment {
 				rIcr.cost = utils.DivideBig(
-					utils.MultiplyBig(rIcr.cost, icrRt.DecimalIncrement()),
-					icrRt.DecimalUnit())
+					utils.MultiplyBig(rIcr.cost, icrRt.Increment.Big),
+					icrRt.Unit.Big)
 			}
 			if rIcr.CompressFactor != 1 {
 				rIcr.cost = utils.MultiplyBig(

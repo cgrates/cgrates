@@ -4292,6 +4292,14 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 }
 
 func TestRateProfileToAPI(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &RateProfile{
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
@@ -4299,8 +4307,8 @@ func TestRateProfileToAPI(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
+		MinCost:          utils.NewDecimal(1, 1),
+		MaxCost:          utils.NewDecimal(6, 1),
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
 			"RT_WEEK": {
@@ -4310,16 +4318,16 @@ func TestRateProfileToAPI(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						FixedFee:      0.00234,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(234, 5),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -4330,9 +4338,9 @@ func TestRateProfileToAPI(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -4343,9 +4351,9 @@ func TestRateProfileToAPI(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -4374,15 +4382,15 @@ func TestRateProfileToAPI(t *testing.T) {
 					{
 						IntervalStart: "0s",
 						RecurrentFee:  0.12,
-						Unit:          "1m0s",
-						Increment:     "1m0s",
+						Unit:          "60000000000",
+						Increment:     "1000000000",
 					},
 					{
 						IntervalStart: "1m0s",
 						FixedFee:      0.00234,
 						RecurrentFee:  0.06,
-						Unit:          "1m0s",
-						Increment:     "1s",
+						Unit:          "60000000000",
+						Increment:     "1000000000",
 					},
 				},
 			},
@@ -4394,8 +4402,8 @@ func TestRateProfileToAPI(t *testing.T) {
 					{
 						IntervalStart: "0s",
 						RecurrentFee:  0.06,
-						Unit:          "1m0s",
-						Increment:     "1s",
+						Unit:          "60000000000",
+						Increment:     "1000000000",
 					},
 				},
 			},
@@ -4407,19 +4415,29 @@ func TestRateProfileToAPI(t *testing.T) {
 					{
 						IntervalStart: "0s",
 						RecurrentFee:  0.06,
-						Unit:          "1m0s",
-						Increment:     "1s",
+						Unit:          "60000000000",
+						Increment:     "1000000000",
 					},
 				},
 			},
 		},
 	}
-	if rcv := RateProfileToAPI(rPrf); !reflect.DeepEqual(rcv, eTPRatePrf) {
+	if rcv, err := RateProfileToAPI(rPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eTPRatePrf) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eTPRatePrf), utils.ToJSON(rcv))
 	}
 }
 
 func TestAPIToRateProfile(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	eRprf := &RateProfile{
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
@@ -4427,8 +4445,8 @@ func TestAPIToRateProfile(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
+		MinCost:          utils.NewDecimal(1, 1),
+		MaxCost:          utils.NewDecimal(6, 1),
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
 			"RT_WEEK": {
@@ -4438,16 +4456,17 @@ func TestAPIToRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						FixedFee:      2.3451,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						FixedFee:      utils.NewDecimal(23451, 4),
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -4458,9 +4477,10 @@ func TestAPIToRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -4471,9 +4491,10 @@ func TestAPIToRateProfile(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -5042,8 +5063,8 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
+		MinCost:          utils.NewDecimal(1, 1),
+		MaxCost:          utils.NewDecimal(6, 1),
 		MaxCostStrategy:  "*free",
 		Rates:            map[string]*Rate{},
 	}
@@ -5064,138 +5085,10 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 		MaxCostStrategy:  "*free",
 		Rates:            map[string]*utils.TPRate{},
 	}
-	result := RateProfileToAPI(testProfile)
-	if !reflect.DeepEqual(expStruct, result) {
+	if result, err := RateProfileToAPI(testProfile); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expStruct, result) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
-	}
-}
-
-func TestModelHelpersAPItoRateProfileErrorTime(t *testing.T) {
-	testStruct := &utils.TPRateProfile{
-		TPid:      "",
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "cat",
-			ExpiryTime:     "cat2",
-		},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
-		Rates:            map[string]*utils.TPRate{},
-	}
-	_, err := APItoRateProfile(testStruct, utils.EmptyString)
-	if err == nil || err.Error() != "Unsupported time format" {
-		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
-	}
-}
-
-func TestModelHelpersAPItoRateProfileError1(t *testing.T) {
-	testStruct := &utils.TPRateProfile{
-		TPid:             "",
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
-		Rates: map[string]*utils.TPRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.TPIntervalRate{
-					{
-						IntervalStart: "cat",
-						RecurrentFee:  0.12,
-						Unit:          "1m0s",
-						Increment:     "1m0s",
-					},
-				},
-			},
-		},
-	}
-
-	_, err := APItoRateProfile(testStruct, utils.EmptyString)
-	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
-		t.Errorf("\n<time: invalid duration \"cat\">,\n Received <%+v>", err)
-	}
-}
-
-func TestModelHelpersAPItoRateProfileError2(t *testing.T) {
-	testStruct := &utils.TPRateProfile{
-		TPid:             "",
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
-		Rates: map[string]*utils.TPRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.TPIntervalRate{
-					{
-						IntervalStart: "0s",
-						RecurrentFee:  0.12,
-						Unit:          "cat",
-						Increment:     "1m0s",
-					},
-				},
-			},
-		},
-	}
-
-	_, err := APItoRateProfile(testStruct, utils.EmptyString)
-	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
-		t.Errorf("\n<time: invalid duration \"cat\">,\n Received <%+v>", err)
-	}
-}
-
-func TestModelHelpersAPItoRateProfileError3(t *testing.T) {
-	testStruct := &utils.TPRateProfile{
-		TPid:             "",
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
-		Rates: map[string]*utils.TPRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.TPIntervalRate{
-					{
-						IntervalStart: "0s",
-						RecurrentFee:  0.12,
-						Unit:          "1s",
-						Increment:     "cat",
-					},
-				},
-			},
-		},
-	}
-
-	_, err := APItoRateProfile(testStruct, utils.EmptyString)
-	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
-		t.Errorf("\n<time: invalid duration \"cat\">,\n Received <%+v>", err)
 	}
 }
 
