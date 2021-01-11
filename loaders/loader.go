@@ -408,28 +408,16 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetStatQueueProfile(stsPrf, true); err != nil {
 					return err
 				}
-				metrics := make(map[string]engine.StatMetric)
-				for _, metric := range stsPrf.Metrics {
-					stsMetric, err := engine.NewStatMetric(metric.MetricID, stsPrf.MinItems, metric.FilterIDs)
-					if err != nil {
-						return utils.APIErrorHandler(err)
-					}
-					metrics[metric.MetricID] = stsMetric
+				var sq *engine.StatQueue
+				if sq, err = engine.NewStatQueue(stsPrf.Tenant, stsPrf.ID, stsPrf.Metrics,
+					stsPrf.MinItems); err != nil {
+					return utils.APIErrorHandler(err)
 				}
 				var ttl *time.Duration
 				if stsPrf.TTL > 0 {
 					ttl = &stsPrf.TTL
 				}
-				sq := &engine.StatQueue{
-					Tenant: stsPrf.Tenant,
-					ID:     stsPrf.ID,
-				}
-				if !stsPrf.Stored { // for not stored queues create the metrics
-					if sq, err = engine.NewStatQueue(stsPrf.Tenant, stsPrf.ID, stsPrf.Metrics,
-						stsPrf.MinItems); err != nil {
-						return err
-					}
-				}
+
 				// for non stored we do not save the metrics
 				if err := ldr.dm.SetStatQueue(sq, stsPrf.Metrics,
 					stsPrf.MinItems, ttl, stsPrf.QueueLength,
@@ -1111,6 +1099,7 @@ func (ldr *Loader) handleFolder(stopChan chan struct{}) {
 		}
 	}
 }
+
 func (ldr *Loader) processFile(_, itmID string) (err error) {
 	loaderType := ldr.getLdrType(itmID)
 	if len(loaderType) == 0 {
