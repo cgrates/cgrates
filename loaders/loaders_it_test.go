@@ -261,7 +261,7 @@ NOT_UINT
 		utils.MetaFilters: {
 			{Tag: "PK",
 				Path:  "PK",
-				Type:  utils.utils.MetaComposed,
+				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.FieldsSep)},
 		},
 	}

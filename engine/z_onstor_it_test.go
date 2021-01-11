@@ -2326,18 +2326,19 @@ func testOnStorITAccountProfile(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
 		},
 		Weight: 2,
-		Balances: []*utils.Balance{{
-			ID:        "VoiceBalance",
-			FilterIDs: []string{"FLTR_RES_GR2"},
-			Weight:    10,
-			Type:      utils.MetaVoice,
-			Units: &utils.Decimal{
-				new(decimal.Big).SetUint64(10),
-			},
-			Opts: map[string]interface{}{
-				"key1": "val1",
-			},
-		}},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"FLTR_RES_GR2"},
+				Weight:    10,
+				Type:      utils.MetaVoice,
+				Units: &utils.Decimal{
+					new(decimal.Big).SetUint64(10),
+				},
+				Opts: map[string]interface{}{
+					"key1": "val1",
+				},
+			}},
 		ThresholdIDs: []string{"test_thrs"},
 	}
 
