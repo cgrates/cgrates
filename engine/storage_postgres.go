@@ -30,7 +30,7 @@ import (
 // NewPostgresStorage returns the posgres storDB
 func NewPostgresStorage(host, port, name, user, password, sslmode string, maxConn, maxIdleConn, connMaxLifetime int) (*SQLStorage, error) {
 	connectString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", host, port, name, user, password, sslmode)
-	db, err := gorm.Open(postgres.Open(connectString), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(connectString), &gorm.Config{AllowGlobalUpdate: true})
 	if err != nil {
 		return nil, err
 	}

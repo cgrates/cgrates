@@ -102,7 +102,7 @@ func (rdr *SQLEventReader) Serve() (err error) {
 		return fmt.Errorf("db type <%s> not supported", rdr.connType)
 	}
 	var db *gorm.DB
-	if db, err = gorm.Open(dialect, &gorm.Config{}); err != nil {
+	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
 		return
 	}
 	var sqlDB *sql.DB
@@ -326,7 +326,7 @@ func (rdr *SQLEventReader) postCDR(in []interface{}) (err error) {
 		return fmt.Errorf("db type <%s> not supported", rdr.expConnType)
 	}
 	var db *gorm.DB
-	if db, err = gorm.Open(dialect, &gorm.Config{}); err != nil {
+	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
 		return
 	}
 	var sqlDB *sql.DB
@@ -339,9 +339,7 @@ func (rdr *SQLEventReader) postCDR(in []interface{}) (err error) {
 		return
 	}
 	tx := db.Begin()
-	d := tx.Exec(sqlStatement, in...)
-	d.Error
-	if err != nil {
+	if err = tx.Exec(sqlStatement, in...).Error; err != nil {
 		tx.Rollback()
 		if strings.Contains(err.Error(), "1062") || strings.Contains(err.Error(), "duplicate key") { // returns 1062/pq when key is duplicated
 			return utils.ErrExists

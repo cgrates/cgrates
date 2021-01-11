@@ -153,7 +153,7 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 
 	//WRITE
 	var actPrf = []*utils.TPAccountProfile{
-		&utils.TPAccountProfile{
+		{
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "1001",
