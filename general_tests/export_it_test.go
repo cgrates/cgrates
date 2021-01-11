@@ -365,6 +365,15 @@ func testExpVerifyRoutes(t *testing.T) {
 
 func testExpVerifyRateProfiles(t *testing.T) {
 	var reply *engine.RateProfile
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
+
 	splPrf := &engine.RateProfile{
 		Tenant:             "cgrates.org",
 		ID:                 "RT_SPECIAL_1002",
@@ -373,8 +382,8 @@ func testExpVerifyRateProfiles(t *testing.T) {
 		Weight:             10,
 		RoundingDecimals:   4,
 		RoundingMethod:     utils.MetaRoundingUp,
-		MinCost:            0,
-		MaxCost:            0,
+		MinCost:            utils.NewDecimal(0, 0),
+		MaxCost:            utils.NewDecimal(0, 0),
 		MaxCostStrategy:    utils.MetaMaxCostFree,
 		Rates: map[string]*engine.Rate{
 			"RT_ALWAYS": {
@@ -386,9 +395,10 @@ func testExpVerifyRateProfiles(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0 * time.Second,
-						RecurrentFee:  0.01,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						FixedFee:      utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
