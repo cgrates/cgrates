@@ -23,6 +23,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/ericlagergren/decimal"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -217,10 +219,10 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 			} else {
 				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart
 			}
-			if iRt.Increment == time.Duration(0) {
+			if iRt.Increment.Cmp(decimal.New(0, 0)) == 0 {
 				return nil, fmt.Errorf("zero increment to be charged within rate: <%s>", rt.UID())
 			}
-			if rt.IntervalRates[j].FixedFee != 0 { // Add FixedFee
+			if rt.IntervalRates[j].FixedFee != nil && rt.IntervalRates[j].FixedFee.Cmp(decimal.New(0, 0)) != 0 { // Add FixedFee
 				rIcmts = append(rIcmts, &engine.RateSIncrement{
 					UsageStart:        iRtUsageSIdx,
 					Rate:              rt.Rate,
@@ -231,7 +233,10 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage time.Duratio
 			}
 			iRtUsage := iRtUsageEIdx - iRtUsageSIdx
 			intUsage := int64(iRtUsage)
-			intIncrm := int64(iRt.Increment)
+			intIncrm, ok := iRt.Increment.Int64()
+			if !ok {
+				return nil, fmt.Errorf("<%s> cannot convert <%+v> increment to Int64", utils.RateS, iRt.Increment)
+			}
 			cmpFactor := intUsage / intIncrm
 			if intUsage%intIncrm != 0 {
 				cmpFactor++ // int division has used math.Floor, need Ceil

@@ -167,11 +167,21 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 	}
 	rpCost = &engine.RateProfileCost{
 		ID:               rtPfl.ID,
-		MinCost:          rtPfl.MinCost,
-		MaxCost:          rtPfl.MaxCost,
 		RoundingDecimals: rtPfl.RoundingDecimals,
 		RoundingMethod:   rtPfl.RoundingMethod,
 	}
+	var ok bool
+	if rtPfl.MinCost != nil {
+		if rpCost.MinCost, ok = rtPfl.MinCost.Float64(); !ok {
+			return nil, fmt.Errorf("<%s> cannot convert <%+v> min cost to Float64", utils.RateS, rtPfl.MinCost)
+		}
+	}
+	if rtPfl.MaxCost != nil {
+		if rpCost.MaxCost, ok = rtPfl.MaxCost.Float64(); !ok {
+			return nil, fmt.Errorf("<%s> cannot convert <%+v> max cost to Float64", utils.RateS, rtPfl.MaxCost)
+		}
+	}
+
 	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, 0, usage); err != nil {
 		return nil, err
 	}

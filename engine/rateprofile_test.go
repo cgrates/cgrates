@@ -31,6 +31,14 @@ import (
 )
 
 func TestRateProfileSort(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RP1",
@@ -42,15 +50,15 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -61,27 +69,27 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Second,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Second,
-						RecurrentFee:  0.19,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(19, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 					{
 						IntervalStart: 15 * time.Second,
-						RecurrentFee:  0.4,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(4, 1),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 					{
 						IntervalStart: 10 * time.Second,
-						RecurrentFee:  0.27,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(27, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -92,21 +100,21 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 10 * time.Second,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.18,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(18, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 					{
 						IntervalStart: 18 * time.Second,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -117,9 +125,9 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -136,15 +144,15 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -155,21 +163,21 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 10 * time.Second,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 					{
 						IntervalStart: 18 * time.Second,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.18,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(18, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -180,27 +188,27 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: time.Second,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Second,
-						RecurrentFee:  0.19,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(19, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 					{
 						IntervalStart: 10 * time.Second,
-						RecurrentFee:  0.27,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(27, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 					{
 						IntervalStart: 15 * time.Second,
-						RecurrentFee:  0.4,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(4, 1),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -211,9 +219,9 @@ func TestRateProfileSort(t *testing.T) {
 				IntervalRates: []*IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -251,10 +259,8 @@ func TestRateProfileCompile(t *testing.T) {
 				uID:             utils.ConcatenatedKey(rt.Tenant, rt.ID, "RT_CHRISTMAS"),
 			},
 		},
-		Tenant:  "cgrates.org",
-		ID:      "RTP1",
-		minCost: new(decimal.Big).SetFloat64(rt.MinCost),
-		maxCost: new(decimal.Big).SetFloat64(rt.MaxCost),
+		Tenant: "cgrates.org",
+		ID:     "RTP1",
 	}
 	if err := rt.Compile(); err != nil {
 		t.Error(err)
@@ -468,20 +474,28 @@ func TestRateProfileRunTimesPassingActivationTIme(t *testing.T) {
 }
 
 func TestCostForIntervals(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rt0 := &Rate{
 		ID: "RATE0",
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: time.Duration(0),
-				Unit:          time.Duration(1 * time.Minute),
-				Increment:     time.Duration(1 * time.Minute),
-				RecurrentFee:  2.4,
+				Unit:          minDecimal,
+				Increment:     minDecimal,
+				RecurrentFee:  utils.NewDecimal(24, 1),
 			},
 			{
 				IntervalStart: time.Duration(60 * time.Second),
-				Unit:          time.Duration(1 * time.Minute),
-				Increment:     time.Duration(1 * time.Second),
-				RecurrentFee:  2.4,
+				Unit:          minDecimal,
+				Increment:     secDecimal,
+				RecurrentFee:  utils.NewDecimal(24, 1),
 			},
 		},
 	}
@@ -492,16 +506,16 @@ func TestCostForIntervals(t *testing.T) {
 			{
 
 				IntervalStart: time.Duration(0),
-				Unit:          time.Duration(1 * time.Minute),
-				Increment:     time.Duration(1 * time.Second),
-				RecurrentFee:  1.2,
+				Unit:          minDecimal,
+				Increment:     secDecimal,
+				RecurrentFee:  utils.NewDecimal(12, 1),
 			},
 			{
 
 				IntervalStart: time.Duration(2 * time.Minute),
-				Unit:          time.Duration(1 * time.Minute),
-				Increment:     time.Duration(1 * time.Second),
-				RecurrentFee:  0.6,
+				Unit:          minDecimal,
+				Increment:     secDecimal,
+				RecurrentFee:  utils.NewDecimal(6, 1),
 			},
 		},
 	}
@@ -555,21 +569,29 @@ func TestCostForIntervals(t *testing.T) {
 }
 
 func TestCostForIntervalsWIthFixedFee(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rt0 := &Rate{
 		ID: "RATE0",
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: time.Duration(0),
-				FixedFee:      0.4,
-				RecurrentFee:  2.4,
-				Unit:          time.Duration(1 * time.Minute),
-				Increment:     time.Duration(1 * time.Minute),
+				FixedFee:      utils.NewDecimal(4, 1),
+				RecurrentFee:  utils.NewDecimal(24, 1),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Duration(60 * time.Second),
-				RecurrentFee:  2.4,
-				Unit:          time.Duration(1 * time.Minute),
-				Increment:     time.Duration(1 * time.Second),
+				RecurrentFee:  utils.NewDecimal(24, 1),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -580,17 +602,16 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 			{
 
 				IntervalStart: time.Duration(0),
-				FixedFee:      0.2,
-				RecurrentFee:  1.2,
-				Unit:          time.Duration(1 * time.Minute),
-				Increment:     time.Duration(1 * time.Second),
+				FixedFee:      utils.NewDecimal(2, 1),
+				RecurrentFee:  utils.NewDecimal(12, 1),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 			{
-
 				IntervalStart: time.Duration(2 * time.Minute),
-				RecurrentFee:  0.6,
-				Unit:          time.Duration(1 * time.Minute),
-				Increment:     time.Duration(1 * time.Second),
+				RecurrentFee:  utils.NewDecimal(6, 1),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -698,6 +719,14 @@ func TestRateProfileCostCorrectCostMaxCost(t *testing.T) {
 }
 
 func TestRateSIncrementCompressEquals(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -705,15 +734,15 @@ func TestRateSIncrementCompressEquals(t *testing.T) {
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.06,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(6, 3),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -738,6 +767,10 @@ func TestRateSIncrementCompressEquals(t *testing.T) {
 }
 
 func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -745,9 +778,9 @@ func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 		},
 		uID: "ID",
@@ -759,9 +792,9 @@ func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 		},
 		uID: "ID2",
@@ -786,6 +819,10 @@ func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
 	}
 }
 func TestRateSIncrementCompressEqualsCase2(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -793,9 +830,9 @@ func TestRateSIncrementCompressEqualsCase2(t *testing.T) {
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 		},
 	}
@@ -820,6 +857,10 @@ func TestRateSIncrementCompressEqualsCase2(t *testing.T) {
 }
 
 func TestRateSIncrementCompressEqualsCase3(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -827,9 +868,9 @@ func TestRateSIncrementCompressEqualsCase3(t *testing.T) {
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 		},
 	}
@@ -854,6 +895,14 @@ func TestRateSIncrementCompressEqualsCase3(t *testing.T) {
 }
 
 func TestRateSIntervalCompressEqualsCase1(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -861,15 +910,15 @@ func TestRateSIntervalCompressEqualsCase1(t *testing.T) {
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.06,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(6, 3),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -914,6 +963,14 @@ func TestRateSIntervalCompressEqualsCase1(t *testing.T) {
 }
 
 func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -921,15 +978,15 @@ func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.06,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(6, 3),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -940,15 +997,15 @@ func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.06,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(6, 3),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -1000,6 +1057,11 @@ func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
 }
 
 func TestRateSIntervalCompressEqualsCase3(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+
 	rate1 := &Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -1007,9 +1069,9 @@ func TestRateSIntervalCompressEqualsCase3(t *testing.T) {
 		IntervalRates: []*IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 		},
 	}

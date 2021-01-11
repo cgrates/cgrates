@@ -3167,10 +3167,14 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 		Weight:           tpRp.Weight,
 		RoundingMethod:   tpRp.RoundingMethod,
 		RoundingDecimals: tpRp.RoundingDecimals,
-		MinCost:          tpRp.MinCost,
-		MaxCost:          tpRp.MaxCost,
 		MaxCostStrategy:  tpRp.MaxCostStrategy,
 		Rates:            make(map[string]*Rate),
+	}
+	if rp.MinCost, err = utils.NewDecimalFromFloat64(tpRp.MinCost); err != nil {
+		return
+	}
+	if rp.MaxCost, err = utils.NewDecimalFromFloat64(tpRp.MaxCost); err != nil {
+		return
 	}
 	for i, stp := range tpRp.FilterIDs {
 		rp.FilterIDs[i] = stp
@@ -3194,12 +3198,16 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 			if rp.Rates[key].IntervalRates[i].IntervalStart, err = utils.ParseDurationWithNanosecs(iRate.IntervalStart); err != nil {
 				return nil, err
 			}
-			rp.Rates[key].IntervalRates[i].FixedFee = iRate.FixedFee
-			rp.Rates[key].IntervalRates[i].RecurrentFee = iRate.RecurrentFee
-			if rp.Rates[key].IntervalRates[i].Unit, err = utils.ParseDurationWithNanosecs(iRate.Unit); err != nil {
+			if rp.Rates[key].IntervalRates[i].FixedFee, err = utils.NewDecimalFromFloat64(iRate.FixedFee); err != nil {
+				return
+			}
+			if rp.Rates[key].IntervalRates[i].RecurrentFee, err = utils.NewDecimalFromFloat64(iRate.RecurrentFee); err != nil {
+				return
+			}
+			if rp.Rates[key].IntervalRates[i].Unit, err = utils.NewDecimalFromUnit(iRate.Unit); err != nil {
 				return nil, err
 			}
-			if rp.Rates[key].IntervalRates[i].Increment, err = utils.ParseDurationWithNanosecs(iRate.Increment); err != nil {
+			if rp.Rates[key].IntervalRates[i].Increment, err = utils.NewDecimalFromUnit(iRate.Increment); err != nil {
 				return nil, err
 			}
 		}
@@ -3207,7 +3215,7 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 	return rp, nil
 }
 
-func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
+func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile, err error) {
 	tpRp = &utils.TPRateProfile{
 		Tenant:             rp.Tenant,
 		ID:                 rp.ID,
@@ -3216,11 +3224,19 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 		Weight:             rp.Weight,
 		RoundingMethod:     rp.RoundingMethod,
 		RoundingDecimals:   rp.RoundingDecimals,
-		MinCost:            rp.MinCost,
-		MaxCost:            rp.MaxCost,
 		MaxCostStrategy:    rp.MaxCostStrategy,
 		Rates:              make(map[string]*utils.TPRate),
 	}
+	minCostF, ok := rp.MinCost.Float64()
+	if !ok {
+		return nil, fmt.Errorf("cannot convert <%+v> to float64", rp.MinCost)
+	}
+	tpRp.MinCost = minCostF
+	maxCostF, ok := rp.MaxCost.Float64()
+	if !ok {
+		return nil, fmt.Errorf("cannot convert <%+v> to float64", rp.MaxCost)
+	}
+	tpRp.MaxCost = maxCostF
 
 	for key, rate := range rp.Rates {
 		tpRp.Rates[key] = &utils.TPRate{
@@ -3234,10 +3250,26 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 		for i, iRate := range rate.IntervalRates {
 			tpRp.Rates[key].IntervalRates[i] = &utils.TPIntervalRate{
 				IntervalStart: iRate.IntervalStart.String(),
-				FixedFee:      iRate.FixedFee,
-				RecurrentFee:  iRate.RecurrentFee,
-				Unit:          iRate.Unit.String(),
-				Increment:     iRate.Increment.String(),
+			}
+			if iRate.FixedFee != nil {
+				fixedFeeF, ok := iRate.FixedFee.Float64()
+				if !ok {
+					return nil, fmt.Errorf("cannot convert <%+v> to float64", iRate.FixedFee)
+				}
+				tpRp.Rates[key].IntervalRates[i].FixedFee = fixedFeeF
+			}
+			if iRate.Unit != nil {
+				tpRp.Rates[key].IntervalRates[i].Unit = iRate.Unit.String()
+			}
+			if iRate.Increment != nil {
+				tpRp.Rates[key].IntervalRates[i].Increment = iRate.Increment.String()
+			}
+			if iRate.RecurrentFee != nil {
+				recFeeF, ok := iRate.RecurrentFee.Float64()
+				if !ok {
+					return nil, fmt.Errorf("cannot convert <%+v> to float64", iRate.RecurrentFee)
+				}
+				tpRp.Rates[key].IntervalRates[i].RecurrentFee = recFeeF
 			}
 		}
 	}

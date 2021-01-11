@@ -22,6 +22,8 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/ericlagergren/decimal"
 )
@@ -58,6 +60,22 @@ func NewDecimalFromFloat64(f float64) (*Decimal, error) {
 	if !canSet {
 		return nil, fmt.Errorf("cannot convert float64 to Decimal")
 	}
+	return &Decimal{d}, nil
+}
+
+// NewDecimalFromUnit is a constructor for Decimal out of unit represents as string
+func NewDecimalFromUnit(u string) (*Decimal, error) {
+	d := new(decimal.Big)
+	switch {
+	//"ns", "us" (or "µs"), "ms", "s", "m", "h"
+	case strings.HasSuffix(u, "ns"), strings.HasSuffix(u, "us"), strings.HasSuffix(u, "µs"), strings.HasSuffix(u, "ms"), strings.HasSuffix(u, "s"), strings.HasSuffix(u, "m"), strings.HasSuffix(u, "h"):
+		tm, err := time.ParseDuration(u)
+		if err != nil {
+			return nil, err
+		}
+		d.SetUint64(uint64(tm))
+	}
+
 	return &Decimal{d}, nil
 }
 

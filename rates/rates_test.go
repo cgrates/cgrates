@@ -123,7 +123,10 @@ func TestRateProfileCostForEvent(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 	rateS := NewRateS(defaultCfg, filters, dm)
-
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RATE_1",
@@ -137,9 +140,9 @@ func TestRateProfileCostForEvent(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.20,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 				},
 			},
@@ -207,8 +210,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRpCostAfterV1), utils.ToJSON(expectedRPCost))
 	}
 
-	err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true)
-	if err != nil {
+	if err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -219,7 +221,10 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 	rateS := NewRateS(defaultCfg, filters, dm)
-
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RATE_PRF1",
@@ -234,9 +239,9 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.20,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 				},
 			},
@@ -248,9 +253,9 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.20,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 				},
 			},
@@ -453,7 +458,10 @@ func TestV1CostForEventError(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 	rateS := NewRateS(defaultCfg, filters, dm)
-
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RATE_1",
@@ -467,9 +475,9 @@ func TestV1CostForEventError(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.20,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 				},
 			},
@@ -505,7 +513,7 @@ func TestV1CostForEventError(t *testing.T) {
 	rPrf.FilterIDs = []string{"*string:~*req.Destination:10"}
 
 	expectedErr = "SERVER_ERROR: zero increment to be charged within rate: <cgrates.org:RATE_1:RATE1>"
-	rPrf.Rates["RATE1"].IntervalRates[0].Increment = 0
+	rPrf.Rates["RATE1"].IntervalRates[0].Increment = utils.NewDecimal(0, 0)
 	if err := rateS.V1CostForEvent(&utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
 			CGREvent: &utils.CGREvent{
@@ -534,7 +542,14 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 		filterS: filters,
 		dm:      dm,
 	}
-
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		b.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		b.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RateChristmas",
@@ -548,15 +563,15 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.20,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.10,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(1, 1),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -566,9 +581,9 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{{
 					IntervalStart: 0,
-					RecurrentFee:  0.06,
-					Unit:          time.Minute,
-					Increment:     time.Second,
+					RecurrentFee:  utils.NewDecimal(6, 3),
+					Unit:          minDecimal,
+					Increment:     secDecimal,
 				}},
 			},
 		},
@@ -623,7 +638,14 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 		filterS: filters,
 		dm:      dm,
 	}
-
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		b.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		b.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RateAlways",
@@ -637,15 +659,15 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.20,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.10,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(1, 1),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -702,6 +724,10 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 
 	rateS := NewRateS(defaultCfg, filters, dm)
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 
 	rPrf := &engine.RateProfile{
 		Tenant:    "cgrates.org",
@@ -716,9 +742,9 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.20,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 				},
 			},
@@ -757,8 +783,7 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true)
-	if err != nil {
+	if err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -770,7 +795,10 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 
 	rateS := NewRateS(defaultCfg, filters, dm)
-
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RATE_1",
@@ -784,9 +812,9 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.20,
-						Unit:          time.Minute,
-						Increment:     0,
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     utils.NewDecimal(0, 0),
 					},
 				},
 			},
@@ -810,8 +838,7 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 			}}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true)
-	if err != nil {
+	if err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -823,7 +850,10 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 
 	rateS := NewRateS(defaultCfg, filters, dm)
-
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RATE_1",
@@ -837,9 +867,9 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.20,
-						Unit:          time.Minute,
-						Increment:     0,
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     utils.NewDecimal(0, 0),
 					},
 				},
 			},
@@ -865,8 +895,7 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true)
-	if err != nil {
+	if err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
