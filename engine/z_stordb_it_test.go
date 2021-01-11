@@ -154,18 +154,19 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 	//WRITE
 	var actPrf = []*utils.TPAccountProfile{
 		&utils.TPAccountProfile{
-			TPid:   testTPID,
-			Tenant: "cgrates.org",
-			ID:     "1001",
-			Weight: 20,
+			TPid:      testTPID,
+			Tenant:    "cgrates.org",
+			ID:        "1001",
+			Weight:    20,
+			FilterIDs: make([]string, 0),
 			Balances: map[string]*utils.TPAccountBalance{
-				"MonetaryBalance": &utils.TPAccountBalance{
+				"MonetaryBalance": {
 					ID:        "MonetaryBalance",
 					FilterIDs: []string{},
 					Weight:    10,
 					Type:      utils.MetaMonetary,
 					CostIncrement: []*utils.TPBalanceCostIncrement{
-						&utils.TPBalanceCostIncrement{
+						{
 							FilterIDs:    []string{"fltr1", "fltr2"},
 							Increment:    utils.Float64Pointer(1.3),
 							FixedFee:     utils.Float64Pointer(2.3),
@@ -174,11 +175,11 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 					},
 					CostAttributes: []string{"attr1", "attr2"},
 					UnitFactors: []*utils.TPBalanceUnitFactor{
-						&utils.TPBalanceUnitFactor{
+						{
 							FilterIDs: []string{"fltr1", "fltr2"},
 							Factor:    100,
 						},
-						&utils.TPBalanceUnitFactor{
+						{
 							FilterIDs: []string{"fltr3"},
 							Factor:    200,
 						},
@@ -300,10 +301,11 @@ func testStorDBitCRUDTPDispatcherProfiles(t *testing.T) {
 	//WRITE
 	var dsp = []*utils.TPDispatcherProfile{
 		{
-			TPid:      "TP1",
-			Tenant:    "cgrates.org",
-			ID:        "Dsp1",
-			FilterIDs: []string{"*string:~*req.Account:1002"},
+			TPid:       "TP1",
+			Tenant:     "cgrates.org",
+			ID:         "Dsp1",
+			FilterIDs:  []string{"*string:~*req.Account:1002"},
+			Subsystems: make([]string, 0),
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "",
@@ -312,10 +314,11 @@ func testStorDBitCRUDTPDispatcherProfiles(t *testing.T) {
 			Weight:   10,
 		},
 		{
-			TPid:      "TP1",
-			Tenant:    "cgrates.org",
-			ID:        "Dsp2",
-			FilterIDs: []string{"*string:~*req.Destination:10"},
+			TPid:       "TP1",
+			Tenant:     "cgrates.org",
+			ID:         "Dsp2",
+			FilterIDs:  []string{"*string:~*req.Destination:10"},
+			Subsystems: make([]string, 0),
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-08-15T14:00:00Z",
 			},
@@ -720,11 +723,14 @@ func testStorDBitCRUDTPThresholds(t *testing.T) {
 	//READ
 	if rcv, err := storDB.GetTPThresholds(tpThresholds[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(tpThresholds[0], rcv[0]) ||
-		reflect.DeepEqual(tpThresholds[0], rcv[1])) {
-		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
-			utils.ToIJSON(tpThresholds[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
-
+	} else {
+		sort.Strings(rcv[0].FilterIDs)
+		sort.Strings(rcv[1].FilterIDs)
+		if !(reflect.DeepEqual(tpThresholds[0], rcv[0]) ||
+			reflect.DeepEqual(tpThresholds[0], rcv[1])) {
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+				utils.ToIJSON(tpThresholds[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+		}
 	}
 
 	//UPDATE
@@ -761,55 +767,63 @@ func testStorDBitCRUDTPAttributes(t *testing.T) {
 	//WRITE
 	tpAProfile := []*utils.TPAttributeProfile{
 		{
-			TPid:   "TP_ID",
-			Tenant: "cgrates.org",
-			ID:     "APROFILE_ID1",
+			TPid:      "TP_ID",
+			Tenant:    "cgrates.org",
+			ID:        "APROFILE_ID1",
+			FilterIDs: make([]string, 0),
+			Contexts:  make([]string, 0),
 			Attributes: []*utils.TPAttribute{
-				{
-					Type:      utils.MetaString,
-					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField + utils.InInFieldSep,
-					Value:     "102",
-					FilterIDs: []string{"*string:~*req.Account:102"},
-				},
 				{
 					Type:      utils.MetaString,
 					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField + utils.InInFieldSep,
 					Value:     "101",
 					FilterIDs: []string{"*string:~*req.Account:101"},
 				},
+				{
+					Type:      utils.MetaString,
+					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField + utils.InInFieldSep,
+					Value:     "108",
+					FilterIDs: []string{"*string:~*req.Account:102"},
+				},
 			},
 		},
 		{
-			TPid:   "TP_ID",
-			Tenant: "cgrates.org",
-			ID:     "APROFILE_ID2",
+			TPid:      "TP_ID",
+			Tenant:    "cgrates.org",
+			ID:        "APROFILE_ID2",
+			FilterIDs: make([]string, 0),
+			Contexts:  make([]string, 0),
 			Attributes: []*utils.TPAttribute{
 				{
 					Type:      utils.MetaString,
 					Path:      utils.MetaReq + utils.NestingSep + utils.Destination + utils.InInFieldSep,
-					Value:     "11",
+					Value:     "12",
 					FilterIDs: []string{"*string:~*req.Destination:11"},
 				},
 				{
 					Type:      utils.MetaString,
 					Path:      utils.MetaReq + utils.NestingSep + utils.Destination + utils.InInFieldSep,
-					Value:     "11",
+					Value:     "13",
 					FilterIDs: []string{"*string:~*req.Destination:10"},
 				},
 			},
 		},
 	}
 	if err := storDB.SetTPAttributes(tpAProfile); err != nil {
-		t.Errorf("Unable to set TPActionProfile")
+		t.Errorf("Unable to set TPActionProfile:%s", err)
 	}
 
 	//READ
 	if rcv, err := storDB.GetTPAttributes(tpAProfile[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(rcv[0], tpAProfile[0]) ||
-		reflect.DeepEqual(rcv[1], tpAProfile[0])) {
-		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
-			utils.ToIJSON(tpAProfile[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
+	} else {
+		sort.Slice(rcv[0].Attributes, func(i, j int) bool { return rcv[0].Attributes[i].Value < rcv[0].Attributes[j].Value })
+		sort.Slice(rcv[1].Attributes, func(i, j int) bool { return rcv[1].Attributes[i].Value < rcv[1].Attributes[j].Value })
+		if !(reflect.DeepEqual(rcv[0], tpAProfile[0]) ||
+			reflect.DeepEqual(rcv[1], tpAProfile[0])) {
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+				utils.ToIJSON(tpAProfile[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
+		}
 	}
 
 	//UPDATE
@@ -822,10 +836,14 @@ func testStorDBitCRUDTPAttributes(t *testing.T) {
 	//READ
 	if rcv, err := storDB.GetTPAttributes(tpAProfile[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
-	} else if !(reflect.DeepEqual(rcv[0], tpAProfile[0]) ||
-		reflect.DeepEqual(rcv[1], tpAProfile[0])) {
-		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
-			utils.ToIJSON(tpAProfile[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+	} else {
+		sort.Slice(rcv[0].Attributes, func(i, j int) bool { return rcv[0].Attributes[i].Value < rcv[0].Attributes[j].Value })
+		sort.Slice(rcv[1].Attributes, func(i, j int) bool { return rcv[1].Attributes[i].Value < rcv[1].Attributes[j].Value })
+		if !(reflect.DeepEqual(rcv[0], tpAProfile[0]) ||
+			reflect.DeepEqual(rcv[1], tpAProfile[0])) {
+			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+				utils.ToIJSON(tpAProfile[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+		}
 	}
 
 	//REMOVE and READ
@@ -853,8 +871,9 @@ func testStorDBitCRUDTPChargers(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "",
 			},
-			RunID:  utils.MetaDefault,
-			Weight: 20,
+			AttributeIDs: make([]string, 0),
+			RunID:        utils.MetaDefault,
+			Weight:       20,
 		},
 		{
 			TPid:      "TP_id",
@@ -865,8 +884,9 @@ func testStorDBitCRUDTPChargers(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "",
 			},
-			RunID:  utils.MetaDefault,
-			Weight: 10,
+			AttributeIDs: make([]string, 0),
+			RunID:        utils.MetaDefault,
+			Weight:       10,
 		},
 	}
 	if err := storDB.SetTPChargers(tpChargers); err != nil {
