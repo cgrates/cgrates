@@ -28,9 +28,9 @@ import (
 func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 	jsonCfg := &AccountSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
-		Attributes_conns:      &[]string{"*req.index1"},
-		Rates_conns:           &[]string{"*req.index1"},
-		Thresholds_conns:      &[]string{"*req.index1"},
+		Attributes_conns:      &[]string{utils.MetaInternal},
+		Rates_conns:           &[]string{utils.MetaInternal},
+		Thresholds_conns:      &[]string{utils.MetaInternal},
 		Indexed_selects:       utils.BoolPointer(false),
 		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1"},
@@ -39,9 +39,9 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 	}
 	expected := &AccountSCfg{
 		Enabled:             true,
-		AttributeSConns:     []string{"*req.index1"},
-		RateSConns:          []string{"*req.index1"},
-		ThresholdSConns:     []string{"*req.index1"},
+		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
+		RateSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)},
+		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1"},
@@ -61,9 +61,9 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 "accounts": {								
 	"enabled": true,						
 	"indexed_selects": false,			
-	"attributes_conns": ["*req.index1"],
-	"rates_conns": ["*req.index1"],
-	"thresholds_conns": ["*req.index1"],					
+	"attributes_conns": ["*internal:*attributes"],
+	"rates_conns": ["*internal:*rates"],
+	"thresholds_conns": ["*internal:*thresholds"],					
 	"string_indexed_fields": ["*req.index1"],			
 	"prefix_indexed_fields": ["*req.index1"],			
 	"suffix_indexed_fields": ["*req.index1"],			
@@ -74,9 +74,9 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
 		utils.IndexedSelectsCfg:      false,
-		utils.AttributeSConnsCfg:     []string{"*req.index1"},
-		utils.RateSConnsCfg:          []string{"*req.index1"},
-		utils.ThresholdSConnsCfg:     []string{"*req.index1"},
+		utils.AttributeSConnsCfg:     []string{utils.MetaInternal},
+		utils.RateSConnsCfg:          []string{utils.MetaInternal},
+		utils.ThresholdSConnsCfg:     []string{utils.MetaInternal},
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1"},

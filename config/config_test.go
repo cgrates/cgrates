@@ -4462,6 +4462,29 @@ func TestV1GetConfigThresholds(t *testing.T) {
 	}
 }
 
+func TestV1GetConfigAcounts(t *testing.T) {
+	var reply map[string]interface{}
+	expected := map[string]interface{}{
+		AccountSCfgJson: map[string]interface{}{
+			utils.EnabledCfg:             false,
+			utils.IndexedSelectsCfg:      true,
+			utils.AttributeSConnsCfg:     []string{},
+			utils.RateSConnsCfg:          []string{},
+			utils.ThresholdSConnsCfg:     []string{},
+			utils.PrefixIndexedFieldsCfg: []string{},
+			utils.SuffixIndexedFieldsCfg: []string{},
+			utils.NestedFieldsCfg:        false,
+		},
+	}
+	cfg := NewDefaultCGRConfig()
+	if err := cfg.V1GetConfig(&SectionWithOpts{Section: AccountSCfgJson}, &reply); err != nil {
+		t.Error(expected)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+
+}
+
 func TestV1GetConfigRoutes(t *testing.T) {
 	var reply map[string]interface{}
 	expected := map[string]interface{}{
@@ -5086,6 +5109,17 @@ func TestV1GetConfigAsJSONTListen(t *testing.T) {
 	expected := `{"listen":{"http":"127.0.0.1:2080","http_tls":"127.0.0.1:2280","rpc_gob":"127.0.0.1:2013","rpc_gob_tls":"127.0.0.1:2023","rpc_json":"127.0.0.1:2012","rpc_json_tls":"127.0.0.1:2022"}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithOpts{Section: LISTEN_JSN}, &reply); err != nil {
+		t.Error(err)
+	} else if expected != reply {
+		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func TestV1GetConfigAsJSONAccounts(t *testing.T) {
+	var reply string
+	expected := `{"accounts":{"attributes_conns":[],"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"rates_conns":[],"suffix_indexed_fields":[],"thresholds_conns":[]}}`
+	cfg := NewDefaultCGRConfig()
+	if err := cfg.V1GetConfigAsJSON(&SectionWithOpts{Section: AccountSCfgJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -6104,6 +6138,22 @@ func TestLoadActionSCfgError(t *testing.T) {
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadActionSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestLoadAccountSCfgError(t *testing.T) {
+	cfgJSONStr := `{
+"accounts": {								
+	"enabled": "not_bool",
+   }
+}`
+	expected := "json: cannot unmarshal string into Go struct field AccountSJsonCfg.Enabled of type bool"
+	cfg := NewDefaultCGRConfig()
+
+	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if err := cfg.loadAccountSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
