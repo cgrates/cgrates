@@ -1632,11 +1632,7 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithOpts, reply *map[string]inter
 	case GENERAL_JSN:
 		mp = cfg.GeneralCfg().AsMapInterface()
 	case DATADB_JSN:
-		var datadb map[string]interface{}
-		if datadb = cfg.DataDbCfg().AsMapInterface(); err != nil {
-			return
-		}
-		mp = datadb
+		mp = cfg.DataDbCfg().AsMapInterface()
 	case STORDB_JSN:
 		mp = cfg.StorDbCfg().AsMapInterface()
 	case TlsCfgJson:
@@ -1869,6 +1865,8 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithOpts, reply *string) (e
 		mp = cfg.RateSCfg().AsMapInterface()
 	case CoreSCfgJson:
 		mp = cfg.CoreSCfg().AsMapInterface()
+	case AccountSCfgJson:
+		mp = cfg.AccountSCfg().AsMapInterface()
 	default:
 		return errors.New("Invalid section")
 	}
