@@ -3086,3 +3086,12 @@ func TestStatMetricsNewStatMetricError(t *testing.T) {
 	}
 
 }
+
+func TestStatMetricsGetMinItems(t *testing.T) {
+	asr, _ := NewASR(2, "", []string{})
+	result := asr.GetMinItems()
+	if !reflect.DeepEqual(result, 2) {
+		t.Errorf("\n Expecting <2>,\nRecevied  <%+v>", result)
+	}
+
+}
