@@ -2165,35 +2165,19 @@ func testOnStorITRateProfile(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
-				IntervalRates: []*IntervalRate{
-					{
-						RecurrentFee: 0.12,
-						Unit:         time.Minute,
-						Increment:    time.Minute,
-					},
-				},
-				Blocker: false,
+				Blocker:   false,
 			},
 			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
-				IntervalRates: []*IntervalRate{
-					{
-						RecurrentFee: 0.06,
-						Unit:         time.Minute,
-						Increment:    time.Second,
-					},
-				},
-				Blocker: false,
+				Blocker:   false,
 			},
 		},
 	}

@@ -1348,9 +1348,8 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 				Weight:           0,
 				RoundingMethod:   "*up",
 				RoundingDecimals: 4,
-				MinCost:          0.1,
-				MaxCost:          0.6,
-				MaxCostStrategy:  "*free",
+
+				MaxCostStrategy: "*free",
 				Rates: map[string]*engine.Rate{
 					"RT_WEEK": {
 						ID:              "RT_WEEK",
@@ -1359,15 +1358,9 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: 0,
-								RecurrentFee:  0.12,
-								Unit:          time.Minute,
-								Increment:     time.Minute,
 							},
 							{
 								IntervalStart: time.Minute,
-								RecurrentFee:  0.06,
-								Unit:          time.Minute,
-								Increment:     time.Second,
 							},
 						},
 					},
@@ -1378,9 +1371,6 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: 0,
-								RecurrentFee:  0.06,
-								Unit:          time.Minute,
-								Increment:     time.Second,
 							},
 						},
 					},
@@ -1391,9 +1381,6 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: 0,
-								RecurrentFee:  0.06,
-								Unit:          time.Minute,
-								Increment:     time.Second,
 							},
 						},
 					},

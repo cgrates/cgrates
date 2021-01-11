@@ -1479,8 +1479,6 @@ func testDspRplRateProfile(t *testing.T) {
 			Weight:           0,
 			RoundingMethod:   "*up",
 			RoundingDecimals: 4,
-			MinCost:          0.1,
-			MaxCost:          0.6,
 			MaxCostStrategy:  "*free",
 			Rates: map[string]*engine.Rate{
 				"FIRST_GI": {

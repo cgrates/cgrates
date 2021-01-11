@@ -1270,35 +1270,19 @@ func testITIndexRateProfile(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*string:~*req.Category:call"},
 				Weight:    0,
-				IntervalRates: []*IntervalRate{
-					{
-						RecurrentFee: 0.12,
-						Unit:         time.Minute,
-						Increment:    time.Minute,
-					},
-				},
-				Blocker: false,
+				Blocker:   false,
 			},
 			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*string:~*req.Category:voice"},
 				Weight:    10,
-				IntervalRates: []*IntervalRate{
-					{
-						RecurrentFee: 0.06,
-						Unit:         time.Minute,
-						Increment:    time.Second,
-					},
-				},
-				Blocker: false,
+				Blocker:   false,
 			},
 		},
 	}
@@ -1330,48 +1314,25 @@ func testITIndexRateProfile(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*string:~*req.Category:call"},
 				Weight:    0,
-				IntervalRates: []*IntervalRate{
-					{
-						RecurrentFee: 0.12,
-						Unit:         time.Minute,
-						Increment:    time.Minute,
-					},
-				},
-				Blocker: false,
+				Blocker:   false,
 			},
 			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*string:~*req.Category:voice"},
 				Weight:    10,
-				IntervalRates: []*IntervalRate{
-					{
-						RecurrentFee: 0.06,
-						Unit:         time.Minute,
-						Increment:    time.Second,
-					},
-				},
-				Blocker: false,
+				Blocker:   false,
 			},
 			"THIRD_GI": {
 				ID:        "THIRD_GI",
 				FilterIDs: []string{"*string:~*req.Category:custom"},
 				Weight:    20,
-				IntervalRates: []*IntervalRate{
-					{
-						RecurrentFee: 0.06,
-						Unit:         time.Minute,
-						Increment:    time.Second,
-					},
-				},
-				Blocker: false,
+				Blocker:   false,
 			},
 		},
 	}
@@ -1404,35 +1365,19 @@ func testITIndexRateProfile(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*Rate{
 			"CUSTOM_RATE1": {
 				ID:        "CUSTOM_RATE1",
 				FilterIDs: []string{"*string:~*req.Subject:1001"},
 				Weight:    0,
-				IntervalRates: []*IntervalRate{
-					{
-						RecurrentFee: 0.12,
-						Unit:         time.Minute,
-						Increment:    time.Minute,
-					},
-				},
-				Blocker: false,
+				Blocker:   false,
 			},
 			"CUSTOM_RATE2": {
 				ID:        "CUSTOM_RATE2",
 				FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Category:call"},
 				Weight:    10,
-				IntervalRates: []*IntervalRate{
-					{
-						RecurrentFee: 0.6,
-						Unit:         time.Minute,
-						Increment:    time.Second,
-					},
-				},
-				Blocker: false,
+				Blocker:   false,
 			},
 		},
 	}

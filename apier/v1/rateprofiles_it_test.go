@@ -148,6 +148,14 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
@@ -155,8 +163,8 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
+		MinCost:          utils.NewDecimal(1, 1),
+		MaxCost:          utils.NewDecimal(6, 1),
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
@@ -166,15 +174,15 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -185,9 +193,9 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -198,9 +206,9 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(6, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -230,8 +238,6 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
 		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
@@ -241,9 +247,6 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
 					},
 				},
 			},
@@ -283,15 +286,9 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -302,9 +299,6 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -315,9 +309,6 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -352,9 +343,8 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -363,15 +353,9 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -382,9 +366,6 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -395,9 +376,6 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -421,9 +399,8 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -432,15 +409,9 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -451,9 +422,6 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -464,9 +432,6 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -501,9 +466,8 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -512,15 +476,9 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
 					},
 					{
 						IntervalStart: time.Minute,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -531,9 +489,6 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.06,
-						Unit:          time.Minute,
-						Increment:     time.Second,
 					},
 				},
 			},
@@ -565,10 +520,9 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
-		Rates:            map[string]*engine.Rate{},
+
+		MaxCostStrategy: "*free",
+		Rates:           map[string]*engine.Rate{},
 	}
 	var rply2 *engine.RateProfile
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
@@ -604,9 +558,8 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 				Weight:           0,
 				RoundingMethod:   "*up",
 				RoundingDecimals: 4,
-				MinCost:          0.1,
-				MaxCost:          0.6,
-				MaxCostStrategy:  "*free",
+
+				MaxCostStrategy: "*free",
 				Rates: map[string]*engine.Rate{
 					"RT_WEEK": {
 						ID:              "RT_WEEK",
@@ -615,9 +568,6 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: 0,
-								RecurrentFee:  0.12,
-								Unit:          time.Minute,
-								Increment:     time.Minute,
 							},
 						},
 					},
@@ -708,9 +658,8 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 				Weight:           0,
 				RoundingMethod:   "*up",
 				RoundingDecimals: 4,
-				MinCost:          0.1,
-				MaxCost:          0.6,
-				MaxCostStrategy:  "*free",
+
+				MaxCostStrategy: "*free",
 				Rates: map[string]*engine.Rate{
 					"RT_WEEK": {
 						ID:              "RT_WEEK",
@@ -719,15 +668,9 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: 0,
-								RecurrentFee:  0.12,
-								Unit:          time.Minute,
-								Increment:     time.Minute,
 							},
 							{
 								IntervalStart: time.Minute,
-								RecurrentFee:  0.06,
-								Unit:          time.Minute,
-								Increment:     time.Second,
 							},
 						},
 					},
@@ -738,9 +681,6 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: 0,
-								RecurrentFee:  0.06,
-								Unit:          time.Minute,
-								Increment:     time.Second,
 							},
 						},
 					},
@@ -751,9 +691,6 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 						IntervalRates: []*engine.IntervalRate{
 							{
 								IntervalStart: 0,
-								RecurrentFee:  0.06,
-								Unit:          time.Minute,
-								Increment:     time.Second,
 							},
 						},
 					},
@@ -795,6 +732,14 @@ func testV1RatePrfRemoveRateProfileRatesWithoutTenant(t *testing.T) {
 }
 
 func testV1RateCostForEventWithDefault(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &engine.Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -802,15 +747,15 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.06,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(6, 2),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -869,6 +814,14 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 }
 
 func testV1RateCostForEventWithUsage(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -891,15 +844,15 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.06,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(6, 2),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -1006,6 +959,14 @@ func testV1RateCostForEventWithWrongUsage(t *testing.T) {
 }
 
 func testV1RateCostForEventWithStartTime(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &engine.Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -1013,15 +974,15 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.06,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(6, 2),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -1110,6 +1071,14 @@ func testV1RateCostForEventWithWrongStartTime(t *testing.T) {
 }
 
 func testV1RateCostForEventWithOpts(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
 		CGREventWithOpts: &utils.CGREventWithOpts{
@@ -1133,15 +1102,15 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.12,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(12, 2),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.06,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(6, 2),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -1227,6 +1196,14 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 }
 
 func testV1RateCostForEventSpecial(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &engine.Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -1234,15 +1211,15 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.20,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(2, 1),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.10,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(1, 1),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -1252,9 +1229,9 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 		ActivationTimes: "* * 24 12 *",
 		IntervalRates: []*engine.IntervalRate{{
 			IntervalStart: 0,
-			RecurrentFee:  0.06,
-			Unit:          time.Minute,
-			Increment:     time.Second,
+			RecurrentFee:  utils.NewDecimal(6, 2),
+			Unit:          minDecimal,
+			Increment:     secDecimal,
 		}},
 	}
 	rPrf := &RateProfileWithCache{
@@ -1354,6 +1331,14 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 }
 
 func testV1RateCostForEventThreeRates(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &engine.Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -1361,15 +1346,15 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.20,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(2, 1),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.10,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(1, 1),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -1381,9 +1366,9 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.08,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(8, 2),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -1394,9 +1379,9 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.05,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(5, 2),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}

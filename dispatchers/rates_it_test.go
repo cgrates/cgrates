@@ -85,6 +85,10 @@ func testDspRPrfPing(t *testing.T) {
 }
 
 func testDspRPrfCostForEvent(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		ID:        "DefaultRate",
 		Tenant:    "cgrates.org",
@@ -98,9 +102,9 @@ func testDspRPrfCostForEvent(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.12,
-						Unit:          time.Minute,
-						Increment:     time.Minute,
+						RecurrentFee:  utils.NewDecimal(12, 2),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
 					},
 				},
 			},
@@ -155,6 +159,14 @@ func testDspRPrfCostForEvent(t *testing.T) {
 }
 
 func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		ID:     "ID_RP",
 		Tenant: "cgrates.org",
@@ -167,9 +179,9 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0,
-						RecurrentFee:  0.25,
-						Unit:          time.Minute,
-						Increment:     time.Second,
+						RecurrentFee:  utils.NewDecimal(25, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
