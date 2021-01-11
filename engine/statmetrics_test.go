@@ -3095,3 +3095,76 @@ func TestStatMetricsGetMinItems(t *testing.T) {
 	}
 
 }
+func TestStatMetricsStatDistinctGetCompressFactor(t *testing.T) {
+	dst := StatDistinct{
+		FilterIDs:   []string{"Test_Filter_ID"},
+		FieldValues: map[string]utils.StringSet{},
+		Events: map[string]map[string]int64{
+			"Event1": {
+				"1": 10000000000,
+			},
+			"Event2": {
+				"2": 20000000000,
+			},
+		},
+		MinItems:  3,
+		FieldName: "Test_Field_Name",
+		Count:     3,
+	}
+	eventsMap := map[string]int{
+		"Event1": 1,
+	}
+	expected := map[string]int{
+		"Event1": 10000000000,
+		"Event2": 20000000000,
+	}
+	result := dst.GetCompressFactor(eventsMap)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, result)
+	}
+
+}
+
+func TestStatMetricsStatDistinctGetMinItems(t *testing.T) {
+	dst := StatDistinct{
+		FilterIDs:   []string{"Test_Filter_ID"},
+		FieldValues: map[string]utils.StringSet{},
+		Events: map[string]map[string]int64{
+			"Event1": {
+				"1": 10000000000,
+			},
+			"Event2": {
+				"2": 20000000000,
+			},
+		},
+		MinItems:  3,
+		FieldName: "Test_Field_Name",
+		Count:     3,
+	}
+	result := dst.GetMinItems()
+	if !reflect.DeepEqual(result, 3) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", 3, result)
+	}
+}
+
+func TestStatMetricsStatDistinctGetFilterIDs(t *testing.T) {
+	dst := StatDistinct{
+		FilterIDs:   []string{"Test_Filter_ID"},
+		FieldValues: map[string]utils.StringSet{},
+		Events: map[string]map[string]int64{
+			"Event1": {
+				"1": 10000000000,
+			},
+			"Event2": {
+				"2": 20000000000,
+			},
+		},
+		MinItems:  3,
+		FieldName: "Test_Field_Name",
+		Count:     3,
+	}
+	result := dst.GetFilterIDs()
+	if !reflect.DeepEqual(result, dst.FilterIDs) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", dst.FilterIDs, result)
+	}
+}
