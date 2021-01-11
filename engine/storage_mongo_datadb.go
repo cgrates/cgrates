@@ -153,7 +153,7 @@ func DecimalDecoder(ec bsoncodec.DecodeContext, vw bsonrw.ValueReader, val refle
 	if err := dBig.UnmarshalText(data); err != nil {
 		return err
 	}
-	val.Set(reflect.ValueOf(utils.Decimal{dBig}))
+	val.Set(reflect.ValueOf(utils.Decimal{Big: dBig}))
 	return nil
 }
 

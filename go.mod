@@ -45,6 +45,7 @@ require (
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/ishidawataru/sctp v0.0.0-20191218070446-00ab2ac2db07 // indirect
+	github.com/jinzhu/gorm v1.9.16
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/lib/pq v1.8.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect
@@ -68,6 +69,6 @@ require (
 	gopkg.in/fsnotify.v1 v1.4.7
 	gorm.io/driver/mysql v1.0.3
 	gorm.io/driver/postgres v1.0.5
-	gorm.io/gorm v1.20.8
+	gorm.io/gorm v1.20.11
 	pack.ag/amqp v0.12.5
 )
