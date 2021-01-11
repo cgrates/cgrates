@@ -3168,3 +3168,57 @@ func TestStatMetricsStatDistinctGetFilterIDs(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", dst.FilterIDs, result)
 	}
 }
+
+func TestStatMetricsStatDistinctRemEventErr2(t *testing.T) {
+	dst := StatDistinct{
+		FilterIDs:   []string{"Test_Filter_ID"},
+		FieldValues: map[string]utils.StringSet{},
+		Events: map[string]map[string]int64{
+			"Event1": {
+				"FieldValue1": 1,
+			},
+			"Event2": {},
+		},
+		MinItems:  3,
+		FieldName: "Test_Field_Name",
+		Count:     3,
+	}
+	err := dst.RemEvent("Event2")
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nExpecting <nil>,\n Recevied <%+v>", err)
+	}
+}
+
+func TestStatMetricsStatDistinctRemEvent(t *testing.T) {
+	dst := StatDistinct{
+		FilterIDs:   []string{"Test_Filter_ID"},
+		FieldValues: map[string]utils.StringSet{},
+		Events: map[string]map[string]int64{
+			"Event1": {
+				"FieldValue1": 1,
+			},
+			"Event2": {},
+		},
+		MinItems:  3,
+		FieldName: "Test_Field_Name",
+		Count:     3,
+	}
+	expected := StatDistinct{
+		FilterIDs:   []string{"Test_Filter_ID"},
+		FieldValues: map[string]utils.StringSet{},
+		Events: map[string]map[string]int64{
+			"Event1": {},
+			"Event2": {},
+		},
+		MinItems:  3,
+		FieldName: "Test_Field_Name",
+		Count:     2,
+	}
+	err := dst.RemEvent("Event1")
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Recevied <%+v>", err)
+	}
+	if !reflect.DeepEqual(expected, dst) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, dst)
+	}
+}
