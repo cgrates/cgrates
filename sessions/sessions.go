@@ -3004,40 +3004,38 @@ func (v1Rply *V1ProcessEventReply) SetMaxUsageNeeded(getMaxUsage bool) {
 // AsNavigableMap is part of engine.NavigableMapper interface
 func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap2 {
 	cgrReply := make(utils.NavigableMap2)
-	if v1Rply != nil {
-		if v1Rply.getMaxUsage {
-			cgrReply[utils.CapMaxUsage] = utils.NewNMData(v1Rply.MaxUsage)
-		}
-		if v1Rply.ResourceAllocation != nil {
-			cgrReply[utils.CapResourceAllocation] = utils.NewNMData(*v1Rply.ResourceAllocation)
-		}
-		if v1Rply.Attributes != nil {
-			attrs := make(utils.NavigableMap2)
-			for _, fldName := range v1Rply.Attributes.AlteredFields {
-				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-				if v1Rply.Attributes.CGREvent.HasField(fldName) {
-					attrs[fldName] = utils.NewNMData(v1Rply.Attributes.CGREvent.Event[fldName])
-				}
+	if v1Rply.getMaxUsage {
+		cgrReply[utils.CapMaxUsage] = utils.NewNMData(v1Rply.MaxUsage)
+	}
+	if v1Rply.ResourceAllocation != nil {
+		cgrReply[utils.CapResourceAllocation] = utils.NewNMData(*v1Rply.ResourceAllocation)
+	}
+	if v1Rply.Attributes != nil {
+		attrs := make(utils.NavigableMap2)
+		for _, fldName := range v1Rply.Attributes.AlteredFields {
+			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
+			if v1Rply.Attributes.CGREvent.HasField(fldName) {
+				attrs[fldName] = utils.NewNMData(v1Rply.Attributes.CGREvent.Event[fldName])
 			}
-			cgrReply[utils.CapAttributes] = attrs
 		}
-		if v1Rply.Suppliers != nil {
-			cgrReply[utils.CapSuppliers] = v1Rply.Suppliers.AsNavigableMap()
+		cgrReply[utils.CapAttributes] = attrs
+	}
+	if v1Rply.Suppliers != nil {
+		cgrReply[utils.CapSuppliers] = v1Rply.Suppliers.AsNavigableMap()
+	}
+	if v1Rply.ThresholdIDs != nil {
+		thIDs := make(utils.NMSlice, len(*v1Rply.ThresholdIDs))
+		for i, v := range *v1Rply.ThresholdIDs {
+			thIDs[i] = utils.NewNMData(v)
 		}
-		if v1Rply.ThresholdIDs != nil {
-			thIDs := make(utils.NMSlice, len(*v1Rply.ThresholdIDs))
-			for i, v := range *v1Rply.ThresholdIDs {
-				thIDs[i] = utils.NewNMData(v)
-			}
-			cgrReply[utils.CapThresholds] = &thIDs
+		cgrReply[utils.CapThresholds] = &thIDs
+	}
+	if v1Rply.StatQueueIDs != nil {
+		stIDs := make(utils.NMSlice, len(*v1Rply.StatQueueIDs))
+		for i, v := range *v1Rply.StatQueueIDs {
+			stIDs[i] = utils.NewNMData(v)
 		}
-		if v1Rply.StatQueueIDs != nil {
-			stIDs := make(utils.NMSlice, len(*v1Rply.StatQueueIDs))
-			for i, v := range *v1Rply.StatQueueIDs {
-				stIDs[i] = utils.NewNMData(v)
-			}
-			cgrReply[utils.CapStatQueues] = &stIDs
-		}
+		cgrReply[utils.CapStatQueues] = &stIDs
 	}
 	return cgrReply
 }
