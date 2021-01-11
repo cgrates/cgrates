@@ -188,6 +188,14 @@ func testCacheSReplicateProcessRateProfile(t *testing.T) {
 			},
 		},
 	}
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rate1 := &engine.Rate{
 		ID:              "RT_ALWAYS",
 		Weight:          0,
@@ -195,9 +203,10 @@ func testCacheSReplicateProcessRateProfile(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.01,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				FixedFee:      utils.NewDecimal(0, 0),
+				RecurrentFee:  utils.NewDecimal(1, 2),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}

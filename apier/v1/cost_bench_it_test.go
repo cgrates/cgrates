@@ -95,6 +95,14 @@ func testCostBenchLoadFromFolder2(b *testing.B) {
 }
 
 func testCostBenchSetRateProfile(b *testing.B) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		b.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		b.Error(err)
+	}
 	rate1 := &engine.Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -102,16 +110,16 @@ func testCostBenchSetRateProfile(b *testing.B) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				FixedFee:      0.4,
-				RecurrentFee:  0.2,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				FixedFee:      utils.NewDecimal(4, 1),
+				RecurrentFee:  utils.NewDecimal(2, 1),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.1,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(1, 1),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -136,6 +144,14 @@ func testCostBenchSetRateProfile(b *testing.B) {
 }
 
 func testCostBenchSetRateProfile2(b *testing.B) {
+	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		b.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		b.Error(err)
+	}
 	rate1 := &engine.Rate{
 		ID:              "RATE1",
 		Weight:          0,
@@ -143,15 +159,15 @@ func testCostBenchSetRateProfile2(b *testing.B) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.20,
-				Unit:          time.Minute,
-				Increment:     time.Minute,
+				RecurrentFee:  utils.NewDecimal(2, 1),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
 			},
 			{
 				IntervalStart: time.Minute,
-				RecurrentFee:  0.10,
-				Unit:          time.Minute,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(1, 1),
+				Unit:          minDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -161,9 +177,9 @@ func testCostBenchSetRateProfile2(b *testing.B) {
 		ActivationTimes: "* * 24 12 *",
 		IntervalRates: []*engine.IntervalRate{{
 			IntervalStart: 0,
-			RecurrentFee:  0.06,
-			Unit:          time.Minute,
-			Increment:     time.Second,
+			RecurrentFee:  utils.NewDecimal(6, 2),
+			Unit:          minDecimal,
+			Increment:     secDecimal,
 		}},
 	}
 	rPrf := &RateProfileWithCache{

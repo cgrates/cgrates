@@ -2821,22 +2821,29 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 	}
 }
 
-/*
 func TestOrderRatesIntervalsFullDay(t *testing.T) {
+	hourDecimal, err := utils.NewDecimalFromUnit("1h")
+	if err != nil {
+		t.Error(err)
+	}
+	tminDecimal, err := utils.NewDecimalFromUnit("3m")
+	if err != nil {
+		t.Error(err)
+	}
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.50,
-				Unit:          time.Hour,
-				Increment:     3 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(5, 1),
+				Unit:          hourDecimal,
+				Increment:     tminDecimal,
 			},
 			{
 				IntervalStart: 4 * time.Hour,
-				RecurrentFee:  0.35,
-				Unit:          time.Hour,
-				Increment:     3 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(35, 2),
+				Unit:          hourDecimal,
+				Increment:     tminDecimal,
 			},
 		},
 	}
@@ -2846,33 +2853,44 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 13 * time.Hour,
-				RecurrentFee:  0.40,
-				Unit:          time.Hour,
-				Increment:     3 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(4, 1),
+				Unit:          hourDecimal,
+				Increment:     tminDecimal,
 			},
 			{
 				IntervalStart: 16 * time.Hour,
-				RecurrentFee:  0.35,
-				Unit:          time.Hour,
-				Increment:     3 * time.Minute,
+				RecurrentFee:  utils.NewDecimal(35, 2),
+				Unit:          hourDecimal,
+				Increment:     tminDecimal,
 			},
 		},
 	}
-
+	thourDecimal, err := utils.NewDecimalFromUnit("30h")
+	if err != nil {
+		t.Error(err)
+	}
+	dminDecimal, err := utils.NewDecimalFromUnit("2m")
+	if err != nil {
+		t.Error(err)
+	}
+	fminDecimal, err := utils.NewDecimalFromUnit("5m")
+	if err != nil {
+		t.Error(err)
+	}
 	rtGH := &engine.Rate{
 		ID: "RATE_GOLDEN_HOUR",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 12 * time.Hour,
 				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          30 * time.Hour,
-				Increment:     2 * time.Minute,
+				Unit:          thourDecimal,
+				Increment:     dminDecimal,
 			},
 			{
 				IntervalStart: 12*time.Hour + 30*time.Minute,
 				RecurrentFee:  utils.NewDecimal(1, 1),
-				Unit:          time.Hour,
-				Increment:     5 * time.Minute,
+				Unit:          hourDecimal,
+				Increment:     fminDecimal,
 			},
 		},
 	}
@@ -2993,26 +3011,38 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 }
 
 func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
+	tsecDecimal, err := utils.NewDecimalFromUnit("10s")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
+	twsecDecimal, err := utils.NewDecimalFromUnit("2s")
+	if err != nil {
+		t.Error(err)
+	}
 	rt1 := &engine.Rate{
 		ID: "RATE1",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.50,
-				Unit:          10 * time.Second,
-				Increment:     2 * time.Second,
+				RecurrentFee:  utils.NewDecimal(5, 1),
+				Unit:          tsecDecimal,
+				Increment:     twsecDecimal,
 			},
 			{
 				IntervalStart: 4 * time.Second,
-				RecurrentFee:  0.48,
-				Unit:          10 * time.Second,
-				Increment:     2 * time.Second,
+				RecurrentFee:  utils.NewDecimal(48, 2),
+				Unit:          tsecDecimal,
+				Increment:     twsecDecimal,
 			},
 			{
 				IntervalStart: 8 * time.Second,
-				RecurrentFee:  0.45,
-				Unit:          10 * time.Second,
-				Increment:     2 * time.Second,
+				RecurrentFee:  utils.NewDecimal(45, 2),
+				Unit:          tsecDecimal,
+				Increment:     twsecDecimal,
 			},
 		},
 	}
@@ -3022,21 +3052,21 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
-				RecurrentFee:  0.50,
-				Unit:          2 * time.Second,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(5, 1),
+				Unit:          twsecDecimal,
+				Increment:     secDecimal,
 			},
 			{
 				IntervalStart: 2 * time.Second,
-				RecurrentFee:  0.48,
-				Unit:          2 * time.Second,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(48, 2),
+				Unit:          twsecDecimal,
+				Increment:     secDecimal,
 			},
 			{
 				IntervalStart: 6 * time.Second,
-				RecurrentFee:  0.45,
-				Unit:          2 * time.Second,
-				Increment:     time.Second,
+				RecurrentFee:  utils.NewDecimal(45, 2),
+				Unit:          twsecDecimal,
+				Increment:     secDecimal,
 			},
 		},
 	}
@@ -3168,6 +3198,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 	}
 }
 
+/*
 func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 	rt1 := &engine.Rate{
 		ID: "RATE1",
