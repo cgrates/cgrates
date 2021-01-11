@@ -388,8 +388,9 @@ cgrates.org,NewRes1
 		true, true, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
-	if err := os.Remove(flPath); err != nil {
+	if err := os.Remove(path.Join("/tmp", utils.ResourcesCsv)); err != nil {
+		t.Error(err)
+	} else if err := os.Remove(flPath); err != nil {
 		t.Error(err)
 	}
 }

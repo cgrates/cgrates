@@ -60,6 +60,7 @@ var (
 		testProcessFile,
 		testProcessFileLockFolder,
 		testProcessFileUnableToOpen,
+		testProcessFileAllFilesPresent,
 		testProcessFileRenameError,
 		testAllFilesPresentEmptyCSV,
 		testIsFolderLocked,
@@ -827,6 +828,66 @@ cgrates.org,NewRes1
 	}
 
 	if err := os.Remove(path.Join("/tmp", utils.ResourcesCsv)); err != nil {
+		t.Error(err)
+	} else if err := os.Remove(flPath); err != nil {
+		t.Error(err)
+	}
+}
+
+func testProcessFileAllFilesPresent(t *testing.T) {
+	flPath := "/tmp/testProcessFile"
+	if err := os.MkdirAll(flPath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(flPath, "inexistent.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+
+	file.Write([]byte(`
+#Tenant[0],ID[1]
+cgrates.org,NewRes1
+`))
+	file.Close()
+
+	data := engine.NewInternalDB(nil, nil, true)
+	ldr := &Loader{
+		ldrID:         "testProcessFile",
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		fieldSep:      utils.FIELDS_SEP,
+		tpInDir:       flPath,
+		tpOutDir:      "/tmp",
+		lockFilename:  utils.ResourcesCsv,
+		bufLoaderData: make(map[string][]LoaderData),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaResources: {
+			{Tag: "Tenant",
+				Path:      "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Mandatory: true},
+			{Tag: "ID",
+				Path:      "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaResources: {
+			"inexistent.csv":    nil,
+			utils.AttributesCsv: nil,
+		},
+	}
+
+	if err := ldr.processFile("unusedValue", "inexistent.csv"); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.Remove(path.Join(flPath, "inexistent.csv")); err != nil {
 		t.Error(err)
 	} else if err := os.Remove(flPath); err != nil {
 		t.Error(err)
