@@ -83,6 +83,10 @@ func (self *CmdApierPing) RpcMethod() string {
 		return utils.EeSv1Ping
 	case utils.RateSLow:
 		return utils.RateSv1Ping
+	case utils.AccountSLow:
+		return utils.AccountSv1Ping
+	case utils.ActionSLow:
+		return utils.ActionSv1Ping
 	default:
 	}
 	return self.rpcMethod

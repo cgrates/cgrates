@@ -1033,6 +1033,8 @@ const (
 	ApierSLow      = "apiers"
 	EEsLow         = "ees"
 	RateSLow       = "rates"
+	AccountSLow    = "accounts"
+	ActionSLow     = "actions"
 )
 
 // Actions
