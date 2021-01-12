@@ -121,12 +121,13 @@ func testTPAcctPrfGetTPAcctPrfBeforeSet(t *testing.T) {
 
 func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 	tpAcctPrf = &utils.TPAccountProfile{
-		TPid:   "TP1",
-		Tenant: "cgrates.org",
-		ID:     "1001",
-		Weight: 20,
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "1001",
+		Weight:    20,
+		FilterIDs: make([]string, 0),
 		Balances: map[string]*utils.TPAccountBalance{
-			"MonetaryBalance": &utils.TPAccountBalance{
+			"MonetaryBalance": {
 				ID:             "MonetaryBalance",
 				FilterIDs:      []string{},
 				Weight:         10,
@@ -200,7 +201,7 @@ func testTPAcctPrfGetTPAcctBalAfterUpdate(t *testing.T) {
 		ID:     "1001",
 		Weight: 20,
 		Balances: map[string]*utils.TPAccountBalance{
-			"MonetaryBalance2": &utils.TPAccountBalance{
+			"MonetaryBalance2": {
 				ID:             "MonetaryBalance2",
 				FilterIDs:      []string{},
 				Weight:         12,

@@ -122,10 +122,11 @@ func ttestTPDispatcherGetTPDispatcherBeforeSet(t *testing.T) {
 
 func testTPDispatcherSetTPDispatcher(t *testing.T) {
 	tpDispatcher = &utils.TPDispatcherProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Dsp1",
-		FilterIDs: []string{"*string:Account:1002"},
+		TPid:       "TP1",
+		Tenant:     "cgrates.org",
+		ID:         "Dsp1",
+		FilterIDs:  []string{"*string:Account:1002"},
+		Subsystems: make([]string, 0),
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",

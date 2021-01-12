@@ -127,6 +127,7 @@ func testTPRatePrfSetTPRatePrf(t *testing.T) {
 		Weight:           10,
 		RoundingDecimals: 4,
 		RoundingMethod:   "*up",
+		FilterIDs:        make([]string, 0),
 		Rates: map[string]*utils.TPRate{
 			"RT_ALWAYS": {
 				ID:        "RT_ALWAYS",

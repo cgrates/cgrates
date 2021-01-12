@@ -29,13 +29,10 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
-
-type nopLogger struct{}
-
-func (nopLogger) Print(values ...interface{}) {}
 
 var (
 	sqlCfgPath string
@@ -146,34 +143,37 @@ func (_ *testModelSql) TableName() string {
 func testSQLInitDBs(t *testing.T) {
 	var err error
 	var db2 *gorm.DB
-	if db2, err = gorm.Open("mysql", fmt.Sprintf(dbConnString, "cgrates")); err != nil {
+	if db2, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates")),
+		&gorm.Config{
+			AllowGlobalUpdate: true,
+			Logger:            logger.Default.LogMode(logger.Silent),
+		}); err != nil {
 		t.Fatal(err)
 	}
-	db2.SetLogger(new(nopLogger))
 
-	if _, err = db2.DB().Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`); err != nil {
+	if err = db2.Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`).Error; err != nil {
 		t.Fatal(err)
 	}
 }
 func testSQLInitDB(t *testing.T) {
 	cdr.CGRID = utils.UUIDSha1Prefix()
 	var err error
-	db, err = gorm.Open("mysql", fmt.Sprintf(dbConnString, "cgrates2"))
-	if err != nil {
+	if db, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")),
+		&gorm.Config{
+			AllowGlobalUpdate: true,
+			Logger:            logger.Default.LogMode(logger.Silent),
+		}); err != nil {
 		t.Fatal(err)
 	}
-	db.SetLogger(new(nopLogger))
 	tx := db.Begin()
-	if !tx.HasTable("cdrs") {
-		tx = tx.CreateTable(new(engine.CDRsql))
-		if err = tx.Error; err != nil {
+	if !tx.Migrator().HasTable("cdrs") {
+		if err = tx.Migrator().CreateTable(new(engine.CDRsql)); err != nil {
 			tx.Rollback()
 			t.Fatal(err)
 		}
 	}
-	if !tx.HasTable("cdrs2") {
-		tx = tx.CreateTable(new(testModelSql))
-		if err = tx.Error; err != nil {
+	if !tx.Migrator().HasTable("cdrs2") {
+		if err = tx.Migrator().CreateTable(new(testModelSql)); err != nil {
 			tx.Rollback()
 			t.Fatal(err)
 		}
@@ -306,13 +306,20 @@ func testSQLPoster(t *testing.T) {
 }
 
 func testSQLStop(t *testing.T) {
-	if _, err := db.DB().Exec(`DROP DATABASE cgrates2;`); err != nil {
+	close(rdrExit)
+	if err := db.Migrator().DropTable("cdrs2"); err != nil {
 		t.Fatal(err)
 	}
-	close(rdrExit)
-	db = db.DropTable("cdrs2")
-	db = db.DropTable("cdrs")
-	if err := db.Close(); err != nil {
-		t.Error(err)
+	if err := db.Migrator().DropTable("cdrs"); err != nil {
+		t.Fatal(err)
 	}
+	if err := db.Exec(`DROP DATABASE cgrates2;`).Error; err != nil {
+		t.Fatal(err)
+	}
+	if db2, err := db.DB(); err != nil {
+		t.Fatal(err)
+	} else if err = db2.Close(); err != nil {
+		t.Fatal(err)
+	}
+
 }
