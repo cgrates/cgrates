@@ -517,16 +517,14 @@ func testStorDBitCRUDTPRateProfiles(t *testing.T) {
 	//WRITE
 	tpr := []*utils.TPRateProfile{
 		{
-			TPid:             "id_RP1",
-			Tenant:           "cgrates.org",
-			ID:               "RP1",
-			FilterIDs:        []string{"*string:~*req.Subject:1001"},
-			Weight:           0,
-			RoundingMethod:   "*up",
-			RoundingDecimals: 4,
-			MinCost:          0.1,
-			MaxCost:          0.6,
-			MaxCostStrategy:  "*free",
+			TPid:            "id_RP1",
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       []string{"*string:~*req.Subject:1001"},
+			Weight:          0,
+			MinCost:         0.1,
+			MaxCost:         0.6,
+			MaxCostStrategy: "*free",
 			Rates: map[string]*utils.TPRate{
 				"FIRST_GI": {
 					ID:        "FIRST_GI",

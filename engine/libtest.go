@@ -282,11 +282,11 @@ cgrates.org,D1,,,,*first,,C2,*lt:~*req.Usage:10,10,false,192.168.56.204,
 cgrates.org,ALL1,127.0.0.1:2012,*json,true
 `
 	RateProfileCSVContent = `
-#Tenant,ID,FilterIDs,ActivationInterval,Weight,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeight,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP1,*string:~*req.Subject:1001,,0,*up,4,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",0,false,0s,0,0.12,1m,1m
-cgrates.org,RP1,,,,,,,,,RT_WEEK,,,,,1m,1.234,0.06,1m,1s
-cgrates.org,RP1,,,,,,,,,RT_WEEKEND,,"* * * * 0,6",10,false,0s,0.089,0.06,1m,1s
-cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.0564,0.06,1m,1s
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeight,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RP1,*string:~*req.Subject:1001,,0,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",0,false,0s,0,0.12,1m,1m
+cgrates.org,RP1,,,,,,,RT_WEEK,,,,,1m,1.234,0.06,1m,1s
+cgrates.org,RP1,,,,,,,RT_WEEKEND,,"* * * * 0,6",10,false,0s,0.089,0.06,1m,1s
+cgrates.org,RP1,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,0.0564,0.06,1m,1s
 `
 	ActionProfileCSVContent = `
 #Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue

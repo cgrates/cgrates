@@ -483,8 +483,6 @@ CREATE TABLE tp_rate_profiles (
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `weight` decimal(8,2) NOT NULL,
-  `rounding_method` varchar(64) NOT NULL,
-  `rounding_decimals` tinyint(4) NOT NULL,
   `min_cost` decimal(8,4) NOT NULL,
   `max_cost` decimal(8,4) NOT NULL,
   `max_cost_strategy` varchar(64) NOT NULL,

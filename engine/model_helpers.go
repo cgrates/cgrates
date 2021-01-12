@@ -2902,8 +2902,8 @@ type RateProfileMdls []*RateProfileMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (tps RateProfileMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.ActivationIntervalString, utils.Weight, utils.ConnectFee, utils.RoundingMethod,
-		utils.RoundingDecimals, utils.MinCost, utils.MaxCost, utils.MaxCostStrategy, utils.RateID,
+		utils.ActivationIntervalString, utils.Weight, utils.ConnectFee, utils.MinCost,
+		utils.MaxCost, utils.MaxCostStrategy, utils.RateID,
 		utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeight, utils.RateBlocker,
 		utils.RateIntervalStart, utils.RateFixedFee, utils.RateRecurrentFee, utils.RateUnit, utils.RateIncrement,
 	}
@@ -2968,12 +2968,6 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 
 		if tp.Weight != 0 {
 			rPrf.Weight = tp.Weight
-		}
-		if tp.RoundingMethod != utils.EmptyString {
-			rPrf.RoundingMethod = tp.RoundingMethod
-		}
-		if tp.RoundingDecimals != 0 {
-			rPrf.RoundingDecimals = tp.RoundingDecimals
 		}
 		if tp.MinCost != 0 {
 			rPrf.MinCost = tp.MinCost
@@ -3042,8 +3036,6 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 					}
 				}
 				mdl.Weight = tPrf.Weight
-				mdl.RoundingMethod = tPrf.RoundingMethod
-				mdl.RoundingDecimals = tPrf.RoundingDecimals
 				mdl.MinCost = tPrf.MinCost
 				mdl.MaxCost = tPrf.MaxCost
 				mdl.MaxCostStrategy = tPrf.MaxCostStrategy
@@ -3076,16 +3068,14 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 
 func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfile, err error) {
 	rp = &RateProfile{
-		Tenant:           tpRp.Tenant,
-		ID:               tpRp.ID,
-		FilterIDs:        make([]string, len(tpRp.FilterIDs)),
-		Weight:           tpRp.Weight,
-		RoundingMethod:   tpRp.RoundingMethod,
-		RoundingDecimals: tpRp.RoundingDecimals,
-		MaxCostStrategy:  tpRp.MaxCostStrategy,
-		Rates:            make(map[string]*Rate),
-		MinCost:          utils.NewDecimalFromFloat64(tpRp.MinCost),
-		MaxCost:          utils.NewDecimalFromFloat64(tpRp.MaxCost),
+		Tenant:          tpRp.Tenant,
+		ID:              tpRp.ID,
+		FilterIDs:       make([]string, len(tpRp.FilterIDs)),
+		Weight:          tpRp.Weight,
+		MaxCostStrategy: tpRp.MaxCostStrategy,
+		Rates:           make(map[string]*Rate),
+		MinCost:         utils.NewDecimalFromFloat64(tpRp.MinCost),
+		MaxCost:         utils.NewDecimalFromFloat64(tpRp.MaxCost),
 	}
 	for i, stp := range tpRp.FilterIDs {
 		rp.FilterIDs[i] = stp
@@ -3129,8 +3119,6 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile, err error) {
 		FilterIDs:          make([]string, len(rp.FilterIDs)),
 		ActivationInterval: new(utils.TPActivationInterval),
 		Weight:             rp.Weight,
-		RoundingMethod:     rp.RoundingMethod,
-		RoundingDecimals:   rp.RoundingDecimals,
 		MaxCostStrategy:    rp.MaxCostStrategy,
 		Rates:              make(map[string]*utils.TPRate),
 	}

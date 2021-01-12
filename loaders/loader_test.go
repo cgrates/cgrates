@@ -1552,66 +1552,58 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "RoundingMethod",
-				Path:  "RoundingMethod",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "RoundingDecimals",
-				Path:  "RoundingDecimals",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 			{Tag: "MinCost",
 				Path:  "MinCost",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
 			{Tag: "MaxCost",
 				Path:  "MaxCost",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 			{Tag: "MaxCostStrategy",
 				Path:  "MaxCostStrategy",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
 			{Tag: "RateID",
 				Path:  "RateID",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
 			{Tag: "RateFilterIDs",
 				Path:  "RateFilterIDs",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 			{Tag: "RateActivationTimes",
 				Path:  "RateActivationTimes",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 			{Tag: "RateWeight",
 				Path:  "RateWeight",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
 			{Tag: "RateBlocker",
 				Path:  "RateBlocker",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
 			{Tag: "RateIntervalStart",
 				Path:  "RateIntervalStart",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
 			{Tag: "RateFixedFee",
 				Path:  "RateFixedFee",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
 			{Tag: "RateRecurrentFee",
 				Path:  "RateRecurrentFee",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.17", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
 			{Tag: "RateUnit",
 				Path:  "RateUnit",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.18", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
 			{Tag: "RateIncrement",
 				Path:  "RateIncrement",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.19", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.17", utils.InfieldSep)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
@@ -1637,15 +1629,13 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 		t.Error(err)
 	}
 	eRatePrf := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          utils.NewDecimal(1, 1),
-		MaxCost:          utils.NewDecimal(6, 1),
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         utils.NewDecimal(1, 1),
+		MaxCost:         utils.NewDecimal(6, 1),
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -1758,77 +1748,69 @@ func TestLoaderProcessRateProfileRates(t *testing.T) {
 				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "RoundingMethod",
-				Path:  "RoundingMethod",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "RoundingDecimals",
-				Path:  "RoundingDecimals",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 			{Tag: "MinCost",
 				Path:  "MinCost",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
 			{Tag: "MaxCost",
 				Path:  "MaxCost",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 			{Tag: "MaxCostStrategy",
 				Path:  "MaxCostStrategy",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
 			{Tag: "RateID",
 				Path:  "RateID",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
 			{Tag: "RateFilterIDs",
 				Path:  "RateFilterIDs",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 			{Tag: "RateActivationTimes",
 				Path:  "RateActivationTimes",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 			{Tag: "RateWeight",
 				Path:  "RateWeight",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
 			{Tag: "RateBlocker",
 				Path:  "RateBlocker",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
 			{Tag: "RateIntervalStart",
 				Path:  "RateIntervalStart",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
 			{Tag: "RateFixedFee",
 				Path:  "RateFixedFee",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
 			{Tag: "RateRecurrentFee",
 				Path:  "RateRecurrentFee",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.17", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
 			{Tag: "RateUnit",
 				Path:  "RateUnit",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.18", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
 			{Tag: "RateIncrement",
 				Path:  "RateIncrement",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.19", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.17", utils.InfieldSep)},
 		},
 	}
 	ratePrfCnt1 := `
-#Tenant,ID,FilterIDs,ActivationInterval,Weight,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeight,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP1,*string:~*req.Subject:1001,,0,*up,4,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",0,false,0s,0.4,0.12,1m,1m
-cgrates.org,RP1,,,,,,,,,RT_WEEK,,,,,1m,,0.06,1m,1s
+#Tenant,ID,FilterIDs,ActivationInterval,Weight,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeight,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RP1,*string:~*req.Subject:1001,,0,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",0,false,0s,0.4,0.12,1m,1m
+cgrates.org,RP1,,,,,,,RT_WEEK,,,,,1m,,0.06,1m,1s
 `
 	ratePrfCnt2 := `
 #Tenant,ID,FilterIDs,ActivationInterval,Weight,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeight,RateBlocker,RateIntervalStart,RateValue,RateUnit,RateIncrement
-cgrates.org,RP1,,,,,,,,,RT_WEEKEND,,"* * * * 0,6",10,false,0s,,0.06,1m,1s
-cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
+cgrates.org,RP1,,,,,,,RT_WEEKEND,,"* * * * 0,6",10,false,0s,,0.06,1m,1s
+cgrates.org,RP1,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 `
 	rdr1 := ioutil.NopCloser(strings.NewReader(ratePrfCnt1))
 	csvRdr1 := csv.NewReader(rdr1)
@@ -1853,15 +1835,13 @@ cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 		t.Error(err)
 	}
 	eRatePrf := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          utils.NewDecimal(1, 1),
-		MaxCost:          utils.NewDecimal(6, 1),
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         utils.NewDecimal(1, 1),
+		MaxCost:         utils.NewDecimal(6, 1),
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -1913,15 +1893,13 @@ cgrates.org,RP1,,,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	eRatePrf = &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          utils.NewDecimal(1, 1),
-		MaxCost:          utils.NewDecimal(6, 1),
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         utils.NewDecimal(1, 1),
+		MaxCost:         utils.NewDecimal(6, 1),
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -2016,13 +1994,11 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 	}
 
 	rPfr := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -2063,13 +2039,10 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 		t.Error(err)
 	}
 	rPfr2 := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP2",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-
+		Tenant:          "cgrates.org",
+		ID:              "RP2",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
@@ -2137,13 +2110,10 @@ cgrates.org,RP1,
 	}
 
 	eRatePrf := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
@@ -2199,13 +2169,10 @@ cgrates.org,RP1,
 	}
 
 	eRatePrf2 := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP2",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-
+		Tenant:          "cgrates.org",
+		ID:              "RP2",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
@@ -2235,14 +2202,12 @@ cgrates.org,RP1,
 	}
 
 	eRatePrf3 := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MaxCostStrategy:  "*free",
-		Rates:            map[string]*engine.Rate{},
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MaxCostStrategy: "*free",
+		Rates:           map[string]*engine.Rate{},
 	}
 	rcv, err = ldr.dm.GetRateProfile("cgrates.org", "RP1",
 		true, false, utils.NonTransactional)

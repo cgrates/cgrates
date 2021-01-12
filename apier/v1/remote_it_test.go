@@ -682,13 +682,11 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 	}
 
 	rPrf := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -710,13 +708,11 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 	apiRPrf := &APIRateProfileWithCache{
 		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
 			APIRateProfile: &engine.APIRateProfile{
-				Tenant:           "cgrates.org",
-				ID:               "RP1",
-				FilterIDs:        []string{"*string:~*req.Subject:1001"},
-				Weight:           0,
-				RoundingMethod:   "*up",
-				RoundingDecimals: 4,
-				MaxCostStrategy:  "*free",
+				Tenant:          "cgrates.org",
+				ID:              "RP1",
+				FilterIDs:       []string{"*string:~*req.Subject:1001"},
+				Weight:          0,
+				MaxCostStrategy: "*free",
 				Rates: map[string]*engine.APIRate{
 					"RT_WEEK": {
 						ID:              "RT_WEEK",

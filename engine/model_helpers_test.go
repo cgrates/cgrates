@@ -4301,15 +4301,13 @@ func TestRateProfileToAPI(t *testing.T) {
 		t.Error(err)
 	}
 	rPrf := &RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          utils.NewDecimal(1, 1),
-		MaxCost:          utils.NewDecimal(6, 1),
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         utils.NewDecimal(1, 1),
+		MaxCost:         utils.NewDecimal(6, 1),
+		MaxCostStrategy: "*free",
 		Rates: map[string]*Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -4368,11 +4366,9 @@ func TestRateProfileToAPI(t *testing.T) {
 			ActivationTime: "",
 			ExpiryTime:     "",
 		},
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+		MinCost:         0.1,
+		MaxCost:         0.6,
+		MaxCostStrategy: "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -4439,15 +4435,13 @@ func TestAPIToRateProfile(t *testing.T) {
 		t.Error(err)
 	}
 	eRprf := &RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          utils.NewDecimal(1, 1),
-		MaxCost:          utils.NewDecimal(6, 1),
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         utils.NewDecimal(1, 1),
+		MaxCost:         utils.NewDecimal(6, 1),
+		MaxCostStrategy: "*free",
 		Rates: map[string]*Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -4501,16 +4495,14 @@ func TestAPIToRateProfile(t *testing.T) {
 		},
 	}
 	tpRprf := &utils.TPRateProfile{
-		TPid:             "",
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+		TPid:            "",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         0.1,
+		MaxCost:         0.6,
+		MaxCostStrategy: "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -4569,16 +4561,14 @@ func TestAPIToRateProfile(t *testing.T) {
 
 func TestAPItoModelTPRateProfile(t *testing.T) {
 	tpRprf := &utils.TPRateProfile{
-		TPid:             "",
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+		TPid:            "",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         0.1,
+		MaxCost:         0.6,
+		MaxCostStrategy: "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -4611,8 +4601,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			FilterIDs:           "*string:~*req.Subject:1001",
 			ActivationInterval:  "",
 			Weight:              0,
-			RoundingMethod:      "*up",
-			RoundingDecimals:    4,
 			MinCost:             0.1,
 			MaxCost:             0.6,
 			MaxCostStrategy:     "*free",
@@ -4635,8 +4623,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			FilterIDs:           "",
 			ActivationInterval:  "",
 			Weight:              0,
-			RoundingMethod:      "",
-			RoundingDecimals:    0,
 			MinCost:             0,
 			MaxCost:             0,
 			MaxCostStrategy:     "",
@@ -4661,8 +4647,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			FilterIDs:           "*string:~*req.Subject:1001",
 			ActivationInterval:  "",
 			Weight:              0,
-			RoundingMethod:      "*up",
-			RoundingDecimals:    4,
 			MinCost:             0.1,
 			MaxCost:             0.6,
 			MaxCostStrategy:     "*free",
@@ -4685,8 +4669,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			FilterIDs:           "",
 			ActivationInterval:  "",
 			Weight:              0,
-			RoundingMethod:      "",
-			RoundingDecimals:    0,
 			MinCost:             0,
 			MaxCost:             0,
 			MaxCostStrategy:     "",
@@ -4718,8 +4700,6 @@ func TestAsTPRateProfile(t *testing.T) {
 			FilterIDs:           "*string:~*req.Subject:1001",
 			ActivationInterval:  "",
 			Weight:              0,
-			RoundingMethod:      "*up",
-			RoundingDecimals:    4,
 			MinCost:             0.1,
 			MaxCost:             0.6,
 			MaxCostStrategy:     "*free",
@@ -4742,8 +4722,6 @@ func TestAsTPRateProfile(t *testing.T) {
 			FilterIDs:           "",
 			ActivationInterval:  "",
 			Weight:              0,
-			RoundingMethod:      "",
-			RoundingDecimals:    0,
 			MinCost:             0,
 			MaxCost:             0,
 			MaxCostStrategy:     "",
@@ -4761,16 +4739,14 @@ func TestAsTPRateProfile(t *testing.T) {
 	}
 
 	eRprf := &utils.TPRateProfile{
-		TPid:             utils.EmptyString,
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+		TPid:            utils.EmptyString,
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         0.1,
+		MaxCost:         0.6,
+		MaxCostStrategy: "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -5060,13 +5036,11 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 			ExpiryTime: time.Date(2020, time.April,
 				12, 21, 34, 01, 0, time.UTC),
 		},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          utils.NewDecimal(1, 1),
-		MaxCost:          utils.NewDecimal(6, 1),
-		MaxCostStrategy:  "*free",
-		Rates:            map[string]*Rate{},
+		Weight:          0,
+		MinCost:         utils.NewDecimal(1, 1),
+		MaxCost:         utils.NewDecimal(6, 1),
+		MaxCostStrategy: "*free",
+		Rates:           map[string]*Rate{},
 	}
 
 	expStruct := &utils.TPRateProfile{
@@ -5077,13 +5051,11 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 			ActivationTime: "2020-04-11T21:34:01Z",
 			ExpiryTime:     "2020-04-12T21:34:01Z",
 		},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
-		Rates:            map[string]*utils.TPRate{},
+		Weight:          0,
+		MinCost:         0.1,
+		MaxCost:         0.6,
+		MaxCostStrategy: "*free",
+		Rates:           map[string]*utils.TPRate{},
 	}
 	if result, err := RateProfileToAPI(testProfile); err != nil {
 		t.Error(err)
@@ -5147,8 +5119,8 @@ func TestRateProfileMdlsCSVHeader(t *testing.T) {
 	testRPMdls := RateProfileMdls{}
 	result := testRPMdls.CSVHeader()
 	expected := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.ActivationIntervalString, utils.Weight, utils.ConnectFee, utils.RoundingMethod,
-		utils.RoundingDecimals, utils.MinCost, utils.MaxCost, utils.MaxCostStrategy, utils.RateID,
+		utils.ActivationIntervalString, utils.Weight, utils.ConnectFee, utils.MinCost,
+		utils.MaxCost, utils.MaxCostStrategy, utils.RateID,
 		utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeight, utils.RateBlocker,
 		utils.RateIntervalStart, utils.RateFixedFee, utils.RateRecurrentFee, utils.RateUnit, utils.RateIncrement}
 	if !reflect.DeepEqual(result, expected) {
@@ -5375,8 +5347,6 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 		FilterIDs:          "*string:~*req.Subject:1001",
 		ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
 		Weight:             1.2,
-		RoundingMethod:     "*up",
-		RoundingDecimals:   4,
 		MinCost:            0.1,
 		MaxCost:            0.6,
 		MaxCostStrategy:    "*free",
@@ -5394,12 +5364,10 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "2014-08-29T15:00:00Z",
 			},
-			Weight:           1.2,
-			RoundingMethod:   "*up",
-			RoundingDecimals: 4,
-			MinCost:          0.1,
-			MaxCost:          0.6,
-			MaxCostStrategy:  "*free",
+			Weight:          1.2,
+			MinCost:         0.1,
+			MaxCost:         0.6,
+			MaxCostStrategy: "*free",
 			Rates: map[string]*utils.TPRate{
 				"0": {
 					ID:        "0",
@@ -5433,8 +5401,6 @@ func TestRateProfileMdlsAsTPRateProfileCase3(t *testing.T) {
 		FilterIDs:          "*string:~*req.Subject:1001",
 		ActivationInterval: "2014-07-29T15:00:00Z",
 		Weight:             1.2,
-		RoundingMethod:     "*up",
-		RoundingDecimals:   4,
 		MinCost:            0.1,
 		MaxCost:            0.6,
 		MaxCostStrategy:    "*free",
@@ -5451,12 +5417,10 @@ func TestRateProfileMdlsAsTPRateProfileCase3(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			Weight:           1.2,
-			RoundingMethod:   "*up",
-			RoundingDecimals: 4,
-			MinCost:          0.1,
-			MaxCost:          0.6,
-			MaxCostStrategy:  "*free",
+			Weight:          1.2,
+			MinCost:         0.1,
+			MaxCost:         0.6,
+			MaxCostStrategy: "*free",
 			Rates: map[string]*utils.TPRate{
 				"0": {
 					ID:        "0",

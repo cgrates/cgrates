@@ -687,9 +687,6 @@ func TestRateProfileCostCorrectCost(t *testing.T) {
 	if rPrfCost.Cost != 0.24 {
 		t.Errorf("Expected: %+v, received: %+v", 0.24, rPrfCost.Cost)
 	}
-	if rPrfCost.RoundingDecimals != 2 {
-		t.Errorf("Expected: %+v, received: %+v", 2, rPrfCost.Cost)
-	}
 	if !reflect.DeepEqual(rPrfCost.Altered, []string{utils.RoundingDecimals}) {
 		t.Errorf("Expected: %+v, received: %+v", []string{utils.RoundingDecimals}, rPrfCost.Altered)
 	}
