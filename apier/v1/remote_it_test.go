@@ -681,9 +681,35 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	rPrf := &RateProfileWithCache{
-		RateProfileWithOpts: &engine.RateProfileWithOpts{
-			RateProfile: &engine.RateProfile{
+	rPrf := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
+			},
+			"RT_WEEKEND": {
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationTimes: "* * * * 0,6",
+			},
+			"RT_CHRISTMAS": {
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
+			},
+		},
+	}
+	apiRPrf := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+			APIRateProfile: &engine.APIRateProfile{
 				Tenant:           "cgrates.org",
 				ID:               "RP1",
 				FilterIDs:        []string{"*string:~*req.Subject:1001"},
@@ -691,39 +717,21 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 				RoundingMethod:   "*up",
 				RoundingDecimals: 4,
 				MaxCostStrategy:  "*free",
-				Rates: map[string]*engine.Rate{
+				Rates: map[string]*engine.APIRate{
 					"RT_WEEK": {
 						ID:              "RT_WEEK",
 						Weight:          0,
 						ActivationTimes: "* * * * 1-5",
-						IntervalRates: []*engine.IntervalRate{
-							{
-								IntervalStart: 0,
-							},
-							{
-								IntervalStart: time.Minute,
-							},
-						},
 					},
 					"RT_WEEKEND": {
 						ID:              "RT_WEEKEND",
 						Weight:          10,
 						ActivationTimes: "* * * * 0,6",
-						IntervalRates: []*engine.IntervalRate{
-							{
-								IntervalStart: 0,
-							},
-						},
 					},
 					"RT_CHRISTMAS": {
 						ID:              "RT_CHRISTMAS",
 						Weight:          30,
 						ActivationTimes: "* * 24 12 *",
-						IntervalRates: []*engine.IntervalRate{
-							{
-								IntervalStart: 0,
-							},
-						},
 					},
 				},
 			},
@@ -731,7 +739,7 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 	}
 	var reply string
 	if err := engineTwoRPC.Call(utils.APIerSv1SetRateProfile,
-		rPrf, &reply); err != nil {
+		apiRPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
@@ -742,8 +750,8 @@ func testInternalRemoteITGetRouteProfile(t *testing.T) {
 		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
 		&rPfrg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rPrf.RateProfileWithOpts.RateProfile, rPfrg) {
-		t.Errorf("Expecting : %+v, received: %+v", rPrf.RateProfileWithOpts.RateProfile, rPfrg)
+	} else if !reflect.DeepEqual(rPrf, rPfrg) {
+		t.Errorf("Expecting : %+v, received: %+v", rPrf, rPfrg)
 	}
 }
 
