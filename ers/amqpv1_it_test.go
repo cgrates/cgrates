@@ -28,10 +28,10 @@ import (
 	"testing"
 	"time"
 
+	amqpv1 "github.com/Azure/go-amqp"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	amqpv1 "pack.ag/amqp"
 )
 
 var (

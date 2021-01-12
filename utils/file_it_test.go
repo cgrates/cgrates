@@ -26,7 +26,7 @@ import (
 	"path"
 	"testing"
 
-	"gopkg.in/fsnotify.v1"
+	"github.com/fsnotify/fsnotify"
 )
 
 var (

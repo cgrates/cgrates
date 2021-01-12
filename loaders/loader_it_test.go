@@ -854,7 +854,7 @@ cgrates.org,NewRes1
 	ldr := &Loader{
 		ldrID:         "testProcessFile",
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		fieldSep:      utils.FIELDS_SEP,
+		fieldSep:      utils.FieldsSep,
 		tpInDir:       flPath,
 		tpOutDir:      "/tmp",
 		lockFilename:  utils.ResourcesCsv,
@@ -865,13 +865,13 @@ cgrates.org,NewRes1
 		utils.MetaResources: {
 			{Tag: "Tenant",
 				Path:      "Tenant",
-				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.INFIELD_SEP),
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
 			{Tag: "ID",
 				Path:      "ID",
-				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.INFIELD_SEP),
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
 		},
 	}

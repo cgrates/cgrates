@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"gopkg.in/fsnotify.v1"
+	"github.com/fsnotify/fsnotify"
 )
 
 // WatchDir sets up a watcher via inotify to be triggered on new files
