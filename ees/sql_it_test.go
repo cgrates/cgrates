@@ -29,7 +29,9 @@ import (
 
 	"github.com/cgrates/cgrates/utils"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -78,33 +80,33 @@ func (_ *testModelSql) TableName() string {
 	return "expTable"
 }
 
-type nopLogger struct{}
-
-func (nopLogger) Print(values ...interface{}) {}
-
 func testSqlEeCreateTable(t *testing.T) {
 	var err error
 
-	if db2, err = gorm.Open("mysql", fmt.Sprintf(dbConnString, "cgrates")); err != nil {
+	if db2, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates")), &gorm.Config{
+		AllowGlobalUpdate: true,
+		Logger:            logger.Default.LogMode(logger.Silent),
+	}); err != nil {
+		return
+	}
+	if err = db2.Exec(`CREATE DATABASE IF NOT EXISTS exportedDatabase;`).Error; err != nil {
 		t.Fatal(err)
 	}
-	db2.SetLogger(new(nopLogger))
-	if _, err = db2.DB().Exec(`CREATE DATABASE IF NOT EXISTS exportedDatabase;`); err != nil {
-		t.Fatal(err)
-	}
-	if db2, err = gorm.Open("mysql", fmt.Sprintf(dbConnString, "exportedDatabase")); err != nil {
-		t.Fatal(err)
+
+	if db2, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "exportedDatabase")), &gorm.Config{
+		AllowGlobalUpdate: true,
+		Logger:            logger.Default.LogMode(logger.Silent),
+	}); err != nil {
+		return
 	}
 	tx := db2.Begin()
-	if tx.HasTable("expTable") {
-		tx = tx.DropTable(new(testModelSql))
-		if err = tx.Error; err != nil {
+	if tx.Migrator().HasTable("expTable") {
+		if err = tx.Migrator().DropTable(new(testModelSql)); err != nil {
 			tx.Rollback()
 			t.Fatal(err)
 		}
 	}
-	tx = tx.CreateTable(new(testModelSql))
-	if err = tx.Error; err != nil {
+	if err = tx.Migrator().CreateTable(new(testModelSql)); err != nil {
 		tx.Rollback()
 		t.Fatal(err)
 	}

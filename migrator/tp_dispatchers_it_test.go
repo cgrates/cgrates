@@ -107,11 +107,12 @@ func testTpDispITFlush(t *testing.T) {
 
 func testTpDispITPopulate(t *testing.T) {
 	tpDisps = []*utils.TPDispatcherProfile{
-		&utils.TPDispatcherProfile{
-			TPid:      "TP1",
-			Tenant:    "cgrates.org",
-			ID:        "Dsp1",
-			FilterIDs: []string{"*string:Account:1002"},
+		{
+			TPid:       "TP1",
+			Tenant:     "cgrates.org",
+			ID:         "Dsp1",
+			FilterIDs:  []string{"*string:Account:1002"},
+			Subsystems: make([]string, 0),
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "",

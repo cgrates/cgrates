@@ -45,9 +45,8 @@ require (
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/ishidawataru/sctp v0.0.0-20191218070446-00ab2ac2db07 // indirect
-	github.com/jinzhu/gorm v1.9.16
 	github.com/jmhodges/levigo v1.0.0 // indirect
-	github.com/lib/pq v1.8.0
+	github.com/lib/pq v1.8.0 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mediocregopher/radix/v3 v3.5.2
 	github.com/miekg/dns v1.1.30

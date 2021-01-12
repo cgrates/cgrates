@@ -19,12 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"database/sql"
 	"fmt"
 	"net/url"
 	"strings"
 	"sync"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -57,23 +60,26 @@ func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 		sqlEe.tableName = utils.IfaceAsString(iface)
 	}
 
-	var connString string
+	var dialect gorm.Dialector
 	switch u.Scheme {
 	case utils.MySQL:
-		connString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
-			u.User.Username(), password, u.Hostname(), u.Port(), dbname)
+		dialect = mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
+			u.User.Username(), password, u.Hostname(), u.Port(), dbname))
 	case utils.Postgres:
-		connString = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", u.Hostname(), u.Port(), dbname, u.User.Username(), password, ssl)
+		dialect = postgres.Open(fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", u.Hostname(), u.Port(), dbname, u.User.Username(), password, ssl))
 	default:
-		return nil, fmt.Errorf("unknown db_type %s", u.Scheme)
+		return nil, fmt.Errorf("db type <%s> not supported", u.Scheme)
 	}
-
-	db, err := gorm.Open(u.Scheme, connString)
-	if err != nil {
-		return nil, err
+	var db *gorm.DB
+	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
+		return
 	}
-	if err = db.DB().Ping(); err != nil {
-		return nil, err
+	var sqlDB *sql.DB
+	if sqlDB, err = db.DB(); err != nil {
+		return
+	}
+	if err = sqlDB.Ping(); err != nil {
+		return
 	}
 
 	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLMaxIdleConns]; has {
@@ -81,24 +87,25 @@ func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 		if err != nil {
 			return nil, err
 		}
-		db.DB().SetMaxIdleConns(int(val))
+		sqlDB.SetMaxIdleConns(int(val))
 	}
 	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLMaxOpenConns]; has {
 		val, err := utils.IfaceAsTInt64(iface)
 		if err != nil {
 			return nil, err
 		}
-		db.DB().SetMaxOpenConns(int(val))
+		sqlDB.SetMaxOpenConns(int(val))
 	}
 	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLMaxConnLifetime]; has {
 		val, err := utils.IfaceAsDuration(iface)
 		if err != nil {
 			return nil, err
 		}
-		db.DB().SetConnMaxLifetime(val)
+		sqlDB.SetConnMaxLifetime(val)
 	}
 
 	sqlEe.db = db
+	sqlEe.sqldb = sqlDB
 	return
 }
 
@@ -109,6 +116,7 @@ type SQLEe struct {
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
 	db      *gorm.DB
+	sqldb   *sql.DB
 
 	tableName string
 
@@ -123,6 +131,7 @@ func (sqlEe *SQLEe) ID() string {
 
 // OnEvicted implements EventExporter, doing the cleanup before exit
 func (sqlEe *SQLEe) OnEvicted(_ string, _ interface{}) {
+	sqlEe.sqldb.Close()
 	return
 }
 

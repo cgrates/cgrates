@@ -37,6 +37,12 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	createdAt = "created_at"
+	updatedAt = "updated_at"
+	deletedAt = "deleted_at"
+)
+
 // NewSQLEventReader return a new sql event reader
 func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
@@ -109,7 +115,7 @@ func (rdr *SQLEventReader) Serve() (err error) {
 	if sqlDB, err = db.DB(); err != nil {
 		return
 	}
-	// sqlDB.SetMaxOpenConns(10)
+	sqlDB.SetMaxOpenConns(10)
 	if err = sqlDB.Ping(); err != nil {
 		return
 	}
@@ -124,11 +130,7 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	defer sqlDB.Close()
 	tm := time.NewTimer(0)
 	for {
-		if db = db.Table(rdr.tableName).Select("*"); db.Error != nil {
-			rdr.rdrErr <- db.Error
-			return
-		}
-		rows, err := db.Rows()
+		rows, err := db.Table(rdr.tableName).Select(utils.Meta).Rows()
 		if err != nil {
 			rdr.rdrErr <- err
 			return
@@ -136,6 +138,7 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 		colNames, err := rows.Columns()
 		if err != nil {
 			rdr.rdrErr <- err
+			rows.Close()
 			return
 		}
 		for rows.Next() {
@@ -144,11 +147,13 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 				utils.Logger.Info(
 					fmt.Sprintf("<%s> stop monitoring sql DB <%s>",
 						utils.ERs, rdr.Config().SourcePath))
+				rows.Close()
 				return
 			default:
 			}
 			if err := rows.Err(); err != nil {
 				rdr.rdrErr <- err
+				rows.Close()
 				return
 			}
 			if rdr.Config().ConcurrentReqs != -1 {
@@ -161,14 +166,39 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 			}
 			if err = rows.Scan(columnPointers...); err != nil {
 				rdr.rdrErr <- err
+				rows.Close()
 				return
 			}
-			go func(columns []interface{}, colNames []string) {
-				msg := make(map[string]interface{})
-				for i, colName := range colNames {
-					msg[colName] = columns[i]
+			msg := make(map[string]interface{})
+			fltr := make(map[string]string)
+			for i, colName := range colNames {
+				msg[colName] = columns[i]
+				if colName != createdAt && colName != updatedAt && colName != deletedAt { // ignore the sql colums for filter only
+					switch tm := columns[i].(type) { // also ignore the values that are zero for time
+					case time.Time:
+						if tm.IsZero() {
+							continue
+						}
+					case *time.Time:
+						if tm == nil || tm.IsZero() {
+							continue
+						}
+					case nil:
+						continue
+					}
+					fltr[colName] = utils.IfaceAsString(columns[i])
 				}
-				db = db.Delete(msg) // to ensure we don't read it again
+			}
+			if err = db.Table(rdr.tableName).Delete(nil, fltr).Error; err != nil { // to ensure we don't read it again
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> deleting message %s error: %s",
+						utils.ERs, utils.ToJSON(msg), err.Error()))
+				rdr.rdrErr <- err
+				rows.Close()
+				return
+			}
+
+			go func(msg map[string]interface{}) {
 				if err := rdr.processMessage(msg); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> processing message %s error: %s",
@@ -184,8 +214,9 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 				if rdr.Config().ConcurrentReqs != -1 {
 					rdr.cap <- struct{}{}
 				}
-			}(columns, colNames)
+			}(msg)
 		}
+		rows.Close()
 		if rdr.Config().RunDelay < 0 {
 			return
 		}
