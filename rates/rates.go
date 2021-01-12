@@ -166,9 +166,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 		return
 	}
 	rpCost = &engine.RateProfileCost{
-		ID:               rtPfl.ID,
-		RoundingDecimals: rtPfl.RoundingDecimals,
-		RoundingMethod:   rtPfl.RoundingMethod,
+		ID: rtPfl.ID,
 	}
 	var ok bool
 	if rtPfl.MinCost != nil {

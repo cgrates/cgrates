@@ -157,15 +157,13 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 		t.Error(err)
 	}
 	rPrf := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          utils.NewDecimal(1, 1),
-		MaxCost:          utils.NewDecimal(6, 1),
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         utils.NewDecimal(1, 1),
+		MaxCost:         utils.NewDecimal(6, 1),
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -232,13 +230,11 @@ func testV1RatePrfRemoveRateProfile(t *testing.T) {
 
 func testV1RatePrfSetRateProfileRates(t *testing.T) {
 	rPrf := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*wrong:inline"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*wrong:inline"},
+		Weight:          0,
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -256,13 +252,11 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 		t.Fatal(err)
 	}
 	apiRPrf := &engine.APIRateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*wrong:inline"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*wrong:inline"},
+		Weight:          0,
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -358,12 +352,10 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 	}
 
 	rPrfUpdated := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weight:    0,
 
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
@@ -414,12 +406,10 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 
 func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	apiRPrf := &engine.APIRateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "SpecialRate",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
+		Tenant:    "cgrates.org",
+		ID:        "SpecialRate",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weight:    0,
 
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.APIRate{
@@ -481,12 +471,10 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	}
 
 	rPrfUpdated := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "SpecialRate",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
+		Tenant:    "cgrates.org",
+		ID:        "SpecialRate",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weight:    0,
 
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
@@ -535,12 +523,10 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	}
 
 	rPrfUpdated2 := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "SpecialRate",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
+		Tenant:    "cgrates.org",
+		ID:        "SpecialRate",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weight:    0,
 
 		MaxCostStrategy: "*free",
 		Rates:           map[string]*engine.Rate{},
@@ -572,11 +558,9 @@ func testV1RatePrfStopEngine(t *testing.T) {
 
 func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 	rateProfile := &engine.RateProfile{
-		ID:               "RPWithoutTenant",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
+		ID:        "RPWithoutTenant",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weight:    0,
 
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
@@ -598,12 +582,9 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 	apiRPrf := &APIRateProfileWithCache{
 		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
 			APIRateProfile: &engine.APIRateProfile{
-				ID:               "RPWithoutTenant",
-				FilterIDs:        []string{"*string:~*req.Subject:1001"},
-				Weight:           0,
-				RoundingMethod:   "*up",
-				RoundingDecimals: 4,
-
+				ID:              "RPWithoutTenant",
+				FilterIDs:       []string{"*string:~*req.Subject:1001"},
+				Weight:          0,
 				MaxCostStrategy: "*free",
 				Rates: map[string]*engine.APIRate{
 					"RT_WEEK": {
@@ -693,12 +674,10 @@ func testV1RatePrfGetRateProfileIDsCount(t *testing.T) {
 
 func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 	rPrf := &engine.RateProfile{
-		ID:               "SpecialRate",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MaxCostStrategy:  "*free",
+		ID:              "SpecialRate",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -720,12 +699,9 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 	apiRPrf := &APIRateProfileWithCache{
 		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
 			APIRateProfile: &engine.APIRateProfile{
-				ID:               "SpecialRate",
-				FilterIDs:        []string{"*string:~*req.Subject:1001"},
-				Weight:           0,
-				RoundingMethod:   "*up",
-				RoundingDecimals: 4,
-
+				ID:              "SpecialRate",
+				FilterIDs:       []string{"*string:~*req.Subject:1001"},
+				Weight:          0,
 				MaxCostStrategy: "*free",
 				Rates: map[string]*engine.APIRate{
 					"RT_WEEK": {

@@ -36,8 +36,6 @@ type RateProfile struct {
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval
 	Weight             float64
-	RoundingDecimals   int
-	RoundingMethod     string
 	MinCost            *utils.Decimal
 	MaxCost            *utils.Decimal
 	MaxCostStrategy    string
@@ -270,8 +268,6 @@ func (ext *APIRateProfile) AsRateProfile() (rp *RateProfile, err error) {
 		FilterIDs:          ext.FilterIDs,
 		ActivationInterval: ext.ActivationInterval,
 		Weight:             ext.Weight,
-		RoundingDecimals:   ext.RoundingDecimals,
-		RoundingMethod:     ext.RoundingMethod,
 		MaxCostStrategy:    ext.MaxCostStrategy,
 	}
 	if ext.MinCost != nil {
@@ -300,8 +296,6 @@ type APIRateProfile struct {
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval
 	Weight             float64
-	RoundingDecimals   int
-	RoundingMethod     string
 	MinCost            *float64
 	MaxCost            *float64
 	MaxCostStrategy    string

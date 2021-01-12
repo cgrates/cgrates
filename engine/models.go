@@ -519,21 +519,19 @@ type RateProfileMdl struct {
 	FilterIDs           string  `index:"2" re:""`
 	ActivationInterval  string  `index:"3" re:""`
 	Weight              float64 `index:"4" re:"\d+\.?\d*"`
-	RoundingMethod      string  `index:"5" re:""`
-	RoundingDecimals    int     `index:"6" re:""`
-	MinCost             float64 `index:"7"  re:"\d+\.?\d*""`
-	MaxCost             float64 `index:"8"  re:"\d+\.?\d*"`
-	MaxCostStrategy     string  `index:"9" re:""`
-	RateID              string  `index:"10" re:""`
-	RateFilterIDs       string  `index:"11" re:""`
-	RateActivationTimes string  `index:"12" re:""`
-	RateWeight          float64 `index:"13" re:"\d+\.?\d*"`
-	RateBlocker         bool    `index:"14" re:""`
-	RateIntervalStart   string  `index:"15" re:""`
-	RateFixedFee        float64 `index:"16" re:"\d+\.?\d*"`
-	RateRecurrentFee    float64 `index:"17" re:"\d+\.?\d*"`
-	RateUnit            string  `index:"18" re:""`
-	RateIncrement       string  `index:"19" re:""`
+	MinCost             float64 `index:"5"  re:"\d+\.?\d*""`
+	MaxCost             float64 `index:"6"  re:"\d+\.?\d*"`
+	MaxCostStrategy     string  `index:"7" re:""`
+	RateID              string  `index:"8" re:""`
+	RateFilterIDs       string  `index:"9" re:""`
+	RateActivationTimes string  `index:"10" re:""`
+	RateWeight          float64 `index:"11" re:"\d+\.?\d*"`
+	RateBlocker         bool    `index:"12" re:""`
+	RateIntervalStart   string  `index:"13" re:""`
+	RateFixedFee        float64 `index:"14" re:"\d+\.?\d*"`
+	RateRecurrentFee    float64 `index:"15" re:"\d+\.?\d*"`
+	RateUnit            string  `index:"16" re:""`
+	RateIncrement       string  `index:"17" re:""`
 
 	CreatedAt time.Time
 }

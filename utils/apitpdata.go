@@ -1462,8 +1462,6 @@ type TPRateProfile struct {
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval
 	Weight             float64
-	RoundingDecimals   int
-	RoundingMethod     string
 	MinCost            float64
 	MaxCost            float64
 	MaxCostStrategy    string

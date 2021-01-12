@@ -380,8 +380,6 @@ func testExpVerifyRateProfiles(t *testing.T) {
 		FilterIDs:          []string{"*string:~*req.Account:1002"},
 		ActivationInterval: nil,
 		Weight:             10,
-		RoundingDecimals:   4,
-		RoundingMethod:     utils.MetaRoundingUp,
 		MinCost:            utils.NewDecimal(0, 0),
 		MaxCost:            utils.NewDecimal(0, 0),
 		MaxCostStrategy:    utils.MetaMaxCostFree,

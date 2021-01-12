@@ -1407,16 +1407,14 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 
 func TestLoadRateProfiles(t *testing.T) {
 	eRatePrf := &utils.TPRateProfile{
-		TPid:             testTPID,
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          0.1,
-		MaxCost:          0.6,
-		MaxCostStrategy:  "*free",
+		TPid:            testTPID,
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         0.1,
+		MaxCost:         0.6,
+		MaxCostStrategy: "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
