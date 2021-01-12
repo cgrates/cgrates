@@ -262,3 +262,121 @@ func CostForIntervals(rtIvls []*RateSInterval) (cost *decimal.Big) {
 // CompressIntervals will compress intervals which equal
 func CompressIntervals(rtIvls []*RateSInterval) {
 }
+
+func (ext *APIRateProfile) AsRateProfile() (rp *RateProfile, err error) {
+	rp = &RateProfile{
+		Tenant:             ext.Tenant,
+		ID:                 ext.ID,
+		FilterIDs:          ext.FilterIDs,
+		ActivationInterval: ext.ActivationInterval,
+		Weight:             ext.Weight,
+		RoundingDecimals:   ext.RoundingDecimals,
+		RoundingMethod:     ext.RoundingMethod,
+		MaxCostStrategy:    ext.MaxCostStrategy,
+	}
+	if ext.MinCost != nil {
+		if rp.MinCost, err = utils.NewDecimalFromFloat64(*ext.MinCost); err != nil {
+			return
+		}
+	}
+	if ext.MaxCost != nil {
+		if rp.MaxCost, err = utils.NewDecimalFromFloat64(*ext.MaxCost); err != nil {
+			return
+		}
+	}
+	if len(ext.Rates) != 0 {
+		rp.Rates = make(map[string]*Rate)
+		for key, extRate := range ext.Rates {
+			if rp.Rates[key], err = extRate.AsRate(); err != nil {
+				return
+			}
+		}
+	}
+	if err = rp.Compile(); err != nil {
+		return
+	}
+	return
+}
+
+type APIRateProfile struct {
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *utils.ActivationInterval
+	Weight             float64
+	RoundingDecimals   int
+	RoundingMethod     string
+	MinCost            *float64
+	MaxCost            *float64
+	MaxCostStrategy    string
+	Rates              map[string]*APIRate
+}
+
+type APIRateProfileWithOpts struct {
+	*APIRateProfile
+	Opts map[string]interface{}
+}
+
+func (ext *APIRate) AsRate() (rate *Rate, err error) {
+	rate = &Rate{
+		ID:              ext.ID,
+		FilterIDs:       ext.FilterIDs,
+		ActivationTimes: ext.ActivationTimes,
+		Weight:          ext.Weight,
+		Blocker:         ext.Blocker,
+	}
+	if len(ext.IntervalRates) != 0 {
+		rate.IntervalRates = make([]*IntervalRate, len(ext.IntervalRates))
+		for i, iRate := range ext.IntervalRates {
+			if rate.IntervalRates[i], err = iRate.AsIntervalRate(); err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+type APIRate struct {
+	ID              string   // RateID
+	FilterIDs       []string // RateFilterIDs
+	ActivationTimes string   // ActivationTimes is a cron formatted time interval
+	Weight          float64  // RateWeight will decide the winner per interval start
+	Blocker         bool     // RateBlocker will make this rate recurrent, deactivating further intervals
+	IntervalRates   []*APIIntervalRate
+}
+
+func (ext *APIIntervalRate) AsIntervalRate() (iRate *IntervalRate, err error) {
+	iRate = new(IntervalRate)
+	if iRate.IntervalStart, err = utils.ParseDurationWithNanosecs(ext.IntervalStart); err != nil {
+		return
+	}
+	if ext.FixedFee != nil {
+		if iRate.FixedFee, err = utils.NewDecimalFromFloat64(*ext.FixedFee); err != nil {
+			return
+		}
+	}
+	if ext.RecurrentFee != nil {
+		if iRate.RecurrentFee, err = utils.NewDecimalFromFloat64(*ext.RecurrentFee); err != nil {
+			return
+		}
+	}
+	if ext.Unit != nil {
+		if iRate.Unit, err = utils.NewDecimalFromFloat64(*ext.Unit); err != nil {
+			return
+		}
+	}
+	if ext.Increment != nil {
+		if iRate.Increment, err = utils.NewDecimalFromFloat64(*ext.Increment); err != nil {
+			return
+		}
+	}
+	return
+}
+
+type APIIntervalRate struct {
+	IntervalStart string
+	FixedFee      *float64
+	RecurrentFee  *float64
+	Unit          *float64 // RateUnit
+	Increment     *float64 // RateIncrement
+}

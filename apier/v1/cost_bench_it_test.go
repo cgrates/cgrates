@@ -95,42 +95,33 @@ func testCostBenchLoadFromFolder2(b *testing.B) {
 }
 
 func testCostBenchSetRateProfile(b *testing.B) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
-	if err != nil {
-		b.Error(err)
-	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
-	if err != nil {
-		b.Error(err)
-	}
-	rate1 := &engine.Rate{
-		ID:              "RATE1",
-		Weight:          0,
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*engine.IntervalRate{
-			{
-				IntervalStart: 0,
-				FixedFee:      utils.NewDecimal(4, 1),
-				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
-			},
-			{
-				IntervalStart: time.Minute,
-				RecurrentFee:  utils.NewDecimal(1, 1),
-				Unit:          minDecimal,
-				Increment:     secDecimal,
-			},
-		},
-	}
-	rPrf := &RateProfileWithCache{
-		RateProfileWithOpts: &engine.RateProfileWithOpts{
-			RateProfile: &engine.RateProfile{
+	rPrf := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+			APIRateProfile: &engine.APIRateProfile{
 				ID:        "DefaultRate",
 				FilterIDs: []string{"*string:~*req.Subject:1001"},
 				Weight:    10,
-				Rates: map[string]*engine.Rate{
-					"RATE1": rate1,
+				Rates: map[string]*engine.APIRate{
+					"RATE1": &engine.APIRate{
+						ID:              "RATE1",
+						Weight:          0,
+						ActivationTimes: "* * * * *",
+						IntervalRates: []*engine.APIIntervalRate{
+							{
+								IntervalStart: "0",
+								FixedFee:      utils.Float64Pointer(0.4),
+								RecurrentFee:  utils.Float64Pointer(0.2),
+								Unit:          utils.Float64Pointer(60000000000),
+								Increment:     utils.Float64Pointer(60000000000),
+							},
+							{
+								IntervalStart: "1m",
+								RecurrentFee:  utils.Float64Pointer(0.1),
+								Unit:          utils.Float64Pointer(60000000000),
+								Increment:     utils.Float64Pointer(1000000000),
+							},
+						},
+					},
 				},
 			},
 		},
@@ -144,51 +135,43 @@ func testCostBenchSetRateProfile(b *testing.B) {
 }
 
 func testCostBenchSetRateProfile2(b *testing.B) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
-	if err != nil {
-		b.Error(err)
-	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
-	if err != nil {
-		b.Error(err)
-	}
-	rate1 := &engine.Rate{
+	rate1 := &engine.APIRate{
 		ID:              "RATE1",
 		Weight:          0,
 		ActivationTimes: "* * * * *",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*engine.APIIntervalRate{
 			{
-				IntervalStart: 0,
-				RecurrentFee:  utils.NewDecimal(2, 1),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
+				IntervalStart: "0",
+				RecurrentFee:  utils.Float64Pointer(0.2),
+				Unit:          utils.Float64Pointer(60000000000),
+				Increment:     utils.Float64Pointer(60000000000),
 			},
 			{
-				IntervalStart: time.Minute,
-				RecurrentFee:  utils.NewDecimal(1, 1),
-				Unit:          minDecimal,
-				Increment:     secDecimal,
+				IntervalStart: "1m",
+				RecurrentFee:  utils.Float64Pointer(0.1),
+				Unit:          utils.Float64Pointer(60000000000),
+				Increment:     utils.Float64Pointer(1000000000),
 			},
 		},
 	}
-	rtChristmas := &engine.Rate{
+	rtChristmas := &engine.APIRate{
 		ID:              "RT_CHRISTMAS",
 		Weight:          30,
 		ActivationTimes: "* * 24 12 *",
-		IntervalRates: []*engine.IntervalRate{{
-			IntervalStart: 0,
-			RecurrentFee:  utils.NewDecimal(6, 2),
-			Unit:          minDecimal,
-			Increment:     secDecimal,
+		IntervalRates: []*engine.APIIntervalRate{{
+			IntervalStart: "0",
+			RecurrentFee:  utils.Float64Pointer(0.6),
+			Unit:          utils.Float64Pointer(60000000000),
+			Increment:     utils.Float64Pointer(1000000000),
 		}},
 	}
-	rPrf := &RateProfileWithCache{
-		RateProfileWithOpts: &engine.RateProfileWithOpts{
-			RateProfile: &engine.RateProfile{
+	rPrf := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+			APIRateProfile: &engine.APIRateProfile{
 				ID:        "RateChristmas",
 				FilterIDs: []string{"*string:~*req.Subject:1010"},
 				Weight:    50,
-				Rates: map[string]*engine.Rate{
+				Rates: map[string]*engine.APIRate{
 					"RATE1":          rate1,
 					"RATE_CHRISTMAS": rtChristmas,
 				},

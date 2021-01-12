@@ -1339,58 +1339,61 @@ func testInternalReplicateITThreshold(t *testing.T) {
 
 func testInternalReplicateITRateProfile(t *testing.T) {
 	//set
-	rPrf := &RateProfileWithCache{
-		RateProfileWithOpts: &engine.RateProfileWithOpts{
-			RateProfile: &engine.RateProfile{
-				Tenant:           "cgrates.org",
-				ID:               "RP1",
-				FilterIDs:        []string{"*string:~*req.Subject:1001"},
-				Weight:           0,
-				RoundingMethod:   "*up",
-				RoundingDecimals: 4,
-
-				MaxCostStrategy: "*free",
-				Rates: map[string]*engine.Rate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						Weight:          0,
-						ActivationTimes: "* * * * 1-5",
-						IntervalRates: []*engine.IntervalRate{
-							{
-								IntervalStart: 0,
-							},
-							{
-								IntervalStart: time.Minute,
-							},
-						},
-					},
-					"RT_WEEKEND": {
-						ID:              "RT_WEEKEND",
-						Weight:          10,
-						ActivationTimes: "* * * * 0,6",
-						IntervalRates: []*engine.IntervalRate{
-							{
-								IntervalStart: 0,
-							},
-						},
-					},
-					"RT_CHRISTMAS": {
-						ID:              "RT_CHRISTMAS",
-						Weight:          30,
-						ActivationTimes: "* * 24 12 *",
-						IntervalRates: []*engine.IntervalRate{
-							{
-								IntervalStart: 0,
-							},
-						},
-					},
-				},
+	rPrf := &engine.RateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
+			},
+			"RT_WEEKEND": {
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationTimes: "* * * * 0,6",
+			},
+			"RT_CHRISTMAS": {
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
 			},
 		},
 	}
 
+	apiRPrf := &engine.APIRateProfile{
+		Tenant:           "cgrates.org",
+		ID:               "RP1",
+		FilterIDs:        []string{"*string:~*req.Subject:1001"},
+		Weight:           0,
+		RoundingMethod:   "*up",
+		RoundingDecimals: 4,
+		MaxCostStrategy:  "*free",
+		Rates: map[string]*engine.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
+			},
+			"RT_WEEKEND": {
+				ID:              "RT_WEEKEND",
+				Weight:          10,
+				ActivationTimes: "* * * * 0,6",
+			},
+			"RT_CHRISTMAS": {
+				ID:              "RT_CHRISTMAS",
+				Weight:          30,
+				ActivationTimes: "* * 24 12 *",
+			},
+		},
+	}
 	var result string
-	if err := internalRPC.Call(utils.APIerSv1SetRateProfile, rPrf, &result); err != nil {
+	if err := internalRPC.Call(utils.APIerSv1SetRateProfile, apiRPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1400,14 +1403,14 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(rPrf.RateProfileWithOpts.RateProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+	} else if !reflect.DeepEqual(rPrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", rPrf, reply)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetRateProfile,
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(rPrf.RateProfileWithOpts.RateProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+	} else if !reflect.DeepEqual(rPrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", rPrf, reply)
 	}
 	//remove
 	if err := internalRPC.Call(utils.APIerSv1RemoveRateProfile, &utils.TenantIDWithCache{

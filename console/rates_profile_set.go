@@ -28,7 +28,7 @@ func init() {
 	c := &CmdSetRateProfile{
 		name:      "rates_profile_set",
 		rpcMethod: utils.APIerSv1SetRateProfile,
-		rpcParams: &v1.RateProfileWithCache{},
+		rpcParams: &v1.APIRateProfileWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdSetRateProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.RateProfileWithCache
+	rpcParams *v1.APIRateProfileWithCache
 	*CommandExecuter
 }
 
@@ -51,10 +51,10 @@ func (self *CmdSetRateProfile) RpcMethod() string {
 
 func (self *CmdSetRateProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.RateProfileWithCache{
-			RateProfileWithOpts: &engine.RateProfileWithOpts{
-				RateProfile: new(engine.RateProfile),
-				Opts:        make(map[string]interface{}),
+		self.rpcParams = &v1.APIRateProfileWithCache{
+			APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+				APIRateProfile: new(engine.APIRateProfile),
+				Opts:           make(map[string]interface{}),
 			},
 		}
 	}

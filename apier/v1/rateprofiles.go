@@ -88,29 +88,32 @@ func (apierSv1 *APIerSv1) GetRateProfileIDsCount(args *utils.TenantWithOpts, rep
 	return
 }
 
-type RateProfileWithCache struct {
-	*engine.RateProfileWithOpts
+type APIRateProfileWithCache struct {
+	*engine.APIRateProfileWithOpts
 	Cache *string
 }
 
 //SetRateProfile add/update a new Rate Profile
-func (apierSv1 *APIerSv1) SetRateProfile(rPrf *RateProfileWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(rPrf.RateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) SetRateProfile(ext *APIRateProfileWithCache, reply *string) error {
+	if missing := utils.MissingStructFields(ext.APIRateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rPrf.Tenant == utils.EmptyString {
-		rPrf.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	if ext.Tenant == utils.EmptyString {
+		ext.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-
-	if err := apierSv1.DataManager.SetRateProfile(rPrf.RateProfile, true); err != nil {
+	rPrf, err := ext.AsRateProfile()
+	if err != nil {
+		return err
+	}
+	if err := apierSv1.DataManager.SetRateProfile(rPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(rPrf.Cache, rPrf.Tenant, utils.CacheRateProfiles,
-		rPrf.TenantID(), &rPrf.FilterIDs, nil, rPrf.Opts); err != nil {
+	if err := apierSv1.CallCache(ext.Cache, rPrf.Tenant, utils.CacheRateProfiles,
+		rPrf.TenantID(), &rPrf.FilterIDs, nil, ext.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -118,22 +121,26 @@ func (apierSv1 *APIerSv1) SetRateProfile(rPrf *RateProfileWithCache, reply *stri
 }
 
 //SetRateProfileRates add/update Rates from existing RateProfiles
-func (apierSv1 *APIerSv1) SetRateProfileRates(rPrf *RateProfileWithCache, reply *string) (err error) {
-	if missing := utils.MissingStructFields(rPrf.RateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) SetRateProfileRates(ext *APIRateProfileWithCache, reply *string) (err error) {
+	if missing := utils.MissingStructFields(ext.APIRateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rPrf.Tenant == utils.EmptyString {
-		rPrf.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
+	if ext.Tenant == utils.EmptyString {
+		ext.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err = apierSv1.DataManager.SetRateProfileRates(rPrf.RateProfile, true); err != nil {
+	rPrf, err := ext.AsRateProfile()
+	if err != nil {
+		return err
+	}
+	if err = apierSv1.DataManager.SetRateProfileRates(rPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database
 	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err = apierSv1.CallCache(rPrf.Cache, rPrf.Tenant, utils.CacheRateProfiles,
-		rPrf.TenantID(), &rPrf.FilterIDs, nil, rPrf.Opts); err != nil {
+	if err = apierSv1.CallCache(ext.Cache, rPrf.Tenant, utils.CacheRateProfiles,
+		rPrf.TenantID(), &rPrf.FilterIDs, nil, ext.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
