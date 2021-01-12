@@ -229,4 +229,9 @@ func TestGetOne(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, value)
 	}
 
+	set = StringSet{}
+	value = set.GetOne()
+	if value != EmptyString {
+		t.Errorf("Expected %+v, received %+v", EmptyString, value)
+	}
 }

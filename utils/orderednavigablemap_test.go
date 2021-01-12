@@ -939,3 +939,16 @@ func TestOrderedNavigableMapRemove2(t *testing.T) {
 		t.Errorf("Expected error: %s,received: %v", expErr, err)
 	}
 }
+
+func TestOrderedNavigableMapOrderedFields(t *testing.T) {
+	nm := NewOrderedNavigableMap()
+	nm.Set(&FullPath{
+		PathItems: PathItems{{Field: "Field1"}, {Field: "Field2", Index: StringPointer("0")}},
+		Path:      "Field1.Field2[0]",
+	}, NewNMData("1003"))
+	rcv := nm.OrderedFields()
+	newRcv := rcv[0].(string)
+	if newRcv != "1003" {
+		t.Errorf("Expected %+v, received %+v", "1003", newRcv)
+	}
+}
