@@ -20,7 +20,6 @@ package utils
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -55,12 +54,9 @@ func SubstractDecimal(x, y *Decimal) *Decimal {
 
 // NewDecimalFromFloat64 is a constructor for Decimal out of float64
 // passing through string is necessary due to differences between decimal and binary representation of float64
-func NewDecimalFromFloat64(f float64) (*Decimal, error) {
-	d, canSet := new(decimal.Big).SetString(strconv.FormatFloat(f, 'f', -1, 64))
-	if !canSet {
-		return nil, fmt.Errorf("cannot convert float64 to Decimal")
-	}
-	return &Decimal{d}, nil
+func NewDecimalFromFloat64(f float64) *Decimal {
+	d, _ := new(decimal.Big).SetString(strconv.FormatFloat(f, 'f', -1, 64))
+	return &Decimal{d}
 }
 
 // NewDecimalFromUnit is a constructor for Decimal out of unit represents as string

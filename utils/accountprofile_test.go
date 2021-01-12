@@ -134,6 +134,7 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 				Units: 0,
 			},
 		},
+		Weight: 10,
 	}
 	expected := &AccountProfile{
 		Tenant: "cgrates.org",
@@ -151,10 +152,68 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 				Units: NewDecimal(0, 0),
 			},
 		},
+		Weight: 10,
 	}
 	if rcv, err := apiAccPrf.AsAccountProfile(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", ToJSON(expected), ToJSON(rcv))
+	}
+
+	accPrfList := AccountProfiles{}
+	accPrfList = append(accPrfList, expected)
+	accPrfList.Sort()
+	if !reflect.DeepEqual(accPrfList[0], expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, accPrfList[0])
+	}
+}
+
+func TestAPIBalanceAsBalance(t *testing.T) {
+	blc := &APIBalance{
+		ID: "VoiceBalance",
+		CostIncrements: []*APICostIncrement{
+			{
+				FilterIDs:    []string{"*string:~*req.Account:1001"},
+				Increment:    Float64Pointer(1),
+				FixedFee:     Float64Pointer(10),
+				RecurrentFee: Float64Pointer(35),
+			},
+		},
+		Weight: 10,
+		UnitFactors: []*APIUnitFactor{
+			{
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Factor:    20,
+			},
+		},
+	}
+	expected := &Balance{
+		ID: "VoiceBalance",
+		CostIncrements: []*CostIncrement{
+			{
+				FilterIDs:    []string{"*string:~*req.Account:1001"},
+				Increment:    NewDecimal(1, 0),
+				FixedFee:     NewDecimal(10, 0),
+				RecurrentFee: NewDecimal(35, 0),
+			},
+		},
+		Weight: 10,
+		UnitFactors: []*UnitFactor{
+			{
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Factor:    NewDecimal(20, 0),
+			},
+		},
+		Units: NewDecimal(0, 0),
+	}
+	if rcv := blc.AsBalance(); !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(expected), ToJSON(rcv))
+	}
+
+	blcList := Balances{}
+	blcList = append(blcList, expected)
+	blcList.Sort()
+	if !reflect.DeepEqual(blcList[0], expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, blcList[0])
 	}
 }

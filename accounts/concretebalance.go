@@ -168,6 +168,6 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, incrm *utils.Decimal
 	if !ok {
 		return nil, nil, fmt.Errorf("failed representing decimal <%s> as float64", rmain)
 	}
-	cB.blnCfg.Units, err = utils.NewDecimalFromFloat64(rmainFlt64)
+	cB.blnCfg.Units = utils.NewDecimalFromFloat64(rmainFlt64)
 	return
 }

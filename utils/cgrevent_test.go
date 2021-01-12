@@ -462,3 +462,17 @@ func TestCGREventFieldAsInt64(t *testing.T) {
 	}
 	// }
 }
+
+func TestCGREventWithOptsCache(t *testing.T) {
+	event := &CGREventWithOpts{}
+	event.CacheInit()
+	event.CacheSet("testKey", "string_for_test")
+	if rcv, _ := event.CacheGet("testKey"); rcv != "string_for_test" {
+		t.Errorf("Expected %+v, received %+v", rcv, event.cache["testKey"])
+	}
+	event.CacheRemove("testKey")
+	if event.cache["testKey"] != nil {
+		t.Errorf("Expectred nil")
+	}
+	event.CacheClear()
+}

@@ -54,3 +54,28 @@ func TestNewDecimalAdd(t *testing.T) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
 	}
 }
+
+func TestNewDecimalFromUnit(t *testing.T) {
+	if val, err := NewDecimalFromUnit("1ns"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, NewDecimal(1, 0)) {
+		t.Errorf("Expected %+v, received %+v", NewDecimal(1, 0), val)
+	}
+}
+
+func TestUnmarshalMarshalBinary(t *testing.T) {
+	dec := &Decimal{}
+	expected := NewDecimal(10, 0)
+	if err := dec.UnmarshalBinary([]byte(`10`)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected.Big, dec.Big) {
+		t.Errorf("Expected %T, received %T", expected, dec.Big)
+	}
+
+	expected2 := []byte(`10`)
+	if rcv, err := dec.MarshalBinary(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected2, rcv) {
+		t.Errorf("Expected %+v, received %+v", expected2, rcv)
+	}
+}

@@ -252,9 +252,7 @@ func (ext *APIAccountProfile) AsAccountProfile() (profile *AccountProfile, err e
 	if len(ext.Balances) != 0 {
 		profile.Balances = make(map[string]*Balance, len(ext.Balances))
 		for i, bal := range ext.Balances {
-			if profile.Balances[i], err = bal.AsBalance(); err != nil {
-				return
-			}
+			profile.Balances[i] = bal.AsBalance()
 		}
 	}
 	return
@@ -275,7 +273,7 @@ type APIBalance struct {
 }
 
 // AsBalance convert APIBalance struct to Balance struct
-func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
+func (ext *APIBalance) AsBalance() (balance *Balance) {
 	balance = &Balance{
 		ID:             ext.ID,
 		FilterIDs:      ext.FilterIDs,
@@ -284,25 +282,19 @@ func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
 		Type:           ext.Type,
 		Opts:           ext.Opts,
 		CostAttributes: ext.CostAttributes,
+		Units:          NewDecimalFromFloat64(ext.Units),
 	}
 	if len(ext.CostIncrements) != 0 {
 		balance.CostIncrements = make([]*CostIncrement, len(ext.CostIncrements))
 		for i, cIncr := range ext.CostIncrements {
-			if balance.CostIncrements[i], err = cIncr.AsCostIncrement(); err != nil {
-				return
-			}
+			balance.CostIncrements[i] = cIncr.AsCostIncrement()
 		}
 	}
 	if len(ext.UnitFactors) != 0 {
 		balance.UnitFactors = make([]*UnitFactor, len(ext.UnitFactors))
 		for i, uFct := range ext.UnitFactors {
-			if balance.UnitFactors[i], err = uFct.AsUnitFactor(); err != nil {
-				return
-			}
+			balance.UnitFactors[i] = uFct.AsUnitFactor()
 		}
-	}
-	if balance.Units, err = NewDecimalFromFloat64(ext.Units); err != nil {
-		return
 	}
 	return
 
@@ -317,24 +309,18 @@ type APICostIncrement struct {
 }
 
 // AsCostIncrement convert APICostIncrement struct to CostIncrement struct
-func (ext *APICostIncrement) AsCostIncrement() (cIncr *CostIncrement, err error) {
+func (ext *APICostIncrement) AsCostIncrement() (cIncr *CostIncrement) {
 	cIncr = &CostIncrement{
 		FilterIDs: ext.FilterIDs,
 	}
 	if ext.Increment != nil {
-		if cIncr.Increment, err = NewDecimalFromFloat64(*ext.Increment); err != nil {
-			return
-		}
+		cIncr.Increment = NewDecimalFromFloat64(*ext.Increment)
 	}
 	if ext.FixedFee != nil {
-		if cIncr.FixedFee, err = NewDecimalFromFloat64(*ext.FixedFee); err != nil {
-			return
-		}
+		cIncr.FixedFee = NewDecimalFromFloat64(*ext.FixedFee)
 	}
 	if ext.RecurrentFee != nil {
-		if cIncr.RecurrentFee, err = NewDecimalFromFloat64(*ext.RecurrentFee); err != nil {
-			return
-		}
+		cIncr.RecurrentFee = NewDecimalFromFloat64(*ext.RecurrentFee)
 	}
 	return
 }
@@ -346,13 +332,9 @@ type APIUnitFactor struct {
 }
 
 // AsUnitFactor convert APIUnitFactor struct to UnitFactor struct
-func (ext *APIUnitFactor) AsUnitFactor() (uFac *UnitFactor, err error) {
-	uFac = &UnitFactor{
+func (ext *APIUnitFactor) AsUnitFactor() *UnitFactor {
+	return &UnitFactor{
 		FilterIDs: ext.FilterIDs,
+		Factor:    NewDecimalFromFloat64(ext.Factor),
 	}
-	if uFac.Factor, err = NewDecimalFromFloat64(ext.Factor); err != nil {
-		return
-	}
-	return
-
 }

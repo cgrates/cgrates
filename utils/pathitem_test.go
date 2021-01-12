@@ -163,3 +163,23 @@ func TestPathItemsSlice(t *testing.T) {
 		t.Errorf("Expected: %q, received: %q", expected, rply)
 	}
 }
+
+func TestNewFullPath(t *testing.T) {
+	expected := &FullPath{
+		PathItems: []PathItem{
+			{
+				Field: EmptyString,
+			},
+			{
+				Field: "test",
+			},
+			{
+				Field: "path",
+			},
+		},
+		Path: "/test/path",
+	}
+	if rcv := NewFullPath("/test/path", Slash); !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(expected), ToJSON(rcv))
+	}
+}

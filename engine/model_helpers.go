@@ -3169,12 +3169,8 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 		RoundingDecimals: tpRp.RoundingDecimals,
 		MaxCostStrategy:  tpRp.MaxCostStrategy,
 		Rates:            make(map[string]*Rate),
-	}
-	if rp.MinCost, err = utils.NewDecimalFromFloat64(tpRp.MinCost); err != nil {
-		return
-	}
-	if rp.MaxCost, err = utils.NewDecimalFromFloat64(tpRp.MaxCost); err != nil {
-		return
+		MinCost:          utils.NewDecimalFromFloat64(tpRp.MinCost),
+		MaxCost:          utils.NewDecimalFromFloat64(tpRp.MaxCost),
 	}
 	for i, stp := range tpRp.FilterIDs {
 		rp.FilterIDs[i] = stp
@@ -3198,12 +3194,8 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 			if rp.Rates[key].IntervalRates[i].IntervalStart, err = utils.ParseDurationWithNanosecs(iRate.IntervalStart); err != nil {
 				return nil, err
 			}
-			if rp.Rates[key].IntervalRates[i].FixedFee, err = utils.NewDecimalFromFloat64(iRate.FixedFee); err != nil {
-				return
-			}
-			if rp.Rates[key].IntervalRates[i].RecurrentFee, err = utils.NewDecimalFromFloat64(iRate.RecurrentFee); err != nil {
-				return
-			}
+			rp.Rates[key].IntervalRates[i].FixedFee = utils.NewDecimalFromFloat64(iRate.FixedFee)
+			rp.Rates[key].IntervalRates[i].RecurrentFee = utils.NewDecimalFromFloat64(iRate.RecurrentFee)
 			if rp.Rates[key].IntervalRates[i].Unit, err = utils.NewDecimalFromUnit(iRate.Unit); err != nil {
 				return nil, err
 			}
@@ -3759,9 +3751,7 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 			Weight:    bal.Weight,
 			Blocker:   bal.Blocker,
 			Type:      bal.Type,
-		}
-		if ap.Balances[id].Units, err = utils.NewDecimalFromFloat64(bal.Units); err != nil {
-			return
+			Units:     utils.NewDecimalFromFloat64(bal.Units),
 		}
 		if bal.Opts != utils.EmptyString {
 			ap.Balances[id].Opts = make(map[string]interface{})
@@ -3781,19 +3771,13 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 					FilterIDs: costIncrement.FilterIDs,
 				}
 				if costIncrement.Increment != nil {
-					if ap.Balances[id].CostIncrements[j].Increment, err = utils.NewDecimalFromFloat64(*costIncrement.Increment); err != nil {
-						return
-					}
+					ap.Balances[id].CostIncrements[j].Increment = utils.NewDecimalFromFloat64(*costIncrement.Increment)
 				}
 				if costIncrement.FixedFee != nil {
-					if ap.Balances[id].CostIncrements[j].FixedFee, err = utils.NewDecimalFromFloat64(*costIncrement.FixedFee); err != nil {
-						return
-					}
+					ap.Balances[id].CostIncrements[j].FixedFee = utils.NewDecimalFromFloat64(*costIncrement.FixedFee)
 				}
 				if costIncrement.RecurrentFee != nil {
-					if ap.Balances[id].CostIncrements[j].RecurrentFee, err = utils.NewDecimalFromFloat64(*costIncrement.RecurrentFee); err != nil {
-						return
-					}
+					ap.Balances[id].CostIncrements[j].RecurrentFee = utils.NewDecimalFromFloat64(*costIncrement.RecurrentFee)
 				}
 			}
 		}
@@ -3808,9 +3792,7 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 			for j, unitFactor := range bal.UnitFactors {
 				ap.Balances[id].UnitFactors[j] = &utils.UnitFactor{
 					FilterIDs: unitFactor.FilterIDs,
-				}
-				if ap.Balances[id].UnitFactors[j].Factor, err = utils.NewDecimalFromFloat64(unitFactor.Factor); err != nil {
-					return
+					Factor:    utils.NewDecimalFromFloat64(unitFactor.Factor),
 				}
 			}
 		}
