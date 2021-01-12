@@ -3804,3 +3804,77 @@ func TestStatMetricsStatDDCGetValue(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", 1.0, result)
 	}
 }
+
+func TestStatMetricsStatASRAddEventErr1(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EVENT_1",
+		Event: map[string]interface{}{
+			utils.AnswerTime: "10",
+		},
+	}
+	asr := &StatASR{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Answered:  1.0,
+		Count:     2,
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": {Stat: 1, CompressFactor: 1},
+			"EVENT_2": {Stat: 0, CompressFactor: 1},
+		},
+		MinItems: 2,
+		val:      nil,
+	}
+	err := asr.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: ev.Event})
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Errorf("\nExpecting <Unsupported time format>,\n Recevied <%+v>", err)
+	}
+}
+
+func TestStatMetricsStatASRAddEventErr2(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": false,
+		},
+	}
+	asr := &StatASR{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Answered:  1.0,
+		Count:     2,
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": {Stat: 1, CompressFactor: 1},
+			"EVENT_2": {Stat: 0, CompressFactor: 1},
+		},
+		MinItems: 2,
+		val:      nil,
+	}
+	err := asr.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: ev.Event})
+	if err == nil || err.Error() != "cannot convert field: false to time.Time" {
+		t.Errorf("\nExpecting <cannot convert field: false to time.Time>,\n Recevied <%+v>", err)
+	}
+}
+
+func TestStatMetricsStatACDAddEventErr(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EVENT_1",
+		Event: map[string]interface{}{
+			"Usage": false,
+		},
+	}
+	acd := &StatACD{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Count:     2,
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems: 2,
+		val:      nil,
+	}
+	err := acd.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: ev.Event})
+	if err == nil || err.Error() != "cannot convert field: false to time.Duration" {
+		t.Errorf("\nExpecting <cannot convert field: false to time.Duration>,\n Recevied <%+v>", err)
+	}
+}
