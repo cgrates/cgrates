@@ -3656,6 +3656,151 @@ func TestStatMetricsStatACCGetFloat64Value(t *testing.T) {
 	}
 	result := acc.GetFloat64Value(2)
 	if !reflect.DeepEqual(0.0, result) {
-		t.Errorf("\nExpecting <%T>,\n Recevied <%T>", 0.0, result)
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", 0.0, result)
+	}
+}
+
+func TestStatMetricsStatACCGetFilterIDs(t *testing.T) {
+	acc := &StatACC{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	result := acc.GetFilterIDs()
+	if !reflect.DeepEqual(acc.FilterIDs, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", acc.FilterIDs, result)
+	}
+}
+
+func TestStatMetricsStatACCGetMinItems(t *testing.T) {
+	acc := &StatACC{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	result := acc.GetMinItems()
+	if !reflect.DeepEqual(acc.MinItems, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", acc.MinItems, result)
+	}
+}
+
+func TestStatMetricsStatTCCGetMinItems(t *testing.T) {
+	tcc := &StatTCC{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	result := tcc.GetMinItems()
+	if !reflect.DeepEqual(tcc.MinItems, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", tcc.MinItems, result)
+	}
+}
+
+func TestStatMetricsStatTCCGetFilterIDs(t *testing.T) {
+	tcc := &StatTCC{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	result := tcc.GetFilterIDs()
+	if !reflect.DeepEqual(tcc.FilterIDs, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", tcc.FilterIDs, result)
+	}
+}
+
+func TestStatMetricsStatTCCGetFloat64Value(t *testing.T) {
+	tcc := &StatTCC{
+		Sum:       2.0,
+		FilterIDs: []string{"Test_Filter_ID"},
+		Count:     3,
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems: 3,
+		val:      nil,
+	}
+	result := tcc.GetFloat64Value(2.0)
+	if !reflect.DeepEqual(2.0, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", 2.0, result)
+	}
+}
+
+func TestStatMetricsStatPDDGetMinItems(t *testing.T) {
+	pdd := &StatPDD{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	result := pdd.GetMinItems()
+	if !reflect.DeepEqual(pdd.MinItems, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", pdd.MinItems, result)
+	}
+}
+
+func TestStatMetricsStatPDDGetFilterIDs(t *testing.T) {
+	pdd := &StatPDD{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	result := pdd.GetFilterIDs()
+	if !reflect.DeepEqual(pdd.FilterIDs, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", pdd.FilterIDs, result)
+	}
+}
+
+func TestStatMetricsStatDDCGetValue(t *testing.T) {
+	ddc := &StatDDC{
+		FieldValues: map[string]utils.StringSet{
+			"Field_Value1": {},
+		},
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]map[string]int64{
+			"Event1": {
+				"FieldValue1": 1,
+			},
+			"Event2": {},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	result := ddc.GetValue(10000)
+	if !reflect.DeepEqual(1.0, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", 1.0, result)
 	}
 }
