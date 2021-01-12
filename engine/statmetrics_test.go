@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"net"
 	"reflect"
 	"sort"
 	"testing"
@@ -4002,5 +4003,164 @@ func TestStatMetricsStatTCCAddEventErr(t *testing.T) {
 	err := tcc.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: ev.Event})
 	if err == nil || err.Error() != "cannot convert field: false to float64" {
 		t.Errorf("\nExpecting <cannot convert field: false to float64>,\n Recevied <%+v>", err)
+	}
+}
+
+func TestStatMetricsStatPDDAddEventErr(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EVENT_1",
+		Event: map[string]interface{}{
+			"PDD": false,
+		},
+	}
+	pdd := &StatPDD{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Count:     2,
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems: 2,
+		val:      nil,
+	}
+	err := pdd.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: ev.Event})
+	if err == nil || err.Error() != "cannot convert field: false to time.Duration" {
+		t.Errorf("\nExpecting <cannot convert field: false to time.Duration>,\n Recevied <%+v>", err)
+	}
+}
+
+func TestStatMetricsStatPDDGetCompressFactor(t *testing.T) {
+	eventMap := map[string]int{
+		"Event1": 1000000,
+	}
+	timeStruct := &DurationWithCompress{
+		Duration:       time.Second,
+		CompressFactor: 200000000,
+	}
+	pdd := &StatPDD{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]*DurationWithCompress{
+			"Event1": timeStruct,
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	expected := map[string]int{
+		"Event1": 200000000,
+	}
+	result := pdd.GetCompressFactor(eventMap)
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, result)
+	}
+}
+
+func TestStatMetricsStatDDCGetCompressFactor(t *testing.T) {
+	eventMap := map[string]int{
+		"Event1": 1000000,
+	}
+	ddc := &StatDDC{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]map[string]int64{
+			"Event1": {
+				"Event1": 200000000,
+			},
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	expected := map[string]int{
+		"Event1": 200000000,
+	}
+	result := ddc.GetCompressFactor(eventMap)
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, result)
+	}
+}
+
+func TestStatMetricsStatSumAddEventErr(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EVENT_1",
+		Event: map[string]interface{}{
+			"Cost": false,
+		},
+	}
+	sum := &StatSum{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Count:     2,
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems: 2,
+		val:      nil,
+	}
+	err := sum.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: ev.Event})
+	if err == nil || err.Error() != "strconv.ParseFloat: parsing \"\": invalid syntax" {
+		t.Errorf("\nExpecting <strconv.ParseFloat: parsing \"\": invalid syntax>,\n Recevied <%+v>", err)
+	}
+}
+
+func TestStatMetricsStatAverageAddEventErr(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EVENT_1",
+		Event: map[string]interface{}{
+			"Cost": false,
+		},
+	}
+	avg := &StatAverage{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Count:     2,
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems: 2,
+		val:      nil,
+	}
+	err := avg.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: ev.Event})
+	if err == nil || err.Error() != "strconv.ParseFloat: parsing \"\": invalid syntax" {
+		t.Errorf("\nExpecting <strconv.ParseFloat: parsing \"\": invalid syntax>,\n Recevied <%+v>", err)
+	}
+}
+
+type mockDP struct{}
+
+func (mockDP) String() string {
+	return ""
+}
+
+func (mockDP) FieldAsInterface(fldPath []string) (interface{}, error) {
+	return nil, utils.ErrAccountNotFound
+}
+
+func (mockDP) FieldAsString(fldPath []string) (string, error) {
+	return "", nil
+}
+func (mockDP) RemoteHost() net.Addr {
+	return nil
+}
+
+func TestStatMetricsStatASRAddEventErr3(t *testing.T) {
+	asr := &StatASR{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Answered:  1.0,
+		Count:     2,
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": {Stat: 1, CompressFactor: 1},
+			"EVENT_2": {Stat: 0, CompressFactor: 1},
+		},
+		MinItems: 2,
+		val:      nil,
+	}
+	err := asr.AddEvent("EVENT_1", new(mockDP))
+	if err == nil || err.Error() != utils.ErrAccountNotFound.Error() {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", utils.ErrAccountNotFound, err)
 	}
 }
