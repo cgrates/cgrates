@@ -3878,3 +3878,129 @@ func TestStatMetricsStatACDAddEventErr(t *testing.T) {
 		t.Errorf("\nExpecting <cannot convert field: false to time.Duration>,\n Recevied <%+v>", err)
 	}
 }
+
+func TestStatMetricsStatACDGetCompressFactor(t *testing.T) {
+	eventMap := map[string]int{
+		"Event1": 1000000,
+	}
+	timeStruct := &DurationWithCompress{
+		Duration:       time.Second,
+		CompressFactor: 200000000,
+	}
+	acd := &StatACD{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]*DurationWithCompress{
+			"Event1": timeStruct,
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	expected := map[string]int{
+		"Event1": 200000000,
+	}
+	result := acd.GetCompressFactor(eventMap)
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, result)
+	}
+}
+
+func TestStatMetricsStatTCDAddEventErr(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EVENT_1",
+		Event: map[string]interface{}{
+			"Usage": false,
+		},
+	}
+	tcd := &StatTCD{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Count:     2,
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": {Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": {Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems: 2,
+		val:      nil,
+	}
+	err := tcd.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: ev.Event})
+	if err == nil || err.Error() != "cannot convert field: false to time.Duration" {
+		t.Errorf("\nExpecting <cannot convert field: false to time.Duration>,\n Recevied <%+v>", err)
+	}
+}
+
+func TestStatMetricsStatTCDGetCompressFactor(t *testing.T) {
+	eventMap := map[string]int{
+		"Event1": 1000000,
+	}
+	timeStruct := &DurationWithCompress{
+		Duration:       time.Second,
+		CompressFactor: 200000000,
+	}
+	tcd := &StatTCD{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Events: map[string]*DurationWithCompress{
+			"Event1": timeStruct,
+		},
+		MinItems: 3,
+		Count:    3,
+	}
+	expected := map[string]int{
+		"Event1": 200000000,
+	}
+	result := tcd.GetCompressFactor(eventMap)
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, result)
+	}
+}
+
+func TestStatMetricsStatACCAddEventErr(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EVENT_1",
+		Event: map[string]interface{}{
+			"Cost": false,
+		},
+	}
+	acc := &StatACC{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Count:     2,
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems: 2,
+		val:      nil,
+	}
+	err := acc.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: ev.Event})
+	if err == nil || err.Error() != "cannot convert field: false to float64" {
+		t.Errorf("\nExpecting <cannot convert field: false to float64>,\n Recevied <%+v>", err)
+	}
+}
+
+func TestStatMetricsStatTCCAddEventErr(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EVENT_1",
+		Event: map[string]interface{}{
+			"Cost": false,
+		},
+	}
+	tcc := &StatTCC{
+		FilterIDs: []string{"Test_Filter_ID"},
+		Count:     2,
+		Events: map[string]*StatWithCompress{
+			"Event1": {
+				Stat:           5,
+				CompressFactor: 6,
+			},
+		},
+		MinItems: 2,
+		val:      nil,
+	}
+	err := tcc.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: ev.Event})
+	if err == nil || err.Error() != "cannot convert field: false to float64" {
+		t.Errorf("\nExpecting <cannot convert field: false to float64>,\n Recevied <%+v>", err)
+	}
+}
