@@ -24,11 +24,11 @@ import (
 	"fmt"
 	"time"
 
+	amqpv1 "github.com/Azure/go-amqp"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	amqpv1 "pack.ag/amqp"
 )
 
 // NewAMQPv1ER return a new amqpv1 event reader
@@ -127,7 +127,7 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 			rdr.rdrErr <- err
 			return
 		}
-		if err = msg.Accept(); err != nil {
+		if err = msg.Accept(ctx); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> unable to accept message error: %s",
 					utils.ERs, err.Error()))

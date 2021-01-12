@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	amqpv1 "github.com/Azure/go-amqp"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -38,7 +39,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	amqpv1 "pack.ag/amqp"
 )
 
 var (
@@ -327,7 +327,7 @@ func TestAMQPv1Poster(t *testing.T) {
 	}
 
 	// Accept message
-	msg.Accept()
+	msg.Accept(ctx)
 	if rply := string(msg.GetData()); rply != body {
 		t.Errorf("Expected: %q, received: %q", body, rply)
 	}

@@ -117,7 +117,7 @@ func testDestinationGetCostFor1002(t *testing.T) {
 	}
 	var rply *engine.EventCost
 	if err := tutorialRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
-		t.Error("Unexpected nil error received: ", err.Error())
+		t.Error("Unexpected error received: ", err.Error())
 	} else if *rply.Cost != 0.01 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
 	}
@@ -134,7 +134,7 @@ func testDestinationGetCostFor1003(t *testing.T) {
 	}
 	var rply *engine.EventCost
 	if err := tutorialRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
-		t.Error("Unexpected nil error received: ", err.Error())
+		t.Error("Unexpected error received: ", err.Error())
 	} else if *rply.Cost != 0.3 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
 	}
