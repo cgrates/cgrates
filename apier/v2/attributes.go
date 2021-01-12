@@ -26,20 +26,20 @@ import (
 )
 
 type AttributeWithCache struct {
-	*engine.ExternalAttributeProfile
+	*engine.APIAttributeProfile
 	Cache *string
 	Opts  map[string]interface{}
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
 func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(arg.ExternalAttributeProfile, []string{utils.ID}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(arg.APIAttributeProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = APIerSv2.Config.GeneralCfg().DefaultTenant
 	}
-	alsPrf, err := arg.ExternalAttributeProfile.AsAttributeProfile()
+	alsPrf, err := arg.APIAttributeProfile.AsAttributeProfile()
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}

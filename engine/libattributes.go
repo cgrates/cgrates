@@ -88,8 +88,8 @@ type ExternalAttribute struct {
 	Value     string
 }
 
-// ExternalAttributeProfile used by APIs
-type ExternalAttributeProfile struct {
+// APIAttributeProfile used by APIs
+type APIAttributeProfile struct {
 	Tenant             string
 	ID                 string
 	Contexts           []string // bind this AttributeProfile to multiple contexts
@@ -101,7 +101,7 @@ type ExternalAttributeProfile struct {
 }
 
 // AsAttributeProfile converts the external attribute format to the actual AttributeProfile
-func (ext *ExternalAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, err error) {
+func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, err error) {
 	attr = new(AttributeProfile)
 	if len(ext.Attributes) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("Attributes")
