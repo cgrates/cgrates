@@ -278,3 +278,13 @@ type ReplicatorSv1Interface interface {
 	SetActionProfile(args *engine.ActionProfileWithOpts, reply *string) error
 	RemoveActionProfile(args *utils.TenantIDWithOpts, reply *string) error
 }
+
+type ActionSv1Interface interface {
+	ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error
+	ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
+}
+
+type AccountSv1Interface interface {
+	Ping(ign *utils.CGREventWithOpts, reply *string) error
+}
