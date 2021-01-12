@@ -275,14 +275,10 @@ func (ext *APIRateProfile) AsRateProfile() (rp *RateProfile, err error) {
 		MaxCostStrategy:    ext.MaxCostStrategy,
 	}
 	if ext.MinCost != nil {
-		if rp.MinCost, err = utils.NewDecimalFromFloat64(*ext.MinCost); err != nil {
-			return
-		}
+		rp.MinCost = utils.NewDecimalFromFloat64(*ext.MinCost)
 	}
 	if ext.MaxCost != nil {
-		if rp.MaxCost, err = utils.NewDecimalFromFloat64(*ext.MaxCost); err != nil {
-			return
-		}
+		rp.MaxCost = utils.NewDecimalFromFloat64(*ext.MaxCost)
 	}
 	if len(ext.Rates) != 0 {
 		rp.Rates = make(map[string]*Rate)
@@ -351,24 +347,16 @@ func (ext *APIIntervalRate) AsIntervalRate() (iRate *IntervalRate, err error) {
 		return
 	}
 	if ext.FixedFee != nil {
-		if iRate.FixedFee, err = utils.NewDecimalFromFloat64(*ext.FixedFee); err != nil {
-			return
-		}
+		iRate.FixedFee = utils.NewDecimalFromFloat64(*ext.FixedFee)
 	}
 	if ext.RecurrentFee != nil {
-		if iRate.RecurrentFee, err = utils.NewDecimalFromFloat64(*ext.RecurrentFee); err != nil {
-			return
-		}
+		iRate.RecurrentFee = utils.NewDecimalFromFloat64(*ext.RecurrentFee)
 	}
 	if ext.Unit != nil {
-		if iRate.Unit, err = utils.NewDecimalFromFloat64(*ext.Unit); err != nil {
-			return
-		}
+		iRate.Unit = utils.NewDecimalFromFloat64(*ext.Unit)
 	}
 	if ext.Increment != nil {
-		if iRate.Increment, err = utils.NewDecimalFromFloat64(*ext.Increment); err != nil {
-			return
-		}
+		iRate.Increment = utils.NewDecimalFromFloat64(*ext.Increment)
 	}
 	return
 }
