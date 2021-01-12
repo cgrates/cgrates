@@ -29,7 +29,7 @@ import (
 )
 
 func TestConvertExternalToProfile(t *testing.T) {
-	external := &ExternalAttributeProfile{
+	external := &APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
@@ -77,7 +77,7 @@ func TestConvertExternalToProfile(t *testing.T) {
 }
 
 func TestConvertExternalToProfileMissing(t *testing.T) {
-	external := &ExternalAttributeProfile{
+	external := &APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
@@ -98,7 +98,7 @@ func TestConvertExternalToProfileMissing(t *testing.T) {
 }
 
 func TestConvertExternalToProfileMissing2(t *testing.T) {
-	external := &ExternalAttributeProfile{
+	external := &APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},

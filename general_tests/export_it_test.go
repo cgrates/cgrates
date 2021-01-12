@@ -364,6 +364,14 @@ func testExpVerifyRoutes(t *testing.T) {
 }
 
 func testExpVerifyRateProfiles(t *testing.T) {
+	minDec, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDec, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	var reply *engine.RateProfile
 	minDecimal, err := utils.NewDecimalFromUnit("1m")
 	if err != nil {
@@ -393,10 +401,9 @@ func testExpVerifyRateProfiles(t *testing.T) {
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0 * time.Second,
-						FixedFee:      utils.NewDecimal(0, 0),
 						RecurrentFee:  utils.NewDecimal(1, 2),
-						Unit:          minDecimal,
-						Increment:     secDecimal,
+						Unit:          minDec,
+						Increment:     secDec,
 					},
 				},
 			},

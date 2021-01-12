@@ -177,6 +177,14 @@ func testRatePrfITFlush(t *testing.T) {
 }
 
 func testRatePrfITMigrateAndMove(t *testing.T) {
+	minDec, err := utils.NewDecimalFromUnit("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDec, err := utils.NewDecimalFromUnit("1s")
+	if err != nil {
+		t.Error(err)
+	}
 	rPrf := &engine.RateProfile{
 		Tenant:           "cgrates.org",
 		ID:               "RP1",
@@ -184,21 +192,36 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 		Weight:           0,
 		RoundingMethod:   "*up",
 		RoundingDecimals: 4,
-
-		MaxCostStrategy: "*free",
+		MinCost:          utils.NewDecimal(1, 1),
+		MaxCost:          utils.NewDecimal(6, 1),
+		MaxCostStrategy:  "*free",
 		Rates: map[string]*engine.Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
 				Weight:    0,
 
+				IntervalRates: []*engine.IntervalRate{
+					{
+						RecurrentFee: utils.NewDecimal(12, 2),
+						Unit:         minDec,
+						Increment:    minDec,
+					},
+				},
 				Blocker: false,
 			},
 			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
 				Weight:    10,
-				Blocker:   false,
+				IntervalRates: []*engine.IntervalRate{
+					{
+						RecurrentFee: utils.NewDecimal(6, 2),
+						Unit:         minDec,
+						Increment:    secDec,
+					},
+				},
+				Blocker: false,
 			},
 		},
 	}
