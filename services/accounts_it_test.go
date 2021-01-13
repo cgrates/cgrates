@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
 import (
 	"path"
 	"sync"
@@ -109,4 +108,3 @@ func TestAccountSReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 }
-*/
