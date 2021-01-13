@@ -19,72 +19,90 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
+/*
 import (
-	"reflect"
+	"path"
 	"sync"
 	"testing"
+	"time"
 
-	"github.com/cgrates/cgrates/analyzers"
+	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
-func TestNewAnalyzerReload(t *testing.T) {
+func TestAnalyzerSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
+
 	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	connChan := make(chan rpcclient.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, connChan, srvDep)
-	if anz == nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(anz))
+	db := NewDataDBService(cfg, nil, srvDep)
+	anzRPC := make(chan rpcclient.ClientConnector, 1)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	engine.NewConnManager(cfg, nil)
+	srvMngr.AddServices(anz,
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
 	}
-	anz2 := &AnalyzerService{
-		connChan:    connChan,
-		cfg:         cfg,
-		server:      server,
-		filterSChan: filterSChan,
-		shdChan:     shdChan,
-		srvDep:      srvDep,
-		stopChan:    make(chan struct{}, 1),
-	}
-	if anz2.IsRunning() {
+	if anz.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	anz2.anz = &analyzers.AnalyzerService{}
-	if !anz2.IsRunning() {
+	if db.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	var reply string
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		Section: config.AnalyzerCfgJson,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+	select {
+	case d := <-anzRPC:
+		anzRPC <- d
+	case <-time.After(time.Second):
+		t.Fatal("It took to long to reload the cache")
+	}
+	if !anz.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	if !anz2.IsRunning() {
+	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := anz2.Start()
+	err := anz.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = anz2.Reload()
+	err = anz.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	serviceName := anz2.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.AnalyzerS) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.AnalyzerS, serviceName)
-	}
-	shouldRun := anz2.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, false) {
-		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
-	}
-	getAnalyzerS := anz2.GetAnalyzerS()
-	if !reflect.DeepEqual(anz2.anz, getAnalyzerS) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(anz2.anz), utils.ToJSON(getAnalyzerS))
+	cfg.AnalyzerSCfg().Enabled = false
+	cfg.GetReloadChan(config.AnalyzerCfgJson) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+
+	if anz.IsRunning() {
+		t.Errorf("Expected service to be down")
 	}
 
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+
 }
+*/
