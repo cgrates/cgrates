@@ -86,7 +86,7 @@ func TestNewServerCodec(t *testing.T) {
 	if err = codec.Close(); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	runtime.Gosched()
 	if cnt, err := anz.db.DocCount(); err != nil {
 		t.Fatal(err)
