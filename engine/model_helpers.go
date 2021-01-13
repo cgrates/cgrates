@@ -3695,7 +3695,7 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 	return
 }
 
-func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile) {
+func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile, err error) {
 	tpAp = &utils.TPAccountProfile{
 		Tenant:             ap.Tenant,
 		ID:                 ap.ID,
@@ -3719,16 +3719,69 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 
 	for i, bal := range ap.Balances {
 		tpAp.Balances[i] = &utils.TPAccountBalance{
-			ID:        bal.ID,
-			FilterIDs: bal.FilterIDs,
-			Weight:    bal.Weight,
-			Blocker:   bal.Blocker,
-			Type:      bal.Type,
+			ID:             bal.ID,
+			FilterIDs:      make([]string, len(bal.FilterIDs)),
+			Weight:         bal.Weight,
+			Blocker:        bal.Blocker,
+			Type:           bal.Type,
+			CostIncrement:  make([]*utils.TPBalanceCostIncrement, len(bal.CostIncrements)),
+			CostAttributes: make([]string, len(bal.CostAttributes)),
+			UnitFactors:    make([]*utils.TPBalanceUnitFactor, len(bal.UnitFactors)),
+		}
+		for k, fli := range bal.FilterIDs {
+			tpAp.Balances[i].FilterIDs[k] = fli
 		}
 		tpAp.Balances[i].Units, _ = bal.Units.Float64()
 		elems := make([]string, 0, len(bal.Opts))
 		for k, v := range bal.Opts {
 			elems = append(elems, utils.ConcatenatedKey(k, utils.IfaceAsString(v)))
+		}
+		for k, cIncrement := range bal.CostIncrements {
+			tpAp.Balances[i].CostIncrement[k] = &utils.TPBalanceCostIncrement{
+				FilterIDs: make([]string, len(cIncrement.FilterIDs)),
+			}
+			for kk, fli := range cIncrement.FilterIDs {
+				tpAp.Balances[i].CostIncrement[k].FilterIDs[kk] = fli
+			}
+			if cIncrement.Increment != nil {
+				incr, ok := cIncrement.Increment.Float64()
+				if !ok {
+					return nil, fmt.Errorf("cannot convert <%+v> to float64", cIncrement.Increment)
+				}
+				tpAp.Balances[i].CostIncrement[k].Increment = &incr
+			}
+			if cIncrement.FixedFee != nil {
+				fxdFee, ok := cIncrement.FixedFee.Float64()
+				if !ok {
+					return nil, fmt.Errorf("cannot convert <%+v> to float64", cIncrement.FixedFee)
+				}
+				tpAp.Balances[i].CostIncrement[k].FixedFee = &fxdFee
+			}
+			if cIncrement.RecurrentFee != nil {
+				rcrFee, ok := cIncrement.RecurrentFee.Float64()
+				if !ok {
+					return nil, fmt.Errorf("cannot convert <%+v> to float64", cIncrement.RecurrentFee)
+				}
+				tpAp.Balances[i].CostIncrement[k].RecurrentFee = &rcrFee
+			}
+		}
+		for k, cAttributes := range bal.CostAttributes {
+			tpAp.Balances[i].CostAttributes[k] = cAttributes
+		}
+		for k, uFactor := range bal.UnitFactors {
+			tpAp.Balances[i].UnitFactors[k] = &utils.TPBalanceUnitFactor{
+				FilterIDs: make([]string, len(uFactor.FilterIDs)),
+			}
+			for kk, fli := range uFactor.FilterIDs {
+				tpAp.Balances[i].UnitFactors[k].FilterIDs[kk] = fli
+			}
+			if uFactor.Factor != nil {
+				untFctr, ok := uFactor.Factor.Float64()
+				if !ok {
+					return nil, fmt.Errorf("cannot convert <%+v> to float64", uFactor.Factor)
+				}
+				tpAp.Balances[i].UnitFactors[k].Factor = untFctr
+			}
 		}
 		tpAp.Balances[i].Opts = strings.Join(elems, utils.InfieldSep)
 	}

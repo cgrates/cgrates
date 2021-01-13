@@ -61,6 +61,7 @@ var (
 		testExpVerifyRoutes,
 		testExpVerifyRateProfiles,
 		testExpVerifyActionProfiles,
+		testExpVerifyAccountProfiles,
 		testExpCleanFiles,
 		testExpStopCgrEngine,
 	}
@@ -364,14 +365,6 @@ func testExpVerifyRoutes(t *testing.T) {
 }
 
 func testExpVerifyRateProfiles(t *testing.T) {
-	minDec, err := utils.NewDecimalFromUnit("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	secDec, err := utils.NewDecimalFromUnit("1s")
-	if err != nil {
-		t.Error(err)
-	}
 	var reply *engine.RateProfile
 	minDecimal, err := utils.NewDecimalFromUnit("1m")
 	if err != nil {
@@ -402,8 +395,8 @@ func testExpVerifyRateProfiles(t *testing.T) {
 					{
 						IntervalStart: 0 * time.Second,
 						RecurrentFee:  utils.NewDecimal(1, 2),
-						Unit:          minDec,
-						Increment:     secDec,
+						Unit:          minDecimal,
+						Increment:     secDecimal,
 					},
 				},
 			},
@@ -491,6 +484,52 @@ func testExpVerifyActionProfiles(t *testing.T) {
 		}
 	}
 }
+
+func testExpVerifyAccountProfiles(t *testing.T) {
+	var reply *utils.AccountProfile
+	acctPrf := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ACC_PRF_1",
+		FilterIDs: []string{},
+		Weight:    20,
+		Balances: map[string]*utils.Balance{
+			"MonetaryBalance": {
+				ID:        "MonetaryBalance",
+				FilterIDs: []string{},
+				Weight:    10,
+				Type:      "*monetary",
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FilterIDs:    []string{"fltr1", "fltr2"},
+						Increment:    utils.NewDecimal(13, 1),
+						FixedFee:     utils.NewDecimal(23, 1),
+						RecurrentFee: utils.NewDecimal(33, 1),
+					},
+				},
+				CostAttributes: []string{"attr1", "attr2"},
+				UnitFactors: []*utils.UnitFactor{
+					{
+						FilterIDs: []string{"fltr1", "fltr2"},
+						Factor:    utils.NewDecimal(100, 0),
+					},
+					{
+						FilterIDs: []string{"fltr3"},
+						Factor:    utils.NewDecimal(200, 0),
+					},
+				},
+				Units: utils.NewDecimal(14, 0),
+			},
+		},
+		ThresholdIDs: []string{"*none"},
+	}
+	if err := expRpc.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_PRF_1"}}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(acctPrf, reply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acctPrf), utils.ToJSON(reply))
+	}
+}
+
 func testExpCleanFiles(t *testing.T) {
 	if err := os.RemoveAll("/tmp/tp/"); err != nil {
 		t.Error(err)
