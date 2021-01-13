@@ -946,9 +946,25 @@ func TestOrderedNavigableMapOrderedFields(t *testing.T) {
 		PathItems: PathItems{{Field: "Field1"}, {Field: "Field2", Index: StringPointer("0")}},
 		Path:      "Field1.Field2[0]",
 	}, NewNMData("1003"))
+	nm.Set(&FullPath{
+		PathItems: PathItems{{Field: "Field1"}, {Field: "Field3", Index: StringPointer("0")}},
+		Path:      "Field1.Field3[0]",
+	}, NewNMData("1004"))
+	nm.Set(&FullPath{
+		PathItems: PathItems{{Field: "Field5"}},
+		Path:      "Field5",
+	}, NewNMData("1005"))
+	nm.Set(&FullPath{
+		PathItems: PathItems{{Field: "Field6"}},
+		Path:      "Field6",
+	}, NewNMData("1006"))
+	nm.Remove(&FullPath{
+		PathItems: PathItems{{Field: "Field5"}},
+		Path:      "Field5",
+	})
+	exp := []interface{}{"1003", "1004", "1006"}
 	rcv := nm.OrderedFields()
-	newRcv := rcv[0].(string)
-	if newRcv != "1003" {
-		t.Errorf("Expected %+v, received %+v", "1003", newRcv)
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %+v, received %+v", exp, rcv)
 	}
 }
