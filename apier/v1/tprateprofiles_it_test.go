@@ -121,13 +121,11 @@ func testTPRatePrfGetTPRatePrfBeforeSet(t *testing.T) {
 
 func testTPRatePrfSetTPRatePrf(t *testing.T) {
 	tpRatePrf = &utils.TPRateProfile{
-		TPid:             "TP1",
-		Tenant:           "cgrates.org",
-		ID:               "RT_SPECIAL_1002",
-		Weight:           10,
-		RoundingDecimals: 4,
-		RoundingMethod:   "*up",
-		FilterIDs:        make([]string, 0),
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "RT_SPECIAL_1002",
+		Weight:    10,
+		FilterIDs: make([]string, 0),
 		Rates: map[string]*utils.TPRate{
 			"RT_ALWAYS": {
 				ID:        "RT_ALWAYS",
