@@ -7281,7 +7281,10 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 		},
 		ThresholdIDs: []string{"test_thrs"},
 	}
-	result := AccountProfileToAPI(testStruct)
+	result, err := AccountProfileToAPI(testStruct)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
