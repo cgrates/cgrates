@@ -1535,7 +1535,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 	if len(arg.Items) == 0 {
 		arg.Items = []string{utils.MetaAttributes, utils.MetaChargers, utils.MetaDispatchers,
 			utils.MetaDispatcherHosts, utils.MetaFilters, utils.MetaResources, utils.MetaStats,
-			utils.MetaRoutes, utils.MetaThresholds, utils.MetaRateProfiles, utils.MetaActionProfiles}
+			utils.MetaRoutes, utils.MetaThresholds, utils.MetaRateProfiles, utils.MetaActionProfiles, utils.MetaAccountProfiles}
 	}
 	if _, err := os.Stat(arg.Path); os.IsNotExist(err) {
 		os.Mkdir(arg.Path, os.ModeDir)
@@ -1989,7 +1989,11 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 				if err != nil {
 					return err
 				}
-				for _, model := range engine.APItoModelTPAccountProfile(engine.AccountProfileToAPI(accPrf)) {
+				apiActPrf, err := engine.AccountProfileToAPI(accPrf)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelTPAccountProfile(apiActPrf) {
 					if record, err := engine.CsvDump(model); err != nil {
 						return err
 					} else if err := csvWriter.Write(record); err != nil {
@@ -1998,9 +2002,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 				}
 			}
 			csvWriter.Flush()
-
 		}
-
 	}
 	*reply = utils.OK
 	return nil
