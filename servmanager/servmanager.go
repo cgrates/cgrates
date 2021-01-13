@@ -247,6 +247,8 @@ func (srvMngr *ServiceManager) handleReload() {
 			go srvMngr.reloadService(utils.DispatcherH)
 		case <-srvMngr.GetConfig().GetReloadChan(config.HTTP_JSN):
 			go srvMngr.reloadService(utils.GlobalVarS)
+		case <-srvMngr.GetConfig().GetReloadChan(config.AccountSCfgJson):
+			go srvMngr.reloadService(utils.AccountS)
 		}
 		// handle RPC server
 	}

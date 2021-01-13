@@ -126,8 +126,8 @@
 
 
 "accounts": {
-	"enabled": true
-	},
+	"enabled": true,
+},
 
 
 "filters": {								
