@@ -31,7 +31,7 @@ type EeSv1 struct {
 	eeS *ees.EventExporterS
 }
 
-func (eeSv1 *EeSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (eeSv1 *EeSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

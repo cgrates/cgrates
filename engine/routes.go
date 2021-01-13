@@ -146,7 +146,7 @@ func (rpS *RouteService) Shutdown() error {
 }
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGREventWithOpts, singleResult bool) (matchingRPrf []*RouteProfile, err error) {
+func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGREvent, singleResult bool) (matchingRPrf []*RouteProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.Opts,
@@ -278,18 +278,17 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 
 	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
 		var rateRply RateProfileCost
+		argsCostEv := &utils.ArgsCostForEvent{
+			RateProfileIDs: rtPrfIDs,
+			CGREvent:       ev,
+		}
+		argsCostEv.CGREvent.Opts = map[string]interface{}{ // add the setup time and usage in opts
+			utils.OptsRatesStartTime: sTime,
+			utils.OptsRatesUsage:     usage,
+		}
 		if len(rpS.cgrcfg.RouteSCfg().RateSConns) != 0 {
 			if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RateSConns, nil, utils.RateSv1CostForEvent,
-				&utils.ArgsCostForEvent{
-					RateProfileIDs: rtPrfIDs,
-					CGREventWithOpts: &utils.CGREventWithOpts{
-						Opts: map[string]interface{}{ // add the setup time and usage in opts
-							utils.OptsRatesStartTime: sTime,
-							utils.OptsRatesUsage:     usage,
-						},
-						CGREvent: ev,
-					},
-				}, &rateRply); err != nil {
+				argsCostEv, &rateRply); err != nil {
 				return nil, err
 			}
 			costData[utils.Cost] = rateRply.Cost
@@ -535,7 +534,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 		args.CGREvent.Event[utils.Usage] = time.Minute // make sure we have default set for Usage
 	}
 	var rPrfs []*RouteProfile
-	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args.CGREventWithOpts, true); err != nil {
+	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args.CGREvent, true); err != nil {
 		return
 	}
 	rPrfl := rPrfs[0]
@@ -547,7 +546,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 	extraOpts.sortingStragety = rPrfl.Sorting             // populate sortingStrategy in extraOpts
 
 	//construct the DP and pass it to filterS
-	nM := utils.MapStorage{utils.MetaReq: args.CGREvent.Event}
+	nM := utils.MapStorage{utils.MetaReq: args.Event}
 	passedRoutes := utils.NewOrderedNavigableMap()
 	// apply filters for event
 	for _, route := range rPrfl.Routes {
@@ -603,7 +602,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 type ArgsGetRoutes struct {
 	IgnoreErrors bool
 	MaxCost      string // toDo: try with interface{} here
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 	utils.Paginator
 	clnb bool //rpcclonable
 }
@@ -624,10 +623,10 @@ func (attr *ArgsGetRoutes) RPCClone() (interface{}, error) {
 // Clone creates a clone of the object
 func (attr *ArgsGetRoutes) Clone() *ArgsGetRoutes {
 	return &ArgsGetRoutes{
-		IgnoreErrors:     attr.IgnoreErrors,
-		MaxCost:          attr.MaxCost,
-		Paginator:        attr.Paginator.Clone(),
-		CGREventWithOpts: attr.CGREventWithOpts.Clone(),
+		IgnoreErrors: attr.IgnoreErrors,
+		MaxCost:      attr.MaxCost,
+		Paginator:    attr.Paginator.Clone(),
+		CGREvent:     attr.CGREvent.Clone(),
 	}
 }
 
@@ -693,8 +692,8 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 			Context: utils.StringPointer(utils.FirstNonEmpty(
 				utils.IfaceAsString(args.CGREvent.Event[utils.OptsContext]),
 				utils.MetaRoutes)),
-			CGREventWithOpts: args.CGREventWithOpts,
-			ProcessRuns:      processRuns,
+			CGREvent:    args.CGREvent,
+			ProcessRuns: processRuns,
 		}
 		var rplyEv AttrSProcessEventReply
 		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().AttributeSConns, nil,
@@ -717,10 +716,10 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 }
 
 // V1GetRouteProfilesForEvent returns the list of valid route profiles
-func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREventWithOpts, reply *[]*RouteProfile) (err error) {
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID}); len(missing) != 0 {
+func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*RouteProfile) (err error) {
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent.Event == nil {
+	} else if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	tnt := args.Tenant

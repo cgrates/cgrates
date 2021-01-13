@@ -82,7 +82,7 @@ func (fFwv *FileFWVee) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	fFwv.Lock()
 	defer func() {
 		if err != nil {

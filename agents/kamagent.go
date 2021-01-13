@@ -233,9 +233,9 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 	}
 	if ka.cfg.CreateCdr || strings.Index(kev[utils.CGRFlags], utils.MetaCDRs) != -1 {
 		if err := ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessCDR,
-			tsArgs.CGREventWithOpts, &reply); err != nil {
+			tsArgs.CGREvent, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
-				utils.KamailioAgent, utils.ToJSON(tsArgs.CGREventWithOpts), err.Error()))
+				utils.KamailioAgent, utils.ToJSON(tsArgs.CGREvent), err.Error()))
 		}
 	}
 }
@@ -342,7 +342,7 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
-	procCDRArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID
+	procCDRArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
 
 	var processReply string
 	err = ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessCDR, procCDRArgs, &processReply)

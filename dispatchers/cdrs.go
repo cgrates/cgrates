@@ -26,18 +26,18 @@ import (
 )
 
 // CDRsV1Ping interogates CDRsV1 server responsible to process the event
-func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithOpts,
+func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1Ping, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -57,11 +57,9 @@ func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithOpts, re
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRs, args, reply)
 }
 
@@ -77,11 +75,9 @@ func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithOpt
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRsCount, args, reply)
 }
 
@@ -96,11 +92,9 @@ func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSM
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1StoreSessionCost, args, reply)
 }
 
@@ -115,11 +109,9 @@ func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *str
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1RateCDRs, args, reply)
 }
 
@@ -134,11 +126,9 @@ func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWi
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1ProcessExternalCDR, args, reply)
 }
 
@@ -153,7 +143,7 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, 
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREventWithOpts, utils.MetaCDRs,
+	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs,
 		utils.CDRsV1ProcessEvent, args, reply)
 }
 
@@ -168,11 +158,9 @@ func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithOpts, reply *s
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1ProcessCDR, args, reply)
 }
 
@@ -187,7 +175,7 @@ func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, 
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREventWithOpts, utils.MetaCDRs,
+	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs,
 		utils.CDRsV2ProcessEvent, args, reply)
 }
 
@@ -202,10 +190,8 @@ func (dS *DispatcherService) CDRsV2StoreSessionCost(args *engine.ArgsV2CDRSStore
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV2StoreSessionCost, args, reply)
 }

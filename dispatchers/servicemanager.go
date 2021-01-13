@@ -25,12 +25,12 @@ import (
 )
 
 // ServiceManagerV1Ping interogates ServiceManager server responsible to process the event
-func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREventWithOpts,
+func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ServiceManagerV1Ping, args.Tenant,
 			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
@@ -52,11 +52,9 @@ func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWi
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1StartService, args, reply)
 }
 
@@ -72,11 +70,9 @@ func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWit
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1StopService, args, reply)
 }
 
@@ -92,10 +88,8 @@ func (dS *DispatcherService) ServiceManagerV1ServiceStatus(args ArgStartServiceW
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1ServiceStatus, args, reply)
 }

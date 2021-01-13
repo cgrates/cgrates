@@ -122,7 +122,7 @@ func (cdrSv1 *CDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithOpts, reply *[]*engin
 	return cdrSv1.CDRs.V1GetCDRs(*args, reply)
 }
 
-func (cdrSv1 *CDRsV1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (cdrSv1 *CDRsV1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

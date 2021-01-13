@@ -201,7 +201,7 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREventWithOpts) error {
+func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 	resCGREv := *cgrEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:
@@ -282,6 +282,7 @@ func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent
 		ID:    utils.UUIDSha1Prefix(),
 		Time:  &setupTime,
 		Event: smaEv.AsMapStringInterface(),
+		Opts:  smaEv.opts,
 	}
 	return
 }
@@ -292,10 +293,7 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 		return
 	}
 	args = &sessions.V1AuthorizeArgs{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     smaEv.opts,
-		},
+		CGREvent: cgrEv,
 	}
 	if smaEv.Subsystems() == utils.EmptyString {
 		utils.Logger.Err(fmt.Sprintf("<%s> cgr_flags variable is not set",
@@ -307,17 +305,14 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithOpts) (args *sessions.V1InitSessionArgs) {
+func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREvent) (args *sessions.V1InitSessionArgs) {
 	args = &sessions.V1InitSessionArgs{ // defaults
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEvDisp.CGREvent,
-			Opts:     cgrEvDisp.Opts,
-		},
+		CGREvent: &cgrEvDisp,
 	}
-	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRFlags)
+	subsystems, err := cgrEvDisp.FieldAsString(utils.CGRFlags)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have %s variable",
-			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp.CGREvent), utils.CGRFlags))
+			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp), utils.CGRFlags))
 		args.InitSession = true
 		return
 	}
@@ -325,17 +320,14 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithOpts
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREventWithOpts) (args *sessions.V1TerminateSessionArgs) {
+func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREvent) (args *sessions.V1TerminateSessionArgs) {
 	args = &sessions.V1TerminateSessionArgs{ // defaults
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEvDisp.CGREvent,
-			Opts:     cgrEvDisp.Opts,
-		},
+		CGREvent: &cgrEvDisp,
 	}
-	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRFlags)
+	subsystems, err := cgrEvDisp.FieldAsString(utils.CGRFlags)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have %s variable",
-			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp.CGREvent), utils.CGRFlags))
+			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp), utils.CGRFlags))
 		args.TerminateSession = true
 		return
 	}

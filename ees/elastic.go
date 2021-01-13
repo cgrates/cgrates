@@ -123,7 +123,7 @@ func (eEe *ElasticEe) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	eEe.Lock()
 	defer func() {
 		if err != nil {

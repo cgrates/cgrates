@@ -768,13 +768,11 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 	if len(savedAccounts) != 0 {
 		for _, acnt := range savedAccounts {
 			acntSummary := acnt.AsAccountSummary()
-			cgrEv := &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: acntSummary.Tenant,
-					ID:     utils.GenUUID(),
-					Time:   utils.TimePointer(time.Now()),
-					Event:  acntSummary.AsMapInterface(),
-				},
+			cgrEv := &utils.CGREvent{
+				Tenant: acntSummary.Tenant,
+				ID:     utils.GenUUID(),
+				Time:   utils.TimePointer(time.Now()),
+				Event:  acntSummary.AsMapInterface(),
 				Opts: map[string]interface{}{
 					utils.MetaEventType: utils.AccountUpdate,
 				},
@@ -783,7 +781,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				var tIDs []string
 				if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
 					utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
-						CGREventWithOpts: cgrEv,
+						CGREvent: cgrEv,
 					}, &tIDs); err != nil &&
 					err.Error() != utils.ErrNotFound.Error() {
 					utils.Logger.Warning(
@@ -794,7 +792,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				var stsIDs []string
 				if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
 					utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{
-						CGREventWithOpts: cgrEv,
+						CGREvent: cgrEv,
 					}, &stsIDs); err != nil &&
 					err.Error() != utils.ErrNotFound.Error() {
 					utils.Logger.Warning(

@@ -91,7 +91,7 @@ func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	fCsv.Lock()
 	defer func() {
 		if err != nil {

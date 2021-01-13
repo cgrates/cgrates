@@ -764,7 +764,7 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithOpts, 
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (rplSv1 *ReplicatorSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

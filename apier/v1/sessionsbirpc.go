@@ -142,7 +142,7 @@ func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *session
 	return ssv1.sS.BiRPCv1TerminateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREventWithOpts,
+func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREvent,
 	rply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -252,7 +252,7 @@ func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, arg
 	return ssv1.sS.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREventWithOpts,
+func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREvent,
 	reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {

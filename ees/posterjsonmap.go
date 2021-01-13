@@ -81,7 +81,7 @@ func (pstrEE *PosterJSONMapEE) OnEvicted(string, interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	pstrEE.Lock()
 	defer func() {
 		if err != nil {

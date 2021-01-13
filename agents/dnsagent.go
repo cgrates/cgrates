@@ -178,7 +178,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return
 	}
 	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
-	opts := config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
+	cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -194,7 +194,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if reqType == utils.MetaAuthorize ||
 		reqType == utils.MetaMessage ||
 		reqType == utils.MetaEvent {
-		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(opts); err != nil {
+		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.Opts); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
 				utils.DNSAgent, err.Error()))
 			err = nil // reset the error and continue the processing
@@ -227,7 +227,6 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
-			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
@@ -246,8 +245,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
-			opts)
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1InitiateSession,
@@ -260,8 +258,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
-			opts)
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1UpdateSession,
@@ -277,8 +274,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
-			opts)
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := utils.StringPointer("")
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1TerminateSession,
@@ -299,8 +295,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
-			opts)
+			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessMessage,
@@ -315,11 +310,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
-			Flags: reqProcessor.Flags.SliceFlags(),
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: cgrEv,
-				Opts:     opts,
-			},
+			Flags:     reqProcessor.Flags.SliceFlags(),
+			CGREvent:  cgrEv,
 			Paginator: cgrArgs,
 		}
 		rply := new(sessions.V1ProcessEventReply)
@@ -342,10 +334,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rplyCDRs := utils.StringPointer("")
 		if err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithOpts{
-				CGREvent: cgrEv,
-				Opts:     opts,
-			}, &rplyCDRs); err != nil {
+			cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}

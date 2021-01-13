@@ -214,7 +214,7 @@ func (sS *StatService) Call(serviceMethod string, args interface{}, reply interf
 // StatsArgsProcessEvent the arguments for processing the event with stats
 type StatsArgsProcessEvent struct {
 	StatIDs []string
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 	clnb bool //rpcclonable
 }
 
@@ -241,8 +241,8 @@ func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
 		}
 	}
 	return &StatsArgsProcessEvent{
-		StatIDs:          statsIDs,
-		CGREventWithOpts: attr.CGREventWithOpts.Clone(),
+		StatIDs:  statsIDs,
+		CGREvent: attr.CGREvent.Clone(),
 	}
 }
 
@@ -321,14 +321,12 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 			}
 			thEv := &ThresholdsArgsProcessEvent{
 				ThresholdIDs: thIDs,
-				CGREventWithOpts: &utils.CGREventWithOpts{
-					CGREvent: &utils.CGREvent{
-						Tenant: sq.Tenant,
-						ID:     utils.GenUUID(),
-						Event: map[string]interface{}{
-							utils.EventType: utils.StatUpdate,
-							utils.StatID:    sq.ID,
-						},
+				CGREvent: &utils.CGREvent{
+					Tenant: sq.Tenant,
+					ID:     utils.GenUUID(),
+					Event: map[string]interface{}{
+						utils.EventType: utils.StatUpdate,
+						utils.StatID:    sq.ID,
 					},
 					Opts: args.Opts,
 				},

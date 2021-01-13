@@ -28,6 +28,9 @@ type CGREvent struct {
 	ID     string
 	Time   *time.Time // event time
 	Event  map[string]interface{}
+	Opts   map[string]interface{}
+
+	cache map[string]interface{}
 }
 
 func (ev *CGREvent) HasField(fldName string) (has bool) {
@@ -95,32 +98,33 @@ func (ev *CGREvent) TenantID() string {
 	return ConcatenatedKey(ev.Tenant, ev.ID)
 }
 
-/*
-func (ev *CGREvent) FilterableEvent(fltredFields []string) (fEv map[string]interface{}) {
-	fEv = make(map[string]interface{})
-	if len(fltredFields) == 0 {
-		i := 0
-		fltredFields = make([]string, len(ev.Event))
-		for k := range ev.Event {
-			fltredFields[i] = k
-			i++
-		}
+// CacheInit will initialize the cache if not already done
+func (ev *CGREvent) CacheInit() {
+	if ev.cache == nil {
+		ev.cache = make(map[string]interface{})
 	}
-	for _, fltrFld := range fltredFields {
-		fldVal, has := ev.Event[fltrFld]
-		if !has {
-			continue // the field does not exist in map, ignore it
-		}
-		valOf := reflect.ValueOf(fldVal)
-		if valOf.Kind() == reflect.String {
-			fEv[fltrFld] = StringToInterface(valOf.String()) // attempt converting from string to comparable interface
-		} else {
-			fEv[fltrFld] = fldVal
-		}
-	}
+}
+
+// CacheClear will reset the cache
+func (ev *CGREvent) CacheClear() {
+	ev.cache = make(map[string]interface{})
+}
+
+// CacheGet will return a key from the cache
+func (ev *CGREvent) CacheGet(key string) (itm interface{}, has bool) {
+	itm, has = ev.cache[key]
 	return
 }
-*/
+
+// CacheSet will set data into the event's cache
+func (ev *CGREvent) CacheSet(key string, val interface{}) {
+	ev.cache[key] = val
+}
+
+// CacheRemove will remove data from cache
+func (ev *CGREvent) CacheRemove(key string) {
+	delete(ev.cache, key)
+}
 
 func (ev *CGREvent) Clone() (clned *CGREvent) {
 	clned = &CGREvent{
@@ -134,6 +138,12 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	for k, v := range ev.Event {
 		clned.Event[k] = v
 	}
+	if ev.Opts != nil {
+		clned.Opts = make(map[string]interface{})
+		for opt, val := range ev.Opts {
+			clned.Opts[opt] = val
+		}
+	}
 	return
 }
 
@@ -144,60 +154,6 @@ type CGREvents struct {
 	ID     string
 	Time   *time.Time // event time
 	Events []map[string]interface{}
-}
-
-// CGREventWithOpts is the event with Opts
-type CGREventWithOpts struct {
-	Opts map[string]interface{}
-	*CGREvent
-
-	cache map[string]interface{}
-}
-
-// Clone return a copy of the CGREventWithOpts
-func (ev *CGREventWithOpts) Clone() (clned *CGREventWithOpts) {
-	if ev == nil {
-		return
-	}
-	clned = new(CGREventWithOpts)
-	if ev.CGREvent != nil {
-		clned.CGREvent = ev.CGREvent.Clone()
-	}
-	if ev.Opts != nil {
-		clned.Opts = make(map[string]interface{})
-		for opt, val := range ev.Opts {
-			clned.Opts[opt] = val
-		}
-	}
-	return
-}
-
-// CacheInit will initialize the cache if not already done
-func (ev *CGREventWithOpts) CacheInit() {
-	if ev.cache == nil {
-		ev.cache = make(map[string]interface{})
-	}
-}
-
-// CacheClear will reset the cache
-func (ev *CGREventWithOpts) CacheClear() {
-	ev.cache = make(map[string]interface{})
-}
-
-// CacheGet will return a key from the cache
-func (ev *CGREventWithOpts) CacheGet(key string) (itm interface{}, has bool) {
-	itm, has = ev.cache[key]
-	return
-}
-
-// CacheSet will set data into the event's cache
-func (ev *CGREventWithOpts) CacheSet(key string, val interface{}) {
-	ev.cache[key] = val
-}
-
-// CacheRemove will remove data from cache
-func (ev *CGREventWithOpts) CacheRemove(key string) {
-	delete(ev.cache, key)
 }
 
 // EventWithFlags is used where flags are needed to mark processing
@@ -246,5 +202,5 @@ func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err e
 // CGREventWithEeIDs is the CGREventWithOpts with EventExporterIDs
 type CGREventWithEeIDs struct {
 	EeIDs []string
-	*CGREventWithOpts
+	*CGREvent
 }

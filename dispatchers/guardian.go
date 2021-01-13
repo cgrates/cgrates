@@ -25,15 +25,15 @@ import (
 )
 
 // GuardianSv1Ping interogates GuardianSv1 server responsible to process the event
-func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREventWithOpts,
+func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.GuardianSv1Ping, args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+		if err = dS.authorize(utils.GuardianSv1Ping, args.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -53,11 +53,9 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithOpts,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaGuardian, utils.GuardianSv1RemoteLock, args, reply)
 }
 
@@ -74,10 +72,8 @@ func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithOp
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaGuardian, utils.GuardianSv1RemoteUnlock, args, reply)
 }

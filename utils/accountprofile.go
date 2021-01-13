@@ -216,7 +216,7 @@ type AccountProfileWithOpts struct {
 
 // ArgsAccountForEvent arguments used for process event
 type ArgsAccountForEvent struct {
-	*CGREventWithOpts
+	*CGREvent
 	AccountIDs []string
 }
 

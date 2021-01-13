@@ -378,7 +378,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return
 	}
 	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
-	opts := config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
+	cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize, /*
@@ -394,7 +394,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if reqType == utils.MetaAuthorize ||
 		reqType == utils.MetaMessage ||
 		reqType == utils.MetaEvent {
-		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(opts); err != nil {
+		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.Opts); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
 				utils.SIPAgent, err.Error()))
 			err = nil // reset the error and continue the processing
@@ -427,7 +427,6 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
-			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -510,11 +509,8 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	// 	}
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
-			Flags: reqProcessor.Flags.SliceFlags(),
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: cgrEv,
-				Opts:     opts,
-			},
+			Flags:     reqProcessor.Flags.SliceFlags(),
+			CGREvent:  cgrEv,
 			Paginator: cgrArgs,
 		}
 

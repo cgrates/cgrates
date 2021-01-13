@@ -212,10 +212,8 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		if err := connMgr.Call(config.CgrConfig().SchedulerCfg().CDRsConns, nil,
 			utils.CDRsV1ProcessEvent,
 			&ArgV1ProcessEvent{
-				Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
-				CGREventWithOpts: utils.CGREventWithOpts{
-					CGREvent: cdr.AsCGREvent(),
-				},
+				Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
+				CGREvent: *cdr.AsCGREvent(),
 			}, &rply); err != nil {
 			return err
 		}
@@ -1012,31 +1010,30 @@ func resetAccountCDR(ub *Account, action *Action, acts Actions, _ interface{}) e
 }
 
 func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
-	var cgrEv *utils.CGREventWithOpts
+	var cgrEv *utils.CGREvent
 	switch {
 	case ub != nil:
-		cgrEv = &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.NewTenantID(ub.ID).Tenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
-					utils.AccountField:   ub.ID,
-					utils.EventType:      utils.AccountUpdate,
-					utils.EventSource:    utils.AccountService,
-					utils.AllowNegative:  ub.AllowNegative,
-					utils.Disabled:       ub.Disabled,
-					utils.BalanceMap:     ub.BalanceMap,
-					utils.UnitCounters:   ub.UnitCounters,
-					utils.ActionTriggers: ub.ActionTriggers,
-					utils.UpdateTime:     ub.UpdateTime,
-				},
+		cgrEv = &utils.CGREvent{
+			Tenant: utils.NewTenantID(ub.ID).Tenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				utils.AccountField:   ub.ID,
+				utils.EventType:      utils.AccountUpdate,
+				utils.EventSource:    utils.AccountService,
+				utils.AllowNegative:  ub.AllowNegative,
+				utils.Disabled:       ub.Disabled,
+				utils.BalanceMap:     ub.BalanceMap,
+				utils.UnitCounters:   ub.UnitCounters,
+				utils.ActionTriggers: ub.ActionTriggers,
+				utils.UpdateTime:     ub.UpdateTime,
 			},
+
 			Opts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		}
 	case extraData != nil:
-		ev, canCast := extraData.(*utils.CGREventWithOpts)
+		ev, canCast := extraData.(*utils.CGREvent)
 		if !canCast {
 			return
 		}
@@ -1045,8 +1042,8 @@ func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err err
 		return // nothing to post
 	}
 	args := &utils.CGREventWithEeIDs{
-		EeIDs:            strings.Split(a.ExtraParameters, utils.InfieldSep),
-		CGREventWithOpts: cgrEv,
+		EeIDs:    strings.Split(a.ExtraParameters, utils.InfieldSep),
+		CGREvent: cgrEv,
 	}
 	var rply map[string]map[string]interface{}
 	return connMgr.Call(config.CgrConfig().ApierCfg().EEsConns, nil,

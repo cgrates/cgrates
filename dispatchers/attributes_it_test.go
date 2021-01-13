@@ -87,22 +87,20 @@ func TestDspAttributeSNoConn(t *testing.T) {
 
 func testDspAttrPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREventWithOpts), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = ""
-	if err := allEngine2.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREventWithOpts), &reply); err != nil {
+	if err := allEngine2.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = ""
-	ev := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "attr12345",
 		},
@@ -136,17 +134,15 @@ func testDspAttrPingFailover(t *testing.T) {
 
 func testDspAttrPingFailoverNotFoundHost(t *testing.T) {
 	var reply string
-	if err := allEngine2.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREventWithOpts), &reply); err != nil {
+	if err := allEngine2.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				"EventName": "NonexistingHost",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"EventName": "NonexistingHost",
 		},
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "attr12345",
@@ -173,22 +169,20 @@ func testDspAttrPingFailoverNotFoundHost(t *testing.T) {
 
 func testDspAttrPingFailover2(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREventWithOpts), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = ""
-	if err := allEngine2.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREventWithOpts), &reply); err != nil {
+	if err := allEngine2.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = ""
-	ev := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "attr12345",
 		},
@@ -217,14 +211,12 @@ func testDspAttrPingFailover2(t *testing.T) {
 func testDspAttrGetAttrFailover(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1002",
-					utils.EventName:    "Event1",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+				utils.EventName:    "Event1",
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
@@ -254,15 +246,13 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1002",
-					utils.EventName:    "Event1",
-					"Password":         "CGRateS.org",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+				utils.EventName:    "Event1",
+				"Password":         "CGRateS.org",
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
@@ -311,7 +301,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 
 func testDspAttrPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREventWithOpts), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -319,10 +309,8 @@ func testDspAttrPing(t *testing.T) {
 	if dispEngine.RPC == nil {
 		t.Fatal(dispEngine.RPC)
 	}
-	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "attr12345",
 		},
@@ -336,13 +324,11 @@ func testDspAttrPing(t *testing.T) {
 func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
 			},
 		},
 	}
@@ -356,13 +342,11 @@ func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 func testDspAttrTestMissingApiKey(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
 			},
 		},
 	}
@@ -375,14 +359,11 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 
 func testDspAttrTestUnknownApiKey(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer("simpleauth"),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "1234",
@@ -399,13 +380,11 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 func testDspAttrTestAuthKey(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
@@ -422,13 +401,11 @@ func testDspAttrTestAuthKey(t *testing.T) {
 func testDspAttrTestAuthKey2(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
@@ -469,17 +446,16 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
+
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				"Password":         "CGRateS.org",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					"Password":         "CGRateS.org",
-				},
 			},
 		},
 	}
@@ -497,14 +473,12 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 func testDspAttrTestAuthKey3(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					utils.EventName:    "Event1",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.EventName:    "Event1",
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
@@ -521,14 +495,12 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1002",
-					utils.EventName:    "RoundRobin",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+				utils.EventName:    "RoundRobin",
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
@@ -558,15 +530,13 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1002",
-					utils.EventName:    "RoundRobin",
-					"Password":         "CGRateS.org",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+				utils.EventName:    "RoundRobin",
+				"Password":         "CGRateS.org",
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
@@ -616,14 +586,12 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 func testDspAttrGetAttrInternal(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.EventName:    "Internal",
-					utils.AccountField: "1003",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.EventName:    "Internal",
+				utils.AccountField: "1003",
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
@@ -634,18 +602,16 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1003_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1003",
+				utils.EventName:    "Internal",
+				"Password":         "CGRateS.com",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSGetAttributeForEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1003",
-					utils.EventName:    "Internal",
-					"Password":         "CGRateS.com",
-				},
 			},
 		},
 	}
@@ -662,7 +628,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 
 func testDspAttrPingNoArgDispatcher(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREventWithOpts), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -670,9 +636,7 @@ func testDspAttrPingNoArgDispatcher(t *testing.T) {
 	if dispEngine.RPC == nil {
 		t.Fatal(dispEngine.RPC)
 	}
-	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{Tenant: "cgrates.org"},
-	}, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)

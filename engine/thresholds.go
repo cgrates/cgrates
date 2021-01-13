@@ -108,7 +108,7 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 		at := &ActionTiming{
 			Uuid:      utils.GenUUID(),
 			ActionsID: actionSetID,
-			ExtraData: args.CGREventWithOpts,
+			ExtraData: args.CGREvent,
 		}
 		if tntAcnt != utils.EmptyString {
 			at.accountIDs = utils.NewStringMap(tntAcnt)
@@ -296,7 +296,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *Thresho
 // ThresholdsArgsProcessEvent are the arguments to proccess the event with thresholds
 type ThresholdsArgsProcessEvent struct {
 	ThresholdIDs []string
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 	clnb bool //rpcclonable
 }
 
@@ -323,8 +323,8 @@ func (attr *ThresholdsArgsProcessEvent) Clone() *ThresholdsArgsProcessEvent {
 		}
 	}
 	return &ThresholdsArgsProcessEvent{
-		ThresholdIDs:     thIDs,
-		CGREventWithOpts: attr.CGREventWithOpts.Clone(),
+		ThresholdIDs: thIDs,
+		CGREvent:     attr.CGREvent.Clone(),
 	}
 }
 

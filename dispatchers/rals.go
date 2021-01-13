@@ -24,14 +24,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) RALsV1Ping(args *utils.CGREventWithOpts, rpl *string) (err error) {
+func (dS *DispatcherService) RALsV1Ping(args *utils.CGREvent, rpl *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.RALsV1Ping, args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+		if err = dS.authorize(utils.RALsV1Ping, args.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -46,10 +46,8 @@ func (dS *DispatcherService) RALsV1GetRatingPlansCost(args *utils.RatingPlanCost
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tenant,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tenant,
+		Opts:   args.Opts,
 	}, utils.MetaRALs, utils.RALsV1GetRatingPlansCost, args, rpl)
 }

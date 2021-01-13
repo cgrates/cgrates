@@ -24,25 +24,25 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) SchedulerSv1Ping(args *utils.CGREventWithOpts, reply *string) (err error) {
+func (dS *DispatcherService) SchedulerSv1Ping(args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SchedulerSv1Ping, args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+		if err = dS.authorize(utils.SchedulerSv1Ping, args.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(args, utils.MetaScheduler, utils.SchedulerSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) SchedulerSv1Reload(args *utils.CGREventWithOpts, reply *string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+func (dS *DispatcherService) SchedulerSv1Reload(args *utils.CGREvent, reply *string) (err error) {
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SchedulerSv1Ping, args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+		if err = dS.authorize(utils.SchedulerSv1Ping, args.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -57,11 +57,9 @@ func (dS *DispatcherService) SchedulerSv1ExecuteActions(args *utils.AttrsExecute
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: args.Tenant,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: args.Tenant,
+		Opts:   args.Opts,
 	}, utils.MetaScheduler, utils.SchedulerSv1ExecuteActions, args, reply)
 }
 
@@ -73,10 +71,8 @@ func (dS *DispatcherService) SchedulerSv1ExecuteActionPlans(args *utils.AttrsExe
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: args.Tenant,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: args.Tenant,
+		Opts:   args.Opts,
 	}, utils.MetaScheduler, utils.SchedulerSv1ExecuteActionPlans, args, reply)
 }

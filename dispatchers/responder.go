@@ -26,15 +26,15 @@ import (
 )
 
 // ResponderPing interogates Responder server responsible to process the event
-func (dS *DispatcherService) ResponderPing(args *utils.CGREventWithOpts,
+func (dS *DispatcherService) ResponderPing(args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ResponderPing, args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+		if err = dS.authorize(utils.ResponderPing, args.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -49,10 +49,7 @@ func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptorWithOpt
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.AsCGREvent(),
-		Opts:     args.Opts,
-	}, utils.MetaResponder, utils.ResponderGetCost, args, reply)
+	return dS.Dispatch(args.AsCGREvent(args.Opts), utils.MetaResponder, utils.ResponderGetCost, args, reply)
 }
 
 func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptorWithOpts,
@@ -63,10 +60,7 @@ func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptorWithOpts,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.AsCGREvent(),
-		Opts:     args.Opts,
-	}, utils.MetaResponder, utils.ResponderDebit, args, reply)
+	return dS.Dispatch(args.AsCGREvent(args.Opts), utils.MetaResponder, utils.ResponderDebit, args, reply)
 }
 
 func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptorWithOpts,
@@ -77,10 +71,7 @@ func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptorWithOp
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.AsCGREvent(),
-		Opts:     args.Opts,
-	}, utils.MetaResponder, utils.ResponderMaxDebit, args, reply)
+	return dS.Dispatch(args.AsCGREvent(args.Opts), utils.MetaResponder, utils.ResponderMaxDebit, args, reply)
 }
 
 func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescriptorWithOpts,
@@ -91,10 +82,7 @@ func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescript
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.AsCGREvent(),
-		Opts:     args.Opts,
-	}, utils.MetaResponder, utils.ResponderRefundIncrements, args, reply)
+	return dS.Dispatch(args.AsCGREvent(args.Opts), utils.MetaResponder, utils.ResponderRefundIncrements, args, reply)
 }
 
 func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptorWithOpts,
@@ -105,10 +93,7 @@ func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptor
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.AsCGREvent(),
-		Opts:     args.Opts,
-	}, utils.MetaResponder, utils.ResponderRefundRounding, args, reply)
+	return dS.Dispatch(args.AsCGREvent(args.Opts), utils.MetaResponder, utils.ResponderRefundRounding, args, reply)
 }
 
 func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescriptorWithOpts,
@@ -119,10 +104,7 @@ func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescrip
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.AsCGREvent(),
-		Opts:     args.Opts,
-	}, utils.MetaResponder, utils.ResponderGetMaxSessionTime, args, reply)
+	return dS.Dispatch(args.AsCGREvent(args.Opts), utils.MetaResponder, utils.ResponderGetMaxSessionTime, args, reply)
 }
 
 func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithOpts,
@@ -134,10 +116,8 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithOpts,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaResponder, utils.ResponderShutdown, args, reply)
 }

@@ -59,15 +59,13 @@ func TestDspActionSIT(t *testing.T) {
 
 func testDspActPrfPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.ActionSv1Ping, new(utils.CGREventWithOpts), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.ActionSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.ActionSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dispEngine.RPC.Call(utils.ActionSv1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "actPrf12345",
 		},

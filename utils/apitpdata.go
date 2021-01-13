@@ -901,7 +901,7 @@ type TPActivationInterval struct {
 }
 
 type ArgRSv1ResourceUsage struct {
-	*CGREventWithOpts
+	*CGREvent
 	UsageID  string // ResourceUsage Identifier
 	UsageTTL *time.Duration
 	Units    float64
@@ -928,10 +928,10 @@ func (attr *ArgRSv1ResourceUsage) Clone() *ArgRSv1ResourceUsage {
 		usageTTL = DurationPointer(*attr.UsageTTL)
 	}
 	return &ArgRSv1ResourceUsage{
-		UsageID:          attr.UsageID,
-		UsageTTL:         usageTTL,
-		Units:            attr.Units,
-		CGREventWithOpts: attr.CGREventWithOpts.Clone(),
+		UsageID:  attr.UsageID,
+		UsageTTL: usageTTL,
+		Units:    attr.Units,
+		CGREvent: attr.CGREvent.Clone(),
 	}
 }
 
@@ -1494,7 +1494,7 @@ type ArgExportCDRs struct {
 // ArgsCostForEvent arguments used for process event
 type ArgsCostForEvent struct {
 	RateProfileIDs []string
-	*CGREventWithOpts
+	*CGREvent
 }
 
 // StartTime returns the event time used to check active rate profiles
@@ -1644,6 +1644,6 @@ func (unitFactor *TPBalanceUnitFactor) AsString() (s string) {
 
 // ArgActionSv1ScheduleActions is used in ActionSv1 methods
 type ArgActionSv1ScheduleActions struct {
-	*CGREventWithOpts
+	*CGREvent
 	ActionProfileIDs []string
 }

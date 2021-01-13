@@ -45,7 +45,7 @@ func (servManager *ServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartSer
 }
 
 // Ping return pong if the service is active
-func (servManager *ServiceManagerV1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (servManager *ServiceManagerV1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

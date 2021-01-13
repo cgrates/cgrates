@@ -25,21 +25,18 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREvent, rpl *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ResourceSv1Ping, args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+		if err = dS.authorize(utils.ResourceSv1Ping, args.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.CGREvent,
-		Opts:     args.Opts,
-	}, utils.MetaResources, utils.ResourceSv1Ping, args, rpl)
+	return dS.Dispatch(args, utils.MetaResources, utils.ResourceSv1Ping, args, rpl)
 }
 
 func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1ResourceUsage,
@@ -54,10 +51,7 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1R
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.CGREvent,
-		Opts:     args.Opts,
-	}, utils.MetaResources, utils.ResourceSv1GetResourcesForEvent, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaResources, utils.ResourceSv1GetResourcesForEvent, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
@@ -72,10 +66,7 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1Res
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.CGREvent,
-		Opts:     args.Opts,
-	}, utils.MetaResources, utils.ResourceSv1AuthorizeResources, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaResources, utils.ResourceSv1AuthorizeResources, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1ResourceUsage,
@@ -90,10 +81,7 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1Reso
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.CGREvent,
-		Opts:     args.Opts,
-	}, utils.MetaResources, utils.ResourceSv1AllocateResources, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaResources, utils.ResourceSv1AllocateResources, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1ResourceUsage,
@@ -108,10 +96,7 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1Resou
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: args.CGREvent,
-		Opts:     args.Opts,
-	}, utils.MetaResources, utils.ResourceSv1ReleaseResources, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaResources, utils.ResourceSv1ReleaseResources, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithOpts, reply *engine.Resource) (err error) {
@@ -125,11 +110,9 @@ func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithOpts
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-			ID:     args.ID,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		ID:     args.ID,
+		Opts:   args.Opts,
 	}, utils.MetaResources, utils.ResourceSv1GetResource, args, reply)
 }

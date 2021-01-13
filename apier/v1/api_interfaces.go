@@ -34,7 +34,7 @@ type ThresholdSv1Interface interface {
 	GetThresholdsForEvent(args *engine.ThresholdsArgsProcessEvent, reply *engine.Thresholds) error
 	GetThreshold(tntID *utils.TenantIDWithOpts, t *engine.Threshold) error
 	ProcessEvent(args *engine.ThresholdsArgsProcessEvent, tIDs *[]string) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type StatSv1Interface interface {
@@ -43,7 +43,7 @@ type StatSv1Interface interface {
 	GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, reply *[]string) (err error)
 	GetQueueStringMetrics(args *utils.TenantIDWithOpts, reply *map[string]string) (err error)
 	GetQueueFloatMetrics(args *utils.TenantIDWithOpts, reply *map[string]float64) (err error)
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type ResourceSv1Interface interface {
@@ -52,25 +52,25 @@ type ResourceSv1Interface interface {
 	AllocateResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
 	ReleaseResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
 	GetResource(args *utils.TenantIDWithOpts, reply *engine.Resource) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type RouteSv1Interface interface {
 	GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutes) error
-	GetRouteProfilesForEvent(args *utils.CGREventWithOpts, reply *[]*engine.RouteProfile) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*engine.RouteProfile) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type AttributeSv1Interface interface {
 	GetAttributeForEvent(args *engine.AttrArgsProcessEvent, reply *engine.AttributeProfile) (err error)
 	ProcessEvent(args *engine.AttrArgsProcessEvent, reply *engine.AttrSProcessEventReply) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type ChargerSv1Interface interface {
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
-	GetChargersForEvent(cgrEv *utils.CGREventWithOpts, reply *engine.ChargerProfiles) error
-	ProcessEvent(args *utils.CGREventWithOpts, reply *[]*engine.ChrgSProcessEventReply) error
+	Ping(ign *utils.CGREvent, reply *string) error
+	GetChargersForEvent(cgrEv *utils.CGREvent, reply *engine.ChargerProfiles) error
+	ProcessEvent(args *utils.CGREvent, reply *[]*engine.ChrgSProcessEventReply) error
 }
 
 type SessionSv1Interface interface {
@@ -81,7 +81,7 @@ type SessionSv1Interface interface {
 	UpdateSession(args *sessions.V1UpdateSessionArgs, rply *sessions.V1UpdateSessionReply) error
 	SyncSessions(args *utils.TenantWithOpts, rply *string) error
 	TerminateSession(args *sessions.V1TerminateSessionArgs, rply *string) error
-	ProcessCDR(cgrEv *utils.CGREventWithOpts, rply *string) error
+	ProcessCDR(cgrEv *utils.CGREvent, rply *string) error
 	ProcessMessage(args *sessions.V1ProcessMessageArgs, rply *sessions.V1ProcessMessageReply) error
 	ProcessEvent(args *sessions.V1ProcessEventArgs, rply *sessions.V1ProcessEventReply) error
 	GetCost(args *sessions.V1ProcessEventArgs, rply *sessions.V1GetCostReply) error
@@ -90,7 +90,7 @@ type SessionSv1Interface interface {
 	ForceDisconnect(args *utils.SessionFilter, rply *string) error
 	GetPassiveSessions(args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetPassiveSessionsCount(args *utils.SessionFilter, rply *int) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 	ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithOpts, rply *string) error
 	SetPassiveSession(args *sessions.Session, reply *string) error
 	ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
@@ -108,7 +108,7 @@ type ResponderInterface interface {
 	RefundRounding(arg *engine.CallDescriptorWithOpts, reply *float64) (err error)
 	GetMaxSessionTime(arg *engine.CallDescriptorWithOpts, reply *time.Duration) (err error)
 	Shutdown(arg *utils.TenantWithOpts, reply *string) (err error)
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type CacheSv1Interface interface {
@@ -127,18 +127,18 @@ type CacheSv1Interface interface {
 	LoadCache(args *utils.AttrReloadCacheWithOpts, reply *string) error
 	ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error)
 	ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error)
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type GuardianSv1Interface interface {
 	RemoteLock(attr *dispatchers.AttrRemoteLockWithOpts, reply *string) (err error)
 	RemoteUnlock(refID *dispatchers.AttrRemoteUnlockWithOpts, reply *[]string) (err error)
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type SchedulerSv1Interface interface {
-	Reload(arg *utils.CGREventWithOpts, reply *string) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Reload(arg *utils.CGREvent, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 	ExecuteActions(attr *utils.AttrsExecuteActions, reply *string) error
 	ExecuteActionPlans(attr *utils.AttrsExecuteActionPlans, reply *string) error
 }
@@ -151,19 +151,19 @@ type CDRsV1Interface interface {
 	StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error
 	GetCDRsCount(args *utils.RPCCDRsFilterWithOpts, reply *int64) error
 	GetCDRs(args *utils.RPCCDRsFilterWithOpts, reply *[]*engine.CDR) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type ServiceManagerV1Interface interface {
 	StartService(args *dispatchers.ArgStartServiceWithOpts, reply *string) error
 	StopService(args *dispatchers.ArgStartServiceWithOpts, reply *string) error
 	ServiceStatus(args *dispatchers.ArgStartServiceWithOpts, reply *string) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type RALsV1Interface interface {
 	GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type ConfigSv1Interface interface {
@@ -176,21 +176,21 @@ type ConfigSv1Interface interface {
 
 type CoreSv1Interface interface {
 	Status(arg *utils.TenantWithOpts, reply *map[string]interface{}) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 	Sleep(arg *utils.DurationArgs, reply *string) error
 }
 
 type RateSv1Interface interface {
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 	CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) error
 }
 
 type RateProfileSv1Interface interface {
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type ReplicatorSv1Interface interface {
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 	GetAccount(args *utils.StringWithOpts, reply *engine.Account) error
 	GetDestination(key *utils.StringWithOpts, reply *engine.Destination) error
 	GetReverseDestination(key *utils.StringWithOpts, reply *[]string) error
@@ -282,9 +282,9 @@ type ReplicatorSv1Interface interface {
 type ActionSv1Interface interface {
 	ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error
 	ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type AccountSv1Interface interface {
-	Ping(ign *utils.CGREventWithOpts, reply *string) error
+	Ping(ign *utils.CGREvent, reply *string) error
 }
