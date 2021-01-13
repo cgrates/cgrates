@@ -1262,6 +1262,61 @@ func TestECAsCallCost(t *testing.T) {
 	}
 }
 
+func TestECAsCallCost2(t *testing.T) {
+	eCC := &CallCost{
+		ToR:        utils.MetaVoice,
+		Cost:       0,
+		RatedUsage: 60000000000,
+		Timespans: TimeSpans{
+			&TimeSpan{
+				TimeStart: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+				TimeEnd:   time.Date(2017, 1, 9, 16, 19, 21, 0, time.UTC),
+				Cost:      0,
+				RateInterval: &RateInterval{ // standard rating
+					Timing: &RITiming{
+						StartTime: "00:00:00",
+					},
+					Rating: &RIRate{
+						ConnectFee:       0.1,
+						RoundingMethod:   "*up",
+						RoundingDecimals: 5,
+						Rates: RateGroups{
+							&RGRate{
+								GroupIntervalStart: time.Duration(0),
+								Value:              0.01,
+								RateUnit:           time.Duration(1 * time.Second),
+								RateIncrement:      time.Duration(1 * time.Minute),
+							},
+						},
+					},
+				},
+				DurationIndex:  time.Minute,
+				MatchedSubject: "*out:cgrates.org:call:*any",
+				MatchedPrefix:  "+49",
+				MatchedDestId:  "GERMANY",
+				RatingPlanId:   "RPL_RETAIL1",
+				CompressFactor: 1,
+				Increments: Increments{
+					&Increment{ // ConnectFee
+						Cost:           0,
+						Duration:       time.Minute,
+						BalanceInfo:    &DebitInfo{},
+						CompressFactor: 1,
+					},
+				},
+			},
+		},
+	}
+	ec := NewEventCostFromCallCost(eCC, "cgrID", utils.MetaDefault)
+	for k := range ec.Timings {
+		eCC.Timespans[0].RateInterval.Timing.ID = k
+	}
+	cc := ec.AsCallCost(utils.EmptyString)
+	if !reflect.DeepEqual(eCC, cc) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eCC), utils.ToJSON(cc))
+	}
+}
+
 func TestECTrimZeroAndFull(t *testing.T) {
 	ec := testEC.Clone()
 	if srplsEC, err := ec.Trim(10 * time.Minute); err != nil {
