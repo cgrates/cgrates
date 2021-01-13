@@ -144,27 +144,18 @@ type RateSIncrement struct {
 
 // RateProfileCost is the cost returned by RateS at cost queries
 type RateProfileCost struct {
-	ID               string // RateProfileID
-	Cost             float64
-	RoundingDecimals int
-	RoundingMethod   string
-	MinCost          float64
-	MaxCost          float64
-	MaxCostStrategy  string
-	RateSIntervals   []*RateSInterval
-	Altered          []string
+	ID              string // RateProfileID
+	Cost            float64
+	MinCost         float64
+	MaxCost         float64
+	MaxCostStrategy string
+	RateSIntervals  []*RateSInterval
+	Altered         []string
 }
 
 // CorrectCost should be called in final phase of cost calculation
 // in order to apply further correction like Min/MaxCost or rounding
 func (rPc *RateProfileCost) CorrectCost(rndDec *int, rndMtd string) {
-	if rndDec != nil {
-		rPc.RoundingDecimals = *rndDec
-		if rndMtd != utils.EmptyString {
-			rPc.RoundingMethod = rndMtd
-		}
-
-	}
 	if rPc.MinCost != 0 && rPc.Cost < rPc.MinCost {
 		rPc.Cost = rPc.MinCost
 		rPc.Altered = append(rPc.Altered, utils.MinCost)
@@ -173,8 +164,8 @@ func (rPc *RateProfileCost) CorrectCost(rndDec *int, rndMtd string) {
 		rPc.Cost = rPc.MaxCost
 		rPc.Altered = append(rPc.Altered, utils.MaxCost)
 	}
-	if rPc.RoundingDecimals != 0 {
-		rPc.Cost = utils.Round(rPc.Cost, rPc.RoundingDecimals, rPc.RoundingMethod)
+	if rndDec != nil {
+		rPc.Cost = utils.Round(rPc.Cost, *rndDec, rndMtd)
 		rPc.Altered = append(rPc.Altered, utils.RoundingDecimals)
 	}
 }

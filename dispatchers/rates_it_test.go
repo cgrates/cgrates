@@ -85,26 +85,22 @@ func testDspRPrfPing(t *testing.T) {
 }
 
 func testDspRPrfCostForEvent(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	rPrf := &engine.RateProfile{
+	rPrf := &engine.APIRateProfile{
 		ID:        "DefaultRate",
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
 		Weight:    10,
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*engine.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
 				Weight:          0,
 				ActivationTimes: "* * * * *",
-				IntervalRates: []*engine.IntervalRate{
+				IntervalRates: []*engine.APIIntervalRate{
 					{
-						IntervalStart: 0,
-						RecurrentFee:  utils.NewDecimal(12, 2),
-						Unit:          minDecimal,
-						Increment:     minDecimal,
+						IntervalStart: "0",
+						RecurrentFee:  utils.Float64Pointer(0.12),
+						Unit:          utils.Float64Pointer(float64(time.Minute)),
+						Increment:     utils.Float64Pointer(float64(time.Minute)),
 					},
 				},
 			},
@@ -123,6 +119,10 @@ func testDspRPrfCostForEvent(t *testing.T) {
 	}, &rply); err != nil {
 		t.Error(err)
 	}
+	rtWeek, err := rPrf.Rates["RT_WEEK"].AsRate()
+	if err != nil {
+		t.Fatal(err)
+	}
 	exp := &engine.RateProfileCost{
 		ID:   "DefaultRate",
 		Cost: 0.12,
@@ -131,7 +131,7 @@ func testDspRPrfCostForEvent(t *testing.T) {
 			Increments: []*engine.RateSIncrement{{
 				UsageStart:        0,
 				Usage:             time.Minute,
-				Rate:              rPrf.Rates["RT_WEEK"],
+				Rate:              rtWeek,
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 			}},
@@ -154,34 +154,26 @@ func testDspRPrfCostForEvent(t *testing.T) {
 			}}}, &rpCost); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rpCost, exp) {
-		t.Errorf("Expected %+v, received %+v", exp, rpCost)
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rpCost))
 	}
 }
 
 func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
-	if err != nil {
-		t.Error(err)
-	}
-	rPrf := &engine.RateProfile{
+	rPrf := &engine.APIRateProfile{
 		ID:     "ID_RP",
 		Tenant: "cgrates.org",
 		Weight: 10,
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*engine.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
 				Weight:          0,
 				ActivationTimes: "* * * * *",
-				IntervalRates: []*engine.IntervalRate{
+				IntervalRates: []*engine.APIIntervalRate{
 					{
-						IntervalStart: 0,
-						RecurrentFee:  utils.NewDecimal(25, 2),
-						Unit:          minDecimal,
-						Increment:     secDecimal,
+						IntervalStart: "0",
+						RecurrentFee:  utils.Float64Pointer(0.25),
+						Unit:          utils.Float64Pointer(float64(time.Minute)),
+						Increment:     utils.Float64Pointer(float64(time.Second)),
 					},
 				},
 			},
@@ -200,6 +192,10 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 	}, &rply); err != nil {
 		t.Error(err)
 	}
+	rtWeek, err := rPrf.Rates["RT_WEEK"].AsRate()
+	if err != nil {
+		t.Fatal(err)
+	}
 	exp := &engine.RateProfileCost{
 		ID:   "ID_RP",
 		Cost: 0.25,
@@ -208,7 +204,7 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 			Increments: []*engine.RateSIncrement{{
 				UsageStart:        0,
 				Usage:             time.Minute,
-				Rate:              rPrf.Rates["RT_WEEK"],
+				Rate:              rtWeek,
 				IntervalRateIndex: 0,
 				CompressFactor:    60,
 			}},

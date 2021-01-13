@@ -186,15 +186,13 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	}
 	rPrf := &engine.RateProfile{
-		Tenant:           "cgrates.org",
-		ID:               "RP1",
-		FilterIDs:        []string{"*string:~*req.Subject:1001"},
-		Weight:           0,
-		RoundingMethod:   "*up",
-		RoundingDecimals: 4,
-		MinCost:          utils.NewDecimal(1, 1),
-		MaxCost:          utils.NewDecimal(6, 1),
-		MaxCostStrategy:  "*free",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weight:          0,
+		MinCost:         utils.NewDecimal(1, 1),
+		MaxCost:         utils.NewDecimal(6, 1),
+		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
