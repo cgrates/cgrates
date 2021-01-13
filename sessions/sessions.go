@@ -558,7 +558,6 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 	} else if srplsEC == nil {
 		return
 	}
-	utils.Logger.Debug(fmt.Sprintf("Preparing for session refund, EC: %s", utils.ToJSON(srplsEC)))
 	sCC := srplsEC.AsCallCost(sr.CD.ToR)
 	var incrmts engine.Increments
 	for _, tmspn := range sCC.Timespans {
