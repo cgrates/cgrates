@@ -222,7 +222,7 @@ func (rSv1 *RateSv1) CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.R
 	return rSv1.rS.V1CostForEvent(args, rpCost)
 }
 
-func (rSv1 *RateSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (rSv1 *RateSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

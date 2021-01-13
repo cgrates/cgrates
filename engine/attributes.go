@@ -127,7 +127,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 type AttrSProcessEventReply struct {
 	MatchedProfiles []string
 	AlteredFields   []string
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 	blocker bool // internally used to stop further processRuns
 }
 
@@ -153,7 +153,7 @@ type AttrArgsProcessEvent struct {
 	AttributeIDs []string
 	Context      *string // attach the event to a context
 	ProcessRuns  *int    // number of loops for ProcessEvent
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 	clnb bool //rpcclonable
 }
 
@@ -189,10 +189,10 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 		*procRuns = *attr.ProcessRuns
 	}
 	return &AttrArgsProcessEvent{
-		AttributeIDs:     attrIDs,
-		Context:          ctx,
-		ProcessRuns:      procRuns,
-		CGREventWithOpts: attr.CGREventWithOpts.Clone(),
+		AttributeIDs: attrIDs,
+		Context:      ctx,
+		ProcessRuns:  procRuns,
+		CGREvent:     attr.CGREvent.Clone(),
 	}
 }
 
@@ -205,11 +205,8 @@ func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent
 	}
 	rply = &AttrSProcessEventReply{
 		MatchedProfiles: []string{attrPrf.ID},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: args.CGREvent,
-			Opts:     args.Opts,
-		},
-		blocker: attrPrf.Blocker,
+		CGREvent:        args.CGREvent,
+		blocker:         attrPrf.Blocker,
 	}
 	rply.Tenant = tnt
 	for _, attribute := range attrPrf.Attributes {
@@ -513,10 +510,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	*reply = AttrSProcessEventReply{
 		MatchedProfiles: matchedIDs,
 		AlteredFields:   alteredFields.AsSlice(),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: args.CGREvent,
-			Opts:     args.Opts,
-		},
+		CGREvent:        args.CGREvent,
 	}
 	return
 }

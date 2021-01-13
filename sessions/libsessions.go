@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 var unratedReqs = engine.MapEvent{
@@ -265,11 +265,11 @@ type V1STIRIdentityArgs struct {
 }
 
 // getDerivedEvents returns only the *raw event if derivedReply flag is not specified
-func getDerivedEvents(events map[string]*utils.CGREventWithOpts, derivedReply bool) map[string]*utils.CGREventWithOpts {
+func getDerivedEvents(events map[string]*utils.CGREvent, derivedReply bool) map[string]*utils.CGREvent {
 	if derivedReply {
 		return events
 	}
-	return map[string]*utils.CGREventWithOpts{
+	return map[string]*utils.CGREvent{
 		utils.MetaRaw: events[utils.MetaRaw],
 	}
 }

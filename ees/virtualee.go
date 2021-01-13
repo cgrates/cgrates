@@ -60,7 +60,7 @@ func (vEe *VirtualEe) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	vEe.Lock()
 	defer func() {
 		if err != nil {

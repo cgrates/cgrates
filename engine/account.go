@@ -550,17 +550,15 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 			defaultBalance := acc.GetDefaultMoneyBalance()
 			acntTnt := utils.NewTenantID(acc.ID)
 			thEv := &ThresholdsArgsProcessEvent{
-				CGREventWithOpts: &utils.CGREventWithOpts{
-					CGREvent: &utils.CGREvent{
-						Tenant: acntTnt.Tenant,
-						ID:     utils.GenUUID(),
-						Event: map[string]interface{}{
-							utils.EventType:    utils.BalanceUpdate,
-							utils.EventSource:  utils.AccountService,
-							utils.AccountField: acntTnt.ID,
-							utils.BalanceID:    defaultBalance.ID,
-							utils.Units:        defaultBalance.Value,
-						},
+				CGREvent: &utils.CGREvent{
+					Tenant: acntTnt.Tenant,
+					ID:     utils.GenUUID(),
+					Event: map[string]interface{}{
+						utils.EventType:    utils.BalanceUpdate,
+						utils.EventSource:  utils.AccountService,
+						utils.AccountField: acntTnt.ID,
+						utils.BalanceID:    defaultBalance.ID,
+						utils.Units:        defaultBalance.Value,
 					},
 					Opts: map[string]interface{}{
 						utils.MetaEventType: utils.BalanceUpdate,
@@ -1099,13 +1097,11 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 // Publish sends the account to stats and threshold
 func (acc *Account) Publish() {
 	acntSummary := acc.AsAccountSummary()
-	cgrEv := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: acntSummary.Tenant,
-			ID:     utils.GenUUID(),
-			Time:   utils.TimePointer(time.Now()),
-			Event:  acntSummary.AsMapInterface(),
-		},
+	cgrEv := &utils.CGREvent{
+		Tenant: acntSummary.Tenant,
+		ID:     utils.GenUUID(),
+		Time:   utils.TimePointer(time.Now()),
+		Event:  acntSummary.AsMapInterface(),
 		Opts: map[string]interface{}{
 			utils.MetaEventType: utils.AccountUpdate,
 		},
@@ -1113,9 +1109,7 @@ func (acc *Account) Publish() {
 	if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 		var tIDs []string
 		if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
-			utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
-				CGREventWithOpts: cgrEv,
-			}, &tIDs); err != nil &&
+			utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))
@@ -1124,9 +1118,7 @@ func (acc *Account) Publish() {
 	if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
 		var stsIDs []string
 		if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
-			utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{
-				CGREventWithOpts: cgrEv,
-			}, &stsIDs); err != nil &&
+			utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &stsIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<AccountS> error: %s processing account event %+v with StatS.", err.Error(), cgrEv))

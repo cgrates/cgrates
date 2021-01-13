@@ -47,7 +47,7 @@ func TestCBDebitUnits(t *testing.T) {
 	}
 	toDebit := utils.NewDecimal(6, 0)
 	if dbted, uFctr, err := cb.debitUnits(toDebit, utils.NewDecimal(1, 0),
-		&utils.CGREventWithOpts{CGREvent: &utils.CGREvent{Tenant: "cgrates.org"}}); err != nil {
+		&utils.CGREvent{Tenant: "cgrates.org"}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cb.blnCfg.UnitFactors[0], uFctr) {
 		t.Errorf("received unit factor: %+v", uFctr)
@@ -71,7 +71,7 @@ func TestCBDebitUnits(t *testing.T) {
 	if dbted, _, err := cb.debitUnits(
 		utils.NewDecimal(25, 1), //2.5
 		utils.NewDecimal(1, 1),  //0.1
-		&utils.CGREventWithOpts{CGREvent: &utils.CGREvent{Tenant: "cgrates.org"}}); err != nil {
+		&utils.CGREvent{Tenant: "cgrates.org"}); err != nil {
 		t.Error(err)
 	} else if dbted.Cmp(decimal.New(22, 1)) != 0 { // only 1.2 is possible due to increment
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
@@ -93,7 +93,7 @@ func TestCBDebitUnits(t *testing.T) {
 	if dbted, _, err := cb.debitUnits(
 		utils.NewDecimal(25, 1), //2.5
 		utils.NewDecimal(1, 1),  //0.1
-		&utils.CGREventWithOpts{CGREvent: &utils.CGREvent{Tenant: "cgrates.org"}}); err != nil {
+		&utils.CGREvent{Tenant: "cgrates.org"}); err != nil {
 		t.Error(err)
 	} else if dbted.Cmp(decimal.New(25, 1)) != 0 { // only 1.2 is possible due to increment
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
@@ -115,7 +115,7 @@ func TestCBDebitUnits(t *testing.T) {
 	if dbted, _, err := cb.debitUnits(
 		utils.NewDecimal(25, 1), //2.5
 		utils.NewDecimal(1, 1),  //0.1
-		&utils.CGREventWithOpts{CGREvent: &utils.CGREvent{Tenant: "cgrates.org"}}); err != nil {
+		&utils.CGREvent{Tenant: "cgrates.org"}); err != nil {
 		t.Error(err)
 	} else if dbted.Cmp(decimal.New(7, 1)) != 0 { // only 1.2 is possible due to increment
 		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))

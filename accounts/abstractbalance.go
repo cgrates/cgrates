@@ -91,7 +91,7 @@ func (aB *abstractBalance) balanceLimit() (bL *utils.Decimal) {
 
 // debitUsage implements the balanceOperator interface
 func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
-	cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
@@ -100,7 +100,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 
 	// pass the general balance filters
 	var pass bool
-	if pass, err = aB.fltrS.Pass(cgrEv.CGREvent.Tenant, aB.blnCfg.FilterIDs, evNm); err != nil {
+	if pass, err = aB.fltrS.Pass(cgrEv.Tenant, aB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
 		return nil, utils.ErrFilterNotPassingNoCaps
@@ -117,7 +117,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 
 	// costIncrement
 	var costIcrm *utils.CostIncrement
-	if costIcrm, err = aB.costIncrement(cgrEv.CGREvent.Tenant, evNm); err != nil {
+	if costIcrm, err = aB.costIncrement(cgrEv.Tenant, evNm); err != nil {
 		return
 	}
 
@@ -125,7 +125,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 	debUnts := usage
 
 	var uF *utils.UnitFactor
-	if uF, err = aB.unitFactor(cgrEv.CGREvent.Tenant, evNm); err != nil {
+	if uF, err = aB.unitFactor(cgrEv.Tenant, evNm); err != nil {
 		return
 	}
 	//var hasUF bool

@@ -190,7 +190,7 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, re
 	return nil
 }
 
-func (rsv1 *ResourceSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (rsv1 *ResourceSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

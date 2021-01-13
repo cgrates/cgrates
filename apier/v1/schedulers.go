@@ -37,7 +37,7 @@ type SchedulerSv1 struct {
 }
 
 // Reload reloads scheduler instructions
-func (schdSv1 *SchedulerSv1) Reload(arg *utils.CGREventWithOpts, reply *string) error {
+func (schdSv1 *SchedulerSv1) Reload(arg *utils.CGREvent, reply *string) error {
 	schdSv1.cgrcfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
 	*reply = utils.OK
 	return nil
@@ -170,7 +170,7 @@ func (schdSv1 *SchedulerSv1) ExecuteActionPlans(attr *utils.AttrsExecuteActionPl
 }
 
 // Ping returns Pong
-func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

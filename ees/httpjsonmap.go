@@ -69,7 +69,7 @@ func (httpEE *HTTPjsonMapEE) OnEvicted(string, interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	httpEE.Lock()
 	defer func() {
 		if err != nil {

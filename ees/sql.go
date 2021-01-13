@@ -136,7 +136,7 @@ func (sqlEe *SQLEe) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	sqlEe.Lock()
 	defer func() {
 		if err != nil {

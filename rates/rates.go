@@ -136,7 +136,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 		rS.cfg.RateSCfg().RateSuffixIndexedFields,
 		rS.dm,
 		utils.CacheRateFilterIndexes,
-		utils.ConcatenatedKey(args.CGREventWithOpts.CGREvent.Tenant, rtPfl.ID),
+		utils.ConcatenatedKey(args.CGREvent.Tenant, rtPfl.ID),
 		rS.cfg.RateSCfg().RateIndexedSelects,
 		rS.cfg.RateSCfg().RateNestedFields,
 	); err != nil {
@@ -146,7 +146,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 	for rtID := range rtIDs {
 		rt := rtPfl.Rates[rtID] // pick the rate directly from map based on matched ID
 		var pass bool
-		if pass, err = rS.filterS.Pass(args.CGREventWithOpts.CGREvent.Tenant, rt.FilterIDs, evNm); err != nil {
+		if pass, err = rS.filterS.Pass(args.CGREvent.Tenant, rt.FilterIDs, evNm); err != nil {
 			return
 		} else if !pass {
 			continue
@@ -195,7 +195,7 @@ func (rS *RateS) V1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.Rat
 		rPfIDs[i] = rpID
 	}
 	var rtPrl *engine.RateProfile
-	if rtPrl, err = rS.matchingRateProfileForEvent(args.CGREventWithOpts.Tenant, rPfIDs, args); err != nil {
+	if rtPrl, err = rS.matchingRateProfileForEvent(args.Tenant, rPfIDs, args); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if rcvCost, errCost := rS.rateProfileCostForEvent(rtPrl, args, rS.cfg.RateSCfg().Verbosity); errCost != nil {

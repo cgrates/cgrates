@@ -141,12 +141,12 @@ func (rS *RouteSv1) GetRoutes(args *engine.ArgsGetRoutes,
 }
 
 // GetRouteProfilesForEvent returns a list of route profiles that match for Event
-func (rS *RouteSv1) GetRouteProfilesForEvent(args *utils.CGREventWithOpts,
+func (rS *RouteSv1) GetRouteProfilesForEvent(args *utils.CGREvent,
 	reply *[]*engine.RouteProfile) error {
 	return rS.rS.V1GetRouteProfilesForEvent(args, reply)
 }
 
-func (rS *RouteSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (rS *RouteSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

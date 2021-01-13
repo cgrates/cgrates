@@ -63,7 +63,7 @@ func (httpPost *HTTPPost) OnEvicted(_ string, _ interface{}) {
 }
 
 // ExportEvent implements EventExporter
-func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREventWithOpts) (err error) {
+func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	httpPost.Lock()
 	defer func() {
 		if err != nil {

@@ -36,18 +36,16 @@ func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithOpts,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaCore, utils.CoreSv1Status, args, reply)
 }
 
-func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREventWithOpts, reply *string) (err error) {
+func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CoreSv1Ping, tnt,
@@ -70,10 +68,8 @@ func (dS *DispatcherService) CoreSv1Sleep(args *utils.DurationArgs,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)
 }

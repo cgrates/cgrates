@@ -360,6 +360,7 @@ func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &sTime,
 		Event:  fsev.AsMapStringInterface(timezone),
+		Opts:   fsev.GetOptions(),
 	}
 	return cgrEv, nil
 }
@@ -399,10 +400,7 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	}
 	cgrEv.Event[utils.Usage] = config.CgrConfig().GeneralCfg().MaxCallDuration // no billsec available in auth
 	args = &sessions.V1AuthorizeArgs{                                          // defaults
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     fsev.GetOptions(),
-		},
+		CGREvent: cgrEv,
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
@@ -420,10 +418,7 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		return
 	}
 	args = &sessions.V1InitSessionArgs{ // defaults
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     fsev.GetOptions(),
-		},
+		CGREvent: cgrEv,
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
@@ -441,10 +436,7 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 		return
 	}
 	args = &sessions.V1TerminateSessionArgs{ // defaults
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     fsev.GetOptions(),
-		},
+		CGREvent: cgrEv,
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {

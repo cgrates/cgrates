@@ -36,11 +36,9 @@ func (dS *DispatcherService) ConfigSv1GetConfig(args *config.SectionWithOpts, re
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaConfig, utils.ConfigSv1GetConfig, args, reply)
 }
 
@@ -55,11 +53,9 @@ func (dS *DispatcherService) ConfigSv1ReloadConfig(args *config.ReloadArgs, repl
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaConfig, utils.ConfigSv1ReloadConfig, args, reply)
 }
 
@@ -74,11 +70,9 @@ func (dS *DispatcherService) ConfigSv1SetConfig(args *config.SetConfigArgs, repl
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaConfig, utils.ConfigSv1SetConfig, args, reply)
 }
 
@@ -93,11 +87,9 @@ func (dS *DispatcherService) ConfigSv1SetConfigFromJSON(args *config.SetConfigFr
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaConfig, utils.ConfigSv1SetConfigFromJSON, args, reply)
 }
 
@@ -112,10 +104,8 @@ func (dS *DispatcherService) ConfigSv1GetConfigAsJSON(args *config.SectionWithOp
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaConfig, utils.ConfigSv1GetConfigAsJSON, args, reply)
 }

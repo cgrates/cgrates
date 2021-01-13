@@ -25,15 +25,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) StatSv1Ping(args *utils.CGREventWithOpts, reply *string) (err error) {
+func (dS *DispatcherService) StatSv1Ping(args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1Ping,
-			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			args.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -50,7 +50,7 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgs
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREventWithOpts, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWithOpts,
@@ -63,12 +63,10 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWi
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: args.Tenant,
-			ID:     args.ID,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: args.Tenant,
+		ID:     args.ID,
+		Opts:   args.Opts,
 	}, utils.MetaStats, utils.StatSv1GetQueueStringMetrics, args, reply)
 }
 
@@ -82,7 +80,7 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEv
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREventWithOpts, utils.MetaStats, utils.StatSv1ProcessEvent, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaStats, utils.StatSv1ProcessEvent, args, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWithOpts,
@@ -94,12 +92,10 @@ func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWit
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: args.Tenant,
-			ID:     args.ID,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: args.Tenant,
+		ID:     args.ID,
+		Opts:   args.Opts,
 	}, utils.MetaStats, utils.StatSv1GetQueueFloatMetrics, args, reply)
 }
 
@@ -115,10 +111,8 @@ func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithOpts,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaStats, utils.StatSv1GetQueueIDs, args, reply)
 }

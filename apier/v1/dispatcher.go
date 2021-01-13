@@ -229,7 +229,7 @@ type DispatcherThresholdSv1 struct {
 }
 
 // Ping implements ThresholdSv1Ping
-func (dT *DispatcherThresholdSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dT *DispatcherThresholdSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dT.dS.ThresholdSv1Ping(args, reply)
 }
 
@@ -265,7 +265,7 @@ type DispatcherStatSv1 struct {
 }
 
 // Ping implements StatSv1Ping
-func (dSts *DispatcherStatSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dSts *DispatcherStatSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dSts.dS.StatSv1Ping(args, reply)
 }
 
@@ -305,7 +305,7 @@ type DispatcherResourceSv1 struct {
 }
 
 // Ping implements ResourceSv1Ping
-func (dRs *DispatcherResourceSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dRs *DispatcherResourceSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dRs.dRs.ResourceSv1Ping(args, reply)
 }
 
@@ -344,7 +344,7 @@ type DispatcherRouteSv1 struct {
 }
 
 // Ping implements RouteSv1Ping
-func (dRoute *DispatcherRouteSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dRoute *DispatcherRouteSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dRoute.dRoute.RouteSv1Ping(args, reply)
 }
 
@@ -355,7 +355,7 @@ func (dRoute *DispatcherRouteSv1) GetRoutes(args *engine.ArgsGetRoutes,
 }
 
 // GetRouteProfilesForEvent returns a list of route profiles that match for Event
-func (dRoute *DispatcherRouteSv1) GetRouteProfilesForEvent(args *utils.CGREventWithOpts,
+func (dRoute *DispatcherRouteSv1) GetRouteProfilesForEvent(args *utils.CGREvent,
 	reply *[]*engine.RouteProfile) error {
 	return dRoute.dRoute.RouteSv1GetRouteProfilesForEvent(args, reply)
 }
@@ -370,7 +370,7 @@ type DispatcherAttributeSv1 struct {
 }
 
 // Ping implements AttributeSv1Ping
-func (dA *DispatcherAttributeSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dA *DispatcherAttributeSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dA.dA.AttributeSv1Ping(args, reply)
 }
 
@@ -396,18 +396,18 @@ type DispatcherChargerSv1 struct {
 }
 
 // Ping implements ChargerSv1Ping
-func (dC *DispatcherChargerSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dC *DispatcherChargerSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dC.dC.ChargerSv1Ping(args, reply)
 }
 
 // GetChargersForEvent implements ChargerSv1GetChargersForEvent
-func (dC *DispatcherChargerSv1) GetChargersForEvent(args *utils.CGREventWithOpts,
+func (dC *DispatcherChargerSv1) GetChargersForEvent(args *utils.CGREvent,
 	reply *engine.ChargerProfiles) (err error) {
 	return dC.dC.ChargerSv1GetChargersForEvent(args, reply)
 }
 
 // ProcessEvent implements ChargerSv1ProcessEvent
-func (dC *DispatcherChargerSv1) ProcessEvent(args *utils.CGREventWithOpts,
+func (dC *DispatcherChargerSv1) ProcessEvent(args *utils.CGREvent,
 	reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	return dC.dC.ChargerSv1ProcessEvent(args, reply)
 }
@@ -422,7 +422,7 @@ type DispatcherSessionSv1 struct {
 }
 
 // Ping implements SessionSv1Ping
-func (dS *DispatcherSessionSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dS *DispatcherSessionSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.SessionSv1Ping(args, reply)
 }
 
@@ -450,7 +450,7 @@ func (dS *DispatcherSessionSv1) InitiateSession(args *sessions.V1InitSessionArgs
 }
 
 // ProcessCDR implements SessionSv1ProcessCDR
-func (dS *DispatcherSessionSv1) ProcessCDR(args *utils.CGREventWithOpts,
+func (dS *DispatcherSessionSv1) ProcessCDR(args *utils.CGREvent,
 	reply *string) (err error) {
 	return dS.dS.SessionSv1ProcessCDR(args, reply)
 }
@@ -577,7 +577,7 @@ func (dS *DispatcherResponder) Shutdown(args *utils.TenantWithOpts, reply *strin
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherResponder) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dS *DispatcherResponder) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.ResponderPing(args, reply)
 }
 
@@ -676,7 +676,7 @@ func (dS *DispatcherCacheSv1) ReplicateRemove(args *utils.ArgCacheReplicateRemov
 }
 
 // Ping used to determinate if component is active
-func (dS *DispatcherCacheSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dS *DispatcherCacheSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.CacheSv1Ping(args, reply)
 }
 
@@ -700,7 +700,7 @@ func (dS *DispatcherGuardianSv1) RemoteUnlock(attr *dispatchers.AttrRemoteUnlock
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherGuardianSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dS *DispatcherGuardianSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.GuardianSv1Ping(args, reply)
 }
 
@@ -714,12 +714,12 @@ type DispatcherSchedulerSv1 struct {
 }
 
 // Reload reloads scheduler instructions
-func (dS *DispatcherSchedulerSv1) Reload(attr *utils.CGREventWithOpts, reply *string) (err error) {
+func (dS *DispatcherSchedulerSv1) Reload(attr *utils.CGREvent, reply *string) (err error) {
 	return dS.dS.SchedulerSv1Reload(attr, reply)
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherSchedulerSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dS *DispatcherSchedulerSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.SchedulerSv1Ping(args, reply)
 }
 
@@ -742,7 +742,7 @@ type DispatcherSv1 struct {
 }
 
 // GetProfileForEvent returns the matching dispatcher profile for the provided event
-func (dSv1 DispatcherSv1) GetProfileForEvent(ev *utils.CGREventWithOpts,
+func (dSv1 DispatcherSv1) GetProfileForEvent(ev *utils.CGREvent,
 	dPrfl *engine.DispatcherProfile) error {
 	return dSv1.dS.V1GetProfileForEvent(ev, dPrfl)
 }
@@ -763,7 +763,7 @@ type DispatcherSCDRsV1 struct {
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherSCDRsV1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dS *DispatcherSCDRsV1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.CDRsV1Ping(args, reply)
 }
 
@@ -805,7 +805,7 @@ type DispatcherSServiceManagerV1 struct {
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherSServiceManagerV1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dS *DispatcherSServiceManagerV1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.ServiceManagerV1Ping(args, reply)
 }
 func (dS *DispatcherSServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithOpts, reply *string) error {
@@ -860,7 +860,7 @@ func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithOpts, reply *map[strin
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherCoreSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dS *DispatcherCoreSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.CoreSv1Ping(args, reply)
 }
 
@@ -882,7 +882,7 @@ func (dS *DispatcherRALsV1) GetRatingPlansCost(args *utils.RatingPlanCostArg, re
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherRALsV1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dS *DispatcherRALsV1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.RALsV1Ping(args, reply)
 }
 
@@ -895,7 +895,7 @@ func NewDispatcherReplicatorSv1(dps *dispatchers.DispatcherService) *DispatcherR
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherReplicatorSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.ReplicatorSv1Ping(args, reply)
 }
 
@@ -1326,7 +1326,7 @@ type DispatcherRateSv1 struct {
 }
 
 // Ping implements RateSv1Ping
-func (dR *DispatcherRateSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dR *DispatcherRateSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dR.dR.RateSv1Ping(args, reply)
 }
 
@@ -1344,7 +1344,7 @@ type DispatcherActionSv1 struct {
 }
 
 // Ping implements ActionSv1Ping
-func (dR *DispatcherActionSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dR *DispatcherActionSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dR.dR.ActionSv1Ping(args, reply)
 }
 
@@ -1358,6 +1358,6 @@ type DispatcherAccountSv1 struct {
 }
 
 // Ping implements AccountSv1Ping
-func (dR *DispatcherAccountSv1) Ping(args *utils.CGREventWithOpts, reply *string) error {
+func (dR *DispatcherAccountSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dR.dR.AccountSv1Ping(args, reply)
 }

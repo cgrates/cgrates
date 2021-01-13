@@ -314,7 +314,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return
 	}
 	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
-	opts := config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
+	cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,
@@ -328,7 +328,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	}
 	var cgrArgs utils.Paginator
 	if reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent {
-		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(opts); err != nil {
+		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.Opts); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
 				utils.DiameterAgent, err.Error()))
 			err = nil // reset the error and continue the processing
@@ -363,7 +363,6 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs,
 			reqProcessor.Flags.Has(utils.MetaFD),
-			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1AuthorizeEvent,
@@ -381,8 +380,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
-			opts)
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1InitiateSession,
 			initArgs, rply)
@@ -394,8 +392,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
-			opts)
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -410,8 +407,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
-			opts)
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := utils.StringPointer("")
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
@@ -432,8 +428,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs,
-			reqProcessor.Flags.Has(utils.MetaFD),
-			opts)
+			reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1ProcessMessageReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessMessage,
 			msgArgs, rply)
@@ -449,10 +444,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		evArgs := &sessions.V1ProcessEventArgs{
 			Flags:     reqProcessor.Flags.SliceFlags(),
 			Paginator: cgrArgs,
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: cgrEv,
-				Opts:     opts,
-			},
+			CGREvent:  cgrEv,
 		}
 		rply := new(sessions.V1ProcessEventReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessEvent,
@@ -472,8 +464,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
 		if err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithOpts{CGREvent: cgrEv,
-				Opts: opts}, rplyCDRs); err != nil {
+			cgrEv, rplyCDRs); err != nil {
 			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}

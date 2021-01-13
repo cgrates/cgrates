@@ -273,7 +273,7 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 			return
 		}
 		if err := fsa.connMgr.Call(fsa.cfg.SessionSConns, fsa, utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithOpts{CGREvent: cgrEv, Opts: fsev.GetOptions()}, &reply); err != nil {
+			cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",
 				utils.FreeSWITCHAgent, utils.ToJSON(cgrEv), err.Error()))
 		}

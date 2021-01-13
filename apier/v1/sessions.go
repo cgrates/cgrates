@@ -73,7 +73,7 @@ func (ssv1 *SessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,
 	return ssv1.sS.BiRPCv1TerminateSession(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) ProcessCDR(cgrEv *utils.CGREventWithOpts, rply *string) error {
+func (ssv1 *SessionSv1) ProcessCDR(cgrEv *utils.CGREvent, rply *string) error {
 	return ssv1.sS.BiRPCv1ProcessCDR(nil, cgrEv, rply)
 }
 
@@ -117,7 +117,7 @@ func (ssv1 *SessionSv1) GetPassiveSessionsCount(args *utils.SessionFilter,
 	return ssv1.sS.BiRPCv1GetPassiveSessionsCount(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (ssv1 *SessionSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

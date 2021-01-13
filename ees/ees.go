@@ -104,7 +104,7 @@ func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 	eeS.eesMux.Unlock()
 }
 
-func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attrIDs []string, ctx string) (err error) {
+func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []string, ctx string) (err error) {
 	var rplyEv engine.AttrSProcessEventReply
 	if cgrEv.Opts == nil {
 		cgrEv.Opts = make(map[string]interface{})
@@ -119,18 +119,14 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREventWithOpts, attr
 	attrArgs := &engine.AttrArgsProcessEvent{
 		AttributeIDs: attrIDs,
 		Context:      utils.StringPointer(ctx),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts:     cgrEv.Opts,
-			CGREvent: cgrEv.CGREvent,
-		},
-		ProcessRuns: processRuns,
+		CGREvent:     cgrEv,
+		ProcessRuns:  processRuns,
 	}
 	if err = eeS.connMgr.Call(
 		eeS.cfg.EEsNoLksCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
-		cgrEv.CGREvent = rplyEv.CGREvent
-		cgrEv.Opts = rplyEv.Opts
+		cgrEv = rplyEv.CGREvent
 	} else if err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
 		err = nil // cancel ErrNotFound
@@ -177,7 +173,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 
 		if eeCfg.Flags.GetBool(utils.MetaAttributes) {
 			if err = eeS.attrSProcessEvent(
-				cgrEv.CGREventWithOpts,
+				cgrEv.CGREvent,
 				eeCfg.AttributeSIDs,
 				utils.FirstNonEmpty(
 					eeCfg.AttributeSCtx,
@@ -219,7 +215,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 					utils.EventExporterS, ee.ID()))
 		}
 		go func(evict, sync bool, ee EventExporter) {
-			if err := ee.ExportEvent(cgrEv.CGREventWithOpts); err != nil {
+			if err := ee.ExportEvent(cgrEv.CGREvent); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> with id <%s>, error: <%s>",
 						utils.EventExporterS, ee.ID(), err.Error()))

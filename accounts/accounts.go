@@ -66,7 +66,7 @@ func (aS *AccountS) Call(serviceMethod string, args interface{}, reply interface
 }
 
 // matchingAccountForEvent returns the matched Account for the given event
-func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREventWithOpts, acntIDs []string) (acnt *utils.AccountProfile, err error) {
+func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent, acntIDs []string) (acnt *utils.AccountProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.Opts,
@@ -101,8 +101,8 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREventWit
 		if _, isDisabled := qAcnt.Opts[utils.Disabled]; isDisabled {
 			continue
 		}
-		if qAcnt.ActivationInterval != nil && cgrEv.CGREvent.Time != nil &&
-			!qAcnt.ActivationInterval.IsActiveAtTime(*cgrEv.CGREvent.Time) { // not active
+		if qAcnt.ActivationInterval != nil && cgrEv.Time != nil &&
+			!qAcnt.ActivationInterval.IsActiveAtTime(*cgrEv.Time) { // not active
 			continue
 		}
 		var pass bool
@@ -123,7 +123,7 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREventWit
 
 // accountProcessEvent implements event processing by an Account
 func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
-	cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 	//var aBlncs *accountBalances
 	if _, err = newAccountBalances(acnt, aS.fltrS, aS.cfg.AccountSCfg().RateSConns); err != nil {
 		return

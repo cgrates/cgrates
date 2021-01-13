@@ -218,10 +218,11 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			return
 		}
 		rdr.offset += rdr.lineLen // increase the offset
+		cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
+		cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 		rdr.rdrEvents <- &erEvent{
-			cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+			cgrEvent: cgrEv,
 			rdrCfg:   rdr.Config(),
-			opts:     config.NMAsMapInterface(agReq.Opts, utils.NestingSep),
 		}
 		evsPosted++
 
@@ -306,10 +307,11 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 				utils.ERs, absPath, rowNr, err.Error()))
 		return err
 	}
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
+	cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 	rdr.rdrEvents <- &erEvent{
-		cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
-		opts:     config.NMAsMapInterface(agReq.Opts, utils.NestingSep),
 	}
 	evsPosted++
 	// reset the cursor after process the trailer
@@ -348,10 +350,11 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		return err
 	}
 	rdr.offset += rdr.headerOffset // increase the offset
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
+	cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 	rdr.rdrEvents <- &erEvent{
-		cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
-		opts:     config.NMAsMapInterface(agReq.Opts, utils.NestingSep),
 	}
 	evsPosted++
 	return

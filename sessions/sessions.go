@@ -364,7 +364,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 				argsProc := &engine.ArgV1ProcessEvent{
 					Flags: []string{fmt.Sprintf("%s:false", utils.MetaChargers),
 						fmt.Sprintf("%s:false", utils.MetaAttributes)},
-					CGREventWithOpts: *cgrEv,
+					CGREvent: *cgrEv,
 				}
 				if unratedReqs.HasField( // order additional rating for unrated request types
 					engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
@@ -385,13 +385,11 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 	if len(sS.cgrCfg.SessionSCfg().ResSConns) != 0 && s.ResourceID != "" {
 		var reply string
 		argsRU := &utils.ArgRSv1ResourceUsage{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: s.Tenant,
-					ID:     utils.GenUUID(),
-					Event:  s.EventStart,
-				},
-				Opts: s.OptsStart,
+			CGREvent: &utils.CGREvent{
+				Tenant: s.Tenant,
+				ID:     utils.GenUUID(),
+				Event:  s.EventStart,
+				Opts:   s.OptsStart,
 			},
 			UsageID: s.ResourceID,
 			Units:   1,
@@ -1114,7 +1112,7 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 // newSession will populate SRuns within a Session based on ChargerS output
 // forSession can only be called once per Session
 // not thread-safe since it should be called in init where there is no concurrency
-func (sS *SessionS) newSession(cgrEv *utils.CGREventWithOpts, resID, clntConnID string,
+func (sS *SessionS) newSession(cgrEv *utils.CGREvent, resID, clntConnID string,
 	dbtItval time.Duration, forceDuration, isMsg bool) (s *Session, err error) {
 	if len(sS.cgrCfg.SessionSCfg().ChargerSConns) == 0 {
 		err = errors.New("ChargerS is disabled")
@@ -1177,7 +1175,7 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREventWithOpts, resID, clntConnID 
 }
 
 // processChargerS processes the event with chargers and cahces the response based on the requestID
-func (sS *SessionS) processChargerS(cgrEv *utils.CGREventWithOpts) (chrgrs []*engine.ChrgSProcessEventReply, err error) {
+func (sS *SessionS) processChargerS(cgrEv *utils.CGREvent) (chrgrs []*engine.ChrgSProcessEventReply, err error) {
 	if x, ok := engine.Cache.Get(utils.CacheEventCharges, cgrEv.ID); ok && x != nil {
 		return x.([]*engine.ChrgSProcessEventReply), nil
 	}
@@ -1384,7 +1382,7 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 }
 
 // authEvent calculates maximum usage allowed for the given event
-func (sS *SessionS) authEvent(cgrEv *utils.CGREventWithOpts, forceDuration bool) (usage map[string]time.Duration, err error) {
+func (sS *SessionS) authEvent(cgrEv *utils.CGREvent, forceDuration bool) (usage map[string]time.Duration, err error) {
 	evStart := engine.MapEvent(cgrEv.Event)
 	var eventUsage time.Duration
 	if eventUsage, err = evStart.GetDuration(utils.Usage); err != nil {
@@ -1424,7 +1422,7 @@ func (sS *SessionS) authEvent(cgrEv *utils.CGREventWithOpts, forceDuration bool)
 
 // initSession handles a new session
 // not thread-safe for Session since it is constructed here
-func (sS *SessionS) initSession(cgrEv *utils.CGREventWithOpts, clntConnID,
+func (sS *SessionS) initSession(cgrEv *utils.CGREvent, clntConnID,
 	resID string, dbtItval time.Duration, isMsg, forceDuration bool) (s *Session, err error) {
 	if s, err = sS.newSession(cgrEv, resID, clntConnID, dbtItval, forceDuration, isMsg); err != nil {
 		return nil, err
@@ -1584,7 +1582,7 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 }
 
 // chargeEvent will charge a single event (ie: SMS)
-func (sS *SessionS) chargeEvent(cgrEv *utils.CGREventWithOpts, forceDuration bool) (maxUsage time.Duration, err error) {
+func (sS *SessionS) chargeEvent(cgrEv *utils.CGREvent, forceDuration bool) (maxUsage time.Duration, err error) {
 	var s *Session
 	if s, err = sS.initSession(cgrEv, "", "", 0, true, forceDuration); err != nil {
 		return
@@ -1763,7 +1761,7 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 	thrslds bool, thresholdIDs []string, statQueues bool, statIDs []string,
 	res, maxUsage, routes, routesIgnoreErrs, routesEventCost bool,
 	cgrEv *utils.CGREvent, routePaginator utils.Paginator,
-	forceDuration bool, opts map[string]interface{}) (args *V1AuthorizeArgs) {
+	forceDuration bool) (args *V1AuthorizeArgs) {
 	args = &V1AuthorizeArgs{
 		GetAttributes:      attrs,
 		AuthorizeResources: res,
@@ -1772,11 +1770,8 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 		ProcessStats:       statQueues,
 		RoutesIgnoreErrors: routesIgnoreErrs,
 		GetRoutes:          routes,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     opts,
-		},
-		ForceDuration: forceDuration,
+		CGREvent:           cgrEv,
+		ForceDuration:      forceDuration,
 	}
 	if routesEventCost {
 		args.RoutesMaxCost = utils.MetaRoutesEventCost
@@ -1809,7 +1804,7 @@ type V1AuthorizeArgs struct {
 	AttributeIDs       []string
 	ThresholdIDs       []string
 	StatIDs            []string
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 	utils.Paginator
 }
 
@@ -1932,7 +1927,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
 	if args.GetAttributes {
-		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, args.Opts, false)
+		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, false)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent
 			args.Opts = rplyAttr.Opts
@@ -1943,10 +1938,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 	}
 	if args.GetMaxUsage {
 		var sRunsUsage map[string]time.Duration
-		if sRunsUsage, err = sS.authEvent(&utils.CGREventWithOpts{
-			CGREvent: args.CGREvent,
-			Opts:     args.Opts,
-		}, args.ForceDuration); err != nil {
+		if sRunsUsage, err = sS.authEvent(args.CGREvent, args.ForceDuration); err != nil {
 			return err
 		}
 
@@ -1970,12 +1962,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		}
 		var allocMsg string
 		attrRU := &utils.ArgRSv1ResourceUsage{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: args.CGREvent,
-				Opts:     args.Opts,
-			},
-			UsageID: originID,
-			Units:   1,
+			CGREvent: args.CGREvent,
+			UsageID:  originID,
+			Units:    1,
 		}
 		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AuthorizeResources,
 			attrRU, &allocMsg); err != nil {
@@ -1985,7 +1974,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 	}
 	if args.GetRoutes {
 		routesReply, err := sS.getRoutes(args.CGREvent.Clone(), args.Paginator,
-			args.RoutesIgnoreErrors, args.RoutesMaxCost, args.Opts, false)
+			args.RoutesIgnoreErrors, args.RoutesMaxCost, false)
 		if err != nil {
 			return err
 		}
@@ -1994,7 +1983,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		}
 	}
 	if args.ProcessThresholds {
-		tIDs, err := sS.processThreshold(args.CGREvent, args.ThresholdIDs, args.Opts, true)
+		tIDs, err := sS.processThreshold(args.CGREvent, args.ThresholdIDs, true)
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
@@ -2004,7 +1993,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		authReply.ThresholdIDs = &tIDs
 	}
 	if args.ProcessStats {
-		sIDs, err := sS.processStats(args.CGREvent, args.StatIDs, args.Opts, false)
+		sIDs, err := sS.processStats(args.CGREvent, args.StatIDs, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2064,19 +2053,15 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.ClientConnect
 // NewV1InitSessionArgs is a constructor for V1InitSessionArgs
 func NewV1InitSessionArgs(attrs bool, attributeIDs []string,
 	thrslds bool, thresholdIDs []string, stats bool, statIDs []string,
-	resrc, acnt bool, cgrEv *utils.CGREvent, forceDuration bool,
-	opts map[string]interface{}) (args *V1InitSessionArgs) {
+	resrc, acnt bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1InitSessionArgs) {
 	args = &V1InitSessionArgs{
 		GetAttributes:     attrs,
 		AllocateResources: resrc,
 		InitSession:       acnt,
 		ProcessThresholds: thrslds,
 		ProcessStats:      stats,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     opts,
-		},
-		ForceDuration: forceDuration,
+		CGREvent:          cgrEv,
+		ForceDuration:     forceDuration,
 	}
 	if len(attributeIDs) != 0 {
 		args.AttributeIDs = attributeIDs
@@ -2101,7 +2086,7 @@ type V1InitSessionArgs struct {
 	AttributeIDs      []string
 	ThresholdIDs      []string
 	StatIDs           []string
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 }
 
 // ParseFlags will populate the V1InitSessionArgs flags
@@ -2215,10 +2200,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 	}
 	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
 	if args.GetAttributes {
-		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, args.Opts, false)
+		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, false)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent
-			args.Opts = rplyAttr.Opts
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2232,12 +2216,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := &utils.ArgRSv1ResourceUsage{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: args.CGREvent,
-				Opts:     args.Opts,
-			},
-			UsageID: originID,
-			Units:   1,
+			CGREvent: args.CGREvent,
+			UsageID:  originID,
+			Units:    1,
 		}
 		var allocMessage string
 		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil,
@@ -2255,10 +2236,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 				return utils.NewErrRALs(err)
 			}
 		}
-		s, err := sS.initSession(&utils.CGREventWithOpts{
-			CGREvent: args.CGREvent,
-			Opts:     args.Opts,
-		}, sS.biJClntID(clnt), originID, dbtItvl,
+		s, err := sS.initSession(args.CGREvent, sS.biJClntID(clnt), originID, dbtItvl,
 			false, args.ForceDuration)
 		if err != nil {
 			return err
@@ -2286,7 +2264,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		}
 	}
 	if args.ProcessThresholds {
-		tIDs, err := sS.processThreshold(args.CGREvent, args.ThresholdIDs, args.Opts, true)
+		tIDs, err := sS.processThreshold(args.CGREvent, args.ThresholdIDs, true)
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
@@ -2296,7 +2274,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		rply.ThresholdIDs = &tIDs
 	}
 	if args.ProcessStats {
-		sIDs, err := sS.processStats(args.CGREvent, args.StatIDs, args.Opts, false)
+		sIDs, err := sS.processStats(args.CGREvent, args.StatIDs, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2355,15 +2333,11 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.ClientConnec
 
 // NewV1UpdateSessionArgs is a constructor for update session arguments
 func NewV1UpdateSessionArgs(attrs bool, attributeIDs []string,
-	acnts bool, cgrEv *utils.CGREvent, forceDuration bool,
-	opts map[string]interface{}) (args *V1UpdateSessionArgs) {
+	acnts bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1UpdateSessionArgs) {
 	args = &V1UpdateSessionArgs{
 		GetAttributes: attrs,
 		UpdateSession: acnts,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     opts,
-		},
+		CGREvent:      cgrEv,
 		ForceDuration: forceDuration,
 	}
 	if len(attributeIDs) != 0 {
@@ -2378,7 +2352,7 @@ type V1UpdateSessionArgs struct {
 	UpdateSession bool
 	ForceDuration bool
 	AttributeIDs  []string
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 }
 
 // V1UpdateSessionReply contains options for session update reply
@@ -2444,10 +2418,9 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 	}
 
 	if args.GetAttributes {
-		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, args.Opts, false)
+		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, false)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent
-			args.Opts = rplyAttr.Opts
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2468,10 +2441,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 			ev.GetStringIgnoreErrors(utils.OriginID),
 			ev.GetStringIgnoreErrors(utils.OriginHost))
 		if s == nil {
-			if s, err = sS.initSession(&utils.CGREventWithOpts{
-				CGREvent: args.CGREvent,
-				Opts:     args.Opts,
-			}, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
+			if s, err = sS.initSession(args.CGREvent, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
 				dbtItvl, false, args.ForceDuration); err != nil {
 				return err
 			}
@@ -2496,18 +2466,14 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 // NewV1TerminateSessionArgs creates a new V1TerminateSessionArgs using the given arguments
 func NewV1TerminateSessionArgs(acnts, resrc,
 	thrds bool, thresholdIDs []string, stats bool,
-	statIDs []string, cgrEv *utils.CGREvent, forceDuration bool,
-	opts map[string]interface{}) (args *V1TerminateSessionArgs) {
+	statIDs []string, cgrEv *utils.CGREvent, forceDuration bool) (args *V1TerminateSessionArgs) {
 	args = &V1TerminateSessionArgs{
 		TerminateSession:  acnts,
 		ReleaseResources:  resrc,
 		ProcessThresholds: thrds,
 		ProcessStats:      stats,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     opts,
-		},
-		ForceDuration: forceDuration,
+		CGREvent:          cgrEv,
+		ForceDuration:     forceDuration,
 	}
 	if len(thresholdIDs) != 0 {
 		args.ThresholdIDs = thresholdIDs
@@ -2527,7 +2493,7 @@ type V1TerminateSessionArgs struct {
 	ProcessStats      bool
 	ThresholdIDs      []string
 	StatIDs           []string
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 }
 
 // ParseFlags will populate the V1TerminateSessionArgs flags
@@ -2615,10 +2581,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 				continue
 			}
 			isMsg = true
-			if s, err = sS.initSession(&utils.CGREventWithOpts{
-				CGREvent: args.CGREvent,
-				Opts:     args.Opts,
-			}, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
+			if s, err = sS.initSession(args.CGREvent, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
 				dbtItvl, isMsg, args.ForceDuration); err != nil {
 				return utils.NewErrRALs(err)
 			}
@@ -2647,12 +2610,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 		}
 		var reply string
 		argsRU := &utils.ArgRSv1ResourceUsage{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: args.CGREvent,
-				Opts:     args.Opts,
-			},
-			UsageID: originID, // same ID should be accepted by first group since the previous resource should be expired
-			Units:   1,
+			CGREvent: args.CGREvent,
+			UsageID:  originID, // same ID should be accepted by first group since the previous resource should be expired
+			Units:    1,
 		}
 		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
@@ -2660,7 +2620,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 		}
 	}
 	if args.ProcessThresholds {
-		_, err := sS.processThreshold(args.CGREvent, args.ThresholdIDs, args.Opts, true)
+		_, err := sS.processThreshold(args.CGREvent, args.ThresholdIDs, true)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2670,7 +2630,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 		}
 	}
 	if args.ProcessStats {
-		_, err := sS.processStats(args.CGREvent, args.StatIDs, args.Opts, false)
+		_, err := sS.processStats(args.CGREvent, args.StatIDs, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2688,7 +2648,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 
 // BiRPCv1ProcessCDR sends the CDR to CDRs
 func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
-	cgrEv *utils.CGREventWithOpts, rply *string) (err error) {
+	cgrEv *utils.CGREvent, rply *string) (err error) {
 	if cgrEv.ID == utils.EmptyString {
 		cgrEv.ID = utils.GenUUID()
 	}
@@ -2727,8 +2687,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 	thds bool, thresholdIDs []string, stats bool, statIDs []string, resrc, acnts,
 	routes, routesIgnoreErrs, routesEventCost bool, cgrEv *utils.CGREvent,
-	routePaginator utils.Paginator, forceDuration bool,
-	opts map[string]interface{}) (args *V1ProcessMessageArgs) {
+	routePaginator utils.Paginator, forceDuration bool) (args *V1ProcessMessageArgs) {
 	args = &V1ProcessMessageArgs{
 		AllocateResources:  resrc,
 		Debit:              acnts,
@@ -2737,11 +2696,8 @@ func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 		ProcessStats:       stats,
 		RoutesIgnoreErrors: routesIgnoreErrs,
 		GetRoutes:          routes,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     opts,
-		},
-		ForceDuration: forceDuration,
+		CGREvent:           cgrEv,
+		ForceDuration:      forceDuration,
 	}
 	if routesEventCost {
 		args.RoutesMaxCost = utils.MetaRoutesEventCost
@@ -2773,7 +2729,7 @@ type V1ProcessMessageArgs struct {
 	AttributeIDs       []string
 	ThresholdIDs       []string
 	StatIDs            []string
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 	utils.Paginator
 }
 
@@ -2895,10 +2851,9 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 	originID := me.GetStringIgnoreErrors(utils.OriginID)
 
 	if args.GetAttributes {
-		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, args.Opts, false)
+		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, false)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent
-			args.Opts = rplyAttr.Opts
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2912,12 +2867,9 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := &utils.ArgRSv1ResourceUsage{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: args.CGREvent,
-				Opts:     args.Opts,
-			},
-			UsageID: originID,
-			Units:   1,
+			CGREvent: args.CGREvent,
+			UsageID:  originID,
+			Units:    1,
 		}
 		var allocMessage string
 		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
@@ -2928,7 +2880,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 	}
 	if args.GetRoutes {
 		routesReply, err := sS.getRoutes(args.CGREvent.Clone(), args.Paginator,
-			args.RoutesIgnoreErrors, args.RoutesMaxCost, args.Opts, false)
+			args.RoutesIgnoreErrors, args.RoutesMaxCost, false)
 		if err != nil {
 			return err
 		}
@@ -2938,16 +2890,13 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 	}
 	if args.Debit {
 		var maxUsage time.Duration
-		if maxUsage, err = sS.chargeEvent(&utils.CGREventWithOpts{
-			CGREvent: args.CGREvent,
-			Opts:     args.Opts,
-		}, args.ForceDuration); err != nil {
+		if maxUsage, err = sS.chargeEvent(args.CGREvent, args.ForceDuration); err != nil {
 			return err
 		}
 		rply.MaxUsage = &maxUsage
 	}
 	if args.ProcessThresholds {
-		tIDs, err := sS.processThreshold(args.CGREvent, args.ThresholdIDs, args.Opts, true)
+		tIDs, err := sS.processThreshold(args.CGREvent, args.ThresholdIDs, true)
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
@@ -2957,7 +2906,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		rply.ThresholdIDs = &tIDs
 	}
 	if args.ProcessStats {
-		sIDs, err := sS.processStats(args.CGREvent, args.StatIDs, args.Opts, false)
+		sIDs, err := sS.processStats(args.CGREvent, args.StatIDs, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2977,7 +2926,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 // V1ProcessEventArgs are the options passed to ProcessEvent API
 type V1ProcessEventArgs struct {
 	Flags []string
-	*utils.CGREventWithOpts
+	*utils.CGREvent
 	utils.Paginator
 }
 
@@ -3107,25 +3056,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	argsFlagsWithParams := utils.FlagsWithParamsFromSlice(args.Flags)
 
 	blockError := argsFlagsWithParams.GetBool(utils.MetaBlockerError)
-	events := map[string]*utils.CGREventWithOpts{
-		utils.MetaRaw: {
-			CGREvent: args.CGREvent,
-			Opts:     args.Opts,
-		},
+	events := map[string]*utils.CGREvent{
+		utils.MetaRaw: args.CGREvent,
 	}
 	if argsFlagsWithParams.GetBool(utils.MetaChargers) {
 		var chrgrs []*engine.ChrgSProcessEventReply
-		if chrgrs, err = sS.processChargerS(&utils.CGREventWithOpts{
-			CGREvent: args.CGREvent,
-			Opts:     args.Opts,
-		}); err != nil {
+		if chrgrs, err = sS.processChargerS(args.CGREvent); err != nil {
 			return
 		}
 		for _, chrgr := range chrgrs {
-			events[utils.IfaceAsString(chrgr.CGREvent.Event[utils.RunID])] = &utils.CGREventWithOpts{
-				CGREvent: chrgr.CGREvent,
-				Opts:     chrgr.Opts,
-			}
+			events[utils.IfaceAsString(chrgr.CGREvent.Event[utils.RunID])] = chrgr.CGREvent
 		}
 	}
 
@@ -3135,20 +3075,17 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		rply.Attributes = make(map[string]*engine.AttrSProcessEventReply)
 
 		for runID, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaAttributes].Has(utils.MetaDerivedReply)) {
-			rplyAttr, err := sS.processAttributes(cgrEv.CGREvent, attrIDs, cgrEv.Opts, false)
+			rplyAttr, err := sS.processAttributes(cgrEv, attrIDs, false)
 			if err != nil {
 				if err.Error() != utils.ErrNotFound.Error() {
 					return utils.NewErrAttributeS(err)
 				}
 			} else {
-				cgrEv.CGREvent = rplyAttr.CGREvent
-				cgrEv.Opts = rplyAttr.Opts
+				cgrEv = rplyAttr.CGREvent
 				rply.Attributes[runID] = &rplyAttr
 			}
 		}
-		// update the args
-		args.Opts = events[utils.MetaRaw].Opts
-		args.CGREvent = events[utils.MetaRaw].CGREvent
+		args.CGREvent = events[utils.MetaRaw]
 	}
 
 	// get routes if required
@@ -3162,7 +3099,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			maxCost = utils.MetaRoutesEventCost
 		}
 		for runID, cgrEv := range getDerivedEvents(events, flags.Has(utils.MetaDerivedReply)) {
-			routesReply, err := sS.getRoutes(cgrEv.CGREvent.Clone(), args.Paginator, ignoreErrors, maxCost, cgrEv.Opts, false)
+			routesReply, err := sS.getRoutes(cgrEv.Clone(), args.Paginator, ignoreErrors, maxCost, false)
 			if err != nil {
 				return err
 			}
@@ -3177,14 +3114,14 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		rply.ThresholdIDs = make(map[string][]string)
 		thIDs := argsFlagsWithParams.ParamsSlice(utils.MetaThresholds, utils.MetaIDs)
 		for runID, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaThresholds].Has(utils.MetaDerivedReply)) {
-			tIDs, err := sS.processThreshold(cgrEv.CGREvent, thIDs, args.Opts, true)
+			tIDs, err := sS.processThreshold(cgrEv, thIDs, true)
 			if err != nil && err.Error() != utils.ErrNotFound.Error() {
 				if blockError {
 					return utils.NewErrThresholdS(err)
 				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event %+v for RunID <%s>  with ThresholdS.",
-						utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
+						utils.SessionS, err.Error(), cgrEv, runID))
 				withErrors = true
 			}
 			rply.ThresholdIDs[runID] = tIDs
@@ -3196,7 +3133,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		rply.StatQueueIDs = make(map[string][]string)
 		stIDs := argsFlagsWithParams.ParamsSlice(utils.MetaStats, utils.MetaIDs)
 		for runID, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaStats].Has(utils.MetaDerivedReply)) {
-			sIDs, err := sS.processStats(cgrEv.CGREvent, stIDs, cgrEv.Opts, true)
+			sIDs, err := sS.processStats(cgrEv, stIDs, true)
 			if err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				if blockError {
@@ -3204,7 +3141,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event %+v for RunID <%s> with StatS.",
-						utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
+						utils.SessionS, err.Error(), cgrEv, runID))
 				withErrors = true
 			}
 			rply.StatQueueIDs[runID] = sIDs
@@ -3213,7 +3150,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 
 	if argsFlagsWithParams.GetBool(utils.MetaSTIRAuthenticate) {
 		for _, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaSTIRAuthenticate].Has(utils.MetaDerivedReply)) {
-			ev := engine.MapEvent(cgrEv.CGREvent.Event)
+			ev := engine.MapEvent(cgrEv.Event)
 			opts := engine.MapEvent(cgrEv.Opts)
 			attest := sS.cgrCfg.SessionSCfg().STIRCfg.AllowedAttest
 			if uattest := opts.GetStringIgnoreErrors(utils.OptsStirATest); uattest != utils.EmptyString {
@@ -3235,7 +3172,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	} else if argsFlagsWithParams.GetBool(utils.MetaSTIRInitiate) {
 		rply.STIRIdentity = make(map[string]string)
 		for runID, cgrEv := range getDerivedEvents(events, argsFlagsWithParams[utils.MetaSTIRInitiate].Has(utils.MetaDerivedReply)) {
-			ev := engine.MapEvent(cgrEv.CGREvent.Event)
+			ev := engine.MapEvent(cgrEv.Event)
 			opts := engine.MapEvent(cgrEv.Opts)
 			attest := sS.cgrCfg.SessionSCfg().STIRCfg.DefaultAttest
 			if uattest := opts.GetStringIgnoreErrors(utils.OptsStirATest); uattest != utils.EmptyString {
@@ -3259,7 +3196,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			pubkeyPath := utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.OptsStirPublicKeyPath), sS.cgrCfg.SessionSCfg().STIRCfg.PublicKeyPath)
 			prvkeyPath := utils.FirstNonEmpty(opts.GetStringIgnoreErrors(utils.OptsStirPrivateKeyPath), sS.cgrCfg.SessionSCfg().STIRCfg.PrivateKeyPath)
 
-			payload := utils.NewPASSporTPayload(attest, cgrEv.CGREvent.ID, *dest, *orig)
+			payload := utils.NewPASSporTPayload(attest, cgrEv.ID, *dest, *orig)
 			header := utils.NewPASSporTHeader(pubkeyPath)
 			if rply.STIRIdentity[runID], err = NewSTIRIdentity(header, payload, prvkeyPath, sS.cgrCfg.GeneralCfg().ReplyTimeout); err != nil {
 				return utils.NewSTIRError(err.Error())
@@ -3275,18 +3212,15 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		rply.ResourceAllocation = make(map[string]string)
 		if resOpt := argsFlagsWithParams[utils.MetaResources]; len(resOpt) != 0 {
 			for runID, cgrEv := range getDerivedEvents(events, resOpt.Has(utils.MetaDerivedReply)) {
-				originID := engine.MapEvent(cgrEv.CGREvent.Event).GetStringIgnoreErrors(utils.OriginID)
+				originID := engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.OriginID)
 				if originID == "" {
 					return utils.NewErrMandatoryIeMissing(utils.OriginID)
 				}
 
 				attrRU := &utils.ArgRSv1ResourceUsage{
-					CGREventWithOpts: &utils.CGREventWithOpts{
-						CGREvent: cgrEv.CGREvent,
-						Opts:     cgrEv.Opts,
-					},
-					UsageID: originID,
-					Units:   1,
+					CGREvent: cgrEv,
+					UsageID:  originID,
+					Units:    1,
 				}
 				attrRU.SetCloneable(true)
 				var resMessage string
@@ -3301,7 +3235,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						}
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> error: <%s> processing event %+v for RunID <%s>  with ResourceS.",
-								utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
+								utils.SessionS, err.Error(), cgrEv, runID))
 						withErrors = true
 					}
 				case resOpt.Has(utils.MetaAllocate):
@@ -3312,7 +3246,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						}
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> error: <%s> processing event %+v for RunID <%s>  with ResourceS.",
-								utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
+								utils.SessionS, err.Error(), cgrEv, runID))
 						withErrors = true
 					}
 				case resOpt.Has(utils.MetaRelease):
@@ -3323,7 +3257,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						}
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> error: <%s> processing event %+v for RunID <%s>  with ResourceS.",
-								utils.SessionS, err.Error(), cgrEv.CGREvent, runID))
+								utils.SessionS, err.Error(), cgrEv, runID))
 						withErrors = true
 					}
 				}
@@ -3341,7 +3275,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			if ralsOpts.Has(utils.MetaCost) {
 				rply.Cost = make(map[string]float64)
 				for runID, cgrEv := range getDerivedEvents(events, ralsOpts.Has(utils.MetaDerivedReply)) {
-					ev := engine.MapEvent(cgrEv.CGREvent.Event)
+					ev := engine.MapEvent(cgrEv.Event)
 					//compose the CallDescriptor with Args
 					startTime := ev.GetTimeIgnoreErrors(utils.AnswerTime,
 						sS.cgrCfg.GeneralCfg().DefaultTimezone)
@@ -3359,10 +3293,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					}
 
 					cd := &engine.CallDescriptor{
-						CgrID:         cgrEv.CGREvent.ID,
+						CgrID:         cgrEv.ID,
 						RunID:         ev.GetStringIgnoreErrors(utils.RunID),
 						ToR:           ev.GetStringIgnoreErrors(utils.ToR),
-						Tenant:        cgrEv.CGREvent.Tenant,
+						Tenant:        cgrEv.Tenant,
 						Category:      category,
 						Subject:       subject,
 						Account:       ev.GetStringIgnoreErrors(utils.AccountField),
@@ -3390,10 +3324,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			//check for auth session
 			case ralsOpts.Has(utils.MetaAuthorize):
 				var sRunsMaxUsage map[string]time.Duration
-				if sRunsMaxUsage, err = sS.authEvent(&utils.CGREventWithOpts{
-					CGREvent: args.CGREvent,
-					Opts:     args.Opts,
-				}, ralsOpts.Has(utils.MetaFD)); err != nil {
+				if sRunsMaxUsage, err = sS.authEvent(args.CGREvent, ralsOpts.Has(utils.MetaFD)); err != nil {
 					return err
 				}
 				rply.MaxUsage = getDerivedMaxUsage(sRunsMaxUsage, ralsOpts.Has(utils.MetaDerivedReply))
@@ -3404,10 +3335,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						return utils.NewErrRALs(err)
 					}
 				}
-				s, err := sS.initSession(&utils.CGREventWithOpts{
-					CGREvent: args.CGREvent,
-					Opts:     args.Opts,
-				}, sS.biJClntID(clnt), originID, dbtItvl, false,
+				s, err := sS.initSession(args.CGREvent, sS.biJClntID(clnt), originID, dbtItvl, false,
 					ralsOpts.Has(utils.MetaFD))
 				if err != nil {
 					return err
@@ -3436,10 +3364,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					ev.GetStringIgnoreErrors(utils.OriginID),
 					ev.GetStringIgnoreErrors(utils.OriginHost))
 				if s == nil {
-					if s, err = sS.initSession(&utils.CGREventWithOpts{
-						CGREvent: args.CGREvent,
-						Opts:     args.Opts,
-					}, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
+					if s, err = sS.initSession(args.CGREvent, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
 						dbtItvl, false, ralsOpts.Has(utils.MetaFD)); err != nil {
 						return err
 					}
@@ -3461,10 +3386,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					ev.GetStringIgnoreErrors(utils.OriginID),
 					ev.GetStringIgnoreErrors(utils.OriginHost))
 				if s == nil {
-					if s, err = sS.initSession(&utils.CGREventWithOpts{
-						CGREvent: args.CGREvent,
-						Opts:     args.Opts,
-					}, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
+					if s, err = sS.initSession(args.CGREvent, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
 						dbtItvl, false, ralsOpts.Has(utils.MetaFD)); err != nil {
 						return err
 					}
@@ -3493,7 +3415,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with CDRs.",
-						utils.SessionS, err.Error(), cgrEv.CGREvent))
+						utils.SessionS, err.Error(), cgrEv))
 				withErrors = true
 			}
 		}
@@ -3549,10 +3471,9 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 	// check for *attribute
 	if argsFlagsWithParams.Has(utils.MetaAttributes) {
 		rplyAttr, err := sS.processAttributes(args.CGREvent,
-			argsFlagsWithParams.ParamsSlice(utils.MetaAttributes, utils.MetaIDs), args.Opts, false)
+			argsFlagsWithParams.ParamsSlice(utils.MetaAttributes, utils.MetaIDs), false)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent
-			args.Opts = rplyAttr.Opts
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -3709,7 +3630,7 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(clnt rpcclient.ClientConnector,
 	return
 }
 
-func (sS *SessionS) processCDR(cgrEv *utils.CGREventWithOpts, flags []string, rply *string, clnb bool) (err error) {
+func (sS *SessionS) processCDR(cgrEv *utils.CGREvent, flags []string, rply *string, clnb bool) (err error) {
 
 	ev := engine.MapEvent(cgrEv.Event)
 	cgrID := GetSetCGRID(ev)
@@ -3728,8 +3649,8 @@ func (sS *SessionS) processCDR(cgrEv *utils.CGREventWithOpts, flags []string, rp
 		s = sIface.(*Session)
 	} else { // no cached session, CDR will be handled by CDRs
 		argsProc := &engine.ArgV1ProcessEvent{
-			Flags:            flags,
-			CGREventWithOpts: *cgrEv,
+			Flags:    flags,
+			CGREvent: *cgrEv,
 		}
 		argsProc.SetCloneable(clnb)
 		return sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
@@ -3739,7 +3660,7 @@ func (sS *SessionS) processCDR(cgrEv *utils.CGREventWithOpts, flags []string, rp
 	// Use previously stored Session to generate CDRs
 	s.updateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
 	// create one CGREvent for each session run
-	var cgrEvs []*utils.CGREventWithOpts
+	var cgrEvs []*utils.CGREvent
 	if cgrEvs, err = s.asCGREvents(); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -3748,7 +3669,7 @@ func (sS *SessionS) processCDR(cgrEv *utils.CGREventWithOpts, flags []string, rp
 		argsProc := &engine.ArgV1ProcessEvent{
 			Flags: []string{fmt.Sprintf("%s:false", utils.MetaChargers),
 				fmt.Sprintf("%s:false", utils.MetaAttributes)},
-			CGREventWithOpts: *cgrEv,
+			CGREvent: *cgrEv,
 		}
 		argsProc.SetCloneable(clnb)
 		if mp := engine.MapEvent(cgrEv.Event); unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
@@ -3770,15 +3691,12 @@ func (sS *SessionS) processCDR(cgrEv *utils.CGREventWithOpts, flags []string, rp
 }
 
 // processThreshold will receive the event and send it to ThresholdS to be processed
-func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, thIDs []string, opts map[string]interface{}, clnb bool) (tIDs []string, err error) {
+func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, thIDs []string, clnb bool) (tIDs []string, err error) {
 	if len(sS.cgrCfg.SessionSCfg().ThreshSConns) == 0 {
 		return tIDs, utils.NewErrNotConnected(utils.ThresholdS)
 	}
 	thEv := &engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     opts,
-		},
+		CGREvent: cgrEv,
 	}
 	// check if we have thresholdIDs
 	if len(thIDs) != 0 {
@@ -3791,16 +3709,13 @@ func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, thIDs []string, opts
 }
 
 // processStats will receive the event and send it to StatS to be processed
-func (sS *SessionS) processStats(cgrEv *utils.CGREvent, stsIDs []string, opts map[string]interface{}, clnb bool) (sIDs []string, err error) {
+func (sS *SessionS) processStats(cgrEv *utils.CGREvent, stsIDs []string, clnb bool) (sIDs []string, err error) {
 	if len(sS.cgrCfg.SessionSCfg().StatSConns) == 0 {
 		return sIDs, utils.NewErrNotConnected(utils.StatS)
 	}
 
 	statArgs := &engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     opts,
-		},
+		CGREvent: cgrEv,
 	}
 	// check in case we have StatIDs inside flags
 	if len(stsIDs) != 0 {
@@ -3814,7 +3729,7 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, stsIDs []string, opts ma
 
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
 func (sS *SessionS) getRoutes(cgrEv *utils.CGREvent, pag utils.Paginator, ignoreErrors bool,
-	maxCost string, opts map[string]interface{}, clnb bool) (routesReply engine.SortedRoutes, err error) {
+	maxCost string, clnb bool) (routesReply engine.SortedRoutes, err error) {
 	if len(sS.cgrCfg.SessionSCfg().RouteSConns) == 0 {
 		return routesReply, utils.NewErrNotConnected(utils.RouteS)
 	}
@@ -3822,10 +3737,7 @@ func (sS *SessionS) getRoutes(cgrEv *utils.CGREvent, pag utils.Paginator, ignore
 		cgrEv.Event[utils.Usage] = acd
 	}
 	sArgs := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     opts,
-		},
+		CGREvent:     cgrEv,
 		Paginator:    pag,
 		IgnoreErrors: ignoreErrors,
 		MaxCost:      maxCost,
@@ -3840,28 +3752,25 @@ func (sS *SessionS) getRoutes(cgrEv *utils.CGREvent, pag utils.Paginator, ignore
 
 // processAttributes will receive the event and send it to AttributeS to be processed
 func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, attrIDs []string,
-	opts engine.MapEvent, clnb bool) (rplyEv engine.AttrSProcessEventReply, err error) {
+	clnb bool) (rplyEv engine.AttrSProcessEventReply, err error) {
 	if len(sS.cgrCfg.SessionSCfg().AttrSConns) == 0 {
 		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
 	}
-	if opts == nil {
-		opts = make(engine.MapEvent)
+	if cgrEv.Opts == nil {
+		cgrEv.Opts = make(engine.MapEvent)
 	}
-	opts[utils.Subsys] = utils.MetaSessionS
+	cgrEv.Opts[utils.Subsys] = utils.MetaSessionS
 	var processRuns *int
-	if val, has := opts[utils.OptsAttributesProcessRuns]; has {
+	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
 		if v, err := utils.IfaceAsTInt64(val); err == nil {
 			processRuns = utils.IntPointer(int(v))
 		}
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
-			opts.GetStringIgnoreErrors(utils.OptsContext),
+			utils.IfaceAsString(cgrEv.Opts[utils.OptsContext]),
 			utils.MetaSessionS)),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     opts,
-		},
+		CGREvent:     cgrEv,
 		AttributeIDs: attrIDs,
 		ProcessRuns:  processRuns,
 	}
@@ -3880,14 +3789,12 @@ func (sS *SessionS) BiRPCV1GetMaxUsage(clnt rpcclient.ClientConnector,
 		clnt,
 		&V1AuthorizeArgs{
 			GetMaxUsage: true,
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: utils.FirstNonEmpty(
-						ev.GetStringIgnoreErrors(utils.Tenant),
-						sS.cgrCfg.GeneralCfg().DefaultTenant),
-					ID:    utils.UUIDSha1Prefix(),
-					Event: ev,
-				},
+			CGREvent: &utils.CGREvent{
+				Tenant: utils.FirstNonEmpty(
+					ev.GetStringIgnoreErrors(utils.Tenant),
+					sS.cgrCfg.GeneralCfg().DefaultTenant),
+				ID:    utils.UUIDSha1Prefix(),
+				Event: ev,
 			},
 		},
 		rply); err != nil {
@@ -3907,14 +3814,12 @@ func (sS *SessionS) BiRPCV1InitiateSession(clnt rpcclient.ClientConnector,
 		clnt,
 		&V1InitSessionArgs{
 			InitSession: true,
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: utils.FirstNonEmpty(
-						ev.GetStringIgnoreErrors(utils.Tenant),
-						sS.cgrCfg.GeneralCfg().DefaultTenant),
-					ID:    utils.UUIDSha1Prefix(),
-					Event: ev,
-				},
+			CGREvent: &utils.CGREvent{
+				Tenant: utils.FirstNonEmpty(
+					ev.GetStringIgnoreErrors(utils.Tenant),
+					sS.cgrCfg.GeneralCfg().DefaultTenant),
+				ID:    utils.UUIDSha1Prefix(),
+				Event: ev,
 			},
 		},
 		rply); err != nil {
@@ -3934,14 +3839,12 @@ func (sS *SessionS) BiRPCV1UpdateSession(clnt rpcclient.ClientConnector,
 		clnt,
 		&V1UpdateSessionArgs{
 			UpdateSession: true,
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: utils.FirstNonEmpty(
-						ev.GetStringIgnoreErrors(utils.Tenant),
-						sS.cgrCfg.GeneralCfg().DefaultTenant),
-					ID:    utils.UUIDSha1Prefix(),
-					Event: ev,
-				},
+			CGREvent: &utils.CGREvent{
+				Tenant: utils.FirstNonEmpty(
+					ev.GetStringIgnoreErrors(utils.Tenant),
+					sS.cgrCfg.GeneralCfg().DefaultTenant),
+				ID:    utils.UUIDSha1Prefix(),
+				Event: ev,
 			},
 		},
 		rply); err != nil {
@@ -3960,14 +3863,12 @@ func (sS *SessionS) BiRPCV1TerminateSession(clnt rpcclient.ClientConnector,
 		clnt,
 		&V1TerminateSessionArgs{
 			TerminateSession: true,
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: utils.FirstNonEmpty(
-						ev.GetStringIgnoreErrors(utils.Tenant),
-						sS.cgrCfg.GeneralCfg().DefaultTenant),
-					ID:    utils.UUIDSha1Prefix(),
-					Event: ev,
-				},
+			CGREvent: &utils.CGREvent{
+				Tenant: utils.FirstNonEmpty(
+					ev.GetStringIgnoreErrors(utils.Tenant),
+					sS.cgrCfg.GeneralCfg().DefaultTenant),
+				ID:    utils.UUIDSha1Prefix(),
+				Event: ev,
 			},
 		},
 		rply)
@@ -3980,13 +3881,12 @@ func (sS *SessionS) BiRPCV1ProcessCDR(clnt rpcclient.ClientConnector,
 	ev engine.MapEvent, rply *string) (err error) {
 	return sS.BiRPCv1ProcessCDR(
 		clnt,
-		&utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(
-					ev.GetStringIgnoreErrors(utils.Tenant),
-					sS.cgrCfg.GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Event: ev}},
+		&utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(
+				ev.GetStringIgnoreErrors(utils.Tenant),
+				sS.cgrCfg.GeneralCfg().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Event: ev},
 		rply)
 }
 

@@ -25,14 +25,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREventWithOpts, reply *string) (err error) {
+func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ThresholdSv1Ping, args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+		if err = dS.authorize(utils.ThresholdSv1Ping, args.Tenant,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -49,7 +49,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.Thre
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREventWithOpts, utils.MetaThresholds, utils.ThresholdSv1GetThresholdsForEvent, args, t)
+	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, utils.ThresholdSv1GetThresholdsForEvent, args, t)
 }
 
 func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ThresholdsArgsProcessEvent,
@@ -62,7 +62,7 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ThresholdsArg
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREventWithOpts, utils.MetaThresholds, utils.ThresholdSv1ProcessEvent, args, tIDs)
+	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, utils.ThresholdSv1ProcessEvent, args, tIDs)
 }
 
 func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithOpts, tIDs *[]string) (err error) {
@@ -76,11 +76,9 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithO
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
 	}, utils.MetaThresholds, utils.ThresholdSv1GetThresholdIDs, args, tIDs)
 }
 
@@ -95,11 +93,9 @@ func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithOp
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: tnt,
-			ID:     args.ID,
-		},
-		Opts: args.Opts,
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		ID:     args.ID,
+		Opts:   args.Opts,
 	}, utils.MetaThresholds, utils.ThresholdSv1GetThreshold, args, th)
 }

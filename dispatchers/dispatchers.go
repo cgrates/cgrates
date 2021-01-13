@@ -62,11 +62,8 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	if err = dS.connMgr.Call(dS.cfg.DispatcherSCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,
 		&engine.AttrArgsProcessEvent{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: ev,
-				Opts:     map[string]interface{}{utils.Subsys: utils.MetaDispatchers},
-			},
-			Context: utils.StringPointer(utils.MetaAuth),
+			CGREvent: ev,
+			Context:  utils.StringPointer(utils.MetaAuth),
 		}, reply); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			err = utils.ErrUnknownApiKey
@@ -87,6 +84,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evT
 		Event: map[string]interface{}{
 			utils.APIKey: apiKey,
 		},
+		Opts: map[string]interface{}{utils.Subsys: utils.MetaDispatchers},
 	}
 	var rplyEv engine.AttrSProcessEventReply
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
@@ -104,7 +102,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evT
 
 // dispatcherForEvent returns a dispatcher instance configured for specific event
 // or utils.ErrNotFound if none present
-func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGREventWithOpts,
+func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGREvent,
 	subsys string) (dPrlf *engine.DispatcherProfile, err error) {
 	// find out the matching profiles
 	anyIdxPrfx := utils.ConcatenatedKey(tnt, utils.MetaAny)
@@ -113,7 +111,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 		idxKeyPrfx = utils.ConcatenatedKey(tnt, subsys)
 	}
 	evNm := utils.MapStorage{
-		utils.MetaReq:  ev.CGREvent.Event,
+		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.Opts,
 	}
 	prflIDs, err := engine.MatchingItemIDsForEvent(evNm,
@@ -174,7 +172,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 }
 
 // Dispatch is the method forwarding the request towards the right connection
-func (dS *DispatcherService) Dispatch(ev *utils.CGREventWithOpts, subsys string,
+func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {
@@ -199,7 +197,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREventWithOpts, subsys string,
 	return d.Dispatch(utils.IfaceAsString(ev.Opts[utils.OptsRouteID]), subsys, serviceMethod, args, reply)
 }
 
-func (dS *DispatcherService) V1GetProfileForEvent(ev *utils.CGREventWithOpts,
+func (dS *DispatcherService) V1GetProfileForEvent(ev *utils.CGREvent,
 	dPfl *engine.DispatcherProfile) (err error) {
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {

@@ -48,7 +48,7 @@ func (ldrSv1 *LoaderSv1) Remove(args *loaders.ArgsProcessFolder,
 	return ldrSv1.ldrS.V1Remove(args, rply)
 }
 
-func (rsv1 *LoaderSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (rsv1 *LoaderSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

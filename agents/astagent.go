@@ -60,7 +60,7 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 		cgrCfg:      cgrCfg,
 		astConnIdx:  astConnIdx,
 		connMgr:     connMgr,
-		eventsCache: make(map[string]*utils.CGREventWithOpts),
+		eventsCache: make(map[string]*utils.CGREvent),
 	}
 	return sma, nil
 }
@@ -73,8 +73,8 @@ type AsteriskAgent struct {
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
-	eventsCache map[string]*utils.CGREventWithOpts // used to gather information about events during various phases
-	evCacheMux  sync.RWMutex                       // Protect eventsCache
+	eventsCache map[string]*utils.CGREvent // used to gather information about events during various phases
+	evCacheMux  sync.RWMutex               // Protect eventsCache
 }
 
 func (sma *AsteriskAgent) connectAsterisk(stopChan <-chan struct{}) (err error) {
@@ -228,10 +228,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	}
 	// Done with processing event, cache it for later use
 	sma.evCacheMux.Lock()
-	sma.eventsCache[ev.ChannelID()] = &utils.CGREventWithOpts{
-		CGREvent: authArgs.CGREvent,
-		Opts:     authArgs.Opts,
-	}
+	sma.eventsCache[ev.ChannelID()] = authArgs.CGREvent
 	sma.evCacheMux.Unlock()
 }
 
@@ -316,10 +313,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
 		if err := sma.connMgr.Call(sma.cgrCfg.AsteriskAgentCfg().SessionSConns, sma,
 			utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithOpts{
-				CGREvent: cgrEvDisp.CGREvent,
-				Opts:     cgrEvDisp.Opts,
-			}, &reply); err != nil {
+			cgrEvDisp, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",
 				utils.AsteriskAgent, err.Error(), chID))
 		}

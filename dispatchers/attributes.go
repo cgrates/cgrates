@@ -24,14 +24,14 @@ import (
 )
 
 // AttributeSv1Ping interrogates AttributeS server responsible to process the event
-func (dS *DispatcherService) AttributeSv1Ping(args *utils.CGREventWithOpts,
+func (dS *DispatcherService) AttributeSv1Ping(args *utils.CGREvent,
 	reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AttributeSv1Ping, tnt,
@@ -55,7 +55,7 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *engine.AttrA
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREventWithOpts, utils.MetaAttributes, utils.AttributeSv1GetAttributeForEvent, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaAttributes, utils.AttributeSv1GetAttributeForEvent, args, reply)
 }
 
 // AttributeSv1ProcessEvent .
@@ -72,5 +72,5 @@ func (dS *DispatcherService) AttributeSv1ProcessEvent(args *engine.AttrArgsProce
 		}
 
 	}
-	return dS.Dispatch(args.CGREventWithOpts, utils.MetaAttributes, utils.AttributeSv1ProcessEvent, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaAttributes, utils.AttributeSv1ProcessEvent, args, reply)
 }

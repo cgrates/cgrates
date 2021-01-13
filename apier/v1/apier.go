@@ -2026,14 +2026,11 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 	var rplyCdr map[string]map[string]interface{}
 	for _, cdr := range cdrs {
 		argCdr := &utils.CGREventWithEeIDs{
-			EeIDs: args.ExporterIDs,
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: cdr.AsCGREvent(),
-				Opts:     make(map[string]interface{}),
-			},
+			EeIDs:    args.ExporterIDs,
+			CGREvent: cdr.AsCGREvent(),
 		}
 		if args.Verbose {
-			argCdr.CGREventWithOpts.Opts[utils.OptsEEsVerbose] = struct{}{}
+			argCdr.CGREvent.Opts[utils.OptsEEsVerbose] = struct{}{}
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().EEsConns, nil, utils.EeSv1ProcessEvent,
 			argCdr, &rplyCdr); err != nil {

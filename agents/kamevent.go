@@ -189,6 +189,7 @@ func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 		ID:    utils.UUIDSha1Prefix(),
 		Time:  &sTime,
 		Event: kev.AsMapStringInterface(),
+		Opts:  kev.GetOptions(),
 	}
 	return cgrEv, nil
 }
@@ -205,10 +206,7 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 		return
 	}
 	args = &sessions.V1AuthorizeArgs{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     kev.GetOptions(),
-		},
+		CGREvent: cgrEv,
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
@@ -263,10 +261,8 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		return
 	}
 	args = &sessions.V1InitSessionArgs{ // defaults
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     kev.GetOptions(),
-		},
+
+		CGREvent: cgrEv,
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
@@ -284,10 +280,8 @@ func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs)
 		return
 	}
 	args = &sessions.V1ProcessMessageArgs{ // defaults
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     kev.GetOptions(),
-		},
+
+		CGREvent: cgrEv,
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
@@ -298,14 +292,10 @@ func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs)
 }
 
 // V1ProcessCDRArgs returns the arguments used in SessionSv1.ProcessCDR
-func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREventWithOpts) {
-	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	if err != nil {
+func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREvent) {
+	var err error
+	if args, err = kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 		return
-	}
-	args = &utils.CGREventWithOpts{ // defaults
-		CGREvent: cgrEv,
-		Opts:     kev.GetOptions(),
 	}
 	return
 }
@@ -348,7 +338,7 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessa
 }
 
 // AsKamProcessCDRReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
-func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *utils.CGREventWithOpts,
+func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *utils.CGREvent,
 	rply *string, rplyErr error) (kar *KamReply, err error) {
 	evName := CGR_PROCESS_CDR
 	if kamRouReply, has := kev[KamReplyRoute]; has {
@@ -387,10 +377,7 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	}
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: cgrEv,
-			Opts:     kev.GetOptions(),
-		},
+		CGREvent:         cgrEv,
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {

@@ -43,7 +43,7 @@ func (self *GuardianSv1) RemoteUnlock(refID *dispatchers.AttrRemoteUnlockWithOpt
 }
 
 // Ping return pong if the service is active
-func (self *GuardianSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (self *GuardianSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

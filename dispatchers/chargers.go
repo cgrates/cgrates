@@ -23,13 +23,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREventWithOpts, reply *string) (err error) {
+func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
-		args = new(utils.CGREventWithOpts)
+		args = new(utils.CGREvent)
 	}
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ChargerSv1Ping, tnt,
@@ -40,30 +40,30 @@ func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREventWithOpts, reply 
 	return dS.Dispatch(args, utils.MetaChargers, utils.ChargerSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventWithOpts,
+func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREvent,
 	reply *engine.ChargerProfiles) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ChargerSv1GetChargersForEvent, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(args, utils.MetaChargers, utils.ChargerSv1GetChargersForEvent, args, reply)
 }
 
-func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREventWithOpts,
+func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREvent,
 	reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ChargerSv1ProcessEvent, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}

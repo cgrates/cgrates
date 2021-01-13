@@ -86,14 +86,12 @@ func (aS *ActionS) schedInit() {
 	if aS.cfg.ActionSCfg().Tenants != nil {
 		tnts = *aS.cfg.ActionSCfg().Tenants
 	}
-	cgrEvs := make([]*utils.CGREventWithOpts, len(tnts))
+	cgrEvs := make([]*utils.CGREvent, len(tnts))
 	for i, tnt := range tnts {
-		cgrEvs[i] = &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: tnt,
-				ID:     utils.GenUUID(),
-				Time:   utils.TimePointer(time.Now()),
-			},
+		cgrEvs[i] = &utils.CGREvent{
+			Tenant: tnt,
+			ID:     utils.GenUUID(),
+			Time:   utils.TimePointer(time.Now()),
 			Opts: map[string]interface{}{
 				utils.EventType: utils.SchedulerInit,
 				utils.NodeID:    aS.cfg.GeneralCfg().NodeID,
@@ -104,7 +102,7 @@ func (aS *ActionS) schedInit() {
 }
 
 // scheduleActions will set up cron and load the matching data
-func (aS *ActionS) scheduleActions(cgrEvs []*utils.CGREventWithOpts, aPrflIDs []string, crnReset bool) (err error) {
+func (aS *ActionS) scheduleActions(cgrEvs []*utils.CGREvent, aPrflIDs []string, crnReset bool) (err error) {
 	aS.crnLk.Lock() // make sure we don't have parallel processes running  setu
 	defer aS.crnLk.Unlock()
 	crn := aS.crn
@@ -152,9 +150,9 @@ func (aS *ActionS) scheduleActions(cgrEvs []*utils.CGREventWithOpts, aPrflIDs []
 
 // matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
 func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
-	cgrEv *utils.CGREventWithOpts, aPrflIDs []string) (aPfs engine.ActionProfiles, err error) {
+	cgrEv *utils.CGREvent, aPrflIDs []string) (aPfs engine.ActionProfiles, err error) {
 	evNm := utils.MapStorage{
-		utils.MetaReq:  cgrEv.CGREvent.Event,
+		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.Opts,
 	}
 	if len(aPrflIDs) == 0 {
@@ -204,7 +202,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
 }
 
 // scheduledActions is responsible for scheduling the action profiles matching cgrEv
-func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREventWithOpts, aPrflIDs []string,
+func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
 	forceASAP bool) (schedActs []*scheduledActs, err error) {
 	var partExec bool
 	var aPfs engine.ActionProfiles
@@ -238,7 +236,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREventWithOpts, a
 		for trg, acts := range trgActs {
 			if trg == utils.MetaNone { // only one scheduledActs set
 				schedActs = append(schedActs, newScheduledActs(aPf.Tenant, aPf.ID, trg, utils.EmptyString, aPf.Schedule,
-					ctx, &ActData{cgrEv.CGREvent.Event, cgrEv.Opts}, acts))
+					ctx, &ActData{cgrEv.Event, cgrEv.Opts}, acts))
 				continue
 			}
 			if len(aPf.Targets[trg]) == 0 {
@@ -246,7 +244,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREventWithOpts, a
 			}
 			for trgID := range aPf.Targets[trg] {
 				schedActs = append(schedActs, newScheduledActs(aPf.Tenant, aPf.ID, trg, trgID, aPf.Schedule,
-					ctx, &ActData{cgrEv.CGREvent.Event, cgrEv.Opts}, acts))
+					ctx, &ActData{cgrEv.Event, cgrEv.Opts}, acts))
 			}
 		}
 	}
@@ -285,7 +283,7 @@ func (aS *ActionS) asapExecuteActions(sActs *scheduledActs) (err error) {
 
 // V1ScheduleActions will be called to schedule actions matching the arguments
 func (aS *ActionS) V1ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
-	if err = aS.scheduleActions([]*utils.CGREventWithOpts{args.CGREventWithOpts},
+	if err = aS.scheduleActions([]*utils.CGREvent{args.CGREvent},
 		args.ActionProfileIDs, false); err != nil {
 		return
 	}
@@ -296,8 +294,8 @@ func (aS *ActionS) V1ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rp
 // V1ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
 func (aS *ActionS) V1ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
 	var schedActSet []*scheduledActs
-	if schedActSet, err = aS.scheduledActions(args.CGREventWithOpts.Tenant,
-		args.CGREventWithOpts, args.ActionProfileIDs, true); err != nil {
+	if schedActSet, err = aS.scheduledActions(args.CGREvent.Tenant,
+		args.CGREvent, args.ActionProfileIDs, true); err != nil {
 		return
 	}
 	var partExec bool

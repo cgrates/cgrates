@@ -32,7 +32,6 @@ import (
 type erEvent struct {
 	cgrEvent *utils.CGREvent
 	rdrCfg   *config.EventReaderCfg
-	opts     map[string]interface{}
 }
 
 // NewERService instantiates the ERService
@@ -88,7 +87,7 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err er
 			erS.closeAllRdrs()
 			return
 		case erEv := <-erS.rdrEvents:
-			if err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg, erEv.opts); err != nil {
+			if err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> reading event: <%s> got error: <%s>",
 						utils.ERs, utils.ToIJSON(erEv.cgrEvent), err.Error()))
@@ -151,7 +150,7 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 
 // processEvent will be called each time a new event is received from readers
 func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
-	rdrCfg *config.EventReaderCfg, opts map[string]interface{}) (err error) {
+	rdrCfg *config.EventReaderCfg) (err error) {
 	// log the event created if requested by flags
 	if rdrCfg.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
@@ -174,7 +173,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	if reqType == utils.MetaAuthorize ||
 		reqType == utils.MetaMessage ||
 		reqType == utils.MetaEvent {
-		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(opts); err != nil {
+		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.Opts); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction for reader <%s> failed because <%s>",
 				utils.ERs, rdrCfg.ID, err.Error()))
 			err = nil // reset the error and continue the processing
@@ -204,7 +203,6 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs,
 			rdrCfg.Flags.Has(utils.MetaFD),
-			opts,
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -219,8 +217,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			rdrCfg.Flags.Has(utils.MetaResources),
 			rdrCfg.Flags.Has(utils.MetaAccounts),
-			cgrEv, rdrCfg.Flags.Has(utils.MetaFD),
-			opts)
+			cgrEv, rdrCfg.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
@@ -229,8 +226,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.Has(utils.MetaAttributes),
 			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
 			rdrCfg.Flags.Has(utils.MetaAccounts),
-			cgrEv, rdrCfg.Flags.Has(utils.MetaFD),
-			opts)
+			cgrEv, rdrCfg.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -242,8 +238,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
 			rdrCfg.Flags.Has(utils.MetaStats),
 			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			cgrEv, rdrCfg.Flags.Has(utils.MetaFD),
-			opts)
+			cgrEv, rdrCfg.Flags.Has(utils.MetaFD))
 		rply := utils.StringPointer("")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
@@ -261,8 +256,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			rdrCfg.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs,
-			rdrCfg.Flags.Has(utils.MetaFD),
-			opts)
+			rdrCfg.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
@@ -273,11 +267,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		}
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
-			Flags: rdrCfg.Flags.SliceFlags(),
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: cgrEv,
-				Opts:     opts,
-			},
+			Flags:     rdrCfg.Flags.SliceFlags(),
+			CGREvent:  cgrEv,
 			Paginator: cgrArgs,
 		}
 		rply := new(sessions.V1ProcessEventReply)
@@ -293,10 +284,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		!rdrCfg.Flags.Has(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithOpts{
-				CGREvent: cgrEv,
-				Opts:     opts,
-			}, rplyCDRs)
+			cgrEv, rplyCDRs)
 	}
 
 	return

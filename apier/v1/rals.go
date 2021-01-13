@@ -107,7 +107,7 @@ func (rsv1 *RALsV1) GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *disp
 	return nil
 }
 
-func (rsv1 *RALsV1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (rsv1 *RALsV1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

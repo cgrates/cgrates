@@ -45,7 +45,7 @@ func (cS *CoreSv1) Status(arg *utils.TenantWithOpts, reply *map[string]interface
 }
 
 // Ping used to determinate if component is active
-func (cS *CoreSv1) Ping(ign *utils.CGREventWithOpts, reply *string) error {
+func (cS *CoreSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

@@ -91,7 +91,7 @@ func (cB *concreteBalance) balanceLimit() (bL *utils.Decimal) {
 
 // debit implements the balanceOperator interface
 func (cB *concreteBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
-	cgrEv *utils.CGREventWithOpts) (ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
@@ -100,7 +100,7 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 
 	// pass the general balance filters
 	var pass bool
-	if pass, err = cB.fltrS.Pass(cgrEv.CGREvent.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
+	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
 		return nil, utils.ErrFilterNotPassingNoCaps
@@ -111,7 +111,7 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 
 // debitUnits is a direct debit of balance units
 func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, incrm *utils.Decimal,
-	cgrEv *utils.CGREventWithOpts) (dbted *utils.Decimal, uF *utils.UnitFactor, err error) {
+	cgrEv *utils.CGREvent) (dbted *utils.Decimal, uF *utils.UnitFactor, err error) {
 
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
@@ -120,14 +120,14 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, incrm *utils.Decimal
 
 	// pass the general balance filters
 	var pass bool
-	if pass, err = cB.fltrS.Pass(cgrEv.CGREvent.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
+	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
 		return nil, nil, utils.ErrFilterNotPassingNoCaps
 	}
 
 	// unitFactor
-	if uF, err = cB.unitFactor(cgrEv.CGREvent.Tenant, evNm); err != nil {
+	if uF, err = cB.unitFactor(cgrEv.Tenant, evNm); err != nil {
 		return
 	}
 
