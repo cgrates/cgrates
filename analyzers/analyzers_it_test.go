@@ -137,15 +137,13 @@ func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 }
 
 func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
-	cgrEv := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1010",
-				utils.Subject:      "Something_inter",
-				utils.Destination:  "999",
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1010",
+			utils.Subject:      "Something_inter",
+			utils.Destination:  "999",
 		},
 	}
 	var result2 []*engine.ChrgSProcessEventReply
@@ -163,8 +161,8 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 					"RunID":       "*default",
 					"Subject":     "Something_inter",
 				},
+				Opts: map[string]interface{}{"*subsys": "*chargers"},
 			},
-			Opts: map[string]interface{}{"*subsys": "*chargers"},
 		},
 		{
 			ChargerSProfile:    "Raw",
@@ -180,8 +178,8 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 					"RunID":       "*raw",
 					"Subject":     "Something_inter",
 				},
+				Opts: map[string]interface{}{"*subsys": "*chargers"},
 			},
-			Opts: map[string]interface{}{"*subsys": "*chargers"},
 		},
 	}
 
