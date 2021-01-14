@@ -28,7 +28,7 @@ func init() {
 	c := &CmdSessionsProcessCDR{
 		name:      "session_process_cdr",
 		rpcMethod: utils.SessionSv1ProcessCDR,
-		rpcParams: &utils.CGREventWithOpts{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdSessionsProcessCDR struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREventWithOpts
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -51,10 +51,7 @@ func (self *CmdSessionsProcessCDR) RpcMethod() string {
 
 func (self *CmdSessionsProcessCDR) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREventWithOpts{
-			CGREvent: new(utils.CGREvent),
-			Opts:     make(map[string]interface{}),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }

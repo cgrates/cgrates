@@ -214,10 +214,11 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 			return
 		}
 
+		cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
+		cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 		rdr.rdrEvents <- &erEvent{
-			cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+			cgrEvent: cgrEv,
 			rdrCfg:   rdr.Config(),
-			opts:     config.NMAsMapInterface(agReq.Opts, utils.NestingSep),
 		}
 		evsPosted++
 	}

@@ -115,10 +115,11 @@ func (rdr *SQSER) processMessage(body []byte) (err error) {
 	if err = agReq.SetFields(rdr.Config().Fields); err != nil {
 		return
 	}
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
+	cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
 	rdr.rdrEvents <- &erEvent{
-		cgrEvent: config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep),
+		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
-		opts:     config.NMAsMapInterface(agReq.Opts, utils.NestingSep),
 	}
 	return
 }

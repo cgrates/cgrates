@@ -53,10 +53,7 @@ func (self *CmdThresholdProcessEvent) RpcMethod() string {
 func (self *CmdThresholdProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.ThresholdsArgsProcessEvent{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: new(utils.CGREvent),
-				Opts:     make(map[string]interface{}),
-			},
+			CGREvent: new(utils.CGREvent),
 		}
 	}
 	return self.rpcParams

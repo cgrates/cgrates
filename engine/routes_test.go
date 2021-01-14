@@ -129,55 +129,47 @@ var (
 	}
 	argsGetRoutes = []*ArgsGetRoutes{
 		{ //matching RouteProfile1
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "utils.CGREvent1",
-					Event: map[string]interface{}{
-						"Route":          "RouteProfile1",
-						utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-						"UsageInterval":  "1s",
-						"PddInterval":    "1s",
-						"Weight":         "20.0",
-					},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "utils.CGREvent1",
+				Event: map[string]interface{}{
+					"Route":          "RouteProfile1",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+					"UsageInterval":  "1s",
+					"PddInterval":    "1s",
+					"Weight":         "20.0",
 				},
 			},
 		},
 		{ //matching RouteProfile2
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "utils.CGREvent1",
-					Event: map[string]interface{}{
-						"Route":          "RouteProfile2",
-						utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-						"UsageInterval":  "1s",
-						"PddInterval":    "1s",
-						"Weight":         "20.0",
-					},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "utils.CGREvent1",
+				Event: map[string]interface{}{
+					"Route":          "RouteProfile2",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+					"UsageInterval":  "1s",
+					"PddInterval":    "1s",
+					"Weight":         "20.0",
 				},
 			},
 		},
 		{ //matching RouteProfilePrefix
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "utils.CGREvent1",
-					Event: map[string]interface{}{
-						"Route": "RouteProfilePrefix",
-					},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "utils.CGREvent1",
+				Event: map[string]interface{}{
+					"Route": "RouteProfilePrefix",
 				},
 			},
 		},
 		{ //matching
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "CGR",
-					Event: map[string]interface{}{
-						"UsageInterval": "1s",
-						"PddInterval":   "1s",
-					},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "CGR",
+				Event: map[string]interface{}{
+					"UsageInterval": "1s",
+					"PddInterval":   "1s",
 				},
 			},
 		},
@@ -385,7 +377,7 @@ func TestRoutesCache(t *testing.T) {
 }
 
 func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
-	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREventWithOpts, true)
+	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -393,7 +385,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREventWithOpts, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -401,7 +393,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREventWithOpts, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -635,7 +627,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 
 func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
-	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREventWithOpts, true)
+	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -643,7 +635,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREventWithOpts, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -651,7 +643,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREventWithOpts, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

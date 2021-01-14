@@ -297,14 +297,14 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 }
 
 func TestGetDerivedEvents(t *testing.T) {
-	events := map[string]*utils.CGREventWithOpts{
+	events := map[string]*utils.CGREvent{
 		utils.MetaRaw: {},
 		"DEFAULT":     {},
 	}
 	if rply := getDerivedEvents(events, true); !reflect.DeepEqual(events, rply) {
 		t.Errorf("Expected %s received %s", utils.ToJSON(events), utils.ToJSON(rply))
 	}
-	exp := map[string]*utils.CGREventWithOpts{
+	exp := map[string]*utils.CGREvent{
 		utils.MetaRaw: events[utils.MetaRaw],
 	}
 	if rply := getDerivedEvents(events, false); !reflect.DeepEqual(exp, rply) {

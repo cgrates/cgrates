@@ -981,13 +981,11 @@ func TestFsEvV1AuthorizeArgs(t *testing.T) {
 	}
 	expected := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: ev.GetTenant(utils.MetaDefault),
-				ID:     utils.UUIDSha1Prefix(),
-				Time:   &sTime,
-				Event:  ev.AsMapStringInterface(timezone),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: ev.GetTenant(utils.MetaDefault),
+			ID:     utils.UUIDSha1Prefix(),
+			Time:   &sTime,
+			Event:  ev.AsMapStringInterface(timezone),
 		},
 		GetRoutes:          true,
 		GetAttributes:      true,
@@ -1026,13 +1024,11 @@ func TestFsEvV1InitSessionArgs(t *testing.T) {
 	}
 	expected := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: ev.GetTenant(utils.MetaDefault),
-				ID:     utils.UUIDSha1Prefix(),
-				Time:   &sTime,
-				Event:  ev.AsMapStringInterface(timezone),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: ev.GetTenant(utils.MetaDefault),
+			ID:     utils.UUIDSha1Prefix(),
+			Time:   &sTime,
+			Event:  ev.AsMapStringInterface(timezone),
 		},
 	}
 	rcv := ev.V1InitSessionArgs()
@@ -1058,13 +1054,11 @@ func TestFsEvV1TerminateSessionArgs(t *testing.T) {
 	}
 	expected := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: ev.GetTenant(utils.MetaDefault),
-				ID:     utils.UUIDSha1Prefix(),
-				Time:   &sTime,
-				Event:  ev.AsMapStringInterface(timezone),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: ev.GetTenant(utils.MetaDefault),
+			ID:     utils.UUIDSha1Prefix(),
+			Time:   &sTime,
+			Event:  ev.AsMapStringInterface(timezone),
 		},
 	}
 	rcv := ev.V1TerminateSessionArgs()

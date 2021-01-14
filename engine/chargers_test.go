@@ -64,40 +64,34 @@ var (
 			Weight:       20,
 		},
 	}
-	chargerEvents = []*utils.CGREventWithOpts{
+	chargerEvents = []*utils.CGREvent{
 		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"Charger":        "ChargerProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				utils.Weight:     "200.0",
+			},
 			Opts: map[string]interface{}{
 				utils.Subsys: utils.MetaChargers,
 			},
-			CGREvent: &utils.CGREvent{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
-					"Charger":        "ChargerProfile1",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-					"UsageInterval":  "1s",
-					utils.Weight:     "200.0",
-				},
+		},
+		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"Charger":        "ChargerProfile2",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			},
 		},
 		{
-			CGREvent: &utils.CGREvent{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
-					"Charger":        "ChargerProfile2",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				},
-			},
-		},
-		{
-			CGREvent: &utils.CGREvent{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
-					"Charger":        "DistinctMatch",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				},
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"Charger":        "DistinctMatch",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			},
 		},
 	}
@@ -214,16 +208,12 @@ func TestChargerProcessEvent(t *testing.T) {
 	rpl := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CPP_1",
-			Opts:            map[string]interface{}{utils.Subsys: utils.MetaChargers},
 			AlteredFields:   []string{utils.MetaReqRunID},
-			CGREvent:        chargerEvents[0].CGREvent,
+			CGREvent:        chargerEvents[0],
 		},
 	}
 	rpl[0].CGREvent.Event[utils.RunID] = cPPs[0].RunID
-	rcv, err := chargerSrv.processEvent(rpl[0].CGREvent.Tenant, &utils.CGREventWithOpts{
-		CGREvent: chargerEvents[0].CGREvent,
-		Opts:     chargerEvents[0].Opts,
-	})
+	rcv, err := chargerSrv.processEvent(rpl[0].CGREvent.Tenant, chargerEvents[0])
 	if err != nil {
 		t.Fatalf("Error: %+v", err)
 	}

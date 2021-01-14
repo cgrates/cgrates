@@ -108,18 +108,16 @@ func initSession(i int) {
 	defer func() { maxCps <- oneCps }()
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "",
-				Event: map[string]interface{}{
-					utils.EventName:   "TEST_EVENT",
-					utils.ToR:         utils.MetaVoice,
-					utils.Category:    "call",
-					utils.Tenant:      "cgrates.org",
-					utils.RequestType: utils.MetaPrepaid,
-					utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "",
+			Event: map[string]interface{}{
+				utils.EventName:   "TEST_EVENT",
+				utils.ToR:         utils.MetaVoice,
+				utils.Category:    "call",
+				utils.Tenant:      "cgrates.org",
+				utils.RequestType: utils.MetaPrepaid,
+				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 			},
 		},
 	}

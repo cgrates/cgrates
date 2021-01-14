@@ -53,10 +53,7 @@ func (self *CmdSessionsTerminate) RpcMethod() string {
 func (self *CmdSessionsTerminate) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &sessions.V1TerminateSessionArgs{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: new(utils.CGREvent),
-				Opts:     make(map[string]interface{}),
-			},
+			CGREvent: new(utils.CGREvent),
 		}
 	}
 	return self.rpcParams

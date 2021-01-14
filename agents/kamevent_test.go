@@ -158,14 +158,12 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 	}
 	expected := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-					config.CgrConfig().GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Time:  &sTime,
-				Event: kamEv.AsMapStringInterface(),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().GeneralCfg().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
 		},
 		GetRoutes:          true,
 		RoutesIgnoreErrors: true,
@@ -209,14 +207,12 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 	}
 	authArgs := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-					config.CgrConfig().GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Time:  &sTime,
-				Event: kamEv.AsMapStringInterface(),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().GeneralCfg().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
 		},
 	}
 	authRply := &sessions.V1AuthorizeReply{
@@ -236,30 +232,26 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		KamReplyRoute: "CGR_PROFILE_REPLY"}
 	authArgs = &sessions.V1AuthorizeArgs{
 		GetAttributes: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-					config.CgrConfig().GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Time:  &sTime,
-				Event: kamEv.AsMapStringInterface(),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().GeneralCfg().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
 		},
 	}
 	authRply = &sessions.V1AuthorizeReply{
 		Attributes: &engine.AttrSProcessEventReply{
 			MatchedProfiles: []string{"ATTR_1001_ACCOUNT_PROFILE"},
 			AlteredFields:   []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "TestKamEvAsKamAuthReply",
-					Event: map[string]interface{}{
-						utils.Tenant:       "cgrates.org",
-						utils.AccountField: "1001",
-						"Password":         "check123",
-						utils.RequestType:  utils.MetaPrepaid,
-					},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestKamEvAsKamAuthReply",
+				Event: map[string]interface{}{
+					utils.Tenant:       "cgrates.org",
+					utils.AccountField: "1001",
+					"Password":         "check123",
+					utils.RequestType:  utils.MetaPrepaid,
 				},
 			},
 		},
@@ -291,14 +283,12 @@ func TestKamEvV1InitSessionArgs(t *testing.T) {
 	}
 	expected := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-					config.CgrConfig().GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Time:  &sTime,
-				Event: kamEv.AsMapStringInterface(),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().GeneralCfg().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
 		},
 	}
 	rcv := kamEv.V1InitSessionArgs()
@@ -331,14 +321,12 @@ func TestKamEvV1TerminateSessionArgs(t *testing.T) {
 	}
 	expected := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-					config.CgrConfig().GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Time:  &sTime,
-				Event: kamEv.AsMapStringInterface(),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().GeneralCfg().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
 		},
 	}
 	rcv := kamEv.V1TerminateSessionArgs()
@@ -370,14 +358,12 @@ func TestKamEvV1ProcessMessageArgs(t *testing.T) {
 		return
 	}
 	expected := &sessions.V1ProcessMessageArgs{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-					config.CgrConfig().GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Time:  &sTime,
-				Event: kamEv.AsMapStringInterface(),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().GeneralCfg().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
 		},
 	}
 	rcv := kamEv.V1ProcessMessageArgs()
@@ -408,14 +394,12 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	}
 	procEvArgs := &sessions.V1ProcessMessageArgs{
 		Debit: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-					config.CgrConfig().GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Time:  &sTime,
-				Event: kamEv.AsMapStringInterface(),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().GeneralCfg().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
 		},
 	}
 	procEvhRply := &sessions.V1ProcessMessageReply{
@@ -435,30 +419,26 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		KamReplyRoute: "CGR_PROFILE_REPLY"}
 	procEvArgs = &sessions.V1ProcessMessageArgs{
 		GetAttributes: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-					config.CgrConfig().GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Time:  &sTime,
-				Event: kamEv.AsMapStringInterface(),
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().GeneralCfg().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
 		},
 	}
 	procEvhRply = &sessions.V1ProcessMessageReply{
 		Attributes: &engine.AttrSProcessEventReply{
 			MatchedProfiles: []string{"ATTR_1001_ACCOUNT_PROFILE"},
 			AlteredFields:   []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "TestKamEvAsKamAuthReply",
-					Event: map[string]interface{}{
-						utils.Tenant:       "cgrates.org",
-						utils.AccountField: "1001",
-						"Password":         "check123",
-						utils.RequestType:  utils.MetaPrepaid,
-					},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestKamEvAsKamAuthReply",
+				Event: map[string]interface{}{
+					utils.Tenant:       "cgrates.org",
+					utils.AccountField: "1001",
+					"Password":         "check123",
+					utils.RequestType:  utils.MetaPrepaid,
 				},
 			},
 		},
