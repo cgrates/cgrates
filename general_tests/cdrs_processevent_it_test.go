@@ -156,20 +156,18 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 	}
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaAttributes, utils.MetaStore, "*chargers:false", "*export:false"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "test1",
-				Event: map[string]interface{}{
-					utils.RunID:        "testv1",
-					utils.OriginID:     "test1_processEvent",
-					utils.OriginHost:   "OriginHost1",
-					utils.RequestType:  utils.MetaPseudoPrepaid,
-					utils.AccountField: "1001",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:        2 * time.Minute,
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test1",
+			Event: map[string]interface{}{
+				utils.RunID:        "testv1",
+				utils.OriginID:     "test1_processEvent",
+				utils.OriginHost:   "OriginHost1",
+				utils.RequestType:  utils.MetaPseudoPrepaid,
+				utils.AccountField: "1001",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:        2 * time.Minute,
 			},
 		},
 	}
@@ -183,7 +181,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value: config.NewRSRParsersMustCompile("1011", utils.InfieldSep),
+					Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 				},
 			},
 			Weight: 20,
@@ -243,20 +241,18 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 func testV1CDRsProcessEventChrgS(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers, "*attributes:false", "*export:false"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "test2",
-				Event: map[string]interface{}{
-					utils.RunID:        "testv1",
-					utils.OriginID:     "test2_processEvent",
-					utils.OriginHost:   "OriginHost2",
-					utils.RequestType:  utils.MetaPseudoPrepaid,
-					utils.AccountField: "1001",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:        2 * time.Minute,
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test2",
+			Event: map[string]interface{}{
+				utils.RunID:        "testv1",
+				utils.OriginID:     "test2_processEvent",
+				utils.OriginHost:   "OriginHost2",
+				utils.RequestType:  utils.MetaPseudoPrepaid,
+				utils.AccountField: "1001",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:        2 * time.Minute,
 			},
 		},
 	}
@@ -288,20 +284,18 @@ func testV1CDRsProcessEventChrgS(t *testing.T) {
 func testV1CDRsProcessEventRalS(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, "*attributes:false", "*chargers:false", "*export:false"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "test3",
-				Event: map[string]interface{}{
-					utils.RunID:        "testv1",
-					utils.OriginID:     "test3_processEvent",
-					utils.OriginHost:   "OriginHost3",
-					utils.RequestType:  utils.MetaPseudoPrepaid,
-					utils.AccountField: "1001",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:        2 * time.Minute,
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test3",
+			Event: map[string]interface{}{
+				utils.RunID:        "testv1",
+				utils.OriginID:     "test3_processEvent",
+				utils.OriginHost:   "OriginHost3",
+				utils.RequestType:  utils.MetaPseudoPrepaid,
+				utils.AccountField: "1001",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:        2 * time.Minute,
 			},
 		},
 	}
@@ -325,25 +319,23 @@ func testV1CDRsProcessEventRalS(t *testing.T) {
 func testV1CDRsProcessEventSts(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaStatS, "*rals:false", "*attributes:false", "*chargers:false", "*export:false"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "test4",
-				Event: map[string]interface{}{
-					utils.RunID:        "testv1",
-					utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-					utils.Tenant:       "cgrates.org",
-					utils.Category:     "call",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "test4_processEvent",
-					utils.OriginHost:   "OriginHost4",
-					utils.RequestType:  utils.MetaPseudoPrepaid,
-					utils.AccountField: "1001",
-					utils.Destination:  "+4986517174963",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        5 * time.Minute,
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test4",
+			Event: map[string]interface{}{
+				utils.RunID:        "testv1",
+				utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "test4_processEvent",
+				utils.OriginHost:   "OriginHost4",
+				utils.RequestType:  utils.MetaPseudoPrepaid,
+				utils.AccountField: "1001",
+				utils.Destination:  "+4986517174963",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        5 * time.Minute,
 			},
 		},
 	}
@@ -412,20 +404,18 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 func testV1CDRsProcessEventStore(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*store:false", "*attributes:false", "*chargers:false", "*export:false"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "test5",
-				Event: map[string]interface{}{
-					utils.RunID:        "testv1",
-					utils.OriginID:     "test5_processEvent",
-					utils.OriginHost:   "OriginHost5",
-					utils.RequestType:  utils.MetaPseudoPrepaid,
-					utils.AccountField: "1001",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:        2 * time.Minute,
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test5",
+			Event: map[string]interface{}{
+				utils.RunID:        "testv1",
+				utils.OriginID:     "test5_processEvent",
+				utils.OriginHost:   "OriginHost5",
+				utils.RequestType:  utils.MetaPseudoPrepaid,
+				utils.AccountField: "1001",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:        2 * time.Minute,
 			},
 		},
 	}
@@ -505,23 +495,21 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	}
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaThresholds, utils.MetaRALs, utils.ConcatenatedKey(utils.MetaChargers, "false"), "*export:false"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testV2CDRsProcessCDRWithThreshold",
-					utils.OriginHost:   "OriginHost6",
-					utils.Source:       "testV2CDRsProcessCDRWithThreshold",
-					utils.RequestType:  utils.MetaPseudoPrepaid,
-					utils.Category:     "call",
-					utils.AccountField: "1005",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        100 * time.Minute,
-					"field_extr1":      "val_extr1",
-					"fieldextr2":       "valextr2",
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testV2CDRsProcessCDRWithThreshold",
+				utils.OriginHost:   "OriginHost6",
+				utils.Source:       "testV2CDRsProcessCDRWithThreshold",
+				utils.RequestType:  utils.MetaPseudoPrepaid,
+				utils.Category:     "call",
+				utils.AccountField: "1005",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        100 * time.Minute,
+				"field_extr1":      "val_extr1",
+				"fieldextr2":       "valextr2",
 			},
 		},
 	}
@@ -561,20 +549,18 @@ func testV1CDRsProcessEventExport(t *testing.T) {
 	var reply string
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaExport, "*store:false", "*attributes:false", "*chargers:false", "*stats:false", "*thresholds:false"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "test7",
-				Event: map[string]interface{}{
-					utils.RunID:        "testv1",
-					utils.OriginID:     "test7_processEvent",
-					utils.OriginHost:   "OriginHost7",
-					utils.RequestType:  utils.MetaPseudoPrepaid,
-					utils.AccountField: "1001",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:        2 * time.Minute,
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test7",
+			Event: map[string]interface{}{
+				utils.RunID:        "testv1",
+				utils.OriginID:     "test7_processEvent",
+				utils.OriginHost:   "OriginHost7",
+				utils.RequestType:  utils.MetaPseudoPrepaid,
+				utils.AccountField: "1001",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:        2 * time.Minute,
 			},
 		},
 	}
@@ -616,20 +602,18 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 func testV1CDRsV2ProcessEventRalS(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, "*attributes:false", "*chargers:false", "*export:false"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "test101",
-				Event: map[string]interface{}{
-					utils.RunID:        "testv1",
-					utils.OriginID:     "test3_v2processEvent",
-					utils.OriginHost:   "OriginHost101",
-					utils.RequestType:  utils.MetaPseudoPrepaid,
-					utils.AccountField: "1001",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-					utils.Usage:        2 * time.Minute,
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test101",
+			Event: map[string]interface{}{
+				utils.RunID:        "testv1",
+				utils.OriginID:     "test3_v2processEvent",
+				utils.OriginHost:   "OriginHost101",
+				utils.RequestType:  utils.MetaPseudoPrepaid,
+				utils.AccountField: "1001",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:        2 * time.Minute,
 			},
 		},
 	}

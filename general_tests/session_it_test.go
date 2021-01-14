@@ -151,23 +151,21 @@ func testSesItAddVoiceBalance(t *testing.T) {
 func testSesItInitSession(t *testing.T) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: sesTenant,
-				ID:     "TestSesItInitiateSession",
-				Event: map[string]interface{}{
-					utils.Tenant:       sesTenant,
-					utils.Category:     "call",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestRefund",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AccountField: sesAccount,
-					utils.Subject:      "TEST",
-					utils.Destination:  "TEST",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        5 * time.Second,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: sesTenant,
+			ID:     "TestSesItInitiateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:       sesTenant,
+				utils.Category:     "call",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestRefund",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: sesAccount,
+				utils.Subject:      "TEST",
+				utils.Destination:  "TEST",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        5 * time.Second,
 			},
 		},
 	}
@@ -185,23 +183,21 @@ func testSesItInitSession(t *testing.T) {
 func testSesItTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: sesTenant,
-				ID:     "TestSesItUpdateSession",
-				Event: map[string]interface{}{
-					utils.Tenant:       sesTenant,
-					utils.Category:     "call",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestRefund",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AccountField: sesAccount,
-					utils.Subject:      "TEST",
-					utils.Destination:  "TEST",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        time.Second,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: sesTenant,
+			ID:     "TestSesItUpdateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:       sesTenant,
+				utils.Category:     "call",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestRefund",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: sesAccount,
+				utils.Subject:      "TEST",
+				utils.Destination:  "TEST",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        time.Second,
 			},
 		},
 	}

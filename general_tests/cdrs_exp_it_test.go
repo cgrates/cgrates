@@ -56,28 +56,27 @@ var (
 
 	cdrsExpAMQPCon *amqp.Connection
 
-	cdrsExpEv = &utils.CGREventWithOpts{
-		Opts: map[string]interface{}{},
-		CGREvent: &utils.CGREvent{
-			ID:     "Export",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.CGRID:        "TestCGRID",
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "TestCDRsExp",
-				utils.OriginHost:   "192.168.1.0",
-				utils.RequestType:  utils.MetaRated,
-				utils.Tenant:       "cgrates.org",
-				utils.Category:     "call",
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-				utils.SetupTime:    time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
-				utils.AnswerTime:   time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-				utils.Usage:        10 * time.Second,
-				utils.Cost:         1.201,
-			},
+	cdrsExpEv = &utils.CGREvent{
+
+		ID:     "Export",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.CGRID:        "TestCGRID",
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "TestCDRsExp",
+			utils.OriginHost:   "192.168.1.0",
+			utils.RequestType:  utils.MetaRated,
+			utils.Tenant:       "cgrates.org",
+			utils.Category:     "call",
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+			utils.SetupTime:    time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+			utils.Usage:        10 * time.Second,
+			utils.Cost:         1.201,
 		},
+		Opts: map[string]interface{}{},
 	}
 
 	cdrsExpEvExp = map[string]interface{}{
@@ -248,8 +247,8 @@ func testCDRsExpExportEvent(t *testing.T) {
 	var reply string
 	if err := cdrsExpRPC.Call(utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
-			Flags:            []string{"*export:true", utils.MetaRALs},
-			CGREventWithOpts: *cdrsExpEv,
+			Flags:    []string{"*export:true", utils.MetaRALs},
+			CGREvent: *cdrsExpEv,
 		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() { // some exporters will fail
 		t.Error("Unexpected error: ", err.Error())
 	}
@@ -337,7 +336,7 @@ func testCDRsExpFileFailover(t *testing.T) {
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsExpCfg.GeneralCfg().FailedPostsDir)
 	}
-	expectedFormats := utils.NewStringSet([]string{utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaS3jsonMap})
+	expectedFormats := utils.NewStringSet([]string{utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaKafkajsonMap, utils.MetaSQSjsonMap, utils.MetaS3jsonMap})
 	rcvFormats := utils.StringSet{}
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName := file.Name()

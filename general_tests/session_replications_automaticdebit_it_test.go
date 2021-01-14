@@ -174,24 +174,22 @@ func testSessionSRplInitiate(t *testing.T) {
 
 	argsInit := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSessionSRplInitiate",
-				Event: map[string]interface{}{
-					utils.EventName:    "TEST_EVENT",
-					utils.Tenant:       "cgrates.org",
-					utils.OriginID:     "123451",
-					utils.ToR:          utils.MetaVoice,
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AccountField: "1005",
-					utils.Subject:      "1005",
-					utils.Destination:  "1004",
-					utils.Category:     "call",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        0,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionSRplInitiate",
+			Event: map[string]interface{}{
+				utils.EventName:    "TEST_EVENT",
+				utils.Tenant:       "cgrates.org",
+				utils.OriginID:     "123451",
+				utils.ToR:          utils.MetaVoice,
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "1005",
+				utils.Subject:      "1005",
+				utils.Destination:  "1004",
+				utils.Category:     "call",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        0,
 			},
 		},
 	}
@@ -353,24 +351,22 @@ func testSessionSRplCheckAccount(t *testing.T) {
 func testSessionSRplTerminate(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSessionSRplTerminate",
-				Event: map[string]interface{}{
-					utils.EventName:    "TEST_EVENT",
-					utils.Tenant:       "cgrates.org",
-					utils.OriginID:     "123451",
-					utils.ToR:          utils.MetaVoice,
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AccountField: "1005",
-					utils.Subject:      "1005",
-					utils.Destination:  "1004",
-					utils.Category:     "call",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        2 * time.Second,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionSRplTerminate",
+			Event: map[string]interface{}{
+				utils.EventName:    "TEST_EVENT",
+				utils.Tenant:       "cgrates.org",
+				utils.OriginID:     "123451",
+				utils.ToR:          utils.MetaVoice,
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "1005",
+				utils.Subject:      "1005",
+				utils.Destination:  "1004",
+				utils.Category:     "call",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        2 * time.Second,
 			},
 		},
 	}

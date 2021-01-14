@@ -320,10 +320,9 @@ func testCacheRplPing(t *testing.T) {
 	}
 
 	var rpl string
-	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
+
 		Opts: map[string]interface{}{
 			utils.OptsRouteID: "testRoute123",
 		},
@@ -362,10 +361,9 @@ func testCacheRplCheckReplication(t *testing.T) {
 	}
 
 	var rpl string
-	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
+
 		Opts: map[string]interface{}{
 			utils.OptsRouteID: "testRoute123",
 		},
@@ -394,10 +392,9 @@ func testCacheRplAACheckReplication(t *testing.T) {
 	}
 
 	var rpl string
-	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
+
 		Opts: map[string]interface{}{
 			utils.OptsRouteID: "testRouteFromDispatcher2",
 		},
@@ -407,10 +404,8 @@ func testCacheRplAACheckReplication(t *testing.T) {
 		t.Errorf("Received: %s", rpl)
 	}
 
-	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsRouteID: "testRouteFromDispatcher1",
 		},
@@ -466,16 +461,15 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 		wgDisp2.Add(1)
 		go func() {
 			var rpl []*engine.ChrgSProcessEventReply
-			if err := dspEngine1RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "testCacheRplAACheckLoadReplication",
-					Event: map[string]interface{}{
-						utils.AccountField: "1007",
-						utils.Destination:  "+491511231234",
-						"EventName":        "TestLoad",
-					},
+			if err := dspEngine1RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testCacheRplAACheckLoadReplication",
+				Event: map[string]interface{}{
+					utils.AccountField: "1007",
+					utils.Destination:  "+491511231234",
+					"EventName":        "TestLoad",
 				},
+
 				Opts: map[string]interface{}{
 					utils.OptsRouteID: "testRouteFromDispatcher1",
 				},
@@ -488,16 +482,16 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 		}()
 		go func() {
 			var rpl []*engine.ChrgSProcessEventReply
-			if err := dspEngine2RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "testCacheRplAACheckLoadReplication",
-					Event: map[string]interface{}{
-						utils.AccountField: "1007",
-						utils.Destination:  "+491511231234",
-						"EventName":        "TestLoad",
-					},
+			if err := dspEngine2RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREvent{
+
+				Tenant: "cgrates.org",
+				ID:     "testCacheRplAACheckLoadReplication",
+				Event: map[string]interface{}{
+					utils.AccountField: "1007",
+					utils.Destination:  "+491511231234",
+					"EventName":        "TestLoad",
 				},
+
 				Opts: map[string]interface{}{
 					utils.OptsRouteID: "testRouteFromDispatcher2",
 				},
@@ -579,16 +573,16 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func() {
-			if err := dspEngine1RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "testCacheRplCheckLoadReplication",
-					Event: map[string]interface{}{
-						utils.AccountField: "1007",
-						utils.Destination:  "+491511231234",
-						"EventName":        "TestLoad",
-					},
+			if err := dspEngine1RPC.Call(utils.ChargerSv1ProcessEvent, &utils.CGREvent{
+
+				Tenant: "cgrates.org",
+				ID:     "testCacheRplCheckLoadReplication",
+				Event: map[string]interface{}{
+					utils.AccountField: "1007",
+					utils.Destination:  "+491511231234",
+					"EventName":        "TestLoad",
 				},
+
 				Opts: map[string]interface{}{
 					utils.OptsRouteID: "testRoute123",
 				},

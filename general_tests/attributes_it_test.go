@@ -132,30 +132,28 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 func testAttributeSProcessEvent(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEvent",
-				Event: map[string]interface{}{
-					utils.EventName: "VariableTest",
-					utils.ToR:       utils.MetaVoice,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEvent",
+			Event: map[string]interface{}{
+				utils.EventName: "VariableTest",
+				utils.ToR:       utils.MetaVoice,
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_VARIABLE"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + utils.Category},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEvent",
-				Event: map[string]interface{}{
-					utils.EventName: "VariableTest",
-					utils.Category:  utils.MetaVoice,
-					utils.ToR:       utils.MetaVoice,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEvent",
+			Event: map[string]interface{}{
+				utils.EventName: "VariableTest",
+				utils.Category:  utils.MetaVoice,
+				utils.ToR:       utils.MetaVoice,
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -217,29 +215,27 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithAccount",
-				Event: map[string]interface{}{
-					"EventName": "AddAccountInfo",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithAccount",
+			Event: map[string]interface{}{
+				"EventName": "AddAccountInfo",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACCOUNT"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Balance"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithAccount",
-				Event: map[string]interface{}{
-					"EventName": "AddAccountInfo",
-					"Balance":   "10",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithAccount",
+			Event: map[string]interface{}{
+				"EventName": "AddAccountInfo",
+				"Balance":   "10",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -301,29 +297,27 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithAccount2",
-				Event: map[string]interface{}{
-					"EventName": "AddFullAccount",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithAccount2",
+			Event: map[string]interface{}{
+				"EventName": "AddFullAccount",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACCOUNT2"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "FullAccount"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithAccount2",
-				Event: map[string]interface{}{
-					"EventName":   "AddFullAccount",
-					"FullAccount": "{\"ID\":\"cgrates.org:1001\",\"BalanceMap\":{\"*monetary\":[{\"Uuid\":\"18160631-a4ae-4078-8048-b4c6b87a36c6\",\"ID\":\"\",\"Value\":10,\"ExpirationDate\":\"0001-01-01T00:00:00Z\",\"Weight\":10,\"DestinationIDs\":{},\"RatingSubject\":\"\",\"Categories\":{},\"SharedGroups\":{},\"Timings\":null,\"TimingIDs\":{},\"Disabled\":false,\"Factor\":null,\"Blocker\":false}]},\"UnitCounters\":null,\"ActionTriggers\":null,\"AllowNegative\":false,\"Disabled\":false,\"UpdateTime\":\"2020-10-06T12:43:51.805Z\"}",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithAccount2",
+			Event: map[string]interface{}{
+				"EventName":   "AddFullAccount",
+				"FullAccount": "{\"ID\":\"cgrates.org:1001\",\"BalanceMap\":{\"*monetary\":[{\"Uuid\":\"18160631-a4ae-4078-8048-b4c6b87a36c6\",\"ID\":\"\",\"Value\":10,\"ExpirationDate\":\"0001-01-01T00:00:00Z\",\"Weight\":10,\"DestinationIDs\":{},\"RatingSubject\":\"\",\"Categories\":{},\"SharedGroups\":{},\"Timings\":null,\"TimingIDs\":{},\"Disabled\":false,\"Factor\":null,\"Blocker\":false}]},\"UnitCounters\":null,\"ActionTriggers\":null,\"AllowNegative\":false,\"Disabled\":false,\"UpdateTime\":\"2020-10-06T12:43:51.805Z\"}",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -355,16 +349,14 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
 	ev1 := &engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        11 * time.Second,
-					utils.Cost:         10.0,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        11 * time.Second,
+				utils.Cost:         10.0,
 			},
 		},
 	}
@@ -436,29 +428,28 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithStat",
-				Event: map[string]interface{}{
-					"EventName": "AddStatEvent",
-				},
+
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithStat",
+			Event: map[string]interface{}{
+				"EventName": "AddStatEvent",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_STATS"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "AcdMetric"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithStat",
-				Event: map[string]interface{}{
-					"EventName": "AddStatEvent",
-					"AcdMetric": "11",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithStat",
+			Event: map[string]interface{}{
+				"EventName": "AddStatEvent",
+				"AcdMetric": "11",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -520,29 +511,27 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithStat",
-				Event: map[string]interface{}{
-					"EventName": "AddFullStats",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithStat",
+			Event: map[string]interface{}{
+				"EventName": "AddFullStats",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_STATS2"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "AllMetrics"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithStat",
-				Event: map[string]interface{}{
-					"EventName":  "AddFullStats",
-					"AllMetrics": "{\"*acd\":11,\"*asr\":100,\"*tcd\":22}",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithStat",
+			Event: map[string]interface{}{
+				"EventName":  "AddFullStats",
+				"AllMetrics": "{\"*acd\":11,\"*asr\":100,\"*tcd\":22}",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -588,15 +577,15 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 
 	// Allocate 3 units for resource ResTest
 	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					"Account":     "3001",
-					"Destination": "3002"},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				"Account":     "3001",
+				"Destination": "3002"},
+			Opts: map[string]interface{}{},
 		},
+
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
 		Units:   3,
 	}
@@ -606,15 +595,15 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 	// Allocate 2 units for resource ResTest
 	argsRU2 := utils.ArgRSv1ResourceUsage{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					"Account":     "3001",
-					"Destination": "3002"},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				"Account":     "3001",
+				"Destination": "3002"},
+			Opts: map[string]interface{}{},
 		},
+
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
 		Units:   2,
 	}
@@ -667,29 +656,28 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithResource",
-				Event: map[string]interface{}{
-					"EventName": "AddResourceUsages",
-				},
+
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithResource",
+			Event: map[string]interface{}{
+				"EventName": "AddResourceUsages",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_RESOURCE"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "ResourceTotalUsages"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithResource",
-				Event: map[string]interface{}{
-					"EventName":           "AddResourceUsages",
-					"ResourceTotalUsages": "5",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithResource",
+			Event: map[string]interface{}{
+				"EventName":           "AddResourceUsages",
+				"ResourceTotalUsages": "5",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -751,13 +739,11 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithResource2",
-				Event: map[string]interface{}{
-					"EventName": "AddFullResource",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithResource2",
+			Event: map[string]interface{}{
+				"EventName": "AddFullResource",
 			},
 		},
 	}
@@ -765,14 +751,12 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_RESOURCE2"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "FullResource"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithResource2",
-				Event: map[string]interface{}{
-					"EventName":    "AddFullResource",
-					"FullResource": "{\"Tenant\":\"cgrates.org\",\"ID\":\"ResTest\",\"Usages\":{\"651a8db2-4f67-4cf8-b622-169e8a482e21\":{\"Tenant\":\"cgrates.org\",\"ID\":\"651a8db2-4f67-4cf8-b622-169e8a482e21\",\"ExpiryTime\":\"2020-10-06T16:12:52.450804203+03:00\",\"Units\":3},\"651a8db2-4f67-4cf8-b622-169e8a482e22\":{\"Tenant\":\"cgrates.org\",\"ID\":\"651a8db2-4f67-4cf8-b622-169e8a482e22\",\"ExpiryTime\":\"2020-10-06T16:12:52.451034151+03:00\",\"Units\":2}},\"TTLIdx\":[\"651a8db2-4f67-4cf8-b622-169e8a482e21\",\"651a8db2-4f67-4cf8-b622-169e8a482e22\"]}",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithResource2",
+			Event: map[string]interface{}{
+				"EventName":    "AddFullResource",
+				"FullResource": "{\"Tenant\":\"cgrates.org\",\"ID\":\"ResTest\",\"Usages\":{\"651a8db2-4f67-4cf8-b622-169e8a482e21\":{\"Tenant\":\"cgrates.org\",\"ID\":\"651a8db2-4f67-4cf8-b622-169e8a482e21\",\"ExpiryTime\":\"2020-10-06T16:12:52.450804203+03:00\",\"Units\":3},\"651a8db2-4f67-4cf8-b622-169e8a482e22\":{\"Tenant\":\"cgrates.org\",\"ID\":\"651a8db2-4f67-4cf8-b622-169e8a482e22\",\"ExpiryTime\":\"2020-10-06T16:12:52.451034151+03:00\",\"Units\":2}},\"TTLIdx\":[\"651a8db2-4f67-4cf8-b622-169e8a482e21\",\"651a8db2-4f67-4cf8-b622-169e8a482e22\"]}",
 			},
 		},
 	}
@@ -846,31 +830,29 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
-				Event: map[string]interface{}{
-					"EventName":   "AddDestinationCarrier",
-					"Destination": "+447779330921",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
+			Event: map[string]interface{}{
+				"EventName":   "AddDestinationCarrier",
+				"Destination": "+447779330921",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_LIBPHONENUMBER2"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "DestinationCarrier"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
-				Event: map[string]interface{}{
-					"EventName":          "AddDestinationCarrier",
-					"Destination":        "+447779330921",
-					"DestinationCarrier": "Orange",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
+			Event: map[string]interface{}{
+				"EventName":          "AddDestinationCarrier",
+				"Destination":        "+447779330921",
+				"DestinationCarrier": "Orange",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -950,31 +932,29 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
-				Event: map[string]interface{}{
-					"EventName":   "AddComposedInfo",
-					"Destination": "+447779330921",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
+			Event: map[string]interface{}{
+				"EventName":   "AddComposedInfo",
+				"Destination": "+447779330921",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_LIBPHONENUMBER_COMPOSED"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "DestinationCarrier"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
-				Event: map[string]interface{}{
-					"EventName":          "AddComposedInfo",
-					"Destination":        "+447779330921",
-					"DestinationCarrier": "Orange;44",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
+			Event: map[string]interface{}{
+				"EventName":          "AddComposedInfo",
+				"Destination":        "+447779330921",
+				"DestinationCarrier": "Orange;44",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -1036,31 +1016,29 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithLibPhoneNumber",
-				Event: map[string]interface{}{
-					"EventName":   "AddDestinationDetails",
-					"Destination": "+447779330921",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithLibPhoneNumber",
+			Event: map[string]interface{}{
+				"EventName":   "AddDestinationDetails",
+				"Destination": "+447779330921",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 
 	eRply := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_LIBPHONENUMBER"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "DestinationDetails"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testAttributeSProcessEventWithLibPhoneNumber",
-				Event: map[string]interface{}{
-					"EventName":          "AddDestinationDetails",
-					"Destination":        "+447779330921",
-					"DestinationDetails": "{\"Carrier\":\"Orange\",\"CountryCode\":44,\"CountryCodeSource\":1,\"Extension\":\"\",\"GeoLocation\":\"\",\"ItalianLeadingZero\":false,\"LengthOfNationalDestinationCode\":0,\"NationalNumber\":7779330921,\"NumberOfLeadingZeros\":1,\"NumberType\":1,\"PreferredDomesticCarrierCode\":\"\",\"RawInput\":\"+447779330921\",\"Region\":\"GB\"}",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventWithLibPhoneNumber",
+			Event: map[string]interface{}{
+				"EventName":          "AddDestinationDetails",
+				"Destination":        "+447779330921",
+				"DestinationDetails": "{\"Carrier\":\"Orange\",\"CountryCode\":44,\"CountryCodeSource\":1,\"Extension\":\"\",\"GeoLocation\":\"\",\"ItalianLeadingZero\":false,\"LengthOfNationalDestinationCode\":0,\"NationalNumber\":7779330921,\"NumberOfLeadingZeros\":1,\"NumberType\":1,\"PreferredDomesticCarrierCode\":\"\",\"RawInput\":\"+447779330921\",\"Region\":\"GB\"}",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)

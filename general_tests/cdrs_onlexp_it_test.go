@@ -236,10 +236,8 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 	var reply string
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
-			Flags: []string{"*export:false", "*chargers:false"},
-			CGREventWithOpts: utils.CGREventWithOpts{
-				CGREvent: testCdr.AsCGREvent(),
-			},
+			Flags:    []string{"*export:false", "*chargers:false"},
+			CGREvent: *testCdr.AsCGREvent(),
 		}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
@@ -280,10 +278,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	// we expect that the cdr export to fail and go into the failed post directory
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
-			CGREventWithOpts: utils.CGREventWithOpts{
-				CGREvent: testCdr1.AsCGREvent(),
-				Opts:     map[string]interface{}{"ExporterID": "http_localhost"},
-			},
+			CGREvent: *testCdr1.AsCGREvent(),
 		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Error("Unexpected error: ", err)
 	}
@@ -400,9 +395,8 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags: []string{"*export:true"},
-			CGREventWithOpts: utils.CGREventWithOpts{
-				CGREvent: testCdr.AsCGREvent(),
-			},
+
+			CGREvent: *testCdr.AsCGREvent(),
 		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Error("Unexpected error: ", err)
 	}

@@ -160,23 +160,22 @@ func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 func testV2CDRsProcessCDR(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testV2CDRsProcessCDR1",
-					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       "testV2CDRsProcessCDR",
-					utils.RequestType:  utils.MetaRated,
-					utils.Category:     "call",
-					utils.AccountField: "testV2CDRsProcessCDR",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        time.Minute,
-					"field_extr1":      "val_extr1",
-					"fieldextr2":       "valextr2",
-				},
+
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testV2CDRsProcessCDR1",
+				utils.OriginHost:   "192.168.1.1",
+				utils.Source:       "testV2CDRsProcessCDR",
+				utils.RequestType:  utils.MetaRated,
+				utils.Category:     "call",
+				utils.AccountField: "testV2CDRsProcessCDR",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        time.Minute,
+				"field_extr1":      "val_extr1",
+				"fieldextr2":       "valextr2",
 			},
 		},
 	}
@@ -232,23 +231,22 @@ func testV2CDRsGetCdrs(t *testing.T) {
 func testV2CDRsProcessCDR2(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*attributes:false", utils.MetaRALs},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testV2CDRsProcessCDR2",
-					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       "testV2CDRsProcessCDR2",
-					utils.RequestType:  utils.MetaRated,
-					utils.Category:     "call",
-					utils.AccountField: "testV2CDRsProcessCDR2",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        time.Minute,
-					"field_extr1":      "val_extr1",
-					"fieldextr2":       "valextr2",
-				},
+
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testV2CDRsProcessCDR2",
+				utils.OriginHost:   "192.168.1.1",
+				utils.Source:       "testV2CDRsProcessCDR2",
+				utils.RequestType:  utils.MetaRated,
+				utils.Category:     "call",
+				utils.AccountField: "testV2CDRsProcessCDR2",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        time.Minute,
+				"field_extr1":      "val_extr1",
+				"fieldextr2":       "valextr2",
 			},
 		},
 	}
@@ -306,23 +304,21 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 func testV2CDRsProcessCDR3(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*attributes:false", "*chargers:false"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testV2CDRsProcessCDR3",
-					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       "testV2CDRsProcessCDR3",
-					utils.RequestType:  utils.MetaRated,
-					utils.Category:     "call",
-					utils.AccountField: "testV2CDRsProcessCDR3",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        time.Minute,
-					"field_extr1":      "val_extr1",
-					"fieldextr2":       "valextr2",
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testV2CDRsProcessCDR3",
+				utils.OriginHost:   "192.168.1.1",
+				utils.Source:       "testV2CDRsProcessCDR3",
+				utils.RequestType:  utils.MetaRated,
+				utils.Category:     "call",
+				utils.AccountField: "testV2CDRsProcessCDR3",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        time.Minute,
+				"field_extr1":      "val_extr1",
+				"fieldextr2":       "valextr2",
 			},
 		},
 	}
@@ -369,23 +365,21 @@ func testV2CDRsGetCdrs3(t *testing.T) {
 func testV2CDRsProcessCDR4(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaAttributes, utils.MetaRALs},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testV2CDRsProcessCDR4",
-					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       "testV2CDRsProcessCDR4",
-					utils.RequestType:  utils.MetaRated,
-					utils.Category:     "call",
-					utils.AccountField: "testV2CDRsProcessCDR4",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        time.Minute,
-					"field_extr1":      "val_extr1",
-					"fieldextr2":       "valextr2",
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testV2CDRsProcessCDR4",
+				utils.OriginHost:   "192.168.1.1",
+				utils.Source:       "testV2CDRsProcessCDR4",
+				utils.RequestType:  utils.MetaRated,
+				utils.Category:     "call",
+				utils.AccountField: "testV2CDRsProcessCDR4",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        time.Minute,
+				"field_extr1":      "val_extr1",
+				"fieldextr2":       "valextr2",
 			},
 		},
 	}
@@ -560,23 +554,21 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 func testV2CDRsProcessCDR5(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*store:false", "*stats:false", "*thresholds:false"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testV2CDRsProcessCDR5",
-					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       "testV2CDRsProcessCDR5",
-					utils.RequestType:  utils.MetaRated,
-					utils.Category:     "call",
-					utils.AccountField: "testV2CDRsProcessCDR5",
-					utils.Subject:      "ANY2CNT2",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        time.Minute,
-					"field_extr1":      "val_extr1",
-					"fieldextr2":       "valextr2",
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testV2CDRsProcessCDR5",
+				utils.OriginHost:   "192.168.1.1",
+				utils.Source:       "testV2CDRsProcessCDR5",
+				utils.RequestType:  utils.MetaRated,
+				utils.Category:     "call",
+				utils.AccountField: "testV2CDRsProcessCDR5",
+				utils.Subject:      "ANY2CNT2",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        time.Minute,
+				"field_extr1":      "val_extr1",
+				"fieldextr2":       "valextr2",
 			},
 		},
 	}
@@ -628,23 +620,21 @@ func testV2CDRsGetThreshold1(t *testing.T) {
 func testV2CDRsProcessCDR6(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*store:false", "*stats:true", "*thresholds:true"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testV2CDRsProcessCDR5",
-					utils.OriginHost:   "192.168.1.2",
-					utils.Source:       "testV2CDRsProcessCDR6",
-					utils.RequestType:  utils.MetaRated,
-					utils.Category:     "call",
-					utils.AccountField: "testV2CDRsProcessCDR6",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        time.Minute,
-					"field_extr1":      "val_extr1",
-					"fieldextr2":       "valextr2",
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testV2CDRsProcessCDR5",
+				utils.OriginHost:   "192.168.1.2",
+				utils.Source:       "testV2CDRsProcessCDR6",
+				utils.RequestType:  utils.MetaRated,
+				utils.Category:     "call",
+				utils.AccountField: "testV2CDRsProcessCDR6",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        time.Minute,
+				"field_extr1":      "val_extr1",
+				"fieldextr2":       "valextr2",
 			},
 		},
 	}
@@ -688,23 +678,22 @@ func testV2CDRsGetThreshold2(t *testing.T) {
 func testV2CDRsProcessCDR7(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaStore, utils.MetaRALs},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testV2CDRsProcessCDR7",
-					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       "testV2CDRsProcessCDR7",
-					utils.RequestType:  utils.MetaRated,
-					utils.Category:     "call",
-					utils.AccountField: "testV2CDRsProcessCDR7",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        time.Minute,
-					"field_extr1":      "val_extr1",
-					"fieldextr2":       "valextr2",
-				},
+
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testV2CDRsProcessCDR7",
+				utils.OriginHost:   "192.168.1.1",
+				utils.Source:       "testV2CDRsProcessCDR7",
+				utils.RequestType:  utils.MetaRated,
+				utils.Category:     "call",
+				utils.AccountField: "testV2CDRsProcessCDR7",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        time.Minute,
+				"field_extr1":      "val_extr1",
+				"fieldextr2":       "valextr2",
 			},
 		},
 	}

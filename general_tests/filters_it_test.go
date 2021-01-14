@@ -134,16 +134,15 @@ func testV1FltrAddStats(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
 	ev1 := &engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        11 * time.Second,
-					utils.Cost:         10.0,
-				},
+
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        11 * time.Second,
+				utils.Cost:         10.0,
 			},
 		},
 	}
@@ -326,13 +325,11 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 func testV1FltrGetThresholdForEvent(t *testing.T) {
 	// check the event
 	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "1010"},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1010"},
 		},
 	}
 	var ids []string
@@ -391,13 +388,11 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	}
 
 	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "1010"},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1010"},
 		},
 	}
 	var ids []string
@@ -437,14 +432,12 @@ func testV1FltrPopulateResources(t *testing.T) {
 
 	// Allocate 3 units for resource ResTest
 	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					"Account":     "3001",
-					"Destination": "3002"},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				"Account":     "3001",
+				"Destination": "3002"},
 		},
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
 		Units:   3,
@@ -503,15 +496,14 @@ func testV1FltrPopulateResources(t *testing.T) {
 
 	// check the event
 	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "2020"},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "2020"},
 		},
 	}
+
 	var ids []string
 	eIDs := []string{"TH_ResTest"}
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err != nil {
@@ -622,13 +614,11 @@ func testV1FltrAccounts(t *testing.T) {
 	}
 
 	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001"},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001"},
 		},
 	}
 	var ids []string
@@ -712,13 +702,11 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	}
 
 	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001"},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001"},
 		},
 	}
 	var ids []string
@@ -729,13 +717,11 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	}
 
 	tEv = &engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event2",
-				Event: map[string]interface{}{
-					utils.AccountField: "non"},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.AccountField: "non"},
 		},
 	}
 	ids = nil
@@ -791,9 +777,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			ChargerSProfile:    "IntraCharger",
 			AttributeSProfiles: []string{"*constant:*req.Subject:intraState"},
 			AlteredFields:      []string{utils.MetaReqRunID, "*req.Subject"},
-			Opts: map[string]interface{}{
-				utils.Subsys: utils.MetaChargers,
-			},
+
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
@@ -803,18 +787,19 @@ func testV1FltrChargerSuffix(t *testing.T) {
 					utils.RunID:        "Intra",
 					utils.Destination:  "999",
 				},
+				Opts: map[string]interface{}{
+					utils.Subsys: utils.MetaChargers,
+				},
 			},
 		},
 	}
-	cgrEv := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1010",
-				utils.Subject:      "Something_intra",
-				utils.Destination:  "999",
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1010",
+			utils.Subject:      "Something_intra",
+			utils.Destination:  "999",
 		},
 	}
 	var result2 []*engine.ChrgSProcessEventReply
@@ -829,9 +814,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			ChargerSProfile:    "InterCharger",
 			AttributeSProfiles: []string{"*constant:*req.Subject:interState"},
 			AlteredFields:      []string{utils.MetaReqRunID, "*req.Subject"},
-			Opts: map[string]interface{}{
-				utils.Subsys: utils.MetaChargers,
-			},
+
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",
@@ -841,18 +824,20 @@ func testV1FltrChargerSuffix(t *testing.T) {
 					utils.RunID:        "Inter",
 					utils.Destination:  "999",
 				},
+				Opts: map[string]interface{}{
+					utils.Subsys: utils.MetaChargers,
+				},
 			},
 		},
 	}
-	cgrEv = &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1010",
-				utils.Subject:      "Something_inter",
-				utils.Destination:  "999",
-			},
+	cgrEv = &utils.CGREvent{
+
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1010",
+			utils.Subject:      "Something_inter",
+			utils.Destination:  "999",
 		},
 	}
 	if err := fltrRpc.Call(utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
@@ -890,29 +875,28 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 	processedEv := &engine.AttrSProcessEventReply{
 		AlteredFields:   []string{"*req.CustomField"},
 		MatchedProfiles: []string{"ATTR_1001"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.new",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					"CustomField":     "2007",
-					"CustomField2":    "+2007",
-					utils.Destination: "+1207",
-				},
+
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.new",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				"CustomField":     "2007",
+				"CustomField2":    "+2007",
+				utils.Destination: "+1207",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	cgrEv := &engine.AttrArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.new",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					"CustomField":     "+2007",
-					"CustomField2":    "+2007",
-					utils.Destination: "+1207",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.new",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				"CustomField":     "+2007",
+				"CustomField2":    "+2007",
+				utils.Destination: "+1207",
 			},
+			Opts: map[string]interface{}{},
 		},
 		Context: utils.StringPointer("prefix"),
 	}

@@ -129,21 +129,20 @@ func testSes4CDRsProcessCDR(t *testing.T) {
 	// will make the BalanceInfo nil and result in a panic
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, utils.MetaStore, "*routes:false", utils.MetaRerate},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testV2CDRsProcessCDR1",
-					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       "testV2CDRsProcessCDR",
-					utils.RequestType:  utils.MetaPostpaid,
-					utils.Category:     "free",
-					utils.AccountField: "dan7",
-					utils.Subject:      "RP_FREE",
-					utils.Destination:  "0775692",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        time.Minute,
-				},
+
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testV2CDRsProcessCDR1",
+				utils.OriginHost:   "192.168.1.1",
+				utils.Source:       "testV2CDRsProcessCDR",
+				utils.RequestType:  utils.MetaPostpaid,
+				utils.Category:     "free",
+				utils.AccountField: "dan7",
+				utils.Subject:      "RP_FREE",
+				utils.Destination:  "0775692",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        time.Minute,
 			},
 		},
 	}

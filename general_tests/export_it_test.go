@@ -397,6 +397,7 @@ func testExpVerifyRateProfiles(t *testing.T) {
 						RecurrentFee:  utils.NewDecimal(1, 2),
 						Unit:          minDecimal,
 						Increment:     secDecimal,
+						FixedFee:      nil,
 					},
 				},
 			},

@@ -133,22 +133,20 @@ func testbrodcastItLoadFromFolder(t *testing.T) {
 }
 
 func testbrodcastItProccessEvent(t *testing.T) {
-	args := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItProcessCDR",
-			Event: map[string]interface{}{
-				utils.Tenant:       "cgrates.org",
-				utils.Category:     utils.Call,
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "TestSSv1It1Brodcast",
-				utils.RequestType:  utils.MetaPostpaid,
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:        10 * time.Minute,
-			},
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestSSv1ItProcessCDR",
+		Event: map[string]interface{}{
+			utils.Tenant:       "cgrates.org",
+			utils.Category:     utils.Call,
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "TestSSv1It1Brodcast",
+			utils.RequestType:  utils.MetaPostpaid,
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
+			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.Usage:        10 * time.Minute,
 		},
 	}
 
