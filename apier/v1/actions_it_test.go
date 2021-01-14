@@ -194,7 +194,7 @@ func testActionSGetActionProfile(t *testing.T) {
 
 func testActionSPing(t *testing.T) {
 	var resp string
-	if err := actSRPC.Call(utils.ActionSv1Ping, new(utils.CGREventWithOpts), &resp); err != nil {
+	if err := actSRPC.Call(utils.ActionSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)

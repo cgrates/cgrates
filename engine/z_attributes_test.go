@@ -1989,6 +1989,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 				"RandomField": "Val2",
 				utils.Weight:  "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
@@ -2055,6 +2056,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 				"RandomField2": "Concatenated",
 				utils.Weight:   "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
@@ -2116,6 +2118,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 				"RandomField2": "1514804400",
 				utils.Weight:   "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
@@ -2177,6 +2180,7 @@ func TestProcessAttributeSum(t *testing.T) {
 				"RandomField2": "5",
 				utils.Weight:   "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
@@ -2238,6 +2242,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 				"RandomField2": "5",
 				utils.Weight:   "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
@@ -2299,6 +2304,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 				"RandomField2": "5",
 				utils.Weight:   "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
@@ -2360,6 +2366,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 				"RandomField2": "5",
 				utils.Weight:   "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
@@ -2421,6 +2428,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 				"RandomField2": "5",
 				utils.Weight:   "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
@@ -2482,6 +2490,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 				"RandomField2": "2013-12-30T15:00:01Z",
 				utils.Weight:   "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
@@ -2542,6 +2551,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 				"Field2":     "Val2",
 				utils.Weight: "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
@@ -2602,6 +2612,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 				"Field2":     "Val2",
 				utils.Weight: "20.0",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{

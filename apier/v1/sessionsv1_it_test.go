@@ -206,21 +206,19 @@ func testSSv1ItAuth(t *testing.T) {
 		AuthorizeResources: true,
 		GetRoutes:          true,
 		GetAttributes:      true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItAuth",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestSSv1It1",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.Usage:        authUsage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestSSv1It1",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:        authUsage,
 			},
 		},
 	}
@@ -259,25 +257,23 @@ func testSSv1ItAuth(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItAuth",
-				Event: map[string]interface{}{
-					utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					"OfficeGroup":      "Marketing",
-					utils.OriginID:     "TestSSv1It1",
-					utils.RequestType:  sSV1RequestType,
-					utils.SetupTime:    "2018-01-07T17:00:00Z",
-					utils.Usage:        300000000000.0,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				"OfficeGroup":      "Marketing",
+				utils.OriginID:     "TestSSv1It1",
+				utils.RequestType:  sSV1RequestType,
+				utils.SetupTime:    "2018-01-07T17:00:00Z",
+				utils.Usage:        300000000000.0,
 			},
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -293,21 +289,19 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 		AuthorizeResources: true,
 		GetRoutes:          true,
 		GetAttributes:      true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItAuth",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestSSv1It1",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.Usage:        authUsage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestSSv1It1",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:        authUsage,
 			},
 		},
 	}
@@ -339,22 +333,20 @@ func testSSv1ItInitiateSession(t *testing.T) {
 		InitSession:       true,
 		AllocateResources: true,
 		GetAttributes:     true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItInitiateSession",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestSSv1It1",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        initUsage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestSSv1It1",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        initUsage,
 			},
 		},
 	}
@@ -375,26 +367,24 @@ func testSSv1ItInitiateSession(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItInitiateSession",
-				Event: map[string]interface{}{
-					utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					"OfficeGroup":      "Marketing",
-					utils.OriginID:     "TestSSv1It1",
-					utils.RequestType:  sSV1RequestType,
-					utils.SetupTime:    "2018-01-07T17:00:00Z",
-					utils.AnswerTime:   "2018-01-07T17:00:10Z",
-					utils.Usage:        300000000000.0,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession",
+			Event: map[string]interface{}{
+				utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				"OfficeGroup":      "Marketing",
+				utils.OriginID:     "TestSSv1It1",
+				utils.RequestType:  sSV1RequestType,
+				utils.SetupTime:    "2018-01-07T17:00:00Z",
+				utils.AnswerTime:   "2018-01-07T17:00:10Z",
+				utils.Usage:        300000000000.0,
 			},
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -415,22 +405,20 @@ func testSSv1ItInitiateSessionWithDigest(t *testing.T) {
 		InitSession:       true,
 		AllocateResources: true,
 		GetAttributes:     true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItInitiateSession",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestSSv1It2",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        initUsage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestSSv1It2",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        initUsage,
 			},
 		},
 	}
@@ -466,22 +454,20 @@ func testSSv1ItUpdateSession(t *testing.T) {
 	args := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItUpdateSession",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestSSv1It1",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        reqUsage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestSSv1It1",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        reqUsage,
 			},
 		},
 	}
@@ -493,26 +479,24 @@ func testSSv1ItUpdateSession(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItUpdateSession",
-				Event: map[string]interface{}{
-					utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					"OfficeGroup":      "Marketing",
-					utils.OriginID:     "TestSSv1It1",
-					utils.RequestType:  sSV1RequestType,
-					utils.SetupTime:    "2018-01-07T17:00:00Z",
-					utils.AnswerTime:   "2018-01-07T17:00:10Z",
-					utils.Usage:        300000000000.0,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				"OfficeGroup":      "Marketing",
+				utils.OriginID:     "TestSSv1It1",
+				utils.RequestType:  sSV1RequestType,
+				utils.SetupTime:    "2018-01-07T17:00:00Z",
+				utils.AnswerTime:   "2018-01-07T17:00:10Z",
+				utils.Usage:        300000000000.0,
 			},
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -537,22 +521,20 @@ func testSSv1ItTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		ReleaseResources: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItUpdateSession",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestSSv1It1",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        10 * time.Minute,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestSSv1It1",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        10 * time.Minute,
 			},
 		},
 	}
@@ -572,22 +554,20 @@ func testSSv1ItTerminateSession(t *testing.T) {
 }
 
 func testSSv1ItProcessCDR(t *testing.T) {
-	args := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItProcessCDR",
-			Event: map[string]interface{}{
-				utils.Tenant:       "cgrates.org",
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "TestSSv1It1",
-				utils.RequestType:  sSV1RequestType,
-				utils.AccountField: "1001",
-				utils.Subject:      "ANY2CNT",
-				utils.Destination:  "1002",
-				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:        10 * time.Minute,
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestSSv1ItProcessCDR",
+		Event: map[string]interface{}{
+			utils.Tenant:       "cgrates.org",
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "TestSSv1It1",
+			utils.RequestType:  sSV1RequestType,
+			utils.AccountField: "1001",
+			utils.Subject:      "ANY2CNT",
+			utils.Destination:  "1002",
+			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.Usage:        10 * time.Minute,
 		},
 	}
 	var rply string
@@ -607,23 +587,21 @@ func testSSv1ItProcessEvent(t *testing.T) {
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItProcessEvent",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestSSv1It2",
-					utils.OriginHost:   "TestSSv1It3",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        initUsage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItProcessEvent",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestSSv1It2",
+				utils.OriginHost:   "TestSSv1It3",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        initUsage,
 			},
 		},
 	}
@@ -644,27 +622,25 @@ func testSSv1ItProcessEvent(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItProcessEvent",
-				Event: map[string]interface{}{
-					utils.CGRID:        "f7f5cf1029905f9b98be1a608e4bd975b8e51413",
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					"OfficeGroup":      "Marketing",
-					utils.OriginID:     "TestSSv1It2",
-					utils.OriginHost:   "TestSSv1It3",
-					utils.RequestType:  sSV1RequestType,
-					utils.SetupTime:    "2018-01-07T17:00:00Z",
-					utils.AnswerTime:   "2018-01-07T17:00:10Z",
-					utils.Usage:        300000000000.0,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItProcessEvent",
+			Event: map[string]interface{}{
+				utils.CGRID:        "f7f5cf1029905f9b98be1a608e4bd975b8e51413",
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				"OfficeGroup":      "Marketing",
+				utils.OriginID:     "TestSSv1It2",
+				utils.OriginHost:   "TestSSv1It3",
+				utils.RequestType:  sSV1RequestType,
+				utils.SetupTime:    "2018-01-07T17:00:00Z",
+				utils.AnswerTime:   "2018-01-07T17:00:10Z",
+				utils.Usage:        300000000000.0,
 			},
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -799,23 +775,21 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	args := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItUpdateSession",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.Category:     "call",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestSSv1It",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        reqUsage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestSSv1It",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        reqUsage,
 			},
 		},
 	}
@@ -827,27 +801,25 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItUpdateSession",
-				Event: map[string]interface{}{
-					utils.CGRID:        "70876773b294f0e1476065f8d18bb9ec6bcb3d5f",
-					utils.Tenant:       "cgrates.org",
-					utils.Category:     "call",
-					utils.ToR:          utils.MetaVoice,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					"OfficeGroup":      "Marketing",
-					utils.OriginID:     "TestSSv1It",
-					utils.RequestType:  sSV1RequestType,
-					utils.SetupTime:    "2018-01-07T17:00:00Z",
-					utils.AnswerTime:   "2018-01-07T17:00:10Z",
-					utils.Usage:        300000000000.0,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.CGRID:        "70876773b294f0e1476065f8d18bb9ec6bcb3d5f",
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.ToR:          utils.MetaVoice,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				"OfficeGroup":      "Marketing",
+				utils.OriginID:     "TestSSv1It",
+				utils.RequestType:  sSV1RequestType,
+				utils.SetupTime:    "2018-01-07T17:00:00Z",
+				utils.AnswerTime:   "2018-01-07T17:00:10Z",
+				utils.Usage:        300000000000.0,
 			},
+			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -957,26 +929,24 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession:   true,
 		GetAttributes: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession2",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestDynamicTDebit",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "TestDynamicDebit",
+				utils.Subject:      "TEST",
+				utils.Destination:  "TEST",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        0,
+			},
 			Opts: map[string]interface{}{
 				utils.OptsDebitInterval: 30 * time.Millisecond,
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItInitiateSession2",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.Category:     "call",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestDynamicTDebit",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "TestDynamicDebit",
-					utils.Subject:      "TEST",
-					utils.Destination:  "TEST",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        0,
-				},
 			},
 		},
 	}
@@ -1056,22 +1026,20 @@ func testSSv1ItDeactivateSessions(t *testing.T) {
 	args := &sessions.V1InitSessionArgs{
 		InitSession:   true,
 		GetAttributes: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItInitiateSession",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "TestSSv1It1",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        initUsage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "TestSSv1It1",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        initUsage,
 			},
 		},
 	}
@@ -1108,21 +1076,19 @@ func testSSv1ItAuthNotFoundCharger(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "Unexist",
-				ID:     "testSSv1ItAuthNotFoundCharger",
-				Event: map[string]interface{}{
-					utils.Tenant:       "Unexist",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "testSSv1ItAuthNotFoundCharger",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.Usage:        authUsage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "Unexist",
+			ID:     "testSSv1ItAuthNotFoundCharger",
+			Event: map[string]interface{}{
+				utils.Tenant:       "Unexist",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "testSSv1ItAuthNotFoundCharger",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:        authUsage,
 			},
 		},
 	}
@@ -1137,22 +1103,20 @@ func testSSv1ItInitiateSessionNotFoundCharger(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "Unexist",
-				ID:     "testSSv1ItInitiateSessionNotFoundCharger",
-				Event: map[string]interface{}{
-					utils.Tenant:       "Unexist",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "testSSv1ItInitiateSessionNotFoundCharger",
-					utils.RequestType:  sSV1RequestType,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:        initUsage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "Unexist",
+			ID:     "testSSv1ItInitiateSessionNotFoundCharger",
+			Event: map[string]interface{}{
+				utils.Tenant:       "Unexist",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "testSSv1ItInitiateSessionNotFoundCharger",
+				utils.RequestType:  sSV1RequestType,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:        initUsage,
 			},
 		},
 	}

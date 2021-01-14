@@ -823,13 +823,11 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1001",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
 			},
 		},
 	}
@@ -867,16 +865,14 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 	}
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsRatesUsage: "2m10s",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1001",
-				},
 			},
 		},
 	}
@@ -933,16 +929,14 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 	}
 
 	argsRt2 := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsRatesUsage: "4h10m15s",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1001",
-				},
 			},
 		},
 	}
@@ -982,16 +976,14 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 func testV1RateCostForEventWithWrongUsage(t *testing.T) {
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsRatesUsage: "wrongUsage",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1001",
-				},
 			},
 		},
 	}
@@ -1032,16 +1024,14 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1001",
-				},
 			},
 		},
 	}
@@ -1071,16 +1061,14 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 	}
 
 	argsRt2 := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC).String(),
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1001",
-				},
 			},
 		},
 	}
@@ -1094,16 +1082,14 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 func testV1RateCostForEventWithWrongStartTime(t *testing.T) {
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: "wrongTime",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1001",
-				},
 			},
 		},
 	}
@@ -1124,17 +1110,15 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 	}
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 				utils.OptsRatesUsage:     "2m10s",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1001",
-				},
 			},
 		},
 	}
@@ -1191,17 +1175,15 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 	}
 
 	argsRt2 := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 				utils.OptsRatesUsage:     "4h10m15s",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1001",
-				},
 			},
 		},
 	}

@@ -41,34 +41,30 @@ var (
 
 	tEvs = []*engine.ThresholdsArgsProcessEvent{
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
-					Tenant: "cgrates.org",
-					ID:     "event1",
-					Event: map[string]interface{}{
-						utils.EventType:     utils.AccountUpdate,
-						utils.AccountField:  "1002",
-						utils.AllowNegative: true,
-						utils.Disabled:      false,
-						utils.Units:         12.3},
-				},
+			CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.EventType:     utils.AccountUpdate,
+					utils.AccountField:  "1002",
+					utils.AllowNegative: true,
+					utils.Disabled:      false,
+					utils.Units:         12.3},
 				Opts: map[string]interface{}{
 					utils.MetaEventType: utils.AccountUpdate,
 				},
 			},
 		},
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
-					Tenant: "cgrates.org",
-					ID:     "event2",
-					Event: map[string]interface{}{
-						utils.EventType:    utils.BalanceUpdate,
-						utils.AccountField: "1002",
-						utils.BalanceID:    utils.MetaDefault,
-						utils.Units:        12.3,
-						utils.ExpiryTime:   time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
-					},
+			CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					utils.EventType:    utils.BalanceUpdate,
+					utils.AccountField: "1002",
+					utils.BalanceID:    utils.MetaDefault,
+					utils.Units:        12.3,
+					utils.ExpiryTime:   time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
 				},
 				Opts: map[string]interface{}{
 					utils.MetaEventType: utils.BalanceUpdate,
@@ -76,21 +72,19 @@ var (
 			},
 		},
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{ // hitting THD_STATS_1
-					Tenant: "cgrates.org",
-					ID:     "event3",
-					Event: map[string]interface{}{
-						utils.EventType:    utils.StatUpdate,
-						utils.StatID:       "Stats1",
-						utils.AccountField: "1002",
-						"ASR":              35.0,
-						"ACD":              "2m45s",
-						"TCC":              12.7,
-						"TCD":              "12m15s",
-						"ACC":              0.75,
-						"PDD":              "2s",
-					},
+			CGREvent: &utils.CGREvent{ // hitting THD_STATS_1
+				Tenant: "cgrates.org",
+				ID:     "event3",
+				Event: map[string]interface{}{
+					utils.EventType:    utils.StatUpdate,
+					utils.StatID:       "Stats1",
+					utils.AccountField: "1002",
+					"ASR":              35.0,
+					"ACD":              "2m45s",
+					"TCC":              12.7,
+					"TCD":              "12m15s",
+					"ACC":              0.75,
+					"PDD":              "2s",
 				},
 				Opts: map[string]interface{}{
 					utils.MetaEventType: utils.StatUpdate,
@@ -98,18 +92,16 @@ var (
 			},
 		},
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{ // hitting THD_STATS_1 and THD_STATS_2
-					Tenant: "cgrates.org",
-					ID:     "event4",
-					Event: map[string]interface{}{
-						utils.EventType:    utils.StatUpdate,
-						utils.StatID:       "STATS_HOURLY_DE",
-						utils.AccountField: "1002",
-						"ASR":              35.0,
-						"ACD":              "2m45s",
-						"TCD":              "1h",
-					},
+			CGREvent: &utils.CGREvent{ // hitting THD_STATS_1 and THD_STATS_2
+				Tenant: "cgrates.org",
+				ID:     "event4",
+				Event: map[string]interface{}{
+					utils.EventType:    utils.StatUpdate,
+					utils.StatID:       "STATS_HOURLY_DE",
+					utils.AccountField: "1002",
+					"ASR":              35.0,
+					"ACD":              "2m45s",
+					"TCD":              "1h",
 				},
 				Opts: map[string]interface{}{
 					utils.MetaEventType: utils.StatUpdate,
@@ -117,17 +109,15 @@ var (
 			},
 		},
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{ // hitting THD_STATS_3
-					Tenant: "cgrates.org",
-					ID:     "event5",
-					Event: map[string]interface{}{
-						utils.EventType:    utils.StatUpdate,
-						utils.StatID:       "STATS_DAILY_DE",
-						utils.AccountField: "1002",
-						"ACD":              "2m45s",
-						"TCD":              "3h1s",
-					},
+			CGREvent: &utils.CGREvent{ // hitting THD_STATS_3
+				Tenant: "cgrates.org",
+				ID:     "event5",
+				Event: map[string]interface{}{
+					utils.EventType:    utils.StatUpdate,
+					utils.StatID:       "STATS_DAILY_DE",
+					utils.AccountField: "1002",
+					"ACD":              "2m45s",
+					"TCD":              "3h1s",
 				},
 				Opts: map[string]interface{}{
 					utils.MetaEventType: utils.StatUpdate,
@@ -135,16 +125,14 @@ var (
 			},
 		},
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{ // hitting THD_RES_1
-					Tenant: "cgrates.org",
-					ID:     "event6",
-					Event: map[string]interface{}{
-						utils.EventType:    utils.ResourceUpdate,
-						utils.AccountField: "1002",
-						utils.ResourceID:   "RES_GRP_1",
-						utils.Usage:        10.0,
-					},
+			CGREvent: &utils.CGREvent{ // hitting THD_RES_1
+				Tenant: "cgrates.org",
+				ID:     "event6",
+				Event: map[string]interface{}{
+					utils.EventType:    utils.ResourceUpdate,
+					utils.AccountField: "1002",
+					utils.ResourceID:   "RES_GRP_1",
+					utils.Usage:        10.0,
 				},
 				Opts: map[string]interface{}{
 					utils.MetaEventType: utils.ResourceUpdate,
@@ -152,16 +140,14 @@ var (
 			},
 		},
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{ // hitting THD_RES_1
-					Tenant: "cgrates.org",
-					ID:     "event6",
-					Event: map[string]interface{}{
-						utils.EventType:    utils.ResourceUpdate,
-						utils.AccountField: "1002",
-						utils.ResourceID:   "RES_GRP_1",
-						utils.Usage:        10.0,
-					},
+			CGREvent: &utils.CGREvent{ // hitting THD_RES_1
+				Tenant: "cgrates.org",
+				ID:     "event6",
+				Event: map[string]interface{}{
+					utils.EventType:    utils.ResourceUpdate,
+					utils.AccountField: "1002",
+					utils.ResourceID:   "RES_GRP_1",
+					utils.Usage:        10.0,
 				},
 				Opts: map[string]interface{}{
 					utils.MetaEventType: utils.ResourceUpdate,
@@ -169,16 +155,14 @@ var (
 			},
 		},
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{ // hitting THD_RES_1
-					Tenant: "cgrates.org",
-					ID:     "event6",
-					Event: map[string]interface{}{
-						utils.EventType:    utils.ResourceUpdate,
-						utils.AccountField: "1002",
-						utils.ResourceID:   "RES_GRP_1",
-						utils.Usage:        10.0,
-					},
+			CGREvent: &utils.CGREvent{ // hitting THD_RES_1
+				Tenant: "cgrates.org",
+				ID:     "event6",
+				Event: map[string]interface{}{
+					utils.EventType:    utils.ResourceUpdate,
+					utils.AccountField: "1002",
+					utils.ResourceID:   "RES_GRP_1",
+					utils.Usage:        10.0,
 				},
 				Opts: map[string]interface{}{
 					utils.MetaEventType: utils.ResourceUpdate,
@@ -186,33 +170,31 @@ var (
 			},
 		},
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{ // hitting THD_CDRS_1
-					Tenant: "cgrates.org",
-					ID:     "cdrev1",
-					Event: map[string]interface{}{
-						"field_extr1":      "val_extr1",
-						"fieldextr2":       "valextr2",
-						utils.CGRID:        utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-						utils.RunID:        utils.MetaRaw,
-						utils.OrderID:      123,
-						utils.OriginHost:   "192.168.1.1",
-						utils.Source:       utils.UnitTest,
-						utils.OriginID:     "dsafdsaf",
-						utils.ToR:          utils.MetaVoice,
-						utils.RequestType:  utils.MetaRated,
-						utils.Tenant:       "cgrates.org",
-						utils.Category:     "call",
-						utils.AccountField: "1007",
-						utils.Subject:      "1007",
-						utils.Destination:  "+4986517174963",
-						utils.SetupTime:    time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-						utils.PDD:          0 * time.Second,
-						utils.AnswerTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-						utils.Usage:        10 * time.Second,
-						utils.Route:        "SUPPL1",
-						utils.Cost:         -1.0,
-					},
+			CGREvent: &utils.CGREvent{ // hitting THD_CDRS_1
+				Tenant: "cgrates.org",
+				ID:     "cdrev1",
+				Event: map[string]interface{}{
+					"field_extr1":      "val_extr1",
+					"fieldextr2":       "valextr2",
+					utils.CGRID:        utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+					utils.RunID:        utils.MetaRaw,
+					utils.OrderID:      123,
+					utils.OriginHost:   "192.168.1.1",
+					utils.Source:       utils.UnitTest,
+					utils.OriginID:     "dsafdsaf",
+					utils.ToR:          utils.MetaVoice,
+					utils.RequestType:  utils.MetaRated,
+					utils.Tenant:       "cgrates.org",
+					utils.Category:     "call",
+					utils.AccountField: "1007",
+					utils.Subject:      "1007",
+					utils.Destination:  "+4986517174963",
+					utils.SetupTime:    time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+					utils.PDD:          0 * time.Second,
+					utils.AnswerTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+					utils.Usage:        10 * time.Second,
+					utils.Route:        "SUPPL1",
+					utils.Cost:         -1.0,
 				},
 				Opts: map[string]interface{}{
 					utils.MetaEventType: utils.CDR,
@@ -586,13 +568,11 @@ func testV1TSMaxHits(t *testing.T) {
 	var ids []string
 	eIDs := []string{"TH3"}
 	thEvent := &engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{ // hitting TH3
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "1002",
-				},
+		CGREvent: &utils.CGREvent{ // hitting TH3
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
 			},
 		},
 	}
@@ -696,13 +676,11 @@ func testV1TSUpdateSnooze(t *testing.T) {
 	eIDs := []string{"TH4"}
 	thEvent := &engine.ThresholdsArgsProcessEvent{
 		ThresholdIDs: []string{"TH4"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{ // hitting TH4
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					"CustomEv": "SnoozeEv",
-				},
+		CGREvent: &utils.CGREvent{ // hitting TH4
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				"CustomEv": "SnoozeEv",
 			},
 		},
 	}
@@ -832,12 +810,10 @@ func testV1TSProcessEventWithoutTenant(t *testing.T) {
 	eIDs := []string{"TH4"}
 	thEvent := &engine.ThresholdsArgsProcessEvent{
 		ThresholdIDs: []string{"TH4"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{ // hitting TH4
-				ID: "event1",
-				Event: map[string]interface{}{
-					"CustomEv": "SnoozeEv",
-				},
+		CGREvent: &utils.CGREvent{ // hitting TH4
+			ID: "event1",
+			Event: map[string]interface{}{
+				"CustomEv": "SnoozeEv",
 			},
 		},
 	}
@@ -924,12 +900,10 @@ func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 	}
 
 	acntUpdateEv := &engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{ // hitting TH_ACNT_UPDATE_EV
-				Tenant: "cgrates.org",
-				ID:     "SIMULATE_ACNT_UPDATE_EV",
-				Event:  acnt.AsAccountSummary().AsMapInterface(),
-			},
+		CGREvent: &utils.CGREvent{ // hitting TH_ACNT_UPDATE_EV
+			Tenant: "cgrates.org",
+			ID:     "SIMULATE_ACNT_UPDATE_EV",
+			Event:  acnt.AsAccountSummary().AsMapInterface(),
 			Opts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},

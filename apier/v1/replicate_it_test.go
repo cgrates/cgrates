@@ -1207,17 +1207,15 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	tEvs := engine.ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.EventType:     utils.AccountUpdate,
-					utils.AccountField:  "1005",
-					utils.AllowNegative: true,
-					utils.Disabled:      false,
-					utils.Units:         12.3},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType:     utils.AccountUpdate,
+				utils.AccountField:  "1005",
+				utils.AllowNegative: true,
+				utils.Disabled:      false,
+				utils.Units:         12.3},
 			Opts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},

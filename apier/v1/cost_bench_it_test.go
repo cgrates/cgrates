@@ -265,16 +265,14 @@ func BenchmarkCostWithRateS(b *testing.B) {
 	testCostBenchSetRateProfile(b)
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsRatesUsage: "2m",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1001",
-				},
 			},
 		},
 	}
@@ -299,17 +297,15 @@ func BenchmarkCostDiffPeriodWithRateS(b *testing.B) {
 	testCostBenchSetRateProfile2(b)
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.Subject: "1010",
+			},
 			Opts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2020, 12, 23, 59, 0, 0, 0, time.UTC),
 				utils.OptsRatesUsage:     "2h",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Subject: "1010",
-				},
 			},
 		},
 	}

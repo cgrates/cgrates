@@ -126,27 +126,23 @@ func testCacheSReplicateLoadTariffPlanFromFolder(t *testing.T) {
 func testCacheSReplicateProcessAttributes(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testCacheSReplicateProcessAttributes",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testCacheSReplicateProcessAttributes",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
 			},
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "OfficeGroup"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testCacheSReplicateProcessAttributes",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					"OfficeGroup":      "Marketing",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testCacheSReplicateProcessAttributes",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				"OfficeGroup":      "Marketing",
 			},
 		},
 	}
@@ -178,13 +174,11 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 func testCacheSReplicateProcessRateProfile(t *testing.T) {
 	var rply *engine.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.AccountField: "1002",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
 			},
 		},
 	}
