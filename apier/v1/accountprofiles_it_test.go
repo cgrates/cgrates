@@ -190,7 +190,7 @@ func testAccountSGetAccountProfile(t *testing.T) {
 
 func testAccountSPing(t *testing.T) {
 	var resp string
-	if err := accSRPC.Call(utils.AccountSv1Ping, new(utils.CGREventWithOpts), &resp); err != nil {
+	if err := accSRPC.Call(utils.AccountSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)

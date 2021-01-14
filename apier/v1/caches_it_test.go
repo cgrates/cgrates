@@ -455,7 +455,7 @@ func testCacheSPrecacheStatus(t *testing.T) {
 func testCacheSPing(t *testing.T) {
 	var reply string
 	expected := utils.Pong
-	if err := chcRPC.Call(utils.CacheSv1Ping, &utils.CGREventWithOpts{}, &reply); err != nil {
+	if err := chcRPC.Call(utils.CacheSv1Ping, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("Expected: %v , received:%v", utils.ToJSON(expected), utils.ToJSON(reply))

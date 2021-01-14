@@ -110,18 +110,16 @@ func testV1RouteSWithRateSFromFolder(t *testing.T) {
 
 func testV1RouteSWithRateSGetRoutes(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testV1RouteSWithRateSGetRoutes",
-				Event: map[string]interface{}{
-					utils.AccountField: "1003",
-					utils.Subject:      "1003",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        "1m20s",
-					"EventName":        "RouteWithRateS",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1RouteSWithRateSGetRoutes",
+			Event: map[string]interface{}{
+				utils.AccountField: "1003",
+				utils.Subject:      "1003",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        "1m20s",
+				"EventName":        "RouteWithRateS",
 			},
 		},
 	}
@@ -227,18 +225,16 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 	// we expect that the route with account to have cost 0
 	tNow := time.Now()
 	ev := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Time:   &tNow,
-				ID:     "testV1RouteAccountWithRatingPlan",
-				Event: map[string]interface{}{
-					utils.AccountField: "RandomAccount",
-					utils.Destination:  "+135876",
-					utils.SetupTime:    utils.MetaNow,
-					utils.Usage:        "30s",
-					"EventType":        "testV1RouteSWithRateSAccountWithRateProfile",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Time:   &tNow,
+			ID:     "testV1RouteAccountWithRatingPlan",
+			Event: map[string]interface{}{
+				utils.AccountField: "RandomAccount",
+				utils.Destination:  "+135876",
+				utils.SetupTime:    utils.MetaNow,
+				utils.Usage:        "30s",
+				"EventType":        "testV1RouteSWithRateSAccountWithRateProfile",
 			},
 		},
 	}
@@ -281,18 +277,16 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 	// test for 60 seconds usage
 	// 30 seconds are covered by account and the remaining will be calculated
 	ev = &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Time:   &tNow,
-				ID:     "testV1RouteAccountWithRatingPlan",
-				Event: map[string]interface{}{
-					utils.AccountField: "RandomAccount",
-					utils.Destination:  "+135876",
-					utils.SetupTime:    utils.MetaNow,
-					utils.Usage:        "60s",
-					"EventType":        "testV1RouteSWithRateSAccountWithRateProfile",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Time:   &tNow,
+			ID:     "testV1RouteAccountWithRatingPlan",
+			Event: map[string]interface{}{
+				utils.AccountField: "RandomAccount",
+				utils.Destination:  "+135876",
+				utils.SetupTime:    utils.MetaNow,
+				utils.Usage:        "60s",
+				"EventType":        "testV1RouteSWithRateSAccountWithRateProfile",
 			},
 		},
 	}
@@ -336,18 +330,16 @@ func testV1RouteSWithRateSAccountWithRateProfile(t *testing.T) {
 	// test for 61 seconds usage
 	// 30 seconds are covered by account and the remaining will be calculated
 	ev = &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Time:   &tNow,
-				ID:     "testV1RouteAccountWithRatingPlan",
-				Event: map[string]interface{}{
-					utils.AccountField: "RandomAccount",
-					utils.Destination:  "+135876",
-					utils.SetupTime:    utils.MetaNow,
-					utils.Usage:        "1m1s",
-					"EventType":        "testV1RouteSWithRateSAccountWithRateProfile",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Time:   &tNow,
+			ID:     "testV1RouteAccountWithRatingPlan",
+			Event: map[string]interface{}{
+				utils.AccountField: "RandomAccount",
+				utils.Destination:  "+135876",
+				utils.SetupTime:    utils.MetaNow,
+				utils.Usage:        "1m1s",
+				"EventType":        "testV1RouteSWithRateSAccountWithRateProfile",
 			},
 		},
 	}
@@ -421,18 +413,16 @@ func testV1RouteSWithRateSWithEmptyRateProfileIDs(t *testing.T) {
 	}
 
 	ev := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testV1RouteSWithRateSGetRoutes",
-				Event: map[string]interface{}{
-					utils.AccountField: "1003",
-					utils.Subject:      "1003",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        "1m20s",
-					"EventName":        "testV1RouteSWithRateSWithEmptyRateProfileIDs",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1RouteSWithRateSGetRoutes",
+			Event: map[string]interface{}{
+				utils.AccountField: "1003",
+				utils.Subject:      "1003",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        "1m20s",
+				"EventName":        "testV1RouteSWithRateSWithEmptyRateProfileIDs",
 			},
 		},
 	}

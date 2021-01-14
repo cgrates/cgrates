@@ -132,13 +132,11 @@ func testDspITLoadData(t *testing.T) {
 }
 
 func testDspDspv1GetProfileForEvent(t *testing.T) {
-	arg := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testDspv1",
-			Event: map[string]interface{}{
-				utils.EventName: "Event1",
-			},
+	arg := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testDspv1",
+		Event: map[string]interface{}{
+			utils.EventName: "Event1",
 		},
 		Opts: map[string]interface{}{
 			utils.Subsys: utils.MetaAny,
@@ -181,12 +179,10 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 
-	arg2 := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			ID: "testDspvWithoutTenant",
-			Event: map[string]interface{}{
-				utils.EventName: "Event1",
-			},
+	arg2 := &utils.CGREvent{
+		ID: "testDspvWithoutTenant",
+		Event: map[string]interface{}{
+			utils.EventName: "Event1",
 		},
 		Opts: map[string]interface{}{
 			utils.Subsys: utils.MetaAny,
@@ -203,12 +199,10 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 }
 
 func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
-	arg := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testDspv2",
-			Event:  map[string]interface{}{},
-		},
+	arg := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testDspv2",
+		Event:  map[string]interface{}{},
 		Opts: map[string]interface{}{
 			utils.Subsys:               utils.MetaAny,
 			utils.OptsDispatcherMethod: utils.DispatcherSv1GetProfileForEvent,

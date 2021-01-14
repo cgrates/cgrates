@@ -131,6 +131,7 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 		Tenant: ev.Tenant,
 		ID:     ev.ID,
 		Event:  make(map[string]interface{}), // a bit forced but safe
+		Opts:   make(map[string]interface{}),
 	}
 	if ev.Time != nil {
 		clned.Time = TimePointer(*ev.Time)
@@ -139,7 +140,6 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 		clned.Event[k] = v
 	}
 	if ev.Opts != nil {
-		clned.Opts = make(map[string]interface{})
 		for opt, val := range ev.Opts {
 			clned.Opts[opt] = val
 		}

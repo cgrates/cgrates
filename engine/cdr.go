@@ -448,6 +448,7 @@ func (cdr *CDR) AsCGREvent() *utils.CGREvent {
 		Tenant: cdr.Tenant,
 		ID:     utils.UUIDSha1Prefix(),
 		Event:  cdr.AsMapStringIface(),
+		Opts:   map[string]interface{}{},
 	}
 }
 
