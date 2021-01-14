@@ -368,34 +368,32 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
 	}
 	ev := &ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "cdrev1",
-				Event: map[string]interface{}{
-					utils.EventType:    utils.CDR,
-					"field_extr1":      "val_extr1",
-					"fieldextr2":       "valextr2",
-					utils.CGRID:        utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-					utils.RunID:        utils.MetaRaw,
-					utils.OrderID:      123,
-					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       utils.UnitTest,
-					utils.OriginID:     "dsafdsaf",
-					utils.ToR:          utils.MetaVoice,
-					utils.RequestType:  utils.MetaRated,
-					utils.Tenant:       "cgrates.org",
-					utils.Category:     "call",
-					utils.AccountField: "th_acc",
-					utils.Subject:      "th_acc",
-					utils.Destination:  "+4986517174963",
-					utils.SetupTime:    time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-					utils.PDD:          0 * time.Second,
-					utils.AnswerTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-					utils.Usage:        10 * time.Second,
-					utils.Route:        "SUPPL1",
-					utils.Cost:         -1.0,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "cdrev1",
+			Event: map[string]interface{}{
+				utils.EventType:    utils.CDR,
+				"field_extr1":      "val_extr1",
+				"fieldextr2":       "valextr2",
+				utils.CGRID:        utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+				utils.RunID:        utils.MetaRaw,
+				utils.OrderID:      123,
+				utils.OriginHost:   "192.168.1.1",
+				utils.Source:       utils.UnitTest,
+				utils.OriginID:     "dsafdsaf",
+				utils.ToR:          utils.MetaVoice,
+				utils.RequestType:  utils.MetaRated,
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.AccountField: "th_acc",
+				utils.Subject:      "th_acc",
+				utils.Destination:  "+4986517174963",
+				utils.SetupTime:    time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+				utils.PDD:          0 * time.Second,
+				utils.AnswerTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+				utils.Usage:        10 * time.Second,
+				utils.Route:        "SUPPL1",
+				utils.Cost:         -1.0,
 			},
 			Opts: map[string]interface{}{
 				utils.MetaEventType: utils.CDR,
@@ -597,7 +595,7 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 	var ids []string
 	eIDs := []string{"TH_CGRRPC"}
 	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{CGREvent: ev}}, &ids); err != nil {
+		CGREvent: ev}, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
@@ -652,28 +650,26 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
 	}
-	ev := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "cdrev1",
-			Event: map[string]interface{}{
-				"field_extr1":     "val_extr1",
-				"fieldextr2":      "valextr2",
-				utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-				utils.RunID:       utils.MetaRaw,
-				utils.OrderID:     123,
-				utils.OriginHost:  "192.168.1.1",
-				utils.Source:      utils.UnitTest,
-				utils.OriginID:    "dsafdsaf",
-				utils.RequestType: utils.MetaRated,
-				utils.Tenant:      "cgrates.org",
-				utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-				utils.PDD:         0 * time.Second,
-				utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-				utils.Usage:       10 * time.Second,
-				utils.Route:       "SUPPL1",
-				utils.Cost:        -1.0,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "cdrev1",
+		Event: map[string]interface{}{
+			"field_extr1":     "val_extr1",
+			"fieldextr2":      "valextr2",
+			utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			utils.RunID:       utils.MetaRaw,
+			utils.OrderID:     123,
+			utils.OriginHost:  "192.168.1.1",
+			utils.Source:      utils.UnitTest,
+			utils.OriginID:    "dsafdsaf",
+			utils.RequestType: utils.MetaRated,
+			utils.Tenant:      "cgrates.org",
+			utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+			utils.PDD:         0 * time.Second,
+			utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+			utils.Usage:       10 * time.Second,
+			utils.Route:       "SUPPL1",
+			utils.Cost:        -1.0,
 		},
 		Opts: map[string]interface{}{
 			utils.MetaEventType: utils.CDR,
@@ -682,7 +678,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 	var ids []string
 	eIDs := []string{"THD_PostEvent"}
 	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
-		CGREventWithOpts: ev}, &ids); err != nil {
+		CGREvent: ev}, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
@@ -768,14 +764,12 @@ func testActionsitSetSDestinations(t *testing.T) {
 	var reply2 []string
 	expected := []string{"DistinctMetricProfile"}
 	args := StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.Destination: "333",
-					utils.Usage:       6 * time.Second,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Destination: "333",
+				utils.Usage:       6 * time.Second,
 			},
 		},
 	}
@@ -786,14 +780,12 @@ func testActionsitSetSDestinations(t *testing.T) {
 	}
 
 	args = StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event2",
-				Event: map[string]interface{}{
-					utils.Destination: "777",
-					utils.Usage:       6 * time.Second,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Destination: "777",
+				utils.Usage:       6 * time.Second,
 			},
 		},
 	}
