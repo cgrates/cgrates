@@ -94,21 +94,19 @@ func testCdrsIntRpcConn(t *testing.T) {
 func testCdrsIntTestTTL(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*store:true"},
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testCdrsIntTestTTL",
-					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       "testCdrsIntTestTTL",
-					utils.RequestType:  utils.MetaNone,
-					utils.Category:     "call",
-					utils.AccountField: "testCdrsIntTestTTL",
-					utils.Subject:      "ANY2CNT2",
-					utils.Destination:  "+4986517174963",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        time.Minute,
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testCdrsIntTestTTL",
+				utils.OriginHost:   "192.168.1.1",
+				utils.Source:       "testCdrsIntTestTTL",
+				utils.RequestType:  utils.MetaNone,
+				utils.Category:     "call",
+				utils.AccountField: "testCdrsIntTestTTL",
+				utils.Subject:      "ANY2CNT2",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        time.Minute,
 			},
 		},
 	}

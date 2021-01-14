@@ -135,22 +135,20 @@ func testSes2ItInitSession(t *testing.T) {
 	// Init session
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.EventName:    "TEST_EVENT",
-					utils.OriginID:     utils.UUIDSha1Prefix(),
-					utils.ToR:          utils.MetaVoice,
-					utils.Category:     "call",
-					utils.Tenant:       "cgrates.org",
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.EventName:    "TEST_EVENT",
+				utils.OriginID:     utils.UUIDSha1Prefix(),
+				utils.ToR:          utils.MetaVoice,
+				utils.Category:     "call",
+				utils.Tenant:       "cgrates.org",
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 			},
 		},
 	}
@@ -189,22 +187,21 @@ func testSes2ItStopCgrEngine(t *testing.T) {
 func testSes2StirAuthenticate(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaSTIRAuthenticate},
-		CGREventWithOpts: &utils.CGREventWithOpts{
+
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSes2StirAuthorize",
+			Event: map[string]interface{}{
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "testSes2StirAuthorize",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.Usage:        10 * time.Minute,
+			},
 			Opts: map[string]interface{}{
 				utils.OptsStirIdentity: "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testSes2StirAuthorize",
-				Event: map[string]interface{}{
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "testSes2StirAuthorize",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.Usage:        10 * time.Minute,
-				},
 			},
 		},
 	}
@@ -231,23 +228,22 @@ func testSes2StirAuthenticate(t *testing.T) {
 func testSes2StirInit(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
 		Flags: []string{utils.MetaSTIRInitiate},
-		CGREventWithOpts: &utils.CGREventWithOpts{
+
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSes2StirInit",
+			Event: map[string]interface{}{
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "testSes2StirInit",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+				utils.Usage:        10 * time.Minute,
+			},
 			Opts: map[string]interface{}{
 				utils.OptsStirPublicKeyPath:  "/usr/share/cgrates/stir/stir_pubkey.pem",
 				utils.OptsStirPrivateKeyPath: "/usr/share/cgrates/stir/stir_privatekey.pem",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testSes2StirInit",
-				Event: map[string]interface{}{
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "testSes2StirInit",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AccountField: "1001",
-					utils.Subject:      "ANY2CNT",
-					utils.Destination:  "1002",
-					utils.Usage:        10 * time.Minute,
-				},
 			},
 		},
 	}

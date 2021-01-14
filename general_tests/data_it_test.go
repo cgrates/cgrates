@@ -444,29 +444,28 @@ func testV1DataInitSession(t *testing.T) {
 	initUsage := 10000
 	args := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
+
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1DataInitSession",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaData,
+				utils.Category:     "data",
+				utils.OriginID:     "781512335",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "testV1DataInitSession",
+				utils.Subject:      "10kilo",
+				utils.Destination:  "*any",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:        initUsage,
+			},
 			Opts: map[string]interface{}{
 				utils.OptsSessionTTL:         "300s",
 				utils.OptsSessionTTLLastUsed: "0s",
 				utils.OptsSessionTTLMaxDelay: "1800s",
 				utils.OptsSessionTTLUsage:    "0s",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testV1DataInitSession",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaData,
-					utils.Category:     "data",
-					utils.OriginID:     "781512335",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AccountField: "testV1DataInitSession",
-					utils.Subject:      "10kilo",
-					utils.Destination:  "*any",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.Usage:        initUsage,
-				},
 			},
 		},
 	}
@@ -490,31 +489,30 @@ func testV1DataUpdateWith1Mo(t *testing.T) {
 	reqUsage := 1000000
 	args := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
+
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1DataUpdateWith1Mo",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaData,
+				utils.Category:     "data",
+				"InitialOriginID":  "781512335",
+				"LastUsed":         0,
+				"OriginID":         "781512335-11",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "testV1DataInitSession",
+				utils.Subject:      "10kilo",
+				utils.Destination:  "*any",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:        reqUsage,
+			},
 			Opts: map[string]interface{}{
 				utils.OptsSessionTTL:         "28807s",
 				utils.OptsSessionTTLLastUsed: "0s",
 				utils.OptsSessionTTLMaxDelay: "1800s",
 				utils.OptsSessionTTLUsage:    "0s"},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testV1DataUpdateWith1Mo",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaData,
-					utils.Category:     "data",
-					"InitialOriginID":  "781512335",
-					"LastUsed":         0,
-					"OriginID":         "781512335-11",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AccountField: "testV1DataInitSession",
-					utils.Subject:      "10kilo",
-					utils.Destination:  "*any",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.Usage:        reqUsage,
-				},
-			},
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
@@ -536,31 +534,29 @@ func testV1DataUpdateWith1Go(t *testing.T) {
 	reqUsage := 1000000000
 	args := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1DataUpdateWith1Go",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaData,
+				utils.Category:     "data",
+				"InitialOriginID":  "781512335",
+				"LastUsed":         946405,
+				"OriginID":         "781512335-11",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "testV1DataInitSession",
+				utils.Subject:      "10kilo",
+				utils.Destination:  "*any",
+				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:        reqUsage,
+			},
 			Opts: map[string]interface{}{
 				utils.OptsSessionTTL:         "28807s",
 				utils.OptsSessionTTLLastUsed: "0s",
 				utils.OptsSessionTTLMaxDelay: "1800s",
 				utils.OptsSessionTTLUsage:    "0s"},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testV1DataUpdateWith1Go",
-				Event: map[string]interface{}{
-					utils.Tenant:       "cgrates.org",
-					utils.ToR:          utils.MetaData,
-					utils.Category:     "data",
-					"InitialOriginID":  "781512335",
-					"LastUsed":         946405,
-					"OriginID":         "781512335-11",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AccountField: "testV1DataInitSession",
-					utils.Subject:      "10kilo",
-					utils.Destination:  "*any",
-					utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.Usage:        reqUsage,
-				},
-			},
 		},
 	}
 	var rply sessions.V1UpdateSessionReply

@@ -162,17 +162,15 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 	}
 	ev := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testV1SplSGetLeastCostSuppliers",
-				Event: map[string]interface{}{
-					utils.AccountField: "accc",
-					utils.Subject:      "1003",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        "1m20s",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetLeastCostSuppliers",
+			Event: map[string]interface{}{
+				utils.AccountField: "accc",
+				utils.Subject:      "1003",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        "1m20s",
 			},
 		},
 	}
@@ -344,17 +342,16 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "RandomID",
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "Event1",
-				Event: map[string]interface{}{
-					"Account":  "1002",
-					"Supplier": "route1",
-					"ResID":    "ResourceSupplier1",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "Event1",
+			Event: map[string]interface{}{
+				"Account":  "1002",
+				"Supplier": "route1",
+				"ResID":    "ResourceSupplier1",
 			},
 		},
+
 		Units: 4,
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
@@ -369,17 +366,16 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "RandomID2",
 
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "Event2",
-				Event: map[string]interface{}{
-					"Account":  "1002",
-					"Supplier": "route1",
-					"ResID":    "Resource2Supplier1",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "Event2",
+			Event: map[string]interface{}{
+				"Account":  "1002",
+				"Supplier": "route1",
+				"ResID":    "Resource2Supplier1",
 			},
 		},
+
 		Units: 7,
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
@@ -393,17 +389,16 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "RandomID3",
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "Event3",
-				Event: map[string]interface{}{
-					"Account":  "1002",
-					"Supplier": "route2",
-					"ResID":    "ResourceSupplier2",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "Event3",
+			Event: map[string]interface{}{
+				"Account":  "1002",
+				"Supplier": "route2",
+				"ResID":    "ResourceSupplier2",
 			},
 		},
+
 		Units: 7,
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
@@ -417,15 +412,13 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "RandomID4",
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "Event4",
-				Event: map[string]interface{}{
-					"Account":  "1002",
-					"Supplier": "route3",
-					"ResID":    "ResourceSupplier3",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "Event4",
+			Event: map[string]interface{}{
+				"Account":  "1002",
+				"Supplier": "route3",
+				"ResID":    "ResourceSupplier3",
 			},
 		},
 		Units: 7,
@@ -443,13 +436,11 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 
 func testV1SplSGetSortedSuppliers(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testV1SplSGetSortedRoutes",
-				Event: map[string]interface{}{
-					"CustomField": "ResourceTest",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetSortedRoutes",
+			Event: map[string]interface{}{
+				"CustomField": "ResourceTest",
 			},
 		},
 	}
@@ -529,13 +520,11 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 
 func testV1SplSGetSortedSuppliers2(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testV1SplSGetSortedSuppliers2",
-				Event: map[string]interface{}{
-					"CustomField": "ResourceDescendent",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetSortedSuppliers2",
+			Event: map[string]interface{}{
+				"CustomField": "ResourceDescendent",
 			},
 		},
 	}
@@ -566,14 +555,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_Supplier1"}
 	ev1 := &engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					"LoadReq": 1,
-					"StatID":  "Stat_Supplier1",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier1",
 			},
 		},
 	}
@@ -585,14 +572,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 
 	expected = []string{"Stat_Supplier1"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event2",
-				Event: map[string]interface{}{
-					"LoadReq": 1,
-					"StatID":  "Stat_Supplier1",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier1",
 			},
 		},
 	}
@@ -616,14 +601,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 
 	expected = []string{"Stat_Supplier2"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event3",
-				Event: map[string]interface{}{
-					"LoadReq": 1,
-					"StatID":  "Stat_Supplier2",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier2",
 			},
 		},
 	}
@@ -635,14 +618,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 
 	expected = []string{"Stat_Supplier2"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event4",
-				Event: map[string]interface{}{
-					"LoadReq": 1,
-					"StatID":  "Stat_Supplier2",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event4",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier2",
 			},
 		},
 	}
@@ -662,14 +643,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 
 	expected = []string{"Stat_Supplier3"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event5",
-				Event: map[string]interface{}{
-					"LoadReq": 1,
-					"StatID":  "Stat_Supplier3",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event5",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier3",
 			},
 		},
 	}
@@ -681,14 +660,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 
 	expected = []string{"Stat_Supplier3"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event6",
-				Event: map[string]interface{}{
-					"LoadReq": 1,
-					"StatID":  "Stat_Supplier3",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event6",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier3",
 			},
 		},
 	}
@@ -700,14 +677,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 
 	expected = []string{"Stat_Supplier3"}
 	ev1 = &engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event7",
-				Event: map[string]interface{}{
-					"LoadReq": 1,
-					"StatID":  "Stat_Supplier3",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event7",
+			Event: map[string]interface{}{
+				"LoadReq": 1,
+				"StatID":  "Stat_Supplier3",
 			},
 		},
 	}
@@ -732,16 +707,15 @@ func testV1SplSPopulateStats(t *testing.T) {
 
 func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testV1SplSGetSoredSuppliersWithLoad",
-				Event: map[string]interface{}{
-					"DistinctMatch": "LoadDistStrategy",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetSoredSuppliersWithLoad",
+			Event: map[string]interface{}{
+				"DistinctMatch": "LoadDistStrategy",
 			},
 		},
 	}
+
 	expSuppliers := []*engine.SortedRoute{
 		{
 			RouteID:         "route2",
