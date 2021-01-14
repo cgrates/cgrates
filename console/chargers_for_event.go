@@ -27,7 +27,7 @@ func init() {
 	c := &CmdGetChargersForEvent{
 		name:      "chargers_for_event",
 		rpcMethod: utils.ChargerSv1GetChargersForEvent,
-		rpcParams: &utils.CGREventWithOpts{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetChargersForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREventWithOpts
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -50,10 +50,7 @@ func (self *CmdGetChargersForEvent) RpcMethod() string {
 
 func (self *CmdGetChargersForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREventWithOpts{
-			CGREvent: new(utils.CGREvent),
-			Opts:     make(map[string]interface{}),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }

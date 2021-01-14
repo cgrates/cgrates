@@ -1934,7 +1934,7 @@ func TestCallDescriptorAsCGREvent(t *testing.T) {
 			"Usage":       30 * time.Minute,
 		},
 	}
-	cgrEvent := cd.AsCGREvent()
+	cgrEvent := cd.AsCGREvent(nil)
 	if !reflect.DeepEqual(eCGREvent.Tenant, cgrEvent.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", eCGREvent.Tenant, cgrEvent.Tenant)
 	}

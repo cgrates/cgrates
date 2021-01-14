@@ -53,10 +53,7 @@ func (self *CmdSessionsInitiate) RpcMethod() string {
 func (self *CmdSessionsInitiate) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &sessions.V1InitSessionArgs{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: new(utils.CGREvent),
-				Opts:     make(map[string]interface{}),
-			},
+			CGREvent: new(utils.CGREvent),
 		}
 	}
 	return self.rpcParams

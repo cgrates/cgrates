@@ -272,6 +272,7 @@ func TestCGREventClone(t *testing.T) {
 			"PddInterval":      "1s",
 			"Weight":           20.0,
 		},
+		Opts: map[string]interface{}{},
 	}
 	cloned := ev.Clone()
 	if !reflect.DeepEqual(ev, cloned) {
@@ -378,48 +379,6 @@ func TestCGREventconsumeRoutePaginatorCase1(t *testing.T) {
 	}
 }
 
-func TestCGREventWithOptsClone(t *testing.T) {
-	//empty check
-	cgrEventWithOpts := new(CGREventWithOpts)
-	rcv := cgrEventWithOpts.Clone()
-	if !reflect.DeepEqual(cgrEventWithOpts, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithOpts, rcv)
-	}
-	//nil check
-	cgrEventWithOpts = nil
-	rcv = cgrEventWithOpts.Clone()
-	if !reflect.DeepEqual(cgrEventWithOpts, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithOpts, rcv)
-	}
-	//normal check
-	now := time.Now()
-	cgrEventWithOpts = &CGREventWithOpts{
-		CGREvent: &CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "IDtest",
-			Time:   &now,
-			Event: map[string]interface{}{
-				"test1": 1,
-				"test2": 2,
-				"test3": 3,
-			},
-		},
-		Opts: map[string]interface{}{
-			"Context": MetaSessionS,
-		},
-	}
-	rcv = cgrEventWithOpts.Clone()
-	if !reflect.DeepEqual(cgrEventWithOpts, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithOpts, rcv)
-	}
-	//check vars
-	rcv.Opts["var"] = 1
-	if reflect.DeepEqual(cgrEventWithOpts.Opts, rcv.Opts) {
-		t.Errorf("Expected to be different")
-	}
-
-}
-
 func TestCGREventFieldAsInt64(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
@@ -464,7 +423,7 @@ func TestCGREventFieldAsInt64(t *testing.T) {
 }
 
 func TestCGREventWithOptsCache(t *testing.T) {
-	event := &CGREventWithOpts{}
+	event := &CGREvent{}
 	event.CacheInit()
 	event.CacheSet("testKey", "string_for_test")
 	if rcv, _ := event.CacheGet("testKey"); rcv != "string_for_test" {

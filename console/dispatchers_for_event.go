@@ -36,7 +36,7 @@ func init() {
 type CmdDispatcherProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREventWithOpts
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -50,10 +50,7 @@ func (self *CmdDispatcherProfile) RpcMethod() string {
 
 func (self *CmdDispatcherProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREventWithOpts{
-			CGREvent: new(utils.CGREvent),
-			Opts:     make(map[string]interface{}),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }

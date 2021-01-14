@@ -53,10 +53,7 @@ func (self *CmdSessionsProcessEvent) RpcMethod() string {
 func (self *CmdSessionsProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &sessions.V1ProcessMessageArgs{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: new(utils.CGREvent),
-				Opts:     make(map[string]interface{}),
-			},
+			CGREvent: new(utils.CGREvent),
 		}
 	}
 	return self.rpcParams

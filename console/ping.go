@@ -103,7 +103,7 @@ func (self *CmdApierPing) PostprocessRpcParams() error {
 	if val, can := self.rpcParams.(*StringWrapper); can {
 		self.item = val.Item
 	}
-	self.rpcParams = &utils.CGREventWithOpts{}
+	self.rpcParams = &utils.CGREvent{}
 	return nil
 }
 

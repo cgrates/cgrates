@@ -97,44 +97,38 @@ var (
 			rPrf:   resprf[2],
 		},
 	}
-	resEvs = []*utils.CGREventWithOpts{
+	resEvs = []*utils.CGREvent{
 		{
-			CGREvent: &utils.CGREvent{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "event1",
-				Event: map[string]interface{}{
-					"Resources":      "ResourceProfile1",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-					"UsageInterval":  "1s",
-					"PddInterval":    "1s",
-					utils.Weight:     "20.0",
-					utils.Usage:      135 * time.Second,
-					utils.Cost:       123.0,
-				},
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "event1",
+			Event: map[string]interface{}{
+				"Resources":      "ResourceProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "20.0",
+				utils.Usage:      135 * time.Second,
+				utils.Cost:       123.0,
 			},
 		},
 		{
-			CGREvent: &utils.CGREvent{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "event2",
-				Event: map[string]interface{}{
-					"Resources":      "ResourceProfile2",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-					"UsageInterval":  "1s",
-					"PddInterval":    "1s",
-					utils.Weight:     "15.0",
-					utils.Usage:      45 * time.Second,
-				},
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "event2",
+			Event: map[string]interface{}{
+				"Resources":      "ResourceProfile2",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "15.0",
+				utils.Usage:      45 * time.Second,
 			},
 		},
 		{
-			CGREvent: &utils.CGREvent{
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				ID:     "event3",
-				Event: map[string]interface{}{
-					"Resources": "ResourceProfilePrefix",
-					utils.Usage: 30 * time.Second,
-				},
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     "event3",
+			Event: map[string]interface{}{
+				"Resources": "ResourceProfilePrefix",
+				utils.Usage: 30 * time.Second,
 			},
 		},
 	}
@@ -385,22 +379,18 @@ func TestResourcePopulateResourceService(t *testing.T) {
 func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 	var reply *string
 	argsMissingTenant := utils.ArgRSv1ResourceUsage{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				ID:    "id1",
-				Event: map[string]interface{}{},
-			},
+		CGREvent: &utils.CGREvent{
+			ID:    "id1",
+			Event: map[string]interface{}{},
 		},
 		UsageID: "test1", // ResourceUsage Identifier
 		Units:   20,
 	}
 	argsMissingUsageID := utils.ArgRSv1ResourceUsage{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "id1",
-				Event:  map[string]interface{}{},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "id1",
+			Event:  map[string]interface{}{},
 		},
 		Units: 20,
 	}
@@ -773,14 +763,12 @@ func TestResourceCaching(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 
-	ev := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Destination": "3002"},
-		},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "3002"},
 	}
 
 	mres, err := resService.matchingResourcesForEvent(ev.Tenant, ev,

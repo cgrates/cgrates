@@ -100,47 +100,41 @@ var (
 	}
 	statsEvs = []*StatsArgsProcessEvent{
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event1",
-					Event: map[string]interface{}{
-						"Stats":          "StatQueueProfile1",
-						utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-						"UsageInterval":  "1s",
-						"PddInterval":    "1s",
-						"Weight":         "9.0",
-						utils.Usage:      135 * time.Second,
-						utils.Cost:       123.0,
-					},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					"Stats":          "StatQueueProfile1",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+					"UsageInterval":  "1s",
+					"PddInterval":    "1s",
+					"Weight":         "9.0",
+					utils.Usage:      135 * time.Second,
+					utils.Cost:       123.0,
 				},
 			},
 		},
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event2",
-					Event: map[string]interface{}{
-						"Stats":          "StatQueueProfile2",
-						utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-						"UsageInterval":  "1s",
-						"PddInterval":    "1s",
-						"Weight":         "15.0",
-						utils.Usage:      45 * time.Second,
-					},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					"Stats":          "StatQueueProfile2",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+					"UsageInterval":  "1s",
+					"PddInterval":    "1s",
+					"Weight":         "15.0",
+					utils.Usage:      45 * time.Second,
 				},
 			},
 		},
 		{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event3",
-					Event: map[string]interface{}{
-						"Stats":     "StatQueueProfilePrefix",
-						utils.Usage: 30 * time.Second,
-					},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event3",
+				Event: map[string]interface{}{
+					"Stats":     "StatQueueProfilePrefix",
+					utils.Usage: 30 * time.Second,
 				},
 			},
 		},
@@ -401,8 +395,8 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sqPrf, tempStat)
 	}
 	ev := &StatsArgsProcessEvent{
-		StatIDs:          []string{"StatQueueProfile1", "StatQueueProfile2", "StatQueueProfile3"},
-		CGREventWithOpts: statsEvs[0].CGREventWithOpts,
+		StatIDs:  []string{"StatQueueProfile1", "StatQueueProfile2", "StatQueueProfile3"},
+		CGREvent: statsEvs[0].CGREvent,
 	}
 	reply := []string{}
 	expected := []string{"StatQueueProfile1", "StatQueueProfile3"}

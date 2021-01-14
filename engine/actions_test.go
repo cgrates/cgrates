@@ -2669,7 +2669,7 @@ func TestCdrLogAction(t *testing.T) {
 	if mock.args == nil {
 		t.Fatalf("Expected a call to %s", utils.CDRsV1ProcessEvent)
 	}
-	expCgrEv := &utils.CGREvent{
+	expCgrEv := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     mock.args.CGREvent.ID,
 		Event: map[string]interface{}{
@@ -2700,7 +2700,7 @@ func TestCdrLogAction(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(expCgrEv, mock.args.CGREvent) {
-		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expCgrEv), utils.ToJSON(mock.args.CGREvent))
+		t.Errorf("Expected: %+v \n,received: %+v", expCgrEv, mock.args.CGREvent)
 	}
 }
 
