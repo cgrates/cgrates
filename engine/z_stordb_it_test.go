@@ -28,6 +28,8 @@ import (
 	"testing"
 	"time"
 
+	"gorm.io/gorm/logger"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -87,6 +89,7 @@ func TestStorDBit(t *testing.T) {
 			100, 10, 0); err != nil {
 			t.Fatal(err)
 		}
+		storDB.(*SQLStorage).db.Config.Logger = logger.Default.LogMode(logger.Silent)
 	case utils.MetaMongo:
 		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
 			t.Fatal(err)
@@ -109,6 +112,7 @@ func TestStorDBit(t *testing.T) {
 			100, 10, 0); err != nil {
 			t.Fatal(err)
 		}
+		storDB.(*SQLStorage).db.Config.Logger = logger.Default.LogMode(logger.Silent)
 	default:
 		t.Fatal("Unknown Database type")
 	}

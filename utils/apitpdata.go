@@ -1048,7 +1048,6 @@ type TPRoute struct {
 	FilterIDs       []string
 	AccountIDs      []string
 	RatingPlanIDs   []string // used when computing price
-	RateProfileIDs  []string // used when computing price
 	ResourceIDs     []string // queried in some strategies
 	StatIDs         []string // queried in some strategies
 	Weight          float64

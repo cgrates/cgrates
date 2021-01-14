@@ -1,2 +1,0 @@
-#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
-cgrates.org,*routes,*any,2018-01-01T00:00:00Z,RP_TESTIT1,

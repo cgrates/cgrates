@@ -35,7 +35,6 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		Resources_conns:       &[]string{utils.MetaInternal, "conn1"},
 		Stats_conns:           &[]string{utils.MetaInternal, "conn1"},
 		Rals_conns:            &[]string{utils.MetaInternal, "conn1"},
-		Rates_conns:           &[]string{utils.MetaInternal, "conn1"},
 		Default_ratio:         utils.IntPointer(10),
 		Nested_fields:         utils.BoolPointer(true),
 	}
@@ -49,7 +48,6 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS), "conn1"},
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "conn1"},
-		RateSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
 	}
@@ -75,7 +73,6 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.ResourceSConnsCfg:      []string{},
 		utils.StatSConnsCfg:          []string{},
 		utils.RALsConnsCfg:           []string{},
-		utils.RateSConnsCfg:          []string{},
 		utils.DefaultRatioCfg:        1,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -98,7 +95,6 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 			"resources_conns": ["*internal:*resources", "conn1"],
 			"stats_conns": ["*internal:*stats", "conn1"],
 			"rals_conns": ["*internal:*responder", "conn1"],
-			"rates_conns": ["*internal:*rates", "conn1"],
 			"default_ratio":2,
 		},
 	}`
@@ -113,7 +109,6 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.ResourceSConnsCfg:      []string{utils.MetaInternal, "conn1"},
 		utils.StatSConnsCfg:          []string{utils.MetaInternal, "conn1"},
 		utils.RALsConnsCfg:           []string{utils.MetaInternal, "conn1"},
-		utils.RateSConnsCfg:          []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -134,7 +129,6 @@ func TestRouteSCfgClone(t *testing.T) {
 		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS), "conn1"},
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "conn1"},
-		RateSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
 	}
@@ -152,9 +146,6 @@ func TestRouteSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.RALsConns[1] = ""; ban.RALsConns[1] != "conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.RateSConns[1] = ""; ban.RateSConns[1] != "conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {

@@ -1885,10 +1885,6 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 				ratingPlanSplit := strings.Split(tp.RouteRatingplanIDs, utils.InfieldSep)
 				sup.RatingPlanIDs = append(sup.RatingPlanIDs, ratingPlanSplit...)
 			}
-			if tp.RouteRateProfileIDs != utils.EmptyString {
-				rateProfileSplit := strings.Split(tp.RouteRateProfileIDs, utils.InfieldSep)
-				sup.RateProfileIDs = append(sup.RateProfileIDs, rateProfileSplit...)
-			}
 			if tp.RouteResourceIDs != utils.EmptyString {
 				resSplit := strings.Split(tp.RouteResourceIDs, utils.InfieldSep)
 				sup.ResourceIDs = append(sup.ResourceIDs, resSplit...)
@@ -1994,12 +1990,6 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 			}
 			mdl.RouteRatingplanIDs += val
 		}
-		for i, val := range supl.RateProfileIDs {
-			if i != 0 {
-				mdl.RouteRateProfileIDs += utils.InfieldSep
-			}
-			mdl.RouteRateProfileIDs += val
-		}
 		for i, val := range supl.FilterIDs {
 			if i != 0 {
 				mdl.RouteFilterIDs += utils.InfieldSep
@@ -2053,7 +2043,6 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 			Weight:          route.Weight,
 			Blocker:         route.Blocker,
 			RatingPlanIDs:   route.RatingPlanIDs,
-			RateProfileIDs:  route.RateProfileIDs,
 			AccountIDs:      route.AccountIDs,
 			FilterIDs:       route.FilterIDs,
 			ResourceIDs:     route.ResourceIDs,
@@ -2082,7 +2071,6 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 			FilterIDs:       route.FilterIDs,
 			AccountIDs:      route.AccountIDs,
 			RatingPlanIDs:   route.RatingPlanIDs,
-			RateProfileIDs:  route.RateProfileIDs,
 			ResourceIDs:     route.ResourceIDs,
 			StatIDs:         route.StatIDs,
 			Weight:          route.Weight,

@@ -35,7 +35,6 @@ type Route struct {
 	FilterIDs       []string
 	AccountIDs      []string
 	RatingPlanIDs   []string // used when computing price
-	RateProfileIDs  []string // used when computing price
 	ResourceIDs     []string // queried in some strategies
 	StatIDs         []string // queried in some strategies
 	Weight          float64
@@ -209,7 +208,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 // costForEvent will compute cost out of accounts and rating plans for event
 // returns map[string]interface{} with cost and relevant matching information inside
 func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
-	acntIDs, rpIDs, rtPrfIDs []string) (costData map[string]interface{}, err error) {
+	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
 	costData = make(map[string]interface{})
 	if err = ev.CheckMandatoryFields([]string{utils.AccountField,
 		utils.Destination, utils.SetupTime}); err != nil {
@@ -262,8 +261,8 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 			}
 			if usage > accountMaxUsage {
 				// remain usage needs to be covered by rating plans
-				if len(rpIDs) == 0 && len(rpS.cgrcfg.RouteSCfg().RateSConns) == 0 {
-					return nil, fmt.Errorf("no rating plans or no connection to RateS defined for remaining usage")
+				if len(rpIDs) == 0 {
+					return nil, fmt.Errorf("no rating plans defined for remaining usage")
 				}
 				// update the setup time and the usage
 				sTime = sTime.Add(accountMaxUsage)
@@ -277,39 +276,21 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	}
 
 	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
-		var rateRply RateProfileCost
-		argsCostEv := &utils.ArgsCostForEvent{
-			RateProfileIDs: rtPrfIDs,
-			CGREvent:       ev,
+		var rpCost map[string]interface{}
+		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
+			&utils.GetCostOnRatingPlansArgs{
+				Tenant:        ev.Tenant,
+				Account:       acnt,
+				Subject:       subj,
+				Destination:   dst,
+				SetupTime:     sTime,
+				Usage:         usage,
+				RatingPlanIDs: rpIDs,
+			}, &rpCost); err != nil {
+			return nil, err
 		}
-		argsCostEv.CGREvent.Opts = map[string]interface{}{ // add the setup time and usage in opts
-			utils.OptsRatesStartTime: sTime,
-			utils.OptsRatesUsage:     usage,
-		}
-		if len(rpS.cgrcfg.RouteSCfg().RateSConns) != 0 {
-			if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RateSConns, nil, utils.RateSv1CostForEvent,
-				argsCostEv, &rateRply); err != nil {
-				return nil, err
-			}
-			costData[utils.Cost] = rateRply.Cost
-			costData[utils.RateProfileMatched] = rateRply.ID
-		} else {
-			var rpCost map[string]interface{}
-			if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
-				&utils.GetCostOnRatingPlansArgs{
-					Tenant:        ev.Tenant,
-					Account:       acnt,
-					Subject:       subj,
-					Destination:   dst,
-					SetupTime:     sTime,
-					Usage:         usage,
-					RatingPlanIDs: rpIDs,
-				}, &rpCost); err != nil {
-				return nil, err
-			}
-			for k, v := range rpCost { // do not overwrite the return map
-				costData[k] = v
-			}
+		for k, v := range rpCost { // do not overwrite the return map
+			costData[k] = v
 		}
 	}
 	return
@@ -419,8 +400,8 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 		RouteParameters: route.RouteParameters,
 	}
 	//calculate costData if we have fields
-	if len(route.AccountIDs) != 0 || len(route.RatingPlanIDs) != 0 || len(rpS.cgrcfg.RouteSCfg().RateSConns) != 0 {
-		costData, err := rpS.costForEvent(ev, route.AccountIDs, route.RatingPlanIDs, route.RateProfileIDs)
+	if len(route.AccountIDs) != 0 || len(route.RatingPlanIDs) != 0 {
+		costData, err := rpS.costForEvent(ev, route.AccountIDs, route.RatingPlanIDs)
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
@@ -705,6 +686,8 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 		}
 	}
 	sSps, err := rpS.sortedRoutesForEvent(tnt, args)
+	utils.Logger.Debug(fmt.Sprintf("ADI %s", utils.ToJSON(sSps)))
+	utils.Logger.Debug(fmt.Sprintf("ADI %q", err))
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)

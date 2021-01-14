@@ -1,4 +1,0 @@
-#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters,Weight
-cgrates.org,ROUTE_LC,*string:~*req.EventName:RouteWithRateS,2017-11-27T00:00:00Z,*lc,,route1,,,,RT_SPECIAL_1002,,,10,false,,10
-cgrates.org,ROUTE_LC,,,,,route2,,,,RT_RETAIL1,,,20,,,
-cgrates.org,ROUTE_LC,,,,,route3,,,,RT_SPECIAL_1002,,,15,,,
