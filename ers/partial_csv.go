@@ -217,8 +217,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 		cgrID := utils.Sha1(orgID, orgHost)
 		// take Partial field from NavigableMap
 		partial, _ := agReq.CGRRequest.FieldAsString([]string{utils.Partial})
-		cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
-		cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
+		cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 		if val, has := rdr.cache.Get(cgrID); !has {
 			if utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) { // complete CDR
 				rdr.rdrEvents <- &erEvent{
