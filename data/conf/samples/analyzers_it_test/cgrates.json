@@ -39,7 +39,6 @@
 "schedulers": {
 	"enabled": true,
 	"cdrs_conns": ["*localhost"],
-	"stats_conns": ["*localhost"],
 },
 
 
@@ -120,18 +119,13 @@
 },
 
 
-"actions": {
-	"enabled": true
-},
-
-
-"accounts": {
-	"enabled": true,
-},
-
-
 "filters": {								
 	"apiers_conns": ["*internal"],
+},
+
+
+"analyzers":{									// AnalyzerS config
+	"enabled": true,							// starts AnalyzerS service: <true|false>.
 },
 
 
