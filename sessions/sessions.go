@@ -1930,7 +1930,6 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, false)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent
-			args.Opts = rplyAttr.Opts
 			authReply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -3081,7 +3080,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					return utils.NewErrAttributeS(err)
 				}
 			} else {
-				cgrEv = rplyAttr.CGREvent
+				*cgrEv = *rplyAttr.CGREvent
 				rply.Attributes[runID] = &rplyAttr
 			}
 		}

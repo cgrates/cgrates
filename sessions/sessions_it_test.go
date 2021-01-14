@@ -133,27 +133,25 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 	usage := 2 * time.Minute
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSessionsItTerminatNonexist",
+			Event: map[string]interface{}{
+				utils.EventName:    "TerminateEvent",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "123451",
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.Category:     "call",
+				utils.Tenant:       "cgrates.org",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:        usage,
+			},
 			Opts: map[string]interface{}{
 				utils.OptsDebitInterval: "10s",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testSessionsItTerminatNonexist",
-				Event: map[string]interface{}{
-					utils.EventName:    "TerminateEvent",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "123451",
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-					utils.Category:     "call",
-					utils.Tenant:       "cgrates.org",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-					utils.Usage:        usage,
-				},
 			},
 		},
 	}
@@ -171,7 +169,7 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 	time.Sleep(100 * time.Millisecond)
-	if err := sItRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithOpts{CGREvent: termArgs.CGREvent}, &rpl); err != nil {
+	if err := sItRPC.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &rpl); err != nil {
 		t.Error(err)
 	} else if rpl != utils.OK {
 		t.Errorf("Received reply: %s", rpl)
@@ -210,27 +208,25 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 	usage := 2 * time.Minute
 	updtArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSessionsItUpdateNonexist",
+			Event: map[string]interface{}{
+				utils.EventName:    "UpdateEvent",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "123789",
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.Category:     "call",
+				utils.Tenant:       "cgrates.org",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:        usage,
+			},
 			Opts: map[string]interface{}{
 				utils.OptsDebitInterval: "0s",
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testSessionsItUpdateNonexist",
-				Event: map[string]interface{}{
-					utils.EventName:    "UpdateEvent",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "123789",
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-					utils.Category:     "call",
-					utils.Tenant:       "cgrates.org",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-					utils.Usage:        usage,
-				},
 			},
 		},
 	}
@@ -254,24 +250,22 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 	var rpl string
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testSessionsItTerminatNonexist",
-				Event: map[string]interface{}{
-					utils.EventName:    "TerminateEvent",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "123789",
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-					utils.Category:     "call",
-					utils.Tenant:       "cgrates.org",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-					utils.Usage:        usage,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSessionsItTerminatNonexist",
+			Event: map[string]interface{}{
+				utils.EventName:    "TerminateEvent",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "123789",
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.Category:     "call",
+				utils.Tenant:       "cgrates.org",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:        usage,
 			},
 		},
 	}
@@ -336,24 +330,22 @@ func testSessionsItTerminatePassive(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "testSessionsItTerminatNonexist",
-				Event: map[string]interface{}{
-					utils.EventName:    "TerminateEvent",
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "123789",
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-					utils.Category:     "call",
-					utils.Tenant:       "cgrates.org",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
-					utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-					utils.Usage:        time.Minute,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSessionsItTerminatNonexist",
+			Event: map[string]interface{}{
+				utils.EventName:    "TerminateEvent",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "123789",
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.Category:     "call",
+				utils.Tenant:       "cgrates.org",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:        time.Minute,
 			},
 		},
 	}
@@ -397,18 +389,16 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 	// Init the session
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSessionsItEventCostCompressing",
-				Event: map[string]interface{}{
-					utils.OriginID:     "TestSessionsItEventCostCompressing",
-					utils.AccountField: "TestSessionsItEventCostCompressing",
-					utils.Destination:  "1002",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AnswerTime:   time.Date(2019, time.March, 1, 13, 57, 05, 0, time.UTC),
-					utils.Usage:        "1s",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsItEventCostCompressing",
+			Event: map[string]interface{}{
+				utils.OriginID:     "TestSessionsItEventCostCompressing",
+				utils.AccountField: "TestSessionsItEventCostCompressing",
+				utils.Destination:  "1002",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AnswerTime:   time.Date(2019, time.March, 1, 13, 57, 05, 0, time.UTC),
+				utils.Usage:        "1s",
 			},
 		},
 	}
@@ -422,14 +412,12 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 	}
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSessionsItEventCostCompressing",
-				Event: map[string]interface{}{
-					utils.OriginID: "TestSessionsItEventCostCompressing",
-					utils.Usage:    "1s",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsItEventCostCompressing",
+			Event: map[string]interface{}{
+				utils.OriginID: "TestSessionsItEventCostCompressing",
+				utils.Usage:    "1s",
 			},
 		},
 	}
@@ -448,18 +436,16 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 	}
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSessionsDataLastUsedData",
-				Event: map[string]interface{}{
-					utils.OriginID:     "TestSessionsItEventCostCompressing",
-					utils.AccountField: "TestSessionsItEventCostCompressing",
-					utils.Destination:  "1002",
-					utils.RequestType:  utils.MetaPrepaid,
-					utils.AnswerTime:   time.Date(2019, time.March, 1, 13, 57, 05, 0, time.UTC),
-					utils.Usage:        "4s",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsDataLastUsedData",
+			Event: map[string]interface{}{
+				utils.OriginID:     "TestSessionsItEventCostCompressing",
+				utils.AccountField: "TestSessionsItEventCostCompressing",
+				utils.Destination:  "1002",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AnswerTime:   time.Date(2019, time.March, 1, 13, 57, 05, 0, time.UTC),
+				utils.Usage:        "4s",
 			},
 		},
 	}
@@ -470,7 +456,7 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 		t.Error(err)
 	}
 	if err := sItRPC.Call(utils.SessionSv1ProcessCDR,
-		&utils.CGREventWithOpts{CGREvent: termArgs.CGREvent}, &reply); err != nil {
+		termArgs.CGREvent, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(20 * time.Millisecond)

@@ -366,6 +366,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 				utils.Subject:      "1001",
 				utils.Destination:  "+491511231234",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -407,6 +408,7 @@ func testAttributeSProcessEventNotFound(t *testing.T) {
 				utils.AccountField: "Inexistent",
 				utils.Destination:  "+491511231234",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -428,6 +430,7 @@ func testAttributeSProcessEventMissing(t *testing.T) {
 				utils.Category:     "*attributes",
 				utils.Destination:  "+491511231234",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -492,6 +495,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Destination:  "+491511231234",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 
@@ -560,6 +564,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Destination:  "+491511231234",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	eRply2 := &engine.AttrSProcessEventReply{
@@ -573,6 +578,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Destination:  "+491511231234",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -641,6 +647,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 				utils.Subject:      "1001",
 				utils.Destination:  "+491511231234",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -700,6 +707,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 				"Field1": "Value1",
 				"Field2": "Value1",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -1022,6 +1030,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 			Event: map[string]interface{}{
 				"Category": "call_suffix",
 			},
+			Opts: map[string]interface{}{},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
