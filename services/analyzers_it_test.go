@@ -19,20 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
 import (
 	"path"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/cgrates/rpcclient"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestAnalyzerSReload(t *testing.T) {
@@ -50,7 +48,7 @@ func TestAnalyzerSReload(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anzRPC := make(chan rpcclient.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, anzRPC, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(anz,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
@@ -60,13 +58,10 @@ func TestAnalyzerSReload(t *testing.T) {
 	if anz.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
 
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "analyzers_it_test"),
 		Section: config.AnalyzerCfgJson,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -80,9 +75,6 @@ func TestAnalyzerSReload(t *testing.T) {
 		t.Fatal("It took to long to reload the cache")
 	}
 	if !anz.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	err := anz.Start()
@@ -105,4 +97,3 @@ func TestAnalyzerSReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 }
-*/
