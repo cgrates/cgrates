@@ -1071,7 +1071,6 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Resources_conns:       &[]string{},
 		Stats_conns:           &[]string{},
 		Rals_conns:            &[]string{},
-		Rates_conns:           &[]string{},
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 	}

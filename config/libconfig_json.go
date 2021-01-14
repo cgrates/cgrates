@@ -462,7 +462,6 @@ type RouteSJsonCfg struct {
 	Resources_conns       *[]string
 	Stats_conns           *[]string
 	Rals_conns            *[]string
-	Rates_conns           *[]string
 	Default_ratio         *int
 }
 

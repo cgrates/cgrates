@@ -1255,7 +1255,6 @@ func TestLoadRouteProfiles(t *testing.T) {
 				FilterIDs:       []string{"FLTR_DST_DE"},
 				AccountIDs:      []string{"Account2"},
 				RatingPlanIDs:   []string{"RPL_3"},
-				RateProfileIDs:  []string{"RT_ALWAYS"},
 				ResourceIDs:     []string{"ResGroup3"},
 				StatIDs:         []string{"Stat2"},
 				Weight:          10,

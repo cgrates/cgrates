@@ -350,7 +350,6 @@ CREATE TABLE tp_routes (
   "route_filter_ids" varchar(64) NOT NULL,
   "route_account_ids" varchar(64) NOT NULL,
   "route_ratingplan_ids" varchar(64) NOT NULL,
-  "route_rate_profile_ids" varchar(64) NOT NULL,
   "route_resource_ids" varchar(64) NOT NULL,
   "route_stat_ids" varchar(64) NOT NULL,
   "route_weight" decimal(8,2) NOT NULL,
