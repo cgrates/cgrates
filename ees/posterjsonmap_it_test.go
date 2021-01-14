@@ -113,30 +113,28 @@ func testHTTPJsonMapStartHTTPServer(t *testing.T) {
 func testHTTPJsonMapExportEvent(t *testing.T) {
 	eventVoice := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPJsonMapExporter"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "voiceEvent",
-				Time:   utils.TimePointer(time.Now()),
-				Event: map[string]interface{}{
-					utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.MetaVoice,
-					utils.OriginID:     "dsafdsaf",
-					utils.OriginHost:   "192.168.1.1",
-					utils.RequestType:  utils.MetaRated,
-					utils.Tenant:       "cgrates.org",
-					utils.Category:     "call",
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
-					utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
-					utils.Usage:        10 * time.Second,
-					utils.RunID:        utils.MetaDefault,
-					utils.Cost:         1.01,
-					"ExtraFields": map[string]string{"extra1": "val_extra1",
-						"extra2": "val_extra2", "extra3": "val_extra3"},
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "dsafdsaf",
+				utils.OriginHost:   "192.168.1.1",
+				utils.RequestType:  utils.MetaRated,
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
+				utils.Usage:        10 * time.Second,
+				utils.RunID:        utils.MetaDefault,
+				utils.Cost:         1.01,
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			Opts: map[string]interface{}{
 				utils.MetaEventType: utils.CDR,
@@ -146,30 +144,28 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 
 	eventData := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPJsonMapExporter"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "dataEvent",
-				Time:   utils.TimePointer(time.Now()),
-				Event: map[string]interface{}{
-					utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.MetaData,
-					utils.OriginID:     "abcdef",
-					utils.OriginHost:   "192.168.1.1",
-					utils.RequestType:  utils.MetaRated,
-					utils.Tenant:       "AnotherTenant",
-					utils.Category:     "call", //for data CDR use different Tenant
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
-					utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
-					utils.Usage:        10 * time.Nanosecond,
-					utils.RunID:        utils.MetaDefault,
-					utils.Cost:         0.012,
-					"ExtraFields": map[string]string{"extra1": "val_extra1",
-						"extra2": "val_extra2", "extra3": "val_extra3"},
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "dataEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:          utils.MetaData,
+				utils.OriginID:     "abcdef",
+				utils.OriginHost:   "192.168.1.1",
+				utils.RequestType:  utils.MetaRated,
+				utils.Tenant:       "AnotherTenant",
+				utils.Category:     "call", //for data CDR use different Tenant
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
+				utils.Usage:        10 * time.Nanosecond,
+				utils.RunID:        utils.MetaDefault,
+				utils.Cost:         0.012,
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			Opts: map[string]interface{}{
 				utils.MetaEventType: utils.CDR,
@@ -179,31 +175,29 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 
 	eventSMS := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPJsonMapExporter"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "SMSEvent",
-				Time:   utils.TimePointer(time.Now()),
-				Event: map[string]interface{}{
-					utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.MetaSMS,
-					utils.OriginID:     "sdfwer",
-					utils.OriginHost:   "192.168.1.1",
-					utils.RequestType:  utils.MetaRated,
-					utils.Tenant:       "cgrates.org",
-					utils.Category:     "call",
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-					utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
-					utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
-					utils.Usage:        1,
-					utils.RunID:        utils.MetaDefault,
-					utils.Cost:         0.15,
-					utils.OrderID:      10,
-					"ExtraFields": map[string]string{"extra1": "val_extra1",
-						"extra2": "val_extra2", "extra3": "val_extra3"},
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "SMSEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:          utils.MetaSMS,
+				utils.OriginID:     "sdfwer",
+				utils.OriginHost:   "192.168.1.1",
+				utils.RequestType:  utils.MetaRated,
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
+				utils.Usage:        1,
+				utils.RunID:        utils.MetaDefault,
+				utils.Cost:         0.15,
+				utils.OrderID:      10,
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			Opts: map[string]interface{}{
 				utils.MetaEventType: utils.CDR,
@@ -213,20 +207,18 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 
 	eventSMSNoFields := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"HTTPJsonMapExporterWithNoFields"},
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "SMSEvent",
-				Time:   utils.TimePointer(time.Now()),
-				Event: map[string]interface{}{
-					utils.CGRID:        utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
-					utils.ToR:          utils.MetaSMS,
-					utils.Tenant:       "cgrates.org",
-					utils.Category:     "call",
-					utils.AccountField: "1001",
-					utils.Destination:  "1002",
-					utils.RunID:        utils.MetaDefault,
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "SMSEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:        utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:          utils.MetaSMS,
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.AccountField: "1001",
+				utils.Destination:  "1002",
+				utils.RunID:        utils.MetaDefault,
 			},
 		},
 	}
