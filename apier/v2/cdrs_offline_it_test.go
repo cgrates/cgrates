@@ -304,21 +304,19 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	}
 
 	args := &engine.ArgV1ProcessEvent{
-		CGREventWithOpts: utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
-					utils.OriginID:     "testV2CDRsOfflineProcessCDR1",
-					utils.OriginHost:   "192.168.1.1",
-					utils.Source:       "testV2CDRsOfflineProcessCDR",
-					utils.RequestType:  utils.MetaPostpaid,
-					utils.Category:     "call",
-					utils.AccountField: "test2",
-					utils.Subject:      "test2",
-					utils.Destination:  "1002",
-					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-					utils.Usage:        time.Minute,
-				},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:     "testV2CDRsOfflineProcessCDR1",
+				utils.OriginHost:   "192.168.1.1",
+				utils.Source:       "testV2CDRsOfflineProcessCDR",
+				utils.RequestType:  utils.MetaPostpaid,
+				utils.Category:     "call",
+				utils.AccountField: "test2",
+				utils.Subject:      "test2",
+				utils.Destination:  "1002",
+				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:        time.Minute,
 			},
 		},
 	}
