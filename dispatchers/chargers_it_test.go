@@ -74,10 +74,9 @@ func testDspCppPingFailover(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	ev := utils.CGREvent{
+		Tenant: "cgrates.org",
+
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chrg12345",
 		},
@@ -102,15 +101,14 @@ func testDspCppPingFailover(t *testing.T) {
 }
 
 func testDspCppGetChtgFailover(t *testing.T) {
-	args := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventName:    "Event1",
-				utils.AccountField: "1001",
-			},
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventName:    "Event1",
+			utils.AccountField: "1001",
 		},
+
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chrg12345",
 		},
@@ -171,10 +169,8 @@ func testDspCppPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chrg12345",
 		},
@@ -186,13 +182,11 @@ func testDspCppPing(t *testing.T) {
 }
 
 func testDspCppTestAuthKey(t *testing.T) {
-	args := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "12345",
@@ -206,14 +200,13 @@ func testDspCppTestAuthKey(t *testing.T) {
 }
 
 func testDspCppTestAuthKey2(t *testing.T) {
-	args := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
+
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chrg12345",
 		},
@@ -254,14 +247,12 @@ func testDspCppTestAuthKey2(t *testing.T) {
 }
 
 func testDspCppGetChtgRoundRobin(t *testing.T) {
-	args := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventName:    "RoundRobin",
-				utils.AccountField: "1001",
-			},
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventName:    "RoundRobin",
+			utils.AccountField: "1001",
 		},
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chrg12345",

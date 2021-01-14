@@ -67,10 +67,9 @@ func testDspGrdPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.GuardianSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dispEngine.RPC.Call(utils.GuardianSv1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
+
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "grd12345",
 		},

@@ -80,10 +80,10 @@ func testDspChcPing(t *testing.T) {
 	if dispEngine.RPC == nil {
 		t.Fatal(dispEngine.RPC)
 	}
-	if err := dispEngine.RPC.Call(utils.CacheSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dispEngine.RPC.Call(utils.CacheSv1Ping, &utils.CGREvent{
+
+		Tenant: "cgrates.org",
+
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},

@@ -66,10 +66,9 @@ func testDspRALsPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.RALsV1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dispEngine.RPC.Call(utils.RALsV1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
+
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "rals12345",
 		},

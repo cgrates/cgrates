@@ -98,10 +98,9 @@ func testDspRplPingFailover(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = utils.EmptyString
-	ev := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	ev := utils.CGREvent{
+		Tenant: "cgrates.org",
+
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
