@@ -78,10 +78,8 @@ func testDspSupPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "sup12345",
 		},
@@ -99,10 +97,9 @@ func testDspSupPingFailover(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	ev := utils.CGREvent{
+		Tenant: "cgrates.org",
+
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "sup12345",
 		},
@@ -168,20 +165,19 @@ func testDspSupGetSupFailover(t *testing.T) {
 		},
 	}
 	args := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Time:   &nowTime,
-				Event: map[string]interface{}{
-					utils.EventName:    "Event1",
-					utils.AccountField: "1002",
-					utils.Subject:      "1002",
-					utils.Destination:  "1001",
-					utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        "1m20s",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Time:   &nowTime,
+			Event: map[string]interface{}{
+				utils.EventName:    "Event1",
+				utils.AccountField: "1002",
+				utils.Subject:      "1002",
+				utils.Destination:  "1001",
+				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        "1m20s",
 			},
+
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "sup12345",
 			},
@@ -206,18 +202,17 @@ func testDspSupGetSupFailover(t *testing.T) {
 func testDspSupTestAuthKey(t *testing.T) {
 	var rpl *engine.SortedRoutes
 	args := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				ID:   utils.UUIDSha1Prefix(),
-				Time: &nowTime,
-				Event: map[string]interface{}{
-					utils.AccountField: "1002",
-					utils.Subject:      "1002",
-					utils.Destination:  "1001",
-					utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        "1m20s",
-				},
+		CGREvent: &utils.CGREvent{
+			ID:   utils.UUIDSha1Prefix(),
+			Time: &nowTime,
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+				utils.Subject:      "1002",
+				utils.Destination:  "1001",
+				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        "1m20s",
 			},
+
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
 			},
@@ -257,19 +252,18 @@ func testDspSupTestAuthKey2(t *testing.T) {
 		},
 	}
 	args := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Time:   &nowTime,
-				Event: map[string]interface{}{
-					utils.AccountField: "1002",
-					utils.Subject:      "1002",
-					utils.Destination:  "1001",
-					utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        "1m20s",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Time:   &nowTime,
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+				utils.Subject:      "1002",
+				utils.Destination:  "1001",
+				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        "1m20s",
 			},
+
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "sup12345",
 			},
@@ -325,20 +319,19 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 		},
 	}
 	args := &engine.ArgsGetRoutes{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Time:   &nowTime,
-				Event: map[string]interface{}{
-					utils.EventName:    "RoundRobin",
-					utils.AccountField: "1002",
-					utils.Subject:      "1002",
-					utils.Destination:  "1001",
-					utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        "1m20s",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Time:   &nowTime,
+			Event: map[string]interface{}{
+				utils.EventName:    "RoundRobin",
+				utils.AccountField: "1002",
+				utils.Subject:      "1002",
+				utils.Destination:  "1001",
+				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        "1m20s",
 			},
+
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "sup12345",
 			},
@@ -359,18 +352,17 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 }
 
 func testDspSupGetSupplierForEvent(t *testing.T) {
-	ev := &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetHighestCostSuppliers",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Subject:      "1002",
-				utils.Destination:  "1001",
-				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        "1m20s",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testV1SplSGetHighestCostSuppliers",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Subject:      "1002",
+			utils.Destination:  "1001",
+			utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        "1m20s",
 		},
+
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "sup12345",
 		},

@@ -74,10 +74,8 @@ func testDspStsPingFailover(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	ev := utils.CGREvent{
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "stat12345",
 		},
@@ -106,19 +104,19 @@ func testDspStsGetStatFailover(t *testing.T) {
 	var metrics map[string]string
 	expected := []string{"Stats1"}
 	args := engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.EventName:    "Event1",
-					utils.AccountField: "1001",
-					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        135 * time.Second,
-					utils.Cost:         123.0,
-					utils.RunID:        utils.MetaDefault,
-					utils.Destination:  "1002"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventName:    "Event1",
+				utils.AccountField: "1001",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        135 * time.Second,
+				utils.Cost:         123.0,
+				utils.RunID:        utils.MetaDefault,
+				utils.Destination:  "1002",
 			},
+
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "stat12345",
 			},
@@ -162,10 +160,8 @@ func testDspStsPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RPC.Call(utils.StatSv1Ping, &utils.CGREventWithOpts{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-		},
+	if err := dispEngine.RPC.Call(utils.StatSv1Ping, &utils.CGREvent{
+		Tenant: "cgrates.org",
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "stat12345",
 		},
@@ -179,17 +175,15 @@ func testDspStsPing(t *testing.T) {
 func testDspStsTestAuthKey(t *testing.T) {
 	var reply []string
 	args := engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        135 * time.Second,
-					utils.Cost:         123.0,
-					utils.PDD:          12 * time.Second},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        135 * time.Second,
+				utils.Cost:         123.0,
+				utils.PDD:          12 * time.Second},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
 			},
@@ -222,18 +216,16 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	var metrics map[string]string
 	expected := []string{"Stats2"}
 	args := engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        135 * time.Second,
-					utils.Cost:         123.0,
-					utils.RunID:        utils.MetaDefault,
-					utils.Destination:  "1002"},
-			},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        135 * time.Second,
+				utils.Cost:         123.0,
+				utils.RunID:        utils.MetaDefault,
+				utils.Destination:  "1002"},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "stat12345",
 			},
@@ -267,18 +259,16 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	}
 
 	args = engine.StatsArgsProcessEvent{
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.AccountField: "1002",
-					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        45 * time.Second,
-					utils.RunID:        utils.MetaDefault,
-					utils.Cost:         10.0,
-					utils.Destination:  "1001",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        45 * time.Second,
+				utils.RunID:        utils.MetaDefault,
+				utils.Cost:         10.0,
+				utils.Destination:  "1001",
 			},
 			Opts: map[string]interface{}{
 				utils.OptsAPIKey: "stat12345",
@@ -347,19 +337,19 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	estats = []string{"Stats2"}
 	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueuesForEvent,
 		&engine.StatsArgsProcessEvent{
-			CGREventWithOpts: &utils.CGREventWithOpts{
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "GetStats",
-					Event: map[string]interface{}{
-						utils.AccountField: "1002",
-						utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-						utils.Usage:        45 * time.Second,
-						utils.RunID:        utils.MetaDefault,
-						utils.Cost:         10.0,
-						utils.Destination:  "1001",
-					},
+
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "GetStats",
+				Event: map[string]interface{}{
+					utils.AccountField: "1002",
+					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:        45 * time.Second,
+					utils.RunID:        utils.MetaDefault,
+					utils.Cost:         10.0,
+					utils.Destination:  "1001",
 				},
+
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey: "stat12345",
 				},
