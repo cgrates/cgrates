@@ -234,6 +234,7 @@ func testSQLReader(t *testing.T) {
 			Event: map[string]interface{}{
 				"CGRID": cdr.CGRID,
 			},
+			Opts: map[string]interface{}{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
@@ -267,6 +268,7 @@ func testSQLReader2(t *testing.T) {
 			Event: map[string]interface{}{
 				"CGRID": cdr.CGRID,
 			},
+			Opts: map[string]interface{}{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
