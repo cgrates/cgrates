@@ -164,8 +164,7 @@ func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
 					utils.ERs, absPath, rowNr, err.Error()))
 			continue
 		}
-		cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
-		cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
+		cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 		rdr.rdrEvents <- &erEvent{
 			cgrEvent: cgrEv,
 			rdrCfg:   rdr.Config(),

@@ -112,8 +112,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep)
-	cgrEv.Opts = config.NMAsMapInterface(agReq.Opts, utils.NestingSep)
+	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,

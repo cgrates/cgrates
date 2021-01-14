@@ -176,7 +176,7 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 // NMAsCGREvent builds a CGREvent considering Time as time.Now()
 // and Event as linear map[string]interface{} with joined paths
 // treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
-func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cgrEv *utils.CGREvent) {
+func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string, opts *utils.OrderedNavigableMap) (cgrEv *utils.CGREvent) {
 	if nM == nil {
 		return
 	}
@@ -189,6 +189,7 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string) (cg
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   utils.TimePointer(time.Now()),
 		Event:  make(map[string]interface{}),
+		Opts:   NMAsMapInterface(opts, pathSep),
 	}
 	for ; el != nil; el = el.Next() {
 		branchPath := el.Value
