@@ -19,6 +19,7 @@ package engine
 
 import (
 	"reflect"
+	"sort"
 	"strconv"
 	"testing"
 
@@ -861,5 +862,222 @@ func BenchmarkRouteSortCost(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		sSpls.SortLeastCost()
 	}
+}
 
+func TestRouteIDsGetIDs(t *testing.T) {
+	sSpls := &SortedRoutes{
+		SortedRoutes: []*SortedRoute{
+			{
+				RouteID: "route1",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+				RouteParameters: "param1",
+			},
+			{
+				RouteID: "route2",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+				RouteParameters: "param2",
+			},
+			{
+				RouteID: "route3",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+				RouteParameters: "param3",
+			},
+		},
+	}
+	expected := []string{"route1", "route2", "route3"}
+	sort.Strings(expected)
+	rcv := sSpls.RouteIDs()
+	sort.Strings(rcv)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+}
+
+func TestSortHighestCost(t *testing.T) {
+	sSpls := &SortedRoutes{
+		SortedRoutes: []*SortedRoute{
+			{
+				RouteID: "route1",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.1,
+					utils.Weight: 11.0,
+				},
+			},
+			{
+				RouteID: "route2",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+			},
+		},
+	}
+	sSpls.SortHighestCost()
+	ex := sSpls
+	if !reflect.DeepEqual(ex, sSpls) {
+		t.Errorf("Expected %+v, received %+v", ex, sSpls)
+	}
+}
+
+func TestSortResourceAscendentDescendent(t *testing.T) {
+	sSpls := &SortedRoutes{
+		SortedRoutes: []*SortedRoute{
+			{
+				RouteID: "route2",
+				SortingData: map[string]interface{}{
+					utils.ResourceUsage: 10.0,
+					utils.Weight:        10.0,
+				},
+			},
+			{
+				RouteID: "route1",
+				SortingData: map[string]interface{}{
+					utils.ResourceUsage: 10.0,
+					utils.Weight:        11.0,
+				},
+			},
+		},
+	}
+
+	//SortingResourceAscendent/Descendent while ResourceUsages are equal
+	expSRts := sSpls
+	sSpls.SortResourceAscendent()
+	if !reflect.DeepEqual(expSRts, sSpls) {
+		t.Errorf("Expected %+v, received %+v", expSRts, sSpls)
+	}
+
+	sSpls.SortResourceDescendent()
+	if !reflect.DeepEqual(expSRts, sSpls) {
+		t.Errorf("Expected %+v, received %+v", expSRts, sSpls)
+	}
+
+	//SortingResourceAscendent/Descendent while ResourceUsages are not equal
+	sSpls.SortedRoutes[0].SortingData[utils.ResourceUsage] = 11.0
+	expSRts = sSpls
+	sSpls.SortResourceAscendent()
+	if !reflect.DeepEqual(expSRts, sSpls) {
+		t.Errorf("Expected %+v, received %+v", expSRts, sSpls)
+	}
+
+	sSpls.SortResourceDescendent()
+	if !reflect.DeepEqual(expSRts, sSpls) {
+		t.Errorf("Expected %+v, received %+v", expSRts, sSpls)
+	}
+}
+
+func TestSortLoadDistribution(t *testing.T) {
+	sSpls := &SortedRoutes{
+		SortedRoutes: []*SortedRoute{
+			{
+				RouteID: "ROUTE1",
+				SortingData: map[string]interface{}{
+					utils.Ratio:  6.0,
+					utils.Load:   10.0,
+					utils.Weight: 15.5,
+				},
+			},
+			{
+				RouteID: "ROUTE2",
+				SortingData: map[string]interface{}{
+					utils.Ratio:  6.0,
+					utils.Load:   10.0,
+					utils.Weight: 14.5,
+				},
+			},
+		},
+	}
+	sSpls.SortLoadDistribution()
+	expSSPls := sSpls
+	if !reflect.DeepEqual(sSpls, expSSPls) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expSSPls), utils.ToJSON(sSpls))
+	}
+}
+
+func TestSortedRouteAsNavigableMap(t *testing.T) {
+	sSpls := &SortedRoute{
+		RouteID:         "ROUTE1",
+		RouteParameters: "SORTING_PARAMETER",
+		SortingData: map[string]interface{}{
+			utils.Ratio:  6.0,
+			utils.Load:   10.0,
+			utils.Weight: 15.5,
+		},
+	}
+	expNavMap := utils.NavigableMap2{
+		utils.RouteID:         utils.NewNMData("ROUTE1"),
+		utils.RouteParameters: utils.NewNMData("SORTING_PARAMETER"),
+		utils.SortingData: utils.NavigableMap2{
+			utils.Ratio:  utils.NewNMData(6.0),
+			utils.Load:   utils.NewNMData(10.0),
+			utils.Weight: utils.NewNMData(15.5),
+		},
+	}
+	if rcv := sSpls.AsNavigableMap(); !reflect.DeepEqual(rcv, expNavMap) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expNavMap), utils.ToJSON(rcv))
+	}
+}
+
+func TestSortedRoutesAsNavigableMap(t *testing.T) {
+	sSpls := &SortedRoutes{
+		ProfileID: "TEST_ID1",
+		Sorting:   utils.MetaWeight,
+		Count:     100,
+		SortedRoutes: []*SortedRoute{
+			{
+				RouteID:         "ROUTE1",
+				RouteParameters: "SORTING_PARAMETER",
+				SortingData: map[string]interface{}{
+					utils.Ratio:  6.0,
+					utils.Load:   10.0,
+					utils.Weight: 15.5,
+				},
+			},
+			{
+				RouteID:         "ROUTE2",
+				RouteParameters: "SORTING_PARAMETER_SECOND",
+				SortingData: map[string]interface{}{
+					utils.Ratio: 7.0,
+					utils.Load:  10.0,
+				},
+			},
+		},
+	}
+
+	expNavMap := utils.NavigableMap2{
+		utils.ProfileID: utils.NewNMData("TEST_ID1"),
+		utils.Sorting:   utils.NewNMData(utils.MetaWeight),
+		utils.Count:     utils.NewNMData(100),
+		utils.SortedRoutes: &utils.NMSlice{
+			utils.NavigableMap2{
+				utils.RouteID:         utils.NewNMData("ROUTE1"),
+				utils.RouteParameters: utils.NewNMData("SORTING_PARAMETER"),
+				utils.SortingData: utils.NavigableMap2{
+					utils.Ratio:  utils.NewNMData(6.0),
+					utils.Load:   utils.NewNMData(10.0),
+					utils.Weight: utils.NewNMData(15.5),
+				},
+			},
+			utils.NavigableMap2{
+				utils.RouteID:         utils.NewNMData("ROUTE2"),
+				utils.RouteParameters: utils.NewNMData("SORTING_PARAMETER_SECOND"),
+				utils.SortingData: utils.NavigableMap2{
+					utils.Ratio: utils.NewNMData(7.0),
+					utils.Load:  utils.NewNMData(10.0),
+				},
+			},
+		},
+	}
+
+	if rcv := sSpls.AsNavigableMap(); !reflect.DeepEqual(rcv, expNavMap) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expNavMap), utils.ToJSON(rcv))
+	}
 }
