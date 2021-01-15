@@ -4418,9 +4418,7 @@ func TestRateProfileToAPI(t *testing.T) {
 			},
 		},
 	}
-	if rcv, err := RateProfileToAPI(rPrf); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, eTPRatePrf) {
+	if rcv := RateProfileToAPI(rPrf); !reflect.DeepEqual(rcv, eTPRatePrf) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eTPRatePrf), utils.ToJSON(rcv))
 	}
 }
@@ -4556,6 +4554,40 @@ func TestAPIToRateProfile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, eRprf) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eRprf), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPIToRateProfileError(t *testing.T) {
+	tpRprf := &utils.TPRateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RP1",
+		ActivationInterval: &utils.TPActivationInterval{
+			ExpiryTime: "NOT_A_TIME",
+		},
+		Rates: map[string]*utils.TPRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				Weight:          0,
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*utils.TPIntervalRate{
+					{
+						IntervalStart: "NOT_A_TIME",
+						FixedFee:      2.3451,
+						RecurrentFee:  0.12,
+					},
+				},
+			},
+		},
+	}
+	expectedErr := "Unsupported time format"
+	if _, err := APItoRateProfile(tpRprf, "UTC"); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	expectedErr = "time: invalid duration \"NOT_A_TIME\""
+	tpRprf.ActivationInterval = nil
+	if _, err := APItoRateProfile(tpRprf, "UTC"); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+q", expectedErr, err)
 	}
 }
 
@@ -5055,9 +5087,7 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 		MaxCostStrategy: "*free",
 		Rates:           map[string]*utils.TPRate{},
 	}
-	if result, err := RateProfileToAPI(testProfile); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expStruct, result) {
+	if result := RateProfileToAPI(testProfile); !reflect.DeepEqual(expStruct, result) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
@@ -6945,6 +6975,42 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 	}
 }
 
+func TestAccountProfileMdlsAsTPAccountProfileError(t *testing.T) {
+	testStruct := AccountProfileMdls{
+		{
+			PK:                    0,
+			Tpid:                  "TEST_TPID",
+			Tenant:                "cgrates.org",
+			ID:                    "ResGroup1",
+			BalanceID:             "VoiceBalance",
+			BalanceCostIncrements: "AN;INVALID;COST;INCREMENT;VALUE",
+		},
+	}
+	expectedErr := "invlid key: <AN;INVALID;COST;INCREMENT;VALUE> for BalanceCostIncrements"
+	if _, err := testStruct.AsTPAccountProfile(); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	testStruct[0].BalanceCostIncrements = ";20;not_float;10"
+	expectedErr = "strconv.ParseFloat: parsing \"not_float\": invalid syntax"
+	if _, err := testStruct.AsTPAccountProfile(); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	testStruct[0].BalanceCostIncrements = utils.EmptyString
+	testStruct[0].BalanceUnitFactors = "NOT;A;VALUE"
+	expectedErr = "invlid key: <NOT;A;VALUE> for BalanceUnitFactors"
+	if _, err := testStruct.AsTPAccountProfile(); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	testStruct[0].BalanceUnitFactors = ";float"
+	expectedErr = "strconv.ParseFloat: parsing \"float\": invalid syntax"
+	if _, err := testStruct.AsTPAccountProfile(); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
 func TestAPItoModelTPAccountProfile(t *testing.T) {
 	testStruct := &utils.TPAccountProfile{
 		TPid:      "TEST_TPID",
@@ -6958,11 +7024,12 @@ func TestAPItoModelTPAccountProfile(t *testing.T) {
 		Weight: 10.0,
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
-				ID:        "VoiceBalance",
-				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weight:    10,
-				Type:      utils.MetaVoice,
-				Units:     3600000000000,
+				ID:            "VoiceBalance",
+				FilterIDs:     []string{"FLTR_RES_GR2"},
+				Weight:        10,
+				Type:          utils.MetaVoice,
+				Units:         3600000000000,
+				CostIncrement: []*utils.TPBalanceCostIncrement{},
 			},
 		},
 		ThresholdIDs: []string{"WARN_RES1"},
@@ -7027,24 +7094,52 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 				Weight:    10,
 				Type:      utils.MetaVoice,
 				Units:     3600000000000,
+				CostIncrement: []*utils.TPBalanceCostIncrement{
+					{
+						FilterIDs:    []string{"*string:*~req.Account:100"},
+						Increment:    utils.Float64Pointer(1),
+						FixedFee:     utils.Float64Pointer(20),
+						RecurrentFee: utils.Float64Pointer(5),
+					},
+					{
+						FilterIDs:    []string{"*string:*~req.Destination:10"},
+						Increment:    utils.Float64Pointer(2),
+						FixedFee:     utils.Float64Pointer(10),
+						RecurrentFee: utils.Float64Pointer(7),
+					},
+				},
+				CostAttributes: []string{"20", "30"},
+				UnitFactors: []*utils.TPBalanceUnitFactor{
+					{
+						FilterIDs: []string{"*string:*~req.Account:100"},
+						Factor:    21,
+					},
+					{
+						FilterIDs: []string{"*string:*~req.Destination:10"},
+						Factor:    27,
+					},
+				},
 			},
 		},
 		ThresholdIDs: []string{"WARN_RES1", "WARN_RES2"},
 	}
 	exp := AccountProfileMdls{{
-		Tpid:               "TEST_TPID",
-		Tenant:             "cgrates.org",
-		ID:                 "ResGroup1",
-		FilterIDs:          "FLTR_RES_GR1;FLTR_RES_GR2",
-		ActivationInterval: "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
-		Weight:             10.0,
-		BalanceID:          "VoiceBalance",
-		BalanceFilterIDs:   "FLTR_RES_GR1;FLTR_RES_GR2",
-		BalanceWeight:      10,
-		BalanceBlocker:     false,
-		BalanceType:        utils.MetaVoice,
-		BalanceUnits:       3600000000000,
-		ThresholdIDs:       "WARN_RES1;WARN_RES2",
+		Tpid:                  "TEST_TPID",
+		Tenant:                "cgrates.org",
+		ID:                    "ResGroup1",
+		FilterIDs:             "FLTR_RES_GR1;FLTR_RES_GR2",
+		ActivationInterval:    "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
+		Weight:                10.0,
+		BalanceID:             "VoiceBalance",
+		BalanceFilterIDs:      "FLTR_RES_GR1;FLTR_RES_GR2",
+		BalanceWeight:         10,
+		BalanceBlocker:        false,
+		BalanceType:           utils.MetaVoice,
+		BalanceCostIncrements: "*string:*~req.Account:100;1;20;5;*string:*~req.Destination:10;2;10;7",
+		BalanceCostAttributes: "20;30",
+		BalanceUnitFactors:    "*string:*~req.Account:100;21;*string:*~req.Destination:10;27",
+		BalanceUnits:          3600000000000,
+		ThresholdIDs:          "WARN_RES1;WARN_RES2",
 	}}
 	sort.Strings(testStruct.FilterIDs)
 	sort.Strings(testStruct.ThresholdIDs)
@@ -7179,17 +7274,13 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 				TargetType: utils.MetaAccounts,
 				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
 			},
-			&utils.TPActionTarget{
-				TargetType: utils.MetaResources,
-				TargetIDs:  []string{"test_ID1", "test_ID2"},
-			},
 		},
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
 				Path:      "test_path",
-				Opts:      "key1:val1;key2:val2",
+				Opts:      "key1:val1",
 			},
 		},
 	}
@@ -7209,30 +7300,30 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 				TargetType: utils.MetaAccounts,
 				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
 			},
-			&utils.TPActionTarget{
-				TargetType: utils.MetaResources,
-				TargetIDs:  []string{"test_ID1", "test_ID2"},
-			},
 		},
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
 				Path:      "test_path",
-				Opts:      "key1:val1;key2:val2",
+				Opts:      "key1:val1",
+				TTL:       "0s",
 			},
 		},
 	}
+
 	result, err := APItoActionProfile(testStruct, "")
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	result2 := ActionProfileToAPI(result)
-	sort.Strings(result.FilterIDs)
-	if reflect.DeepEqual(result2, expStruct) {
+	sort.Strings(result2.FilterIDs)
+	sort.Strings(expStruct.FilterIDs)
+	sort.Strings(result2.Targets[0].TargetIDs)
+	sort.Strings(expStruct.Targets[0].TargetIDs)
+	if !reflect.DeepEqual(result2, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result2))
 	}
-
 }
 
 func TestModelHelpersAccountProfileToAPI(t *testing.T) {
@@ -7252,13 +7343,28 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 				Weight:    10,
 				Type:      utils.MetaVoice,
 				Units:     &utils.Decimal{decimal.New(3600000000000, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FilterIDs:    []string{"*string:*~req.Account:100"},
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(20, 0),
+						RecurrentFee: utils.NewDecimal(5, 0),
+					},
+				},
+				CostAttributes: []string{"20"},
+				UnitFactors: []*utils.UnitFactor{
+					{
+						FilterIDs: []string{"*string:*~req.Account:100"},
+						Factor:    utils.NewDecimal(21, 0),
+					},
+				},
 				Opts: map[string]interface{}{
 					"key1": "val1",
 				},
 			}},
 		ThresholdIDs: []string{"test_thrs"},
 	}
-	expStruct := utils.TPAccountProfile{
+	expStruct := &utils.TPAccountProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"test_filterId"},
@@ -7274,16 +7380,27 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 				Weight:    10,
 				Type:      utils.MetaVoice,
 				Units:     3600000000000,
-				Opts:      "22:22:4fs",
+				Opts:      "key1:val1",
+				CostIncrement: []*utils.TPBalanceCostIncrement{
+					{
+						FilterIDs:    []string{"*string:*~req.Account:100"},
+						Increment:    utils.Float64Pointer(1),
+						FixedFee:     utils.Float64Pointer(20),
+						RecurrentFee: utils.Float64Pointer(5),
+					},
+				},
+				CostAttributes: []string{"20"},
+				UnitFactors: []*utils.TPBalanceUnitFactor{
+					{
+						FilterIDs: []string{"*string:*~req.Account:100"},
+						Factor:    21,
+					},
+				},
 			},
 		},
 		ThresholdIDs: []string{"test_thrs"},
 	}
-	result, err := AccountProfileToAPI(testStruct)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if reflect.DeepEqual(result, expStruct) {
+	if result := AccountProfileToAPI(testStruct); !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
