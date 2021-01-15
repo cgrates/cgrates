@@ -114,23 +114,18 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 
 // debitUnits is a direct debit of balance units
 func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, incrm *utils.Decimal,
-	cgrEv *utils.CGREvent) (dbted *utils.Decimal, uF *utils.UnitFactor, err error) {
-
-	evNm := utils.MapStorage{
-		utils.MetaOpts: cgrEv.Opts,
-		utils.MetaReq:  cgrEv.Event,
-	}
+	tnt string, ev utils.DataProvider) (dbted *utils.Decimal, uF *utils.UnitFactor, err error) {
 
 	// pass the general balance filters
 	var pass bool
-	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
+	if pass, err = cB.fltrS.Pass(tnt, cB.blnCfg.FilterIDs, ev); err != nil {
 		return
 	} else if !pass {
 		return nil, nil, utils.ErrFilterNotPassingNoCaps
 	}
 
 	// unitFactor
-	if uF, err = cB.unitFactor(cgrEv.Tenant, evNm); err != nil {
+	if uF, err = cB.unitFactor(tnt, ev); err != nil {
 		return
 	}
 

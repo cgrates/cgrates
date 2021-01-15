@@ -96,7 +96,7 @@ func (aB *abstractBalance) balanceLimit() (bL *utils.Decimal) {
 }
 
 // processAttributeS will process the event with AttributeS
-func (aB *abstractBalance) processAttributeS(cgrEv *utils.CGREventWithOpts) (rplyEv *engine.AttrSProcessEventReply, err error) {
+func (aB *abstractBalance) processAttributeS(cgrEv *utils.CGREvent) (rplyEv *engine.AttrSProcessEventReply, err error) {
 	if len(aB.attrSConns) == 0 {
 		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
 	}
@@ -110,9 +110,9 @@ func (aB *abstractBalance) processAttributeS(cgrEv *utils.CGREventWithOpts) (rpl
 		Context: utils.StringPointer(utils.FirstNonEmpty(
 			engine.MapEvent(cgrEv.Opts).GetStringIgnoreErrors(utils.OptsContext),
 			utils.MetaAccountS)),
-		CGREventWithOpts: cgrEv,
-		AttributeIDs:     aB.blnCfg.CostAttributes,
-		ProcessRuns:      procRuns,
+		CGREvent:     cgrEv,
+		AttributeIDs: aB.blnCfg.CostAttributes,
+		ProcessRuns:  procRuns,
 	}
 	err = aB.connMgr.Call(aB.attrSConns, nil, utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv)
@@ -121,7 +121,7 @@ func (aB *abstractBalance) processAttributeS(cgrEv *utils.CGREventWithOpts) (rpl
 
 // debitUsageFromConcrete attempts to debit the usage out of concrete balances
 func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal, costIcrm *utils.CostIncrement,
-	cgrEv *utils.CGREventWithOpts) (dbtedUsage *utils.Decimal, err error) {
+	cgrEv *utils.CGREvent) (dbtedUsage *utils.Decimal, err error) {
 
 	return
 }
@@ -155,8 +155,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 			return
 		}
 		if len(rplyAttrS.AlteredFields) != 0 { // event was altered
-			cgrEv.CGREvent = rplyAttrS.CGREvent
-			cgrEv.Opts = rplyAttrS.Opts
+			cgrEv = rplyAttrS.CGREvent
 		}
 	}
 
@@ -181,7 +180,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 
 	// unitFactor
 	var uF *utils.UnitFactor
-	if uF, err = aB.unitFactor(cgrEv.CGREvent.Tenant, evNm); err != nil {
+	if uF, err = aB.unitFactor(cgrEv.Tenant, evNm); err != nil {
 		return
 	}
 
