@@ -106,3 +106,139 @@ func TestResourceTenantID(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", testStruct.Tenant, result)
 	}
 }
+
+func TestResourceTotalUsage1(t *testing.T) {
+	testStruct := Resource{
+		Tenant: "test_tenant",
+		ID:     "test_id",
+		Usages: map[string]*ResourceUsage{
+			"0": {
+				Tenant:     "test_tenant2",
+				ID:         "test_id2",
+				ExpiryTime: time.Date(2015, 1, 14, 0, 0, 0, 0, time.UTC),
+				Units:      1,
+			},
+			"1": {
+				Tenant:     "test_tenant3",
+				ID:         "test_id3",
+				ExpiryTime: time.Date(2015, 1, 14, 0, 0, 0, 0, time.UTC),
+				Units:      2,
+			},
+		},
+	}
+	result := testStruct.totalUsage()
+	if reflect.DeepEqual(3, result) {
+		t.Errorf("\nExpecting <3>,\n Received <%+v>", result)
+	}
+}
+
+func TestResourceTotalUsage2(t *testing.T) {
+	testStruct := Resource{
+		Tenant: "test_tenant",
+		ID:     "test_id",
+		Usages: map[string]*ResourceUsage{
+			"0": {
+				Tenant:     "test_tenant2",
+				ID:         "test_id2",
+				ExpiryTime: time.Date(2015, 1, 14, 0, 0, 0, 0, time.UTC),
+				Units:      1,
+			},
+			"1": {
+				Tenant:     "test_tenant3",
+				ID:         "test_id3",
+				ExpiryTime: time.Date(2015, 1, 14, 0, 0, 0, 0, time.UTC),
+				Units:      2,
+			},
+		},
+	}
+	result := testStruct.TotalUsage()
+	if reflect.DeepEqual(3, result) {
+		t.Errorf("\nExpecting <3>,\n Received <%+v>", result)
+	}
+}
+
+func TestResourcesRecordUsage(t *testing.T) {
+	testStruct := &Resource{
+		Tenant: "test_tenant",
+		ID:     "test_id",
+		Usages: map[string]*ResourceUsage{
+			"test_id2": {
+				Tenant:     "test_tenant2",
+				ID:         "test_id2",
+				ExpiryTime: time.Date(2015, 1, 14, 0, 0, 0, 0, time.UTC),
+				Units:      1,
+			},
+		},
+	}
+	recordStruct := &ResourceUsage{
+		Tenant:     "test_tenant3",
+		ID:         "test_id3",
+		ExpiryTime: time.Date(2016, 1, 14, 0, 0, 0, 0, time.UTC),
+		Units:      1,
+	}
+	expStruct := Resource{
+		Tenant: "test_tenant",
+		ID:     "test_id",
+		Usages: map[string]*ResourceUsage{
+			"test_id2": {
+				Tenant:     "test_tenant2",
+				ID:         "test_id2",
+				ExpiryTime: time.Date(2015, 1, 14, 0, 0, 0, 0, time.UTC),
+				Units:      1,
+			},
+			"test_id3": {
+				Tenant:     "test_tenant3",
+				ID:         "test_id3",
+				ExpiryTime: time.Date(2016, 1, 14, 0, 0, 0, 0, time.UTC),
+				Units:      1,
+			},
+		},
+	}
+	err := testStruct.recordUsage(recordStruct)
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	if reflect.DeepEqual(testStruct, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expStruct, testStruct)
+	}
+}
+
+func TestResourcesClearUsage(t *testing.T) {
+	testStruct := &Resource{
+		Tenant: "test_tenant",
+		ID:     "test_id",
+		Usages: map[string]*ResourceUsage{
+			"test_id2": {
+				Tenant:     "test_tenant2",
+				ID:         "test_id2",
+				ExpiryTime: time.Date(2015, 1, 14, 0, 0, 0, 0, time.UTC),
+				Units:      1,
+			},
+			"test_id3": {
+				Tenant:     "test_tenant3",
+				ID:         "test_id3",
+				ExpiryTime: time.Date(2016, 1, 14, 0, 0, 0, 0, time.UTC),
+				Units:      1,
+			},
+		},
+	}
+	expStruct := Resource{
+		Tenant: "test_tenant",
+		ID:     "test_id",
+		Usages: map[string]*ResourceUsage{
+			"test_id2": {
+				Tenant:     "test_tenant2",
+				ID:         "test_id2",
+				ExpiryTime: time.Date(2015, 1, 14, 0, 0, 0, 0, time.UTC),
+				Units:      1,
+			},
+		},
+	}
+	err := testStruct.clearUsage("test_id3")
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	if reflect.DeepEqual(testStruct, expStruct) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expStruct, testStruct)
+	}
+}
