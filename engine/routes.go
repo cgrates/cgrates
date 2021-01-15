@@ -528,7 +528,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 
 	//construct the DP and pass it to filterS
 	nM := utils.MapStorage{utils.MetaReq: args.Event}
-	passedRoutes := utils.NewOrderedNavigableMap()
+	passedRoutes := make(map[string]*Route)
 	// apply filters for event
 	for _, route := range rPrfl.Routes {
 		pass, lazyCheckRules, err := rpS.filterS.LazyPass(tnt,
@@ -542,26 +542,14 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 		} else if !pass {
 			continue
 		}
-		nmFpth := utils.NewFullPath(route.ID, utils.NestingSep)
-		var prevRt *Route
-		if prevRtIface, errPth := passedRoutes.Field(nmFpth.PathItems); errPth == nil {
-			prevRt = prevRtIface.Interface().(*Route)
-		}
-		if prevRt != nil && prevRt.Weight >= route.Weight {
-			continue // ignoring the new route due to duplication
-		}
-		if _, err = passedRoutes.Set(nmFpth, utils.NewNMData(route)); err != nil {
-			return nil, err
-		}
 		route.lazyCheckRules = lazyCheckRules
-	}
-	ordRts := passedRoutes.OrderedFields()
-	routesAllowed := make([]*Route, len(ordRts))
-	for i, rtIface := range ordRts {
-		routesAllowed[i] = rtIface.(*Route)
+		if prev, has := passedRoutes[route.ID]; has && prev.Weight >= route.Weight {
+			continue
+		}
+		passedRoutes[route.ID] = route
 	}
 	sortedRoutes, err = rpS.sorter.SortRoutes(rPrfl.ID, rPrfl.Sorting,
-		routesAllowed, args.CGREvent, extraOpts)
+		passedRoutes, args.CGREvent, extraOpts)
 	if err != nil {
 		return nil, err
 	}

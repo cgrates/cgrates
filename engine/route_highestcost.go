@@ -35,7 +35,7 @@ type HightCostSorter struct {
 	rS      *RouteService
 }
 
-func (hcs *HightCostSorter) SortRoutes(prflID string, routes []*Route,
+func (hcs *HightCostSorter) SortRoutes(prflID string, routes map[string]*Route,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting:      hcs.sorting,

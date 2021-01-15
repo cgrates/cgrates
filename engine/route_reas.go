@@ -36,7 +36,7 @@ type ResourceAscendentSorter struct {
 }
 
 func (ws *ResourceAscendentSorter) SortRoutes(prflID string,
-	routes []*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	routes map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting:      ws.sorting,
 		SortedRoutes: make([]*SortedRoute, 0)}
