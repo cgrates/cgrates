@@ -33,7 +33,7 @@ type QOSRouteSorter struct {
 	rS      *RouteService
 }
 
-func (qos *QOSRouteSorter) SortRoutes(prflID string, routes []*Route,
+func (qos *QOSRouteSorter) SortRoutes(prflID string, routes map[string]*Route,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting:      qos.sorting,
