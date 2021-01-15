@@ -36,7 +36,8 @@ import (
 // NewAccountService returns the Account Service
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalChan chan rpcclient.ClientConnector,
+	connMgr *engine.ConnManager, server *cores.Server,
+	internalChan chan rpcclient.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AccountService{
 		connChan:    internalChan,
@@ -44,6 +45,7 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
+		connMgr:     connMgr,
 		server:      server,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -58,6 +60,7 @@ type AccountService struct {
 	dm          *DataDBService
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
+	connMgr     *engine.ConnManager
 	server      *cores.Server
 
 	rldChan  chan struct{}
@@ -87,7 +90,7 @@ func (acts *AccountService) Start() (err error) {
 
 	acts.Lock()
 	defer acts.Unlock()
-	acts.acts = accounts.NewAccountS(acts.cfg, filterS, datadb)
+	acts.acts = accounts.NewAccountS(acts.cfg, filterS, acts.connMgr, datadb)
 	acts.stopChan = make(chan struct{})
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 
