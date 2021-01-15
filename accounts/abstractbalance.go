@@ -29,8 +29,9 @@ import (
 
 // newAbstractBalance constructs an abstractBalanceOperator
 func newAbstractBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []*concreteBalance,
-	fltrS *engine.FilterS, ralsConns []string) balanceOperator {
-	return &abstractBalance{blnCfg, cncrtBlncs, fltrS, ralsConns}
+	fltrS *engine.FilterS, connMgr *engine.ConnManager,
+	attrSConns, rateSConns []string) balanceOperator {
+	return &abstractBalance{blnCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns}
 }
 
 // abstractBalance is the operator for *abstract balance type
@@ -38,7 +39,9 @@ type abstractBalance struct {
 	blnCfg     *utils.Balance
 	cncrtBlncs []*concreteBalance // paying balances
 	fltrS      *engine.FilterS
-	ralsConns  []string
+	connMgr    *engine.ConnManager
+	attrSConns,
+	rateSConns []string
 }
 
 // costIncrement finds out the cost increment for the event
@@ -58,6 +61,9 @@ func (aB *abstractBalance) costIncrement(tnt string, ev utils.DataProvider) (cos
 	}
 	if costIcrm.Increment == nil {
 		costIcrm.Increment = utils.NewDecimal(1, 0)
+	}
+	if costIcrm.RecurrentFee == nil {
+		costIcrm.RecurrentFee = utils.NewDecimal(-1, 0)
 	}
 	return
 }
@@ -89,6 +95,37 @@ func (aB *abstractBalance) balanceLimit() (bL *utils.Decimal) {
 	return
 }
 
+// processAttributeS will process the event with AttributeS
+func (aB *abstractBalance) processAttributeS(cgrEv *utils.CGREventWithOpts) (rplyEv *engine.AttrSProcessEventReply, err error) {
+	if len(aB.attrSConns) == 0 {
+		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
+	}
+	var procRuns *int
+	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
+		if v, err := utils.IfaceAsTInt64(val); err == nil {
+			procRuns = utils.IntPointer(int(v))
+		}
+	}
+	attrArgs := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.FirstNonEmpty(
+			engine.MapEvent(cgrEv.Opts).GetStringIgnoreErrors(utils.OptsContext),
+			utils.MetaAccountS)),
+		CGREventWithOpts: cgrEv,
+		AttributeIDs:     aB.blnCfg.CostAttributes,
+		ProcessRuns:      procRuns,
+	}
+	err = aB.connMgr.Call(aB.attrSConns, nil, utils.AttributeSv1ProcessEvent,
+		attrArgs, &rplyEv)
+	return
+}
+
+// debitUsageFromConcrete attempts to debit the usage out of concrete balances
+func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal, costIcrm *utils.CostIncrement,
+	cgrEv *utils.CGREventWithOpts) (dbtedUsage *utils.Decimal, err error) {
+
+	return
+}
+
 // debitUsage implements the balanceOperator interface
 func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
@@ -106,33 +143,52 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 		return nil, utils.ErrFilterNotPassingNoCaps
 	}
 
-	blcVal := aB.blnCfg.Units
-	// balanceLimit
-	var hasLmt bool
-	blncLmt := aB.balanceLimit()
-	if blncLmt.Cmp(decimal.New(0, 0)) != 0 {
-		blcVal = utils.SubstractDecimal(blcVal, blncLmt)
-		hasLmt = true
-	}
-
 	// costIncrement
 	var costIcrm *utils.CostIncrement
 	if costIcrm, err = aB.costIncrement(cgrEv.Tenant, evNm); err != nil {
 		return
 	}
+	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
+		len(aB.blnCfg.CostAttributes) != 0 { // cost unknown, apply AttributeS to query from RateS
+		var rplyAttrS *engine.AttrSProcessEventReply
+		if rplyAttrS, err = aB.processAttributeS(cgrEv); err != nil {
+			return
+		}
+		if len(rplyAttrS.AlteredFields) != 0 { // event was altered
+			cgrEv.CGREvent = rplyAttrS.CGREvent
+			cgrEv.Opts = rplyAttrS.Opts
+		}
+	}
+
+	blcVal := aB.blnCfg.Units
+
+	// balanceLimit
+	var hasLmt bool
+	blncLmt := aB.balanceLimit()
+	if blncLmt != nil && blncLmt.Cmp(decimal.New(0, 0)) != 0 {
+		blcVal = utils.SubstractDecimal(blcVal, blncLmt)
+		hasLmt = true
+	}
+	// balance smaller than usage, correct usage
+	if blcVal.Compare(usage) == -1 && blncLmt != nil {
+		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
+		maxIncrm := &utils.Decimal{
+			decimal.WithContext(
+				decimal.Context{RoundingMode: decimal.ToZero}).Quo(blcVal.Big,
+				costIcrm.Increment.Big).RoundToInt()}
+		usage = utils.MultiplyDecimal(maxIncrm, costIcrm.Increment) // decrease the usage to match the maximum increments
+	}
 
 	// unitFactor
-	debUnts := usage
-
 	var uF *utils.UnitFactor
-	if uF, err = aB.unitFactor(cgrEv.Tenant, evNm); err != nil {
+	if uF, err = aB.unitFactor(cgrEv.CGREvent.Tenant, evNm); err != nil {
 		return
 	}
-	//var hasUF bool
-	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
-		debUnts = utils.MultiplyDecimal(debUnts, uF.Factor)
-		//incrm = utils.MultiplyBig(incrm, uF.Factor.Big)
-		//hasUF = true
+
+	// attempt to debit usage with cost
+	// fix the maximum number of iterations
+	for i := 0; i < 10000; i++ {
+		continue
 	}
 
 	fmt.Printf("costIcrm: %+v, blncLmt: %+v, hasLmt: %+v, uF: %+v", costIcrm, blncLmt, hasLmt, uF)

@@ -27,19 +27,16 @@ import (
 )
 
 // NewAccountS instantiates the AccountS
-func NewAccountS(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager) *AccountS {
-	return &AccountS{
-		cfg:   cfg,
-		fltrS: fltrS,
-		dm:    dm,
-	}
+func NewAccountS(cfg *config.CGRConfig, fltrS *engine.FilterS, connMgr *engine.ConnManager, dm *engine.DataManager) *AccountS {
+	return &AccountS{cfg, fltrS, connMgr, dm}
 }
 
 // AccountS operates Accounts
 type AccountS struct {
-	cfg   *config.CGRConfig
-	fltrS *engine.FilterS
-	dm    *engine.DataManager
+	cfg     *config.CGRConfig
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
+	dm      *engine.DataManager
 }
 
 // ListenAndServe keeps the service alive
@@ -125,7 +122,8 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent, a
 func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 	//var aBlncs *accountBalances
-	if _, err = newAccountBalances(acnt, aS.fltrS, aS.cfg.AccountSCfg().RateSConns); err != nil {
+	if _, err = newAccountBalances(acnt, aS.fltrS, aS.connMgr,
+		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
 		return
 	}
 	return

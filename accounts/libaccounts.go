@@ -28,13 +28,14 @@ import (
 
 // newAccountBalances constructs accountBalances
 func newAccountBalances(acnt *utils.AccountProfile,
-	fltrS *engine.FilterS, ralsConns []string) (acntBlncs *accountBalances, err error) {
+	fltrS *engine.FilterS, connMgr *engine.ConnManager,
+	attrSConns, rateSConns []string) (acntBlncs *accountBalances, err error) {
 	blncs := make(utils.Balances, len(acnt.Balances)) // Temporary code to pass the build please update this accordingly
 	for _, bal := range acnt.Balances {
 		blncs = append(blncs, bal)
 	}
 	blncs.Sort()
-	acntBlncs = &accountBalances{blnCfgs: blncs}
+	acntBlncs = &accountBalances{blnCfgs: blncs, connMgr: connMgr, attrSConns: attrSConns, rateSConns: rateSConns}
 	// populate typIdx
 	for i, blnCfg := range blncs {
 		acntBlncs.typIdx[blnCfg.Type] = append(acntBlncs.typIdx[blnCfg.Type], i)
@@ -42,7 +43,8 @@ func newAccountBalances(acnt *utils.AccountProfile,
 	// populate cncrtBlncs
 	acntBlncs.cncrtBlncs = make([]*concreteBalance, len(acntBlncs.typIdx[utils.MetaConcrete]))
 	for i, blncIdx := range acntBlncs.typIdx[utils.MetaConcrete] {
-		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx], acntBlncs.cncrtBlncs, fltrS, ralsConns).(*concreteBalance)
+		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx],
+			acntBlncs.cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns).(*concreteBalance)
 		acntBlncs.opers[acntBlncs.blnCfgs[blncIdx].ID] = acntBlncs.cncrtBlncs[i]
 	}
 	// populate opers
@@ -51,7 +53,7 @@ func newAccountBalances(acnt *utils.AccountProfile,
 			continue
 		}
 		if acntBlncs.opers[blnCfg.ID], err = newBalanceOperator(blnCfg,
-			acntBlncs.cncrtBlncs, fltrS, ralsConns); err != nil {
+			acntBlncs.cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns); err != nil {
 			return
 		}
 	}
@@ -65,21 +67,24 @@ type accountBalances struct {
 	cncrtBlncs []*concreteBalance         // concrete balances so we can pass them to the newBalanceOperator
 	opers      map[string]balanceOperator // map[blncID]balanceOperator
 
-	fltrS     *engine.FilterS
-	ralsConns []string
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
+	attrSConns,
+	rateSConns []string
 }
 
 // newBalanceOperator instantiates balanceOperator interface
 // cncrtBlncs are needed for abstract balance debits
 func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
-	fltrS *engine.FilterS, ralsConns []string) (bP balanceOperator, err error) {
+	fltrS *engine.FilterS, connMgr *engine.ConnManager,
+	attrSConns, rateSConns []string) (bP balanceOperator, err error) {
 	switch blncCfg.Type {
 	default:
 		return nil, fmt.Errorf("unsupported balance type: <%s>", blncCfg.Type)
 	case utils.MetaConcrete:
-		return newConcreteBalanceOperator(blncCfg, cncrtBlncs, fltrS, ralsConns), nil
+		return newConcreteBalanceOperator(blncCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns), nil
 	case utils.MetaAbstract:
-		return newAbstractBalanceOperator(blncCfg, cncrtBlncs, fltrS, ralsConns), nil
+		return newAbstractBalanceOperator(blncCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns), nil
 	}
 }
 

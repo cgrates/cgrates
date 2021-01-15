@@ -29,8 +29,9 @@ import (
 
 // newConcreteBalance constructs a concreteBalanceOperator
 func newConcreteBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []*concreteBalance,
-	fltrS *engine.FilterS, ralsConns []string) balanceOperator {
-	return &concreteBalance{blnCfg, cncrtBlncs, fltrS, ralsConns}
+	fltrS *engine.FilterS, connMgr *engine.ConnManager,
+	attrSConns, rateSConns []string) balanceOperator {
+	return &concreteBalance{blnCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns}
 }
 
 // concreteBalance is the operator for *concrete balance type
@@ -38,7 +39,9 @@ type concreteBalance struct {
 	blnCfg     *utils.Balance
 	cncrtBlncs []*concreteBalance // paying balances
 	fltrS      *engine.FilterS
-	ralsConns  []string
+	connMgr    *engine.ConnManager
+	attrSConns,
+	rateSConns []string
 }
 
 // costIncrement finds out the cost increment for the event
