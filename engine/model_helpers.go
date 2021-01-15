@@ -3100,7 +3100,7 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 	return rp, nil
 }
 
-func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile, err error) {
+func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 	tpRp = &utils.TPRateProfile{
 		Tenant:             rp.Tenant,
 		ID:                 rp.ID,
@@ -3111,17 +3111,13 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile, err error) {
 		Rates:              make(map[string]*utils.TPRate),
 	}
 	if rp.MinCost != nil {
-		minCostF, ok := rp.MinCost.Float64()
-		if !ok {
-			return nil, fmt.Errorf("cannot convert <%+v> to float64", rp.MinCost)
-		}
+		//there should not be an invalid value of converting from Decimal into float64
+		minCostF, _ := rp.MinCost.Float64()
 		tpRp.MinCost = minCostF
 	}
 	if rp.MaxCost != nil {
-		maxCostF, ok := rp.MaxCost.Float64()
-		if !ok {
-			return nil, fmt.Errorf("cannot convert <%+v> to float64", rp.MaxCost)
-		}
+		//there should not be an invalid value of converting from Decimal into float64
+		maxCostF, _ := rp.MaxCost.Float64()
 		tpRp.MaxCost = maxCostF
 	}
 
@@ -3139,10 +3135,8 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile, err error) {
 				IntervalStart: iRate.IntervalStart.String(),
 			}
 			if iRate.FixedFee != nil {
-				fixedFeeF, ok := iRate.FixedFee.Float64()
-				if !ok {
-					return nil, fmt.Errorf("cannot convert <%+v> to float64", iRate.FixedFee)
-				}
+				//there should not be an invalid value of converting from Decimal into float64
+				fixedFeeF, _ := iRate.FixedFee.Float64()
 				tpRp.Rates[key].IntervalRates[i].FixedFee = fixedFeeF
 			}
 			if iRate.Unit != nil {
@@ -3152,10 +3146,8 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile, err error) {
 				tpRp.Rates[key].IntervalRates[i].Increment = iRate.Increment.String()
 			}
 			if iRate.RecurrentFee != nil {
-				recFeeF, ok := iRate.RecurrentFee.Float64()
-				if !ok {
-					return nil, fmt.Errorf("cannot convert <%+v> to float64", iRate.RecurrentFee)
-				}
+				//there should not be an invalid value of converting from Decimal into float64
+				recFeeF, _ := iRate.RecurrentFee.Float64()
 				tpRp.Rates[key].IntervalRates[i].RecurrentFee = recFeeF
 			}
 		}
@@ -3683,7 +3675,7 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 	return
 }
 
-func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile, err error) {
+func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile) {
 	tpAp = &utils.TPAccountProfile{
 		Tenant:             ap.Tenant,
 		ID:                 ap.ID,
@@ -3719,6 +3711,7 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 		for k, fli := range bal.FilterIDs {
 			tpAp.Balances[i].FilterIDs[k] = fli
 		}
+		//there should not be an invalid value of converting into float64
 		tpAp.Balances[i].Units, _ = bal.Units.Float64()
 		elems := make([]string, 0, len(bal.Opts))
 		for k, v := range bal.Opts {
@@ -3732,24 +3725,18 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 				tpAp.Balances[i].CostIncrement[k].FilterIDs[kk] = fli
 			}
 			if cIncrement.Increment != nil {
-				incr, ok := cIncrement.Increment.Float64()
-				if !ok {
-					return nil, fmt.Errorf("cannot convert <%+v> to float64", cIncrement.Increment)
-				}
+				//there should not be an invalid value of converting from Decimal into float64
+				incr, _ := cIncrement.Increment.Float64()
 				tpAp.Balances[i].CostIncrement[k].Increment = &incr
 			}
 			if cIncrement.FixedFee != nil {
-				fxdFee, ok := cIncrement.FixedFee.Float64()
-				if !ok {
-					return nil, fmt.Errorf("cannot convert <%+v> to float64", cIncrement.FixedFee)
-				}
+				//there should not be an invalid value of converting from Decimal into float64
+				fxdFee, _ := cIncrement.FixedFee.Float64()
 				tpAp.Balances[i].CostIncrement[k].FixedFee = &fxdFee
 			}
 			if cIncrement.RecurrentFee != nil {
-				rcrFee, ok := cIncrement.RecurrentFee.Float64()
-				if !ok {
-					return nil, fmt.Errorf("cannot convert <%+v> to float64", cIncrement.RecurrentFee)
-				}
+				//there should not be an invalid value of converting from Decimal into float64
+				rcrFee, _ := cIncrement.RecurrentFee.Float64()
 				tpAp.Balances[i].CostIncrement[k].RecurrentFee = &rcrFee
 			}
 		}
@@ -3764,10 +3751,8 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 				tpAp.Balances[i].UnitFactors[k].FilterIDs[kk] = fli
 			}
 			if uFactor.Factor != nil {
-				untFctr, ok := uFactor.Factor.Float64()
-				if !ok {
-					return nil, fmt.Errorf("cannot convert <%+v> to float64", uFactor.Factor)
-				}
+				//there should not be an invalid value of converting from Decimal into float64
+				untFctr, _ := uFactor.Factor.Float64()
 				tpAp.Balances[i].UnitFactors[k].Factor = untFctr
 			}
 		}
