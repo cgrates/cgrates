@@ -98,7 +98,7 @@ func (aB *abstractBalance) balanceLimit() (bL *utils.Decimal) {
 // processAttributeS will process the event with AttributeS
 func (aB *abstractBalance) processAttributeS(cgrEv *utils.CGREvent) (rplyEv *engine.AttrSProcessEventReply, err error) {
 	if len(aB.attrSConns) == 0 {
-		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
+		return nil, utils.NewErrNotConnected(utils.AttributeS)
 	}
 	var procRuns *int
 	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
@@ -119,10 +119,40 @@ func (aB *abstractBalance) processAttributeS(cgrEv *utils.CGREvent) (rplyEv *eng
 	return
 }
 
-// debitUsageFromConcrete attempts to debit the usage out of concrete balances
-func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal, costIcrm *utils.CostIncrement,
-	cgrEv *utils.CGREvent) (dbtedUsage *utils.Decimal, err error) {
+// rateSCostForEvent will process the event with RateS in order to get the cost
+func (aB *abstractBalance) rateSCostForEvent(cgrEv *utils.CGREvent) (rplyCost *engine.RateProfileCost, err error) {
+	if len(aB.rateSConns) == 0 {
+		return nil, utils.NewErrNotConnected(utils.RateS)
+	}
+	err = aB.connMgr.Call(aB.rateSConns, nil, utils.RateSv1CostForEvent,
+		&utils.ArgsCostForEvent{CGREvent: cgrEv}, &rplyCost)
+	return
+}
 
+// debitUsageFromConcrete attempts to debit the usage out of concrete balances
+// returns error if complete usage cannot be debitted
+func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal, costIcrm *utils.CostIncrement,
+	cgrEv *utils.CGREvent) (err error) {
+	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
+		costIcrm.FixedFee == nil {
+		var rplyCost *engine.RateProfileCost
+		if rplyCost, err = aB.rateSCostForEvent(cgrEv); err != nil {
+			return
+		}
+		costIcrm.FixedFee = utils.NewDecimalFromFloat64(rplyCost.Cost)
+	}
+	var tCost *utils.Decimal
+	if costIcrm.FixedFee != nil {
+		tCost = costIcrm.FixedFee
+	}
+	// RecurrentFee is configured, used it with increments
+	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) != 0 {
+		rcrntCost := utils.MultiplyBig(
+			utils.DivideBig(usage.Big, costIcrm.Increment.Big),
+			costIcrm.RecurrentFee.Big)
+		tCost = &utils.Decimal{utils.AddBig(tCost.Big, rcrntCost)}
+	}
+	fmt.Println(tCost)
 	return
 }
 
@@ -149,6 +179,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 		return
 	}
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
+		costIcrm.FixedFee == nil &&
 		len(aB.blnCfg.CostAttributes) != 0 { // cost unknown, apply AttributeS to query from RateS
 		var rplyAttrS *engine.AttrSProcessEventReply
 		if rplyAttrS, err = aB.processAttributeS(cgrEv); err != nil {
