@@ -21,6 +21,7 @@ package actions
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -68,5 +69,61 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expActionPrf) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expActionPrf), utils.ToJSON(rcv))
+	}
+
+	cgrEv = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ACTIONS1",
+		Event: map[string]interface{}{
+			utils.Accounts: "10",
+		},
+	}
+	//This Event is not matching with our filter
+	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, []string{}); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	cgrEv.Event[utils.AccountField] = "1001"
+	actPrfIDs := []string{"inexisting_id"}
+	//Unable to get from database an ActionProfile if the ID won't match
+	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, actPrfIDs); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	actPrfIDs = []string{"test_id1"}
+	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, actPrfIDs); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	actPrf.ActivationInterval = &utils.ActivationInterval{
+		ActivationTime: time.Date(2012, 7, 21, 0, 0, 0, 0, time.UTC),
+		ExpiryTime:     time.Date(2012, 8, 21, 0, 0, 0, 0, time.UTC),
+	}
+	//this event is not active in this interval time
+	cgrEv.Time = utils.TimePointer(time.Date(2012, 6, 21, 0, 0, 0, 0, time.UTC))
+	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, actPrfIDs); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+	actPrf.ActivationInterval = nil
+
+	//when dataManager is nil, it won't be able to get ActionsProfile from database
+	acts.dm = nil
+	if _, err := acts.matchingActionProfilesForEvent("INVALID_TENANT", cgrEv, actPrfIDs); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
+	}
+
+	acts.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	actPrf.FilterIDs = []string{"invalid_filters"}
+	//Set in database and invalid filter, so it won t pass
+	if err := acts.dm.SetActionProfile(actPrf, false); err != nil {
+		t.Error(err)
+	}
+	expected := "NOT_FOUND:invalid_filters"
+	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, actPrfIDs); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	if err := acts.dm.RemoveActionProfile(actPrf.Tenant, actPrf.ID, utils.NonTransactional, false); err != nil {
+		t.Error(err)
 	}
 }
