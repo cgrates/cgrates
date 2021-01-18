@@ -1559,7 +1559,8 @@ type TPAccountBalance struct {
 	Type           string
 	Opts           string
 	CostIncrement  []*TPBalanceCostIncrement
-	CostAttributes []string
+	AttributeIDs   []string
+	RateProfileIDs []string
 	UnitFactors    []*TPBalanceUnitFactor
 	Units          float64
 }

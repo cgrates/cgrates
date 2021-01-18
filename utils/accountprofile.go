@@ -44,7 +44,8 @@ type Balance struct {
 	Type           string
 	Opts           map[string]interface{}
 	CostIncrements []*CostIncrement
-	CostAttributes []string
+	AttributeIDs   []string
+	RateProfileIDs []string
 	UnitFactors    []*UnitFactor
 	Units          *Decimal
 }
@@ -168,10 +169,16 @@ func (bL *Balance) Clone() (blnc *Balance) {
 			blnc.CostIncrements[i] = value.Clone()
 		}
 	}
-	if bL.CostAttributes != nil {
-		blnc.CostAttributes = make([]string, len(bL.CostAttributes))
-		for i, value := range bL.CostAttributes {
-			blnc.CostAttributes[i] = value
+	if bL.AttributeIDs != nil {
+		blnc.AttributeIDs = make([]string, len(bL.AttributeIDs))
+		for i, value := range bL.AttributeIDs {
+			blnc.AttributeIDs[i] = value
+		}
+	}
+	if bL.RateProfileIDs != nil {
+		blnc.RateProfileIDs = make([]string, len(bL.RateProfileIDs))
+		for i, value := range bL.RateProfileIDs {
+			blnc.RateProfileIDs[i] = value
 		}
 	}
 	if bL.UnitFactors != nil {
@@ -267,7 +274,8 @@ type APIBalance struct {
 	Type           string
 	Opts           map[string]interface{}
 	CostIncrements []*APICostIncrement
-	CostAttributes []string
+	AttributeIDs   []string
+	RateProfileIDs []string
 	UnitFactors    []*APIUnitFactor
 	Units          float64
 }
@@ -281,7 +289,8 @@ func (ext *APIBalance) AsBalance() (balance *Balance) {
 		Blocker:        ext.Blocker,
 		Type:           ext.Type,
 		Opts:           ext.Opts,
-		CostAttributes: ext.CostAttributes,
+		AttributeIDs:   ext.AttributeIDs,
+		RateProfileIDs: ext.RateProfileIDs,
 		Units:          NewDecimalFromFloat64(ext.Units),
 	}
 	if len(ext.CostIncrements) != 0 {

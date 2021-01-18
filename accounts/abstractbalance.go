@@ -111,7 +111,7 @@ func (aB *abstractBalance) processAttributeS(cgrEv *utils.CGREvent) (rplyEv *eng
 			engine.MapEvent(cgrEv.Opts).GetStringIgnoreErrors(utils.OptsContext),
 			utils.MetaAccountS)),
 		CGREvent:     cgrEv,
-		AttributeIDs: aB.blnCfg.CostAttributes,
+		AttributeIDs: aB.blnCfg.AttributeIDs,
 		ProcessRuns:  procRuns,
 	}
 	err = aB.connMgr.Call(aB.attrSConns, nil, utils.AttributeSv1ProcessEvent,
@@ -180,7 +180,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 	}
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
 		costIcrm.FixedFee == nil &&
-		len(aB.blnCfg.CostAttributes) != 0 { // cost unknown, apply AttributeS to query from RateS
+		len(aB.blnCfg.AttributeIDs) != 0 { // cost unknown, apply AttributeS to query from RateS
 		var rplyAttrS *engine.AttrSProcessEventReply
 		if rplyAttrS, err = aB.processAttributeS(cgrEv); err != nil {
 			return

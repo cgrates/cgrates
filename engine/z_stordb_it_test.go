@@ -177,7 +177,7 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 							RecurrentFee: utils.Float64Pointer(3.3),
 						},
 					},
-					CostAttributes: []string{"attr1", "attr2"},
+					AttributeIDs: []string{"attr1", "attr2"},
 					UnitFactors: []*utils.TPBalanceUnitFactor{
 						{
 							FilterIDs: []string{"fltr1", "fltr2"},
