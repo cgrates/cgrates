@@ -147,7 +147,8 @@ func testAccountSGetAccountProfile(t *testing.T) {
 						RecurrentFee: &utils.Decimal{decimal.New(33, 1)},
 					},
 				},
-				CostAttributes: []string{"attr1", "attr2"},
+				AttributeIDs:   []string{"attr1", "attr2"},
+				RateProfileIDs: []string{},
 				UnitFactors: []*utils.UnitFactor{
 					&utils.UnitFactor{
 						FilterIDs: []string{"fltr1", "fltr2"},
@@ -166,7 +167,8 @@ func testAccountSGetAccountProfile(t *testing.T) {
 				Weight:         10,
 				Type:           utils.MetaVoice,
 				CostIncrements: []*utils.CostIncrement{},
-				CostAttributes: []string{},
+				AttributeIDs:   []string{},
+				RateProfileIDs: []string{},
 				UnitFactors:    []*utils.UnitFactor{},
 				Units:          &utils.Decimal{decimal.New(3600000000000, 0)},
 			},
@@ -218,7 +220,7 @@ func testAccountSSettAccountProfile(t *testing.T) {
 								RecurrentFee: utils.Float64Pointer(3.3),
 							},
 						},
-						CostAttributes: []string{"attr1", "attr2"},
+						AttributeIDs: []string{"attr1", "attr2"},
 						UnitFactors: []*utils.APIUnitFactor{
 							&utils.APIUnitFactor{
 								FilterIDs: []string{"fltr1", "fltr2"},

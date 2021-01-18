@@ -507,7 +507,7 @@ func testExpVerifyAccountProfiles(t *testing.T) {
 						RecurrentFee: utils.NewDecimal(33, 1),
 					},
 				},
-				CostAttributes: []string{"attr1", "attr2"},
+				AttributeIDs: []string{"attr1", "attr2"},
 				UnitFactors: []*utils.UnitFactor{
 					{
 						FilterIDs: []string{"fltr1", "fltr2"},

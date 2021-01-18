@@ -6908,7 +6908,8 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 					Weight:         10,
 					Type:           utils.MetaVoice,
 					CostIncrement:  []*utils.TPBalanceCostIncrement{},
-					CostAttributes: []string{},
+					AttributeIDs:   []string{},
+					RateProfileIDs: []string{},
 					UnitFactors:    []*utils.TPBalanceUnitFactor{},
 					Units:          3600000000000,
 				},
@@ -6959,7 +6960,8 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 					Weight:         10,
 					Type:           utils.MetaVoice,
 					CostIncrement:  []*utils.TPBalanceCostIncrement{},
-					CostAttributes: []string{},
+					AttributeIDs:   []string{},
+					RateProfileIDs: []string{},
 					UnitFactors:    []*utils.TPBalanceUnitFactor{},
 					Units:          3600000000000,
 				},
@@ -7108,7 +7110,7 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 						RecurrentFee: utils.Float64Pointer(7),
 					},
 				},
-				CostAttributes: []string{"20", "30"},
+				AttributeIDs: []string{"20", "30"},
 				UnitFactors: []*utils.TPBalanceUnitFactor{
 					{
 						FilterIDs: []string{"*string:*~req.Account:100"},
@@ -7136,7 +7138,7 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 		BalanceBlocker:        false,
 		BalanceType:           utils.MetaVoice,
 		BalanceCostIncrements: "*string:*~req.Account:100;1;20;5;*string:*~req.Destination:10;2;10;7",
-		BalanceCostAttributes: "20;30",
+		BalanceAttributeIDs:   "20;30",
 		BalanceUnitFactors:    "*string:*~req.Account:100;21;*string:*~req.Destination:10;27",
 		BalanceUnits:          3600000000000,
 		ThresholdIDs:          "WARN_RES1;WARN_RES2",
@@ -7351,7 +7353,7 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 						RecurrentFee: utils.NewDecimal(5, 0),
 					},
 				},
-				CostAttributes: []string{"20"},
+				AttributeIDs: []string{"20"},
 				UnitFactors: []*utils.UnitFactor{
 					{
 						FilterIDs: []string{"*string:*~req.Account:100"},
@@ -7389,7 +7391,8 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 						RecurrentFee: utils.Float64Pointer(5),
 					},
 				},
-				CostAttributes: []string{"20"},
+				AttributeIDs:   []string{"20"},
+				RateProfileIDs: []string{},
 				UnitFactors: []*utils.TPBalanceUnitFactor{
 					{
 						FilterIDs: []string{"*string:*~req.Account:100"},

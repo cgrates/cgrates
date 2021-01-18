@@ -1631,7 +1631,8 @@ func TestLoadAccountProfiles(t *testing.T) {
 						RecurrentFee: utils.Float64Pointer(3.3),
 					},
 				},
-				CostAttributes: []string{"attr1", "attr2"},
+				AttributeIDs:   []string{"attr1", "attr2"},
+				RateProfileIDs: []string{},
 				UnitFactors: []*utils.TPBalanceUnitFactor{
 					{
 						FilterIDs: []string{"fltr1", "fltr2"},
@@ -1650,7 +1651,8 @@ func TestLoadAccountProfiles(t *testing.T) {
 				Weight:         10,
 				Type:           utils.MetaVoice,
 				CostIncrement:  []*utils.TPBalanceCostIncrement{},
-				CostAttributes: []string{},
+				AttributeIDs:   []string{},
+				RateProfileIDs: []string{},
 				UnitFactors:    []*utils.TPBalanceUnitFactor{},
 				Units:          3600000000000,
 			},

@@ -3480,11 +3480,18 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 					costIncrements = append(costIncrements, costIncrement)
 				}
 			}
-			costAttributes := make([]string, 0)
-			if tp.BalanceCostAttributes != utils.EmptyString {
-				costAttributeSplit := strings.Split(tp.BalanceCostAttributes, utils.InfieldSep)
+			attributeIDs := make([]string, 0)
+			if tp.BalanceAttributeIDs != utils.EmptyString {
+				costAttributeSplit := strings.Split(tp.BalanceAttributeIDs, utils.InfieldSep)
 				for _, costAttribute := range costAttributeSplit {
-					costAttributes = append(costAttributes, costAttribute)
+					attributeIDs = append(attributeIDs, costAttribute)
+				}
+			}
+			rateProfileIDs := make([]string, 0)
+			if tp.BalanceRateProfileIDs != utils.EmptyString {
+				rateProfileIDs := strings.Split(tp.BalanceRateProfileIDs, utils.InfieldSep)
+				for _, ratePrfID := range rateProfileIDs {
+					rateProfileIDs = append(rateProfileIDs, ratePrfID)
 				}
 			}
 			unitFactors := make([]*utils.TPBalanceUnitFactor, 0)
@@ -3510,7 +3517,8 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 				Type:           tp.BalanceType,
 				Opts:           tp.BalanceOpts,
 				CostIncrement:  costIncrements,
-				CostAttributes: costAttributes,
+				AttributeIDs:   attributeIDs,
+				RateProfileIDs: rateProfileIDs,
 				UnitFactors:    unitFactors,
 				Units:          tp.BalanceUnits,
 			}
@@ -3579,11 +3587,17 @@ func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfi
 			}
 			mdl.BalanceCostIncrements += costIncr.AsString()
 		}
-		for i, costAttr := range balance.CostAttributes {
+		for i, attrID := range balance.AttributeIDs {
 			if i != 0 {
-				mdl.BalanceCostAttributes += utils.InfieldSep
+				mdl.BalanceAttributeIDs += utils.InfieldSep
 			}
-			mdl.BalanceCostAttributes += costAttr
+			mdl.BalanceAttributeIDs += attrID
+		}
+		for i, ratePrfID := range balance.RateProfileIDs {
+			if i != 0 {
+				mdl.BalanceRateProfileIDs += utils.InfieldSep
+			}
+			mdl.BalanceRateProfileIDs += ratePrfID
 		}
 		for i, unitFactor := range balance.UnitFactors {
 			if i != 0 {
@@ -3653,10 +3667,16 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 				}
 			}
 		}
-		if bal.CostAttributes != nil {
-			ap.Balances[id].CostAttributes = make([]string, len(bal.CostAttributes))
-			for j, costAttribute := range bal.CostAttributes {
-				ap.Balances[id].CostAttributes[j] = costAttribute
+		if bal.AttributeIDs != nil {
+			ap.Balances[id].AttributeIDs = make([]string, len(bal.AttributeIDs))
+			for j, costAttribute := range bal.AttributeIDs {
+				ap.Balances[id].AttributeIDs[j] = costAttribute
+			}
+		}
+		if bal.RateProfileIDs != nil {
+			ap.Balances[id].RateProfileIDs = make([]string, len(bal.RateProfileIDs))
+			for j, costAttribute := range bal.RateProfileIDs {
+				ap.Balances[id].RateProfileIDs[j] = costAttribute
 			}
 		}
 		if bal.UnitFactors != nil {
@@ -3705,7 +3725,8 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 			Blocker:        bal.Blocker,
 			Type:           bal.Type,
 			CostIncrement:  make([]*utils.TPBalanceCostIncrement, len(bal.CostIncrements)),
-			CostAttributes: make([]string, len(bal.CostAttributes)),
+			AttributeIDs:   make([]string, len(bal.AttributeIDs)),
+			RateProfileIDs: make([]string, len(bal.RateProfileIDs)),
 			UnitFactors:    make([]*utils.TPBalanceUnitFactor, len(bal.UnitFactors)),
 		}
 		for k, fli := range bal.FilterIDs {
@@ -3740,8 +3761,11 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 				tpAp.Balances[i].CostIncrement[k].RecurrentFee = &rcrFee
 			}
 		}
-		for k, cAttributes := range bal.CostAttributes {
-			tpAp.Balances[i].CostAttributes[k] = cAttributes
+		for k, attrID := range bal.AttributeIDs {
+			tpAp.Balances[i].AttributeIDs[k] = attrID
+		}
+		for k, ratePrfID := range bal.RateProfileIDs {
+			tpAp.Balances[i].RateProfileIDs[k] = ratePrfID
 		}
 		for k, uFactor := range bal.UnitFactors {
 			tpAp.Balances[i].UnitFactors[k] = &utils.TPBalanceUnitFactor{
