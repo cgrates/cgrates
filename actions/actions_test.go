@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -126,4 +127,201 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	if err := acts.dm.RemoveActionProfile(actPrf.Tenant, actPrf.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestScheduledActions(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	acts := NewActionS(defaultCfg, filters, dm)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ACTIONS1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  1002,
+		},
+	}
+
+	actPrf := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "test_id1",
+		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		Actions: []*engine.APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      utils.MetaLog,
+				Path:      "~*balance.TestBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+			},
+		},
+	}
+
+	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := acts.scheduledActions(cgrEv.Tenant, cgrEv, []string{}, false); err != nil {
+		t.Error(err)
+	} else {
+		expSchedActs := newScheduledActs(cgrEv.Tenant, cgrEv.ID, utils.MetaNone, utils.EmptyString,
+			utils.EmptyString, context.Background(), &ActData{cgrEv.Event, cgrEv.Opts}, rcv[0].acts)
+		if reflect.DeepEqual(expSchedActs, rcv) {
+			t.Errorf("Expected %+v, received %+v", expSchedActs, rcv)
+		}
+	}
+
+	cgrEv = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ACTIONS1",
+		Event: map[string]interface{}{
+			utils.Accounts: "10",
+		},
+	}
+	if _, err := acts.scheduledActions(cgrEv.Tenant, cgrEv, []string{}, false); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	cgrEv = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "test_id1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  1002,
+		},
+	}
+	actPrf.Actions[0].Type = "*topup"
+	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+		t.Error(err)
+	}
+	if _, err := acts.scheduledActions(cgrEv.Tenant, cgrEv, []string{}, false); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestScheduleAction(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	acts := NewActionS(defaultCfg, filters, dm)
+
+	cgrEv := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACTIONS1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Destination:  1002,
+			},
+		},
+	}
+
+	actPrf := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "test_id1",
+		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		Schedule:  "* * * * *",
+		Actions: []*engine.APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      utils.MetaLog,
+				Path:      "~*balance.TestBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+			},
+		},
+	}
+	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	if err := acts.scheduleActions(cgrEv, []string{}, true); err != nil {
+		t.Error(err)
+	}
+
+	//Cannot schedule an action if the ID is invalid
+	if err := acts.scheduleActions(cgrEv, []string{"INVALID_ID1"}, true); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
+	}
+
+	//When schedule is "*asap", the action will execute immediately
+	actPrf.Schedule = utils.MetaASAP
+	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := acts.scheduleActions(cgrEv, []string{}, true); err != nil {
+		t.Error(err)
+	}
+
+	//Cannot execute the action if the cron is invalid
+	actPrf.Schedule = "* * * *"
+	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := acts.scheduleActions(cgrEv, []string{}, true); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Error(err)
+	}
+}
+
+func TestAsapExecuteActions(t *testing.T) {
+	newData := &dataDBMockError{}
+	dm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
+	defaultCfg := config.NewDefaultCGRConfig()
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	acts := NewActionS(defaultCfg, filters, dm)
+
+	cgrEv := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			ID:     "CHANGED_ID",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Destination:  1002,
+			},
+		},
+	}
+
+	expSchedActs := newScheduledActs(cgrEv[0].Tenant, cgrEv[0].ID, utils.MetaNone, utils.EmptyString,
+		utils.EmptyString, context.Background(), &ActData{cgrEv[0].Event, cgrEv[0].Opts}, nil)
+
+	if err := acts.asapExecuteActions(expSchedActs); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
+	}
+
+	data := engine.NewInternalDB(nil, nil, true)
+	acts.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	expSchedActs = newScheduledActs(cgrEv[0].Tenant, "another_id", utils.MetaNone, utils.EmptyString,
+		utils.EmptyString, context.Background(), &ActData{cgrEv[0].Event, cgrEv[0].Opts}, nil)
+	if err := acts.asapExecuteActions(expSchedActs); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+}
+
+type dataDBMockError struct {
+	*engine.DataDBMock
+}
+
+func (dbM *dataDBMockError) GetActionProfileDrv(string, string) (*engine.ActionProfile, error) {
+	return &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "test_id1",
+		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		Actions: []*engine.APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      utils.MetaLog,
+				Path:      "~*balance.TestBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("10", ","),
+			},
+		},
+	}, nil
+}
+
+func (dbM *dataDBMockError) SetActionProfileDrv(*engine.ActionProfile) error {
+	return utils.ErrNoDatabaseConn
 }

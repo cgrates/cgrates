@@ -212,7 +212,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 
 	for _, aPf := range aPfs {
 		ctx := context.Background()
-		var trgActs map[string][]actioner // build here the list of actioners based on the trgKey
+		trgActs := map[string][]actioner{} // build here the list of actioners based on the trgKey
 		var trgKey string
 		for _, aCfg := range aPf.Actions { // create actioners and attach them to the right target
 			if trgTyp := actionTarget(aCfg.Type); trgTyp != utils.MetaNone ||
