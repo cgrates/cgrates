@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
+	"fmt"
 	"net"
 
 	"github.com/cgrates/cgrates/utils"
@@ -51,6 +52,16 @@ func (aD *ActData) FieldAsString(fldPath []string) (val string, err error) {
 
 // FieldAsInterface implements utils.DataProvider
 func (aD *ActData) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if len(fldPath) < 1 {
+		return nil, fmt.Errorf("invalid fieldPath: <%+v>", fldPath)
+	}
+	switch fldPath[0] {
+	case utils.MetaReq:
+	case utils.MetaOpts:
+	default:
+		return nil, fmt.Errorf("invalid prefix for fieldPath: <%+v>", fldPath)
+	}
+
 	return
 }
 
