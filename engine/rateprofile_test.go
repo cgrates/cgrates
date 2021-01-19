@@ -31,11 +31,11 @@ import (
 )
 
 func TestRateProfileSort(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -474,11 +474,11 @@ func TestRateProfileRunTimesPassingActivationTIme(t *testing.T) {
 }
 
 func TestCostForIntervals(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -569,11 +569,11 @@ func TestCostForIntervals(t *testing.T) {
 }
 
 func TestCostForIntervalsWIthFixedFee(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -716,11 +716,11 @@ func TestRateProfileCostCorrectCostMaxCost(t *testing.T) {
 }
 
 func TestRateSIncrementCompressEquals(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -764,7 +764,7 @@ func TestRateSIncrementCompressEquals(t *testing.T) {
 }
 
 func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -816,7 +816,7 @@ func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
 	}
 }
 func TestRateSIncrementCompressEqualsCase2(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -854,7 +854,7 @@ func TestRateSIncrementCompressEqualsCase2(t *testing.T) {
 }
 
 func TestRateSIncrementCompressEqualsCase3(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -892,11 +892,11 @@ func TestRateSIncrementCompressEqualsCase3(t *testing.T) {
 }
 
 func TestRateSIntervalCompressEqualsCase1(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -960,11 +960,11 @@ func TestRateSIntervalCompressEqualsCase1(t *testing.T) {
 }
 
 func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -1054,7 +1054,7 @@ func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
 }
 
 func TestRateSIntervalCompressEqualsCase3(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}

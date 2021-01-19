@@ -56,7 +56,7 @@ func TestNewDecimalAdd(t *testing.T) {
 }
 
 func TestNewDecimalFromUnit(t *testing.T) {
-	if val, err := NewDecimalFromUnit("1ns"); err != nil {
+	if val, err := NewDecimalFromUsage("1ns"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, NewDecimal(1, 0)) {
 		t.Errorf("Expected %+v, received %+v", NewDecimal(1, 0), val)

@@ -3089,10 +3089,10 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 			}
 			rp.Rates[key].IntervalRates[i].FixedFee = utils.NewDecimalFromFloat64(iRate.FixedFee)
 			rp.Rates[key].IntervalRates[i].RecurrentFee = utils.NewDecimalFromFloat64(iRate.RecurrentFee)
-			if rp.Rates[key].IntervalRates[i].Unit, err = utils.NewDecimalFromUnit(iRate.Unit); err != nil {
+			if rp.Rates[key].IntervalRates[i].Unit, err = utils.NewDecimalFromUsage(iRate.Unit); err != nil {
 				return nil, err
 			}
-			if rp.Rates[key].IntervalRates[i].Increment, err = utils.NewDecimalFromUnit(iRate.Increment); err != nil {
+			if rp.Rates[key].IntervalRates[i].Increment, err = utils.NewDecimalFromUsage(iRate.Increment); err != nil {
 				return nil, err
 			}
 		}

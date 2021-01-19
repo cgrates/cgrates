@@ -1615,11 +1615,11 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -1821,11 +1821,11 @@ cgrates.org,RP1,,,,,,,RT_CHRISTMAS,,* * 24 12 *,30,false,0s,,0.06,1m,1s
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}

@@ -177,11 +177,11 @@ func testRatePrfITFlush(t *testing.T) {
 }
 
 func testRatePrfITMigrateAndMove(t *testing.T) {
-	minDec, err := utils.NewDecimalFromUnit("1m")
+	minDec, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDec, err := utils.NewDecimalFromUnit("1s")
+	secDec, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
