@@ -20,6 +20,7 @@ package actions
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/cgrates/cgrates/config"
@@ -103,7 +104,6 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)
 
 	}
-	return
 }
 
 // actioner is implemented by each action type
@@ -128,5 +128,7 @@ func (aL *actLog) cfg() *engine.APAction {
 
 // execute implements actioner interface
 func (aL *actLog) execute(ctx context.Context, data *ActData) (err error) {
+	body, _ := json.Marshal(data)
+	utils.Logger.Info(fmt.Sprintf("LOG Event: %s", body))
 	return
 }
