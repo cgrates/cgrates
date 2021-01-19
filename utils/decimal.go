@@ -59,8 +59,8 @@ func NewDecimalFromFloat64(f float64) *Decimal {
 	return &Decimal{d}
 }
 
-// NewDecimalFromUnit is a constructor for Decimal out of unit represents as string
-func NewDecimalFromUnit(u string) (d *Decimal, err error) {
+// NewDecimalFromUsage is a constructor for Decimal out of unit represents as string
+func NewDecimalFromUsage(u string) (d *Decimal, err error) {
 	switch {
 	//"ns", "us" (or "µs"), "ms", "s", "m", "h"
 	case strings.HasSuffix(u, NsSuffix), strings.HasSuffix(u, UsSuffix), strings.HasSuffix(u, µSuffix), strings.HasSuffix(u, MsSuffix),

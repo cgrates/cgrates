@@ -148,11 +148,11 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -757,11 +757,11 @@ func testV1RatePrfRemoveRateProfileRatesWithoutTenant(t *testing.T) {
 }
 
 func testV1RateCostForEventWithDefault(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -855,11 +855,11 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 }
 
 func testV1RateCostForEventWithUsage(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -994,11 +994,11 @@ func testV1RateCostForEventWithWrongUsage(t *testing.T) {
 }
 
 func testV1RateCostForEventWithStartTime(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -1100,11 +1100,11 @@ func testV1RateCostForEventWithWrongStartTime(t *testing.T) {
 }
 
 func testV1RateCostForEventWithOpts(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -1222,11 +1222,11 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 
 /*
 func testV1RateCostForEventSpecial(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -1357,11 +1357,11 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 }
 
 func testV1RateCostForEventThreeRates(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}

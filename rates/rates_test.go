@@ -121,7 +121,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 	rateS := NewRateS(defaultCfg, filters, dm)
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -217,7 +217,7 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 	rateS := NewRateS(defaultCfg, filters, dm)
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -447,7 +447,7 @@ func TestV1CostForEventError(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 	rateS := NewRateS(defaultCfg, filters, dm)
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -531,11 +531,11 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 		filterS: filters,
 		dm:      dm,
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		b.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		b.Error(err)
 	}
@@ -626,11 +626,11 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 		filterS: filters,
 		dm:      dm,
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		b.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		b.Error(err)
 	}
@@ -711,7 +711,7 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 
 	rateS := NewRateS(defaultCfg, filters, dm)
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -782,7 +782,7 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 
 	rateS := NewRateS(defaultCfg, filters, dm)
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -837,7 +837,7 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 
 	rateS := NewRateS(defaultCfg, filters, dm)
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}

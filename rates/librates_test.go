@@ -1576,11 +1576,11 @@ func TestOrderRatesOnIntervalStartLowerThanEndIdx(t *testing.T) {
 }
 
 func TestComputeRateSIntervals(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -1747,15 +1747,15 @@ func TestComputeRateSIntervals(t *testing.T) {
 }
 
 func TestComputeRateSIntervals1(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -1861,15 +1861,15 @@ func TestComputeRateSIntervals1(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -1998,7 +1998,7 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 }
 
 func TestComputeRateSIntervals2(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -2113,11 +2113,11 @@ func TestComputeRateSIntervals2(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -2296,7 +2296,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -2350,11 +2350,11 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsZeroIncrement(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
-	zeroDecimal, err := utils.NewDecimalFromUnit("0s")
+	zeroDecimal, err := utils.NewDecimalFromUsage("0s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -2385,19 +2385,19 @@ func TestComputeRateSIntervalsZeroIncrement(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
-	ssecDecimal, err := utils.NewDecimalFromUnit("7s")
+	ssecDecimal, err := utils.NewDecimalFromUsage("7s")
 	if err != nil {
 		t.Error(err)
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -2456,27 +2456,27 @@ func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
-	ssecDecimal, err := utils.NewDecimalFromUnit("7s")
+	ssecDecimal, err := utils.NewDecimalFromUsage("7s")
 	if err != nil {
 		t.Error(err)
 	}
-	fsecDecimal, err := utils.NewDecimalFromUnit("5s")
+	fsecDecimal, err := utils.NewDecimalFromUsage("5s")
 	if err != nil {
 		t.Error(err)
 	}
-	fssecDecimal, err := utils.NewDecimalFromUnit("25s")
+	fssecDecimal, err := utils.NewDecimalFromUsage("25s")
 	if err != nil {
 		t.Error(err)
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -2643,19 +2643,19 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 }
 
 func TestComputeRatesIntervalsAllInOne(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
-	ssecDecimal, err := utils.NewDecimalFromUnit("7s")
+	ssecDecimal, err := utils.NewDecimalFromUsage("7s")
 	if err != nil {
 		t.Error(err)
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -2822,11 +2822,11 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 }
 
 func TestOrderRatesIntervalsFullDay(t *testing.T) {
-	hourDecimal, err := utils.NewDecimalFromUnit("1h")
+	hourDecimal, err := utils.NewDecimalFromUsage("1h")
 	if err != nil {
 		t.Error(err)
 	}
-	tminDecimal, err := utils.NewDecimalFromUnit("3m")
+	tminDecimal, err := utils.NewDecimalFromUsage("3m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -2865,15 +2865,15 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 			},
 		},
 	}
-	thourDecimal, err := utils.NewDecimalFromUnit("30h")
+	thourDecimal, err := utils.NewDecimalFromUsage("30h")
 	if err != nil {
 		t.Error(err)
 	}
-	dminDecimal, err := utils.NewDecimalFromUnit("2m")
+	dminDecimal, err := utils.NewDecimalFromUsage("2m")
 	if err != nil {
 		t.Error(err)
 	}
-	fminDecimal, err := utils.NewDecimalFromUnit("5m")
+	fminDecimal, err := utils.NewDecimalFromUsage("5m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -3011,15 +3011,15 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 }
 
 func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("10s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("10s")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
-	twsecDecimal, err := utils.NewDecimalFromUnit("2s")
+	twsecDecimal, err := utils.NewDecimalFromUsage("2s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -3199,15 +3199,15 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("15m")
+	minDecimal, err := utils.NewDecimalFromUsage("15m")
 	if err != nil {
 		t.Error(err)
 	}
-	fminDeminal, err := utils.NewDecimalFromUnit("5m")
+	fminDeminal, err := utils.NewDecimalFromUsage("5m")
 	if err != nil {
 		t.Error(err)
 	}
-	cDecimal, err := utils.NewDecimalFromUnit("1m30s")
+	cDecimal, err := utils.NewDecimalFromUsage("1m30s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -3228,11 +3228,11 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 			},
 		},
 	}
-	tminDeminal, err := utils.NewDecimalFromUnit("10m")
+	tminDeminal, err := utils.NewDecimalFromUsage("10m")
 	if err != nil {
 		t.Error(err)
 	}
-	ominDeminal, err := utils.NewDecimalFromUnit("1m")
+	ominDeminal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -3351,11 +3351,11 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -3463,24 +3463,24 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
 
-	tminDecimal, err := utils.NewDecimalFromUnit("10m")
+	tminDecimal, err := utils.NewDecimalFromUsage("10m")
 	if err != nil {
 		t.Error(err)
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
-	tensecDecimal, err := utils.NewDecimalFromUnit("10s")
+	tensecDecimal, err := utils.NewDecimalFromUsage("10s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -3508,11 +3508,11 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 			},
 		},
 	}
-	twminDecimal, err := utils.NewDecimalFromUnit("20m")
+	twminDecimal, err := utils.NewDecimalFromUsage("20m")
 	if err != nil {
 		t.Error(err)
 	}
-	twsecDecimal, err := utils.NewDecimalFromUnit("20s")
+	twsecDecimal, err := utils.NewDecimalFromUsage("20s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -3528,7 +3528,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 			},
 		},
 	}
-	trminDecimal, err := utils.NewDecimalFromUnit("30m")
+	trminDecimal, err := utils.NewDecimalFromUsage("30m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -3641,35 +3641,35 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 }
 
 func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("30s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
 		t.Error(err)
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
-	twsecDecimal, err := utils.NewDecimalFromUnit("20s")
+	twsecDecimal, err := utils.NewDecimalFromUsage("20s")
 	if err != nil {
 		t.Error(err)
 	}
-	tssecDecimal, err := utils.NewDecimalFromUnit("10s")
+	tssecDecimal, err := utils.NewDecimalFromUsage("10s")
 	if err != nil {
 		t.Error(err)
 	}
-	tminDecimal, err := utils.NewDecimalFromUnit("10m")
+	tminDecimal, err := utils.NewDecimalFromUsage("10m")
 	if err != nil {
 		t.Error(err)
 	}
-	twminDecimal, err := utils.NewDecimalFromUnit("20m")
+	twminDecimal, err := utils.NewDecimalFromUsage("20m")
 	if err != nil {
 		t.Error(err)
 	}
-	thminDecimal, err := utils.NewDecimalFromUnit("30m")
+	thminDecimal, err := utils.NewDecimalFromUsage("30m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -3887,20 +3887,20 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
-	twminDecimal, err := utils.NewDecimalFromUnit("30m")
+	twminDecimal, err := utils.NewDecimalFromUsage("30m")
 	if err != nil {
 		t.Error(err)
 	}
 
-	nminDecimal, err := utils.NewDecimalFromUnit("9m")
+	nminDecimal, err := utils.NewDecimalFromUsage("9m")
 	if err != nil {
 		t.Error(err)
 	}
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
@@ -4097,23 +4097,23 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
-	fminDecimal, err := utils.NewDecimalFromUnit("15m")
+	fminDecimal, err := utils.NewDecimalFromUsage("15m")
 	if err != nil {
 		t.Error(err)
 	}
-	eminDecimal, err := utils.NewDecimalFromUnit("11m")
+	eminDecimal, err := utils.NewDecimalFromUsage("11m")
 	if err != nil {
 		t.Error(err)
 	}
-	nminDecimal, err := utils.NewDecimalFromUnit("9m")
+	nminDecimal, err := utils.NewDecimalFromUsage("9m")
 	if err != nil {
 		t.Error(err)
 	}
-	sminDecimal, err := utils.NewDecimalFromUnit("7m")
+	sminDecimal, err := utils.NewDecimalFromUsage("7m")
 	if err != nil {
 		t.Error(err)
 	}
-	fvminDecimal, err := utils.NewDecimalFromUnit("5m")
+	fvminDecimal, err := utils.NewDecimalFromUsage("5m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -4228,27 +4228,27 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("2s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("2s")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
-	tminDecimal, err := utils.NewDecimalFromUnit("2m")
+	tminDecimal, err := utils.NewDecimalFromUsage("2m")
 	if err != nil {
 		t.Error(err)
 	}
-	sminDecimal, err := utils.NewDecimalFromUnit("6m")
+	sminDecimal, err := utils.NewDecimalFromUsage("6m")
 	if err != nil {
 		t.Error(err)
 	}
-	nminDecimal, err := utils.NewDecimalFromUnit("9m")
+	nminDecimal, err := utils.NewDecimalFromUsage("9m")
 	if err != nil {
 		t.Error(err)
 	}
-	eminDecimal, err := utils.NewDecimalFromUnit("8m")
+	eminDecimal, err := utils.NewDecimalFromUsage("8m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -4362,23 +4362,23 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUnit("2s")
+	tsecDecimal, err := utils.NewDecimalFromUsage("2s")
 	if err != nil {
 		t.Error(err)
 	}
-	tminDecimal, err := utils.NewDecimalFromUnit("2m")
+	tminDecimal, err := utils.NewDecimalFromUsage("2m")
 	if err != nil {
 		t.Error(err)
 	}
-	ttminDecimal, err := utils.NewDecimalFromUnit("10m")
+	ttminDecimal, err := utils.NewDecimalFromUsage("10m")
 	if err != nil {
 		t.Error(err)
 	}
-	fsecDecimal, err := utils.NewDecimalFromUnit("4s")
+	fsecDecimal, err := utils.NewDecimalFromUsage("4s")
 	if err != nil {
 		t.Error(err)
 	}
-	fminDecimal, err := utils.NewDecimalFromUnit("4m")
+	fminDecimal, err := utils.NewDecimalFromUsage("4m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -4593,15 +4593,15 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	hourDecimal, err := utils.NewDecimalFromUnit("1h")
+	hourDecimal, err := utils.NewDecimalFromUsage("1h")
 	if err != nil {
 		t.Error(err)
 	}
-	fminDecimal, err := utils.NewDecimalFromUnit("17m")
+	fminDecimal, err := utils.NewDecimalFromUsage("17m")
 	if err != nil {
 		t.Error(err)
 	}
@@ -4679,19 +4679,19 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 }
 
 func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
-	minDecimal, err := utils.NewDecimalFromUnit("1m")
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
 	}
-	secDecimal, err := utils.NewDecimalFromUnit("1s")
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
 	if err != nil {
 		t.Error(err)
 	}
-	fminDecimal, err := utils.NewDecimalFromUnit("5m")
+	fminDecimal, err := utils.NewDecimalFromUsage("5m")
 	if err != nil {
 		t.Error(err)
 	}
-	tminDecimal, err := utils.NewDecimalFromUnit("10m")
+	tminDecimal, err := utils.NewDecimalFromUsage("10m")
 	if err != nil {
 		t.Error(err)
 	}
