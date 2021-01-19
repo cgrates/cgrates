@@ -26,10 +26,28 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	dmTH   *DataManager
-	thServ *ThresholdService
-	tPrfls = []*ThresholdProfile{
+func TestThresholdsSort(t *testing.T) {
+	ts := Thresholds{
+		&Threshold{tPrfl: &ThresholdProfile{ID: "FIRST", Weight: 30.0}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "SECOND", Weight: 40.0}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "THIRD", Weight: 30.0}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "FOURTH", Weight: 35.0}},
+	}
+	ts.Sort()
+	eInst := Thresholds{
+		&Threshold{tPrfl: &ThresholdProfile{ID: "SECOND", Weight: 40.0}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "FOURTH", Weight: 35.0}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "FIRST", Weight: 30.0}},
+		&Threshold{tPrfl: &ThresholdProfile{ID: "THIRD", Weight: 30.0}},
+	}
+	if !reflect.DeepEqual(eInst, ts) {
+		t.Errorf("expecting: %+v, received: %+v", eInst, ts)
+	}
+}
+
+func TestThresholdsCache(t *testing.T) {
+	var dmTH *DataManager
+	tPrfls := []*ThresholdProfile{
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
@@ -72,7 +90,7 @@ var (
 			Async:     false,
 		},
 	}
-	ths = Thresholds{
+	ths := Thresholds{
 		&Threshold{
 			Tenant: "cgrates.org",
 			ID:     "TH_1",
@@ -89,72 +107,14 @@ var (
 			Hits:   0,
 		},
 	}
-	argsGetThresholds = []*ThresholdsArgsProcessEvent{
-		{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "Ev1",
-				Event: map[string]interface{}{
-					"Threshold": "TH_1",
-					"Weight":    "10.0",
-				},
-			},
-		},
-		{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "Ev1",
-				Event: map[string]interface{}{
-					"Threshold": "TH_2",
-					"Weight":    "20.0",
-				},
-			},
-		},
-		{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "Ev1",
-				Event: map[string]interface{}{
-					"Threshold": "ThresholdPrefix123",
-				},
-			},
-		},
-	}
-)
 
-func TestThresholdsSort(t *testing.T) {
-	ts := Thresholds{
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FIRST", Weight: 30.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "SECOND", Weight: 40.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "THIRD", Weight: 30.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FOURTH", Weight: 35.0}},
-	}
-	ts.Sort()
-	eInst := Thresholds{
-		&Threshold{tPrfl: &ThresholdProfile{ID: "SECOND", Weight: 40.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FOURTH", Weight: 35.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "FIRST", Weight: 30.0}},
-		&Threshold{tPrfl: &ThresholdProfile{ID: "THIRD", Weight: 30.0}},
-	}
-	if !reflect.DeepEqual(eInst, ts) {
-		t.Errorf("expecting: %+v, received: %+v", eInst, ts)
-	}
-}
-
-func TestThresholdsPopulateThresholdService(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmTH = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg.ThresholdSCfg().StoreInterval = 0
 	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
 	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ, err = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-}
 
-func TestThresholdsAddFilters(t *testing.T) {
 	fltrTh1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_1",
@@ -201,9 +161,6 @@ func TestThresholdsAddFilters(t *testing.T) {
 		},
 	}
 	dmTH.SetFilter(fltrTh3, true)
-}
-
-func TestThresholdsCache(t *testing.T) {
 	for _, th := range tPrfls {
 		if err = dmTH.SetThresholdProfile(th, true); err != nil {
 			t.Errorf("Error: %+v", err)
@@ -236,6 +193,184 @@ func TestThresholdsCache(t *testing.T) {
 }
 
 func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
+	var dmTH *DataManager
+	var thServ *ThresholdService
+	var tPrfls = []*ThresholdProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: []string{"FLTR_TH_1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_2",
+			FilterIDs: []string{"FLTR_TH_2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_3",
+			FilterIDs: []string{"FLTR_TH_3"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+	}
+	ths := Thresholds{
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_1",
+			Hits:   0,
+		},
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_2",
+			Hits:   0,
+		},
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_3",
+			Hits:   0,
+		},
+	}
+	argsGetThresholds := []*ThresholdsArgsProcessEvent{
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "TH_1",
+					"Weight":    "10.0",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "TH_2",
+					"Weight":    "20.0",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "ThresholdPrefix123",
+				},
+			},
+		},
+	}
+
+	defaultCfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dmTH = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	defaultCfg.ThresholdSCfg().StoreInterval = 0
+	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
+	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
+	thServ, err = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	fltrTh1 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh1, true)
+	fltrTh2 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_2"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"15.0"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh2, true)
+	fltrTh3 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_3",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Threshold",
+				Values:  []string{"ThresholdPrefix"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh3, true)
+	for _, th := range tPrfls {
+		if err = dmTH.SetThresholdProfile(th, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	//Test each threshold profile from cache
+	for _, th := range tPrfls {
+		if temptTh, err := dmTH.GetThresholdProfile(th.Tenant,
+			th.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(th, temptTh) {
+			t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
+		}
+	}
+	for _, th := range ths {
+		if err = dmTH.SetThreshold(th, 0, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	//Test each threshold profile from cache
+	for _, th := range ths {
+		if temptTh, err := dmTH.GetThreshold(th.Tenant,
+			th.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(th, temptTh) {
+			t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
+		}
+	}
 	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Tenant) {
@@ -268,6 +403,184 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 }
 
 func TestThresholdsProcessEvent(t *testing.T) {
+	var dmTH *DataManager
+	var thServ *ThresholdService
+	var tPrfls = []*ThresholdProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: []string{"FLTR_TH_1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_2",
+			FilterIDs: []string{"FLTR_TH_2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_3",
+			FilterIDs: []string{"FLTR_TH_3"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+	}
+	ths := Thresholds{
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_1",
+			Hits:   0,
+		},
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_2",
+			Hits:   0,
+		},
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_3",
+			Hits:   0,
+		},
+	}
+	argsGetThresholds := []*ThresholdsArgsProcessEvent{
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "TH_1",
+					"Weight":    "10.0",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "TH_2",
+					"Weight":    "20.0",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "ThresholdPrefix123",
+				},
+			},
+		},
+	}
+
+	defaultCfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dmTH = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	defaultCfg.ThresholdSCfg().StoreInterval = 0
+	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
+	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
+	thServ, err = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	fltrTh1 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh1, true)
+	fltrTh2 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_2"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"15.0"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh2, true)
+	fltrTh3 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_3",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Threshold",
+				Values:  []string{"ThresholdPrefix"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh3, true)
+	for _, th := range tPrfls {
+		if err = dmTH.SetThresholdProfile(th, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	//Test each threshold profile from cache
+	for _, th := range tPrfls {
+		if temptTh, err := dmTH.GetThresholdProfile(th.Tenant,
+			th.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(th, temptTh) {
+			t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
+		}
+	}
+	for _, th := range ths {
+		if err = dmTH.SetThreshold(th, 0, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	//Test each threshold profile from cache
+	for _, th := range ths {
+		if temptTh, err := dmTH.GetThreshold(th.Tenant,
+			th.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(th, temptTh) {
+			t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
+		}
+	}
 	thIDs := []string{"TH_1"}
 	if thMatched, err := thServ.processEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != utils.ErrPartiallyExecuted {
 		t.Errorf("Error: %+v", err)
@@ -291,6 +604,195 @@ func TestThresholdsProcessEvent(t *testing.T) {
 }
 
 func TestThresholdsVerifyIfExecuted(t *testing.T) {
+	var dmTH *DataManager
+	var thServ *ThresholdService
+	var tPrfls = []*ThresholdProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: []string{"FLTR_TH_1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_2",
+			FilterIDs: []string{"FLTR_TH_2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_3",
+			FilterIDs: []string{"FLTR_TH_3"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+	}
+	ths := Thresholds{
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_1",
+			Hits:   0,
+		},
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_2",
+			Hits:   0,
+		},
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_3",
+			Hits:   0,
+		},
+	}
+	argsGetThresholds := []*ThresholdsArgsProcessEvent{
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "TH_1",
+					"Weight":    "10.0",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "TH_2",
+					"Weight":    "20.0",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "ThresholdPrefix123",
+				},
+			},
+		},
+	}
+
+	defaultCfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dmTH = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	defaultCfg.ThresholdSCfg().StoreInterval = 0
+	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
+	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
+	thServ, err = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	fltrTh1 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh1, true)
+	fltrTh2 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_2"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"15.0"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh2, true)
+	fltrTh3 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_3",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Threshold",
+				Values:  []string{"ThresholdPrefix"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh3, true)
+	for _, th := range tPrfls {
+		if err = dmTH.SetThresholdProfile(th, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	//Test each threshold profile from cache
+	for _, th := range tPrfls {
+		if temptTh, err := dmTH.GetThresholdProfile(th.Tenant,
+			th.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(th, temptTh) {
+			t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
+		}
+	}
+	for _, th := range ths {
+		if err = dmTH.SetThreshold(th, 0, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	thIDs := []string{"TH_1"}
+	if thMatched, err := thServ.processEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != utils.ErrPartiallyExecuted {
+		t.Errorf("Error: %+v", err)
+	} else if !reflect.DeepEqual(thIDs, thMatched) {
+		t.Errorf("Expecting: %+v, received: %+v", thIDs, thMatched)
+	}
+
+	thIDs = []string{"TH_2"}
+	if thMatched, err := thServ.processEvent(argsGetThresholds[1].Tenant, argsGetThresholds[1]); err != utils.ErrPartiallyExecuted {
+		t.Errorf("Error: %+v", err)
+	} else if !reflect.DeepEqual(thIDs, thMatched) {
+		t.Errorf("Expecting: %+v, received: %+v", thIDs, thMatched)
+	}
+
+	thIDs = []string{"TH_3"}
+	if thMatched, err := thServ.processEvent(argsGetThresholds[2].Tenant, argsGetThresholds[2]); err != utils.ErrPartiallyExecuted {
+		t.Errorf("Error: %+v", err)
+	} else if !reflect.DeepEqual(thIDs, thMatched) {
+		t.Errorf("Expecting: %+v, received: %+v", thIDs, thMatched)
+	}
 	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Tenant) {
@@ -323,6 +825,187 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 }
 
 func TestThresholdsProcessEvent2(t *testing.T) {
+	var dmTH *DataManager
+	var thServ *ThresholdService
+	tPrfls := []*ThresholdProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: []string{"FLTR_TH_1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_2",
+			FilterIDs: []string{"FLTR_TH_2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH_3",
+			FilterIDs: []string{"FLTR_TH_3"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   12,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     false,
+		},
+	}
+	ths := Thresholds{
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_1",
+			Hits:   0,
+		},
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_2",
+			Hits:   0,
+		},
+		&Threshold{
+			Tenant: "cgrates.org",
+			ID:     "TH_3",
+			Hits:   0,
+		},
+	}
+	argsGetThresholds := []*ThresholdsArgsProcessEvent{
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "TH_1",
+					"Weight":    "10.0",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "TH_2",
+					"Weight":    "20.0",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Ev1",
+				Event: map[string]interface{}{
+					"Threshold": "ThresholdPrefix123",
+				},
+			},
+		},
+	}
+
+	defaultCfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dmTH = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	defaultCfg.ThresholdSCfg().StoreInterval = 0
+	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
+	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
+	thServ, err = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+
+	fltrTh1 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_1"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh1, true)
+	fltrTh2 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_2",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Threshold",
+				Values:  []string{"TH_2"},
+			},
+			{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"15.0"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh2, true)
+	fltrTh3 := &Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "FLTR_TH_3",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Threshold",
+				Values:  []string{"ThresholdPrefix"},
+			},
+		},
+	}
+	dmTH.SetFilter(fltrTh3, true)
+
+	for _, th := range tPrfls {
+		if err = dmTH.SetThresholdProfile(th, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	//Test each threshold profile from cache
+	for _, th := range tPrfls {
+		if temptTh, err := dmTH.GetThresholdProfile(th.Tenant,
+			th.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(th, temptTh) {
+			t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
+		}
+	}
+	for _, th := range ths {
+		if err = dmTH.SetThreshold(th, 0, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	//Test each threshold profile from cache
+	for _, th := range ths {
+		if temptTh, err := dmTH.GetThreshold(th.Tenant,
+			th.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(th, temptTh) {
+			t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
+		}
+	}
+
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH_4",
@@ -377,8 +1060,8 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 		for _, thM := range thMatched {
 			if !reflect.DeepEqual(thPrf.Tenant, thM.Tenant) {
 				t.Errorf("Expecting: %+v, received: %+v", thPrf.Tenant, thM.Tenant)
-			} else if reflect.DeepEqual(thIDs[0], thM.ID) && thM.Hits != 2 {
-				t.Errorf("Expecting: 2 for %+v, received: %+v", thM.ID, thM.Hits)
+			} else if reflect.DeepEqual(thIDs[0], thM.ID) && thM.Hits != 1 {
+				t.Errorf("Expecting: 1 for %+v, received: %+v", thM.ID, thM.Hits)
 			} else if reflect.DeepEqual(thIDs[1], thM.ID) && thM.Hits != 1 {
 				t.Errorf("Expecting: 1 for %+v, received: %+v", thM.ID, thM.Hits)
 			}
