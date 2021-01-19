@@ -183,6 +183,8 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, 0, usage); err != nil {
 		return nil, err
 	}
+	// in case we have error it is returned in the function from above
+	// this came to light in coverage tests
 	rpCost.Cost, _ = engine.CostForIntervals(rpCost.RateSIntervals).Float64()
 
 	return
