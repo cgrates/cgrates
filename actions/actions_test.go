@@ -24,6 +24,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cron"
+
+	"github.com/cgrates/rpcclient"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -298,6 +302,163 @@ func TestAsapExecuteActions(t *testing.T) {
 		utils.EmptyString, context.Background(), &ActData{cgrEv[0].Event, cgrEv[0].Opts}, nil)
 	if err := acts.asapExecuteActions(expSchedActs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+}
+
+func TestActionSListenAndServe(t *testing.T) {
+	newData := &dataDBMockError{}
+	dm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.ActionSCfg().Tenants = &[]string{"cgrates1.org", "cgrates.org2"}
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	acts := NewActionS(defaultCfg, filters, dm)
+
+	stopChan := make(chan struct{}, 1)
+	cfgRld := make(chan struct{}, 1)
+	cfgRld <- struct{}{}
+	go func() {
+		time.Sleep(10)
+		stopChan <- struct{}{}
+	}()
+	acts.ListenAndServe(stopChan, cfgRld)
+}
+
+func TestV1ScheduleActions(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	defaultCfg := config.NewDefaultCGRConfig()
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	acts := NewActionS(defaultCfg, filters, dm)
+
+	var reply string
+	newArgs := &utils.ArgActionSv1ScheduleActions{
+		ActionProfileIDs: []string{},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test_id1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Destination:  1002,
+			},
+		},
+	}
+
+	actPrf := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "test_id1",
+		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		Schedule:  utils.MetaASAP,
+		Actions: []*engine.APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      utils.MetaLog,
+				Path:      "~*balance.TestBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+			},
+		},
+	}
+
+	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	if err := acts.V1ScheduleActions(newArgs, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply %+v", reply)
+	}
+
+	newArgs.ActionProfileIDs = []string{"invalid_id"}
+	if err := acts.V1ScheduleActions(newArgs, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
+	}
+
+	if err := acts.dm.RemoveActionProfile(actPrf.Tenant, actPrf.ID, utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestV1ExecuteActions(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	defaultCfg := config.NewDefaultCGRConfig()
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	acts := NewActionS(defaultCfg, filters, dm)
+
+	var reply string
+	newArgs := &utils.ArgActionSv1ScheduleActions{
+		ActionProfileIDs: []string{},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test_id1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Destination:  1002,
+			},
+		},
+	}
+
+	actPrf := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "test_id1",
+		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		Schedule:  utils.MetaASAP,
+		Actions: []*engine.APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      utils.MetaLog,
+				Path:      "~*balance.TestBalance.Value",
+				Value:     config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+			},
+		},
+	}
+	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	if err := acts.V1ExecuteActions(newArgs, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply %+v", reply)
+	}
+
+	newArgs.ActionProfileIDs = []string{"invalid_id"}
+	if err := acts.V1ExecuteActions(newArgs, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	newData := &dataDBMockError{}
+	newDm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
+	newActs := NewActionS(defaultCfg, filters, newDm)
+	newArgs.ActionProfileIDs = []string{}
+	if err := newActs.V1ExecuteActions(newArgs, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
+	}
+
+	if err := acts.dm.RemoveActionProfile(actPrf.Tenant, actPrf.ID, utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestActionSCall(t *testing.T) {
+	acts := new(ActionS)
+	if err := acts.Call("UnsupportedServiceMethod", "args", "rply"); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
+		t.Errorf("Expected %+q, received %+q", rpcclient.ErrUnsupporteServiceMethod, err)
+	}
+}
+
+func TestActionShutDown(t *testing.T) {
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	defaultCfg := config.NewDefaultCGRConfig()
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	acts := NewActionS(defaultCfg, filters, dm)
+	acts.crn = &cron.Cron{}
+
+	if err := acts.Shutdown(); err != nil {
+		t.Error(err)
 	}
 }
 
