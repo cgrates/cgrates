@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "sort"
+import (
+	"sort"
+)
 
 // NewStringSet returns a new StringSet
 func NewStringSet(dataSlice []string) (s StringSet) {
@@ -108,4 +110,14 @@ func (s StringSet) GetOne() string {
 		return k
 	}
 	return EmptyString
+}
+
+func Join(s ...StringSet) (conc StringSet) {
+	conc = make(StringSet)
+	for _, k := range s {
+		for key := range k {
+			conc.Add(key)
+		}
+	}
+	return
 }

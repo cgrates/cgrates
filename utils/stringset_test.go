@@ -235,3 +235,27 @@ func TestGetOne(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", EmptyString, value)
 	}
 }
+
+func TestStringSetJoin(t *testing.T) {
+	set1 := StringSet{
+		"test1": struct{}{},
+	}
+	set2 := StringSet{
+		"test2": struct{}{},
+		"test5": struct{}{},
+	}
+	set3 := StringSet{
+		"test3": struct{}{},
+	}
+	rcv := Join(set1, set2, set3)
+
+	expected := StringSet{
+		"test1": struct{}{},
+		"test2": struct{}{},
+		"test3": struct{}{},
+		"test5": struct{}{},
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(expected), ToJSON(rcv))
+	}
+}

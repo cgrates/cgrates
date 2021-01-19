@@ -42,29 +42,32 @@ var (
 		MetaS3jsonMap:     ContentJSON,
 	}
 
-	// CachePartitions enables creation of cache partitions
-	CachePartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations,
-		CacheRatingPlans, CacheRatingProfiles, CacheActions, CacheActionPlans,
-		CacheAccountActionPlans, CacheActionTriggers, CacheSharedGroups, CacheTimings,
-		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles,
-		CacheStatQueues, CacheThresholdProfiles, CacheThresholds, CacheFilters,
-		CacheRouteProfiles, CacheAttributeProfiles, CacheChargerProfiles, CacheActionProfiles,
-		CacheDispatcherProfiles, CacheDispatcherHosts, CacheDispatchers, CacheResourceFilterIndexes,
-		CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
-		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes,
-		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses,
-		CacheClosedSessions, CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp,
-		CacheUCH, CacheSTIR, CacheEventCharges, CacheRateProfiles, CacheRateProfilesFilterIndexes,
-		CacheRateFilterIndexes, CacheActionProfilesFilterIndexes, CacheAccountProfilesFilterIndexes,
-		CacheAccountProfiles, CacheReverseFilterIndexes, MetaAPIBan, CacheCapsEvents,
-		// only internalDB
-		CacheVersions, CacheAccounts,
-		CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
+	extraDBPartition = NewStringSet([]string{CacheDispatchers,
+		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
+		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan,
+		CacheCapsEvents, CacheVersions})
+
+	dataDBPartition = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
+		CacheRatingProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
+		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
+		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
+		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
+		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
+		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
+		CacheRatingProfilesTmp, CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
+		CacheActionProfilesFilterIndexes, CacheAccountProfilesFilterIndexes, CacheReverseFilterIndexes,
+		CacheActionPlans, CacheAccountActionPlans, CacheAccountProfiles, CacheAccounts})
+
+	storDBPartition = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
 		CacheTBLTPRatingPlans, CacheTBLTPRatingProfiles, CacheTBLTPSharedGroups, CacheTBLTPActions,
 		CacheTBLTPActionPlans, CacheTBLTPActionTriggers, CacheTBLTPAccountActions, CacheTBLTPResources,
 		CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
 		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccountProfiles})
+
+	// CachePartitions enables creation of cache partitions
+	CachePartitions = Join(extraDBPartition, dataDBPartition, storDBPartition)
+
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:                 DestinationPrefix,
 		CacheReverseDestinations:          ReverseDestinationPrefix,
