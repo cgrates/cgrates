@@ -397,7 +397,7 @@ func testExpVerifyRateProfiles(t *testing.T) {
 						RecurrentFee:  utils.NewDecimal(1, 2),
 						Unit:          minDecimal,
 						Increment:     secDecimal,
-						FixedFee:      nil,
+						FixedFee:      utils.NewDecimal(0, 0),
 					},
 				},
 			},
@@ -507,7 +507,8 @@ func testExpVerifyAccountProfiles(t *testing.T) {
 						RecurrentFee: utils.NewDecimal(33, 1),
 					},
 				},
-				AttributeIDs: []string{"attr1", "attr2"},
+				AttributeIDs:   []string{"attr1", "attr2"},
+				RateProfileIDs: []string{},
 				UnitFactors: []*utils.UnitFactor{
 					{
 						FilterIDs: []string{"fltr1", "fltr2"},

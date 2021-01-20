@@ -42,8 +42,8 @@ var (
 
 	sTestBrodcastIt = []func(t *testing.T){
 		testbrodcastItLoadConfig,
-		// testbrodcastItResetDataDB,
-		// testbrodcastItResetStorDb,
+		testbrodcastItResetDataDB,
+		testbrodcastItResetStorDb,
 		testbrodcastItStartEngine,
 		testbrodcastItRPCConn,
 		testbrodcastItLoadFromFolder,
@@ -87,17 +87,17 @@ func testbrodcastItLoadConfig(t *testing.T) {
 	}
 }
 
-// func testbrodcastItResetDataDB(t *testing.T) {
-// 	if err := engine.InitDataDb(brodcastCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+func testbrodcastItResetDataDB(t *testing.T) {
+	if err := engine.InitDataDb(brodcastInternalCfg); err != nil {
+		t.Fatal(err)
+	}
+}
 
-// func testbrodcastItResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDb(brodcastCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+func testbrodcastItResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(brodcastInternalCfg); err != nil {
+		t.Fatal(err)
+	}
+}
 
 func testbrodcastItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(brodcastCfgPath, *waitRater); err != nil {
