@@ -49,7 +49,7 @@ func TestNewDecimalAdd(t *testing.T) {
 	x := new(decimal.Big).SetUint64(10)
 	y := new(decimal.Big).SetUint64(5)
 	expected, _ := new(decimal.Big).SetUint64(15).Float64()
-	received, _ := AddBig(x, y).Float64()
+	received, _ := SumBig(x, y).Float64()
 	if !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
 	}

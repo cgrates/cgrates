@@ -35,7 +35,7 @@ func MultiplyBig(x, y *decimal.Big) *decimal.Big {
 	return new(decimal.Big).Mul(x, y)
 }
 
-func AddBig(x, y *decimal.Big) *decimal.Big {
+func SumBig(x, y *decimal.Big) *decimal.Big {
 	return new(decimal.Big).Add(x, y)
 }
 
