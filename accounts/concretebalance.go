@@ -155,7 +155,7 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, incrm *utils.Decimal
 	}
 	rmain := &utils.Decimal{utils.SubstractBig(blcVal.Big, dUnts.Big)}
 	if hasLmt {
-		rmain = &utils.Decimal{utils.AddBig(rmain.Big, blncLmt.Big)}
+		rmain = &utils.Decimal{utils.SumBig(rmain.Big, blncLmt.Big)}
 	}
 	if hasUF {
 		dbted = &utils.Decimal{utils.DivideBig(dUnts.Big, uF.Factor.Big)}

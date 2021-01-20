@@ -196,7 +196,7 @@ func (rIv *RateSInterval) Cost() *decimal.Big {
 	if rIv.cost == nil {
 		rIv.cost = new(decimal.Big)
 		for _, incrm := range rIv.Increments {
-			rIv.cost = utils.AddBig(rIv.cost, incrm.Cost())
+			rIv.cost = utils.SumBig(rIv.cost, incrm.Cost())
 		}
 	}
 	return rIv.cost
@@ -243,7 +243,7 @@ func (rIcr *RateSIncrement) Cost() *decimal.Big {
 func CostForIntervals(rtIvls []*RateSInterval) (cost *decimal.Big) {
 	cost = new(decimal.Big)
 	for _, rtIvl := range rtIvls {
-		cost = utils.AddBig(cost, rtIvl.Cost())
+		cost = utils.SumBig(cost, rtIvl.Cost())
 	}
 	return
 }

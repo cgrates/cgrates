@@ -150,7 +150,7 @@ func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal, costIcrm
 		rcrntCost := utils.MultiplyBig(
 			utils.DivideBig(usage.Big, costIcrm.Increment.Big),
 			costIcrm.RecurrentFee.Big)
-		tCost = &utils.Decimal{utils.AddBig(tCost.Big, rcrntCost)}
+		tCost = &utils.Decimal{utils.SumBig(tCost.Big, rcrntCost)}
 	}
 	fmt.Println(tCost)
 	return
