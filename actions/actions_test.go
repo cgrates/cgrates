@@ -19,8 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
+	"bytes"
 	"context"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -40,13 +44,12 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
 	acts := NewActionS(defaultCfg, filters, dm)
 
-	cgrEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "TEST_ACTIONS1",
-		Event: map[string]interface{}{
+	evNM := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
 		},
+		utils.MetaOpts: map[string]interface{}{},
 	}
 
 	actPrf := &engine.ActionProfile{
@@ -70,33 +73,37 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 
 	expActionPrf := engine.ActionProfiles{actPrf}
 
-	if rcv, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, []string{}); err != nil {
+	if rcv, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), []string{}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expActionPrf) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expActionPrf), utils.ToJSON(rcv))
 	}
 
-	cgrEv = &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "TEST_ACTIONS1",
-		Event: map[string]interface{}{
-			utils.Accounts: "10",
+	evNM = utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.AccountField: "10",
 		},
+		utils.MetaOpts: map[string]interface{}{},
 	}
 	//This Event is not matching with our filter
-	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, []string{}); err == nil || err != utils.ErrNotFound {
+	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), []string{}); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
-	cgrEv.Event[utils.AccountField] = "1001"
+	evNM = utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		utils.MetaOpts: map[string]interface{}{},
+	}
 	actPrfIDs := []string{"inexisting_id"}
 	//Unable to get from database an ActionProfile if the ID won't match
-	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, actPrfIDs); err == nil || err != utils.ErrNotFound {
+	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
 	actPrfIDs = []string{"test_id1"}
-	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, actPrfIDs); err == nil || err != utils.ErrNotFound {
+	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
@@ -105,15 +112,14 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		ExpiryTime:     time.Date(2012, 8, 21, 0, 0, 0, 0, time.UTC),
 	}
 	//this event is not active in this interval time
-	cgrEv.Time = utils.TimePointer(time.Date(2012, 6, 21, 0, 0, 0, 0, time.UTC))
-	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, actPrfIDs); err == nil || err != utils.ErrNotFound {
+	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Date(2012, 6, 21, 0, 0, 0, 0, time.UTC)), actPrfIDs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 	actPrf.ActivationInterval = nil
 
 	//when dataManager is nil, it won't be able to get ActionsProfile from database
 	acts.dm = nil
-	if _, err := acts.matchingActionProfilesForEvent("INVALID_TENANT", cgrEv, actPrfIDs); err == nil || err != utils.ErrNoDatabaseConn {
+	if _, err := acts.matchingActionProfilesForEvent("INVALID_TENANT", evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
 	}
 
@@ -124,7 +130,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		t.Error(err)
 	}
 	expected := "NOT_FOUND:invalid_filters"
-	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", cgrEv, actPrfIDs); err == nil || err.Error() != expected {
+	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -147,6 +153,10 @@ func TestScheduledActions(t *testing.T) {
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
 		},
+	}
+	evNM := utils.MapStorage{
+		utils.MetaReq:  cgrEv.Event,
+		utils.MetaOpts: map[string]interface{}{},
 	}
 
 	actPrf := &engine.ActionProfile{
@@ -172,7 +182,7 @@ func TestScheduledActions(t *testing.T) {
 		t.Error(err)
 	} else {
 		expSchedActs := newScheduledActs(cgrEv.Tenant, cgrEv.ID, utils.MetaNone, utils.EmptyString,
-			utils.EmptyString, context.Background(), &ActData{cgrEv.Event, cgrEv.Opts}, rcv[0].acts)
+			utils.EmptyString, context.Background(), evNM, rcv[0].acts)
 		if reflect.DeepEqual(expSchedActs, rcv) {
 			t.Errorf("Expected %+v, received %+v", expSchedActs, rcv)
 		}
@@ -289,8 +299,13 @@ func TestAsapExecuteActions(t *testing.T) {
 		},
 	}
 
+	evNM := utils.MapStorage{
+		utils.MetaReq:  cgrEv[0].Event,
+		utils.MetaOpts: map[string]interface{}{},
+	}
+
 	expSchedActs := newScheduledActs(cgrEv[0].Tenant, cgrEv[0].ID, utils.MetaNone, utils.EmptyString,
-		utils.EmptyString, context.Background(), &ActData{cgrEv[0].Event, cgrEv[0].Opts}, nil)
+		utils.EmptyString, context.Background(), evNM, nil)
 
 	if err := acts.asapExecuteActions(expSchedActs); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
@@ -299,7 +314,7 @@ func TestAsapExecuteActions(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	acts.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	expSchedActs = newScheduledActs(cgrEv[0].Tenant, "another_id", utils.MetaNone, utils.EmptyString,
-		utils.EmptyString, context.Background(), &ActData{cgrEv[0].Event, cgrEv[0].Opts}, nil)
+		utils.EmptyString, context.Background(), evNM, nil)
 	if err := acts.asapExecuteActions(expSchedActs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -485,4 +500,37 @@ func (dbM *dataDBMockError) GetActionProfileDrv(string, string) (*engine.ActionP
 
 func (dbM *dataDBMockError) SetActionProfileDrv(*engine.ActionProfile) error {
 	return utils.ErrNoDatabaseConn
+}
+
+func TestLogActionExecute(t *testing.T) {
+	output := new(bytes.Buffer)
+	log.SetOutput(output)
+
+	loggertype := utils.MetaStdLog
+	id := "Engine1"
+	if newLogger, err := utils.Newlogger(loggertype, id); err != nil {
+		t.Error(err)
+	} else {
+		newLogger.SetLogLevel(7)
+		utils.Logger = newLogger
+	}
+
+	evNM := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.AccountField: "10",
+		},
+		utils.MetaOpts: map[string]interface{}{},
+	}
+
+	logAction := actLog{}
+	if err := logAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+
+	expected := "CGRateS <Engine1> [INFO] LOG Event: {\"*opts\":{},\"*req\":{\"Account\":\"10\"}}"
+	if rcv := output.String(); !strings.Contains(rcv, expected) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+
+	log.SetOutput(os.Stderr)
 }
