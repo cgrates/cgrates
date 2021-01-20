@@ -150,11 +150,7 @@ func (aS *ActionS) scheduleActions(cgrEvs []*utils.CGREvent, aPrflIDs []string, 
 
 // matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
 func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
-	cgrEv *utils.CGREvent, aPrflIDs []string) (aPfs engine.ActionProfiles, err error) {
-	evNm := utils.MapStorage{
-		utils.MetaReq:  cgrEv.Event,
-		utils.MetaOpts: cgrEv.Opts,
-	}
+	evNm utils.MapStorage, actTime *time.Time, aPrflIDs []string) (aPfs engine.ActionProfiles, err error) {
 	if len(aPrflIDs) == 0 {
 		var aPfIDMp utils.StringSet
 		if aPfIDMp, err = engine.MatchingItemIDsForEvent(
@@ -182,8 +178,8 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
 			}
 			return
 		}
-		if aPf.ActivationInterval != nil && cgrEv.Time != nil &&
-			!aPf.ActivationInterval.IsActiveAtTime(*cgrEv.Time) { // not active
+		if aPf.ActivationInterval != nil && actTime != nil &&
+			!aPf.ActivationInterval.IsActiveAtTime(*actTime) { // not active
 			continue
 		}
 		var pass bool
@@ -206,7 +202,11 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 	forceASAP bool) (schedActs []*scheduledActs, err error) {
 	var partExec bool
 	var aPfs engine.ActionProfiles
-	if aPfs, err = aS.matchingActionProfilesForEvent(tnt, cgrEv, aPrflIDs); err != nil {
+	evNm := utils.MapStorage{
+		utils.MetaReq:  cgrEv.Event,
+		utils.MetaOpts: cgrEv.Opts,
+	}
+	if aPfs, err = aS.matchingActionProfilesForEvent(tnt, evNm, cgrEv.Time, aPrflIDs); err != nil {
 		return
 	}
 
@@ -236,7 +236,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 		for trg, acts := range trgActs {
 			if trg == utils.MetaNone { // only one scheduledActs set
 				schedActs = append(schedActs, newScheduledActs(aPf.Tenant, aPf.ID, trg, utils.EmptyString, aPf.Schedule,
-					ctx, &ActData{cgrEv.Event, cgrEv.Opts}, acts))
+					ctx, evNm.Clone(), acts))
 				continue
 			}
 			if len(aPf.Targets[trg]) == 0 {
@@ -244,7 +244,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 			}
 			for trgID := range aPf.Targets[trg] {
 				schedActs = append(schedActs, newScheduledActs(aPf.Tenant, aPf.ID, trg, trgID, aPf.Schedule,
-					ctx, &ActData{cgrEv.Event, cgrEv.Opts}, acts))
+					ctx, evNm, acts))
 			}
 		}
 	}

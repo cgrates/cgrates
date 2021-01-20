@@ -39,7 +39,7 @@ func actionTarget(act string) (trgt string) {
 }
 
 func newScheduledActs(tenant, apID, trgTyp, trgID, schedule string,
-	ctx context.Context, data *ActData, acts []actioner) (sActs *scheduledActs) {
+	ctx context.Context, data utils.MapStorage, acts []actioner) (sActs *scheduledActs) {
 	return &scheduledActs{tenant, apID, trgTyp, trgID, schedule, ctx, data, acts,
 		ltcache.NewTransCache(map[string]*ltcache.CacheConfig{})}
 }
@@ -49,7 +49,7 @@ type scheduledActs struct {
 	tenant, apID, trgTyp, trgID string
 	schedule                    string
 	ctx                         context.Context
-	data                        *ActData
+	data                        utils.MapStorage
 	acts                        []actioner
 
 	cch *ltcache.TransCache // cache data between actions here
@@ -110,7 +110,7 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 type actioner interface {
 	id() string
 	cfg() *engine.APAction
-	execute(ctx context.Context, data *ActData) (err error)
+	execute(ctx context.Context, data utils.MapStorage) (err error)
 }
 
 // actLogger will log data to CGRateS logger
@@ -127,8 +127,11 @@ func (aL *actLog) cfg() *engine.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actLog) execute(ctx context.Context, data *ActData) (err error) {
-	body, _ := json.Marshal(data)
+func (aL *actLog) execute(ctx context.Context, data utils.MapStorage) (err error) {
+	var body []byte
+	if body, err = json.Marshal(data); err != nil {
+		return
+	}
 	utils.Logger.Info(fmt.Sprintf("LOG Event: %s", body))
 	return
 }
