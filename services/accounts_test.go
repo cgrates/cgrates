@@ -51,28 +51,9 @@ func TestAccountSCoverage(t *testing.T) {
 	}
 	//initialises an empty chan to call the reload function
 	testChan := make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-testChan:
-			}
-		}
-	}()
 	//populates actRPC with something in order to call the close function
 	actRPC <- chS
 	actS2 := &AccountService{
-		cfg:         cfg,
-		dm:          db,
-		cacheS:      chS,
-		filterSChan: filterSChan,
-		server:      server,
-		rldChan:     testChan,
-		stopChan:    make(chan struct{}, 1),
-		connChan:    actRPC,
-		anz:         anz,
-		srvDep:      srvDep,
-	}
-	actS3 := &AccountService{
 		cfg:         cfg,
 		dm:          db,
 		cacheS:      chS,
@@ -99,9 +80,4 @@ func TestAccountSCoverage(t *testing.T) {
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
-	actS3.rldChan <- struct{}{}
-	if !reflect.DeepEqual(actS2.rldChan, actS3.rldChan) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(actS3.rldChan), utils.ToJSON(actS2.rldChan))
-	}
-
 }

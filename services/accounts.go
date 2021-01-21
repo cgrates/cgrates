@@ -49,7 +49,7 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		anz:         anz,
 		srvDep:      srvDep,
-		rldChan:     make(chan struct{}),
+		rldChan:     make(chan struct{}, 1),
 	}
 }
 
