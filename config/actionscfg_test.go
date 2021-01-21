@@ -37,6 +37,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 	}
 	expected := &ActionSCfg{
 		Enabled:             true,
+		CDRsConns:           []string{},
 		IndexedSelects:      false,
 		Tenants:             &[]string{"itsyscom.com"},
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -67,6 +68,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
+		utils.CDRsConnsCfg:           []string{},
 		utils.Tenants:                []string{"itsyscom.com"},
 		utils.IndexedSelectsCfg:      false,
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},

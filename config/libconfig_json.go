@@ -672,6 +672,7 @@ type CoreSJsonCfg struct {
 // Action service config section
 type ActionSJsonCfg struct {
 	Enabled               *bool
+	Cdrs_conns            *[]string
 	Tenants               *[]string
 	Indexed_selects       *bool
 	String_indexed_fields *[]string

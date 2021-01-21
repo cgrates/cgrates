@@ -1070,6 +1070,34 @@ const CGRATES_CFG_JSON = `
 			{"tag": "Request", "path": "*rep.Request", "type": "*constant",
 				"value": "SIP/2.0 500 Internal Server Error", "mandatory": true},
 	],
+	"*cdrLog": [ // cdrLog template is used in ActionS to build the event that is send to CDRs in case of *cdrLog actionType
+		{"tag": "ToR", "path": "*rep.ToR", "type": "*variable",
+			"value": "~*req.BalanceType", "mandatory": true},
+		{"tag": "OriginHost", "path": "*rep.OriginHost", "type": "*constant",
+			"value": "127.0.0.1", "mandatory": true},
+		{"tag": "RequestType", "path": "*rep.RequestType", "type": "*constant",
+			"value": "*none", "mandatory": true},
+		{"tag": "Tenant", "path": "*rep.Tenant", "type": "*variable",
+			"value": "~*req.Tenant", "mandatory": true},
+		{"tag": "Account", "path": "*rep.Account", "type": "*variable",
+			"value": "~*req.Account", "mandatory": true},
+		{"tag": "Subject", "path": "*rep.Subject", "type": "*variable",
+			"value": "~*req.Account", "mandatory": true},
+		{"tag": "Cost", "path": "*rep.Cost", "type": "*variable",
+			"value": "~*req.Cost", "mandatory": true},
+		{"tag": "Source", "path": "*rep.Source", "type": "*constant",
+			"value": "*cdrLog", "mandatory": true},
+		{"tag": "Usage", "path": "*rep.Usage", "type": "*constant",
+			"value": "1", "mandatory": true},
+		{"tag": "RunID", "path": "*rep.RunID", "type": "*variable",
+			"value": "~*req.ActionType", "mandatory": true},
+		{"tag": "SetupTime", "path": "*rep.SetupTime", "type": "*constant",
+			"value": "*now", "mandatory": true},
+		{"tag": "AnswerTime", "path": "*rep.AnswerTime", "type": "*constant",
+			"value": "*now", "mandatory": true},
+		{"tag": "PreRated", "path": "*rep.PreRated", "type": "*constant",
+			"value": "true", "mandatory": true},
+	],
 },
 
 
@@ -1088,6 +1116,7 @@ const CGRATES_CFG_JSON = `
 
 "actions": {								// ActionS config
 	"enabled": false,						// starts attribute service: <true|false>
+	"cdrs_conns": [],						// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
 	"tenants":[],							// List of tenants to operate on
 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
