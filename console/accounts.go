@@ -61,7 +61,7 @@ func (self *CmdGetAccounts) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetAccounts) RpcResult() interface{} {
-	a := make([]engine.Account, 0)
+	a := make([]*engine.Account, 0)
 	return &a
 }
 
