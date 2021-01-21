@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cenkalti/rpc2"
@@ -177,10 +178,65 @@ func TestServeJSONAndGob(t *testing.T) {
 
 	shdChan := utils.NewSyncedChan()
 
-	//invalid port format
-	rcv.ServeJSON("2015", shdChan)
+	//cannot accept the listener
+	rcv.ServeJSON("8080", shdChan)
 
+	//cannot accept the listener
 	rcv.ServeGOB("2015", shdChan)
+
+	if err := os.RemoveAll(cfgDflt.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
+	rcv.StopBiRPC()
+}
+
+func TestRegisterProfiler(t *testing.T) {
+	cfgDflt := config.NewDefaultCGRConfig()
+	cfgDflt.CoreSCfg().CapsStatsInterval = 1
+	caps := engine.NewCaps(0, utils.MetaBusy)
+	rcv := NewServer(caps)
+
+	registerProfiler("test_prefix", rcv.httpMux)
+
+	rcv.RegisterProfiler("/test_prefix")
+
+	rcv.StopBiRPC()
+}
+
+type mockWriteResponse struct{}
+
+func (mk *mockWriteResponse) Header() http.Header        { return http.Header{} }
+func (mk *mockWriteResponse) Write([]byte) (int, error)  { return 0, nil }
+func (mk *mockWriteResponse) WriteHeader(statusCode int) {}
+
+func TestHandleRequest(t *testing.T) {
+	cfgDflt := config.NewDefaultCGRConfig()
+	cfgDflt.CoreSCfg().CapsStatsInterval = 1
+	caps := engine.NewCaps(0, utils.MetaBusy)
+	rcv := NewServer(caps)
+
+	cfgDflt.AnalyzerSCfg().DBPath = "/tmp/analyzers"
+	if err := os.RemoveAll(cfgDflt.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(cfgDflt.AnalyzerSCfg().DBPath, 0700); err != nil {
+		t.Fatal(err)
+	}
+	analz, err := analyzers.NewAnalyzerService(cfgDflt)
+	if err != nil {
+		t.Error(err)
+	}
+	rcv.SetAnalyzer(analz)
+	rcv.rpcEnabled = true
+
+	req, err := http.NewRequest("POST", "http://www.google.com/search?q=foo&q=bar&both=x&prio=1&orphan=nope&empty=not",
+		strings.NewReader("z=post&both=y&prio=2&=nokey&orphan;empty=&"))
+	if err != nil {
+		t.Error(err)
+	}
+
+	mkRespWriter := &mockWriteResponse{}
+	rcv.handleRequest(mkRespWriter, req)
 
 	if err := os.RemoveAll(cfgDflt.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
