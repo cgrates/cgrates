@@ -42,7 +42,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm)
+	acts := NewActionS(defaultCfg, filters, dm, nil)
 
 	evNM := utils.MapStorage{
 		utils.MetaReq: map[string]interface{}{
@@ -144,7 +144,7 @@ func TestScheduledActions(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm)
+	acts := NewActionS(defaultCfg, filters, dm, nil)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -221,7 +221,7 @@ func TestScheduleAction(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm)
+	acts := NewActionS(defaultCfg, filters, dm, nil)
 
 	cgrEv := []*utils.CGREvent{
 		{
@@ -286,7 +286,7 @@ func TestAsapExecuteActions(t *testing.T) {
 	dm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg := config.NewDefaultCGRConfig()
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm)
+	acts := NewActionS(defaultCfg, filters, dm, nil)
 
 	cgrEv := []*utils.CGREvent{
 		{
@@ -326,7 +326,7 @@ func TestActionSListenAndServe(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	defaultCfg.ActionSCfg().Tenants = &[]string{"cgrates1.org", "cgrates.org2"}
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm)
+	acts := NewActionS(defaultCfg, filters, dm, nil)
 
 	stopChan := make(chan struct{}, 1)
 	cfgRld := make(chan struct{}, 1)
@@ -343,7 +343,7 @@ func TestV1ScheduleActions(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg := config.NewDefaultCGRConfig()
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm)
+	acts := NewActionS(defaultCfg, filters, dm, nil)
 
 	var reply string
 	newArgs := &utils.ArgActionSv1ScheduleActions{
@@ -399,7 +399,7 @@ func TestV1ExecuteActions(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg := config.NewDefaultCGRConfig()
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm)
+	acts := NewActionS(defaultCfg, filters, dm, nil)
 
 	var reply string
 	newArgs := &utils.ArgActionSv1ScheduleActions{
@@ -446,7 +446,7 @@ func TestV1ExecuteActions(t *testing.T) {
 
 	newData := &dataDBMockError{}
 	newDm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
-	newActs := NewActionS(defaultCfg, filters, newDm)
+	newActs := NewActionS(defaultCfg, filters, newDm, nil)
 	newArgs.ActionProfileIDs = []string{}
 	if err := newActs.V1ExecuteActions(newArgs, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
@@ -469,7 +469,7 @@ func TestActionShutDown(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg := config.NewDefaultCGRConfig()
 	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm)
+	acts := NewActionS(defaultCfg, filters, dm, nil)
 	acts.crn = &cron.Cron{}
 
 	if err := acts.Shutdown(); err != nil {

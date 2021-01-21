@@ -36,10 +36,12 @@ import (
 // NewActionService returns the Action Service
 func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	connMgr *engine.ConnManager,
 	server *cores.Server, internalChan chan rpcclient.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ActionService{
 		connChan:    internalChan,
+		connMgr:     connMgr,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -58,6 +60,7 @@ type ActionService struct {
 	dm          *DataDBService
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
+	connMgr     *engine.ConnManager
 	server      *cores.Server
 
 	rldChan  chan struct{}
@@ -87,7 +90,7 @@ func (acts *ActionService) Start() (err error) {
 
 	acts.Lock()
 	defer acts.Unlock()
-	acts.acts = actions.NewActionS(acts.cfg, filterS, datadb)
+	acts.acts = actions.NewActionS(acts.cfg, filterS, datadb, acts.connMgr)
 	acts.stopChan = make(chan struct{})
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 

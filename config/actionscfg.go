@@ -23,6 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 // ActionSCfg is the configuration of ActionS
 type ActionSCfg struct {
 	Enabled             bool
+	CDRsConns           []string
 	Tenants             *[]string
 	IndexedSelects      bool
 	StringIndexedFields *[]string
@@ -34,6 +35,16 @@ type ActionSCfg struct {
 func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
+	}
+	if jsnCfg.Cdrs_conns != nil {
+		acS.CDRsConns = make([]string, len(*jsnCfg.Cdrs_conns))
+		for idx, connID := range *jsnCfg.Cdrs_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			acS.CDRsConns[idx] = connID
+			if connID == utils.MetaInternal {
+				acS.CDRsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
+			}
+		}
 	}
 	if jsnCfg.Enabled != nil {
 		acS.Enabled = *jsnCfg.Enabled
@@ -82,6 +93,16 @@ func (acS *ActionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
 	}
+	if acS.CDRsConns != nil {
+		CDRsConns := make([]string, len(acS.CDRsConns))
+		for i, item := range acS.CDRsConns {
+			CDRsConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
+				CDRsConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.CDRsConnsCfg] = CDRsConns
+	}
 	if acS.Tenants != nil {
 		Tenants := make([]string, len(*acS.Tenants))
 		for i, item := range *acS.Tenants {
@@ -119,6 +140,12 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 		Enabled:        acS.Enabled,
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
+	}
+	if acS.CDRsConns != nil {
+		cln.CDRsConns = make([]string, len(acS.CDRsConns))
+		for i, con := range acS.CDRsConns {
+			cln.CDRsConns[i] = con
+		}
 	}
 	if acS.Tenants != nil {
 		tnt := make([]string, len(*acS.Tenants))

@@ -53,7 +53,7 @@ func TestActionSReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	actRPC := make(chan rpcclient.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	actS := NewActionService(cfg, db, chS, filterSChan, server, actRPC, anz, srvDep)
+	actS := NewActionService(cfg, db, chS, filterSChan, nil, server, actRPC, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(actS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)

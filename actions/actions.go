@@ -32,24 +32,24 @@ import (
 )
 
 // NewActionS instantiates the ActionS
-func NewActionS(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager) (aS *ActionS) {
+func NewActionS(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager,connMgr *engine.ConnManager) (aS *ActionS) {
 	aS = &ActionS{
 		cfg:   cfg,
+		connMgr: connMgr,
 		fltrS: fltrS,
 		dm:    dm,
 		crnLk: new(sync.RWMutex),
 	}
-	aS.schedInit() // initialize cron and schedule actions
-	return
 }
 
 // ActionS manages exection of Actions
 type ActionS struct {
-	cfg   *config.CGRConfig
-	fltrS *engine.FilterS
-	dm    *engine.DataManager
-	crn   *cron.Cron
-	crnLk *sync.RWMutex
+	cfg     *config.CGRConfig
+	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
+	dm      *engine.DataManager
+	crn     *cron.Cron
+	crnLk   *sync.RWMutex
 }
 
 // ListenAndServe keeps the service alive
@@ -220,7 +220,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 				trgKey == utils.EmptyString {
 				trgKey = trgTyp
 			}
-			if act, errAct := newActioner(aS.cfg, aS.fltrS, aS.dm, aCfg); errAct != nil {
+			if act, errAct := newActioner(aS.cfg, aS.fltrS, aS.dm, aS.connMgr, aCfg); errAct != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf(
 						"<%s> ignoring ActionProfile with id: <%s:%s> creating action: <%s>, error: <%s>",

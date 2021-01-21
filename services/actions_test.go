@@ -44,7 +44,7 @@ func TestActionSCoverage(t *testing.T) {
 	actRPC := make(chan rpcclient.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	actS := NewActionService(cfg, db,
-		chS, filterSChan, server, actRPC,
+		chS, filterSChan, nil, server, actRPC,
 		anz, srvDep)
 	if actS == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(actS))
@@ -68,7 +68,7 @@ func TestActionSCoverage(t *testing.T) {
 	if actS2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	actS2.acts = actions.NewActionS(cfg, &engine.FilterS{}, &engine.DataManager{})
+	actS2.acts = actions.NewActionS(cfg, &engine.FilterS{}, &engine.DataManager{}, nil)
 	if !actS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}

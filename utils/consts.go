@@ -946,6 +946,8 @@ const (
 	MetaAbstract          = "*abstract"
 	MetaBalanceLimit      = "*balanceLimit"
 	MetaBalanceUnlimited  = "*balanceUnlimited"
+	MetaTemplateID        = "*templateID"
+	MetaCdrLog            = "*cdrLog"
 )
 
 // Migrator Action
