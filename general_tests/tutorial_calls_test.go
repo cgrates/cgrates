@@ -307,15 +307,13 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		UsageID: "OriginID",
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "ResourceEvent",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ResourceEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
 			},
 		},
 	}
@@ -460,15 +458,13 @@ func testCallCheckResourceAllocation(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		UsageID: "OriginID1",
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "ResourceAllocation",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ResourceAllocation",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
 			},
 		},
 	}
@@ -652,15 +648,13 @@ func testCallCheckResourceRelease(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		UsageID: "OriginID2",
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "ResourceRelease",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ResourceRelease",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
 			},
 		},
 	}
@@ -731,15 +725,13 @@ func testCallSyncSessions(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		UsageID: "OriginID3",
-		CGREventWithOpts: &utils.CGREventWithOpts{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "AllocateResource",
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "1002",
-				},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "AllocateResource",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
 			},
 		},
 	}
