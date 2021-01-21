@@ -32,13 +32,15 @@ import (
 )
 
 // NewActionS instantiates the ActionS
-func NewActionS(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager) *ActionS {
-	return &ActionS{
+func NewActionS(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager) (aS *ActionS) {
+	aS = &ActionS{
 		cfg:   cfg,
 		fltrS: fltrS,
 		dm:    dm,
 		crnLk: new(sync.RWMutex),
 	}
+	aS.schedInit() // initialize cron and schedule actions
+	return
 }
 
 // ActionS manages exection of Actions
@@ -54,7 +56,6 @@ type ActionS struct {
 func (aS *ActionS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s>",
 		utils.CoreS, utils.ActionS))
-	aS.schedInit() // initialize cron and schedule actions
 	for {
 		select {
 		case <-stopChan:

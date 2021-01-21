@@ -74,13 +74,13 @@ func (anz *AnalyzerService) Start() (err error) {
 		return
 	}
 	anz.stopChan = make(chan struct{})
-	go func() {
-		if err := anz.anz.ListenAndServe(anz.stopChan); err != nil {
+	go func(a *analyzers.AnalyzerService) {
+		if err := a.ListenAndServe(anz.stopChan); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
 			anz.shdChan.CloseOnce()
 		}
 		return
-	}()
+	}(anz.anz)
 	anz.server.SetAnalyzer(anz.anz)
 	anz.rpc = v1.NewAnalyzerSv1(anz.anz)
 	go func() {
@@ -89,6 +89,11 @@ func (anz *AnalyzerService) Start() (err error) {
 		case <-anz.stopChan:
 			return
 		case fS = <-anz.filterSChan:
+			if !anz.IsRunning() {
+				return
+			}
+			anz.Lock()
+			defer anz.Unlock()
 			anz.filterSChan <- fS
 			anz.anz.SetFilterS(fS)
 		}
