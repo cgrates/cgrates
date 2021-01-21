@@ -1355,7 +1355,7 @@ func testApierSetAccountActionTriggers(t *testing.T) {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 	var setReply string
-	setReq := &AttrSetAccountActionTriggers{
+	setReq := AttrSetAccountActionTriggers{
 		Tenant:  "cgrates.org",
 		Account: "dan2",
 		AttrSetActionTrigger: AttrSetActionTrigger{
