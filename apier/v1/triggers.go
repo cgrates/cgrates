@@ -20,7 +20,6 @@ package v1
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -165,7 +164,6 @@ type AttrResetAccountActionTriggers struct {
 }
 
 func (apierSv1 *APIerSv1) ResetAccountActionTriggers(attr *AttrResetAccountActionTriggers, reply *string) error {
-	fmt.Println("yay")
 	if missing := utils.MissingStructFields(&attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
