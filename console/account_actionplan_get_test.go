@@ -41,11 +41,11 @@ func TestCmdGetAccountActionPlan(t *testing.T) {
 	}
 	// verify the type of input parameter
 	if ok := m.Type.In(1).AssignableTo(reflect.TypeOf(command.RpcParams(true))); !ok {
-		t.Fatalf("cannot assing input parameter")
+		t.Fatalf("cannot assign input parameter")
 	}
 	// verify the type of output parameter
 	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
-		t.Fatalf("cannot assing output parameter")
+		t.Fatalf("cannot assign output parameter")
 	}
 	// for coverage purpose
 	if err := command.PostprocessRpcParams(); err != nil {

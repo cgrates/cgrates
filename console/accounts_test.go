@@ -23,23 +23,22 @@ import (
 	"strings"
 	"testing"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	v2 "github.com/cgrates/cgrates/apier/v2"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCmdAccountTriggerAdd(t *testing.T) {
+func TestCmdAccounts(t *testing.T) {
 	// commands map is initiated in init function
-	command := commands["account_triggers_add"]
+	command := commands["accounts"]
 	// verify if ApierSv1 object has method on it
-	m, ok := reflect.TypeOf(new(v1.APIerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	m, ok := reflect.TypeOf(new(v2.APIerSv2)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
 	if !ok {
 		t.Fatal("method not found")
 	}
 	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
-
 	// verify the type of input parameter
 	if ok := m.Type.In(1).AssignableTo(reflect.TypeOf(command.RpcParams(true))); !ok {
 		t.Fatalf("cannot assign input parameter")
