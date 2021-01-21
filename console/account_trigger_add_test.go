@@ -23,14 +23,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cgrates/cgrates/utils"
-
 	v1 "github.com/cgrates/cgrates/apier/v1"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCmdGetAccountActionPlan(t *testing.T) {
+func TestCmdAccountTriggerAdd(t *testing.T) {
 	// commands map is initiated in init function
-	command := commands["account_actionplan_get"]
+	command := commands["account_triggers_add"]
 	// verify if ApierSv1 object has method on it
 	m, ok := reflect.TypeOf(new(v1.APIerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
 	if !ok {
