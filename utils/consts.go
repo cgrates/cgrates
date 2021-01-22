@@ -299,6 +299,8 @@ const (
 	FilterValStart           = "("
 	FilterValEnd             = ")"
 	JSON                     = "json"
+	JSONCaps                 = "JSON"
+	GOBCaps                  = "GOB"
 	MsgPack                  = "msgpack"
 	CSVLoad                  = "CSVLOAD"
 	CGRID                    = "CGRID"
