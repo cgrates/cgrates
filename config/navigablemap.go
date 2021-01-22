@@ -208,6 +208,42 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string, opt
 	return
 }
 
+// NMAsCGREventWithOpts builds a CGREvent considering Time as time.Now()
+// and Event as linear map[string]interface{} with joined paths
+// received the opts
+// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
+func NMAsCGREventWithOpts(nM *utils.OrderedNavigableMap, tnt string, pathSep string, opts *utils.OrderedNavigableMap) (cgrEv *utils.CGREvent) {
+	if nM == nil {
+		return
+	}
+	el := nM.GetFirstElement()
+	if el == nil {
+		return
+	}
+	cgrEv = &utils.CGREvent{
+		Tenant: tnt,
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   utils.TimePointer(time.Now()),
+		Event:  make(map[string]interface{}),
+		Opts:   NMAsMapInterface(opts, pathSep),
+	}
+	for ; el != nil; el = el.Next() {
+		branchPath := el.Value
+		val, _ := nM.Field(branchPath) // this should never return error cause we get the path from the order
+		opath := utils.GetPathWithoutIndex(branchPath.String())
+		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents
+			if nmItm.Config != nil &&
+				nmItm.Config.AttributeID != "" {
+				continue
+			}
+		}
+		if _, has := cgrEv.Event[opath]; !has {
+			cgrEv.Event[opath] = val.Interface() // first item which is not an attribute will become the value
+		}
+	}
+	return
+}
+
 // NMAsMapInterface builds a linear map[string]interface{} with joined paths
 // treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
 func NMAsMapInterface(nM *utils.OrderedNavigableMap, pathSep string) (mp map[string]interface{}) {

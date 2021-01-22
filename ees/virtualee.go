@@ -73,12 +73,15 @@ func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	vEe.dc[utils.NumberOfEvents] = vEe.dc[utils.NumberOfEvents].(int64) + 1
 
 	req := utils.MapStorage(cgrEv.Event)
-	eeReq := NewEventExporterRequest(req, vEe.dc, cgrEv.Opts,
+	oNm := map[string]*utils.OrderedNavigableMap{
+		utils.MetaExp: utils.NewOrderedNavigableMap(),
+	}
+	eeReq := engine.NewEventRequest(req, vEe.dc, cgrEv.Opts,
 		vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Tenant,
 		vEe.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Timezone,
 			vEe.cgrCfg.GeneralCfg().DefaultTimezone),
-		vEe.filterS)
+		vEe.filterS, oNm)
 	if err = eeReq.SetFields(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].ContentFields()); err != nil {
 		return
 	}

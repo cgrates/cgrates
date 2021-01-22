@@ -98,18 +98,21 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	if len(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ContentFields()) == 0 {
 		valMp = cgrEv.Event
 	} else {
-		eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), pstrEE.dc, cgrEv.Opts,
+		oNm := map[string]*utils.OrderedNavigableMap{
+			utils.MetaExp: utils.NewOrderedNavigableMap(),
+		}
+		eeReq := engine.NewEventRequest(utils.MapStorage(cgrEv.Event), pstrEE.dc, cgrEv.Opts,
 			pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Tenant,
 			pstrEE.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Timezone,
-				pstrEE.cgrCfg.GeneralCfg().DefaultTimezone), pstrEE.filterS)
+				pstrEE.cgrCfg.GeneralCfg().DefaultTimezone), pstrEE.filterS, oNm)
 
 		if err = eeReq.SetFields(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 			var nmIt utils.NMInterface
-			if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
+			if nmIt, err = eeReq.OrdNavMP[utils.MetaExp].Field(el.Value); err != nil {
 				return
 			}
 			itm, isNMItem := nmIt.(*config.NMItem)

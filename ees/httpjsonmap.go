@@ -87,18 +87,21 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	if len(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].ContentFields()) == 0 {
 		valMp = cgrEv.Event
 	} else {
-		eeReq := NewEventExporterRequest(utils.MapStorage(cgrEv.Event), httpEE.dc, cgrEv.Opts,
+		oNm := map[string]*utils.OrderedNavigableMap{
+			utils.MetaExp: utils.NewOrderedNavigableMap(),
+		}
+		eeReq := engine.NewEventRequest(utils.MapStorage(cgrEv.Event), httpEE.dc, cgrEv.Opts,
 			httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Tenant,
 			httpEE.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Timezone,
-				httpEE.cgrCfg.GeneralCfg().DefaultTimezone), httpEE.filterS)
+				httpEE.cgrCfg.GeneralCfg().DefaultTimezone), httpEE.filterS, oNm)
 
 		if err = eeReq.SetFields(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 			var nmIt utils.NMInterface
-			if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
+			if nmIt, err = eeReq.OrdNavMP[utils.MetaExp].Field(el.Value); err != nil {
 				return
 			}
 			itm, isNMItem := nmIt.(*config.NMItem)
@@ -141,18 +144,21 @@ func (httpEE *HTTPjsonMapEE) composeHeader() (hdr http.Header, err error) {
 	if len(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].HeaderFields()) == 0 {
 		return
 	}
-	eeReq := NewEventExporterRequest(nil, httpEE.dc, nil,
+	oNm := map[string]*utils.OrderedNavigableMap{
+		utils.MetaHdr: utils.NewOrderedNavigableMap(),
+	}
+	eeReq := engine.NewEventRequest(nil, httpEE.dc, nil,
 		httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Tenant,
 		httpEE.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Timezone,
 			httpEE.cgrCfg.GeneralCfg().DefaultTimezone),
-		httpEE.filterS)
+		httpEE.filterS, oNm)
 	if err = eeReq.SetFields(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].HeaderFields()); err != nil {
 		return
 	}
-	for el := eeReq.hdr.GetFirstElement(); el != nil; el = el.Next() {
+	for el := eeReq.OrdNavMP[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
 		var nmIt utils.NMInterface
-		if nmIt, err = eeReq.hdr.Field(el.Value); err != nil {
+		if nmIt, err = eeReq.OrdNavMP[utils.MetaHdr].Field(el.Value); err != nil {
 			return
 		}
 		itm, isNMItem := nmIt.(*config.NMItem)

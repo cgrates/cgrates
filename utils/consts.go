@@ -948,6 +948,7 @@ const (
 	MetaBalanceUnlimited  = "*balanceUnlimited"
 	MetaTemplateID        = "*templateID"
 	MetaCdrLog            = "*cdrLog"
+	MetaCDR               = "*cdr"
 )
 
 // Migrator Action

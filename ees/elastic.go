@@ -139,19 +139,22 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	if len(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ContentFields()) == 0 {
 		valMp = cgrEv.Event
 	} else {
+		oNm := map[string]*utils.OrderedNavigableMap{
+			utils.MetaExp: utils.NewOrderedNavigableMap(),
+		}
 		req := utils.MapStorage(cgrEv.Event)
-		eeReq := NewEventExporterRequest(req, eEe.dc, cgrEv.Opts,
+		eeReq := engine.NewEventRequest(req, eEe.dc, cgrEv.Opts,
 			eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Tenant,
 			eEe.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,
 				eEe.cgrCfg.GeneralCfg().DefaultTimezone),
-			eEe.filterS)
+			eEe.filterS, oNm)
 		if err = eeReq.SetFields(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 			var nmIt utils.NMInterface
-			if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
+			if nmIt, err = eeReq.OrdNavMP[utils.MetaExp].Field(el.Value); err != nil {
 				return
 			}
 			itm, isNMItem := nmIt.(*config.NMItem)
