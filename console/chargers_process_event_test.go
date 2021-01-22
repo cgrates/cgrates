@@ -18,13 +18,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
+import (
+	"reflect"
+	"strings"
+	"testing"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
+
 //willfix
-/*
-func TestCmdAccountTriggerRemove(t *testing.T) {
+
+func TestCmdChargersProcessEvent(t *testing.T) {
 	// commands map is initiated in init function
-	command := commands["account_triggers_remove"]
+	command := commands["chargers_process_event"]
 	// verify if ApierSv1 object has method on it
-	m, ok := reflect.TypeOf(new(v1.APIerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	m, ok := reflect.TypeOf(new(v1.ChargerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
 	if !ok {
 		t.Fatal("method not found")
 	}
@@ -44,4 +53,3 @@ func TestCmdAccountTriggerRemove(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-*/

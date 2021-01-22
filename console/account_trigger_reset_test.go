@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-//will fix
+//willfix
 /*
 func TestCmdAccountTriggerReset(t *testing.T) {
 	// commands map is initiated in init function

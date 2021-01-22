@@ -20,9 +20,9 @@ package console
 
 //willfix
 /*
-func TestCmdAccountTriggerRemove(t *testing.T) {
+func TestCmdBalanceRemove(t *testing.T) {
 	// commands map is initiated in init function
-	command := commands["account_triggers_remove"]
+	command := commands["balance_remove"]
 	// verify if ApierSv1 object has method on it
 	m, ok := reflect.TypeOf(new(v1.APIerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
 	if !ok {
