@@ -32,14 +32,16 @@ import (
 )
 
 // NewActionS instantiates the ActionS
-func NewActionS(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager,connMgr *engine.ConnManager) (aS *ActionS) {
+func NewActionS(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager, connMgr *engine.ConnManager) (aS *ActionS) {
 	aS = &ActionS{
-		cfg:   cfg,
+		cfg:     cfg,
 		connMgr: connMgr,
-		fltrS: fltrS,
-		dm:    dm,
-		crnLk: new(sync.RWMutex),
+		fltrS:   fltrS,
+		dm:      dm,
+		crnLk:   new(sync.RWMutex),
 	}
+	aS.schedInit() // initialize cron and schedule actions
+	return
 }
 
 // ActionS manages exection of Actions
