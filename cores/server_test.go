@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cores
 
 import (
+	"bytes"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cenkalti/rpc2"
@@ -203,43 +204,25 @@ func TestRegisterProfiler(t *testing.T) {
 	rcv.StopBiRPC()
 }
 
-type mockWriteResponse struct{}
-
-func (mk *mockWriteResponse) Header() http.Header        { return http.Header{} }
-func (mk *mockWriteResponse) Write([]byte) (int, error)  { return 0, nil }
-func (mk *mockWriteResponse) WriteHeader(statusCode int) {}
-
 func TestHandleRequest(t *testing.T) {
 	cfgDflt := config.NewDefaultCGRConfig()
 	cfgDflt.CoreSCfg().CapsStatsInterval = 1
 	caps := engine.NewCaps(0, utils.MetaBusy)
 	rcv := NewServer(caps)
 
-	cfgDflt.AnalyzerSCfg().DBPath = "/tmp/analyzers"
-	if err := os.RemoveAll(cfgDflt.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(cfgDflt.AnalyzerSCfg().DBPath, 0700); err != nil {
-		t.Fatal(err)
-	}
-	analz, err := analyzers.NewAnalyzerService(cfgDflt)
-	if err != nil {
-		t.Error(err)
-	}
-	rcv.SetAnalyzer(analz)
 	rcv.rpcEnabled = true
 
-	req, err := http.NewRequest("POST", "http://www.google.com/search?q=foo&q=bar&both=x&prio=1&orphan=nope&empty=not",
-		strings.NewReader("z=post&both=y&prio=2&=nokey&orphan;empty=&"))
+	req, err := http.NewRequest(http.MethodPost, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/tariffplans/oldtutorial/ActionPlans.csv",
+		bytes.NewBuffer([]byte("1")))
 	if err != nil {
-		t.Error(err)
-	}
-
-	mkRespWriter := &mockWriteResponse{}
-	rcv.handleRequest(mkRespWriter, req)
-
-	if err := os.RemoveAll(cfgDflt.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}
+
+	w := httptest.NewRecorder()
+	rcv.handleRequest(w, req)
+	if w.Body.String() != utils.EmptyString {
+		t.Errorf("Expected: %q ,received: %q", utils.EmptyString, w.Body.String())
+	}
+
 	rcv.StopBiRPC()
 }

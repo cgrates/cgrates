@@ -403,9 +403,7 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 	if !enabled {
 		return
 	}
-	fmt.Println("am intrat aici")
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
-	fmt.Println("am iesit de aici")
 	if err != nil {
 		shdChan.CloseOnce()
 		return
