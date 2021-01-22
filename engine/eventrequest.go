@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package ees
+package engine
 
 import (
 	"fmt"
@@ -27,70 +27,64 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewEventExporterRequest returns a new EventExporterRequest
-func NewEventExporterRequest(req utils.DataProvider, dc, opts utils.MapStorage,
+// NewEventRequest returns a new EventRequest
+func NewEventRequest(req utils.DataProvider, dc, opts utils.MapStorage,
 	tntTpl config.RSRParsers, dfltTenant, timezone string,
-	filterS *engine.FilterS) (eeR *EventExporterRequest) {
-	eeR = &EventExporterRequest{
-		req:     req,
-		tnt:     dfltTenant,
-		tmz:     timezone,
-		filterS: filterS,
-		cnt:     utils.NewOrderedNavigableMap(),
-		hdr:     utils.NewOrderedNavigableMap(),
-		trl:     utils.NewOrderedNavigableMap(),
-		dc:      dc,
-		opts:    opts,
+	filterS *FilterS, oNM map[string]*utils.OrderedNavigableMap) (eeR *EventRequest) {
+	eeR = &EventRequest{
+		req:      req,
+		Tenant:   dfltTenant,
+		Timezone: timezone,
+		filterS:  filterS,
+		dc:       dc,
+		opts:     opts,
+		OrdNavMP: oNM,
 	}
 	if tntTpl != nil {
 		if tntIf, err := eeR.ParseField(
 			&config.FCTemplate{Type: utils.MetaComposed,
 				Value: tntTpl}); err == nil && tntIf.(string) != "" {
-			eeR.tnt = tntIf.(string)
+			eeR.Tenant = tntIf.(string)
 		}
 	}
 	return
 }
 
-// EventExporterRequest represents data related to one request towards agent
+// EventRequest represents data related to one request towards agent
 // implements utils.DataProvider so we can pass it to filters
-type EventExporterRequest struct {
-	req  utils.DataProvider // request
-	eeDP utils.DataProvider // eventExporter DataProvider
-	tnt  string
-	tmz  string
-	cnt  *utils.OrderedNavigableMap // Used in reply to access the request that was send
-	hdr  *utils.OrderedNavigableMap // Used in reply to access the request that was send
-	trl  *utils.OrderedNavigableMap // Used in reply to access the request that was send
-	dc   utils.MapStorage
-	opts utils.MapStorage
+type EventRequest struct {
+	req      utils.DataProvider // request
+	Tenant   string
+	Timezone string
+	OrdNavMP map[string]*utils.OrderedNavigableMap // *exp:OrderNavMp *trl:OrderNavMp *cdr:OrderNavMp
+	dc       utils.MapStorage
+	opts     utils.MapStorage
 
-	filterS *engine.FilterS
+	filterS *FilterS
 }
 
 // String implements utils.DataProvider
-func (eeR *EventExporterRequest) String() string {
+func (eeR *EventRequest) String() string {
 	return utils.ToIJSON(eeR)
 }
 
 // RemoteHost implements utils.DataProvider
-func (eeR *EventExporterRequest) RemoteHost() net.Addr {
+func (eeR *EventRequest) RemoteHost() net.Addr {
 	return eeR.req.RemoteHost()
 }
 
 // FieldAsInterface implements utils.DataProvider
-func (eeR *EventExporterRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (eeR *EventRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
 	default:
 		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
 	case utils.MetaReq:
 		val, err = eeR.req.FieldAsInterface(fldPath[1:])
 	case utils.MetaUCH:
-		if cacheVal, ok := engine.Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
+		if cacheVal, ok := Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
 			err = utils.ErrNotFound
 		} else {
 			val = cacheVal
@@ -110,22 +104,16 @@ func (eeR *EventExporterRequest) FieldAsInterface(fldPath []string) (val interfa
 }
 
 // Field implements utils.NMInterface
-func (eeR *EventExporterRequest) Field(fldPath utils.PathItems) (val utils.NMInterface, err error) {
-	switch fldPath[0].Field {
-	default:
+func (eeR *EventRequest) Field(fldPath utils.PathItems) (val utils.NMInterface, err error) {
+	nm, has := eeR.OrdNavMP[fldPath[0].Field]
+	if !has {
 		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
-	case utils.MetaExp:
-		val, err = eeR.cnt.Field(fldPath[1:])
-	case utils.MetaHdr:
-		val, err = eeR.hdr.Field(fldPath[1:])
-	case utils.MetaTrl:
-		val, err = eeR.trl.Field(fldPath[1:])
 	}
-	return
+	return nm.Field(fldPath[1:])
 }
 
 // FieldAsString implements utils.DataProvider
-func (eeR *EventExporterRequest) FieldAsString(fldPath []string) (val string, err error) {
+func (eeR *EventRequest) FieldAsString(fldPath []string) (val string, err error) {
 	var iface interface{}
 	if iface, err = eeR.FieldAsInterface(fldPath); err != nil {
 		return
@@ -134,9 +122,9 @@ func (eeR *EventExporterRequest) FieldAsString(fldPath []string) (val string, er
 }
 
 //SetFields will populate fields of AgentRequest out of templates
-func (eeR *EventExporterRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
+func (eeR *EventRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	for _, tplFld := range tplFlds {
-		if pass, err := eeR.filterS.Pass(eeR.tnt,
+		if pass, err := eeR.filterS.Pass(eeR.Tenant,
 			tplFld.Filters, eeR); err != nil {
 			return err
 		} else if !pass {
@@ -189,34 +177,25 @@ func (eeR *EventExporterRequest) SetFields(tplFlds []*config.FCTemplate) (err er
 }
 
 // Set implements utils.NMInterface
-func (eeR *EventExporterRequest) Set(fullPath *utils.FullPath, nm utils.NMInterface) (added bool, err error) {
-
+func (eeR *EventRequest) Set(fullPath *utils.FullPath, nm utils.NMInterface) (added bool, err error) {
+	oNM, has := eeR.OrdNavMP[fullPath.PathItems[0].Field]
+	if !has && fullPath.PathItems[0].Field != utils.MetaUCH {
+		return false, fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0].Field)
+	}
 	switch fullPath.PathItems[0].Field {
 	default:
-		return false, fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0].Field)
-	case utils.MetaExp:
-		return eeR.cnt.Set(&utils.FullPath{
+		return oNM.Set(&utils.FullPath{
 			PathItems: fullPath.PathItems[1:],
-			Path:      fullPath.Path[4:],
-		}, nm)
-	case utils.MetaHdr:
-		return eeR.hdr.Set(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
-			Path:      fullPath.Path[4:],
-		}, nm)
-	case utils.MetaTrl:
-		return eeR.trl.Set(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
-			Path:      fullPath.Path[4:],
+			Path:      fullPath.Path[len(fullPath.PathItems[0].Field):],
 		}, nm)
 	case utils.MetaUCH:
-		err = engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm, nil, true, utils.NonTransactional)
+		err = Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm, nil, true, utils.NonTransactional)
 	}
 	return false, err
 }
 
 // ParseField outputs the value based on the template item
-func (eeR *EventExporterRequest) ParseField(
+func (eeR *EventRequest) ParseField(
 	cfgFld *config.FCTemplate) (out interface{}, err error) {
 	var isString bool
 	switch cfgFld.Type {
@@ -251,11 +230,11 @@ func (eeR *EventExporterRequest) ParseField(
 			return
 		}
 		var tEnd time.Time
-		if tEnd, err = utils.ParseTimeDetectLayout(strVal1, eeR.tmz); err != nil {
+		if tEnd, err = utils.ParseTimeDetectLayout(strVal1, eeR.Timezone); err != nil {
 			return
 		}
 		var tStart time.Time
-		if tStart, err = utils.ParseTimeDetectLayout(strVal2, eeR.tmz); err != nil {
+		if tStart, err = utils.ParseTimeDetectLayout(strVal2, eeR.Timezone); err != nil {
 			return
 		}
 		out = tEnd.Sub(tStart).String()
@@ -368,7 +347,7 @@ func (eeR *EventExporterRequest) ParseField(
 			return
 		}
 		if cfgFld.MaskLen != -1 && len(cfgFld.MaskDestID) != 0 &&
-			engine.CachedDestHasPrefix(cfgFld.MaskDestID, dst) {
+			CachedDestHasPrefix(cfgFld.MaskDestID, dst) {
 			out = utils.MaskSuffix(dst, cfgFld.MaskLen)
 		}
 

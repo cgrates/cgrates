@@ -150,20 +150,23 @@ func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 
 	var vals []interface{}
 	var colNames []string
+	oNm := map[string]*utils.OrderedNavigableMap{
+		utils.MetaExp: utils.NewOrderedNavigableMap(),
+	}
 	req := utils.MapStorage(cgrEv.Event)
-	eeReq := NewEventExporterRequest(req, sqlEe.dc, cgrEv.Opts,
+	eeReq := engine.NewEventRequest(req, sqlEe.dc, cgrEv.Opts,
 		sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Tenant,
 		sqlEe.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Timezone,
 			sqlEe.cgrCfg.GeneralCfg().DefaultTimezone),
-		sqlEe.filterS)
+		sqlEe.filterS, oNm)
 	if err = eeReq.SetFields(sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].ContentFields()); err != nil {
 		return
 	}
 
-	for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+	for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 		var iface interface{}
-		if iface, err = eeReq.cnt.FieldAsInterface(el.Value.Slice()); err != nil {
+		if iface, err = eeReq.OrdNavMP[utils.MetaExp].FieldAsInterface(el.Value.Slice()); err != nil {
 			return
 		}
 		pathWithoutIndex := utils.GetPathWithoutIndex(el.Value.String())

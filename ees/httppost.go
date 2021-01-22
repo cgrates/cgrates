@@ -82,19 +82,22 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			urlVals.Set(k, utils.IfaceAsString(v))
 		}
 	} else {
+		oNm := map[string]*utils.OrderedNavigableMap{
+			utils.MetaExp: utils.NewOrderedNavigableMap(),
+		}
 		req := utils.MapStorage(cgrEv.Event)
-		eeReq := NewEventExporterRequest(req, httpPost.dc, cgrEv.Opts,
+		eeReq := engine.NewEventRequest(req, httpPost.dc, cgrEv.Opts,
 			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
 			httpPost.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
 				httpPost.cgrCfg.GeneralCfg().DefaultTimezone),
-			httpPost.filterS)
+			httpPost.filterS, oNm)
 		if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 			var nmIt utils.NMInterface
-			if nmIt, err = eeReq.cnt.Field(el.Value); err != nil {
+			if nmIt, err = eeReq.OrdNavMP[utils.MetaExp].Field(el.Value); err != nil {
 				return
 			}
 			itm, isNMItem := nmIt.(*config.NMItem)
@@ -134,18 +137,21 @@ func (httpPost *HTTPPost) composeHeader() (hdr http.Header, err error) {
 	if len(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].HeaderFields()) == 0 {
 		return
 	}
-	eeReq := NewEventExporterRequest(nil, httpPost.dc, nil,
+	oNm := map[string]*utils.OrderedNavigableMap{
+		utils.MetaHdr: utils.NewOrderedNavigableMap(),
+	}
+	eeReq := engine.NewEventRequest(nil, httpPost.dc, nil,
 		httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
 		httpPost.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
 			httpPost.cgrCfg.GeneralCfg().DefaultTimezone),
-		httpPost.filterS)
+		httpPost.filterS, oNm)
 	if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].HeaderFields()); err != nil {
 		return
 	}
-	for el := eeReq.hdr.GetFirstElement(); el != nil; el = el.Next() {
+	for el := eeReq.OrdNavMP[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
 		var nmIt utils.NMInterface
-		if nmIt, err = eeReq.hdr.Field(el.Value); err != nil {
+		if nmIt, err = eeReq.OrdNavMP[utils.MetaHdr].Field(el.Value); err != nil {
 			return
 		}
 		itm, isNMItem := nmIt.(*config.NMItem)

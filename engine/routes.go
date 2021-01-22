@@ -674,8 +674,6 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 		}
 	}
 	sSps, err := rpS.sortedRoutesForEvent(tnt, args)
-	utils.Logger.Debug(fmt.Sprintf("ADI %s", utils.ToJSON(sSps)))
-	utils.Logger.Debug(fmt.Sprintf("ADI %q", err))
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)

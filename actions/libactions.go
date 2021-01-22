@@ -23,8 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/cgrates/cgrates/agents"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -159,6 +157,7 @@ func (aL *actCDRLog) cfg() *engine.APAction {
 // execute implements actioner interface
 func (aL *actCDRLog) execute(ctx context.Context, data utils.MapStorage) (err error) {
 	if len(aL.config.ActionSCfg().CDRsConns) == 0 {
+		//eroare predefinita
 		return fmt.Errorf("no connection with CDR Server")
 	}
 	template := aL.config.TemplatesCfg()[utils.MetaCdrLog]
@@ -173,15 +172,24 @@ func (aL *actCDRLog) execute(ctx context.Context, data utils.MapStorage) (err er
 	}
 
 	opts := data[utils.MetaOpts].(map[string]interface{})
+	optsMS := utils.MapStorage{}
+	for key, val := range opts {
+		optsMS[key] = val
+	}
 	optsNm := utils.NewOrderedNavigableMap()
 	for key, val := range opts {
 		optsNm.Set(utils.NewFullPath(key, utils.NestingSep), utils.NewNMData(val))
 	}
 
+	oNm := map[string]*utils.OrderedNavigableMap{
+		utils.MetaCDR:  utils.NewOrderedNavigableMap(),
+		utils.MetaOpts: optsNm,
+	}
 	// construct an AgentRequest so we can build the reply and send it to CDRServer
-	agReq := agents.NewAgentRequest(reqNm, nil, nil, nil, optsNm, nil, aL.config.GeneralCfg().DefaultTenant, aL.config.GeneralCfg().DefaultTimezone, aL.filterS, nil, nil)
+	cdrLogReq := engine.NewEventRequest(reqNm, nil, optsMS, nil, aL.config.GeneralCfg().DefaultTenant,
+		aL.config.GeneralCfg().DefaultTimezone, aL.filterS, oNm)
 
-	if err = agReq.SetFields(template); err != nil {
+	if err = cdrLogReq.SetFields(template); err != nil {
 		return
 	}
 	var rply string
@@ -189,7 +197,7 @@ func (aL *actCDRLog) execute(ctx context.Context, data utils.MapStorage) (err er
 		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
-			CGREvent: *config.NMAsCGREvent(agReq.Reply, agReq.Tenant, utils.NestingSep, agReq.Opts),
+			CGREvent: *config.NMAsCGREvent(cdrLogReq.OrdNavMP[utils.MetaCDR], cdrLogReq.Tenant, utils.NestingSep, cdrLogReq.OrdNavMP[utils.MetaOpts]),
 		}, &rply); err != nil {
 		return err
 	}

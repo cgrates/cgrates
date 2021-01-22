@@ -593,7 +593,7 @@ func TestCDRLogActionExecute(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalCDRsChann,
 	})
 	apA := &engine.APAction{
-		ID:   "ACT_LOG",
+		ID:   "ACT_CDRLOG",
 		Type: utils.MetaCdrLog,
 	}
 	cdrLogAction := &actCDRLog{

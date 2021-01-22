@@ -99,20 +99,23 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			records = append(records, utils.IfaceAsString(val))
 		}
 	} else {
+		oNm := map[string]*utils.OrderedNavigableMap{
+			utils.MetaExp: utils.NewOrderedNavigableMap(),
+		}
 		req := utils.MapStorage(cgrEv.Event)
-		eeReq := NewEventExporterRequest(req, fFwv.dc, cgrEv.Opts,
+		eeReq := engine.NewEventRequest(req, fFwv.dc, cgrEv.Opts,
 			fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
 			fFwv.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
 				fFwv.cgrCfg.GeneralCfg().DefaultTimezone),
-			fFwv.filterS)
+			fFwv.filterS, oNm)
 
 		if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		for el := eeReq.cnt.GetFirstElement(); el != nil; el = el.Next() {
+		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 			var strVal string
-			if strVal, err = eeReq.cnt.FieldAsString(el.Value.Slice()); err != nil {
+			if strVal, err = eeReq.OrdNavMP[utils.MetaExp].FieldAsString(el.Value.Slice()); err != nil {
 				return
 			}
 			records = append(records, strVal)
@@ -135,18 +138,21 @@ func (fFwv *FileFWVee) composeHeader() (err error) {
 		return
 	}
 	var records []string
-	eeReq := NewEventExporterRequest(nil, fFwv.dc, nil,
+	oNm := map[string]*utils.OrderedNavigableMap{
+		utils.MetaHdr: utils.NewOrderedNavigableMap(),
+	}
+	eeReq := engine.NewEventRequest(nil, fFwv.dc, nil,
 		fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
 		fFwv.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
 			fFwv.cgrCfg.GeneralCfg().DefaultTimezone),
-		fFwv.filterS)
+		fFwv.filterS, oNm)
 	if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].HeaderFields()); err != nil {
 		return
 	}
-	for el := eeReq.hdr.GetFirstElement(); el != nil; el = el.Next() {
+	for el := eeReq.OrdNavMP[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
 		var strVal string
-		if strVal, err = eeReq.hdr.FieldAsString(el.Value.Slice()); err != nil {
+		if strVal, err = eeReq.OrdNavMP[utils.MetaHdr].FieldAsString(el.Value.Slice()); err != nil {
 			return
 		}
 		records = append(records, strVal)
@@ -165,18 +171,21 @@ func (fFwv *FileFWVee) composeTrailer() (err error) {
 		return
 	}
 	var records []string
-	eeReq := NewEventExporterRequest(nil, fFwv.dc, nil,
+	oNm := map[string]*utils.OrderedNavigableMap{
+		utils.MetaTrl: utils.NewOrderedNavigableMap(),
+	}
+	eeReq := engine.NewEventRequest(nil, fFwv.dc, nil,
 		fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
 		fFwv.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
 			fFwv.cgrCfg.GeneralCfg().DefaultTimezone),
-		fFwv.filterS)
+		fFwv.filterS, oNm)
 	if err = eeReq.SetFields(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].TrailerFields()); err != nil {
 		return
 	}
-	for el := eeReq.trl.GetFirstElement(); el != nil; el = el.Next() {
+	for el := eeReq.OrdNavMP[utils.MetaTrl].GetFirstElement(); el != nil; el = el.Next() {
 		var strVal string
-		if strVal, err = eeReq.trl.FieldAsString(el.Value.Slice()); err != nil {
+		if strVal, err = eeReq.OrdNavMP[utils.MetaTrl].FieldAsString(el.Value.Slice()); err != nil {
 			return
 		}
 		records = append(records, strVal)
