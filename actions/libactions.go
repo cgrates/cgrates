@@ -185,7 +185,7 @@ func (aL *actCDRLog) execute(ctx context.Context, data utils.MapStorage) (err er
 		return
 	}
 	var rply string
-	if err := aL.connMgr.Call(config.CgrConfig().SchedulerCfg().CDRsConns, nil,
+	if err := aL.connMgr.Call(aL.config.ActionSCfg().CDRsConns, nil,
 		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
