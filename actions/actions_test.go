@@ -534,3 +534,85 @@ func TestLogActionExecute(t *testing.T) {
 
 	log.SetOutput(os.Stderr)
 }
+
+type testMockCDRsConn struct {
+	calls map[string]func(arg interface{}, rply interface{}) error
+}
+
+func (s *testMockCDRsConn) Call(method string, arg interface{}, rply interface{}) error {
+	if call, has := s.calls[method]; !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	} else {
+		return call(arg, rply)
+	}
+}
+
+func TestCDRLogActionExecute(t *testing.T) {
+	sMock := &testMockCDRsConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.CDRsV1ProcessEvent: func(arg interface{}, rply interface{}) error {
+				argConv, can := arg.(*engine.ArgV1ProcessEvent)
+				if !can {
+					t.Errorf("Wrong argument type: %T", arg)
+				}
+				if !reflect.DeepEqual(argConv.Flags, []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}) {
+					t.Errorf("Expected %+v, received %+v", []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, argConv.Flags)
+				}
+				if val, has := argConv.CGREvent.Event[utils.Subject]; !has {
+					t.Error("missing Subject")
+				} else if strVal := utils.IfaceAsString(val); strVal != "10" {
+					t.Errorf("Expected %+v, received %+v", "10", strVal)
+				}
+				if val, has := argConv.CGREvent.Event[utils.Cost]; !has {
+					t.Error("missing Cost")
+				} else if strVal := utils.IfaceAsString(val); strVal != "0.15" {
+					t.Errorf("Expected %+v, received %+v", "0.15", strVal)
+				}
+				if val, has := argConv.CGREvent.Event[utils.RequestType]; !has {
+					t.Error("missing RequestType")
+				} else if strVal := utils.IfaceAsString(val); strVal != utils.MetaNone {
+					t.Errorf("Expected %+v, received %+v", utils.MetaNone, strVal)
+				}
+				if val, has := argConv.CGREvent.Event[utils.RunID]; !has {
+					t.Error("missing RunID")
+				} else if strVal := utils.IfaceAsString(val); strVal != utils.MetaTopUp {
+					t.Errorf("Expected %+v, received %+v", utils.MetaNone, strVal)
+				}
+				return nil
+			},
+		},
+	}
+	internalCDRsChann := make(chan rpcclient.ClientConnector, 1)
+	internalCDRsChann <- sMock
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalCDRsChann,
+	})
+	apA := &engine.APAction{
+		ID:   "ACT_LOG",
+		Type: utils.MetaCdrLog,
+	}
+	cdrLogAction := &actCDRLog{
+		config:  cfg,
+		filterS: filterS,
+		connMgr: connMgr,
+		aCfg:    apA,
+	}
+	evNM := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.AccountField: "10",
+			utils.Tenant:       "cgrates.org",
+			utils.BalanceType:  utils.MetaConcrete,
+			utils.Cost:         0.15,
+			utils.ActionType:   utils.MetaTopUp,
+		},
+		utils.MetaOpts: map[string]interface{}{},
+	}
+	if err := cdrLogAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+}
