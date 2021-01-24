@@ -131,7 +131,7 @@ func (aB *abstractBalance) rateSCostForEvent(cgrEv *utils.CGREvent) (rplyCost *e
 
 // debitUsageFromConcrete attempts to debit the usage out of concrete balances
 // returns utils.ErrInsufficientCredit if complete usage cannot be debitted
-func (aB *abstractBalance) debitUsageFromConcrete(cBs []*concreteBalance, usage *utils.Decimal,
+func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal,
 	costIcrm *utils.CostIncrement, cgrEv *utils.CGREvent) (err error) {
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
 		costIcrm.FixedFee == nil {
@@ -156,15 +156,15 @@ func (aB *abstractBalance) debitUsageFromConcrete(cBs []*concreteBalance, usage 
 			tCost = utils.SumBig(tCost, rcrntCost)
 		}
 	}
-	clnedUnts := cloneUnitsFromConcretes(cBs)
-	for _, cB := range cBs {
+	clnedUnts := cloneUnitsFromConcretes(aB.cncrtBlncs)
+	for _, cB := range aB.cncrtBlncs {
 		ev := utils.MapStorage{
 			utils.MetaOpts: cgrEv.Opts,
 			utils.MetaReq:  cgrEv.Event,
 		}
 		var dbted *utils.Decimal
 		if dbted, _, err = cB.debitUnits(&utils.Decimal{tCost}, cgrEv.Tenant, ev); err != nil {
-			restoreUnitsFromClones(cBs, clnedUnts)
+			restoreUnitsFromClones(aB.cncrtBlncs, clnedUnts)
 			return
 		}
 		tCost = utils.SubstractBig(tCost, dbted.Big)
@@ -173,7 +173,7 @@ func (aB *abstractBalance) debitUsageFromConcrete(cBs []*concreteBalance, usage 
 		}
 	}
 	// we could not debit all, put back what we have debited
-	restoreUnitsFromClones(cBs, clnedUnts)
+	restoreUnitsFromClones(aB.cncrtBlncs, clnedUnts)
 	return utils.ErrInsufficientCredit
 }
 
@@ -244,6 +244,13 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 	// attempt to debit usage with cost
 	// fix the maximum number of iterations
 	for i := 0; i < 10000; i++ {
+		if err = aB.debitUsageFromConcrete(usage, costIcrm, cgrEv); err != nil {
+			if err == utils.ErrInsufficientCredit {
+				continue
+			}
+			aB.blnCfg.Units.Big = origBlclVal
+			return
+		}
 		continue
 	}
 

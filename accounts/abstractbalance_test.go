@@ -27,80 +27,81 @@ import (
 )
 
 func TestABDebitUsageFromConcrete(t *testing.T) {
-	cBs := []*concreteBalance{
-		{
-			blnCfg: &utils.Balance{
-				ID:   "CB1",
-				Type: utils.MetaConcrete,
-				Opts: map[string]interface{}{
-					utils.MetaBalanceLimit: utils.NewDecimal(-200, 0),
-				},
-				UnitFactors: []*utils.UnitFactor{
-					{
-						Factor: utils.NewDecimal(100, 0), // EuroCents
+	aB := &abstractBalance{
+		cncrtBlncs: []*concreteBalance{
+			{
+				blnCfg: &utils.Balance{
+					ID:   "CB1",
+					Type: utils.MetaConcrete,
+					Opts: map[string]interface{}{
+						utils.MetaBalanceLimit: utils.NewDecimal(-200, 0),
 					},
+					UnitFactors: []*utils.UnitFactor{
+						{
+							Factor: utils.NewDecimal(100, 0), // EuroCents
+						},
+					},
+					Units: utils.NewDecimal(500, 0), // 500 EURcents
 				},
-				Units: utils.NewDecimal(500, 0), // 500 EURcents
+				fltrS: new(engine.FilterS),
 			},
-			fltrS: new(engine.FilterS),
-		},
-		{
-			blnCfg: &utils.Balance{
-				ID:   "CB2",
-				Type: utils.MetaConcrete,
-				Opts: map[string]interface{}{
-					utils.MetaBalanceLimit: utils.NewDecimal(-1, 0),
+			{
+				blnCfg: &utils.Balance{
+					ID:   "CB2",
+					Type: utils.MetaConcrete,
+					Opts: map[string]interface{}{
+						utils.MetaBalanceLimit: utils.NewDecimal(-1, 0),
+					},
+					Units: utils.NewDecimal(125, 2),
 				},
-				Units: utils.NewDecimal(125, 2),
+				fltrS: new(engine.FilterS),
 			},
-			fltrS: new(engine.FilterS),
-		},
-	}
+		}}
 	// consume only from first balance
-	if err := new(abstractBalance).debitUsageFromConcrete(cBs,
+	if err := aB.debitUsageFromConcrete(
 		utils.NewDecimal(int64(time.Duration(5*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
 			RecurrentFee: utils.NewDecimal(1, 0)},
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if cBs[0].blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
-		t.Errorf("Unexpected units in first balance: %s", cBs[0].blnCfg.Units)
-	} else if cBs[1].blnCfg.Units.Compare(utils.NewDecimal(125, 2)) != 0 {
-		t.Errorf("Unexpected units in first balance: %s", cBs[1].blnCfg.Units)
+	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
+		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
+	} else if aB.cncrtBlncs[1].blnCfg.Units.Compare(utils.NewDecimal(125, 2)) != 0 {
+		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[1].blnCfg.Units)
 	}
 
 	// consume from second also, remaining in second
-	cBs[0].blnCfg.Units = utils.NewDecimal(500, 0)
-	cBs[1].blnCfg.Units = utils.NewDecimal(125, 2)
+	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(500, 0)
+	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 
-	if err := new(abstractBalance).debitUsageFromConcrete(cBs,
+	if err := aB.debitUsageFromConcrete(
 		utils.NewDecimal(int64(time.Duration(9*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
 			RecurrentFee: utils.NewDecimal(1, 0)},
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if cBs[0].blnCfg.Units.Compare(utils.NewDecimal(-200, 0)) != 0 {
-		t.Errorf("Unexpected units in first balance: %s", cBs[0].blnCfg.Units)
-	} else if cBs[1].blnCfg.Units.Compare(utils.NewDecimal(-75, 2)) != 0 {
-		t.Errorf("Unexpected units in second balance: %s", cBs[1].blnCfg.Units)
+	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(-200, 0)) != 0 {
+		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
+	} else if aB.cncrtBlncs[1].blnCfg.Units.Compare(utils.NewDecimal(-75, 2)) != 0 {
+		t.Errorf("Unexpected units in second balance: %s", aB.cncrtBlncs[1].blnCfg.Units)
 	}
 
 	// not enough balance
-	cBs[0].blnCfg.Units = utils.NewDecimal(500, 0)
-	cBs[1].blnCfg.Units = utils.NewDecimal(125, 2)
+	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(500, 0)
+	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 
-	if err := new(abstractBalance).debitUsageFromConcrete(cBs,
+	if err := aB.debitUsageFromConcrete(
 		utils.NewDecimal(int64(time.Duration(10*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
 			RecurrentFee: utils.NewDecimal(1, 0)},
 		new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
 		t.Error(err)
-	} else if cBs[0].blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
-		t.Errorf("Unexpected units in first balance: %s", cBs[0].blnCfg.Units)
-	} else if cBs[1].blnCfg.Units.Compare(utils.NewDecimal(125, 2)) != 0 {
-		t.Errorf("Unexpected units in first balance: %s", cBs[1].blnCfg.Units)
+	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
+		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
+	} else if aB.cncrtBlncs[1].blnCfg.Units.Compare(utils.NewDecimal(125, 2)) != 0 {
+		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[1].blnCfg.Units)
 	}
 }
