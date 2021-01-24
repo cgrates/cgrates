@@ -156,6 +156,7 @@ func (aB *abstractBalance) debitUsageFromConcrete(cBs []*concreteBalance, usage 
 			tCost = utils.SumBig(tCost, rcrntCost)
 		}
 	}
+	clnedUnts := cloneUnitsFromConcretes(cBs)
 	for _, cB := range cBs {
 		ev := utils.MapStorage{
 			utils.MetaOpts: cgrEv.Opts,
@@ -163,13 +164,16 @@ func (aB *abstractBalance) debitUsageFromConcrete(cBs []*concreteBalance, usage 
 		}
 		var dbted *utils.Decimal
 		if dbted, _, err = cB.debitUnits(&utils.Decimal{tCost}, cgrEv.Tenant, ev); err != nil {
+			restoreUnitsFromClones(cBs, clnedUnts)
 			return
 		}
 		tCost = utils.SubstractBig(tCost, dbted.Big)
 		if tCost.Cmp(decimal.New(0, 0)) <= 0 {
-			return // have debitted all, total is smaller or equal to 0
+			return // have debited all, total is smaller or equal to 0
 		}
 	}
+	// we could not debit all, put back what we have debited
+	restoreUnitsFromClones(cBs, clnedUnts)
 	return utils.ErrInsufficientCredit
 }
 
@@ -207,29 +211,34 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 		}
 	}
 
-	blcVal := aB.blnCfg.Units
+	origBlclVal := new(decimal.Big).Copy(aB.blnCfg.Units.Big) // so we can restore on errors
 
 	// balanceLimit
 	var hasLmt bool
 	blncLmt := aB.balanceLimit()
 	if blncLmt != nil && blncLmt.Cmp(decimal.New(0, 0)) != 0 {
-		blcVal = utils.SubstractDecimal(blcVal, blncLmt)
+		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, blncLmt.Big)
 		hasLmt = true
-	}
-	// balance smaller than usage, correct usage
-	if blcVal.Compare(usage) == -1 && blncLmt != nil {
-		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
-		maxIncrm := &utils.Decimal{
-			decimal.WithContext(
-				decimal.Context{RoundingMode: decimal.ToZero}).Quo(blcVal.Big,
-				costIcrm.Increment.Big).RoundToInt()}
-		usage = utils.MultiplyDecimal(maxIncrm, costIcrm.Increment) // decrease the usage to match the maximum increments
 	}
 
 	// unitFactor
 	var uF *utils.UnitFactor
 	if uF, err = aB.unitFactor(cgrEv.Tenant, evNm); err != nil {
 		return
+	}
+	var hasUF bool
+	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
+		usage.Big = utils.MultiplyBig(usage.Big, uF.Factor.Big)
+		hasUF = true
+	}
+
+	// balance smaller than usage, correct usage
+	if aB.blnCfg.Units.Compare(usage) == -1 {
+		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
+		maxIncrm := decimal.WithContext(
+			decimal.Context{RoundingMode: decimal.ToZero}).Quo(aB.blnCfg.Units.Big,
+			costIcrm.Increment.Big).RoundToInt()
+		usage.Big = utils.MultiplyBig(maxIncrm, costIcrm.Increment.Big) // decrease the usage to match the maximum increments
 	}
 
 	// attempt to debit usage with cost
@@ -238,7 +247,8 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 		continue
 	}
 
-	fmt.Printf("costIcrm: %+v, blncLmt: %+v, hasLmt: %+v, uF: %+v", costIcrm, blncLmt, hasLmt, uF)
+	fmt.Printf("costIcrm: %+v, blncLmt: %+v, hasLmt: %+v, uF: %+v, origBlclVal: %s, hasUF: %v",
+		costIcrm, blncLmt, hasLmt, uF, origBlclVal, hasUF)
 
 	return
 }

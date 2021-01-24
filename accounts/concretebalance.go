@@ -159,13 +159,19 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
 }
 
 // cloneUnitsFromConcretes returns cloned units from the concrete balances passed as parameters
-func cloneUnitsFromConcretes(cBs []*concreteBalance) (clnUnits []*utils.Decimal) {
+func cloneUnitsFromConcretes(cBs []*concreteBalance) (clnedUnts []*utils.Decimal) {
 	if cBs == nil {
 		return
 	}
-	clnUnits = make([]*utils.Decimal, len(cBs))
+	clnedUnts = make([]*utils.Decimal, len(cBs))
 	for i := range cBs {
-		clnUnits[i] = cBs[i].blnCfg.Units.Clone()
+		clnedUnts[i] = cBs[i].blnCfg.Units.Clone()
 	}
 	return
+}
+
+func restoreUnitsFromClones(cBs []*concreteBalance, clnedUnts []*utils.Decimal) {
+	for i, clnedUnt := range clnedUnts {
+		cBs[i].blnCfg.Units.Big = clnedUnt.Big
+	}
 }

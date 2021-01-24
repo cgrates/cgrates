@@ -98,9 +98,9 @@ func TestABDebitUsageFromConcrete(t *testing.T) {
 			RecurrentFee: utils.NewDecimal(1, 0)},
 		new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
 		t.Error(err)
-	} else if cBs[0].blnCfg.Units.Compare(utils.NewDecimal(-200, 0)) != 0 {
+	} else if cBs[0].blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
 		t.Errorf("Unexpected units in first balance: %s", cBs[0].blnCfg.Units)
-	} else if cBs[1].blnCfg.Units.Compare(utils.NewDecimal(-1, 0)) != 0 {
+	} else if cBs[1].blnCfg.Units.Compare(utils.NewDecimal(125, 2)) != 0 {
 		t.Errorf("Unexpected units in first balance: %s", cBs[1].blnCfg.Units)
 	}
 }
