@@ -46,7 +46,7 @@ func TestCBDebitUnits(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 	toDebit := utils.NewDecimal(6, 0)
-	if dbted, uFctr, err := cb.debitUnits(toDebit, utils.NewDecimal(1, 0),
+	if dbted, uFctr, err := cb.debitUnits(toDebit,
 		"cgrates.org", utils.MapStorage{}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cb.blnCfg.UnitFactors[0], uFctr) {
@@ -54,8 +54,9 @@ func TestCBDebitUnits(t *testing.T) {
 	} else if dbted.Compare(toDebit) != 0 {
 		t.Errorf("debited: %s", dbted)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(-100, 0)) != 0 {
-		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
+		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
+
 	//with increment and not enough balance
 	cb = &concreteBalance{
 		blnCfg: &utils.Balance{
@@ -64,20 +65,20 @@ func TestCBDebitUnits(t *testing.T) {
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: utils.NewDecimal(-1, 0),
 			},
-			Units: utils.NewDecimal(125, 2),
+			Units: utils.NewDecimal(125, 2), // 1.25
 		},
 		fltrS: new(engine.FilterS),
 	}
-	if dbted, _, err := cb.debitUnits(
-		utils.NewDecimal(25, 1), //2.5
-		utils.NewDecimal(1, 1),  //0.1
+	toDebit = utils.NewDecimal(25, 1) //2.5
+	if dbted, _, err := cb.debitUnits(toDebit,
 		"cgrates.org", utils.MapStorage{}); err != nil {
 		t.Error(err)
-	} else if dbted.Cmp(decimal.New(22, 1)) != 0 { // only 1.2 is possible due to increment
-		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
-	} else if cb.blnCfg.Units.Cmp(decimal.New(-95, 2)) != 0 {
-		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
+	} else if dbted.Cmp(decimal.New(225, 2)) != 0 { // 2.25 debited
+		t.Errorf("debited: %s", dbted)
+	} else if cb.blnCfg.Units.Cmp(decimal.New(-1, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
+
 	//with increment and unlimited balance
 	cb = &concreteBalance{
 		blnCfg: &utils.Balance{
@@ -86,20 +87,20 @@ func TestCBDebitUnits(t *testing.T) {
 			Opts: map[string]interface{}{
 				utils.MetaBalanceUnlimited: true,
 			},
-			Units: &utils.Decimal{decimal.New(125, 2)},
+			Units: utils.NewDecimal(125, 2), // 1.25
 		},
 		fltrS: new(engine.FilterS),
 	}
-	if dbted, _, err := cb.debitUnits(
-		utils.NewDecimal(25, 1), //2.5
-		utils.NewDecimal(1, 1),  //0.1
+	toDebit = utils.NewDecimal(25, 1) // 2.5
+	if dbted, _, err := cb.debitUnits(toDebit,
 		"cgrates.org", utils.MapStorage{}); err != nil {
 		t.Error(err)
-	} else if dbted.Cmp(decimal.New(25, 1)) != 0 { // only 1.2 is possible due to increment
-		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
+	} else if dbted.Cmp(decimal.New(25, 1)) != 0 { // debit more than available since we have unlimited
+		t.Errorf("debited: %s", dbted)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(-125, 2)) != 0 {
-		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
+		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
+
 	//with increment and positive limit
 	cb = &concreteBalance{
 		blnCfg: &utils.Balance{
@@ -108,18 +109,18 @@ func TestCBDebitUnits(t *testing.T) {
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: utils.NewDecimal(5, 1), // 0.5 as limit
 			},
-			Units: &utils.Decimal{decimal.New(125, 2)},
+			Units: utils.NewDecimal(125, 2), // 1.25
 		},
 		fltrS: new(engine.FilterS),
 	}
-	if dbted, _, err := cb.debitUnits(
-		utils.NewDecimal(25, 1), //2.5
-		utils.NewDecimal(1, 1),  //0.1
+	toDebit = utils.NewDecimal(25, 1) //2.5
+	if dbted, _, err := cb.debitUnits(toDebit,
 		"cgrates.org", utils.MapStorage{}); err != nil {
 		t.Error(err)
-	} else if dbted.Cmp(decimal.New(7, 1)) != 0 { // only 1.2 is possible due to increment
-		t.Errorf("debited: %s, cmp: %v", dbted, dbted.Cmp(new(decimal.Big).SetFloat64(1.2)))
-	} else if cb.blnCfg.Units.Cmp(decimal.New(55, 2)) != 0 {
-		t.Errorf("balance remaining: %f", cb.blnCfg.Units)
+	} else if dbted.Cmp(decimal.New(75, 2)) != 0 { // limit is 0.5
+		t.Errorf("debited: %s", dbted)
+	} else if cb.blnCfg.Units.Cmp(decimal.New(5, 1)) != 0 {
+		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
+
 }

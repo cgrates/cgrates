@@ -130,9 +130,9 @@ func (aB *abstractBalance) rateSCostForEvent(cgrEv *utils.CGREvent) (rplyCost *e
 }
 
 // debitUsageFromConcrete attempts to debit the usage out of concrete balances
-// returns error if complete usage cannot be debitted
-func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal, costIcrm *utils.CostIncrement,
-	cgrEv *utils.CGREvent) (err error) {
+// returns utils.ErrInsufficientCredit if complete usage cannot be debitted
+func (aB *abstractBalance) debitUsageFromConcrete(cBs []*concreteBalance, usage *utils.Decimal,
+	costIcrm *utils.CostIncrement, cgrEv *utils.CGREvent) (err error) {
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
 		costIcrm.FixedFee == nil {
 		var rplyCost *engine.RateProfileCost
@@ -141,19 +141,36 @@ func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal, costIcrm
 		}
 		costIcrm.FixedFee = utils.NewDecimalFromFloat64(rplyCost.Cost)
 	}
-	var tCost *utils.Decimal
+	var tCost *decimal.Big
 	if costIcrm.FixedFee != nil {
-		tCost = costIcrm.FixedFee
+		tCost = costIcrm.FixedFee.Big
 	}
 	// RecurrentFee is configured, used it with increments
-	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) != 0 {
+	if costIcrm.RecurrentFee.Big.Cmp(decimal.New(-1, 0)) != 0 {
 		rcrntCost := utils.MultiplyBig(
 			utils.DivideBig(usage.Big, costIcrm.Increment.Big),
 			costIcrm.RecurrentFee.Big)
-		tCost = &utils.Decimal{utils.SumBig(tCost.Big, rcrntCost)}
+		if tCost == nil {
+			tCost = rcrntCost
+		} else {
+			tCost = utils.SumBig(tCost, rcrntCost)
+		}
 	}
-	fmt.Println(tCost)
-	return
+	for _, cB := range cBs {
+		ev := utils.MapStorage{
+			utils.MetaOpts: cgrEv.Opts,
+			utils.MetaReq:  cgrEv.Event,
+		}
+		var dbted *utils.Decimal
+		if dbted, _, err = cB.debitUnits(&utils.Decimal{tCost}, cgrEv.Tenant, ev); err != nil {
+			return
+		}
+		tCost = utils.SubstractBig(tCost, dbted.Big)
+		if tCost.Cmp(decimal.New(0, 0)) <= 0 {
+			return // have debitted all, total is smaller or equal to 0
+		}
+	}
+	return utils.ErrInsufficientCredit
 }
 
 // debitUsage implements the balanceOperator interface

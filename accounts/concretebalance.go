@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -113,8 +112,8 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 }
 
 // debitUnits is a direct debit of balance units
-func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, incrm *utils.Decimal,
-	tnt string, ev utils.DataProvider) (dbted *utils.Decimal, uF *utils.UnitFactor, err error) {
+func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
+	ev utils.DataProvider) (dbted *utils.Decimal, uF *utils.UnitFactor, err error) {
 
 	// pass the general balance filters
 	var pass bool
@@ -125,47 +124,48 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, incrm *utils.Decimal
 	}
 
 	// unitFactor
+	var hasUF bool
 	if uF, err = cB.unitFactor(tnt, ev); err != nil {
 		return
 	}
-
-	var hasUF bool
 	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
-		dUnts = &utils.Decimal{utils.MultiplyBig(dUnts.Big, uF.Factor.Big)}
-		incrm = &utils.Decimal{utils.MultiplyBig(incrm.Big, uF.Factor.Big)}
 		hasUF = true
+		dUnts = &utils.Decimal{utils.MultiplyBig(dUnts.Big, uF.Factor.Big)}
 	}
-
-	blcVal := cB.blnCfg.Units
 
 	// balanceLimit
 	var hasLmt bool
 	blncLmt := cB.balanceLimit()
 	if blncLmt != nil && blncLmt.Big.Cmp(decimal.New(0, 0)) != 0 {
-		blcVal = &utils.Decimal{utils.SubstractBig(blcVal.Big, blncLmt.Big)}
+		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, blncLmt.Big)
 		hasLmt = true
 	}
-	if blcVal.Compare(dUnts) == -1 && blncLmt != nil { // balance smaller than debit
-		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
-		maxIncrm := &utils.Decimal{
-			decimal.WithContext(
-				decimal.Context{RoundingMode: decimal.ToZero}).Quo(blcVal.Big,
-				incrm.Big).RoundToInt()}
-		dUnts = utils.MultiplyDecimal(incrm, maxIncrm)
-	}
-	rmain := &utils.Decimal{utils.SubstractBig(blcVal.Big, dUnts.Big)}
-	if hasLmt {
-		rmain = &utils.Decimal{utils.SumBig(rmain.Big, blncLmt.Big)}
-	}
-	if hasUF {
-		dbted = &utils.Decimal{utils.DivideBig(dUnts.Big, uF.Factor.Big)}
+
+	if cB.blnCfg.Units.Compare(dUnts) <= 0 && blncLmt != nil { // balance smaller than debit and limited
+		dbted = &utils.Decimal{cB.blnCfg.Units.Big}
+		cB.blnCfg.Units.Big = blncLmt.Big
 	} else {
+		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, dUnts.Big)
+		if hasLmt { // put back the limit
+			cB.blnCfg.Units.Big = utils.SumBig(cB.blnCfg.Units.Big, blncLmt.Big)
+		}
 		dbted = dUnts
 	}
-	rmainFlt64, ok := rmain.Float64()
-	if !ok {
-		return nil, nil, fmt.Errorf("failed representing decimal <%s> as float64", rmain)
+	if hasUF {
+		dbted.Big = utils.DivideBig(dbted.Big, uF.Factor.Big)
 	}
-	cB.blnCfg.Units = utils.NewDecimalFromFloat64(rmainFlt64)
+
+	return
+}
+
+// cloneUnitsFromConcretes returns cloned units from the concrete balances passed as parameters
+func cloneUnitsFromConcretes(cBs []*concreteBalance) (clnUnits []*utils.Decimal) {
+	if cBs == nil {
+		return
+	}
+	clnUnits = make([]*utils.Decimal, len(cBs))
+	for i := range cBs {
+		clnUnits[i] = cBs[i].blnCfg.Units.Clone()
+	}
 	return
 }
