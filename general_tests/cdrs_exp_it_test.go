@@ -1,4 +1,4 @@
-// +build integration
+// +build nodocker
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -330,6 +330,32 @@ func testCDRsExpKafka(t *testing.T) {
 	cancel()
 }
 
+func checkContent(ev *engine.ExportEvents, content []interface{}) error {
+	match := false
+	for _, bev := range ev.Events {
+		for _, con := range content {
+			if reflect.DeepEqual(bev, con) {
+				match = true
+				break
+			}
+		}
+		if match {
+			break
+		}
+	}
+	if !match {
+		exp := make([]string, len(content))
+		for i, con := range content {
+			exp[i] = utils.IfaceAsString(con)
+		}
+		recv := make([]string, len(ev.Events))
+		for i, con := range ev.Events {
+			recv[i] = utils.IfaceAsString(con)
+		}
+		return fmt.Errorf("Expecting: one of %s, received: %s", utils.ToJSON(exp), utils.ToJSON(recv))
+	}
+	return nil
+}
 func testCDRsExpFileFailover(t *testing.T) {
 	time.Sleep(time.Second)
 	filesInDir, _ := ioutil.ReadDir(cdrsExpCfg.GeneralCfg().FailedPostsDir)
