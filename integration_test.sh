@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+# set -e
 go clean --cache
 results=()
 ./test.sh
