@@ -21,6 +21,7 @@ package actions
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"reflect"
@@ -553,30 +554,30 @@ func TestCDRLogActionExecute(t *testing.T) {
 			utils.CDRsV1ProcessEvent: func(arg interface{}, rply interface{}) error {
 				argConv, can := arg.(*engine.ArgV1ProcessEvent)
 				if !can {
-					t.Errorf("Wrong argument type: %T", arg)
+					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
 				if !reflect.DeepEqual(argConv.Flags, []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}) {
-					t.Errorf("Expected %+v, received %+v", []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, argConv.Flags)
+					return fmt.Errorf("Expected %+v, received %+v", []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, argConv.Flags)
 				}
 				if val, has := argConv.CGREvent.Event[utils.Subject]; !has {
-					t.Error("missing Subject")
+					return fmt.Errorf("missing Subject")
 				} else if strVal := utils.IfaceAsString(val); strVal != "10" {
-					t.Errorf("Expected %+v, received %+v", "10", strVal)
+					return fmt.Errorf("Expected %+v, received %+v", "10", strVal)
 				}
 				if val, has := argConv.CGREvent.Event[utils.Cost]; !has {
-					t.Error("missing Cost")
+					return fmt.Errorf("missing Cost")
 				} else if strVal := utils.IfaceAsString(val); strVal != "0.15" {
-					t.Errorf("Expected %+v, received %+v", "0.15", strVal)
+					return fmt.Errorf("Expected %+v, received %+v", "0.15", strVal)
 				}
 				if val, has := argConv.CGREvent.Event[utils.RequestType]; !has {
-					t.Error("missing RequestType")
+					return fmt.Errorf("missing RequestType")
 				} else if strVal := utils.IfaceAsString(val); strVal != utils.MetaNone {
-					t.Errorf("Expected %+v, received %+v", utils.MetaNone, strVal)
+					return fmt.Errorf("Expected %+v, received %+v", utils.MetaNone, strVal)
 				}
 				if val, has := argConv.CGREvent.Event[utils.RunID]; !has {
-					t.Error("missing RunID")
+					return fmt.Errorf("missing RunID")
 				} else if strVal := utils.IfaceAsString(val); strVal != utils.MetaTopUp {
-					t.Errorf("Expected %+v, received %+v", utils.MetaNone, strVal)
+					return fmt.Errorf("Expected %+v, received %+v", utils.MetaNone, strVal)
 				}
 				return nil
 			},
@@ -611,6 +612,117 @@ func TestCDRLogActionExecute(t *testing.T) {
 			utils.ActionType:   utils.MetaTopUp,
 		},
 		utils.MetaOpts: map[string]interface{}{},
+	}
+	if err := cdrLogAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCDRLogActionWithOpts(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+	sMock2 := &testMockCDRsConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.CDRsV1ProcessEvent: func(arg interface{}, rply interface{}) error {
+				argConv, can := arg.(*engine.ArgV1ProcessEvent)
+				if !can {
+					return fmt.Errorf("Wrong argument type: %T", arg)
+				}
+				if !reflect.DeepEqual(argConv.Flags, []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}) {
+					return fmt.Errorf("Expected %+v, received %+v", []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, argConv.Flags)
+				}
+				if val, has := argConv.CGREvent.Event[utils.Tenant]; !has {
+					return fmt.Errorf("missing Tenant")
+				} else if strVal := utils.IfaceAsString(val); strVal != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", strVal)
+				}
+				if val, has := argConv.CGREvent.Opts["EventFieldOpt"]; !has {
+					return fmt.Errorf("missing EventFieldOpt from Opts")
+				} else if strVal := utils.IfaceAsString(val); strVal != "eventValue" {
+					return fmt.Errorf("Expected %+v, received %+v", "eventValue", strVal)
+				}
+				if val, has := argConv.CGREvent.Opts["Option1"]; !has {
+					return fmt.Errorf("missing Option1 from Opts")
+				} else if strVal := utils.IfaceAsString(val); strVal != "Value1" {
+					return fmt.Errorf("Expected %+v, received %+v", "Value1", strVal)
+				}
+				if val, has := argConv.CGREvent.Opts["Option3"]; !has {
+					return fmt.Errorf("missing Option3 from Opts")
+				} else if strVal := utils.IfaceAsString(val); strVal != "eventValue" {
+					return fmt.Errorf("Expected %+v, received %+v", "eventValue", strVal)
+				}
+				return nil
+			},
+		},
+	}
+	internalCDRsChann := make(chan rpcclient.ClientConnector, 1)
+	internalCDRsChann <- sMock2
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
+	cfg.TemplatesCfg()["CustomTemplate"] = []*config.FCTemplate{
+		&config.FCTemplate{
+			Tag:    "Tenant",
+			Type:   "*constant",
+			Path:   "*cdr.Tenant",
+			Value:  config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+			Layout: time.RFC3339,
+		},
+		&config.FCTemplate{
+			Tag:    "Opt1",
+			Type:   "*constant",
+			Path:   "*opts.Option1",
+			Value:  config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
+			Layout: time.RFC3339,
+		},
+		&config.FCTemplate{
+			Tag:    "Opt2",
+			Type:   "*constant",
+			Path:   "*opts.Option2",
+			Value:  config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
+			Layout: time.RFC3339,
+		},
+		&config.FCTemplate{
+			Tag:    "Opt3",
+			Type:   "*variable",
+			Path:   "*opts.Option3",
+			Value:  config.NewRSRParsersMustCompile("~*opts.EventFieldOpt", utils.InfieldSep),
+			Layout: time.RFC3339,
+		},
+	}
+	for _, tpl := range cfg.TemplatesCfg()["CustomTemplate"] {
+		tpl.ComputePath()
+	}
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalCDRsChann,
+	})
+	apA := &engine.APAction{
+		ID:   "ACT_CDRLOG2",
+		Type: utils.MetaCdrLog,
+		Opts: map[string]interface{}{
+			utils.MetaTemplateID: "CustomTemplate",
+		},
+	}
+	cdrLogAction := &actCDRLog{
+		config:  cfg,
+		filterS: filterS,
+		connMgr: connMgr,
+		aCfg:    apA,
+	}
+	evNM := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.AccountField: "10",
+			utils.Tenant:       "cgrates.org",
+			utils.BalanceType:  utils.MetaConcrete,
+			utils.Cost:         0.15,
+			utils.ActionType:   utils.MetaTopUp,
+		},
+		utils.MetaOpts: map[string]interface{}{
+			"EventFieldOpt": "eventValue",
+		},
 	}
 	if err := cdrLogAction.execute(nil, evNM); err != nil {
 		t.Error(err)
