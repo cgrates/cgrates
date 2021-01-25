@@ -21,6 +21,7 @@ package loaders
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io/ioutil"
 	"net/rpc"
 	"os"
@@ -715,24 +716,26 @@ func testLoaderMoveFilesMatchingFiles(t *testing.T) {
 }
 
 func testLoaderMoveFilesRenameError(t *testing.T) {
-	flPath := "/tmp"
-	ldr := &Loader{
-		tpInDir:      flPath,
-		tpOutDir:     "/tmp",
-		lockFilename: "ActionProfiles.csv",
-	}
-	newFile, err := os.Create(path.Join(flPath, "ActionProfiles.csv"))
-	if err != nil {
+	flPath := "/tmp/testLoaderMoveFilesRenameError"
+	if err := os.MkdirAll(flPath, 0777); err != nil {
 		t.Error(err)
 	}
-	newFile.Close()
+	ldr := &Loader{
+		tpInDir:      flPath,
+		tpOutDir:     flPath,
+		lockFilename: "ActionProfiles.lks",
+	}
+	filepath := path.Join(flPath, "ActionProfiles")
+	if err := os.MkdirAll(filepath, 0777); err != nil {
+		t.Error(err)
+	}
 
-	expected := "rename /tmp/.ICE-unix /tmp/.ICE-unix: file exists"
+	expected := fmt.Sprintf("rename %s %s: file exists", filepath, filepath)
 	if err := ldr.moveFiles(); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	if err := os.Remove(path.Join(flPath, "ActionProfiles.csv")); err != nil {
+	if err := os.Remove(filepath); err != nil {
 		t.Error(err)
 	}
 }
