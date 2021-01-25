@@ -234,28 +234,42 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 
 	// balance smaller than usage, correct usage
 	if aB.blnCfg.Units.Compare(usage) == -1 {
+		// decrease the usage to match the maximum increments
 		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
-		maxIncrm := decimal.WithContext(
-			decimal.Context{RoundingMode: decimal.ToZero}).Quo(aB.blnCfg.Units.Big,
-			costIcrm.Increment.Big).RoundToInt()
-		usage.Big = utils.MultiplyBig(maxIncrm, costIcrm.Increment.Big) // decrease the usage to match the maximum increments
+		usage.Big = roundedUsageWithIncrements(aB.blnCfg.Units.Big, costIcrm.Increment.Big)
 	}
 
 	// attempt to debit usage with cost
 	// fix the maximum number of iterations
+	usagePaid, usageDenied := new(decimal.Big), new(decimal.Big)
+	clnedUnts := cloneUnitsFromConcretes(aB.cncrtBlncs) // so we can revert during usage checks
 	for i := 0; i < 10000; i++ {
 		if err = aB.debitUsageFromConcrete(usage, costIcrm, cgrEv); err != nil {
-			if err == utils.ErrInsufficientCredit {
-				continue
+			if err != utils.ErrInsufficientCredit {
+				aB.blnCfg.Units.Big = origBlclVal
+				return
 			}
-			aB.blnCfg.Units.Big = origBlclVal
+			usageDenied = new(decimal.Big).Copy(usage.Big)
+			usage.Big = utils.DivideBig( // divide by 2
+				utils.SubstractBig(usageDenied, usagePaid),
+				decimal.New(2, 0)).RoundToInt()
+			usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big) // make sure usage is multiple of increments
+		}
+		if i == 0 { // no estimation done, covering full
 			return
 		}
-		continue
+		usagePaid = new(decimal.Big).Copy(usage.Big)
+		usage.Big = utils.DivideBig( // divide by 2
+			utils.SubstractBig(usageDenied, usagePaid),
+			decimal.New(2, 0)).RoundToInt()
+		usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big)
+		if usage.Big.Cmp(usagePaid) <= 0 ||
+			usage.Big.Cmp(usageDenied) >= 0 {
+			return
+		}
 	}
-
-	fmt.Printf("costIcrm: %+v, blncLmt: %+v, hasLmt: %+v, uF: %+v, origBlclVal: %s, hasUF: %v",
-		costIcrm, blncLmt, hasLmt, uF, origBlclVal, hasUF)
-
-	return
+	fmt.Printf("hasLmt: %v, hasUF: %v", hasLmt, hasUF)
+	restoreUnitsFromClones(aB.cncrtBlncs, clnedUnts) // since we are erroring, we restore the concerete balances
+	aB.blnCfg.Units.Big = origBlclVal
+	return nil, utils.ErrMaxIncrementsExceeded
 }

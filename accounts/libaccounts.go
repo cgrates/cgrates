@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 // newAccountBalances constructs accountBalances
@@ -92,4 +93,13 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 type balanceOperator interface {
 	debitUsage(usage *utils.Decimal, startTime time.Time,
 		cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
+}
+
+// roundUsageWithIncrements rounds the usage based on increments
+func roundedUsageWithIncrements(usage, incrm *decimal.Big) (rndedUsage *decimal.Big) {
+	usgMaxIncrm := decimal.WithContext(
+		decimal.Context{RoundingMode: decimal.ToZero}).Quo(usage,
+		incrm).RoundToInt()
+	rndedUsage = utils.MultiplyBig(usgMaxIncrm, incrm)
+	return
 }
