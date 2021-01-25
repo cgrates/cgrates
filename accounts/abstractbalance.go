@@ -256,6 +256,13 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 			usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big) // make sure usage is multiple of increments
 		}
 		if i == 0 { // no estimation done, covering full
+			aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, usage.Big)
+			if hasLmt { // put back the limit
+				aB.blnCfg.Units.Big = utils.SumBig(aB.blnCfg.Units.Big, blncLmt.Big)
+			}
+			if hasUF {
+				usage.Big = utils.DivideBig(usage.Big, uF.Factor.Big)
+			}
 			return
 		}
 		usagePaid = new(decimal.Big).Copy(usage.Big)
