@@ -22,6 +22,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -102,6 +103,10 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 		return &actLog{aCfg}, nil
 	case utils.CDRLog:
 		return &actCDRLog{config: cfg, connMgr: connMgr, aCfg: aCfg, filterS: fltrS}, nil
+	case utils.MetaHTTPPost:
+		return &actHTTPPost{aCfg: aCfg}, nil
+	case utils.HttpPostAsync:
+		return &actHTTPPostAsync{aCfg: aCfg}, nil
 	default:
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)
 
@@ -202,5 +207,67 @@ func (aL *actCDRLog) execute(ctx context.Context, data utils.MapStorage) (err er
 		return err
 	}
 
+	return
+}
+
+type actHTTPPost struct {
+	aCfg *engine.APAction
+}
+
+func (aL *actHTTPPost) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actHTTPPost) cfg() *engine.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actHTTPPost) execute(ctx context.Context, data utils.MapStorage) (err error) {
+	var body []byte
+	if body, err = json.Marshal(data); err != nil {
+		return
+	}
+	var pstr *engine.HTTPPoster
+	if pstr, err = engine.NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, aL.cfg().Path,
+		utils.ContentJSON, config.CgrConfig().GeneralCfg().PosterAttempts); err != nil {
+		return
+	}
+	if err = pstr.PostValues(body, make(http.Header)); err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
+		engine.AddFailedPost(aL.cfg().Path, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+aL.cfg().Type, body, make(map[string]interface{}))
+		err = nil
+	}
+	return
+}
+
+type actHTTPPostAsync struct {
+	aCfg *engine.APAction
+}
+
+func (aL *actHTTPPostAsync) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actHTTPPostAsync) cfg() *engine.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actHTTPPostAsync) execute(ctx context.Context, data utils.MapStorage) (err error) {
+	var body []byte
+	if body, err = json.Marshal(data); err != nil {
+		return
+	}
+	var pstr *engine.HTTPPoster
+	if pstr, err = engine.NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, aL.cfg().Path,
+		utils.ContentJSON, config.CgrConfig().GeneralCfg().PosterAttempts); err != nil {
+		return
+	}
+	go func() {
+		err := pstr.PostValues(body, make(http.Header))
+		if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
+			engine.AddFailedPost(aL.cfg().Path, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+aL.cfg().Type, body, make(map[string]interface{}))
+		}
+	}()
 	return
 }
