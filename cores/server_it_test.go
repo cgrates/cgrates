@@ -1,3 +1,4 @@
+// +build integration
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -20,7 +21,6 @@ package cores
 
 import (
 	"net"
-	"net/rpc/jsonrpc"
 	"runtime"
 	"testing"
 
@@ -81,10 +81,6 @@ func testServeJSONPass(t *testing.T) {
 
 	go server.ServeJSON(":2016", shdChan)
 	runtime.Gosched()
-	_, err := jsonrpc.Dial(utils.TCP, ":2016")
-	if err != nil {
-		t.Error(err)
-	}
 
 	shdChan.CloseOnce()
 }
@@ -98,12 +94,6 @@ func testServeJSONFail(t *testing.T) {
 	l := &mockListener{}
 	go server.accept(l, utils.JSONCaps, newCapsJSONCodec, shdChan)
 	runtime.Gosched()
-	_, err := jsonrpc.Dial(utils.TCP, ":9999")
-	expected := "dial tcp :9999: connect: connection refused"
-	if err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-
 	_, ok := <-shdChan.Done()
 	if ok {
 		t.Errorf("Expected to be close")
@@ -130,10 +120,6 @@ func testServeGOBPass(t *testing.T) {
 
 	go server.ServeGOB(":2019", shdChan)
 	runtime.Gosched()
-	_, err := jsonrpc.Dial(utils.TCP, ":2019")
-	if err != nil {
-		t.Error(err)
-	}
 
 	shdChan.CloseOnce()
 }
@@ -154,10 +140,6 @@ func testServeHHTPPass(t *testing.T) {
 		shdChan)
 
 	runtime.Gosched()
-	_, err := jsonrpc.Dial(utils.TCP, ":2021")
-	if err != nil {
-		t.Error(err)
-	}
 
 	shdChan.CloseOnce()
 }
@@ -178,10 +160,6 @@ func testServeHHTPPassUseBasicAuth(t *testing.T) {
 		shdChan)
 
 	runtime.Gosched()
-	_, err := jsonrpc.Dial(utils.TCP, ":2075")
-	if err != nil {
-		t.Error(err)
-	}
 
 	shdChan.CloseOnce()
 }
@@ -202,11 +180,6 @@ func testServeHHTPEnableHttp(t *testing.T) {
 		shdChan)
 
 	runtime.Gosched()
-	_, err := jsonrpc.Dial(utils.TCP, ":2077")
-	expected := "dial tcp :2077: connect: connection refused"
-	if err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
 
 	shdChan.CloseOnce()
 }
@@ -227,11 +200,6 @@ func testServeHHTPFail(t *testing.T) {
 		shdChan)
 
 	runtime.Gosched()
-	_, err := jsonrpc.Dial(utils.TCP, ":2037")
-	expected := "dial tcp :2037: connect: connection refused"
-	if err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
 
 	_, ok := <-shdChan.Done()
 	if ok {
@@ -276,10 +244,6 @@ func testServeBiJSON(t *testing.T) {
 	}()
 
 	runtime.Gosched()
-	_, err := jsonrpc.Dial(utils.TCP, ":3434")
-	if err != nil {
-		t.Error(err)
-	}
 }
 
 func testServeBiJSONEmptyBiRPCServer(t *testing.T) {
@@ -302,11 +266,6 @@ func testServeBiJSONEmptyBiRPCServer(t *testing.T) {
 	}()
 
 	runtime.Gosched()
-	expected := "dial tcp :3430: connect: connection refused"
-	_, err := jsonrpc.Dial(utils.TCP, ":3430")
-	if err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
 }
 
 func testServeBiJSONInvalidPort(t *testing.T) {
@@ -347,10 +306,6 @@ func testServeGOBTLS(t *testing.T) {
 		shdChan,
 	)
 
-	_, err := jsonrpc.Dial(utils.TCP, ":1256")
-	if err != nil {
-		t.Error(err)
-	}
 
 	shdChan.CloseOnce()
 }
