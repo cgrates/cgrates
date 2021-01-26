@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -360,12 +361,13 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 	serverName string) (config *tls.Config, err error) {
 	cert, err := tls.LoadX509KeyPair(serverCrt, serverKey)
 	if err != nil {
-		log.Fatalf("Error: %s when load server keys", err)
+		utils.Logger.Crit(fmt.Sprintf("Error: %s when load server keys", err))
+		return nil, err
 	}
 	rootCAs, err := x509.SystemCertPool()
 	if err != nil {
-		log.Fatalf("Error: %s when load SystemCertPool", err)
-		return
+		utils.Logger.Crit(fmt.Sprintf("Error: %s when load SystemCertPool", err))
+		return nil, err
 	}
 	if rootCAs == nil {
 		rootCAs = x509.NewCertPool()
@@ -374,13 +376,13 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 	if caCert != "" {
 		ca, err := ioutil.ReadFile(caCert)
 		if err != nil {
-			log.Fatalf("Error: %s when read CA", err)
+			utils.Logger.Crit(fmt.Sprintf("Error: %s when read CA", err))
 			return config, err
 		}
 
 		if ok := rootCAs.AppendCertsFromPEM(ca); !ok {
-			log.Fatalf("Cannot append certificate authority")
-			return config, err
+			utils.Logger.Crit(fmt.Sprintf("Cannot append certificate authority"))
+			return config, errors.New("Cannot append certificate authority")
 		}
 	}
 
@@ -395,8 +397,9 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 	return
 }
 
-func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
-	serverPolicy int, serverName string, shdChan *utils.SyncedChan) {
+func (s *Server) serveCodecTLS(addr, codecName, serverCrt, serverKey, caCert string,
+	serverPolicy int, serverName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) rpc.ServerCodec,
+	shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
@@ -414,72 +417,18 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 		shdChan.CloseOnce()
 		return
 	}
+	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s TLS server at <%s>.", codecName, addr))
+	s.accept(listener, codecName+" "+utils.TLS, newCodec, shdChan)
+}
 
-	utils.Logger.Info(fmt.Sprintf("Starting CGRateS GOB TLS server at <%s>.", addr))
-	errCnt := 0
-	var lastErrorTime time.Time
-	for {
-		conn, err := listener.Accept()
-		defer conn.Close()
-		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CGRServer> TLS accept error: <%s>", err.Error()))
-			now := time.Now()
-			if now.Sub(lastErrorTime) > 5*time.Second {
-				errCnt = 0 // reset error count if last error was more than 5 seconds ago
-			}
-			lastErrorTime = time.Now()
-			errCnt++
-			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
-				shdChan.CloseOnce()
-				return
-			}
-			continue
-		}
-		go rpc.ServeCodec(newCapsGOBCodec(conn, s.caps, s.anz))
-	}
+func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
+	serverPolicy int, serverName string, shdChan *utils.SyncedChan) {
+	s.serveCodecTLS(addr, utils.GOBCaps, serverCrt, serverKey, caCert, serverPolicy, serverName, newCapsGOBCodec, shdChan)
 }
 
 func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 	serverPolicy int, serverName string, shdChan *utils.SyncedChan) {
-	s.RLock()
-	enabled := s.rpcEnabled
-	s.RUnlock()
-	if !enabled {
-		return
-	}
-	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
-	if err != nil {
-		shdChan.CloseOnce()
-		return
-	}
-	listener, err := tls.Listen(utils.TCP, addr, config)
-	if err != nil {
-		log.Println(fmt.Sprintf("Error: %s when listening", err))
-		shdChan.CloseOnce()
-		return
-	}
-	utils.Logger.Info(fmt.Sprintf("Starting CGRateS JSON TLS server at <%s>.", addr))
-	errCnt := 0
-	var lastErrorTime time.Time
-	for {
-		conn, err := listener.Accept()
-		defer conn.Close()
-		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CGRServer> TLS accept error: <%s>", err.Error()))
-			now := time.Now()
-			if now.Sub(lastErrorTime) > 5*time.Second {
-				errCnt = 0 // reset error count if last error was more than 5 seconds ago
-			}
-			lastErrorTime = time.Now()
-			errCnt++
-			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
-				shdChan.CloseOnce()
-				return
-			}
-			continue
-		}
-		go rpc.ServeCodec(newCapsJSONCodec(conn, s.caps, s.anz))
-	}
+	s.serveCodecTLS(addr, utils.JSONCaps, serverCrt, serverKey, caCert, serverPolicy, serverName, newCapsJSONCodec, shdChan)
 }
 
 func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,

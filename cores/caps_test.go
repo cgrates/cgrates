@@ -38,7 +38,7 @@ func (c *mockServerCodec) ReadRequestHeader(r *rpc.Request) (err error) {
 }
 
 func (c *mockServerCodec) ReadRequestBody(x interface{}) (err error) {
-	return
+	return utils.ErrNotImplemented
 }
 func (c *mockServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
 	return nil
@@ -72,7 +72,7 @@ func TestNewCapsServerCodec(t *testing.T) {
 		t.Errorf("Expected: %v ,received:%v", expR, r)
 	}
 
-	if err = codec.ReadRequestBody("args"); err != nil {
+	if err = codec.ReadRequestBody("args"); err == nil || err != utils.ErrNotImplemented {
 		t.Fatal(err)
 	}
 
