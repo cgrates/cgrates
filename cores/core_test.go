@@ -32,13 +32,12 @@ func TestNewCoreService(t *testing.T) {
 	cfgDflt := config.NewDefaultCGRConfig()
 	cfgDflt.CoreSCfg().CapsStatsInterval = 1
 	caps := engine.NewCaps(1, utils.MetaBusy)
-	stopChan := make(chan struct{}, 1)
-	sts := engine.NewCapsStats(cfgDflt.CoreSCfg().CapsStatsInterval, caps, stopChan)
+	sts := engine.NewCapsStats(cfgDflt.CoreSCfg().CapsStatsInterval, caps, nil)
 	expected := &CoreService{
 		cfg:       cfgDflt,
 		CapsStats: sts,
 	}
-	rcv := NewCoreService(cfgDflt, caps, stopChan)
+	rcv := NewCoreService(cfgDflt, caps, nil)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
