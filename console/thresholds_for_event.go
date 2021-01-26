@@ -64,6 +64,6 @@ func (self *CmdThresholdsForEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdThresholdsForEvent) RpcResult() interface{} {
-	var s *engine.Thresholds
+	var s engine.Thresholds
 	return &s
 }

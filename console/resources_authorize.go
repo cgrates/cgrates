@@ -68,6 +68,6 @@ func (self *CmdResourceAuthorize) PostprocessRpcParams() error {
 }
 
 func (self *CmdResourceAuthorize) RpcResult() interface{} {
-	var atr *string
+	var atr string
 	return &atr
 }

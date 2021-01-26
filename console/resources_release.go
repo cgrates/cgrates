@@ -68,6 +68,6 @@ func (self *CmdResourceRelease) PostprocessRpcParams() error {
 }
 
 func (self *CmdResourceRelease) RpcResult() interface{} {
-	var atr *string
+	var atr string
 	return &atr
 }
