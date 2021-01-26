@@ -2418,6 +2418,7 @@ func TestDfActionSJsonCfg(t *testing.T) {
 	eCfg := &ActionSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
 		Tenants:               &[]string{},
+		Ees_conns:             &[]string{},
 		Cdrs_conns:            &[]string{},
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,

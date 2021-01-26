@@ -24,6 +24,7 @@ import "github.com/cgrates/cgrates/utils"
 type ActionSCfg struct {
 	Enabled             bool
 	CDRsConns           []string
+	EEsConns            []string
 	Tenants             *[]string
 	IndexedSelects      bool
 	StringIndexedFields *[]string
@@ -43,6 +44,16 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 			acS.CDRsConns[idx] = connID
 			if connID == utils.MetaInternal {
 				acS.CDRsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
+			}
+		}
+	}
+	if jsnCfg.Ees_conns != nil {
+		acS.EEsConns = make([]string, len(*jsnCfg.Ees_conns))
+		for idx, connID := range *jsnCfg.Ees_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			acS.EEsConns[idx] = connID
+			if connID == utils.MetaInternal {
+				acS.EEsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
 			}
 		}
 	}
@@ -103,6 +114,16 @@ func (acS *ActionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.CDRsConnsCfg] = CDRsConns
 	}
+	if acS.EEsConns != nil {
+		eesConns := make([]string, len(acS.EEsConns))
+		for i, item := range acS.EEsConns {
+			eesConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
+				eesConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.EEsConnsCfg] = eesConns
+	}
 	if acS.Tenants != nil {
 		Tenants := make([]string, len(*acS.Tenants))
 		for i, item := range *acS.Tenants {
@@ -147,6 +168,12 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 			cln.CDRsConns[i] = con
 		}
 	}
+	if acS.EEsConns != nil {
+		cln.EEsConns = make([]string, len(acS.EEsConns))
+		for i, k := range acS.EEsConns {
+			cln.EEsConns[i] = k
+		}
+	}
 	if acS.Tenants != nil {
 		tnt := make([]string, len(*acS.Tenants))
 		for i, dx := range *acS.Tenants {
@@ -175,5 +202,6 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 		}
 		cln.SuffixIndexedFields = &idx
 	}
+
 	return
 }

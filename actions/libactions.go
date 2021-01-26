@@ -23,6 +23,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -85,10 +87,10 @@ func (s *scheduledActs) postExec() (err error) {
 
 // newActionersFromActions constructs multiple actioners out of APAction configurations
 func newActionersFromActions(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager,
-	connMgr *engine.ConnManager, aCfgs []*engine.APAction) (acts []actioner, err error) {
+	connMgr *engine.ConnManager, aCfgs []*engine.APAction, tnt string) (acts []actioner, err error) {
 	acts = make([]actioner, len(aCfgs))
 	for i, aCfg := range aCfgs {
-		if acts[i], err = newActioner(cfg, fltrS, dm, connMgr, aCfg); err != nil {
+		if acts[i], err = newActioner(cfg, fltrS, dm, connMgr, aCfg, tnt); err != nil {
 			return nil, err
 		}
 	}
@@ -97,7 +99,7 @@ func newActionersFromActions(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *e
 
 // newAction is the constructor to create actioner
 func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager,
-	connMgr *engine.ConnManager, aCfg *engine.APAction) (act actioner, err error) {
+	connMgr *engine.ConnManager, aCfg *engine.APAction, tnt string) (act actioner, err error) {
 	switch aCfg.Type {
 	case utils.MetaLog:
 		return &actLog{aCfg}, nil
@@ -105,8 +107,8 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 		return &actCDRLog{config: cfg, connMgr: connMgr, aCfg: aCfg, filterS: fltrS}, nil
 	case utils.MetaHTTPPost:
 		return &actHTTPPost{aCfg: aCfg}, nil
-	case utils.HttpPostAsync:
-		return &actHTTPPostAsync{aCfg: aCfg}, nil
+	case utils.MetaExport:
+		return &actExport{config: cfg, connMgr: connMgr, aCfg: aCfg, tnt: tnt}, err
 	default:
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)
 
@@ -233,6 +235,15 @@ func (aL *actHTTPPost) execute(ctx context.Context, data utils.MapStorage) (err 
 		utils.ContentJSON, config.CgrConfig().GeneralCfg().PosterAttempts); err != nil {
 		return
 	}
+	if async, has := aL.cfg().Opts[utils.MetaAsync]; has && utils.IfaceAsString(async) == utils.TrueStr {
+		go func() {
+			err := pstr.PostValues(body, make(http.Header))
+			if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
+				engine.AddFailedPost(aL.cfg().Path, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+aL.cfg().Type, body, make(map[string]interface{}))
+			}
+		}()
+		return
+	}
 	if err = pstr.PostValues(body, make(http.Header)); err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
 		engine.AddFailedPost(aL.cfg().Path, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+aL.cfg().Type, body, make(map[string]interface{}))
 		err = nil
@@ -240,34 +251,39 @@ func (aL *actHTTPPost) execute(ctx context.Context, data utils.MapStorage) (err 
 	return
 }
 
-type actHTTPPostAsync struct {
-	aCfg *engine.APAction
+type actExport struct {
+	tnt     string
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	aCfg    *engine.APAction
 }
 
-func (aL *actHTTPPostAsync) id() string {
+func (aL *actExport) id() string {
 	return aL.aCfg.ID
 }
 
-func (aL *actHTTPPostAsync) cfg() *engine.APAction {
+func (aL *actExport) cfg() *engine.APAction {
 	return aL.aCfg
 }
 
 // execute implements actioner interface
-func (aL *actHTTPPostAsync) execute(ctx context.Context, data utils.MapStorage) (err error) {
-	var body []byte
-	if body, err = json.Marshal(data); err != nil {
-		return
+func (aL *actExport) execute(ctx context.Context, data utils.MapStorage) (err error) {
+	var exporterIDs []string
+	if expIDs, has := aL.cfg().Opts[utils.MetaExporterIDs]; has { // if templateID is not present we use default template
+		exporterIDs = strings.Split(utils.IfaceAsString(expIDs), utils.InfieldSep)
 	}
-	var pstr *engine.HTTPPoster
-	if pstr, err = engine.NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, aL.cfg().Path,
-		utils.ContentJSON, config.CgrConfig().GeneralCfg().PosterAttempts); err != nil {
-		return
+	args := &utils.CGREventWithEeIDs{
+		EeIDs: exporterIDs,
+		CGREvent: &utils.CGREvent{
+			Tenant: aL.tnt,
+			Time:   utils.TimePointer(time.Now()),
+			ID:     utils.GenUUID(),
+			Event:  data[utils.MetaReq].(map[string]interface{}),
+			Opts:   data[utils.MetaOpts].(map[string]interface{}),
+		},
 	}
-	go func() {
-		err := pstr.PostValues(body, make(http.Header))
-		if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
-			engine.AddFailedPost(aL.cfg().Path, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+aL.cfg().Type, body, make(map[string]interface{}))
-		}
-	}()
-	return
+
+	var rply map[string]map[string]interface{}
+	return aL.connMgr.Call(aL.config.ActionSCfg().EEsConns, nil,
+		utils.EeSv1ProcessEvent, args, &rply)
 }

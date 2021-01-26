@@ -951,6 +951,8 @@ const (
 	MetaTemplateID        = "*templateID"
 	MetaCdrLog            = "*cdrLog"
 	MetaCDR               = "*cdr"
+	MetaExporterIDs       = "*exporterIDs"
+	MetaAsync             = "*async"
 )
 
 // Migrator Action
