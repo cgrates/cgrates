@@ -740,7 +740,7 @@ func main() {
 	}()
 	select {
 	case <-shtdDone:
-	case <-time.After(10 * time.Second): //cfg.CoreSCfg().ShutdownTimeout):
+	case <-time.After(cfg.CoreSCfg().ShutdownTimeout):
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown all subsystems in the given time",
 			utils.ServiceManager))
 	}

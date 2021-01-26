@@ -61,7 +61,7 @@ func TestAnalyzerSReload(t *testing.T) {
 
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "analyzers_it_test"),
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "analyzers"),
 		Section: config.AnalyzerCfgJson,
 	}, &reply); err != nil {
 		t.Error(err)

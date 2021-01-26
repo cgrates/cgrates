@@ -242,13 +242,13 @@ func TestNMAsXMLElements(t *testing.T) {
 
 func TestNMAsCGREvent(t *testing.T) {
 	if cgrEv := NMAsCGREvent(nil, "cgrates.org",
-		utils.NestingSep,nil); cgrEv != nil {
+		utils.NestingSep, nil); cgrEv != nil {
 		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(nil), utils.ToJSON(cgrEv.Event))
 	}
 
 	nM := utils.NewOrderedNavigableMap()
 	if cgrEv := NMAsCGREvent(nM, "cgrates.org",
-		utils.NestingSep,nil); cgrEv != nil {
+		utils.NestingSep, nil); cgrEv != nil {
 		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(nil), utils.ToJSON(cgrEv.Event))
 	}
 
@@ -329,8 +329,8 @@ func TestNMAsCGREvent(t *testing.T) {
 		"FirstLevel2.Field6":                     "Value6",
 		"Field4":                                 "Val4",
 	}
-		if cgrEv := NMAsCGREvent(nM, "cgrates.org",
-		utils.NestingSep,utils.NewOrderedNavigableMap()); cgrEv.Tenant != "cgrates.org" ||
+	if cgrEv := NMAsCGREvent(nM, "cgrates.org",
+		utils.NestingSep, utils.NewOrderedNavigableMap()); cgrEv.Tenant != "cgrates.org" ||
 		cgrEv.Time == nil ||
 		!reflect.DeepEqual(eEv, cgrEv.Event) {
 		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(eEv), utils.ToJSON(cgrEv.Event))

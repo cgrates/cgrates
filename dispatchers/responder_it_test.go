@@ -23,6 +23,7 @@ package dispatchers
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -190,6 +191,7 @@ func testDspResponderBroadcast(t *testing.T) {
 		t.Errorf("Expected error: %s received error: %v	 and reply %q", utils.ErrPartiallyExecuted.Error(), err, pingReply)
 	}
 	allEngine.stopEngine(t)
+	time.Sleep(10 * time.Millisecond)
 	pingReply = ""
 	if err := dispEngine.RPC.Call(utils.ResponderPing, pingEv, &pingReply); err == nil ||
 		!rpcclient.IsNetworkError(err) {
