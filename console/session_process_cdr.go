@@ -64,6 +64,6 @@ func (self *CmdSessionsProcessCDR) PostprocessRpcParams() error {
 }
 
 func (self *CmdSessionsProcessCDR) RpcResult() interface{} {
-	var atr *string
+	var atr string
 	return &atr
 }

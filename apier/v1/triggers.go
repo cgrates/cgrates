@@ -118,8 +118,8 @@ type AttrRemoveAccountActionTriggers struct {
 	UniqueID string
 }
 
-func (apierSv1 *APIerSv1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTriggers, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{utils.AccountField}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) RemoveAccountActionTriggers(attr *AttrRemoveAccountActionTriggers, reply *string) error {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant

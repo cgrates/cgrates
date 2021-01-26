@@ -68,6 +68,6 @@ func (self *CmdSessionsTerminate) PostprocessRpcParams() error {
 }
 
 func (self *CmdSessionsTerminate) RpcResult() interface{} {
-	var atr *string
+	var atr string
 	return &atr
 }

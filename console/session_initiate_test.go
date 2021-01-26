@@ -24,14 +24,15 @@ import (
 	"testing"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCmdAccountTriggerRemove(t *testing.T) {
+func TestCmdSessionInitiate(t *testing.T) {
 	// commands map is initiated in init function
-	command := commands["account_triggers_remove"]
+	command := commands["session_initiate"]
 	// verify if ApierSv1 object has method on it
-	m, ok := reflect.TypeOf(new(v1.APIerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	m, ok := reflect.TypeOf(new(v1.SessionSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
 	if !ok {
 		t.Fatal("method not found")
 	}
