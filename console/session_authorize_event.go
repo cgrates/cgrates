@@ -68,6 +68,6 @@ func (self *CmdSessionsAuthorize) PostprocessRpcParams() error {
 }
 
 func (self *CmdSessionsAuthorize) RpcResult() interface{} {
-	var atr *sessions.V1AuthorizeReplyWithDigest
+	var atr sessions.V1AuthorizeReplyWithDigest
 	return &atr
 }

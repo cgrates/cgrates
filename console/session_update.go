@@ -68,7 +68,7 @@ func (self *CmdSessionsUpdate) PostprocessRpcParams() error {
 }
 
 func (self *CmdSessionsUpdate) RpcResult() interface{} {
-	var atr *sessions.V1UpdateSessionReply
+	var atr sessions.V1UpdateSessionReply
 	return &atr
 }
 

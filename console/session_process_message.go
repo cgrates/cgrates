@@ -68,7 +68,7 @@ func (self *CmdSessionsProcessEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdSessionsProcessEvent) RpcResult() interface{} {
-	var atr *sessions.V1ProcessMessageReply
+	var atr sessions.V1ProcessMessageReply
 	return &atr
 }
 
