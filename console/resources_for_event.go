@@ -69,6 +69,6 @@ func (self *CmdGetResourceForEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetResourceForEvent) RpcResult() interface{} {
-	var atr *engine.Resources
+	var atr engine.Resources
 	return &atr
 }
