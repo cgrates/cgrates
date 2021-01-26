@@ -65,8 +65,8 @@ func (rsv1 *ResourceSv1) GetResource(args *utils.TenantIDWithOpts, reply *engine
 }
 
 // GetResourceProfile returns a resource configuration
-func (apierSv1 *APIerSv1) GetResourceProfile(arg utils.TenantID, reply *engine.ResourceProfile) error {
-	if missing := utils.MissingStructFields(&arg, []string{utils.ID}); len(missing) != 0 { //Params missing
+func (apierSv1 *APIerSv1) GetResourceProfile(arg *utils.TenantID, reply *engine.ResourceProfile) error {
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := utils.EmptyString
@@ -82,7 +82,7 @@ func (apierSv1 *APIerSv1) GetResourceProfile(arg utils.TenantID, reply *engine.R
 }
 
 // GetResourceProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetResourceProfileIDs(args utils.PaginatorWithTenant, rsPrfIDs *[]string) error {
+func (apierSv1 *APIerSv1) GetResourceProfileIDs(args *utils.PaginatorWithTenant, rsPrfIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant

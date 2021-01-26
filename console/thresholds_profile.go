@@ -27,7 +27,7 @@ func init() {
 	c := &CmdGetThresholdProfile{
 		name:      "thresholds_profile",
 		rpcMethod: utils.APIerSv1GetThresholdProfile,
-		rpcParams: &utils.TenantIDWithOpts{},
+		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetThresholdProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithOpts
+	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
@@ -50,10 +50,7 @@ func (self *CmdGetThresholdProfile) RpcMethod() string {
 
 func (self *CmdGetThresholdProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithOpts{
-			TenantID: new(utils.TenantID),
-			Opts:     make(map[string]interface{}),
-		}
+		self.rpcParams = &utils.TenantID{}
 	}
 	return self.rpcParams
 }

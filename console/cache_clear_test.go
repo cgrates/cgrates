@@ -30,9 +30,9 @@ import (
 
 func TestCmdCacheClear(t *testing.T) {
 	// commands map is initiated in init function
-	command := commands["balance_set"]
+	command := commands["cache_clear"]
 	// verify if ApierSv1 object has method on it
-	m, ok := reflect.TypeOf(new(v1.APIerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
+	m, ok := reflect.TypeOf(new(v1.CacheSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
 	if !ok {
 		t.Fatal("method not found")
 	}

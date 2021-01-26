@@ -163,8 +163,8 @@ type AttrResetAccountActionTriggers struct {
 	Executed bool
 }
 
-func (apierSv1 *APIerSv1) ResetAccountActionTriggers(attr AttrResetAccountActionTriggers, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{utils.AccountField}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) ResetAccountActionTriggers(attr *AttrResetAccountActionTriggers, reply *string) error {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant
@@ -351,8 +351,8 @@ func (attr *AttrSetActionTrigger) UpdateActionTrigger(at *engine.ActionTrigger, 
 }
 
 // SetAccountActionTriggers updates or creates if not present the ActionTrigger for an Account
-func (apierSv1 *APIerSv1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{utils.AccountField}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) SetAccountActionTriggers(attr *AttrSetAccountActionTriggers, reply *string) error {
+	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := attr.Tenant
@@ -401,8 +401,8 @@ type AttrRemoveActionTrigger struct {
 	UniqueID string
 }
 
-func (apierSv1 *APIerSv1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) RemoveActionTrigger(attr *AttrRemoveActionTrigger, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attr.UniqueID == "" {
@@ -443,8 +443,8 @@ func (apierSv1 *APIerSv1) RemoveActionTrigger(attr AttrRemoveActionTrigger, repl
 }
 
 // SetActionTrigger updates a ActionTrigger
-func (apierSv1 *APIerSv1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) SetActionTrigger(attr *AttrSetActionTrigger, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 

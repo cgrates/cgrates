@@ -18,8 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-//willfix
-/*
+import (
+	"reflect"
+	"strings"
+	"testing"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
+
 func TestCmdTriggerSet(t *testing.T) {
 	// commands map is initiated in init function
 	command := commands["triggers_set"]
@@ -31,8 +38,6 @@ func TestCmdTriggerSet(t *testing.T) {
 	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
-	fmt.Println(m.Type.In(1))
-	fmt.Println(reflect.TypeOf(command.RpcParams(true)))
 	// verify the type of input parameter
 	if ok := m.Type.In(1).AssignableTo(reflect.TypeOf(command.RpcParams(true))); !ok {
 		t.Fatalf("cannot assign input parameter")
@@ -46,4 +51,3 @@ func TestCmdTriggerSet(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-*/

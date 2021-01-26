@@ -24,12 +24,13 @@ import (
 	"testing"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCmdChargersProfileRem(t *testing.T) {
+func TestCmdResourcesProfileSet(t *testing.T) {
 	// commands map is initiated in init function
-	command := commands["chargers_profile_remove"]
+	command := commands["resources_profile_set"]
 	// verify if ApierSv1 object has method on it
 	m, ok := reflect.TypeOf(new(v1.APIerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
 	if !ok {
