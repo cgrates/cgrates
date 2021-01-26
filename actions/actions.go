@@ -222,7 +222,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 				trgKey == utils.EmptyString {
 				trgKey = trgTyp
 			}
-			if act, errAct := newActioner(aS.cfg, aS.fltrS, aS.dm, aS.connMgr, aCfg); errAct != nil {
+			if act, errAct := newActioner(aS.cfg, aS.fltrS, aS.dm, aS.connMgr, aCfg, tnt); errAct != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf(
 						"<%s> ignoring ActionProfile with id: <%s:%s> creating action: <%s>, error: <%s>",

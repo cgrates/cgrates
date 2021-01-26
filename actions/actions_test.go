@@ -728,3 +728,113 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestExportAction(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+	sMock2 := &testMockCDRsConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.EeSv1ProcessEvent: func(arg interface{}, rply interface{}) error {
+				argConv, can := arg.(*utils.CGREventWithEeIDs)
+				if !can {
+					return fmt.Errorf("Wrong argument type: %T", arg)
+				}
+				if argConv.CGREvent.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.CGREvent.Tenant)
+				}
+				return nil
+			},
+		},
+	}
+	internalCDRsChann := make(chan rpcclient.ClientConnector, 1)
+	internalCDRsChann <- sMock2
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
+
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs): internalCDRsChann,
+	})
+	apA := &engine.APAction{
+		ID:   "ACT_CDRLOG2",
+		Type: utils.MetaExport,
+	}
+	exportAction := &actExport{
+		tnt:     "cgrates.org",
+		config:  cfg,
+		connMgr: connMgr,
+		aCfg:    apA,
+	}
+	evNM := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.AccountField: "10",
+			utils.Tenant:       "cgrates.org",
+			utils.BalanceType:  utils.MetaConcrete,
+			utils.Cost:         0.15,
+			utils.ActionType:   utils.MetaTopUp,
+		},
+		utils.MetaOpts: map[string]interface{}{
+			"EventFieldOpt": "eventValue",
+		},
+	}
+	if err := exportAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestExportActionWithEeIDs(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+	sMock2 := &testMockCDRsConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.EeSv1ProcessEvent: func(arg interface{}, rply interface{}) error {
+				argConv, can := arg.(*utils.CGREventWithEeIDs)
+				if !can {
+					return fmt.Errorf("Wrong argument type: %T", arg)
+				}
+				if argConv.CGREvent.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.CGREvent.Tenant)
+				}
+				if !reflect.DeepEqual(argConv.EeIDs, []string{"Exporter1", "Exporter2", "Exporter3"}) {
+					return fmt.Errorf("Expected %+v, received %+v", []string{"Exporter1", "Exporter2", "Exporter3"}, argConv.EeIDs)
+				}
+				return nil
+			},
+		},
+	}
+	internalCDRsChann := make(chan rpcclient.ClientConnector, 1)
+	internalCDRsChann <- sMock2
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
+
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs): internalCDRsChann,
+	})
+	apA := &engine.APAction{
+		ID:   "ACT_CDRLOG2",
+		Type: utils.MetaExport,
+		Opts: map[string]interface{}{
+			utils.MetaExporterIDs: "Exporter1;Exporter2;Exporter3",
+		},
+	}
+	exportAction := &actExport{
+		tnt:     "cgrates.org",
+		config:  cfg,
+		connMgr: connMgr,
+		aCfg:    apA,
+	}
+	evNM := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.AccountField: "10",
+			utils.Tenant:       "cgrates.org",
+			utils.BalanceType:  utils.MetaConcrete,
+			utils.Cost:         0.15,
+			utils.ActionType:   utils.MetaTopUp,
+		},
+		utils.MetaOpts: map[string]interface{}{
+			"EventFieldOpt": "eventValue",
+		},
+	}
+	if err := exportAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+}
