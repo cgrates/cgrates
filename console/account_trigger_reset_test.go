@@ -18,8 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-//willfix
-/*
+import (
+	"reflect"
+	"strings"
+	"testing"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
+
 func TestCmdAccountTriggerReset(t *testing.T) {
 	// commands map is initiated in init function
 	command := commands["account_triggers_reset"]
@@ -44,4 +51,3 @@ func TestCmdAccountTriggerReset(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-*/

@@ -63,7 +63,7 @@ func (self *CmdActiveSessions) PostprocessRpcParams() error {
 }
 
 func (self *CmdActiveSessions) RpcResult() interface{} {
-	var sessions *[]*sessions.ExternalSession
+	var sessions []*sessions.ExternalSession
 	return &sessions
 }
 

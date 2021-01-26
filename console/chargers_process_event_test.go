@@ -27,8 +27,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-//willfix
-
 func TestCmdChargersProcessEvent(t *testing.T) {
 	// commands map is initiated in init function
 	command := commands["chargers_process_event"]
