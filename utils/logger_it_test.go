@@ -27,6 +27,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 var (
@@ -192,6 +193,7 @@ func testCriticalLogger(t *testing.T) {
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(100 * time.Millisecond)
 	if err := l.Close(); err != nil {
 		t.Error(err)
 	}

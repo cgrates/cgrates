@@ -196,6 +196,8 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 }
 
 func testAnalyzerSV1Search(t *testing.T) {
+	// need to wait in order for the log gorutine to execute
+	time.Sleep(10 * time.Millisecond)
 	var result []map[string]interface{}
 	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
