@@ -46,7 +46,7 @@ func (cmd *CmdSleep) RpcMethod() string {
 
 func (cmd *CmdSleep) RpcParams(reset bool) interface{} {
 	if reset || cmd.rpcParams == nil {
-		cmd.rpcParams = &StringWrapper{}
+		cmd.rpcParams = &utils.DurationArgs{}
 	}
 	return cmd.rpcParams
 }
@@ -64,6 +64,6 @@ func (cmd *CmdSleep) PostprocessRpcParams() (err error) {
 }
 
 func (cmd *CmdSleep) RpcResult() interface{} {
-	var s *string
+	var s string
 	return &s
 }

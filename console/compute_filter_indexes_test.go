@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCmdComputeActionPlanIndexes(t *testing.T) {
+func TestCmdComputeFilterIndexes(t *testing.T) {
 	// commands map is initiated in init function
 	command := commands["compute_filter_indexes"]
 	// verify if ApierSv1 object has method on it
