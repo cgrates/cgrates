@@ -30,6 +30,7 @@ import (
 	"net/rpc/jsonrpc"
 	"os"
 	"path"
+	"reflect"
 	"runtime"
 	"strings"
 	"testing"
@@ -73,6 +74,9 @@ var (
 		testServeHTTPTLSHttpNotEnabled,
 		testHandleRequest,
 		testBiRPCRegisterName,
+		testAcceptBiRPC,
+		testRpcRegisterActions,
+		testWebSocket,
 	}
 )
 
@@ -84,7 +88,11 @@ func TestServerIT(t *testing.T) {
 	}
 }
 
-type mockRegister struct{}
+type mockRegister string
+
+func (x *mockRegister) ForTest(method *rpc2.Client, args *interface{}, reply *interface{}) error {
+	return nil
+}
 
 func (robj *mockRegister) Ping(in string, out *string) error {
 	*out = utils.Pong
@@ -272,7 +280,7 @@ func testServeHHTPFail(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 
 	go server.ServeHTTP(
-		"invalid_portt_format",
+		"invalid_port_format",
 		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
 		cfgDflt.HTTPCfg().HTTPWSURL,
 		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
@@ -668,4 +676,85 @@ func testBiRPCRegisterName(t *testing.T) {
 	runtime.Gosched()
 
 	server.StopBiRPC()
+}
+
+func testAcceptBiRPC(t *testing.T) {
+	caps := engine.NewCaps(0, utils.MetaBusy)
+	server := NewServer(caps)
+	server.RpcRegister(new(mockRegister))
+	server.birpcSrv = rpc2.NewServer()
+
+	p1, p2 := net.Pipe()
+	l := &mockListener{
+		p1: p1,
+	}
+	go server.acceptBiRPC(l)
+	rpc := jsonrpc.NewClient(p2)
+	var reply string
+	expected := "rpc2: can't find method AttributeSv1.Ping"
+	if err := rpc.Call(utils.AttributeSv1Ping, utils.CGREvent{}, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	p2.Close()
+	runtime.Gosched()
+}
+
+func testRpcRegisterActions(t *testing.T) {
+	caps := engine.NewCaps(0, utils.MetaBusy)
+	server := NewServer(caps)
+
+	r, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc",
+		bytes.NewBuffer([]byte("1")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rmtIP, _ := utils.GetRemoteIP(r)
+	rmtAddr, _ := net.ResolveIPAddr(utils.EmptyString, rmtIP)
+
+	rpcReq := newRPCRequest(r.Body, rmtAddr, server.caps, nil)
+	rpcReq.remoteAddr = utils.NewNetAddr("network", "127.0.0.1:2012")
+
+	if n, err := rpcReq.Write([]byte(`TEST`)); err != nil {
+		t.Error(err)
+	} else if n != 4 {
+		t.Errorf("Expected 4, received %+v", n)
+	}
+
+	if rcv := rpcReq.LocalAddr(); !reflect.DeepEqual(rcv, utils.LocalAddr()) {
+		t.Errorf("Received %+v, expected %+v", utils.ToJSON(rcv), utils.ToJSON(utils.LocalAddr()))
+	}
+
+	exp := utils.NewNetAddr("network", "127.0.0.1:2012")
+	if rcv := rpcReq.RemoteAddr(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Received %+v, expected %+v", utils.ToJSON(rcv), utils.ToJSON(exp))
+	}
+}
+
+func testWebSocket(t *testing.T) {
+	cfgDflt := config.NewDefaultCGRConfig()
+	caps := engine.NewCaps(100, utils.MetaBusy)
+	server = NewServer(caps)
+	server.RpcRegister(new(mockRegister))
+
+	shdChan := utils.NewSyncedChan()
+
+	authUsers := map[string]string{
+		"admin": "password",
+	}
+
+	//Invalid port address
+	go server.ServeHTTPTLS(
+		"57235",
+		"/usr/share/cgrates/tls/inexisting_file",
+		"/usr/share/cgrates/tls/server.key",
+		"/usr/share/cgrates/tls/ca.crt",
+		cfgDflt.TLSCfg().ServerPolicy,
+		cfgDflt.TLSCfg().ServerName,
+		utils.EmptyString,
+		cfgDflt.HTTPCfg().HTTPWSURL,
+		true,
+		authUsers,
+		shdChan)
+	runtime.Gosched()
 }

@@ -31,7 +31,6 @@ import (
 	"net/http"
 	"net/http/pprof"
 	"net/rpc"
-	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -121,24 +120,6 @@ func (s *Server) BiRPCRegisterName(method string, handlerFunc interface{}) {
 		s.Unlock()
 	}
 	s.birpcSrv.Handle(method, handlerFunc)
-}
-
-func (s *Server) BiRPCRegister(rcvr interface{}) {
-	s.RLock()
-	isNil := s.birpcSrv == nil
-	s.RUnlock()
-	if isNil {
-		s.Lock()
-		s.birpcSrv = rpc2.NewServer()
-		s.Unlock()
-	}
-	rcvType := reflect.TypeOf(rcvr)
-	for i := 0; i < rcvType.NumMethod(); i++ {
-		method := rcvType.Method(i)
-		if method.Name != "Call" {
-			s.birpcSrv.Handle("SMGenericV1."+method.Name, method.Func.Interface())
-		}
-	}
 }
 
 func (s *Server) serveCodec(addr, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) rpc.ServerCodec,
@@ -270,7 +251,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	}
 }
 
-// ServeBiJSON create a gorutine to listen and serve as BiRPC server
+// ServeBiJSON create a goroutine to listen and serve as BiRPC server
 func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(*rpc2.Client)) (err error) {
 	s.RLock()
 	isNil := s.birpcSrv == nil
@@ -287,26 +268,28 @@ func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(
 	s.birpcSrv.OnConnect(onConn)
 	s.birpcSrv.OnDisconnect(onDis)
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at <%s>", addr))
-	go func(l net.Listener) {
-		for {
-			conn, err := l.Accept()
-			if err != nil {
-				if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
-					return
-				}
-				s.stopbiRPCServer <- struct{}{}
-				log.Fatal(err)
-				return // stop if we get Accept error
-			}
-			go s.birpcSrv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
-		}
-	}(lBiJSON)
+	go s.acceptBiRPC(lBiJSON)
 	<-s.stopbiRPCServer // wait until server is stoped to close the listener
 	lBiJSON.Close()
 	return
 }
 
-// StopBiRPC stops the go rutine create with ServeBiJSON
+func (s *Server) acceptBiRPC(l net.Listener) {
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
+				return
+			}
+			s.stopbiRPCServer <- struct{}{}
+			utils.Logger.Crit(fmt.Sprintf("Stoped BiRPC server beacause %s", err))
+			return // stop if we get Accept error
+		}
+		go s.birpcSrv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
+	}
+}
+
+// StopBiRPC stops the go routine create with ServeBiJSON
 func (s *Server) StopBiRPC() {
 	s.stopbiRPCServer <- struct{}{}
 }
@@ -364,13 +347,12 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 		utils.Logger.Crit(fmt.Sprintf("Error: %s when load server keys", err))
 		return nil, err
 	}
+
 	rootCAs, err := x509.SystemCertPool()
+	//This will only happen on windows
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("Error: %s when load SystemCertPool", err))
 		return nil, err
-	}
-	if rootCAs == nil {
-		rootCAs = x509.NewCertPool()
 	}
 
 	if caCert != "" {

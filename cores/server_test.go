@@ -26,7 +26,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/analyzers"
 
@@ -90,38 +89,6 @@ func TestRegisterHttpFunc(t *testing.T) {
 
 	httpAgent := agents.NewHTTPAgent(nil, []string{}, nil, utils.EmptyString, utils.EmptyString, utils.EmptyString, nil)
 	rcv.RegisterHttpHandler("invalid_pattern", httpAgent)
-
-	if err := os.RemoveAll(cfgDflt.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
-	}
-	rcv.StopBiRPC()
-}
-
-func TestBiRPCRegisterName(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
-	cfgDflt.CoreSCfg().CapsStatsInterval = 1
-	caps := engine.NewCaps(0, utils.MetaBusy)
-	rcv := NewServer(caps)
-
-	cfgDflt.AnalyzerSCfg().DBPath = "/tmp/analyzers"
-	if err := os.RemoveAll(cfgDflt.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(cfgDflt.AnalyzerSCfg().DBPath, 0700); err != nil {
-		t.Fatal(err)
-	}
-	analz, err := analyzers.NewAnalyzerService(cfgDflt)
-	if err != nil {
-		t.Error(err)
-	}
-	rcv.SetAnalyzer(analz)
-
-	rcv.birpcSrv = &rpc2.Server{}
-
-	rcv.BiRPCRegister(mockReadWriteCloserErrorNilResponse{})
-
-	rcv.birpcSrv = nil
-	rcv.BiRPCRegister(gobServerCodec{})
 
 	if err := os.RemoveAll(cfgDflt.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
