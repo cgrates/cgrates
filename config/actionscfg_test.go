@@ -39,6 +39,8 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		Enabled:             true,
 		EEsConns:            []string{},
 		CDRsConns:           []string{},
+		ThresholdSConns:     []string{},
+		StatSConns:          []string{},
 		IndexedSelects:      false,
 		Tenants:             &[]string{"itsyscom.com"},
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -70,6 +72,8 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
 		utils.EEsConnsCfg:            []string{},
+		utils.ThresholdSConnsCfg:     []string{},
+		utils.StatSConnsCfg:          []string{},
 		utils.CDRsConnsCfg:           []string{},
 		utils.Tenants:                []string{"itsyscom.com"},
 		utils.IndexedSelectsCfg:      false,

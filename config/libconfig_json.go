@@ -674,6 +674,8 @@ type ActionSJsonCfg struct {
 	Enabled               *bool
 	Cdrs_conns            *[]string
 	Ees_conns             *[]string
+	Thresholds_conns      *[]string
+	Stats_conns           *[]string
 	Tenants               *[]string
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
