@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCmdStorDBVersions(t *testing.T) {
+func TestCmdSetStorDBVersions(t *testing.T) {
 	// commands map is initiated in init function
 	command := commands["set_stordb_versions"]
 	// verify if ApierSv1 object has method on it

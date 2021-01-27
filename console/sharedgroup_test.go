@@ -20,9 +20,9 @@ package console
 
 //willfix
 /*
-func TestCmdLoadIDs(t *testing.T) {
+func TestCmdSharedGroup(t *testing.T) {
 	// commands map is initiated in init function
-	command := commands["get_load_ids"]
+	command := commands["sharedgroup"]
 	// verify if ApierSv1 object has method on it
 	m, ok := reflect.TypeOf(new(v1.APIerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
 	if !ok {
@@ -31,6 +31,8 @@ func TestCmdLoadIDs(t *testing.T) {
 	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
+	fmt.Println(m.Type.In(1))
+	fmt.Println(reflect.TypeOf(command.RpcParams(true)))
 	// verify the type of input parameter
 	if ok := m.Type.In(1).AssignableTo(reflect.TypeOf(command.RpcParams(true))); !ok {
 		t.Fatalf("cannot assign input parameter")
