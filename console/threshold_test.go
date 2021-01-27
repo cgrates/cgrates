@@ -50,5 +50,13 @@ func TestCmdThreshold(t *testing.T) {
 	if err := command.PostprocessRpcParams(); err != nil {
 		t.Fatal(err)
 	}
+	// for coverage purpose
+	formatedResult := command.GetFormatedResult(command.RpcResult())
+	expected := GetFormatedResult(command.RpcResult(), utils.StringSet{
+		utils.MinSleep: {},
+	})
+	if !reflect.DeepEqual(formatedResult, expected) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected, formatedResult)
+	}
 
 }

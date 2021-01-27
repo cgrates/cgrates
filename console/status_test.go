@@ -50,4 +50,8 @@ func TestCmdStatus(t *testing.T) {
 	if err := command.PostprocessRpcParams(); err != nil {
 		t.Fatal(err)
 	}
+	// for coverage purpose
+	if reflect.DeepEqual(command.ClientArgs(), []string{}) {
+		t.Errorf("Expected <%+v>, Received <%+v>", []string{}, command.ClientArgs())
+	}
 }

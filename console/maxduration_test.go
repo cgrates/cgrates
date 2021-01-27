@@ -51,4 +51,10 @@ func TestCmdMaxDuration(t *testing.T) {
 	if err := command.PostprocessRpcParams(); err != nil {
 		t.Fatal(err)
 	}
+	expected := []string{utils.Category, utils.ToR, utils.Tenant, utils.Subject, utils.AccountField, utils.Destination,
+		utils.TimeStart, utils.TimeEnd, utils.CallDuration, utils.FallbackSubject}
+
+	if !reflect.DeepEqual(command.ClientArgs(), expected) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected, command.ClientArgs())
+	}
 }
