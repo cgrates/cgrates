@@ -340,11 +340,13 @@ func testSessionSRplCheckAccount(t *testing.T) {
 		Account: "1005",
 	}
 
+	expectedBal := 5*time.Second - 40*time.Millisecond
 	if err := smgRplcSlvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-		// a tolerance of +/- 5ms is acceptable
-	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply < float64(5*time.Second-46*time.Millisecond) || rply > float64(5*time.Second-35*time.Millisecond) {
-		t.Errorf("Expecting: ~%v, received: %v", float64(5*time.Second-40*time.Millisecond), rply)
+		// a tolerance of +/- 10ms is acceptable
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply < float64(expectedBal-10*time.Millisecond) ||
+		rply > float64(expectedBal+10*time.Millisecond) {
+		t.Errorf("Expecting: ~%v, received: %v", expectedBal, time.Duration(rply))
 	}
 }
 
