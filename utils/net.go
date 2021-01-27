@@ -34,7 +34,6 @@ type Server interface {
 	RegisterHttpFunc(pattern string, handler func(http.ResponseWriter, *http.Request))
 	RegisterHttpHandler(pattern string, handler http.Handler)
 	BiRPCRegisterName(method string, handlerFunc interface{})
-	BiRPCRegister(rcvr interface{})
 }
 
 func LocalAddr() *NetAddr {
