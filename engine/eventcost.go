@@ -517,7 +517,9 @@ func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
 		ec.Charges = append(ec.Charges, cIl)
 		if *idxLastCF > 1 { // add the remaining part out of original ChargingInterval
 			cIlCln.CompressFactor = *idxLastCF - 1
-			ec.Charges = append(ec.Charges, cIlCln)
+			// append the cloned charge in order to not keep refrences
+			// of the increments used for previous charge
+			ec.Charges = append(ec.Charges, cIlCln.Clone())
 		}
 	}
 }
