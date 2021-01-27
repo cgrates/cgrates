@@ -229,9 +229,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 		s.httpEnabled = true
 		s.Unlock()
 		utils.Logger.Info("<HTTP> enabling handler for WebSocket connections")
-		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
-			rpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
-		})
+		wsHandler := websocket.Handler(s.handleWebSocket)
 		if useBasicAuth {
 			s.httpMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
@@ -413,6 +411,10 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 	s.serveCodecTLS(addr, utils.JSONCaps, serverCrt, serverKey, caCert, serverPolicy, serverName, newCapsJSONCodec, shdChan)
 }
 
+func (s *Server) handleWebSocket(ws *websocket.Conn) {
+	rpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
+}
+
 func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,
 	serverName string, jsonRPCURL string, wsRPCURL string,
 	useBasicAuth bool, userList map[string]string, shdChan *utils.SyncedChan) {
@@ -438,9 +440,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		s.httpEnabled = true
 		s.Unlock()
 		utils.Logger.Info("<HTTPS> enabling handler for WebSocket connections")
-		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
-			rpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
-		})
+		wsHandler := websocket.Handler(s.handleWebSocket)
 		if useBasicAuth {
 			s.httpsMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
