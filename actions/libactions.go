@@ -108,7 +108,11 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 	case utils.MetaHTTPPost:
 		return &actHTTPPost{aCfg: aCfg}, nil
 	case utils.MetaExport:
-		return &actExport{config: cfg, connMgr: connMgr, aCfg: aCfg, tnt: tnt}, err
+		return &actExport{config: cfg, connMgr: connMgr, aCfg: aCfg, tnt: tnt}, nil
+	case utils.MetaResetStatQueue:
+		return &actResetStat{config: cfg, connMgr: connMgr, aCfg: aCfg}, nil
+	case utils.MetaResetThreshold:
+		return &actResetThreshold{config: cfg, connMgr: connMgr, aCfg: aCfg}, nil
 	default:
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)
 
@@ -286,4 +290,54 @@ func (aL *actExport) execute(ctx context.Context, data utils.MapStorage) (err er
 	var rply map[string]map[string]interface{}
 	return aL.connMgr.Call(aL.config.ActionSCfg().EEsConns, nil,
 		utils.EeSv1ProcessEvent, args, &rply)
+}
+
+type actResetStat struct {
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	aCfg    *engine.APAction
+}
+
+func (aL *actResetStat) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actResetStat) cfg() *engine.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actResetStat) execute(ctx context.Context, data utils.MapStorage) (err error) {
+	var tenID string
+	if tenID, err = aL.cfg().Value.ParseDataProvider(data); err != nil {
+		return
+	}
+	var rply string
+	return aL.connMgr.Call(aL.config.ActionSCfg().StatSConns, nil,
+		utils.StatSv1ResetStatQueue, &utils.TenantIDWithOpts{TenantID: utils.NewTenantID(tenID)}, &rply)
+}
+
+type actResetThreshold struct {
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	aCfg    *engine.APAction
+}
+
+func (aL *actResetThreshold) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actResetThreshold) cfg() *engine.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actResetThreshold) execute(ctx context.Context, data utils.MapStorage) (err error) {
+	var tenID string
+	if tenID, err = aL.cfg().Value.ParseDataProvider(data); err != nil {
+		return
+	}
+	var rply string
+	return aL.connMgr.Call(aL.config.ActionSCfg().ThresholdSConns, nil,
+		utils.ThresholdSv1ResetThreshold, &utils.TenantIDWithOpts{TenantID: utils.NewTenantID(tenID)}, &rply)
 }
