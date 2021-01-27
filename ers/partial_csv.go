@@ -265,6 +265,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 					rdrCfg:   rdr.Config(),
 				}
 				evsPosted++
+				rdr.cache.Set(cgrID, nil, nil)
 				rdr.cache.Remove(cgrID)
 			} else {
 				// overwrite the cache value with merged NavigableMap
@@ -356,6 +357,9 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 }
 
 func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
+	if value == nil {
+		return
+	}
 	tmz := utils.FirstNonEmpty(rdr.Config().Timezone,
 		rdr.cgrCfg.GeneralCfg().DefaultTimezone)
 	origCgrEvs := value.([]*utils.CGREvent)
