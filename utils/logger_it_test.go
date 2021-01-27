@@ -121,10 +121,11 @@ func testEmergencyLogger(t *testing.T) {
 	if err := newLogger.Emerg("emergency_panic"); err != nil {
 		t.Error(err)
 	}
-	runtime.Gosched()
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
+	runtime.Gosched()
+	time.Sleep(100 * time.Millisecond)
 	if err := l.Close(); err != nil {
 		t.Error(err)
 	}
@@ -156,10 +157,11 @@ func testAlertLogger(t *testing.T) {
 	if err := newLogger.Alert("emergency_alert"); err != nil {
 		t.Error(err)
 	}
-	runtime.Gosched()
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
+	runtime.Gosched()
+	time.Sleep(100 * time.Millisecond)
 	if err := l.Close(); err != nil {
 		t.Error(err)
 	}
@@ -189,10 +191,10 @@ func testCriticalLogger(t *testing.T) {
 	if err := newLogger.Crit("critical_panic"); err != nil {
 		t.Error(err)
 	}
-	runtime.Gosched()
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
+	runtime.Gosched()
 	time.Sleep(100 * time.Millisecond)
 	if err := l.Close(); err != nil {
 		t.Error(err)
@@ -223,10 +225,11 @@ func testErrorLogger(t *testing.T) {
 	if err := newLogger.Err("error_panic"); err != nil {
 		t.Error(err)
 	}
-	runtime.Gosched()
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
+	runtime.Gosched()
+	time.Sleep(100 * time.Millisecond)
 	if err := l.Close(); err != nil {
 		t.Error(err)
 	}
@@ -256,10 +259,11 @@ func testWarningLogger(t *testing.T) {
 	if err := newLogger.Warning("warning_panic"); err != nil {
 		t.Error(err)
 	}
-	runtime.Gosched()
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
+	runtime.Gosched()
+	time.Sleep(100 * time.Millisecond)
 	if err := l.Close(); err != nil {
 		t.Error(err)
 	}
@@ -289,11 +293,12 @@ func testNoticeLogger(t *testing.T) {
 	if err := newLogger.Notice("notice_panic"); err != nil {
 		t.Error(err)
 	}
-	runtime.Gosched()
 
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
+	runtime.Gosched()
+	time.Sleep(100 * time.Millisecond)
 	if err := l.Close(); err != nil {
 		t.Error(err)
 	}
@@ -323,11 +328,11 @@ func testInfoLogger(t *testing.T) {
 	if err := newLogger.Info("info_panic"); err != nil {
 		t.Error(err)
 	}
-	runtime.Gosched()
-
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
+	runtime.Gosched()
+	time.Sleep(100 * time.Millisecond)
 	if err := l.Close(); err != nil {
 		t.Error(err)
 	}
@@ -357,11 +362,11 @@ func testDebugLogger(t *testing.T) {
 	if err := newLogger.Debug("debug_panic"); err != nil {
 		t.Error(err)
 	}
-	runtime.Gosched()
-
 	if err := writer.Close(); err != nil {
 		t.Error(err)
 	}
+	runtime.Gosched()
+	time.Sleep(100 * time.Millisecond)
 	if err := l.Close(); err != nil {
 		t.Error(err)
 	}

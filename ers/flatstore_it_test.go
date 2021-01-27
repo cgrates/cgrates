@@ -175,8 +175,12 @@ func testFlatstoreITHandleCdr1File(t *testing.T) {
 		t.Errorf("Files in ersInDir: %+v", filesInDir)
 	}
 	filesOutDir, _ := ioutil.ReadDir("/tmp/flatstoreErs/out")
+	ids := []string{}
+	for _, fD := range filesOutDir {
+		ids = append(ids, fD.Name())
+	}
 	if len(filesOutDir) != 6 {
-		t.Errorf("Unexpected number of files in output directory: %+v", len(filesOutDir))
+		t.Errorf("Unexpected number of files in output directory: %+v, %q", len(filesOutDir), ids)
 	}
 	ePartContent := "INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475\n"
 	if partContent, err := ioutil.ReadFile(path.Join("/tmp/flatstoreErs/out", "acc_3.log.tmp")); err != nil {

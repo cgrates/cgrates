@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"os"
 	"path"
 	"sync"
 	"testing"
@@ -35,7 +36,9 @@ import (
 
 func TestAnalyzerSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
+	if err := os.MkdirAll("/tmp/analyzers", 0700); err != nil {
+		t.Fatal(err)
+	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
@@ -95,5 +98,7 @@ func TestAnalyzerSReload(t *testing.T) {
 
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
-
+	if err := os.RemoveAll("/tmp/analyzers"); err != nil {
+		t.Fatal(err)
+	}
 }
