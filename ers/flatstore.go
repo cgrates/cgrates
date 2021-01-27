@@ -180,6 +180,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 							utils.ERs, utils.ToJSON(pair), utils.ToJSON(pr), err.Error()))
 					continue
 				}
+				rdr.cache.Set(pr.OriginID, nil, nil)
 				rdr.cache.Remove(pr.OriginID)
 			}
 		}
@@ -295,6 +296,9 @@ func pairToRecord(part1, part2 *UnpairedRecord) ([]string, error) {
 }
 
 func (rdr *FlatstoreER) dumpToFile(itmID string, value interface{}) {
+	if value == nil {
+		return
+	}
 	unpRcd := value.(*UnpairedRecord)
 
 	dumpFilePath := path.Join(rdr.Config().ProcessedPath, unpRcd.FileName+utils.TmpSuffix)
