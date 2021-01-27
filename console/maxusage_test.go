@@ -51,4 +51,11 @@ func TestCmdMaxUsage(t *testing.T) {
 	if err := command.PostprocessRpcParams(); err != nil {
 		t.Fatal(err)
 	}
+	expected := []string{utils.ToR, utils.RequestType, utils.Tenant,
+		utils.Category, utils.AccountField, utils.Subject, utils.Destination,
+		utils.SetupTime, utils.AnswerTime, utils.Usage, utils.ExtraFields}
+
+	if !reflect.DeepEqual(command.ClientArgs(), expected) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected, command.ClientArgs())
+	}
 }
