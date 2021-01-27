@@ -25,6 +25,8 @@ type ActionSCfg struct {
 	Enabled             bool
 	CDRsConns           []string
 	EEsConns            []string
+	ThresholdSConns     []string
+	StatSConns          []string
 	Tenants             *[]string
 	IndexedSelects      bool
 	StringIndexedFields *[]string
@@ -54,6 +56,26 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 			acS.EEsConns[idx] = connID
 			if connID == utils.MetaInternal {
 				acS.EEsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
+			}
+		}
+	}
+	if jsnCfg.Thresholds_conns != nil {
+		acS.ThresholdSConns = make([]string, len(*jsnCfg.Thresholds_conns))
+		for idx, connID := range *jsnCfg.Thresholds_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			acS.ThresholdSConns[idx] = connID
+			if connID == utils.MetaInternal {
+				acS.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+			}
+		}
+	}
+	if jsnCfg.Stats_conns != nil {
+		acS.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
+		for idx, connID := range *jsnCfg.Stats_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			acS.StatSConns[idx] = connID
+			if connID == utils.MetaInternal {
+				acS.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
 			}
 		}
 	}
@@ -114,6 +136,26 @@ func (acS *ActionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.CDRsConnsCfg] = CDRsConns
 	}
+	if acS.ThresholdSConns != nil {
+		threshSConns := make([]string, len(acS.ThresholdSConns))
+		for i, item := range acS.ThresholdSConns {
+			threshSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+				threshSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.ThresholdSConnsCfg] = threshSConns
+	}
+	if acS.StatSConns != nil {
+		statSConns := make([]string, len(acS.StatSConns))
+		for i, item := range acS.StatSConns {
+			statSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+				statSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.StatSConnsCfg] = statSConns
+	}
 	if acS.EEsConns != nil {
 		eesConns := make([]string, len(acS.EEsConns))
 		for i, item := range acS.EEsConns {
@@ -168,6 +210,18 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 			cln.CDRsConns[i] = con
 		}
 	}
+	if acS.ThresholdSConns != nil {
+		cln.ThresholdSConns = make([]string, len(acS.ThresholdSConns))
+		for i, con := range acS.ThresholdSConns {
+			cln.ThresholdSConns[i] = con
+		}
+	}
+	if acS.StatSConns != nil {
+		cln.StatSConns = make([]string, len(acS.StatSConns))
+		for i, con := range acS.StatSConns {
+			cln.StatSConns[i] = con
+		}
+	}
 	if acS.EEsConns != nil {
 		cln.EEsConns = make([]string, len(acS.EEsConns))
 		for i, k := range acS.EEsConns {
@@ -202,6 +256,5 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 		}
 		cln.SuffixIndexedFields = &idx
 	}
-
 	return
 }
