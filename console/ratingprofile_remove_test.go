@@ -18,7 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-/*
+import (
+	"reflect"
+	"strings"
+	"testing"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
+
 func TestCmdRatingPlanRem(t *testing.T) {
 	// commands map is initiated in init function
 	command := commands["ratingprofile_remove"]
@@ -38,9 +46,36 @@ func TestCmdRatingPlanRem(t *testing.T) {
 	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
 	}
-	// for coverage purpose
-	if err := command.PostprocessRpcParams(); err != nil {
+
+}
+
+func TestCmdRatingPlanRemPostprocessRpcParams(t *testing.T) {
+	testStruct := CmdRemRatingProfile{
+		name:            "",
+		rpcMethod:       "",
+		rpcParams:       nil,
+		rpcResult:       "",
+		CommandExecuter: nil,
+	}
+
+	if err := testStruct.PostprocessRpcParams(); err != nil {
 		t.Fatal(err)
 	}
 }
-*/
+
+func TestCmdRatingPlanRemPostprocessRpcParamsError(t *testing.T) {
+	testStruct := CmdRemRatingProfile{
+		name:            "",
+		rpcMethod:       "",
+		rpcParams:       &v1.AttrRemoveRatingProfile{},
+		rpcResult:       "",
+		CommandExecuter: nil,
+	}
+
+	err := testStruct.PostprocessRpcParams()
+
+	if err == nil || err != utils.ErrMandatoryIeMissing {
+		t.Fatal(err)
+	}
+
+}

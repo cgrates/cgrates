@@ -50,4 +50,21 @@ func TestCmdCost(t *testing.T) {
 	if err := command.PostprocessRpcParams(); err != nil {
 		t.Fatal(err)
 	}
+	// for coverage purpose
+	formatedResult := command.GetFormatedResult(command.RpcResult())
+	expected := GetFormatedResult(command.RpcResult(), utils.StringSet{
+		utils.Usage:              {},
+		utils.GroupIntervalStart: {},
+		utils.RateIncrement:      {},
+		utils.RateUnit:           {},
+	})
+	if !reflect.DeepEqual(formatedResult, expected) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected, formatedResult)
+	}
+	// for coverage purpose
+	result := command.ClientArgs()
+	expected2 := []string{utils.Tenant, utils.Category, utils.Subject, utils.AnswerTime, utils.Destination, utils.Usage}
+	if !reflect.DeepEqual(result, expected2) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected2, result)
+	}
 }

@@ -50,4 +50,5 @@ func TestCmdThreshold(t *testing.T) {
 	if err := command.PostprocessRpcParams(); err != nil {
 		t.Fatal(err)
 	}
+
 }
