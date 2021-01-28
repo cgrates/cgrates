@@ -110,7 +110,7 @@ func TestKafkaER(t *testing.T) {
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
 		}
-	case <-time.After(10 * time.Second):
+	case <-time.After(30 * time.Second):
 		t.Fatal("Timeout")
 	}
 	close(rdrExit)

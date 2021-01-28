@@ -314,7 +314,7 @@ func testCDRsExpKafka(t *testing.T) {
 
 	defer reader.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	var m kafka.Message
 	var err error
 	if m, err = reader.ReadMessage(ctx); err != nil {

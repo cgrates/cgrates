@@ -491,7 +491,7 @@ func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 	defer reader.Close()
 
 	for i := 0; i < 2; i++ { // no raw CDR
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		if m, err := reader.ReadMessage(ctx); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(failoverContent[0], m.Value) && !reflect.DeepEqual(failoverContent[1], m.Value) { // Checking just the prefix should do since some content is dynamic

@@ -50,4 +50,3 @@ func TestCmdTriggerRemove(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-
