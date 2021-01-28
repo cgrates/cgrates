@@ -362,7 +362,7 @@ func testCDRsExpFileFailover(t *testing.T) {
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsExpCfg.GeneralCfg().FailedPostsDir)
 	}
-	expectedFormats := utils.NewStringSet([]string{utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaKafkajsonMap, utils.MetaSQSjsonMap, utils.MetaS3jsonMap})
+	expectedFormats := utils.NewStringSet([]string{utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaS3jsonMap})
 	rcvFormats := utils.StringSet{}
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName := file.Name()
