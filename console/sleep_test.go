@@ -50,4 +50,21 @@ func TestCmdSleep(t *testing.T) {
 	if err := command.PostprocessRpcParams(); err != nil {
 		t.Fatal(err)
 	}
+
+}
+func TestCmdSleepPostprocessRpcParamsCase2(t *testing.T) {
+	testStruct := &CmdSleep{
+		name:      "",
+		rpcMethod: "",
+		rpcParams: &StringWrapper{
+			Item: "test_item",
+		},
+		CommandExecuter: nil,
+	}
+
+	err := testStruct.PostprocessRpcParams()
+	if err == nil || err.Error() != "time: invalid duration \"test_item\"" {
+		t.Errorf("Expected <time: invalid duration \"test_item\">, Received <%T>", err)
+	}
+
 }

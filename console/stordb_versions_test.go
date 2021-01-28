@@ -18,7 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-/*
+import (
+	"reflect"
+	"strings"
+	"testing"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
+
 func TestCmdStorDBVersions(t *testing.T) {
 	// commands map is initiated in init function
 	command := commands["stordb_versions"]
@@ -30,10 +38,12 @@ func TestCmdStorDBVersions(t *testing.T) {
 	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
 		t.Fatalf("invalid number of input parameters ")
 	}
-	// verify the type of input parameter
-	if ok := m.Type.In(1).AssignableTo(reflect.TypeOf(command.RpcParams(true))); !ok {
-		t.Fatalf("cannot assign input parameter")
+	// for coverage purpose
+	result := command.RpcParams(true)
+	if !reflect.DeepEqual(result, new(EmptyWrapper)) {
+		t.Errorf("Expected <%T>, Received <%T>", new(EmptyWrapper), result)
 	}
+
 	// verify the type of output parameter
 	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
 		t.Fatalf("cannot assign output parameter")
@@ -42,5 +52,8 @@ func TestCmdStorDBVersions(t *testing.T) {
 	if err := command.PostprocessRpcParams(); err != nil {
 		t.Fatal(err)
 	}
+	// for coverage purpose
+	if err := command.ClientArgs(); err != nil {
+		t.Fatal(err)
+	}
 }
-*/
