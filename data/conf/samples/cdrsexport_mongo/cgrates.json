@@ -119,7 +119,7 @@
 				"topic": "cgrates_cdrs",
 			},
 			"tenant": "cgrates.org",
-			"attempts": 1,
+			"attempts": 10,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],
