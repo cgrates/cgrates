@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -56,5 +55,25 @@ func TestCmdMaxDuration(t *testing.T) {
 
 	if !reflect.DeepEqual(command.ClientArgs(), expected) {
 		t.Errorf("Expected <%+v>, Received <%+v>", expected, command.ClientArgs())
+	}
+	result := command.GetFormatedResult(command.RpcResult())
+	if !reflect.DeepEqual(result, `"0s"`) {
+		t.Errorf("Expected <%+v>, Received <%+v>", `"0s"`, result)
+	}
+
+}
+
+func TestCmdMaxDurationGetFormatedResultCase2(t *testing.T) {
+	testStruct := &CmdGetMaxDuration{
+		name:            "",
+		rpcMethod:       "",
+		rpcParams:       nil,
+		clientArgs:      nil,
+		CommandExecuter: nil,
+	}
+
+	result := testStruct.GetFormatedResult(testStruct)
+	if !reflect.DeepEqual(result, "{}") {
+		t.Errorf("Expected <%+v>, Received <%+v>", "{}", result)
 	}
 }

@@ -51,11 +51,23 @@ func TestCmdMaxUsage(t *testing.T) {
 	if err := command.PostprocessRpcParams(); err != nil {
 		t.Fatal(err)
 	}
-	expected := []string{utils.ToR, utils.RequestType, utils.Tenant,
+	// for coverage purpose
+	formatedResult := command.GetFormatedResult(command.RpcResult())
+	expected := GetFormatedResult(command.RpcResult(), utils.StringSet{
+		utils.Usage:              {},
+		utils.GroupIntervalStart: {},
+		utils.RateIncrement:      {},
+		utils.RateUnit:           {},
+	})
+	if !reflect.DeepEqual(formatedResult, expected) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected, formatedResult)
+	}
+	expected2 := []string{utils.ToR, utils.RequestType, utils.Tenant,
 		utils.Category, utils.AccountField, utils.Subject, utils.Destination,
 		utils.SetupTime, utils.AnswerTime, utils.Usage, utils.ExtraFields}
 
-	if !reflect.DeepEqual(command.ClientArgs(), expected) {
-		t.Errorf("Expected <%+v>, Received <%+v>", expected, command.ClientArgs())
+	if !reflect.DeepEqual(command.ClientArgs(), expected2) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected2, command.ClientArgs())
 	}
+
 }
