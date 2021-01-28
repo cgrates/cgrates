@@ -22,6 +22,8 @@ package cores
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -35,6 +37,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"golang.org/x/net/websocket"
 
 	sessions2 "github.com/cgrates/cgrates/sessions"
 
@@ -75,6 +79,7 @@ var (
 		testHandleRequest,
 		testBiRPCRegisterName,
 		testAcceptBiRPC,
+		testAcceptBiRPCError,
 		testRpcRegisterActions,
 		testWebSocket,
 	}
@@ -700,6 +705,26 @@ func testAcceptBiRPC(t *testing.T) {
 	runtime.Gosched()
 }
 
+type mockListenError struct {
+	*mockListener
+}
+
+func (mK *mockListenError) Accept() (net.Conn, error) {
+	return nil, errors.New("use of closed network connection")
+}
+
+func testAcceptBiRPCError(t *testing.T) {
+	caps := engine.NewCaps(0, utils.MetaBusy)
+	server := NewServer(caps)
+	server.RpcRegister(new(mockRegister))
+	server.birpcSrv = rpc2.NewServer()
+
+	//it will contain "use of closed network connection"
+	l := new(mockListenError)
+	go server.acceptBiRPC(l)
+	runtime.Gosched()
+}
+
 func testRpcRegisterActions(t *testing.T) {
 	caps := engine.NewCaps(0, utils.MetaBusy)
 	server := NewServer(caps)
@@ -732,29 +757,37 @@ func testRpcRegisterActions(t *testing.T) {
 }
 
 func testWebSocket(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
-	server.RpcRegister(new(mockRegister))
+	server.RpcRegisterName("mockRegister", new(mockRegister))
 
-	shdChan := utils.NewSyncedChan()
-
-	authUsers := map[string]string{
-		"admin": "password",
+	s := httptest.NewServer(websocket.Handler(server.handleWebSocket))
+	config, err := websocket.NewConfig(fmt.Sprintf("ws://%s", s.Listener.Addr().String()), "http://localhost")
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	//Invalid port address
-	go server.ServeHTTPTLS(
-		"57235",
-		"/usr/share/cgrates/tls/inexisting_file",
-		"/usr/share/cgrates/tls/server.key",
-		"/usr/share/cgrates/tls/ca.crt",
-		cfgDflt.TLSCfg().ServerPolicy,
-		cfgDflt.TLSCfg().ServerName,
-		utils.EmptyString,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		true,
-		authUsers,
-		shdChan)
-	runtime.Gosched()
+	c1, err := net.Dial(utils.TCP, s.Listener.Addr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	conn1, err := websocket.NewClient(config, c1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rpc := jsonrpc.NewClient(conn1)
+	var reply string
+	err = rpc.Call("mockRegister.Ping", "", &reply)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reply != utils.Pong {
+		t.Errorf("Expected Pong, receive %+s", reply)
+	}
+
+	conn1.Close()
+
+	s.Close()
 }

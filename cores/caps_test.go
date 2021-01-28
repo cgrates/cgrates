@@ -22,6 +22,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"reflect"
+	"syscall"
 	"testing"
 
 	"github.com/cgrates/cgrates/analyzers"
@@ -102,7 +103,7 @@ func TestNewCapsServerCodec(t *testing.T) {
 
 type mockConn struct{}
 
-func (*mockConn) Read(b []byte) (n int, err error)  { return }
+func (*mockConn) Read(b []byte) (n int, err error)  { return 0, syscall.EINVAL }
 func (*mockConn) Write(b []byte) (n int, err error) { return }
 func (*mockConn) Close() error                      { return nil }
 func (*mockConn) LocalAddr() net.Addr               { return utils.LocalAddr() }
