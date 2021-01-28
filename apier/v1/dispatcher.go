@@ -1361,3 +1361,8 @@ type DispatcherAccountSv1 struct {
 func (dR *DispatcherAccountSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dR.dR.AccountSv1Ping(args, reply)
 }
+
+func (rS *DispatcherSv1) Ping(ign *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}
