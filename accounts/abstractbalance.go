@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -211,7 +210,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 		}
 	}
 
-	origBlclVal := new(decimal.Big).Copy(aB.blnCfg.Units.Big) // so we can restore on errors
+	//origBlclVal := new(decimal.Big).Copy(aB.blnCfg.Units.Big) // so we can restore on errors
 
 	// balanceLimit
 	var hasLmt bool
@@ -241,42 +240,73 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 
 	// attempt to debit usage with cost
 	// fix the maximum number of iterations
-	usagePaid, usageDenied := new(decimal.Big), new(decimal.Big)
-	clnedUnts := cloneUnitsFromConcretes(aB.cncrtBlncs) // so we can revert during usage checks
-	for i := 0; i < 10000; i++ {
+	origConcrtUnts := cloneUnitsFromConcretes(aB.cncrtBlncs) // so we can revert during usage checks
+	paidConcrtUnts := origConcrtUnts
+	var usagePaid, usageDenied *decimal.Big
+	maxIter := 100
+	for i := 0; i < maxIter; i++ {
+		if i != 0 {
+			restoreUnitsFromClones(aB.cncrtBlncs, origConcrtUnts)
+		}
+		if i == maxIter {
+			//aB.blnCfg.Units.Big = origBlclVal
+			return nil, utils.ErrMaxIncrementsExceeded
+		}
+		//fmt.Printf("i: %d, usage: %s\n", i, usage)
 		if err = aB.debitUsageFromConcrete(usage, costIcrm, cgrEv); err != nil {
 			if err != utils.ErrInsufficientCredit {
-				aB.blnCfg.Units.Big = origBlclVal
+				//aB.blnCfg.Units.Big = origBlclVal
 				return
 			}
+			err = nil
+			// ErrInsufficientCredit
 			usageDenied = new(decimal.Big).Copy(usage.Big)
-			usage.Big = utils.DivideBig( // divide by 2
-				utils.SubstractBig(usageDenied, usagePaid),
-				decimal.New(2, 0)).RoundToInt()
-			usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big) // make sure usage is multiple of increments
-		}
-		if i == 0 { // no estimation done, covering full
-			aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, usage.Big)
-			if hasLmt { // put back the limit
-				aB.blnCfg.Units.Big = utils.SumBig(aB.blnCfg.Units.Big, blncLmt.Big)
+			if usagePaid == nil { // going backwards
+				usage.Big = utils.DivideBig( // divide by 2
+					usage.Big, decimal.New(2, 0))
+				usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big) // make sure usage is multiple of increments
+				if usage.Big.Cmp(usageDenied) >= 0 ||
+					usage.Big.Cmp(decimal.New(0, 0)) == 0 {
+					break
+				}
+				continue
 			}
-			if hasUF {
-				usage.Big = utils.DivideBig(usage.Big, uF.Factor.Big)
+
+		} else {
+			usagePaid = new(decimal.Big).Copy(usage.Big)
+			paidConcrtUnts = cloneUnitsFromConcretes(aB.cncrtBlncs)
+			if i == 0 { // no estimation done, covering full
+				break
 			}
-			return
 		}
-		usagePaid = new(decimal.Big).Copy(usage.Big)
-		usage.Big = utils.DivideBig( // divide by 2
-			utils.SubstractBig(usageDenied, usagePaid),
-			decimal.New(2, 0)).RoundToInt()
+		// going upwards
+		usage.Big = utils.SumBig(usagePaid,
+			utils.DivideBig(usagePaid, decimal.New(2, 0)).RoundToInt())
+		if usage.Big.Cmp(usageDenied) >= 0 {
+			usage.Big = utils.SumBig(usagePaid, costIcrm.Increment.Big)
+		}
 		usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big)
 		if usage.Big.Cmp(usagePaid) <= 0 ||
 			usage.Big.Cmp(usageDenied) >= 0 {
-			return
+			break
 		}
 	}
-	fmt.Printf("hasLmt: %v, hasUF: %v", hasLmt, hasUF)
-	restoreUnitsFromClones(aB.cncrtBlncs, clnedUnts) // since we are erroring, we restore the concerete balances
-	aB.blnCfg.Units.Big = origBlclVal
-	return nil, utils.ErrMaxIncrementsExceeded
+	// Nothing paid
+	if usagePaid == nil {
+		// since we are erroring, we restore the concerete balances
+		//aB.blnCfg.Units.Big = origBlclVal
+		usagePaid = decimal.New(0, 0)
+	}
+
+	restoreUnitsFromClones(aB.cncrtBlncs, paidConcrtUnts)
+	if usagePaid.Cmp(decimal.New(0, 0)) != 0 {
+		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, usagePaid)
+	}
+	if hasLmt { // put back the limit
+		aB.blnCfg.Units.Big = utils.SumBig(aB.blnCfg.Units.Big, blncLmt.Big)
+	}
+	if hasUF {
+		usage.Big = utils.DivideBig(usage.Big, uF.Factor.Big)
+	}
+	return
 }
