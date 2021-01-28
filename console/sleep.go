@@ -18,9 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
 	c := &CmdSleep{

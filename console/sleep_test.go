@@ -64,7 +64,7 @@ func TestCmdSleepPostprocessRpcParamsCase2(t *testing.T) {
 
 	err := testStruct.PostprocessRpcParams()
 	if err == nil || err.Error() != "time: invalid duration \"test_item\"" {
-		t.Errorf("Expected <time: invalid duration \"test_item\">, Received <%T>", err)
+		t.Errorf("Expected <time: invalid duration \"test_item\">, Received <%+v>", err)
 	}
 
 }
