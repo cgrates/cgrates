@@ -23,6 +23,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	jwt "github.com/dgrijalva/jwt-go"
@@ -199,6 +201,26 @@ func TestProcessedIdentityVerifyPayload(t *testing.T) {
 	}
 }
 
+func TestVerifySignature(t *testing.T) {
+	rply, err := NewProcessedIdentity("eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken")
+	if err != nil {
+		t.Error(err)
+	}
+	cfg := config.NewDefaultCGRConfig()
+
+	rply.Header.X5u = "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_pubkey.pem"
+	expectedErr := "crypto/ecdsa: verification error"
+	if err := rply.VerifySignature(cfg.GeneralCfg().ReplyTimeout); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	rply.Header.X5u = "Invalid_url"
+	expectedErr = "open Invalid_url: no such file or directory"
+	if err := rply.VerifySignature(cfg.GeneralCfg().ReplyTimeout); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
 func TestAuthStirShaken(t *testing.T) {
 	if err := AuthStirShaken("", "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err == nil {
 		t.Error("Expected invalid identity")
@@ -239,6 +261,22 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err := AuthStirShaken(
 		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken", "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestNewSTIRIdentityError(t *testing.T) {
+	rply, err := NewProcessedIdentity("eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, err := NewSTIRIdentity(rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pem", -1); err != nil {
+		t.Error(err)
+	}
+
+	expectedErr := "http status error: 404"
+	if _, err := NewSTIRIdentity(rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pe", -1); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
 
