@@ -72,7 +72,7 @@
 				"routingKey": "cgr_cdrs",
 			},
 			"tenant": "cgrates.org",
-			"attempts": 4,
+			"attempts": 20,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],
@@ -80,7 +80,7 @@
 		{
 			"id": "aws_test_file",
 			"type": "*amqpv1_json_map",
-			"export_path": "amqps://guest:guest@localhost:25672/",
+			"export_path": "amqps://guest:guest@localhost:95672/",
 			"opts": {
 				"queueID": "cgrates_cdrs",
 			},

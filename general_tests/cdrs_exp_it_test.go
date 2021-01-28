@@ -250,7 +250,7 @@ func testCDRsExpExportEvent(t *testing.T) {
 			Flags:    []string{"*export:true", utils.MetaRALs},
 			CGREvent: *cdrsExpEv,
 		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() { // some exporters will fail
-		t.Error("Unexpected error: ", err.Error())
+		t.Error("Unexpected error: ", err)
 	}
 	time.Sleep(100 * time.Millisecond)
 	filesInDir, _ := ioutil.ReadDir(cdrsExpCfg.GeneralCfg().FailedPostsDir)
