@@ -641,3 +641,17 @@ func TestCmdPingActionSLow(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestCmdPingTestDefault(t *testing.T) {
+	// commands map is initiated in init function
+	command := commands["ping"]
+	castCommand, canCast := command.(*CmdApierPing)
+	if !canCast {
+		t.Fatalf("cannot cast")
+	}
+	castCommand.item = "test_item"
+	result2 := command.RpcMethod()
+	if !reflect.DeepEqual(result2, "") {
+		t.Errorf("Expected <%T>, Received <%T>", "", result2)
+	}
+}
