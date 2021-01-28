@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -90,7 +89,6 @@ func (self *CmdApierPing) RpcMethod() string {
 		return utils.ActionSv1Ping
 	default:
 	}
-	fmt.Println("yay")
 	return self.rpcMethod
 }
 
