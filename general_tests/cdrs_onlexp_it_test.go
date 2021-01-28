@@ -275,10 +275,13 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 		},
 	}
 	var reply string
+	arg := testCdr1.AsCGREvent()
+	arg.Opts = map[string]interface{}{"ExporterID": "http_localhost"}
+
 	// we expect that the cdr export to fail and go into the failed post directory
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
-			CGREvent: *testCdr1.AsCGREvent(),
+			CGREvent: *arg,
 		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Error("Unexpected error: ", err)
 	}
