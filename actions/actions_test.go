@@ -838,3 +838,301 @@ func TestExportActionWithEeIDs(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+	sMock2 := &testMockCDRsConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.ThresholdSv1ResetThreshold: func(arg interface{}, rply interface{}) error {
+				argConv, can := arg.(*utils.TenantIDWithOpts)
+				if !can {
+					return fmt.Errorf("Wrong argument type: %T", arg)
+				}
+				if argConv.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
+				}
+				if argConv.ID != "TH1" {
+					return fmt.Errorf("Expected %+v, received %+v", "TH1", argConv.ID)
+				}
+				return nil
+			},
+		},
+	}
+	internalChann := make(chan rpcclient.ClientConnector, 1)
+	internalChann <- sMock2
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
+	})
+	apA := &engine.APAction{
+		ID:    "ACT_RESET_TH",
+		Type:  utils.MetaResetThreshold,
+		Value: config.NewRSRParsersMustCompile("cgrates.org;:;TH1", utils.InfieldSep),
+	}
+	exportAction := &actResetThreshold{
+		tnt:     "cgrates.org",
+		config:  cfg,
+		connMgr: connMgr,
+		aCfg:    apA,
+	}
+	evNM := utils.MapStorage{
+		utils.MetaOpts: map[string]interface{}{},
+	}
+	if err := exportAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestExportActionResetThresholdStaticID(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+	sMock2 := &testMockCDRsConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.ThresholdSv1ResetThreshold: func(arg interface{}, rply interface{}) error {
+				argConv, can := arg.(*utils.TenantIDWithOpts)
+				if !can {
+					return fmt.Errorf("Wrong argument type: %T", arg)
+				}
+				if argConv.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
+				}
+				if argConv.ID != "TH1" {
+					return fmt.Errorf("Expected %+v, received %+v", "TH1", argConv.ID)
+				}
+				return nil
+			},
+		},
+	}
+	internalChann := make(chan rpcclient.ClientConnector, 1)
+	internalChann <- sMock2
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
+	})
+	apA := &engine.APAction{
+		ID:    "ACT_RESET_TH",
+		Type:  utils.MetaResetThreshold,
+		Value: config.NewRSRParsersMustCompile("TH1", utils.InfieldSep),
+	}
+	exportAction := &actResetThreshold{
+		tnt:     "cgrates.org",
+		config:  cfg,
+		connMgr: connMgr,
+		aCfg:    apA,
+	}
+	evNM := utils.MapStorage{
+		utils.MetaOpts: map[string]interface{}{},
+	}
+	if err := exportAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestExportActionResetThresholdVariableID(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+	sMock2 := &testMockCDRsConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.ThresholdSv1ResetThreshold: func(arg interface{}, rply interface{}) error {
+				argConv, can := arg.(*utils.TenantIDWithOpts)
+				if !can {
+					return fmt.Errorf("Wrong argument type: %T", arg)
+				}
+				if argConv.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
+				}
+				if argConv.ID != "TH1" {
+					return fmt.Errorf("Expected %+v, received %+v", "TH1", argConv.ID)
+				}
+				return nil
+			},
+		},
+	}
+	internalChann := make(chan rpcclient.ClientConnector, 1)
+	internalChann <- sMock2
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
+	})
+	apA := &engine.APAction{
+		ID:    "ACT_RESET_TH",
+		Type:  utils.MetaResetThreshold,
+		Value: config.NewRSRParsersMustCompile("~*req.RandomName", utils.InfieldSep),
+	}
+	exportAction := &actResetThreshold{
+		tnt:     "cgrates.org",
+		config:  cfg,
+		connMgr: connMgr,
+		aCfg:    apA,
+	}
+	evNM := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.AccountField: "10",
+			utils.Tenant:       "cgrates.org",
+			utils.BalanceType:  utils.MetaConcrete,
+			utils.Cost:         0.15,
+			utils.ActionType:   utils.MetaTopUp,
+			"RandomName":       "TH1",
+		},
+		utils.MetaOpts: map[string]interface{}{},
+	}
+	if err := exportAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestExportActionResetStatStaticTenantID(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+	sMock2 := &testMockCDRsConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.StatSv1ResetStatQueue: func(arg interface{}, rply interface{}) error {
+				argConv, can := arg.(*utils.TenantIDWithOpts)
+				if !can {
+					return fmt.Errorf("Wrong argument type: %T", arg)
+				}
+				if argConv.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
+				}
+				if argConv.ID != "ST1" {
+					return fmt.Errorf("Expected %+v, received %+v", "TH1", argConv.ID)
+				}
+				return nil
+			},
+		},
+	}
+	internalChann := make(chan rpcclient.ClientConnector, 1)
+	internalChann <- sMock2
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
+	})
+	apA := &engine.APAction{
+		ID:    "ACT_RESET_ST",
+		Type:  utils.MetaResetStatQueue,
+		Value: config.NewRSRParsersMustCompile("cgrates.org;:;ST1", utils.InfieldSep),
+	}
+	exportAction := &actResetStat{
+		tnt:     "cgrates.org",
+		config:  cfg,
+		connMgr: connMgr,
+		aCfg:    apA,
+	}
+	evNM := utils.MapStorage{
+		utils.MetaOpts: map[string]interface{}{},
+	}
+	if err := exportAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestExportActionResetStatStaticID(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+	sMock2 := &testMockCDRsConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.StatSv1ResetStatQueue: func(arg interface{}, rply interface{}) error {
+				argConv, can := arg.(*utils.TenantIDWithOpts)
+				if !can {
+					return fmt.Errorf("Wrong argument type: %T", arg)
+				}
+				if argConv.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
+				}
+				if argConv.ID != "ST1" {
+					return fmt.Errorf("Expected %+v, received %+v", "TH1", argConv.ID)
+				}
+				return nil
+			},
+		},
+	}
+	internalChann := make(chan rpcclient.ClientConnector, 1)
+	internalChann <- sMock2
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
+	})
+	apA := &engine.APAction{
+		ID:    "ACT_RESET_ST",
+		Type:  utils.MetaResetStatQueue,
+		Value: config.NewRSRParsersMustCompile("ST1", utils.InfieldSep),
+	}
+	exportAction := &actResetStat{
+		tnt:     "cgrates.org",
+		config:  cfg,
+		connMgr: connMgr,
+		aCfg:    apA,
+	}
+	evNM := utils.MapStorage{
+		utils.MetaOpts: map[string]interface{}{},
+	}
+	if err := exportAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestExportActionResetStatVariableID(t *testing.T) {
+	// Clear cache because connManager sets the internal connection in cache
+	engine.Cache.Clear([]string{utils.CacheRPCConnections})
+	sMock2 := &testMockCDRsConn{
+		calls: map[string]func(arg interface{}, rply interface{}) error{
+			utils.StatSv1ResetStatQueue: func(arg interface{}, rply interface{}) error {
+				argConv, can := arg.(*utils.TenantIDWithOpts)
+				if !can {
+					return fmt.Errorf("Wrong argument type: %T", arg)
+				}
+				if argConv.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
+				}
+				if argConv.ID != "ST1" {
+					return fmt.Errorf("Expected %+v, received %+v", "TH1", argConv.ID)
+				}
+				return nil
+			},
+		},
+	}
+	internalChann := make(chan rpcclient.ClientConnector, 1)
+	internalChann <- sMock2
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
+	})
+	apA := &engine.APAction{
+		ID:    "ACT_RESET_ST",
+		Type:  utils.MetaResetStatQueue,
+		Value: config.NewRSRParsersMustCompile("~*req.RandomName", utils.InfieldSep),
+	}
+	exportAction := &actResetStat{
+		tnt:     "cgrates.org",
+		config:  cfg,
+		connMgr: connMgr,
+		aCfg:    apA,
+	}
+	evNM := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.AccountField: "10",
+			utils.Tenant:       "cgrates.org",
+			utils.BalanceType:  utils.MetaConcrete,
+			utils.Cost:         0.15,
+			utils.ActionType:   utils.MetaTopUp,
+			"RandomName":       "ST1",
+		},
+		utils.MetaOpts: map[string]interface{}{},
+	}
+	if err := exportAction.execute(nil, evNM); err != nil {
+		t.Error(err)
+	}
+}

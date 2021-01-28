@@ -110,9 +110,9 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 	case utils.MetaExport:
 		return &actExport{config: cfg, connMgr: connMgr, aCfg: aCfg, tnt: tnt}, nil
 	case utils.MetaResetStatQueue:
-		return &actResetStat{config: cfg, connMgr: connMgr, aCfg: aCfg}, nil
+		return &actResetStat{config: cfg, connMgr: connMgr, aCfg: aCfg, tnt: tnt}, nil
 	case utils.MetaResetThreshold:
-		return &actResetThreshold{config: cfg, connMgr: connMgr, aCfg: aCfg}, nil
+		return &actResetThreshold{config: cfg, connMgr: connMgr, aCfg: aCfg, tnt: tnt}, nil
 	default:
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)
 
@@ -293,6 +293,7 @@ func (aL *actExport) execute(ctx context.Context, data utils.MapStorage) (err er
 }
 
 type actResetStat struct {
+	tnt     string
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
 	aCfg    *engine.APAction
@@ -312,12 +313,20 @@ func (aL *actResetStat) execute(ctx context.Context, data utils.MapStorage) (err
 	if tenID, err = aL.cfg().Value.ParseDataProvider(data); err != nil {
 		return
 	}
+	args := &utils.TenantIDWithOpts{
+		TenantID: utils.NewTenantID(tenID),
+		Opts:     data[utils.MetaOpts].(map[string]interface{}),
+	}
+	if args.Tenant == utils.EmptyString { // in case that user pass only ID we populate the tenant from the event
+		args.Tenant = aL.tnt
+	}
 	var rply string
 	return aL.connMgr.Call(aL.config.ActionSCfg().StatSConns, nil,
-		utils.StatSv1ResetStatQueue, &utils.TenantIDWithOpts{TenantID: utils.NewTenantID(tenID)}, &rply)
+		utils.StatSv1ResetStatQueue, args, &rply)
 }
 
 type actResetThreshold struct {
+	tnt     string
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
 	aCfg    *engine.APAction
@@ -337,7 +346,14 @@ func (aL *actResetThreshold) execute(ctx context.Context, data utils.MapStorage)
 	if tenID, err = aL.cfg().Value.ParseDataProvider(data); err != nil {
 		return
 	}
+	args := &utils.TenantIDWithOpts{
+		TenantID: utils.NewTenantID(tenID),
+		Opts:     data[utils.MetaOpts].(map[string]interface{}),
+	}
+	if args.Tenant == utils.EmptyString { // in case that user pass only ID we populate the tenant from the event
+		args.Tenant = aL.tnt
+	}
 	var rply string
 	return aL.connMgr.Call(aL.config.ActionSCfg().ThresholdSConns, nil,
-		utils.ThresholdSv1ResetThreshold, &utils.TenantIDWithOpts{TenantID: utils.NewTenantID(tenID)}, &rply)
+		utils.ThresholdSv1ResetThreshold, args, &rply)
 }
