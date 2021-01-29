@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestABDebitUsageFromConcrete(t *testing.T) {
+func TestDebitUsageFromConcrete(t *testing.T) {
 	aB := &abstractBalance{
 		cncrtBlncs: []*concreteBalance{
 			{
@@ -56,12 +56,12 @@ func TestABDebitUsageFromConcrete(t *testing.T) {
 			},
 		}}
 	// consume only from first balance
-	if err := aB.debitUsageFromConcrete(
+	if err := debitUsageFromConcrete(aB.cncrtBlncs,
 		utils.NewDecimal(int64(time.Duration(5*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
 			RecurrentFee: utils.NewDecimal(1, 0)},
-		new(utils.CGREvent)); err != nil {
+		new(utils.CGREvent), nil, nil, nil); err != nil {
 		t.Error(err)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -73,12 +73,12 @@ func TestABDebitUsageFromConcrete(t *testing.T) {
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(500, 0)
 	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 
-	if err := aB.debitUsageFromConcrete(
+	if err := debitUsageFromConcrete(aB.cncrtBlncs,
 		utils.NewDecimal(int64(time.Duration(9*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
 			RecurrentFee: utils.NewDecimal(1, 0)},
-		new(utils.CGREvent)); err != nil {
+		new(utils.CGREvent), nil, nil, nil); err != nil {
 		t.Error(err)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(-200, 0)) != 0 {
 		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -90,12 +90,12 @@ func TestABDebitUsageFromConcrete(t *testing.T) {
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(500, 0)
 	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 
-	if err := aB.debitUsageFromConcrete(
+	if err := debitUsageFromConcrete(aB.cncrtBlncs,
 		utils.NewDecimal(int64(time.Duration(10*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
 			RecurrentFee: utils.NewDecimal(1, 0)},
-		new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
+		new(utils.CGREvent), nil, nil, nil); err == nil || err != utils.ErrInsufficientCredit {
 		t.Error(err)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
 		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[0].blnCfg.Units)

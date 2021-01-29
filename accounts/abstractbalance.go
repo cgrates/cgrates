@@ -92,64 +92,6 @@ func (aB *abstractBalance) balanceLimit() (bL *utils.Decimal) {
 	return
 }
 
-// rateSCostForEvent will process the event with RateS in order to get the cost
-func (aB *abstractBalance) rateSCostForEvent(cgrEv *utils.CGREvent) (rplyCost *engine.RateProfileCost, err error) {
-	if len(aB.rateSConns) == 0 {
-		return nil, utils.NewErrNotConnected(utils.RateS)
-	}
-	err = aB.connMgr.Call(aB.rateSConns, nil, utils.RateSv1CostForEvent,
-		&utils.ArgsCostForEvent{CGREvent: cgrEv}, &rplyCost)
-	return
-}
-
-// debitUsageFromConcrete attempts to debit the usage out of concrete balances
-// returns utils.ErrInsufficientCredit if complete usage cannot be debitted
-func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal,
-	costIcrm *utils.CostIncrement, cgrEv *utils.CGREvent) (err error) {
-	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
-		costIcrm.FixedFee == nil {
-		var rplyCost *engine.RateProfileCost
-		if rplyCost, err = aB.rateSCostForEvent(cgrEv); err != nil {
-			return
-		}
-		costIcrm.FixedFee = utils.NewDecimalFromFloat64(rplyCost.Cost)
-	}
-	var tCost *decimal.Big
-	if costIcrm.FixedFee != nil {
-		tCost = costIcrm.FixedFee.Big
-	}
-	// RecurrentFee is configured, used it with increments
-	if costIcrm.RecurrentFee.Big.Cmp(decimal.New(-1, 0)) != 0 {
-		rcrntCost := utils.MultiplyBig(
-			utils.DivideBig(usage.Big, costIcrm.Increment.Big),
-			costIcrm.RecurrentFee.Big)
-		if tCost == nil {
-			tCost = rcrntCost
-		} else {
-			tCost = utils.SumBig(tCost, rcrntCost)
-		}
-	}
-	clnedUnts := cloneUnitsFromConcretes(aB.cncrtBlncs)
-	for _, cB := range aB.cncrtBlncs {
-		ev := utils.MapStorage{
-			utils.MetaOpts: cgrEv.Opts,
-			utils.MetaReq:  cgrEv.Event,
-		}
-		var dbted *utils.Decimal
-		if dbted, _, err = cB.debitUnits(&utils.Decimal{tCost}, cgrEv.Tenant, ev); err != nil {
-			restoreUnitsFromClones(aB.cncrtBlncs, clnedUnts)
-			return
-		}
-		tCost = utils.SubstractBig(tCost, dbted.Big)
-		if tCost.Cmp(decimal.New(0, 0)) <= 0 {
-			return // have debited all, total is smaller or equal to 0
-		}
-	}
-	// we could not debit all, put back what we have debited
-	restoreUnitsFromClones(aB.cncrtBlncs, clnedUnts)
-	return utils.ErrInsufficientCredit
-}
-
 // debitUsage implements the balanceOperator interface
 func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 	cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error) {
@@ -225,7 +167,8 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 			return nil, nil, utils.ErrMaxIncrementsExceeded
 		}
 		qriedUsage := usage.Big // so we can detect loops
-		if err = aB.debitUsageFromConcrete(usage, costIcrm, cgrEv); err != nil {
+		if err = debitUsageFromConcrete(aB.cncrtBlncs, usage, costIcrm, cgrEv,
+			aB.connMgr, aB.rateSConns, aB.blnCfg.RateProfileIDs); err != nil {
 			if err != utils.ErrInsufficientCredit {
 				return
 			}

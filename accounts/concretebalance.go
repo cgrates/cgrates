@@ -52,14 +52,18 @@ func (cB *concreteBalance) costIncrement(tnt string, ev utils.DataProvider) (cos
 		} else if !pass {
 			continue
 		}
-		costIcrm = cIcrm.Clone() // need clone since we might modify
-		return
+		costIcrm = cIcrm
+		break
 	}
-	// nothing matched, return default
-	costIcrm = &utils.CostIncrement{
-		Increment:    &utils.Decimal{decimal.New(1, 0)},
-		RecurrentFee: &utils.Decimal{decimal.New(-1, 0)}}
-
+	if costIcrm == nil {
+		costIcrm = new(utils.CostIncrement)
+	}
+	if costIcrm.Increment == nil {
+		costIcrm.Increment = utils.NewDecimal(1, 0)
+	}
+	if costIcrm.RecurrentFee == nil {
+		costIcrm.RecurrentFee = utils.NewDecimal(-1, 0)
+	}
 	return
 }
 

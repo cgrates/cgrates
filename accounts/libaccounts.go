@@ -126,3 +126,63 @@ func processAttributeS(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 		attrArgs, &rplyEv)
 	return
 }
+
+// rateSCostForEvent will process the event with RateS in order to get the cost
+func rateSCostForEvent(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
+	rateSConns, rpIDs []string) (rplyCost *engine.RateProfileCost, err error) {
+	if len(rateSConns) == 0 {
+		return nil, utils.NewErrNotConnected(utils.RateS)
+	}
+	err = connMgr.Call(rateSConns, nil, utils.RateSv1CostForEvent,
+		&utils.ArgsCostForEvent{CGREvent: cgrEv, RateProfileIDs: rpIDs}, &rplyCost)
+	return
+}
+
+// debitUsageFromConcrete attempts to debit the usage out of concrete balances
+// returns utils.ErrInsufficientCredit if complete usage cannot be debitted
+func debitUsageFromConcrete(cncrtBlncs []*concreteBalance, usage *utils.Decimal,
+	costIcrm *utils.CostIncrement, cgrEv *utils.CGREvent,
+	connMgr *engine.ConnManager, rateSConns, rpIDs []string) (err error) {
+	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
+		costIcrm.FixedFee == nil {
+		var rplyCost *engine.RateProfileCost
+		if rplyCost, err = rateSCostForEvent(connMgr, cgrEv, rateSConns, rpIDs); err != nil {
+			return
+		}
+		costIcrm.FixedFee = utils.NewDecimalFromFloat64(rplyCost.Cost)
+	}
+	var tCost *decimal.Big
+	if costIcrm.FixedFee != nil {
+		tCost = costIcrm.FixedFee.Big
+	}
+	// RecurrentFee is configured, used it with increments
+	if costIcrm.RecurrentFee.Big.Cmp(decimal.New(-1, 0)) != 0 {
+		rcrntCost := utils.MultiplyBig(
+			utils.DivideBig(usage.Big, costIcrm.Increment.Big),
+			costIcrm.RecurrentFee.Big)
+		if tCost == nil {
+			tCost = rcrntCost
+		} else {
+			tCost = utils.SumBig(tCost, rcrntCost)
+		}
+	}
+	clnedUnts := cloneUnitsFromConcretes(cncrtBlncs)
+	for _, cB := range cncrtBlncs {
+		ev := utils.MapStorage{
+			utils.MetaOpts: cgrEv.Opts,
+			utils.MetaReq:  cgrEv.Event,
+		}
+		var dbted *utils.Decimal
+		if dbted, _, err = cB.debitUnits(&utils.Decimal{tCost}, cgrEv.Tenant, ev); err != nil {
+			restoreUnitsFromClones(cncrtBlncs, clnedUnts)
+			return
+		}
+		tCost = utils.SubstractBig(tCost, dbted.Big)
+		if tCost.Cmp(decimal.New(0, 0)) <= 0 {
+			return // have debited all, total is smaller or equal to 0
+		}
+	}
+	// we could not debit all, put back what we have debited
+	restoreUnitsFromClones(cncrtBlncs, clnedUnts)
+	return utils.ErrInsufficientCredit
+}
