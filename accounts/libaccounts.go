@@ -20,7 +20,6 @@ package accounts
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -91,8 +90,7 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
-	debitUsage(usage *utils.Decimal, startTime time.Time,
-		cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error)
+	debitUsage(usage *utils.Decimal, cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error)
 }
 
 // roundUsageWithIncrements rounds the usage based on increments
@@ -101,5 +99,30 @@ func roundedUsageWithIncrements(usage, incrm *decimal.Big) (rndedUsage *decimal.
 		decimal.Context{RoundingMode: decimal.ToZero}).Quo(usage,
 		incrm).RoundToInt()
 	rndedUsage = utils.MultiplyBig(usgMaxIncrm, incrm)
+	return
+}
+
+// processAttributeS will process the event with AttributeS
+func processAttributeS(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
+	attrSConns, attrIDs []string) (rplyEv *engine.AttrSProcessEventReply, err error) {
+	if len(attrSConns) == 0 {
+		return nil, utils.NewErrNotConnected(utils.AttributeS)
+	}
+	var procRuns *int
+	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
+		if v, err := utils.IfaceAsTInt64(val); err == nil {
+			procRuns = utils.IntPointer(int(v))
+		}
+	}
+	attrArgs := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.FirstNonEmpty(
+			engine.MapEvent(cgrEv.Opts).GetStringIgnoreErrors(utils.OptsContext),
+			utils.MetaAccountS)),
+		CGREvent:     cgrEv,
+		AttributeIDs: attrIDs,
+		ProcessRuns:  procRuns,
+	}
+	err = connMgr.Call(attrSConns, nil, utils.AttributeSv1ProcessEvent,
+		attrArgs, &rplyEv)
 	return
 }

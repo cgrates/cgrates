@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -94,30 +92,6 @@ func (aB *abstractBalance) balanceLimit() (bL *utils.Decimal) {
 	return
 }
 
-// processAttributeS will process the event with AttributeS
-func (aB *abstractBalance) processAttributeS(cgrEv *utils.CGREvent) (rplyEv *engine.AttrSProcessEventReply, err error) {
-	if len(aB.attrSConns) == 0 {
-		return nil, utils.NewErrNotConnected(utils.AttributeS)
-	}
-	var procRuns *int
-	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
-		if v, err := utils.IfaceAsTInt64(val); err == nil {
-			procRuns = utils.IntPointer(int(v))
-		}
-	}
-	attrArgs := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.FirstNonEmpty(
-			engine.MapEvent(cgrEv.Opts).GetStringIgnoreErrors(utils.OptsContext),
-			utils.MetaAccountS)),
-		CGREvent:     cgrEv,
-		AttributeIDs: aB.blnCfg.AttributeIDs,
-		ProcessRuns:  procRuns,
-	}
-	err = aB.connMgr.Call(aB.attrSConns, nil, utils.AttributeSv1ProcessEvent,
-		attrArgs, &rplyEv)
-	return
-}
-
 // rateSCostForEvent will process the event with RateS in order to get the cost
 func (aB *abstractBalance) rateSCostForEvent(cgrEv *utils.CGREvent) (rplyCost *engine.RateProfileCost, err error) {
 	if len(aB.rateSConns) == 0 {
@@ -177,7 +151,7 @@ func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal,
 }
 
 // debitUsage implements the balanceOperator interface
-func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
+func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 	cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
@@ -202,7 +176,8 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 		costIcrm.FixedFee == nil &&
 		len(aB.blnCfg.AttributeIDs) != 0 { // cost unknown, apply AttributeS to query from RateS
 		var rplyAttrS *engine.AttrSProcessEventReply
-		if rplyAttrS, err = aB.processAttributeS(cgrEv); err != nil {
+		if rplyAttrS, err = processAttributeS(aB.connMgr, cgrEv, aB.attrSConns,
+			aB.blnCfg.AttributeIDs); err != nil {
 			return
 		}
 		if len(rplyAttrS.AlteredFields) != 0 { // event was altered

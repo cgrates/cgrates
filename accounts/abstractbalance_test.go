@@ -133,8 +133,8 @@ func TestABDebitUsage(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if dbted, _, err := aB.debitUsage(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0),
-		time.Now(), new(utils.CGREvent)); err != nil {
+	if dbted, _, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if dbted.Compare(utils.NewDecimal(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", dbted)
@@ -148,8 +148,8 @@ func TestABDebitUsage(t *testing.T) {
 	aB.blnCfg.Units = utils.NewDecimal(int64(time.Duration(60*time.Second)), 0)
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(29, 0) // not enough concrete
 
-	if dbted, _, err := aB.debitUsage(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0),
-		time.Now(), new(utils.CGREvent)); err != nil {
+	if dbted, _, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if dbted.Compare(utils.NewDecimal(int64(29*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", dbted)
@@ -162,12 +162,12 @@ func TestABDebitUsage(t *testing.T) {
 	// limited by concrete
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(0, 0) // not enough concrete
 
-	if dbted, _, err := aB.debitUsage(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0),
-		time.Now(), new(utils.CGREvent)); err != nil {
+	if dbted, _, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if dbted.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", dbted)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(31*time.Second)), 0)) != 0 { // same as above
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(31*time.Second), 0)) != 0 { // same as above
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 { // same as above
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -177,10 +177,10 @@ func TestABDebitUsage(t *testing.T) {
 	aB.blnCfg.Units = utils.NewDecimal(int64(time.Duration(29*time.Second)), 0) // not enough abstract
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(60, 0)
 
-	if dbted, _, err := aB.debitUsage(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0),
-		time.Now(), new(utils.CGREvent)); err != nil {
+	if dbted, _, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if dbted.Compare(utils.NewDecimal(int64(time.Duration(29*time.Second)), 0)) != 0 {
+	} else if dbted.Compare(utils.NewDecimal(int64(29*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", dbted)
 	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 { // should be all used
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)

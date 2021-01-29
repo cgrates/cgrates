@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
-	"time"
+	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -91,26 +91,6 @@ func (cB *concreteBalance) balanceLimit() (bL *utils.Decimal) {
 	return
 }
 
-// debit implements the balanceOperator interface
-func (cB *concreteBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
-	cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error) {
-
-	evNm := utils.MapStorage{
-		utils.MetaOpts: cgrEv.Opts,
-		utils.MetaReq:  cgrEv.Event,
-	}
-
-	// pass the general balance filters
-	var pass bool
-	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
-		return
-	} else if !pass {
-		return nil, nil, utils.ErrFilterNotPassingNoCaps
-	}
-
-	return
-}
-
 // debitUnits is a direct debit of balance units
 func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
 	ev utils.DataProvider) (dbted *utils.Decimal, uF *utils.UnitFactor, err error) {
@@ -158,6 +138,72 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
 	return
 }
 
+// debit implements the balanceOperator interface
+func (cB *concreteBalance) debitUsage(usage *utils.Decimal,
+	cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error) {
+
+	evNm := utils.MapStorage{
+		utils.MetaOpts: cgrEv.Opts,
+		utils.MetaReq:  cgrEv.Event,
+	}
+
+	// pass the general balance filters
+	var pass bool
+	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
+		return
+	} else if !pass {
+		return nil, nil, utils.ErrFilterNotPassingNoCaps
+	}
+
+	// costIncrement
+	var costIcrm *utils.CostIncrement
+	if costIcrm, err = cB.costIncrement(cgrEv.Tenant, evNm); err != nil {
+		return
+	}
+	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
+		costIcrm.FixedFee == nil &&
+		len(cB.blnCfg.AttributeIDs) != 0 { // cost unknown, apply AttributeS to query from RateS
+		var rplyAttrS *engine.AttrSProcessEventReply
+		if rplyAttrS, err = processAttributeS(cB.connMgr, cgrEv, cB.attrSConns,
+			cB.blnCfg.AttributeIDs); err != nil {
+			return
+		}
+		if len(rplyAttrS.AlteredFields) != 0 { // event was altered
+			cgrEv = rplyAttrS.CGREvent
+		}
+	}
+
+	// balanceLimit
+	var hasLmt bool
+	blncLmt := cB.balanceLimit()
+	if blncLmt != nil && blncLmt.Cmp(decimal.New(0, 0)) != 0 {
+		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, blncLmt.Big)
+		hasLmt = true
+	}
+
+	// unitFactor
+	var uF *utils.UnitFactor
+	if uF, err = cB.unitFactor(cgrEv.Tenant, evNm); err != nil {
+		return
+	}
+	var hasUF bool
+	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
+		usage.Big = utils.MultiplyBig(usage.Big, uF.Factor.Big)
+		hasUF = true
+	}
+
+	// balance smaller than usage, correct usage
+	if cB.blnCfg.Units.Compare(usage) == -1 {
+		// decrease the usage to match the maximum increments
+		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
+		usage.Big = roundedUsageWithIncrements(cB.blnCfg.Units.Big, costIcrm.Increment.Big)
+	}
+
+	fmt.Printf("hasLmt: %v, hasUF: %v\n", hasLmt, hasUF)
+
+	return
+}
+
 // cloneUnitsFromConcretes returns cloned units from the concrete balances passed as parameters
 func cloneUnitsFromConcretes(cBs []*concreteBalance) (clnedUnts []*utils.Decimal) {
 	if cBs == nil {
@@ -170,6 +216,7 @@ func cloneUnitsFromConcretes(cBs []*concreteBalance) (clnedUnts []*utils.Decimal
 	return
 }
 
+// restoreUnitsFromClones will restore the units from the clones
 func restoreUnitsFromClones(cBs []*concreteBalance, clnedUnts []*utils.Decimal) {
 	for i, clnedUnt := range clnedUnts {
 		cBs[i].blnCfg.Units.Big = clnedUnt.Big
