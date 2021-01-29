@@ -19,15 +19,59 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestCmdGetCommands(t *testing.T) {
 	expected := commands
 	result := GetCommands()
 	if !reflect.DeepEqual(result, expected) {
-		fmt.Errorf("Expected <%+v>, Received <%+v>", expected, result)
+		t.Errorf("\nExpected <%+v>,\nReceived <%+v>", expected, result)
+	}
+}
+
+func TestGetAvailableCommandsErr(t *testing.T) {
+	err := getAvailabelCommandsErr()
+	if err == nil {
+		t.Errorf("\nExpected not nil,\nReceived <%+v>", err)
+	}
+}
+
+func TestGetCommandValueCase1(t *testing.T) {
+	expected := &CmdGetChargersForEvent{
+		name:      "chargers_for_event",
+		rpcMethod: utils.ChargerSv1GetChargersForEvent,
+		rpcParams: &utils.CGREvent{},
+	}
+	result, err := GetCommandValue("chargers_for_event", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(result), utils.ToJSON(expected)) {
+		t.Errorf("\nExpected <%+v>,\nReceived <%+v>", utils.ToJSON(result), utils.ToJSON(expected))
+	}
+}
+
+func TestGetCommandValueCase2(t *testing.T) {
+	_, err := GetCommandValue("", false)
+	if err == nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGetCommandValueCase3(t *testing.T) {
+	_, err := GetCommandValue("false_command", false)
+	if err == nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGetCommandValueCase4(t *testing.T) {
+	_, err := GetCommandValue("chargers _for_event", false)
+	if err == nil {
+		t.Fatal(err)
 	}
 }
