@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cenkalti/rpc2"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -82,6 +84,52 @@ func TestIsIndexed(t *testing.T) {
 	}
 	if sS.isIndexed(&Session{CGRID: "test"}, false) {
 		t.Error("Expecting: false, received: true")
+	}
+}
+
+func TestOnBiJSONConnectDisconnect(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	//connect BiJSON
+	client := rpc2.NewClient(nil)
+	sessions.OnBiJSONConnect(client)
+
+	//we'll change the connection identifier just for testing
+	sessions.biJClnts[client] = "test_conn"
+	sessions.biJIDs = nil
+
+	expected := NewSessionS(cfg, dm, nil)
+	expected.biJClnts[client] = "test_conn"
+	expected.biJIDs = nil
+
+	if !reflect.DeepEqual(sessions, expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, sessions)
+	}
+
+	//Disconnect BiJSON
+	sessions.OnBiJSONDisconnect(client)
+	delete(expected.biJClnts, client)
+	if !reflect.DeepEqual(sessions, expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, sessions)
+	}
+}
+
+func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	client := rpc2.NewClient(nil)
+
+	var reply string
+	if err := sessions.BiRPCv1RegisterInternalBiJSONConn(client, utils.EmptyString, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v, received %+v", reply, utils.OK)
 	}
 }
 
