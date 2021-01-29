@@ -19,6 +19,8 @@ package console
 
 import (
 	"encoding/json"
+	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
@@ -251,5 +253,31 @@ func TestFromJSONInterestingFields2(t *testing.T) {
 	if line != expected {
 		t.Log(jsn)
 		t.Errorf("Expected: %s got: '%s'", expected, line)
+	}
+}
+
+func TestGetStringValueInterface(t *testing.T) {
+	dflt := utils.StringSet{}
+	expected := getSliceAsString([]interface{}{}, dflt)
+	rply := getStringValue([]interface{}{}, dflt)
+	if rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+}
+
+func TestGetFormatedSliceResultCase2(t *testing.T) {
+	dflt := utils.StringSet{}
+	rply := GetFormatedSliceResult(true, dflt)
+	expected := true
+	if reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %+v , received: %+v", expected, rply)
+	}
+}
+
+func TestLocalExecute(t *testing.T) {
+	testStruct := CommandExecuter{}
+	result := testStruct.LocalExecute()
+	if reflect.DeepEqual(utils.EmptyString, result) {
+		fmt.Errorf("Expected <%+v>, Received <%+v>", utils.EmptyString, result)
 	}
 }
