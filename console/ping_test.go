@@ -652,6 +652,6 @@ func TestCmdPingTestDefault(t *testing.T) {
 	castCommand.item = "test_item"
 	result2 := command.RpcMethod()
 	if !reflect.DeepEqual(result2, "") {
-		t.Errorf("Expected <%T>, Received <%T>", "", result2)
+		t.Errorf("Expected <%+v>, Received <%+v>", "", result2)
 	}
 }
