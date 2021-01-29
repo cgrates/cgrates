@@ -178,7 +178,7 @@ func (aB *abstractBalance) debitUsageFromConcrete(usage *utils.Decimal,
 
 // debitUsage implements the balanceOperator interface
 func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
-	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
@@ -190,7 +190,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 	if pass, err = aB.fltrS.Pass(cgrEv.Tenant, aB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
-		return nil, utils.ErrFilterNotPassingNoCaps
+		return nil, nil, utils.ErrFilterNotPassingNoCaps
 	}
 
 	// costIncrement
@@ -209,8 +209,6 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 			cgrEv = rplyAttrS.CGREvent
 		}
 	}
-
-	//origBlclVal := new(decimal.Big).Copy(aB.blnCfg.Units.Big) // so we can restore on errors
 
 	// balanceLimit
 	var hasLmt bool
@@ -249,13 +247,11 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 			restoreUnitsFromClones(aB.cncrtBlncs, origConcrtUnts)
 		}
 		if i == maxIter {
-			//aB.blnCfg.Units.Big = origBlclVal
-			return nil, utils.ErrMaxIncrementsExceeded
+			return nil, nil, utils.ErrMaxIncrementsExceeded
 		}
-		//fmt.Printf("i: %d, usage: %s\n", i, usage)
+		qriedUsage := usage.Big // so we can detect loops
 		if err = aB.debitUsageFromConcrete(usage, costIcrm, cgrEv); err != nil {
 			if err != utils.ErrInsufficientCredit {
-				//aB.blnCfg.Units.Big = origBlclVal
 				return
 			}
 			err = nil
@@ -266,7 +262,8 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 					usage.Big, decimal.New(2, 0))
 				usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big) // make sure usage is multiple of increments
 				if usage.Big.Cmp(usageDenied) >= 0 ||
-					usage.Big.Cmp(decimal.New(0, 0)) == 0 {
+					usage.Big.Cmp(decimal.New(0, 0)) == 0 ||
+					usage.Big.Cmp(qriedUsage) == 0 { // loop
 					break
 				}
 				continue
@@ -287,14 +284,14 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 		}
 		usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big)
 		if usage.Big.Cmp(usagePaid) <= 0 ||
-			usage.Big.Cmp(usageDenied) >= 0 {
+			usage.Big.Cmp(usageDenied) >= 0 ||
+			usage.Big.Cmp(qriedUsage) == 0 { // loop
 			break
 		}
 	}
 	// Nothing paid
 	if usagePaid == nil {
 		// since we are erroring, we restore the concerete balances
-		//aB.blnCfg.Units.Big = origBlclVal
 		usagePaid = decimal.New(0, 0)
 	}
 
@@ -308,5 +305,6 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 	if hasUF {
 		usage.Big = utils.DivideBig(usage.Big, uF.Factor.Big)
 	}
+	dbted = &utils.Decimal{usagePaid}
 	return
 }

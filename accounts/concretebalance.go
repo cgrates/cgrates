@@ -93,7 +93,7 @@ func (cB *concreteBalance) balanceLimit() (bL *utils.Decimal) {
 
 // debit implements the balanceOperator interface
 func (cB *concreteBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
-	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
@@ -105,7 +105,7 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal, startTime time.Time,
 	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
-		return nil, utils.ErrFilterNotPassingNoCaps
+		return nil, nil, utils.ErrFilterNotPassingNoCaps
 	}
 
 	return

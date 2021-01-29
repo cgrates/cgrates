@@ -92,7 +92,7 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
 	debitUsage(usage *utils.Decimal, startTime time.Time,
-		cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
+		cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error)
 }
 
 // roundUsageWithIncrements rounds the usage based on increments
