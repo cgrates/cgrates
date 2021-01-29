@@ -23,11 +23,12 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net/rpc"
+	"net/rpc/jsonrpc"
 	"path"
 	"strconv"
+	"sync"
 	"time"
-
-	"github.com/cgrates/rpcclient"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
@@ -41,22 +42,18 @@ var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path h
 func main() {
 	flag.Parse()
 	var err error
-	var rpc *rpcclient.RPCClient
+	var rpc *rpc.Client
 	var cfgPath string
 	var cfg *config.CGRConfig
 	cfgPath = path.Join(*dataDir, "conf", "samples", "cdrsv1mysql")
 	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
 		log.Fatal("Got config error: ", err.Error())
 	}
-	rpc, err = rpcclient.NewRPCClient(utils.TCP, cfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
-		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false)
-	if err != nil {
-		log.Fatal("Could not connect to rater: ", err.Error())
+	if rpc, err = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err != nil {
+		return
 	}
 	var sumApier float64
 	var sumRateS float64
-	var tApier time.Duration
-	var tRateS time.Duration
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	//
@@ -65,59 +62,63 @@ func main() {
 		sls = append(sls, strconv.Itoa(i))
 	}
 
-	for i := 0; i < 1000; i++ {
+	var wgApier sync.WaitGroup
+	var wgRateS sync.WaitGroup
+	for i := 0; i < 10000; i++ {
+		wgApier.Add(1)
+		wgRateS.Add(1)
 		destination := fmt.Sprintf("%+v%+v", sls[r1.Intn(100)], 1000000+rand.Intn(9999999-1000000))
 		usage := fmt.Sprintf("%+vm", r1.Intn(250))
-		attrs := v1.AttrGetCost{
-			Category:    "call",
-			Tenant:      "cgrates.org",
-			Subject:     "*any",
-			AnswerTime:  utils.MetaNow,
-			Destination: destination,
-			Usage:       usage,
-		}
-		var replyApier *engine.EventCost
-		tApiInit := time.Now()
-		if err := rpc.Call(utils.APIerSv1GetCost, &attrs, &replyApier); err != nil {
-			fmt.Println(err)
-			return
-		}
-		tApier += time.Now().Sub(tApiInit)
-		sumApier += *replyApier.Cost
+		go func() {
+			attrs := v1.AttrGetCost{
+				Category:    "call",
+				Tenant:      "cgrates.org",
+				Subject:     "*any",
+				AnswerTime:  utils.MetaNow,
+				Destination: destination,
+				Usage:       usage,
+			}
+			var replyApier *engine.EventCost
+			if err := rpc.Call(utils.APIerSv1GetCost, &attrs, &replyApier); err != nil {
+				fmt.Println(err)
+				return
+			}
+			sumApier += *replyApier.Cost
+			wgApier.Done()
+		}()
 
-		argsRateS := &utils.ArgsCostForEvent{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Event: map[string]interface{}{
-					utils.Category:    "call",
-					utils.Tenant:      "cgrates.org",
-					utils.Subject:     "*any",
-					utils.AnswerTime:  utils.MetaNow,
-					utils.Destination: destination,
+		go func() {
+			argsRateS := &utils.ArgsCostForEvent{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     utils.UUIDSha1Prefix(),
+					Event: map[string]interface{}{
+						utils.Category:    "call",
+						utils.Tenant:      "cgrates.org",
+						utils.Subject:     "*any",
+						utils.AnswerTime:  utils.MetaNow,
+						utils.Destination: destination,
+					},
+					Opts: map[string]interface{}{
+						utils.OptsRatesUsage: usage,
+					},
 				},
-				Opts: map[string]interface{}{
-					utils.OptsRatesUsage: usage,
-				},
-			},
-		}
+			}
 
-		var rplyRateS *engine.RateProfileCost
-		tRateSInit := time.Now()
-		if err := rpc.Call(utils.RateSv1CostForEvent, argsRateS, &rplyRateS); err != nil {
-			fmt.Printf("Unexpected nil error received for RateSv1CostForEvent: %+v\n", err.Error())
-			return
-		}
-		tRateS += time.Now().Sub(tRateSInit)
-		sumRateS += rplyRateS.Cost
+			var rplyRateS *engine.RateProfileCost
+			if err := rpc.Call(utils.RateSv1CostForEvent, argsRateS, &rplyRateS); err != nil {
+				fmt.Printf("Unexpected nil error received for RateSv1CostForEvent: %+v\n", err.Error())
+				return
+			}
+			sumRateS += rplyRateS.Cost
+			wgRateS.Done()
+		}()
 	}
+	wgApier.Wait()
+	wgRateS.Wait()
 	fmt.Println("Cost for apier get cost : ")
 	fmt.Println(sumApier)
 	fmt.Println("Cost for RateS")
 	fmt.Println(sumRateS)
-	fmt.Println("Time for apier get cost : ")
-	fmt.Println(tApier)
-	fmt.Println("Time for RateS")
-	fmt.Println(tRateS)
 
 }
