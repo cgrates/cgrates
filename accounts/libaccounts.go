@@ -245,3 +245,69 @@ func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal
 	restoreUnitsFromClones(cncrtBlncs, clnedUnts)
 	return utils.ErrInsufficientCredit
 }
+
+// maxDebitUsageFromConcretes will debit the maximum possible usage out of concretes
+func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal,
+	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
+	rateSConns, rpIDs []string,
+	costIcrm *utils.CostIncrement) (dbtedUsage *utils.Decimal, ec *utils.EventCharges, err error) {
+	// fix the maximum number of iterations
+	origConcrtUnts := cloneUnitsFromConcretes(cncrtBlncs) // so we can revert on errors
+	paidConcrtUnts := origConcrtUnts                      // so we can revert when higher usages are not possible
+	var usagePaid, usageDenied *decimal.Big
+	maxIter := 100
+	for i := 0; i < maxIter; i++ {
+		if i != 0 {
+			restoreUnitsFromClones(cncrtBlncs, origConcrtUnts)
+		}
+		if i == maxIter {
+			return nil, nil, utils.ErrMaxIncrementsExceeded
+		}
+		qriedUsage := usage.Big // so we can detect loops
+		if err = debitUsageFromConcretes(cncrtBlncs, usage, costIcrm, cgrEv,
+			connMgr, rateSConns, rpIDs); err != nil {
+			if err != utils.ErrInsufficientCredit {
+				return
+			}
+			err = nil
+			// ErrInsufficientCredit
+			usageDenied = new(decimal.Big).Copy(usage.Big)
+			if usagePaid == nil { // going backwards
+				usage.Big = utils.DivideBig( // divide by 2
+					usage.Big, decimal.New(2, 0))
+				usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big) // make sure usage is multiple of increments
+				if usage.Big.Cmp(usageDenied) >= 0 ||
+					usage.Big.Cmp(decimal.New(0, 0)) == 0 ||
+					usage.Big.Cmp(qriedUsage) == 0 { // loop
+					break
+				}
+				continue
+			}
+		} else {
+			usagePaid = new(decimal.Big).Copy(usage.Big)
+			paidConcrtUnts = cloneUnitsFromConcretes(cncrtBlncs)
+			if i == 0 { // no estimation done, covering full
+				break
+			}
+		}
+		// going upwards
+		usage.Big = utils.SumBig(usagePaid,
+			utils.DivideBig(usagePaid, decimal.New(2, 0)).RoundToInt())
+		if usage.Big.Cmp(usageDenied) >= 0 {
+			usage.Big = utils.SumBig(usagePaid, costIcrm.Increment.Big)
+		}
+		usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big)
+		if usage.Big.Cmp(usagePaid) <= 0 ||
+			usage.Big.Cmp(usageDenied) >= 0 ||
+			usage.Big.Cmp(qriedUsage) == 0 { // loop
+			break
+		}
+	}
+	// Nothing paid
+	if usagePaid == nil {
+		// since we are erroring, we restore the concerete balances
+		usagePaid = decimal.New(0, 0)
+	}
+	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
+	return &utils.Decimal{usagePaid}, nil, nil
+}
