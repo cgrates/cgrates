@@ -43,58 +43,6 @@ type concreteBalance struct {
 	rateSConns []string
 }
 
-// costIncrement finds out the cost increment for the event
-func (cB *concreteBalance) costIncrement(tnt string, ev utils.DataProvider) (costIcrm *utils.CostIncrement, err error) {
-	for _, cIcrm := range cB.blnCfg.CostIncrements {
-		var pass bool
-		if pass, err = cB.fltrS.Pass(tnt, cIcrm.FilterIDs, ev); err != nil {
-			return
-		} else if !pass {
-			continue
-		}
-		costIcrm = cIcrm
-		break
-	}
-	if costIcrm == nil {
-		costIcrm = new(utils.CostIncrement)
-	}
-	if costIcrm.Increment == nil {
-		costIcrm.Increment = utils.NewDecimal(1, 0)
-	}
-	if costIcrm.RecurrentFee == nil {
-		costIcrm.RecurrentFee = utils.NewDecimal(-1, 0)
-	}
-	return
-}
-
-// unitFactor returns the unitFactor for the event
-func (cB *concreteBalance) unitFactor(tnt string, ev utils.DataProvider) (uF *utils.UnitFactor, err error) {
-	for _, uF = range cB.blnCfg.UnitFactors {
-		var pass bool
-		if pass, err = cB.fltrS.Pass(tnt, uF.FilterIDs, ev); err != nil {
-			return
-		} else if !pass {
-			continue
-		}
-		return
-	}
-	return
-}
-
-// balanceLimit returns the balance's limit
-func (cB *concreteBalance) balanceLimit() (bL *utils.Decimal) {
-	if _, isUnlimited := cB.blnCfg.Opts[utils.MetaBalanceUnlimited]; isUnlimited {
-		return
-	}
-	if lmtIface, has := cB.blnCfg.Opts[utils.MetaBalanceLimit]; has {
-		bL = lmtIface.(*utils.Decimal)
-		return
-	}
-	// nothing matched, return default
-	bL = utils.NewDecimal(0, 0)
-	return
-}
-
 // debitUnits is a direct debit of balance units
 func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
 	ev utils.DataProvider) (dbted *utils.Decimal, uF *utils.UnitFactor, err error) {
@@ -109,7 +57,7 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
 
 	// unitFactor
 	var hasUF bool
-	if uF, err = cB.unitFactor(tnt, ev); err != nil {
+	if uF, err = unitFactor(cB.blnCfg.UnitFactors, cB.fltrS, tnt, ev); err != nil {
 		return
 	}
 	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
@@ -119,7 +67,10 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
 
 	// balanceLimit
 	var hasLmt bool
-	blncLmt := cB.balanceLimit()
+	var blncLmt *utils.Decimal
+	if blncLmt, err = balanceLimit(cB.blnCfg.Opts); err != nil {
+		return
+	}
 	if blncLmt != nil && blncLmt.Big.Cmp(decimal.New(0, 0)) != 0 {
 		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, blncLmt.Big)
 		hasLmt = true
@@ -161,7 +112,8 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal,
 
 	// costIncrement
 	var costIcrm *utils.CostIncrement
-	if costIcrm, err = cB.costIncrement(cgrEv.Tenant, evNm); err != nil {
+	if costIcrm, err = costIncrement(cB.blnCfg.CostIncrements,
+		cB.fltrS, cgrEv.Tenant, evNm); err != nil {
 		return
 	}
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
@@ -179,7 +131,10 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal,
 
 	// balanceLimit
 	var hasLmt bool
-	blncLmt := cB.balanceLimit()
+	var blncLmt *utils.Decimal
+	if blncLmt, err = balanceLimit(cB.blnCfg.Opts); err != nil {
+		return
+	}
 	if blncLmt != nil && blncLmt.Cmp(decimal.New(0, 0)) != 0 {
 		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, blncLmt.Big)
 		hasLmt = true
@@ -187,7 +142,7 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal,
 
 	// unitFactor
 	var uF *utils.UnitFactor
-	if uF, err = cB.unitFactor(cgrEv.Tenant, evNm); err != nil {
+	if uF, err = unitFactor(cB.blnCfg.UnitFactors, cB.fltrS, cgrEv.Tenant, evNm); err != nil {
 		return
 	}
 	var hasUF bool

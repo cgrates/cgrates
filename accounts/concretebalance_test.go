@@ -34,7 +34,7 @@ func TestCBDebitUnits(t *testing.T) {
 			ID:   "TestCBDebitUnits",
 			Type: utils.MetaConcrete,
 			Opts: map[string]interface{}{
-				utils.MetaBalanceLimit: utils.NewDecimal(-200, 0),
+				utils.MetaBalanceLimit: -200.0,
 			},
 			UnitFactors: []*utils.UnitFactor{
 				{
@@ -63,7 +63,7 @@ func TestCBDebitUnits(t *testing.T) {
 			ID:   "TestCBDebitUnits",
 			Type: utils.MetaConcrete,
 			Opts: map[string]interface{}{
-				utils.MetaBalanceLimit: utils.NewDecimal(-1, 0),
+				utils.MetaBalanceLimit: -1.0,
 			},
 			Units: utils.NewDecimal(125, 2), // 1.25
 		},
@@ -107,7 +107,7 @@ func TestCBDebitUnits(t *testing.T) {
 			ID:   "TestCBDebitUnits",
 			Type: utils.MetaConcrete,
 			Opts: map[string]interface{}{
-				utils.MetaBalanceLimit: utils.NewDecimal(5, 1), // 0.5 as limit
+				utils.MetaBalanceLimit: 0.5, // 0.5 as limit
 			},
 			Units: utils.NewDecimal(125, 2), // 1.25
 		},

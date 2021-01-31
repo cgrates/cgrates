@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
@@ -138,9 +139,66 @@ func rateSCostForEvent(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	return
 }
 
+// costIncrement computes the costIncrement for the event
+func costIncrement(cfgCostIncrmts []*utils.CostIncrement,
+	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (costIcrm *utils.CostIncrement, err error) {
+	for _, cIcrm := range cfgCostIncrmts {
+		var pass bool
+		if pass, err = fltrS.Pass(tnt, cIcrm.FilterIDs, ev); err != nil {
+			return
+		} else if !pass {
+			continue
+		}
+		costIcrm = cIcrm
+		break
+	}
+	if costIcrm == nil {
+		costIcrm = new(utils.CostIncrement)
+	}
+	if costIcrm.Increment == nil {
+		costIcrm.Increment = utils.NewDecimal(1, 0)
+	}
+	if costIcrm.RecurrentFee == nil {
+		costIcrm.RecurrentFee = utils.NewDecimal(-1, 0)
+	}
+	return
+}
+
+// unitFactor detects the unitFactor for the event
+func unitFactor(cfgUnitFactors []*utils.UnitFactor,
+	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (uF *utils.UnitFactor, err error) {
+	for _, uF = range cfgUnitFactors {
+		var pass bool
+		if pass, err = fltrS.Pass(tnt, uF.FilterIDs, ev); err != nil {
+			return
+		} else if !pass {
+			continue
+		}
+		return
+	}
+	return
+}
+
+// balanceLimit returns the balance limit based on configuration
+func balanceLimit(optsCfg map[string]interface{}) (bL *utils.Decimal, err error) {
+	if _, isUnlimited := optsCfg[utils.MetaBalanceUnlimited]; isUnlimited {
+		return // unlimited is nil pointer
+	}
+	if lmtIface, has := optsCfg[utils.MetaBalanceLimit]; has {
+		flt64Lmt, canCast := lmtIface.(float64)
+		if !canCast {
+			return nil, errors.New("unsupported *balanceLimit format")
+		}
+		return utils.NewDecimalFromFloat64(flt64Lmt), nil
+	}
+	// nothing matched, return default
+	bL = utils.NewDecimal(0, 0)
+	return
+}
+
 // debitUsageFromConcrete attempts to debit the usage out of concrete balances
 // returns utils.ErrInsufficientCredit if complete usage cannot be debitted
-func debitUsageFromConcrete(cncrtBlncs []*concreteBalance, usage *utils.Decimal,
+func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal,
 	costIcrm *utils.CostIncrement, cgrEv *utils.CGREvent,
 	connMgr *engine.ConnManager, rateSConns, rpIDs []string) (err error) {
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
@@ -149,6 +207,7 @@ func debitUsageFromConcrete(cncrtBlncs []*concreteBalance, usage *utils.Decimal,
 		if rplyCost, err = rateSCostForEvent(connMgr, cgrEv, rateSConns, rpIDs); err != nil {
 			return
 		}
+		costIcrm = costIcrm.Clone() // so we don't modify the original
 		costIcrm.FixedFee = utils.NewDecimalFromFloat64(rplyCost.Cost)
 	}
 	var tCost *decimal.Big

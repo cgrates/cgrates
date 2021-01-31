@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestDebitUsageFromConcrete(t *testing.T) {
+func TestdebitUsageFromConcretes(t *testing.T) {
 	aB := &abstractBalance{
 		cncrtBlncs: []*concreteBalance{
 			{
@@ -56,7 +56,7 @@ func TestDebitUsageFromConcrete(t *testing.T) {
 			},
 		}}
 	// consume only from first balance
-	if err := debitUsageFromConcrete(aB.cncrtBlncs,
+	if err := debitUsageFromConcretes(aB.cncrtBlncs,
 		utils.NewDecimal(int64(time.Duration(5*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
@@ -73,7 +73,7 @@ func TestDebitUsageFromConcrete(t *testing.T) {
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(500, 0)
 	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 
-	if err := debitUsageFromConcrete(aB.cncrtBlncs,
+	if err := debitUsageFromConcretes(aB.cncrtBlncs,
 		utils.NewDecimal(int64(time.Duration(9*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
@@ -90,7 +90,7 @@ func TestDebitUsageFromConcrete(t *testing.T) {
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(500, 0)
 	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 
-	if err := debitUsageFromConcrete(aB.cncrtBlncs,
+	if err := debitUsageFromConcretes(aB.cncrtBlncs,
 		utils.NewDecimal(int64(time.Duration(10*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
