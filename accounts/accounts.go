@@ -121,26 +121,30 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent, a
 // accountProcessEvent implements event processing by an Account
 func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
-	//var aBlncs *accountBalances
+	var aBlncs *accountBalances
 	if _, err = newAccountBalances(acnt, aS.fltrS, aS.connMgr,
 		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
 		return
 	}
+	fmt.Println(aBlncs)
 	return
 }
 
 // V1MaxUsage returns the maximum usage for the event, based on matching Account
 func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, ec *utils.EventCharges) (err error) {
-	/*var acnt *utils.AccountProfile
-	if acnt, err = aS.matchingAccountForEvent(args.CGREventWithOpts.Tenant,
-		args.CGREventWithOpts, args.AccountIDs); err != nil {
+	var acnt *utils.AccountProfile
+	if acnt, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
+		args.CGREvent, args.AccountIDs); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	*/
-	//if aS.accountProcessEvent(acnt, args)
 
+	var procEC *utils.EventCharges
+	if procEC, err = aS.accountProcessEvent(acnt, args.CGREvent); err != nil {
+		return
+	}
+	*ec = *procEC
 	return
 }

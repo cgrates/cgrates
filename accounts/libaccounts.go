@@ -47,7 +47,7 @@ func newAccountBalances(acnt *utils.AccountProfile,
 	acntBlncs.cncrtBlncs = make([]*concreteBalance, len(acntBlncs.typIdx[utils.MetaConcrete]))
 	for i, blncIdx := range acntBlncs.typIdx[utils.MetaConcrete] {
 		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx],
-			acntBlncs.cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns).(*concreteBalance)
+			fltrS, connMgr, attrSConns, rateSConns).(*concreteBalance)
 		acntBlncs.opers[acntBlncs.blnCfgs[blncIdx].ID] = acntBlncs.cncrtBlncs[i]
 	}
 	// populate opers
@@ -85,7 +85,7 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 	default:
 		return nil, fmt.Errorf("unsupported balance type: <%s>", blncCfg.Type)
 	case utils.MetaConcrete:
-		return newConcreteBalanceOperator(blncCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns), nil
+		return newConcreteBalanceOperator(blncCfg, fltrS, connMgr, attrSConns, rateSConns), nil
 	case utils.MetaAbstract:
 		return newAbstractBalanceOperator(blncCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns), nil
 	}

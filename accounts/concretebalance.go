@@ -44,18 +44,17 @@ func restoreUnitsFromClones(cBs []*concreteBalance, clnedUnts []*utils.Decimal) 
 }
 
 // newConcreteBalance constructs a concreteBalanceOperator
-func newConcreteBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []*concreteBalance,
+func newConcreteBalanceOperator(blnCfg *utils.Balance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) balanceOperator {
-	return &concreteBalance{blnCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns}
+	return &concreteBalance{blnCfg, fltrS, connMgr, attrSConns, rateSConns}
 }
 
 // concreteBalance is the operator for *concrete balance type
 type concreteBalance struct {
-	blnCfg     *utils.Balance
-	cncrtBlncs []*concreteBalance // paying balances
-	fltrS      *engine.FilterS
-	connMgr    *engine.ConnManager
+	blnCfg  *utils.Balance
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
 	attrSConns,
 	rateSConns []string
 }
