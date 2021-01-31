@@ -19,12 +19,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
+
+// cloneUnitsFromConcretes returns cloned units from the concrete balances passed as parameters
+func cloneUnitsFromConcretes(cBs []*concreteBalance) (clnedUnts []*utils.Decimal) {
+	if cBs == nil {
+		return
+	}
+	clnedUnts = make([]*utils.Decimal, len(cBs))
+	for i := range cBs {
+		clnedUnts[i] = cBs[i].blnCfg.Units.Clone()
+	}
+	return
+}
+
+// restoreUnitsFromClones will restore the units from the clones
+func restoreUnitsFromClones(cBs []*concreteBalance, clnedUnts []*utils.Decimal) {
+	for i, clnedUnt := range clnedUnts {
+		cBs[i].blnCfg.Units.Big = clnedUnt.Big
+	}
+}
 
 // newConcreteBalance constructs a concreteBalanceOperator
 func newConcreteBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []*concreteBalance,
@@ -129,55 +146,10 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal,
 		}
 	}
 
-	// balanceLimit
-	var hasLmt bool
-	var blncLmt *utils.Decimal
-	if blncLmt, err = balanceLimit(cB.blnCfg.Opts); err != nil {
-		return
-	}
-	if blncLmt != nil && blncLmt.Cmp(decimal.New(0, 0)) != 0 {
-		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, blncLmt.Big)
-		hasLmt = true
-	}
+	return maxDebitUsageFromConcretes([]*concreteBalance{cB}, usage,
+		cB.connMgr, cgrEv,
+		cB.attrSConns, cB.blnCfg.AttributeIDs,
+		cB.rateSConns, cB.blnCfg.RateProfileIDs,
+		costIcrm)
 
-	// unitFactor
-	var uF *utils.UnitFactor
-	if uF, err = unitFactor(cB.blnCfg.UnitFactors, cB.fltrS, cgrEv.Tenant, evNm); err != nil {
-		return
-	}
-	var hasUF bool
-	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
-		usage.Big = utils.MultiplyBig(usage.Big, uF.Factor.Big)
-		hasUF = true
-	}
-
-	// balance smaller than usage, correct usage
-	if cB.blnCfg.Units.Compare(usage) == -1 {
-		// decrease the usage to match the maximum increments
-		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
-		usage.Big = roundedUsageWithIncrements(cB.blnCfg.Units.Big, costIcrm.Increment.Big)
-	}
-
-	fmt.Printf("hasLmt: %v, hasUF: %v\n", hasLmt, hasUF)
-
-	return
-}
-
-// cloneUnitsFromConcretes returns cloned units from the concrete balances passed as parameters
-func cloneUnitsFromConcretes(cBs []*concreteBalance) (clnedUnts []*utils.Decimal) {
-	if cBs == nil {
-		return
-	}
-	clnedUnts = make([]*utils.Decimal, len(cBs))
-	for i := range cBs {
-		clnedUnts[i] = cBs[i].blnCfg.Units.Clone()
-	}
-	return
-}
-
-// restoreUnitsFromClones will restore the units from the clones
-func restoreUnitsFromClones(cBs []*concreteBalance, clnedUnts []*utils.Decimal) {
-	for i, clnedUnt := range clnedUnts {
-		cBs[i].blnCfg.Units.Big = clnedUnt.Big
-	}
 }

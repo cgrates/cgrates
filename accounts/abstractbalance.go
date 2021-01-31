@@ -86,18 +86,6 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 		cgrEv.Tenant, evNm); err != nil {
 		return
 	}
-	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
-		costIcrm.FixedFee == nil &&
-		len(aB.blnCfg.AttributeIDs) != 0 { // cost unknown, apply AttributeS to query from RateS
-		var rplyAttrS *engine.AttrSProcessEventReply
-		if rplyAttrS, err = processAttributeS(aB.connMgr, cgrEv, aB.attrSConns,
-			aB.blnCfg.AttributeIDs); err != nil {
-			return
-		}
-		if len(rplyAttrS.AlteredFields) != 0 { // event was altered
-			cgrEv = rplyAttrS.CGREvent
-		}
-	}
 
 	// balance smaller than usage, correct usage
 	if aB.blnCfg.Units.Compare(usage) == -1 {
@@ -109,6 +97,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 	// attempt to debit usage with cost
 	if dbted, ec, err = maxDebitUsageFromConcretes(aB.cncrtBlncs, usage,
 		aB.connMgr, cgrEv,
+		aB.attrSConns, aB.blnCfg.AttributeIDs,
 		aB.rateSConns, aB.blnCfg.RateProfileIDs,
 		costIcrm); err != nil {
 		return

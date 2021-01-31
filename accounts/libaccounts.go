@@ -249,8 +249,23 @@ func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal
 // maxDebitUsageFromConcretes will debit the maximum possible usage out of concretes
 func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
-	rateSConns, rpIDs []string,
+	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement) (dbtedUsage *utils.Decimal, ec *utils.EventCharges, err error) {
+
+	// process AttributeS if needed
+	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
+		costIcrm.FixedFee == nil &&
+		len(attributeIDs) != 0 { // cost unknown, apply AttributeS to query from RateS
+		var rplyAttrS *engine.AttrSProcessEventReply
+		if rplyAttrS, err = processAttributeS(connMgr, cgrEv, attrSConns,
+			attributeIDs); err != nil {
+			return
+		}
+		if len(rplyAttrS.AlteredFields) != 0 { // event was altered
+			cgrEv = rplyAttrS.CGREvent
+		}
+	}
+
 	// fix the maximum number of iterations
 	origConcrtUnts := cloneUnitsFromConcretes(cncrtBlncs) // so we can revert on errors
 	paidConcrtUnts := origConcrtUnts                      // so we can revert when higher usages are not possible
