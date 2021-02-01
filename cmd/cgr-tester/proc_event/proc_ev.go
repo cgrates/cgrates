@@ -106,11 +106,12 @@ func main() {
 					Tenant: "cgrates.org",
 					ID:     utils.UUIDSha1Prefix(),
 					Event: map[string]interface{}{
-						utils.Category:    "call",
-						utils.Tenant:      "cgrates.org",
-						utils.Subject:     "*any",
-						utils.AnswerTime:  utils.MetaNow,
-						utils.Destination: destination,
+						utils.Category:      "call",
+						utils.Tenant:        "cgrates.org",
+						utils.Subject:       "*any",
+						utils.AnswerTime:    utils.MetaNow,
+						utils.Destination:   destination,
+						"PrefixDestination": destination[:3],
 					},
 					Opts: map[string]interface{}{
 						utils.OptsRatesUsage: usage,
