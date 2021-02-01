@@ -30,6 +30,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/rpcclient"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,21 +39,21 @@ import (
 
 var (
 	sTests = []func(t *testing.T){
-		/*
-			testSetSTerminator,
-			testSetSTerminatorError,
-			testSetSTerminatorAutomaticTermination,
-			testSetSTerminatorManualTermination,
-
-		*/
+		testSetSTerminator,
+		testSetSTerminatorError,
+		testSetSTerminatorAutomaticTermination,
+		testSetSTerminatorManualTermination,
 		testForceSTerminatorManualTermination,
+		testForceSTerminatorPostCDRs,
+		testForceSTerminatorReleaseSession,
+		testForceSTerminatorClientCall,
 	}
 )
 
 func TestSessionsIT(t *testing.T) {
 	for _, test := range sTests {
 		log.SetOutput(ioutil.Discard)
-		t.Run("Runing Sessions tests", test)
+		t.Run("Running Sessions tests", test)
 	}
 }
 
@@ -284,5 +286,124 @@ func testForceSTerminatorManualTermination(t *testing.T) {
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
 	if err := sessions.forceSTerminate(ss, time.Second, nil, nil); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, receive %+v", expected, err)
+	}
+}
+
+func testForceSTerminatorPostCDRs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): nil,
+	})
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	ss := &Session{
+		CGRID:      "CGRID",
+		Tenant:     "cgrates.org",
+		EventStart: engine.NewMapEvent(nil),
+		SRuns: []*SRun{
+			{
+				Event: map[string]interface{}{
+					utils.RequestType: utils.MetaPostpaid,
+				},
+				CD:            &engine.CallDescriptor{Category: "test"},
+				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+				ExtraDuration: 1,
+				LastUsage:     2,
+				TotalUsage:    3,
+				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
+			},
+		},
+	}
+
+	expected := "MANDATORY_IE_MISSING: [connIDs]"
+	if err := sessions.forceSTerminate(ss, time.Second, nil, nil); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, receiveD %+v", expected, err)
+	}
+}
+
+func testForceSTerminatorReleaseSession(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): nil,
+	})
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	ss := &Session{
+		CGRID:      "CGRID",
+		Tenant:     "cgrates.org",
+		EventStart: engine.NewMapEvent(nil),
+		ResourceID: "resourceID",
+		SRuns: []*SRun{
+			{
+				Event: map[string]interface{}{
+					utils.RequestType: utils.MetaPostpaid,
+				},
+				CD:            &engine.CallDescriptor{Category: "test"},
+				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+				ExtraDuration: 1,
+				LastUsage:     2,
+				TotalUsage:    3,
+				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
+			},
+		},
+	}
+
+	expected := "MANDATORY_IE_MISSING: [connIDs]"
+	if err := sessions.forceSTerminate(ss, time.Second, nil, nil); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, receiveD %+v", expected, err)
+	}
+}
+
+type testMockClientConn struct {
+	*testRPCClientConnection
+}
+
+func (sT *testMockClientConn) Call(method string, arg interface{}, rply interface{}) error {
+	return utils.ErrNoActiveSession
+}
+
+func testForceSTerminatorClientCall(t *testing.T) {
+	sTestMock := &testMockClientConn{}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().NodeID = "ClientConnID"
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): nil,
+	})
+	sessions := NewSessionS(cfg, dm, connMgr)
+	sessions.RegisterIntBiJConn(sTestMock)
+
+	ss := &Session{
+		CGRID:        "CGRID",
+		Tenant:       "cgrates.org",
+		EventStart:   engine.NewMapEvent(nil),
+		ResourceID:   "resourceID",
+		ClientConnID: "ClientConnID",
+		SRuns: []*SRun{
+			{
+				Event: map[string]interface{}{
+					utils.RequestType: utils.MetaPostpaid,
+				},
+				CD:            &engine.CallDescriptor{Category: "test"},
+				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+				ExtraDuration: 1,
+				LastUsage:     2,
+				TotalUsage:    3,
+				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
+			},
+		},
+	}
+
+	expected := "MANDATORY_IE_MISSING: [connIDs]"
+	if err := sessions.forceSTerminate(ss, time.Second, nil, nil); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
