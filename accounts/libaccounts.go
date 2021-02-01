@@ -22,6 +22,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -270,12 +272,12 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Deci
 	origConcrtUnts := cloneUnitsFromConcretes(cncrtBlncs) // so we can revert on errors
 	paidConcrtUnts := origConcrtUnts                      // so we can revert when higher usages are not possible
 	var usagePaid, usageDenied *decimal.Big
-	maxIter := 100
-	for i := 0; i < maxIter; i++ {
+	maxItr := config.CgrConfig().AccountSCfg().MaxIterations
+	for i := 0; i < maxItr; i++ {
 		if i != 0 {
 			restoreUnitsFromClones(cncrtBlncs, origConcrtUnts)
 		}
-		if i == maxIter {
+		if i == maxItr {
 			return nil, nil, utils.ErrMaxIncrementsExceeded
 		}
 		qriedUsage := usage.Big // so we can detect loops
