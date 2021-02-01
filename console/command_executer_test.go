@@ -20,7 +20,9 @@ package console
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -274,10 +276,88 @@ func TestGetFormatedSliceResultCase2(t *testing.T) {
 	}
 }
 
-func TestLocalExecute(t *testing.T) {
-	testStruct := CommandExecuter{}
+func TestCommandExecuterUsage(t *testing.T) {
+	testStruct := &CommandExecuter{}
+	testStruct.command = commands["accounts"]
+	result := testStruct.Usage()
+	expected := "\n\tUsage: accounts Tenant=\"\" AccountIDs=null Offset=0 Limit=0 Filter=null \n"
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected, result)
+	}
+
+}
+
+func TestCommandExecuterLocalExecute(t *testing.T) {
+	testStruct := &CommandExecuter{}
+	testStruct.command = commands["accounts"]
 	result := testStruct.LocalExecute()
-	if reflect.DeepEqual(utils.EmptyString, result) {
-		fmt.Errorf("Expected <%+v>, Received <%+v>", utils.EmptyString, result)
+	expected := utils.EmptyString
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected, result)
+	}
+}
+
+func TestCommandExecuterLocalFromArgs(t *testing.T) {
+	null, _ := os.Open(os.DevNull)
+	stdout := os.Stdout
+	os.Stdout = null
+	testStruct := &CommandExecuter{}
+	testStruct.command = commands["status"]
+	cmdArgs := "argument_test"
+	result := testStruct.FromArgs(cmdArgs, true)
+	if !reflect.DeepEqual(nil, result) {
+		t.Errorf("Expected <%+v>, Received <%+v>", nil, result)
+	}
+	os.Stdout = stdout
+}
+
+type mockCommandExecuter struct {
+	Commander
+}
+
+func (*mockCommandExecuter) Name() string {
+	return utils.EmptyString
+}
+
+func (*mockCommandExecuter) RpcMethod() string {
+	return utils.EmptyString
+}
+
+func (*mockCommandExecuter) RpcParams(reset bool) interface{} {
+	return struct{}{}
+}
+
+func (*mockCommandExecuter) PostprocessRpcParams() error {
+	return nil
+}
+
+func (*mockCommandExecuter) RpcResult() interface{} {
+	return nil
+}
+
+func (*mockCommandExecuter) ClientArgs() (args []string) {
+	return
+}
+
+func TestCommandExecuterLocalFromArgsCase2(t *testing.T) {
+	testStruct := &CommandExecuter{new(mockCommandExecuter)}
+	cmdArgs := "argument_test"
+	err := testStruct.FromArgs(cmdArgs, true)
+	expected := "json: Unmarshal(non-pointer struct {})"
+	if err == nil || err.Error() != expected {
+		fmt.Errorf("\nExpected <%+v>, \nRecevied <%+v>", expected, err)
+	}
+}
+
+func TestCommandExecuterClientArgs(t *testing.T) {
+	testStruct := &CommandExecuter{}
+	testStruct.command = commands["accounts"]
+	result := testStruct.clientArgs(testStruct.command.RpcParams(true))
+	expected := []string{"Filter", "Limit", "Offset", "AccountIDs", "Tenant"}
+	sort.Slice(result, func(i, j int) bool {
+		return true
+	})
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected, result)
 	}
 }
