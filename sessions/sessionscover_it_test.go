@@ -47,6 +47,7 @@ var (
 		testForceSTerminatorPostCDRs,
 		testForceSTerminatorReleaseSession,
 		testForceSTerminatorClientCall,
+		testDebitSession,
 	}
 )
 
@@ -405,5 +406,52 @@ func testForceSTerminatorClientCall(t *testing.T) {
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
 	if err := sessions.forceSTerminate(ss, time.Second, nil, nil); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func testDebitSession(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	ss := &Session{
+		CGRID:      "CGRID",
+		Tenant:     "cgrates.org",
+		EventStart: engine.NewMapEvent(nil),
+		SRuns: []*SRun{
+			{
+				Event: map[string]interface{}{
+					utils.RequestType: utils.MetaPostpaid,
+				},
+				CD:            &engine.CallDescriptor{Category: "test"},
+				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+				ExtraDuration: 1,
+				LastUsage:     2,
+				TotalUsage:    3,
+				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
+			},
+		},
+	}
+
+	//RunIdx cannot be higher than the length of sessions runs
+	expectedErr := "sRunIdx out of range"
+	if _, err := sessions.debitSession(ss, 2, 0,
+		utils.DurationPointer(time.Second)); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	//debitReserve must be higher than 0
+	if maxDur, err := sessions.debitSession(ss, 0, 0,
+		utils.DurationPointer(0)); err != nil {
+		t.Error(err)
+	} else if maxDur != 0 {
+		t.Errorf("Expected %+v, received %+v", 0, maxDur)
+	}
+
+	expectedErr = "MANDATORY_IE_MISSING: [connIDs]"
+	if _, err := sessions.debitSession(ss, 0, 0,
+		utils.DurationPointer(5*time.Second)); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
