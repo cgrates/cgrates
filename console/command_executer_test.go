@@ -353,10 +353,27 @@ func TestCommandExecuterClientArgs(t *testing.T) {
 	testStruct := &CommandExecuter{}
 	testStruct.command = commands["accounts"]
 	result := testStruct.clientArgs(testStruct.command.RpcParams(true))
-	expected := []string{"Filter", "Limit", "Offset", "AccountIDs", "Tenant"}
-	sort.Slice(result, func(i, j int) bool {
-		return true
-	})
+	expected := []string{"AccountIDs", "Filter", "Limit", "Offset", "Tenant"}
+	sort.Strings(result)
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected, result)
+	}
+}
+
+type mockTest struct {
+	a int
+	B *bool
+	C struct {
+	}
+	D time.Time
+}
+
+func TestCommandExecuterClientArgsCase(t *testing.T) {
+	testStruct := &CommandExecuter{}
+	testStruct.command = commands["accounts"]
+	result := testStruct.clientArgs(new(mockTest))
+	expected := []string{"B", "D"}
+	sort.Strings(result)
 	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("Expected <%+v>, Received <%+v>", expected, result)
 	}
