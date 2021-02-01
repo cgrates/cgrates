@@ -40,8 +40,13 @@ import (
 var (
 	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	requests  = flag.Int("requests", 10000, "Number of requests")
-	gorutines = flag.Int("gorutines", 5, "Number of simultaneous goroutines")
+	gorutines = flag.Int("goroutines", 5, "Number of simultaneous goroutines")
 )
+
+// How to run:
+// 1) Start the engine with the following configuration cgr-engine -config_path=/usr/share/cgrates/conf/samples/hundred_rates
+// 2) Load the data with cgr-loader cgr-loader -config_path=/usr/share/cgrates/conf/samples/hundred_rates -verbose -path=/usr/share/cgrates/tariffplans/hundredrates
+// 3) Run the program with go run proc_ev.go -requests=10000 -goroutines=5
 
 func main() {
 	flag.Parse()
