@@ -75,3 +75,101 @@ func TestGetCommandValueCase4(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+type mockCommander struct {
+	Commander
+}
+
+func (*mockCommander) FromArgs(args string, verbose bool) error {
+	return nil
+}
+
+func (*mockCommander) Usage() string {
+	return utils.EmptyString
+}
+
+func (*mockCommander) RpcMethod() string {
+	return utils.EmptyString
+}
+func (*mockCommander) RpcParams(bool) interface{} {
+	return nil
+}
+
+func (*mockCommander) PostprocessRpcParams() error {
+	return utils.ErrNotImplemented
+}
+
+func (*mockCommander) RpcResult() interface{} {
+	return nil
+}
+func (*mockCommander) ClientArgs() []string {
+	return []string{}
+}
+func (*mockCommander) Name() string {
+	return utils.EmptyString
+}
+func (*mockCommander) LocalExecute() string {
+	return utils.EmptyString
+}
+func (*mockCommander) GetFormatedResult(result interface{}) string {
+	return utils.EmptyString
+}
+
+func TestGetCommandValueCase5(t *testing.T) {
+	commands["chargers_for_event"] = new(mockCommander)
+	_, err := GetCommandValue("chargers_for_event", true)
+	if !reflect.DeepEqual(utils.ErrNotImplemented, err) {
+		t.Errorf("Expected <%+v>, Received <%+v>", utils.ErrNotImplemented, err)
+	}
+}
+
+type mockCommander2 struct {
+	Commander
+}
+
+func (*mockCommander2) FromArgs(args string, verbose bool) error {
+	return utils.ErrNotImplemented
+}
+
+func (*mockCommander2) Usage() string {
+	return utils.EmptyString
+}
+
+func (*mockCommander2) RpcMethod() string {
+	return utils.EmptyString
+}
+func (*mockCommander2) RpcParams(bool) interface{} {
+	return nil
+}
+
+func (*mockCommander2) PostprocessRpcParams() error {
+	return nil
+}
+
+func (*mockCommander2) RpcResult() interface{} {
+	return nil
+}
+
+func (*mockCommander2) ClientArgs() []string {
+	return []string{}
+}
+
+func (*mockCommander2) Name() string {
+	return utils.EmptyString
+}
+
+func (*mockCommander2) LocalExecute() string {
+	return utils.EmptyString
+}
+
+func (*mockCommander2) GetFormatedResult(result interface{}) string {
+	return utils.EmptyString
+}
+
+func TestGetCommandValueCase6(t *testing.T) {
+	commands["test"] = new(mockCommander2)
+	_, err := GetCommandValue("test", true)
+	if !reflect.DeepEqual(utils.ErrNotImplemented, err) {
+		t.Errorf("Expected <%+v>, Received <%+v>", utils.ErrNotImplemented, err)
+	}
+}
