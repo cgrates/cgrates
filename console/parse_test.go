@@ -125,11 +125,13 @@ func TestCmdParseLocalExecuteCase5(t *testing.T) {
 	// for coverage purpose
 	testStruct := &CmdParse{
 		rpcParams: &AttrParse{
-			Expression: "~test_exp",
-			Value:      "~test_value",
+			Expression: "~*req.Field{*duration}",
+			Value:      "a",
 		},
 	}
-
-	testStruct.LocalExecute()
-
+	expected := "time: invalid duration \"a\""
+	received := testStruct.LocalExecute()
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("Expected <%+v>, Received <%+v>", expected, received)
+	}
 }
