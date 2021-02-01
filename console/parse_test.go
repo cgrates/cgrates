@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -33,19 +32,19 @@ func TestCmdParse(t *testing.T) {
 	// for coverage purpose
 	expected := command.Name()
 	if !reflect.DeepEqual(expected, "parse") {
-		fmt.Errorf("Expected <%+v>, Received <%+v>", "parse", expected)
+		t.Errorf("Expected <%+v>, Received <%+v>", "parse", expected)
 	}
 
 	// for coverage purpose
 	expected = command.RpcMethod()
 	if !reflect.DeepEqual(expected, utils.EmptyString) {
-		fmt.Errorf("Expected <%+v>, Received <%+v>", utils.EmptyString, expected)
+		t.Errorf("Expected <%+v>, Received <%+v>", utils.EmptyString, expected)
 	}
 
 	// for coverage purpose
 	expected2 := command.RpcParams(true)
-	if !reflect.DeepEqual(expected, &AttrParse{}) {
-		fmt.Errorf("Expected <%+v>, Received <%+v>", &AttrParse{}, expected2)
+	if !reflect.DeepEqual(expected2, &AttrParse{}) {
+		t.Errorf("Expected <%+v>, Received <%+v>", &AttrParse{}, expected2)
 	}
 
 	// for coverage purpose
