@@ -30,50 +30,26 @@ import (
 )
 
 // newAccountBalances constructs accountBalances
-func newAccountBalances(acnt *utils.AccountProfile,
+func newAccountBalanceOperators(acnt *utils.AccountProfile,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
-	attrSConns, rateSConns []string) (acntBlncs *accountBalances, err error) {
-	blncs := make(utils.Balances, len(acnt.Balances)) // Temporary code to pass the build please update this accordingly
-	for _, bal := range acnt.Balances {
-		blncs = append(blncs, bal)
+	attrSConns, rateSConns []string) (blncOpers []balanceOperator, err error) {
+
+	blnCfgs := make(utils.Balances, 0, len(acnt.Balances))
+	for _, blnCfg := range acnt.Balances {
+		blnCfgs = append(blnCfgs, blnCfg)
 	}
-	blncs.Sort()
-	acntBlncs = &accountBalances{blnCfgs: blncs, connMgr: connMgr, attrSConns: attrSConns, rateSConns: rateSConns}
-	// populate typIdx
-	for i, blnCfg := range blncs {
-		acntBlncs.typIdx[blnCfg.Type] = append(acntBlncs.typIdx[blnCfg.Type], i)
-	}
-	// populate cncrtBlncs
-	acntBlncs.cncrtBlncs = make([]*concreteBalance, len(acntBlncs.typIdx[utils.MetaConcrete]))
-	for i, blncIdx := range acntBlncs.typIdx[utils.MetaConcrete] {
-		acntBlncs.cncrtBlncs[i] = newConcreteBalanceOperator(acntBlncs.blnCfgs[blncIdx],
-			fltrS, connMgr, attrSConns, rateSConns).(*concreteBalance)
-		acntBlncs.opers[acntBlncs.blnCfgs[blncIdx].ID] = acntBlncs.cncrtBlncs[i]
-	}
-	// populate opers
-	for _, blnCfg := range acntBlncs.blnCfgs {
-		if blnCfg.Type == utils.MetaConcrete { // already computed above
-			continue
-		}
-		if acntBlncs.opers[blnCfg.ID], err = newBalanceOperator(blnCfg,
-			acntBlncs.cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns); err != nil {
+	blnCfgs.Sort()
+
+	var cncrtBlncs []*concreteBalance
+	blncOpers = make([]balanceOperator, len(blnCfgs))
+	for i, blnCfg := range blnCfgs {
+		if blncOpers[i], err = newBalanceOperator(blnCfg, cncrtBlncs, fltrS, connMgr,
+			attrSConns, rateSConns); err != nil {
 			return
 		}
 	}
+
 	return
-}
-
-// accountBalances implements processing of the events centralized
-type accountBalances struct {
-	blnCfgs    []*utils.Balance           // ordered list of balance configurations
-	typIdx     map[string][]int           // index based on type
-	cncrtBlncs []*concreteBalance         // concrete balances so we can pass them to the newBalanceOperator
-	opers      map[string]balanceOperator // map[blncID]balanceOperator
-
-	fltrS   *engine.FilterS
-	connMgr *engine.ConnManager
-	attrSConns,
-	rateSConns []string
 }
 
 // newBalanceOperator instantiates balanceOperator interface

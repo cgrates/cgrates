@@ -121,12 +121,12 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent, a
 // accountProcessEvent implements event processing by an Account
 func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
-	var aBlncs *accountBalances
-	if _, err = newAccountBalances(acnt, aS.fltrS, aS.connMgr,
+	var blncOpers []balanceOperator
+	if blncOpers, err = newAccountBalanceOperators(acnt, aS.fltrS, aS.connMgr,
 		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
 		return
 	}
-	fmt.Println(aBlncs)
+	fmt.Println(blncOpers)
 	return
 }
 
@@ -145,6 +145,7 @@ func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, ec *utils.EventC
 	if procEC, err = aS.accountProcessEvent(acnt, args.CGREvent); err != nil {
 		return
 	}
+
 	*ec = *procEC
 	return
 }
