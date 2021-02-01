@@ -120,3 +120,16 @@ func TestCmdParseLocalExecuteCase4(t *testing.T) {
 		t.Errorf("Expected <%+v>, Received <%+v>", expected, err)
 	}
 }
+
+func TestCmdParseLocalExecuteCase5(t *testing.T) {
+	// for coverage purpose
+	testStruct := &CmdParse{
+		rpcParams: &AttrParse{
+			Expression: "~test_exp",
+			Value:      "~test_value",
+		},
+	}
+
+	testStruct.LocalExecute()
+
+}
