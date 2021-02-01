@@ -40,7 +40,7 @@
   
   "rates": {
     "enabled": true,
-    "rate_prefix_indexed_fields": ["*req.Destination"]
+    "rate_string_indexed_fields": ["*req.PrefixDestination"]
   },
 
 
