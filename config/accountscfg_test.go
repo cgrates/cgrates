@@ -36,6 +36,7 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{"*req.index1"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:         utils.BoolPointer(true),
+		Max_iterations:        utils.IntPointer(1000),
 	}
 	expected := &AccountSCfg{
 		Enabled:             true,
@@ -47,6 +48,7 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
+		MaxIterations:       1000,
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.accountSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -67,7 +69,8 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 	"string_indexed_fields": ["*req.index1"],			
 	"prefix_indexed_fields": ["*req.index1"],			
 	"suffix_indexed_fields": ["*req.index1"],			
-	"nested_fields": true,					
+	"nested_fields": true,			
+    "max_iterations": 100,
 },	
 }`
 
@@ -81,6 +84,7 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1"},
 		utils.NestedFieldsCfg:        true,
+		utils.MaxIterations:          100,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -100,6 +104,7 @@ func TestAccountSCfgClone(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
+		MaxIterations:       1000,
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

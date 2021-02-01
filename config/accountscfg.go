@@ -31,6 +31,7 @@ type AccountSCfg struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	NestedFields        bool
+	MaxIterations       int
 }
 
 func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
@@ -97,6 +98,9 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		acS.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Max_iterations != nil {
+		acS.MaxIterations = *jsnCfg.Max_iterations
+	}
 	return
 }
 
@@ -106,6 +110,7 @@ func (acS *AccountSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.EnabledCfg:        acS.Enabled,
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
+		utils.MaxIterations:     acS.MaxIterations,
 	}
 	if acS.AttributeSConns != nil {
 		attributeSConns := make([]string, len(acS.AttributeSConns))
@@ -167,6 +172,7 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 		Enabled:        acS.Enabled,
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
+		MaxIterations:  acS.MaxIterations,
 	}
 	if acS.AttributeSConns != nil {
 		cln.AttributeSConns = make([]string, len(acS.AttributeSConns))

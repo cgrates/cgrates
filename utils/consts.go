@@ -2337,6 +2337,9 @@ const (
 	CapsStrategyCfg      = "caps_strategy"
 	CapsStatsIntervalCfg = "caps_stats_interval"
 	ShutdownTimeoutCfg   = "shutdown_timeout"
+
+	// AccountSCfg
+	MaxIterations = "max_iterations"
 )
 
 // FC Template
