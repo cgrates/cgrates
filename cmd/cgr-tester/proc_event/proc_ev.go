@@ -37,7 +37,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+var (
+	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	requests  = flag.Int("requests", 10000, "Number of requests")
+	gorutines = flag.Int("gorutines", 5, "Number of simultaneous goroutines")
+)
 
 func main() {
 	flag.Parse()
@@ -64,7 +68,9 @@ func main() {
 
 	var wgApier sync.WaitGroup
 	var wgRateS sync.WaitGroup
-	for i := 0; i < 10000; i++ {
+	var apierTime time.Duration
+	var rateSTime time.Duration
+	for i := 0; i < *requests; i++ {
 		wgApier.Add(1)
 		wgRateS.Add(1)
 		destination := fmt.Sprintf("%+v%+v", sls[r1.Intn(100)], 1000000+rand.Intn(9999999-1000000))
@@ -79,10 +85,12 @@ func main() {
 				Usage:       usage,
 			}
 			var replyApier *engine.EventCost
+			tNow := time.Now()
 			if err := rpc.Call(utils.APIerSv1GetCost, &attrs, &replyApier); err != nil {
 				fmt.Println(err)
 				return
 			}
+			apierTime += time.Now().Sub(tNow)
 			sumApier += *replyApier.Cost
 			wgApier.Done()
 		}()
@@ -106,13 +114,20 @@ func main() {
 			}
 
 			var rplyRateS *engine.RateProfileCost
+			tNow := time.Now()
 			if err := rpc.Call(utils.RateSv1CostForEvent, argsRateS, &rplyRateS); err != nil {
 				fmt.Printf("Unexpected nil error received for RateSv1CostForEvent: %+v\n", err.Error())
 				return
 			}
+			rateSTime += time.Now().Sub(tNow)
 			sumRateS += rplyRateS.Cost
 			wgRateS.Done()
 		}()
+		if i%*gorutines == 0 {
+			wgApier.Wait()
+			wgRateS.Wait()
+		}
+
 	}
 	wgApier.Wait()
 	wgRateS.Wait()
@@ -120,5 +135,13 @@ func main() {
 	fmt.Println(sumApier)
 	fmt.Println("Cost for RateS")
 	fmt.Println(sumRateS)
+	fmt.Println("Average ApierTime")
+	fmt.Println(apierTime / time.Duration(*requests))
+	fmt.Println("Average RateSTime")
+	fmt.Println(rateSTime / time.Duration(*requests))
+	fmt.Println("Total ApierTime")
+	fmt.Println(apierTime)
+	fmt.Println("Total RateSTime")
+	fmt.Println(rateSTime)
 
 }
