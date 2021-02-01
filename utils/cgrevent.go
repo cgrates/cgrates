@@ -56,6 +56,15 @@ func (ev *CGREvent) FieldAsString(fldName string) (val string, err error) {
 	return IfaceAsString(iface), nil
 }
 
+// OptAsString returns an option as string
+func (ev *CGREvent) OptAsString(optName string) (val string, err error) {
+	iface, has := ev.Opts[optName]
+	if !has {
+		return "", ErrNotFound
+	}
+	return IfaceAsString(iface), nil
+}
+
 // FieldAsTime returns a field as Time instance
 func (ev *CGREvent) FieldAsTime(fldName string, timezone string) (t time.Time, err error) {
 	iface, has := ev.Event[fldName]
@@ -69,6 +78,16 @@ func (ev *CGREvent) FieldAsTime(fldName string, timezone string) (t time.Time, e
 // FieldAsDuration returns a field as Duration instance
 func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error) {
 	iface, has := ev.Event[fldName]
+	if !has {
+		err = ErrNotFound
+		return
+	}
+	return IfaceAsDuration(iface)
+}
+
+// OptAsDuration returns an option as Duration instance
+func (ev *CGREvent) OptAsDuration(optName string) (d time.Duration, err error) {
+	iface, has := ev.Event[optName]
 	if !has {
 		err = ErrNotFound
 		return

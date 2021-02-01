@@ -953,6 +953,7 @@ const (
 	MetaCDR               = "*cdr"
 	MetaExporterIDs       = "*exporterIDs"
 	MetaAsync             = "*async"
+	MetaUsage             = "*usage"
 )
 
 // Migrator Action

@@ -20,10 +20,12 @@ package accounts
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 // NewAccountS instantiates the AccountS
@@ -126,7 +128,38 @@ func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
 		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
 		return
 	}
-	fmt.Println(blncOpers)
+	usage := utils.NewDecimal(int64(72*time.Hour), 0)
+	var usgEv time.Duration
+	if usgEv, err = cgrEv.FieldAsDuration(utils.Usage); err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+		// not found, try at opts level
+		if usgEv, err = cgrEv.OptAsDuration(utils.MetaUsage); err != nil {
+			if err != utils.ErrNotFound {
+				return
+			}
+			err = nil
+		} else { // found, overwrite usage
+			usage.Big = decimal.New(int64(usgEv), 0)
+		}
+	} else {
+		usage.Big = decimal.New(int64(usgEv), 0)
+	}
+
+	for _, blncOper := range blncOpers {
+		if usage.Big.Cmp(decimal.New(0, 0)) == 0 {
+			return // no more debit
+		}
+		var dbted *utils.Decimal
+		if dbted, _, err = blncOper.debitUsage(usage, cgrEv); err != nil {
+			if err == utils.ErrFilterNotPassingNoCaps {
+				err = nil
+				continue
+			}
+		}
+		usage.Big = utils.SubstractBig(usage.Big, dbted.Big)
+	}
 	return
 }
 

@@ -43,6 +43,12 @@ func newAccountBalanceOperators(acnt *utils.AccountProfile,
 	var cncrtBlncs []*concreteBalance
 	blncOpers = make([]balanceOperator, len(blnCfgs))
 	for i, blnCfg := range blnCfgs {
+		if blnCfg.Type == utils.MetaConcrete {
+			blncOpers[i] = newConcreteBalanceOperator(blnCfg,
+				fltrS, connMgr, attrSConns, rateSConns)
+			cncrtBlncs = append(cncrtBlncs, blncOpers[i].(*concreteBalance))
+			continue
+		}
 		if blncOpers[i], err = newBalanceOperator(blnCfg, cncrtBlncs, fltrS, connMgr,
 			attrSConns, rateSConns); err != nil {
 			return
