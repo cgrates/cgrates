@@ -5,6 +5,7 @@ map $upstream_http_docker_distribution_api_version $docker_distribution_api_vers
 
 server {
   listen 80;
+  autoindex_localtime on;
   server_name dkr.cgrates.org;
 
   access_log /var/log/nginx/docker-error.log;
