@@ -278,3 +278,46 @@ func BenchmarkGuardIDs(b *testing.B) {
 		}(n)
 	}
 }
+
+func TestGuardianLockItemUnlockItem(t *testing.T) {
+	//for coverage purposes
+	itemID := utils.EmptyString
+	Guardian.lockItem(itemID)
+	Guardian.unlockItem(itemID)
+	if itemID != utils.EmptyString {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.EmptyString, itemID)
+	}
+}
+
+func TestGuardianLockUnlockWithReference(t *testing.T) {
+	//for coverage purposes
+	refID := utils.EmptyString
+	Guardian.lockWithReference(refID, []string{})
+	Guardian.unlockWithReference(refID)
+	if refID != utils.EmptyString {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.EmptyString, refID)
+	}
+}
+
+func TestGuardianGuardUnguardIDs(t *testing.T) {
+	//for coverage purposes
+	refID := utils.EmptyString
+	lkIDs := []string{"test1", "test2", "test3"}
+	Guardian.GuardIDs(refID, time.Second, lkIDs...)
+	Guardian.UnguardIDs(refID)
+	if refID != utils.EmptyString {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.EmptyString, refID)
+	}
+}
+
+func testHandler() (interface{}, error) {
+	return nil, utils.ErrNotFound
+}
+func TestGuardianGuardUnguardIDsCase2(t *testing.T) {
+	//for coverage purposes
+	lkIDs := []string{"test1", "test2", "test3"}
+	_, err := Guardian.Guard(testHandler, 10*time.Millisecond, lkIDs...)
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
+	}
+}
