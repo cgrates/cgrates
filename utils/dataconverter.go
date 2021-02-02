@@ -21,6 +21,7 @@ package utils
 import (
 	"encoding/hex"
 	"fmt"
+	"math/rand"
 	"net"
 	"strconv"
 	"strings"
@@ -54,26 +55,26 @@ type DataConverter interface {
 func NewDataConverter(params string) (conv DataConverter, err error) {
 	switch {
 	case params == MetaDurationSeconds:
-		return NewDurationSecondsConverter("")
+		return NewDurationSecondsConverter(EmptyString)
 	case params == MetaDurationNanoseconds:
-		return NewDurationNanosecondsConverter("")
+		return NewDurationNanosecondsConverter(EmptyString)
 	case strings.HasPrefix(params, MetaRound):
 		if len(params) == len(MetaRound) { // no extra params, defaults implied
-			return NewRoundConverter("")
+			return NewRoundConverter(EmptyString)
 		}
 		return NewRoundConverter(params[len(MetaRound)+1:])
 	case strings.HasPrefix(params, MetaMultiply):
 		if len(params) == len(MetaMultiply) { // no extra params, defaults implied
-			return NewMultiplyConverter("")
+			return NewMultiplyConverter(EmptyString)
 		}
 		return NewMultiplyConverter(params[len(MetaMultiply)+1:])
 	case strings.HasPrefix(params, MetaDivide):
 		if len(params) == len(MetaDivide) { // no extra params, defaults implied
-			return NewDivideConverter("")
+			return NewDivideConverter(EmptyString)
 		}
 		return NewDivideConverter(params[len(MetaDivide)+1:])
 	case params == MetaDuration:
-		return NewDurationConverter("")
+		return NewDurationConverter(EmptyString)
 	case params == MetaIP2Hex:
 		return new(IP2HexConverter), nil
 	case params == MetaString2Hex:
@@ -88,7 +89,7 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(UnixTimeConverter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
-			return NewPhoneNumberConverter("")
+			return NewPhoneNumberConverter(EmptyString)
 		}
 		return NewPhoneNumberConverter(params[len(MetaLibPhoneNumber)+1:])
 	case strings.HasPrefix(params, MetaTimeString):
@@ -97,6 +98,11 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 			layout = params[len(MetaTimeString)+1:]
 		}
 		return NewTimeStringConverter(layout), nil
+	case strings.HasPrefix(params, MetaRandom):
+		if len(params) == len(MetaRandom) { // no extra params, defaults implied
+			return NewRandomConverter(EmptyString)
+		}
+		return NewRandomConverter(params[len(MetaRandom)+1:])
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -215,7 +221,7 @@ func (m *MultiplyConverter) Convert(in interface{}) (out interface{}, err error)
 }
 
 func NewDivideConverter(constructParams string) (hdlr DataConverter, err error) {
-	if constructParams == "" {
+	if constructParams == EmptyString {
 		return nil, ErrMandatoryIeMissingNoCaps
 	}
 	var val float64
@@ -389,4 +395,54 @@ func (tS *UnixTimeConverter) Convert(in interface{}) (
 	}
 	out = tm.Unix()
 	return
+}
+
+func NewRandomConverter(params string) (dflr DataConverter, err error) {
+	randConv := &RandomConverter{}
+	if params == EmptyString {
+		dflr = randConv
+		return
+	}
+	sls := strings.Split(params, InInFieldSep)
+	switch len(sls) {
+	case 2:
+		if sls[0] != EmptyString {
+			if randConv.begin, err = strconv.Atoi(sls[0]); err != nil {
+				return
+			}
+		}
+		if sls[1] != EmptyString {
+			if randConv.end, err = strconv.Atoi(sls[1]); err != nil {
+				return
+			}
+		}
+	case 1:
+		if randConv.begin, err = strconv.Atoi(sls[0]); err != nil {
+			return
+		}
+	}
+	dflr = randConv
+	return
+}
+
+type RandomConverter struct {
+	begin, end int
+}
+
+// Convert implements DataConverter interface
+func (rC *RandomConverter) Convert(in interface{}) (
+	out interface{}, err error) {
+	if rC.begin == 0 {
+		if rC.end == 0 {
+			return rand.Int(), nil
+		} else {
+			return rand.Intn(rC.end), nil
+		}
+	} else {
+		if rC.end == 0 {
+			return rand.Int() + rC.begin, nil
+		} else {
+			return RandomInteger(rC.begin, rC.end), nil
+		}
+	}
 }

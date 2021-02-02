@@ -873,3 +873,30 @@ func TestUnixTimeConverter(t *testing.T) {
 		t.Errorf("Expected error received %v", err)
 	}
 }
+
+func TestRandomConverter(t *testing.T) {
+	exp := new(RandomConverter)
+	if cnv, err := NewRandomConverter(EmptyString); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, cnv) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
+	}
+
+	if rcv, err := exp.Convert(nil); err != nil {
+		t.Error(err)
+	} else if rcv == 0 {
+		t.Errorf("Expecting different than 0, received: %+v", rcv)
+	}
+	exp.begin = 10
+	if rcv, err := exp.Convert(nil); err != nil {
+		t.Error(err)
+	} else if rcv.(int) < 10 {
+		t.Errorf("Expecting bigger than 10, received: %+v", rcv)
+	}
+	exp.end = 20
+	if rcv, err := exp.Convert(nil); err != nil {
+		t.Error(err)
+	} else if rcv.(int) < 10 || rcv.(int) > 20 {
+		t.Errorf("Expecting bigger than 10 and smaller than 20, received: %+v", rcv)
+	}
+}
