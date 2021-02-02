@@ -13,6 +13,7 @@ http {
 
     server {
       listen 80;
+      autoindex_localtime on;
       server_name yum.cgrates.org;
 
       access_log /var/log/nginx/yum.cgrates.org_access.log;
