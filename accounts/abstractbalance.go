@@ -43,7 +43,7 @@ type abstractBalance struct {
 
 // debitUsage implements the balanceOperator interface
 func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
-	cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
@@ -55,7 +55,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 	if pass, err = aB.fltrS.Pass(cgrEv.Tenant, aB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
-		return nil, nil, utils.ErrFilterNotPassingNoCaps
+		return nil, utils.ErrFilterNotPassingNoCaps
 	}
 
 	// balanceLimit
@@ -95,7 +95,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 	}
 
 	// attempt to debit usage with cost
-	if dbted, ec, err = maxDebitUsageFromConcretes(aB.cncrtBlncs, usage,
+	if ec, err = maxDebitUsageFromConcretes(aB.cncrtBlncs, usage,
 		aB.connMgr, cgrEv,
 		aB.attrSConns, aB.blnCfg.AttributeIDs,
 		aB.rateSConns, aB.blnCfg.RateProfileIDs,
@@ -103,8 +103,8 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 		return
 	}
 
-	if dbted.Cmp(decimal.New(0, 0)) != 0 {
-		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, dbted.Big)
+	if ec.Usage.Cmp(decimal.New(0, 0)) != 0 {
+		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, ec.Usage)
 	}
 	if hasLmt { // put back the limit
 		aB.blnCfg.Units.Big = utils.SumBig(aB.blnCfg.Units.Big, blncLmt.Big)

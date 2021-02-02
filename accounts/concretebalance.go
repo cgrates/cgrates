@@ -111,7 +111,7 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
 
 // debit implements the balanceOperator interface
 func (cB *concreteBalance) debitUsage(usage *utils.Decimal,
-	cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
@@ -123,7 +123,7 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal,
 	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
-		return nil, nil, utils.ErrFilterNotPassingNoCaps
+		return nil, utils.ErrFilterNotPassingNoCaps
 	}
 
 	// costIncrement
@@ -145,7 +145,8 @@ func (cB *concreteBalance) debitUsage(usage *utils.Decimal,
 		}
 	}
 
-	return maxDebitUsageFromConcretes([]*concreteBalance{cB}, usage,
+	return maxDebitUsageFromConcretes(
+		[]*concreteBalance{cB}, usage,
 		cB.connMgr, cgrEv,
 		cB.attrSConns, cB.blnCfg.AttributeIDs,
 		cB.rateSConns, cB.blnCfg.RateProfileIDs,

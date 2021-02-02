@@ -151,14 +151,15 @@ func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
 		if usage.Big.Cmp(decimal.New(0, 0)) == 0 {
 			return // no more debit
 		}
-		var dbted *utils.Decimal
-		if dbted, _, err = blncOper.debitUsage(usage, cgrEv); err != nil {
+		var ecDbt *utils.EventCharges
+		if ec, err = blncOper.debitUsage(usage, cgrEv); err != nil {
 			if err == utils.ErrFilterNotPassingNoCaps {
 				err = nil
 				continue
 			}
 		}
-		usage.Big = utils.SubstractBig(usage.Big, dbted.Big)
+		usage.Big = utils.SubstractBig(usage.Big, ecDbt.Usage)
+		ec.Merge(ecDbt)
 	}
 	return
 }

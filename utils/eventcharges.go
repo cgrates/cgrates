@@ -19,18 +19,55 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"time"
+	"errors"
 
 	"github.com/ericlagergren/decimal"
 )
 
 // EventCharges records the charges applied to an Event
 type EventCharges struct {
-	StartTime  *time.Time
 	Usage      *decimal.Big
 	Cost       *decimal.Big
 	Charges    []*ChargedInterval
 	Account    *AccountProfile
 	Accounting *ChargedAccounting
 	Rating     *ChargedRating
+}
+
+// Merge will merge the event charges into existing
+func (ec *EventCharges) Merge(eCs ...*EventCharges) {
+	for _, nEc := range eCs {
+		if ec.Usage == nil {
+			ec.Usage = nEc.Usage
+			continue
+		}
+		ec.Usage = SumBig(ec.Usage, nEc.Usage)
+	}
+}
+
+// AsExtEventCharges converts EventCharges to ExtEventCharges
+func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
+	eEc = new(ExtEventCharges)
+	if ec.Usage != nil {
+		if flt, ok := ec.Usage.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal Usage to float64")
+		} else {
+			eEc.Usage = &flt
+		}
+	}
+	if ec.Cost != nil {
+		if flt, ok := ec.Cost.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal Cost to float64")
+		} else {
+			eEc.Cost = &flt
+		}
+	}
+	// add here code for the rest of the fields
+	return
+}
+
+// ExtEventCharges is a generic EventCharges used in APIs
+type ExtEventCharges struct {
+	Usage *float64
+	Cost  *float64
 }

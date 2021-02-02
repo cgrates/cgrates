@@ -75,7 +75,7 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
-	debitUsage(usage *utils.Decimal, cgrEv *utils.CGREvent) (dbted *utils.Decimal, ec *utils.EventCharges, err error)
+	debitUsage(usage *utils.Decimal, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
 }
 
 // roundUsageWithIncrements rounds the usage based on increments
@@ -234,7 +234,7 @@ func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal
 func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
-	costIcrm *utils.CostIncrement) (dbtedUsage *utils.Decimal, ec *utils.EventCharges, err error) {
+	costIcrm *utils.CostIncrement) (ec *utils.EventCharges, err error) {
 
 	// process AttributeS if needed
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
@@ -260,7 +260,7 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Deci
 			restoreUnitsFromClones(cncrtBlncs, origConcrtUnts)
 		}
 		if i == maxItr {
-			return nil, nil, utils.ErrMaxIncrementsExceeded
+			return nil, utils.ErrMaxIncrementsExceeded
 		}
 		qriedUsage := usage.Big // so we can detect loops
 		if err = debitUsageFromConcretes(cncrtBlncs, usage, costIcrm, cgrEv,
@@ -308,5 +308,5 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Deci
 		usagePaid = decimal.New(0, 0)
 	}
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
-	return &utils.Decimal{usagePaid}, nil, nil
+	return &utils.EventCharges{Usage: usagePaid}, nil
 }
