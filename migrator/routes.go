@@ -89,12 +89,12 @@ func (m *Migrator) migrateFromSupplierToRoute() (err error) {
 		if err := m.dmOut.DataManager().SetRouteProfile(convertSupplierToRoute(spp), true); err != nil {
 			return err
 		}
-		m.stats[utils.DerivedChargersV]++
+		m.stats[utils.Routes]++
 	}
 	if m.dryRun {
 		return
 	}
-	if err = m.removeSupplier(); err != nil {
+	if err = m.removeSupplier(); err != nil && err != utils.ErrNoMoreData {
 		return
 	}
 	// All done, update version with current one
