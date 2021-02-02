@@ -1,0 +1,111 @@
+{
+"general": {
+	"log_level": 7,
+	"node_id": "InternalEngine",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2022", "transport":"*json"}],
+	},
+},
+
+"caches":{
+	"partitions": {
+		"*destinations": {"limit":0 },
+		"*reverse_destinations": {"limit":0 },
+		"*rating_plans": {"limit":0 },
+		"*rating_profiles": {"limit":0 },
+		"*actions": {"limit":0 },
+		"*action_plans": {"limit":0 },
+		"*account_action_plans": {"limit":0 },
+		"*action_triggers": {"limit":0 },
+		"*shared_groups": {"limit":0 },
+		"*timings": {"limit":0 },
+		"*resource_profiles": {"limit":0 },
+		"*resources": {"limit":0 },
+		"*statqueue_profiles": {"limit":0 },
+		"*statqueues": {"limit":0 },
+		"*threshold_profiles": {"limit":0 },
+		"*thresholds": {"limit":0 },
+		"*filters": {"limit":0 },
+		"*route_profiles": {"limit":0 },
+		"*attribute_profiles": {"limit":0 },
+		"*charger_profiles": {"limit":0 },
+		"*dispatcher_profiles": {"limit":0 },
+		"*dispatcher_hosts": {"limit":0 },
+		"*rate_profiles": {"limit":0 },
+		"*action_profiles": {"limit":0 },
+		"*account_profiles": {"limit":0 },
+		"*resource_filter_indexes" : {"limit":0},
+		"*stat_filter_indexes" : {"limit":0},
+		"*threshold_filter_indexes" : {"limit":0},
+		"*route_filter_indexes" : {"limit":0},
+		"*attribute_filter_indexes" : {"limit":0},
+		"*charger_filter_indexes" : {"limit":0},
+		"*dispatcher_filter_indexes" : {"limit":0},
+		"*rate_profile_filter_indexes" : {"limit":0},
+		"*rate_filter_indexes" : {"limit":0},
+		"*action_profile_filter_indexes" : {"limit":0},
+		"*account_profile_filter_indexes" : {"limit":0},
+		"*reverse_filter_indexes" : {"limit":0},
+		"*dispatcher_routes": {"limit":0},
+		"*dispatcher_loads": {"limit":0},
+		"*dispatchers": {"limit":0},
+		},
+	},
+
+
+"data_db": {
+	"db_type": "*internal",
+	"remote_conns": ["conn1"],
+	"items":{
+		"*accounts":{"remote":true,"replicate":false},
+		"*reverse_destinations": {"remote":true,"replicate":false},
+		"*destinations": {"remote":true,"replicate":false},
+		"*rating_plans": {"remote":true,"replicate":false},
+		"*rating_profiles":{"remote":true,"replicate":false},
+		"*actions":{"remote":true,"replicate":false},
+		"*action_plans": {"remote":true,"replicate":false},
+		"*account_action_plans":{"remote":true,"replicate":false},
+		"*action_triggers":{"remote":true,"replicate":false},
+		"*shared_groups":{"remote":true,"replicate":false},
+		"*timings": {"remote":true,"replicate":false},
+		"*resource_profiles":{"remote":true,"replicate":false},
+		"*resources":{"remote":true,"replicate":false},
+		"*statqueue_profiles": {"remote":true,"replicate":false},
+		"*statqueues": {"remote":true,"replicate":false},
+		"*threshold_profiles": {"remote":true,"replicate":false},
+		"*thresholds": {"remote":true,"replicate":false},
+		"*filters": {"remote":true,"replicate":false},
+		"*route_profiles":{"remote":true,"replicate":false},
+		"*attribute_profiles":{"remote":true,"replicate":false},
+		"*charger_profiles": {"remote":true,"replicate":false},
+		"*dispatcher_profiles":{"remote":true,"replicate":false},
+		"*dispatcher_hosts":{"remote":true,"replicate":false},
+		"*rate_profiles":{"remote":true,"replicate":false},
+		"*load_ids":{"remote":true,"replicate":false},
+		"*indexes":{"remote":true, "replicate":false},
+	},
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"apiers": {
+	"enabled": true,
+},
+
+}
