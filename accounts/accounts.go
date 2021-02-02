@@ -164,6 +164,20 @@ func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
 	return
 }
 
+// V1AccountProfileForEvent returns the matching AccountProfile for Event
+func (aS *AccountS) V1AccountProfileForEvent(args *utils.ArgsAccountForEvent, ap *utils.AccountProfile) (err error) {
+	var acnt *utils.AccountProfile
+	if acnt, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
+		args.CGREvent, args.AccountIDs); err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return
+	}
+	*ap = *acnt // Make sure we clone in RPC
+	return
+}
+
 // V1MaxUsage returns the maximum usage for the event, based on matching Account
 func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, ec *utils.EventCharges) (err error) {
 	var acnt *utils.AccountProfile
@@ -178,6 +192,30 @@ func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, ec *utils.EventC
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountProcessEvent(acnt, args.CGREvent); err != nil {
 		return
+	}
+
+	*ec = *procEC
+	return
+}
+
+// V1DebitUsage performs debit for the provided event
+func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountForEvent, ec *utils.EventCharges) (err error) {
+	var acnt *utils.AccountProfile
+	if acnt, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
+		args.CGREvent, args.AccountIDs); err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return
+	}
+
+	var procEC *utils.EventCharges
+	if procEC, err = aS.accountProcessEvent(acnt, args.CGREvent); err != nil {
+		return
+	}
+
+	if err = aS.dm.SetAccountProfile(acnt, false); err != nil {
+		return // no need of revert since we did not save
 	}
 
 	*ec = *procEC
