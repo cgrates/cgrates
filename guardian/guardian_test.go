@@ -310,13 +310,12 @@ func TestGuardianGuardUnguardIDs(t *testing.T) {
 	}
 }
 
-func testHandler() (interface{}, error) {
-	return nil, utils.ErrNotFound
-}
 func TestGuardianGuardUnguardIDsCase2(t *testing.T) {
 	//for coverage purposes
 	lkIDs := []string{"test1", "test2", "test3"}
-	_, err := Guardian.Guard(testHandler, 10*time.Millisecond, lkIDs...)
+	_, err := Guardian.Guard(func() (interface{}, error) {
+		return nil, utils.ErrNotFound
+	}, 10*time.Millisecond, lkIDs...)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
