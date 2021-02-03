@@ -32,6 +32,7 @@ type AccountSCfg struct {
 	SuffixIndexedFields *[]string
 	NestedFields        bool
 	MaxIterations       int
+	MaxUsage            *utils.Decimal
 }
 
 func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
@@ -101,6 +102,11 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 	if jsnCfg.Max_iterations != nil {
 		acS.MaxIterations = *jsnCfg.Max_iterations
 	}
+	if jsnCfg.Max_usage != nil {
+		if acS.MaxUsage, err = utils.NewDecimalFromUsage(*jsnCfg.Max_usage); err != nil {
+			return err
+		}
+	}
 	return
 }
 
@@ -163,6 +169,9 @@ func (acS *AccountSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
+	if acS.MaxUsage != nil {
+		initialMP[utils.MaxUsage] = acS.MaxUsage
+	}
 	return
 }
 
@@ -173,6 +182,7 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
 		MaxIterations:  acS.MaxIterations,
+		MaxUsage:       acS.MaxUsage,
 	}
 	if acS.AttributeSConns != nil {
 		cln.AttributeSConns = make([]string, len(acS.AttributeSConns))

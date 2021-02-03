@@ -1139,6 +1139,7 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "max_iterations": 1000,                 // maximum number of iterations
+    "max_usage": "72h",                     // maximum time of usage
 },
 
 

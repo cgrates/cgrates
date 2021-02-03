@@ -2341,6 +2341,7 @@ const (
 
 	// AccountSCfg
 	MaxIterations = "max_iterations"
+	MaxUsage      = "max_usage"
 )
 
 // FC Template
