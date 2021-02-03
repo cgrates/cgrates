@@ -323,21 +323,13 @@ func TestNavMapGetKeys(t *testing.T) {
 		"Field6": []string{"1", "2"},
 	}
 	expKeys := []string{
-		"FirstLevel",
-		"FirstLevel.SecondLevel",
-		"FirstLevel.SecondLevel.ThirdLevel",
 		"FirstLevel.SecondLevel.ThirdLevel.Fld1",
-		"FistLever2",
-		"FistLever2.SecondLevel2",
 		"FistLever2.SecondLevel2.Field2",
 		"FistLever2.Field3",
-		"FistLever2.Field4",
 		"FistLever2.Field4.Item1",
 		"FistLever2.Field4.Item2",
-		"Field5",
 		"Field5.Item1",
 		"Field5.Item2",
-		"Field6",
 		"Field6[0]",
 		"Field6[1]",
 	}
@@ -362,9 +354,7 @@ func TestNavMapGetKeys(t *testing.T) {
 	}
 
 	expKeys = []string{
-		"FirstLevel",
 		"FirstLevel.SecondLevel",
-		"FistLever2",
 		"FistLever2.SecondLevel2",
 		"FistLever2.Field3",
 		"FistLever2.Field4",
@@ -676,65 +666,22 @@ func TestNavMapGetKeys2(t *testing.T) {
 		"Field10": []map[string]interface{}{{"A": 1}},
 	}
 	expKeys := []string{
-		"FirstLevel",
-		"FirstLevel.SecondLevel",
-		"FirstLevel.SecondLevel.ThirdLevel",
 		"FirstLevel.SecondLevel.ThirdLevel.Fld1",
-		"FistLever2",
-		"FistLever2.SecondLevel2",
 		"FistLever2.SecondLevel2.Field2",
 		"FistLever2.Field3",
-		"FistLever2.Field4",
 		"FistLever2.Field4.Item1",
 		"FistLever2.Field4.Item2",
-		"Field5",
 		"Field5.Item1",
 		"Field5.Item2",
-		"Field6",
 		"Field6[0]",
 		"Field6[1]",
-		"Field7",
 		"Field7[0]",
 		"Field7[1]",
-		"Field8",
-		"Field8[0]",
 		"Field8[0].A",
-		"Field9",
-		"Field9[0]",
 		"Field9[0].A",
-		"Field10",
-		"Field10[0]",
 		"Field10[0].A",
 	}
 	keys := navMp.GetKeys(true, 0, EmptyString)
-	sort.Strings(expKeys)
-	sort.Strings(keys)
-	if !reflect.DeepEqual(expKeys, keys) {
-		t.Errorf("Expecting: %+v, received: %+v", ToJSON(expKeys), ToJSON(keys))
-	}
-}
-
-func TestGetPathFromInterface(t *testing.T) {
-	var navMp interface{} = []map[string]interface{}{{
-		"A": "B",
-		"C": []string{"1"},
-		"D": []interface{}{"1"},
-		"E": []struct{}{{}},
-		"F": map[string]struct{}{"A": {}},
-	}}
-	expKeys := []string{
-		"L[0]",
-		"L[0].A",
-		"L[0].C",
-		"L[0].C[0]",
-		"L[0].D",
-		"L[0].D[0]",
-		"L[0].E",
-		"L[0].E[0]",
-		"L[0].F",
-		"L[0].F.A",
-	}
-	keys := getPathFromInterface(navMp, "L")
 	sort.Strings(expKeys)
 	sort.Strings(keys)
 	if !reflect.DeepEqual(expKeys, keys) {
