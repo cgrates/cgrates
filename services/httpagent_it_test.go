@@ -84,8 +84,8 @@ func TestHTTPAgentReload(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	err = srv.Shutdown()
-	if err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	if err != nil {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
