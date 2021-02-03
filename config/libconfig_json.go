@@ -696,4 +696,5 @@ type AccountSJsonCfg struct {
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Max_iterations        *int
+	Max_usage             *string
 }

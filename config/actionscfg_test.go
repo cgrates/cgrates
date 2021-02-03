@@ -28,6 +28,10 @@ import (
 func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 	jsonCfg := &ActionSJsonCfg{
 		Enabled:               utils.BoolPointer(true),
+		Ees_conns:             &[]string{utils.MetaInternal},
+		Cdrs_conns:            &[]string{utils.MetaInternal},
+		Thresholds_conns:      &[]string{utils.MetaInternal},
+		Stats_conns:           &[]string{utils.MetaInternal},
 		Indexed_selects:       utils.BoolPointer(false),
 		Tenants:               &[]string{"itsyscom.com"},
 		String_indexed_fields: &[]string{"*req.index1"},
@@ -37,10 +41,10 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 	}
 	expected := &ActionSCfg{
 		Enabled:             true,
-		EEsConns:            []string{},
-		CDRsConns:           []string{},
-		ThresholdSConns:     []string{},
-		StatSConns:          []string{},
+		EEsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)},
+		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
 		IndexedSelects:      false,
 		Tenants:             &[]string{"itsyscom.com"},
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -60,6 +64,10 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 "actions": {								
 	"enabled": true,
+    "cdrs_conns": ["*internal:*cdrs"],						
+	"ees_conns": ["*internal:*ees"],						
+	"thresholds_conns": ["*internal:*thresholds"],					
+	"stats_conns": ["*internal:*stats"],						
 	"tenants": ["itsyscom.com"],
 	"indexed_selects": false,
 	"string_indexed_fields": ["*req.index1"],			
@@ -71,10 +79,10 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
-		utils.EEsConnsCfg:            []string{},
-		utils.ThresholdSConnsCfg:     []string{},
-		utils.StatSConnsCfg:          []string{},
-		utils.CDRsConnsCfg:           []string{},
+		utils.EEsConnsCfg:            []string{utils.MetaInternal},
+		utils.ThresholdSConnsCfg:     []string{utils.MetaInternal},
+		utils.StatSConnsCfg:          []string{utils.MetaInternal},
+		utils.CDRsConnsCfg:           []string{utils.MetaInternal},
 		utils.Tenants:                []string{"itsyscom.com"},
 		utils.IndexedSelectsCfg:      false,
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
@@ -92,6 +100,10 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 func TestActionSCfgClone(t *testing.T) {
 	ban := &ActionSCfg{
 		Enabled:             true,
+		EEsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)},
+		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
 		Tenants:             &[]string{"itsyscom.com"},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -113,6 +125,18 @@ func TestActionSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.EEsConns[0] = ""; ban.EEsConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.CDRsConns[0] = ""; ban.CDRsConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ThresholdSConns[0] = ""; ban.ThresholdSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.StatSConns[0] = ""; ban.StatSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

@@ -37,6 +37,11 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:         utils.BoolPointer(true),
 		Max_iterations:        utils.IntPointer(1000),
+		Max_usage:             utils.StringPointer("200h"),
+	}
+	usage, err := utils.NewDecimalFromUsage("200h")
+	if err != nil {
+		t.Error(err)
 	}
 	expected := &AccountSCfg{
 		Enabled:             true,
@@ -49,12 +54,24 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		MaxIterations:       1000,
+		MaxUsage:            usage,
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.accountSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.accountSCfg) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expected), utils.ToJSON(jsnCfg.accountSCfg))
+	}
+}
+
+func TestAccountsCfLoadConfigError(t *testing.T) {
+	accountsJson := &AccountSJsonCfg{
+		Max_usage: utils.StringPointer("invalid_Decimal"),
+	}
+	actsCfg := new(AccountSCfg)
+	expected := "strconv.ParseInt: parsing \"invalid_Decimal\": invalid syntax"
+	if err := actsCfg.loadFromJSONCfg(accountsJson); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
@@ -71,6 +88,7 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 	"suffix_indexed_fields": ["*req.index1"],			
 	"nested_fields": true,			
     "max_iterations": 100,
+    "max_usage": "72h",
 },	
 }`
 
@@ -86,6 +104,12 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:        true,
 		utils.MaxIterations:          100,
 	}
+	usage, err := utils.NewDecimalFromUsage("72h")
+	if err != nil {
+		t.Error(err)
+	}
+	eMap[utils.MaxUsage] = usage
+
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.accountSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
@@ -94,6 +118,10 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 }
 
 func TestAccountSCfgClone(t *testing.T) {
+	usage, err := utils.NewDecimalFromUsage("24h")
+	if err != nil {
+		t.Error(err)
+	}
 	ban := &AccountSCfg{
 		Enabled:             true,
 		IndexedSelects:      false,
@@ -105,6 +133,7 @@ func TestAccountSCfgClone(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		MaxIterations:       1000,
+		MaxUsage:            usage,
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
