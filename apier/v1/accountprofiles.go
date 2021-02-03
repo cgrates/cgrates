@@ -157,3 +157,21 @@ func (aSv1 *AccountSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
+
+// AccountProfileForEvent returns the matching AccountProfile for Event
+func (aSv1 *AccountSv1) AccountProfileForEvent(args *utils.ArgsAccountForEvent,
+	ap *utils.AccountProfile) (err error) {
+	return aSv1.aS.V1AccountProfileForEvent(args, ap)
+}
+
+// MaxUsage returns the maximum usage for the event, based on matching Account
+func (aSv1 *AccountSv1) MaxUsage(args *utils.ArgsAccountForEvent,
+	ec *utils.EventCharges) (err error) {
+	return aSv1.aS.V1MaxUsage(args, ec)
+}
+
+// DebitUsage performs debit for the provided event
+func (aSv1 *AccountSv1) DebitUsage(args *utils.ArgsAccountForEvent,
+	ec *utils.EventCharges) (err error) {
+	return aSv1.aS.V1DebitUsage(args, ec)
+}

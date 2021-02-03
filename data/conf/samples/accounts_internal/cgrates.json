@@ -1,0 +1,43 @@
+{
+
+// CGRateS sample configuration file
+// Copyright (C) ITsysCOM GmbH
+//
+
+
+
+"data_db": {
+	"db_type": "*internal",
+},
+
+
+"stor_db": {
+	"db_type": "*internal",
+},
+
+
+"attributes": {
+	"enabled": true,
+
+},
+
+
+"rates": {
+	"enabled": true,
+},
+
+
+
+"accounts": {
+	"enabled": true,
+	"attributes_conns": ["*localhost"],
+	"rates_conns": ["*localhost"],
+},
+
+
+"apiers": {
+	"enabled": true,
+},
+
+}
+

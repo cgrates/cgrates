@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
@@ -65,7 +66,10 @@ func (aS *AccountS) Call(serviceMethod string, args interface{}, reply interface
 }
 
 // matchingAccountForEvent returns the matched Account for the given event
-func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent, acntIDs []string) (acnt *utils.AccountProfile, err error) {
+// if lked option is passed, the AccountProfile will be also locked
+//   so it becomes responsibility of upper layers to release the lock
+func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent,
+	acntIDs []string, lked bool) (acnt *utils.AccountProfile, lkID string, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.Opts,
@@ -78,7 +82,7 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent, a
 			aS.cfg.AccountSCfg().PrefixIndexedFields,
 			aS.cfg.AccountSCfg().SuffixIndexedFields,
 			aS.dm,
-			utils.CacheActionProfilesFilterIndexes,
+			utils.CacheAccountProfilesFilterIndexes,
 			tnt,
 			aS.cfg.AccountSCfg().IndexedSelects,
 			aS.cfg.AccountSCfg().NestedFields,
@@ -88,9 +92,18 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent, a
 		acntIDs = actIDsMp.AsSlice()
 	}
 	for _, acntID := range acntIDs {
+		var refID string
+		if lked {
+			cacheKey := utils.ConcatenatedKey(utils.CacheAccountProfiles, acntID)
+			refID = guardian.Guardian.GuardIDs("",
+				aS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		}
 		var qAcnt *utils.AccountProfile
 		if qAcnt, err = aS.dm.GetAccountProfile(tnt, acntID,
 			true, true, utils.NonTransactional); err != nil {
+			if lked {
+				guardian.Guardian.UnguardIDs(refID)
+			}
 			if err == utils.ErrNotFound {
 				err = nil
 				continue
@@ -98,24 +111,41 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent, a
 			return
 		}
 		if _, isDisabled := qAcnt.Opts[utils.Disabled]; isDisabled {
+			if lked {
+				guardian.Guardian.UnguardIDs(refID)
+			}
 			continue
 		}
 		if qAcnt.ActivationInterval != nil && cgrEv.Time != nil &&
 			!qAcnt.ActivationInterval.IsActiveAtTime(*cgrEv.Time) { // not active
+			if lked {
+				guardian.Guardian.UnguardIDs(refID)
+			}
 			continue
 		}
 		var pass bool
 		if pass, err = aS.fltrS.Pass(tnt, qAcnt.FilterIDs, evNm); err != nil {
+			if lked {
+				guardian.Guardian.UnguardIDs(refID)
+			}
 			return
 		} else if !pass {
+			if lked {
+				guardian.Guardian.UnguardIDs(refID)
+			}
 			continue
 		}
 		if acnt == nil || acnt.Weight < qAcnt.Weight {
 			acnt = qAcnt
+			if lked {
+				lkID = refID
+			}
+		} else if lked {
+			guardian.Guardian.UnguardIDs(refID)
 		}
 	}
 	if acnt == nil {
-		return nil, utils.ErrNotFound
+		return nil, "", utils.ErrNotFound
 	}
 	return
 }
@@ -167,27 +197,29 @@ func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
 // V1AccountProfileForEvent returns the matching AccountProfile for Event
 func (aS *AccountS) V1AccountProfileForEvent(args *utils.ArgsAccountForEvent, ap *utils.AccountProfile) (err error) {
 	var acnt *utils.AccountProfile
-	if acnt, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
-		args.CGREvent, args.AccountIDs); err != nil {
+	if acnt, _, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
+		args.CGREvent, args.AccountIDs, false); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	*ap = *acnt // Make sure we clone in RPC
+	*ap = *acnt // ToDo: make sure we clone in RPC
 	return
 }
 
 // V1MaxUsage returns the maximum usage for the event, based on matching Account
 func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, ec *utils.EventCharges) (err error) {
 	var acnt *utils.AccountProfile
-	if acnt, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
-		args.CGREvent, args.AccountIDs); err != nil {
+	var lkID string
+	if acnt, lkID, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
+		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
+	defer guardian.Guardian.UnguardIDs(lkID)
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountProcessEvent(acnt, args.CGREvent); err != nil {
@@ -201,13 +233,15 @@ func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, ec *utils.EventC
 // V1DebitUsage performs debit for the provided event
 func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountForEvent, ec *utils.EventCharges) (err error) {
 	var acnt *utils.AccountProfile
-	if acnt, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
-		args.CGREvent, args.AccountIDs); err != nil {
+	var lkID string
+	if acnt, lkID, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
+		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
+	defer guardian.Guardian.UnguardIDs(lkID)
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountProcessEvent(acnt, args.CGREvent); err != nil {
