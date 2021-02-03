@@ -232,18 +232,22 @@ func (ms MapStorage) GetKeys(nested bool, nestedLimit int, prefix string) (keys 
 			return
 		}
 		for k, v := range ms { // in case of nested on false we take in consideraton the nestedLimit
-			keys = append(keys, prefix+k)
+			//keys = append(keys, prefix+k)
 			switch rv := v.(type) { // and for performance we only take in consideration a limited set of types for nested false
 			case dataStorage:
 				keys = append(keys, rv.GetKeys(nested, nestedLimit-1, prefix+k)...)
 			case map[string]interface{}:
 				keys = append(keys, MapStorage(rv).GetKeys(nested, nestedLimit-1, prefix+k)...)
+			case nil, int, int32, int64, uint32, uint64, bool, float32, float64, []uint8, time.Duration, time.Time, string:
+				keys = append(keys, prefix+k)
+			default:
+				keys = append(keys, prefix+k)
 			}
 		}
 		return
 	}
 	for k, v := range ms {
-		keys = append(keys, prefix+k)
+		//keys = append(keys, prefix+k)
 		switch rv := v.(type) {
 		case dataStorage:
 			keys = append(keys, rv.GetKeys(nested, nestedLimit, prefix+k)...)
@@ -252,19 +256,19 @@ func (ms MapStorage) GetKeys(nested bool, nestedLimit int, prefix string) (keys 
 		case []MapStorage:
 			for i, dp := range rv {
 				pref := prefix + k + fmt.Sprintf("[%v]", i)
-				keys = append(keys, pref)
+				// keys = append(keys, pref)
 				keys = append(keys, dp.GetKeys(nested, nestedLimit, pref)...)
 			}
 		case []dataStorage:
 			for i, dp := range rv {
 				pref := prefix + k + fmt.Sprintf("[%v]", i)
-				keys = append(keys, pref)
+				// keys = append(keys, pref)
 				keys = append(keys, dp.GetKeys(nested, nestedLimit, pref)...)
 			}
 		case []map[string]interface{}:
 			for i, dp := range rv {
 				pref := prefix + k + fmt.Sprintf("[%v]", i)
-				keys = append(keys, pref)
+				// keys = append(keys, pref)
 				keys = append(keys, MapStorage(dp).GetKeys(nested, nestedLimit, pref)...)
 			}
 		case []interface{}:
@@ -275,9 +279,11 @@ func (ms MapStorage) GetKeys(nested bool, nestedLimit int, prefix string) (keys 
 			for i := range rv {
 				keys = append(keys, prefix+k+fmt.Sprintf("[%v]", i))
 			}
+		case nil, int, int32, int64, uint32, uint64, bool, float32, float64, []uint8, time.Duration, time.Time, string:
+			keys = append(keys, prefix+k)
 		default:
 			// ToDo:should not be called
-			keys = append(keys, getPathFromInterface(v, prefix+k+NestingSep)...)
+			keys = append(keys, getPathFromValue(reflect.ValueOf(v), prefix+k+NestingSep)...)
 		}
 	}
 	return
@@ -327,7 +333,7 @@ func (ms MapStorage) Clone() (msClone MapStorage) {
 	return
 }
 
-// ToDo: remove the following functions
+// used only in extreme cases where the dataprovider is an object that doesn't implement the dataStorage interface
 func getPathFromValue(in reflect.Value, prefix string) (out []string) {
 	switch in.Kind() {
 	case reflect.Ptr:
@@ -336,61 +342,26 @@ func getPathFromValue(in reflect.Value, prefix string) (out []string) {
 		prefix = strings.TrimSuffix(prefix, NestingSep)
 		for i := 0; i < in.Len(); i++ {
 			pref := fmt.Sprintf("%s[%v]", prefix, i)
-			out = append(out, pref)
+			// out = append(out, pref)
 			out = append(out, getPathFromValue(in.Index(i), pref+NestingSep)...)
 		}
 	case reflect.Map:
 		iter := in.MapRange()
 		for iter.Next() {
 			pref := prefix + iter.Key().String()
-			out = append(out, pref)
+			// out = append(out, pref)
 			out = append(out, getPathFromValue(iter.Value(), pref+NestingSep)...)
 		}
 	case reflect.Struct:
 		inType := in.Type()
 		for i := 0; i < in.NumField(); i++ {
 			pref := prefix + inType.Field(i).Name
-			out = append(out, pref)
+			// out = append(out, pref)
 			out = append(out, getPathFromValue(in.Field(i), pref+NestingSep)...)
 		}
 	case reflect.Invalid, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String, reflect.Chan, reflect.Func, reflect.UnsafePointer, reflect.Interface:
+		out = append(out, strings.TrimSuffix(prefix, NestingSep))
 	default:
-	}
-	return
-}
-
-// used by MapStorage2 GetKeys to return all values
-func getPathFromInterface(in interface{}, prefix string) (out []string) {
-	switch vin := in.(type) {
-	case map[string]interface{}:
-		for k, val := range vin {
-			pref := prefix + k
-			out = append(out, pref)
-			out = append(out, getPathFromInterface(val, pref+NestingSep)...)
-		}
-	case []map[string]interface{}:
-		prefix = strings.TrimSuffix(prefix, NestingSep)
-		for i, val := range vin {
-			pref := fmt.Sprintf("%s[%v]", prefix, i)
-			out = append(out, pref)
-			out = append(out, getPathFromInterface(val, pref+NestingSep)...)
-		}
-	case []interface{}:
-		prefix = strings.TrimSuffix(prefix, NestingSep)
-		for i, val := range vin {
-			pref := fmt.Sprintf("%s[%v]", prefix, i)
-			out = append(out, pref)
-			out = append(out, getPathFromInterface(val, pref+NestingSep)...)
-		}
-	case []string:
-		prefix = strings.TrimSuffix(prefix, NestingSep)
-		for i := range vin {
-			pref := fmt.Sprintf("%s[%v]", prefix, i)
-			out = append(out, pref)
-		}
-	case nil, int, int32, int64, uint32, uint64, bool, float32, float64, []uint8, time.Duration, time.Time, string: //no path
-	default: //reflect based
-		out = getPathFromValue(reflect.ValueOf(vin), prefix)
 	}
 	return
 }
