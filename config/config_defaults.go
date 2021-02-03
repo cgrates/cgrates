@@ -309,7 +309,6 @@ const CGRATES_CFG_JSON = `
 		"*tp_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_attributes":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_chargers":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_dispatcher_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_dispatcher_hosts":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_rate_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},

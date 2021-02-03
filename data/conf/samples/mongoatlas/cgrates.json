@@ -141,4 +141,9 @@
 },
 
 
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
 }

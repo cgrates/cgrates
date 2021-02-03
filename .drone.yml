@@ -1,6 +1,6 @@
 kind: pipeline
 type: docker
-name: unit tests
+name: unit
 
 workspace:
   path: /cgrates
@@ -12,7 +12,21 @@ steps:
   commands:
   - docker-entrypoint.sh
   - ./test.sh
+- name: notify
+  pull: never
+  image: trial97/drone-email
+  settings:
+    from: cgrates.test01@gmail.com
+    credentials:
+      from_secret: credentials
+    token:
+      from_secret: token
+    recipients:
+      - alexandru.tripon@itsyscom.com
 
+
+
+---
 kind: pipeline
 type: docker
 name: default
@@ -29,12 +43,18 @@ steps:
   - ./integration_test.sh
 
 - name: notify
-  image: drillster/drone-email
+  pull: never
+  image: trial97/drone-email
   settings:
     from: cgrates.test01@gmail.com
-    host: smtp.gmail.com
-    username: cgrates.test01
+    credentials:
+      from_secret: credentials
+    token:
+      from_secret: token
     recipients:
       - alexandru.tripon@itsyscom.com
   when:
     status: [ changed, failure ]
+
+depends_on:
+- unit
