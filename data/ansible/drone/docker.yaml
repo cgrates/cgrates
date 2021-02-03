@@ -1,0 +1,43 @@
+---
+
+- name: Add Docker's public GPG key to the APT keyring
+  become: true
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
+    state: present
+
+- name: Configure Docker's upstream APT repository
+  become: true
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+    state: present
+    update_cache: yes
+
+- name: Install Docker
+  become: true
+  apt:
+    name:
+      - docker-ce 
+      - docker-ce-cli 
+      - containerd.io
+    state: "present"
+
+- name: Add user(s) to "docker" group
+  become: true
+  user:
+    name: "{{ user }}"
+    groups: "docker"
+    append: true
+
+- name: Enable service docker and ensure it is not masked
+  become: true
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+    masked: no
+
+- name: Install Docker Module for Python
+  shell: "pip3 install docker"
+
+   

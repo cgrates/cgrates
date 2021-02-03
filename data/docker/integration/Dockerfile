@@ -65,12 +65,6 @@ RUN chmod 777  /logs/mariadb.log /logs/mariadb_script.log /logs/rabbitmq.log
 
 
 COPY ./scripts /scripts
-COPY ../../storage/mongo/create_user.js /scripts/create_user.js
-COPY ../../storage/postgres/create_cdrs_tables.sql /scripts/postgres/create_cdrs_tables.sql
-COPY ../../storage/postgres/create_tariffplan_tables.sql /scripts/postgres/create_tariffplan_tables.sql
-COPY ../../storage/mysql/create_cdrs_tables.sql /scripts/mysql/create_cdrs_tables.sql
-COPY ../../storage/mysql/create_db_with_users.sql /scripts/mysql/create_db_with_users.sql
-COPY ../../storage/mysql/create_tariffplan_tables.sql /scripts/mysql/create_tariffplan_tables.sql
 COPY ./scripts/service /usr/local/bin/service
 
 COPY ./conf/rsyslogd.conf /etc/rsyslogd.conf
