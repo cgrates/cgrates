@@ -36,11 +36,11 @@
     drone_dir: "/home/{{ user }}/go/src/github.com/drone/drone"
 
     drone_server_protocol: https
-    drone_server_host: leotrial.duckdns.org
+    drone_server_host: ci.cgrates.org
     drone_validate_plugin_endpoint: 127.0.0.1:3001
     docker_runner_capacity: 20
 
-    drone_user_create: Trial97
+    drone_user_create: cgrates
     drone_user_filter: cgrates,danbogos,TeoV,Trial97,porosnicuadrian,andronache98
     ###############################################################
     # CGRateS vars
@@ -164,7 +164,7 @@
 
     - name: git clone cgrates
       git:
-        repo: https://github.com/Trial97/cgrates.git
+        repo: https://github.com/cgrates/cgrates.git
         dest: '{{ cgrates_dir }}'
         update: yes
         force: yes
@@ -279,8 +279,8 @@
     - name:  add secrets
       become: yes
       shell: |
-        drone-cli orgsecret add Trial97 credentials @/home/{{ user }}/credentials.json --allow-pull-request;
-        drone-cli orgsecret add Trial97 token @/home/{{ user }}/token.json --allow-pull-request;
+        drone-cli orgsecret add cgrates credentials @/home/{{ user }}/credentials.json --allow-pull-request;
+        drone-cli orgsecret add cgrates token @/home/{{ user }}/token.json --allow-pull-request;
         rm /home/{{ user }}/credentials.json;
         rm /home/{{ user }}/token.json; 
       environment:
