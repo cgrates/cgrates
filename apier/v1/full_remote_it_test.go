@@ -51,7 +51,8 @@ var (
 		testFullRemoteITRPCConn,
 
 		testFullRemoteITAttribute,
-		testFullRemoteITStat,
+		testFullRemoteITStatQueuq,
+		testFullRemoteITThreshold,
 
 		testFullRemoteITKillEngine,
 	}
@@ -180,7 +181,7 @@ func testFullRemoteITAttribute(t *testing.T) {
 	}
 }
 
-func testFullRemoteITStat(t *testing.T) {
+func testFullRemoteITStatQueuq(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.StatQueueProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
@@ -216,7 +217,7 @@ func testFullRemoteITStat(t *testing.T) {
 			MinItems:     1,
 		},
 	}
-	// add an attribute profile in engine1 and verify it internal
+	// add a statQueue profile in engine1 and verify it internal
 	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetStatQueueProfile, stat, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
@@ -230,7 +231,7 @@ func testFullRemoteITStat(t *testing.T) {
 	} else if !reflect.DeepEqual(stat.StatQueueProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(stat.StatQueueProfile), utils.ToJSON(reply))
 	}
-	// update the attribute profile and verify it to be updated
+	// update the statQueue profile and verify it to be updated
 	stat.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
 	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetStatQueueProfile, stat, &replySet); err != nil {
 		t.Error(err)
@@ -244,6 +245,64 @@ func testFullRemoteITStat(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(stat.StatQueueProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(stat.StatQueueProfile), utils.ToJSON(reply))
+	}
+}
+
+func testFullRemoteITThreshold(t *testing.T) {
+	// verify for not found in internal
+	var reply *engine.ThresholdProfile
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
+	}
+
+	var replySet string
+	tPrfl := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_Test",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  5 * time.Minute,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1"},
+			Async:     true,
+		},
+	}
+	// add a threshold profile in engine1 and verify it internal
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &replySet); err != nil {
+		t.Error(err)
+	} else if replySet != utils.OK {
+		t.Error("Unexpected reply returned", replySet)
+	}
+
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
+		&reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tPrfl.ThresholdProfile), utils.ToJSON(reply))
+	}
+	// update the threshold profile and verify it to be updated
+	tPrfl.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &replySet); err != nil {
+		t.Error(err)
+	} else if replySet != utils.OK {
+		t.Error("Unexpected reply returned", replySet)
+	}
+
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
+		&reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tPrfl.ThresholdProfile), utils.ToJSON(reply))
 	}
 }
 
