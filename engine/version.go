@@ -74,15 +74,14 @@ func CheckVersions(storage Storage) error {
 			return fmt.Errorf("No versions defined: please backup cgrates data and run : <cgr-migrator -exec=*set_versions>")
 		}
 		// no data, safe to write version
-		if err := OverwriteDBVersions(storage); err != nil {
-			return err
-		}
-	} else {
-		// comparing versions
-		message := dbVersion.Compare(x, storType, isDataDB)
-		if message != "" {
-			return fmt.Errorf("Migration needed: please backup cgr data and run : <%s>", message)
-		}
+		return OverwriteDBVersions(storage)
+	} else if err != nil {
+		return err
+	}
+	// comparing versions
+	message := dbVersion.Compare(x, storType, isDataDB)
+	if message != "" {
+		return fmt.Errorf("Migration needed: please backup cgr data and run : <%s>", message)
 	}
 	return nil
 }

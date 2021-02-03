@@ -218,6 +218,6 @@ results+=($?)
 
 pass=1
 for val in ${results[@]}; do
-   (( pass=$pass&&$val))
+   (( pass=$pass||$val))
 done
 exit $pass
