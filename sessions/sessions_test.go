@@ -2372,3 +2372,43 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		t.Fatal(err)
 	}
 }
+
+type mockConnWarnDisconnect1 struct {
+	*testRPCClientConnection
+}
+
+func (mk *mockConnWarnDisconnect1) Call(method string, args interface{}, rply interface{}) error {
+	return utils.ErrNotImplemented
+}
+
+type mockConnWarnDisconnect2 struct {
+	*testRPCClientConnection
+}
+
+func (mk *mockConnWarnDisconnect2) Call(method string, args interface{}, rply interface{}) error {
+	return utils.ErrNoActiveSession
+}
+
+func TestWarnSession(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().NodeID = "ClientConnIdtest"
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+
+	sessions := NewSessionS(cfg, dm, nil)
+
+	sTestMock := &mockConnWarnDisconnect1{}
+	sessions.RegisterIntBiJConn(sTestMock)
+
+	if err := sessions.warnSession("ClientConnIdtest", nil); err != nil {
+		t.Error(err)
+	}
+
+	cfg.GeneralCfg().NodeID = "ClientConnIdtest2"
+	sessions = NewSessionS(cfg, dm, nil)
+	sTestMock2 := &mockConnWarnDisconnect2{}
+	sessions.RegisterIntBiJConn(sTestMock2)
+	if err := sessions.warnSession("ClientConnIdtest2", nil); err == nil || err != utils.ErrNoActiveSession {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNoActiveSession, err)
+	}
+}

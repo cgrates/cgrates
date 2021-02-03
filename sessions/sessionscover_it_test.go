@@ -39,7 +39,7 @@ import (
 
 var (
 	sTests = []func(t *testing.T){
-		testDebitLoopSession2,
+		testDebitLoopSessionLowBalance,
 		testSetSTerminator,
 		testSetSTerminatorError,
 		testSetSTerminatorAutomaticTermination,
@@ -54,6 +54,7 @@ var (
 		testInitSessionDebitLoops,
 		testDebitLoopSessionErrorDebiting,
 		testDebitLoopSession,
+		testDebitLoopSessionWarningSessions,
 	}
 )
 
@@ -477,6 +478,7 @@ func (sT *testMockClients) Call(method string, arg interface{}, rply interface{}
 }
 
 func testDebitSessionResponderMaxDebit(t *testing.T) {
+	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
@@ -720,10 +722,10 @@ func testDebitLoopSessionErrorDebiting(t *testing.T) {
 }
 
 func testDebitLoopSession(t *testing.T) {
+	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
-
 				callCost := new(engine.CallCost)
 				callCost.Timespans = []*engine.TimeSpan{
 					{
@@ -732,7 +734,6 @@ func testDebitLoopSession(t *testing.T) {
 					},
 				}
 				*(reply.(*engine.CallCost)) = *callCost
-
 				return nil
 			},
 		},
@@ -780,7 +781,8 @@ func testDebitLoopSession(t *testing.T) {
 	time.Sleep(2 * time.Second)
 }
 
-func testDebitLoopSession2(t *testing.T) {
+func testDebitLoopSessionLowBalance(t *testing.T) {
+	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
@@ -793,6 +795,63 @@ func testDebitLoopSession2(t *testing.T) {
 	sMock <- testMock1
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	cfg.SessionSCfg().MinDurLowBalance = 1 * time.Second
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): sMock,
+	})
+
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	ss := &Session{
+		CGRID:      "CGRID",
+		Tenant:     "cgrates.org",
+		EventStart: engine.NewMapEvent(nil),
+		debitStop:  make(chan struct{}),
+		SRuns: []*SRun{
+			{
+				Event: map[string]interface{}{
+					utils.RequestType: utils.MetaPostpaid,
+				},
+				CD: &engine.CallDescriptor{
+					Category:  "test",
+					LoopIndex: 12,
+				},
+				EventCost:     nil, //without an EventCost
+				ExtraDuration: 30 * time.Millisecond,
+				LastUsage:     10 * time.Second,
+				TotalUsage:    3 * time.Minute,
+				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
+			},
+		},
+	}
+
+	sessions.cgrCfg.SessionSCfg().MinDurLowBalance = 10 * time.Second
+	// will disconnect faster, MinDurLowBalance higher than the debit interval
+	go func() {
+		if _, err := sessions.debitLoopSession(ss, 0, 50*time.Millisecond); err != nil {
+			t.Error(err)
+		}
+	}()
+	time.Sleep(1 * time.Second)
+}
+
+func testDebitLoopSessionWarningSessions(t *testing.T) {
+	engine.Cache.Clear(nil)
+	testMock1 := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock <- testMock1
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	cfg.SessionSCfg().MinDurLowBalance = 1 * time.Second
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
@@ -824,15 +883,8 @@ func testDebitLoopSession2(t *testing.T) {
 		},
 	}
 
-	// will disconnect faster
-	go func() {
-		if _, err := sessions.debitLoopSession(ss, 0, 2*time.Second); err != nil {
-			t.Error(err)
-		}
-	}()
-	time.Sleep(3 * time.Second)
-}
-
-func testDebitLoopSessionForceTerminate(t *testing.T) {
-
+	// will disconnect faster, MinDurLowBalance higher than the debit interval
+	if _, err := sessions.debitLoopSession(ss, 0, 2*time.Second); err != nil {
+		t.Error(err)
+	}
 }
