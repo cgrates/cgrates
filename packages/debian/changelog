@@ -8,6 +8,7 @@ cgrates (0.10.3~dev) UNRELEASED; urgency=medium
   * [ApierS] Correct handle error in case of APIerSv1.GetActionTriggers
   * [SessionS] Added extra condition to determine if the increment is considered the roundIncrement
   * [SessionS] Cloned the charging interval added on EventCost merge 
+  * [FilterS] Optimized the automated index fields matching
 
  -- DanB <danb@cgrates.org>  Thu, 08 Oct 2020 16:23:58 +0300
 

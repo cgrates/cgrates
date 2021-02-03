@@ -321,21 +321,13 @@ func TestNavMapGetKeys(t *testing.T) {
 		"Field6": []string{"1", "2"},
 	}
 	expKeys := []string{
-		"FirstLevel",
-		"FirstLevel.SecondLevel",
-		"FirstLevel.SecondLevel.ThirdLevel",
 		"FirstLevel.SecondLevel.ThirdLevel.Fld1",
-		"FistLever2",
-		"FistLever2.SecondLevel2",
 		"FistLever2.SecondLevel2.Field2",
 		"FistLever2.Field3",
-		"FistLever2.Field4",
 		"FistLever2.Field4.Item1",
 		"FistLever2.Field4.Item2",
-		"Field5",
 		"Field5.Item1",
 		"Field5.Item2",
-		"Field6",
 		"Field6[0]",
 		"Field6[1]",
 	}
