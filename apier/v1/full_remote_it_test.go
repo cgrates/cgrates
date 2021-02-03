@@ -51,6 +51,7 @@ var (
 		testFullRemoteITRPCConn,
 
 		testFullRemoteITAttribute,
+		testFullRemoteITStat,
 
 		testFullRemoteITKillEngine,
 	}
@@ -176,6 +177,73 @@ func testFullRemoteITAttribute(t *testing.T) {
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.AttributeProfile), utils.ToJSON(reply))
+	}
+}
+
+func testFullRemoteITStat(t *testing.T) {
+	// verify for not found in internal
+	var reply *engine.StatQueueProfile
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
+	}
+
+	var replySet string
+	stat := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_PROFILE1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			QueueLength: 10,
+			TTL:         10 * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"Val1", "Val2"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	// add an attribute profile in engine1 and verify it internal
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetStatQueueProfile, stat, &replySet); err != nil {
+		t.Error(err)
+	} else if replySet != utils.OK {
+		t.Error("Unexpected reply returned", replySet)
+	}
+
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
+		&reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(stat.StatQueueProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(stat.StatQueueProfile), utils.ToJSON(reply))
+	}
+	// update the attribute profile and verify it to be updated
+	stat.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetStatQueueProfile, stat, &replySet); err != nil {
+		t.Error(err)
+	} else if replySet != utils.OK {
+		t.Error("Unexpected reply returned", replySet)
+	}
+
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
+		&reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(stat.StatQueueProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(stat.StatQueueProfile), utils.ToJSON(reply))
 	}
 }
 
