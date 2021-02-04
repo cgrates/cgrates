@@ -73,7 +73,7 @@ var (
 		testInternalRemoteITGetChargerProfile,
 		testInternalRemoteITGetDispatcherProfile,
 		testInternalRemoteITGetDispatcherHost,
-		testInternalRemoteITGetRouteProfile,
+		testInternalRemoteITGetRateProfile,
 
 		testInternalReplicationSetThreshold,
 		testInternalMatchThreshold,
@@ -673,7 +673,7 @@ func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 	}
 }
 
-func testInternalRemoteITGetRouteProfile(t *testing.T) {
+func testInternalRemoteITGetRateProfile(t *testing.T) {
 	var rcv *engine.RateProfile
 	if err := internalRPC.Call(utils.APIerSv1GetRateProfile,
 		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
