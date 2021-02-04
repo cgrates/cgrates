@@ -397,7 +397,7 @@ func (ec *EventCost) AsCallCost(tor string) *CallCost {
 		if l := len(cIl.Increments); l != 0 {
 			if cIl.Increments[l-1].Cost != 0 &&
 				ec.Accounting[cIl.Increments[l-1].AccountingID].RatingID == utils.MetaRounding {
-				// special case: if the last increment has the ratingID equal to *roundig
+				// special case: if the last increment has the ratingID equal to *rounding
 				// we consider it as the roundIncrement
 				l--
 				incrs = incrs[:l]
