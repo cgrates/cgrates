@@ -52,6 +52,10 @@ func TestResponderCoverage(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	err := srv.Start()
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
 	serviceName := srv.ServiceName()
 	if !reflect.DeepEqual(serviceName, utils.ResponderS) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ResponderS, serviceName)
