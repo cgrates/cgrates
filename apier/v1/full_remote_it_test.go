@@ -51,8 +51,9 @@ var (
 		testFullRemoteITRPCConn,
 
 		testFullRemoteITAttribute,
-		testFullRemoteITStatQueuq,
+		testFullRemoteITStatQueue,
 		testFullRemoteITThreshold,
+		testFullRemoteITResource,
 
 		testFullRemoteITKillEngine,
 	}
@@ -181,7 +182,7 @@ func testFullRemoteITAttribute(t *testing.T) {
 	}
 }
 
-func testFullRemoteITStatQueuq(t *testing.T) {
+func testFullRemoteITStatQueue(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.StatQueueProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
@@ -303,6 +304,63 @@ func testFullRemoteITThreshold(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tPrfl.ThresholdProfile), utils.ToJSON(reply))
+	}
+}
+
+func testFullRemoteITResource(t *testing.T) {
+	// verify for not found in internal
+	var reply *engine.ResourceProfile
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetResourceProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
+	}
+
+	var replySet string
+	rlsPrf := &ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ResGroup1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			},
+			UsageTTL:          -1,
+			Limit:             7,
+			AllocationMessage: "",
+			Stored:            true,
+			Weight:            10,
+			ThresholdIDs:      []string{utils.MetaNone},
+		},
+	}
+	// add a threshold profile in engine1 and verify it internal
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetResourceProfile, rlsPrf, &replySet); err != nil {
+		t.Error(err)
+	} else if replySet != utils.OK {
+		t.Error("Unexpected reply returned", replySet)
+	}
+
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetResourceProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
+		&reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rlsPrf.ResourceProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(rlsPrf.ResourceProfile), utils.ToJSON(reply))
+	}
+	// update the threshold profile and verify it to be updated
+	rlsPrf.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetResourceProfile, rlsPrf, &replySet); err != nil {
+		t.Error(err)
+	} else if replySet != utils.OK {
+		t.Error("Unexpected reply returned", replySet)
+	}
+
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetResourceProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
+		&reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rlsPrf.ResourceProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(rlsPrf.ResourceProfile), utils.ToJSON(reply))
 	}
 }
 
