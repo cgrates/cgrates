@@ -51,7 +51,8 @@ type APIerSv1 struct {
 	FilterS          *engine.FilterS //Used for CDR Exporter
 	ConnMgr          *engine.ConnManager
 
-	StorDBChan chan engine.StorDB
+	StorDBChan    chan engine.StorDB
+	ResponderChan chan *engine.Responder
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
@@ -1519,6 +1520,8 @@ func (apierSv1 *APIerSv1) ListenAndServe(stopChan chan struct{}) {
 			}
 			apierSv1.CdrDb = stordb
 			apierSv1.StorDb = stordb
+		case resp := <-apierSv1.ResponderChan:
+			apierSv1.Responder = resp
 		}
 	}
 }
