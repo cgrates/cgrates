@@ -21,7 +21,6 @@ package services
 
 import (
 	"path"
-	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -34,53 +33,66 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestFreeSwitchAgentReload(t *testing.T) {
+func TestDispatcherHReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
-	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
+	cfg.RPCConns()["dispConn"] = &config.RPCConn{
+		Strategy: rpcclient.PoolFirst,
+		Conns: []*config.RemoteHost{{
+			Address:   "http://127.0.0.1:2080/dispatchers_registrar",
+			Transport: rpcclient.HTTPjson,
+		}},
+	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-	cacheSChan <- chS
-
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, nil, anz, srvDep)
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+	connMngr := engine.NewConnManager(cfg, nil)
+	srv := NewDispatcherHostsService(cfg, server, connMngr, anz, srvDep)
+	srvMngr.AddServices(srv,
+		NewLoaderService(cfg, db, filterSChan, server,
+			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "fs_evsock", "cgrates", "etc", "cgrates"),
-		Section: config.FreeSWITCHAgentJSN,
+		Path: path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatcherh", "all_mongo"),
+
+		Section: config.DispatcherHJson,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	// the engine should be stopped as we could not connect to freeswitch
+	if !srv.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	err := srv.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	cfg.DispatcherHCfg().Enabled = false
+	cfg.GetReloadChan(config.DispatcherHJson) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	shdChan.CloseOnce()
-	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond)
 }
