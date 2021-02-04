@@ -52,9 +52,9 @@
 		"run_delay": "0",									
 		"lock_filename": ".cgr.lock",					
 		"caches_conns": ["*internal"],
-		"field_separator": ",",							
-		"tp_in_dir": "/tmp/In",		
-		"tp_out_dir": "/tmp/Out",	
+		"field_separator": ",",
+		"tp_in_dir": "/tmp/In",
+		"tp_out_dir": "/tmp/Out",
 		"data":[	
 			{
 				"type": "*attributes",						
@@ -169,20 +169,20 @@
 		],
 	},
 	{
-		"id": "LoaderWithTemplate",									
-		"enabled": true,									
-		"dry_run": false,									
+		"id": "LoaderWithTemplate",
+		"enabled": true,
+		"dry_run": false,
 		"tenant": "cgrates.org",
-		"run_delay": "0",										
-		"lock_filename": ".cgr.lock",						
+		"run_delay": "0",
+		"lock_filename": ".cgr.lock",
 		"caches_conns": ["*internal"],
-		"field_separator": ",",								
-		"tp_in_dir": "/tmp/templateLoaderIn",		
-		"tp_out_dir": "/tmp/templateLoaderOut",	
+		"field_separator": ",",
+		"tp_in_dir": "/tmp/templateLoaderIn",
+		"tp_out_dir": "/tmp/templateLoaderOut",
 		"data":[
 			{
-				"type": "*attributes",						
-				"file_name": "Attributes.csv",				
+				"type": "*attributes",
+				"file_name": "Attributes.csv",
 				"fields": [
 					{"tag": "AttributesFields","type": "*template", "value": "attrTemplateLoader"}
 				],

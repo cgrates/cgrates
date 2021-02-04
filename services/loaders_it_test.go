@@ -22,7 +22,6 @@ package services
 /*
 func TestLoaderSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
@@ -30,42 +29,43 @@ func TestLoaderSReload(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	srv := NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+	conMngr := engine.NewConnManager(cfg, nil)
+	srv := NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), conMngr, anz, srvDep)
+	srvMngr.AddServices(srv, db)
 	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmysql_internal"),
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "loaders", "tutinternal"),
 		Section: config.LoaderJson,
 	}, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
+	}
+
+	if !srv.IsRunning() {
+		t.Fatal("Expected service to be running")
 	}
 
 	err := srv.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-
-	cfg.AccountSCfg().Enabled = false
+	err = srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	cfg.GetReloadChan(config.LoaderJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 
