@@ -94,6 +94,9 @@ func (apiService *APIerSv1Service) Start() (err error) {
 	apiService.stopChan = make(chan struct{})
 	apiService.storDB.RegisterSyncChan(storDBChan)
 	stordb := <-storDBChan
+
+	respChan := make(chan *engine.Responder, 1)
+	apiService.responderService.RegisterSyncChan(apiService.ServiceName(), respChan)
 	apiService.Lock()
 	defer apiService.Unlock()
 
@@ -102,11 +105,13 @@ func (apiService *APIerSv1Service) Start() (err error) {
 		CdrDb:            stordb,
 		StorDb:           stordb,
 		Config:           apiService.cfg,
-		Responder:        apiService.responderService.GetResponder(),
 		SchedulerService: apiService.schedService,
 		FilterS:          filterS,
 		ConnMgr:          apiService.connMgr,
 		StorDBChan:       storDBChan,
+
+		Responder:     apiService.responderService.GetResponder(), // if already started use it
+		ResponderChan: respChan,                                   // if not wait in listenAndServe
 	}
 
 	go apiService.api.ListenAndServe(apiService.stopChan)
@@ -136,6 +141,7 @@ func (apiService *APIerSv1Service) Shutdown() (err error) {
 	close(apiService.stopChan)
 	apiService.api = nil
 	<-apiService.connChan
+	apiService.responderService.UnregisterSyncChan(apiService.ServiceName())
 	apiService.Unlock()
 	return
 }

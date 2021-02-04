@@ -34,12 +34,13 @@ func NewResponderService(cfg *config.CGRConfig, server *cores.Server,
 	shdChan *utils.SyncedChan, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *ResponderService {
 	return &ResponderService{
-		connChan: internalRALsChan,
-		cfg:      cfg,
-		server:   server,
-		shdChan:  shdChan,
-		anz:      anz,
-		srvDep:   srvDep,
+		connChan:  internalRALsChan,
+		cfg:       cfg,
+		server:    server,
+		shdChan:   shdChan,
+		anz:       anz,
+		srvDep:    srvDep,
+		syncChans: make(map[string]chan *engine.Responder),
 	}
 }
 
@@ -51,10 +52,11 @@ type ResponderService struct {
 	server  *cores.Server
 	shdChan *utils.SyncedChan
 
-	resp     *engine.Responder
-	connChan chan rpcclient.ClientConnector
-	anz      *AnalyzerService
-	srvDep   map[string]*sync.WaitGroup
+	resp      *engine.Responder
+	connChan  chan rpcclient.ClientConnector
+	anz       *AnalyzerService
+	srvDep    map[string]*sync.WaitGroup
+	syncChans map[string]chan *engine.Responder
 }
 
 // Start should handle the sercive start
@@ -76,6 +78,7 @@ func (resp *ResponderService) Start() (err error) {
 	}
 
 	resp.connChan <- resp.anz.GetInternalCodec(resp.resp, utils.ResponderS) // Rater done
+	resp.sync()
 	return
 }
 
@@ -92,6 +95,9 @@ func (resp *ResponderService) Shutdown() (err error) {
 	resp.Lock()
 	resp.resp = nil
 	<-resp.connChan
+	for _, c := range resp.syncChans {
+		c <- nil // just tell the services that responder is nil
+	}
 	resp.Unlock()
 	return
 }
@@ -100,6 +106,10 @@ func (resp *ResponderService) Shutdown() (err error) {
 func (resp *ResponderService) IsRunning() bool {
 	resp.RLock()
 	defer resp.RUnlock()
+	return resp.isRunning()
+}
+
+func (resp *ResponderService) isRunning() bool {
 	return resp != nil && resp.resp != nil
 }
 
@@ -118,4 +128,34 @@ func (resp *ResponderService) GetResponder() *engine.Responder {
 // ShouldRun returns if the service should be running
 func (resp *ResponderService) ShouldRun() bool {
 	return resp.cfg.RalsCfg().Enabled
+}
+
+// RegisterSyncChan used by dependent subsystems to register a chanel to reload only the responder(thread safe)
+func (resp *ResponderService) RegisterSyncChan(srv string, c chan *engine.Responder) {
+	resp.Lock()
+	resp.syncChans[srv] = c
+	if resp.isRunning() {
+		c <- resp.resp
+	}
+	resp.Unlock()
+}
+
+// UnregisterSyncChan used by dependent subsystems to unregister a chanel
+func (resp *ResponderService) UnregisterSyncChan(srv string) {
+	resp.Lock()
+	c, has := resp.syncChans[srv]
+	if has {
+		close(c)
+		delete(resp.syncChans, srv)
+	}
+	resp.Unlock()
+}
+
+// sync sends the responder over syncChansv (not thrad safe)
+func (resp *ResponderService) sync() {
+	if resp.isRunning() {
+		for _, c := range resp.syncChans {
+			c <- resp.resp
+		}
+	}
 }
