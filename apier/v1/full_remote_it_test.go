@@ -54,6 +54,7 @@ var (
 		testFullRemoteITStatQueue,
 		testFullRemoteITThreshold,
 		testFullRemoteITResource,
+		testFullRemoteITRoutes,
 
 		testFullRemoteITKillEngine,
 	}
@@ -361,6 +362,68 @@ func testFullRemoteITResource(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rlsPrf.ResourceProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(rlsPrf.ResourceProfile), utils.ToJSON(reply))
+	}
+}
+
+func testFullRemoteITRoutes(t *testing.T) {
+	// verify for not found in internal
+	var reply *engine.RouteProfile
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRouteProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
+	}
+
+	var replySet string
+	routePrf := &engine.RouteProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ROUTE_ACNT_1001",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
+		},
+		Sorting:           utils.MetaWeight,
+		SortingParameters: []string{},
+		Routes: []*engine.Route{
+			{
+				ID:     "route1",
+				Weight: 10,
+			},
+			{
+				ID:     "route2",
+				Weight: 20,
+			},
+		},
+		Weight: 20,
+	}
+	// add a threshold profile in engine1 and verify it internal
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetRouteProfile, routePrf, &replySet); err != nil {
+		t.Error(err)
+	} else if replySet != utils.OK {
+		t.Error("Unexpected reply returned", replySet)
+	}
+
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRouteProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
+		&reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(routePrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(routePrf), utils.ToJSON(reply))
+	}
+	// update the threshold profile and verify it to be updated
+	routePrf.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetRouteProfile, routePrf, &replySet); err != nil {
+		t.Error(err)
+	} else if replySet != utils.OK {
+		t.Error("Unexpected reply returned", replySet)
+	}
+
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRouteProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
+		&reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(routePrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(routePrf), utils.ToJSON(reply))
 	}
 }
 
