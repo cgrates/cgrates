@@ -353,31 +353,24 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 	}
 	// post the CDRs
 	if len(sS.cgrCfg.SessionSCfg().CDRsConns) != 0 {
-		if cgrEvs, err := s.asCGREvents(); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf(
-					"<%s> failed convering session: %s in CGREvents with err: %s",
-					utils.SessionS, utils.ToJSON(s), err.Error()))
-		} else {
-			var reply string
-			for _, cgrEv := range cgrEvs {
-				argsProc := &engine.ArgV1ProcessEvent{
-					Flags: []string{fmt.Sprintf("%s:false", utils.MetaChargers),
-						fmt.Sprintf("%s:false", utils.MetaAttributes)},
-					CGREvent: *cgrEv,
-				}
-				if unratedReqs.HasField( // order additional rating for unrated request types
-					engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
-					argsProc.Flags = append(argsProc.Flags, utils.MetaRALs)
-				}
-				argsProc.SetCloneable(true)
-				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil,
-					utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf(
-							"<%s> could not post CDR for event %s, err: %s",
-							utils.SessionS, utils.ToJSON(cgrEv), err.Error()))
-				}
+		var reply string
+		for _, cgrEv := range s.asCGREvents() {
+			argsProc := &engine.ArgV1ProcessEvent{
+				Flags: []string{fmt.Sprintf("%s:false", utils.MetaChargers),
+					fmt.Sprintf("%s:false", utils.MetaAttributes)},
+				CGREvent: *cgrEv,
+			}
+			if unratedReqs.HasField( // order additional rating for unrated request types
+				engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
+				argsProc.Flags = append(argsProc.Flags, utils.MetaRALs)
+			}
+			argsProc.SetCloneable(true)
+			if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil,
+				utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf(
+						"<%s> could not post CDR for event %s, err: %s",
+						utils.SessionS, utils.ToJSON(cgrEv), err.Error()))
 			}
 		}
 	}
@@ -3659,12 +3652,8 @@ func (sS *SessionS) processCDR(cgrEv *utils.CGREvent, flags []string, rply *stri
 	// Use previously stored Session to generate CDRs
 	s.updateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
 	// create one CGREvent for each session run
-	var cgrEvs []*utils.CGREvent
-	if cgrEvs, err = s.asCGREvents(); err != nil {
-		return utils.NewErrServerError(err)
-	}
 	var withErrors bool
-	for _, cgrEv := range cgrEvs {
+	for _, cgrEv := range s.asCGREvents() {
 		argsProc := &engine.ArgV1ProcessEvent{
 			Flags: []string{fmt.Sprintf("%s:false", utils.MetaChargers),
 				fmt.Sprintf("%s:false", utils.MetaAttributes)},

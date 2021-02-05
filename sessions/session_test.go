@@ -319,7 +319,7 @@ func TestSessionAsCGREventsRawEvent(t *testing.T) {
 		Tenant:     "cgrates.org",
 		EventStart: engine.NewMapEvent(ev),
 	}
-	if cgrEvs, _ := s.asCGREvents(); len(cgrEvs) != 0 {
+	if cgrEvs := s.asCGREvents(); len(cgrEvs) != 0 {
 		t.Errorf("Expecting: 1, received: %+v", len(cgrEvs))
 	}
 
@@ -367,10 +367,8 @@ func TestSessionAsCGREvents(t *testing.T) {
 		}},
 	}
 	//check for some fields if populated correct
-	cgrEvs, err := s.asCGREvents()
-	if err != nil {
-		t.Error(err)
-	} else if len(cgrEvs) != 1 {
+	cgrEvs := s.asCGREvents()
+	if len(cgrEvs) != 1 {
 		t.Errorf("Expecting: 1, received: %+v", len(cgrEvs))
 	}
 	if cgrEvs[0].Event[utils.RunID] != utils.MetaDefault {
