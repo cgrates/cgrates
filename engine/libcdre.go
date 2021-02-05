@@ -115,7 +115,7 @@ type ExportEvents struct {
 
 // FileName returns the file name it should use for saving the failed events
 func (expEv *ExportEvents) FileName() string {
-	return expEv.module + utils.HandlerArgSep + utils.UUIDSha1Prefix() + utils.GOBSuffix
+	return expEv.module + utils.PipeSep + utils.UUIDSha1Prefix() + utils.GOBSuffix
 }
 
 // SetModule sets the module for this event

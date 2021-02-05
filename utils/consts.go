@@ -460,7 +460,6 @@ const (
 	MetaRaw                  = "*raw"
 	CreatedAt                = "CreatedAt"
 	UpdatedAt                = "UpdatedAt"
-	HandlerArgSep            = "|"
 	NodeID                   = "NodeID"
 	ActiveGoroutines         = "ActiveGoroutines"
 	MemoryUsage              = "MemoryUsage"

@@ -68,6 +68,10 @@ var (
 		testV1RsSetResourceProfileWithOpts,
 		testV1RsAuthorizeResourcesWithOpts,
 		testV1RsStopEngine,
+		testV1RsStartEngine,
+		testV1RsRpcConn,
+		testV1RsCheckAuthorizeResourcesAfterRestart,
+		testV1RsStopEngine,
 	}
 )
 
@@ -888,7 +892,7 @@ func testV1RsStopEngine(t *testing.T) {
 func testV1RsGetResourceProfileWithoutTenant(t *testing.T) {
 	rlsConfig = &ResourceWithCache{
 		ResourceProfile: &engine.ResourceProfile{
-			ID:        rlsConfig.ID,
+			ID:        "RES_ULTIMITED2",
 			FilterIDs: []string{"*string:~*req.CustomField:UnlimitedEvent"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -946,7 +950,6 @@ func testV1RsSetResourceProfileWithOpts(t *testing.T) {
 			UsageTTL:  time.Duration(1) * time.Nanosecond,
 			Limit:     10,
 			Blocker:   true,
-			Stored:    true,
 			Weight:    20,
 		},
 	}
@@ -991,4 +994,48 @@ func testV1RsAuthorizeResourcesWithOpts(t *testing.T) {
 	} else if reply != "TEST_WITH_OPTS" {
 		t.Error("Unexpected reply returned", reply)
 	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
+		&argsRU,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != "TEST_WITH_OPTS" {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func testV1RsCheckAuthorizeResourcesAfterRestart(t *testing.T) {
+	var rplyRes *engine.Resource
+	expRes := &engine.Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES_ULTIMITED",
+		Usages: map[string]*engine.ResourceUsage{
+			"651a8db2-4f67-4cf8-b622-169e8a482e51": {
+				Tenant: "cgrates.org",
+				ID:     "651a8db2-4f67-4cf8-b622-169e8a482e51",
+				Units:  1,
+			},
+		},
+	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ULTIMITED"},
+	}, &rplyRes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expRes, rplyRes) {
+		t.Errorf("Expecting: %+v, received: %+v", expRes, rplyRes)
+	}
+
+	rplyRes = new(engine.Resource)
+	expRes = &engine.Resource{
+		Tenant: "cgrates.org",
+		ID:     "TEST_WITH_OPTS",
+		Usages: map[string]*engine.ResourceUsage{},
+	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_WITH_OPTS"},
+	}, &rplyRes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expRes, rplyRes) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expRes), utils.ToJSON(rplyRes))
+	}
+
 }

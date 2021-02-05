@@ -148,11 +148,12 @@ func TestNewAttributeFromInlineWithMultipleRuns(t *testing.T) {
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
 		Contexts: []string{utils.MetaAny},
-		Attributes: []*Attribute{{
-			Path:  utils.MetaReq + utils.NestingSep + "RequestType",
-			Type:  utils.MetaConstant,
-			Value: config.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
-		},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "RequestType",
+				Type:  utils.MetaConstant,
+				Value: config.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
+			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Category",
 				Type:  utils.MetaConstant,
