@@ -39,37 +39,34 @@ import (
 
 var (
 	sTests = []func(t *testing.T){
-		/*
-					testDebitLoopSessionLowBalance,
-					testSetSTerminator,
-					testSetSTerminatorError,
-					testSetSTerminatorAutomaticTermination,
-					testSetSTerminatorManualTermination,
-					testForceSTerminatorManualTermination,
-					testForceSTerminatorPostCDRs,
-					testForceSTerminatorReleaseSession,
-					testForceSTerminatorClientCall,
-					testDebitSession,
-					testDebitSessionResponderMaxDebit,
-					testDebitSessionResponderMaxDebitError,
-					testInitSessionDebitLoops,
-					testDebitLoopSessionFrcDiscLowerDbtInterval,
-					testDebitLoopSessionErrorDebiting,
-					testDebitLoopSession,
-					testDebitLoopSessionWarningSessions,
-					testDebitLoopSessionDisconnectSession,
-					testStoreSCost,
-					testRefundSession,
-					testRoundCost,
-					testDisconnectSession,
-					testReplicateSessions,
-					testNewSession,
-					testProcessChargerS,
-					testTransitSState,
-				testRelocateSession,
-			testGetRelocateSession,
-
-		*/
+		testDebitLoopSessionLowBalance,
+		testSetSTerminator,
+		testSetSTerminatorError,
+		testSetSTerminatorAutomaticTermination,
+		testSetSTerminatorManualTermination,
+		testForceSTerminatorManualTermination,
+		testForceSTerminatorPostCDRs,
+		testForceSTerminatorReleaseSession,
+		testForceSTerminatorClientCall,
+		testDebitSession,
+		testDebitSessionResponderMaxDebit,
+		testDebitSessionResponderMaxDebitError,
+		testInitSessionDebitLoops,
+		testDebitLoopSessionFrcDiscLowerDbtInterval,
+		testDebitLoopSessionErrorDebiting,
+		testDebitLoopSession,
+		testDebitLoopSessionWarningSessions,
+		testDebitLoopSessionDisconnectSession,
+		testStoreSCost,
+		testRefundSession,
+		testRoundCost,
+		testDisconnectSession,
+		testReplicateSessions,
+		testNewSession,
+		testProcessChargerS,
+		testTransitSState,
+		testRelocateSession,
+		testGetRelocateSession,
 		testSyncSessions,
 	}
 )
@@ -1591,34 +1588,42 @@ func testGetRelocateSession(t *testing.T) {
 	}
 }
 
+type testMockClientSyncSessions struct {
+	*testRPCClientConnection
+}
+
+func (sT *testMockClientSyncSessions) Call(method string, arg interface{}, rply interface{}) error {
+	queriedSessionIDs := []*SessionID{
+		{
+			OriginID:   "ORIGIN_ID",
+			OriginHost: "ORIGIN_HOST",
+		},
+	}
+	*rply.(*[]*SessionID) = queriedSessionIDs
+	return utils.ErrNoActiveSession
+}
+
 func testSyncSessions(t *testing.T) {
-	engine.Cache.Clear(nil)
-	testMock1 := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.SessionSv1GetActiveSessionIDs: func(args interface{}, reply interface{}) error {
-				queriedSessionIDs := []*SessionID{
-					{
-						OriginID:   "ORIGIN_ID",
-						OriginHost: "ORIGIN_HOST",
-					},
-				}
-				*reply.(*[]*SessionID) = queriedSessionIDs
-				return nil
-			},
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	sTestMock := &testMockClientSyncSessions{}
+	sessions.RegisterIntBiJConn(sTestMock)
+
+	sessions.aSessions = map[string]*Session{
+		"SESS1": {
+			CGRID: "TEST_CGRID",
 		},
 	}
 
-	sMock := make(chan rpcclient.ClientConnector, 1)
-	sMock <- testMock1
-	cfg := config.NewDefaultCGRConfig()
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): sMock})
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	sessions := NewSessionS(cfg, dm, connMgr)
+	sessions.syncSessions()
 
-	sTestMock := &testMockClientConnDiscSess{}
-	sessions.RegisterIntBiJConn(sTestMock)
-
+	sessions.aSessions = map[string]*Session{
+		"ORIGIN_ID": {
+			CGRID: "TEST_CGRID",
+		},
+	}
 	sessions.syncSessions()
 }
