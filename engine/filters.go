@@ -147,20 +147,20 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 	return
 }
 
-func splitDynFltrValues(val string) (vals []string) {
+func splitDynFltrValues(val, sep string) (vals []string) {
 	startIdx := strings.IndexByte(val, utils.RSRDynStartChar)
 	endIdx := strings.IndexByte(val, utils.RSRDynEndChar)
 	if startIdx == -1 || endIdx == -1 {
-		return strings.Split(val, utils.InfieldSep)
+		return strings.Split(val, sep)
 	}
 
-	vals = strings.Split(val[:startIdx], utils.InfieldSep)
+	vals = strings.Split(val[:startIdx], sep)
 	vals[len(vals)-1] += val[startIdx : endIdx+1]
 	val = val[endIdx+1:]
 	if len(val) == 0 {
 		return
 	}
-	valsEnd := splitDynFltrValues(val)
+	valsEnd := splitDynFltrValues(val, sep)
 	vals[len(vals)-1] += valsEnd[0]
 	return append(vals, valsEnd[1:]...)
 }
@@ -173,7 +173,7 @@ func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 	}
 	var vals []string
 	if ruleSplt[2] != utils.EmptyString {
-		vals = splitDynFltrValues(ruleSplt[2])
+		vals = splitDynFltrValues(ruleSplt[2], utils.PipeSep)
 	}
 	f = &Filter{
 		Tenant: tenant,

@@ -852,7 +852,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.new",
 			ID:        "ATTR_1001",
-			FilterIDs: []string{"*prefix:~*req.CustomField:2007;+2007", "*prefix:~*req.CustomField2:2007;+2007", "FLTR_1"},
+			FilterIDs: []string{"*prefix:~*req.CustomField:2007|+2007", "*prefix:~*req.CustomField2:2007|+2007", "FLTR_1"},
 			Contexts:  []string{"prefix"},
 			Attributes: []*engine.Attribute{
 				{

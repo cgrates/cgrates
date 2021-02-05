@@ -62,7 +62,6 @@ func NewRPCConnection(cfg *config.RemoteHost, keyPath, certPath, caPath string, 
 	return rpcclient.NewRPCClient(utils.TCP, cfg.Address, cfg.TLS, keyPath, certPath, caPath,
 		connAttempts, reconnects, connectTimeout, replyTimeout,
 		utils.FirstNonEmpty(cfg.Transport, rpcclient.GOBrpc), nil, lazyConnect)
-	return
 }
 
 // IntRPC is the global variable that is used to comunicate with all the subsystems internally

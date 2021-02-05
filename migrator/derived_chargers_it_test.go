@@ -150,7 +150,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		ID:       fmt.Sprintf("%s_%v", derivch.Key, 0),
 		Contexts: []string{utils.MetaChargers},
 		FilterIDs: []string{
-			"*destinations:~*req.Destination:1001;1002;1003",
+			"*destinations:~*req.Destination:1001|1002|1003",
 			"*string:~*req.Account:1003",
 		},
 		ActivationInterval: nil,
@@ -174,7 +174,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		Tenant: defaultTenant,
 		ID:     fmt.Sprintf("%s_%v", derivch.Key, 0),
 		FilterIDs: []string{
-			"*destinations:~*req.Destination:1001;1002;1003",
+			"*destinations:~*req.Destination:1001|1002|1003",
 			"*string:~*req.Account:1003",
 			"*rsr:~*req.filterhdr1:.+",
 		},

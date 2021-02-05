@@ -906,7 +906,7 @@ func migrateInlineFilterV4(v4fltIDs []string) (fltrIDs []string, err error) {
 			}
 
 			fltrIDs = append(fltrIDs, fltr+el+utils.InInFieldSep+
-				strings.Join(vals, utils.InfieldSep))
+				strings.Join(vals, utils.PipeSep))
 		}
 	}
 	return

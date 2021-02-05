@@ -19,7 +19,6 @@ package console
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"reflect"
 	"sort"
@@ -345,7 +344,7 @@ func TestCommandExecuterLocalFromArgsCase2(t *testing.T) {
 	err := testStruct.FromArgs(cmdArgs, true)
 	expected := "json: Unmarshal(non-pointer struct {})"
 	if err == nil || err.Error() != expected {
-		fmt.Errorf("\nExpected <%+v>, \nRecevied <%+v>", expected, err)
+		t.Errorf("\nExpected <%+v>, \nRecevied <%+v>", expected, err)
 	}
 }
 
