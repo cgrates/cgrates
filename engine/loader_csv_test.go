@@ -960,7 +960,6 @@ func TestLoadResourceProfiles(t *testing.T) {
 			Limit:             "2",
 			Blocker:           true,
 			Stored:            true,
-			ThresholdIDs:      make([]string, 0),
 		},
 		{Tenant: "cgrates.org", ID: "ResGroup22"}: {
 			TPid:      testTPID,
@@ -976,7 +975,6 @@ func TestLoadResourceProfiles(t *testing.T) {
 			Stored:            true,
 			Weight:            10,
 			Limit:             "2",
-			ThresholdIDs:      make([]string, 0),
 		},
 	}
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup21"}
@@ -1227,8 +1225,7 @@ func TestLoadRouteProfiles(t *testing.T) {
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 		},
-		Sorting:           utils.MetaLC,
-		SortingParameters: []string{},
+		Sorting: utils.MetaLC,
 		Routes: []*utils.TPRoute{
 			{
 				ID:              "route1",
@@ -1481,12 +1478,11 @@ func TestLoadRateProfiles(t *testing.T) {
 
 func TestLoadActionProfiles(t *testing.T) {
 	expected := &utils.TPActionProfile{
-		TPid:      testTPID,
-		Tenant:    "cgrates.org",
-		ID:        "ONE_TIME_ACT",
-		FilterIDs: make([]string, 0),
-		Weight:    10,
-		Schedule:  utils.MetaASAP,
+		TPid:     testTPID,
+		Tenant:   "cgrates.org",
+		ID:       "ONE_TIME_ACT",
+		Weight:   10,
+		Schedule: utils.MetaASAP,
 		Targets: []*utils.TPActionTarget{
 			{
 				TargetType: utils.MetaAccounts,
@@ -1612,17 +1608,15 @@ func TestLoadThresholds(t *testing.T) {
 
 func TestLoadAccountProfiles(t *testing.T) {
 	expected := &utils.TPAccountProfile{
-		TPid:      testTPID,
-		Tenant:    "cgrates.org",
-		ID:        "1001",
-		FilterIDs: make([]string, 0),
-		Weight:    20,
+		TPid:   testTPID,
+		Tenant: "cgrates.org",
+		ID:     "1001",
+		Weight: 20,
 		Balances: map[string]*utils.TPAccountBalance{
 			"MonetaryBalance": {
-				ID:        "MonetaryBalance",
-				FilterIDs: []string{},
-				Weight:    10,
-				Type:      utils.MetaMonetary,
+				ID:     "MonetaryBalance",
+				Weight: 10,
+				Type:   utils.MetaMonetary,
 				CostIncrement: []*utils.TPBalanceCostIncrement{
 					{
 						FilterIDs:    []string{"fltr1", "fltr2"},
@@ -1631,8 +1625,7 @@ func TestLoadAccountProfiles(t *testing.T) {
 						RecurrentFee: utils.Float64Pointer(3.3),
 					},
 				},
-				AttributeIDs:   []string{"attr1", "attr2"},
-				RateProfileIDs: []string{},
+				AttributeIDs: []string{"attr1", "attr2"},
 				UnitFactors: []*utils.TPBalanceUnitFactor{
 					{
 						FilterIDs: []string{"fltr1", "fltr2"},
@@ -1646,15 +1639,10 @@ func TestLoadAccountProfiles(t *testing.T) {
 				Units: 14,
 			},
 			"VoiceBalance": {
-				ID:             "VoiceBalance",
-				FilterIDs:      []string{},
-				Weight:         10,
-				Type:           utils.MetaVoice,
-				CostIncrement:  []*utils.TPBalanceCostIncrement{},
-				AttributeIDs:   []string{},
-				RateProfileIDs: []string{},
-				UnitFactors:    []*utils.TPBalanceUnitFactor{},
-				Units:          3600000000000,
+				ID:     "VoiceBalance",
+				Weight: 10,
+				Type:   utils.MetaVoice,
+				Units:  3600000000000,
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},

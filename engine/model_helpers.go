@@ -3459,15 +3459,22 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 		}
 
 		if tp.BalanceID != utils.EmptyString {
-			filterIDs := make([]string, 0)
-			if tp.BalanceFilterIDs != utils.EmptyString {
-				filterAttrSplit := strings.Split(tp.BalanceFilterIDs, utils.InfieldSep)
-				for _, filterAttr := range filterAttrSplit {
-					filterIDs = append(filterIDs, filterAttr)
-				}
+			aPrf.Balances[tp.BalanceID] = &utils.TPAccountBalance{
+				ID:      tp.BalanceID,
+				Weight:  tp.BalanceWeight,
+				Blocker: tp.BalanceBlocker,
+				Type:    tp.BalanceType,
+				Opts:    tp.BalanceOpts,
+				Units:   tp.BalanceUnits,
 			}
-			costIncrements := make([]*utils.TPBalanceCostIncrement, 0)
+
+			if tp.BalanceFilterIDs != utils.EmptyString {
+				filterIDs := make(utils.StringSet)
+				filterIDs.AddSlice(strings.Split(tp.BalanceFilterIDs, utils.InfieldSep))
+				aPrf.Balances[tp.BalanceID].FilterIDs = filterIDs.AsSlice()
+			}
 			if tp.BalanceCostIncrements != utils.EmptyString {
+				costIncrements := make([]*utils.TPBalanceCostIncrement, 0)
 				sls := strings.Split(tp.BalanceCostIncrements, utils.InfieldSep)
 				if len(sls)%4 != 0 {
 					return nil, fmt.Errorf("invlid key: <%s> for BalanceCostIncrements", tp.BalanceCostIncrements)
@@ -3479,23 +3486,20 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 					}
 					costIncrements = append(costIncrements, costIncrement)
 				}
+				aPrf.Balances[tp.BalanceID].CostIncrement = costIncrements
 			}
-			attributeIDs := make([]string, 0)
 			if tp.BalanceAttributeIDs != utils.EmptyString {
-				costAttributeSplit := strings.Split(tp.BalanceAttributeIDs, utils.InfieldSep)
-				for _, costAttribute := range costAttributeSplit {
-					attributeIDs = append(attributeIDs, costAttribute)
-				}
+				attributeIDs := make(utils.StringSet)
+				attributeIDs.AddSlice(strings.Split(tp.BalanceAttributeIDs, utils.InfieldSep))
+				aPrf.Balances[tp.BalanceID].AttributeIDs = attributeIDs.AsSlice()
 			}
-			rateProfileIDs := make([]string, 0)
 			if tp.BalanceRateProfileIDs != utils.EmptyString {
-				rateProfileIDs := strings.Split(tp.BalanceRateProfileIDs, utils.InfieldSep)
-				for _, ratePrfID := range rateProfileIDs {
-					rateProfileIDs = append(rateProfileIDs, ratePrfID)
-				}
+				rateProfileIDs := make(utils.StringSet)
+				rateProfileIDs.AddSlice(strings.Split(tp.BalanceRateProfileIDs, utils.InfieldSep))
+				aPrf.Balances[tp.BalanceID].RateProfileIDs = rateProfileIDs.AsSlice()
 			}
-			unitFactors := make([]*utils.TPBalanceUnitFactor, 0)
 			if tp.BalanceUnitFactors != utils.EmptyString {
+				unitFactors := make([]*utils.TPBalanceUnitFactor, 0)
 				sls := strings.Split(tp.BalanceUnitFactors, utils.InfieldSep)
 				if len(sls)%2 != 0 {
 					return nil, fmt.Errorf("invlid key: <%s> for BalanceUnitFactors", tp.BalanceUnitFactors)
@@ -3508,20 +3512,9 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 					}
 					unitFactors = append(unitFactors, unitFactor)
 				}
+				aPrf.Balances[tp.BalanceID].UnitFactors = unitFactors
 			}
-			aPrf.Balances[tp.BalanceID] = &utils.TPAccountBalance{
-				ID:             tp.BalanceID,
-				FilterIDs:      filterIDs,
-				Weight:         tp.BalanceWeight,
-				Blocker:        tp.BalanceBlocker,
-				Type:           tp.BalanceType,
-				Opts:           tp.BalanceOpts,
-				CostIncrement:  costIncrements,
-				AttributeIDs:   attributeIDs,
-				RateProfileIDs: rateProfileIDs,
-				UnitFactors:    unitFactors,
-				Units:          tp.BalanceUnits,
-			}
+
 		}
 		actPrfMap[tenID] = aPrf
 	}

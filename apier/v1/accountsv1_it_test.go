@@ -123,10 +123,9 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Balances: map[string]*utils.Balance{
 			"GenericBalance1": &utils.Balance{
-				ID:        "GenericBalance1",
-				FilterIDs: []string{},
-				Weight:    20,
-				Type:      utils.MetaAbstract,
+				ID:     "GenericBalance1",
+				Weight: 20,
+				Type:   utils.MetaAbstract,
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -141,8 +140,6 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
 					},
 				},
-				AttributeIDs:   []string{},
-				RateProfileIDs: []string{},
 				UnitFactors: []*utils.UnitFactor{
 					&utils.UnitFactor{
 						FilterIDs: []string{"*string:~*req.ToR:*voice"},
@@ -156,10 +153,9 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 				Units: &utils.Decimal{decimal.New(int64(time.Hour), 0)},
 			},
 			"MonetaryBalance1": &utils.Balance{
-				ID:        "MonetaryBalance1",
-				FilterIDs: []string{},
-				Weight:    30,
-				Type:      utils.MetaConcrete,
+				ID:     "MonetaryBalance1",
+				Weight: 30,
+				Type:   utils.MetaConcrete,
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -174,21 +170,13 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
 					},
 				},
-				AttributeIDs:   []string{},
-				RateProfileIDs: []string{},
-				UnitFactors:    []*utils.UnitFactor{},
-				Units:          &utils.Decimal{decimal.New(5, 0)},
+				Units: &utils.Decimal{decimal.New(5, 0)},
 			},
 			"MonetaryBalance2": &utils.Balance{
-				ID:             "MonetaryBalance2",
-				FilterIDs:      []string{},
-				Weight:         10,
-				Type:           utils.MetaConcrete,
-				CostIncrements: []*utils.CostIncrement{},
-				AttributeIDs:   []string{},
-				RateProfileIDs: []string{},
-				UnitFactors:    []*utils.UnitFactor{},
-				Units:          &utils.Decimal{decimal.New(3, 0)},
+				ID:     "MonetaryBalance2",
+				Weight: 10,
+				Type:   utils.MetaConcrete,
+				Units:  &utils.Decimal{decimal.New(3, 0)},
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},

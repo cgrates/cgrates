@@ -25,7 +25,6 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
-	"sort"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -114,34 +113,28 @@ func testTPAcctPrfRPCConn(t *testing.T) {
 func testTPAcctPrfGetTPAcctPrfBeforeSet(t *testing.T) {
 	var reply *utils.TPAccountProfile
 	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfile,
-		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
 func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 	tpAcctPrf = &utils.TPAccountProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "1001",
-		Weight:    20,
-		FilterIDs: make([]string, 0),
+		TPid:   "TP1",
+		Tenant: "cgrates.org",
+		ID:     "1001",
+		Weight: 20,
 		Balances: map[string]*utils.TPAccountBalance{
 			"MonetaryBalance": {
-				ID:             "MonetaryBalance",
-				FilterIDs:      []string{},
-				Weight:         10,
-				Type:           utils.MetaMonetary,
-				CostIncrement:  []*utils.TPBalanceCostIncrement{},
-				AttributeIDs:   []string{},
-				RateProfileIDs: []string{},
-				UnitFactors:    []*utils.TPBalanceUnitFactor{},
-				Units:          14,
+				ID:        "MonetaryBalance",
+				FilterIDs: []string{},
+				Weight:    10,
+				Type:      utils.MetaMonetary,
+				Units:     14,
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	sort.Strings(tpAcctPrf.FilterIDs)
 	var result string
 	if err := tpAcctPrfRPC.Call(utils.APIerSv1SetTPAccountProfile, tpAcctPrf, &result); err != nil {
 		t.Error(err)
@@ -156,7 +149,6 @@ func testTPAcctPrfGetTPAcctPrfAfterSet(t *testing.T) {
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	sort.Strings(reply.FilterIDs)
 	if !reflect.DeepEqual(tpAcctPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpAcctPrf), utils.ToJSON(reply))
 	}
@@ -176,15 +168,10 @@ func testTPAcctPrfGetTPAcctPrfIDs(t *testing.T) {
 func testTPAcctPrfUpdateTPAcctBal(t *testing.T) {
 	tpAcctPrf.Balances = map[string]*utils.TPAccountBalance{
 		"MonetaryBalance2": {
-			ID:             "MonetaryBalance2",
-			FilterIDs:      []string{},
-			Weight:         12,
-			Type:           utils.MetaMonetary,
-			CostIncrement:  []*utils.TPBalanceCostIncrement{},
-			AttributeIDs:   []string{},
-			RateProfileIDs: []string{},
-			UnitFactors:    []*utils.TPBalanceUnitFactor{},
-			Units:          16,
+			ID:     "MonetaryBalance2",
+			Weight: 12,
+			Type:   utils.MetaMonetary,
+			Units:  16,
 		},
 	}
 	var result string
@@ -204,25 +191,18 @@ func testTPAcctPrfGetTPAcctBalAfterUpdate(t *testing.T) {
 		Weight: 20,
 		Balances: map[string]*utils.TPAccountBalance{
 			"MonetaryBalance2": {
-				ID:             "MonetaryBalance2",
-				FilterIDs:      []string{},
-				Weight:         12,
-				Type:           utils.MetaMonetary,
-				CostIncrement:  []*utils.TPBalanceCostIncrement{},
-				AttributeIDs:   []string{},
-				RateProfileIDs: []string{},
-				UnitFactors:    []*utils.TPBalanceUnitFactor{},
-				Units:          16,
+				ID:     "MonetaryBalance2",
+				Weight: 12,
+				Type:   utils.MetaMonetary,
+				Units:  16,
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	sort.Strings(revTPAcctPrf.FilterIDs)
 	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	sort.Strings(reply.FilterIDs)
 	if !reflect.DeepEqual(tpAcctPrf, reply) && !reflect.DeepEqual(revTPAcctPrf, reply) {
 		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(tpAcctPrf), utils.ToJSON(reply))
 	}

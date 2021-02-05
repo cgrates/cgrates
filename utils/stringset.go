@@ -57,6 +57,9 @@ func (s StringSet) AddSlice(dataSlice []string) {
 
 // AsSlice returns the keys as string slice
 func (s StringSet) AsSlice() []string {
+	if s == nil {
+		return nil
+	}
 	result := make([]string, len(s))
 	i := 0
 	for k := range s {
