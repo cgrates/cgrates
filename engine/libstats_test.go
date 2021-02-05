@@ -241,7 +241,7 @@ func TestStatRemOnQueueLength2(t *testing.T) {
 	sq = &StatQueue{
 		sqPrfl: &StatQueueProfile{
 			QueueLength: 2,
-			FilterIDs:   []string{"*string:~Account:1001;1002"},
+			FilterIDs:   []string{"*string:~Account:1001|1002"},
 		},
 		SQItems: []SQItem{
 			{"cgrates.org:TestStatRemExpired_1", nil},

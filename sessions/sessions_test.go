@@ -2108,7 +2108,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 	expSess := []*ExternalSession{
 		eses1,
 	}
-	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.MetaVoice, utils.MetaData)}}
+	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s|%s", utils.MetaVoice, utils.MetaData)}}
 	if sess := sS.filterSessions(fltrs, true); len(sess) != 0 {
 		t.Errorf("Expected no session, received: %s", utils.ToJSON(sess))
 	}
@@ -2163,7 +2163,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 	} else if !reflect.DeepEqual(expSess[0], eses1) && !reflect.DeepEqual(expSess[0], eses2) {
 		t.Errorf("Expected %s or %s, received: %s", utils.ToJSON(eses1), utils.ToJSON(eses2), utils.ToJSON(sess[0]))
 	}
-	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.MetaVoice, utils.MetaSMS)}, Limit: utils.IntPointer(1)}
+	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s|%s", utils.MetaVoice, utils.MetaSMS)}, Limit: utils.IntPointer(1)}
 	if sess := sS.filterSessions(fltrs, false); len(sess) != 1 {
 		t.Errorf("Expected one session, received: %s", utils.ToJSON(sess))
 	} else if !reflect.DeepEqual(expSess[0], eses1) && !reflect.DeepEqual(expSess[0], eses2) {
@@ -2222,7 +2222,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	sEv[utils.ToR] = utils.MetaData
 	sr2[utils.CGRID] = GetSetCGRID(sEv)
 	sS.registerSession(session, false)
-	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.MetaVoice, utils.MetaData)}}
+	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s|%s", utils.MetaVoice, utils.MetaData)}}
 
 	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 2 {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
@@ -2263,7 +2263,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	}
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.registerSession(session, true)
-	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.MetaVoice, utils.MetaData)}}
+	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s|%s", utils.MetaVoice, utils.MetaData)}}
 	if noSess := sS.filterSessionsCount(fltrs, true); noSess != 2 {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
 	}

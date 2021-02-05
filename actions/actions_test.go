@@ -56,7 +56,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "test_id1",
-		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Actions: []*engine.APAction{
 			{
 				ID:        "TOPUP",
@@ -163,7 +163,7 @@ func TestScheduledActions(t *testing.T) {
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "test_id1",
-		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Actions: []*engine.APAction{
 			{
 				ID:        "TOPUP",
@@ -238,7 +238,7 @@ func TestScheduleAction(t *testing.T) {
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "test_id1",
-		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Schedule:  "* * * * *",
 		Actions: []*engine.APAction{
 			{
@@ -362,7 +362,7 @@ func TestV1ScheduleActions(t *testing.T) {
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "test_id1",
-		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Schedule:  utils.MetaASAP,
 		Actions: []*engine.APAction{
 			{
@@ -418,7 +418,7 @@ func TestV1ExecuteActions(t *testing.T) {
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "test_id1",
-		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Schedule:  utils.MetaASAP,
 		Actions: []*engine.APAction{
 			{
@@ -486,7 +486,7 @@ func (dbM *dataDBMockError) GetActionProfileDrv(string, string) (*engine.ActionP
 	return &engine.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "test_id1",
-		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Actions: []*engine.APAction{
 			{
 				ID:        "TOPUP",

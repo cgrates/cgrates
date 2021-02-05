@@ -122,7 +122,7 @@
 			"synchronous": false,
 			"attempts": 1,
 			"field_separator": ",",
-			"filters": ["*string:~*req.CGRID:Cdr1;Cdr2"],
+			"filters": ["*string:~*req.CGRID:Cdr1|Cdr2"],
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},

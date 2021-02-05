@@ -82,7 +82,7 @@ func TestMatchingRateProfileForEventActivationInterval(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		Weight:    10,
-		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2020, 7, 21, 0, 0, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC),
@@ -311,7 +311,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		Weight:    7,
-		FilterIDs: []string{"*string:~*req.Account:1001;1002;1003", "*prefix:~*req.Destination:10"},
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		ActivationInterval: &utils.ActivationInterval{
 			ExpiryTime: t1,
 		},
@@ -400,7 +400,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	rpp.FilterIDs = []string{"*string:~*req.Account:1001;1002;1003", "*gt:~*req.Cost{*:10"}
+	rpp.FilterIDs = []string{"*string:~*req.Account:1001|1002|1003", "*gt:~*req.Cost{*:10"}
 	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
 		&utils.ArgsCostForEvent{
 
@@ -416,7 +416,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		}); err.Error() != "invalid converter terminator in rule: <~*req.Cost{*>" {
 		t.Error(err)
 	}
-	rpp.FilterIDs = []string{"*string:~*req.Account:1001;1002;1003"}
+	rpp.FilterIDs = []string{"*string:~*req.Account:1001|1002|1003"}
 
 	rate.dm = nil
 	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{"rp3"},

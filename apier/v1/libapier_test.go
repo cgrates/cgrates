@@ -60,7 +60,7 @@ func TestComposeArgsReload(t *testing.T) {
 	}
 
 	if rply, err := apv1.composeArgsReload("cgrates.org", utils.CacheAttributeProfiles,
-		"cgrates.org:ATTR1", &[]string{"*string:~*req.Account:1001;~req.Subject", "*prefix:1001:~*req.Destination", "*gt:~req.Usage:0"}, []string{utils.MetaCDRs}, make(map[string]interface{})); err != nil {
+		"cgrates.org:ATTR1", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination", "*gt:~req.Usage:0"}, []string{utils.MetaCDRs}, make(map[string]interface{})); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expArgs, rply) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(expArgs), utils.ToJSON(rply))
@@ -79,7 +79,7 @@ func TestComposeArgsReload(t *testing.T) {
 	}
 
 	if rply, err := apv1.composeArgsReload("cgrates.org", utils.CacheStatQueueProfiles,
-		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001;~req.Subject", "*prefix:1001:~*req.Destination"}, nil, make(map[string]interface{})); err != nil {
+		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"}, nil, make(map[string]interface{})); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expArgs, rply) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(expArgs), utils.ToJSON(rply))
@@ -162,7 +162,7 @@ func TestCallCache(t *testing.T) {
 	}
 
 	if err := apv1.CallCache(utils.StringPointer(utils.MetaReload), "cgrates.org", utils.CacheStatQueueProfiles,
-		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001;~req.Subject", "*prefix:1001:~*req.Destination"},
+		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"},
 		nil, make(map[string]interface{})); err != nil {
 		t.Fatal(err)
 	} else if len(cache) != 1 {
@@ -172,7 +172,7 @@ func TestCallCache(t *testing.T) {
 	}
 	exp.Method = utils.CacheSv1LoadCache
 	if err := apv1.CallCache(utils.StringPointer(utils.MetaLoad), "cgrates.org", utils.CacheStatQueueProfiles,
-		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001;~req.Subject", "*prefix:1001:~*req.Destination"},
+		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"},
 		nil, make(map[string]interface{})); err != nil {
 		t.Fatal(err)
 	} else if len(cache) != 1 {
@@ -182,7 +182,7 @@ func TestCallCache(t *testing.T) {
 	}
 	exp.Method = utils.CacheSv1RemoveItems
 	if err := apv1.CallCache(utils.StringPointer(utils.MetaRemove), "cgrates.org", utils.CacheStatQueueProfiles,
-		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001;~req.Subject", "*prefix:1001:~*req.Destination"},
+		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"},
 		nil, make(map[string]interface{})); err != nil {
 		t.Fatal(err)
 	} else if len(cache) != 1 {

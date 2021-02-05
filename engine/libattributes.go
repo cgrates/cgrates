@@ -145,7 +145,7 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 			return nil, fmt.Errorf("inline parse error for string: <%s>", rule)
 		}
 		var vals config.RSRParsers
-		if vals, err = config.NewRSRParsers(ruleSplt[2], utils.PipeSep); err != nil {
+		if vals, err = config.NewRSRParsers(ruleSplt[2], utils.ANDSep); err != nil {
 			return nil, err
 		}
 		if len(ruleSplt[1]) == 0 {

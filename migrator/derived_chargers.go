@@ -158,7 +158,7 @@ func (m *Migrator) derivedChargers2Chargers(dck *v1DerivedChargersWithKey) (err 
 	if len(dck.Value.DestinationIDs) != 0 {
 		destination = fmt.Sprintf("%s:~%s:", utils.MetaDestinations, utils.MetaReq+utils.NestingSep+utils.Destination)
 		keys := dcGetMapKeys(dck.Value.DestinationIDs)
-		destination += strings.Join(keys, utils.InfieldSep)
+		destination += strings.Join(keys, utils.PipeSep)
 	}
 	filter := make([]string, 0)
 

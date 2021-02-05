@@ -222,7 +222,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 				FilterIDs: []string{
 					"*string:~*req.Category:*voice1",
 					"*string:~*req.Account:1001",
-					"*rsr:~*req.Header4:b;c",
+					"*rsr:~*req.Header4:b|c",
 				},
 				ActivationInterval: nil,
 				RunID:              "runID",
