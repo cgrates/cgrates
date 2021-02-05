@@ -127,26 +127,35 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 				},
 			},
 		}
-		// force cache set so it can be picked by calldescriptor for cost calculation
-		if errCh := Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
-			true, utils.NonTransactional); errCh != nil {
-			return errCh
+		var cc *CallCost
+		if _, errGuard := guardian.Guardian.Guard(func() (_ interface{}, errGuard error) { // prevent cache data concurrency
+
+			// force cache set so it can be picked by calldescriptor for cost calculation
+			if errGuard := Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
+				true, utils.NonTransactional); errGuard != nil {
+				return nil, errGuard
+			}
+			cd := &CallDescriptor{
+				Category:      utils.MetaTmp,
+				Tenant:        tnt,
+				Subject:       arg.Subject,
+				Account:       arg.Account,
+				Destination:   arg.Destination,
+				TimeStart:     arg.SetupTime,
+				TimeEnd:       arg.SetupTime.Add(arg.Usage),
+				DurationIndex: arg.Usage,
+			}
+			cc, err = cd.GetCost()
+			if errGuard := Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
+				true, utils.NonTransactional); errGuard != nil { // Remove here so we don't overload memory
+				return nil, errGuard
+			}
+			return
+
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ConcatenatedKey(utils.CacheRatingProfilesTmp, rPrfl.Id)); errGuard != nil {
+			return errGuard
 		}
-		cd := &CallDescriptor{
-			Category:      utils.MetaTmp,
-			Tenant:        tnt,
-			Subject:       arg.Subject,
-			Account:       arg.Account,
-			Destination:   arg.Destination,
-			TimeStart:     arg.SetupTime,
-			TimeEnd:       arg.SetupTime.Add(arg.Usage),
-			DurationIndex: arg.Usage,
-		}
-		cc, err := cd.GetCost()
-		if errCh := Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
-			true, utils.NonTransactional); errCh != nil { // Remove here so we don't overload memory
-			return errCh
-		}
+
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return err
