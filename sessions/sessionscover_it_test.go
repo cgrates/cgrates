@@ -22,7 +22,6 @@ package sessions
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -40,30 +39,38 @@ import (
 
 var (
 	sTests = []func(t *testing.T){
-		testDebitLoopSessionLowBalance,
-		testSetSTerminator,
-		testSetSTerminatorError,
-		testSetSTerminatorAutomaticTermination,
-		testSetSTerminatorManualTermination,
-		testForceSTerminatorManualTermination,
-		testForceSTerminatorPostCDRs,
-		testForceSTerminatorReleaseSession,
-		testForceSTerminatorClientCall,
-		testDebitSession,
-		testDebitSessionResponderMaxDebit,
-		testDebitSessionResponderMaxDebitError,
-		testInitSessionDebitLoops,
-		testDebitLoopSessionFrcDiscLowerDbtInterval,
-		testDebitLoopSessionErrorDebiting,
-		testDebitLoopSession,
-		testDebitLoopSessionWarningSessions,
-		testDebitLoopSessionDisconnectSession,
-		testStoreSCost,
-		testRefundSession,
-		testRoundCost,
-		testDisconnectSession,
-		testReplicateSessions,
-		testNewSession,
+		/*
+					testDebitLoopSessionLowBalance,
+					testSetSTerminator,
+					testSetSTerminatorError,
+					testSetSTerminatorAutomaticTermination,
+					testSetSTerminatorManualTermination,
+					testForceSTerminatorManualTermination,
+					testForceSTerminatorPostCDRs,
+					testForceSTerminatorReleaseSession,
+					testForceSTerminatorClientCall,
+					testDebitSession,
+					testDebitSessionResponderMaxDebit,
+					testDebitSessionResponderMaxDebitError,
+					testInitSessionDebitLoops,
+					testDebitLoopSessionFrcDiscLowerDbtInterval,
+					testDebitLoopSessionErrorDebiting,
+					testDebitLoopSession,
+					testDebitLoopSessionWarningSessions,
+					testDebitLoopSessionDisconnectSession,
+					testStoreSCost,
+					testRefundSession,
+					testRoundCost,
+					testDisconnectSession,
+					testReplicateSessions,
+					testNewSession,
+					testProcessChargerS,
+					testTransitSState,
+				testRelocateSession,
+			testGetRelocateSession,
+
+		*/
+		testSyncSessions,
 	}
 )
 
@@ -335,7 +342,7 @@ func testForceSTerminatorPostCDRs(t *testing.T) {
 		},
 	}
 
-	expected := "MANDATORY_IE_MISSING: [connIDs]"
+	expected := "INTERNALLY_DISCONNECTED"
 	if err := sessions.forceSTerminate(ss, time.Second, nil, nil); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, receiveD %+v", expected, err)
 	}
@@ -1323,7 +1330,20 @@ func testNewSession(t *testing.T) {
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
-				fmt.Println("am intrat")
+				if args.(*utils.CGREvent).ID == utils.EmptyString {
+					return utils.ErrNotImplemented
+				}
+				chrgrs := []*engine.ChrgSProcessEventReply{
+					{ChargerSProfile: "TEST_PROFILE1",
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "TEST_ID",
+							Event: map[string]interface{}{
+								utils.Destination: "10",
+							},
+						}},
+				}
+				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 		},
@@ -1336,7 +1356,7 @@ func testNewSession(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): sMock})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 
-	sessions := NewSessionS(cfg, dm, nil)
+	sessions := NewSessionS(cfg, dm, connMgr)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1353,4 +1373,252 @@ func testNewSession(t *testing.T) {
 	}
 
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+
+	expectedSess := &Session{
+		CGRID:        "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+		Tenant:       "cgrates.org",
+		ResourceID:   "resourceID",
+		ClientConnID: "clientConnID",
+		EventStart: map[string]interface{}{
+			utils.CGRID:       "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			utils.Destination: "10",
+		},
+		DebitInterval: time.Second,
+		SRuns: []*SRun{
+			{
+				Event: map[string]interface{}{
+					utils.Destination: "10",
+				},
+				CD: &engine.CallDescriptor{
+					CgrID:       "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+					Tenant:      "cgrates.org",
+					Category:    "call",
+					Destination: "10",
+					ExtraFields: map[string]string{},
+				},
+			},
+		},
+	}
+	if rcv, err := sessions.newSession(cgrEv, "resourceID", "clientConnID",
+		time.Second, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expectedSess) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedSess), utils.ToJSON(rcv))
+	}
+
+	//error in mocking the call from connMgr
+	cgrEv.ID = utils.EmptyString
+	if _, err := sessions.newSession(cgrEv, "resourceID", "clientConnID",
+		time.Second, false, false); err == nil || err.Error() != utils.NewErrChargerS(utils.ErrNotImplemented).Error() {
+		t.Errorf("Expected %+v, received %+v", utils.NewErrChargerS(utils.ErrNotImplemented), err)
+	}
+
+	sessions.aSessions = map[string]*Session{
+		"da39a3ee5e6b4b0d3255bfef95601890afd80709": &Session{},
+	}
+	//sessions already exists
+	if _, err := sessions.newSession(cgrEv, "resourceID", "clientConnID",
+		time.Second, false, false); err == nil || err.Error() != utils.ErrExists.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrExists, err)
+	}
+}
+
+func testProcessChargerS(t *testing.T) {
+	tmpCache := engine.Cache
+
+	engine.Cache.Clear(nil)
+	testMock1 := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				return utils.ErrExists
+			},
+			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock <- testMock1
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): sMock})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ID",
+		Event: map[string]interface{}{
+			utils.Destination: "10",
+		},
+	}
+
+	expected := "CHARGERS_ERROR:MANDATORY_IE_MISSING: [connIDs]"
+	if _, err := sessions.processChargerS(cgrEv); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	if _, err := sessions.processChargerS(cgrEv); err != nil {
+		t.Error(err)
+	}
+
+	engine.Cache.Clear(nil)
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheEventCharges] = &config.CacheParamCfg{
+		Replicate: true,
+	}
+	cacheS := engine.NewCacheS(cfg, nil, nil)
+	engine.SetCache(cacheS)
+	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): sMock})
+	engine.SetConnManager(connMgr)
+
+	if _, err := sessions.processChargerS(cgrEv); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
+	}
+
+	engine.Cache = tmpCache
+}
+
+func testTransitSState(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+
+	sessions := NewSessionS(cfg, dm, nil)
+
+	rcv := sessions.transitSState("test", true)
+	if rcv != nil {
+		t.Error("Expected to be nil")
+	}
+
+	sessions.pSessions = map[string]*Session{
+		"test": {
+			CGRID: "TEST_CGRID",
+		},
+	}
+	expected := &Session{
+		CGRID: "TEST_CGRID",
+	}
+
+	rcv = sessions.getActivateSession("test")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testRelocateSession(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+
+	sessions := NewSessionS(cfg, dm, nil)
+
+	if rcv := sessions.relocateSession(utils.EmptyString, "222", "127.0.0.1"); rcv != nil {
+		t.Errorf("Expected to be nil")
+	}
+
+	sessions.cgrCfg.SessionSCfg().SessionIndexes = map[string]struct{}{}
+	sessions.aSessions = map[string]*Session{
+		"0d0fe8779b54c88f121e26c5d83abee5935127e5": {
+			CGRID:      "TEST_CGRID",
+			EventStart: map[string]interface{}{},
+			SRuns: []*SRun{
+				{
+					Event: map[string]interface{}{},
+				},
+			},
+		},
+	}
+	expected := &Session{
+		CGRID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+		EventStart: map[string]interface{}{
+			utils.CGRID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+			utils.OriginID: "222",
+		},
+		SRuns: []*SRun{
+			{
+				Event: map[string]interface{}{
+					utils.CGRID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+					utils.OriginID: "222",
+				},
+			},
+		},
+	}
+	if rcv := sessions.relocateSession("111", "222", "127.0.0.1"); rcv == nil {
+		t.Errorf("Expected to not be nil")
+	} else if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	sessions.pSessions = map[string]*Session{
+		"0d0fe8779b54c88f121e26c5d83abee5935127e5": nil,
+	}
+
+	rcv := sessions.relocateSession("111", "222", utils.EmptyString)
+	if rcv != nil {
+		t.Errorf("Expected to be nil")
+	}
+}
+
+func testGetRelocateSession(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+
+	sessions := NewSessionS(cfg, dm, nil)
+
+	rcv := sessions.getRelocateSession("test", "111", "222", "127.0.0.1")
+	if rcv != nil {
+		t.Errorf("Expected to be nil")
+	}
+
+	sessions.pSessions = map[string]*Session{
+		"test": {
+			CGRID: "TEST_CGRID",
+		},
+	}
+
+	expected := &Session{
+		CGRID: "TEST_CGRID",
+	}
+	if rcv = sessions.getRelocateSession("test", utils.EmptyString, "222", "127.0.0.1"); rcv == nil {
+		t.Errorf("Expected to be nil")
+	} else if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testSyncSessions(t *testing.T) {
+	engine.Cache.Clear(nil)
+	testMock1 := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.SessionSv1GetActiveSessionIDs: func(args interface{}, reply interface{}) error {
+				queriedSessionIDs := []*SessionID{
+					{
+						OriginID:   "ORIGIN_ID",
+						OriginHost: "ORIGIN_HOST",
+					},
+				}
+				*reply.(*[]*SessionID) = queriedSessionIDs
+				return nil
+			},
+		},
+	}
+
+	sMock := make(chan rpcclient.ClientConnector, 1)
+	sMock <- testMock1
+	cfg := config.NewDefaultCGRConfig()
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): sMock})
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	sTestMock := &testMockClientConnDiscSess{}
+	sessions.RegisterIntBiJConn(sTestMock)
+
+	sessions.syncSessions()
 }
