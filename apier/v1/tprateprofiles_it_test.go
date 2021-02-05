@@ -121,11 +121,10 @@ func testTPRatePrfGetTPRatePrfBeforeSet(t *testing.T) {
 
 func testTPRatePrfSetTPRatePrf(t *testing.T) {
 	tpRatePrf = &utils.TPRateProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "RT_SPECIAL_1002",
-		Weight:    10,
-		FilterIDs: make([]string, 0),
+		TPid:   "TP1",
+		Tenant: "cgrates.org",
+		ID:     "RT_SPECIAL_1002",
+		Weight: 10,
 		Rates: map[string]*utils.TPRate{
 			"RT_ALWAYS": {
 				ID:        "RT_ALWAYS",
@@ -143,7 +142,6 @@ func testTPRatePrfSetTPRatePrf(t *testing.T) {
 			},
 		},
 	}
-	sort.Strings(tpRatePrf.FilterIDs)
 	var result string
 	if err := tpRatePrfRPC.Call(utils.APIerSv1SetTPRateProfile, tpRatePrf, &result); err != nil {
 		t.Error(err)
@@ -208,7 +206,6 @@ func testTPRatePrfGetTPRatePrfAfterUpdate(t *testing.T) {
 		ID:     "RT_SPECIAL_1002",
 		Weight: 10,
 	}
-	sort.Strings(revTPRatePrf.FilterIDs)
 
 	if err := tpRatePrfRPC.Call(utils.APIerSv1GetTPRateProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "RT_SPECIAL_1002"}, &reply); err != nil {

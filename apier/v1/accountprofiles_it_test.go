@@ -127,88 +127,76 @@ func testAccountSLoadFromFolder(t *testing.T) {
 }
 
 func testAccountSGetAccountProfile(t *testing.T) {
-	expected := &utils.AccountProfile{
+	eAcnt := &utils.AccountProfile{
 		Tenant:    "cgrates.org",
 		ID:        "1001",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Balances: map[string]*utils.Balance{
-			"GenericBalance1": {
-				ID:        "GenericBalance1",
-				FilterIDs: []string{},
-				Weight:    20,
-				Blocker:   false,
-				Type:      "*abstract",
-				CostIncrements: []*utils.CostIncrement{{
-					FilterIDs:    []string{"*string:~*req.ToR:*voice"},
-					Increment:    &utils.Decimal{Big: decimal.New(1000000000, 0)},
-					FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
-					RecurrentFee: &utils.Decimal{Big: decimal.New(1, 2)},
-				}, {
-					FilterIDs:    []string{"*string:~*req.ToR:*data"},
-					Increment:    &utils.Decimal{Big: decimal.New(1024, 0)},
-					FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
-					RecurrentFee: &utils.Decimal{Big: decimal.New(1, 2)},
-				}},
-				AttributeIDs:   []string{},
-				RateProfileIDs: []string{},
-				UnitFactors: []*utils.UnitFactor{{
-					FilterIDs: []string{"*string:~*req.ToR:*voice"},
-					Factor:    &utils.Decimal{Big: decimal.New(1000000000, 0)},
-				}, {
-					FilterIDs: []string{"*string:~*req.ToR:*data"},
-					Factor:    &utils.Decimal{Big: decimal.New(1024000000000, 0)},
-				}},
-				Units: &utils.Decimal{Big: decimal.New(3600000000000, 0)},
+			"GenericBalance1": &utils.Balance{
+				ID:     "GenericBalance1",
+				Weight: 20,
+				Type:   utils.MetaAbstract,
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1024, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+				},
+				UnitFactors: []*utils.UnitFactor{
+					&utils.UnitFactor{
+						FilterIDs: []string{"*string:~*req.ToR:*voice"},
+						Factor:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+					},
+					&utils.UnitFactor{
+						FilterIDs: []string{"*string:~*req.ToR:*data"},
+						Factor:    &utils.Decimal{decimal.New(int64(1024*time.Second), 0)},
+					},
+				},
+				Units: &utils.Decimal{decimal.New(int64(time.Hour), 0)},
 			},
-			"MonetaryBalance1": {
-				ID:        "MonetaryBalance1",
-				FilterIDs: []string{},
-				Weight:    30,
-				Blocker:   false,
-				Type:      "*concrete",
-				CostIncrements: []*utils.CostIncrement{{
-					FilterIDs:    []string{"*string:~*req.ToR:*voice"},
-					Increment:    &utils.Decimal{Big: decimal.New(1000000000, 0)},
-					FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
-					RecurrentFee: &utils.Decimal{Big: decimal.New(1, 2)},
-				}, {
-					FilterIDs:    []string{"*string:~*req.ToR:*data"},
-					Increment:    &utils.Decimal{Big: decimal.New(1024, 0)},
-					FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
-					RecurrentFee: &utils.Decimal{Big: decimal.New(1, 2)},
-				}},
-				AttributeIDs:   []string{},
-				RateProfileIDs: []string{},
-				UnitFactors:    []*utils.UnitFactor{},
-				Units:          &utils.Decimal{Big: decimal.New(5, 0)},
+			"MonetaryBalance1": &utils.Balance{
+				ID:     "MonetaryBalance1",
+				Weight: 30,
+				Type:   utils.MetaConcrete,
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1024, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+				},
+				Units: &utils.Decimal{decimal.New(5, 0)},
 			},
-			"MonetaryBalance2": {
-				ID:             "MonetaryBalance2",
-				FilterIDs:      []string{},
-				Weight:         10,
-				Blocker:        false,
-				Type:           "*concrete",
-				CostIncrements: []*utils.CostIncrement{},
-				AttributeIDs:   []string{},
-				RateProfileIDs: []string{},
-				UnitFactors:    []*utils.UnitFactor{},
-				Units:          &utils.Decimal{Big: decimal.New(3, 0)},
+			"MonetaryBalance2": &utils.Balance{
+				ID:     "MonetaryBalance2",
+				Weight: 10,
+				Type:   utils.MetaConcrete,
+				Units:  &utils.Decimal{decimal.New(3, 0)},
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
-	}
-	if *encoding == utils.MetaGOB {
-		expected.FilterIDs = nil
-		for i := range expected.Balances {
-			expected.Balances[i].FilterIDs = nil
-		}
 	}
 	var reply *utils.AccountProfile
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile,
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &reply); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(eAcnt, reply) {
+		t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(eAcnt), utils.ToJSON(reply))
 	}
 }
 
@@ -229,11 +217,10 @@ func testAccountSSettAccountProfile(t *testing.T) {
 				ID:     "id_test",
 				Weight: 10,
 				Balances: map[string]*utils.APIBalance{
-					"MonetaryBalance": {
-						ID:        "MonetaryBalance",
-						FilterIDs: []string{},
-						Weight:    10,
-						Type:      utils.MetaMonetary,
+					"MonetaryBalance": &utils.APIBalance{
+						ID:     "MonetaryBalance",
+						Weight: 10,
+						Type:   utils.MetaMonetary,
 						CostIncrements: []*utils.APICostIncrement{
 							{
 								FilterIDs:    []string{"fltr1", "fltr2"},
@@ -255,12 +242,11 @@ func testAccountSSettAccountProfile(t *testing.T) {
 						},
 						Units: 14,
 					},
-					"VoiceBalance": {
-						ID:        "VoiceBalance",
-						FilterIDs: []string{},
-						Weight:    10,
-						Type:      utils.MetaVoice,
-						Units:     3600000000000,
+					"VoiceBalance": &utils.APIBalance{
+						ID:     "VoiceBalance",
+						Weight: 10,
+						Type:   utils.MetaVoice,
+						Units:  3600000000000,
 					},
 				},
 				ThresholdIDs: []string{utils.MetaNone},
