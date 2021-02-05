@@ -93,6 +93,11 @@ var (
 		testV1STSProcessStatWithThreshold2,
 		testV1STSSimulateAccountUpdate,
 		testV1STSGetStatQueueWithoutExpired,
+		testV1STSGetStatQueueWithoutStored,
+		testV1STSStopEngine,
+		testV1STSStartEngine,
+		testV1STSRpcConn,
+		testV1STSCheckMetricsAfterRestart,
 		testV1STSStopEngine,
 	}
 )
@@ -1534,6 +1539,112 @@ func testV1STSGetStatQueueWithoutExpired(t *testing.T) {
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Sq1Nanao"}}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
+
+func testV1STSGetStatQueueWithoutStored(t *testing.T) {
+	var result string
+	var reply *engine.StatQueueProfile
+	statConfig = &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "Sq1NotStored",
+			FilterIDs:   []string{"*string:~*req.StatQ:Sq1NotStored"},
+			QueueLength: 10,
+			TTL:         time.Second,
+			Metrics: []*engine.MetricWithFilters{{
+				MetricID: utils.MetaTCD,
+			}},
+			Blocker:  true,
+			Weight:   200,
+			MinItems: 1,
+		},
+	}
+	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := stsV1Rpc.Call(utils.APIerSv1GetStatQueueProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Sq1NotStored"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
+	}
+
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.MetaTCD: "10s",
+	}
+	//process event
+	var reply2 []string
+	expected := []string{"Sq1NotStored"}
+	args := engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "Sq1NotStored",
+			Event: map[string]interface{}{
+				"StatQ":     "Sq1NotStored",
+				utils.Usage: 10 * time.Second,
+			},
+		},
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+	//verify metrics after first process
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Sq1NotStored"}}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+	//verify metrics after first process
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Sq1NotStored"}}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
+
+func testV1STSCheckMetricsAfterRestart(t *testing.T) {
+	var metrics map[string]string
+
+	expectedMetrics := map[string]string{
+		utils.MetaSum + utils.HashtagSep + "~*asm.BalanceSummaries.HolidayBalance.Value": "3",
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatForAccountUpdate"}}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+	expectedMetrics = map[string]string{
+		utils.MetaTCD: utils.NotAvailable,
+	}
+	metrics = map[string]string{}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithOpts{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Sq1NotStored"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
