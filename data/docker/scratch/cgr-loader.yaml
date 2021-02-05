@@ -7,7 +7,7 @@ services:
       - DOCKER_IP=cgr-engine
     stdin_open: true
     tty: true
-    command: /cgr-loader -config_path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/docker/cgrates.json -path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/tariffplans/tutorial/ -caches_address="conn1" -scheduler_address="conn1" -verbose
+    command: -config_path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/docker/cgrates.json -path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/tariffplans/tutorial/ -caches_address="conn1" -scheduler_address="conn1" -verbose
 networks:
   default:
     external:

@@ -12,7 +12,7 @@ services:
       - 2080:2080
     environment:
       - DOCKER_IP=0.0.0.0
-    command: /cgr-engine --logger=*stdout -httprof_path=/pprof -config_path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/docker/cgrates.json
+    command:  -httprof_path=/pprof -config_path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/docker/cgrates.json
   
   redis:
     image: redis
