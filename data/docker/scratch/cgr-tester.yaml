@@ -5,7 +5,7 @@ services:
     container_name: cgr-tester
     environment:
       - DOCKER_IP=cgr-engine
-    command: /cgr-tester -config_path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/docker/cgrates.json
+    command: -config_path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/docker/cgrates.json
 networks:
   default:
     external:
