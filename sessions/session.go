@@ -221,7 +221,7 @@ func (s *Session) totalUsage() (tDur time.Duration) {
 
 // AsCGREvents is a  method to return the Session as CGREvents
 // AsCGREvents is not thread safe since it is supposed to run by the time Session is closed
-func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent, err error) {
+func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent) {
 	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)) // so we can gather all cdr info while under lock
 	for i, sr := range s.SRuns {
 		cgrEvs[i] = &utils.CGREvent{

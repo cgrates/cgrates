@@ -377,9 +377,14 @@ func TestLoadersFieldAsInterfaceError(t *testing.T) {
 		"File1.csv": {"ignored", "ignored", "ignored", "ignored", "ignored", "Subject", "*any", "1001", "ignored", "ignored"},
 	}
 	csvProv := newCsvProvider(loadRun1["File1.csv"], "File1.csv")
-	csvProv.String()
 
-	expected := "invalid prefix for : [File2.csv]"
+	csvString := csvProv.String()
+	expected := "{}"
+	if csvString != expected {
+		t.Errorf("Expected %+v, received %+v", expected, csvString)
+	}
+
+	expected = "invalid prefix for : [File2.csv]"
 	if _, err := csvProv.FieldAsInterface([]string{"File2.csv"}); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
