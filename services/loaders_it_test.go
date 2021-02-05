@@ -19,9 +19,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"path"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 func TestLoaderSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cfg.TemplatesCfg()["attrTemplateLoader"] = []*config.FCTemplate{
+		{
+			Type:  utils.MetaVariable,
+			Path:  "*req.Accounts",
+			Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+		},
+	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
@@ -35,11 +55,18 @@ func TestLoaderSReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	conMngr := engine.NewConnManager(cfg, nil)
-	srv := NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), conMngr, anz, srvDep)
+	srv := NewLoaderService(cfg, db, filterSChan,
+		server, make(chan rpcclient.ClientConnector, 1),
+		conMngr, anz, srvDep)
 	srvMngr.AddServices(srv, db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
+
+	if db.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -54,6 +81,10 @@ func TestLoaderSReload(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 
+	if !db.IsRunning() {
+		t.Fatal("Expected service to be running")
+	}
+
 	if !srv.IsRunning() {
 		t.Fatal("Expected service to be running")
 	}
@@ -66,6 +97,11 @@ func TestLoaderSReload(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
+
+	for _, v := range cfg.LoaderCfg() {
+		v.Enabled = false
+	}
+
 	cfg.GetReloadChan(config.LoaderJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 
@@ -77,4 +113,3 @@ func TestLoaderSReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 }
-*/
