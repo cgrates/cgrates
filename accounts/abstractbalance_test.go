@@ -27,7 +27,7 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
-func TestdebitUsageFromConcretes(t *testing.T) {
+func TestABDebitUsageFromConcretes(t *testing.T) {
 	aB := &abstractBalance{
 		cncrtBlncs: []*concreteBalance{
 			{
@@ -35,7 +35,7 @@ func TestdebitUsageFromConcretes(t *testing.T) {
 					ID:   "CB1",
 					Type: utils.MetaConcrete,
 					Opts: map[string]interface{}{
-						utils.MetaBalanceLimit: utils.NewDecimal(-200, 0),
+						utils.MetaBalanceLimit: -200.0,
 					},
 					UnitFactors: []*utils.UnitFactor{
 						{
@@ -50,7 +50,7 @@ func TestdebitUsageFromConcretes(t *testing.T) {
 					ID:   "CB2",
 					Type: utils.MetaConcrete,
 					Opts: map[string]interface{}{
-						utils.MetaBalanceLimit: utils.NewDecimal(-1, 0),
+						utils.MetaBalanceLimit: -1.0,
 					},
 					Units: utils.NewDecimal(125, 2),
 				},
