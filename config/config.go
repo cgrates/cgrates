@@ -201,6 +201,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.coreSCfg = new(CoreSCfg)
 	cfg.accountSCfg = new(AccountSCfg)
 
+	cfg.cacheDP = make(map[string]utils.MapStorage)
+
 	var cgrJSONCfg *CgrJsonCfg
 	if cgrJSONCfg, err = NewCgrJsonCfgFromBytes(config); err != nil {
 		return
@@ -229,7 +231,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	dfltLoaderConfig = cfg.loaderCfg[0].Clone()
 	dfltRemoteHost = new(RemoteHost)
 	*dfltRemoteHost = *cfg.rpcConns[utils.MetaLocalHost].Conns[0]
-	cfg.dp = utils.MapStorage(cfg.AsMapInterface(cfg.generalCfg.RSRSep))
 	err = cfg.checkConfigSanity()
 	return
 }
@@ -254,7 +255,6 @@ func NewCGRConfigFromPath(path string) (cfg *CGRConfig, err error) {
 	if err = cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, false); err != nil {
 		return
 	}
-	cfg.dp = utils.MapStorage(cfg.AsMapInterface(cfg.generalCfg.RSRSep))
 	err = cfg.checkConfigSanity()
 	return
 }
@@ -337,7 +337,8 @@ type CGRConfig struct {
 	coreSCfg         *CoreSCfg         // CoreS config
 	accountSCfg      *AccountSCfg      // AccountS config
 
-	dp utils.DataProvider
+	cacheDP    map[string]utils.MapStorage
+	cacheDPMux sync.RWMutex
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -1600,13 +1601,13 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ReloadArgs, reply *string) (err error
 	if args.DryRun {
 		cfgV = cfg.Clone()
 	}
+	cfgV.reloadDPCache(args.Section)
 	if err = cfgV.loadCfgWithLocks(args.Path, args.Section); err != nil {
 		return
 	}
 	//  lock all sections
 	cfgV.rLockSections()
 
-	cfgV.dp = utils.MapStorage(cfg.AsMapInterface(cfgV.generalCfg.RSRSep))
 	err = cfgV.checkConfigSanity()
 
 	cfgV.rUnlockSections() // unlock before checking the error
@@ -1634,9 +1635,25 @@ type SectionWithOpts struct {
 
 // V1GetConfig will retrieve from CGRConfig a section
 func (cfg *CGRConfig) V1GetConfig(args *SectionWithOpts, reply *map[string]interface{}) (err error) {
+	args.Section = utils.FirstNonEmpty(args.Section, utils.MetaAll)
+	cfg.cacheDPMux.RLock()
+	if mp, has := cfg.cacheDP[args.Section]; has && mp != nil {
+		*reply = mp
+		cfg.cacheDPMux.RUnlock()
+		return
+	}
+	cfg.cacheDPMux.RUnlock()
+	defer func() {
+		if err != nil {
+			return
+		}
+		cfg.cacheDPMux.Lock()
+		cfg.cacheDP[args.Section] = *reply
+		cfg.cacheDPMux.Unlock()
+	}()
 	var mp interface{}
 	switch args.Section {
-	case utils.EmptyString:
+	case utils.MetaAll:
 		*reply = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
 		return
 	case GENERAL_JSN:
@@ -1762,13 +1779,15 @@ func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error
 	if args.DryRun {
 		cfgV = cfg.Clone()
 	}
+
+	cfgV.reloadDPCache(sections...)
 	if err = cfgV.loadCfgFromJSONWithLocks(bytes.NewBuffer(b), sections); err != nil {
 		return
 	}
+
 	//  lock all sections
 	cfgV.rLockSections()
 
-	cfgV.dp = utils.MapStorage(cfg.AsMapInterface(cfgV.generalCfg.RSRSep))
 	err = cfgV.checkConfigSanity()
 
 	cfgV.rUnlockSections() // unlock before checking the error
@@ -1784,11 +1803,28 @@ func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error
 
 //V1GetConfigAsJSON will retrieve from CGRConfig a section as a string
 func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithOpts, reply *string) (err error) {
+	args.Section = utils.FirstNonEmpty(args.Section, utils.MetaAll)
+	cfg.cacheDPMux.RLock()
+	if mp, has := cfg.cacheDP[args.Section]; has && mp != nil {
+		*reply = utils.ToJSON(mp)
+		cfg.cacheDPMux.RUnlock()
+		return
+	}
+	cfg.cacheDPMux.RUnlock()
+	var rplyMap utils.MapStorage
+	defer func() {
+		if err != nil {
+			return
+		}
+		cfg.cacheDPMux.Lock()
+		cfg.cacheDP[args.Section] = rplyMap
+		cfg.cacheDPMux.Unlock()
+	}()
 	var mp interface{}
 	switch args.Section {
-	case utils.EmptyString:
-		mp = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
-		*reply = utils.ToJSON(mp)
+	case utils.MetaAll:
+		rplyMap = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
+		*reply = utils.ToJSON(rplyMap)
 		return
 	case GENERAL_JSN:
 		mp = cfg.GeneralCfg().AsMapInterface()
@@ -1881,7 +1917,8 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithOpts, reply *string) (e
 	default:
 		return errors.New("Invalid section")
 	}
-	*reply = utils.ToJSON(map[string]interface{}{args.Section: mp})
+	rplyMap = map[string]interface{}{args.Section: mp}
+	*reply = utils.ToJSON(rplyMap)
 	return
 }
 
@@ -1903,13 +1940,14 @@ func (cfg *CGRConfig) V1SetConfigFromJSON(args *SetConfigFromJSONArgs, reply *st
 	if args.DryRun {
 		cfgV = cfg.Clone()
 	}
+
+	cfgV.reloadDPCache(sortedCfgSections...)
 	if err = cfgV.loadCfgFromJSONWithLocks(bytes.NewBufferString(args.Config), sortedCfgSections); err != nil {
 		return
 	}
 
 	//  lock all sections
 	cfgV.rLockSections()
-	cfgV.dp = utils.MapStorage(cfg.AsMapInterface(cfgV.generalCfg.RSRSep))
 	err = cfgV.checkConfigSanity()
 	cfgV.rUnlockSections() // unlock before checking the error
 	if err != nil {
@@ -1923,7 +1961,7 @@ func (cfg *CGRConfig) V1SetConfigFromJSON(args *SetConfigFromJSONArgs, reply *st
 }
 
 // Clone returns a deep copy of CGRConfig
-func (cfg CGRConfig) Clone() (cln *CGRConfig) {
+func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 	cln = &CGRConfig{
 		DataFolderPath: cfg.DataFolderPath,
 		ConfigPath:     cfg.ConfigPath,
@@ -1975,12 +2013,32 @@ func (cfg CGRConfig) Clone() (cln *CGRConfig) {
 		coreSCfg:         cfg.coreSCfg.Clone(),
 		actionSCfg:       cfg.actionSCfg.Clone(),
 		accountSCfg:      cfg.accountSCfg.Clone(),
+
+		cacheDP: make(map[string]utils.MapStorage),
 	}
 	cln.initChanels()
 	return
 }
 
+func (cfg *CGRConfig) reloadDPCache(sections ...string) {
+	cfg.cacheDPMux.Lock()
+	delete(cfg.cacheDP, utils.MetaAll)
+	for _, sec := range sections {
+		delete(cfg.cacheDP, sec)
+	}
+	cfg.cacheDPMux.Unlock()
+}
+
 // GetDataProvider returns the config as a data provider interface
-func (cfg CGRConfig) GetDataProvider() utils.DataProvider {
-	return cfg.dp
+func (cfg *CGRConfig) GetDataProvider() utils.DataProvider {
+	cfg.cacheDPMux.RLock()
+	val, has := cfg.cacheDP[utils.MetaAll]
+	cfg.cacheDPMux.RUnlock()
+	if !has || val == nil {
+		cfg.cacheDPMux.Lock()
+		val = utils.MapStorage(cfg.AsMapInterface(cfg.GeneralCfg().RSRSep))
+		cfg.cacheDP[utils.MetaAll] = val
+		cfg.cacheDPMux.Unlock()
+	}
+	return val
 }

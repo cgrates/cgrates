@@ -3749,14 +3749,18 @@ func TestCgrCfgV1GetConfigAllConfig(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expected := map[string]interface{}{}
+	expected := cgrCfg.AsMapInterface(cgrCfg.GeneralCfg().RSRSep)
 	if err := cgrCfg.V1GetConfig(&SectionWithOpts{Section: utils.EmptyString}, &rcv); err != nil {
-		t.Error(err)
-	} else {
-		rcv = map[string]interface{}{}
-		if !reflect.DeepEqual(expected, rcv) {
-			t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
-		}
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+	if err := cgrCfg.V1GetConfig(&SectionWithOpts{Section: utils.EmptyString}, &rcv); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 
@@ -5596,6 +5600,11 @@ func TestV1GetConfigAsJSONAllConfig(t *testing.T) {
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
 	}
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: utils.EmptyString}, &reply); err != nil {
+		t.Error(err)
+	} else if expected != reply {
+		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
 }
 
 func TestV1ReloadConfigFromJSONEmptyConfig(t *testing.T) {
@@ -5946,8 +5955,6 @@ func TestCGRConfigClone(t *testing.T) {
 	rcv.rldChans = nil
 	cfg.lks = nil
 	rcv.lks = nil
-	cfg.dp = nil
-	rcv.dp = nil
 	if !reflect.DeepEqual(cfg, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg), utils.ToJSON(rcv))
 	}
