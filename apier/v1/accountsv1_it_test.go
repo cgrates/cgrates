@@ -51,6 +51,7 @@ func TestAccountSv1IT(t *testing.T) {
 		testAccountSv1RPCConn,
 		testAccountSv1LoadFromFolder,
 		testAccountSv1AccountProfileForEvent,
+		testAccountSv1MaxUsage,
 	}
 	switch *dbType {
 	case utils.MetaInternal:
@@ -145,12 +146,8 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 				RateProfileIDs: []string{},
 				UnitFactors: []*utils.UnitFactor{
 					&utils.UnitFactor{
-						FilterIDs: []string{"*string:~*req.ToR:*voice"},
-						Factor:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-					},
-					&utils.UnitFactor{
 						FilterIDs: []string{"*string:~*req.ToR:*data"},
-						Factor:    &utils.Decimal{decimal.New(int64(1024*time.Second), 0)},
+						Factor:    &utils.Decimal{decimal.New(1024, 3)},
 					},
 				},
 				Units: &utils.Decimal{decimal.New(int64(time.Hour), 0)},
@@ -180,11 +177,18 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 				Units:          &utils.Decimal{decimal.New(5, 0)},
 			},
 			"MonetaryBalance2": &utils.Balance{
-				ID:             "MonetaryBalance2",
-				FilterIDs:      []string{},
-				Weight:         10,
-				Type:           utils.MetaConcrete,
-				CostIncrements: []*utils.CostIncrement{},
+				ID:        "MonetaryBalance2",
+				FilterIDs: []string{},
+				Weight:    10,
+				Type:      utils.MetaConcrete,
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
 				AttributeIDs:   []string{},
 				RateProfileIDs: []string{},
 				UnitFactors:    []*utils.UnitFactor{},
@@ -204,5 +208,22 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAcnt, acnt) {
 		t.Errorf("Expecting : %s \n received: %s", utils.ToJSON(eAcnt), utils.ToJSON(acnt))
+	}
+}
+
+func testAccountSv1MaxUsage(t *testing.T) {
+	var eEc *utils.ExtEventCharges
+	if err := acntSRPC.Call(utils.AccountSv1MaxUsage,
+		&utils.ArgsAccountForEvent{CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAccountSv1MaxUsage",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.ToR:          utils.MetaVoice,
+				utils.Usage:        "15m",
+			}}}, &eEc); err != nil {
+		t.Error(err)
+	} else if eEc.Usage == nil || *eEc.Usage != 800000000000.0 { // 500s from first monetary + 300s from last monetary
+		t.Errorf("received usage: %v", *eEc.Usage)
 	}
 }

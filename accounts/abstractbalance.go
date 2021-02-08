@@ -93,7 +93,6 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
 		usage.Big = roundedUsageWithIncrements(aB.blnCfg.Units.Big, costIcrm.Increment.Big)
 	}
-
 	// attempt to debit usage with cost
 	if ec, err = maxDebitUsageFromConcretes(aB.cncrtBlncs, usage,
 		aB.connMgr, cgrEv,

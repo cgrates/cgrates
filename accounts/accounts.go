@@ -176,17 +176,20 @@ func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
 	} else {
 		usage.Big = decimal.New(int64(usgEv), 0)
 	}
-
-	for _, blncOper := range blncOpers {
+	for i, blncOper := range blncOpers {
+		if i == 0 {
+			ec = utils.NewEventCharges()
+		}
 		if usage.Big.Cmp(decimal.New(0, 0)) == 0 {
 			return // no more debit
 		}
 		var ecDbt *utils.EventCharges
-		if ec, err = blncOper.debitUsage(usage, cgrEv); err != nil {
+		if ecDbt, err = blncOper.debitUsage(usage.Clone(), cgrEv); err != nil {
 			if err == utils.ErrFilterNotPassingNoCaps {
 				err = nil
 				continue
 			}
+			return
 		}
 		usage.Big = utils.SubstractBig(usage.Big, ecDbt.Usage)
 		ec.Merge(ecDbt)
@@ -209,7 +212,7 @@ func (aS *AccountS) V1AccountProfileForEvent(args *utils.ArgsAccountForEvent, ap
 }
 
 // V1MaxUsage returns the maximum usage for the event, based on matching Account
-func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, ec *utils.EventCharges) (err error) {
+func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, eEc *utils.ExtEventCharges) (err error) {
 	var acnt *utils.AccountProfile
 	var lkID string
 	if acnt, lkID, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
@@ -225,13 +228,16 @@ func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, ec *utils.EventC
 	if procEC, err = aS.accountProcessEvent(acnt, args.CGREvent); err != nil {
 		return
 	}
-
-	*ec = *procEC
+	var rcvEec *utils.ExtEventCharges
+	if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
+		return
+	}
+	*eEc = *rcvEec
 	return
 }
 
 // V1DebitUsage performs debit for the provided event
-func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountForEvent, ec *utils.EventCharges) (err error) {
+func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountForEvent, eEc *utils.ExtEventCharges) (err error) {
 	var acnt *utils.AccountProfile
 	var lkID string
 	if acnt, lkID, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
@@ -245,6 +251,11 @@ func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountForEvent, ec *utils.Even
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountProcessEvent(acnt, args.CGREvent); err != nil {
+		return
+	}
+
+	var rcvEec *utils.ExtEventCharges
+	if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
 		return
 	}
 
@@ -252,6 +263,6 @@ func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountForEvent, ec *utils.Even
 		return // no need of revert since we did not save
 	}
 
-	*ec = *procEC
+	*eEc = *rcvEec
 	return
 }

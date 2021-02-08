@@ -40,13 +40,19 @@ func newAccountBalanceOperators(acnt *utils.AccountProfile,
 	}
 	blnCfgs.Sort()
 
-	var cncrtBlncs []*concreteBalance
 	blncOpers = make([]balanceOperator, len(blnCfgs))
-	for i, blnCfg := range blnCfgs {
+	var cncrtBlncs []*concreteBalance
+	for i, blnCfg := range blnCfgs { // build the concrete balances
+		if blnCfg.Type != utils.MetaConcrete {
+			continue
+		}
+		blncOpers[i] = newConcreteBalanceOperator(blnCfg,
+			fltrS, connMgr, attrSConns, rateSConns)
+		cncrtBlncs = append(cncrtBlncs, blncOpers[i].(*concreteBalance))
+	}
+
+	for i, blnCfg := range blnCfgs { // build the abstract balances
 		if blnCfg.Type == utils.MetaConcrete {
-			blncOpers[i] = newConcreteBalanceOperator(blnCfg,
-				fltrS, connMgr, attrSConns, rateSConns)
-			cncrtBlncs = append(cncrtBlncs, blncOpers[i].(*concreteBalance))
 			continue
 		}
 		if blncOpers[i], err = newBalanceOperator(blnCfg, cncrtBlncs, fltrS, connMgr,
@@ -189,6 +195,7 @@ func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal
 		costIcrm.FixedFee == nil {
 		var rplyCost *engine.RateProfileCost
 		if rplyCost, err = rateSCostForEvent(connMgr, cgrEv, rateSConns, rpIDs); err != nil {
+			err = utils.NewErrRateS(err)
 			return
 		}
 		costIcrm = costIcrm.Clone() // so we don't modify the original
@@ -235,7 +242,6 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Deci
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement) (ec *utils.EventCharges, err error) {
-
 	// process AttributeS if needed
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
 		costIcrm.FixedFee == nil &&
