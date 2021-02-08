@@ -342,8 +342,12 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		utils.AttributeIDsCfg:     eeC.AttributeSIDs,
 		utils.SynchronousCfg:      eeC.Synchronous,
 		utils.AttemptsCfg:         eeC.Attempts,
-		utils.OptsCfg:             eeC.Opts,
 	}
+	opts := make(map[string]interface{})
+	for k, v := range eeC.Opts {
+		opts[k] = v
+	}
+	initialMP[utils.OptsCfg] = opts
 
 	if eeC.Fields != nil {
 		fields := make([]map[string]interface{}, 0, len(eeC.Fields))

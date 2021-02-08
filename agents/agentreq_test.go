@@ -2216,3 +2216,31 @@ func TestNeedsMaxUsage(t *testing.T) {
 		t.Error("Expected flag to need maxUsage")
 	}
 }
+
+func TestAgReqSetFieldsFromCfg(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+
+	tplFlds := []*config.FCTemplate{
+		{Tag: "CfgField",
+			Path: utils.MetaCgreq + utils.NestingSep + "NodeID", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cfg.general.node_id", utils.InfieldSep)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	}
+
+	if val, err := agReq.FieldAsInterface([]string{utils.MetaCgreq, "NodeID"}); err != nil {
+		t.Error(err)
+	} else if val != config.CgrConfig().GeneralCfg().NodeID {
+		t.Errorf("expecting: %+v, \n received: %+v ", config.CgrConfig().GeneralCfg().NodeID, utils.ToJSON(val))
+	}
+
+}

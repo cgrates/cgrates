@@ -104,7 +104,6 @@ func migrateFilterV2(fl *v1Filter) (fltr *engine.Filter) {
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaCgreq) ||
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaCgrep) ||
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaRep) ||
-			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaCGRAReq) ||
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaAct) {
 			continue
 		}
@@ -174,7 +173,6 @@ func migrateInlineFilterV2(fl string) string {
 			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaCgreq) ||
 			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaCgrep) ||
 			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaRep) ||
-			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaCGRAReq) ||
 			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaAct)) {
 		return fl
 	}

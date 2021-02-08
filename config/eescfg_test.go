@@ -640,7 +640,9 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
                   "id": "CSVExporter",									
 			      "type": "*file_csv",									
                   "export_path": "/tmp/testCSV",			
-			      "opts": {},											
+			      "opts": {
+					"groupID": "test",
+				  },											
 			      "tenant": "~*req.Destination1",										
 			      "timezone": "UTC",										
 			      "filters": [],										
@@ -670,10 +672,12 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 		},
 		utils.ExportersCfg: []map[string]interface{}{
 			{
-				utils.IDCfg:               "CSVExporter",
-				utils.TypeCfg:             "*file_csv",
-				utils.ExportPathCfg:       "/tmp/testCSV",
-				utils.OptsCfg:             map[string]interface{}{},
+				utils.IDCfg:         "CSVExporter",
+				utils.TypeCfg:       "*file_csv",
+				utils.ExportPathCfg: "/tmp/testCSV",
+				utils.OptsCfg: map[string]interface{}{
+					utils.KafkaGroupID: "test",
+				},
 				utils.TenantCfg:           "~*req.Destination1",
 				utils.TimezoneCfg:         "UTC",
 				utils.FiltersCfg:          []string{},

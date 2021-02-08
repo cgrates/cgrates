@@ -5946,6 +5946,8 @@ func TestCGRConfigClone(t *testing.T) {
 	rcv.rldChans = nil
 	cfg.lks = nil
 	rcv.lks = nil
+	cfg.dp = nil
+	rcv.dp = nil
 	if !reflect.DeepEqual(cfg, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg), utils.ToJSON(rcv))
 	}
@@ -6161,5 +6163,14 @@ func TestLoadAccountSCfgError(t *testing.T) {
 		t.Error(err)
 	} else if err := cfg.loadAccountSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestCGRConfigGetDP(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	exp := utils.MapStorage(cfg.AsMapInterface(cfg.generalCfg.RSRSep))
+	dp := cfg.GetDataProvider()
+	if !reflect.DeepEqual(dp, exp) {
+		t.Errorf("Expected %+v, received %+v", exp, err)
 	}
 }

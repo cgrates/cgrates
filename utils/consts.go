@@ -699,7 +699,6 @@ const (
 	Error                    = "Error"
 	MetaCgreq                = "*cgreq"
 	MetaCgrep                = "*cgrep"
-	MetaCGRAReq              = "*cgrareq"
 	CgrAcd                   = "cgr_acd"
 	ActivationIntervalString = "ActivationInterval"
 	MaxHits                  = "MaxHits"
@@ -755,6 +754,7 @@ const (
 	MetaTrl                  = "*trl"
 	MetaTmp                  = "*tmp"
 	MetaOpts                 = "*opts"
+	MetaCfg                  = "*cfg"
 	MetaDynReq               = "~*req"
 	MetaScPrefix             = "~*sc." // used for SMCostFilter
 	CGROriginHost            = "cgr_originhost"

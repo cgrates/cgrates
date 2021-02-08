@@ -913,7 +913,10 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				"processed_path": "/tmp/ers/out",
 				"cache_dump_fields": [
                            {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true}                
-                ],
+				],
+				"opts":{
+					"groupID": "test",
+				},
 			},
 		],
 	}
@@ -990,7 +993,9 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.TenantCfg:                   "~*req.Destination1",
 				utils.TimezoneCfg:                 "",
 				utils.XMLRootPathCfg:              []string{""},
-				utils.OptsCfg:                     make(map[string]interface{}),
+				utils.OptsCfg: map[string]interface{}{
+					utils.KafkaGroupID: "test",
+				},
 			},
 		},
 	}

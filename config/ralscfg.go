@@ -116,7 +116,6 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.RemoveExpiredCfg:           ralsCfg.RemoveExpired,
 		utils.MaxIncrementsCfg:           ralsCfg.MaxIncrements,
 		utils.DynaprepaidActionplansCfg:  ralsCfg.DynaprepaidActionPlans,
-		utils.BalanceRatingSubjectCfg:    ralsCfg.BalanceRatingSubject,
 	}
 	if ralsCfg.ThresholdSConns != nil {
 		threSholds := make([]string, len(ralsCfg.ThresholdSConns))
@@ -157,6 +156,11 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 	}
 	initialMP[utils.MaxComputedUsageCfg] = maxComputed
+	balanceRatSubj := make(map[string]string)
+	for k, v := range ralsCfg.BalanceRatingSubject {
+		balanceRatSubj[k] = v
+	}
+	initialMP[utils.BalanceRatingSubjectCfg] = balanceRatSubj
 	return
 }
 

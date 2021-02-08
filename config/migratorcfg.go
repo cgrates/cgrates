@@ -113,6 +113,14 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if mg.UsersFilters != nil {
 		fltrs = mg.UsersFilters
 	}
+	outDataDBOpts := make(map[string]interface{})
+	for k, v := range mg.OutDataDBOpts {
+		outDataDBOpts[k] = v
+	}
+	outStorDBOpts := make(map[string]interface{})
+	for k, v := range mg.OutStorDBOpts {
+		outStorDBOpts[k] = v
+	}
 	return map[string]interface{}{
 		utils.OutDataDBTypeCfg:     mg.OutDataDBType,
 		utils.OutDataDBHostCfg:     mg.OutDataDBHost,
@@ -127,8 +135,8 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.OutStorDBNameCfg:     mg.OutStorDBName,
 		utils.OutStorDBUserCfg:     mg.OutStorDBUser,
 		utils.OutStorDBPasswordCfg: mg.OutStorDBPassword,
-		utils.OutDataDBOptsCfg:     mg.OutDataDBOpts,
-		utils.OutStorDBOptsCfg:     mg.OutStorDBOpts,
+		utils.OutDataDBOptsCfg:     outDataDBOpts,
+		utils.OutStorDBOptsCfg:     outStorDBOpts,
 		utils.UsersFiltersCfg:      fltrs,
 	}
 }

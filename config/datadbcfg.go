@@ -149,8 +149,12 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.DataDbPassCfg: dbcfg.DataDbPass,
 		utils.RmtConnsCfg:   dbcfg.RmtConns,
 		utils.RplConnsCfg:   dbcfg.RplConns,
-		utils.OptsCfg:       dbcfg.Opts,
 	}
+	opts := make(map[string]interface{})
+	for k, v := range dbcfg.Opts {
+		opts[k] = v
+	}
+	initialMP[utils.OptsCfg] = opts
 	if dbcfg.Items != nil {
 		items := make(map[string]interface{})
 		for key, item := range dbcfg.Items {

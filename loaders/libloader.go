@@ -90,8 +90,12 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 
 // newCsvProvider constructs a DataProvider
 func newCsvProvider(record []string, fileName string) (dP utils.DataProvider) {
-	dP = &csvProvider{req: record, fileName: fileName, cache: utils.MapStorage{}}
-	return
+	return &csvProvider{
+		req:      record,
+		fileName: fileName,
+		cache:    utils.MapStorage{},
+		cfg:      config.CgrConfig().GetDataProvider(),
+	}
 }
 
 // csvProvider implements utils.DataProvider so we can pass it to filters
@@ -99,6 +103,7 @@ type csvProvider struct {
 	req      []string
 	fileName string
 	cache    utils.MapStorage
+	cfg      utils.DataProvider
 }
 
 // String is part of utils.DataProvider interface
@@ -115,7 +120,8 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	}
 	err = nil // cancel previous err
 
-	if strings.HasPrefix(fldPath[0], utils.MetaFile+utils.FilterValStart) {
+	switch {
+	case strings.HasPrefix(fldPath[0], utils.MetaFile+utils.FilterValStart):
 		fileName := strings.TrimPrefix(fldPath[0], utils.MetaFile+utils.FilterValStart)
 		hasSelEnd := false
 		for _, val := range fldPath[1:] {
@@ -132,7 +138,15 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 			cP.cache.Set(fldPath, nil)
 			return
 		}
-	} else if fldPath[0] != utils.MetaReq {
+	case fldPath[0] == utils.MetaReq:
+	case fldPath[0] == utils.MetaCfg:
+		data, err = cP.cfg.FieldAsInterface(fldPath[1:])
+		if err != nil {
+			return
+		}
+		cP.cache.Set(fldPath, data)
+		return
+	default:
 		return nil, fmt.Errorf("invalid prefix for : %s", fldPath)
 	}
 	var cfgFieldIdx int

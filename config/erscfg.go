@@ -302,10 +302,16 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.FlagsCfg:                    []string{},
 		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
 		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
-		utils.OptsCfg:                     er.Opts,
 		utils.PartialRecordCacheCfg:       "0",
 		utils.RunDelayCfg:                 "0",
 	}
+
+	opts := make(map[string]interface{})
+	for k, v := range er.Opts {
+		opts[k] = v
+	}
+	initialMP[utils.OptsCfg] = opts
+
 	if flags := er.Flags.SliceFlags(); flags != nil {
 		initialMP[utils.FlagsCfg] = flags
 	}

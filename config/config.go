@@ -229,6 +229,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	dfltLoaderConfig = cfg.loaderCfg[0].Clone()
 	dfltRemoteHost = new(RemoteHost)
 	*dfltRemoteHost = *cfg.rpcConns[utils.MetaLocalHost].Conns[0]
+	cfg.dp = utils.MapStorage(cfg.AsMapInterface(cfg.generalCfg.RSRSep))
 	err = cfg.checkConfigSanity()
 	return
 }
@@ -253,6 +254,7 @@ func NewCGRConfigFromPath(path string) (cfg *CGRConfig, err error) {
 	if err = cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, false); err != nil {
 		return
 	}
+	cfg.dp = utils.MapStorage(cfg.AsMapInterface(cfg.generalCfg.RSRSep))
 	err = cfg.checkConfigSanity()
 	return
 }
@@ -334,6 +336,8 @@ type CGRConfig struct {
 	apiBanCfg        *APIBanCfg        // APIBan config
 	coreSCfg         *CoreSCfg         // CoreS config
 	accountSCfg      *AccountSCfg      // AccountS config
+
+	dp utils.DataProvider
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -1602,6 +1606,7 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ReloadArgs, reply *string) (err error
 	//  lock all sections
 	cfgV.rLockSections()
 
+	cfgV.dp = utils.MapStorage(cfg.AsMapInterface(cfgV.generalCfg.RSRSep))
 	err = cfgV.checkConfigSanity()
 
 	cfgV.rUnlockSections() // unlock before checking the error
@@ -1763,6 +1768,7 @@ func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error
 	//  lock all sections
 	cfgV.rLockSections()
 
+	cfgV.dp = utils.MapStorage(cfg.AsMapInterface(cfgV.generalCfg.RSRSep))
 	err = cfgV.checkConfigSanity()
 
 	cfgV.rUnlockSections() // unlock before checking the error
@@ -1903,6 +1909,7 @@ func (cfg *CGRConfig) V1SetConfigFromJSON(args *SetConfigFromJSONArgs, reply *st
 
 	//  lock all sections
 	cfgV.rLockSections()
+	cfgV.dp = utils.MapStorage(cfg.AsMapInterface(cfgV.generalCfg.RSRSep))
 	err = cfgV.checkConfigSanity()
 	cfgV.rUnlockSections() // unlock before checking the error
 	if err != nil {
@@ -1971,4 +1978,9 @@ func (cfg CGRConfig) Clone() (cln *CGRConfig) {
 	}
 	cln.initChanels()
 	return
+}
+
+// GetDataProvider returns the config as a data provider interface
+func (cfg CGRConfig) GetDataProvider() utils.DataProvider {
+	return cfg.dp
 }

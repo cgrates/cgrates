@@ -69,8 +69,12 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (httpcfg *HTTPCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
+	clientOpts := make(map[string]interface{})
+	for k, v := range httpcfg.ClientOpts {
+		clientOpts[k] = v
+	}
+	return map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:          httpcfg.HTTPJsonRPCURL,
 		utils.DispatchersRegistrarURLCfg: httpcfg.DispatchersRegistrarURL,
 		utils.HTTPWSURLCfg:               httpcfg.HTTPWSURL,
@@ -78,9 +82,8 @@ func (httpcfg *HTTPCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.HTTPCDRsURLCfg:             httpcfg.HTTPCDRsURL,
 		utils.HTTPUseBasicAuthCfg:        httpcfg.HTTPUseBasicAuth,
 		utils.HTTPAuthUsersCfg:           httpcfg.HTTPAuthUsers,
-		utils.HTTPClientOptsCfg:          httpcfg.ClientOpts,
+		utils.HTTPClientOptsCfg:          clientOpts,
 	}
-	return
 }
 
 // Clone returns a deep copy of HTTPCfg

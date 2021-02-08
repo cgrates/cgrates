@@ -101,12 +101,10 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 // AsMapInterface returns the config as a map[string]interface{}
 func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:            ra.Enabled,
-		utils.ListenNetCfg:          ra.ListenNet,
-		utils.ListenAuthCfg:         ra.ListenAuth,
-		utils.ListenAcctCfg:         ra.ListenAcct,
-		utils.ClientSecretsCfg:      ra.ClientSecrets,
-		utils.ClientDictionariesCfg: ra.ClientDictionaries,
+		utils.EnabledCfg:    ra.Enabled,
+		utils.ListenNetCfg:  ra.ListenNet,
+		utils.ListenAuthCfg: ra.ListenAuth,
+		utils.ListenAcctCfg: ra.ListenAcct,
 	}
 
 	requestProcessors := make([]map[string]interface{}, len(ra.RequestProcessors))
@@ -125,6 +123,16 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
+	clientSecrets := make(map[string]string)
+	for k, v := range ra.ClientSecrets {
+		clientSecrets[k] = v
+	}
+	initialMP[utils.ClientSecretsCfg] = clientSecrets
+	clientDictionaries := make(map[string]string)
+	for k, v := range ra.ClientDictionaries {
+		clientDictionaries[k] = v
+	}
+	initialMP[utils.ClientDictionariesCfg] = clientDictionaries
 	return
 }
 
