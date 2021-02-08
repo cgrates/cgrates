@@ -67,7 +67,13 @@ var (
 		testTransitSState,
 		testRelocateSession,
 		testGetRelocateSession,
+		testLibsessionsSetMockErrors,
 		testSyncSessions,
+		testAuthEvent,
+		testAuthEventMockCall,
+		testChargeEvent,
+		testUpdateSession,
+		testEndSession,
 	}
 )
 
@@ -643,6 +649,7 @@ func testInitSessionDebitLoops(t *testing.T) {
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(nil),
 		DebitInterval: time.Minute,
+		debitStop:     make(chan struct{}, 1),
 		SRuns: []*SRun{
 			{
 				Event: map[string]interface{}{
@@ -658,6 +665,9 @@ func testInitSessionDebitLoops(t *testing.T) {
 		},
 	}
 
+	sessions.initSessionDebitLoops(ss)
+
+	ss.debitStop = nil
 	sessions.initSessionDebitLoops(ss)
 }
 
@@ -1588,6 +1598,56 @@ func testGetRelocateSession(t *testing.T) {
 	}
 }
 
+func testLibsessionsSetMockErrors(t *testing.T) {
+	tmp := engine.Cache
+
+	engine.Cache.Clear(nil)
+	sTestMock := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheSTIR] = &config.CacheParamCfg{
+		Replicate: true,
+	}
+	cacheS := engine.NewCacheS(cfg, nil, nil)
+	engine.SetCache(cacheS)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
+	engine.SetConnManager(connMgr)
+
+	procIndt, err := NewProcessedIdentity("eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken")
+	if err != nil {
+		t.Error(err)
+	}
+	if err := procIndt.VerifySignature(cfg.GeneralCfg().ReplyTimeout); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
+	}
+
+	procIndt.Header.X5u = "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_pubkey.pem"
+	if err := procIndt.VerifySignature(cfg.GeneralCfg().ReplyTimeout); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
+	}
+
+	if _, err := NewSTIRIdentity(procIndt.Header, procIndt.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pem",
+		-1); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
+	}
+
+	if _, err := NewSTIRIdentity(procIndt.Header, procIndt.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pe",
+		-1); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
+	}
+
+	engine.Cache = tmp
+}
+
 type testMockClientSyncSessions struct {
 	*testRPCClientConnection
 }
@@ -1600,17 +1660,41 @@ func (sT *testMockClientSyncSessions) Call(method string, arg interface{}, rply 
 		},
 	}
 	*rply.(*[]*SessionID) = queriedSessionIDs
+	time.Sleep(20)
 	return utils.ErrNoActiveSession
 }
 
 func testSyncSessions(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	sessions := NewSessionS(cfg, dm, nil)
+	tmp := engine.Cache
+	engine.Cache.Clear(nil)
 
-	sTestMock := &testMockClientSyncSessions{}
-	sessions.RegisterIntBiJConn(sTestMock)
+	sTestMock := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResourceSv1ReleaseResources: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	cfg := config.NewDefaultCGRConfig()
+	//cfg.GeneralCfg().ReplyTimeout = 1
+	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheClosedSessions] = &config.CacheParamCfg{
+		Replicate: true,
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): chanInternal})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	sTestMock1 := &testMockClientSyncSessions{}
+	sessions.RegisterIntBiJConn(sTestMock1)
 
 	sessions.aSessions = map[string]*Session{
 		"SESS1": {
@@ -1620,10 +1704,344 @@ func testSyncSessions(t *testing.T) {
 
 	sessions.syncSessions()
 
+	sessions.cgrCfg.GeneralCfg().ReplyTimeout = 1
+	cacheS := engine.NewCacheS(cfg, nil, nil)
+	engine.SetCache(cacheS)
+	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
+	engine.SetConnManager(connMgr)
 	sessions.aSessions = map[string]*Session{
-		"ORIGIN_ID": {
-			CGRID: "TEST_CGRID",
-		},
+		"ORIGIN_ID": {},
 	}
 	sessions.syncSessions()
+
+	engine.Cache = tmp
+
+	//There are no sessions to be removed
+	sessions.terminateSyncSessions([]string{"no_sesssion"})
+}
+func testAuthEvent(t *testing.T) {
+	engine.Cache.Clear(nil)
+
+	sTestMock := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderGetMaxSessionTime: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				chrgrs := []*engine.ChrgSProcessEventReply{
+					{ChargerSProfile: "TEST_PROFILE1",
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "TEST_ID",
+							Event: map[string]interface{}{
+								utils.Destination: "10",
+							},
+						}},
+				}
+
+				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):     chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ID",
+		Event: map[string]interface{}{
+			utils.Destination: "10",
+			utils.Usage:       "invalid_time",
+		},
+	}
+
+	expected := "time: invalid duration \"invalid_time\""
+	if _, err := sessions.authEvent(cgrEv, true); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	delete(cgrEv.Event, utils.Usage)
+	expected = "ChargerS is disabled"
+	if _, err := sessions.authEvent(cgrEv, true); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	expectedTime := map[string]time.Duration{
+		utils.EmptyString: 3 * time.Hour,
+	}
+	if usage, err := sessions.authEvent(cgrEv, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(usage, expectedTime) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedTime), utils.ToJSON(usage))
+	}
+
+}
+
+func testAuthEventMockCall(t *testing.T) {
+	//mocking the GetMaxSession for checking the error
+	engine.Cache.Clear(nil)
+	sTestMock := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderGetMaxSessionTime: func(args interface{}, reply interface{}) error {
+				usage := args.(*engine.CallDescriptorWithOpts).Opts[utils.Usage]
+				if usage != 10 {
+					return utils.ErrNoMoreData
+				}
+				*reply.(*time.Duration) = 4 * time.Hour
+				return nil
+			},
+			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				chrgrs := []*engine.ChrgSProcessEventReply{
+					{ChargerSProfile: "TEST_PROFILE1",
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "TEST_ID",
+							Event: map[string]interface{}{
+								utils.Destination: "10",
+								utils.RequestType: utils.MetaPrepaid,
+							},
+						}},
+				}
+				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):     chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal})
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ID",
+		Event: map[string]interface{}{
+			utils.Destination: "10",
+		},
+		Opts: map[string]interface{}{
+			utils.Usage: 10,
+		},
+	}
+
+	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	expectedTime := map[string]time.Duration{
+		utils.EmptyString: 3 * time.Hour,
+	}
+	if usage, err := sessions.authEvent(cgrEv, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(usage, expectedTime) {
+		t.Errorf("Expected %+v, received %+v", expectedTime, usage)
+	}
+
+	cgrEv.Opts = map[string]interface{}{
+		utils.Usage: 20,
+	}
+	expected := "RALS_ERROR:NO_MORE_DATA"
+	if _, err := sessions.authEvent(cgrEv, true); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func testChargeEvent(t *testing.T) {
+	tmp := engine.Cache
+
+	engine.Cache.Clear(nil)
+	sTestMock := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				chrgrs := []*engine.ChrgSProcessEventReply{
+					{ChargerSProfile: "TEST_PROFILE1",
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "TEST_ID",
+							Event: map[string]interface{}{
+								utils.Destination: "10",
+								utils.RequestType: utils.MetaPostpaid,
+							},
+						}},
+				}
+				if args.(*utils.CGREvent).Tenant != "cgrates.org" {
+					chrgrs[0].CGREvent.Event[utils.RequestType] = utils.MetaPrepaid
+				}
+				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				return nil
+			},
+			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheClosedSessions] = &config.CacheParamCfg{
+		Replicate: true,
+	}
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):     chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal,
+	})
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ID",
+		Event: map[string]interface{}{
+			utils.Usage:       10,
+			utils.RequestType: utils.MetaPostpaid,
+		},
+	}
+
+	//disabled chargers
+	expected := "ChargerS is disabled"
+	if _, err := sessions.chargeEvent(cgrEv, true); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	cacheS := engine.NewCacheS(cfg, nil, nil)
+	engine.SetCache(cacheS)
+	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
+	engine.SetConnManager(connMgr)
+
+	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+
+	if usage, err := sessions.chargeEvent(cgrEv, false); err != nil {
+		t.Error(err)
+	} else if usage != 10*time.Nanosecond {
+		t.Errorf("Expected %+v, received %+v", 10*time.Nanosecond, usage)
+	}
+
+	engine.Cache.Clear(nil)
+	cgrEv.Tenant = "CHANGED_TENANT"
+	cgrEv.Event[utils.RequestType] = utils.MetaPrepaid
+	expected = "RALS_ERROR:MANDATORY_IE_MISSING: [connIDs]"
+	if _, err := sessions.chargeEvent(cgrEv, false); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	engine.Cache = tmp
+}
+
+func testUpdateSession(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	updatedEv := map[string]interface{}{
+		utils.Usage:       time.Second,
+		utils.Destination: 10,
+	}
+	ss := &Session{
+		EventStart: map[string]interface{}{},
+		SRuns: []*SRun{
+			{
+				Event: map[string]interface{}{},
+				CD: &engine.CallDescriptor{
+					RunID: "RUNID_TEST",
+				},
+			},
+		},
+	}
+
+	if _, err := sessions.updateSession(ss, updatedEv, nil, false); err != nil {
+		t.Error(err)
+	}
+
+	updatedEv[utils.Usage] = "invalid_format"
+	expectedErr := "time: invalid duration \"invalid_format\""
+	if _, err := sessions.updateSession(ss, updatedEv, nil, false); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	delete(updatedEv, utils.Usage)
+	ss.SRuns[0].Event[utils.RequestType] = utils.MetaNone
+	if _, err := sessions.updateSession(ss, updatedEv, nil, false); err != nil {
+		t.Error(err)
+	}
+}
+
+func testEndSession(t *testing.T) {
+	engine.Cache.Clear(nil)
+	sTestMock := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResponderDebit: func(args interface{}, reply interface{}) error {
+				return nil
+			},
+			utils.ResponderRefundRounding: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): chanInternal,
+	})
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	ss := &Session{
+		EventStart: map[string]interface{}{},
+		SRuns: []*SRun{
+			{
+				TotalUsage: 50 * time.Minute,
+				Event:      map[string]interface{}{},
+				EventCost: &engine.EventCost{
+					Usage:          utils.DurationPointer(30 * time.Minute),
+					AccountSummary: &engine.AccountSummary{},
+				},
+				CD: &engine.CallDescriptor{
+					LoopIndex: 1,
+				},
+			},
+		},
+	}
+
+	activationTime := time.Date(2020, 21, 07, 10, 0, 0, 0, time.UTC)
+	expected := "cannot find last active ChargingInterval"
+	if err := sessions.endSession(ss, utils.DurationPointer(time.Minute), utils.DurationPointer(time.Second),
+		utils.TimePointer(activationTime), false); err == nil || err.Error() != expected {
+		t.Error(err)
+	}
+	sessions = NewSessionS(cfg, dm, connMgr)
+	//totalUsage will be empty
+	if err := sessions.endSession(ss, nil, utils.DurationPointer(time.Second),
+		utils.TimePointer(activationTime), false); err != nil {
+		t.Error(err)
+	}
+
+	engine.Cache.Clear(nil)
+	sessions.cgrCfg.SessionSCfg().StoreSCosts = true
+	if err := sessions.endSession(ss, nil, utils.DurationPointer(time.Second),
+		utils.TimePointer(activationTime), false); err != nil {
+		t.Error(err)
+	}
+
 }
