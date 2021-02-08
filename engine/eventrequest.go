@@ -42,6 +42,7 @@ func NewEventRequest(req utils.DataProvider, dc, opts utils.MapStorage,
 		dc:       dc,
 		opts:     opts,
 		OrdNavMP: oNM,
+		Cfg:      config.CgrConfig().GetDataProvider(),
 	}
 	if tntTpl != nil {
 		if tntIf, err := eeR.ParseField(
@@ -62,6 +63,7 @@ type EventRequest struct {
 	OrdNavMP map[string]*utils.OrderedNavigableMap // *exp:OrderNavMp *trl:OrderNavMp *cdr:OrderNavMp
 	dc       utils.MapStorage
 	opts     utils.MapStorage
+	Cfg      utils.DataProvider
 
 	filterS *FilterS
 }
@@ -93,6 +95,8 @@ func (eeR *EventRequest) FieldAsInterface(fldPath []string) (val interface{}, er
 		val, err = eeR.dc.FieldAsInterface(fldPath[1:])
 	case utils.MetaOpts:
 		val, err = eeR.opts.FieldAsInterface(fldPath[1:])
+	case utils.MetaCfg:
+		val, err = eeR.Cfg.FieldAsInterface(fldPath[1:])
 	}
 	if err != nil {
 		return

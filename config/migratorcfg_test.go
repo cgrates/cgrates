@@ -96,7 +96,10 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		   "redis_cluster": true,					
 		   "redis_cluster_sync": "2s",					
 		   "redis_cluster_ondown_delay": "1",	
-	    },
+		},
+		"out_stordb_opts":{	
+			"redis_cluster": true,					
+		 },
 	},
 }`
 	eMap := map[string]interface{}{
@@ -114,7 +117,9 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		utils.OutStorDBUserCfg:     "cgrates",
 		utils.OutStorDBPasswordCfg: "",
 		utils.UsersFiltersCfg:      []string{"users", "filters", "Account"},
-		utils.OutStorDBOptsCfg:     map[string]interface{}{},
+		utils.OutStorDBOptsCfg: map[string]interface{}{
+			utils.RedisClusterCfg: true,
+		},
 		utils.OutDataDBOptsCfg: map[string]interface{}{
 			utils.RedisSentinelNameCfg:       "",
 			utils.RedisClusterCfg:            true,

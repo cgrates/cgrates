@@ -65,6 +65,7 @@ func NewAgentRequest(req utils.DataProvider,
 		Header:     header,
 		Trailer:    trailer,
 		Opts:       opts,
+		Cfg:        config.CgrConfig().GetDataProvider(),
 	}
 	if tntTpl != nil {
 		if tntIf, err := ar.ParseField(
@@ -93,6 +94,7 @@ type AgentRequest struct {
 	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
 	tmp        utils.NavigableMap2        // used in case you want to store temporary items and access them later
 	Opts       *utils.OrderedNavigableMap
+	Cfg        utils.DataProvider
 }
 
 // String implements utils.DataProvider
@@ -136,6 +138,8 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		}
 	case utils.MetaOpts:
 		val, err = ar.Opts.FieldAsInterface(fldPath[1:])
+	case utils.MetaCfg:
+		val, err = ar.Cfg.FieldAsInterface(fldPath[1:])
 	}
 	if err != nil {
 		return

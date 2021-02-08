@@ -147,11 +147,20 @@ func (ha *HTTPAgentCfg) AsMapInterface(separator string) (initialMP map[string]i
 	initialMP = map[string]interface{}{
 		utils.IDCfg:             ha.ID,
 		utils.URLCfg:            ha.URL,
-		utils.SessionSConnsCfg:  ha.SessionSConns,
 		utils.RequestPayloadCfg: ha.RequestPayload,
 		utils.ReplyPayloadCfg:   ha.ReplyPayload,
 	}
 
+	if ha.SessionSConns != nil {
+		sessionSConns := make([]string, len(ha.SessionSConns))
+		for i, item := range ha.SessionSConns {
+			sessionSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.SessionSConnsCfg] = sessionSConns
+	}
 	requestProcessors := make([]map[string]interface{}, len(ha.RequestProcessors))
 	for i, item := range ha.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
