@@ -203,6 +203,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs,
 			rdrCfg.Flags.Has(utils.MetaFD),
+			rdrCfg.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -256,7 +257,9 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			rdrCfg.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs,
-			rdrCfg.Flags.Has(utils.MetaFD))
+			rdrCfg.Flags.Has(utils.MetaFD),
+			rdrCfg.Flags.ParamValue(utils.MetaRoutesMaxCost),
+		)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage,
 			evArgs, rply)

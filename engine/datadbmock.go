@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -277,7 +275,6 @@ func (dbM *DataDBMock) RemStatQueueDrv(tenant, id string) (err error) {
 }
 
 func (dbM *DataDBMock) GetThresholdProfileDrv(tenant string, ID string) (tp *ThresholdProfile, err error) {
-	fmt.Println(4)
 	return nil, utils.ErrNotImplemented
 }
 

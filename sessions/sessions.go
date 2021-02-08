@@ -1758,7 +1758,7 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 	thrslds bool, thresholdIDs []string, statQueues bool, statIDs []string,
 	res, maxUsage, routes, routesIgnoreErrs, routesEventCost bool,
 	cgrEv *utils.CGREvent, routePaginator utils.Paginator,
-	forceDuration bool) (args *V1AuthorizeArgs) {
+	forceDuration bool, routesMaxCost string) (args *V1AuthorizeArgs) {
 	args = &V1AuthorizeArgs{
 		GetAttributes:      attrs,
 		AuthorizeResources: res,
@@ -1772,6 +1772,8 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 	}
 	if routesEventCost {
 		args.RoutesMaxCost = utils.MetaRoutesEventCost
+	} else {
+		args.RoutesMaxCost = routesMaxCost
 	}
 	args.Paginator = routePaginator
 	if len(attributeIDs) != 0 {
@@ -1819,6 +1821,8 @@ func (args *V1AuthorizeArgs) ParseFlags(flags string) {
 			args.RoutesIgnoreErrors = true
 		case subsystem == utils.MetaRoutesEventCost:
 			args.RoutesMaxCost = utils.MetaEventCost
+		case strings.HasPrefix(subsystem, utils.MetaRoutesMaxCost):
+			args.RoutesMaxCost = strings.TrimPrefix(subsystem, utils.MetaRoutesMaxCost+utils.InInFieldSep)
 		case strings.HasPrefix(subsystem, utils.MetaAttributes):
 			args.GetAttributes = true
 			args.AttributeIDs = getFlagIDs(subsystem)
@@ -2683,7 +2687,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 	thds bool, thresholdIDs []string, stats bool, statIDs []string, resrc, acnts,
 	routes, routesIgnoreErrs, routesEventCost bool, cgrEv *utils.CGREvent,
-	routePaginator utils.Paginator, forceDuration bool) (args *V1ProcessMessageArgs) {
+	routePaginator utils.Paginator, forceDuration bool, routesMaxCost string) (args *V1ProcessMessageArgs) {
 	args = &V1ProcessMessageArgs{
 		AllocateResources:  resrc,
 		Debit:              acnts,
@@ -2697,6 +2701,8 @@ func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 	}
 	if routesEventCost {
 		args.RoutesMaxCost = utils.MetaRoutesEventCost
+	} else {
+		args.RoutesMaxCost = routesMaxCost
 	}
 	args.Paginator = routePaginator
 	if len(attributeIDs) != 0 {
@@ -2743,6 +2749,8 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 			args.RoutesIgnoreErrors = true
 		case subsystem == utils.MetaRoutesEventCost:
 			args.RoutesMaxCost = utils.MetaEventCost
+		case strings.HasPrefix(subsystem, utils.MetaRoutesMaxCost):
+			args.RoutesMaxCost = strings.TrimPrefix(subsystem, utils.MetaRoutesMaxCost+utils.InInFieldSep)
 		case strings.Index(subsystem, utils.MetaAttributes) != -1:
 			args.GetAttributes = true
 			args.AttributeIDs = getFlagIDs(subsystem)
@@ -3093,6 +3101,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		var maxCost string
 		if flags.Has(utils.MetaEventCost) {
 			maxCost = utils.MetaRoutesEventCost
+		} else {
+			maxCost = flags.ParamValue(utils.MetaRoutesMaxCost)
 		}
 		for runID, cgrEv := range getDerivedEvents(events, flags.Has(utils.MetaDerivedReply)) {
 			routesReply, err := sS.getRoutes(cgrEv.Clone(), args.Paginator, ignoreErrors, maxCost, false)

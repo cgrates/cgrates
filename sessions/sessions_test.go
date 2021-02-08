@@ -906,7 +906,7 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		CGREvent:           cgrEv,
 		ForceDuration:      true,
 	}
-	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false, false, cgrEv, utils.Paginator{}, true)
+	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false, false, cgrEv, utils.Paginator{}, true, "")
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -922,7 +922,7 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		CGREvent:           cgrEv,
 		ForceDuration:      true,
 	}
-	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false, true, true, cgrEv, utils.Paginator{}, true)
+	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false, true, true, cgrEv, utils.Paginator{}, true, "")
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
 	}
@@ -945,7 +945,26 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		StatIDs:            []string{"test3", "test4"},
 	}
 	rply = NewV1AuthorizeArgs(true, attributeIDs, false, thresholdIDs,
-		true, statIDs, false, true, false, true, true, cgrEv, utils.Paginator{}, false)
+		true, statIDs, false, true, false, true, true, cgrEv, utils.Paginator{}, false, "")
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
+	}
+	expected = &V1AuthorizeArgs{
+		GetAttributes:      true,
+		AuthorizeResources: false,
+		GetMaxUsage:        true,
+		ProcessThresholds:  false,
+		ProcessStats:       true,
+		GetRoutes:          false,
+		RoutesIgnoreErrors: true,
+		RoutesMaxCost:      "100",
+		CGREvent:           cgrEv,
+		AttributeIDs:       []string{"ATTR1", "ATTR2"},
+		ThresholdIDs:       []string{"ID1", "ID2"},
+		StatIDs:            []string{"test3", "test4"},
+	}
+	rply = NewV1AuthorizeArgs(true, attributeIDs, false, thresholdIDs,
+		true, statIDs, false, true, false, true, false, cgrEv, utils.Paginator{}, false, "100")
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
 	}
@@ -982,6 +1001,8 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 	}
 
 	strArg = "*accounts,*fd,*resources,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1authArgs = new(V1AuthorizeArgs)
+	v1authArgs.CGREvent = new(utils.CGREvent)
 	v1authArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
@@ -1006,6 +1027,32 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 	}
 
 	strArg = "*accounts,*fd,*resources,,*dispatchers,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1authArgs = new(V1AuthorizeArgs)
+	v1authArgs.CGREvent = new(utils.CGREvent)
+	v1authArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1authArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
+	}
+	eOut = &V1AuthorizeArgs{
+		GetMaxUsage:        true,
+		AuthorizeResources: true,
+		GetRoutes:          true,
+		RoutesIgnoreErrors: true,
+		RoutesMaxCost:      "100",
+		GetAttributes:      true,
+		AttributeIDs:       []string{"Attr1", "Attr2"},
+		ProcessThresholds:  true,
+		ThresholdIDs:       []string{"tr1", "tr2", "tr3"},
+		ProcessStats:       true,
+		StatIDs:            []string{"st1", "st2", "st3"},
+		Paginator:          cgrArgs,
+		CGREvent:           eOut.CGREvent,
+		ForceDuration:      true,
+	}
+
+	strArg = "*accounts,*fd,*resources,,*dispatchers,*routes,*routes_ignore_errors,*routes_maxcost:100,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1authArgs = new(V1AuthorizeArgs)
+	v1authArgs.CGREvent = new(utils.CGREvent)
 	v1authArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
@@ -1111,7 +1158,7 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		ForceDuration:     true,
 	}
 	rply := NewV1ProcessMessageArgs(true, nil, false, nil, false,
-		nil, true, true, true, false, false, cgrEv, utils.Paginator{}, true)
+		nil, true, true, true, false, false, cgrEv, utils.Paginator{}, true, "")
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1125,7 +1172,7 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		ForceDuration:      true,
 	}
 	rply = NewV1ProcessMessageArgs(true, nil, false, nil, false,
-		nil, true, false, true, true, true, cgrEv, utils.Paginator{}, true)
+		nil, true, false, true, true, true, cgrEv, utils.Paginator{}, true, "")
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1147,11 +1194,24 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		ForceDuration:      true,
 	}
 	rply = NewV1ProcessMessageArgs(true, attributeIDs, false, thresholdIDs, false, statIDs,
-		true, false, true, true, true, cgrEv, utils.Paginator{}, true)
+		true, false, true, true, true, cgrEv, utils.Paginator{}, true, "")
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-
+	expected = &V1ProcessMessageArgs{
+		AllocateResources:  true,
+		GetAttributes:      true,
+		CGREvent:           cgrEv,
+		GetRoutes:          true,
+		RoutesMaxCost:      "100",
+		RoutesIgnoreErrors: true,
+		ForceDuration:      true,
+	}
+	rply = NewV1ProcessMessageArgs(true, nil, false, nil, false,
+		nil, true, false, true, true, false, cgrEv, utils.Paginator{}, true, "100")
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
 }
 
 func TestSessionSNewV1InitSessionArgs(t *testing.T) {
@@ -1552,7 +1612,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts(t *testing.T) {
 	}
 	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.Opts)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false,
-		false, false, false, cgrEv, cgrArgs, true)
+		false, false, false, cgrEv, cgrArgs, true, "")
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1569,7 +1629,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts(t *testing.T) {
 		ForceDuration:      true,
 	}
 	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true,
-		false, true, true, cgrEv, cgrArgs, true)
+		false, true, true, cgrEv, cgrArgs, true, "")
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1596,7 +1656,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 	}
 	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.Opts)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false,
-		false, false, cgrEv, cgrArgs, true)
+		false, false, cgrEv, cgrArgs, true, "")
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1613,7 +1673,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 		ForceDuration:      true,
 	}
 	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false,
-		true, true, cgrEv, cgrArgs, true)
+		true, true, cgrEv, cgrArgs, true, "")
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -1922,6 +1982,8 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 	}
 
 	strArg = "*accounts,*resources,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
+	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
 	v1ProcessMsgArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
@@ -1944,6 +2006,31 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 	}
 
 	strArg = "*accounts,*resources,*dispatchers,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
+	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
+	v1ProcessMsgArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
+	}
+
+	eOut = &V1ProcessMessageArgs{
+		Debit:              true,
+		AllocateResources:  true,
+		GetRoutes:          true,
+		RoutesIgnoreErrors: true,
+		RoutesMaxCost:      "100",
+		GetAttributes:      true,
+		AttributeIDs:       []string{"Attr1", "Attr2"},
+		ProcessThresholds:  true,
+		ThresholdIDs:       []string{"tr1", "tr2", "tr3"},
+		ProcessStats:       true,
+		StatIDs:            []string{"st1", "st2", "st3"},
+		CGREvent:           eOut.CGREvent,
+	}
+
+	strArg = "*accounts,*resources,*dispatchers,*routes,*routes_ignore_errors,*routes_maxcost:100,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
+	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
 	v1ProcessMsgArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
