@@ -80,6 +80,7 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+	time.Sleep(10 * time.Millisecond)
 	shdChan.CloseOnce()
 	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond)

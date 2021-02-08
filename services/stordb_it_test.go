@@ -83,10 +83,12 @@ func TestStorDBReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+	time.Sleep(10 * time.Millisecond)
 	err := stordb.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
+	time.Sleep(10 * time.Millisecond)
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.STORDB_JSN,
@@ -149,6 +151,7 @@ func TestStorDBReload(t *testing.T) {
 
 func TestStorDBReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -161,7 +164,7 @@ func TestStorDBReload2(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	cfg.StorDbCfg().Password = "CGRateS.org"
+	cfg.StorDbCfg().Type = utils.INTERNAL
 	stordb := NewStorDBService(cfg, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
@@ -197,10 +200,7 @@ func TestStorDBReload2(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-	err := stordb.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
+
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.STORDB_JSN,
@@ -222,22 +222,7 @@ func TestStorDBReload2(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 
-	err = cdrS.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-
-	err = stordb.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	cfg.StorDbCfg().Type = utils.INTERNAL
-	err = stordb.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-
-	err = stordb.Reload()
+	err := cdrS.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -250,7 +235,6 @@ func TestStorDBReload2(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-
 	cfg.CdrsCfg().Enabled = false
 	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
