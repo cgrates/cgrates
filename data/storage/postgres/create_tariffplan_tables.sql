@@ -533,12 +533,12 @@ CREATE TABLE tp_account_profiles (
   "balance_weight" decimal(8,2) NOT NULL,
   "balance_blocker" BOOLEAN NOT NULL,
   "balance_type" varchar(64) NOT NULL,
+  "balance_units" decimal(16,4) NOT NULL,
+  "balance_unit_factors" varchar(64) NOT NULL,
   "balance_opts" varchar(64) NOT NULL,
   "balance_cost_increments" varchar(64) NOT NULL,
   "balance_attribute_ids" varchar(64) NOT NULL,
   "balance_rate_profile_ids" varchar(64) NOT NULL,
-  "balance_unit_factors" varchar(64) NOT NULL,
-  "balance_units" decimal(16,4) NOT NULL,
   "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );

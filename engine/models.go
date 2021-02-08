@@ -579,12 +579,12 @@ type AccountProfileMdl struct {
 	BalanceWeight         float64 `index:"7" re:"\d+\.?\d*"`
 	BalanceBlocker        bool    `index:"8" re:""`
 	BalanceType           string  `index:"9" re:""`
-	BalanceOpts           string  `index:"10" re:""`
-	BalanceCostIncrements string  `index:"11" re:""`
-	BalanceAttributeIDs   string  `index:"12" re:""`
-	BalanceRateProfileIDs string  `index:"13" re:""`
-	BalanceUnitFactors    string  `index:"14" re:""`
-	BalanceUnits          float64 `index:"15" re:"\d+\.?\d*"`
+	BalanceUnits          float64 `index:"10" re:"\d+\.?\d*"`
+	BalanceUnitFactors    string  `index:"11" re:""`
+	BalanceOpts           string  `index:"12" re:""`
+	BalanceCostIncrements string  `index:"13" re:""`
+	BalanceAttributeIDs   string  `index:"14" re:""`
+	BalanceRateProfileIDs string  `index:"15" re:""`
 	ThresholdIDs          string  `index:"16" re:""`
 	CreatedAt             time.Time
 }

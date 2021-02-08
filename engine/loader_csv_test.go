@@ -1655,7 +1655,7 @@ func TestLoadAccountProfiles(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "1001",
 	}
-
+	sort.Strings(csvr.accountProfiles[accPrfKey].Balances["MonetaryBalance"].AttributeIDs)
 	if !reflect.DeepEqual(csvr.accountProfiles[accPrfKey], expected) {
 		t.Errorf("Expecting: %+v,\n received: %+v",
 			utils.ToJSON(expected), utils.ToJSON(csvr.accountProfiles[accPrfKey]))
