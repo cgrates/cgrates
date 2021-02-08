@@ -219,6 +219,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -283,7 +284,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD))
+			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
+		)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage, evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {

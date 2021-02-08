@@ -357,11 +357,12 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
-			reqProcessor.Flags.Has(utils.MetaRoutes),
+			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs,
 			reqProcessor.Flags.Has(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1AuthorizeEvent,
@@ -427,7 +428,9 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs,
-			reqProcessor.Flags.Has(utils.MetaFD))
+			reqProcessor.Flags.Has(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
+		)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessMessage,
 			msgArgs, rply)

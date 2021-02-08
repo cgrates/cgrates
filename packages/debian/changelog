@@ -141,6 +141,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] Cloned the charging interval added on EventCost merge 
   * [FilterS] Optimized the automated index fields matching
   * [AgentS] Added *cfg as DataProvider for AgentRequest 
+  * [AgentS] Added *routes_maxcost flag
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

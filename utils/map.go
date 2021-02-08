@@ -167,6 +167,16 @@ func (fWp FlagParams) Has(opt string) (has bool) {
 	return
 }
 
+// ParamValue returns the value of the flag
+func (fWp FlagParams) ParamValue(opt string) (ps string) {
+	for _, ps = range fWp[opt] {
+		if ps != EmptyString {
+			return
+		}
+	}
+	return
+}
+
 // Add adds the options to the flag
 func (fWp FlagParams) Add(opts []string) {
 	switch len(opts) {
@@ -230,6 +240,14 @@ func (fWp FlagsWithParams) Has(flag string) (has bool) {
 func (fWp FlagsWithParams) ParamsSlice(subs, opt string) (ps []string) {
 	if psIfc, has := fWp[subs]; has {
 		ps = psIfc.ParamsSlice(opt)
+	}
+	return
+}
+
+// ParamValue returns the value of the flag
+func (fWp FlagsWithParams) ParamValue(subs string) (ps string) {
+	for ps = range fWp[subs] {
+		return
 	}
 	return
 }

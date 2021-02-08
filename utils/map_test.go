@@ -207,6 +207,44 @@ func TestFlagsWithParamsGetBool(t *testing.T) {
 	}
 }
 
+func TestFlagsWithParamsValue(t *testing.T) {
+	flagsWithParams := &FlagsWithParams{
+		"test":  map[string][]string{"string2": {}},
+		"empty": map[string][]string{},
+	}
+	key := "notpresent"
+	if rcv := flagsWithParams.ParamValue(key); rcv != EmptyString {
+		t.Errorf("Expecting: %q, received: %+v", EmptyString, rcv)
+	}
+	key = "empty"
+	if rcv := flagsWithParams.ParamValue(key); rcv != EmptyString {
+		t.Errorf("Expecting: %q, received: %+v", EmptyString, rcv)
+	}
+	key = "test"
+	if rcv := flagsWithParams.ParamValue(key); rcv != "string2" {
+		t.Errorf("Expecting: string2, received: %+v", rcv)
+	}
+}
+
+func TestFlagParamsValue(t *testing.T) {
+	flagsWithParams := &FlagParams{
+		"test":  []string{"string2"},
+		"empty": []string{},
+	}
+	key := "notpresent"
+	if rcv := flagsWithParams.ParamValue(key); rcv != EmptyString {
+		t.Errorf("Expecting: %q, received: %+v", EmptyString, rcv)
+	}
+	key = "empty"
+	if rcv := flagsWithParams.ParamValue(key); rcv != EmptyString {
+		t.Errorf("Expecting: %q, received: %+v", EmptyString, rcv)
+	}
+	key = "test"
+	if rcv := flagsWithParams.ParamValue(key); rcv != "string2" {
+		t.Errorf("Expecting: string2, received: %+v", rcv)
+	}
+}
+
 func TestFlagParamsAdd(t *testing.T) {
 	flgs := make(FlagParams)
 	exp := FlagParams{

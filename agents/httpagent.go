@@ -160,7 +160,9 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD))
+			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
+		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
@@ -224,7 +226,9 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD))
+			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
+		)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessMessage,
 			evArgs, rply)

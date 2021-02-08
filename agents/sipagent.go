@@ -426,6 +426,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -494,6 +495,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	// 		reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 	// 		reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 	// 		cgrEv, cgrArgs,	// 		reqProcessor.Flags.Has(utils.MetaFD),
+	// 		reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 	// 		opts)
 	// 	rply := new(sessions.V1ProcessMessageReply)
 	// 	err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage,
