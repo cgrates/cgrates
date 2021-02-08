@@ -666,17 +666,16 @@ func (fltr *FilterRule) passActivationInterval(dDp utils.DataProvider) (bool, er
 			return false, err
 		}
 		return startTime.Before(timeStrVal) && timeStrVal.Before(endTime), nil
-	} else {
-		val1, err := fltr.rsrValues[0].CompileDynRule(dDp)
-		if err != nil {
-			return false, err
-		}
-		startTime, err := utils.ParseTimeDetectLayout(val1, config.CgrConfig().GeneralCfg().DefaultTimezone)
-		if err != nil {
-			return false, err
-		}
-		return startTime.Before(timeStrVal), nil
 	}
+	val1, err := fltr.rsrValues[0].CompileDynRule(dDp)
+	if err != nil {
+		return false, err
+	}
+	startTime, err := utils.ParseTimeDetectLayout(val1, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	if err != nil {
+		return false, err
+	}
+	return startTime.Before(timeStrVal), nil
 }
 
 func verifyInlineFilterS(fltrs []string) (err error) {

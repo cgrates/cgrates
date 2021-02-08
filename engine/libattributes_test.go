@@ -189,3 +189,30 @@ func TestNewAttributeFromInlineWithMultipleRuns2(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestNewAttributeFromInlineWithMultipleVaslues(t *testing.T) {
+	attrID := "*variable:*req.Category:call_&*req.OriginID;*constant:*req.RequestType:*rated"
+	expAttrPrf1 := &AttributeProfile{
+		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:       attrID,
+		Contexts: []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "Category",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("call_;*req.OriginID", utils.InfieldSep),
+			},
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "RequestType",
+				Type:  utils.MetaConstant,
+				Value: config.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
+			},
+		},
+	}
+	attr, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expAttrPrf1, attr) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attr))
+	}
+}

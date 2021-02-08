@@ -3550,7 +3550,7 @@ func TestModelAsTPChargers3(t *testing.T) {
 			ID:                 "Charger1",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
 			RunID:              "*rated",
-			AttributeIDs:       "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call",
+			AttributeIDs:       "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call&<~*req.OriginID;_suf>",
 			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
 			Weight:             20,
 		},
@@ -3565,7 +3565,7 @@ func TestModelAsTPChargers3(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "2014-07-15T14:35:00Z",
 		},
-		AttributeIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call", "ATTR1", "*constant:*req.Category:call"},
+		AttributeIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call", "ATTR1", "*constant:*req.Category:call&<~*req.OriginID;_suf>"},
 		Weight:       20,
 	}
 	rcv := models.AsTPChargers()
