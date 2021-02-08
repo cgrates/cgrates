@@ -1331,7 +1331,6 @@ func (sS *SessionS) syncSessions() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> timeout quering session ids ", utils.SessionS))
 		}
-
 	}
 	var toBeRemoved []string
 	sS.aSsMux.RLock()
@@ -1341,6 +1340,11 @@ func (sS *SessionS) syncSessions() {
 		}
 	}
 	sS.aSsMux.RUnlock()
+	sS.terminateSyncSessions(toBeRemoved)
+}
+
+// Extracted from syncSessions in order to test all cases
+func (sS *SessionS) terminateSyncSessions(toBeRemoved []string) {
 	for _, cgrID := range toBeRemoved {
 		ss := sS.getSessions(cgrID, false)
 		if len(ss) == 0 {
