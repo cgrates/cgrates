@@ -198,10 +198,16 @@ func (rS *RateS) V1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.Rat
 	}
 	var rtPrl *engine.RateProfile
 	if rtPrl, err = rS.matchingRateProfileForEvent(args.Tenant, rPfIDs, args); err != nil {
-		return utils.NewErrServerError(err)
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return
 	}
 	if rcvCost, errCost := rS.rateProfileCostForEvent(rtPrl, args, rS.cfg.RateSCfg().Verbosity); errCost != nil {
-		return utils.NewErrServerError(errCost)
+		if errCost != utils.ErrNotFound {
+			errCost = utils.NewErrServerError(err)
+		}
+		return errCost
 	} else {
 		*rpCost = *rcvCost
 	}

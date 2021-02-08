@@ -24,6 +24,12 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
+// NewEventChargers instantiates the EventChargers in a central place
+func NewEventCharges() (ec *EventCharges) {
+	ec = new(EventCharges)
+	return
+}
+
 // EventCharges records the charges applied to an Event
 type EventCharges struct {
 	Usage      *decimal.Big

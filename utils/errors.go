@@ -65,6 +65,7 @@ var (
 	ErrNotConnected                  = errors.New("NOT_CONNECTED")
 	RalsErrorPrfx                    = "RALS_ERROR"
 	DispatcherErrorPrefix            = "DISPATCHER_ERROR"
+	RateSErrPrfx                     = "RATES_ERROR"
 	ErrUnsupportedFormat             = errors.New("UNSUPPORTED_FORMAT")
 	ErrNoDatabaseConn                = errors.New("NO_DATA_BASE_CONNECTION")
 	ErrMaxIncrementsExceeded         = errors.New("MAX_INCREMENTS_EXCEEDED")
@@ -202,6 +203,10 @@ func NewErrThresholdS(err error) error {
 
 func NewErrDispatcherS(err error) error {
 	return fmt.Errorf("%s:%s", DispatcherErrorPrefix, err.Error())
+}
+
+func NewErrRateS(err error) error {
+	return fmt.Errorf("%s:%s", RateSErrPrfx, err.Error())
 }
 
 // Centralized returns for APIs

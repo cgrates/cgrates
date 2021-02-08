@@ -112,7 +112,6 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
 // debit implements the balanceOperator interface
 func (cB *concreteBalance) debitUsage(usage *utils.Decimal,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
-
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
 		utils.MetaReq:  cgrEv.Event,
