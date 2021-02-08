@@ -2340,14 +2340,20 @@ func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
 		if tp.AttributeIDs != utils.EmptyString {
 			attributeSplit := strings.Split(tp.AttributeIDs, utils.InfieldSep)
 			var inlineAttribute string
+			var dynam bool
 			for _, attribute := range attributeSplit {
-				if !strings.HasPrefix(attribute, utils.Meta) {
+				if !dynam && !strings.HasPrefix(attribute, utils.Meta) {
 					if inlineAttribute != utils.EmptyString {
 						attributeMap[tntID] = append(attributeMap[tntID], inlineAttribute[1:])
 						inlineAttribute = utils.EmptyString
 					}
 					attributeMap[tntID] = append(attributeMap[tntID], attribute)
 					continue
+				}
+				if dynam {
+					dynam = !strings.Contains(attribute, string(utils.RSRDynEndChar))
+				} else {
+					dynam = strings.Contains(attribute, string(utils.RSRDynStartChar))
 				}
 				inlineAttribute += utils.InfieldSep + attribute
 			}
