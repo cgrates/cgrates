@@ -87,12 +87,12 @@ func (dns *DNSAgent) Reload() (err error) {
 	if dns.oldListen == dns.cfg.DNSAgentCfg().Listen {
 		return
 	}
-	if err = dns.Shutdown(); err != nil {
+	dns.Lock()
+	defer dns.Unlock()
+	if err = dns.dns.Shutdown(); err != nil {
 		return
 	}
-	dns.Lock()
 	dns.oldListen = dns.cfg.DNSAgentCfg().Listen
-	defer dns.Unlock()
 	if err = dns.dns.Reload(); err != nil {
 		return
 	}

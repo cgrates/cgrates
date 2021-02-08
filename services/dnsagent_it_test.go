@@ -101,7 +101,6 @@ func TestDNSAgentReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
-/*
 func TestDNSAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
@@ -150,7 +149,14 @@ func TestDNSAgentReload2(t *testing.T) {
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	cfg.DNSAgentCfg().Listen = "string_test"
+
+	castSrv, canCastSrv := srv.(*DNSAgent)
+	if !canCastSrv {
+		t.Fatalf("cannot cast")
+	}
+
+	castSrv.oldListen = "test_string"
+
 	err = srv.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
@@ -164,7 +170,7 @@ func TestDNSAgentReload2(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-
+	time.Sleep(10 * time.Millisecond)
 	cfg.DNSAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
@@ -174,4 +180,3 @@ func TestDNSAgentReload2(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
-*/

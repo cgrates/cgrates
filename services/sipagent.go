@@ -88,10 +88,8 @@ func (sip *SIPAgent) Reload() (err error) {
 	if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
 		return
 	}
-	if err = sip.Shutdown(); err != nil {
-		return
-	}
 	sip.Lock()
+	sip.sip.Shutdown()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
 	sip.Unlock()
 	go func() {
