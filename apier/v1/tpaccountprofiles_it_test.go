@@ -126,11 +126,10 @@ func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 		Weight: 20,
 		Balances: map[string]*utils.TPAccountBalance{
 			"MonetaryBalance": {
-				ID:        "MonetaryBalance",
-				FilterIDs: []string{},
-				Weight:    10,
-				Type:      utils.MetaMonetary,
-				Units:     14,
+				ID:     "MonetaryBalance",
+				Weight: 10,
+				Type:   utils.MetaMonetary,
+				Units:  14,
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},

@@ -122,12 +122,11 @@ func testTPActPrfGetTPActPrfBeforeSet(t *testing.T) {
 
 func testTPActPrfSetTPActPrf(t *testing.T) {
 	tpActPrf = &utils.TPActionProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "ONE_TIME_ACT",
-		Weight:    10,
-		Schedule:  utils.MetaASAP,
-		FilterIDs: make([]string, 0),
+		TPid:     "TP1",
+		Tenant:   "cgrates.org",
+		ID:       "ONE_TIME_ACT",
+		Weight:   10,
+		Schedule: utils.MetaASAP,
 		Targets: []*utils.TPActionTarget{
 			&utils.TPActionTarget{
 				TargetType: utils.MetaAccounts,

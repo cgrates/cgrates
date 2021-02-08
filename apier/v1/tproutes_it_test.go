@@ -132,8 +132,7 @@ func testTPRouteSetTPRoute(t *testing.T) {
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
 		},
-		Sorting:           "*lc",
-		SortingParameters: []string{},
+		Sorting: "*lc",
 		Routes: []*utils.TPRoute{
 			&utils.TPRoute{
 				ID:              "route1",
