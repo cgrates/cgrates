@@ -22,6 +22,7 @@ package sessions
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -74,6 +75,8 @@ var (
 		testChargeEvent,
 		testUpdateSession,
 		testEndSession,
+		testCallBiRPC,
+		testBiRPCv1GetActiveSessions,
 	}
 )
 
@@ -1942,6 +1945,12 @@ func testChargeEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
+	//testing initSession with if it is message
+	if _, err := sessions.initSession(cgrEv, utils.EmptyString, utils.EmptyString, time.Second,
+		false, true); err != nil {
+		t.Error(err)
+	}
+
 	engine.Cache = tmp
 }
 
@@ -1994,18 +2003,23 @@ func testEndSession(t *testing.T) {
 			utils.ResponderRefundRounding: func(args interface{}, reply interface{}) error {
 				return utils.ErrNotImplemented
 			},
+			utils.CDRsV1StoreSessionCost: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
 		},
 	}
 	chanInternal := make(chan rpcclient.ClientConnector, 1)
 	chanInternal <- sTestMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	cfg.SessionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
 	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs): chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): chanInternal,
 	})
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	sessions := NewSessionS(cfg, dm, nil)
+	sessions := NewSessionS(cfg, dm, connMgr)
 
 	ss := &Session{
 		EventStart: map[string]interface{}{},
@@ -2016,6 +2030,48 @@ func testEndSession(t *testing.T) {
 				EventCost: &engine.EventCost{
 					Usage:          utils.DurationPointer(30 * time.Minute),
 					AccountSummary: &engine.AccountSummary{},
+					Accounting: map[string]*engine.BalanceCharge{
+						utils.MetaRounding: {
+							AccountID: "ACCOUNTING_ID_TEST",
+							RatingID:  "RATING_ID_TEST",
+						},
+						"ID_TEST2": {
+							AccountID: "ACCOUNTING_ID_TEST2",
+							RatingID:  utils.MetaRounding,
+						},
+					},
+					Charges: []*engine.ChargingInterval{
+						{
+							RatingID: "RATING_ID",
+							Increments: []*engine.ChargingIncrement{
+								{
+									Usage:        20 * time.Minute,
+									Cost:         0.50,
+									AccountingID: utils.MetaRounding,
+								},
+								{
+									Usage:        15 * time.Minute,
+									Cost:         0.466,
+									AccountingID: "ID_TEST2",
+								},
+							},
+						},
+					},
+					Rating: map[string]*engine.RatingUnit{
+						"RATING_ID_TEST": {
+							RatesID:          utils.EmptyString,
+							TimingID:         utils.EmptyString,
+							RoundingDecimals: 2,
+						},
+						utils.MetaRounding: {
+							RatesID:  utils.EmptyString,
+							TimingID: utils.EmptyString,
+						},
+						"RATING_ID": {
+							RatingFiltersID:  utils.EmptyString,
+							RoundingDecimals: 5,
+						},
+					},
 				},
 				CD: &engine.CallDescriptor{
 					LoopIndex: 1,
@@ -2026,22 +2082,164 @@ func testEndSession(t *testing.T) {
 
 	activationTime := time.Date(2020, 21, 07, 10, 0, 0, 0, time.UTC)
 	expected := "cannot find last active ChargingInterval"
-	if err := sessions.endSession(ss, utils.DurationPointer(time.Minute), utils.DurationPointer(time.Second),
+	if err := sessions.endSession(ss, utils.DurationPointer(20*time.Minute), utils.DurationPointer(time.Second),
 		utils.TimePointer(activationTime), false); err == nil || err.Error() != expected {
-		t.Error(err)
-	}
-	sessions = NewSessionS(cfg, dm, connMgr)
-	//totalUsage will be empty
-	if err := sessions.endSession(ss, nil, utils.DurationPointer(time.Second),
-		utils.TimePointer(activationTime), false); err != nil {
 		t.Error(err)
 	}
 
 	engine.Cache.Clear(nil)
+	//totalUsage will be empty
 	sessions.cgrCfg.SessionSCfg().StoreSCosts = true
-	if err := sessions.endSession(ss, nil, utils.DurationPointer(time.Second),
+	if err := sessions.endSession(ss, nil, utils.DurationPointer(time.Hour),
 		utils.TimePointer(activationTime), false); err != nil {
 		t.Error(err)
 	}
+}
 
+func (ss *Session) BiRPCv1TestCase(clnt rpcclient.ClientConnector, args *V1TerminateSessionArgs, authReply *string) (aux string, err error) {
+	return utils.EmptyString, nil
+}
+
+func testCallBiRPC(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	sTestMock := &testMockClients{}
+	valid := "BiRPCv1TerminateSession"
+	args := new(V1TerminateSessionArgs)
+	var reply *string
+
+	if err := sessions.CallBiRPC(sTestMock, valid, args, reply); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
+		t.Errorf("Expected %+v, received %+v", rpcclient.ErrUnsupporteServiceMethod, err)
+	}
+
+	valid = "BiRPC.TerminateSession"
+	if err := sessions.CallBiRPC(sTestMock, valid, args, reply); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
+		t.Errorf("Expected %+v, received %+v", rpcclient.ErrUnsupporteServiceMethod, err)
+	}
+
+	valid = "BiRPCv1.TerminateSession"
+	expected := "MANDATORY_IE_MISSING: [CGREvent]"
+	if err := sessions.CallBiRPC(sTestMock, valid, args, reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	/*
+		//inexistent client
+		args.CGREvent = &utils.CGREvent{}
+		valid = "BiRPCv1.TestCase"
+		if err := sessions.CallBiRPC(sTestMock, valid, args, reply); err == nil || err.Error() != expected {
+			t.Errorf("Expected %+v, received %+v", expected, err)
+		}
+
+	*/
+}
+
+func testBiRPCv1GetActiveSessions(t *testing.T) {
+	clnt := &testMockClients{}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
+		"ToR": {},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	var reply []*ExternalSession
+	if err := sessions.BiRPCv1GetActiveSessions(clnt, nil, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	sEv := engine.NewMapEvent(map[string]interface{}{
+		utils.EventName:       "TEST_EVENT",
+		utils.ToR:             "*voice",
+		utils.OriginID:        "12345",
+		utils.AccountField:    "account1",
+		utils.Subject:         "subject1",
+		utils.Destination:     "+4986517174963",
+		utils.Category:        "call",
+		utils.Tenant:          "cgrates.org",
+		utils.RequestType:     "*prepaid",
+		utils.SetupTime:       "2015-11-09T14:21:24Z",
+		utils.AnswerTime:      "2015-11-09T14:22:02Z",
+		utils.Usage:           "1m23s",
+		utils.LastUsed:        "21s",
+		utils.PDD:             "300ms",
+		utils.Route:           "supplier1",
+		utils.DisconnectCause: "NORMAL_DISCONNECT",
+		utils.OriginHost:      "127.0.0.1",
+		"Extra1":              "Value1",
+		"Extra2":              5,
+		"Extra3":              "",
+	})
+	sr2 := sEv.Clone()
+	// Index first session
+	session := &Session{
+		CGRID:      GetSetCGRID(sEv),
+		EventStart: sEv,
+		SRuns: []*SRun{
+			{
+				Event: sEv,
+				CD: &engine.CallDescriptor{
+					RunID: "RunID",
+				},
+			},
+			{
+				Event: sr2,
+				CD: &engine.CallDescriptor{
+					RunID: "RunID2",
+				},
+			},
+		},
+	}
+	sr2[utils.ToR] = utils.MetaSMS
+	sr2[utils.Subject] = "subject2"
+	sr2[utils.CGRID] = GetSetCGRID(sEv)
+	sessions.registerSession(session, false)
+	st, err := utils.IfaceAsTime("2015-11-09T14:21:24Z", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	at, err := utils.IfaceAsTime("2015-11-09T14:22:02Z", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	eses1 := &ExternalSession{
+		CGRID:       "cade401f46f046311ed7f62df3dfbb84adb98aad",
+		ToR:         "*voice",
+		OriginID:    "12345",
+		OriginHost:  "127.0.0.1",
+		Source:      "SessionS_TEST_EVENT",
+		RequestType: "*prepaid",
+		Category:    "call",
+		Account:     "account1",
+		Subject:     "subject1",
+		Destination: "+4986517174963",
+		SetupTime:   st,
+		AnswerTime:  at,
+		ExtraFields: map[string]string{
+			"DisconnectCause": "NORMAL_DISCONNECT",
+			"EventName":       "TEST_EVENT",
+			"Extra1":          "Value1",
+			"Extra2":          "5",
+			"Extra3":          "",
+			"LastUsed":        "21s",
+			"PDD":             "300ms",
+			utils.Route:       "supplier1",
+		},
+		NodeID: sessions.cgrCfg.GeneralCfg().NodeID,
+	}
+	expSess := []*ExternalSession{
+		eses1,
+	}
+
+	args := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s|%s", utils.MetaVoice, utils.MetaData)}}
+	if err := sessions.BiRPCv1GetActiveSessions(clnt, args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expSess, reply) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(reply))
+	}
 }
