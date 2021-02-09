@@ -132,6 +132,9 @@ func TestSIPAgentReload2(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "sipagent_mongo"),
