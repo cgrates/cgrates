@@ -139,6 +139,9 @@ func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
 
 //Clone returns a clone of the ActivationInterval
 func (aI *ActivationInterval) Clone() *ActivationInterval {
+	if aI == nil {
+		return nil
+	}
 	return &ActivationInterval{
 		ActivationTime: aI.ActivationTime,
 		ExpiryTime:     aI.ExpiryTime,

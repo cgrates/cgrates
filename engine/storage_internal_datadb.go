@@ -941,7 +941,7 @@ func (iDB *InternalDB) GetAccountProfileDrv(tenant, id string) (ap *utils.Accoun
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*utils.AccountProfile), nil
+	return x.(*utils.AccountProfile).Clone(), nil
 }
 
 func (iDB *InternalDB) SetAccountProfileDrv(ap *utils.AccountProfile) (err error) {
