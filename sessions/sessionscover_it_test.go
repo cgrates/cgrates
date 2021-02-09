@@ -76,7 +76,9 @@ var (
 		testUpdateSession,
 		testEndSession,
 		testCallBiRPC,
-		testBiRPCv1GetActiveSessions,
+		testBiRPCv1GetActivePassiveSessions,
+		testBiRPCv1SetPassiveSession,
+		testBiRPCv1ReplicateSessions,
 	}
 )
 
@@ -2137,7 +2139,7 @@ func testCallBiRPC(t *testing.T) {
 	*/
 }
 
-func testBiRPCv1GetActiveSessions(t *testing.T) {
+func testBiRPCv1GetActivePassiveSessions(t *testing.T) {
 	clnt := &testMockClients{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2199,6 +2201,7 @@ func testBiRPCv1GetActiveSessions(t *testing.T) {
 	sr2[utils.Subject] = "subject2"
 	sr2[utils.CGRID] = GetSetCGRID(sEv)
 	sessions.registerSession(session, false)
+
 	st, err := utils.IfaceAsTime("2015-11-09T14:21:24Z", "")
 	if err != nil {
 		t.Fatal(err)
@@ -2232,6 +2235,7 @@ func testBiRPCv1GetActiveSessions(t *testing.T) {
 		},
 		NodeID: sessions.cgrCfg.GeneralCfg().NodeID,
 	}
+
 	expSess := []*ExternalSession{
 		eses1,
 	}
@@ -2241,5 +2245,136 @@ func testBiRPCv1GetActiveSessions(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expSess, reply) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(reply))
+	}
+
+	var newReply1 int
+	//nil args, but it will be an empty SessionFilter
+	if err := sessions.BiRPCv1GetActiveSessionsCount(clnt, nil, &newReply1); err != nil {
+		t.Error(err)
+	} else if newReply1 != 2 {
+		t.Errorf("Expected %+v, received: %+v", 2, newReply1)
+	}
+
+	if err := sessions.BiRPCv1GetActiveSessionsCount(clnt, args, &newReply1); err != nil {
+		t.Error(err)
+	} else if newReply1 != 1 {
+		t.Errorf("Expected %+v, received: %+v", 1, newReply1)
+	}
+
+	//Passive session
+	reply = []*ExternalSession{}
+	if err := sessions.BiRPCv1GetPassiveSessions(clnt, nil, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	sessions.pSessions = map[string]*Session{
+		utils.EmptyString: {
+			SRuns: []*SRun{
+				{
+					EventCost: &engine.EventCost{},
+				},
+			},
+		},
+	}
+	//empty filters
+	sessions.cgrCfg.GeneralCfg().NodeID = "TEST_ID"
+	args = &utils.SessionFilter{}
+	expSess = []*ExternalSession{
+		{
+			Source:      "SessionS_",
+			NodeID:      "TEST_ID",
+			ExtraFields: map[string]string{},
+		},
+	}
+	if err := sessions.BiRPCv1GetPassiveSessions(clnt, args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expSess) {
+		t.Errorf("Expected %+v\n, received: %+v", utils.ToJSON(expSess), utils.ToJSON(reply))
+	}
+
+	if err := sessions.BiRPCv1GetPassiveSessionsCount(clnt, nil, &newReply1); err != nil {
+		t.Error(err)
+	}
+}
+
+func testBiRPCv1SetPassiveSession(t *testing.T) {
+	clnt := &testMockClients{}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	var reply string
+	ss := &Session{
+		Tenant: "cgrates.org",
+		SRuns:  []*SRun{},
+	}
+	expected := "MANDATORY_IE_MISSING: [CGRID]"
+	if err := sessions.BiRPCv1SetPassiveSession(clnt, ss, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v\n, received: %+v", expected, err)
+	} else if reply != utils.EmptyString {
+		t.Errorf("Expected %+v\n, received: %+v", utils.EmptyString, err)
+	}
+
+	ss.CGRID = "CGR_ID"
+	if err := sessions.BiRPCv1SetPassiveSession(clnt, ss, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v\n, received: %+v", utils.ErrNotFound, err)
+	} else if reply != utils.EmptyString {
+		t.Errorf("Expected %+v\n, received: %+v", utils.EmptyString, err)
+	}
+
+	sessions.pSessions = map[string]*Session{
+		"CGR_ID": ss,
+	}
+	if err := sessions.BiRPCv1SetPassiveSession(clnt, ss, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v\n, received: %+v", utils.OK, err)
+	}
+
+	sessions.aSessions = map[string]*Session{
+		"CGR_ID": ss,
+	}
+	ss.EventStart = engine.MapEvent{}
+	if err := sessions.BiRPCv1SetPassiveSession(clnt, ss, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v\n, received: %+v", utils.OK, err)
+	}
+}
+
+func testBiRPCv1ReplicateSessions(t *testing.T) {
+	clnt := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.SessionSv1SetPassiveSession: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- clnt
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		"conn1": chanInternal,
+	})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	args := ArgsReplicateSessions{
+		CGRID:   "CGRID_TEST",
+		Passive: false,
+		ConnIDs: []string{},
+	}
+
+	var reply string
+	if err := sessions.BiRPCv1ReplicateSessions(clnt, args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	args.ConnIDs = []string{"conn1"}
+	if err := sessions.BiRPCv1ReplicateSessions(clnt, args, &reply); err != nil {
+		t.Error(err)
 	}
 }
