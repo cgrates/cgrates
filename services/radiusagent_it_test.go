@@ -141,6 +141,7 @@ func TestRadiusAgentReload2(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+
 	err := srv.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
@@ -152,6 +153,10 @@ func TestRadiusAgentReload2(t *testing.T) {
 	castSrv, canCastSrv := srv.(*RadiusAgent)
 	if !canCastSrv {
 		t.Fatalf("cannot cast")
+	}
+	err = srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	castSrv.lnet = "test_string"
 	err = srv.Reload()

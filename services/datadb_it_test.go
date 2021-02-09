@@ -190,11 +190,11 @@ func TestDataDBReload(t *testing.T) {
 	if !reflect.DeepEqual(oldcfg, db.oldDBCfg) {
 		t.Errorf("Expected %s \n received:%s", utils.ToJSON(oldcfg), utils.ToJSON(db.oldDBCfg))
 	}
+
 	err := db.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-
 	cfg.AttributeSCfg().Enabled = false
 	cfg.GetReloadChan(config.DATADB_JSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
