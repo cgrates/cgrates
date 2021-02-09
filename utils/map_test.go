@@ -313,3 +313,21 @@ func TestFlagsWithParamsGetBool(t *testing.T) {
 		t.Errorf("Expecting: true, received: %+v", ToJSON(rcv))
 	}
 }
+func TestFlagsWithParamsValue(t *testing.T) {
+	flagsWithParams := &FlagsWithParams{
+		"test":  []string{"string2"},
+		"empty": []string{},
+	}
+	key := "notpresent"
+	if rcv := flagsWithParams.ParamValue(key); rcv != EmptyString {
+		t.Errorf("Expecting: %q, received: %+v", EmptyString, rcv)
+	}
+	key = "empty"
+	if rcv := flagsWithParams.ParamValue(key); rcv != EmptyString {
+		t.Errorf("Expecting: %q, received: %+v", EmptyString, rcv)
+	}
+	key = "test"
+	if rcv := flagsWithParams.ParamValue(key); rcv != "string2" {
+		t.Errorf("Expecting: string2, received: %+v", rcv)
+	}
+}

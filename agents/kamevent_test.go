@@ -191,6 +191,56 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 	}
 }
 
+func TestKamEvV1AuthorizeArgs2(t *testing.T) {
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
+	kamEv := KamEvent{"event": "CGR_CALL_END",
+		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
+		"from_tag": "bf71ad59", "to_tag": "7351fecf",
+		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_destination": "1002", "cgr_answertime": "1419839310",
+		"cgr_duration": "3", "cgr_pdd": "4",
+		utils.CGR_SUPPLIER:         "supplier2",
+		utils.CGR_DISCONNECT_CAUSE: "200",
+		utils.CGRFlags:             "*accounts,*suppliers,*suppliers_maxcost:100,*suppliers_ignore_errors"}
+	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
+	if err != nil {
+		return
+	}
+	expected := &sessions.V1AuthorizeArgs{
+		GetMaxUsage: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().GeneralCfg().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
+		},
+		GetSuppliers:          true,
+		SuppliersIgnoreErrors: true,
+		SuppliersMaxCost:      "100",
+	}
+	rcv := kamEv.V1AuthorizeArgs()
+	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
+	} else if !reflect.DeepEqual(expected.CGREvent.Time, rcv.CGREvent.Time) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Time, rcv.CGREvent.Time)
+	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
+	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
+	} else if !reflect.DeepEqual(expected.GetMaxUsage, rcv.GetMaxUsage) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.GetMaxUsage, rcv.GetMaxUsage)
+	} else if !reflect.DeepEqual(expected.GetSuppliers, rcv.GetSuppliers) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.GetSuppliers, rcv.GetSuppliers)
+	} else if !reflect.DeepEqual(expected.GetAttributes, rcv.GetAttributes) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.GetAttributes, rcv.GetAttributes)
+	} else if !reflect.DeepEqual(expected.SuppliersMaxCost, rcv.SuppliersMaxCost) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.SuppliersMaxCost, rcv.SuppliersMaxCost)
+	} else if !reflect.DeepEqual(expected.SuppliersIgnoreErrors, rcv.SuppliersIgnoreErrors) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.SuppliersIgnoreErrors, rcv.SuppliersIgnoreErrors)
+	}
+}
+
 func TestKamEvAsKamAuthReply(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	kamEv := KamEvent{"event": "CGR_CALL_END",
