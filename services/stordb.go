@@ -47,8 +47,6 @@ type StorDBService struct {
 	syncChans []chan engine.StorDB
 
 	srvDep map[string]*sync.WaitGroup
-
-	reconnected bool
 }
 
 // Start should handle the sercive start
@@ -82,7 +80,7 @@ func (db *StorDBService) Start() (err error) {
 func (db *StorDBService) Reload() (err error) {
 	db.Lock()
 	defer db.Unlock()
-	if db.reconnected = db.needsConnectionReload(); db.reconnected {
+	if db.needsConnectionReload() {
 		var d engine.StorDB
 		if d, err = engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
 			db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
@@ -145,7 +143,6 @@ func (db *StorDBService) Shutdown() (err error) {
 	db.Lock()
 	db.db.Close()
 	db.db = nil
-	db.reconnected = false
 	for _, c := range db.syncChans {
 		close(c)
 	}
