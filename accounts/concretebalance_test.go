@@ -124,3 +124,67 @@ func TestCBDebitUnits(t *testing.T) {
 	}
 
 }
+
+func TestCBSimpleDebit(t *testing.T) {
+	// debit 10 units from a concrete balance with 500 units
+	cb := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS: new(engine.FilterS),
+	}
+	toDebit := utils.NewDecimal(10, 0)
+	if dbted, _, err := cb.debitUnits(toDebit,
+		"cgrates.org", utils.MapStorage{}); err != nil {
+		t.Error(err)
+	} else if dbted.Compare(toDebit) != 0 {
+		t.Errorf("debited: %s", dbted)
+	} else if cb.blnCfg.Units.Cmp(decimal.New(490, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
+	}
+}
+
+func TestCBDebitExceed(t *testing.T) {
+	// debit 510 units from a concrete balance with 500 units
+	cb := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS: new(engine.FilterS),
+	}
+	if dbted, _, err := cb.debitUnits(utils.NewDecimal(510, 0),
+		"cgrates.org", utils.MapStorage{}); err != nil {
+		t.Error(err)
+	} else if dbted.Compare(utils.NewDecimal(500, 0)) != 0 {
+		t.Errorf("debited: %s", dbted)
+	} else if cb.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
+	}
+}
+
+func TestCBDebitUnlimited(t *testing.T) {
+	// debit 510 units from an unlimited concrete balance with 100 units
+	cb := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:   "CB",
+			Type: utils.MetaConcrete,
+			Opts: map[string]interface{}{
+				utils.MetaBalanceUnlimited: true,
+			},
+			Units: utils.NewDecimal(100, 0),
+		},
+		fltrS: new(engine.FilterS),
+	}
+	if dbted, _, err := cb.debitUnits(utils.NewDecimal(510, 0),
+		"cgrates.org", utils.MapStorage{}); err != nil {
+		t.Error(err)
+	} else if dbted.Compare(utils.NewDecimal(510, 0)) != 0 {
+		t.Errorf("debited: %s", dbted)
+	} else if cb.blnCfg.Units.Cmp(decimal.New(-410, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
+	}
+}
