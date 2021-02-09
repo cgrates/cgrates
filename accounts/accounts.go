@@ -189,7 +189,7 @@ func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
 			}
 			return
 		}
-		usage.Big = utils.SubstractBig(usage.Big, ecDbt.Usage)
+		usage.Big = utils.SubstractBig(usage.Big, ecDbt.Usage.Big)
 		ec.Merge(ecDbt)
 	}
 	return

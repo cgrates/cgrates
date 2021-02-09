@@ -93,17 +93,24 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
 		usage.Big = roundedUsageWithIncrements(aB.blnCfg.Units.Big, costIcrm.Increment.Big)
 	}
-	// attempt to debit usage with cost
-	if ec, err = maxDebitUsageFromConcretes(aB.cncrtBlncs, usage,
-		aB.connMgr, cgrEv,
-		aB.attrSConns, aB.blnCfg.AttributeIDs,
-		aB.rateSConns, aB.blnCfg.RateProfileIDs,
-		costIcrm); err != nil {
-		return
+	if costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) == 0 &&
+		(costIcrm.FixedFee == nil ||
+			costIcrm.FixedFee.Cmp(decimal.New(0, 0)) == 0) {
+		// cost 0, no need of concrete
+		ec = &utils.EventCharges{Usage: usage}
+	} else {
+		// attempt to debit usage with cost
+		if ec, err = maxDebitUsageFromConcretes(aB.cncrtBlncs, usage,
+			aB.connMgr, cgrEv,
+			aB.attrSConns, aB.blnCfg.AttributeIDs,
+			aB.rateSConns, aB.blnCfg.RateProfileIDs,
+			costIcrm); err != nil {
+			return
+		}
 	}
 
 	if ec.Usage.Cmp(decimal.New(0, 0)) != 0 {
-		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, ec.Usage)
+		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, ec.Usage.Big)
 	}
 	if hasLmt { // put back the limit
 		aB.blnCfg.Units.Big = utils.SumBig(aB.blnCfg.Units.Big, blncLmt.Big)

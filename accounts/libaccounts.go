@@ -314,5 +314,5 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Deci
 		usagePaid = decimal.New(0, 0)
 	}
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
-	return &utils.EventCharges{Usage: usagePaid}, nil
+	return &utils.EventCharges{Usage: &utils.Decimal{usagePaid}}, nil
 }

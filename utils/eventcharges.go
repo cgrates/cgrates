@@ -20,8 +20,6 @@ package utils
 
 import (
 	"errors"
-
-	"github.com/ericlagergren/decimal"
 )
 
 // NewEventChargers instantiates the EventChargers in a central place
@@ -32,8 +30,8 @@ func NewEventCharges() (ec *EventCharges) {
 
 // EventCharges records the charges applied to an Event
 type EventCharges struct {
-	Usage      *decimal.Big
-	Cost       *decimal.Big
+	Usage      *Decimal
+	Cost       *Decimal
 	Charges    []*ChargedInterval
 	Account    *AccountProfile
 	Accounting *ChargedAccounting
@@ -47,7 +45,7 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 			ec.Usage = nEc.Usage
 			continue
 		}
-		ec.Usage = SumBig(ec.Usage, nEc.Usage)
+		ec.Usage = &Decimal{SumBig(ec.Usage.Big, nEc.Usage.Big)}
 	}
 }
 
@@ -55,14 +53,14 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 	eEc = new(ExtEventCharges)
 	if ec.Usage != nil {
-		if flt, ok := ec.Usage.Float64(); !ok {
+		if flt, ok := ec.Usage.Big.Float64(); !ok {
 			return nil, errors.New("cannot convert decimal Usage to float64")
 		} else {
 			eEc.Usage = &flt
 		}
 	}
 	if ec.Cost != nil {
-		if flt, ok := ec.Cost.Float64(); !ok {
+		if flt, ok := ec.Cost.Big.Float64(); !ok {
 			return nil, errors.New("cannot convert decimal Cost to float64")
 		} else {
 			eEc.Cost = &flt
