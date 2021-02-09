@@ -918,7 +918,7 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		ProcessStats:       true,
 		GetRoutes:          false,
 		RoutesIgnoreErrors: true,
-		RoutesMaxCost:      utils.MetaRoutesEventCost,
+		RoutesMaxCost:      utils.MetaEventCost,
 		CGREvent:           cgrEv,
 		ForceDuration:      true,
 	}
@@ -938,7 +938,7 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		ProcessStats:       true,
 		GetRoutes:          false,
 		RoutesIgnoreErrors: true,
-		RoutesMaxCost:      utils.MetaRoutesEventCost,
+		RoutesMaxCost:      utils.MetaEventCost,
 		CGREvent:           cgrEv,
 		AttributeIDs:       []string{"ATTR1", "ATTR2"},
 		ThresholdIDs:       []string{"ID1", "ID2"},
@@ -1167,7 +1167,7 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		GetAttributes:      true,
 		CGREvent:           cgrEv,
 		GetRoutes:          true,
-		RoutesMaxCost:      utils.MetaRoutesEventCost,
+		RoutesMaxCost:      utils.MetaEventCost,
 		RoutesIgnoreErrors: true,
 		ForceDuration:      true,
 	}
@@ -1186,7 +1186,7 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 		GetAttributes:      true,
 		CGREvent:           cgrEv,
 		GetRoutes:          true,
-		RoutesMaxCost:      utils.MetaRoutesEventCost,
+		RoutesMaxCost:      utils.MetaEventCost,
 		RoutesIgnoreErrors: true,
 		AttributeIDs:       []string{"ATTR1", "ATTR2"},
 		ThresholdIDs:       []string{"ID1", "ID2"},
@@ -1624,7 +1624,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts(t *testing.T) {
 		ProcessStats:       true,
 		GetRoutes:          false,
 		RoutesIgnoreErrors: true,
-		RoutesMaxCost:      utils.MetaRoutesEventCost,
+		RoutesMaxCost:      utils.MetaEventCost,
 		CGREvent:           cgrEv,
 		ForceDuration:      true,
 	}
@@ -1668,7 +1668,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 		ProcessStats:       true,
 		GetRoutes:          false,
 		RoutesIgnoreErrors: true,
-		RoutesMaxCost:      utils.MetaRoutesEventCost,
+		RoutesMaxCost:      utils.MetaEventCost,
 		CGREvent:           cgrEv,
 		ForceDuration:      true,
 	}

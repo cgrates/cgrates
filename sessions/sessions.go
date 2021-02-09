@@ -1771,7 +1771,7 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 		ForceDuration:      forceDuration,
 	}
 	if routesEventCost {
-		args.RoutesMaxCost = utils.MetaRoutesEventCost
+		args.RoutesMaxCost = utils.MetaEventCost
 	} else {
 		args.RoutesMaxCost = routesMaxCost
 	}
@@ -2700,7 +2700,7 @@ func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 		ForceDuration:      forceDuration,
 	}
 	if routesEventCost {
-		args.RoutesMaxCost = utils.MetaRoutesEventCost
+		args.RoutesMaxCost = utils.MetaEventCost
 	} else {
 		args.RoutesMaxCost = routesMaxCost
 	}
@@ -3100,9 +3100,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		ignoreErrors := flags.Has(utils.MetaIgnoreErrors)
 		var maxCost string
 		if flags.Has(utils.MetaEventCost) {
-			maxCost = utils.MetaRoutesEventCost
+			maxCost = utils.MetaEventCost
 		} else {
-			maxCost = flags.ParamValue(utils.MetaRoutesMaxCost)
+			maxCost = flags.ParamValue(utils.MetaMaxCost)
 		}
 		for runID, cgrEv := range getDerivedEvents(events, flags.Has(utils.MetaDerivedReply)) {
 			routesReply, err := sS.getRoutes(cgrEv.Clone(), args.Paginator, ignoreErrors, maxCost, false)
