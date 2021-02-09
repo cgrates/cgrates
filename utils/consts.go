@@ -736,6 +736,7 @@ const (
 	MetaNegativeExports      = "*negative_exports"
 	MetaRoutesEventCost      = "*routes_event_cost"
 	MetaRoutesMaxCost        = "*routes_maxcost"
+	MetaMaxCost              = "*maxcost"
 	MetaRoutesIgnoreErrors   = "*routes_ignore_errors"
 	Freeswitch               = "freeswitch"
 	Kamailio                 = "kamailio"

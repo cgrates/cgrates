@@ -129,7 +129,6 @@ func testSes4CDRsProcessCDR(t *testing.T) {
 	// will make the BalanceInfo nil and result in a panic
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, utils.MetaStore, "*routes:false", utils.MetaRerate},
-
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{

@@ -504,7 +504,6 @@ func TestV1CostForEventError(t *testing.T) {
 	expectedErr = "SERVER_ERROR: zero increment to be charged within rate: <cgrates.org:RATE_1:RATE1>"
 	rPrf.Rates["RATE1"].IntervalRates[0].Increment = utils.NewDecimal(0, 0)
 	if err := rateS.V1CostForEvent(&utils.ArgsCostForEvent{
-
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "RATE_1",
