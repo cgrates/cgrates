@@ -203,11 +203,12 @@ func (rS *RateS) V1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.Rat
 		}
 		return
 	}
-	if rcvCost, errCost := rS.rateProfileCostForEvent(rtPrl, args, rS.cfg.RateSCfg().Verbosity); errCost != nil {
-		if errCost != utils.ErrNotFound {
-			errCost = utils.NewErrServerError(err)
+	var rcvCost *engine.RateProfileCost
+	if rcvCost, err = rS.rateProfileCostForEvent(rtPrl, args, rS.cfg.RateSCfg().Verbosity); err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
 		}
-		return errCost
+		return
 	} else {
 		*rpCost = *rcvCost
 	}
