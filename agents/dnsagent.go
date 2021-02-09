@@ -218,6 +218,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaSuppliersMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
@@ -293,7 +294,9 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaSuppliersMaxCost),
+		)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessMessage,

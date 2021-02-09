@@ -194,6 +194,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaSuppliersMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
@@ -265,7 +266,9 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
-			reqProcessor.Flags.HasKey(utils.MetaFD))
+			reqProcessor.Flags.HasKey(utils.MetaFD),
+			reqProcessor.Flags.ParamValue(utils.MetaSuppliersMaxCost),
+		)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage, evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {

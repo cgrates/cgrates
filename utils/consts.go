@@ -534,6 +534,8 @@ const (
 	MetaRound                   = "*round"
 	Pong                        = "Pong"
 	MetaEventCost               = "*event_cost"
+	MetaSuppliersMaxCost        = "*suppliers_maxcost"
+	MetaMaxCost                 = "*maxcost"
 	MetaSuppliersEventCost      = "*suppliers_event_cost"
 	MetaSuppliersIgnoreErrors   = "*suppliers_ignore_errors"
 	Freeswitch                  = "freeswitch"

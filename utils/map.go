@@ -263,6 +263,14 @@ func (fWp FlagsWithParams) ParamsSlice(subs string) (ps []string) {
 	return
 }
 
+// ParamValue returns the value of the flag
+func (fWp FlagsWithParams) ParamValue(subs string) (ps string) {
+	for _, ps = range fWp[subs] {
+		return
+	}
+	return
+}
+
 // SliceFlags converts from FlagsWithParams back to []string
 func (fWp FlagsWithParams) SliceFlags() (sls []string) {
 	for key := range fWp {

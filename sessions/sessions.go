@@ -1703,7 +1703,7 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 	thrslds bool, thresholdIDs []string, statQueues bool, statIDs []string,
 	res, maxUsage, suppls, supplsIgnoreErrs, supplsEventCost bool,
 	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	supplierPaginator utils.Paginator, forceDuration bool) (args *V1AuthorizeArgs) {
+	supplierPaginator utils.Paginator, forceDuration bool, supMaxCost string) (args *V1AuthorizeArgs) {
 	args = &V1AuthorizeArgs{
 		GetAttributes:         attrs,
 		AuthorizeResources:    res,
@@ -1716,7 +1716,9 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 		ForceDuration:         forceDuration,
 	}
 	if supplsEventCost {
-		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
+		args.SuppliersMaxCost = utils.MetaEventCost
+	} else {
+		args.SuppliersMaxCost = supMaxCost
 	}
 	args.ArgDispatcher = argDisp
 	args.Paginator = supplierPaginator
@@ -1769,6 +1771,8 @@ func (args *V1AuthorizeArgs) ParseFlags(flags string) {
 			args.SuppliersIgnoreErrors = true
 		case subsystem == utils.MetaSuppliersEventCost:
 			args.SuppliersMaxCost = utils.MetaEventCost
+		case strings.HasPrefix(subsystem, utils.MetaSuppliersMaxCost):
+			args.SuppliersMaxCost = strings.TrimPrefix(subsystem, utils.MetaSuppliersMaxCost+utils.InInFieldSep)
 		case strings.HasPrefix(subsystem, utils.MetaAttributes):
 			args.GetAttributes = true
 			args.AttributeIDs = getFlagIDs(subsystem)
@@ -2709,7 +2713,7 @@ func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 	thds bool, thresholdIDs []string, stats bool, statIDs []string, resrc, acnts,
 	suppls, supplsIgnoreErrs, supplsEventCost bool,
 	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	supplierPaginator utils.Paginator, forceDuration bool) (args *V1ProcessMessageArgs) {
+	supplierPaginator utils.Paginator, forceDuration bool, supMaxCost string) (args *V1ProcessMessageArgs) {
 	args = &V1ProcessMessageArgs{
 		AllocateResources:     resrc,
 		Debit:                 acnts,
@@ -2723,7 +2727,9 @@ func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 		ForceDuration:         forceDuration,
 	}
 	if supplsEventCost {
-		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
+		args.SuppliersMaxCost = utils.MetaEventCost
+	} else {
+		args.SuppliersMaxCost = supMaxCost
 	}
 	args.Paginator = supplierPaginator
 	if len(attributeIDs) != 0 {
@@ -2774,6 +2780,8 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 			args.SuppliersIgnoreErrors = true
 		case subsystem == utils.MetaSuppliersEventCost:
 			args.SuppliersMaxCost = utils.MetaEventCost
+		case strings.HasPrefix(subsystem, utils.MetaSuppliersMaxCost):
+			args.SuppliersMaxCost = strings.TrimPrefix(subsystem, utils.MetaSuppliersMaxCost+utils.InInFieldSep)
 		case strings.Index(subsystem, utils.MetaAttributes) != -1:
 			args.GetAttributes = true
 			args.AttributeIDs = getFlagIDs(subsystem)
@@ -3228,8 +3236,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	// get suppliers if required
 	if argsFlagsWithParams.HasKey(utils.MetaSuppliers) {
 		var ignoreErrors bool
-		var maxCost string
 		// check in case we have options for suppliers
+		maxCost := argsFlagsWithParams.ParamValue(utils.MetaSuppliersMaxCost)
 		if splOpts := argsFlagsWithParams.ParamsSlice(utils.MetaSuppliers); len(splOpts) != 0 {
 			//check for subflags and convert them into utils.FlagsWithParams
 			splsFlagsWithParams, err := utils.FlagsWithParamsFromSlice(splOpts)
@@ -3240,7 +3248,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				ignoreErrors = true
 			}
 			if splsFlagsWithParams.HasKey(utils.MetaEventCost) {
-				maxCost = utils.MetaSuppliersEventCost
+				maxCost = utils.MetaEventCost
 			}
 		}
 		splsReply, err := sS.getSuppliers(args.CGREvent.Clone(), args.ArgDispatcher,
