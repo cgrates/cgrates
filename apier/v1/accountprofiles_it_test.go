@@ -136,6 +136,13 @@ func testAccountSGetAccountProfile(t *testing.T) {
 				ID:     "GenericBalance1",
 				Weight: 20,
 				Type:   utils.MetaAbstract,
+				Units:  &utils.Decimal{decimal.New(int64(time.Hour), 0)},
+				UnitFactors: []*utils.UnitFactor{
+					&utils.UnitFactor{
+						FilterIDs: []string{"*string:~*req.ToR:*data"},
+						Factor:    &utils.Decimal{decimal.New(1024, 3)},
+					},
+				},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -150,22 +157,12 @@ func testAccountSGetAccountProfile(t *testing.T) {
 						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
 					},
 				},
-				UnitFactors: []*utils.UnitFactor{
-					&utils.UnitFactor{
-						FilterIDs: []string{"*string:~*req.ToR:*voice"},
-						Factor:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-					},
-					&utils.UnitFactor{
-						FilterIDs: []string{"*string:~*req.ToR:*data"},
-						Factor:    &utils.Decimal{decimal.New(int64(1024*time.Second), 0)},
-					},
-				},
-				Units: &utils.Decimal{decimal.New(int64(time.Hour), 0)},
 			},
 			"MonetaryBalance1": &utils.Balance{
 				ID:     "MonetaryBalance1",
 				Weight: 30,
 				Type:   utils.MetaConcrete,
+				Units:  &utils.Decimal{decimal.New(5, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -180,13 +177,20 @@ func testAccountSGetAccountProfile(t *testing.T) {
 						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
 					},
 				},
-				Units: &utils.Decimal{decimal.New(5, 0)},
 			},
 			"MonetaryBalance2": &utils.Balance{
 				ID:     "MonetaryBalance2",
 				Weight: 10,
 				Type:   utils.MetaConcrete,
 				Units:  &utils.Decimal{decimal.New(3, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
