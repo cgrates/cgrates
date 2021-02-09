@@ -209,8 +209,7 @@ func (rS *RateS) V1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.Rat
 			err = utils.NewErrServerError(err)
 		}
 		return
-	} else {
-		*rpCost = *rcvCost
 	}
+	*rpCost = *rcvCost
 	return
 }
