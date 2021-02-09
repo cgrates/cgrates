@@ -430,40 +430,35 @@ func testExpVerifyActionProfiles(t *testing.T) {
 		},
 		Actions: []*engine.APAction{
 			{
-				ID:        "TOPUP",
-				FilterIDs: []string{},
-				Type:      utils.MetaTopUp,
-				Path:      utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestBalance" + utils.NestingSep + utils.Value,
-				Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+				ID:    "TOPUP",
+				Type:  utils.MetaTopUp,
+				Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestBalance" + utils.NestingSep + utils.Value,
+				Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep),
 			},
 
 			{
-				ID:        "SET_BALANCE_TEST_DATA",
-				FilterIDs: []string{},
-				Type:      utils.MetaSetBalance,
-				Path:      utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Type,
-				Value:     config.NewRSRParsersMustCompile(utils.MetaData, utils.InfieldSep),
+				ID:    "SET_BALANCE_TEST_DATA",
+				Type:  utils.MetaSetBalance,
+				Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Type,
+				Value: config.NewRSRParsersMustCompile(utils.MetaData, utils.InfieldSep),
 			},
 			{
-				ID:        "TOPUP_TEST_DATA",
-				FilterIDs: []string{},
-				Type:      utils.MetaTopUp,
-				Path:      utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Value,
-				Value:     config.NewRSRParsersMustCompile("1024", utils.InfieldSep),
+				ID:    "TOPUP_TEST_DATA",
+				Type:  utils.MetaTopUp,
+				Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Value,
+				Value: config.NewRSRParsersMustCompile("1024", utils.InfieldSep),
 			},
 			{
-				ID:        "SET_BALANCE_TEST_VOICE",
-				FilterIDs: []string{},
-				Type:      utils.MetaSetBalance,
-				Path:      utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Type,
-				Value:     config.NewRSRParsersMustCompile(utils.MetaVoice, utils.InfieldSep),
+				ID:    "SET_BALANCE_TEST_VOICE",
+				Type:  utils.MetaSetBalance,
+				Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Type,
+				Value: config.NewRSRParsersMustCompile(utils.MetaVoice, utils.InfieldSep),
 			},
 			{
-				ID:        "TOPUP_TEST_VOICE",
-				FilterIDs: []string{},
-				Type:      utils.MetaTopUp,
-				Path:      utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Value,
-				Value:     config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
+				ID:    "TOPUP_TEST_VOICE",
+				Type:  utils.MetaTopUp,
+				Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Value,
+				Value: config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
 			},
 		},
 	}
@@ -495,10 +490,9 @@ func testExpVerifyAccountProfiles(t *testing.T) {
 		Weight:    20,
 		Balances: map[string]*utils.Balance{
 			"MonetaryBalance": {
-				ID:        "MonetaryBalance",
-				FilterIDs: []string{},
-				Weight:    10,
-				Type:      "*monetary",
+				ID:     "MonetaryBalance",
+				Weight: 10,
+				Type:   "*monetary",
 				CostIncrements: []*utils.CostIncrement{
 					{
 						FilterIDs:    []string{"fltr1", "fltr2"},
@@ -507,8 +501,7 @@ func testExpVerifyAccountProfiles(t *testing.T) {
 						RecurrentFee: utils.NewDecimal(33, 1),
 					},
 				},
-				AttributeIDs:   []string{"attr1", "attr2"},
-				RateProfileIDs: []string{},
+				AttributeIDs: []string{"attr1", "attr2"},
 				UnitFactors: []*utils.UnitFactor{
 					{
 						FilterIDs: []string{"fltr1", "fltr2"},

@@ -242,10 +242,9 @@ func testStorDBitCRUDTPActionProfiles(t *testing.T) {
 			Schedule:  utils.MetaASAP,
 			Actions: []*utils.TPAPAction{
 				{
-					ID:        "TOPUP",
-					FilterIDs: []string{},
-					Type:      "*topup",
-					Path:      "~*balance.TestBalance.Value",
+					ID:   "TOPUP",
+					Type: "*topup",
+					Path: "~*balance.TestBalance.Value",
 				},
 			},
 		},
