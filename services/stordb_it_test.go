@@ -83,20 +83,7 @@ func TestStorDBReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-	time.Sleep(10 * time.Millisecond)
-	err := stordb.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	time.Sleep(10 * time.Millisecond)
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.STORDB_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
+
 	select {
 	case d := <-cdrsRPC:
 		cdrsRPC <- d
@@ -109,37 +96,44 @@ func TestStorDBReload(t *testing.T) {
 	if !stordb.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	time.Sleep(10 * time.Millisecond)
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	cfg.StorDbCfg().Password = ""
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		Section: config.STORDB_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
 
-	err = cdrS.Reload()
-	if err != nil {
+	if err := cdrS.Reload(); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 
-	err = stordb.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.StorDbCfg().Type = utils.INTERNAL
-	err = stordb.Reload()
-	if err != nil {
+	if err := stordb.Reload(); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 
-	err = stordb.Reload()
-	if err != nil {
+	if err := stordb.Reload(); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	err = db.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
+	if err := db.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = cdrS.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
+	if err := cdrS.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 
-	err = cdrS.Reload()
-	if err != nil {
+	if err := cdrS.Reload(); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 
@@ -231,12 +225,10 @@ func TestStorDBReload2(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 
-	err = cdrS.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
+	if err := cdrS.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = cdrS.Reload()
-	if err != nil {
+	if err := cdrS.Reload(); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.CdrsCfg().Enabled = false

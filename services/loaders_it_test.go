@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"io/ioutil"
+	"os"
 	"path"
 	"sync"
 	"testing"
@@ -33,7 +35,33 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+func testCreateDirs(t *testing.T) {
+	for _, dir := range []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/SubpathWithoutMove",
+		"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut", "/tmp/templateLoaderIn", "/tmp/templateLoaderOut",
+		"/tmp/customSepLoaderIn", "/tmp/customSepLoaderOut"} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal("Error creating folder: ", dir, err)
+		}
+	}
+	if err := ioutil.WriteFile(path.Join("/tmp/In", utils.AttributesCsv), []byte(engine.AttributesCSVContent), 0644); err != nil {
+		t.Fatal(err.Error())
+	}
+}
+
+func testCleanupFiles(t *testing.T) {
+	for _, dir := range []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/SubpathWithoutMove",
+		"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut"} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
+	}
+}
+
 func TestLoaderSReload(t *testing.T) {
+	testCreateDirs(t)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.TemplatesCfg()["attrTemplateLoader"] = []*config.FCTemplate{
 		{
@@ -112,5 +140,5 @@ func TestLoaderSReload(t *testing.T) {
 
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
-
+	testCleanupFiles(t)
 }
