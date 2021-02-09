@@ -93,15 +93,16 @@ func TestLoaderSReload(t *testing.T) {
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
+	time.Sleep(10 * time.Millisecond)
 	err = srv.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-
+	time.Sleep(10 * time.Millisecond)
 	for _, v := range cfg.LoaderCfg() {
 		v.Enabled = false
 	}
-
+	time.Sleep(10 * time.Millisecond)
 	cfg.GetReloadChan(config.LoaderJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 
