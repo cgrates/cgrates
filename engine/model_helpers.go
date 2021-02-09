@@ -3221,23 +3221,21 @@ func (tps ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfil
 		}
 
 		if tp.ActionID != utils.EmptyString {
-			filterIDs := make([]string, 0)
-			if tp.ActionFilterIDs != utils.EmptyString {
-				filterAttrSplit := strings.Split(tp.ActionFilterIDs, utils.InfieldSep)
-				for _, filterAttr := range filterAttrSplit {
-					filterIDs = append(filterIDs, filterAttr)
-				}
+			tpAAction := &utils.TPAPAction{
+				ID:      tp.ActionID,
+				Blocker: tp.ActionBlocker,
+				TTL:     tp.ActionTTL,
+				Type:    tp.ActionType,
+				Opts:    tp.ActionOpts,
+				Path:    tp.ActionPath,
+				Value:   tp.ActionValue,
 			}
-			aPrf.Actions = append(aPrf.Actions, &utils.TPAPAction{
-				ID:        tp.ActionID,
-				FilterIDs: filterIDs,
-				Blocker:   tp.ActionBlocker,
-				TTL:       tp.ActionTTL,
-				Type:      tp.ActionType,
-				Opts:      tp.ActionOpts,
-				Path:      tp.ActionPath,
-				Value:     tp.ActionValue,
-			})
+			if tp.ActionFilterIDs != utils.EmptyString {
+				filterIDs := make(utils.StringSet)
+				filterIDs.AddSlice(strings.Split(tp.ActionFilterIDs, utils.InfieldSep))
+				tpAAction.FilterIDs = filterIDs.AsSlice()
+			}
+			aPrf.Actions = append(aPrf.Actions, tpAAction)
 		}
 		actPrfMap[tenID] = aPrf
 	}
