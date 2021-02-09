@@ -52,6 +52,7 @@ func TestAccountSv1IT(t *testing.T) {
 		testAccountSv1LoadFromFolder,
 		testAccountSv1AccountProfileForEvent,
 		testAccountSv1MaxUsage,
+		testAccountSv1DebitUsage,
 	}
 	switch *dbType {
 	case utils.MetaInternal:
@@ -122,12 +123,14 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "1001",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Opts:      make(map[string]interface{}),
 		Balances: map[string]*utils.Balance{
 			"GenericBalance1": &utils.Balance{
 				ID:     "GenericBalance1",
 				Weight: 20,
 				Type:   utils.MetaAbstract,
 				Units:  &utils.Decimal{decimal.New(int64(time.Hour), 0)},
+				Opts:   make(map[string]interface{}),
 				UnitFactors: []*utils.UnitFactor{
 					&utils.UnitFactor{
 						FilterIDs: []string{"*string:~*req.ToR:*data"},
@@ -153,6 +156,7 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 				ID:     "MonetaryBalance1",
 				Weight: 30,
 				Type:   utils.MetaConcrete,
+				Opts:   make(map[string]interface{}),
 				Units:  &utils.Decimal{decimal.New(5, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
@@ -173,6 +177,7 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 				ID:     "MonetaryBalance2",
 				Weight: 10,
 				Type:   utils.MetaConcrete,
+				Opts:   make(map[string]interface{}),
 				Units:  &utils.Decimal{decimal.New(3, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
@@ -214,5 +219,186 @@ func testAccountSv1MaxUsage(t *testing.T) {
 		t.Error(err)
 	} else if eEc.Usage == nil || *eEc.Usage != 800000000000.0 { // 500s from first monetary + 300s from last monetary
 		t.Errorf("received usage: %v", *eEc.Usage)
+	}
+
+	// Make sure we did not Debit anything from Account
+	eAcnt := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "1001",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Opts:      make(map[string]interface{}),
+		Balances: map[string]*utils.Balance{
+			"GenericBalance1": &utils.Balance{
+				ID:     "GenericBalance1",
+				Weight: 20,
+				Type:   utils.MetaAbstract,
+				Opts:   make(map[string]interface{}),
+				Units:  &utils.Decimal{decimal.New(int64(time.Hour), 0)},
+				UnitFactors: []*utils.UnitFactor{
+					&utils.UnitFactor{
+						FilterIDs: []string{"*string:~*req.ToR:*data"},
+						Factor:    &utils.Decimal{decimal.New(1024, 3)},
+					},
+				},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1024, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+				},
+			},
+			"MonetaryBalance1": &utils.Balance{
+				ID:     "MonetaryBalance1",
+				Weight: 30,
+				Type:   utils.MetaConcrete,
+				Opts:   make(map[string]interface{}),
+				Units:  &utils.Decimal{decimal.New(5, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1024, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+				},
+			},
+			"MonetaryBalance2": &utils.Balance{
+				ID:     "MonetaryBalance2",
+				Weight: 10,
+				Type:   utils.MetaConcrete,
+				Opts:   make(map[string]interface{}),
+				Units:  &utils.Decimal{decimal.New(3, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
+			},
+		},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+
+	var reply *utils.AccountProfile
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(eAcnt, reply) {
+		t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(eAcnt), utils.ToJSON(reply))
+	}
+}
+
+func testAccountSv1DebitUsage(t *testing.T) {
+	var eEc *utils.ExtEventCharges
+	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
+		&utils.ArgsAccountForEvent{CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAccountSv1MaxUsage",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.ToR:          utils.MetaVoice,
+				utils.Usage:        "15m",
+			}}}, &eEc); err != nil {
+		t.Error(err)
+	} else if eEc.Usage == nil || *eEc.Usage != 800000000000.0 { // 500s from first monetary + 300s from last monetary
+		t.Errorf("received usage: %v", *eEc.Usage)
+	}
+
+	// Make sure we did not Debit anything from Account
+	eAcnt := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "1001",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Opts:      make(map[string]interface{}),
+		Balances: map[string]*utils.Balance{
+			"GenericBalance1": &utils.Balance{
+				ID:     "GenericBalance1",
+				Weight: 20,
+				Type:   utils.MetaAbstract,
+				Opts:   make(map[string]interface{}),
+				Units:  &utils.Decimal{decimal.New(int64(3300*time.Second), 0)},
+				UnitFactors: []*utils.UnitFactor{
+					&utils.UnitFactor{
+						FilterIDs: []string{"*string:~*req.ToR:*data"},
+						Factor:    &utils.Decimal{decimal.New(1024, 3)},
+					},
+				},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1024, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+				},
+			},
+			"MonetaryBalance1": &utils.Balance{
+				ID:     "MonetaryBalance1",
+				Weight: 30,
+				Type:   utils.MetaConcrete,
+				Opts:   make(map[string]interface{}),
+				Units:  &utils.Decimal{decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1024, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					},
+				},
+			},
+			"MonetaryBalance2": &utils.Balance{
+				ID:     "MonetaryBalance2",
+				Weight: 10,
+				Type:   utils.MetaConcrete,
+				Opts:   make(map[string]interface{}),
+				Units:  &utils.Decimal{decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
+			},
+		},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+
+	var reply *utils.AccountProfile
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile,
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(eAcnt, reply) {
+		t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(eAcnt), utils.ToJSON(reply))
 	}
 }
