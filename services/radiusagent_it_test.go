@@ -95,3 +95,75 @@ func TestRadiusAgentReload(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+
+func TestRadiusAgentReload2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	cfg.SessionSCfg().Enabled = true
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, nil, anz, srvDep)
+	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	engine.NewConnManager(cfg, nil)
+	srvMngr.AddServices(srv, sS,
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Fatal(err)
+	}
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	var reply string
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql"),
+		Section: config.RA_JSN,
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	if !srv.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	err := srv.Start()
+	if err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	err = srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	castSrv, canCastSrv := srv.(*RadiusAgent)
+	if !canCastSrv {
+		t.Fatalf("cannot cast")
+	}
+	castSrv.lnet = "test_string"
+	err = srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	cfg.RadiusAgentCfg().Enabled = false
+	cfg.GetReloadChan(config.RA_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}
