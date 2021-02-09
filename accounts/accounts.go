@@ -110,14 +110,9 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent,
 			}
 			return
 		}
-		if _, isDisabled := qAcnt.Opts[utils.Disabled]; isDisabled {
-			if lked {
-				guardian.Guardian.UnguardIDs(refID)
-			}
-			continue
-		}
-		if qAcnt.ActivationInterval != nil && cgrEv.Time != nil &&
-			!qAcnt.ActivationInterval.IsActiveAtTime(*cgrEv.Time) { // not active
+		if _, isDisabled := qAcnt.Opts[utils.Disabled]; isDisabled ||
+			(qAcnt.ActivationInterval != nil && cgrEv.Time != nil &&
+				!qAcnt.ActivationInterval.IsActiveAtTime(*cgrEv.Time)) { // not active
 			if lked {
 				guardian.Guardian.UnguardIDs(refID)
 			}
@@ -138,6 +133,9 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent,
 		if acnt == nil || acnt.Weight < qAcnt.Weight {
 			acnt = qAcnt
 			if lked {
+				if lkID != utils.EmptyString {
+					guardian.Guardian.UnguardIDs(lkID)
+				}
 				lkID = refID
 			}
 		} else if lked {
