@@ -103,10 +103,8 @@ func TestSIPAgentReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
-/*
 func TestSIPAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
 	cfg.SessionSCfg().Enabled = true
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
@@ -133,12 +131,10 @@ func TestSIPAgentReload2(t *testing.T) {
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
+
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "sipagent_mysql"),
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "sipagent_mongo"),
 		Section: config.SIPAgentJson,
 	}, &reply); err != nil {
 		t.Fatal(err)
@@ -146,13 +142,7 @@ func TestSIPAgentReload2(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !srv.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	srvStart := srv.Start()
-	if srvStart != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, srvStart)
-	}
+
 	err := srv.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <err>,\n Received <%+v>", err)
@@ -167,4 +157,3 @@ func TestSIPAgentReload2(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
-*/
