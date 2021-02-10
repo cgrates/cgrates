@@ -66,6 +66,7 @@ func TestKamailioAgentReload(t *testing.T) {
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
+
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -78,6 +79,9 @@ func TestKamailioAgentReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+
+	runtime.Gosched()
+	time.Sleep(10 * time.Millisecond)
 	kaCfg := &config.KamAgentCfg{
 		Enabled:       true,
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
@@ -88,13 +92,13 @@ func TestKamailioAgentReload(t *testing.T) {
 
 	srv.(*KamailioAgent).kam = agents.NewKamailioAgent(kaCfg, nil, "")
 
-	srv.Reload()
-	runtime.Gosched()
+	err := srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	// the engine should be stoped as we could not connect to kamailio
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
+
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
