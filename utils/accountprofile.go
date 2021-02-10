@@ -157,7 +157,6 @@ func (bL *Balance) Clone() (blnc *Balance) {
 		Weight:  bL.Weight,
 		Blocker: bL.Blocker,
 		Type:    bL.Type,
-		Opts:    make(map[string]interface{}),
 	}
 	if bL.FilterIDs != nil {
 		blnc.FilterIDs = make([]string, len(bL.FilterIDs))
@@ -165,8 +164,11 @@ func (bL *Balance) Clone() (blnc *Balance) {
 			blnc.FilterIDs[i] = value
 		}
 	}
-	for key, value := range bL.Opts {
-		blnc.Opts[key] = value
+	if bL.Opts != nil {
+		blnc.Opts = make(map[string]interface{})
+		for key, value := range bL.Opts {
+			blnc.Opts[key] = value
+		}
 	}
 	if bL.CostIncrements != nil {
 		blnc.CostIncrements = make([]*CostIncrement, len(bL.CostIncrements))

@@ -57,6 +57,11 @@ func TestCloneBalance(t *testing.T) {
 	if rcv := expBlc.Clone(); !reflect.DeepEqual(rcv, expBlc) {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(expBlc), ToJSON(rcv))
 	}
+
+	expBlc.Opts = nil
+	if rcv := expBlc.Clone(); !reflect.DeepEqual(rcv, expBlc) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(expBlc), ToJSON(rcv))
+	}
 }
 
 func TestCloneAccountProfile(t *testing.T) {
