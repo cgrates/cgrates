@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/agents"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -75,10 +77,25 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	// the engine should be stopped as we could not connect to freeswitch
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
+	}
+
+	agentCfg := &config.FsAgentCfg{
+		Enabled:          true,
+		CreateCdr:        true,
+		SubscribePark:    true,
+		EventSocketConns: []*config.FsConnCfg{},
+	}
+
+	srv.(*FreeswitchAgent).fS = agents.NewFSsessions(agentCfg, "", nil)
+	//srv.(*FreeswitchAgent).fS = new(agents.FSsessions)
+	err := srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	time.Sleep(10 * time.Millisecond)
 	shdChan.CloseOnce()
