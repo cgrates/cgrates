@@ -10,7 +10,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 
 # Install necessary libs
 RUN apt-get update 
-RUN apt-get install -y apt-utils wget gnupg gnupg2 apt-transport-https curl redis-server git build-essential rsyslog procps gosu "mariadb-server" mariadb-backup socat default-jdk-headless neovim
+RUN apt-get install -y apt-utils wget gnupg gnupg2 apt-transport-https curl redis-server git build-essential rsyslog procps gosu "mariadb-server" mariadb-backup socat default-jdk-headless neovim net-tools
 
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add -
 RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list
