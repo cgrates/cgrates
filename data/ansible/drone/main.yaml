@@ -1,6 +1,6 @@
 ---
 - name: Check and set python version on APT server
-  hosts: local
+  hosts: ci
   remote_user: '{{ user }}'
   gather_facts: false
   tasks:
@@ -11,7 +11,7 @@
         fi
       become: true
 
-- hosts: local
+- hosts: ci
   vars:
     ###############################################################
     ##################### Golang Vars #############################
@@ -35,13 +35,18 @@
     #################################################################
     drone_dir: "/home/{{ user }}/go/src/github.com/drone/drone"
 
-    drone_server_protocol: https
-    drone_server_host: ci.cgrates.org
+    drone_server_host: ci.cgrates.net
     drone_validate_plugin_endpoint: 127.0.0.1:3001
     docker_runner_capacity: 20
 
     drone_user_create: cgrates
-    drone_user_filter: cgrates,danbogos,TeoV,Trial97,porosnicuadrian,andronache98
+    drone_user_filter: 
+      - cgrates
+      - danbogos
+      - TeoV
+      - Trial97
+      - porosnicuadrian
+      - andronache98
     ###############################################################
     # CGRateS vars
     dependencies:
@@ -263,7 +268,7 @@
 
     - name:  Start drone-runner
       become: yes
-      shell: docker run -d -v /var/run/docker.sock:/var/run/docker.sock -e DRONE_RPC_PROTO="{{ drone_server_protocol }}" -e DRONE_RPC_HOST="{{ drone_server_host }}" -e DRONE_RPC_SECRET="{{ drone_secret.stdout }}" -e DRONE_RUNNER_CAPACITY={{ docker_runner_capacity }} -e DRONE_RUNNER_NAME=cgrates -p 3000:3000 --restart always --name runner drone/drone-runner-docker:1
+      shell: docker run -d -v /var/run/docker.sock:/var/run/docker.sock -e DRONE_RPC_PROTO="https" -e DRONE_RPC_HOST="{{ drone_server_host }}" -e DRONE_RPC_SECRET="{{ drone_secret.stdout }}" -e DRONE_RUNNER_CAPACITY={{ docker_runner_capacity }} -e DRONE_RUNNER_NAME=cgrates -p 3000:3000 --restart always --name runner drone/drone-runner-docker:1
       when: continerList2.stdout_lines|length == 0
 
     - name: Creating credentials file
@@ -279,12 +284,20 @@
     - name:  add secrets
       become: yes
       shell: |
-        drone-cli orgsecret add cgrates credentials @/home/{{ user }}/credentials.json --allow-pull-request;
-        drone-cli orgsecret add cgrates token @/home/{{ user }}/token.json --allow-pull-request;
-        rm /home/{{ user }}/credentials.json;
-        rm /home/{{ user }}/token.json; 
+        drone-cli orgsecret add {{ item }} credentials @/home/{{ user }}/credentials.json --allow-pull-request;
+        drone-cli orgsecret add {{ item }} token @/home/{{ user }}/token.json --allow-pull-request;
       environment:
         PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-        DRONE_SERVER: "{{ drone_server_protocol }}://{{ drone_server_host }}"
+        DRONE_SERVER: "https://{{ drone_server_host }}"
         DRONE_TOKEN: "{{ drone_token.stdout }}"
+      with_items: '{{ drone_user_filter }}'
 
+    - name: Removeing credentials file
+      file:
+        path: "/home/{{ user }}/credentials.json"
+        state: absent
+    
+    - name: Removeing token file 
+      file:
+        path: "/home/{{ user }}/token.json"
+        state: absent
