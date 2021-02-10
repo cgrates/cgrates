@@ -149,7 +149,7 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent,
 }
 
 // accountProcessEvent implements event processing by an Account
-func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
+func (aS *AccountS) accountDebitUsage(acnt *utils.AccountProfile,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 	var blncOpers []balanceOperator
 	if blncOpers, err = newAccountBalanceOperators(acnt, aS.fltrS, aS.connMgr,
@@ -195,6 +195,11 @@ func (aS *AccountS) accountProcessEvent(acnt *utils.AccountProfile,
 	return
 }
 
+func (aS *AccountS) accountDebitCost(acnt *utils.AccountProfile,
+	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+	return
+}
+
 // V1AccountProfileForEvent returns the matching AccountProfile for Event
 func (aS *AccountS) V1AccountProfileForEvent(args *utils.ArgsAccountForEvent, ap *utils.AccountProfile) (err error) {
 	var acnt *utils.AccountProfile
@@ -223,7 +228,7 @@ func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, eEc *utils.ExtEv
 	defer guardian.Guardian.UnguardIDs(lkID)
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountProcessEvent(acnt, args.CGREvent); err != nil {
+	if procEC, err = aS.accountDebitUsage(acnt, args.CGREvent); err != nil {
 		return
 	}
 	var rcvEec *utils.ExtEventCharges
@@ -248,7 +253,7 @@ func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountForEvent, eEc *utils.Ext
 	defer guardian.Guardian.UnguardIDs(lkID)
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountProcessEvent(acnt, args.CGREvent); err != nil {
+	if procEC, err = aS.accountDebitUsage(acnt, args.CGREvent); err != nil {
 		return
 	}
 
