@@ -157,13 +157,14 @@ func costIncrement(cfgCostIncrmts []*utils.CostIncrement,
 // unitFactor detects the unitFactor for the event
 func unitFactor(cfgUnitFactors []*utils.UnitFactor,
 	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (uF *utils.UnitFactor, err error) {
-	for _, uF = range cfgUnitFactors {
+	for _, uFcfg := range cfgUnitFactors {
 		var pass bool
-		if pass, err = fltrS.Pass(tnt, uF.FilterIDs, ev); err != nil {
+		if pass, err = fltrS.Pass(tnt, uFcfg.FilterIDs, ev); err != nil {
 			return
 		} else if !pass {
 			continue
 		}
+		uF = uFcfg
 		return
 	}
 	return
