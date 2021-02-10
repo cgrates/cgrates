@@ -110,6 +110,7 @@ func TestSessionSReload(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	time.Sleep(10 * time.Millisecond)
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}

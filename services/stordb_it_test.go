@@ -122,7 +122,10 @@ func TestStorDBReload(t *testing.T) {
 	if err := stordb.Reload(); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-
+	err := stordb.Start()
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
 	if err := stordb.Reload(); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
