@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/agents"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -76,7 +78,17 @@ func TestKamailioAgentReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+	kaCfg := &config.KamAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		CreateCdr:     true,
+		EvapiConns:    []*config.KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 10, Alias: "randomAlias"}},
+		Timezone:      "Local",
+	}
 
+	srv.(*KamailioAgent).kam = agents.NewKamailioAgent(kaCfg, nil, "")
+
+	srv.Reload()
 	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	// the engine should be stoped as we could not connect to kamailio
