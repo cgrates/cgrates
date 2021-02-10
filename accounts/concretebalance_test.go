@@ -416,3 +416,41 @@ func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
+
+func TestCBDebitWithMultipleUnitFactor(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	// debit 100 units from a balance ( the unit factor doesn't match )
+	cb := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:   "CB",
+			Type: utils.MetaConcrete,
+			UnitFactors: []*utils.UnitFactor{
+				&utils.UnitFactor{
+					FilterIDs: []string{"*string:~*req.CustomField:CustomValue"},
+					Factor:    utils.NewDecimal(100, 0),
+				},
+				&utils.UnitFactor{
+					FilterIDs: []string{"*string:~*req.CustomField2:CustomValue2"},
+					Factor:    utils.NewDecimal(50, 0),
+				},
+			},
+			Units: utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS: filterS,
+	}
+	mp := utils.MapStorage{}
+	mp.Set([]string{utils.MetaReq}, map[string]interface{}{
+		"CustomField2": "CustomValue2",
+	})
+	if dbted, _, err := cb.debitUnits(utils.NewDecimal(3, 0),
+		"cgrates.org", mp); err != nil {
+		t.Error(err)
+	} else if dbted.Compare(utils.NewDecimal(3, 0)) != 0 {
+		t.Errorf("debited: %s", dbted)
+	} else if cb.blnCfg.Units.Cmp(decimal.New(350, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
+	}
+}
