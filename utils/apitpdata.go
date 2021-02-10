@@ -1647,9 +1647,3 @@ type ArgActionSv1ScheduleActions struct {
 	*CGREvent
 	ActionProfileIDs []string
 }
-
-// DynamicWeight returns Weight based on Filters
-type DynamicWeight struct {
-	FilterIDs []string
-	Weight    float64
-}
