@@ -68,7 +68,6 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, blncLmt.Big)
 		hasLmt = true
 	}
-
 	// unitFactor
 	var uF *utils.UnitFactor
 	if uF, err = unitFactor(aB.blnCfg.UnitFactors, aB.fltrS, cgrEv.Tenant, evNm); err != nil {
@@ -87,8 +86,8 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 		return
 	}
 
-	// balance smaller than usage, correct usage
-	if aB.blnCfg.Units.Compare(usage) == -1 {
+	// balance smaller than usage, correct usage if the balance has limit
+	if aB.blnCfg.Units.Compare(usage) == -1 && blncLmt != nil {
 		// decrease the usage to match the maximum increments
 		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
 		usage.Big = roundedUsageWithIncrements(aB.blnCfg.Units.Big, costIcrm.Increment.Big)

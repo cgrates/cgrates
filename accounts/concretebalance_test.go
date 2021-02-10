@@ -410,9 +410,9 @@ func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 	if dbted, _, err := cb.debitUnits(utils.NewDecimal(3, 0),
 		"cgrates.org", mp); err != nil {
 		t.Error(err)
-	} else if dbted.Compare(utils.NewDecimal(3, 0)) != 0 {
+	} else if dbted.Compare(utils.NewDecimal(2, 0)) != 0 {
 		t.Errorf("debited: %s", dbted)
-	} else if cb.blnCfg.Units.Cmp(decimal.New(200, 0)) != 0 {
+	} else if cb.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
