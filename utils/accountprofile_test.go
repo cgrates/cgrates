@@ -44,7 +44,8 @@ func TestCloneBalance(t *testing.T) {
 				RecurrentFee: &Decimal{decimal.New(20, 1)},
 			},
 		},
-		AttributeIDs: []string{"attr1", "attr2"},
+		AttributeIDs:   []string{"attr1", "attr2"},
+		RateProfileIDs: []string{"RATE1", "RATE2"},
 		UnitFactors: []*UnitFactor{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -103,6 +104,12 @@ func TestCloneAccountProfile(t *testing.T) {
 	}
 	if rcv := actPrf.Clone(); !reflect.DeepEqual(rcv, actPrf) {
 		t.Errorf("Expected %+v, received %+v", ToJSON(actPrf), ToJSON(rcv))
+	}
+
+	actPrf.Opts = nil
+	actPrf.ActivationInterval = nil
+	if rcv := actPrf.Clone(); !reflect.DeepEqual(rcv, actPrf) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(actPrf), ToJSON(rcv))
 	}
 }
 

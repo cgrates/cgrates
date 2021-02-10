@@ -110,7 +110,6 @@ func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
 		Tenant:             aP.Tenant,
 		ID:                 aP.ID,
 		Weight:             aP.Weight,
-		Opts:               make(map[string]interface{}),
 		ActivationInterval: aP.ActivationInterval.Clone(),
 	}
 	if aP.FilterIDs != nil {
@@ -119,8 +118,11 @@ func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
 			acnt.FilterIDs[i] = value
 		}
 	}
-	for key, value := range aP.Opts {
-		acnt.Opts[key] = value
+	if aP.Opts != nil {
+		acnt.Opts = make(map[string]interface{})
+		for key, value := range aP.Opts {
+			acnt.Opts[key] = value
+		}
 	}
 	if aP.ThresholdIDs != nil {
 		acnt.ThresholdIDs = make([]string, len(aP.ThresholdIDs))
