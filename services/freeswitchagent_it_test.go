@@ -80,10 +80,6 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	// the engine should be stopped as we could not connect to freeswitch
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-
 	agentCfg := &config.FsAgentCfg{
 		Enabled:          true,
 		CreateCdr:        true,

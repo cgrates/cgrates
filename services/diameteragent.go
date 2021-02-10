@@ -70,7 +70,10 @@ func (da *DiameterAgent) Start() (err error) {
 
 	da.Lock()
 	defer da.Unlock()
+	return da.start(filterS)
+}
 
+func (da *DiameterAgent) start(filterS *engine.FilterS) (err error) {
 	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, da.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
@@ -98,16 +101,17 @@ func (da *DiameterAgent) Reload() (err error) {
 		da.laddr == da.cfg.DiameterAgentCfg().Listen {
 		return
 	}
-	if err = da.Shutdown(); err != nil {
-		return
-	}
-	return da.Start()
+	close(da.stopChan)
+	filterS := <-da.filterSChan
+	da.filterSChan <- filterS
+	return da.start(filterS)
 }
 
 // Shutdown stops the service
 func (da *DiameterAgent) Shutdown() (err error) {
 	da.Lock()
 	close(da.stopChan)
+
 	da.da = nil
 	da.Unlock()
 	return // no shutdown for the momment

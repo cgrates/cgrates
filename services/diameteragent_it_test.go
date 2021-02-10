@@ -86,9 +86,13 @@ func TestDiameterAgentReload(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-
 	cfg.DiameterAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DA_JSN) <- struct{}{}
+	srv.(*DiameterAgent).lnet = "bad_lnet_test"
+	err2 := srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err2)
+	}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
