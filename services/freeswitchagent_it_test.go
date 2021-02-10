@@ -92,7 +92,7 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	}
 
 	srv.(*FreeswitchAgent).fS = agents.NewFSsessions(agentCfg, "", nil)
-	//srv.(*FreeswitchAgent).fS = new(agents.FSsessions)
+
 	err := srv.Reload()
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)

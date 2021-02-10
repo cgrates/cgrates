@@ -78,12 +78,11 @@ func (kam *KamailioAgent) Start() (err error) {
 
 // Reload handles the change of config
 func (kam *KamailioAgent) Reload() (err error) {
-
-	if err = kam.Shutdown(); err != nil {
-		return
-	}
 	kam.Lock()
 	defer kam.Unlock()
+	if err = kam.kam.Shutdown(); err != nil {
+		return
+	}
 	kam.kam.Reload()
 	go func(k *agents.KamailioAgent) {
 		if err = k.Connect(); err != nil {
