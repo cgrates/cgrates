@@ -75,11 +75,11 @@ func (fS *FreeswitchAgent) Start() (err error) {
 
 // Reload handles the change of config
 func (fS *FreeswitchAgent) Reload() (err error) {
-	if err = fS.Shutdown(); err != nil {
-		return
-	}
 	fS.Lock()
 	defer fS.Unlock()
+	if err = fS.fS.Shutdown(); err != nil {
+		return
+	}
 	fS.fS.Reload()
 	go func(f *agents.FSsessions) {
 		if err := fS.fS.Connect(); err != nil {
