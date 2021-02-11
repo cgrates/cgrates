@@ -171,13 +171,6 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", ToJSON(expected), ToJSON(rcv))
 	}
-
-	accPrfList := AccountProfiles{}
-	accPrfList = append(accPrfList, expected)
-	accPrfList.Sort()
-	if !reflect.DeepEqual(accPrfList[0], expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, accPrfList[0])
-	}
 }
 
 func TestAPIBalanceAsBalance(t *testing.T) {
@@ -222,10 +215,4 @@ func TestAPIBalanceAsBalance(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(expected), ToJSON(rcv))
 	}
 
-	blcList := Balances{}
-	blcList = append(blcList, expected)
-	blcList.Sort()
-	if !reflect.DeepEqual(blcList[0], expected) {
-		t.Errorf("Expected %+v \n, received %+v", expected, blcList[0])
-	}
 }

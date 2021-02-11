@@ -151,8 +151,20 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent,
 // accountProcessEvent implements event processing by an Account
 func (aS *AccountS) accountDebitUsage(acnt *utils.AccountProfile,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+	//ev := cgrEv.AsDataProvider()
+	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
+	for _, blnCfg := range acnt.Balances {
+		var weight float64
+		/*
+			if weight, err = engine.WeightFromDynamics(blnCfg.DynamicWeights,
+				aS.fltrS, cgrEv.Tenant, ev); err != nil {
+				return
+			}
+		*/
+		blcsWithWeight = append(blcsWithWeight, &utils.BalanceWithWeight{blnCfg, weight})
+	}
 	var blncOpers []balanceOperator
-	if blncOpers, err = newAccountBalanceOperators(acnt, aS.fltrS, aS.connMgr,
+	if blncOpers, err = newBalanceOperators(blcsWithWeight.Balances(), aS.fltrS, aS.connMgr,
 		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
 		return
 	}

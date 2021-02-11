@@ -67,8 +67,8 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 		fltrS:      filters,
 		cncrtBlncs: cncrtBlncs,
 	}
-
-	if blcOp, err := newAccountBalanceOperators(acntPrf, filters, nil,
+	blnCfgs := []*utils.Balance{acntPrf.Balances["BL0"], acntPrf.Balances["BL1"]}
+	if blcOp, err := newBalanceOperators(blnCfgs, filters, nil,
 		nil, nil); err != nil {
 		t.Error(err)
 	} else {
@@ -80,7 +80,7 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 
 	acntPrf.Balances["BL1"].Type = "INVALID_TYPE"
 	expectedErr := "unsupported balance type: <INVALID_TYPE>"
-	if _, err := newAccountBalanceOperators(acntPrf, filters, nil,
+	if _, err := newBalanceOperators(blnCfgs, filters, nil,
 		nil, nil); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}

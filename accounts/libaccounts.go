@@ -30,15 +30,9 @@ import (
 )
 
 // newAccountBalances constructs accountBalances
-func newAccountBalanceOperators(acnt *utils.AccountProfile,
+func newBalanceOperators(blnCfgs []*utils.Balance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) (blncOpers []balanceOperator, err error) {
-
-	blnCfgs := make(utils.Balances, 0, len(acnt.Balances))
-	for _, blnCfg := range acnt.Balances {
-		blnCfgs = append(blnCfgs, blnCfg)
-	}
-	blnCfgs.Sort()
 
 	blncOpers = make([]balanceOperator, len(blnCfgs))
 	var cncrtBlncs []*concreteBalance

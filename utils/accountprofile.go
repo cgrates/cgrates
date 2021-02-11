@@ -200,20 +200,54 @@ func (bL *Balance) Clone() (blnc *Balance) {
 	return
 }
 
-// ActionProfiles is a sortable list of ActionProfiles
-type AccountProfiles []*AccountProfile
+// AccountProfileWithWeight attaches static weight to AccountProfile
+type AccountProfileWithWeight struct {
+	*AccountProfile
+	Weight float64
+}
+
+// AccountProfilesWithWeight is a sortable list of AccountProfileWithWeight
+type AccountProfilesWithWeight []*AccountProfileWithWeight
 
 // Sort is part of sort interface, sort based on Weight
-func (aps AccountProfiles) Sort() {
+func (aps AccountProfilesWithWeight) Sort() {
 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
 }
 
+// AccountProfiles returns the list of AccountProfiles
+func (apWws AccountProfilesWithWeight) AccountProfiles() (aps []*AccountProfile) {
+	if apWws != nil {
+		aps = make([]*AccountProfile, len(apWws))
+		for i, apWw := range apWws {
+			aps[i] = apWw.AccountProfile
+		}
+	}
+	return
+}
+
+// BalanceWithWeight attaches static Weight to Balance
+type BalanceWithWeight struct {
+	*Balance
+	Weight float64
+}
+
 // Balances is a sortable list of Balances
-type Balances []*Balance
+type BalancesWithWeight []*BalanceWithWeight
 
 // Sort is part of sort interface, sort based on Weight
-func (blcs Balances) Sort() {
+func (blcs BalancesWithWeight) Sort() {
 	sort.Slice(blcs, func(i, j int) bool { return blcs[i].Weight > blcs[j].Weight })
+}
+
+// Balances returns the list of Balances
+func (bWws BalancesWithWeight) Balances() (blncs []*Balance) {
+	if bWws != nil {
+		blncs = make([]*Balance, len(bWws))
+		for i, bWw := range bWws {
+			blncs[i] = bWw.Balance
+		}
+	}
+	return
 }
 
 // APIAccountProfileWithOpts is used in API calls

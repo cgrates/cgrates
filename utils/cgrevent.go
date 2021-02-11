@@ -166,6 +166,14 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	return
 }
 
+// AsDataProvider returns the CGREvent as MapStorage with *opts and *req paths set
+func (cgrEv *CGREvent) AsDataProvider() (ev DataProvider) {
+	return MapStorage{
+		MetaOpts: cgrEv.Opts,
+		MetaReq:  cgrEv.Event,
+	}
+}
+
 // CGREvents is a group of generic events processed by CGR services
 // ie: derived CDRs
 type CGREvents struct {
