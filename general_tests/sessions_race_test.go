@@ -102,9 +102,8 @@ func TestSessionSRace(t *testing.T) {
 	filterS = engine.NewFilterS(cfg, connMgr, dm)
 
 	// chargerS
-	if chrS, err = engine.NewChargerService(dm, filterS, cfg, connMgr); err != nil {
-		t.Fatal(err)
-	}
+	chrS = engine.NewChargerService(dm, filterS, cfg, connMgr)
+
 	chargerSChan <- v1.NewChargerSv1(chrS)
 
 	// addCharger

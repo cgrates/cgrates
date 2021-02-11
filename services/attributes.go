@@ -82,13 +82,7 @@ func (attrS *AttributeService) Start() (err error) {
 
 	attrS.Lock()
 	defer attrS.Unlock()
-	attrS.attrS, err = engine.NewAttributeService(datadb, filterS, attrS.cfg)
-	if err != nil {
-		utils.Logger.Crit(
-			fmt.Sprintf("<%s> Could not init, error: %s",
-				utils.AttributeS, err.Error()))
-		return
-	}
+	attrS.attrS = engine.NewAttributeService(datadb, filterS, attrS.cfg)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	attrS.rpc = v1.NewAttributeSv1(attrS.attrS)
 	if !attrS.cfg.DispatcherSCfg().Enabled {
@@ -107,9 +101,7 @@ func (attrS *AttributeService) Reload() (err error) {
 func (attrS *AttributeService) Shutdown() (err error) {
 	attrS.Lock()
 	defer attrS.Unlock()
-	if err = attrS.attrS.Shutdown(); err != nil {
-		return
-	}
+	attrS.attrS.Shutdown()
 	attrS.attrS = nil
 	attrS.rpc = nil
 	<-attrS.connChan
