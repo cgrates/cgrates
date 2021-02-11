@@ -26,10 +26,9 @@ import (
 )
 
 func NewChargerService(dm *DataManager, filterS *FilterS,
-	cfg *config.CGRConfig, connMgr *ConnManager) (*ChargerService, error) {
-
+	cfg *config.CGRConfig, connMgr *ConnManager) *ChargerService {
 	return &ChargerService{dm: dm, filterS: filterS,
-		cfg: cfg, connMgr: connMgr}, nil
+		cfg: cfg, connMgr: connMgr}
 }
 
 // ChargerService is performing charging
@@ -41,10 +40,9 @@ type ChargerService struct {
 }
 
 // Shutdown is called to shutdown the service
-func (cS *ChargerService) Shutdown() (err error) {
+func (cS *ChargerService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.ChargerS))
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.ChargerS))
-	return
 }
 
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call

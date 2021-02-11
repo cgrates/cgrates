@@ -83,12 +83,7 @@ func (chrS *ChargerService) Start() (err error) {
 
 	chrS.Lock()
 	defer chrS.Unlock()
-	if chrS.chrS, err = engine.NewChargerService(datadb, filterS, chrS.cfg, chrS.connMgr); err != nil {
-		utils.Logger.Crit(
-			fmt.Sprintf("<%s> Could not init, error: %s",
-				utils.ChargerS, err.Error()))
-		return
-	}
+	chrS.chrS = engine.NewChargerService(datadb, filterS, chrS.cfg, chrS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
 	cSv1 := v1.NewChargerSv1(chrS.chrS)
 	if !chrS.cfg.DispatcherSCfg().Enabled {
@@ -107,9 +102,7 @@ func (chrS *ChargerService) Reload() (err error) {
 func (chrS *ChargerService) Shutdown() (err error) {
 	chrS.Lock()
 	defer chrS.Unlock()
-	if err = chrS.chrS.Shutdown(); err != nil {
-		return
-	}
+	chrS.chrS.Shutdown()
 	chrS.chrS = nil
 	chrS.rpc = nil
 	<-chrS.connChan

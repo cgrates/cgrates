@@ -31,12 +31,12 @@ import (
 
 // NewAttributeService returns a new AttributeService
 func NewAttributeService(dm *DataManager, filterS *FilterS,
-	cgrcfg *config.CGRConfig) (*AttributeService, error) {
+	cgrcfg *config.CGRConfig) *AttributeService {
 	return &AttributeService{
 		dm:      dm,
 		filterS: filterS,
 		cgrcfg:  cgrcfg,
-	}, nil
+	}
 }
 
 // AttributeService the service for the API
@@ -47,10 +47,9 @@ type AttributeService struct {
 }
 
 // Shutdown is called to shutdown the service
-func (alS *AttributeService) Shutdown() (err error) {
+func (alS *AttributeService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.AttributeS))
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.AttributeS))
-	return
 }
 
 // attributeProfileForEvent returns the matching attribute

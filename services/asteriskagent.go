@@ -72,10 +72,7 @@ func (ast *AsteriskAgent) Start() (err error) {
 	ast.stopChan = make(chan struct{})
 	ast.smas = make([]*agents.AsteriskAgent, len(ast.cfg.AsteriskAgentCfg().AsteriskConns))
 	for connIdx := range ast.cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		if ast.smas[connIdx], err = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.AsteriskAgent, err))
-			return
-		}
+		ast.smas[connIdx] = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr)
 		go listenAndServe(ast.smas[connIdx], ast.stopChan, ast.shdChan)
 	}
 	return
@@ -83,14 +80,17 @@ func (ast *AsteriskAgent) Start() (err error) {
 
 // Reload handles the change of config
 func (ast *AsteriskAgent) Reload() (err error) {
-	if err = ast.Shutdown(); err != nil {
-		return
-	}
+	ast.shutdown()
 	return ast.Start()
 }
 
 // Shutdown stops the service
 func (ast *AsteriskAgent) Shutdown() (err error) {
+	ast.shutdown()
+	return
+}
+
+func (ast *AsteriskAgent) shutdown() {
 	ast.Lock()
 	close(ast.stopChan)
 	ast.smas = nil

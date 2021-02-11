@@ -55,14 +55,14 @@ const (
 
 // NewAsteriskAgent constructs a new Asterisk Agent
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
-	connMgr *engine.ConnManager) (*AsteriskAgent, error) {
+	connMgr *engine.ConnManager) *AsteriskAgent {
 	sma := &AsteriskAgent{
 		cgrCfg:      cgrCfg,
 		astConnIdx:  astConnIdx,
 		connMgr:     connMgr,
 		eventsCache: make(map[string]*utils.CGREvent),
 	}
-	return sma, nil
+	return sma
 }
 
 // AsteriskAgent used to cominicate with asterisk

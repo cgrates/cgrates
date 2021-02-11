@@ -212,11 +212,8 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	chargerSrv, err = NewChargerService(dmCharger,
+	chargerSrv = NewChargerService(dmCharger,
 		&FilterS{dm: dmCharger, cfg: defaultCfg}, defaultCfg, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 
 	fltrCP1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -382,11 +379,8 @@ func TestChargerProcessEvent(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true)
 	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	chargerSrv, err = NewChargerService(dmCharger,
+	chargerSrv = NewChargerService(dmCharger,
 		&FilterS{dm: dmCharger, cfg: defaultCfg}, defaultCfg, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 
 	fltrCP1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,

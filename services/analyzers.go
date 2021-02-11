@@ -83,6 +83,7 @@ func (anz *AnalyzerService) Start() (err error) {
 	}(anz.anz)
 	anz.server.SetAnalyzer(anz.anz)
 	anz.rpc = v1.NewAnalyzerSv1(anz.anz)
+	//separa in propria functie
 	go func() {
 		var fS *engine.FilterS
 		select {
