@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -531,5 +532,169 @@ func TestABCost0WithLimitExceedWithConcrete(t *testing.T) {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(10, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
+	}
+}
+
+func TestDebitUsageFiltersError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	filters := engine.NewFilterS(cfg, nil, nil)
+	aB := &abstractBalance{
+		blnCfg: &utils.Balance{
+			ID:        "ID_TEST",
+			Type:      utils.MetaAbstract,
+			FilterIDs: []string{"*string:*~req.Usage:10s"},
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment:    utils.NewDecimal(int64(1*time.Second), 0),
+					RecurrentFee: utils.NewDecimal(2, 0),
+				},
+			},
+			Units: utils.NewDecimal(int64(50*time.Second), 0),
+		},
+		fltrS: filters,
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Usage: "10s",
+		},
+	}
+	_, err := aB.debitUsage(utils.NewDecimal(int64(40*time.Second), 0),
+		cgrEv)
+	if err == nil || err != utils.ErrFilterNotPassingNoCaps {
+		t.Errorf("Expected %+v, received %+v", utils.ErrFilterNotPassingNoCaps, err)
+	}
+
+	aB.blnCfg.FilterIDs = []string{"invalid_filter_format"}
+	_, err = aB.debitUsage(utils.NewDecimal(int64(40*time.Second), 0),
+		cgrEv)
+	if err == nil || err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
+	}
+}
+
+func TestDebitUsageBalanceLimitErrors(t *testing.T) {
+	aB := &abstractBalance{
+		blnCfg: &utils.Balance{
+			ID:   "ID_TEST",
+			Type: utils.MetaAbstract,
+			Opts: map[string]interface{}{
+				utils.MetaBalanceLimit: "not_FLOAT64",
+			},
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment:    utils.NewDecimal(int64(1*time.Second), 0),
+					RecurrentFee: utils.NewDecimal(2, 0),
+				},
+			},
+			Units: utils.NewDecimal(int64(60*time.Second), 0),
+		},
+		fltrS: new(engine.FilterS),
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Usage: "10s",
+		},
+	}
+
+	expectedErr := "unsupported *balanceLimit format"
+	_, err := aB.debitUsage(utils.NewDecimal(int64(40*time.Second), 0),
+		cgrEv)
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	aB.blnCfg.Opts[utils.MetaBalanceLimit] = float64(16 * time.Second)
+	if _, err = aB.debitUsage(utils.NewDecimal(int64(40*time.Second), 0),
+		cgrEv); err != nil {
+		t.Error(err)
+	}
+	if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(60*time.Second), 0)) != 0 {
+		t.Errorf("Expected %+v, received %+v", aB.blnCfg.Units.Big, utils.NewDecimal(int64(50*time.Second), 0))
+	}
+}
+
+func TestDebitUsageUnitFactorsErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	filters := engine.NewFilterS(cfg, nil, nil)
+	aB := &abstractBalance{
+		blnCfg: &utils.Balance{
+			ID:   "ID_TEST",
+			Type: utils.MetaAbstract,
+			UnitFactors: []*utils.UnitFactor{
+				{
+					FilterIDs: []string{"invalid_filter_fromat"},
+					Factor:    utils.NewDecimal(2, 0),
+				},
+			},
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment:    utils.NewDecimal(int64(1*time.Second), 0),
+					RecurrentFee: utils.NewDecimal(2, 0),
+				},
+			},
+			Units: utils.NewDecimal(int64(60*time.Second), 0),
+		},
+		fltrS: filters,
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Usage: "10s",
+		},
+	}
+
+	if _, err := aB.debitUsage(utils.NewDecimal(int64(20*time.Second), 0), cgrEv); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
+	}
+
+	aB.blnCfg.UnitFactors[0].FilterIDs = []string{"*string:*~req.Usage:10s"}
+	if ec, err := aB.debitUsage(utils.NewDecimal(int64(20*time.Second), 0), cgrEv); err != nil {
+		t.Error(err)
+	} else if ec.Usage.Cmp(decimal.New(0, 0)) != 0 {
+		t.Error(err)
+	}
+}
+
+func TestDebitUsageCostIncrementError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	filters := engine.NewFilterS(cfg, nil, nil)
+	aB := &abstractBalance{
+		blnCfg: &utils.Balance{
+			ID:   "ID_TEST",
+			Type: utils.MetaAbstract,
+			CostIncrements: []*utils.CostIncrement{
+				{
+					FilterIDs:    []string{"INVALID_FILTER_FORMAT"},
+					Increment:    utils.NewDecimal(int64(1*time.Second), 0),
+					RecurrentFee: utils.NewDecimal(2, 0),
+				},
+			},
+			Units: utils.NewDecimal(int64(60*time.Second), 0),
+		},
+		fltrS: filters,
+	}
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Usage: "10s",
+		},
+	}
+
+	if _, err := aB.debitUsage(utils.NewDecimal(int64(20*time.Second), 0), cgrEv); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
+	}
+
+	//Will check the error by making the event charge
+	//the cost is unknown, will use attributes to query from rates
+	aB.blnCfg.CostIncrements = nil
+	aB.blnCfg.AttributeIDs = []string{"attr11"}
+	expected := "NOT_CONNECTED: AttributeS"
+	if _, err := aB.debitUsage(utils.NewDecimal(int64(20*time.Second), 0), cgrEv); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
