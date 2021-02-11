@@ -696,6 +696,9 @@ func TestDebitUsageCostIncrementError(t *testing.T) {
 	expected := "NOT_CONNECTED: AttributeS"
 	if _, err := aB.debitUsage(utils.NewDecimal(int64(20*time.Second), 0), cgrEv); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
 func TestABCost(t *testing.T) {
 	// debit 10 seconds with cost of 0.1 per second
 	aB := &abstractBalance{
