@@ -101,3 +101,17 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 	}
 	return
 }
+
+// Weight returns weight of the first matching DynamicWeight
+func WeightFromDynamics(dWs []*utils.DynamicWeight,
+	fltrS FilterS, tnt string, ev utils.DataProvider) (wg float64, err error) {
+	for _, dW := range dWs {
+		var pass bool
+		if pass, err = fltrS.Pass(tnt, dW.FilterIDs, ev); err != nil {
+			return
+		} else if pass {
+			return dW.Weight, nil
+		}
+	}
+	return 0.0, nil
+}

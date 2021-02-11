@@ -32,13 +32,13 @@ func NewDynamicWeightsFromString(s, dWSep, fltrSep string) (dWs []*DynamicWeight
 	if lnDwStrs%nrFlds != 0 { // need to have multiples of number of fields in one DynamicWeight
 		return nil, fmt.Errorf("invalid DynamicWeight format for string <%s>", s)
 	}
-	dWs = make([]*DynamicWeight, lnDwStrs/2)
+	dWs = make([]*DynamicWeight, lnDwStrs/nrFlds)
 	for i := 0; i < lnDwStrs; i += nrFlds {
 		dw := &DynamicWeight{FilterIDs: strings.Split(dwStrs[i], fltrSep)}
 		if dw.Weight, err = strconv.ParseFloat(dwStrs[i+1], 64); err != nil {
 			return nil, fmt.Errorf("invalid Weight <%s> in string: <%s>", dwStrs[i+1], s)
 		}
-		dWs[i/nrFlds] = dw
+		dWs = append(dWs, dw)
 	}
 	return
 }
