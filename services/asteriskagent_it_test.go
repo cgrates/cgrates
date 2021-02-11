@@ -35,7 +35,6 @@ import (
 
 func TestAsteriskAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
 	cfg.SessionSCfg().Enabled = true
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
@@ -85,6 +84,81 @@ func TestAsteriskAgentReload(t *testing.T) {
 	err := srv.Start()
 	if err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	cfg.AsteriskAgentCfg().Enabled = false
+	cfg.GetReloadChan(config.AsteriskAgentJSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}
+
+func TestAsteriskAgentReload2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, nil, anz, srvDep)
+	srv := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
+	engine.NewConnManager(cfg, nil)
+	srvMngr.AddServices(srv, sS,
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Fatal(err)
+	}
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	var reply string
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "asterisk_ari", "cgrates", "etc", "cgrates"),
+		Section: config.AsteriskAgentJSN,
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	if !srv.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	srvReload := srv.Reload()
+	if srvReload != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", srvReload)
+	}
+	err := srv.Start()
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	cfg.AsteriskAgentCfg().AsteriskConns = []*config.AsteriskConnCfg{
+		{
+			Alias:           "127.0.0.1:8448",
+			Address:         "127.0.0.1:8088",
+			User:            "cgrates",
+			Password:        "CGRateS.org",
+			ConnectAttempts: 0,
+			Reconnects:      0,
+		}}
+	srvReload = srv.Reload()
+	if srvReload != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", srvReload)
 	}
 	cfg.AsteriskAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.AsteriskAgentJSN) <- struct{}{}

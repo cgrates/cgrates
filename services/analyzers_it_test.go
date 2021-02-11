@@ -121,4 +121,33 @@ func TestAnalyzerSReload2(t *testing.T) {
 	anz.start()
 	close(anz.stopChan)
 	anz.start()
+	anz.anz = nil
 }
+
+/*
+func TestAnalyzerSReload3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	if err := os.MkdirAll("/tmp/analyzers", 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll("/tmp/analyzers_test", 0700); err != nil {
+		t.Fatal(err)
+	}
+	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers_test"
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	shdChan := utils.NewSyncedChan()
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	anzRPC := make(chan rpcclient.ClientConnector, 1)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, anzRPC, srvDep)
+	anz.stopChan = make(chan struct{})
+	anz.Start()
+
+	anz.anz = nil
+	close(anz.stopChan)
+
+}
+*/
