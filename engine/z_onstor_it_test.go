@@ -2323,7 +2323,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 				},
 				Type: utils.MetaVoice,
 				Units: &utils.Decimal{
-					new(decimal.Big).SetUint64(10),
+					Big: new(decimal.Big).SetUint64(10),
 				},
 				Opts: map[string]interface{}{
 					"key1": "val1",

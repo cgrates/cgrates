@@ -27,14 +27,19 @@ import (
 
 // The output structure that will be returned with the call cost information.
 type CallCost struct {
-	Category, Tenant, Subject, Account, Destination, ToR string
-	Cost                                                 float64
-	Timespans                                            TimeSpans
-	RatedUsage                                           float64
-	AccountSummary                                       *AccountSummary
-	deductConnectFee                                     bool
-	negativeConnectFee                                   bool // the connect fee went negative on default balance
-	maxCostDisconect                                     bool
+	Category           string
+	Tenant             string
+	Subject            string
+	Account            string
+	Destination        string
+	ToR                string
+	Cost               float64
+	Timespans          TimeSpans
+	RatedUsage         float64
+	AccountSummary     *AccountSummary
+	deductConnectFee   bool
+	negativeConnectFee bool // the connect fee went negative on default balance
+	maxCostDisconect   bool
 }
 
 // Merges the received timespan if they are similar (same activation period, same interval, same minute info.

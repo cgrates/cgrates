@@ -21,9 +21,8 @@ steps:
       from_secret: credentials
     token:
       from_secret: token
-    recipients:
-      - alexandru.tripon@itsyscom.com
-
+  when:
+    status: [ changed, failure ]
 
 
 ---
@@ -51,8 +50,6 @@ steps:
       from_secret: credentials
     token:
       from_secret: token
-    recipients:
-      - alexandru.tripon@itsyscom.com
   when:
     status: [ changed, failure ]
 

@@ -623,3 +623,63 @@ func IfaceAsEventCost(itm interface{}) (ec *EventCost, err error) {
 	}
 	return
 }
+
+// NewFreeEventCost returns an EventCost of given duration that it's free
+func NewFreeEventCost(cgrID, runID, account string, tStart time.Time, usage time.Duration) *EventCost {
+	return &EventCost{
+		CGRID:     cgrID,
+		RunID:     runID,
+		StartTime: tStart,
+		Cost:      utils.Float64Pointer(0),
+		Charges: []*ChargingInterval{{
+			RatingID: "*free",
+			Increments: []*ChargingIncrement{
+				{
+					Usage:          usage,
+					AccountingID:   "*free",
+					CompressFactor: 1,
+				},
+			},
+			CompressFactor: 1,
+		}},
+
+		Rating: Rating{
+			"*free": {
+				RoundingMethod:   "*up",
+				RoundingDecimals: 5,
+				RatesID:          "*free",
+				RatingFiltersID:  "*free",
+				TimingID:         "*free",
+			},
+		},
+		Accounting: Accounting{
+			"*free": {
+				AccountID: account,
+				// BalanceUUID: "",
+				RatingID: "*free",
+			},
+		},
+		RatingFilters: RatingFilters{
+			"*free": {
+				utils.Subject:               "",
+				utils.DestinationPrefixName: "",
+				utils.DestinationID:         "",
+				utils.RatingPlanID:          "",
+			},
+		},
+		Rates: ChargedRates{
+			"*free": {
+				{
+					RateIncrement: usage,
+					RateUnit:      usage,
+				},
+			},
+		},
+		Timings: ChargedTimings{
+			"*free": {
+				StartTime: "00:00:00",
+			},
+		},
+		cache: utils.MapStorage{},
+	}
+}
