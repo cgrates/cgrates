@@ -84,26 +84,28 @@ func (anz *AnalyzerService) Start() (err error) {
 	anz.server.SetAnalyzer(anz.anz)
 	anz.rpc = v1.NewAnalyzerSv1(anz.anz)
 	//separa in propria functie
-	go func() {
-		var fS *engine.FilterS
-		select {
-		case <-anz.stopChan:
-			return
-		case fS = <-anz.filterSChan:
-			if !anz.IsRunning() {
-				return
-			}
-			anz.Lock()
-			defer anz.Unlock()
-			anz.filterSChan <- fS
-			anz.anz.SetFilterS(fS)
-		}
-		if !anz.cfg.DispatcherSCfg().Enabled {
-			anz.server.RpcRegister(anz.rpc)
-		}
-		anz.connChan <- anz.rpc
-	}()
+	go anz.start()
 	return
+}
+
+func (anz *AnalyzerService) start() {
+	var fS *engine.FilterS
+	select {
+	case <-anz.stopChan:
+		return
+	case fS = <-anz.filterSChan:
+		if !anz.IsRunning() {
+			return
+		}
+		anz.Lock()
+		defer anz.Unlock()
+		anz.filterSChan <- fS
+		anz.anz.SetFilterS(fS)
+	}
+	if !anz.cfg.DispatcherSCfg().Enabled {
+		anz.server.RpcRegister(anz.rpc)
+	}
+	anz.connChan <- anz.rpc
 }
 
 // Reload handles the change of config
