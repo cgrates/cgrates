@@ -34,11 +34,17 @@ func NewDynamicWeightsFromString(s, dWSep, fltrSep string) (dWs []*DynamicWeight
 	}
 	dWs = make([]*DynamicWeight, 0, lnDwStrs/nrFlds)
 	for i := 0; i < lnDwStrs; i += nrFlds {
-		dw := &DynamicWeight{FilterIDs: strings.Split(dwStrs[i], fltrSep)}
-		if dw.Weight, err = strconv.ParseFloat(dwStrs[i+1], 64); err != nil {
-			return nil, fmt.Errorf("invalid Weight <%s> in string: <%s>", dwStrs[i+1], s)
+		var fltrIDs []string
+		if len(dwStrs[i]) != 0 {
+			fltrIDs = strings.Split(dwStrs[i], fltrSep)
 		}
-		dWs = append(dWs, dw)
+		var weight float64
+		if len(dwStrs[i+1]) != 0 {
+			if weight, err = strconv.ParseFloat(dwStrs[i+1], 64); err != nil {
+				return nil, fmt.Errorf("invalid Weight <%s> in string: <%s>", dwStrs[i+1], s)
+			}
+		}
+		dWs = append(dWs, &DynamicWeight{FilterIDs: fltrIDs, Weight: weight})
 	}
 	return
 }

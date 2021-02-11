@@ -43,5 +43,46 @@ func TestNewDynamicWeightsFromString(t *testing.T) {
 	} else if !reflect.DeepEqual(eDws, dws) {
 		t.Errorf("expecting: %+v, received: %+v", eDws, dws)
 	}
+	eDws = []*DynamicWeight{
+		{
+			FilterIDs: []string{"fltr1", "fltr2"},
+			Weight:    20.0,
+		},
+		{
+			Weight: 30.0,
+		},
+		{
+			FilterIDs: []string{"fltr4", "fltr5"},
+			Weight:    50.0,
+		},
+	}
+	dwsStr = "fltr1&fltr2;20;;30;fltr4&fltr5;50"
+	if dws, err := NewDynamicWeightsFromString(dwsStr, ";", "&"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eDws[1], dws[1]) {
+		t.Errorf("expecting: %+v, received: %+v", eDws[1], dws[1])
+	}
+	eDws = []*DynamicWeight{
+		{
+			Weight: 20.0,
+		},
+	}
+	dwsStr = ";20"
+	if dws, err := NewDynamicWeightsFromString(dwsStr, ";", "&"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eDws, dws) {
+		t.Errorf("expecting: %+v, received: %+v", eDws, dws)
+	}
+	eDws = []*DynamicWeight{
+		{
+			Weight: 0.0,
+		},
+	}
+	dwsStr = ";"
+	if dws, err := NewDynamicWeightsFromString(dwsStr, ";", "&"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eDws, dws) {
+		t.Errorf("expecting: %+v, received: %+v", eDws, dws)
+	}
 
 }
