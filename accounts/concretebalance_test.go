@@ -22,6 +22,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/rpcclient"
+
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/engine"
@@ -587,6 +589,232 @@ func TestCBDebitWithInvalidLimit(t *testing.T) {
 	})
 	if _, _, err := cb.debitUnits(utils.NewDecimal(3, 0),
 		"cgrates.org", mp); err == nil || err.Error() != "unsupported *balanceLimit format" {
+		t.Error(err)
+	}
+}
+
+func TestCBSDebitUsage(t *testing.T) {
+	// debit 10 units from a concrete balance with 500 units
+	cb := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment:    utils.NewDecimal(5, 0),
+					RecurrentFee: utils.NewDecimal(1, 0),
+				},
+			},
+		},
+		fltrS: new(engine.FilterS),
+	}
+	toDebit := utils.NewDecimal(10, 0)
+	if dbted, err := cb.debitUsage(toDebit,
+		new(utils.CGREvent)); err != nil {
+		t.Error(err)
+	} else if dbted.Usage.Compare(toDebit) != 0 {
+		t.Errorf("debited: %+v", dbted)
+	} else if cb.blnCfg.Units.Cmp(decimal.New(498, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
+	}
+}
+
+func TestCBSDebitUsageInvalidFilter(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	// debit 10 units from a concrete balance with 500 units
+	cb := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:        "CB",
+			Type:      utils.MetaConcrete,
+			Units:     utils.NewDecimal(500, 0), // 500 Units
+			FilterIDs: []string{"*string"},
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment:    utils.NewDecimal(5, 0),
+					RecurrentFee: utils.NewDecimal(1, 0),
+				},
+			},
+		},
+		fltrS: filterS,
+	}
+	toDebit := utils.NewDecimal(10, 0)
+	if _, err := cb.debitUsage(toDebit,
+		new(utils.CGREvent)); err == nil || err.Error() != "inline parse error for string: <*string>" {
+		t.Error(err)
+	}
+}
+
+func TestCBSDebitUsageNoMatchFilter(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	// debit 10 units from a concrete balance with 500 units
+	cb := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:        "CB",
+			Type:      utils.MetaConcrete,
+			Units:     utils.NewDecimal(500, 0), // 500 Units
+			FilterIDs: []string{"*string:~*req.CustomField:CustomValue"},
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment:    utils.NewDecimal(5, 0),
+					RecurrentFee: utils.NewDecimal(1, 0),
+				},
+			},
+		},
+		fltrS: filterS,
+	}
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EV",
+		Event: map[string]interface{}{
+			"CustomField2": "CustomValue2",
+		},
+	}
+	toDebit := utils.NewDecimal(10, 0)
+	if _, err := cb.debitUsage(toDebit,
+		cgrEv); err == nil || err != utils.ErrFilterNotPassingNoCaps {
+		t.Error(err)
+	}
+}
+
+func TestCBSDebitUsageInvalidCostIncrementFilter(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	// debit 10 units from a concrete balance with 500 units
+	cb := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+			CostIncrements: []*utils.CostIncrement{
+				{
+					FilterIDs:    []string{"*string"},
+					Increment:    utils.NewDecimal(5, 0),
+					RecurrentFee: utils.NewDecimal(1, 0),
+				},
+			},
+		},
+		fltrS: filterS,
+	}
+	toDebit := utils.NewDecimal(10, 0)
+	if _, err := cb.debitUsage(toDebit,
+		new(utils.CGREvent)); err == nil || err.Error() != "inline parse error for string: <*string>" {
+		t.Error(err)
+	}
+}
+
+func TestCBSDebitUsageCoverProcessAttributes(t *testing.T) { // coverage purpose
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+
+	engine.Cache.Clear(nil)
+
+	sTestMock := &testMockCall{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
+	})
+
+	// debit 10 units from a concrete balance with 500 units
+	cb := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment:    utils.NewDecimal(5, 0),
+					RecurrentFee: utils.NewDecimal(-1, 0),
+				},
+			},
+			AttributeIDs: []string{"CustomAttr"},
+		},
+		fltrS:   filterS,
+		connMgr: connMgr,
+	}
+	toDebit := utils.NewDecimal(10, 0)
+	if _, err := cb.debitUsage(toDebit,
+		new(utils.CGREvent)); err == nil || err.Error() != "NOT_CONNECTED: AttributeS" {
+		t.Error(err)
+	}
+}
+
+func TestCBSDebitUsageCoverProcessAttributes2(t *testing.T) { // coverage purpose
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+
+	engine.Cache.Clear(nil)
+
+	sTestMock := &testMockCall{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				rplCast, canCast := reply.(*engine.AttrSProcessEventReply)
+				if !canCast {
+					t.Errorf("Wrong argument type : %T", reply)
+					return nil
+				}
+				customEv := &engine.AttrSProcessEventReply{
+					MatchedProfiles: nil,
+					AlteredFields:   []string{"CustomField2"},
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "EV",
+						Event: map[string]interface{}{
+							"CustomField2": "CustomValue2",
+						},
+					},
+				}
+				*rplCast = *customEv
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
+	})
+
+	// debit 10 units from a concrete balance with 500 units
+	cb := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment:    utils.NewDecimal(5, 0),
+					RecurrentFee: utils.NewDecimal(-1, 0),
+				},
+			},
+			AttributeIDs: []string{"CustomAttr"},
+		},
+		fltrS:      filterS,
+		connMgr:    connMgr,
+		attrSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
+	}
+	toDebit := utils.NewDecimal(10, 0)
+	if _, err := cb.debitUsage(toDebit,
+		new(utils.CGREvent)); err == nil || err.Error() != "RATES_ERROR:NOT_CONNECTED: RateS" {
 		t.Error(err)
 	}
 }
