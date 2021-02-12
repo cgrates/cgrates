@@ -2307,13 +2307,21 @@ func testOnStorITAccountProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
 		},
-		Weight: 2,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 2,
+			},
+		},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weight:    10,
-				Type:      utils.MetaVoice,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type: utils.MetaVoice,
 				Units: &utils.Decimal{
 					new(decimal.Big).SetUint64(10),
 				},

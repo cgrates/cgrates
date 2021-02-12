@@ -27,12 +27,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ericlagergren/decimal"
-
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-
-	"github.com/cgrates/cgrates/config"
 )
 
 var (
@@ -51,7 +48,6 @@ var (
 		testFullRemoteITDataFlush,
 		testFullRemoteITStartEngine,
 		testFullRemoteITRPCConn,
-
 		testFullRemoteITAttribute,
 		testFullRemoteITStatQueue,
 		testFullRemoteITThreshold,
@@ -63,7 +59,6 @@ var (
 		testFullRemoteITRate,
 		testFullRemoteITAction,
 		testFullRemoteITAccount,
-
 		testFullRemoteITKillEngine,
 	}
 )
@@ -764,51 +759,66 @@ func testFullRemoteITAccount(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var replySet string
-	accPrf := &utils.AccountProfile{
-		Tenant: "cgrates.org",
-		ID:     "1001",
-		Weight: 20,
-		Balances: map[string]*utils.Balance{
-			"MonetaryBalance": &utils.Balance{
-				ID:     "MonetaryBalance",
-				Weight: 10,
-				Type:   utils.MetaMonetary,
-				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
-						FilterIDs:    []string{"fltr1", "fltr2"},
-						Increment:    &utils.Decimal{decimal.New(13, 1)},
-						FixedFee:     &utils.Decimal{decimal.New(23, 1)},
-						RecurrentFee: &utils.Decimal{decimal.New(33, 1)},
-					},
-				},
-				AttributeIDs: []string{"attr1", "attr2"},
-				UnitFactors: []*utils.UnitFactor{
-					&utils.UnitFactor{
-						FilterIDs: []string{"fltr1", "fltr2"},
-						Factor:    &utils.Decimal{decimal.New(100, 0)},
-					},
-					&utils.UnitFactor{
-						FilterIDs: []string{"fltr3"},
-						Factor:    &utils.Decimal{decimal.New(200, 0)},
-					},
-				},
-				Units: &utils.Decimal{decimal.New(14, 0)},
+	apiAccPrf := &APIAccountProfileWithCache{
+		APIAccountProfile: &utils.APIAccountProfile{
+			Tenant:  "cgrates.org",
+			ID:      "1001",
+			Weights: ";20",
+			Opts: map[string]interface{}{
+				"TEST0": 2.,
 			},
-			"VoiceBalance": &utils.Balance{
-				ID:     "VoiceBalance",
-				Weight: 10,
-				Type:   utils.MetaVoice,
-				Units:  &utils.Decimal{decimal.New(3600000000000, 0)},
+			Balances: map[string]*utils.APIBalance{
+				"MonetaryBalance": {
+					ID:      "MonetaryBalance",
+					Weights: ";10",
+					Type:    utils.MetaMonetary,
+					Opts: map[string]interface{}{
+						"TEST1": 5.,
+					},
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							FilterIDs:    []string{"fltr1", "fltr2"},
+							Increment:    utils.Float64Pointer(1.3),
+							FixedFee:     utils.Float64Pointer(2.3),
+							RecurrentFee: utils.Float64Pointer(3.3),
+						},
+					},
+					AttributeIDs: []string{"attr1", "attr2"},
+					UnitFactors: []*utils.APIUnitFactor{
+						{
+							FilterIDs: []string{"fltr1", "fltr2"},
+							Factor:    100,
+						},
+						{
+							FilterIDs: []string{"fltr3"},
+							Factor:    200,
+						},
+					},
+					Units: 14,
+				},
+				"VoiceBalance": {
+					ID:      "VoiceBalance",
+					Weights: ";10",
+					Type:    utils.MetaVoice,
+					Opts:    map[string]interface{}{},
+					Units:   3600000000000,
+				},
 			},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
-		ThresholdIDs: []string{utils.MetaNone},
 	}
+	var replySet string
+
 	// add a threshold profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetAccountProfile, accPrf, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
+	}
+
+	accPrf, err := apiAccPrf.AsAccountProfile()
+	if err != nil {
+		t.Error(err)
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccountProfile,
@@ -816,21 +826,28 @@ func testFullRemoteITAccount(t *testing.T) {
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(accPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(accPrf), utils.ToJSON(reply))
+		t.Errorf("Expecting : %+v \n, received: %+v", utils.ToJSON(accPrf), utils.ToJSON(reply))
 	}
+
 	// update the threshold profile and verify it to be updated
-	accPrf.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetAccountProfile, accPrf, &replySet); err != nil {
+	apiAccPrf.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
 	}
+
+	accPrf, err = apiAccPrf.AsAccountProfile()
+	if err != nil {
+		t.Error(err)
+	}
+
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccountProfile,
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(accPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(accPrf), utils.ToJSON(reply))
+		t.Errorf("Expecting : %+v \n, received: %+v", utils.ToJSON(accPrf), utils.ToJSON(reply))
 	}
 }
 

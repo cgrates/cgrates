@@ -133,10 +133,14 @@ func testAccountSGetAccountProfile(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Balances: map[string]*utils.Balance{
 			"GenericBalance1": &utils.Balance{
-				ID:     "GenericBalance1",
-				Weight: 20,
-				Type:   utils.MetaAbstract,
-				Units:  &utils.Decimal{decimal.New(int64(time.Hour), 0)},
+				ID: "GenericBalance1",
+				Weights: []*utils.DynamicWeight{
+					{
+						Weight: 20,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: &utils.Decimal{decimal.New(int64(time.Hour), 0)},
 				UnitFactors: []*utils.UnitFactor{
 					&utils.UnitFactor{
 						FilterIDs: []string{"*string:~*req.ToR:*data"},
@@ -159,10 +163,14 @@ func testAccountSGetAccountProfile(t *testing.T) {
 				},
 			},
 			"MonetaryBalance1": &utils.Balance{
-				ID:     "MonetaryBalance1",
-				Weight: 30,
-				Type:   utils.MetaConcrete,
-				Units:  &utils.Decimal{decimal.New(5, 0)},
+				ID: "MonetaryBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(5, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -179,10 +187,14 @@ func testAccountSGetAccountProfile(t *testing.T) {
 				},
 			},
 			"MonetaryBalance2": &utils.Balance{
-				ID:     "MonetaryBalance2",
-				Weight: 10,
-				Type:   utils.MetaConcrete,
-				Units:  &utils.Decimal{decimal.New(3, 0)},
+				ID: "MonetaryBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(3, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -215,47 +227,44 @@ func testAccountSPing(t *testing.T) {
 
 func testAccountSSettAccountProfile(t *testing.T) {
 	apiAccPrf = &APIAccountProfileWithCache{
-		APIAccountProfileWithOpts: &utils.APIAccountProfileWithOpts{
-			APIAccountProfile: &utils.APIAccountProfile{
-				Tenant: "cgrates.org",
-				ID:     "id_test",
-				Weight: 10,
-				Balances: map[string]*utils.APIBalance{
-					"MonetaryBalance": &utils.APIBalance{
-						ID:     "MonetaryBalance",
-						Weight: 10,
-						Type:   utils.MetaMonetary,
-						CostIncrements: []*utils.APICostIncrement{
-							{
-								FilterIDs:    []string{"fltr1", "fltr2"},
-								Increment:    utils.Float64Pointer(1.3),
-								FixedFee:     utils.Float64Pointer(2.3),
-								RecurrentFee: utils.Float64Pointer(3.3),
-							},
+		APIAccountProfile: &utils.APIAccountProfile{
+			Tenant:  "cgrates.org",
+			ID:      "id_test",
+			Weights: ";10",
+			Balances: map[string]*utils.APIBalance{
+				"MonetaryBalance": &utils.APIBalance{
+					ID:      "MonetaryBalance",
+					Weights: ";10",
+					Type:    utils.MetaMonetary,
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							FilterIDs:    []string{"fltr1", "fltr2"},
+							Increment:    utils.Float64Pointer(1.3),
+							FixedFee:     utils.Float64Pointer(2.3),
+							RecurrentFee: utils.Float64Pointer(3.3),
 						},
-						AttributeIDs: []string{"attr1", "attr2"},
-						UnitFactors: []*utils.APIUnitFactor{
-							{
-								FilterIDs: []string{"fltr1", "fltr2"},
-								Factor:    100,
-							},
-							{
-								FilterIDs: []string{"fltr3"},
-								Factor:    200,
-							},
+					},
+					AttributeIDs: []string{"attr1", "attr2"},
+					UnitFactors: []*utils.APIUnitFactor{
+						{
+							FilterIDs: []string{"fltr1", "fltr2"},
+							Factor:    100,
 						},
-						Units: 14,
+						{
+							FilterIDs: []string{"fltr3"},
+							Factor:    200,
+						},
 					},
-					"VoiceBalance": &utils.APIBalance{
-						ID:     "VoiceBalance",
-						Weight: 10,
-						Type:   utils.MetaVoice,
-						Units:  3600000000000,
-					},
+					Units: 14,
 				},
-				ThresholdIDs: []string{utils.MetaNone},
+				"VoiceBalance": &utils.APIBalance{
+					ID:      "VoiceBalance",
+					Weights: ";10",
+					Type:    utils.MetaVoice,
+					Units:   3600000000000,
+				},
 			},
-			Opts: map[string]interface{}{},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 	var result string
@@ -321,7 +330,7 @@ func testAccountSGetAccountProfileIDsCount(t *testing.T) {
 
 func testAccountSUpdateAccountProfile(t *testing.T) {
 	var reply string
-	apiAccPrf.Weight = 2
+	apiAccPrf.Weights = ";2"
 	apiAccPrf.Balances["MonetaryBalance"].CostIncrements[0].FixedFee = utils.Float64Pointer(123.5)
 	if err := accSRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &reply); err != nil {
 		t.Error(err)

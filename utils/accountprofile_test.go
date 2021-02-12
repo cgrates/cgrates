@@ -30,9 +30,13 @@ func TestCloneBalance(t *testing.T) {
 	expBlc := &Balance{
 		ID:        "TEST_ID1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Weight:    1.1,
-		Blocker:   true,
-		Type:      "*abstract",
+		Weights: DynamicWeights{
+			{
+				Weight: 1.1,
+			},
+		},
+		Blocker: true,
+		Type:    "*abstract",
 		Opts: map[string]interface{}{
 			"Destination": 10,
 		},
@@ -73,7 +77,11 @@ func TestCloneAccountProfile(t *testing.T) {
 			ActivationTime: time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2020, 7, 22, 10, 0, 0, 0, time.UTC),
 		},
-		Weight: 2.4,
+		Weights: DynamicWeights{
+			{
+				Weight: 2.4,
+			},
+		},
 		Opts: map[string]interface{}{
 			"Destination": 10,
 		},
@@ -81,9 +89,13 @@ func TestCloneAccountProfile(t *testing.T) {
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"*string:~*req.Account:1001"},
-				Weight:    1.1,
-				Blocker:   true,
-				Type:      "*abstract",
+				Weights: DynamicWeights{
+					{
+						Weight: 1.1,
+					},
+				},
+				Blocker: true,
+				Type:    "*abstract",
 				Opts: map[string]interface{}{
 					"Destination": 10,
 				},
@@ -133,11 +145,12 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 	apiAccPrf := &APIAccountProfile{
 		Tenant: "cgrates.org",
 		ID:     "test_ID1",
+		Opts:   map[string]interface{}{},
 		Balances: map[string]*APIBalance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"*string:~*req.Account:1001"},
-				Weight:    1.1,
+				Weights:   ";1.2",
 				Blocker:   true,
 				Type:      "*abstract",
 				Opts: map[string]interface{}{
@@ -146,25 +159,34 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 				Units: 0,
 			},
 		},
-		Weight: 10,
+		Weights: ";10",
 	}
 	expected := &AccountProfile{
 		Tenant: "cgrates.org",
 		ID:     "test_ID1",
+		Opts:   map[string]interface{}{},
 		Balances: map[string]*Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"*string:~*req.Account:1001"},
-				Weight:    1.1,
-				Blocker:   true,
-				Type:      "*abstract",
+				Weights: DynamicWeights{
+					{
+						Weight: 1.2,
+					},
+				},
+				Blocker: true,
+				Type:    "*abstract",
 				Opts: map[string]interface{}{
 					"Destination": 10,
 				},
 				Units: NewDecimal(0, 0),
 			},
 		},
-		Weight: 10,
+		Weights: DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	if rcv, err := apiAccPrf.AsAccountProfile(); err != nil {
 		t.Error(err)
@@ -184,7 +206,7 @@ func TestAPIBalanceAsBalance(t *testing.T) {
 				RecurrentFee: Float64Pointer(35),
 			},
 		},
-		Weight: 10,
+		Weights: ";10",
 		UnitFactors: []*APIUnitFactor{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -202,7 +224,11 @@ func TestAPIBalanceAsBalance(t *testing.T) {
 				RecurrentFee: NewDecimal(35, 0),
 			},
 		},
-		Weight: 10,
+		Weights: DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		UnitFactors: []*UnitFactor{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -211,7 +237,9 @@ func TestAPIBalanceAsBalance(t *testing.T) {
 		},
 		Units: NewDecimal(0, 0),
 	}
-	if rcv := blc.AsBalance(); !reflect.DeepEqual(rcv, expected) {
+	if rcv, err := blc.AsBalance(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(expected), ToJSON(rcv))
 	}
 

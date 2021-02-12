@@ -3433,6 +3433,7 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 				TPid:     tp.Tpid,
 				Tenant:   tp.Tenant,
 				ID:       tp.ID,
+				Weights:  tp.Weights,
 				Balances: make(map[string]*utils.TPAccountBalance),
 			}
 		}
@@ -3458,14 +3459,10 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 				aPrf.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
-		if tp.Weight != 0 {
-			aPrf.Weight = tp.Weight
-		}
-
 		if tp.BalanceID != utils.EmptyString {
 			aPrf.Balances[tp.BalanceID] = &utils.TPAccountBalance{
 				ID:      tp.BalanceID,
-				Weight:  tp.BalanceWeight,
+				Weights: tp.BalanceWeights,
 				Blocker: tp.BalanceBlocker,
 				Type:    tp.BalanceType,
 				Opts:    tp.BalanceOpts,
@@ -3565,7 +3562,7 @@ func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfi
 					mdl.ActivationInterval += utils.InfieldSep + tPrf.ActivationInterval.ExpiryTime
 				}
 			}
-			mdl.Weight = tPrf.Weight
+			mdl.Weights = tPrf.Weights
 		}
 		mdl.BalanceID = balance.ID
 		for i, val := range balance.FilterIDs {
@@ -3575,7 +3572,7 @@ func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfi
 			mdl.BalanceFilterIDs += val
 		}
 		mdl.BalanceBlocker = balance.Blocker
-		mdl.BalanceWeight = balance.Weight
+		mdl.BalanceWeights = balance.Weights
 		mdl.BalanceType = balance.Type
 		mdl.BalanceOpts = balance.Opts
 		for i, costIncr := range balance.CostIncrement {
@@ -3614,9 +3611,15 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 		Tenant:       tpAp.Tenant,
 		ID:           tpAp.ID,
 		FilterIDs:    make([]string, len(tpAp.FilterIDs)),
-		Weight:       tpAp.Weight,
 		Balances:     make(map[string]*utils.Balance, len(tpAp.Balances)),
 		ThresholdIDs: make([]string, len(tpAp.ThresholdIDs)),
+	}
+	if tpAp.Weights != utils.EmptyString {
+		weight, err := utils.NewDynamicWeightsFromString(tpAp.Weights, ";", "&")
+		if err != nil {
+			return nil, err
+		}
+		ap.Weights = weight
 	}
 	for i, stp := range tpAp.FilterIDs {
 		ap.FilterIDs[i] = stp
@@ -3631,7 +3634,6 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 		ap.Balances[id] = &utils.Balance{
 			ID:        bal.ID,
 			FilterIDs: bal.FilterIDs,
-			Weight:    bal.Weight,
 			Blocker:   bal.Blocker,
 			Type:      bal.Type,
 			Units:     utils.NewDecimalFromFloat64(bal.Units),
@@ -3646,6 +3648,13 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 				}
 				ap.Balances[id].Opts[keyValSls[0]] = keyValSls[1]
 			}
+		}
+		if bal.Weights != utils.EmptyString {
+			weight, err := utils.NewDynamicWeightsFromString(bal.Weights, ";", "&")
+			if err != nil {
+				return nil, err
+			}
+			ap.Balances[id].Weights = weight
 		}
 		if bal.CostIncrement != nil {
 			ap.Balances[id].CostIncrements = make([]*utils.CostIncrement, len(bal.CostIncrement))
@@ -3696,9 +3705,9 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 	tpAp = &utils.TPAccountProfile{
 		Tenant:             ap.Tenant,
 		ID:                 ap.ID,
+		Weights:            ap.Weights.String(";", "&"),
 		FilterIDs:          make([]string, len(ap.FilterIDs)),
 		ActivationInterval: new(utils.TPActivationInterval),
-		Weight:             ap.Weight,
 		Balances:           make(map[string]*utils.TPAccountBalance, len(ap.Balances)),
 		ThresholdIDs:       make([]string, len(ap.ThresholdIDs)),
 	}
@@ -3718,7 +3727,7 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 		tpAp.Balances[i] = &utils.TPAccountBalance{
 			ID:             bal.ID,
 			FilterIDs:      make([]string, len(bal.FilterIDs)),
-			Weight:         bal.Weight,
+			Weights:        bal.Weights.String(";", "&"),
 			Blocker:        bal.Blocker,
 			Type:           bal.Type,
 			CostIncrement:  make([]*utils.TPBalanceCostIncrement, len(bal.CostIncrements)),

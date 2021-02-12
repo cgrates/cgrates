@@ -123,14 +123,16 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "1001",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Opts:      make(map[string]interface{}),
 		Balances: map[string]*utils.Balance{
 			"GenericBalance1": &utils.Balance{
-				ID:     "GenericBalance1",
-				Weight: 20,
-				Type:   utils.MetaAbstract,
-				Units:  &utils.Decimal{decimal.New(int64(time.Hour), 0)},
-				Opts:   make(map[string]interface{}),
+				ID: "GenericBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: &utils.Decimal{decimal.New(int64(time.Hour), 0)},
 				UnitFactors: []*utils.UnitFactor{
 					&utils.UnitFactor{
 						FilterIDs: []string{"*string:~*req.ToR:*data"},
@@ -153,11 +155,14 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 				},
 			},
 			"MonetaryBalance1": &utils.Balance{
-				ID:     "MonetaryBalance1",
-				Weight: 30,
-				Type:   utils.MetaConcrete,
-				Opts:   make(map[string]interface{}),
-				Units:  &utils.Decimal{decimal.New(5, 0)},
+				ID: "MonetaryBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(5, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -174,11 +179,14 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 				},
 			},
 			"MonetaryBalance2": &utils.Balance{
-				ID:     "MonetaryBalance2",
-				Weight: 10,
-				Type:   utils.MetaConcrete,
-				Opts:   make(map[string]interface{}),
-				Units:  &utils.Decimal{decimal.New(3, 0)},
+				ID: "MonetaryBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(3, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -226,14 +234,16 @@ func testAccountSv1MaxUsage(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "1001",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Opts:      make(map[string]interface{}),
 		Balances: map[string]*utils.Balance{
 			"GenericBalance1": &utils.Balance{
-				ID:     "GenericBalance1",
-				Weight: 20,
-				Type:   utils.MetaAbstract,
-				Opts:   make(map[string]interface{}),
-				Units:  &utils.Decimal{decimal.New(int64(time.Hour), 0)},
+				ID: "GenericBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: &utils.Decimal{decimal.New(int64(time.Hour), 0)},
 				UnitFactors: []*utils.UnitFactor{
 					&utils.UnitFactor{
 						FilterIDs: []string{"*string:~*req.ToR:*data"},
@@ -256,11 +266,14 @@ func testAccountSv1MaxUsage(t *testing.T) {
 				},
 			},
 			"MonetaryBalance1": &utils.Balance{
-				ID:     "MonetaryBalance1",
-				Weight: 30,
-				Type:   utils.MetaConcrete,
-				Opts:   make(map[string]interface{}),
-				Units:  &utils.Decimal{decimal.New(5, 0)},
+				ID: "MonetaryBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(5, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -277,11 +290,14 @@ func testAccountSv1MaxUsage(t *testing.T) {
 				},
 			},
 			"MonetaryBalance2": &utils.Balance{
-				ID:     "MonetaryBalance2",
-				Weight: 10,
-				Type:   utils.MetaConcrete,
-				Opts:   make(map[string]interface{}),
-				Units:  &utils.Decimal{decimal.New(3, 0)},
+				ID: "MonetaryBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(3, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -317,7 +333,7 @@ func testAccountSv1DebitUsage(t *testing.T) {
 			}}}, &eEc); err != nil {
 		t.Error(err)
 	} else if eEc.Usage == nil || *eEc.Usage != 800000000000.0 { // 500s from first monetary + 300s from last monetary
-		t.Errorf("received usage: %v", *eEc.Usage)
+		t.Fatalf("received usage: %v", *eEc.Usage)
 	}
 
 	// Make sure we did not Debit anything from Account
@@ -325,14 +341,16 @@ func testAccountSv1DebitUsage(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "1001",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Opts:      make(map[string]interface{}),
 		Balances: map[string]*utils.Balance{
 			"GenericBalance1": &utils.Balance{
-				ID:     "GenericBalance1",
-				Weight: 20,
-				Type:   utils.MetaAbstract,
-				Opts:   make(map[string]interface{}),
-				Units:  &utils.Decimal{decimal.New(int64(3300*time.Second), 0)},
+				ID: "GenericBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: &utils.Decimal{decimal.New(int64(3300*time.Second), 0)},
 				UnitFactors: []*utils.UnitFactor{
 					&utils.UnitFactor{
 						FilterIDs: []string{"*string:~*req.ToR:*data"},
@@ -355,11 +373,14 @@ func testAccountSv1DebitUsage(t *testing.T) {
 				},
 			},
 			"MonetaryBalance1": &utils.Balance{
-				ID:     "MonetaryBalance1",
-				Weight: 30,
-				Type:   utils.MetaConcrete,
-				Opts:   make(map[string]interface{}),
-				Units:  &utils.Decimal{decimal.New(0, 0)},
+				ID: "MonetaryBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(0, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
@@ -376,11 +397,14 @@ func testAccountSv1DebitUsage(t *testing.T) {
 				},
 			},
 			"MonetaryBalance2": &utils.Balance{
-				ID:     "MonetaryBalance2",
-				Weight: 10,
-				Type:   utils.MetaConcrete,
-				Opts:   make(map[string]interface{}),
-				Units:  &utils.Decimal{decimal.New(0, 0)},
+				ID: "MonetaryBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(0, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},

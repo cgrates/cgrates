@@ -573,19 +573,20 @@ type AccountProfileMdl struct {
 	ID                    string  `index:"1" re:""`
 	FilterIDs             string  `index:"2" re:""`
 	ActivationInterval    string  `index:"3" re:""`
-	Weight                float64 `index:"4" re:"\d+\.?\d*"`
-	BalanceID             string  `index:"5" re:""`
-	BalanceFilterIDs      string  `index:"6" re:""`
-	BalanceWeight         float64 `index:"7" re:"\d+\.?\d*"`
-	BalanceBlocker        bool    `index:"8" re:""`
-	BalanceType           string  `index:"9" re:""`
-	BalanceUnits          float64 `index:"10" re:"\d+\.?\d*"`
-	BalanceUnitFactors    string  `index:"11" re:""`
-	BalanceOpts           string  `index:"12" re:""`
-	BalanceCostIncrements string  `index:"13" re:""`
-	BalanceAttributeIDs   string  `index:"14" re:""`
-	BalanceRateProfileIDs string  `index:"15" re:""`
-	ThresholdIDs          string  `index:"16" re:""`
+	Weights               string  `index:"4" re:""`
+	Opts                  string  `index:"5" re:""`
+	BalanceID             string  `index:"6" re:""`
+	BalanceFilterIDs      string  `index:"7" re:""`
+	BalanceWeights        string  `index:"8" re:""`
+	BalanceBlocker        bool    `index:"9" re:""`
+	BalanceType           string  `index:"10" re:""`
+	BalanceUnits          float64 `index:"11" re:"\d+\.?\d*"`
+	BalanceUnitFactors    string  `index:"12" re:""`
+	BalanceOpts           string  `index:"13" re:""`
+	BalanceCostIncrements string  `index:"14" re:""`
+	BalanceAttributeIDs   string  `index:"15" re:""`
+	BalanceRateProfileIDs string  `index:"16" re:""`
+	ThresholdIDs          string  `index:"17" re:""`
 	CreatedAt             time.Time
 }
 
