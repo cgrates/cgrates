@@ -52,8 +52,7 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 			},
 		},
 	}
-	config := config.NewDefaultCGRConfig()
-	filters := engine.NewFilterS(config, nil, nil)
+	filters := engine.NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
 
 	concrete, err := newBalanceOperator(acntPrf.Balances["BL1"], nil, filters, nil, nil, nil)
 	if err != nil {
@@ -72,9 +71,12 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 		nil, nil); err != nil {
 		t.Error(err)
 	} else {
-		rcv := blcOp[0].(*abstractBalance)
-		if !reflect.DeepEqual(expected, rcv) {
-			t.Errorf("Expected %+v, received %+v", expected, rcv)
+		for _, bal := range blcOp {
+			if rcv, canCast := bal.(*abstractBalance); canCast {
+				if !reflect.DeepEqual(expected, rcv) {
+					t.Errorf("Expected %+v, received %+v", expected, rcv)
+				}
+			}
 		}
 	}
 
@@ -102,7 +104,7 @@ func TestProcessAttributeS(t *testing.T) {
 	engine.Cache.Clear(nil)
 
 	config := config.NewDefaultCGRConfig()
-	sTestMock := &testMockCall{
+	sTestMock := &testMockCall{ // coverage purpose
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
 				return utils.ErrNotImplemented
@@ -125,6 +127,34 @@ func TestProcessAttributeS(t *testing.T) {
 	attrsConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
 	if _, err := processAttributeS(connMgr, cgrEvent, attrsConns, nil); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRateSCostForEvent(t *testing.T) { // coverage purpose
+	engine.Cache.Clear(nil)
+
+	config := config.NewDefaultCGRConfig()
+	sTestMock := &testMockCall{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.RateSv1CostForEvent: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	connMgr := engine.NewConnManager(config, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
+	})
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ID1",
+	}
+
+	rateSConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
+
+	if _, err := rateSCostForEvent(connMgr, cgrEvent, rateSConns, nil); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
 }
