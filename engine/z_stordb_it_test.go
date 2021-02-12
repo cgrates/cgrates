@@ -158,15 +158,15 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 	//WRITE
 	var actPrf = []*utils.TPAccountProfile{
 		{
-			TPid:   testTPID,
-			Tenant: "cgrates.org",
-			ID:     "1001",
-			Weight: 20,
+			TPid:    testTPID,
+			Tenant:  "cgrates.org",
+			ID:      "1001",
+			Weights: ";20",
 			Balances: map[string]*utils.TPAccountBalance{
 				"MonetaryBalance": {
-					ID:     "MonetaryBalance",
-					Weight: 10,
-					Type:   utils.MetaMonetary,
+					ID:      "MonetaryBalance",
+					Weights: ";10",
+					Type:    utils.MetaMonetary,
 					CostIncrement: []*utils.TPBalanceCostIncrement{
 						{
 							FilterIDs:    []string{"fltr1", "fltr2"},

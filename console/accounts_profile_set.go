@@ -50,7 +50,7 @@ func (self *CmdSetAccountProfile) RpcMethod() string {
 
 func (self *CmdSetAccountProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.APIAccountProfileWithCache{APIAccountProfileWithOpts: new(utils.APIAccountProfileWithOpts)}
+		self.rpcParams = &v1.APIAccountProfileWithCache{APIAccountProfile: new(utils.APIAccountProfile)}
 	}
 	return self.rpcParams
 }

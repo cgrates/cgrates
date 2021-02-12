@@ -116,7 +116,7 @@ func init() {
 		log.Print("error in LoadActionProfiles: ", err)
 	}
 	if err := csvr.WriteToDatabase(false, false); err != nil {
-		log.Print("error when writing into database", err)
+		log.Print("error when writing into database ", err)
 	}
 }
 
@@ -1603,15 +1603,15 @@ func TestLoadThresholds(t *testing.T) {
 
 func TestLoadAccountProfiles(t *testing.T) {
 	expected := &utils.TPAccountProfile{
-		TPid:   testTPID,
-		Tenant: "cgrates.org",
-		ID:     "1001",
-		Weight: 20,
+		TPid:    testTPID,
+		Tenant:  "cgrates.org",
+		ID:      "1001",
+		Weights: ";20",
 		Balances: map[string]*utils.TPAccountBalance{
 			"MonetaryBalance": {
-				ID:     "MonetaryBalance",
-				Weight: 10,
-				Type:   utils.MetaMonetary,
+				ID:      "MonetaryBalance",
+				Weights: ";10",
+				Type:    utils.MetaMonetary,
 				CostIncrement: []*utils.TPBalanceCostIncrement{
 					{
 						FilterIDs:    []string{"fltr1", "fltr2"},
@@ -1634,10 +1634,10 @@ func TestLoadAccountProfiles(t *testing.T) {
 				Units: 14,
 			},
 			"VoiceBalance": {
-				ID:     "VoiceBalance",
-				Weight: 10,
-				Type:   utils.MetaVoice,
-				Units:  3600000000000,
+				ID:      "VoiceBalance",
+				Weights: ";10",
+				Type:    utils.MetaVoice,
+				Units:   3600000000000,
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},

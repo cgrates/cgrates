@@ -6852,7 +6852,7 @@ func TestAccountProfileMdlsCSVHeader(t *testing.T) {
 		ID:                 "ResGroup1",
 		FilterIDs:          "FLTR_RES_GR1",
 		ActivationInterval: "2014-07-29T15:00:00Z",
-		Weight:             10.0,
+		Weights:            "10.0",
 		ThresholdIDs:       "WARN_RES1;WARN_RES1",
 	},
 	}
@@ -6874,10 +6874,10 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 		ID:                 "ResGroup1",
 		FilterIDs:          "FLTR_RES_GR1",
 		ActivationInterval: "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
-		Weight:             10.0,
+		Weights:            "10.0",
 		BalanceID:          "VoiceBalance",
 		BalanceFilterIDs:   "FLTR_RES_GR2",
-		BalanceWeight:      10,
+		BalanceWeights:     "10",
 		BalanceBlocker:     false,
 		BalanceType:        utils.MetaVoice,
 		BalanceUnits:       3600000000000,
@@ -6894,12 +6894,12 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 				ActivationTime: "2014-07-24T15:00:00Z",
 				ExpiryTime:     "2014-07-25T15:00:00Z",
 			},
-			Weight: 10.0,
+			Weights: "10.0",
 			Balances: map[string]*utils.TPAccountBalance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
 					FilterIDs: []string{"FLTR_RES_GR2"},
-					Weight:    10,
+					Weights:   "10",
 					Type:      utils.MetaVoice,
 					Units:     3600000000000,
 				},
@@ -6923,10 +6923,10 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 		ID:                 "ResGroup1",
 		FilterIDs:          "FLTR_RES_GR1",
 		ActivationInterval: "2014-07-24T15:00:00Z",
-		Weight:             10.0,
+		Weights:            "10.0",
 		BalanceID:          "VoiceBalance",
 		BalanceFilterIDs:   "FLTR_RES_GR2",
-		BalanceWeight:      10,
+		BalanceWeights:     "10",
 		BalanceBlocker:     false,
 		BalanceType:        utils.MetaVoice,
 		BalanceUnits:       3600000000000,
@@ -6942,12 +6942,12 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-24T15:00:00Z",
 			},
-			Weight: 10.0,
+			Weights: "10.0",
 			Balances: map[string]*utils.TPAccountBalance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
 					FilterIDs: []string{"FLTR_RES_GR2"},
-					Weight:    10,
+					Weights:   "10",
 					Type:      utils.MetaVoice,
 					Units:     3600000000000,
 				},
@@ -7009,12 +7009,12 @@ func TestAPItoModelTPAccountProfile(t *testing.T) {
 			ActivationTime: "2014-07-24T15:00:00Z",
 			ExpiryTime:     "2014-07-25T15:00:00Z",
 		},
-		Weight: 10.0,
+		Weights: "10.0",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:            "VoiceBalance",
 				FilterIDs:     []string{"FLTR_RES_GR2"},
-				Weight:        10,
+				Weights:       "10",
 				Type:          utils.MetaVoice,
 				Units:         3600000000000,
 				CostIncrement: []*utils.TPBalanceCostIncrement{},
@@ -7028,10 +7028,10 @@ func TestAPItoModelTPAccountProfile(t *testing.T) {
 		ID:                 "ResGroup1",
 		FilterIDs:          "FLTR_RES_GR1",
 		ActivationInterval: "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
-		Weight:             10.0,
+		Weights:            "10.0",
 		BalanceID:          "VoiceBalance",
 		BalanceFilterIDs:   "FLTR_RES_GR2",
-		BalanceWeight:      10,
+		BalanceWeights:     "10",
 		BalanceBlocker:     false,
 		BalanceType:        utils.MetaVoice,
 		BalanceUnits:       3600000000000,
@@ -7053,7 +7053,7 @@ func TestAPItoModelTPAccountProfileNoBalance(t *testing.T) {
 			ActivationTime: "2014-07-24T15:00:00Z",
 			ExpiryTime:     "2014-07-25T15:00:00Z",
 		},
-		Weight:       10.0,
+		Weights:      "10.0",
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
 	exp := AccountProfileMdls{}
@@ -7074,12 +7074,12 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 			ActivationTime: "2014-07-24T15:00:00Z",
 			ExpiryTime:     "2014-07-25T15:00:00Z",
 		},
-		Weight: 10.0,
+		Weights: "10.0",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR2"},
-				Weight:    10,
+				Weights:   "10",
 				Type:      utils.MetaVoice,
 				Units:     3600000000000,
 				CostIncrement: []*utils.TPBalanceCostIncrement{
@@ -7117,10 +7117,10 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 		ID:                    "ResGroup1",
 		FilterIDs:             "FLTR_RES_GR1;FLTR_RES_GR2",
 		ActivationInterval:    "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
-		Weight:                10.0,
+		Weights:               "10.0",
 		BalanceID:             "VoiceBalance",
 		BalanceFilterIDs:      "FLTR_RES_GR1;FLTR_RES_GR2",
-		BalanceWeight:         10,
+		BalanceWeights:        "10",
 		BalanceBlocker:        false,
 		BalanceType:           utils.MetaVoice,
 		BalanceCostIncrements: "*string:*~req.Account:100;1;20;5;*string:*~req.Destination:10;2;10;7",
@@ -7147,12 +7147,12 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 			ActivationTime: "2014-07-14T14:25:00Z",
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
-		Weight: 10.0,
+		Weights: ";10",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weight:    10,
+				Weights:   ";10",
 				Type:      utils.MetaVoice,
 				Units:     3600000000000,
 				Opts:      "key1:val1",
@@ -7168,14 +7168,22 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
 		},
-		Weight: 10.0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10.0,
+			},
+		},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weight:    10,
-				Type:      utils.MetaVoice,
-				Units:     &utils.Decimal{decimal.New(3600000000000, 0)},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10.0,
+					},
+				},
+				Type:  utils.MetaVoice,
+				Units: &utils.Decimal{decimal.New(3600000000000, 0)},
 				Opts: map[string]interface{}{
 					"key1": "val1",
 				},
@@ -7200,12 +7208,12 @@ func TestApitoAccountProfileCaseTimeError(t *testing.T) {
 			ActivationTime: "test_time",
 			ExpiryTime:     "test_time2",
 		},
-		Weight: 10.0,
+		Weights: ";10",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weight:    10,
+				Weights:   "10",
 				Type:      utils.MetaVoice,
 				Units:     3600000000000,
 			},
@@ -7227,12 +7235,12 @@ func TestApitoAccountProfileCaseTimeError2(t *testing.T) {
 			ActivationTime: "2014-07-14T14:25:00Z",
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
-		Weight: 10.0,
+		Weights: ";10.0",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weight:    10,
+				Weights:   "10",
 				Type:      utils.MetaVoice,
 				Units:     3600000000000,
 				Opts:      "22:22:4fs",
@@ -7323,14 +7331,22 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
 		},
-		Weight: 2,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 2,
+			},
+		},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weight:    10,
-				Type:      utils.MetaVoice,
-				Units:     &utils.Decimal{decimal.New(3600000000000, 0)},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaVoice,
+				Units: &utils.Decimal{decimal.New(3600000000000, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					{
 						FilterIDs:    []string{"*string:*~req.Account:100"},
@@ -7360,12 +7376,12 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 			ActivationTime: "2014-07-14T14:25:00Z",
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
-		Weight: 2,
+		Weights: ";2",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weight:    10,
+				Weights:   ";10",
 				Type:      utils.MetaVoice,
 				Units:     3600000000000,
 				Opts:      "key1:val1",

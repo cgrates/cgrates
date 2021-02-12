@@ -120,16 +120,16 @@ func testTPAcctPrfGetTPAcctPrfBeforeSet(t *testing.T) {
 
 func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 	tpAcctPrf = &utils.TPAccountProfile{
-		TPid:   "TP1",
-		Tenant: "cgrates.org",
-		ID:     "1001",
-		Weight: 20,
+		TPid:    "TP1",
+		Tenant:  "cgrates.org",
+		ID:      "1001",
+		Weights: ";20",
 		Balances: map[string]*utils.TPAccountBalance{
 			"MonetaryBalance": {
-				ID:     "MonetaryBalance",
-				Weight: 10,
-				Type:   utils.MetaMonetary,
-				Units:  14,
+				ID:      "MonetaryBalance",
+				Weights: ";10",
+				Type:    utils.MetaMonetary,
+				Units:   14,
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
@@ -167,10 +167,10 @@ func testTPAcctPrfGetTPAcctPrfIDs(t *testing.T) {
 func testTPAcctPrfUpdateTPAcctBal(t *testing.T) {
 	tpAcctPrf.Balances = map[string]*utils.TPAccountBalance{
 		"MonetaryBalance2": {
-			ID:     "MonetaryBalance2",
-			Weight: 12,
-			Type:   utils.MetaMonetary,
-			Units:  16,
+			ID:      "MonetaryBalance2",
+			Weights: ";12",
+			Type:    utils.MetaMonetary,
+			Units:   16,
 		},
 	}
 	var result string
@@ -184,16 +184,16 @@ func testTPAcctPrfUpdateTPAcctBal(t *testing.T) {
 func testTPAcctPrfGetTPAcctBalAfterUpdate(t *testing.T) {
 	var reply *utils.TPAccountProfile
 	revTPAcctPrf := &utils.TPAccountProfile{
-		TPid:   "TP1",
-		Tenant: "cgrates.org",
-		ID:     "1001",
-		Weight: 20,
+		TPid:    "TP1",
+		Tenant:  "cgrates.org",
+		ID:      "1001",
+		Weights: ";20",
 		Balances: map[string]*utils.TPAccountBalance{
 			"MonetaryBalance2": {
-				ID:     "MonetaryBalance2",
-				Weight: 12,
-				Type:   utils.MetaMonetary,
-				Units:  16,
+				ID:      "MonetaryBalance2",
+				Weights: ";12",
+				Type:    utils.MetaMonetary,
+				Units:   16,
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},

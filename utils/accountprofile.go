@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"sort"
 	"time"
 )
 
@@ -29,7 +28,7 @@ type AccountProfile struct {
 	ID                 string // Account identificator, unique within the tenant
 	FilterIDs          []string
 	ActivationInterval *ActivationInterval
-	Weight             float64
+	Weights            DynamicWeights
 	Opts               map[string]interface{}
 	Balances           map[string]*Balance
 	ThresholdIDs       []string
@@ -39,7 +38,7 @@ type AccountProfile struct {
 type Balance struct {
 	ID             string // Balance identificator, unique within an Account
 	FilterIDs      []string
-	Weight         float64
+	Weights        DynamicWeights
 	Blocker        bool
 	Type           string
 	Opts           map[string]interface{}
@@ -109,7 +108,7 @@ func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
 	acnt = &AccountProfile{
 		Tenant:             aP.Tenant,
 		ID:                 aP.ID,
-		Weight:             aP.Weight,
+		Weights:            aP.Weights.Clone(),
 		ActivationInterval: aP.ActivationInterval.Clone(),
 	}
 	if aP.FilterIDs != nil {
@@ -154,8 +153,8 @@ func (aI *ActivationInterval) Clone() *ActivationInterval {
 func (bL *Balance) Clone() (blnc *Balance) {
 	blnc = &Balance{
 		ID:      bL.ID,
-		Weight:  bL.Weight,
 		Blocker: bL.Blocker,
+		Weights: bL.Weights.Clone(),
 		Type:    bL.Type,
 	}
 	if bL.FilterIDs != nil {
@@ -209,10 +208,13 @@ type AccountProfileWithWeight struct {
 // AccountProfilesWithWeight is a sortable list of AccountProfileWithWeight
 type AccountProfilesWithWeight []*AccountProfileWithWeight
 
+/*
 // Sort is part of sort interface, sort based on Weight
 func (aps AccountProfilesWithWeight) Sort() {
 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
 }
+
+*/
 
 // AccountProfiles returns the list of AccountProfiles
 func (apWws AccountProfilesWithWeight) AccountProfiles() (aps []*AccountProfile) {
@@ -234,10 +236,13 @@ type BalanceWithWeight struct {
 // Balances is a sortable list of Balances
 type BalancesWithWeight []*BalanceWithWeight
 
+/*
 // Sort is part of sort interface, sort based on Weight
 func (blcs BalancesWithWeight) Sort() {
 	sort.Slice(blcs, func(i, j int) bool { return blcs[i].Weight > blcs[j].Weight })
 }
+`
+*/
 
 // Balances returns the list of Balances
 func (bWws BalancesWithWeight) Balances() (blncs []*Balance) {
@@ -280,7 +285,7 @@ type APIAccountProfile struct {
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *ActivationInterval
-	Weight             float64
+	Weights            string
 	Opts               map[string]interface{}
 	Balances           map[string]*APIBalance
 	ThresholdIDs       []string
@@ -293,14 +298,20 @@ func (ext *APIAccountProfile) AsAccountProfile() (profile *AccountProfile, err e
 		ID:                 ext.ID,
 		FilterIDs:          ext.FilterIDs,
 		ActivationInterval: ext.ActivationInterval,
-		Weight:             ext.Weight,
 		Opts:               ext.Opts,
 		ThresholdIDs:       ext.ThresholdIDs,
+	}
+	if ext.Weights != EmptyString {
+		if profile.Weights, err = NewDynamicWeightsFromString(ext.Weights, ";", "&"); err != nil {
+			return nil, err
+		}
 	}
 	if len(ext.Balances) != 0 {
 		profile.Balances = make(map[string]*Balance, len(ext.Balances))
 		for i, bal := range ext.Balances {
-			profile.Balances[i] = bal.AsBalance()
+			if profile.Balances[i], err = bal.AsBalance(); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return
@@ -310,7 +321,7 @@ func (ext *APIAccountProfile) AsAccountProfile() (profile *AccountProfile, err e
 type APIBalance struct {
 	ID             string // Balance identificator, unique within an Account
 	FilterIDs      []string
-	Weight         float64
+	Weights        string
 	Blocker        bool
 	Type           string
 	Opts           map[string]interface{}
@@ -322,17 +333,21 @@ type APIBalance struct {
 }
 
 // AsBalance convert APIBalance struct to Balance struct
-func (ext *APIBalance) AsBalance() (balance *Balance) {
+func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
 	balance = &Balance{
 		ID:             ext.ID,
 		FilterIDs:      ext.FilterIDs,
-		Weight:         ext.Weight,
 		Blocker:        ext.Blocker,
 		Type:           ext.Type,
 		Opts:           ext.Opts,
 		AttributeIDs:   ext.AttributeIDs,
 		RateProfileIDs: ext.RateProfileIDs,
 		Units:          NewDecimalFromFloat64(ext.Units),
+	}
+	if ext.Weights != EmptyString {
+		if balance.Weights, err = NewDynamicWeightsFromString(ext.Weights, ";", "&"); err != nil {
+			return nil, err
+		}
 	}
 	if len(ext.CostIncrements) != 0 {
 		balance.CostIncrements = make([]*CostIncrement, len(ext.CostIncrements))

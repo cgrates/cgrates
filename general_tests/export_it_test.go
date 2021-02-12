@@ -487,12 +487,20 @@ func testExpVerifyAccountProfiles(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ACC_PRF_1",
 		FilterIDs: []string{},
-		Weight:    20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		Balances: map[string]*utils.Balance{
 			"MonetaryBalance": {
-				ID:     "MonetaryBalance",
-				Weight: 10,
-				Type:   "*monetary",
+				ID: "MonetaryBalance",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type: "*monetary",
 				CostIncrements: []*utils.CostIncrement{
 					{
 						FilterIDs:    []string{"fltr1", "fltr2"},
