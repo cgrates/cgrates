@@ -204,3 +204,72 @@ func TestDataDBReload(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+func TestDataDBReload2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	cM := engine.NewConnManager(cfg, nil)
+	db := NewDataDBService(cfg, cM, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	srvMngr.AddServices(NewAttributeService(cfg, db,
+		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep),
+		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
+	}
+	if db.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	var reply string
+	cfg.AttributeSCfg().Enabled = true
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		Section: config.DATADB_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	if !db.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+
+	err := db.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmysql"),
+		Section: config.DATADB_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+
+	err = db.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	cfg.AttributeSCfg().Enabled = false
+	cfg.GetReloadChan(config.DATADB_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	if db.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}

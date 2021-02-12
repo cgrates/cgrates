@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"log"
 	"os"
 	"path"
 	"sync"
@@ -124,16 +125,17 @@ func TestAnalyzerSReload2(t *testing.T) {
 	anz.anz = nil
 }
 
-/*
 func TestAnalyzerSReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	if err := os.MkdirAll("/tmp/analyzers", 0700); err != nil {
+	if err := os.MkdirAll("/tmp/analyzers_test3", 0700); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll("/tmp/analyzers_test", 0700); err != nil {
-		t.Fatal(err)
+	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers_test3"
+	err := os.RemoveAll("/tmp/analyzers_test3")
+	if err != nil {
+		log.Fatal(err)
 	}
-	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers_test"
+	cfg.AnalyzerSCfg().IndexType = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	shdChan := utils.NewSyncedChan()
@@ -150,4 +152,3 @@ func TestAnalyzerSReload3(t *testing.T) {
 	close(anz.stopChan)
 
 }
-*/
