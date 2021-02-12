@@ -88,7 +88,7 @@ func (apierSv1 *APIerSv1) GetAccountProfileIDsCount(args *utils.TenantWithOpts, 
 }
 
 type APIAccountProfileWithCache struct {
-	*utils.APIAccountProfileWithOpts
+	*utils.APIAccountProfile
 	Cache *string
 }
 
