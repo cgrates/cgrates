@@ -130,7 +130,7 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent,
 			}
 			continue
 		}
-		if acnt == nil || acnt.Weight < qAcnt.Weight {
+		if acnt == nil {
 			acnt = qAcnt
 			if lked {
 				if lkID != utils.EmptyString {
