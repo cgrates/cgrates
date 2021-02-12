@@ -107,9 +107,12 @@ func processAttributeS(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 		AttributeIDs: attrIDs,
 		ProcessRuns:  procRuns,
 	}
-	err = connMgr.Call(attrSConns, nil, utils.AttributeSv1ProcessEvent,
-		attrArgs, &rplyEv)
-	return
+	var tmpReply engine.AttrSProcessEventReply
+	if err = connMgr.Call(attrSConns, nil, utils.AttributeSv1ProcessEvent,
+		attrArgs, &tmpReply); err != nil {
+		return
+	}
+	return &tmpReply, nil
 }
 
 // rateSCostForEvent will process the event with RateS in order to get the cost
@@ -118,9 +121,12 @@ func rateSCostForEvent(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	if len(rateSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RateS)
 	}
-	err = connMgr.Call(rateSConns, nil, utils.RateSv1CostForEvent,
-		&utils.ArgsCostForEvent{CGREvent: cgrEv, RateProfileIDs: rpIDs}, &rplyCost)
-	return
+	var tmpReply engine.RateProfileCost
+	if err = connMgr.Call(rateSConns, nil, utils.RateSv1CostForEvent,
+		&utils.ArgsCostForEvent{CGREvent: cgrEv, RateProfileIDs: rpIDs}, &tmpReply); err != nil {
+		return
+	}
+	return &tmpReply, nil
 }
 
 // costIncrement computes the costIncrement for the event
