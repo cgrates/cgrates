@@ -23,7 +23,7 @@ import (
 )
 
 func TestNewDynamicWeightsFromString(t *testing.T) {
-	eDws := []*DynamicWeight{
+	eDws := DynamicWeights{
 		{
 			FilterIDs: []string{"fltr1", "fltr2"},
 			Weight:    20.0,
@@ -41,9 +41,9 @@ func TestNewDynamicWeightsFromString(t *testing.T) {
 	if dws, err := NewDynamicWeightsFromString(dwsStr, ";", "&"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eDws, dws) {
-		t.Errorf("expecting: %+v, received: %+v", eDws, dws)
+		t.Errorf("expecting: %+v, received: %+v", ToJSON(eDws), ToJSON(dws))
 	}
-	eDws = []*DynamicWeight{
+	eDws = DynamicWeights{
 		{
 			FilterIDs: []string{"fltr1", "fltr2"},
 			Weight:    20.0,
@@ -62,7 +62,7 @@ func TestNewDynamicWeightsFromString(t *testing.T) {
 	} else if !reflect.DeepEqual(eDws[1], dws[1]) {
 		t.Errorf("expecting: %+v, received: %+v", eDws[1], dws[1])
 	}
-	eDws = []*DynamicWeight{
+	eDws = DynamicWeights{
 		{
 			Weight: 20.0,
 		},
@@ -73,7 +73,7 @@ func TestNewDynamicWeightsFromString(t *testing.T) {
 	} else if !reflect.DeepEqual(eDws, dws) {
 		t.Errorf("expecting: %+v, received: %+v", eDws, dws)
 	}
-	eDws = []*DynamicWeight{
+	eDws = DynamicWeights{
 		{
 			Weight: 0.0,
 		},
@@ -84,5 +84,4 @@ func TestNewDynamicWeightsFromString(t *testing.T) {
 	} else if !reflect.DeepEqual(eDws, dws) {
 		t.Errorf("expecting: %+v, received: %+v", eDws, dws)
 	}
-
 }

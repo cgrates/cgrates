@@ -25,7 +25,7 @@ import (
 )
 
 // NewDynamicWeightsFromString creates a DynamicWeight list based on the string received from .csv/StorDB
-func NewDynamicWeightsFromString(s, dWSep, fltrSep string) (dWs []*DynamicWeight, err error) {
+func NewDynamicWeightsFromString(s, dWSep, fltrSep string) (dWs DynamicWeights, err error) {
 	nrFlds := 2
 	dwStrs := strings.Split(s, dWSep)
 	lnDwStrs := len(dwStrs)
@@ -49,8 +49,49 @@ func NewDynamicWeightsFromString(s, dWSep, fltrSep string) (dWs []*DynamicWeight
 	return
 }
 
+type DynamicWeights []*DynamicWeight
+
+func (dWS DynamicWeights) String(dWSep, fltrsep string) (out string) {
+	if len(dWS) == 0 {
+		return
+	}
+	dwToString := make([]string, len(dWS))
+	for i, value := range dWS {
+		dwToString[i] = value.String(dWSep, fltrsep)
+	}
+	return strings.Join(dwToString, dWSep)
+}
+
+func (dW DynamicWeight) String(dWSep, fltrsep string) (out string) {
+	return strings.Join(dW.FilterIDs, fltrsep) + dWSep + strconv.FormatFloat(dW.Weight, 'f', -1, 64)
+}
+
 // DynamicWeight returns Weight based on Filters
 type DynamicWeight struct {
 	FilterIDs []string
 	Weight    float64
+}
+
+func (dW *DynamicWeight) Clone() (dinWeight *DynamicWeight) {
+	dinWeight = &DynamicWeight{
+		Weight: dW.Weight,
+	}
+	if dW.FilterIDs != nil {
+		dinWeight.FilterIDs = make([]string, len(dW.FilterIDs))
+		for i, value := range dW.FilterIDs {
+			dinWeight.FilterIDs[i] = value
+		}
+	}
+	return dinWeight
+}
+
+func (dW DynamicWeights) Clone() (dinWeight DynamicWeights) {
+	if dW == nil {
+		return
+	}
+	dinWeight = make(DynamicWeights, len(dW))
+	for i, value := range dW {
+		dinWeight[i] = value.Clone()
+	}
+	return
 }
