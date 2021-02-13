@@ -220,9 +220,11 @@ func (aS *AccountS) accountsDebitUsage(acnts []*utils.AccountProfileWithWeight,
 			}
 			return
 		}
-		if err = aS.dm.SetAccountProfile(acnt.AccountProfile, false); err != nil {
-			restoreAccounts(aS.dm, acnts, acntBkps)
-			return
+		if store {
+			if err = aS.dm.SetAccountProfile(acnt.AccountProfile, false); err != nil {
+				restoreAccounts(aS.dm, acnts, acntBkps)
+				return
+			}
 		}
 		usage = utils.SubstractBig(usage, ecDbt.Usage.Big)
 		ec.Merge(ecDbt)

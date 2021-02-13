@@ -1565,11 +1565,11 @@ const (
 )
 
 const (
-	AccountSv1                       = "AccountSv1"
-	AccountSv1Ping                   = "AccountSv1.Ping"
-	AccountSv1AccountProfileForEvent = "AccountSv1.AccountProfileForEvent"
-	AccountSv1MaxUsage               = "AccountSv1.MaxUsage"
-	AccountSv1DebitUsage             = "AccountSv1.DebitUsage"
+	AccountSv1                        = "AccountSv1"
+	AccountSv1Ping                    = "AccountSv1.Ping"
+	AccountSv1AccountProfilesForEvent = "AccountSv1.AccountProfilesForEvent"
+	AccountSv1MaxUsage                = "AccountSv1.MaxUsage"
+	AccountSv1DebitUsage              = "AccountSv1.DebitUsage"
 )
 
 const (

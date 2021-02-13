@@ -138,19 +138,19 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 						FilterIDs: []string{"*string:~*req.ToR:*data"},
 						Factor:    &utils.Decimal{decimal.New(1024, 3)},
 					},
-				},
-				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
-						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
-					},
-					&utils.CostIncrement{
-						FilterIDs:    []string{"*string:~*req.ToR:*data"},
-						Increment:    &utils.Decimal{decimal.New(1024, 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+					CostIncrements: []*utils.CostIncrement{
+						&utils.CostIncrement{
+							FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+							Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+							RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+						},
+						&utils.CostIncrement{
+							FilterIDs:    []string{"*string:~*req.ToR:*data"},
+							Increment:    &utils.Decimal{decimal.New(1024, 0)},
+							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+							RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+						},
 					},
 				},
 			},
@@ -196,27 +196,28 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 					},
 				},
 			},
+			ThresholdIDs: []string{utils.MetaNone},
 		},
-		ThresholdIDs: []string{utils.MetaNone},
 	}
-	var acnt *utils.AccountProfile
-	if err := acntSRPC.Call(utils.AccountSv1AccountProfileForEvent,
-		&utils.ArgsAccountForEvent{CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAccountSv1AccountProfileForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			}}}, &acnt); err != nil {
+	var acnts []*utils.AccountProfile
+	if err := acntSRPC.Call(utils.AccountSv1AccountProfilesForEvent,
+		&utils.ArgsAccountsForEvent{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAccountSv1AccountProfileForEvent",
+				Event: map[string]interface{}{
+					utils.AccountField: "1001",
+				}}}, &acnts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAcnt, acnt) {
-		t.Errorf("Expecting : %s \n received: %s", utils.ToJSON(eAcnt), utils.ToJSON(acnt))
+	} else if !reflect.DeepEqual(eAcnts, acnts) {
+		t.Errorf("Expecting : %s \n received: %s", utils.ToJSON(eAcnts), utils.ToJSON(acnts))
 	}
 }
 
 func testAccountSv1MaxUsage(t *testing.T) {
 	var eEc *utils.ExtEventCharges
 	if err := acntSRPC.Call(utils.AccountSv1MaxUsage,
-		&utils.ArgsAccountForEvent{CGREvent: &utils.CGREvent{
+		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAccountSv1MaxUsage",
 			Event: map[string]interface{}{
@@ -323,7 +324,7 @@ func testAccountSv1MaxUsage(t *testing.T) {
 func testAccountSv1DebitUsage(t *testing.T) {
 	var eEc *utils.ExtEventCharges
 	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
-		&utils.ArgsAccountForEvent{CGREvent: &utils.CGREvent{
+		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAccountSv1MaxUsage",
 			Event: map[string]interface{}{
