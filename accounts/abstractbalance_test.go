@@ -59,7 +59,7 @@ func TestABDebitUsageFromConcretes(t *testing.T) {
 		}}
 	// consume only from first balance
 	if err := debitUsageFromConcretes(aB.cncrtBlncs,
-		utils.NewDecimal(int64(time.Duration(5*time.Minute)), 0),
+		decimal.New(int64(time.Duration(5*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
 			RecurrentFee: utils.NewDecimal(1, 0)},
@@ -76,7 +76,7 @@ func TestABDebitUsageFromConcretes(t *testing.T) {
 	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 
 	if err := debitUsageFromConcretes(aB.cncrtBlncs,
-		utils.NewDecimal(int64(time.Duration(9*time.Minute)), 0),
+		decimal.New(int64(time.Duration(9*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
 			RecurrentFee: utils.NewDecimal(1, 0)},
@@ -93,7 +93,7 @@ func TestABDebitUsageFromConcretes(t *testing.T) {
 	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 
 	if err := debitUsageFromConcretes(aB.cncrtBlncs,
-		utils.NewDecimal(int64(time.Duration(10*time.Minute)), 0),
+		decimal.New(int64(time.Duration(10*time.Minute)), 0),
 		&utils.CostIncrement{
 			Increment:    utils.NewDecimal(int64(time.Duration(time.Minute)), 0),
 			RecurrentFee: utils.NewDecimal(1, 0)},
@@ -135,7 +135,7 @@ func TestABDebitUsage(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
@@ -150,7 +150,7 @@ func TestABDebitUsage(t *testing.T) {
 	aB.blnCfg.Units = utils.NewDecimal(int64(time.Duration(60*time.Second)), 0)
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(29, 0) // not enough concrete
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(29*time.Second), 0)) != 0 {
@@ -164,7 +164,7 @@ func TestABDebitUsage(t *testing.T) {
 	// limited by concrete
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(0, 0) // not enough concrete
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(0, 0)) != 0 {
@@ -179,7 +179,7 @@ func TestABDebitUsage(t *testing.T) {
 	aB.blnCfg.Units = utils.NewDecimal(int64(time.Duration(29*time.Second)), 0) // not enough abstract
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(60, 0)
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(29*time.Second), 0)) != 0 {
@@ -218,7 +218,7 @@ func TestABCost0WithConcrete(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
@@ -247,7 +247,7 @@ func TestABCost0WithoutConcrete(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
@@ -283,7 +283,7 @@ func TestABCost0Exceed(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(70*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(70*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(60*time.Second), 0)) != 0 {
@@ -312,7 +312,7 @@ func TestABCost0ExceedWithoutConcrete(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(70*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(70*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(60*time.Second), 0)) != 0 {
@@ -342,7 +342,7 @@ func TestABCost0WithUnlimited(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(80*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(80*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(80*time.Second), 0)) != 0 {
@@ -381,7 +381,7 @@ func TestABCost0WithUnlimitedWithConcrete(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(80*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(80*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(80*time.Second), 0)) != 0 {
@@ -413,7 +413,7 @@ func TestABCost0WithLimit(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
@@ -452,7 +452,7 @@ func TestABCost0WithLimitWithConcrete(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
@@ -484,7 +484,7 @@ func TestABCost0WithLimitExceed(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(50*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(50*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
@@ -523,7 +523,7 @@ func TestABCost0WithLimitExceedWithConcrete(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(50*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(50*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
@@ -560,14 +560,14 @@ func TestDebitUsageFiltersError(t *testing.T) {
 			utils.Usage: "10s",
 		},
 	}
-	_, err := aB.debitUsage(utils.NewDecimal(int64(40*time.Second), 0),
+	_, err := aB.debitUsage(decimal.New(int64(40*time.Second), 0),
 		cgrEv)
 	if err == nil || err != utils.ErrFilterNotPassingNoCaps {
 		t.Errorf("Expected %+v, received %+v", utils.ErrFilterNotPassingNoCaps, err)
 	}
 
 	aB.blnCfg.FilterIDs = []string{"invalid_filter_format"}
-	_, err = aB.debitUsage(utils.NewDecimal(int64(40*time.Second), 0),
+	_, err = aB.debitUsage(decimal.New(int64(40*time.Second), 0),
 		cgrEv)
 	if err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
@@ -601,14 +601,14 @@ func TestDebitUsageBalanceLimitErrors(t *testing.T) {
 	}
 
 	expectedErr := "unsupported *balanceLimit format"
-	_, err := aB.debitUsage(utils.NewDecimal(int64(40*time.Second), 0),
+	_, err := aB.debitUsage(decimal.New(int64(40*time.Second), 0),
 		cgrEv)
 	if err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
 	aB.blnCfg.Opts[utils.MetaBalanceLimit] = float64(16 * time.Second)
-	if _, err = aB.debitUsage(utils.NewDecimal(int64(40*time.Second), 0),
+	if _, err = aB.debitUsage(decimal.New(int64(40*time.Second), 0),
 		cgrEv); err != nil {
 		t.Error(err)
 	}
@@ -648,12 +648,13 @@ func TestDebitUsageUnitFactorsErrors(t *testing.T) {
 		},
 	}
 
-	if _, err := aB.debitUsage(utils.NewDecimal(int64(20*time.Second), 0), cgrEv); err == nil || err != utils.ErrNoDatabaseConn {
+	if _, err := aB.debitUsage(decimal.New(int64(20*time.Second), 0), cgrEv); err == nil ||
+		err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
 	}
 
 	aB.blnCfg.UnitFactors[0].FilterIDs = []string{"*string:*~req.Usage:10s"}
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(20*time.Second), 0), cgrEv); err != nil {
+	if ec, err := aB.debitUsage(decimal.New(int64(20*time.Second), 0), cgrEv); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(0, 0)) != 0 {
 		t.Error(err)
@@ -685,7 +686,8 @@ func TestDebitUsageCostIncrementError(t *testing.T) {
 		},
 	}
 
-	if _, err := aB.debitUsage(utils.NewDecimal(int64(20*time.Second), 0), cgrEv); err == nil || err != utils.ErrNoDatabaseConn {
+	if _, err := aB.debitUsage(decimal.New(int64(20*time.Second), 0), cgrEv); err == nil ||
+		err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
 	}
 
@@ -694,7 +696,8 @@ func TestDebitUsageCostIncrementError(t *testing.T) {
 	aB.blnCfg.CostIncrements = nil
 	aB.blnCfg.AttributeIDs = []string{"attr11"}
 	expected := "NOT_CONNECTED: AttributeS"
-	if _, err := aB.debitUsage(utils.NewDecimal(int64(20*time.Second), 0), cgrEv); err == nil || err.Error() != expected {
+	if _, err := aB.debitUsage(decimal.New(int64(20*time.Second), 0), cgrEv); err == nil ||
+		err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -725,7 +728,7 @@ func TestABCost(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(10*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(10*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(10*time.Second), 0)) != 0 {
@@ -774,7 +777,7 @@ func TestABCostWithFiltersNotMatch(t *testing.T) {
 			"CustomField2": "CustomValue2",
 		},
 	}
-	if _, err := aB.debitUsage(utils.NewDecimal(int64(10*time.Second), 0),
+	if _, err := aB.debitUsage(decimal.New(int64(10*time.Second), 0),
 		cgrEv); err == nil || err.Error() != "RATES_ERROR:NOT_CONNECTED: RateS" {
 		t.Error(err)
 	}
@@ -818,7 +821,7 @@ func TestABCostWithFilters(t *testing.T) {
 		},
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(10*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(10*time.Second), 0),
 		cgrEv); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(10*time.Second), 0)) != 0 {
@@ -856,7 +859,7 @@ func TestABCostExceed(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(70*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(70*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(60*time.Second), 0)) != 0 {
@@ -897,7 +900,7 @@ func TestABCostUnlimitedExceed(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(70*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(70*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(70*time.Second), 0)) != 0 {
@@ -938,7 +941,7 @@ func TestABCostLimit(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(30*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
@@ -979,7 +982,7 @@ func TestABCostLimitExceed(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(70*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(70*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
@@ -1017,7 +1020,7 @@ func TestABCostNotEnoughConcrete(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(55*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(55*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(50*time.Second), 0)) != 0 {
@@ -1062,7 +1065,7 @@ func TestABCostMultipleConcrete(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(55*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(55*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(55*time.Second), 0)) != 0 {
@@ -1112,7 +1115,7 @@ func TestABCostMultipleConcreteUnlimited(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(70*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(70*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(70*time.Second), 0)) != 0 {
@@ -1169,7 +1172,7 @@ func TestAMCostWithUnitFactor(t *testing.T) {
 		},
 	}
 
-	if ec, err := aB.debitUsage(utils.NewDecimal(int64(10*time.Second), 0),
+	if ec, err := aB.debitUsage(decimal.New(int64(10*time.Second), 0),
 		cgrEv); err != nil {
 		t.Error(err)
 	} else if ec.Usage.Cmp(decimal.New(int64(20*time.Second), 0)) != 0 {

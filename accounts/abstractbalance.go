@@ -42,7 +42,7 @@ type abstractBalance struct {
 }
 
 // debitUsage implements the balanceOperator interface
-func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
+func (aB *abstractBalance) debitUsage(usage *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
@@ -75,7 +75,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 	}
 	var hasUF bool
 	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
-		usage.Big = utils.MultiplyBig(usage.Big, uF.Factor.Big)
+		usage = utils.MultiplyBig(usage, uF.Factor.Big)
 		hasUF = true
 	}
 
@@ -87,16 +87,16 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 	}
 
 	// balance smaller than usage, correct usage if the balance has limit
-	if aB.blnCfg.Units.Compare(usage) == -1 && blncLmt != nil {
+	if aB.blnCfg.Units.Big.Cmp(usage) == -1 && blncLmt != nil {
 		// decrease the usage to match the maximum increments
 		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
-		usage.Big = roundedUsageWithIncrements(aB.blnCfg.Units.Big, costIcrm.Increment.Big)
+		usage = roundedUsageWithIncrements(aB.blnCfg.Units.Big, costIcrm.Increment.Big)
 	}
 	if costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) == 0 &&
 		(costIcrm.FixedFee == nil ||
 			costIcrm.FixedFee.Cmp(decimal.New(0, 0)) == 0) {
 		// cost 0, no need of concrete
-		ec = &utils.EventCharges{Usage: usage}
+		ec = &utils.EventCharges{Usage: &utils.Decimal{usage}}
 	} else {
 		// attempt to debit usage with cost
 		if ec, err = maxDebitUsageFromConcretes(aB.cncrtBlncs, usage,
@@ -115,7 +115,7 @@ func (aB *abstractBalance) debitUsage(usage *utils.Decimal,
 		aB.blnCfg.Units.Big = utils.SumBig(aB.blnCfg.Units.Big, blncLmt.Big)
 	}
 	if hasUF {
-		usage.Big = utils.DivideBig(usage.Big, uF.Factor.Big)
+		usage = utils.DivideBig(usage, uF.Factor.Big)
 	}
 	return
 }

@@ -20,6 +20,8 @@ package utils
 
 import (
 	"time"
+
+	"github.com/ericlagergren/decimal"
 )
 
 // AccountProfile represents one Account on a Tenant
@@ -32,6 +34,41 @@ type AccountProfile struct {
 	Opts               map[string]interface{}
 	Balances           map[string]*Balance
 	ThresholdIDs       []string
+}
+
+// BalancesAltered detects altering of the Balances by comparing the Balance values with the ones from backup
+func (ap *AccountProfile) BalancesAltered(abb AccountBalancesBackup) (altred bool) {
+	if len(ap.Balances) != len(abb) {
+		return true
+	}
+	for blncID, blnc := range ap.Balances {
+		if bkpVal, has := abb[blncID]; !has {
+			return true
+		} else if blnc.Units.Big.Cmp(bkpVal) != 0 {
+			return true
+		}
+	}
+	return
+}
+
+func (ap *AccountProfile) RestoreFromBackup(abb AccountBalancesBackup) {
+	for blncID, val := range abb {
+		ap.Balances[blncID].Units.Big = val
+	}
+}
+
+// AccountBalanceBackups is used to create balance snapshots as backups
+type AccountBalancesBackup map[string]*decimal.Big
+
+// AccountBalanceBackup returns a backup of all balance values
+func (ap *AccountProfile) AccountBalancesBackup() (abb AccountBalancesBackup) {
+	if ap.Balances != nil {
+		abb = make(AccountBalancesBackup)
+		for blncID, blnc := range ap.Balances {
+			abb[blncID] = new(decimal.Big).Copy(blnc.Units.Big)
+		}
+	}
+	return
 }
 
 // Balance represents one Balance inside an Account
@@ -203,6 +240,7 @@ func (bL *Balance) Clone() (blnc *Balance) {
 type AccountProfileWithWeight struct {
 	*AccountProfile
 	Weight float64
+	LockID string
 }
 
 // AccountProfilesWithWeight is a sortable list of AccountProfileWithWeight
@@ -222,6 +260,27 @@ func (apWws AccountProfilesWithWeight) AccountProfiles() (aps []*AccountProfile)
 		aps = make([]*AccountProfile, len(apWws))
 		for i, apWw := range apWws {
 			aps[i] = apWw.AccountProfile
+		}
+	}
+	return
+}
+
+// LockIDs returns the list of LockIDs
+func (apWws AccountProfilesWithWeight) LockIDs() (lkIDs []string) {
+	if apWws != nil {
+		lkIDs = make([]string, len(apWws))
+		for i, apWw := range apWws {
+			lkIDs[i] = apWw.LockID
+		}
+	}
+	return
+}
+
+func (apWws AccountProfilesWithWeight) TenantIDs() (tntIDs []string) {
+	if apWws != nil {
+		tntIDs = make([]string, len(apWws))
+		for i, apWw := range apWws {
+			tntIDs[i] = apWw.AccountProfile.TenantID()
 		}
 	}
 	return
@@ -268,7 +327,7 @@ type AccountProfileWithOpts struct {
 }
 
 // ArgsAccountForEvent arguments used for process event
-type ArgsAccountForEvent struct {
+type ArgsAccountsForEvent struct {
 	*CGREvent
 	AccountIDs []string
 }

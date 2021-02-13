@@ -65,11 +65,11 @@ func (aS *AccountS) Call(serviceMethod string, args interface{}, reply interface
 	return utils.RPCCall(aS, serviceMethod, args, reply)
 }
 
-// matchingAccountForEvent returns the matched Account for the given event
-// if lked option is passed, the AccountProfile will be also locked
+// matchingAccountsForEvent returns the matched Accounts for the given event
+// if lked option is passed, each AccountProfile will be also locked
 //   so it becomes responsibility of upper layers to release the lock
-func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent,
-	acntIDs []string, lked bool) (acnt *utils.AccountProfile, lkID string, err error) {
+func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
+	acntIDs []string, lked bool) (acnts utils.AccountProfilesWithWeight, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.Opts,
@@ -101,9 +101,7 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent,
 		var qAcnt *utils.AccountProfile
 		if qAcnt, err = aS.dm.GetAccountProfile(tnt, acntID,
 			true, true, utils.NonTransactional); err != nil {
-			if lked {
-				guardian.Guardian.UnguardIDs(refID)
-			}
+			guardian.Guardian.UnguardIDs(refID)
 			if err == utils.ErrNotFound {
 				err = nil
 				continue
@@ -113,44 +111,37 @@ func (aS *AccountS) matchingAccountForEvent(tnt string, cgrEv *utils.CGREvent,
 		if _, isDisabled := qAcnt.Opts[utils.Disabled]; isDisabled ||
 			(qAcnt.ActivationInterval != nil && cgrEv.Time != nil &&
 				!qAcnt.ActivationInterval.IsActiveAtTime(*cgrEv.Time)) { // not active
-			if lked {
-				guardian.Guardian.UnguardIDs(refID)
-			}
+			guardian.Guardian.UnguardIDs(refID)
 			continue
 		}
 		var pass bool
 		if pass, err = aS.fltrS.Pass(tnt, qAcnt.FilterIDs, evNm); err != nil {
-			if lked {
-				guardian.Guardian.UnguardIDs(refID)
-			}
+			guardian.Guardian.UnguardIDs(refID)
 			return
 		} else if !pass {
-			if lked {
-				guardian.Guardian.UnguardIDs(refID)
-			}
+			guardian.Guardian.UnguardIDs(refID)
 			continue
 		}
-		if acnt == nil {
-			acnt = qAcnt
-			if lked {
-				if lkID != utils.EmptyString {
-					guardian.Guardian.UnguardIDs(lkID)
-				}
-				lkID = refID
+		var weight float64
+		/*
+			if weight, err = engine.WeightFromDynamics(acnt.DynamicWeights,
+				aS.fltrS, cgrEv.Tenant, ev); err != nil {
+				return
 			}
-		} else if lked {
-			guardian.Guardian.UnguardIDs(refID)
-		}
+		*/
+		acnts = append(acnts, &utils.AccountProfileWithWeight{qAcnt, weight, refID})
 	}
-	if acnt == nil {
-		return nil, "", utils.ErrNotFound
+	if len(acnts) == 0 {
+		return nil, utils.ErrNotFound
 	}
+	acnts.Sort()
 	return
 }
 
-// accountProcessEvent implements event processing by an Account
-func (aS *AccountS) accountDebitUsage(acnt *utils.AccountProfile,
+// accountDebitUsage will debit the usage out of an Account
+func (aS *AccountS) accountDebitUsage(acnt *utils.AccountProfile, usage *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+	// Find balances matching event
 	//ev := cgrEv.AsDataProvider()
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
 	for _, blnCfg := range acnt.Balances {
@@ -163,12 +154,38 @@ func (aS *AccountS) accountDebitUsage(acnt *utils.AccountProfile,
 		*/
 		blcsWithWeight = append(blcsWithWeight, &utils.BalanceWithWeight{blnCfg, weight})
 	}
+	blcsWithWeight.Sort()
 	var blncOpers []balanceOperator
 	if blncOpers, err = newBalanceOperators(blcsWithWeight.Balances(), aS.fltrS, aS.connMgr,
 		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
 		return
 	}
-	usage := utils.NewDecimal(int64(72*time.Hour), 0)
+
+	for i, blncOper := range blncOpers {
+		if i == 0 {
+			ec = utils.NewEventCharges()
+		}
+		if usage.Cmp(decimal.New(0, 0)) == 0 {
+			return // no more debit
+		}
+		var ecDbt *utils.EventCharges
+		if ecDbt, err = blncOper.debitUsage(new(decimal.Big).Copy(usage), cgrEv); err != nil {
+			if err == utils.ErrFilterNotPassingNoCaps {
+				err = nil
+				continue
+			}
+			return
+		}
+		usage = utils.SubstractBig(usage, ecDbt.Usage.Big)
+		ec.Merge(ecDbt)
+	}
+	return
+}
+
+// accountsDebitUsage will debit an usage out of multiple accounts
+func (aS *AccountS) accountsDebitUsage(acnts []*utils.AccountProfileWithWeight,
+	cgrEv *utils.CGREvent, store bool) (ec *utils.EventCharges, err error) {
+	usage := decimal.New(int64(72*time.Hour), 0)
 	var usgEv time.Duration
 	if usgEv, err = cgrEv.FieldAsDuration(utils.Usage); err != nil {
 		if err != utils.ErrNotFound {
@@ -181,27 +198,33 @@ func (aS *AccountS) accountDebitUsage(acnt *utils.AccountProfile,
 			}
 			err = nil
 		} else { // found, overwrite usage
-			usage.Big = decimal.New(int64(usgEv), 0)
+			usage = decimal.New(int64(usgEv), 0)
 		}
 	} else {
-		usage.Big = decimal.New(int64(usgEv), 0)
+		usage = decimal.New(int64(usgEv), 0)
 	}
-	for i, blncOper := range blncOpers {
+	acntBkps := make([]utils.AccountBalancesBackup, len(acnts))
+	for i, acnt := range acnts {
 		if i == 0 {
 			ec = utils.NewEventCharges()
 		}
-		if usage.Big.Cmp(decimal.New(0, 0)) == 0 {
-			return // no more debit
+		if usage.Cmp(decimal.New(0, 0)) == 0 {
+			return // no more debits
 		}
+		acntBkps[i] = acnt.AccountProfile.AccountBalancesBackup()
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = blncOper.debitUsage(usage.Clone(), cgrEv); err != nil {
-			if err == utils.ErrFilterNotPassingNoCaps {
-				err = nil
-				continue
+		if ecDbt, err = aS.accountDebitUsage(acnt.AccountProfile,
+			new(decimal.Big).Copy(usage), cgrEv); err != nil {
+			if store {
+				restoreAccounts(aS.dm, acnts, acntBkps)
 			}
 			return
 		}
-		usage.Big = utils.SubstractBig(usage.Big, ecDbt.Usage.Big)
+		if err = aS.dm.SetAccountProfile(acnt.AccountProfile, false); err != nil {
+			restoreAccounts(aS.dm, acnts, acntBkps)
+			return
+		}
+		usage = utils.SubstractBig(usage, ecDbt.Usage.Big)
 		ec.Merge(ecDbt)
 	}
 	return
@@ -212,35 +235,37 @@ func (aS *AccountS) accountDebitCost(acnt *utils.AccountProfile,
 	return
 }
 
-// V1AccountProfileForEvent returns the matching AccountProfile for Event
-func (aS *AccountS) V1AccountProfileForEvent(args *utils.ArgsAccountForEvent, ap *utils.AccountProfile) (err error) {
-	var acnt *utils.AccountProfile
-	if acnt, _, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
+// V1AccountProfilesForEvent returns the matching AccountProfiles for Event
+func (aS *AccountS) V1AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.AccountProfile) (err error) {
+	var acnts utils.AccountProfilesWithWeight
+	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, false); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	*ap = *acnt // ToDo: make sure we clone in RPC
+	*aps = acnts.AccountProfiles()
 	return
 }
 
-// V1MaxUsage returns the maximum usage for the event, based on matching Account
-func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, eEc *utils.ExtEventCharges) (err error) {
-	var acnt *utils.AccountProfile
-	var lkID string
-	if acnt, lkID, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
+// V1MaxUsage returns the maximum usage for the event, based on matching Accounts
+func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+	var acnts utils.AccountProfilesWithWeight
+	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	defer guardian.Guardian.UnguardIDs(lkID)
-
+	defer func() {
+		for _, lkID := range acnts.LockIDs() {
+			guardian.Guardian.UnguardIDs(lkID)
+		}
+	}()
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountDebitUsage(acnt, args.CGREvent); err != nil {
+	if procEC, err = aS.accountsDebitUsage(acnts, args.CGREvent, false); err != nil {
 		return
 	}
 	var rcvEec *utils.ExtEventCharges
@@ -252,30 +277,29 @@ func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountForEvent, eEc *utils.ExtEv
 }
 
 // V1DebitUsage performs debit for the provided event
-func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountForEvent, eEc *utils.ExtEventCharges) (err error) {
-	var acnt *utils.AccountProfile
-	var lkID string
-	if acnt, lkID, err = aS.matchingAccountForEvent(args.CGREvent.Tenant,
+func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+	var acnts utils.AccountProfilesWithWeight
+	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	defer guardian.Guardian.UnguardIDs(lkID)
+	defer func() {
+		for _, lkID := range acnts.LockIDs() {
+			guardian.Guardian.UnguardIDs(lkID)
+		}
+	}()
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountDebitUsage(acnt, args.CGREvent); err != nil {
+	if procEC, err = aS.accountsDebitUsage(acnts, args.CGREvent, true); err != nil {
 		return
 	}
 
 	var rcvEec *utils.ExtEventCharges
 	if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
 		return
-	}
-
-	if err = aS.dm.SetAccountProfile(acnt, false); err != nil {
-		return // no need of revert since we did not save
 	}
 
 	*eEc = *rcvEec

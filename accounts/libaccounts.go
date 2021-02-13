@@ -75,7 +75,7 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
-	debitUsage(usage *utils.Decimal, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
+	debitUsage(usage *decimal.Big, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
 }
 
 // roundUsageWithIncrements rounds the usage based on increments
@@ -189,7 +189,7 @@ func balanceLimit(optsCfg map[string]interface{}) (bL *utils.Decimal, err error)
 
 // debitUsageFromConcrete attempts to debit the usage out of concrete balances
 // returns utils.ErrInsufficientCredit if complete usage cannot be debitted
-func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal,
+func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
 	costIcrm *utils.CostIncrement, cgrEv *utils.CGREvent,
 	connMgr *engine.ConnManager, rateSConns, rpIDs []string) (err error) {
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
@@ -209,7 +209,7 @@ func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal
 	// RecurrentFee is configured, used it with increments
 	if costIcrm.RecurrentFee.Big.Cmp(decimal.New(-1, 0)) != 0 {
 		rcrntCost := utils.MultiplyBig(
-			utils.DivideBig(usage.Big, costIcrm.Increment.Big),
+			utils.DivideBig(usage, costIcrm.Increment.Big),
 			costIcrm.RecurrentFee.Big)
 		if tCost == nil {
 			tCost = rcrntCost
@@ -239,7 +239,7 @@ func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal
 }
 
 // maxDebitUsageFromConcretes will debit the maximum possible usage out of concretes
-func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Decimal,
+func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement) (ec *utils.EventCharges, err error) {
@@ -269,7 +269,7 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Deci
 		if i == maxItr {
 			return nil, utils.ErrMaxIncrementsExceeded
 		}
-		qriedUsage := usage.Big // so we can detect loops
+		qriedUsage := usage // so we can detect loops
 		if err = debitUsageFromConcretes(cncrtBlncs, usage, costIcrm, cgrEv,
 			connMgr, rateSConns, rpIDs); err != nil {
 			if err != utils.ErrInsufficientCredit {
@@ -277,35 +277,35 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Deci
 			}
 			err = nil
 			// ErrInsufficientCredit
-			usageDenied = new(decimal.Big).Copy(usage.Big)
+			usageDenied = new(decimal.Big).Copy(usage)
 			if usagePaid == nil { // going backwards
-				usage.Big = utils.DivideBig( // divide by 2
-					usage.Big, decimal.New(2, 0))
-				usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big) // make sure usage is multiple of increments
-				if usage.Big.Cmp(usageDenied) >= 0 ||
-					usage.Big.Cmp(decimal.New(0, 0)) == 0 ||
-					usage.Big.Cmp(qriedUsage) == 0 { // loop
+				usage = utils.DivideBig( // divide by 2
+					usage, decimal.New(2, 0))
+				usage = roundedUsageWithIncrements(usage, costIcrm.Increment.Big) // make sure usage is multiple of increments
+				if usage.Cmp(usageDenied) >= 0 ||
+					usage.Cmp(decimal.New(0, 0)) == 0 ||
+					usage.Cmp(qriedUsage) == 0 { // loop
 					break
 				}
 				continue
 			}
 		} else {
-			usagePaid = new(decimal.Big).Copy(usage.Big)
+			usagePaid = new(decimal.Big).Copy(usage)
 			paidConcrtUnts = cloneUnitsFromConcretes(cncrtBlncs)
 			if i == 0 { // no estimation done, covering full
 				break
 			}
 		}
 		// going upwards
-		usage.Big = utils.SumBig(usagePaid,
+		usage = utils.SumBig(usagePaid,
 			utils.DivideBig(usagePaid, decimal.New(2, 0)).RoundToInt())
-		if usage.Big.Cmp(usageDenied) >= 0 {
-			usage.Big = utils.SumBig(usagePaid, costIcrm.Increment.Big)
+		if usage.Cmp(usageDenied) >= 0 {
+			usage = utils.SumBig(usagePaid, costIcrm.Increment.Big)
 		}
-		usage.Big = roundedUsageWithIncrements(usage.Big, costIcrm.Increment.Big)
-		if usage.Big.Cmp(usagePaid) <= 0 ||
-			usage.Big.Cmp(usageDenied) >= 0 ||
-			usage.Big.Cmp(qriedUsage) == 0 { // loop
+		usage = roundedUsageWithIncrements(usage, costIcrm.Increment.Big)
+		if usage.Cmp(usagePaid) <= 0 ||
+			usage.Cmp(usageDenied) >= 0 ||
+			usage.Cmp(qriedUsage) == 0 { // loop
 			break
 		}
 	}
@@ -316,4 +316,20 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *utils.Deci
 	}
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
 	return &utils.EventCharges{Usage: &utils.Decimal{usagePaid}}, nil
+}
+
+// restoreAccounts will restore the accounts in DataDB out of their backups if present
+func restoreAccounts(dm *engine.DataManager,
+	acnts []*utils.AccountProfileWithWeight, bkps []utils.AccountBalancesBackup) {
+	for i, bkp := range bkps {
+		if bkp == nil ||
+			!acnts[i].AccountProfile.BalancesAltered(bkp) {
+			continue
+		}
+		acnts[i].AccountProfile.RestoreFromBackup(bkp)
+		if err := dm.SetAccountProfile(acnts[i].AccountProfile, false); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> restoring account <%s>",
+				utils.AccountS, err, acnts[i].AccountProfile.TenantID()))
+		}
+	}
 }
