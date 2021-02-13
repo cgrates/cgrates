@@ -609,11 +609,11 @@ func TestCBSDebitUsage(t *testing.T) {
 		},
 		fltrS: new(engine.FilterS),
 	}
-	toDebit := utils.NewDecimal(10, 0)
+	toDebit := decimal.New(10, 0)
 	if dbted, err := cb.debitUsage(toDebit,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if dbted.Usage.Compare(toDebit) != 0 {
+	} else if dbted.Usage.Big.Cmp(toDebit) != 0 {
 		t.Errorf("debited: %+v", dbted)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(498, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
@@ -641,9 +641,9 @@ func TestCBSDebitUsageInvalidFilter(t *testing.T) {
 		},
 		fltrS: filterS,
 	}
-	toDebit := utils.NewDecimal(10, 0)
-	if _, err := cb.debitUsage(toDebit,
-		new(utils.CGREvent)); err == nil || err.Error() != "inline parse error for string: <*string>" {
+	toDebit := decimal.New(10, 0)
+	if _, err := cb.debitUsage(toDebit, new(utils.CGREvent)); err == nil ||
+		err.Error() != "inline parse error for string: <*string>" {
 		t.Error(err)
 	}
 }
@@ -676,9 +676,9 @@ func TestCBSDebitUsageNoMatchFilter(t *testing.T) {
 			"CustomField2": "CustomValue2",
 		},
 	}
-	toDebit := utils.NewDecimal(10, 0)
-	if _, err := cb.debitUsage(toDebit,
-		cgrEv); err == nil || err != utils.ErrFilterNotPassingNoCaps {
+	toDebit := decimal.New(10, 0)
+	if _, err := cb.debitUsage(toDebit, cgrEv); err == nil ||
+		err != utils.ErrFilterNotPassingNoCaps {
 		t.Error(err)
 	}
 }
@@ -704,9 +704,9 @@ func TestCBSDebitUsageInvalidCostIncrementFilter(t *testing.T) {
 		},
 		fltrS: filterS,
 	}
-	toDebit := utils.NewDecimal(10, 0)
-	if _, err := cb.debitUsage(toDebit,
-		new(utils.CGREvent)); err == nil || err.Error() != "inline parse error for string: <*string>" {
+	toDebit := decimal.New(10, 0)
+	if _, err := cb.debitUsage(toDebit, new(utils.CGREvent)); err == nil ||
+		err.Error() != "inline parse error for string: <*string>" {
 		t.Error(err)
 	}
 }
@@ -749,9 +749,9 @@ func TestCBSDebitUsageCoverProcessAttributes(t *testing.T) { // coverage purpose
 		fltrS:   filterS,
 		connMgr: connMgr,
 	}
-	toDebit := utils.NewDecimal(10, 0)
-	if _, err := cb.debitUsage(toDebit,
-		new(utils.CGREvent)); err == nil || err.Error() != "NOT_CONNECTED: AttributeS" {
+	toDebit := decimal.New(10, 0)
+	if _, err := cb.debitUsage(toDebit, new(utils.CGREvent)); err == nil ||
+		err.Error() != "NOT_CONNECTED: AttributeS" {
 		t.Error(err)
 	}
 }
@@ -812,9 +812,9 @@ func TestCBSDebitUsageCoverProcessAttributes2(t *testing.T) { // coverage purpos
 		connMgr:    connMgr,
 		attrSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
 	}
-	toDebit := utils.NewDecimal(10, 0)
-	if _, err := cb.debitUsage(toDebit,
-		new(utils.CGREvent)); err == nil || err.Error() != "RATES_ERROR:NOT_CONNECTED: RateS" {
+	toDebit := decimal.New(10, 0)
+	if _, err := cb.debitUsage(toDebit, new(utils.CGREvent)); err == nil ||
+		err.Error() != "RATES_ERROR:NOT_CONNECTED: RateS" {
 		t.Error(err)
 	}
 }
