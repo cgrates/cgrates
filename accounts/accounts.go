@@ -215,7 +215,7 @@ func (aS *AccountS) accountsDebitUsage(acnts []*utils.AccountProfileWithWeight,
 			}
 			return
 		}
-		if store {
+		if store && acnt.AccountProfile.BalancesAltered(acntBkps[i]) {
 			if err = aS.dm.SetAccountProfile(acnt.AccountProfile, false); err != nil {
 				restoreAccounts(aS.dm, acnts, acntBkps)
 				return
