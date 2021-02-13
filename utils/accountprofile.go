@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"sort"
 	"time"
 
 	"github.com/ericlagergren/decimal"
@@ -246,13 +247,10 @@ type AccountProfileWithWeight struct {
 // AccountProfilesWithWeight is a sortable list of AccountProfileWithWeight
 type AccountProfilesWithWeight []*AccountProfileWithWeight
 
-/*
 // Sort is part of sort interface, sort based on Weight
 func (aps AccountProfilesWithWeight) Sort() {
 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
 }
-
-*/
 
 // AccountProfiles returns the list of AccountProfiles
 func (apWws AccountProfilesWithWeight) AccountProfiles() (aps []*AccountProfile) {
@@ -295,13 +293,10 @@ type BalanceWithWeight struct {
 // Balances is a sortable list of Balances
 type BalancesWithWeight []*BalanceWithWeight
 
-/*
 // Sort is part of sort interface, sort based on Weight
 func (blcs BalancesWithWeight) Sort() {
 	sort.Slice(blcs, func(i, j int) bool { return blcs[i].Weight > blcs[j].Weight })
 }
-`
-*/
 
 // Balances returns the list of Balances
 func (bWws BalancesWithWeight) Balances() (blncs []*Balance) {

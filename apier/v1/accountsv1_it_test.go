@@ -50,7 +50,7 @@ func TestAccountSv1IT(t *testing.T) {
 		testAccountSv1StartEngine,
 		testAccountSv1RPCConn,
 		testAccountSv1LoadFromFolder,
-		testAccountSv1AccountProfileForEvent,
+		testAccountSv1AccountProfilesForEvent,
 		testAccountSv1MaxUsage,
 		testAccountSv1DebitUsage,
 	}
@@ -118,25 +118,27 @@ func testAccountSv1LoadFromFolder(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func testAccountSv1AccountProfileForEvent(t *testing.T) {
-	eAcnt := &utils.AccountProfile{
-		Tenant:    "cgrates.org",
-		ID:        "1001",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Balances: map[string]*utils.Balance{
-			"GenericBalance1": &utils.Balance{
-				ID: "GenericBalance1",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 20,
+func testAccountSv1AccountProfilesForEvent(t *testing.T) {
+	eAcnts := []*utils.AccountProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "1001",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Balances: map[string]*utils.Balance{
+				"GenericBalance1": &utils.Balance{
+					ID: "GenericBalance1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
 					},
-				},
-				Type:  utils.MetaAbstract,
-				Units: &utils.Decimal{decimal.New(int64(time.Hour), 0)},
-				UnitFactors: []*utils.UnitFactor{
-					&utils.UnitFactor{
-						FilterIDs: []string{"*string:~*req.ToR:*data"},
-						Factor:    &utils.Decimal{decimal.New(1024, 3)},
+					Type:  utils.MetaAbstract,
+					Units: &utils.Decimal{decimal.New(int64(time.Hour), 0)},
+					UnitFactors: []*utils.UnitFactor{
+						&utils.UnitFactor{
+							FilterIDs: []string{"*string:~*req.ToR:*data"},
+							Factor:    &utils.Decimal{decimal.New(1024, 3)},
+						},
 					},
 					CostIncrements: []*utils.CostIncrement{
 						&utils.CostIncrement{
@@ -153,46 +155,46 @@ func testAccountSv1AccountProfileForEvent(t *testing.T) {
 						},
 					},
 				},
-			},
-			"MonetaryBalance1": &utils.Balance{
-				ID: "MonetaryBalance1",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 30,
+				"MonetaryBalance1": &utils.Balance{
+					ID: "MonetaryBalance1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 30,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: &utils.Decimal{decimal.New(5, 0)},
+					CostIncrements: []*utils.CostIncrement{
+						&utils.CostIncrement{
+							FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+							Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+							RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+						},
+						&utils.CostIncrement{
+							FilterIDs:    []string{"*string:~*req.ToR:*data"},
+							Increment:    &utils.Decimal{decimal.New(1024, 0)},
+							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+							RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+						},
 					},
 				},
-				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(5, 0)},
-				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
-						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
+				"MonetaryBalance2": &utils.Balance{
+					ID: "MonetaryBalance2",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
 					},
-					&utils.CostIncrement{
-						FilterIDs:    []string{"*string:~*req.ToR:*data"},
-						Increment:    &utils.Decimal{decimal.New(1024, 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 2)},
-					},
-				},
-			},
-			"MonetaryBalance2": &utils.Balance{
-				ID: "MonetaryBalance2",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 10,
-					},
-				},
-				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(3, 0)},
-				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
-						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					Type:  utils.MetaConcrete,
+					Units: &utils.Decimal{decimal.New(3, 0)},
+					CostIncrements: []*utils.CostIncrement{
+						&utils.CostIncrement{
+							FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+							Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+							RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+						},
 					},
 				},
 			},

@@ -123,12 +123,10 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 			continue
 		}
 		var weight float64
-		/*
-			if weight, err = engine.WeightFromDynamics(acnt.DynamicWeights,
-				aS.fltrS, cgrEv.Tenant, ev); err != nil {
-				return
-			}
-		*/
+		if weight, err = engine.WeightFromDynamics(qAcnt.Weights,
+			aS.fltrS, cgrEv.Tenant, evNm); err != nil {
+			return
+		}
 		acnts = append(acnts, &utils.AccountProfileWithWeight{qAcnt, weight, refID})
 	}
 	if len(acnts) == 0 {
@@ -142,16 +140,13 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 func (aS *AccountS) accountDebitUsage(acnt *utils.AccountProfile, usage *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 	// Find balances matching event
-	//ev := cgrEv.AsDataProvider()
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
 	for _, blnCfg := range acnt.Balances {
 		var weight float64
-		/*
-			if weight, err = engine.WeightFromDynamics(blnCfg.DynamicWeights,
-				aS.fltrS, cgrEv.Tenant, ev); err != nil {
-				return
-			}
-		*/
+		if weight, err = engine.WeightFromDynamics(blnCfg.Weights,
+			aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
+			return
+		}
 		blcsWithWeight = append(blcsWithWeight, &utils.BalanceWithWeight{blnCfg, weight})
 	}
 	blcsWithWeight.Sort()
