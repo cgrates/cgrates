@@ -23,6 +23,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ericlagergren/decimal"
+
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/rpcclient"
@@ -157,4 +159,317 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 	if _, err := rateSCostForEvent(connMgr, cgrEvent, rateSConns, nil); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
+}
+
+func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
+	engine.Cache.Clear(nil)
+
+	config := config.NewDefaultCGRConfig()
+	sTestMock := &testMockCall{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.RateSv1CostForEvent: func(args interface{}, reply interface{}) error {
+				rplCast, canCast := reply.(*engine.RateProfileCost)
+				if !canCast {
+					t.Errorf("Wrong argument type : %T", reply)
+					return nil
+				}
+				customRply := &engine.RateProfileCost{
+					ID:   "test",
+					Cost: 1,
+				}
+				*rplCast = *customRply
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	connMgr := engine.NewConnManager(config, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
+	})
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ID1",
+	}
+
+	rateSConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
+
+	if _, err := rateSCostForEvent(connMgr, cgrEvent, rateSConns, nil); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDebitUsageFromConcretes(t *testing.T) {
+	engine.Cache.Clear(nil)
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	cb1 := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB1",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS: filterS,
+	}
+	cb2 := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB2",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS: filterS,
+	}
+	if err := debitUsageFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
+		FixedFee:     utils.NewDecimal(10, 0),
+		Increment:    utils.NewDecimal(1, 0),
+		RecurrentFee: utils.NewDecimal(1, 0),
+	}, new(utils.CGREvent), nil, nil, nil); err != nil {
+		t.Error(err)
+	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
+	} else if cb2.blnCfg.Units.Cmp(decimal.New(290, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
+	}
+
+}
+
+func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
+	engine.Cache.Clear(nil)
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	sTestMock := &testMockCall{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.RateSv1CostForEvent: func(args interface{}, reply interface{}) error {
+				rplCast, canCast := reply.(*engine.RateProfileCost)
+				if !canCast {
+					t.Errorf("Wrong argument type : %T", reply)
+					return nil
+				}
+				customRply := &engine.RateProfileCost{
+					ID:   "test",
+					Cost: 100,
+				}
+				*rplCast = *customRply
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- sTestMock
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
+	})
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	cb1 := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB1",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS:   filterS,
+		connMgr: connMgr,
+	}
+	cb2 := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB2",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS:   filterS,
+		connMgr: connMgr,
+	}
+	if err := debitUsageFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
+		Increment:    utils.NewDecimal(1, 0),
+		RecurrentFee: utils.NewDecimal(-1, 0),
+	}, new(utils.CGREvent), connMgr, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}, nil); err != nil {
+		t.Error(err)
+	} else if cb1.blnCfg.Units.Cmp(decimal.New(400, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
+	} else if cb2.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
+	}
+
+}
+
+func TestDebitUsageFromConcretesRestore(t *testing.T) {
+	engine.Cache.Clear(nil)
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	cb1 := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:        "CB1",
+			Type:      utils.MetaConcrete,
+			FilterIDs: []string{"*string"},
+			Units:     utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS: filterS,
+	}
+	cb2 := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB2",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS: filterS,
+	}
+	if err := debitUsageFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(200, 0), &utils.CostIncrement{
+		Increment:    utils.NewDecimal(1, 0),
+		RecurrentFee: utils.NewDecimal(1, 0),
+	}, new(utils.CGREvent), nil, nil, nil); err == nil || err.Error() != "inline parse error for string: <*string>" {
+		t.Error(err)
+	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
+	} else if cb2.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
+	}
+}
+
+func TestMaxDebitUsageFromConcretes(t *testing.T) {
+	engine.Cache.Clear(nil)
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AccountSCfg().MaxIterations = 100
+	config.SetCgrConfig(cfg)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	cb1 := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB1",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS: filterS,
+	}
+	cb2 := &concreteBalance{
+		blnCfg: &utils.Balance{
+			ID:    "CB2",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(500, 0), // 500 Units
+		},
+		fltrS: filterS,
+	}
+	if _, err := maxDebitUsageFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(1100, 0),
+		nil, new(utils.CGREvent), nil, nil, nil, nil, &utils.CostIncrement{
+			Increment:    utils.NewDecimal(1, 0),
+			RecurrentFee: utils.NewDecimal(1, 0),
+		}); err == nil || err != utils.ErrMaxIncrementsExceeded {
+		t.Error(err)
+	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
+	} else if cb2.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
+	}
+}
+
+func TestRestoreAccount(t *testing.T) { //coverage purpose
+	engine.Cache.Clear(nil)
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	acntPrf := &utils.AccountProfile{
+		Tenant: "cgrates.org",
+		ID:     "1001",
+		Balances: map[string]*utils.Balance{
+			"CB1": &utils.Balance{
+				ID:    "CB1",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(500, 0),
+			},
+			"CB2": &utils.Balance{
+				ID:    "CB2",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(300, 0),
+			},
+		},
+	}
+	if err := dm.SetAccountProfile(acntPrf, false); err != nil {
+		t.Error(err)
+	}
+	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
+		&utils.AccountProfileWithWeight{acntPrf, 0, utils.EmptyString},
+	}, []utils.AccountBalancesBackup{
+		map[string]*decimal.Big{"CB2": decimal.New(100, 0)},
+	})
+	if rcv, err := dm.GetAccountProfile("cgrates.org", "1001", false, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if len(rcv.Balances) != 2 {
+		t.Errorf("Unexpected number of balances received")
+	} else if rcv.Balances["CB2"].Units.Cmp(decimal.New(100, 0)) != 0 {
+		t.Errorf("Unexpected balance received after restore")
+	}
+}
+
+type dataDBMockError struct {
+	*engine.DataDBMock
+}
+
+func TestRestoreAccount2(t *testing.T) { //coverage purpose
+	engine.Cache.Clear(nil)
+
+	dm := engine.NewDataManager(&dataDBMockError{}, config.CgrConfig().CacheCfg(), nil)
+	acntPrf := &utils.AccountProfile{
+		Tenant: "cgrates.org",
+		ID:     "1001",
+		Balances: map[string]*utils.Balance{
+			"CB1": &utils.Balance{
+				ID:    "CB1",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(500, 0), // 500 Units
+			},
+			"CB2": &utils.Balance{
+				ID:    "CB2",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(100, 0), // 500 Units
+			},
+		},
+	}
+	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
+		&utils.AccountProfileWithWeight{acntPrf, 0, utils.EmptyString},
+	}, []utils.AccountBalancesBackup{
+		map[string]*decimal.Big{"CB1": decimal.New(100, 0)},
+	})
+
+}
+
+func TestRestoreAccount3(t *testing.T) { //coverage purpose
+	engine.Cache.Clear(nil)
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	acntPrf := &utils.AccountProfile{
+		Tenant: "cgrates.org",
+		ID:     "1001",
+		Balances: map[string]*utils.Balance{
+			"CB1": &utils.Balance{
+				ID:    "CB1",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(500, 0), // 500 Units
+			},
+			"CB2": &utils.Balance{
+				ID:    "CB2",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(100, 0), // 500 Units
+			},
+		},
+	}
+	if err := dm.SetAccountProfile(acntPrf, false); err != nil {
+		t.Error(err)
+	}
+	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
+		&utils.AccountProfileWithWeight{acntPrf, 0, utils.EmptyString},
+	}, []utils.AccountBalancesBackup{
+		nil,
+	})
+
 }
