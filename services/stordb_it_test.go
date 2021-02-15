@@ -150,9 +150,8 @@ func TestStorDBReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
-func TestStorDBReload2(t *testing.T) {
+func TestStorDBReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -165,7 +164,7 @@ func TestStorDBReload2(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	cfg.StorDbCfg().Type = utils.INTERNAL
+	cfg.StorDbCfg().Password = "CGRateS.org"
 	stordb := NewStorDBService(cfg, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
@@ -202,14 +201,6 @@ func TestStorDBReload2(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.STORDB_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
 	select {
 	case d := <-cdrsRPC:
 		cdrsRPC <- d
@@ -222,18 +213,536 @@ func TestStorDBReload2(t *testing.T) {
 	if !stordb.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-
-	err := cdrS.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	time.Sleep(10 * time.Millisecond)
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	cfg.StorDbCfg().Password = ""
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		Section: config.STORDB_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
 	}
 
-	if err := cdrS.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
 	if err := cdrS.Reload(); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
+
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	cfg.StorDbCfg().Type = "bad_type"
+
+	if err := stordb.Reload(); err == nil {
+		t.Fatalf("\nExpecting <unknown db 'bad_type' valid options are [mysql, mongo, postgres, internal]>,\n Received <%+v>", err)
+	}
+	cfg.StorDbCfg().Type = utils.INTERNAL
+	if err := stordb.Reload(); err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	err := stordb.Start()
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := db.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := cdrS.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+
+	if err := cdrS.Reload(); err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	cfg.CdrsCfg().Enabled = false
+	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}
+
+func TestStorDBReload4(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cfg.ChargerSCfg().Enabled = true
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Password = "CGRateS.org"
+	stordb := NewStorDBService(cfg, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	ralS := NewRalService(cfg, chS, server,
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+		cdrsRPC, nil, anz, srvDep)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS,
+		NewLoaderService(cfg, db, filterSChan, server,
+			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
+	}
+	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	if stordb.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	cfg.RalsCfg().Enabled = true
+	var reply string
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		Section: config.CDRS_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+
+	select {
+	case d := <-cdrsRPC:
+		cdrsRPC <- d
+	case <-time.After(time.Second):
+		t.Fatal("It took to long to reload the cache")
+	}
+	if !cdrS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !stordb.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	time.Sleep(10 * time.Millisecond)
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	cfg.StorDbCfg().Password = ""
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		Section: config.STORDB_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+
+	if err := cdrS.Reload(); err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	cfg.StorDbCfg().Type = utils.Mongo
+	db.cfg.StorDbCfg().Opts = map[string]interface{}{
+		utils.QueryTimeoutCfg: false,
+	}
+	if err := stordb.Reload(); err == nil {
+		t.Errorf("\nExpecting <cannot convert field: false to time.Duration>,\n Received <%+v>", err)
+	}
+	if err := stordb.Reload(); err == nil {
+		t.Fatalf("\nExpecting <unknown db 'bad_type' valid options are [mysql, mongo, postgres, internal]>,\n Received <%+v>", err)
+	}
+	err := stordb.Start()
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := db.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := cdrS.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+
+	if err := cdrS.Reload(); err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	cfg.CdrsCfg().Enabled = false
+	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}
+
+func TestStorDBReload5(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cfg.ChargerSCfg().Enabled = true
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Password = "CGRateS.org"
+	stordb := NewStorDBService(cfg, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	ralS := NewRalService(cfg, chS, server,
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+		cdrsRPC, nil, anz, srvDep)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS,
+		NewLoaderService(cfg, db, filterSChan, server,
+			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
+	}
+	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	if stordb.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	cfg.RalsCfg().Enabled = true
+	var reply string
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		Section: config.CDRS_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+
+	select {
+	case d := <-cdrsRPC:
+		cdrsRPC <- d
+	case <-time.After(time.Second):
+		t.Fatal("It took to long to reload the cache")
+	}
+	if !cdrS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !stordb.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	time.Sleep(10 * time.Millisecond)
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	cfg.StorDbCfg().Password = ""
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmysql"),
+		Section: config.STORDB_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+
+	if err := cdrS.Reload(); err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	cfg.StorDbCfg().Type = utils.MySQL
+	db.cfg.StorDbCfg().Opts = map[string]interface{}{
+		utils.MaxOpenConnsCfg: false,
+	}
+	if err := stordb.Reload(); err == nil {
+		t.Errorf("\nExpecting <cannot convert field<bool>: false to int>,\n Received <%+v>", err)
+	}
+
+	err := stordb.Start()
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := db.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := cdrS.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+
+	if err := cdrS.Reload(); err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	cfg.CdrsCfg().Enabled = false
+	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}
+
+func TestStorDBReload6(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cfg.ChargerSCfg().Enabled = true
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Password = "CGRateS.org"
+	stordb := NewStorDBService(cfg, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	ralS := NewRalService(cfg, chS, server,
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+		cdrsRPC, nil, anz, srvDep)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS,
+		NewLoaderService(cfg, db, filterSChan, server,
+			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
+	}
+	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	if stordb.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	cfg.RalsCfg().Enabled = true
+	var reply string
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		Section: config.CDRS_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+
+	select {
+	case d := <-cdrsRPC:
+		cdrsRPC <- d
+	case <-time.After(time.Second):
+		t.Fatal("It took to long to reload the cache")
+	}
+	if !cdrS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !stordb.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	time.Sleep(10 * time.Millisecond)
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	cfg.StorDbCfg().Password = ""
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmysql"),
+		Section: config.STORDB_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+
+	if err := cdrS.Reload(); err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	cfg.StorDbCfg().Type = utils.MySQL
+	db.cfg.StorDbCfg().Opts = map[string]interface{}{
+		utils.MaxOpenConnsCfg:    1,
+		utils.MaxIdleConnsCfg:    1,
+		utils.ConnMaxLifetimeCfg: false,
+	}
+	if err := stordb.Reload(); err == nil {
+		t.Errorf("\nExpecting <cannot convert field<bool>: false to int>,\n Received <%+v>", err)
+	}
+
+	err := stordb.Start()
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := db.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := cdrS.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+
+	if err := cdrS.Reload(); err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	cfg.CdrsCfg().Enabled = false
+	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}
+
+func TestStorDBReload7(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cfg.ChargerSCfg().Enabled = true
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Password = "CGRateS.org"
+	stordb := NewStorDBService(cfg, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	ralS := NewRalService(cfg, chS, server,
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+		cdrsRPC, nil, anz, srvDep)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS,
+		NewLoaderService(cfg, db, filterSChan, server,
+			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
+	}
+	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	if stordb.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	cfg.RalsCfg().Enabled = true
+	var reply string
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmysql"),
+		Section: config.CDRS_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+
+	select {
+	case d := <-cdrsRPC:
+		cdrsRPC <- d
+	case <-time.After(time.Second):
+		t.Fatal("It took to long to reload the cache")
+	}
+	if !cdrS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !stordb.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	time.Sleep(10 * time.Millisecond)
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	cfg.StorDbCfg().Password = ""
+	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmysql"),
+		Section: config.STORDB_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting OK ,received %s", reply)
+	}
+
+	if err := cdrS.Reload(); err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	if err := stordb.Reload(); err != nil {
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
+	cfg.StorDbCfg().Type = utils.MySQL
+	db.cfg.StorDbCfg().Opts = map[string]interface{}{
+		utils.MaxOpenConnsCfg:    1,
+		utils.MaxIdleConnsCfg:    false,
+		utils.ConnMaxLifetimeCfg: 1,
+	}
+	if err := stordb.Reload(); err == nil {
+		t.Errorf("\nExpecting <cannot convert field<bool>: false to int>,\n Received <%+v>", err)
+	}
+
+	err := stordb.Start()
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := db.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+	if err := cdrS.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+	}
+
+	if err := cdrS.Reload(); err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+
 	cfg.CdrsCfg().Enabled = false
 	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)

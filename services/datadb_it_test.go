@@ -428,6 +428,7 @@ func TestDataDBReload5(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+
 func TestDataDBReload6(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
@@ -502,94 +503,17 @@ func TestDataDBReload6(t *testing.T) {
 }
 
 /*
-func TestDataDBReload7(t *testing.T) {
-	dataDir := flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+func TestDataDBReloadVersion(t *testing.T) {
 	var versionsConfigDIR string
+	dataDir := flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", versionsConfigDIR))
 	if err != nil {
 		t.Fatal(err)
 	}
-	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().DataDbType,
-		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dm3 := engine.NewDataManager(dbConn, cfg.CacheCfg(), nil)
-	var test string
-	var currentVersion engine.Versions
-	var testVersion engine.Versions
-	dataDbVersions := engine.CurrentDataDBVersions()
-	storDbVersions := engine.CurrentStorDBVersions()
 
-	allVersions := make(engine.Versions)
-	for k, v := range dataDbVersions {
-		allVersions[k] = v
-	}
-	for k, v := range storDbVersions {
-		allVersions[k] = v
-	}
-
-	storType := dm3.DataDB().GetStorageType()
-	switch storType {
-	case utils.INTERNAL:
-		currentVersion = allVersions
-		testVersion = allVersions
-		testVersion[utils.Accounts] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
-	case utils.Mongo, utils.Redis:
-		currentVersion = dataDbVersions
-		testVersion = dataDbVersions
-		testVersion[utils.Accounts] = 1
-
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
-	}
-
-	//dataDB
-	if _, rcvErr := dm3.DataDB().GetVersions(""); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := engine.CheckVersions(dm3.DataDB()); err != nil {
-		t.Error(err)
-	}
-	if rcv, err := dm3.DataDB().GetVersions(""); err != nil {
-		t.Error(err)
-	} else if len(currentVersion) != len(rcv) {
-		t.Errorf("Expecting: %v, received: %v", currentVersion, rcv)
-	}
-	if err = dm3.DataDB().RemoveVersions(currentVersion); err != nil {
-		t.Error(err)
-	}
-	if _, rcvErr := dm3.DataDB().GetVersions(""); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := dm3.DataDB().SetVersions(testVersion, false); err != nil {
-		t.Error(err)
-	}
-	if err := engine.CheckVersions(dm3.DataDB()); err.Error() != test {
-		t.Error(err)
-	}
-	if err = dm3.DataDB().RemoveVersions(testVersion); err != nil {
-		t.Error(err)
-	}
-	var storageDb engine.Storage
-	storType = storageDb.GetStorageType()
-	switch storType {
-	case utils.INTERNAL:
-		currentVersion = allVersions
-		testVersion = allVersions
-		testVersion[utils.Accounts] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
-	case utils.Mongo, utils.Postgres, utils.MySQL:
-		currentVersion = storDbVersions
-		testVersion = allVersions
-		testVersion[utils.CostDetails] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>"
-	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
+
 	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
@@ -639,14 +563,19 @@ func TestDataDBReload7(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-
 	time.Sleep(10 * time.Millisecond)
 	err = db.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-
-	cfg.DataDbCfg().DataDbType = utils.MySQL
+	db.cfg.DataDbCfg().DataDbType = utils.Mongo
+	db.cfg.DataDbCfg().Opts = map[string]interface{}{
+		utils.QueryTimeoutCfg: false,
+	}
+	err = db.Reload()
+	if err == nil {
+		t.Errorf("\nExpecting <cannot convert field: false to time.Duration>,\n Received <%+v>", err)
+	}
 
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
