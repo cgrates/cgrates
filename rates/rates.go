@@ -111,7 +111,7 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *
 		} else if !pass {
 			continue
 		}
-		if rtPfl == nil || rtPfl.Weight < rPf.Weight {
+		if rtPfl == nil { //|| rtPfl.Weight < rPf.Weight {
 			rtPfl = rPf
 		}
 	}
