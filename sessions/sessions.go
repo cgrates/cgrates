@@ -425,6 +425,11 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 		return
 	}
 	sr := s.SRuns[sRunIdx]
+	if !s.chargeable {
+		sS.pause(sr, dur)
+		sr.TotalUsage += sr.LastUsage
+		return dur, nil
+	}
 	rDur := sr.debitReserve(dur, lastUsed) // debit out of reserve, rDur is still to be debited
 	if rDur == time.Duration(0) {
 		return dur, nil // complete debit out of reserve
@@ -496,6 +501,27 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	}
 	maxDur = sr.LastUsage
 	return
+}
+
+func (sS *SessionS) pause(sr *SRun, dur time.Duration) {
+	if sr.CD.LoopIndex > 0 {
+		sr.CD.TimeStart = sr.CD.TimeEnd
+	}
+	sr.CD.TimeEnd = sr.CD.TimeStart.Add(dur)
+	sr.CD.DurationIndex += dur
+	ec := engine.NewFreeEventCost(sr.CD.CgrID, sr.CD.RunID, sr.CD.Account, sr.CD.TimeStart, dur)
+	sr.LastUsage = dur
+	sr.CD.LoopIndex++
+	if sr.EventCost == nil { // is the first increment
+		// when we start the call with debit interval 0
+		// but later we update this value with one greater than 0
+		sr.EventCost = ec
+	} else { // we already debited something
+		// copy the old AccountSummary as in Merge the old one is overwriten by the new one
+		ec.AccountSummary = sr.EventCost.AccountSummary
+		// similar to the debit merge the event costs
+		sr.EventCost.Merge(ec)
+	}
 }
 
 // debitLoopSession will periodically debit sessions, ie: automatic prepaid
@@ -1121,6 +1147,7 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREvent, resID, clntConnID string,
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
 	}
+	s.chargeable = s.OptsStart.GetBoolOrDefault(utils.OptsChargeable, true)
 	if !isMsg && sS.isIndexed(s, false) { // check if already exists
 		return nil, utils.ErrExists
 	}
@@ -1367,7 +1394,7 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 		return
 	}
 	for i, sr := range s.SRuns {
-		if s.DebitInterval != 0 &&
+		if s.DebitInterval > 0 &&
 			sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.MetaPrepaid {
 			if s.debitStop == nil { // init the debitStop only for the first sRun with DebitInterval and RequestType MetaPrepaid
 				s.debitStop = make(chan struct{})
@@ -1450,6 +1477,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 		s.updateSRuns(updtEv, sS.cgrCfg.SessionSCfg().AlterableFields)
 		sS.setSTerminator(s, opts) // reset the terminator
 	}
+	s.chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
 	//init has no updtEv
 	if updtEv == nil {
 		updtEv = engine.MapEvent(s.EventStart.Clone())
@@ -1517,20 +1545,24 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 		if sr.EventCost != nil {
 			if !isMsg { // in case of one time charge there is no need of corrections
 				if notCharged := sUsage - sr.EventCost.GetUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
-					if sr.CD.LoopIndex > 0 {
-						sr.CD.TimeStart = sr.CD.TimeEnd
-					}
-					sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
-					sr.CD.DurationIndex += notCharged
-					cc := new(engine.CallCost)
-					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderDebit,
-						&engine.CallDescriptorWithOpts{
-							CallDescriptor: sr.CD,
-							Opts:           s.OptsStart,
-						}, cc); err == nil {
-						sr.EventCost.Merge(
-							engine.NewEventCostFromCallCost(cc, s.CGRID,
-								sr.Event.GetStringIgnoreErrors(utils.RunID)))
+					if !s.chargeable {
+						sS.pause(sr, notCharged)
+					} else {
+						if sr.CD.LoopIndex > 0 {
+							sr.CD.TimeStart = sr.CD.TimeEnd
+						}
+						sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
+						sr.CD.DurationIndex += notCharged
+						cc := new(engine.CallCost)
+						if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderDebit,
+							&engine.CallDescriptorWithOpts{
+								CallDescriptor: sr.CD,
+								Opts:           s.OptsStart,
+							}, cc); err == nil {
+							sr.EventCost.Merge(
+								engine.NewEventCostFromCallCost(cc, s.CGRID,
+									sr.Event.GetStringIgnoreErrors(utils.RunID)))
+						}
 					}
 				} else if notCharged < 0 { // charged too much, try refund
 					if err = sS.refundSession(s, sRunIdx, -notCharged); err != nil {
@@ -2585,7 +2617,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 				dbtItvl, isMsg, args.ForceDuration); err != nil {
 				return utils.NewErrRALs(err)
 			}
-			if _, err = sS.updateSession(s, ev, args.Opts, isMsg); err != nil {
+			if _, err = sS.updateSession(s, ev, opts, isMsg); err != nil {
 				return err
 			}
 			break
@@ -2593,6 +2625,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 		if !isMsg {
 			s.UpdateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
 		}
+		s.Lock()
+		s.chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
+		s.Unlock()
 		if err = sS.terminateSession(s,
 			ev.GetDurationPtrIgnoreErrors(utils.Usage),
 			ev.GetDurationPtrIgnoreErrors(utils.LastUsed),
@@ -3396,6 +3431,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 						dbtItvl, false, ralsOpts.Has(utils.MetaFD)); err != nil {
 						return err
 					}
+				} else {
+					s.Lock()
+					s.chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
+					s.Unlock()
 				}
 				if err = sS.terminateSession(s,
 					ev.GetDurationPtrIgnoreErrors(utils.Usage),
@@ -3637,7 +3676,6 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(clnt rpcclient.ClientConnector,
 }
 
 func (sS *SessionS) processCDR(cgrEv *utils.CGREvent, flags []string, rply *string, clnb bool) (err error) {
-
 	ev := engine.MapEvent(cgrEv.Event)
 	cgrID := GetSetCGRID(ev)
 	s := sS.getRelocateSession(cgrID,

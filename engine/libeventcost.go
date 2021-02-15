@@ -632,11 +632,11 @@ func NewFreeEventCost(cgrID, runID, account string, tStart time.Time, usage time
 		StartTime: tStart,
 		Cost:      utils.Float64Pointer(0),
 		Charges: []*ChargingInterval{{
-			RatingID: "*free",
+			RatingID: utils.MetaPause,
 			Increments: []*ChargingIncrement{
 				{
 					Usage:          usage,
-					AccountingID:   "*free",
+					AccountingID:   utils.MetaPause,
 					CompressFactor: 1,
 				},
 			},
@@ -644,39 +644,40 @@ func NewFreeEventCost(cgrID, runID, account string, tStart time.Time, usage time
 		}},
 
 		Rating: Rating{
-			"*free": {
+			utils.MetaPause: {
 				RoundingMethod:   "*up",
 				RoundingDecimals: 5,
-				RatesID:          "*free",
-				RatingFiltersID:  "*free",
-				TimingID:         "*free",
+				RatesID:          utils.MetaPause,
+				RatingFiltersID:  utils.MetaPause,
+				TimingID:         utils.MetaPause,
 			},
 		},
 		Accounting: Accounting{
-			"*free": {
+			utils.MetaPause: {
 				AccountID: account,
 				// BalanceUUID: "",
-				RatingID: "*free",
+				RatingID: utils.MetaPause,
 			},
 		},
 		RatingFilters: RatingFilters{
-			"*free": {
+			utils.MetaPause: {
 				utils.Subject:               "",
 				utils.DestinationPrefixName: "",
 				utils.DestinationID:         "",
-				utils.RatingPlanID:          "",
+				utils.RatingPlanID:          utils.MetaPause,
 			},
 		},
 		Rates: ChargedRates{
-			"*free": {
+			utils.MetaPause: {
 				{
-					RateIncrement: usage,
-					RateUnit:      usage,
+					RateIncrement: 1,
+					RateUnit:      1,
 				},
 			},
 		},
 		Timings: ChargedTimings{
-			"*free": {
+			utils.MetaPause: {
+
 				StartTime: "00:00:00",
 			},
 		},

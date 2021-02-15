@@ -285,3 +285,16 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err 
 func (me MapEvent) Data() map[string]interface{} {
 	return me
 }
+
+// GetBoolOrDefault returns the value as a bool or dflt if not present in map
+func (me MapEvent) GetBoolOrDefault(fldName string, dflt bool) (out bool) {
+	fldIface, has := me[fldName]
+	if !has {
+		return dflt
+	}
+	out, err := utils.IfaceAsBool(fldIface)
+	if err != nil {
+		return dflt
+	}
+	return out
+}
