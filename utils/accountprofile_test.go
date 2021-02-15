@@ -35,8 +35,7 @@ func TestCloneBalance(t *testing.T) {
 				Weight: 1.1,
 			},
 		},
-		Blocker: true,
-		Type:    "*abstract",
+		Type: "*abstract",
 		Opts: map[string]interface{}{
 			"Destination": 10,
 		},
@@ -94,8 +93,7 @@ func TestCloneAccountProfile(t *testing.T) {
 						Weight: 1.1,
 					},
 				},
-				Blocker: true,
-				Type:    "*abstract",
+				Type: "*abstract",
 				Opts: map[string]interface{}{
 					"Destination": 10,
 				},
@@ -151,7 +149,6 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Weights:   ";1.2",
-				Blocker:   true,
 				Type:      "*abstract",
 				Opts: map[string]interface{}{
 					"Destination": 10,
@@ -174,8 +171,7 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 						Weight: 1.2,
 					},
 				},
-				Blocker: true,
-				Type:    "*abstract",
+				Type: "*abstract",
 				Opts: map[string]interface{}{
 					"Destination": 10,
 				},

@@ -578,15 +578,14 @@ type AccountProfileMdl struct {
 	BalanceID             string  `index:"6" re:""`
 	BalanceFilterIDs      string  `index:"7" re:""`
 	BalanceWeights        string  `index:"8" re:""`
-	BalanceBlocker        bool    `index:"9" re:""`
-	BalanceType           string  `index:"10" re:""`
-	BalanceUnits          float64 `index:"11" re:"\d+\.?\d*"`
-	BalanceUnitFactors    string  `index:"12" re:""`
-	BalanceOpts           string  `index:"13" re:""`
-	BalanceCostIncrements string  `index:"14" re:""`
-	BalanceAttributeIDs   string  `index:"15" re:""`
-	BalanceRateProfileIDs string  `index:"16" re:""`
-	ThresholdIDs          string  `index:"17" re:""`
+	BalanceType           string  `index:"9" re:""`
+	BalanceUnits          float64 `index:"10" re:"\d+\.?\d*"`
+	BalanceUnitFactors    string  `index:"11" re:""`
+	BalanceOpts           string  `index:"12" re:""`
+	BalanceCostIncrements string  `index:"13" re:""`
+	BalanceAttributeIDs   string  `index:"14" re:""`
+	BalanceRateProfileIDs string  `index:"15" re:""`
+	ThresholdIDs          string  `index:"16" re:""`
 	CreatedAt             time.Time
 }
 

@@ -3463,7 +3463,6 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 			aPrf.Balances[tp.BalanceID] = &utils.TPAccountBalance{
 				ID:      tp.BalanceID,
 				Weights: tp.BalanceWeights,
-				Blocker: tp.BalanceBlocker,
 				Type:    tp.BalanceType,
 				Opts:    tp.BalanceOpts,
 				Units:   tp.BalanceUnits,
@@ -3571,7 +3570,6 @@ func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfi
 			}
 			mdl.BalanceFilterIDs += val
 		}
-		mdl.BalanceBlocker = balance.Blocker
 		mdl.BalanceWeights = balance.Weights
 		mdl.BalanceType = balance.Type
 		mdl.BalanceOpts = balance.Opts
@@ -3634,7 +3632,6 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 		ap.Balances[id] = &utils.Balance{
 			ID:        bal.ID,
 			FilterIDs: bal.FilterIDs,
-			Blocker:   bal.Blocker,
 			Type:      bal.Type,
 			Units:     utils.NewDecimalFromFloat64(bal.Units),
 		}
@@ -3728,7 +3725,6 @@ func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile
 			ID:             bal.ID,
 			FilterIDs:      make([]string, len(bal.FilterIDs)),
 			Weights:        bal.Weights.String(";", "&"),
-			Blocker:        bal.Blocker,
 			Type:           bal.Type,
 			CostIncrement:  make([]*utils.TPBalanceCostIncrement, len(bal.CostIncrements)),
 			AttributeIDs:   make([]string, len(bal.AttributeIDs)),
