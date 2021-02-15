@@ -308,6 +308,7 @@ func testForceSTerminatorManualTermination(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -348,6 +349,7 @@ func testForceSTerminatorPostCDRs(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	expected := "INTERNALLY_DISCONNECTED"
@@ -384,6 +386,7 @@ func testForceSTerminatorReleaseSession(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
@@ -432,6 +435,7 @@ func testForceSTerminatorClientCall(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
@@ -464,6 +468,7 @@ func testDebitSession(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	//RunIdx cannot be higher than the length of sessions runs
@@ -551,6 +556,7 @@ func testDebitSessionResponderMaxDebit(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	if maxDur, err := sessions.debitSession(ss, 0, 5*time.Second,
@@ -614,6 +620,7 @@ func testDebitSessionResponderMaxDebitError(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	if maxDur, err := sessions.debitSession(ss, 0, 5*time.Minute,
@@ -668,6 +675,7 @@ func testInitSessionDebitLoops(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	sessions.initSessionDebitLoops(ss)
@@ -713,6 +721,7 @@ func testDebitLoopSessionErrorDebiting(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	// session already closed
@@ -800,6 +809,7 @@ func testDebitLoopSession(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 	go func() {
 		if _, err := sessions.debitLoopSession(ss, 0, time.Second); err != nil {
@@ -860,6 +870,7 @@ func testDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 	go func() {
 		if _, err := sessions.debitLoopSession(ss, 0, time.Second); err != nil {
@@ -913,6 +924,7 @@ func testDebitLoopSessionLowBalance(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	sessions.cgrCfg.SessionSCfg().MinDurLowBalance = 10 * time.Second
@@ -970,6 +982,7 @@ func testDebitLoopSessionWarningSessions(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	// will disconnect faster, MinDurLowBalance higher than the debit interval
@@ -1031,6 +1044,7 @@ func testDebitLoopSessionDisconnectSession(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		chargeable: true,
 	}
 
 	// will disconnect faster
@@ -1085,6 +1099,7 @@ func testStoreSCost(t *testing.T) {
 				},
 			},
 		},
+		chargeable: true,
 	}
 
 	if err := sessions.storeSCost(ss, 0); err != nil {
@@ -1132,6 +1147,7 @@ func testRefundSession(t *testing.T) {
 				},
 			},
 		},
+		chargeable: true,
 	}
 
 	expectedErr := "no event cost"
@@ -1266,6 +1282,7 @@ func testRoundCost(t *testing.T) {
 				},
 			},
 		},
+		chargeable: true,
 	}
 
 	//mocking an error API Call
@@ -1288,6 +1305,7 @@ func testDisconnectSession(t *testing.T) {
 				TotalUsage: time.Minute,
 			},
 		},
+		chargeable: true,
 	}
 
 	sTestMock := &testMockClientConn{}
@@ -1410,6 +1428,7 @@ func testNewSession(t *testing.T) {
 				},
 			},
 		},
+		chargeable: true,
 	}
 	if rcv, err := sessions.newSession(cgrEv, "resourceID", "clientConnID",
 		time.Second, false, false); err != nil {
@@ -2080,6 +2099,7 @@ func testEndSession(t *testing.T) {
 				},
 			},
 		},
+		chargeable: true,
 	}
 
 	activationTime := time.Date(2020, 21, 07, 10, 0, 0, 0, time.UTC)
@@ -2196,6 +2216,7 @@ func testBiRPCv1GetActivePassiveSessions(t *testing.T) {
 				},
 			},
 		},
+		chargeable: true,
 	}
 	sr2[utils.ToR] = utils.MetaSMS
 	sr2[utils.Subject] = "subject2"

@@ -102,7 +102,7 @@ func processAttributeS(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrArgs := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
 			engine.MapEvent(cgrEv.Opts).GetStringIgnoreErrors(utils.OptsContext),
-			utils.MetaAccountS)),
+			utils.MetaAccounts)),
 		CGREvent:     cgrEv,
 		AttributeIDs: attrIDs,
 		ProcessRuns:  procRuns,

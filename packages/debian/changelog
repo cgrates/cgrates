@@ -142,6 +142,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [FilterS] Optimized the automated index fields matching
   * [AgentS] Added *cfg as DataProvider for AgentRequest 
   * [AgentS] Added *routes_maxcost flag
+  * [SessionS] Added *sessionChargeable session option to control session charging 
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

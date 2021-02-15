@@ -81,6 +81,7 @@ type Session struct {
 
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session
+	chargeable  bool
 }
 
 // Lock exported function from sync.RWMutex
