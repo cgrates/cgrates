@@ -262,7 +262,7 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Bi
 	paidConcrtUnts := origConcrtUnts                      // so we can revert when higher usages are not possible
 	var usagePaid, usageDenied *decimal.Big
 	maxItr := config.CgrConfig().AccountSCfg().MaxIterations
-	for i := 0; i < maxItr; i++ {
+	for i := 0; i <= maxItr; i++ {
 		if i != 0 {
 			restoreUnitsFromClones(cncrtBlncs, origConcrtUnts)
 		}
