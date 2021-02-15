@@ -78,12 +78,12 @@ type Balance struct {
 	FilterIDs      []string
 	Weights        DynamicWeights
 	Type           string
+	Units          *Decimal
+	UnitFactors    []*UnitFactor
 	Opts           map[string]interface{}
 	CostIncrements []*CostIncrement
 	AttributeIDs   []string
 	RateProfileIDs []string
-	UnitFactors    []*UnitFactor
-	Units          *Decimal
 }
 
 // CostIncrement enforces cost calculation to specific balance increments
@@ -145,8 +145,8 @@ func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
 	acnt = &AccountProfile{
 		Tenant:             aP.Tenant,
 		ID:                 aP.ID,
-		Weights:            aP.Weights.Clone(),
 		ActivationInterval: aP.ActivationInterval.Clone(),
+		Weights:            aP.Weights.Clone(),
 	}
 	if aP.FilterIDs != nil {
 		acnt.FilterIDs = make([]string, len(aP.FilterIDs))
@@ -160,16 +160,16 @@ func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
 			acnt.Opts[key] = value
 		}
 	}
-	if aP.ThresholdIDs != nil {
-		acnt.ThresholdIDs = make([]string, len(aP.ThresholdIDs))
-		for i, value := range aP.ThresholdIDs {
-			acnt.ThresholdIDs[i] = value
-		}
-	}
 	if aP.Balances != nil {
 		acnt.Balances = make(map[string]*Balance, len(aP.Balances))
 		for i, value := range aP.Balances {
 			acnt.Balances[i] = value.Clone()
+		}
+	}
+	if aP.ThresholdIDs != nil {
+		acnt.ThresholdIDs = make([]string, len(aP.ThresholdIDs))
+		for i, value := range aP.ThresholdIDs {
+			acnt.ThresholdIDs[i] = value
 		}
 	}
 	return
@@ -199,6 +199,15 @@ func (bL *Balance) Clone() (blnc *Balance) {
 			blnc.FilterIDs[i] = value
 		}
 	}
+	if bL.Units != nil {
+		blnc.Units = bL.Units.Clone()
+	}
+	if bL.UnitFactors != nil {
+		blnc.UnitFactors = make([]*UnitFactor, len(bL.UnitFactors))
+		for i, value := range bL.UnitFactors {
+			blnc.UnitFactors[i] = value.Clone()
+		}
+	}
 	if bL.Opts != nil {
 		blnc.Opts = make(map[string]interface{})
 		for key, value := range bL.Opts {
@@ -222,15 +231,6 @@ func (bL *Balance) Clone() (blnc *Balance) {
 		for i, value := range bL.RateProfileIDs {
 			blnc.RateProfileIDs[i] = value
 		}
-	}
-	if bL.UnitFactors != nil {
-		blnc.UnitFactors = make([]*UnitFactor, len(bL.UnitFactors))
-		for i, value := range bL.UnitFactors {
-			blnc.UnitFactors[i] = value.Clone()
-		}
-	}
-	if bL.Units != nil {
-		blnc.Units = bL.Units.Clone()
 	}
 	return
 }
@@ -375,12 +375,12 @@ type APIBalance struct {
 	FilterIDs      []string
 	Weights        string
 	Type           string
+	Units          float64
+	UnitFactors    []*APIUnitFactor
 	Opts           map[string]interface{}
 	CostIncrements []*APICostIncrement
 	AttributeIDs   []string
 	RateProfileIDs []string
-	UnitFactors    []*APIUnitFactor
-	Units          float64
 }
 
 // AsBalance convert APIBalance struct to Balance struct
@@ -389,26 +389,26 @@ func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
 		ID:             ext.ID,
 		FilterIDs:      ext.FilterIDs,
 		Type:           ext.Type,
+		Units:          NewDecimalFromFloat64(ext.Units),
 		Opts:           ext.Opts,
 		AttributeIDs:   ext.AttributeIDs,
 		RateProfileIDs: ext.RateProfileIDs,
-		Units:          NewDecimalFromFloat64(ext.Units),
 	}
 	if ext.Weights != EmptyString {
 		if balance.Weights, err = NewDynamicWeightsFromString(ext.Weights, ";", "&"); err != nil {
 			return nil, err
 		}
 	}
-	if len(ext.CostIncrements) != 0 {
-		balance.CostIncrements = make([]*CostIncrement, len(ext.CostIncrements))
-		for i, cIncr := range ext.CostIncrements {
-			balance.CostIncrements[i] = cIncr.AsCostIncrement()
-		}
-	}
 	if len(ext.UnitFactors) != 0 {
 		balance.UnitFactors = make([]*UnitFactor, len(ext.UnitFactors))
 		for i, uFct := range ext.UnitFactors {
 			balance.UnitFactors[i] = uFct.AsUnitFactor()
+		}
+	}
+	if len(ext.CostIncrements) != 0 {
+		balance.CostIncrements = make([]*CostIncrement, len(ext.CostIncrements))
+		for i, cIncr := range ext.CostIncrements {
+			balance.CostIncrements[i] = cIncr.AsCostIncrement()
 		}
 	}
 	return
