@@ -44,8 +44,12 @@ func TestRateProfileSort(t *testing.T) {
 		ID:     "RP1",
 		Rates: map[string]*Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
@@ -63,8 +67,12 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_Custom": {
-				ID:              "RT_Custom",
-				Weight:          0,
+				ID: "RT_Custom",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
@@ -94,8 +102,12 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": {
-				ID:              "RT_WEEKEND",
-				Weight:          10,
+				ID: "RT_WEEKEND",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
 					{
@@ -119,8 +131,12 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
 					{
@@ -138,8 +154,12 @@ func TestRateProfileSort(t *testing.T) {
 		ID:     "RP1",
 		Rates: map[string]*Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
@@ -157,8 +177,12 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": {
-				ID:              "RT_WEEKEND",
-				Weight:          10,
+				ID: "RT_WEEKEND",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
 					{
@@ -182,8 +206,12 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_Custom": {
-				ID:              "RT_Custom",
-				Weight:          0,
+				ID: "RT_Custom",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
@@ -213,8 +241,12 @@ func TestRateProfileSort(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
 					{
@@ -237,8 +269,12 @@ func TestRateProfileCompile(t *testing.T) {
 	rt := &RateProfile{
 		Rates: map[string]*Rate{
 			"randomVal1": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 			},
 		},
@@ -252,8 +288,12 @@ func TestRateProfileCompile(t *testing.T) {
 	expRt := &RateProfile{
 		Rates: map[string]*Rate{
 			"randomVal1": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 				sched:           expectedATime,
 				uID:             utils.ConcatenatedKey(rt.Tenant, rt.ID, "RT_CHRISTMAS"),
@@ -273,8 +313,12 @@ func TestRateUID(t *testing.T) {
 	rt := &RateProfile{
 		Rates: map[string]*Rate{
 			"randomVal1": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 				uID:             "randomID",
 			},
@@ -290,8 +334,12 @@ func TestRateProfileCompileError(t *testing.T) {
 	rt := &RateProfile{
 		Rates: map[string]*Rate{
 			"randomVal": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * * *",
 			},
 		},
@@ -304,8 +352,12 @@ func TestRateProfileCompileError(t *testing.T) {
 
 func TestRateCompileChristmasTime(t *testing.T) {
 	rt := &Rate{
-		ID:              "RT_CHRISTMAS",
-		Weight:          30,
+		ID: "RT_CHRISTMAS",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		ActivationTimes: "* * 24 12 *",
 	}
 	expTime, err := cron.ParseStandard("* * 24 12 *")
@@ -313,8 +365,12 @@ func TestRateCompileChristmasTime(t *testing.T) {
 		t.Error(err)
 	}
 	expectedRt := &Rate{
-		ID:              "RT_CHRISTMAS",
-		Weight:          30,
+		ID: "RT_CHRISTMAS",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		ActivationTimes: "* * 24 12 *",
 		sched:           expTime,
 	}
@@ -327,8 +383,12 @@ func TestRateCompileChristmasTime(t *testing.T) {
 
 func TestRateCompileEmptyActivationTime(t *testing.T) {
 	rt := &Rate{
-		ID:              "RT_CHRISTMAS",
-		Weight:          30,
+		ID: "RT_CHRISTMAS",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		ActivationTimes: utils.EmptyString,
 	}
 	expTime, err := cron.ParseStandard("* * * * *")
@@ -336,8 +396,12 @@ func TestRateCompileEmptyActivationTime(t *testing.T) {
 		t.Error(err)
 	}
 	expectedRt := &Rate{
-		ID:              "RT_CHRISTMAS",
-		Weight:          30,
+		ID: "RT_CHRISTMAS",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		ActivationTimes: utils.EmptyString,
 		sched:           expTime,
 	}
@@ -373,8 +437,12 @@ func TestRateProfileRunTimes(t *testing.T) {
 	}
 
 	rt = &Rate{
-		ID:              "RT_CHRISTMAS",
-		Weight:          30,
+		ID: "RT_CHRISTMAS",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		ActivationTimes: "* * 24 12 *",
 	}
 	rt.Compile()
@@ -725,8 +793,12 @@ func TestRateSIncrementCompressEquals(t *testing.T) {
 		t.Error(err)
 	}
 	rate1 := &Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*IntervalRate{
 			{
@@ -769,8 +841,12 @@ func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
 		t.Error(err)
 	}
 	rate1 := &Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*IntervalRate{
 			{
@@ -783,8 +859,12 @@ func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
 		uID: "ID",
 	}
 	rate2 := &Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*IntervalRate{
 			{
@@ -821,8 +901,12 @@ func TestRateSIncrementCompressEqualsCase2(t *testing.T) {
 		t.Error(err)
 	}
 	rate1 := &Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*IntervalRate{
 			{
@@ -859,8 +943,12 @@ func TestRateSIncrementCompressEqualsCase3(t *testing.T) {
 		t.Error(err)
 	}
 	rate1 := &Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*IntervalRate{
 			{
@@ -901,8 +989,12 @@ func TestRateSIntervalCompressEqualsCase1(t *testing.T) {
 		t.Error(err)
 	}
 	rate1 := &Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*IntervalRate{
 			{
@@ -969,8 +1061,12 @@ func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
 		t.Error(err)
 	}
 	rate1 := &Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*IntervalRate{
 			{
@@ -988,8 +1084,12 @@ func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
 		},
 	}
 	rate2 := &Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*IntervalRate{
 			{
@@ -1060,8 +1160,12 @@ func TestRateSIntervalCompressEqualsCase3(t *testing.T) {
 	}
 
 	rate1 := &Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*IntervalRate{
 			{

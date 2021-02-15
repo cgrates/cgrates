@@ -35,7 +35,7 @@ type RateProfile struct {
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval
-	Weight             float64
+	Weights            utils.DynamicWeights
 	MinCost            *utils.Decimal
 	MaxCost            *utils.Decimal
 	MaxCostStrategy    string
@@ -58,11 +58,11 @@ func (rp *RateProfile) Compile() (err error) {
 
 // Rate defines rate related information used within a RateProfile
 type Rate struct {
-	ID              string   // RateID
-	FilterIDs       []string // RateFilterIDs
-	ActivationTimes string   // ActivationTimes is a cron formatted time interval
-	Weight          float64  // RateWeight will decide the winner per interval start
-	Blocker         bool     // RateBlocker will make this rate recurrent, deactivating further intervals
+	ID              string               // RateID
+	FilterIDs       []string             // RateFilterIDs
+	ActivationTimes string               // ActivationTimes is a cron formatted time interval
+	Weights         utils.DynamicWeights // RateWeight will decide the winner per interval start
+	Blocker         bool                 // RateBlocker will make this rate recurrent, deactivating further intervals
 	IntervalRates   []*IntervalRate
 
 	sched cron.Schedule // compiled version of activation times as cron.Schedule interface
@@ -258,8 +258,12 @@ func (ext *APIRateProfile) AsRateProfile() (rp *RateProfile, err error) {
 		ID:                 ext.ID,
 		FilterIDs:          ext.FilterIDs,
 		ActivationInterval: ext.ActivationInterval,
-		Weight:             ext.Weight,
 		MaxCostStrategy:    ext.MaxCostStrategy,
+	}
+	if ext.Weights != utils.EmptyString {
+		if rp.Weights, err = utils.NewDynamicWeightsFromString(ext.Weights, ";", "&"); err != nil {
+			return nil, err
+		}
 	}
 	if ext.MinCost != nil {
 		rp.MinCost = utils.NewDecimalFromFloat64(*ext.MinCost)
@@ -286,7 +290,7 @@ type APIRateProfile struct {
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval
-	Weight             float64
+	Weights            string
 	MinCost            *float64
 	MaxCost            *float64
 	MaxCostStrategy    string
@@ -303,8 +307,12 @@ func (ext *APIRate) AsRate() (rate *Rate, err error) {
 		ID:              ext.ID,
 		FilterIDs:       ext.FilterIDs,
 		ActivationTimes: ext.ActivationTimes,
-		Weight:          ext.Weight,
 		Blocker:         ext.Blocker,
+	}
+	if ext.Weights != utils.EmptyString {
+		if rate.Weights, err = utils.NewDynamicWeightsFromString(ext.Weights, ";", "&"); err != nil {
+			return nil, err
+		}
 	}
 	if len(ext.IntervalRates) != 0 {
 		rate.IntervalRates = make([]*IntervalRate, len(ext.IntervalRates))
@@ -321,7 +329,7 @@ type APIRate struct {
 	ID              string   // RateID
 	FilterIDs       []string // RateFilterIDs
 	ActivationTimes string   // ActivationTimes is a cron formatted time interval
-	Weight          float64  // RateWeight will decide the winner per interval start
+	Weights         string   // RateWeight will decide the winner per interval start
 	Blocker         bool     // RateBlocker will make this rate recurrent, deactivating further intervals
 	IntervalRates   []*APIIntervalRate
 }

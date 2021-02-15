@@ -1264,23 +1264,35 @@ func testITTestIndexingMetaNot(t *testing.T) {
 
 func testITIndexRateProfile(t *testing.T) {
 	rPrf := &RateProfile{
-		Tenant:          "cgrates.org",
-		ID:              "RP1",
-		FilterIDs:       []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		Weight:          0,
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MaxCostStrategy: "*free",
 		Rates: map[string]*Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*string:~*req.Category:call"},
-				Weight:    0,
-				Blocker:   false,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				Blocker: false,
 			},
 			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*string:~*req.Category:voice"},
-				Weight:    10,
-				Blocker:   false,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Blocker: false,
 			},
 		},
 	}
@@ -1306,29 +1318,45 @@ func testITIndexRateProfile(t *testing.T) {
 	}
 	// update the RateProfile by adding a new Rate
 	rPrf = &RateProfile{ // recreate the profile because if we test on internal
-		Tenant:          "cgrates.org", // each update on the original item will update the item from DB
-		ID:              "RP1",
-		FilterIDs:       []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		Weight:          0,
+		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MaxCostStrategy: "*free",
 		Rates: map[string]*Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*string:~*req.Category:call"},
-				Weight:    0,
-				Blocker:   false,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				Blocker: false,
 			},
 			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*string:~*req.Category:voice"},
-				Weight:    10,
-				Blocker:   false,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Blocker: false,
 			},
 			"THIRD_GI": {
 				ID:        "THIRD_GI",
 				FilterIDs: []string{"*string:~*req.Category:custom"},
-				Weight:    20,
-				Blocker:   false,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Blocker: false,
 			},
 		},
 	}
@@ -1356,22 +1384,34 @@ func testITIndexRateProfile(t *testing.T) {
 		}
 	}
 	rPrf2 := &RateProfile{
-		Tenant:          "cgrates.org",
-		ID:              "RP2",
-		Weight:          0,
+		Tenant: "cgrates.org",
+		ID:     "RP2",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MaxCostStrategy: "*free",
 		Rates: map[string]*Rate{
 			"CUSTOM_RATE1": {
 				ID:        "CUSTOM_RATE1",
 				FilterIDs: []string{"*string:~*req.Subject:1001"},
-				Weight:    0,
-				Blocker:   false,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				Blocker: false,
 			},
 			"CUSTOM_RATE2": {
 				ID:        "CUSTOM_RATE2",
 				FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Category:call"},
-				Weight:    10,
-				Blocker:   false,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Blocker: false,
 			},
 		},
 	}

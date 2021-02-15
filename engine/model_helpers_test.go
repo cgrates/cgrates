@@ -4301,17 +4301,25 @@ func TestRateProfileToAPI(t *testing.T) {
 		t.Error(err)
 	}
 	rPrf := &RateProfile{
-		Tenant:          "cgrates.org",
-		ID:              "RP1",
-		FilterIDs:       []string{"*string:~*req.Subject:1001"},
-		Weight:          0,
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MinCost:         utils.NewDecimal(1, 1),
 		MaxCost:         utils.NewDecimal(6, 1),
 		MaxCostStrategy: "*free",
 		Rates: map[string]*Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
@@ -4330,8 +4338,12 @@ func TestRateProfileToAPI(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": {
-				ID:              "RT_WEEKEND",
-				Weight:          10,
+				ID: "RT_WEEKEND",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
 					{
@@ -4343,8 +4355,12 @@ func TestRateProfileToAPI(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
 					{
@@ -4361,7 +4377,7 @@ func TestRateProfileToAPI(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weight:    0,
+		Weights:   ";0",
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "",
 			ExpiryTime:     "",
@@ -4372,7 +4388,7 @@ func TestRateProfileToAPI(t *testing.T) {
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
-				Weight:          0,
+				Weights:         ";0",
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
@@ -4392,7 +4408,7 @@ func TestRateProfileToAPI(t *testing.T) {
 			},
 			"RT_WEEKEND": {
 				ID:              "RT_WEEKEND",
-				Weight:          10,
+				Weights:         ";10",
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
@@ -4405,7 +4421,7 @@ func TestRateProfileToAPI(t *testing.T) {
 			},
 			"RT_CHRISTMAS": {
 				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				Weights:         ";30",
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
@@ -4433,17 +4449,25 @@ func TestAPIToRateProfile(t *testing.T) {
 		t.Error(err)
 	}
 	eRprf := &RateProfile{
-		Tenant:          "cgrates.org",
-		ID:              "RP1",
-		FilterIDs:       []string{"*string:~*req.Subject:1001"},
-		Weight:          0,
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MinCost:         utils.NewDecimal(1, 1),
 		MaxCost:         utils.NewDecimal(6, 1),
 		MaxCostStrategy: "*free",
 		Rates: map[string]*Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*IntervalRate{
 					{
@@ -4463,8 +4487,12 @@ func TestAPIToRateProfile(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": {
-				ID:              "RT_WEEKEND",
-				Weight:          10,
+				ID: "RT_WEEKEND",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*IntervalRate{
 					{
@@ -4477,8 +4505,12 @@ func TestAPIToRateProfile(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*IntervalRate{
 					{
@@ -4497,14 +4529,14 @@ func TestAPIToRateProfile(t *testing.T) {
 		Tenant:          "cgrates.org",
 		ID:              "RP1",
 		FilterIDs:       []string{"*string:~*req.Subject:1001"},
-		Weight:          0,
+		Weights:         ";0",
 		MinCost:         0.1,
 		MaxCost:         0.6,
 		MaxCostStrategy: "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
-				Weight:          0,
+				Weights:         ";0",
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
@@ -4524,7 +4556,7 @@ func TestAPIToRateProfile(t *testing.T) {
 			},
 			"RT_WEEKEND": {
 				ID:              "RT_WEEKEND",
-				Weight:          10,
+				Weights:         ";10",
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
@@ -4537,7 +4569,7 @@ func TestAPIToRateProfile(t *testing.T) {
 			},
 			"RT_CHRISTMAS": {
 				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				Weights:         ";30",
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
@@ -4567,7 +4599,7 @@ func TestAPIToRateProfileError(t *testing.T) {
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
-				Weight:          0,
+				Weights:         ";0",
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
@@ -4597,14 +4629,14 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 		Tenant:          "cgrates.org",
 		ID:              "RP1",
 		FilterIDs:       []string{"*string:~*req.Subject:1001"},
-		Weight:          0,
+		Weights:         ";0",
 		MinCost:         0.1,
 		MaxCost:         0.6,
 		MaxCostStrategy: "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
-				Weight:          0,
+				Weights:         ";0",
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
@@ -4632,14 +4664,14 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			ID:                  "RP1",
 			FilterIDs:           "*string:~*req.Subject:1001",
 			ActivationInterval:  "",
-			Weight:              0,
+			Weights:             ";0",
 			MinCost:             0.1,
 			MaxCost:             0.6,
 			MaxCostStrategy:     "*free",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
 			RateActivationTimes: "* * * * 1-5",
-			RateWeight:          0,
+			RateWeights:         ";0",
 			RateBlocker:         false,
 			RateIntervalStart:   "1m",
 			RateRecurrentFee:    0.06,
@@ -4654,14 +4686,14 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			ID:                  "RP1",
 			FilterIDs:           "",
 			ActivationInterval:  "",
-			Weight:              0,
+			Weights:             ";0",
 			MinCost:             0,
 			MaxCost:             0,
 			MaxCostStrategy:     "",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
 			RateActivationTimes: "",
-			RateWeight:          0,
+			RateWeights:         ";0",
 			RateBlocker:         false,
 			RateIntervalStart:   "0s",
 			RateRecurrentFee:    0.12,
@@ -4678,14 +4710,14 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			ID:                  "RP1",
 			FilterIDs:           "*string:~*req.Subject:1001",
 			ActivationInterval:  "",
-			Weight:              0,
+			Weights:             ";0",
 			MinCost:             0.1,
 			MaxCost:             0.6,
 			MaxCostStrategy:     "*free",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
 			RateActivationTimes: "* * * * 1-5",
-			RateWeight:          0,
+			RateWeights:         ";0",
 			RateBlocker:         false,
 			RateIntervalStart:   "0s",
 			RateRecurrentFee:    0.12,
@@ -4700,14 +4732,14 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			ID:                  "RP1",
 			FilterIDs:           "",
 			ActivationInterval:  "",
-			Weight:              0,
+			Weights:             "",
 			MinCost:             0,
 			MaxCost:             0,
 			MaxCostStrategy:     "",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
 			RateActivationTimes: "",
-			RateWeight:          0,
+			RateWeights:         "",
 			RateBlocker:         false,
 			RateIntervalStart:   "1m",
 			RateRecurrentFee:    0.06,
@@ -4718,7 +4750,7 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 	}
 	rcv := APItoModelTPRateProfile(tpRprf)
 	if !reflect.DeepEqual(rcv, expModels) && !reflect.DeepEqual(rcv, expModelsRev) {
-		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expModels), utils.ToJSON(rcv))
+		t.Errorf("Expecting: %+v or \n%+v,\nReceived: %+v", utils.ToJSON(expModels), utils.ToJSON(expModelsRev), utils.ToJSON(rcv))
 	}
 }
 
@@ -4731,14 +4763,14 @@ func TestAsTPRateProfile(t *testing.T) {
 			ID:                  "RP1",
 			FilterIDs:           "*string:~*req.Subject:1001",
 			ActivationInterval:  "",
-			Weight:              0,
+			Weights:             ";0",
 			MinCost:             0.1,
 			MaxCost:             0.6,
 			MaxCostStrategy:     "*free",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
 			RateActivationTimes: "* * * * 1-5",
-			RateWeight:          0,
+			RateWeights:         ";0",
 			RateBlocker:         false,
 			RateIntervalStart:   "1m",
 			RateRecurrentFee:    0.06,
@@ -4753,14 +4785,14 @@ func TestAsTPRateProfile(t *testing.T) {
 			ID:                  "RP1",
 			FilterIDs:           "",
 			ActivationInterval:  "",
-			Weight:              0,
+			Weights:             ";0",
 			MinCost:             0,
 			MaxCost:             0,
 			MaxCostStrategy:     "",
 			RateID:              "RT_WEEK",
 			RateFilterIDs:       "",
 			RateActivationTimes: "",
-			RateWeight:          0,
+			RateWeights:         ";0",
 			RateBlocker:         false,
 			RateIntervalStart:   "0s",
 			RateRecurrentFee:    0.12,
@@ -4775,14 +4807,14 @@ func TestAsTPRateProfile(t *testing.T) {
 		Tenant:          "cgrates.org",
 		ID:              "RP1",
 		FilterIDs:       []string{"*string:~*req.Subject:1001"},
-		Weight:          0,
+		Weights:         ";0",
 		MinCost:         0.1,
 		MaxCost:         0.6,
 		MaxCostStrategy: "*free",
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
-				Weight:          0,
+				Weights:         ";0",
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
@@ -4810,7 +4842,6 @@ func TestAsTPRateProfile(t *testing.T) {
 }
 
 func TestModelHelperCsvLoadError(t *testing.T) {
-
 	type testStruct struct {
 		Id        int64
 		Tpid      string
@@ -5066,7 +5097,11 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 			ExpiryTime: time.Date(2020, time.April,
 				12, 21, 34, 01, 0, time.UTC),
 		},
-		Weight:          0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MinCost:         utils.NewDecimal(1, 1),
 		MaxCost:         utils.NewDecimal(6, 1),
 		MaxCostStrategy: "*free",
@@ -5081,7 +5116,7 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 			ActivationTime: "2020-04-11T21:34:01Z",
 			ExpiryTime:     "2020-04-12T21:34:01Z",
 		},
-		Weight:          0,
+		Weights:         ";0",
 		MinCost:         0.1,
 		MaxCost:         0.6,
 		MaxCostStrategy: "*free",
@@ -5112,7 +5147,7 @@ func TestAPItoModelTPRateProfileCase2(t *testing.T) {
 		Rates: map[string]*utils.TPRate{"RT_CHRISTMAS": {
 			ID:              "RT_CHRISTMAS",
 			FilterIDs:       []string{"test_string1", "test_string2"},
-			Weight:          30,
+			Weights:         ";30",
 			ActivationTimes: "* * 24 12 *",
 			IntervalRates: []*utils.TPIntervalRate{
 				{
@@ -5130,7 +5165,7 @@ func TestAPItoModelTPRateProfileCase2(t *testing.T) {
 		ActivationInterval:  "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
 		RateID:              "RT_CHRISTMAS",
 		RateFilterIDs:       "test_string1;test_string2",
-		RateWeight:          30,
+		RateWeights:         ";30",
 		RateActivationTimes: "* * 24 12 *",
 		RateIntervalStart:   "0s",
 		RateRecurrentFee:    0.06,
@@ -5372,13 +5407,13 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 		ID:                 "RP1",
 		FilterIDs:          "*string:~*req.Subject:1001",
 		ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
-		Weight:             1.2,
+		Weights:            ";1.2",
 		MinCost:            0.1,
 		MaxCost:            0.6,
 		MaxCostStrategy:    "*free",
 		RateID:             "0",
 		RateFilterIDs:      "test_filter_id",
-		RateWeight:         2,
+		RateWeights:        ";2",
 	},
 	}
 	expStruct := []*utils.TPRateProfile{
@@ -5390,7 +5425,7 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "2014-08-29T15:00:00Z",
 			},
-			Weight:          1.2,
+			Weights:         ";1.2",
 			MinCost:         0.1,
 			MaxCost:         0.6,
 			MaxCostStrategy: "*free",
@@ -5398,7 +5433,7 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 				"0": {
 					ID:        "0",
 					FilterIDs: []string{"test_filter_id"},
-					Weight:    2,
+					Weights:   ";2",
 					IntervalRates: []*utils.TPIntervalRate{
 						{
 							IntervalStart: "",
@@ -5426,13 +5461,13 @@ func TestRateProfileMdlsAsTPRateProfileCase3(t *testing.T) {
 		ID:                 "RP1",
 		FilterIDs:          "*string:~*req.Subject:1001",
 		ActivationInterval: "2014-07-29T15:00:00Z",
-		Weight:             1.2,
+		Weights:            ";1.2",
 		MinCost:            0.1,
 		MaxCost:            0.6,
 		MaxCostStrategy:    "*free",
 		RateID:             "0",
 		RateFilterIDs:      "test_filter_id",
-		RateWeight:         2,
+		RateWeights:        ";2",
 	},
 	}
 	expStruct := []*utils.TPRateProfile{
@@ -5443,7 +5478,7 @@ func TestRateProfileMdlsAsTPRateProfileCase3(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			Weight:          1.2,
+			Weights:         ";1.2",
 			MinCost:         0.1,
 			MaxCost:         0.6,
 			MaxCostStrategy: "*free",
@@ -5451,7 +5486,7 @@ func TestRateProfileMdlsAsTPRateProfileCase3(t *testing.T) {
 				"0": {
 					ID:        "0",
 					FilterIDs: []string{"test_filter_id"},
-					Weight:    2,
+					Weights:   ";2",
 					IntervalRates: []*utils.TPIntervalRate{
 						{
 							IntervalStart: "",
@@ -7236,7 +7271,7 @@ func TestApitoAccountProfileCaseTimeError2(t *testing.T) {
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
 				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weights:   "10",
+				Weights:   ";10",
 				Type:      utils.MetaVoice,
 				Units:     3600000000000,
 				Opts:      "22:22:4fs",
