@@ -1460,7 +1460,7 @@ type TPRateProfile struct {
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval
-	Weight             float64
+	Weights            string
 	MinCost            float64
 	MaxCost            float64
 	MaxCostStrategy    string
@@ -1471,8 +1471,8 @@ type TPRate struct {
 	ID              string   // RateID
 	FilterIDs       []string // RateFilterIDs
 	ActivationTimes string
-	Weight          float64 // RateWeight will decide the winner per interval start
-	Blocker         bool    // RateBlocker will make this rate recurrent, deactivating further intervals
+	Weights         string // RateWeight will decide the winner per interval start
+	Blocker         bool   // RateBlocker will make this rate recurrent, deactivating further intervals
 	IntervalRates   []*TPIntervalRate
 }
 

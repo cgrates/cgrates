@@ -79,9 +79,13 @@ func TestMatchingRateProfileForEventActivationInterval(t *testing.T) {
 	}
 
 	rPrf := &engine.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		Weight:    10,
+		Tenant: "cgrates.org",
+		ID:     "RP1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2020, 7, 21, 0, 0, 0, 0, time.UTC),
@@ -129,11 +133,19 @@ func TestRateProfileCostForEvent(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RATE_1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Weight:    50,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 50,
+			},
+		},
 		Rates: map[string]*engine.Rate{
 			"RATE1": {
-				ID:              "RATE1",
-				Weight:          0,
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * *",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -225,11 +237,19 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RATE_PRF1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Weight:    50,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 50,
+			},
+		},
 		Rates: map[string]*engine.Rate{
 			"RATE1": {
-				ID:              "RATE1",
-				Weight:          0,
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * *",
 				FilterIDs:       []string{"*string:~*req.Destination:10"},
 				IntervalRates: []*engine.IntervalRate{
@@ -242,8 +262,12 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 				},
 			},
 			"RATE2": {
-				ID:              "RATE2",
-				Weight:          0,
+				ID: "RATE2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * *",
 				FilterIDs:       []string{"*string:~*req.Destination:10"},
 				IntervalRates: []*engine.IntervalRate{
@@ -308,9 +332,13 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 	}
 	t1 := time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC)
 	rpp := &engine.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		Weight:    7,
+		Tenant: "cgrates.org",
+		ID:     "RP1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 7,
+			},
+		},
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		ActivationInterval: &utils.ActivationInterval{
 			ExpiryTime: t1,
@@ -455,11 +483,19 @@ func TestV1CostForEventError(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RATE_1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Weight:    50,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 50,
+			},
+		},
 		Rates: map[string]*engine.Rate{
 			"RATE1": {
-				ID:              "RATE1",
-				Weight:          0,
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * *",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -542,11 +578,19 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 		Tenant:    "cgrates.org",
 		ID:        "RateChristmas",
 		FilterIDs: []string{"*string:~*req.Subject:1010"},
-		Weight:    50,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 50,
+			},
+		},
 		Rates: map[string]*engine.Rate{
 			"RATE1": &engine.Rate{
-				ID:              "RATE1",
-				Weight:          0,
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 50,
+					},
+				},
 				ActivationTimes: "* * * * *",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -564,8 +608,12 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 				},
 			},
 			"RATE_CHRISTMAS": &engine.Rate{
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{{
 					IntervalStart: 0,
@@ -637,11 +685,19 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 		Tenant:    "cgrates.org",
 		ID:        "RateAlways",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weight:    50,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 50,
+			},
+		},
 		Rates: map[string]*engine.Rate{
 			"RATE1": &engine.Rate{
-				ID:              "RATE1",
-				Weight:          0,
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * *",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -719,11 +775,19 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RATE_1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Weight:    50,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 50,
+			},
+		},
 		Rates: map[string]*engine.Rate{
 			"RATE1": {
-				ID:              "RATE1",
-				Weight:          0,
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * *",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -789,11 +853,19 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RATE_1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Weight:    50,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 50,
+			},
+		},
 		Rates: map[string]*engine.Rate{
 			"RATE1": {
-				ID:              "RATE1",
-				Weight:          0,
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "1 * * * *",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -844,11 +916,19 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RATE_1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Weight:    50,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 50,
+			},
+		},
 		Rates: map[string]*engine.Rate{
 			"RATE1": {
-				ID:              "RATE1",
-				Weight:          0,
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "1 * * * *",
 				IntervalRates: []*engine.IntervalRate{
 					{

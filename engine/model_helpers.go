@@ -2936,8 +2936,8 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 			if tp.RateActivationTimes != utils.EmptyString {
 				rate.ActivationTimes = tp.RateActivationTimes
 			}
-			if tp.RateWeight != 0 {
-				rate.Weight = tp.RateWeight
+			if tp.RateWeights != utils.EmptyString {
+				rate.Weights = tp.RateWeights
 			}
 			// create new interval rate and append to the slice
 			intervalRate := new(utils.TPIntervalRate)
@@ -2960,8 +2960,8 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 			rateMap[tenID][tp.RateID] = rate
 		}
 
-		if tp.Weight != 0 {
-			rPrf.Weight = tp.Weight
+		if tp.Weights != utils.EmptyString {
+			rPrf.Weights = tp.Weights
 		}
 		if tp.MinCost != 0 {
 			rPrf.MinCost = tp.MinCost
@@ -3029,7 +3029,7 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 						mdl.ActivationInterval += utils.InfieldSep + tPrf.ActivationInterval.ExpiryTime
 					}
 				}
-				mdl.Weight = tPrf.Weight
+				mdl.Weights = tPrf.Weights
 				mdl.MinCost = tPrf.MinCost
 				mdl.MaxCost = tPrf.MaxCost
 				mdl.MaxCostStrategy = tPrf.MaxCostStrategy
@@ -3042,7 +3042,7 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 					}
 					mdl.RateFilterIDs += val
 				}
-				mdl.RateWeight = rate.Weight
+				mdl.RateWeights = rate.Weights
 				mdl.RateActivationTimes = rate.ActivationTimes
 				mdl.RateBlocker = rate.Blocker
 
@@ -3065,11 +3065,17 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 		Tenant:          tpRp.Tenant,
 		ID:              tpRp.ID,
 		FilterIDs:       make([]string, len(tpRp.FilterIDs)),
-		Weight:          tpRp.Weight,
 		MaxCostStrategy: tpRp.MaxCostStrategy,
 		Rates:           make(map[string]*Rate),
 		MinCost:         utils.NewDecimalFromFloat64(tpRp.MinCost),
 		MaxCost:         utils.NewDecimalFromFloat64(tpRp.MaxCost),
+	}
+	if tpRp.Weights != utils.EmptyString {
+		weight, err := utils.NewDynamicWeightsFromString(tpRp.Weights, ";", "&")
+		if err != nil {
+			return nil, err
+		}
+		rp.Weights = weight
 	}
 	for i, stp := range tpRp.FilterIDs {
 		rp.FilterIDs[i] = stp
@@ -3082,11 +3088,17 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 	for key, rate := range tpRp.Rates {
 		rp.Rates[key] = &Rate{
 			ID:              rate.ID,
-			Weight:          rate.Weight,
 			Blocker:         rate.Blocker,
 			FilterIDs:       rate.FilterIDs,
 			ActivationTimes: rate.ActivationTimes,
 			IntervalRates:   make([]*IntervalRate, len(rate.IntervalRates)),
+		}
+		if rate.Weights != utils.EmptyString {
+			weight, err := utils.NewDynamicWeightsFromString(rate.Weights, ";", "&")
+			if err != nil {
+				return nil, err
+			}
+			rp.Rates[key].Weights = weight
 		}
 		for i, iRate := range rate.IntervalRates {
 			rp.Rates[key].IntervalRates[i] = new(IntervalRate)
@@ -3112,7 +3124,7 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 		ID:                 rp.ID,
 		FilterIDs:          make([]string, len(rp.FilterIDs)),
 		ActivationInterval: new(utils.TPActivationInterval),
-		Weight:             rp.Weight,
+		Weights:            rp.Weights.String(";", "&"),
 		MaxCostStrategy:    rp.MaxCostStrategy,
 		Rates:              make(map[string]*utils.TPRate),
 	}
@@ -3130,7 +3142,7 @@ func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
 	for key, rate := range rp.Rates {
 		tpRp.Rates[key] = &utils.TPRate{
 			ID:              rate.ID,
-			Weight:          rate.Weight,
+			Weights:         rate.Weights.String(";", "&"),
 			Blocker:         rate.Blocker,
 			FilterIDs:       rate.FilterIDs,
 			ActivationTimes: rate.ActivationTimes,
@@ -3635,6 +3647,22 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 			Type:      bal.Type,
 			Units:     utils.NewDecimalFromFloat64(bal.Units),
 		}
+		if bal.Weights != utils.EmptyString {
+			weight, err := utils.NewDynamicWeightsFromString(bal.Weights, ";", "&")
+			if err != nil {
+				return nil, err
+			}
+			ap.Balances[id].Weights = weight
+		}
+		if bal.UnitFactors != nil {
+			ap.Balances[id].UnitFactors = make([]*utils.UnitFactor, len(bal.UnitFactors))
+			for j, unitFactor := range bal.UnitFactors {
+				ap.Balances[id].UnitFactors[j] = &utils.UnitFactor{
+					FilterIDs: unitFactor.FilterIDs,
+					Factor:    utils.NewDecimalFromFloat64(unitFactor.Factor),
+				}
+			}
+		}
 		if bal.Opts != utils.EmptyString {
 			ap.Balances[id].Opts = make(map[string]interface{})
 			for _, opt := range strings.Split(bal.Opts, utils.InfieldSep) { // example of opts: key1:val1;key2:val2;key3:val3
@@ -3645,13 +3673,6 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 				}
 				ap.Balances[id].Opts[keyValSls[0]] = keyValSls[1]
 			}
-		}
-		if bal.Weights != utils.EmptyString {
-			weight, err := utils.NewDynamicWeightsFromString(bal.Weights, ";", "&")
-			if err != nil {
-				return nil, err
-			}
-			ap.Balances[id].Weights = weight
 		}
 		if bal.CostIncrement != nil {
 			ap.Balances[id].CostIncrements = make([]*utils.CostIncrement, len(bal.CostIncrement))
@@ -3680,15 +3701,6 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 			ap.Balances[id].RateProfileIDs = make([]string, len(bal.RateProfileIDs))
 			for j, costAttribute := range bal.RateProfileIDs {
 				ap.Balances[id].RateProfileIDs[j] = costAttribute
-			}
-		}
-		if bal.UnitFactors != nil {
-			ap.Balances[id].UnitFactors = make([]*utils.UnitFactor, len(bal.UnitFactors))
-			for j, unitFactor := range bal.UnitFactors {
-				ap.Balances[id].UnitFactors[j] = &utils.UnitFactor{
-					FilterIDs: unitFactor.FilterIDs,
-					Factor:    utils.NewDecimalFromFloat64(unitFactor.Factor),
-				}
 			}
 		}
 	}

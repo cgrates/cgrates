@@ -380,17 +380,25 @@ func testExpVerifyRateProfiles(t *testing.T) {
 		ID:                 "RT_SPECIAL_1002",
 		FilterIDs:          []string{"*string:~*req.Account:1002"},
 		ActivationInterval: nil,
-		Weight:             10,
-		MinCost:            utils.NewDecimal(0, 0),
-		MaxCost:            utils.NewDecimal(0, 0),
-		MaxCostStrategy:    utils.MetaMaxCostFree,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		MinCost:         utils.NewDecimal(0, 0),
+		MaxCost:         utils.NewDecimal(0, 0),
+		MaxCostStrategy: utils.MetaMaxCostFree,
 		Rates: map[string]*engine.Rate{
 			"RT_ALWAYS": {
 				ID:              "RT_ALWAYS",
 				FilterIDs:       nil,
 				ActivationTimes: "* * * * *",
-				Weight:          0,
-				Blocker:         false,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				Blocker: false,
 				IntervalRates: []*engine.IntervalRate{
 					{
 						IntervalStart: 0 * time.Second,

@@ -517,14 +517,14 @@ type RateProfileMdl struct {
 	ID                  string  `index:"1" re:""`
 	FilterIDs           string  `index:"2" re:""`
 	ActivationInterval  string  `index:"3" re:""`
-	Weight              float64 `index:"4" re:"\d+\.?\d*"`
+	Weights             string  `index:"4" re:""`
 	MinCost             float64 `index:"5"  re:"\d+\.?\d*""`
 	MaxCost             float64 `index:"6"  re:"\d+\.?\d*"`
 	MaxCostStrategy     string  `index:"7" re:""`
 	RateID              string  `index:"8" re:""`
 	RateFilterIDs       string  `index:"9" re:""`
 	RateActivationTimes string  `index:"10" re:""`
-	RateWeight          float64 `index:"11" re:"\d+\.?\d*"`
+	RateWeights         string  `index:"11" re:""`
 	RateBlocker         bool    `index:"12" re:""`
 	RateIntervalStart   string  `index:"13" re:""`
 	RateFixedFee        float64 `index:"14" re:"\d+\.?\d*"`

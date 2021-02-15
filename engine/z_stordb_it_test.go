@@ -522,7 +522,7 @@ func testStorDBitCRUDTPRateProfiles(t *testing.T) {
 			Tenant:          "cgrates.org",
 			ID:              "RP1",
 			FilterIDs:       []string{"*string:~*req.Subject:1001"},
-			Weight:          0,
+			Weights:         ";0",
 			MinCost:         0.1,
 			MaxCost:         0.6,
 			MaxCostStrategy: "*free",
@@ -530,7 +530,7 @@ func testStorDBitCRUDTPRateProfiles(t *testing.T) {
 				"FIRST_GI": {
 					ID:        "FIRST_GI",
 					FilterIDs: []string{"*gi:~*req.Usage:0"},
-					Weight:    0,
+					Weights:   ";0",
 					IntervalRates: []*utils.TPIntervalRate{
 						{
 							RecurrentFee: 0.12,
