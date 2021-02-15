@@ -502,15 +502,52 @@ func TestDataDBReload6(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
-/*
 func TestDataDBReloadVersion(t *testing.T) {
-	var versionsConfigDIR string
-	dataDir := flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", versionsConfigDIR))
+	cfg, err := config.NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"))
 	if err != nil {
 		t.Fatal(err)
 	}
+	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().DataDbType,
+		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
+		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
+		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		dbConn.Flush("")
+		dbConn.Close()
+	}()
 
+	err = dbConn.SetVersions(engine.Versions{
+		utils.StatS:          4,
+		utils.Accounts:       3,
+		utils.Actions:        2,
+		utils.ActionTriggers: 2,
+		utils.ActionPlans:    3,
+		utils.SharedGroups:   2,
+		utils.Thresholds:     4,
+		utils.Routes:         2,
+		// old version for Attributes
+		utils.Attributes:          5,
+		utils.Timing:              1,
+		utils.RQF:                 5,
+		utils.Resource:            1,
+		utils.Subscribers:         1,
+		utils.Destinations:        1,
+		utils.ReverseDestinations: 1,
+		utils.RatingPlan:          1,
+		utils.RatingProfile:       1,
+		utils.Chargers:            2,
+		utils.Dispatchers:         2,
+		utils.LoadIDsVrs:          1,
+		utils.RateProfiles:        1,
+		utils.ActionProfiles:      1,
+	}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
@@ -530,54 +567,13 @@ func TestDataDBReloadVersion(t *testing.T) {
 	srvMngr.AddServices(NewAttributeService(cfg, db,
 		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep),
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	var reply string
-	cfg.AttributeSCfg().Enabled = true
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.DATADB_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !db.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-
+	srvMngr.StartServices()
+	<-shdChan.Done()
+	db.dm = nil
 	err = db.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	if err == nil || err.Error() != "can't conver DataDB of type mongo to MongoStorage" {
+		t.Fatal(err)
 	}
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.DATADB_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond)
-	err = db.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	db.cfg.DataDbCfg().DataDbType = utils.Mongo
-	db.cfg.DataDbCfg().Opts = map[string]interface{}{
-		utils.QueryTimeoutCfg: false,
-	}
-	err = db.Reload()
-	if err == nil {
-		t.Errorf("\nExpecting <cannot convert field: false to time.Duration>,\n Received <%+v>", err)
-	}
-
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
-*/
