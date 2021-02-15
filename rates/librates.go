@@ -53,7 +53,7 @@ type ratesWithWinner struct {
 //add will add the rate to the rates
 func (rs *ratesWithWinner) add(rWt *rateWithTimes) {
 	rs.rts[rWt.id()] = rWt
-	if rs.wnr == nil || rs.wnr.rt.Weight < rWt.rt.Weight {
+	if rs.wnr == nil { //|| rs.wnr.rt.Weight < rWt.rt.Weight {
 		rs.wnr = rWt
 	}
 }

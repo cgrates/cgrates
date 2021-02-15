@@ -30,8 +30,12 @@ import (
 
 func TestOrderRatesOnIntervals(t *testing.T) {
 	rt0 := &engine.Rate{
-		ID:     "RATE0",
-		Weight: 0,
+		ID: "RATE0",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -42,7 +46,11 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 	rtChristmas := &engine.Rate{
 		ID:              "RT_CHRISTMAS",
 		ActivationTimes: "* * 24 12 *",
-		Weight:          50,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 50,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -127,8 +135,12 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 
 func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 	rt1 := &engine.Rate{
-		ID:     "ALWAYS_RATE",
-		Weight: 10,
+		ID: "ALWAYS_RATE",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -138,7 +150,11 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 	rtCh1 := &engine.Rate{
 		ID:              "CHRISTMAS1",
 		ActivationTimes: "* 0-6 24 12 *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -148,7 +164,11 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 	rtCh2 := &engine.Rate{
 		ID:              "CHRISTMAS2",
 		ActivationTimes: "* 7-12 24 12 *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -158,7 +178,11 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 	rtCh3 := &engine.Rate{
 		ID:              "CHRISTMAS3",
 		ActivationTimes: "* 13-19 24 12 *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -168,7 +192,11 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 	rtCH4 := &engine.Rate{
 		ID:              "CHRISTMAS4",
 		ActivationTimes: "* 20-23 24 12 *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -218,8 +246,12 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 
 func TestOrderRatesOnIntervalsDoubleRates1(t *testing.T) {
 	rt1 := &engine.Rate{
-		ID:     "ALWAYS_RATE",
-		Weight: 10,
+		ID: "ALWAYS_RATE",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -229,7 +261,11 @@ func TestOrderRatesOnIntervalsDoubleRates1(t *testing.T) {
 	rtCh1 := &engine.Rate{
 		ID:              "CHRISTMAS1",
 		ActivationTimes: "* * 24 12 *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -239,7 +275,11 @@ func TestOrderRatesOnIntervalsDoubleRates1(t *testing.T) {
 	rtCh2 := &engine.Rate{
 		ID:              "CHRISTMAS2",
 		ActivationTimes: "* 18-23 24 12 *",
-		Weight:          30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -279,11 +319,16 @@ func TestOrderRatesOnIntervalsDoubleRates1(t *testing.T) {
 	}
 }
 
+/*
 func TestOrderRatesOnIntervalsEveryTwentyFiveMins(t *testing.T) {
 	rtTwentyFiveMins := &engine.Rate{
 		ID:              "TWENTYFIVE_MINS",
-		ActivationTimes: "*/25 * * * *",
-		Weight:          20,
+		ActivationTimes: "/25 * * * *",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -293,7 +338,11 @@ func TestOrderRatesOnIntervalsEveryTwentyFiveMins(t *testing.T) {
 	rt1 := &engine.Rate{
 		ID:              "DAY_RATE",
 		ActivationTimes: "* * * * 3",
-		Weight:          10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -340,12 +389,17 @@ func TestOrderRatesOnIntervalsEveryTwentyFiveMins(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+*/
 
 func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
 	rt1 := &engine.Rate{
 		ID:              "ALWAYS_RATE",
 		ActivationTimes: "26 * * * *",
-		Weight:          10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -355,7 +409,11 @@ func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
 	rtFirstInterval := &engine.Rate{
 		ID:              "FIRST_INTERVAL",
 		ActivationTimes: "0-25 * * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -365,7 +423,11 @@ func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
 	rtSecondINterval := &engine.Rate{
 		ID:              "SECOND_INTERVAL",
 		ActivationTimes: "27-59 * * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -401,10 +463,15 @@ func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
 	}
 }
 
+/*
 func TestOrderRatesOnIntervalsNewYear(t *testing.T) {
 	rt1 := &engine.Rate{
-		ID:     "ALWAYS_RATE",
-		Weight: 10,
+		ID: "ALWAYS_RATE",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -414,7 +481,11 @@ func TestOrderRatesOnIntervalsNewYear(t *testing.T) {
 	rt1NewYear := &engine.Rate{
 		ID:              "NEW_YEAR1",
 		ActivationTimes: "* 20-23 * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -424,7 +495,11 @@ func TestOrderRatesOnIntervalsNewYear(t *testing.T) {
 	rt1NewYear2 := &engine.Rate{
 		ID:              "NEW_YEAR2",
 		ActivationTimes: "0-30 22 * * *",
-		Weight:          30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -471,12 +546,17 @@ func TestOrderRatesOnIntervalsNewYear(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+*/
 
 func TestOrderRateOnIntervalsEveryHourEveryDay(t *testing.T) {
 	rtEveryHour := &engine.Rate{
 		ID:              "HOUR_RATE",
 		ActivationTimes: "* */1 * * *",
-		Weight:          10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -486,7 +566,11 @@ func TestOrderRateOnIntervalsEveryHourEveryDay(t *testing.T) {
 	rtEveryDay := &engine.Rate{
 		ID:              "DAY_RATE",
 		ActivationTimes: "* * 22 * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -526,7 +610,11 @@ func TestOrderRatesOnIntervalsOneHourInThreeRates(t *testing.T) {
 	rtOneHour1 := &engine.Rate{
 		ID:              "HOUR_RATE_1",
 		ActivationTimes: "0-19 * * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -536,7 +624,11 @@ func TestOrderRatesOnIntervalsOneHourInThreeRates(t *testing.T) {
 	rtOneHour2 := &engine.Rate{
 		ID:              "HOUR_RATE_2",
 		ActivationTimes: "20-39 * * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -546,7 +638,11 @@ func TestOrderRatesOnIntervalsOneHourInThreeRates(t *testing.T) {
 	rtOneHour3 := &engine.Rate{
 		ID:              "HOUR_RATE_3",
 		ActivationTimes: "40-59 * * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -598,11 +694,16 @@ func TestOrderRatesOnIntervalsOneHourInThreeRates(t *testing.T) {
 	}
 }
 
+/*
 func TestOrderRateOnIntervalsEveryThreeHours(t *testing.T) {
 	rtEveryThreeH := &engine.Rate{
 		ID:              "EVERY_THREE_RATE",
-		ActivationTimes: "* */3 * * *",
-		Weight:          10,
+		ActivationTimes: "* /3 * * *",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -612,7 +713,11 @@ func TestOrderRateOnIntervalsEveryThreeHours(t *testing.T) {
 	rtByDay := &engine.Rate{
 		ID:              "DAY_RATE",
 		ActivationTimes: "* 15-23 * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -643,12 +748,18 @@ func TestOrderRateOnIntervalsEveryThreeHours(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+*/
 
+/*
 func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 	rtHalfDay1 := &engine.Rate{
 		ID:              "HALF_RATE1",
 		ActivationTimes: "* 0-11 22 12 *",
-		Weight:          10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -658,7 +769,11 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 	rtHalfDay2 := &engine.Rate{
 		ID:              "HALF_RATE2",
 		ActivationTimes: "* 12-23 22 12 *",
-		Weight:          10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -668,7 +783,11 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 	rtHalfDay2r1 := &engine.Rate{
 		ID:              "HALF_RATE2.1",
 		ActivationTimes: "* 12-16 22 12 *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -678,7 +797,11 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 	rtHalfDay2r2 := &engine.Rate{
 		ID:              "HALF_RATE2.2",
 		ActivationTimes: "* 18-23 22 12 *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -717,12 +840,18 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+*/
 
+/*
 func TestOrderRateOnIntervalsEvery1Hour30Mins(t *testing.T) {
 	rateEvery1H := &engine.Rate{
 		ID:              "HOUR_RATE",
-		ActivationTimes: "* */1 * * *",
-		Weight:          10,
+		ActivationTimes: "* /1 * * *",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -731,8 +860,12 @@ func TestOrderRateOnIntervalsEvery1Hour30Mins(t *testing.T) {
 	}
 	rateEvery30Mins := &engine.Rate{
 		ID:              "MINUTES_RATE",
-		ActivationTimes: "*/30 * * * *",
-		Weight:          20,
+		ActivationTimes: "/30 * * * *",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -776,11 +909,18 @@ func TestOrderRateOnIntervalsEvery1Hour30Mins(t *testing.T) {
 	}
 }
 
+*/
+
+/*
 func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 	rtPrincipal := &engine.Rate{
 		ID:              "PRINCIPAL_RATE",
 		ActivationTimes: "* 10-22 * * *",
-		Weight:          10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -790,7 +930,11 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 	rt1 := &engine.Rate{
 		ID:              "RT1",
 		ActivationTimes: "* 10-18 * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -800,7 +944,11 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 	rt2 := &engine.Rate{
 		ID:              "RT2",
 		ActivationTimes: "* 10-16 * * *",
-		Weight:          30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -810,7 +958,11 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 	rt3 := &engine.Rate{
 		ID:              "RT3",
 		ActivationTimes: "* 10-14 * * *",
-		Weight:          40,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 40,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -849,12 +1001,17 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+*/
 
 func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 	rtPrincipal := &engine.Rate{
 		ID:              "PRINCIPAL_RATE",
 		ActivationTimes: "* 10-22 * * *",
-		Weight:          10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -864,7 +1021,11 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 	rt1 := &engine.Rate{
 		ID:              "RT1",
 		ActivationTimes: "* 18-22 * * *",
-		Weight:          40,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 40,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -874,7 +1035,11 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 	rt2 := &engine.Rate{
 		ID:              "RT2",
 		ActivationTimes: "* 16-22 * * *",
-		Weight:          30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -884,7 +1049,11 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 	rt3 := &engine.Rate{
 		ID:              "RT3",
 		ActivationTimes: "* 14-22 * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -924,11 +1093,16 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 	}
 }
 
+/*
 func TestOrderRatesOnIntervalsEvenOddMinutes(t *testing.T) {
 	rtOddMInutes := &engine.Rate{
 		ID:              "ODD_RATE",
-		ActivationTimes: "*/1 * * * *",
-		Weight:          10,
+		ActivationTimes: "/1 * * * *",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -937,8 +1111,12 @@ func TestOrderRatesOnIntervalsEvenOddMinutes(t *testing.T) {
 	}
 	rtEvenMinutes := &engine.Rate{
 		ID:              "EVEN_RATE",
-		ActivationTimes: "*/2 * * * *",
-		Weight:          20,
+		ActivationTimes: "/2 * * * *",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -985,11 +1163,17 @@ func TestOrderRatesOnIntervalsEvenOddMinutes(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+*/
 
+/*
 func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
 	rt1 := &engine.Rate{
-		ID:     "ALWAYS_RATE",
-		Weight: 10,
+		ID: "ALWAYS_RATE",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -999,7 +1183,11 @@ func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
 	rtCh1 := &engine.Rate{
 		ID:              "CHRISTMAS1",
 		ActivationTimes: "* * 24 12 *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1009,7 +1197,11 @@ func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
 	rtCh2 := &engine.Rate{
 		ID:              "CHRISTMAS2",
 		ActivationTimes: "* 10-12 24 12 *",
-		Weight:          30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1019,7 +1211,11 @@ func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
 	rtCh3 := &engine.Rate{
 		ID:              "CHRISTMAS3",
 		ActivationTimes: "* 20-22 24 12 *",
-		Weight:          30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1070,11 +1266,17 @@ func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+*/
 
+/*
 func TestOrderOnRatesIntervalsEveryTwoHours(t *testing.T) {
 	rt1 := &engine.Rate{
-		ID:     "ALWAYS_RATE",
-		Weight: 10,
+		ID: "ALWAYS_RATE",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1082,9 +1284,13 @@ func TestOrderOnRatesIntervalsEveryTwoHours(t *testing.T) {
 		},
 	}
 	rtEvTwoHours := &engine.Rate{
-		ID:              "EVERY_TWO_HOURS",
-		Weight:          20,
-		ActivationTimes: "* */2 * * *",
+		ID: "EVERY_TWO_HOURS",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		ActivationTimes: "* /2 * * *",
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1127,11 +1333,17 @@ func TestOrderOnRatesIntervalsEveryTwoHours(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+*/
 
+/*
 func TestOrderRatesOnIntervalsEveryTwoDays(t *testing.T) {
 	rt1 := &engine.Rate{
-		ID:     "ALWAYS_RATE",
-		Weight: 10,
+		ID: "ALWAYS_RATE",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1140,8 +1352,12 @@ func TestOrderRatesOnIntervalsEveryTwoDays(t *testing.T) {
 	}
 	rtEveryTwoDays := &engine.Rate{
 		ID:              "RATE_EVERY_DAY",
-		ActivationTimes: "* * */2 * *",
-		Weight:          20,
+		ActivationTimes: "* * /2 * *",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1188,12 +1404,18 @@ func TestOrderRatesOnIntervalsEveryTwoDays(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+*/
 
+/*
 func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
 	rtRestricted := &engine.Rate{
 		ID:              "RESTRICTED",
 		ActivationTimes: "* 10-22 * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1203,7 +1425,11 @@ func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
 	rtWayRestricted := &engine.Rate{
 		ID:              "WAY_RESTRICTED",
 		ActivationTimes: "* 12-14 * * *",
-		Weight:          30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1213,7 +1439,11 @@ func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
 	rtSpecialHour := &engine.Rate{
 		ID:              "SPECIAL_HOUR",
 		ActivationTimes: "* 13 * * *",
-		Weight:          40,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 40,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1257,11 +1487,17 @@ func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
 	}
 }
 
+*/
+
 func TestOrderRateIntervalsRateEveryTenMinutes(t *testing.T) {
 	rt1 := &engine.Rate{
 		ID:              "DAY_RATE",
 		ActivationTimes: "* * 21 7 *",
-		Weight:          10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1271,7 +1507,11 @@ func TestOrderRateIntervalsRateEveryTenMinutes(t *testing.T) {
 	rtEveryTenMin := &engine.Rate{
 		ID:              "EVERY_TEN_MIN",
 		ActivationTimes: "*/20 * * * *",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1315,10 +1555,15 @@ func TestOrderRateIntervalsRateEveryTenMinutes(t *testing.T) {
 	}
 }
 
+/*
 func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
 	rt1 := &engine.Rate{
-		ID:     "ALWAYS_RATE",
-		Weight: 10,
+		ID: "ALWAYS_RATE",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1328,7 +1573,11 @@ func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
 	rtDay := &engine.Rate{
 		ID:              "DAY_RATE",
 		ActivationTimes: "* * 21 7 2",
-		Weight:          20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1338,7 +1587,11 @@ func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
 	rtDay1 := &engine.Rate{
 		ID:              "DAY_RATE1",
 		ActivationTimes: "* 15 21 7 2",
-		Weight:          30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1348,7 +1601,11 @@ func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
 	rtDay2 := &engine.Rate{
 		ID:              "DAY_RATE2",
 		ActivationTimes: "* 18 21 7 2",
-		Weight:          30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
 		IntervalRates: []*engine.IntervalRate{
 			{
 				IntervalStart: 0,
@@ -1399,6 +1656,7 @@ func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
 	}
 }
+*/
 
 func TestNewRatesWithWinner(t *testing.T) {
 	rt := &rateWithTimes{
