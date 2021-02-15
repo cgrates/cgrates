@@ -2,7 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates)
 [![Documentation Status](https://readthedocs.org/projects/cgrates/badge/?version=latest)](https://cgrates.readthedocs.io/en/latest/?badge=latest)
-[![GoDoc](https://godoc.org/github.com/cgrates/cgrates?status.svg)](https://godoc.org/github.com/cgrates/cgrates)
+[![GoDoc](https://pkg.go.dev/badge/github.com/cgrates/cgrates)](https://pkg.go.dev/github.com/cgrates/cgrates@master)
 
 ### Features ###
 + Real-time Online/Offline Charging System (OCS).
