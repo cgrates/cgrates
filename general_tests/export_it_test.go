@@ -525,11 +525,19 @@ func testExpVerifyAccountProfiles(t *testing.T) {
 		},
 		ThresholdIDs: []string{"*none"},
 	}
+	sort.Strings(acctPrf.Balances["MonetaryBalance"].CostIncrements[0].FilterIDs)
+	sort.Strings(acctPrf.Balances["MonetaryBalance"].UnitFactors[0].FilterIDs)
+	sort.Strings(acctPrf.Balances["MonetaryBalance"].AttributeIDs)
 	if err := expRpc.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_PRF_1"}}, &reply); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(acctPrf, reply) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acctPrf), utils.ToJSON(reply))
+	} else {
+		sort.Strings(acctPrf.Balances["MonetaryBalance"].CostIncrements[0].FilterIDs)
+		sort.Strings(acctPrf.Balances["MonetaryBalance"].UnitFactors[0].FilterIDs)
+		sort.Strings(acctPrf.Balances["MonetaryBalance"].AttributeIDs)
+		if !reflect.DeepEqual(acctPrf, reply) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acctPrf), utils.ToJSON(reply))
+		}
 	}
 }
 

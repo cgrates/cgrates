@@ -77,7 +77,6 @@ type Balance struct {
 	ID             string // Balance identificator, unique within an Account
 	FilterIDs      []string
 	Weights        DynamicWeights
-	Blocker        bool
 	Type           string
 	Opts           map[string]interface{}
 	CostIncrements []*CostIncrement
@@ -191,7 +190,6 @@ func (aI *ActivationInterval) Clone() *ActivationInterval {
 func (bL *Balance) Clone() (blnc *Balance) {
 	blnc = &Balance{
 		ID:      bL.ID,
-		Blocker: bL.Blocker,
 		Weights: bL.Weights.Clone(),
 		Type:    bL.Type,
 	}
@@ -376,7 +374,6 @@ type APIBalance struct {
 	ID             string // Balance identificator, unique within an Account
 	FilterIDs      []string
 	Weights        string
-	Blocker        bool
 	Type           string
 	Opts           map[string]interface{}
 	CostIncrements []*APICostIncrement
@@ -391,7 +388,6 @@ func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
 	balance = &Balance{
 		ID:             ext.ID,
 		FilterIDs:      ext.FilterIDs,
-		Blocker:        ext.Blocker,
 		Type:           ext.Type,
 		Opts:           ext.Opts,
 		AttributeIDs:   ext.AttributeIDs,
