@@ -97,6 +97,7 @@ func TestRadiusAgentReload(t *testing.T) {
 }
 
 func TestRadiusAgentReload2(t *testing.T) {
+	time.Sleep(10 * time.Millisecond)
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true

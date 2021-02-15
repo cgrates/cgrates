@@ -51,15 +51,6 @@ func testCreateDirs(t *testing.T) {
 	}
 }
 
-func testCleanupFiles(t *testing.T) {
-	for _, dir := range []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/SubpathWithoutMove",
-		"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut"} {
-		if err := os.RemoveAll(dir); err != nil {
-			t.Fatal("Error removing folder: ", dir, err)
-		}
-	}
-}
-
 func TestLoaderSReload(t *testing.T) {
 	testCreateDirs(t)
 	cfg := config.NewDefaultCGRConfig()
@@ -108,11 +99,11 @@ func TestLoaderSReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-
+	time.Sleep(10 * time.Millisecond)
 	if !db.IsRunning() {
 		t.Fatal("Expected service to be running")
 	}
-
+	time.Sleep(10 * time.Millisecond)
 	if !srv.IsRunning() {
 		t.Fatal("Expected service to be running")
 	}
@@ -141,4 +132,12 @@ func TestLoaderSReload(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 	testCleanupFiles(t)
+}
+func testCleanupFiles(t *testing.T) {
+	for _, dir := range []string{"/tmp/In", "/tmp/Out", "/tmp/LoaderIn", "/tmp/SubpathWithoutMove",
+		"/tmp/SubpathLoaderWithMove", "/tmp/SubpathOut"} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
+	}
 }
