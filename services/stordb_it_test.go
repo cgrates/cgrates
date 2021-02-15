@@ -752,3 +752,56 @@ func TestStorDBReload7(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+
+func TestStorDBReload8(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cfg.ChargerSCfg().Enabled = true
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Password = "CGRateS.org"
+	stordb := NewStorDBService(cfg, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	ralS := NewRalService(cfg, chS, server,
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+		cdrsRPC, nil, anz, srvDep)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS,
+		NewLoaderService(cfg, db, filterSChan, server,
+			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
+	}
+	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	if stordb.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	cfg.StorDbCfg().Type = ""
+	stordb.Start()
+
+	cfg.CdrsCfg().Enabled = false
+	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}

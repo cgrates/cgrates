@@ -33,7 +33,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestDiameterAgentReload(t *testing.T) {
+func TestDiameterAgentReload1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true
@@ -100,3 +100,39 @@ func TestDiameterAgentReload(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+
+/*
+func TestDiameterAgentReload2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	engine.NewConnManager(cfg, nil)
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	cfg.DiameterAgentCfg().ListenNet = "bad"
+	srv.Start()
+
+	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+
+	time.Sleep(10 * time.Millisecond)
+	cfg.DiameterAgentCfg().Enabled = false
+	cfg.GetReloadChan(config.DA_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+
+	time.Sleep(10 * time.Millisecond)
+}
+*/

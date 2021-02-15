@@ -106,7 +106,7 @@ func TestSessionSReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-	time.Sleep(20 * time.Millisecond) //need to switch to gorutine
+	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
