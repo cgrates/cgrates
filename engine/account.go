@@ -1161,6 +1161,21 @@ func (as *AccountSummary) Clone() (cln *AccountSummary) {
 	return
 }
 
+// UpdateInitialValue keeps the old initial balance value
+func (as *AccountSummary) UpdateInitialValue(old *AccountSummary) {
+	if old == nil {
+		return
+	}
+	for _, initialBal := range old.BalanceSummaries {
+		for _, currentBal := range as.BalanceSummaries {
+			if currentBal.UUID == initialBal.UUID {
+				currentBal.Initial = initialBal.Initial
+				break
+			}
+		}
+	}
+}
+
 // GetBalanceWithID returns a Balance given balance type and balance ID
 func (acc *Account) GetBalanceWithID(blcType, blcID string) (blc *Balance) {
 	for _, blc = range acc.BalanceMap[blcType] {

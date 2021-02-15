@@ -52,8 +52,12 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 	}
 	for i, ts := range cc.Timespans {
 		cIl := &ChargingInterval{CompressFactor: ts.CompressFactor}
-		rf := RatingMatchedFilters{"Subject": ts.MatchedSubject, "DestinationPrefix": ts.MatchedPrefix,
-			"DestinationID": ts.MatchedDestId, "RatingPlanID": ts.RatingPlanId}
+		rf := RatingMatchedFilters{
+			utils.DestinationID:         ts.MatchedDestId,
+			utils.DestinationPrefixName: ts.MatchedPrefix,
+			utils.RatingPlanID:          ts.RatingPlanId,
+			utils.Subject:               ts.MatchedSubject,
+		}
 		isPause := ts.RatingPlanId == utils.MetaPause
 		cIl.RatingID = ec.ratingIDForRateInterval(ts.RateInterval, rf, isPause)
 		if len(ts.Increments) != 0 {
@@ -170,7 +174,7 @@ func (ec *EventCost) initCache() {
 
 func (ec *EventCost) ratingIDForRateInterval(ri *RateInterval, rf RatingMatchedFilters, isPause bool) string {
 	if ri == nil || ri.Rating == nil {
-		return ""
+		return utils.EmptyString
 	}
 	var rfUUID string
 	if rf != nil {
@@ -689,7 +693,9 @@ func (ec *EventCost) SyncKeys(refEC *EventCost) {
 // Merge will merge a list of EventCosts into this one
 func (ec *EventCost) Merge(ecs ...*EventCost) {
 	for _, newEC := range ecs {
-		ec.AccountSummary = newEC.AccountSummary // updated AccountSummary information
+		// updated AccountSummary information
+		newEC.AccountSummary.UpdateInitialValue(ec.AccountSummary)
+		ec.AccountSummary = newEC.AccountSummary
 		for cIlIdx := range newEC.Charges {
 			ec.appendChargingIntervalFromEventCost(newEC, cIlIdx)
 		}
