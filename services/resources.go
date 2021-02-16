@@ -67,7 +67,7 @@ type ResourceService struct {
 	srvDep   map[string]*sync.WaitGroup
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (reS *ResourceService) Start() (err error) {
 	if reS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
@@ -85,11 +85,7 @@ func (reS *ResourceService) Start() (err error) {
 
 	reS.Lock()
 	defer reS.Unlock()
-	reS.reS, err = engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ResourceS, err.Error()))
-		return
-	}
+	reS.reS = engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
 	reS.reS.StartLoop()
 	reS.rpc = v1.NewResourceSv1(reS.reS)
