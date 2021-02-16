@@ -131,18 +131,6 @@ func (cB *concreteBalance) debitUsage(usage *decimal.Big,
 		cB.fltrS, cgrEv.Tenant, evNm); err != nil {
 		return
 	}
-	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
-		costIcrm.FixedFee == nil &&
-		len(cB.blnCfg.AttributeIDs) != 0 { // cost unknown, apply AttributeS to query from RateS
-		var rplyAttrS *engine.AttrSProcessEventReply
-		if rplyAttrS, err = processAttributeS(cB.connMgr, cgrEv, cB.attrSConns,
-			cB.blnCfg.AttributeIDs); err != nil {
-			return
-		}
-		if len(rplyAttrS.AlteredFields) != 0 { // event was altered
-			cgrEv = rplyAttrS.CGREvent
-		}
-	}
 
 	return maxDebitUsageFromConcretes(
 		[]*concreteBalance{cB}, usage,
