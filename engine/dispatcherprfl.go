@@ -160,7 +160,7 @@ func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply int
 			cfg.TLSCfg().ClientCerificate, cfg.TLSCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			IntRPC.GetInternalChanel(), false); err != nil {
+			IntRPC.GetInternalChanel(), false, nil); err != nil {
 			return
 		}
 

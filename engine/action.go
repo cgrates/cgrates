@@ -704,7 +704,7 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) (e
 	} else if client, err = rpcclient.NewRPCClient(utils.TCP, req.Address, false, "", "", "",
 		req.Attempts, 0, config.CgrConfig().GeneralCfg().ConnectTimeout,
 		config.CgrConfig().GeneralCfg().ReplyTimeout, req.Transport,
-		nil, false); err != nil {
+		nil, false, nil); err != nil {
 		return
 	}
 	in, out := params.InParam, params.OutParam

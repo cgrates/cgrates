@@ -31,13 +31,14 @@ import (
 // NewRPCPool returns a new pool of connection with the given configuration
 func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
-	internalConnChan chan rpcclient.ClientConnector, lazyConnect bool) (rpcPool *rpcclient.RPCPool, err error) {
+	internalConnChan chan rpcclient.ClientConnector, lazyConnect bool,
+	biRPCClient rpcclient.BiRPCConector) (rpcPool *rpcclient.RPCPool, err error) {
 	var rpcClient rpcclient.ClientConnector
 	var atLestOneConnected bool // If one connected we don't longer return errors
 	rpcPool = rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
 	for _, rpcConnCfg := range rpcConnCfgs {
 		rpcClient, err = NewRPCConnection(rpcConnCfg, keyPath, certPath, caPath, connAttempts, reconnects,
-			connectTimeout, replyTimeout, internalConnChan, lazyConnect)
+			connectTimeout, replyTimeout, internalConnChan, lazyConnect, biRPCClient)
 		if err == rpcclient.ErrUnsupportedCodec {
 			return nil, fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
 		}
@@ -54,14 +55,16 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 
 // NewRPCConnection creates a new connection based on the RemoteHost structure
 func NewRPCConnection(cfg *config.RemoteHost, keyPath, certPath, caPath string, connAttempts, reconnects int,
-	connectTimeout, replyTimeout time.Duration, internalConnChan chan rpcclient.ClientConnector, lazyConnect bool) (client rpcclient.ClientConnector, err error) {
-	if cfg.Address == utils.MetaInternal {
+	connectTimeout, replyTimeout time.Duration, internalConnChan chan rpcclient.ClientConnector, lazyConnect bool,
+	biRPCClient rpcclient.BiRPCConector) (client rpcclient.ClientConnector, err error) {
+	if cfg.Address == rpcclient.InternalRPC ||
+		cfg.Address == rpcclient.BiRPCInternal {
 		return rpcclient.NewRPCClient("", "", cfg.TLS, keyPath, certPath, caPath, connAttempts,
-			reconnects, connectTimeout, replyTimeout, rpcclient.InternalRPC, internalConnChan, lazyConnect)
+			reconnects, connectTimeout, replyTimeout, cfg.Address, internalConnChan, lazyConnect, biRPCClient)
 	}
 	return rpcclient.NewRPCClient(utils.TCP, cfg.Address, cfg.TLS, keyPath, certPath, caPath,
 		connAttempts, reconnects, connectTimeout, replyTimeout,
-		utils.FirstNonEmpty(cfg.Transport, rpcclient.GOBrpc), nil, lazyConnect)
+		utils.FirstNonEmpty(cfg.Transport, rpcclient.GOBrpc), nil, lazyConnect, biRPCClient)
 }
 
 // IntRPC is the global variable that is used to comunicate with all the subsystems internally
@@ -81,7 +84,7 @@ func (s RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient.
 		utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
 		config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
-		rpcclient.InternalRPC, connChan, true)
+		rpcclient.InternalRPC, connChan, true, nil)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Error adding %s to the set: %s", utils.InternalRPCSet, name, err.Error()))
 		return

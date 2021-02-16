@@ -20,7 +20,6 @@ package utils
 
 import (
 	"net"
-	"reflect"
 	"testing"
 
 	"github.com/cenkalti/rpc2"
@@ -63,35 +62,4 @@ func (t *testBiRPCServer) CallBiRPC(_ rpcclient.ClientConnector, metod string, a
 	t.args = args
 	t.reply = reply
 	return nil
-}
-
-func TestNewBiRPCInternalClient(t *testing.T) {
-	//empty check
-
-	rpc := &testBiRPCServer{}
-	eOut := &BiRPCInternalClient{serverConn: rpc}
-	rcv := NewBiRPCInternalClient(rpc)
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-
-	rcv.SetClientConn(&testBiRPCServer{})
-
-	if rcv.clntConn == nil {
-		t.Error("Client Connection must be not nil")
-	}
-
-	err := rcv.Call(APIerSv1ComputeActionPlanIndexes, "arg1", "reply")
-	if err != nil {
-		t.Error(err)
-	}
-	testrpc := &testBiRPCServer{
-		metod: APIerSv1ComputeActionPlanIndexes,
-		args:  "arg1",
-		reply: "reply",
-	}
-	if !reflect.DeepEqual(testrpc, rpc) {
-		t.Errorf("Expecting: %+v, received: %+v", testrpc, rpc)
-	}
-
 }
