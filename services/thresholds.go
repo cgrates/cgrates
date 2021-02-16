@@ -83,11 +83,8 @@ func (thrs *ThresholdService) Start() (err error) {
 
 	thrs.Lock()
 	defer thrs.Unlock()
-	thrs.thrs, err = engine.NewThresholdService(datadb, thrs.cfg, filterS)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ThresholdS, err.Error()))
-		return
-	}
+	thrs.thrs = engine.NewThresholdService(datadb, thrs.cfg, filterS)
+
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
 	thrs.thrs.StartLoop()
 	thrs.rpc = v1.NewThresholdSv1(thrs.thrs)

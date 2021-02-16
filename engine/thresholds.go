@@ -136,14 +136,14 @@ func (ts Thresholds) Sort() {
 }
 
 // NewThresholdService the constructor for ThresoldS service
-func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS) (tS *ThresholdService, err error) {
+func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS) (tS *ThresholdService) {
 	return &ThresholdService{dm: dm,
 		cgrcfg:      cgrcfg,
 		filterS:     filterS,
 		stopBackup:  make(chan struct{}),
 		loopStoped:  make(chan struct{}),
 		storedTdIDs: make(utils.StringSet),
-	}, nil
+	}
 }
 
 // ThresholdService manages Threshold execution and storing them to dataDB

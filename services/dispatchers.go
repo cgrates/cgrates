@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -87,10 +86,7 @@ func (dspS *DispatcherService) Start() (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
 
-	if dspS.dspS, err = dispatchers.NewDispatcherService(datadb, dspS.cfg, fltrS, dspS.connMgr); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
-		return
-	}
+	dspS.dspS = dispatchers.NewDispatcherService(datadb, dspS.cfg, fltrS, dspS.connMgr)
 
 	// for the moment we dispable Apier through dispatcher
 	// until we figured out a better sollution in case of gob server
