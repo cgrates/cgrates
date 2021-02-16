@@ -212,17 +212,17 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	var err error
 	// TTL
 	var ttl time.Duration
-	if opts.HasField(utils.OptsSessionTTL) {
-		ttl, err = opts.GetDuration(utils.OptsSessionTTL)
-	} else if s.OptsStart.HasField(utils.OptsSessionTTL) {
-		ttl, err = s.OptsStart.GetDuration(utils.OptsSessionTTL)
+	if opts.HasField(utils.OptsSessionsTTL) {
+		ttl, err = opts.GetDuration(utils.OptsSessionsTTL)
+	} else if s.OptsStart.HasField(utils.OptsSessionsTTL) {
+		ttl, err = s.OptsStart.GetDuration(utils.OptsSessionsTTL)
 	} else {
 		ttl = sS.cgrCfg.SessionSCfg().SessionTTL
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSessionTTL, s.CGRID, opts, err))
+				utils.SessionS, utils.OptsSessionsTTL, s.CGRID, opts, err))
 		return
 	}
 	if ttl == 0 {
@@ -230,17 +230,17 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// random delay computation
 	var maxDelay time.Duration
-	if opts.HasField(utils.OptsSessionTTLMaxDelay) {
-		maxDelay, err = opts.GetDuration(utils.OptsSessionTTLMaxDelay)
-	} else if s.OptsStart.HasField(utils.OptsSessionTTLMaxDelay) {
-		maxDelay, err = s.OptsStart.GetDuration(utils.OptsSessionTTLMaxDelay)
+	if opts.HasField(utils.OptsSessionsTTLMaxDelay) {
+		maxDelay, err = opts.GetDuration(utils.OptsSessionsTTLMaxDelay)
+	} else if s.OptsStart.HasField(utils.OptsSessionsTTLMaxDelay) {
+		maxDelay, err = s.OptsStart.GetDuration(utils.OptsSessionsTTLMaxDelay)
 	} else if sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay != nil {
 		maxDelay = *sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSessionTTLMaxDelay, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionsTTLMaxDelay, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	if maxDelay != 0 {
@@ -250,47 +250,47 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// LastUsed
 	var ttlLastUsed *time.Duration
-	if opts.HasField(utils.OptsSessionTTLLastUsed) {
-		ttlLastUsed, err = opts.GetDurationPtr(utils.OptsSessionTTLLastUsed)
-	} else if s.OptsStart.HasField(utils.OptsSessionTTLLastUsed) {
-		ttlLastUsed, err = s.OptsStart.GetDurationPtr(utils.OptsSessionTTLLastUsed)
+	if opts.HasField(utils.OptsSessionsTTLLastUsed) {
+		ttlLastUsed, err = opts.GetDurationPtr(utils.OptsSessionsTTLLastUsed)
+	} else if s.OptsStart.HasField(utils.OptsSessionsTTLLastUsed) {
+		ttlLastUsed, err = s.OptsStart.GetDurationPtr(utils.OptsSessionsTTLLastUsed)
 	} else {
 		ttlLastUsed = sS.cgrCfg.SessionSCfg().SessionTTLLastUsed
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSessionTTLLastUsed, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionsTTLLastUsed, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	// LastUsage
 	var ttlLastUsage *time.Duration
-	if opts.HasField(utils.OptsSessionTTLLastUsage) {
-		ttlLastUsage, err = opts.GetDurationPtr(utils.OptsSessionTTLLastUsage)
-	} else if s.OptsStart.HasField(utils.OptsSessionTTLLastUsage) {
-		ttlLastUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSessionTTLLastUsage)
+	if opts.HasField(utils.OptsSessionsTTLLastUsage) {
+		ttlLastUsage, err = opts.GetDurationPtr(utils.OptsSessionsTTLLastUsage)
+	} else if s.OptsStart.HasField(utils.OptsSessionsTTLLastUsage) {
+		ttlLastUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSessionsTTLLastUsage)
 	} else {
 		ttlLastUsage = sS.cgrCfg.SessionSCfg().SessionTTLLastUsage
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSessionTTLLastUsage, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionsTTLLastUsage, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	// TTLUsage
 	var ttlUsage *time.Duration
-	if opts.HasField(utils.OptsSessionTTLUsage) {
-		ttlUsage, err = opts.GetDurationPtr(utils.OptsSessionTTLUsage)
-	} else if s.OptsStart.HasField(utils.OptsSessionTTLUsage) {
-		ttlUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSessionTTLUsage)
+	if opts.HasField(utils.OptsSessionsTTLUsage) {
+		ttlUsage, err = opts.GetDurationPtr(utils.OptsSessionsTTLUsage)
+	} else if s.OptsStart.HasField(utils.OptsSessionsTTLUsage) {
+		ttlUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSessionsTTLUsage)
 	} else {
 		ttlUsage = sS.cgrCfg.SessionSCfg().SessionTTLUsage
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSessionTTLUsage, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionsTTLUsage, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	// previously defined, reset

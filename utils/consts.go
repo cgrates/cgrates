@@ -2500,8 +2500,8 @@ var (
 )
 
 // CGROptionsSet the possible cgr options
-var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSessionTTL,
-	OptsSessionTTLMaxDelay, OptsSessionTTLLastUsed, OptsSessionTTLLastUsage, OptsSessionTTLUsage,
+var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSessionsTTL,
+	OptsSessionsTTLMaxDelay, OptsSessionsTTLLastUsed, OptsSessionsTTLLastUsage, OptsSessionsTTLUsage,
 	OptsDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
@@ -2527,17 +2527,17 @@ const (
 
 // Event Opts
 const (
-	OptsRoutesLimit         = "*routes_limit"
-	OptsRoutesOffset        = "*routes_offset"
-	OptsRatesStartTime      = "*ratesStartTime"
-	OptsRatesUsage          = "*ratesUsage"
-	OptsSessionTTL          = "*sessionTTL"
-	OptsSessionTTLMaxDelay  = "*sessionTTLMaxDelay"
-	OptsSessionTTLLastUsed  = "*sessionTTLLastUsed"
-	OptsSessionTTLLastUsage = "*sessionTTLLastUsage"
-	OptsSessionTTLUsage     = "*sessionTTLUsage"
-	OptsDebitInterval       = "*sessionDebitInterval"
-	OptsChargeable          = "*sessionChargeable"
+	OptsRoutesLimit          = "*routes_limit"
+	OptsRoutesOffset         = "*routes_offset"
+	OptsRatesStartTime       = "*ratesStartTime"
+	OptsRatesUsage           = "*ratesUsage"
+	OptsSessionsTTL          = "*sessionsTTL"
+	OptsSessionsTTLMaxDelay  = "*sessionsTTLMaxDelay"
+	OptsSessionsTTLLastUsed  = "*sessionsTTLLastUsed"
+	OptsSessionsTTLLastUsage = "*sessionsTTLLastUsage"
+	OptsSessionsTTLUsage     = "*sessionsTTLUsage"
+	OptsDebitInterval        = "*sessionsDebitInterval"
+	OptsChargeable           = "*sessionsChargeable"
 	// STIR
 	OptsStirATest              = "*stirATest"
 	OptsStirPayloadMaxDuration = "*stirPayloadMaxDuration"
