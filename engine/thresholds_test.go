@@ -293,7 +293,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	defaultCfg.ThresholdSCfg().StoreInterval = 0
 	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
 	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ, err = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
+	thServ = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -503,7 +503,7 @@ func TestThresholdsProcessEvent(t *testing.T) {
 	defaultCfg.ThresholdSCfg().StoreInterval = 0
 	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
 	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ, err = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
+	thServ = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -704,7 +704,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 	defaultCfg.ThresholdSCfg().StoreInterval = 0
 	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
 	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ, err = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
+	thServ = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -925,7 +925,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 	defaultCfg.ThresholdSCfg().StoreInterval = 0
 	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
 	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ, err = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
+	thServ = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

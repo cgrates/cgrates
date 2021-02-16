@@ -33,13 +33,13 @@ import (
 // NewDispatcherService constructs a DispatcherService
 func NewDispatcherService(dm *engine.DataManager,
 	cfg *config.CGRConfig, fltrS *engine.FilterS,
-	connMgr *engine.ConnManager) (*DispatcherService, error) {
+	connMgr *engine.ConnManager) *DispatcherService {
 	return &DispatcherService{
 		dm:      dm,
 		cfg:     cfg,
 		fltrS:   fltrS,
 		connMgr: connMgr,
-	}, nil
+	}
 }
 
 // DispatcherService  is the service handling dispatching towards internal components

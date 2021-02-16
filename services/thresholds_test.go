@@ -44,7 +44,7 @@ func TestThresholdSCoverage(t *testing.T) {
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	thrs1, _ := engine.NewThresholdService(&engine.DataManager{}, &config.CGRConfig{}, &engine.FilterS{})
+	thrs1 := engine.NewThresholdService(&engine.DataManager{}, &config.CGRConfig{}, &engine.FilterS{})
 	tS2 := &ThresholdService{
 		cfg:         cfg,
 		dm:          db,

@@ -805,3 +805,288 @@ func TestStorDBReload8(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+
+func TestStorDBReloadVersion1(t *testing.T) {
+	cfg, err := config.NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	storageDb, err := engine.NewStorDBConn(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
+		cfg.StorDbCfg().Opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() {
+		storageDb.Flush("")
+		storageDb.Close()
+	}()
+
+	err = storageDb.SetVersions(engine.Versions{
+		utils.CostDetails:   2,
+		utils.SessionSCosts: 3,
+		//old version for CDRs
+		utils.CDRs:               1,
+		utils.TpRatingPlans:      1,
+		utils.TpFilters:          1,
+		utils.TpDestinationRates: 1,
+		utils.TpActionTriggers:   1,
+		utils.TpAccountActionsV:  1,
+		utils.TpActionPlans:      1,
+		utils.TpActions:          1,
+		utils.TpThresholds:       1,
+		utils.TpRoutes:           1,
+		utils.TpStats:            1,
+		utils.TpSharedGroups:     1,
+		utils.TpRatingProfiles:   1,
+		utils.TpResources:        1,
+		utils.TpRates:            1,
+		utils.TpTiming:           1,
+		utils.TpResource:         1,
+		utils.TpDestinations:     1,
+		utils.TpRatingPlan:       1,
+		utils.TpRatingProfile:    1,
+		utils.TpChargers:         1,
+		utils.TpDispatchers:      1,
+		utils.TpRateProfiles:     1,
+		utils.TpActionProfiles:   1,
+	}, true)
+
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cfg.ChargerSCfg().Enabled = true
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Password = "CGRateS.org"
+	stordb := NewStorDBService(cfg, srvDep)
+	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	ralS := NewRalService(cfg, chS, server,
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+		cdrsRPC, nil, anz, srvDep)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS,
+		NewLoaderService(cfg, db, filterSChan, server,
+			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
+	}
+	stordb.db = nil
+	err = stordb.Reload()
+	if err == nil || err.Error() != "can't conver StorDB of type mongo to MongoStorage" {
+		t.Fatal(err)
+	}
+
+	cfg.CdrsCfg().Enabled = false
+	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}
+
+func TestStorDBReloadVersion2(t *testing.T) {
+	cfg, err := config.NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmysql"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	storageDb, err := engine.NewStorDBConn(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
+		cfg.StorDbCfg().Opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() {
+		storageDb.Flush("")
+		storageDb.Close()
+	}()
+
+	err = storageDb.SetVersions(engine.Versions{
+		utils.CostDetails:   2,
+		utils.SessionSCosts: 3,
+		//old version for CDRs
+		utils.CDRs:               1,
+		utils.TpRatingPlans:      1,
+		utils.TpFilters:          1,
+		utils.TpDestinationRates: 1,
+		utils.TpActionTriggers:   1,
+		utils.TpAccountActionsV:  1,
+		utils.TpActionPlans:      1,
+		utils.TpActions:          1,
+		utils.TpThresholds:       1,
+		utils.TpRoutes:           1,
+		utils.TpStats:            1,
+		utils.TpSharedGroups:     1,
+		utils.TpRatingProfiles:   1,
+		utils.TpResources:        1,
+		utils.TpRates:            1,
+		utils.TpTiming:           1,
+		utils.TpResource:         1,
+		utils.TpDestinations:     1,
+		utils.TpRatingPlan:       1,
+		utils.TpRatingProfile:    1,
+		utils.TpChargers:         1,
+		utils.TpDispatchers:      1,
+		utils.TpRateProfiles:     1,
+		utils.TpActionProfiles:   1,
+	}, true)
+
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cfg.ChargerSCfg().Enabled = true
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Password = "CGRateS.org"
+	stordb := NewStorDBService(cfg, srvDep)
+	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	ralS := NewRalService(cfg, chS, server,
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+		cdrsRPC, nil, anz, srvDep)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS,
+		NewLoaderService(cfg, db, filterSChan, server,
+			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
+	}
+	stordb.db = nil
+	err = stordb.Reload()
+	if err == nil || err.Error() != "can't conver StorDB of type mysql to SQLStorage" {
+		t.Fatal(err)
+	}
+
+	cfg.CdrsCfg().Enabled = false
+	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}
+
+func TestStorDBReloadVersion3(t *testing.T) {
+	cfg, err := config.NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutinternal"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	storageDb, err := engine.NewStorDBConn(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
+		cfg.StorDbCfg().Opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() {
+		storageDb.Flush("")
+		storageDb.Close()
+	}()
+
+	err = storageDb.SetVersions(engine.Versions{
+		utils.CostDetails:   2,
+		utils.SessionSCosts: 3,
+		//old version for CDRs
+		utils.CDRs:               1,
+		utils.TpRatingPlans:      1,
+		utils.TpFilters:          1,
+		utils.TpDestinationRates: 1,
+		utils.TpActionTriggers:   1,
+		utils.TpAccountActionsV:  1,
+		utils.TpActionPlans:      1,
+		utils.TpActions:          1,
+		utils.TpThresholds:       1,
+		utils.TpRoutes:           1,
+		utils.TpStats:            1,
+		utils.TpSharedGroups:     1,
+		utils.TpRatingProfiles:   1,
+		utils.TpResources:        1,
+		utils.TpRates:            1,
+		utils.TpTiming:           1,
+		utils.TpResource:         1,
+		utils.TpDestinations:     1,
+		utils.TpRatingPlan:       1,
+		utils.TpRatingProfile:    1,
+		utils.TpChargers:         1,
+		utils.TpDispatchers:      1,
+		utils.TpRateProfiles:     1,
+		utils.TpActionProfiles:   1,
+	}, true)
+
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	shdWg := new(sync.WaitGroup)
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cfg.ChargerSCfg().Enabled = true
+	server := cores.NewServer(nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Password = "CGRateS.org"
+	stordb := NewStorDBService(cfg, srvDep)
+	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+	ralS := NewRalService(cfg, chS, server,
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+		cdrsRPC, nil, anz, srvDep)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS,
+		NewLoaderService(cfg, db, filterSChan, server,
+			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	if err := srvMngr.StartServices(); err != nil {
+		t.Error(err)
+	}
+	stordb.db = nil
+	err = stordb.Reload()
+	if err == nil || err.Error() != "can't conver StorDB of type internal to InternalDB" {
+		t.Fatal(err)
+	}
+
+	cfg.CdrsCfg().Enabled = false
+	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}
