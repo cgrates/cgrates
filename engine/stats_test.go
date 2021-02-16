@@ -37,10 +37,7 @@ func TestNewStatService(t *testing.T) {
 		cgrcfg:           testCgrCfg,
 		storedStatQueues: make(utils.StringSet),
 	}
-	result, err := NewStatService(testDM, testCgrCfg, testFltrS, nil)
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
+	result := NewStatService(testDM, testCgrCfg, testFltrS, nil)
 	if !reflect.DeepEqual(expStruct.dm, result.dm) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expStruct.dm, result.dm)
 	}
@@ -173,11 +170,9 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 	defaultCfg.StatSCfg().StoreInterval = 1
 	defaultCfg.StatSCfg().StringIndexedFields = nil
 	defaultCfg.StatSCfg().PrefixIndexedFields = nil
-	statService, err = NewStatService(dmSTS, defaultCfg,
+	statService = NewStatService(dmSTS, defaultCfg,
 		&FilterS{dm: dmSTS, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+
 	fltrSts1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_1",
@@ -415,11 +410,9 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 	defaultCfg.StatSCfg().StoreInterval = 1
 	defaultCfg.StatSCfg().StringIndexedFields = nil
 	defaultCfg.StatSCfg().PrefixIndexedFields = nil
-	statService, err = NewStatService(dmSTS, defaultCfg,
+	statService = NewStatService(dmSTS, defaultCfg,
 		&FilterS{dm: dmSTS, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+
 	fltrSts1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_1",
@@ -658,11 +651,9 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	defaultCfg.StatSCfg().StoreInterval = 1
 	defaultCfg.StatSCfg().StringIndexedFields = nil
 	defaultCfg.StatSCfg().PrefixIndexedFields = nil
-	statService, err = NewStatService(dmSTS, defaultCfg,
+	statService = NewStatService(dmSTS, defaultCfg,
 		&FilterS{dm: dmSTS, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+
 	fltrSts1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_1",
@@ -901,11 +892,9 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	defaultCfg.StatSCfg().StoreInterval = 1
 	defaultCfg.StatSCfg().StringIndexedFields = nil
 	defaultCfg.StatSCfg().PrefixIndexedFields = nil
-	statService, err = NewStatService(dmSTS, defaultCfg,
+	statService = NewStatService(dmSTS, defaultCfg,
 		&FilterS{dm: dmSTS, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+
 	fltrSts1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_1",

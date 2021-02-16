@@ -31,7 +31,7 @@ import (
 
 // NewStatService initializes a StatService
 func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
-	filterS *FilterS, connMgr *ConnManager) (ss *StatService, err error) {
+	filterS *FilterS, connMgr *ConnManager) (ss *StatService) {
 
 	return &StatService{
 		dm:               dm,
@@ -41,7 +41,7 @@ func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
 		storedStatQueues: make(utils.StringSet),
 		loopStoped:       make(chan struct{}),
 		stopBackup:       make(chan struct{}),
-	}, nil
+	}
 }
 
 // StatService builds stats for events

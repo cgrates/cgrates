@@ -111,7 +111,6 @@ func (da *DiameterAgent) Reload() (err error) {
 func (da *DiameterAgent) Shutdown() (err error) {
 	da.Lock()
 	close(da.stopChan)
-
 	da.da = nil
 	da.Unlock()
 	return // no shutdown for the momment

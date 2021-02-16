@@ -86,13 +86,8 @@ func (sts *StatService) Start() (err error) {
 
 	sts.Lock()
 	defer sts.Unlock()
-	if sts.sts, err = engine.NewStatService(datadb,
-		sts.cfg, filterS, sts.connMgr); err != nil {
-		utils.Logger.Crit(
-			fmt.Sprintf("<StatS> Could not init, error: %s",
-				err.Error()))
-		return
-	}
+	sts.sts = engine.NewStatService(datadb, sts.cfg, filterS, sts.connMgr)
+
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.StatS))
 	sts.sts.StartLoop()
