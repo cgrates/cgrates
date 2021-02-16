@@ -103,6 +103,12 @@ func TestAsSlice(t *testing.T) {
 	if rcv := s.AsSlice(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
+
+	s = nil
+	if rcv := s.AsSlice(); len(rcv) != 0 {
+		t.Errorf("Expecting empty slice")
+	}
+
 	s = StringSet{
 		"test":  struct{}{},
 		"test1": struct{}{},

@@ -84,4 +84,46 @@ func TestNewDynamicWeightsFromString(t *testing.T) {
 	} else if !reflect.DeepEqual(eDws, dws) {
 		t.Errorf("expecting: %+v, received: %+v", eDws, dws)
 	}
+
+	dwsStr = "fltr1&fltr2;not_a_float64"
+	expected := "invalid Weight <not_a_float64> in string: <fltr1&fltr2;not_a_float64>"
+	if _, err := NewDynamicWeightsFromString(dwsStr, ";", "&"); err == nil || err.Error() != expected {
+		t.Errorf("expecting: %+v, received: %+v", expected, err)
+	}
+}
+
+func TestDynamicWeightString(t *testing.T) {
+	dynWeigh := DynamicWeights{}
+	if rcv := dynWeigh.String(";", "&"); len(rcv) != 0 {
+		t.Errorf("Expected empty slice")
+	}
+
+	expected := "fltr1&fltr2;10"
+	dynWeigh = DynamicWeights{
+		{
+			FilterIDs: []string{"fltr1", "fltr2"},
+			Weight:    10,
+		},
+	}
+	if rcv := dynWeigh.String(";", "&"); !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+}
+
+func TestCloneDynamicWeights(t *testing.T) {
+	dynWeigh := DynamicWeights{}
+	dynWeigh = nil
+	if rcv := dynWeigh.Clone(); len(rcv) != 0 {
+		t.Errorf("Expected empty slice")
+	}
+
+	dynWeigh = DynamicWeights{
+		{
+			FilterIDs: []string{"fltr1", "fltr2"},
+			Weight:    10,
+		},
+	}
+	if rcv := dynWeigh.Clone(); !reflect.DeepEqual(dynWeigh, rcv) {
+		t.Errorf("Expected %+v, received %+v", dynWeigh, rcv)
+	}
 }

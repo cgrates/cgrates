@@ -191,6 +191,31 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 	}
 }
 
+func TestAsAccountProfileError(t *testing.T) {
+	apiAccPrf := &APIAccountProfile{
+		Tenant: "cgrates.org",
+		ID:     "test_ID1",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*APIBalance{
+			"MonetaryBalance": {
+				Weights: ";10",
+			},
+		},
+		Weights: "10",
+	}
+	expectedErr := "invalid DynamicWeight format for string <10>"
+	if _, err := apiAccPrf.AsAccountProfile(); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	apiAccPrf.Weights = ";10"
+	apiAccPrf.Balances["MonetaryBalance"].Weights = "10"
+	expectedErr = "invalid DynamicWeight format for string <10>"
+	if _, err := apiAccPrf.AsAccountProfile(); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
 func TestAPIBalanceAsBalance(t *testing.T) {
 	blc := &APIBalance{
 		ID: "VoiceBalance",

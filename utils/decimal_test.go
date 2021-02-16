@@ -72,10 +72,83 @@ func TestUnmarshalMarshalBinary(t *testing.T) {
 		t.Errorf("Expected %T, received %T", expected, dec.Big)
 	}
 
-	expected2 := []byte(`10`)
-	if rcv, err := dec.MarshalBinary(); err != nil {
+	dec = nil
+	expected = NewDecimal(10, 0)
+	if err := dec.UnmarshalBinary([]byte(`10`)); err != nil {
+		t.Error(err)
+	}
+
+	dec1 := new(Decimal)
+	expected2 := []byte(`0`)
+	if rcv, err := dec1.MarshalBinary(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected2, rcv) {
-		t.Errorf("Expected %+v, received %+v", expected2, rcv)
+		t.Errorf("Expected %+v, received %+v", string(expected2), string(rcv))
+	}
+}
+
+func TestUnmarshalJSON(t *testing.T) {
+	dec1 := new(Decimal)
+	expected := NewDecimal(0, 0)
+	if err := dec1.UnmarshalJSON([]byte(`0`)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, dec1) {
+		t.Errorf("Expected %+v, received %+v", expected, dec1)
+	}
+
+	dec1 = nil
+	if err := dec1.UnmarshalJSON([]byte(`0`)); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDecimalCalculus(t *testing.T) {
+	d1 := NewDecimal(10, 0)
+	d2 := NewDecimal(20, 0)
+	if d1.Compare(d2) != -1 {
+		t.Errorf("%+v should be lower that %+v", d1, d2)
+	}
+
+	if rcv := SubstractBig(d2.Big, d1.Big); !reflect.DeepEqual(rcv, d1.Big) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(d1.Big), ToJSON(rcv))
+	}
+
+	if rcv := MultiplyDecimal(d1, d2); !reflect.DeepEqual(NewDecimal(200, 0), rcv) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(NewDecimal(200, 0)), ToJSON(rcv))
+	}
+
+	if rcv := SubstractDecimal(d2, d1); !reflect.DeepEqual(d1, rcv) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(d1), ToJSON(rcv))
+	}
+}
+
+func TestMarshalJSON(t *testing.T) {
+	dec := new(Decimal)
+	if rcv, err := dec.MarshalJSON(); err != nil {
+		t.Error(err)
+	} else if len(rcv) != 5 {
+		t.Error("Expected empty slice", len(rcv))
+	}
+}
+
+func TestNewDecimalFromUsage(t *testing.T) {
+	dec := "12tts"
+	expectedErr := "time: unknown unit \"tts\" in duration \"12tts\""
+	if _, err := NewDecimalFromUsage(dec); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	dec = "2"
+	expected := NewDecimal(2, 0)
+	if rcv, err := NewDecimalFromUsage(dec); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+
+	dec = "invalid_decimal_format"
+	expectedErr = "strconv.ParseInt: parsing \"invalid_decimal_format\": invalid syntax"
+	if _, err := NewDecimalFromUsage(dec); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
