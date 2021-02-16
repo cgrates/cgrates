@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -88,6 +89,13 @@ func TestNewErrServerError(t *testing.T) {
 func TestNewErrServiceNotOperational(t *testing.T) {
 	if rcv := NewErrServiceNotOperational("Error"); rcv.Error() != "SERVICE_NOT_OPERATIONAL: Error" {
 		t.Errorf("Expecting: SERVICE_NOT_OPERATIONAL: Error, received: %+v", rcv)
+	}
+}
+
+func TestNewErrRates(t *testing.T) {
+	err := errors.New("ErrorRates")
+	if rcv := NewErrRateS(err); rcv.Error() != "RATES_ERROR:ErrorRates" {
+		t.Errorf("Expecting: RATES_ERROR:ErrorRates, received: %+v", rcv)
 	}
 }
 
