@@ -4589,6 +4589,47 @@ func TestAPIToRateProfile(t *testing.T) {
 	}
 }
 
+func TestAPItoRateProfileError(t *testing.T) {
+	tpRprf := &utils.TPRateProfile{
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weights:   "0",
+		Rates: map[string]*utils.TPRate{
+			"RT_WEEK": {
+				ID:      "RT_WEEK",
+				Weights: "0",
+				IntervalRates: []*utils.TPIntervalRate{
+					{
+						IntervalStart: "0s",
+						RecurrentFee:  0.06,
+						Unit:          "1ss",
+						Increment:     "1ss",
+					},
+				},
+			},
+		},
+	}
+	expectedErr := "invalid DynamicWeight format for string <0>"
+	if _, err := APItoRateProfile(tpRprf, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Error(err)
+	}
+
+	tpRprf.Weights = ";0"
+	if _, err := APItoRateProfile(tpRprf, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Error(err)
+	}
+
+	tpRprf.Rates["RT_WEEK"].Weights = ";0"
+	expectedErr = "time: unknown unit \"ss\" in duration \"1ss\""
+	if _, err := APItoRateProfile(tpRprf, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Error(err)
+	}
+
+	tpRprf.Rates["RT_WEEK"].IntervalRates[0].Unit = "1s"
+	if _, err := APItoRateProfile(tpRprf, utils.EmptyString); err == nil || err.Error() != expectedErr {
+		t.Error(err)
+	}
+}
+
 func TestAPIToRateProfileError(t *testing.T) {
 	tpRprf := &utils.TPRateProfile{
 		Tenant: "cgrates.org",
@@ -6903,19 +6944,20 @@ func TestAccountProfileMdlsCSVHeader(t *testing.T) {
 
 func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 	testStruct := AccountProfileMdls{{
-		PK:                 0,
-		Tpid:               "TEST_TPID",
-		Tenant:             "cgrates.org",
-		ID:                 "ResGroup1",
-		FilterIDs:          "FLTR_RES_GR1",
-		ActivationInterval: "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
-		Weights:            "10.0",
-		BalanceID:          "VoiceBalance",
-		BalanceFilterIDs:   "FLTR_RES_GR2",
-		BalanceWeights:     "10",
-		BalanceType:        utils.MetaVoice,
-		BalanceUnits:       3600000000000,
-		ThresholdIDs:       "WARN_RES1",
+		PK:                    0,
+		Tpid:                  "TEST_TPID",
+		Tenant:                "cgrates.org",
+		ID:                    "ResGroup1",
+		FilterIDs:             "FLTR_RES_GR1",
+		ActivationInterval:    "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
+		Weights:               "10.0",
+		BalanceID:             "VoiceBalance",
+		BalanceFilterIDs:      "FLTR_RES_GR2",
+		BalanceWeights:        "10",
+		BalanceRateProfileIDs: "rt1;rt2",
+		BalanceType:           utils.MetaVoice,
+		BalanceUnits:          3600000000000,
+		ThresholdIDs:          "WARN_RES1",
 	},
 	}
 	exp := []*utils.TPAccountProfile{
@@ -6931,11 +6973,12 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 			Weights: "10.0",
 			Balances: map[string]*utils.TPAccountBalance{
 				"VoiceBalance": {
-					ID:        "VoiceBalance",
-					FilterIDs: []string{"FLTR_RES_GR2"},
-					Weights:   "10",
-					Type:      utils.MetaVoice,
-					Units:     3600000000000,
+					ID:             "VoiceBalance",
+					FilterIDs:      []string{"FLTR_RES_GR2"},
+					Weights:        "10",
+					Type:           utils.MetaVoice,
+					RateProfileIDs: []string{"rt1", "rt2"},
+					Units:          3600000000000,
 				},
 			},
 			ThresholdIDs: []string{"WARN_RES1"},
@@ -7128,7 +7171,8 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 						RecurrentFee: utils.Float64Pointer(7),
 					},
 				},
-				AttributeIDs: []string{"20", "30"},
+				AttributeIDs:   []string{"20", "30"},
+				RateProfileIDs: []string{"rt1", "rt2"},
 				UnitFactors: []*utils.TPBalanceUnitFactor{
 					{
 						FilterIDs: []string{"*string:*~req.Account:100"},
@@ -7157,6 +7201,7 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 		BalanceCostIncrements: "*string:*~req.Account:100;1;20;5;*string:*~req.Destination:10;2;10;7",
 		BalanceAttributeIDs:   "20;30",
 		BalanceUnitFactors:    "*string:*~req.Account:100;21;*string:*~req.Destination:10;27",
+		BalanceRateProfileIDs: "rt1;rt2",
 		BalanceUnits:          3600000000000,
 		ThresholdIDs:          "WARN_RES1;WARN_RES2",
 	}}
@@ -7181,12 +7226,13 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 		Weights: ";10",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
-				ID:        "VoiceBalance",
-				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weights:   ";10",
-				Type:      utils.MetaVoice,
-				Units:     3600000000000,
-				Opts:      "key1:val1",
+				ID:             "VoiceBalance",
+				FilterIDs:      []string{"FLTR_RES_GR2"},
+				Weights:        ";10",
+				Type:           utils.MetaVoice,
+				RateProfileIDs: []string{"RTPRF1"},
+				Units:          3600000000000,
+				Opts:           "key1:val1",
 			},
 		},
 		ThresholdIDs: []string{"WARN_RES1"},
@@ -7213,8 +7259,9 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 						Weight: 10.0,
 					},
 				},
-				Type:  utils.MetaVoice,
-				Units: &utils.Decimal{decimal.New(3600000000000, 0)},
+				Type:           utils.MetaVoice,
+				Units:          &utils.Decimal{decimal.New(3600000000000, 0)},
+				RateProfileIDs: []string{"RTPRF1"},
 				Opts: map[string]interface{}{
 					"key1": "val1",
 				},
@@ -7230,6 +7277,29 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 	}
 }
 
+func TestApiToAccountProfileWeightsError(t *testing.T) {
+	testStruct := &utils.TPAccountProfile{
+		Tenant:  "cgrates.org",
+		Weights: "10",
+		Balances: map[string]*utils.TPAccountBalance{
+			"VoiceBalance": {
+				Weights: ";10",
+				Type:    utils.MetaVoice,
+			},
+		},
+	}
+	expectedErr := "invalid DynamicWeight format for string <10>"
+	if _, err := APItoAccountProfile(testStruct, ""); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expecting: %+v,\nreceived: <%+v>", expectedErr, err)
+	}
+
+	testStruct.Weights = ";10"
+	testStruct.Balances["VoiceBalance"].Weights = "10"
+	if _, err := APItoAccountProfile(testStruct, ""); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expecting: %+v,\nreceived: <%+v>", expectedErr, err)
+	}
+}
+
 func TestApitoAccountProfileCaseTimeError(t *testing.T) {
 	testStruct := &utils.TPAccountProfile{
 		Tenant:    "cgrates.org",
@@ -7242,11 +7312,12 @@ func TestApitoAccountProfileCaseTimeError(t *testing.T) {
 		Weights: ";10",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
-				ID:        "VoiceBalance",
-				FilterIDs: []string{"FLTR_RES_GR2"},
-				Weights:   "10",
-				Type:      utils.MetaVoice,
-				Units:     3600000000000,
+				ID:             "VoiceBalance",
+				FilterIDs:      []string{"FLTR_RES_GR2"},
+				RateProfileIDs: []string{"RT_GR2"},
+				Weights:        ";10",
+				Type:           utils.MetaVoice,
+				Units:          3600000000000,
 			},
 		},
 		ThresholdIDs: []string{"WARN_RES1"},
@@ -7386,7 +7457,8 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 						RecurrentFee: utils.NewDecimal(5, 0),
 					},
 				},
-				AttributeIDs: []string{"20"},
+				AttributeIDs:   []string{"20"},
+				RateProfileIDs: []string{"rtprf1"},
 				UnitFactors: []*utils.UnitFactor{
 					{
 						FilterIDs: []string{"*string:*~req.Account:100"},
@@ -7425,7 +7497,7 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 					},
 				},
 				AttributeIDs:   []string{"20"},
-				RateProfileIDs: []string{},
+				RateProfileIDs: []string{"rtprf1"},
 				UnitFactors: []*utils.TPBalanceUnitFactor{
 					{
 						FilterIDs: []string{"*string:*~req.Account:100"},
