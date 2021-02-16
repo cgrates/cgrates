@@ -157,17 +157,25 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 		t.Error(err)
 	}
 	rPrf := &engine.RateProfile{
-		Tenant:          "cgrates.org",
-		ID:              "RP1",
-		FilterIDs:       []string{"*string:~*req.Subject:1001"},
-		Weight:          0,
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MinCost:         utils.NewDecimal(1, 1),
 		MaxCost:         utils.NewDecimal(6, 1),
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -185,8 +193,12 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": {
-				ID:              "RT_WEEKEND",
-				Weight:          10,
+				ID: "RT_WEEKEND",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -198,8 +210,12 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -230,15 +246,23 @@ func testV1RatePrfRemoveRateProfile(t *testing.T) {
 
 func testV1RatePrfSetRateProfileRates(t *testing.T) {
 	rPrf := &engine.RateProfile{
-		Tenant:          "cgrates.org",
-		ID:              "RP1",
-		FilterIDs:       []string{"*wrong:inline"},
-		Weight:          0,
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*wrong:inline"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -255,12 +279,12 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 		Tenant:          "cgrates.org",
 		ID:              "RP1",
 		FilterIDs:       []string{"*wrong:inline"},
-		Weight:          0,
+		Weights:         ";0",
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
-				Weight:          0,
+				Weights:         ";0",
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*engine.APIIntervalRate{
 					{
@@ -296,7 +320,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 		Rates: map[string]*engine.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
-				Weight:          0,
+				Weights:         ";0",
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*engine.APIIntervalRate{
 					{
@@ -309,7 +333,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 			},
 			"RT_WEEKEND": {
 				ID:              "RT_WEEKEND",
-				Weight:          10,
+				Weights:         ";10",
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*engine.APIIntervalRate{
 					{
@@ -319,7 +343,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 			},
 			"RT_CHRISTMAS": {
 				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				Weights:         ";30",
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*engine.APIIntervalRate{
 					{
@@ -355,13 +379,20 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weight:    0,
-
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -373,8 +404,12 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				},
 			},
 			"RT_WEEKEND": {
-				ID:              "RT_WEEKEND",
-				Weight:          10,
+				ID: "RT_WEEKEND",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -383,8 +418,12 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -406,16 +445,15 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 
 func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	apiRPrf := &engine.APIRateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SpecialRate",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weight:    0,
-
+		Tenant:          "cgrates.org",
+		ID:              "SpecialRate",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weights:         ";0",
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
-				Weight:          0,
+				Weights:         ";0",
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*engine.APIIntervalRate{
 					{
@@ -428,7 +466,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 			},
 			"RT_WEEKEND": {
 				ID:              "RT_WEEKEND",
-				Weight:          10,
+				Weights:         ";10",
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*engine.APIIntervalRate{
 					{
@@ -438,7 +476,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 			},
 			"RT_CHRISTMAS": {
 				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				Weights:         ";30",
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*engine.APIIntervalRate{
 					{
@@ -474,13 +512,20 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "SpecialRate",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weight:    0,
-
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -492,8 +537,12 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				},
 			},
 			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -526,8 +575,11 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "SpecialRate",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weight:    0,
-
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MaxCostStrategy: "*free",
 		Rates:           map[string]*engine.Rate{},
 	}
@@ -560,13 +612,20 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 	rateProfile := &engine.RateProfile{
 		ID:        "RPWithoutTenant",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weight:    0,
-
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*engine.IntervalRate{
 					{
@@ -584,12 +643,12 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 			APIRateProfile: &engine.APIRateProfile{
 				ID:              "RPWithoutTenant",
 				FilterIDs:       []string{"*string:~*req.Subject:1001"},
-				Weight:          0,
+				Weights:         ";0",
 				MaxCostStrategy: "*free",
 				Rates: map[string]*engine.APIRate{
 					"RT_WEEK": {
 						ID:              "RT_WEEK",
-						Weight:          0,
+						Weights:         ";0",
 						ActivationTimes: "* * * * 1-5",
 						IntervalRates: []*engine.APIIntervalRate{
 							{
@@ -674,24 +733,40 @@ func testV1RatePrfGetRateProfileIDsCount(t *testing.T) {
 
 func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 	rPrf := &engine.RateProfile{
-		ID:              "SpecialRate",
-		FilterIDs:       []string{"*string:~*req.Subject:1001"},
-		Weight:          0,
+		ID:        "SpecialRate",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MaxCostStrategy: "*free",
 		Rates: map[string]*engine.Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weight:          0,
+				ID: "RT_WEEK",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 			},
 			"RT_WEEKEND": {
-				ID:              "RT_WEEKEND",
-				Weight:          10,
+				ID: "RT_WEEKEND",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 				ActivationTimes: "* * * * 0,6",
 			},
 			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weight:          30,
+				ID: "RT_CHRISTMAS",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
 				ActivationTimes: "* * 24 12 *",
 			},
 		},
@@ -701,22 +776,22 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 			APIRateProfile: &engine.APIRateProfile{
 				ID:              "SpecialRate",
 				FilterIDs:       []string{"*string:~*req.Subject:1001"},
-				Weight:          0,
+				Weights:         ";0",
 				MaxCostStrategy: "*free",
 				Rates: map[string]*engine.APIRate{
 					"RT_WEEK": {
 						ID:              "RT_WEEK",
-						Weight:          0,
+						Weights:         ";0",
 						ActivationTimes: "* * * * 1-5",
 					},
 					"RT_WEEKEND": {
 						ID:              "RT_WEEKEND",
-						Weight:          10,
+						Weights:         ";10",
 						ActivationTimes: "* * * * 0,6",
 					},
 					"RT_CHRISTMAS": {
 						ID:              "RT_CHRISTMAS",
-						Weight:          30,
+						Weights:         ";30",
 						ActivationTimes: "* * 24 12 *",
 					},
 				},
@@ -766,8 +841,12 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 		t.Error(err)
 	}
 	rate1 := &engine.Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*engine.IntervalRate{
 			{
@@ -789,11 +868,11 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 			APIRateProfile: &engine.APIRateProfile{
 				ID:        "DefaultRate",
 				FilterIDs: []string{"*string:~*req.Subject:1001"},
-				Weight:    10,
+				Weights:   ";0",
 				Rates: map[string]*engine.APIRate{
 					"RATE1": &engine.APIRate{
 						ID:              "RATE1",
-						Weight:          0,
+						Weights:         ";0",
 						ActivationTimes: "* * * * *",
 						IntervalRates: []*engine.APIIntervalRate{
 							{
@@ -877,8 +956,12 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 		},
 	}
 	rate1 := &engine.Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*engine.IntervalRate{
 			{
@@ -1003,8 +1086,12 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 		t.Error(err)
 	}
 	rate1 := &engine.Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*engine.IntervalRate{
 			{
@@ -1123,8 +1210,12 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 		},
 	}
 	rate1 := &engine.Rate{
-		ID:              "RATE1",
-		Weight:          0,
+		ID: "RATE1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*engine.IntervalRate{
 			{

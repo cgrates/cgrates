@@ -611,22 +611,22 @@ func testFullRemoteITRate(t *testing.T) {
 				Tenant:          "cgrates.org",
 				ID:              "RP1",
 				FilterIDs:       []string{"*string:~*req.Subject:1001"},
-				Weight:          0,
+				Weights:         ";0",
 				MaxCostStrategy: "*free",
 				Rates: map[string]*engine.APIRate{
 					"RT_WEEK": {
 						ID:              "RT_WEEK",
-						Weight:          0,
+						Weights:         ";0",
 						ActivationTimes: "* * * * 1-5",
 					},
 					"RT_WEEKEND": {
 						ID:              "RT_WEEKEND",
-						Weight:          10,
+						Weights:         ";10",
 						ActivationTimes: "* * * * 0,6",
 					},
 					"RT_CHRISTMAS": {
 						ID:              "RT_CHRISTMAS",
-						Weight:          30,
+						Weights:         ";30",
 						ActivationTimes: "* * 24 12 *",
 					},
 				},

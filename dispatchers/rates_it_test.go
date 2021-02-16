@@ -87,11 +87,11 @@ func testDspRPrfCostForEvent(t *testing.T) {
 		ID:        "DefaultRate",
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weight:    10,
+		Weights:   ";10",
 		Rates: map[string]*engine.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
-				Weight:          0,
+				Weights:         ";0",
 				ActivationTimes: "* * * * *",
 				IntervalRates: []*engine.APIIntervalRate{
 					{
@@ -157,13 +157,13 @@ func testDspRPrfCostForEvent(t *testing.T) {
 
 func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 	rPrf := &engine.APIRateProfile{
-		ID:     "ID_RP",
-		Tenant: "cgrates.org",
-		Weight: 10,
+		ID:      "ID_RP",
+		Tenant:  "cgrates.org",
+		Weights: ";10",
 		Rates: map[string]*engine.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
-				Weight:          0,
+				Weights:         ";0",
 				ActivationTimes: "* * * * *",
 				IntervalRates: []*engine.APIIntervalRate{
 					{
