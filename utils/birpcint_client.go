@@ -23,7 +23,6 @@ import (
 
 	"github.com/cenkalti/rpc2"
 	rpc2_jsonrpc "github.com/cenkalti/rpc2/jsonrpc"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewBiJSONrpcClient will create a bidirectional JSON client connection
@@ -38,35 +37,4 @@ func NewBiJSONrpcClient(addr string, handlers map[string]interface{}) (*rpc2.Cli
 	}
 	go clnt.Run()
 	return clnt, nil
-}
-
-// Interface which the server needs to work as BiRPCServer
-type BiRPCServer interface {
-	Call(string, interface{}, interface{}) error // So we can use it also as rpcclient.ClientConnector
-	CallBiRPC(rpcclient.ClientConnector, string, interface{}, interface{}) error
-}
-
-type BiRPCClient interface {
-	Call(string, interface{}, interface{}) error // So we can use it also as rpcclient.ClientConnector
-	ID() string
-}
-
-func NewBiRPCInternalClient(serverConn BiRPCServer) *BiRPCInternalClient {
-	return &BiRPCInternalClient{serverConn: serverConn}
-}
-
-// Need separate client from the original RpcClientConnection since diretly passing the server is not enough without passing the client's reference
-type BiRPCInternalClient struct {
-	serverConn BiRPCServer
-	clntConn   rpcclient.ClientConnector // conn to reach client and do calls over it
-}
-
-// Used in case when clientConn is not available at init time (eg: SMGAsterisk who needs the biRPCConn at initialization)
-func (clnt *BiRPCInternalClient) SetClientConn(clntConn rpcclient.ClientConnector) {
-	clnt.clntConn = clntConn
-}
-
-// Part of rpcclient.ClientConnector interface
-func (clnt *BiRPCInternalClient) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	return clnt.serverConn.CallBiRPC(clnt.clntConn, serviceMethod, args, reply)
 }

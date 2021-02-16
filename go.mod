@@ -4,7 +4,7 @@ go 1.15
 
 // replace github.com/cgrates/radigo => ../radigo
 
-// replace github.com/cgrates/rpcclient => ../rpcclient
+replace github.com/cgrates/rpcclient => ../rpcclient
 
 require (
 	cloud.google.com/go v0.75.0 // indirect
@@ -16,7 +16,7 @@ require (
 	github.com/blevesearch/bleve v1.0.14
 	github.com/cenk/hub v1.0.1 // indirect
 	github.com/cenkalti/hub v1.0.1 // indirect
-	github.com/cenkalti/rpc2 v0.0.0-20201118113917-be2cde9a479f
+	github.com/cenkalti/rpc2 v0.0.0-20210206021708-de76ddb08fa8
 	github.com/cgrates/aringo v0.0.0-20201113143849-3b299e4e636d
 	github.com/cgrates/baningo v0.0.0-20201105145354-6e3173f6a91b
 	github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70

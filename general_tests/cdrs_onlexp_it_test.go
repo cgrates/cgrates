@@ -185,7 +185,7 @@ func testCDRsOnExpAMQPQueuesCreation(t *testing.T) {
 func testCDRsOnExpInitMasterRPC(t *testing.T) {
 	var err error
 	cdrsMasterRpc, err = rpcclient.NewRPCClient(utils.TCP, cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
-		time.Second, 5*time.Second, rpcclient.JSONrpc, nil, false)
+		time.Second, 5*time.Second, rpcclient.JSONrpc, nil, false, nil)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -287,7 +287,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	cdrsSlaveRpc, err := rpcclient.NewRPCClient(utils.TCP, "127.0.0.1:12012", false, "", "", "", 1, 1,
-		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false)
+		time.Second, 2*time.Second, rpcclient.JSONrpc, nil, false, nil)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
