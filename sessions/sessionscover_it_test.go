@@ -117,11 +117,11 @@ func testSetSTerminator(t *testing.T) {
 	}
 
 	opts = engine.MapEvent{
-		utils.OptsSessionTTL:          "1s",
-		utils.OptsSessionTTLMaxDelay:  "1s",
-		utils.OptsSessionTTLLastUsed:  "2s",
-		utils.OptsSessionTTLLastUsage: "0s",
-		utils.OptsSessionTTLUsage:     "5s",
+		utils.OptsSessionsTTL:          "1s",
+		utils.OptsSessionsTTLMaxDelay:  "1s",
+		utils.OptsSessionsTTLLastUsed:  "2s",
+		utils.OptsSessionsTTLLastUsage: "0s",
+		utils.OptsSessionsTTLUsage:     "5s",
 	}
 	ss.sTerminator = &sTerminator{
 		timer: time.NewTimer(cfg.SessionSCfg().SessionTTL),
@@ -142,11 +142,11 @@ func testSetSTerminator(t *testing.T) {
 	}
 
 	ss.OptsStart = engine.MapEvent{
-		utils.OptsSessionTTL:          "1s",
-		utils.OptsSessionTTLMaxDelay:  "1s",
-		utils.OptsSessionTTLLastUsed:  "2s",
-		utils.OptsSessionTTLLastUsage: "0s",
-		utils.OptsSessionTTLUsage:     "5s",
+		utils.OptsSessionsTTL:          "1s",
+		utils.OptsSessionsTTLMaxDelay:  "1s",
+		utils.OptsSessionsTTLLastUsed:  "2s",
+		utils.OptsSessionsTTLLastUsage: "0s",
+		utils.OptsSessionsTTLUsage:     "5s",
 	}
 	ss.sTerminator = &sTerminator{
 		timer: time.NewTimer(cfg.SessionSCfg().SessionTTL),
@@ -181,17 +181,17 @@ func testSetSTerminatorError(t *testing.T) {
 
 	//Cannot set a terminate when ttl is 0
 	ss.OptsStart = engine.MapEvent{
-		utils.OptsSessionTTL: "0s",
+		utils.OptsSessionsTTL: "0s",
 	}
 	opts := engine.MapEvent{}
 	sessions.setSTerminator(ss, opts)
 
 	//Invalid format types for time duration
 	ss.OptsStart = engine.MapEvent{
-		utils.OptsSessionTTL: "invalid_time_format",
+		utils.OptsSessionsTTL: "invalid_time_format",
 	}
 	sessions.setSTerminator(ss, opts)
-	expected := "cannot extract <*sessionTTL> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
+	expected := "cannot extract <*sessionsTTL> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
 	if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
@@ -200,11 +200,11 @@ func testSetSTerminatorError(t *testing.T) {
 	log.SetOutput(buff)
 
 	ss.OptsStart = engine.MapEvent{
-		utils.OptsSessionTTL:         "1s",
-		utils.OptsSessionTTLMaxDelay: "invalid_time_format",
+		utils.OptsSessionsTTL:         "1s",
+		utils.OptsSessionsTTLMaxDelay: "invalid_time_format",
 	}
 	sessions.setSTerminator(ss, opts)
-	expected = "cannot extract <*sessionTTLMaxDelay> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
+	expected = "cannot extract <*sessionsTTLMaxDelay> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
 	if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
@@ -213,12 +213,12 @@ func testSetSTerminatorError(t *testing.T) {
 	log.SetOutput(buff)
 
 	ss.OptsStart = engine.MapEvent{
-		utils.OptsSessionTTL:         "1s",
-		utils.OptsSessionTTLMaxDelay: "2s",
-		utils.OptsSessionTTLLastUsed: "invalid_time_format",
+		utils.OptsSessionsTTL:         "1s",
+		utils.OptsSessionsTTLMaxDelay: "2s",
+		utils.OptsSessionsTTLLastUsed: "invalid_time_format",
 	}
 	sessions.setSTerminator(ss, opts)
-	expected = "cannot extract <*sessionTTLLastUsed> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
+	expected = "cannot extract <*sessionsTTLLastUsed> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
 	if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
@@ -227,13 +227,13 @@ func testSetSTerminatorError(t *testing.T) {
 	log.SetOutput(buff)
 
 	ss.OptsStart = engine.MapEvent{
-		utils.OptsSessionTTL:          "1s",
-		utils.OptsSessionTTLMaxDelay:  "2s",
-		utils.OptsSessionTTLLastUsed:  "1s",
-		utils.OptsSessionTTLLastUsage: "invalid_time_format",
+		utils.OptsSessionsTTL:          "1s",
+		utils.OptsSessionsTTLMaxDelay:  "2s",
+		utils.OptsSessionsTTLLastUsed:  "1s",
+		utils.OptsSessionsTTLLastUsage: "invalid_time_format",
 	}
 	sessions.setSTerminator(ss, opts)
-	expected = "cannot extract <*sessionTTLLastUsage> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
+	expected = "cannot extract <*sessionsTTLLastUsage> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
 	if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
@@ -244,12 +244,12 @@ func testSetSTerminatorError(t *testing.T) {
 	cfg.SessionSCfg().SessionTTLMaxDelay = utils.DurationPointer(time.Second)
 	sessions = NewSessionS(cfg, dm, nil)
 	ss.OptsStart = engine.MapEvent{
-		utils.OptsSessionTTLLastUsed:  "1s",
-		utils.OptsSessionTTLLastUsage: "5s",
-		utils.OptsSessionTTLUsage:     "invalid_time_format",
+		utils.OptsSessionsTTLLastUsed:  "1s",
+		utils.OptsSessionsTTLLastUsage: "5s",
+		utils.OptsSessionsTTLUsage:     "invalid_time_format",
 	}
 	sessions.setSTerminator(ss, opts)
-	expected = "cannot extract <*sessionTTLUsage> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
+	expected = "cannot extract <*sessionsTTLUsage> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
 	if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
@@ -266,8 +266,8 @@ func testSetSTerminatorAutomaticTermination(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil)
 
 	opts := engine.MapEvent{
-		utils.OptsSessionTTL:          "1s",
-		utils.OptsSessionTTLLastUsage: "0s",
+		utils.OptsSessionsTTL:          "1s",
+		utils.OptsSessionsTTLLastUsage: "0s",
 	}
 
 	sessions.setSTerminator(ss, opts)
@@ -287,7 +287,7 @@ func testSetSTerminatorManualTermination(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil)
 
 	opts := engine.MapEvent{
-		utils.OptsSessionTTL: "1s",
+		utils.OptsSessionsTTL: "1s",
 	}
 
 	sessions.setSTerminator(ss, opts)
