@@ -186,10 +186,14 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	}
 	rPrf := &engine.RateProfile{
-		Tenant:          "cgrates.org",
-		ID:              "RP1",
-		FilterIDs:       []string{"*string:~*req.Subject:1001"},
-		Weight:          0,
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MinCost:         utils.NewDecimal(1, 1),
 		MaxCost:         utils.NewDecimal(6, 1),
 		MaxCostStrategy: "*free",
@@ -197,8 +201,11 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},
-				Weight:    0,
-
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				IntervalRates: []*engine.IntervalRate{
 					{
 						RecurrentFee: utils.NewDecimal(12, 2),
@@ -211,7 +218,11 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 			"SECOND_GI": {
 				ID:        "SECOND_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:1m"},
-				Weight:    10,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
 				IntervalRates: []*engine.IntervalRate{
 					{
 						RecurrentFee: utils.NewDecimal(6, 2),

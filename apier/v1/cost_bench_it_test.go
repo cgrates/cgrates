@@ -100,11 +100,11 @@ func testCostBenchSetRateProfile(b *testing.B) {
 			APIRateProfile: &engine.APIRateProfile{
 				ID:        "DefaultRate",
 				FilterIDs: []string{"*string:~*req.Subject:1001"},
-				Weight:    10,
+				Weights:   ";10",
 				Rates: map[string]*engine.APIRate{
 					"RATE1": &engine.APIRate{
 						ID:              "RATE1",
-						Weight:          0,
+						Weights:         ";0",
 						ActivationTimes: "* * * * *",
 						IntervalRates: []*engine.APIIntervalRate{
 							{
@@ -137,7 +137,7 @@ func testCostBenchSetRateProfile(b *testing.B) {
 func testCostBenchSetRateProfile2(b *testing.B) {
 	rate1 := &engine.APIRate{
 		ID:              "RATE1",
-		Weight:          0,
+		Weights:         ";0",
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*engine.APIIntervalRate{
 			{
@@ -156,7 +156,7 @@ func testCostBenchSetRateProfile2(b *testing.B) {
 	}
 	rtChristmas := &engine.APIRate{
 		ID:              "RT_CHRISTMAS",
-		Weight:          30,
+		Weights:         ";30",
 		ActivationTimes: "* * 24 12 *",
 		IntervalRates: []*engine.APIIntervalRate{{
 			IntervalStart: "0",
@@ -170,7 +170,7 @@ func testCostBenchSetRateProfile2(b *testing.B) {
 			APIRateProfile: &engine.APIRateProfile{
 				ID:        "RateChristmas",
 				FilterIDs: []string{"*string:~*req.Subject:1010"},
-				Weight:    50,
+				Weights:   ";50",
 				Rates: map[string]*engine.APIRate{
 					"RATE1":          rate1,
 					"RATE_CHRISTMAS": rtChristmas,

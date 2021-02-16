@@ -1472,23 +1472,35 @@ func testDspRplRateProfile(t *testing.T) {
 	var replyStr string
 	rPrf := &engine.RateProfileWithOpts{
 		RateProfile: &engine.RateProfile{
-			Tenant:          "cgrates.org",
-			ID:              "RP1",
-			FilterIDs:       []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-			Weight:          0,
+			Tenant:    "cgrates.org",
+			ID:        "RP1",
+			FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
 			MaxCostStrategy: "*free",
 			Rates: map[string]*engine.Rate{
 				"FIRST_GI": {
 					ID:        "FIRST_GI",
 					FilterIDs: []string{"*gi:~*req.Usage:0"},
-					Weight:    0,
-					Blocker:   false,
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					Blocker: false,
 				},
 				"SECOND_GI": {
 					ID:        "SECOND_GI",
 					FilterIDs: []string{"*gi:~*req.Usage:1m"},
-					Weight:    10,
-					Blocker:   false,
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					Blocker: false,
 				},
 			},
 		},

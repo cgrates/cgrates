@@ -192,8 +192,12 @@ func testCacheSReplicateProcessRateProfile(t *testing.T) {
 		t.Error(err)
 	}
 	rate1 := &engine.Rate{
-		ID:              "RT_ALWAYS",
-		Weight:          0,
+		ID: "RT_ALWAYS",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		ActivationTimes: "* * * * *",
 		IntervalRates: []*engine.IntervalRate{
 			{

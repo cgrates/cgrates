@@ -121,15 +121,15 @@ func testTPRatePrfGetTPRatePrfBeforeSet(t *testing.T) {
 
 func testTPRatePrfSetTPRatePrf(t *testing.T) {
 	tpRatePrf = &utils.TPRateProfile{
-		TPid:   "TP1",
-		Tenant: "cgrates.org",
-		ID:     "RT_SPECIAL_1002",
-		Weight: 10,
+		TPid:    "TP1",
+		Tenant:  "cgrates.org",
+		ID:      "RT_SPECIAL_1002",
+		Weights: ";10",
 		Rates: map[string]*utils.TPRate{
 			"RT_ALWAYS": {
 				ID:        "RT_ALWAYS",
 				FilterIDs: []string{"* * * * *"},
-				Weight:    0,
+				Weights:   ";0",
 				Blocker:   false,
 				IntervalRates: []*utils.TPIntervalRate{
 					{
@@ -178,7 +178,7 @@ func testTPRatePrfUpdateTPRatePrf(t *testing.T) {
 		"RT_ALWAYS": {
 			ID:        "RT_ALWAYS",
 			FilterIDs: []string{"* * * * *"},
-			Weight:    0,
+			Weights:   ";0",
 			Blocker:   false,
 			IntervalRates: []*utils.TPIntervalRate{
 				{
@@ -201,10 +201,10 @@ func testTPRatePrfUpdateTPRatePrf(t *testing.T) {
 func testTPRatePrfGetTPRatePrfAfterUpdate(t *testing.T) {
 	var reply *utils.TPRateProfile
 	revTPRatePrf := &utils.TPRateProfile{
-		TPid:   "TP1",
-		Tenant: "cgrates.org",
-		ID:     "RT_SPECIAL_1002",
-		Weight: 10,
+		TPid:    "TP1",
+		Tenant:  "cgrates.org",
+		ID:      "RT_SPECIAL_1002",
+		Weights: ";10",
 	}
 
 	if err := tpRatePrfRPC.Call(utils.APIerSv1GetTPRateProfile,
