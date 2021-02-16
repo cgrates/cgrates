@@ -29,6 +29,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type rpWithWeight struct {
+	*engine.RateProfile
+	weight float64
+}
+
 func newRatesWithWinner(rIt *rateWithTimes) *ratesWithWinner {
 	return &ratesWithWinner{
 		rts: map[string]*rateWithTimes{
@@ -53,7 +58,7 @@ type ratesWithWinner struct {
 //add will add the rate to the rates
 func (rs *ratesWithWinner) add(rWt *rateWithTimes) {
 	rs.rts[rWt.id()] = rWt
-	if rs.wnr == nil { //|| rs.wnr.rt.Weight < rWt.rt.Weight {
+	if rs.wnr == nil || rs.wnr.weight < rWt.weight {
 		rs.wnr = rWt
 	}
 }
@@ -75,6 +80,7 @@ type rateWithTimes struct {
 	rt  *engine.Rate
 	aTime,
 	iTime time.Time
+	weight float64
 }
 
 // id is used to provide an unique identifier for a rateWithTimes
@@ -92,7 +98,7 @@ type orderedRate struct {
 
 // orderRatesOnIntervals will order the rates based on ActivationInterval and intervalStart of each Rate
 // there can be only one winning Rate for each interval, prioritized by the Weight
-func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Duration,
+func orderRatesOnIntervals(aRts []*engine.Rate, wghts []float64, sTime time.Time, usage time.Duration,
 	isDuration bool, verbosity int) (ordRts []*orderedRate, err error) {
 
 	endTime := sTime.Add(usage)
@@ -100,16 +106,17 @@ func orderRatesOnIntervals(aRts []*engine.Rate, sTime time.Time, usage time.Dura
 	// index the received rates based on unique times they run
 	rtIdx := make(map[time.Time]*ratesWithWinner) // map[ActivationTimes]*ratesWithWinner
 	allRates := make(map[string]*rateWithTimes)
-	for _, rt := range aRts {
+	for i, rt := range aRts {
 		var rTimes [][]time.Time
 		if rTimes, err = rt.RunTimes(sTime, endTime, verbosity); err != nil {
 			return
 		}
 		for _, rTimeSet := range rTimes {
 			rIt := &rateWithTimes{
-				rt:    rt,
-				aTime: rTimeSet[0],
-				iTime: rTimeSet[1],
+				rt:     rt,
+				aTime:  rTimeSet[0],
+				iTime:  rTimeSet[1],
+				weight: wghts[i], // weights are in order of aRts
 			}
 			allRates[rIt.id()] = rIt
 			if _, hasKey := rtIdx[rTimeSet[0]]; !hasKey {

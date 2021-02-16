@@ -91,6 +91,7 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *
 		}
 		rPfIDs = rPfIDMp.AsSlice()
 	}
+	var rpWw *rpWithWeight
 	for _, rPfID := range rPfIDs {
 		var rPf *engine.RateProfile
 		if rPf, err = rS.dm.GetRateProfile(tnt, rPfID,
@@ -111,15 +112,20 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *
 		} else if !pass {
 			continue
 		}
-		if rtPfl == nil { //|| rtPfl.Weight < rPf.Weight {
-			rtPfl = rPf
+		var rPfWeight float64
+		if rPfWeight, err = engine.WeightFromDynamics(rPf.Weights,
+			rS.filterS, tnt, evNm); err != nil {
+			return
+		}
+		if rpWw == nil || rpWw.weight < rPfWeight {
+			rpWw = &rpWithWeight{rPf, rPfWeight}
 		}
 	}
 	if rtPfl == nil {
 		return nil, utils.ErrNotFound
 	}
 
-	return
+	return rpWw.RateProfile, nil
 }
 
 // rateProfileCostForEvent computes the rateProfileCost for an event based on a preselected rate profile
@@ -153,6 +159,14 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 		}
 		aRates = append(aRates, rt)
 	}
+	// populate weights to be used on ordering
+	wghts := make([]float64, len(aRates))
+	for i, aRt := range aRates {
+		if wghts[i], err = engine.WeightFromDynamics(aRt.Weights,
+			rS.filterS, args.CGREvent.Tenant, evNm); err != nil {
+			return
+		}
+	}
 	var sTime time.Time
 	if sTime, err = args.StartTime(rS.cfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
@@ -162,7 +176,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 		return
 	}
 	var ordRts []*orderedRate
-	if ordRts, err = orderRatesOnIntervals(aRates, sTime, usage, true, verbosity); err != nil {
+	if ordRts, err = orderRatesOnIntervals(aRates, wghts, sTime, usage, true, verbosity); err != nil {
 		return
 	}
 	rpCost = &engine.RateProfileCost{

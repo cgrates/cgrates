@@ -288,7 +288,7 @@ type BalanceWithWeight struct {
 	Weight float64
 }
 
-// Balances is a sortable list of Balances
+// BalancesWithWeight is a sortable list of BalanceWithWeight
 type BalancesWithWeight []*BalanceWithWeight
 
 // Sort is part of sort interface, sort based on Weight
