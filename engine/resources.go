@@ -314,7 +314,7 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 
 // NewResourceService  returns a new ResourceService
 func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
-	filterS *FilterS, connMgr *ConnManager) (*ResourceService, error) {
+	filterS *FilterS, connMgr *ConnManager) *ResourceService {
 	return &ResourceService{dm: dm,
 		storedResources: make(utils.StringSet),
 		cgrcfg:          cgrcfg,
@@ -322,7 +322,7 @@ func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
 		loopStoped:      make(chan struct{}),
 		stopBackup:      make(chan struct{}),
 		connMgr:         connMgr,
-	}, nil
+	}
 
 }
 
