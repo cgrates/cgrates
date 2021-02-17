@@ -529,6 +529,8 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions):        internalActionSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts):       internalAccountSChan,
+
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
 	srvDep := map[string]*sync.WaitGroup{
 		utils.AnalyzerS:       new(sync.WaitGroup),

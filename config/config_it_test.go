@@ -33,6 +33,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -613,7 +614,7 @@ func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 	}
 	expAttr := &FsAgentCfg{
 		Enabled:           true,
-		SessionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		SessionSConns:     []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)},
 		SubscribePark:     true,
 		ExtraFields:       RSRParsers{},
 		MaxWaitConnection: 2 * time.Second,

@@ -14,9 +14,7 @@ require (
 	github.com/antchfx/xpath v1.1.11 // indirect
 	github.com/aws/aws-sdk-go v1.36.24
 	github.com/blevesearch/bleve v1.0.14
-	github.com/cenk/hub v1.0.1 // indirect
-	github.com/cenkalti/hub v1.0.1 // indirect
-	github.com/cenkalti/rpc2 v0.0.0-20210206021708-de76ddb08fa8
+	github.com/cenkalti/rpc2 v0.0.0-20210220005819-4a29bc83afe1
 	github.com/cgrates/aringo v0.0.0-20201113143849-3b299e4e636d
 	github.com/cgrates/baningo v0.0.0-20201105145354-6e3173f6a91b
 	github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70
@@ -24,7 +22,7 @@ require (
 	github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
 	github.com/cgrates/radigo v0.0.0-20201113143731-162035428d72
-	github.com/cgrates/rpcclient v0.0.0-20201120095908-1c0f9f4bb06e
+	github.com/cgrates/rpcclient v0.0.0-00010101000000-000000000000
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60
 	github.com/creack/pty v1.1.11

@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
@@ -83,7 +84,7 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 func TestKamAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"kamailio_agent": {
-			"sessions_conns": ["*conn1","*conn2"],
+			"sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 			"create_cdr": true,
 			"timezone": "UTC",
 			"evapi_conns":[
@@ -93,7 +94,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 	}`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:       false,
-		utils.SessionSConnsCfg: []string{"*conn1", "*conn2"},
+		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.CreateCdrCfg:     true,
 		utils.TimezoneCfg:      "UTC",
 		utils.EvapiConnsCfg: []map[string]interface{}{
@@ -113,7 +114,7 @@ func TestKamAgentCfgAsMapInterface1(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:       false,
-		utils.SessionSConnsCfg: []string{"*internal"},
+		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal},
 		utils.CreateCdrCfg:     false,
 		utils.TimezoneCfg:      "",
 		utils.EvapiConnsCfg: []map[string]interface{}{

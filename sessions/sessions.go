@@ -126,8 +126,8 @@ func (sS *SessionS) Shutdown() (err error) {
 
 // OnBiJSONConnect is called by rpc2.Client on each new connection
 func (sS *SessionS) OnBiJSONConnect(c *rpc2.Client) {
-	sS.biJMux.Lock()
 	nodeID := utils.UUIDSha1Prefix() // connection identifier, should be later updated as login procedure
+	sS.biJMux.Lock()
 	sS.biJClnts[c] = nodeID
 	sS.biJIDs[nodeID] = &biJClient{
 		conn:  c,
@@ -146,9 +146,11 @@ func (sS *SessionS) OnBiJSONDisconnect(c *rpc2.Client) {
 }
 
 // RegisterIntBiJConn is called on internal BiJ connection towards SessionS
-func (sS *SessionS) RegisterIntBiJConn(c rpcclient.ClientConnector) {
+func (sS *SessionS) RegisterIntBiJConn(c rpcclient.ClientConnector, nodeID string) {
+	if nodeID == utils.EmptyString {
+		nodeID = sS.cgrCfg.GeneralCfg().NodeID
+	}
 	sS.biJMux.Lock()
-	nodeID := sS.cgrCfg.GeneralCfg().NodeID
 	sS.biJClnts[c] = nodeID
 	sS.biJIDs[nodeID] = &biJClient{
 		conn:  c,
@@ -1685,7 +1687,7 @@ func (sS *SessionS) CallBiRPC(clnt rpcclient.ClientConnector,
 	var clntVal reflect.Value
 	if clnt == nil {
 		clntVal = reflect.New(
-			reflect.TypeOf(new(utils.BiRPCInternalClient))).Elem() // Kinda cheat since we make up a type here
+			reflect.TypeOf(new(rpcclient.BiRPCInternalServer))).Elem() // Kinda cheat since we make up a type here
 	} else {
 		clntVal = reflect.ValueOf(clnt)
 	}
@@ -3629,8 +3631,8 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.ClientConnector,
 
 // BiRPCv1RegisterInternalBiJSONConn will register the client for a bidirectional comunication
 func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.ClientConnector,
-	ign string, reply *string) error {
-	sS.RegisterIntBiJConn(clnt)
+	connID string, reply *string) error {
+	sS.RegisterIntBiJConn(clnt, connID)
 	*reply = utils.OK
 	return nil
 }
@@ -4059,4 +4061,40 @@ func (sS *SessionS) BiRPCv1STIRIdentity(clnt rpcclient.ClientConnector,
 		return utils.NewSTIRError(err.Error())
 	}
 	return
+}
+
+// Handlers bidirectional methods following
+func (sS *SessionS) Handlers() map[string]interface{} {
+	return map[string]interface{}{
+		utils.SessionSv1GetActiveSessions:       sS.BiRPCv1GetActiveSessions,
+		utils.SessionSv1GetActiveSessionsCount:  sS.BiRPCv1GetActiveSessionsCount,
+		utils.SessionSv1GetPassiveSessions:      sS.BiRPCv1GetPassiveSessions,
+		utils.SessionSv1GetPassiveSessionsCount: sS.BiRPCv1GetPassiveSessionsCount,
+
+		utils.SessionSv1AuthorizeEvent:            sS.BiRPCv1AuthorizeEvent,
+		utils.SessionSv1AuthorizeEventWithDigest:  sS.BiRPCv1AuthorizeEventWithDigest,
+		utils.SessionSv1InitiateSession:           sS.BiRPCv1InitiateSession,
+		utils.SessionSv1InitiateSessionWithDigest: sS.BiRPCv1InitiateSessionWithDigest,
+		utils.SessionSv1UpdateSession:             sS.BiRPCv1UpdateSession,
+		utils.SessionSv1SyncSessions:              sS.BiRPCv1SyncSessions,
+		utils.SessionSv1TerminateSession:          sS.BiRPCv1TerminateSession,
+		utils.SessionSv1ProcessCDR:                sS.BiRPCv1ProcessCDR,
+		utils.SessionSv1ProcessMessage:            sS.BiRPCv1ProcessMessage,
+		utils.SessionSv1ProcessEvent:              sS.BiRPCv1ProcessEvent,
+		utils.SessionSv1GetCost:                   sS.BiRPCv1GetCost,
+
+		utils.SessionSv1ForceDisconnect:            sS.BiRPCv1ForceDisconnect,
+		utils.SessionSv1RegisterInternalBiJSONConn: sS.BiRPCv1RegisterInternalBiJSONConn,
+
+		utils.SessionSv1ReplicateSessions:  sS.BiRPCv1ReplicateSessions,
+		utils.SessionSv1SetPassiveSession:  sS.BiRPCv1SetPassiveSession,
+		utils.SessionSv1ActivateSessions:   sS.BiRPCv1ActivateSessions,
+		utils.SessionSv1DeactivateSessions: sS.BiRPCv1DeactivateSessions,
+
+		utils.SessionSv1ReAuthorize:    sS.BiRPCv1ReAuthorize,
+		utils.SessionSv1DisconnectPeer: sS.BiRPCv1DisconnectPeer,
+
+		utils.SessionSv1STIRAuthenticate: sS.BiRPCv1STIRAuthenticate,
+		utils.SessionSv1STIRIdentity:     sS.BiRPCv1STIRIdentity,
+	}
 }

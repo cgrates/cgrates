@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
+	"github.com/cgrates/rpcclient"
 )
 
 func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
@@ -478,4 +479,47 @@ func (fsa *FSsessions) V1WarnDisconnect(args map[string]interface{}, reply *stri
 	}
 	*reply = utils.OK
 	return
+}
+
+// CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.ClientConnector interface
+func (fsa *FSsessions) CallBiRPC(clnt rpcclient.ClientConnector, serviceMethod string, args interface{}, reply interface{}) error {
+	return utils.BiRPCCall(fsa, clnt, serviceMethod, args, reply)
+}
+
+// BiRPCv1DisconnectSession is internal method to disconnect session in asterisk
+func (fsa *FSsessions) BiRPCv1DisconnectSession(clnt rpcclient.ClientConnector, args utils.AttrDisconnectSession, reply *string) error {
+	return fsa.V1DisconnectSession(args, reply)
+}
+
+// BiRPCv1GetActiveSessionIDs is internal method to  get all active sessions in asterisk
+func (fsa *FSsessions) BiRPCv1GetActiveSessionIDs(clnt rpcclient.ClientConnector, ignParam string,
+	sessionIDs *[]*sessions.SessionID) error {
+	return fsa.V1GetActiveSessionIDs(ignParam, sessionIDs)
+
+}
+
+// BiRPCv1ReAuthorize is used to implement the sessions.BiRPClient interface
+func (fsa *FSsessions) BiRPCv1ReAuthorize(clnt rpcclient.ClientConnector, originID string, reply *string) (err error) {
+	return fsa.V1ReAuthorize(originID, reply)
+}
+
+// BiRPCv1DisconnectPeer is used to implement the sessions.BiRPClient interface
+func (fsa *FSsessions) BiRPCv1DisconnectPeer(clnt rpcclient.ClientConnector, args *utils.DPRArgs, reply *string) (err error) {
+	return fsa.V1DisconnectPeer(args, reply)
+}
+
+// BiRPCv1WarnDisconnect is used to implement the sessions.BiRPClient interface
+func (fsa *FSsessions) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]interface{}, reply *string) (err error) {
+	return fsa.V1WarnDisconnect(args, reply)
+}
+
+// Handlers is used to implement the rpcclient.BiRPCConector interface
+func (fsa *FSsessions) Handlers() map[string]interface{} {
+	return map[string]interface{}{
+		utils.SessionSv1DisconnectSession:   fsa.BiRPCv1DisconnectSession,
+		utils.SessionSv1GetActiveSessionIDs: fsa.BiRPCv1GetActiveSessionIDs,
+		utils.SessionSv1ReAuthorize:         fsa.BiRPCv1ReAuthorize,
+		utils.SessionSv1DisconnectPeer:      fsa.BiRPCv1DisconnectPeer,
+		utils.SessionSv1WarnDisconnect:      fsa.BiRPCv1WarnDisconnect,
+	}
 }

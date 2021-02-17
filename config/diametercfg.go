@@ -20,6 +20,7 @@ package config
 
 import (
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // DiameterAgentCfg the config section that describes the Diameter Agent
@@ -62,8 +63,9 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 		for idx, attrConn := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			da.SessionSConns[idx] = attrConn
-			if attrConn == utils.MetaInternal {
-				da.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			if attrConn == utils.MetaInternal ||
+				attrConn == rpcclient.BiRPCInternal {
+				da.SessionSConns[idx] = utils.ConcatenatedKey(attrConn, utils.MetaSessionS)
 			}
 		}
 	}
@@ -146,6 +148,8 @@ func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 				sessionSConns[i] = utils.MetaInternal
+			} else if item == utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS) {
+				sessionSConns[i] = rpcclient.BiRPCInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns

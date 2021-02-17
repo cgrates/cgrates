@@ -418,7 +418,7 @@ func testForceSTerminatorClientCall(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): nil,
 	})
 	sessions := NewSessionS(cfg, dm, connMgr)
-	sessions.RegisterIntBiJConn(sTestMock)
+	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
 
 	ss := &Session{
 		CGRID:        "CGRID",
@@ -755,7 +755,7 @@ func testDebitLoopSessionErrorDebiting(t *testing.T) {
 	sessions = NewSessionS(cfg, dm, connMgr)
 
 	sTestMock := &testMockClientConnDiscSess{}
-	sessions.RegisterIntBiJConn(sTestMock)
+	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
 
 	if _, err = sessions.debitLoopSession(ss, 0, time.Hour); err != nil {
 		t.Error(err)
@@ -1025,7 +1025,7 @@ func testDebitLoopSessionDisconnectSession(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, connMgr)
 
 	sTestMock := &testMockClientConnDiscSess{}
-	sessions.RegisterIntBiJConn(sTestMock)
+	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
 
 	ss := &Session{
 		CGRID:         "CGRID",
@@ -1184,10 +1184,10 @@ func testRefundSession(t *testing.T) {
 			},
 		},
 		Rating: map[string]*engine.RatingUnit{
-			"21a5ab9": &engine.RatingUnit{},
+			"21a5ab9": {},
 		},
 		Accounting: map[string]*engine.BalanceCharge{
-			"44d6c02": &engine.BalanceCharge{},
+			"44d6c02": {},
 		},
 	}
 
@@ -1313,7 +1313,7 @@ func testDisconnectSession(t *testing.T) {
 	}
 
 	sTestMock := &testMockClientConn{}
-	sessions.RegisterIntBiJConn(sTestMock)
+	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
 	sessions.biJIDs["test"] = &biJClient{
 		conn: sTestMock,
 	}
@@ -1323,7 +1323,7 @@ func testDisconnectSession(t *testing.T) {
 	}
 
 	sTestMock1 := &mockConnWarnDisconnect1{}
-	sessions.RegisterIntBiJConn(sTestMock1)
+	sessions.RegisterIntBiJConn(sTestMock1, utils.EmptyString)
 	sessions.biJIDs["test"] = &biJClient{
 		conn: sTestMock1,
 	}
@@ -1449,7 +1449,7 @@ func testNewSession(t *testing.T) {
 	}
 
 	sessions.aSessions = map[string]*Session{
-		"da39a3ee5e6b4b0d3255bfef95601890afd80709": &Session{},
+		"da39a3ee5e6b4b0d3255bfef95601890afd80709": {},
 	}
 	//sessions already exists
 	if _, err := sessions.newSession(cgrEv, "resourceID", "clientConnID",
@@ -1722,7 +1722,7 @@ func testSyncSessions(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, connMgr)
 
 	sTestMock1 := &testMockClientSyncSessions{}
-	sessions.RegisterIntBiJConn(sTestMock1)
+	sessions.RegisterIntBiJConn(sTestMock1, utils.EmptyString)
 
 	sessions.aSessions = map[string]*Session{
 		"SESS1": {

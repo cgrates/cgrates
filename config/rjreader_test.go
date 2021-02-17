@@ -485,7 +485,7 @@ func TestGetJSONOffsetLineFuncError(t *testing.T) {
 	rjr.indx = 7
 	var eLine, eCharacter int64 = 1, 0
 	if line, character := rjr.getJSONOffsetLine(int64(3)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -494,7 +494,7 @@ func TestGetJSONOffsetLineReadStringEOF(t *testing.T) {
 	rjr.indx = 3
 	var eLine, eCharacter int64 = 1, 0
 	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -503,7 +503,7 @@ func TestGetJSONOffsetLineReadString1(t *testing.T) {
 	rjr.indx = 0
 	var eLine, eCharacter int64 = 1, 0
 	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -514,7 +514,7 @@ func TestGetJSONOffsetLineReadStringNilError(t *testing.T) {
 	rjr.indx = 0
 	var eLine, eCharacter int64 = 1, 0
 	if line, character := rjr.getJSONOffsetLine(int64(3)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -523,7 +523,7 @@ func TestGetJSONOffsetLineReadLineCommentEOFInvalid(t *testing.T) {
 	rjr.indx = 6
 	var eLine, eCharacter int64 = 1, 0
 	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -532,7 +532,7 @@ func TestGetJSONOffsetLineReadLineCommentEOF1(t *testing.T) {
 	rjr.indx = 6
 	var eLine, eCharacter int64 = 1, 0
 	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -541,7 +541,7 @@ func TestGetJSONOffsetLineReadCommentEOF(t *testing.T) {
 	rjr.indx = 5
 	var eLine, eCharacter int64 = 1, 0
 	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -552,7 +552,7 @@ func TestGetJSONOffsetLineReadCommentInvalidEnding(t *testing.T) {
 	rjr.indx = 5
 	var eLine, eCharacter int64 = 3, 2
 	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -562,7 +562,7 @@ func TestGetJSONOffsetLineReadComment(t *testing.T) {
 	rjr.indx = 0
 	var eLine, eCharacter int64 = 3, 2
 	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -571,7 +571,7 @@ func TestGetJSONOffsetLineInvalidComment(t *testing.T) {
 	rjr.indx = 0
 	var eLine, eCharacter int64 = 1, 5
 	if line, character := rjr.getJSONOffsetLine(int64(5)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 }
 
@@ -580,7 +580,7 @@ func TestGetJSONOffsetLineReadCommentOffset(t *testing.T) {
 	rjr.indx = 0
 	var eLine, eCharacter int64 = 1, 5
 	if line, character := rjr.getJSONOffsetLine(int64(3)); line != eLine && character != eCharacter {
-		fmt.Printf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
+		t.Errorf("Expected %+v and %+v, received %+v and %+v", eLine, eCharacter, line, character)
 	}
 
 }
