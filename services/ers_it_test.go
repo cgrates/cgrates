@@ -19,22 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"os"
-	"path"
-	"sync"
-	"testing"
-	"time"
-
-	"github.com/cgrates/rpcclient"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 func TestEventReaderSReload(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
@@ -86,6 +71,7 @@ func TestEventReaderSReload(t *testing.T) {
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
+	time.Sleep(10 * time.Millisecond)
 	err = attrS.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
@@ -142,13 +128,12 @@ func TestEventReaderSReload2(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-
+	time.Sleep(10 * time.Millisecond)
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
 			Type: "bad_type",
 		},
 	}
-
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	err := attrS.Reload()
 	if err != nil {
@@ -158,88 +143,6 @@ func TestEventReaderSReload2(t *testing.T) {
 	cfg.GetReloadChan(config.ERsJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
-}
-
-/*
-func TestDNSAgentReload3(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().Enabled = true
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
-
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-	cacheSChan <- chS
-
-	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, nil, anz, srvDep)
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_mongo"),
-		Section: config.DNSAgentJson,
-	}, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !srv.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-
-	err := srv.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-
-	castSrv, canCastSrv := srv.(*DNSAgent)
-	if !canCastSrv {
-		t.Fatalf("cannot cast")
-	}
-
-	castSrv.oldListen = "test_string"
-
-	err = srv.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	err = db.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-
-	err = srv.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	time.Sleep(10 * time.Millisecond)
-	cfg.DNSAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
