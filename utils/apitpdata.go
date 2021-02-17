@@ -1506,10 +1506,19 @@ func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error)
 
 // usage returns the event time used to check active rate profiles
 func (args *ArgsCostForEvent) Usage() (usage time.Duration, err error) {
+	// first search for the usage in opts
 	if uIface, has := args.Opts[OptsRatesUsage]; has {
 		return IfaceAsDuration(uIface)
 	}
-	return time.Duration(time.Minute), nil
+	// if the usage is not present in opts search in event
+	if usage, err = args.FieldAsDuration(Usage); err != nil {
+		if err != ErrNotFound {
+			return
+		}
+		// if the usage is not found in the event populate with default value and overwrite the NOT_FOUND error with nil
+		usage, err = time.Duration(time.Minute), nil
+	}
+	return
 }
 
 type TPActionProfile struct {
