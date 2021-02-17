@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
@@ -530,7 +531,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
-		utils.SessionSConnsCfg:       []string{"*internal"},
+		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal},
 		utils.SubscribeParkCfg:       true,
 		utils.CreateCdrCfg:           false,
 		utils.ExtraFieldsCfg:         "",
@@ -553,7 +554,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
 	"freeswitch_agent": {
           "enabled": true,						
-          "sessions_conns": ["*conn1","*conn2"],
+          "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 	      "subscribe_park": false,					
 	      "create_cdr": true,
 	      "max_wait_connection": "7s",			
@@ -563,7 +564,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
-		utils.SessionSConnsCfg:       []string{"*conn1", "*conn2"},
+		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.SubscribeParkCfg:       false,
 		utils.CreateCdrCfg:           true,
 		utils.ExtraFieldsCfg:         "",
@@ -591,7 +592,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
-		utils.SessionSConnsCfg:       []string{"*internal"},
+		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal},
 		utils.SubscribeParkCfg:       true,
 		utils.CreateCdrCfg:           false,
 		utils.ExtraFieldsCfg:         "randomFields",
@@ -709,7 +710,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:       false,
-		utils.SessionSConnsCfg: []string{"*internal"},
+		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal},
 		utils.CreateCdrCfg:     false,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5},
@@ -726,7 +727,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"asterisk_agent": {
 		"enabled": true,
-		"sessions_conns": ["*conn1","*conn2"],
+		"sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 		"create_cdr": true,
 		"asterisk_conns":[
 			{"address": "127.0.0.1:8089","connect_attempts": 5,"reconnects": 8}
@@ -735,7 +736,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:       true,
-		utils.SessionSConnsCfg: []string{"*conn1", "*conn2"},
+		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.CreateCdrCfg:     true,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8},

@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // NewDfltFsConnConfig returns the first cached default value for a FreeSWITCHAgent connection
@@ -572,8 +573,9 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		for idx, connID := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			fscfg.SessionSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				fscfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			if connID == utils.MetaInternal ||
+				connID == rpcclient.BiRPCInternal {
+				fscfg.SessionSConns[idx] = utils.ConcatenatedKey(connID, utils.MetaSessionS)
 			}
 		}
 	}
@@ -629,6 +631,8 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 				sessionSConns[i] = utils.MetaInternal
+			} else if item == utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS) {
+				sessionSConns[i] = rpcclient.BiRPCInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
@@ -767,8 +771,9 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		for idx, attrConn := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			aCfg.SessionSConns[idx] = attrConn
-			if attrConn == utils.MetaInternal {
-				aCfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			if attrConn == utils.MetaInternal ||
+				attrConn == rpcclient.BiRPCInternal {
+				aCfg.SessionSConns[idx] = utils.ConcatenatedKey(attrConn, utils.MetaSessionS)
 			}
 		}
 	}
@@ -805,6 +810,8 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}
 			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 				sessionSConns[i] = utils.MetaInternal
+			} else if item == utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS) {
+				sessionSConns[i] = rpcclient.BiRPCInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns

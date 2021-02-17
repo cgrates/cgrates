@@ -165,6 +165,13 @@ func TestLoadConfig(t *testing.T) {
 				Address: utils.MetaInternal,
 			}},
 		},
+		rpcclient.BiRPCInternal: {
+			Strategy: rpcclient.PoolFirst,
+			PoolSize: 0,
+			Conns: []*config.RemoteHost{{
+				Address: rpcclient.BiRPCInternal,
+			}},
+		},
 		"*localhost": {
 			Strategy: rpcclient.PoolFirst,
 			Conns:    []*config.RemoteHost{{Address: "127.0.0.1:2012", Transport: utils.MetaJSON}},

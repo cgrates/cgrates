@@ -235,10 +235,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				utils.FreeSWITCHAgent, utils.SessionS)
 		}
 		for _, connID := range cfg.fsAgentCfg.SessionSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			if isInternal && !cfg.sessionSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SessionS, utils.FreeSWITCHAgent)
 			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FreeSWITCHAgent, connID)
 			}
 		}
@@ -250,10 +251,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				utils.KamailioAgent, utils.SessionS)
 		}
 		for _, connID := range cfg.kamAgentCfg.SessionSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			if isInternal && !cfg.sessionSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SessionS, utils.KamailioAgent)
 			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.KamailioAgent, connID)
 			}
 		}
@@ -265,10 +267,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				utils.AsteriskAgent, utils.SessionS)
 		}
 		for _, connID := range cfg.asteriskAgentCfg.SessionSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			if isInternal && !cfg.sessionSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SessionS, utils.AsteriskAgent)
 			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.AsteriskAgent, connID)
 			}
 		}
@@ -280,10 +283,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				utils.DiameterAgent, utils.SessionS)
 		}
 		for _, connID := range cfg.diameterAgentCfg.SessionSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			if isInternal && !cfg.sessionSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SessionS, utils.DiameterAgent)
 			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DiameterAgent, connID)
 			}
 		}
@@ -369,10 +373,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	for _, httpAgentCfg := range cfg.httpAgentCfg {
 		// httpAgent checks
 		for _, connID := range httpAgentCfg.SessionSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			if isInternal && !cfg.sessionSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.SessionS, httpAgentCfg.ID)
 			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 				return fmt.Errorf("<%s> template with ID <%s> has connection with id: <%s> not defined", utils.HTTPAgent, httpAgentCfg.ID, connID)
 			}
 		}

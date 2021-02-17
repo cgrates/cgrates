@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -52,8 +53,13 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.BiRPCConecto
 	// in case we don't find in cache create the connection and add this in cache
 	var intChan chan rpcclient.ClientConnector
 	var isInternalRPC bool
-	connCfg := cM.cfg.RPCConns()[utils.MetaInternal]
-	if intChan, isInternalRPC = cM.rpcInternal[connID]; !isInternalRPC {
+	var connCfg *config.RPCConn
+	if intChan, isInternalRPC = cM.rpcInternal[connID]; isInternalRPC {
+		connCfg = cM.cfg.RPCConns()[rpcclient.InternalRPC]
+		if strings.HasPrefix(connID, rpcclient.BiRPCInternal) {
+			connCfg = cM.cfg.RPCConns()[rpcclient.BiRPCInternal]
+		}
+	} else {
 		connCfg = cM.cfg.RPCConns()[connID]
 		for _, rpcConn := range connCfg.Conns {
 			if rpcConn.Address == utils.MetaInternal {
@@ -62,23 +68,7 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.BiRPCConecto
 			}
 		}
 	}
-	switch {
-	case biRPCClient != nil && isInternalRPC: // special handling for SessionS BiJSONRPCClient
-		if conn, err = rpcclient.NewRPCClient(utils.EmptyString, utils.EmptyString, false,
-			utils.EmptyString, utils.EmptyString, utils.EmptyString,
-			cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,
-			cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
-			rpcclient.BiRPCInternal, intChan, false, biRPCClient); err != nil {
-			return
-		}
-		var rply string
-		if err = conn.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-			utils.EmptyString, &rply); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not register biRPCClient, error: <%s>",
-				utils.SessionS, err.Error()))
-			return
-		}
-	case connCfg.Strategy == rpcclient.PoolParallel:
+	if connCfg.Strategy == rpcclient.PoolParallel {
 		rpcConnCfg := connCfg.Conns[0] // for parrallel we need only the first connection
 		codec := rpcclient.GOBrpc
 		switch {
@@ -105,7 +95,7 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.BiRPCConecto
 			cM.cfg.GeneralCfg().ReplyTimeout, codec, intChan, int64(cM.cfg.GeneralCfg().MaxParallelConns), false, biRPCClient); err != nil {
 			return
 		}
-	default:
+	} else {
 		if conn, err = NewRPCPool(connCfg.Strategy,
 			cM.cfg.TLSCfg().ClientKey,
 			cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
@@ -113,6 +103,22 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.BiRPCConecto
 			cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
 			connCfg.Conns, intChan, false, biRPCClient); err != nil {
 			return
+		}
+	}
+	if biRPCClient != nil {
+		for _, c := range connCfg.Conns {
+			if c.Transport == rpcclient.BiRPCGOB ||
+				c.Transport == rpcclient.BiRPCJSON ||
+				c.Address == rpcclient.BiRPCInternal {
+				var rply string
+				if err = conn.Call(utils.SessionSv1RegisterInternalBiJSONConn,
+					connID, &rply); err != nil {
+					utils.Logger.Crit(fmt.Sprintf("<%s> Could not register biRPCClient, error: <%s>",
+						utils.SessionS, err.Error()))
+					return
+				}
+				break
+			}
 		}
 	}
 

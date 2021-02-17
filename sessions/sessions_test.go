@@ -2485,7 +2485,7 @@ func TestWarnSession(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil)
 
 	sTestMock := &mockConnWarnDisconnect1{}
-	sessions.RegisterIntBiJConn(sTestMock)
+	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
 
 	if err := sessions.warnSession("ClientConnIdtest", nil); err != nil {
 		t.Error(err)
@@ -2494,7 +2494,7 @@ func TestWarnSession(t *testing.T) {
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest2"
 	sessions = NewSessionS(cfg, dm, nil)
 	sTestMock2 := &mockConnWarnDisconnect2{}
-	sessions.RegisterIntBiJConn(sTestMock2)
+	sessions.RegisterIntBiJConn(sTestMock2, utils.EmptyString)
 	if err := sessions.warnSession("ClientConnIdtest2", nil); err == nil || err != utils.ErrNoActiveSession {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoActiveSession, err)
 	}
@@ -2569,4 +2569,8 @@ func TestInitSession(t *testing.T) {
 	if !reflect.DeepEqual(exp, s) {
 		t.Errorf("Expected %v , received: %s", utils.ToJSON(exp), utils.ToJSON(s))
 	}
+}
+
+func TestSessionSAsBiRPC(t *testing.T) {
+	_ = rpcclient.BiRPCConector(new(SessionS))
 }

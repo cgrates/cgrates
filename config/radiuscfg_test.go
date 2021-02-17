@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
@@ -154,7 +155,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	     "client_dictionaries": {									
 	    	"*default": "/usr/share/cgrates/",			
 	     },
-	     "sessions_conns": ["*conn1","*conn2"],
+	     "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
          "request_processors": [
 			{
 				"id": "OutboundAUTHDryRun",
@@ -180,7 +181,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		utils.ClientDictionariesCfg: map[string]string{
 			utils.MetaDefault: "/usr/share/cgrates/",
 		},
-		utils.SessionSConnsCfg: []string{"*conn1", "*conn2"},
+		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
 				utils.IDCfg:            "OutboundAUTHDryRun",

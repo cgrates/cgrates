@@ -493,10 +493,10 @@ func testSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 	var rply string
 	if err := sSv1BiRpc2.Call(utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if rply != utils.OK {
-		t.Errorf("Unexpected reply: %s", rply)
+		t.Fatalf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||

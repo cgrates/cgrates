@@ -20,6 +20,7 @@ package config
 
 import (
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // HTTPAgentCfgs the config section for HTTP Agent
@@ -123,10 +124,10 @@ func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 		ha.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for idx, connID := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			if connID == utils.MetaInternal {
-				ha.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			} else {
-				ha.SessionSConns[idx] = connID
+			ha.SessionSConns[idx] = connID
+			if connID == utils.MetaInternal ||
+				connID == rpcclient.BiRPCInternal {
+				ha.SessionSConns[idx] = utils.ConcatenatedKey(connID, utils.MetaSessionS)
 			}
 		}
 	}
@@ -157,6 +158,8 @@ func (ha *HTTPAgentCfg) AsMapInterface(separator string) (initialMP map[string]i
 			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 				sessionSConns[i] = utils.MetaInternal
+			} else if item == utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS) {
+				sessionSConns[i] = rpcclient.BiRPCInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
