@@ -79,6 +79,7 @@ var (
 		testBiRPCv1GetActivePassiveSessions,
 		testBiRPCv1SetPassiveSession,
 		testBiRPCv1ReplicateSessions,
+		testBiRPCv1AuthorizeEvent,
 	}
 )
 
@@ -2397,5 +2398,65 @@ func testBiRPCv1ReplicateSessions(t *testing.T) {
 	args.ConnIDs = []string{"conn1"}
 	if err := sessions.BiRPCv1ReplicateSessions(clnt, args, &reply); err != nil {
 		t.Error(err)
+	}
+}
+
+func testBiRPCv1AuthorizeEvent(t *testing.T) {
+	clnt := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.SessionSv1SetPassiveSession: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- clnt
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		"conn1": chanInternal,
+	})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	cgrEvent := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.Usage: "10s",
+		},
+	}
+	args := NewV1AuthorizeArgs(false, []string{},
+		false, []string{}, false, []string{}, false, false,
+		false, false, false, nil, utils.Paginator{}, false, "")
+
+	rply := &V1AuthorizeReply{
+		Attributes:   &engine.AttrSProcessEventReply{},
+		Routes:       &engine.SortedRoutes{},
+		StatQueueIDs: &[]string{},
+		ThresholdIDs: &[]string{},
+	}
+
+	expected := "MANDATORY_IE_MISSING: [CGREvent]"
+	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	args.CGREvent = cgrEvent
+	//RPC caching
+	sessions.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	expected = "MANDATORY_IE_MISSING: [subsystems]"
+	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	//Get Attributes
+	sessions.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	args = NewV1AuthorizeArgs(true, []string{},
+		false, []string{}, false, []string{}, false, false,
+		true, false, false, cgrEvent, utils.Paginator{}, false, "")
+	args.CGREvent.ID = "TestID"
+	args.CGREvent.Tenant = "cgrates.org"
+	expected = "ATTRIBUTES_ERROR:NOT_CONNECTED: AttributeS"
+	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
