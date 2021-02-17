@@ -540,7 +540,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 				ID: "RT_CHRISTMAS",
 				Weights: utils.DynamicWeights{
 					{
-						Weight: 0,
+						Weight: 30,
 					},
 				},
 				ActivationTimes: "* * 24 12 *",
@@ -868,7 +868,7 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 			APIRateProfile: &engine.APIRateProfile{
 				ID:        "DefaultRate",
 				FilterIDs: []string{"*string:~*req.Subject:1001"},
-				Weights:   ";0",
+				Weights:   ";10",
 				Rates: map[string]*engine.APIRate{
 					"RATE1": &engine.APIRate{
 						ID:              "RATE1",
@@ -929,7 +929,6 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
-
 	}
 }
 
