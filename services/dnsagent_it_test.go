@@ -181,6 +181,7 @@ func TestDNSAgentReload2(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
+/*
 func TestDNSAgentReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
@@ -261,3 +262,4 @@ func TestDNSAgentReload3(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+*/
