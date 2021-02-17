@@ -212,6 +212,7 @@ type EventExporterJsonCfg struct {
 type SessionSJsonCfg struct {
 	Enabled                *bool
 	Listen_bijson          *string
+	Listen_bigob           *string
 	Chargers_conns         *[]string
 	Rals_conns             *[]string
 	Resources_conns        *[]string

@@ -724,6 +724,7 @@ func TestSmgJsonCfg(t *testing.T) {
 	eCfg := &SessionSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
 		Listen_bijson:         utils.StringPointer("127.0.0.1:2014"),
+		Listen_bigob:          utils.StringPointer(""),
 		Chargers_conns:        &[]string{},
 		Rals_conns:            &[]string{},
 		Cdrs_conns:            &[]string{},
