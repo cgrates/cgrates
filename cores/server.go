@@ -35,12 +35,12 @@ import (
 	"sync"
 	"time"
 
-	rpc2_jsonrpc "github.com/cenkalti/rpc2/jsonrpc"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cenkalti/rpc2"
+	jsonrpc2 "github.com/cenkalti/rpc2/jsonrpc"
 	"golang.org/x/net/websocket"
 )
 
@@ -249,30 +249,46 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	}
 }
 
-// ServeBiJSON create a goroutine to listen and serve as BiRPC server
-func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(*rpc2.Client)) (err error) {
+// ServeBiRPC create a goroutine to listen and serve as BiRPC server
+func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(*rpc2.Client), onDis func(*rpc2.Client)) (err error) {
 	s.RLock()
 	isNil := s.birpcSrv == nil
 	s.RUnlock()
 	if isNil {
 		return fmt.Errorf("BiRPCServer should not be nil")
 	}
-	var lBiJSON net.Listener
-	lBiJSON, err = net.Listen(utils.TCP, addr)
-	if err != nil {
-		log.Println("ServeBiJSON listen error:", err)
-		return
-	}
+
 	s.birpcSrv.OnConnect(onConn)
 	s.birpcSrv.OnDisconnect(onDis)
-	utils.Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at <%s>", addr))
-	go s.acceptBiRPC(lBiJSON, s.birpcSrv)
+	if addrJSON != utils.EmptyString {
+		var ljson net.Listener
+		if ljson, err = s.listenBiRPC(addrJSON, utils.JSONCaps, jsonrpc2.NewJSONCodec); err != nil {
+			return
+		}
+		defer ljson.Close()
+	}
+	if addrGOB != utils.EmptyString {
+		var lgob net.Listener
+		if lgob, err = s.listenBiRPC(addrGOB, utils.GOBCaps, rpc2.NewGobCodec); err != nil {
+			return
+		}
+		defer lgob.Close()
+	}
 	<-s.stopbiRPCServer // wait until server is stoped to close the listener
-	lBiJSON.Close()
 	return
 }
 
-func (s *Server) acceptBiRPC(l net.Listener, srv *rpc2.Server) {
+func (s *Server) listenBiRPC(addr, codecName string, newCodec func(io.ReadWriteCloser) rpc2.Codec) (lBiRPC net.Listener, err error) {
+	if lBiRPC, err = net.Listen(utils.TCP, addr); err != nil {
+		log.Printf("ServeBi%s listen error: %s \n", codecName, err)
+		return
+	}
+	utils.Logger.Info(fmt.Sprintf("Starting CGRateS Bi%s server at <%s>", codecName, addr))
+	go s.acceptBiRPC(lBiRPC, codecName, newCodec)
+	return
+}
+
+func (s *Server) acceptBiRPC(l net.Listener, codecName string, newCodec func(io.ReadWriteCloser) rpc2.Codec) {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -280,10 +296,10 @@ func (s *Server) acceptBiRPC(l net.Listener, srv *rpc2.Server) {
 				return
 			}
 			s.stopbiRPCServer <- struct{}{}
-			utils.Logger.Crit(fmt.Sprintf("Stoped BiRPC server beacause %s", err))
+			utils.Logger.Crit(fmt.Sprintf("Stoped Bi%s server beacause %s", codecName, err))
 			return // stop if we get Accept error
 		}
-		go srv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
+		go s.birpcSrv.ServeCodec(newCodec(conn))
 	}
 }
 

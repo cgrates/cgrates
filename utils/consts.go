@@ -2195,6 +2195,7 @@ const (
 // SessionSCfg
 const (
 	ListenBijsonCfg        = "listen_bijson"
+	ListenBigobCfg         = "listen_bigob"
 	RALsConnsCfg           = "rals_conns"
 	ResSConnsCfg           = "resources_conns"
 	ThreshSConnsCfg        = "thresholds_conns"

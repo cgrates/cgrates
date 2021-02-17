@@ -434,6 +434,7 @@ const CGRATES_CFG_JSON = `
 "sessions": {
 	"enabled": false,						// starts the session service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
+	"listen_bigob": "",						// address where to listen for bidirectional GOB-RPC requests
 	"chargers_conns": [],					// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
 	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|$rpc_conns_id>
 	"cdrs_conns": [],						// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>

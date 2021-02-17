@@ -6986,8 +6986,10 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 	}
 	result, err := testStruct.AsTPAccountProfile()
 	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(exp, result) {
+		t.Fatal(err)
+	}
+	sort.Strings(exp[0].Balances["VoiceBalance"].RateProfileIDs)
+	if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
 	}
 }

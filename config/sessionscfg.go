@@ -89,6 +89,7 @@ func (fs FsConnCfg) Clone() *FsConnCfg {
 type SessionSCfg struct {
 	Enabled             bool
 	ListenBijson        string
+	ListenBigob         string
 	ChargerSConns       []string
 	RALsConns           []string
 	ResSConns           []string
@@ -125,6 +126,9 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	}
 	if jsnCfg.Listen_bijson != nil {
 		scfg.ListenBijson = *jsnCfg.Listen_bijson
+	}
+	if jsnCfg.Listen_bigob != nil {
+		scfg.ListenBigob = *jsnCfg.Listen_bigob
 	}
 	if jsnCfg.Chargers_conns != nil {
 		scfg.ChargerSConns = make([]string, len(*jsnCfg.Chargers_conns))
@@ -318,6 +322,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
+		utils.ListenBigobCfg:         scfg.ListenBigob,
 		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
 		utils.StoreSCostsCfg:         scfg.StoreSCosts,
 		utils.SessionIndexesCfg:      scfg.SessionIndexes.AsSlice(),

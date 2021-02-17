@@ -660,28 +660,28 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
 	cfg.TemplatesCfg()["CustomTemplate"] = []*config.FCTemplate{
-		&config.FCTemplate{
+		{
 			Tag:    "Tenant",
 			Type:   "*constant",
 			Path:   "*cdr.Tenant",
 			Value:  config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Layout: time.RFC3339,
 		},
-		&config.FCTemplate{
+		{
 			Tag:    "Opt1",
 			Type:   "*constant",
 			Path:   "*opts.Option1",
 			Value:  config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 			Layout: time.RFC3339,
 		},
-		&config.FCTemplate{
+		{
 			Tag:    "Opt2",
 			Type:   "*constant",
 			Path:   "*opts.Option2",
 			Value:  config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 			Layout: time.RFC3339,
 		},
-		&config.FCTemplate{
+		{
 			Tag:    "Opt3",
 			Type:   "*variable",
 			Path:   "*opts.Option3",

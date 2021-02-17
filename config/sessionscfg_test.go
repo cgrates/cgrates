@@ -310,6 +310,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
 		utils.ListenBijsonCfg:        "127.0.0.1:2014",
+		utils.ListenBigobCfg:         "",
 		utils.ChargerSConnsCfg:       []string{},
 		utils.RALsConnsCfg:           []string{},
 		utils.CDRsConnsCfg:           []string{},
@@ -387,6 +388,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
 		utils.ListenBijsonCfg:        "127.0.0.1:2018",
+		utils.ListenBigobCfg:         "",
 		utils.ChargerSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.RALsConnsCfg:           []string{utils.MetaInternal, "*conn1"},
 		utils.CDRsConnsCfg:           []string{utils.MetaInternal, "*conn1"},
