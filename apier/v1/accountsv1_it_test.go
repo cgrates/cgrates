@@ -734,8 +734,8 @@ func testAccountSv1DebitWithAttributeS(t *testing.T) {
 	accPrfAPI := &APIAccountProfileWithCache{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
-			ID:        "CustomAccount",
-			FilterIDs: []string{"*string:~*req.Account:CustomAccount"},
+			ID:        "ACC_WITH_ATTRIBUTES",
+			FilterIDs: []string{"*string:~*req.Account:ACC_WITH_ATTRIBUTES"},
 			Weights:   ";10",
 			Balances: map[string]*utils.APIBalance{
 				"Balance1": &utils.APIBalance{
@@ -768,19 +768,51 @@ func testAccountSv1DebitWithAttributeS(t *testing.T) {
 	}
 	var reply2 *utils.AccountProfile
 	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
-		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &reply2); err != nil {
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_ATTRIBUTES"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(convAcc, reply2) {
 		t.Errorf("Expecting : %+v, received: %+v", convAcc, reply2)
+	}
+
+	//set a rate profile to be used in case of debit
+	apiRPrf := &engine.APIRateProfile{
+		Tenant:  "cgrates.org",
+		ID:      "RP_Test",
+		Weights: ";10",
+		Rates: map[string]*engine.APIRate{
+			"RT_ALWAYS": {
+				ID:              "RT_ALWAYS",
+				Weights:         ";0",
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*engine.APIIntervalRate{
+					{
+						IntervalStart: "0",
+						RecurrentFee:  utils.Float64Pointer(0.1),
+						Increment:     utils.Float64Pointer(1),
+						Unit:          utils.Float64Pointer(1),
+					},
+				},
+			},
+		},
+	}
+
+	if err := acntSRPC.Call(utils.APIerSv1SetRateProfile,
+		&APIRateProfileWithCache{
+			APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+				APIRateProfile: apiRPrf},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
 	}
 
 	var eEc *utils.ExtEventCharges
 	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testAccountSv1SimpleDebit",
+			ID:     "testAccountSv1DebitWithAttributeS",
 			Event: map[string]interface{}{
-				utils.AccountField: "CustomAccount",
+				utils.AccountField: "ACC_WITH_ATTRIBUTES",
 				utils.Usage:        "10",
 			}}}, &eEc); err != nil {
 		t.Error(err)
@@ -789,7 +821,7 @@ func testAccountSv1DebitWithAttributeS(t *testing.T) {
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
-		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &reply2); err != nil {
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_ATTRIBUTES"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(99, 0)) != 0 {
 		t.Errorf("Expecting : %+v, received: %s", decimal.New(99, 0), reply2.Balances["Balance1"].Units)
