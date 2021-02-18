@@ -48,10 +48,11 @@ var (
 		testV1FltrRpcConn,
 		testV1FltrLoadTarrifPlans,
 		testV1FltrAddStats,
-		testV1FltrPupulateThreshold,
+		testV1FltrPopulateThreshold,
 		testV1FltrGetThresholdForEvent,
 		testV1FltrGetThresholdForEvent2,
 		testV1FltrPopulateResources,
+		testV1FltrPopulateResourcesAvailableUnits,
 		testV1FltrAccounts,
 		testV1FltrAccountsExistsDynamicaly,
 		testV1FltrAttributesPrefix,
@@ -257,7 +258,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 }
 
-func testV1FltrPupulateThreshold(t *testing.T) {
+func testV1FltrPopulateThreshold(t *testing.T) {
 	//Add a filter of type *stats and check if acd metric is minim 10 ( greater than 10)
 	//we expect that acd from Stat_1 to be 11 so the filter should pass (11 > 10)
 	filter := &v1.FilterWithCache{
@@ -544,6 +545,75 @@ func testV1FltrPopulateResources(t *testing.T) {
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
+	//create a resourceProfile
+	rlsConfig := &engine.ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES_TEST",
+		UsageTTL:          time.Minute,
+		Limit:             23,
+		AllocationMessage: "Test_Available",
+		Stored:            true,
+		Weight:            30,
+		ThresholdIDs:      []string{utils.MetaNone},
+	}
+
+	var result string
+	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &v1.ResourceWithCache{ResourceProfile: rlsConfig}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	var reply *engine.ResourceProfile
+	if err := fltrRpc.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, rlsConfig) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsConfig), utils.ToJSON(reply))
+	}
+
+	//Allocate 9 units for resource ResTest
+	argsRU := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				"Account":     "3001",
+				"Destination": "3002"},
+		},
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
+		Units:   9,
+	}
+	if err := fltrRpc.Call(utils.ResourceSv1AllocateResources, argsRU, &result); err != nil {
+		t.Error(err)
+	} else if result != "Test_Available" {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//as we allocate 9 units, there should be available 14 more
+	//our filter should match for *gt or *gte
+	filter := v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_TH_Resource1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    "*gt",
+					Element: "~*resources.RES_TEST.Available",
+					Values:  []string{"16.0"},
+				},
+			},
+		},
+	}
+
+	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
 	}
 }
 
