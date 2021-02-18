@@ -245,9 +245,11 @@ func TestDNSAgentReload3(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
+/*
 func TestDNSAgentReload4(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
+
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -267,7 +269,8 @@ func TestDNSAgentReload4(t *testing.T) {
 	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
 		shdChan, nil, nil, anz, srvDep)
 	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
+	var err error
+
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
@@ -285,39 +288,22 @@ func TestDNSAgentReload4(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	runtime.Gosched()
-	runtime.Gosched()
-	runtime.Gosched()
+	time.Sleep(10 * time.Millisecond) //need to switch to goroutine
+
 	runtime.Gosched()
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	runtime.Gosched()
-	runtime.Gosched()
-	runtime.Gosched()
-	runtime.Gosched()
-	err := srv.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
 
 	runtime.Gosched()
-	runtime.Gosched()
-	err = srv.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
 	err = db.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	runtime.Gosched()
-	runtime.Gosched()
-	err = srv.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
+
+	dnsTest := &agents.DNSAgent{}
+	srv.(*DNSAgent).dns = dnsTest
+
 	time.Sleep(10 * time.Millisecond)
 	cfg.DNSAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
@@ -330,3 +316,4 @@ func TestDNSAgentReload4(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+*/
