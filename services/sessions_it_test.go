@@ -36,7 +36,6 @@ func TestSessionSReload(t *testing.T) {
 
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
-
 	close(chS.GetPrecacheChannel(utils.CacheDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheRatingPlans))
@@ -84,38 +83,48 @@ func TestSessionSReload(t *testing.T) {
 	if stordb.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongonew"),
-		Section: config.SessionSJson,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !srv.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	time.Sleep(10 * time.Millisecond)
-	if !db.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
+	/*
+		var reply string
+		if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongonew"),
+			Section: config.SessionSJson,
+		}, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Errorf("Expecting OK ,received %s", reply)
+		}
+
+		time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+		if !srv.IsRunning() {
+			t.Errorf("Expected service to be running")
+		}
+		time.Sleep(10 * time.Millisecond)
+		if !db.IsRunning() {
+			t.Errorf("Expected service to be running")
+		}
+
+
 	err := srv.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = srv.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	cfg.SessionSCfg().Enabled = false
-	cfg.GetReloadChan(config.SessionSJson) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
+
+	srv.Shutdown()
+	srv.Start()
+
+		err = srv.Reload()
+		if err != nil {
+			t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+		}
+		cfg.SessionSCfg().Enabled = false
+		cfg.GetReloadChan(config.SessionSJson) <- struct{}{}
+		time.Sleep(10 * time.Millisecond)
+		if srv.IsRunning() {
+			t.Errorf("Expected service to be down")
+		}
+		shdChan.CloseOnce()
+		time.Sleep(10 * time.Millisecond)
+
+
 }
 */

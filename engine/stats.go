@@ -57,12 +57,12 @@ type StatService struct {
 }
 
 // Shutdown is called to shutdown the service
-func (sS *StatService) Shutdown() error {
+func (sS *StatService) Shutdown() {
 	utils.Logger.Info("<StatS> service shutdown initialized")
 	close(sS.stopBackup)
 	sS.storeStats()
 	utils.Logger.Info("<StatS> service shutdown complete")
-	return nil
+	return
 }
 
 // runBackup will regularly store resources changed to dataDB

@@ -79,6 +79,7 @@ func (smg *SessionService) Start() (err error) {
 	if smg.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+
 	var datadb *engine.DataManager
 	if smg.dm.IsRunning() {
 		dbchan := smg.dm.GetDMChan()
@@ -111,7 +112,7 @@ func (smg *SessionService) Start() (err error) {
 		for method, handler := range smg.rpcv1.Handlers() {
 			smg.server.BiRPCRegisterName(method, handler)
 		}
-		// run this in it's own gorutine
+		// run this in it's own goroutine
 		go func() {
 			if err := smg.server.ServeBiJSON(smg.cfg.SessionSCfg().ListenBijson, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))

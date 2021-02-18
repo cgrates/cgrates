@@ -19,7 +19,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"os"
+	"path"
+	"runtime"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 func TestEventReaderSReload(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
@@ -63,6 +78,8 @@ func TestEventReaderSReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+	runtime.Gosched()
+	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !attrS.IsRunning() {
 		t.Errorf("Expected service to be running")
@@ -95,7 +112,6 @@ func TestEventReaderSReload2(t *testing.T) {
 		}
 	}
 	cfg := config.NewDefaultCGRConfig()
-
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	cfg.SessionSCfg().Enabled = true
@@ -146,4 +162,3 @@ func TestEventReaderSReload2(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
-*/
