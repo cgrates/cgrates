@@ -7,12 +7,14 @@
 
 
 "data_db": {
-	"db_type": "*internal",
+	"db_type": "redis",
+	"db_port": 6379,
+	"db_name": "10",
 },
 
 
 "stor_db": {
-	"db_type": "*internal",
+	"db_password": "CGRateS.org",
 },
 
 
@@ -23,6 +25,11 @@
 
 
 "rates": {
+	"enabled": true,
+},
+
+
+"schedulers": {
 	"enabled": true,
 },
 
