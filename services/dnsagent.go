@@ -61,7 +61,6 @@ func (dns *DNSAgent) Start() (err error) {
 	if dns.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-
 	filterS := <-dns.filterSChan
 	dns.filterSChan <- filterS
 
@@ -71,6 +70,7 @@ func (dns *DNSAgent) Start() (err error) {
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
+		dns.dns = nil
 		return
 	}
 	go func() {

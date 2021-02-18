@@ -51,13 +51,11 @@ func (da *DNSAgent) initDNSServer() (err error) {
 	handler := dns.HandlerFunc(func(w dns.ResponseWriter, m *dns.Msg) {
 		go da.handleMessage(w, m)
 	})
-
 	if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().ListenNet, utils.TLSNoCaps) {
 		cert, err := tls.LoadX509KeyPair(da.cgrCfg.TLSCfg().ServerCerificate, da.cgrCfg.TLSCfg().ServerKey)
 		if err != nil {
 			return err
 		}
-
 		config := tls.Config{
 			Certificates: []tls.Certificate{cert},
 		}

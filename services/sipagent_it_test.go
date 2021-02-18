@@ -21,6 +21,7 @@ package services
 
 import (
 	"path"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -75,9 +76,17 @@ func TestSIPAgentReload(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	runtime.Gosched()
+	runtime.Gosched()
+	runtime.Gosched()
+	runtime.Gosched()
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	runtime.Gosched()
+	runtime.Gosched()
+	runtime.Gosched()
+	runtime.Gosched()
 	srvStart := srv.Start()
 	if srvStart != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, srvStart)
@@ -91,7 +100,7 @@ func TestSIPAgentReload(t *testing.T) {
 		t.Fatalf("cannot cast")
 	}
 	castSrv.oldListen = "test_string"
-
+	runtime.Gosched()
 	err = srv.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <err>,\n Received <%+v>", err)
