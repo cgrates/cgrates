@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -516,10 +517,20 @@ func (fsa *FSsessions) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, arg
 // Handlers is used to implement the rpcclient.BiRPCConector interface
 func (fsa *FSsessions) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		utils.SessionSv1DisconnectSession:   fsa.BiRPCv1DisconnectSession,
-		utils.SessionSv1GetActiveSessionIDs: fsa.BiRPCv1GetActiveSessionIDs,
-		utils.SessionSv1ReAuthorize:         fsa.BiRPCv1ReAuthorize,
-		utils.SessionSv1DisconnectPeer:      fsa.BiRPCv1DisconnectPeer,
-		utils.SessionSv1WarnDisconnect:      fsa.BiRPCv1WarnDisconnect,
+		utils.SessionSv1DisconnectSession: func(clnt *rpc2.Client, args utils.AttrDisconnectSession, rply *string) error {
+			return fsa.BiRPCv1DisconnectSession(clnt, args, rply)
+		},
+		utils.SessionSv1GetActiveSessionIDs: func(clnt *rpc2.Client, args string, rply *[]*sessions.SessionID) error {
+			return fsa.BiRPCv1GetActiveSessionIDs(clnt, args, rply)
+		},
+		utils.SessionSv1ReAuthorize: func(clnt *rpc2.Client, args string, rply *string) (err error) {
+			return fsa.BiRPCv1ReAuthorize(clnt, args, rply)
+		},
+		utils.SessionSv1DisconnectPeer: func(clnt *rpc2.Client, args *utils.DPRArgs, rply *string) (err error) {
+			return fsa.BiRPCv1DisconnectPeer(clnt, args, rply)
+		},
+		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]interface{}, rply *string) (err error) {
+			return fsa.BiRPCv1WarnDisconnect(clnt, args, rply)
+		},
 	}
 }

@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/rpcclient"
 
@@ -480,10 +481,20 @@ func (ka *KamailioAgent) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, a
 // Handlers is used to implement the rpcclient.BiRPCConector interface
 func (ka *KamailioAgent) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		utils.SessionSv1DisconnectSession:   ka.BiRPCv1DisconnectSession,
-		utils.SessionSv1GetActiveSessionIDs: ka.BiRPCv1GetActiveSessionIDs,
-		utils.SessionSv1ReAuthorize:         ka.BiRPCv1ReAuthorize,
-		utils.SessionSv1DisconnectPeer:      ka.BiRPCv1DisconnectPeer,
-		utils.SessionSv1WarnDisconnect:      ka.BiRPCv1WarnDisconnect,
+		utils.SessionSv1DisconnectSession: func(clnt *rpc2.Client, args utils.AttrDisconnectSession, rply *string) error {
+			return ka.BiRPCv1DisconnectSession(clnt, args, rply)
+		},
+		utils.SessionSv1GetActiveSessionIDs: func(clnt *rpc2.Client, args string, rply *[]*sessions.SessionID) error {
+			return ka.BiRPCv1GetActiveSessionIDs(clnt, args, rply)
+		},
+		utils.SessionSv1ReAuthorize: func(clnt *rpc2.Client, args string, rply *string) (err error) {
+			return ka.BiRPCv1ReAuthorize(clnt, args, rply)
+		},
+		utils.SessionSv1DisconnectPeer: func(clnt *rpc2.Client, args *utils.DPRArgs, rply *string) (err error) {
+			return ka.BiRPCv1DisconnectPeer(clnt, args, rply)
+		},
+		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]interface{}, rply *string) (err error) {
+			return ka.BiRPCv1WarnDisconnect(clnt, args, rply)
+		},
 	}
 }

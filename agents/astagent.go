@@ -27,6 +27,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/aringo"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -386,8 +387,7 @@ func (sma *AsteriskAgent) BiRPCv1DisconnectSession(clnt rpcclient.ClientConnecto
 }
 
 // BiRPCv1GetActiveSessionIDs is internal method to  get all active sessions in asterisk
-func (sma *AsteriskAgent) BiRPCv1GetActiveSessionIDs(clnt rpcclient.ClientConnector, ignParam string,
-	sessionIDs *[]*sessions.SessionID) error {
+func (sma *AsteriskAgent) BiRPCv1GetActiveSessionIDs(clnt rpcclient.ClientConnector, ignParam string, sessionIDs *[]*sessions.SessionID) error {
 	return sma.V1GetActiveSessionIDs(ignParam, sessionIDs)
 
 }
@@ -410,10 +410,20 @@ func (sma *AsteriskAgent) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, 
 // Handlers is used to implement the rpcclient.BiRPCConector interface
 func (sma *AsteriskAgent) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		utils.SessionSv1DisconnectSession:   sma.BiRPCv1DisconnectSession,
-		utils.SessionSv1GetActiveSessionIDs: sma.BiRPCv1GetActiveSessionIDs,
-		utils.SessionSv1ReAuthorize:         sma.BiRPCv1ReAuthorize,
-		utils.SessionSv1DisconnectPeer:      sma.BiRPCv1DisconnectPeer,
-		utils.SessionSv1WarnDisconnect:      sma.BiRPCv1WarnDisconnect,
+		utils.SessionSv1DisconnectSession: func(clnt *rpc2.Client, args utils.AttrDisconnectSession, rply *string) error {
+			return sma.BiRPCv1DisconnectSession(clnt, args, rply)
+		},
+		utils.SessionSv1GetActiveSessionIDs: func(clnt *rpc2.Client, args string, rply *[]*sessions.SessionID) error {
+			return sma.BiRPCv1GetActiveSessionIDs(clnt, args, rply)
+		},
+		utils.SessionSv1ReAuthorize: func(clnt *rpc2.Client, args string, rply *string) (err error) {
+			return sma.BiRPCv1ReAuthorize(clnt, args, rply)
+		},
+		utils.SessionSv1DisconnectPeer: func(clnt *rpc2.Client, args *utils.DPRArgs, rply *string) (err error) {
+			return sma.BiRPCv1DisconnectPeer(clnt, args, rply)
+		},
+		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]interface{}, rply *string) (err error) {
+			return sma.BiRPCv1WarnDisconnect(clnt, args, rply)
+		},
 	}
 }
