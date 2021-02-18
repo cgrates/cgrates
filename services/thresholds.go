@@ -108,9 +108,7 @@ func (thrs *ThresholdService) Shutdown() (err error) {
 	defer thrs.srvDep[utils.DataDB].Done()
 	thrs.Lock()
 	defer thrs.Unlock()
-	if err = thrs.thrs.Shutdown(); err != nil {
-		return
-	}
+	thrs.thrs.Shutdown()
 	thrs.thrs = nil
 	thrs.rpc = nil
 	<-thrs.connChan

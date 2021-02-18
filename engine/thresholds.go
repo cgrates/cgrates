@@ -158,12 +158,12 @@ type ThresholdService struct {
 }
 
 // Shutdown is called to shutdown the service
-func (tS *ThresholdService) Shutdown() error {
+func (tS *ThresholdService) Shutdown() {
 	utils.Logger.Info("<ThresholdS> shutdown initialized")
 	close(tS.stopBackup)
 	tS.storeThresholds()
 	utils.Logger.Info("<ThresholdS> shutdown complete")
-	return nil
+	return
 }
 
 // backup will regularly store resources changed to dataDB

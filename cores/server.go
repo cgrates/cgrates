@@ -266,13 +266,13 @@ func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(
 	s.birpcSrv.OnConnect(onConn)
 	s.birpcSrv.OnDisconnect(onDis)
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at <%s>", addr))
-	go s.acceptBiRPC(lBiJSON)
+	go s.acceptBiRPC(lBiJSON, s.birpcSrv)
 	<-s.stopbiRPCServer // wait until server is stoped to close the listener
 	lBiJSON.Close()
 	return
 }
 
-func (s *Server) acceptBiRPC(l net.Listener) {
+func (s *Server) acceptBiRPC(l net.Listener, srv *rpc2.Server) {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -283,13 +283,16 @@ func (s *Server) acceptBiRPC(l net.Listener) {
 			utils.Logger.Crit(fmt.Sprintf("Stoped BiRPC server beacause %s", err))
 			return // stop if we get Accept error
 		}
-		go s.birpcSrv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
+		go srv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
 	}
 }
 
 // StopBiRPC stops the go routine create with ServeBiJSON
 func (s *Server) StopBiRPC() {
 	s.stopbiRPCServer <- struct{}{}
+	s.Lock()
+	s.birpcSrv = nil
+	s.Unlock()
 }
 
 // rpcRequest represents a RPC request.

@@ -21,6 +21,7 @@ package services
 
 import (
 	"path"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -142,9 +143,11 @@ func TestDNSAgentReload2(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	runtime.Gosched()
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	runtime.Gosched()
 	err := srv.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
@@ -156,7 +159,8 @@ func TestDNSAgentReload2(t *testing.T) {
 	}
 
 	castSrv.oldListen = "test_string"
-
+	runtime.Gosched()
+	runtime.Gosched()
 	err = srv.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
@@ -165,7 +169,8 @@ func TestDNSAgentReload2(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-
+	runtime.Gosched()
+	runtime.Gosched()
 	err = srv.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
@@ -174,6 +179,7 @@ func TestDNSAgentReload2(t *testing.T) {
 	cfg.DNSAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
+	runtime.Gosched()
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -232,13 +238,6 @@ func TestDNSAgentReload3(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 
-	castSrv, canCastSrv := srv.(*DNSAgent)
-	if !canCastSrv {
-		t.Fatalf("cannot cast")
-	}
-
-	castSrv.oldListen = "test_string"
-
 	err = srv.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
@@ -248,17 +247,10 @@ func TestDNSAgentReload3(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 
-	err = srv.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
 	time.Sleep(10 * time.Millisecond)
 	cfg.DNSAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }

@@ -112,9 +112,7 @@ func (sts *StatService) Shutdown() (err error) {
 	defer sts.srvDep[utils.DataDB].Done()
 	sts.Lock()
 	defer sts.Unlock()
-	if err = sts.sts.Shutdown(); err != nil {
-		return
-	}
+	sts.sts.Shutdown()
 	sts.sts = nil
 	sts.rpc = nil
 	<-sts.connChan
