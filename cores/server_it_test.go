@@ -69,6 +69,9 @@ var (
 		testServeBiJSON,
 		testServeBiJSONEmptyBiRPCServer,
 		testServeBiJSONInvalidPort,
+		testServeBiGoB,
+		testServeBiGoBEmptyBiRPCServer,
+		testServeBiGoBInvalidPort,
 		testServeGOBTLS,
 		testServeJSONTls,
 		testServeCodecTLSErr,
@@ -396,7 +399,7 @@ func testServeBiGoB(t *testing.T) {
 	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
 
 	go func() {
-		if err := server.ServeBiRPC("", ":93434", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err != nil {
+		if err := server.ServeBiRPC("", ":9343", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err != nil {
 			t.Error(err)
 		}
 	}()
@@ -756,7 +759,7 @@ func testAcceptBiRPC(t *testing.T) {
 	l := &mockListener{
 		p1: p1,
 	}
-	go server.acceptBiRPC(l, utils.JSONCaps, jsonrpc2.NewJSONCodec)
+	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, jsonrpc2.NewJSONCodec)
 	rpc := jsonrpc.NewClient(p2)
 	var reply string
 	expected := "rpc2: can't find method AttributeSv1.Ping"
@@ -784,7 +787,7 @@ func testAcceptBiRPCError(t *testing.T) {
 
 	//it will contain "use of closed network connection"
 	l := new(mockListenError)
-	go server.acceptBiRPC(l, utils.JSONCaps, jsonrpc2.NewJSONCodec)
+	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, jsonrpc2.NewJSONCodec)
 	runtime.Gosched()
 }
 

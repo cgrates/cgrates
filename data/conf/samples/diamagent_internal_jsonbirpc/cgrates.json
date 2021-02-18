@@ -1,0 +1,76 @@
+{
+// CGRateS Configuration file
+//
+// Used for cgradmin
+// Starts rater, scheduler
+
+"general": {
+	"log_level": 7,
+	"default_tenant": "cgrates.com",
+},
+
+"listen": {
+	"rpc_json": ":2012",				// RPC JSON listening address
+	"rpc_gob": ":2013",					// RPC GOB listening address
+	"http": ":2080",					// HTTP listening address
+},
+
+"rpc_conns": {
+	"*jsonbirpc": {
+		"conns": [{"address": "127.0.0.1:2014", "transport":"*birpc_json"}],
+	},
+},				
+
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+"rals": {
+	"enabled": true,
+},
+
+"schedulers": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": ["*localhost"],
+	"chargers_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
+	"cdrs_conns": ["*localhost"],
+},
+
+"diameter_agent": {
+	"enabled": true,
+	"sessions_conns": ["*jsonbirpc"],
+	"asr_template": "*asr",
+	"rar_template": "*rar",
+	"forced_disconnect": "*asr",								// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
+},
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+}

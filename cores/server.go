@@ -262,14 +262,14 @@ func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(*rpc2.Client),
 	s.birpcSrv.OnDisconnect(onDis)
 	if addrJSON != utils.EmptyString {
 		var ljson net.Listener
-		if ljson, err = s.listenBiRPC(addrJSON, utils.JSONCaps, jsonrpc2.NewJSONCodec); err != nil {
+		if ljson, err = s.listenBiRPC(s.birpcSrv, addrJSON, utils.JSONCaps, jsonrpc2.NewJSONCodec); err != nil {
 			return
 		}
 		defer ljson.Close()
 	}
 	if addrGOB != utils.EmptyString {
 		var lgob net.Listener
-		if lgob, err = s.listenBiRPC(addrGOB, utils.GOBCaps, rpc2.NewGobCodec); err != nil {
+		if lgob, err = s.listenBiRPC(s.birpcSrv, addrGOB, utils.GOBCaps, rpc2.NewGobCodec); err != nil {
 			return
 		}
 		defer lgob.Close()
@@ -278,17 +278,17 @@ func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(*rpc2.Client),
 	return
 }
 
-func (s *Server) listenBiRPC(addr, codecName string, newCodec func(io.ReadWriteCloser) rpc2.Codec) (lBiRPC net.Listener, err error) {
+func (s *Server) listenBiRPC(srv *rpc2.Server, addr, codecName string, newCodec func(io.ReadWriteCloser) rpc2.Codec) (lBiRPC net.Listener, err error) {
 	if lBiRPC, err = net.Listen(utils.TCP, addr); err != nil {
 		log.Printf("ServeBi%s listen error: %s \n", codecName, err)
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS Bi%s server at <%s>", codecName, addr))
-	go s.acceptBiRPC(lBiRPC, codecName, newCodec)
+	go s.acceptBiRPC(srv, lBiRPC, codecName, newCodec)
 	return
 }
 
-func (s *Server) acceptBiRPC(l net.Listener, codecName string, newCodec func(io.ReadWriteCloser) rpc2.Codec) {
+func (s *Server) acceptBiRPC(srv *rpc2.Server, l net.Listener, codecName string, newCodec func(io.ReadWriteCloser) rpc2.Codec) {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -299,7 +299,7 @@ func (s *Server) acceptBiRPC(l net.Listener, codecName string, newCodec func(io.
 			utils.Logger.Crit(fmt.Sprintf("Stoped Bi%s server beacause %s", codecName, err))
 			return // stop if we get Accept error
 		}
-		go s.birpcSrv.ServeCodec(newCodec(conn))
+		go srv.ServeCodec(newCodec(conn))
 	}
 }
 

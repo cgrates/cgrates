@@ -239,7 +239,11 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 		kar.ResourceAllocation = *authReply.ResourceAllocation
 	}
 	if authArgs.GetMaxUsage {
-		kar.MaxUsage = int(utils.Round(authReply.MaxUsage.Seconds(), 0, utils.MetaRoundingMiddle))
+		if authReply.MaxUsage != nil {
+			kar.MaxUsage = int(utils.Round(authReply.MaxUsage.Seconds(), 0, utils.MetaRoundingMiddle))
+		} else {
+			kar.MaxUsage = 0
+		}
 	}
 	if authArgs.GetRoutes && authReply.Routes != nil {
 		kar.Routes = authReply.Routes.Digest()

@@ -19,6 +19,7 @@ package agents
 
 import (
 	"flag"
+	"fmt"
 	"net/rpc"
 	"os/exec"
 	"path"
@@ -127,6 +128,25 @@ func TestDiamItSctp(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
+	for _, stest := range sTestsDiam {
+		t.Run(diamConfigDIR, stest)
+	}
+}
+
+func TestDiamItBiRPC(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		diamConfigDIR = "diamagent_internal_%sbirpc"
+	case utils.MetaMySQL:
+		diamConfigDIR = "diamagent_mysql_%sbirpc"
+	case utils.MetaMongo:
+		diamConfigDIR = "diamagent_mongo_%sbirpc"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	diamConfigDIR = fmt.Sprintf(diamConfigDIR, strings.TrimPrefix(*encoding, utils.Meta))
 	for _, stest := range sTestsDiam {
 		t.Run(diamConfigDIR, stest)
 	}

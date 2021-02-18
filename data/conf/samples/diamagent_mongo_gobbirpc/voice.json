@@ -1,0 +1,434 @@
+
+{
+
+"diameter_agent": {
+	"request_processors": [
+		{
+			"id": "VoiceInitForceDuration",
+			"filters": [
+				"*string:~*vars.*cmd:CCR",
+				"*string:~*req.CC-Request-Type:1",
+				"*prefix:~*req.Service-Context-Id:forceDurationVoice"
+			],
+			"flags": ["*initiate", "*fd", "*accounts", "*attributes"],
+			"request_fields":[
+				{
+					"tag": "ToR",
+					"path": "*cgreq.ToR",
+					"type": "*constant",
+					"value": "*voice"
+				},
+				{
+					"tag": "OriginID",
+					"path": "*cgreq.OriginID",
+					"type": "*variable",
+					"value": "~*req.Session-Id",
+					"mandatory": true
+				},
+				{
+					"tag": "OriginHost",
+					"path": "*cgreq.OriginHost",
+					"type": "*remote_host",
+					"mandatory": true
+				},
+				{
+					"tag": "RequestType",
+					"path": "*cgreq.RequestType",
+					"type": "*constant",
+					"value": "*attributes"
+				},
+				{
+					"tag": "Category",
+					"path": "*cgreq.Category",
+					"type": "*constant",
+					"value": "call"
+				},
+				{
+					"tag": "Account",
+					"path": "*cgreq.Account",
+					"type": "*constant",
+					"value": "*attributes"
+				},
+				{
+					"tag": "Destination",
+					"path": "*cgreq.Destination",
+					"type": "*variable",
+					"value": "~*req.Service-Information.IN-Information.Real-Called-Number",
+					"mandatory": true
+				},
+				{
+					"tag": "AnswerTime",
+					"path": "*cgreq.AnswerTime",
+					"type": "*variable",
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
+				},
+				{
+					"tag": "Usage",
+					"path": "*cgreq.Usage",
+					"type": "*variable",
+					"value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/",
+					"mandatory": true
+				},
+				{
+					"tag": "SubscriberID",
+					"path": "*cgreq.SubscriberId",
+					"type": "*variable",
+					"value": "~*req.Subscription-Id.Subscription-Id-Data",
+					"mandatory": true
+				},
+			],
+			"reply_fields":[
+				{
+					"tag": "ResultCode",
+					"filters": ["*notempty:~*cgrep.Error:"],
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "5030",
+					"blocker": true
+				},
+				{
+					"tag": "ResultCode",
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "2001"
+				},
+				{
+					"tag": "GrantedUnits",
+					"path": "*rep.Granted-Service-Unit.CC-Time",
+					"type": "*variable",
+					"value": "~*cgrep.MaxUsage{*duration_seconds}",
+					"mandatory": true
+				},
+			],
+		},
+		{
+			"id": "VoiceInit",
+			"filters": [
+				"*string:~*vars.*cmd:CCR",
+				"*string:~*req.CC-Request-Type:1",
+				"*prefix:~*req.Service-Context-Id:voice"
+			],
+			"flags": ["*initiate", "*accounts", "*attributes","*continue"],
+			"request_fields":[
+				{
+					"tag": "ToR",
+					"path": "*cgreq.ToR",
+					"type": "*constant",
+					"value": "*voice"
+				},
+				{
+					"tag": "OriginID",
+					"path": "*cgreq.OriginID",
+					"type": "*variable", 
+					"value": "~*req.Session-Id",
+					"mandatory": true
+				},
+				{
+					"tag": "OriginHost",
+					"path": "*cgreq.OriginHost",
+					"type": "*remote_host", 
+					"mandatory": true
+				},
+				{
+					"tag": "RequestType",
+					"path": "*cgreq.RequestType",
+					"type": "*constant",
+					"value": "*attributes"
+				},
+				{
+					"tag": "Category",
+					"path": "*cgreq.Category",
+					"type": "*constant",
+					"value": "call"
+				},
+				{
+					"tag": "Account",
+					"path": "*cgreq.Account",
+					"type": "*constant",
+					"value": "*attributes"
+				},
+				{
+					"tag": "Destination",
+					"path": "*cgreq.Destination",
+					"type": "*variable", 
+					"value": "~*req.Service-Information.IN-Information.Real-Called-Number",
+					"mandatory": true
+				},
+				{
+					"tag": "AnswerTime",
+					"path": "*cgreq.AnswerTime",
+					"type": "*variable", 
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
+				},
+				{
+					"tag": "Usage",
+					"path": "*cgreq.Usage",
+					"type": "*variable", 
+					"value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/",
+					"mandatory": true
+				},
+				{
+					"tag": "SubscriberID",
+					"path": "*cgreq.SubscriberId",
+					"type": "*variable", 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data",
+					"mandatory": true
+				},
+			],
+			"reply_fields":[
+				{
+					"tag": "ResultCode",
+					"filters": ["*notempty:~*cgrep.Error:"], 
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "5030",
+					"blocker": true
+				},
+				{
+					"tag": "ResultCode",
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "2001"
+				},
+				{
+					"tag": "GrantedUnits",
+					"path": "*rep.Granted-Service-Unit.CC-Time",
+					"type": "*variable", 
+					"value": "~*cgrep.MaxUsage{*duration_seconds}",
+					"mandatory": true
+				},
+			],
+		},
+		{
+			"id": "VoiceTerminateEmulate",
+			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:1",
+				"*prefix:~*req.Service-Context-Id:voice","*eq:~*cgrep.MaxUsage:0"],
+			"flags": ["*terminate", "*accounts", "*attributes"],
+			"request_fields":[
+				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*remote_host",
+					"mandatory": true},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*attributes"},
+				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*constant", "value": "*attributes"},
+				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
+					"value": "~*req.Service-Information.IN-Information.Real-Called-Number", "mandatory": true},
+				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable",
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable",
+					"value": "0s", "mandatory": true},
+				{"tag": "SubscriberID", "path": "*cgreq.SubscriberId", "type": "*variable",
+					"value": "~*req.Subscription-Id.Subscription-Id-Data", "mandatory": true}
+			],
+			"reply_fields":[
+				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"],
+					"path": "*rep.Result-Code", "type": "*constant", "value": "5030", "blocker": true},
+				{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant", "value": "2001"},
+			],
+		},
+		{
+			"id": "VoiceUpdate",
+			"filters": [
+				"*string:~*vars.*cmd:CCR",
+				"*string:~*req.CC-Request-Type:2",
+				"*prefix:~*req.Service-Context-Id:voice"
+			],
+			"flags": ["*update", "*accounts", "*attributes"],
+			"request_fields":[
+				{
+					"tag": "ToR",
+					"path": "*cgreq.ToR",
+					"type": "*constant",
+					"value": "*voice"
+				},
+				{
+					"tag": "OriginID",
+					"path": "*cgreq.OriginID",
+					"type": "*variable", 
+					"value": "~*req.Session-Id",
+					"mandatory": true
+				},
+				{
+					"tag": "OriginHost",
+					"path": "*cgreq.OriginHost",
+					"type": "*remote_host", 
+					"mandatory": true
+				},
+				{
+					"tag": "RequestType",
+					"path": "*cgreq.RequestType",
+					"type": "*constant",
+					"value": "*attributes"
+				},
+				{
+					"tag": "Category",
+					"path": "*cgreq.Category",
+					"type": "*constant",
+					"value": "call"
+				},
+				{
+					"tag": "Account",
+					"path": "*cgreq.Account",
+					"type": "*constant",
+					"value": "*attributes"
+				},
+				{
+					"tag": "Destination",
+					"path": "*cgreq.Destination",
+					"type": "*variable", 
+					"value": "~*req.Service-Information.IN-Information.Real-Called-Number",
+					"mandatory": true
+				},
+				{
+					"tag": "AnswerTime",
+					"path": "*cgreq.AnswerTime",
+					"type": "*variable", 
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
+				},
+				{
+					"tag": "Usage",
+					"path": "*cgreq.Usage", "type": "*variable", 
+					"value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/",
+					"mandatory": true
+				},
+				{
+					"tag": "LastUsed",
+					"path": "*cgreq.LastUsed",
+					"type": "*variable", 
+					"value": "~*req.Used-Service-Unit.CC-Time:s/(.*)/${1}s/",
+					"mandatory": true
+				},
+				{
+					"tag": "SubscriberID",
+					"path": "*cgreq.SubscriberId",
+					"type": "*variable", 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data",
+					"mandatory": true
+				},
+			],
+			"reply_fields":[
+				{
+					"tag": "ResultCode",
+					"filters": ["*notempty:~*cgrep.Error:"], 
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "5030",
+					"blocker": true
+				},
+				{
+					"tag": "ResultCode",
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "2001"
+				},
+				{
+					"tag": "GrantedUnits",
+					"path": "*rep.Granted-Service-Unit.CC-Time",
+					"type": "*variable", 
+					"value": "~*cgrep.MaxUsage{*duration_seconds}",
+					"mandatory": true
+				},
+			],
+		},
+		{
+			"id": "VoiceTerminate",
+			"filters": [
+				"*string:~*vars.*cmd:CCR",
+				"*string:~*req.CC-Request-Type:3",
+				"*prefix:~*req.Service-Context-Id:voice"
+			],
+			"flags": ["*terminate", "*accounts", "*attributes", "*cdrs"],
+			"request_fields":[
+				{
+					"tag": "ToR",
+					"path": "*cgreq.ToR",
+					"type": "*constant",
+					"value": "*voice"
+				},
+				{
+					"tag": "OriginID",
+					"path": "*cgreq.OriginID",
+					"type": "*variable", 
+					"value": "~*req.Session-Id",
+					"mandatory": true
+				},
+				{
+					"tag": "OriginHost",
+					"path": "*cgreq.OriginHost",
+					"type": "*remote_host", 
+					"mandatory": true
+				},
+				{
+					"tag": "RequestType",
+					"path": "*cgreq.RequestType",
+					"type": "*constant",
+					"value": "*attributes"
+				},
+				{
+					"tag": "Account",
+					"path": "*cgreq.Account",
+					"type": "*constant",
+					"value": "*attributes"
+				},
+				{
+					"tag": "Destination",
+					"path": "*cgreq.Destination",
+					"type": "*variable", 
+					"value": "~*req.Service-Information.IN-Information.Real-Called-Number",
+					"mandatory": true
+				},
+				{
+					"tag": "AnswerTime",
+					"path": "*cgreq.AnswerTime",
+					"type": "*variable", 
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
+				},
+				{
+					"tag": "Usage",
+					"path": "*cgreq.Usage",
+					"type": "*cc_usage",
+					"mandatory": true, 
+					"value":  "~*req.CC-Request-Number;~*req.Used-Service-Unit.CC-Time:s/(.*)/${1}s/;5m"
+				},
+				{
+					"tag": "LastUsed",
+					"path": "*cgreq.LastUsed", 
+					"type": "*variable", 
+					"value": "~*req.Used-Service-Unit.CC-Time:s/(.*)/${1}s/",
+					"mandatory": true
+				},
+				{
+					"tag": "SubscriberID",
+					"path": "*cgreq.SubscriberId",
+					"type": "*variable", 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data",
+					"mandatory": true
+				},
+			],
+			"reply_fields":[
+				{
+					"tag": "ResultCode",
+					"filters": ["*notempty:~*cgrep.Error:"], 
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "5030",
+					"blocker": true
+				},
+				{
+					"tag": "ResultCode",
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "2001"
+				},
+			],
+		},
+	],
+},
+
+}

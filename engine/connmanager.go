@@ -107,9 +107,7 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.BiRPCConecto
 	}
 	if biRPCClient != nil {
 		for _, c := range connCfg.Conns {
-			if c.Transport == rpcclient.BiRPCGOB ||
-				c.Transport == rpcclient.BiRPCJSON ||
-				c.Address == rpcclient.BiRPCInternal {
+			if c.Address == rpcclient.BiRPCInternal { // register only on internal
 				var rply string
 				if err = conn.Call(utils.SessionSv1RegisterInternalBiJSONConn,
 					connID, &rply); err != nil {

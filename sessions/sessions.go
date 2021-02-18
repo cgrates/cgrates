@@ -1888,12 +1888,23 @@ func (args *V1AuthorizeArgs) ParseFlags(flags string) {
 
 // V1AuthorizeReply are options available in auth reply
 type V1AuthorizeReply struct {
-	Attributes         *engine.AttrSProcessEventReply
-	ResourceAllocation *string
-	MaxUsage           *time.Duration
-	Routes             *engine.SortedRoutes
-	ThresholdIDs       *[]string
-	StatQueueIDs       *[]string
+	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
+	ResourceAllocation *string                        `json:",omitempty"`
+	MaxUsage           *time.Duration                 `json:",omitempty"`
+	Routes             *engine.SortedRoutes           `json:",omitempty"`
+	ThresholdIDs       *[]string                      `json:",omitempty"`
+	StatQueueIDs       *[]string                      `json:",omitempty"`
+
+	needsMaxUsage bool // for gob encoding only
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+// only used for gob encoding
+func (v1AuthReply *V1AuthorizeReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1AuthReply == nil {
+		return
+	}
+	v1AuthReply.needsMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -1914,7 +1925,10 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() utils.NavigableMap2 {
 	}
 	if v1AuthReply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1AuthReply.MaxUsage)
+	} else if v1AuthReply.needsMaxUsage {
+		cgrReply[utils.CapMaxUsage] = utils.NewNMData(0)
 	}
+
 	if v1AuthReply.Routes != nil {
 		cgrReply[utils.CapRoutes] = v1AuthReply.Routes.AsNavigableMap()
 	}
@@ -2160,11 +2174,22 @@ func (args *V1InitSessionArgs) ParseFlags(flags string) {
 
 // V1InitSessionReply are options for initialization reply
 type V1InitSessionReply struct {
-	Attributes         *engine.AttrSProcessEventReply
-	ResourceAllocation *string
-	MaxUsage           *time.Duration
-	ThresholdIDs       *[]string
-	StatQueueIDs       *[]string
+	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
+	ResourceAllocation *string                        `json:",omitempty"`
+	MaxUsage           *time.Duration                 `json:",omitempty"`
+	ThresholdIDs       *[]string                      `json:",omitempty"`
+	StatQueueIDs       *[]string                      `json:",omitempty"`
+
+	needsMaxUsage bool // for gob encoding only
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+// only used for gob encoding
+func (v1Rply *V1InitSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1Rply == nil {
+		return
+	}
+	v1Rply.needsMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2185,6 +2210,8 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap() utils.NavigableMap2 {
 	}
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
+	} else if v1Rply.needsMaxUsage {
+		cgrReply[utils.CapMaxUsage] = utils.NewNMData(0)
 	}
 
 	if v1Rply.ThresholdIDs != nil {
@@ -2403,8 +2430,19 @@ type V1UpdateSessionArgs struct {
 
 // V1UpdateSessionReply contains options for session update reply
 type V1UpdateSessionReply struct {
-	Attributes *engine.AttrSProcessEventReply
-	MaxUsage   *time.Duration
+	Attributes *engine.AttrSProcessEventReply `json:",omitempty"`
+	MaxUsage   *time.Duration                 `json:",omitempty"`
+
+	needsMaxUsage bool // for gob encoding only
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+// only used for gob encoding
+func (v1Rply *V1UpdateSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1Rply == nil {
+		return
+	}
+	v1Rply.needsMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2422,6 +2460,8 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap() utils.NavigableMap2 {
 	}
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
+	} else if v1Rply.needsMaxUsage {
+		cgrReply[utils.CapMaxUsage] = utils.NewNMData(0)
 	}
 	return cgrReply
 }
@@ -2819,12 +2859,23 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 
 // V1ProcessMessageReply is the reply for the ProcessMessage API
 type V1ProcessMessageReply struct {
-	MaxUsage           *time.Duration
-	ResourceAllocation *string
-	Attributes         *engine.AttrSProcessEventReply
-	Routes             *engine.SortedRoutes
-	ThresholdIDs       *[]string
-	StatQueueIDs       *[]string
+	MaxUsage           *time.Duration                 `json:",omitempty"`
+	ResourceAllocation *string                        `json:",omitempty"`
+	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
+	Routes             *engine.SortedRoutes           `json:",omitempty"`
+	ThresholdIDs       *[]string                      `json:",omitempty"`
+	StatQueueIDs       *[]string                      `json:",omitempty"`
+
+	needsMaxUsage bool // for gob encoding only
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+// only used for gob encoding
+func (v1Rply *V1ProcessMessageReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1Rply == nil {
+		return
+	}
+	v1Rply.needsMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2832,6 +2883,8 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() utils.NavigableMap2 {
 	cgrReply := make(utils.NavigableMap2)
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
+	} else if v1Rply.needsMaxUsage {
+		cgrReply[utils.CapMaxUsage] = utils.NewNMData(0)
 	}
 	if v1Rply.ResourceAllocation != nil {
 		cgrReply[utils.CapResourceAllocation] = utils.NewNMData(*v1Rply.ResourceAllocation)
@@ -4066,35 +4119,80 @@ func (sS *SessionS) BiRPCv1STIRIdentity(clnt rpcclient.ClientConnector,
 // Handlers bidirectional methods following
 func (sS *SessionS) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		utils.SessionSv1GetActiveSessions:       sS.BiRPCv1GetActiveSessions,
-		utils.SessionSv1GetActiveSessionsCount:  sS.BiRPCv1GetActiveSessionsCount,
-		utils.SessionSv1GetPassiveSessions:      sS.BiRPCv1GetPassiveSessions,
-		utils.SessionSv1GetPassiveSessionsCount: sS.BiRPCv1GetPassiveSessionsCount,
-
-		utils.SessionSv1AuthorizeEvent:            sS.BiRPCv1AuthorizeEvent,
-		utils.SessionSv1AuthorizeEventWithDigest:  sS.BiRPCv1AuthorizeEventWithDigest,
-		utils.SessionSv1InitiateSession:           sS.BiRPCv1InitiateSession,
-		utils.SessionSv1InitiateSessionWithDigest: sS.BiRPCv1InitiateSessionWithDigest,
-		utils.SessionSv1UpdateSession:             sS.BiRPCv1UpdateSession,
-		utils.SessionSv1SyncSessions:              sS.BiRPCv1SyncSessions,
-		utils.SessionSv1TerminateSession:          sS.BiRPCv1TerminateSession,
-		utils.SessionSv1ProcessCDR:                sS.BiRPCv1ProcessCDR,
-		utils.SessionSv1ProcessMessage:            sS.BiRPCv1ProcessMessage,
-		utils.SessionSv1ProcessEvent:              sS.BiRPCv1ProcessEvent,
-		utils.SessionSv1GetCost:                   sS.BiRPCv1GetCost,
-
-		utils.SessionSv1ForceDisconnect:            sS.BiRPCv1ForceDisconnect,
-		utils.SessionSv1RegisterInternalBiJSONConn: sS.BiRPCv1RegisterInternalBiJSONConn,
-
-		utils.SessionSv1ReplicateSessions:  sS.BiRPCv1ReplicateSessions,
-		utils.SessionSv1SetPassiveSession:  sS.BiRPCv1SetPassiveSession,
-		utils.SessionSv1ActivateSessions:   sS.BiRPCv1ActivateSessions,
-		utils.SessionSv1DeactivateSessions: sS.BiRPCv1DeactivateSessions,
-
-		utils.SessionSv1ReAuthorize:    sS.BiRPCv1ReAuthorize,
-		utils.SessionSv1DisconnectPeer: sS.BiRPCv1DisconnectPeer,
-
-		utils.SessionSv1STIRAuthenticate: sS.BiRPCv1STIRAuthenticate,
-		utils.SessionSv1STIRIdentity:     sS.BiRPCv1STIRIdentity,
+		utils.SessionSv1AuthorizeEvent: func(clnt *rpc2.Client, args *V1AuthorizeArgs, rply *V1AuthorizeReply) (err error) {
+			return sS.BiRPCv1AuthorizeEvent(clnt, args, rply)
+		},
+		utils.SessionSv1AuthorizeEventWithDigest: func(clnt *rpc2.Client, args *V1AuthorizeArgs, rply *V1AuthorizeReplyWithDigest) (err error) {
+			return sS.BiRPCv1AuthorizeEventWithDigest(clnt, args, rply)
+		},
+		utils.SessionSv1InitiateSession: func(clnt *rpc2.Client, args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
+			return sS.BiRPCv1InitiateSession(clnt, args, rply)
+		},
+		utils.SessionSv1InitiateSessionWithDigest: func(clnt *rpc2.Client, args *V1InitSessionArgs, rply *V1InitReplyWithDigest) (err error) {
+			return sS.BiRPCv1InitiateSessionWithDigest(clnt, args, rply)
+		},
+		utils.SessionSv1UpdateSession: func(clnt *rpc2.Client, args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
+			return sS.BiRPCv1UpdateSession(clnt, args, rply)
+		},
+		utils.SessionSv1SyncSessions: func(clnt *rpc2.Client, args *utils.TenantWithOpts, rply *string) (err error) {
+			return sS.BiRPCv1SyncSessions(clnt, args, rply)
+		},
+		utils.SessionSv1TerminateSession: func(clnt *rpc2.Client, args *V1TerminateSessionArgs, rply *string) (err error) {
+			return sS.BiRPCv1TerminateSession(clnt, args, rply)
+		},
+		utils.SessionSv1ProcessCDR: func(clnt *rpc2.Client, args *utils.CGREvent, rply *string) (err error) {
+			return sS.BiRPCv1ProcessCDR(clnt, args, rply)
+		},
+		utils.SessionSv1ProcessMessage: func(clnt *rpc2.Client, args *V1ProcessMessageArgs, rply *V1ProcessMessageReply) (err error) {
+			return sS.BiRPCv1ProcessMessage(clnt, args, rply)
+		},
+		utils.SessionSv1ProcessEvent: func(clnt *rpc2.Client, args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
+			return sS.BiRPCv1ProcessEvent(clnt, args, rply)
+		},
+		utils.SessionSv1GetCost: func(clnt *rpc2.Client, args *V1ProcessEventArgs, rply *V1GetCostReply) (err error) {
+			return sS.BiRPCv1GetCost(clnt, args, rply)
+		},
+		utils.SessionSv1GetActiveSessions: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *[]*ExternalSession) (err error) {
+			return sS.BiRPCv1GetActiveSessions(clnt, args, rply)
+		},
+		utils.SessionSv1GetActiveSessionsCount: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *int) (err error) {
+			return sS.BiRPCv1GetActiveSessionsCount(clnt, args, rply)
+		},
+		utils.SessionSv1GetPassiveSessions: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *[]*ExternalSession) (err error) {
+			return sS.BiRPCv1GetPassiveSessions(clnt, args, rply)
+		},
+		utils.SessionSv1GetPassiveSessionsCount: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *int) (err error) {
+			return sS.BiRPCv1GetPassiveSessionsCount(clnt, args, rply)
+		},
+		utils.SessionSv1ForceDisconnect: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *string) (err error) {
+			return sS.BiRPCv1ForceDisconnect(clnt, args, rply)
+		},
+		utils.SessionSv1RegisterInternalBiJSONConn: func(clnt *rpc2.Client, args string, rply *string) (err error) {
+			return sS.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
+		},
+		utils.SessionSv1ReplicateSessions: func(clnt *rpc2.Client, args ArgsReplicateSessions, rply *string) (err error) {
+			return sS.BiRPCv1ReplicateSessions(clnt, args, rply)
+		},
+		utils.SessionSv1SetPassiveSession: func(clnt *rpc2.Client, args *Session, rply *string) (err error) {
+			return sS.BiRPCv1SetPassiveSession(clnt, args, rply)
+		},
+		utils.SessionSv1ActivateSessions: func(clnt *rpc2.Client, args *utils.SessionIDsWithArgsDispatcher, rply *string) (err error) {
+			return sS.BiRPCv1ActivateSessions(clnt, args, rply)
+		},
+		utils.SessionSv1DeactivateSessions: func(clnt *rpc2.Client, args *utils.SessionIDsWithArgsDispatcher, rply *string) (err error) {
+			return sS.BiRPCv1DeactivateSessions(clnt, args, rply)
+		},
+		utils.SessionSv1ReAuthorize: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *string) (err error) {
+			return sS.BiRPCv1ReAuthorize(clnt, args, rply)
+		},
+		utils.SessionSv1DisconnectPeer: func(clnt *rpc2.Client, args *utils.DPRArgs, rply *string) (err error) {
+			return sS.BiRPCv1DisconnectPeer(clnt, args, rply)
+		},
+		utils.SessionSv1STIRAuthenticate: func(clnt *rpc2.Client, args *V1STIRAuthenticateArgs, rply *string) (err error) {
+			return sS.BiRPCv1STIRAuthenticate(clnt, args, rply)
+		},
+		utils.SessionSv1STIRIdentity: func(clnt *rpc2.Client, args *V1STIRIdentityArgs, rply *string) (err error) {
+			return sS.BiRPCv1STIRIdentity(clnt, args, rply)
+		},
 	}
 }
