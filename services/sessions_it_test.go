@@ -83,7 +83,8 @@ func TestSessionSReload(t *testing.T) {
 	if stordb.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	/*
+
+
 		var reply string
 		if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongonew"),

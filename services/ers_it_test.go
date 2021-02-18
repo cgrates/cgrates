@@ -79,16 +79,17 @@ func TestEventReaderSReload(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	runtime.Gosched()
-	runtime.Gosched()
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !attrS.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+
+	runtime.Gosched()
 	err := attrS.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	time.Sleep(10 * time.Millisecond)
+	runtime.Gosched()
 	err = attrS.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)

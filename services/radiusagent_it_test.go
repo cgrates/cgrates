@@ -21,6 +21,7 @@ package services
 
 import (
 	"path"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -139,10 +140,13 @@ func TestRadiusAgentReload2(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	runtime.Gosched()
+	runtime.Gosched()
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-
+	runtime.Gosched()
+	runtime.Gosched()
 	err := srv.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)

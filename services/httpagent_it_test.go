@@ -21,6 +21,7 @@ package services
 
 import (
 	"path"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -72,13 +73,16 @@ func TestHTTPAgentReload(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+	runtime.Gosched()
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
+	runtime.Gosched()
 	srvReload := srv.Reload()
 	if srvReload != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", srvReload)
 	}
+	runtime.Gosched()
 	err := srv.Start()
 	if err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
