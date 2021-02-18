@@ -81,6 +81,7 @@ var (
 		testBiRPCv1ReplicateSessions,
 		testBiRPCv1AuthorizeEvent,
 		testBiRPCv1AuthorizeEvent2,
+		testBiRPCv1AuthorizeEventWithDigest,
 	}
 )
 
@@ -2404,6 +2405,8 @@ func testBiRPCv1ReplicateSessions(t *testing.T) {
 }
 
 func testBiRPCv1AuthorizeEvent(t *testing.T) {
+	tmp := engine.Cache
+
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2431,6 +2434,7 @@ func testBiRPCv1AuthorizeEvent(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, connMgr)
 
 	cgrEvent := &utils.CGREvent{
+		ID: "TestID",
 		Event: map[string]interface{}{
 			utils.Usage: "10s",
 		},
@@ -2447,15 +2451,29 @@ func testBiRPCv1AuthorizeEvent(t *testing.T) {
 	}
 
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
-
 	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	args.CGREvent = cgrEvent
 	//RPC caching
-	sessions.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	sessions.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = -1
 	expected = "MANDATORY_IE_MISSING: [subsystems]"
+
+	caches := engine.NewCacheS(cfg, dm, nil)
+	value := &utils.CachedRPCResponse{
+		Result: &V1AuthorizeReply{
+			ResourceAllocation: utils.StringPointer("ROUTE_LEASTCOST_1"),
+		},
+	}
+	engine.SetCache(caches)
+	caches.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, args.CGREvent.ID),
+		value, nil, true, utils.NonTransactional)
+	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err != nil {
+		t.Error(err)
+	}
+	engine.Cache = tmp
+
 	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -2537,7 +2555,6 @@ func testBiRPCv1AuthorizeEvent2(t *testing.T) {
 
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "TestID",
 		Event: map[string]interface{}{
 			utils.Usage: "10s",
 		},
@@ -2559,6 +2576,7 @@ func testBiRPCv1AuthorizeEvent2(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
+	args.CGREvent.ID = "TestID"
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err != nil {
 		t.Error(err)
@@ -2612,5 +2630,114 @@ func testBiRPCv1AuthorizeEvent2(t *testing.T) {
 		true, false, false, cgrEvent, utils.Paginator{}, false, "")
 	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func testBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
+	engine.Cache.Clear(nil)
+	clnt := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				cgrEv := engine.AttrSProcessEventReply{
+					CGREvent: &utils.CGREvent{
+						ID:     "TestID",
+						Tenant: "cgrates.org",
+						Event:  map[string]interface{}{},
+					},
+				}
+				*reply.(*engine.AttrSProcessEventReply) = cgrEv
+				return nil
+			},
+			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				cghrgs := []*engine.ChrgSProcessEventReply{
+					{
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "TestID",
+							Event: map[string]interface{}{
+								utils.Usage: "10s",
+							},
+						},
+					},
+				}
+				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
+				return nil
+			},
+			utils.ResourceSv1AuthorizeResources: func(args interface{}, reply interface{}) error {
+				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "new_tenant" {
+					return utils.ErrNotImplemented
+				}
+				return nil
+			},
+			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
+				routesReply := engine.SortedRoutes{
+					SortedRoutes: []*engine.SortedRoute{
+						{
+							RouteID: "RouteID",
+						},
+					},
+				}
+				*reply.(*engine.SortedRoutes) = routesReply
+				return nil
+			},
+			utils.ThresholdSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				return nil
+			},
+			utils.StatSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- clnt
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().RouteSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)}
+	cfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	cfg.SessionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):  chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):     chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):      chanInternal,
+	})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Usage: "10s",
+		},
+	}
+	args := NewV1AuthorizeArgs(true, []string{},
+		true, []string{}, true, []string{}, true, true,
+		true, false, false, cgrEvent, utils.Paginator{}, false, "")
+
+	authReply := new(V1AuthorizeReplyWithDigest)
+	expectedRply := &V1AuthorizeReplyWithDigest{
+		AttributesDigest:   utils.StringPointer(utils.EmptyString),
+		ResourceAllocation: utils.StringPointer(utils.EmptyString),
+		RoutesDigest:       utils.StringPointer("RouteID"),
+		MaxUsage:           10800,
+		Thresholds:         utils.StringPointer(utils.EmptyString),
+		StatQueues:         utils.StringPointer(utils.EmptyString),
+	}
+	if err := sessions.BiRPCv1AuthorizeEventWithDigest(nil, args, authReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(authReply, expectedRply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedRply), utils.ToJSON(authReply))
+	}
+
+	sessions.cgrCfg.SessionSCfg().ChargerSConns = nil
+	expected := "ChargerS is disabled"
+	if err := sessions.BiRPCv1AuthorizeEventWithDigest(nil, args, authReply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
