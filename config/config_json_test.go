@@ -44,8 +44,6 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_timezone:     utils.StringPointer("Local"),
 		Connect_attempts:     utils.IntPointer(5),
 		Reconnects:           utils.IntPointer(-1),
-		Min_call_duration:    utils.StringPointer("0s"),
-		Max_call_duration:    utils.StringPointer("3h"),
 		Connect_timeout:      utils.StringPointer("1s"),
 		Reply_timeout:        utils.StringPointer("2s"),
 		Locking_timeout:      utils.StringPointer("0"),
@@ -742,6 +740,12 @@ func TestSmgJsonCfg(t *testing.T) {
 		Channel_sync_interval: utils.StringPointer("0"),
 		Terminate_attempts:    utils.IntPointer(5),
 		Alterable_fields:      &[]string{},
+		Default_usage: &map[string]string{
+			utils.MetaAny:   "3h",
+			utils.MetaVoice: "3h",
+			utils.MetaData:  "1048576",
+			utils.MetaSMS:   "1",
+		},
 		Stir: &STIRJsonCfg{
 			Allowed_attest:      &[]string{utils.MetaAny},
 			Payload_maxduration: utils.StringPointer("-1"),

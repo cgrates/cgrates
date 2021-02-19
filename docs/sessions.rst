@@ -54,11 +54,8 @@ debit_interval
 store_session_costs
 	Used in case of decoupling events charging from CDR processing. The session costs debitted by *SessionS* will be stored into *StorDB.sessions_costs* table and merged into the CDR later when received.
 
-min_call_duration
-	Imposes a minimum call duration for event authorization.
-
-max_call_duration
-	Imposes the maximum call duration for event authorization.
+default_usage
+	Imposes the default usage for each tipe of call.
 
 session_ttl
 	Enables automatic detection/removal of stale sessions. Zero will disable the functionality.

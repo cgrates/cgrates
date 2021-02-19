@@ -121,6 +121,12 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			PrivateKeyPath:     "randomPath",
 			PublicKeyPath:      "randomPath",
 		},
+		DefaultUsage: map[string]time.Duration{
+			utils.MetaAny:   3 * time.Hour,
+			utils.MetaVoice: 3 * time.Hour,
+			utils.MetaData:  1048576,
+			utils.MetaSMS:   1,
+		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -257,6 +263,12 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		SessionTTLLastUsage: utils.DurationPointer(1),
 		SessionTTLLastUsed:  utils.DurationPointer(10),
 		SessionTTLUsage:     utils.DurationPointer(1),
+		DefaultUsage: map[string]time.Duration{
+			utils.MetaAny:   3 * time.Hour,
+			utils.MetaVoice: 3 * time.Hour,
+			utils.MetaData:  1048576,
+			utils.MetaSMS:   1,
+		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -327,6 +339,12 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.PrivateKeyPathCfg:     "",
 		},
 		utils.SchedulerConnsCfg: []string{},
+		utils.DefaultUsageCfg: map[string]string{
+			utils.MetaAny:   "3h0m0s",
+			utils.MetaVoice: "3h0m0s",
+			utils.MetaData:  "1048576",
+			utils.MetaSMS:   "1",
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -394,6 +412,12 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.PrivateKeyPathCfg:     "",
 		},
 		utils.SchedulerConnsCfg: []string{utils.MetaInternal, "*conn1"},
+		utils.DefaultUsageCfg: map[string]string{
+			utils.MetaAny:   "3h0m0s",
+			utils.MetaVoice: "3h0m0s",
+			utils.MetaData:  "1048576",
+			utils.MetaSMS:   "1",
+		},
 	}
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
 	if err != nil {
@@ -844,6 +868,12 @@ func TestSessionSCfgClone(t *testing.T) {
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "randomPath",
 			PublicKeyPath:      "randomPath",
+		},
+		DefaultUsage: map[string]time.Duration{
+			utils.MetaAny:   3 * time.Hour,
+			utils.MetaVoice: 3 * time.Hour,
+			utils.MetaData:  1048576,
+			utils.MetaSMS:   1,
 		},
 	}
 	rcv := ban.Clone()
