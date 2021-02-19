@@ -25,7 +25,6 @@ import (
 	"path"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -140,13 +139,11 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		"CDRsConns":     []interface{}{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		"ReplicationConns":    []interface{}{},
-		"MaxCallDuration":     float64(3 * time.Hour),
 		"SessionIndexes":      map[string]interface{}{"OriginID": true},
 		"ClientProtocol":      1.,
 		"TerminateAttempts":   5.,
 		"ChannelSyncInterval": 0.,
 		"DebitInterval":       0.,
-		"MinCallDuration":     0.,
 		"SessionTTL":          0.,
 		"SessionTTLLastUsed":  nil,
 		"SessionTTLLastUsage": nil,
@@ -154,6 +151,12 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		"SessionTTLUsage":     nil,
 		"StoreSCosts":         false,
 		"AlterableFields":     map[string]interface{}{},
+		"DefaultUsage": map[string]interface{}{
+			utils.META_ANY: "3h0m0s",
+			utils.VOICE:    "3h0m0s",
+			utils.DATA:     "1048576",
+			utils.SMS:      "1",
+		},
 	}
 	if *encoding == utils.MetaGOB {
 		var empty []interface{}

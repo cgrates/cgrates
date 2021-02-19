@@ -659,14 +659,18 @@ func TestSmgJsonCfg(t *testing.T) {
 		Replication_conns:     &[]string{},
 		Debit_interval:        utils.StringPointer("0s"),
 		Store_session_costs:   utils.BoolPointer(false),
-		Min_call_duration:     utils.StringPointer("0s"),
-		Max_call_duration:     utils.StringPointer("3h"),
 		Session_ttl:           utils.StringPointer("0s"),
 		Session_indexes:       &[]string{},
 		Client_protocol:       utils.Float64Pointer(1.0),
 		Channel_sync_interval: utils.StringPointer("0"),
 		Terminate_attempts:    utils.IntPointer(5),
 		Alterable_fields:      &[]string{},
+		Default_usage: &map[string]string{
+			utils.META_ANY: "3h",
+			utils.VOICE:    "3h",
+			utils.DATA:     "1048576",
+			utils.SMS:      "1",
+		},
 	}
 	if cfg, err := dfCgrJsonCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)

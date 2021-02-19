@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -87,8 +88,6 @@ type SessionSCfg struct {
 	ReplicationConns    []string
 	DebitInterval       time.Duration
 	StoreSCosts         bool
-	MinCallDuration     time.Duration
-	MaxCallDuration     time.Duration
 	SessionTTL          time.Duration
 	SessionTTLMaxDelay  *time.Duration
 	SessionTTLLastUsed  *time.Duration
@@ -99,11 +98,12 @@ type SessionSCfg struct {
 	ChannelSyncInterval time.Duration
 	TerminateAttempts   int
 	AlterableFields     utils.StringSet
+	DefaultUsage        map[string]time.Duration
 }
 
 func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Enabled != nil {
 		scfg.Enabled = *jsnCfg.Enabled
@@ -218,16 +218,6 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.Store_session_costs != nil {
 		scfg.StoreSCosts = *jsnCfg.Store_session_costs
 	}
-	if jsnCfg.Min_call_duration != nil {
-		if scfg.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Max_call_duration != nil {
-		if scfg.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_call_duration); err != nil {
-			return err
-		}
-	}
 	if jsnCfg.Session_ttl != nil {
 		if scfg.SessionTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl); err != nil {
 			return err
@@ -278,7 +268,21 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.Alterable_fields != nil {
 		scfg.AlterableFields = utils.NewStringSet(*jsnCfg.Alterable_fields)
 	}
+	if jsnCfg.Default_usage != nil {
+		for k, v := range *jsnCfg.Default_usage {
+			if scfg.DefaultUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
+				return
+			}
+		}
+	}
 	return nil
+}
+
+func (scfg *SessionSCfg) GetDefaultUsage(tor string) time.Duration {
+	if tor == utils.EmptyString {
+		tor = utils.META_ANY
+	}
+	return scfg.DefaultUsage[tor]
 }
 
 func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
@@ -286,14 +290,15 @@ func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 	if scfg.DebitInterval != 0 {
 		debitInterval = scfg.DebitInterval.String()
 	}
-	var minCallDuration string = "0"
-	if scfg.MinCallDuration != 0 {
-		minCallDuration = scfg.MinCallDuration.String()
+	maxComputed := make(map[string]interface{})
+	for key, item := range scfg.DefaultUsage {
+		if key == utils.ANY || key == utils.VOICE {
+			maxComputed[key] = item.String()
+		} else {
+			maxComputed[key] = strconv.Itoa(int(item))
+		}
 	}
-	var maxCallDuration string = "0"
-	if scfg.MaxCallDuration != 0 {
-		maxCallDuration = scfg.MaxCallDuration.String()
-	}
+
 	var sessionTTL string = "0"
 	if scfg.SessionTTL != 0 {
 		sessionTTL = scfg.SessionTTL.String()
@@ -406,8 +411,6 @@ func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
 		utils.DebitIntervalCfg:       debitInterval,
 		utils.StoreSCostsCfg:         scfg.StoreSCosts,
-		utils.MinCallDurationCfg:     minCallDuration,
-		utils.MaxCallDurationCfg:     maxCallDuration,
 		utils.SessionTTLCfg:          sessionTTL,
 		utils.SessionTTLMaxDelayCfg:  sessionTTLMaxDelay,
 		utils.SessionTTLLastUsedCfg:  sessionTTLLastUsed,
@@ -418,6 +421,7 @@ func (scfg *SessionSCfg) AsMapInterface() map[string]interface{} {
 		utils.ChannelSyncIntervalCfg: channelSyncInterval,
 		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
 		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
+		utils.DefaultUsageCfg:        maxComputed,
 	}
 }
 
