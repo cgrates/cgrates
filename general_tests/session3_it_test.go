@@ -315,7 +315,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 		var rply string
 		if err := ses3RPC.Call(utils.SessionSv1TerminateSession,
 			args, &rply); err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 		if rply != utils.OK {
 			t.Errorf("Unexpected reply: %s", rply)
