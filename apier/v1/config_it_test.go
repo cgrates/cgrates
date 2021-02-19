@@ -168,6 +168,12 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		},
 		"store_session_costs": false,
 		"terminate_attempts":  5.,
+		utils.DefaultUsageCfg: map[string]string{
+			utils.MetaAny:   "3h0m0s",
+			utils.MetaVoice: "3h0m0s",
+			utils.MetaData:  "1048576",
+			utils.MetaSMS:   "1",
+		},
 	}
 	if *encoding == utils.MetaGOB {
 		var empty []string

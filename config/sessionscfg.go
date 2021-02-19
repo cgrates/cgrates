@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -111,6 +112,7 @@ type SessionSCfg struct {
 	MinDurLowBalance    time.Duration
 	SchedulerConns      []string
 	STIRCfg             *STIRcfg
+	DefaultUsage        map[string]time.Duration
 }
 
 func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -275,6 +277,13 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			return err
 		}
 	}
+	if jsnCfg.Default_usage != nil {
+		for k, v := range *jsnCfg.Default_usage {
+			if scfg.DefaultUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
+				return
+			}
+		}
+	}
 	if jsnCfg.Scheduler_conns != nil {
 		scfg.SchedulerConns = make([]string, len(*jsnCfg.Scheduler_conns))
 		for idx, connID := range *jsnCfg.Scheduler_conns {
@@ -288,8 +297,23 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	return scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir)
 }
 
+func (scfg *SessionSCfg) GetDefaultUsage(tor string) time.Duration {
+	if tor == utils.EmptyString {
+		tor = utils.MetaAny
+	}
+	return scfg.DefaultUsage[tor]
+}
+
 // AsMapInterface returns the config as a map[string]interface{}
 func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	maxComputed := make(map[string]string)
+	for key, item := range scfg.DefaultUsage {
+		if key == utils.MetaAny || key == utils.MetaVoice {
+			maxComputed[key] = item.String()
+		} else {
+			maxComputed[key] = strconv.Itoa(int(item))
+		}
+	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
@@ -304,6 +328,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.DebitIntervalCfg:       "0",
 		utils.SessionTTLCfg:          "0",
+		utils.DefaultUsageCfg:        maxComputed,
 	}
 	if scfg.DebitInterval != 0 {
 		initialMP[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
@@ -438,6 +463,10 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		SessionIndexes:  scfg.SessionIndexes.Clone(),
 		AlterableFields: scfg.AlterableFields.Clone(),
 		STIRCfg:         scfg.STIRCfg.Clone(),
+		DefaultUsage:    make(map[string]time.Duration),
+	}
+	for k, v := range scfg.DefaultUsage {
+		cln.DefaultUsage[k] = v
 	}
 	if scfg.SessionTTLMaxDelay != nil {
 		cln.SessionTTLMaxDelay = utils.DurationPointer(*scfg.SessionTTLMaxDelay)

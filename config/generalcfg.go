@@ -46,12 +46,10 @@ type GeneralCfg struct {
 	ConnectTimeout   time.Duration // timeout for RPC connection attempts
 	ReplyTimeout     time.Duration // timeout replies if not reaching back
 	LockingTimeout   time.Duration // locking mechanism timeout to avoid deadlocks
-	MinCallDuration  time.Duration
-	MaxCallDuration  time.Duration
-	DigestSeparator  string //
-	DigestEqual      string //
-	RSRSep           string // separator used to split RSRParser (by default is used ";")
-	MaxParallelConns int    // the maximum number of connection used by the *parallel strategy
+	DigestSeparator  string        //
+	DigestEqual      string        //
+	RSRSep           string        // separator used to split RSRParser (by default is used ";")
+	MaxParallelConns int           // the maximum number of connection used by the *parallel strategy
 }
 
 // loadFromJSONCfg loads General config from JsonCfg
@@ -86,16 +84,6 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	}
 	if jsnGeneralCfg.Reconnects != nil {
 		gencfg.Reconnects = *jsnGeneralCfg.Reconnects
-	}
-	if jsnGeneralCfg.Min_call_duration != nil {
-		if gencfg.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Min_call_duration); err != nil {
-			return err
-		}
-	}
-	if jsnGeneralCfg.Max_call_duration != nil {
-		if gencfg.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Max_call_duration); err != nil {
-			return err
-		}
 	}
 	if jsnGeneralCfg.Connect_timeout != nil {
 		if gencfg.ConnectTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Connect_timeout); err != nil {
@@ -177,8 +165,6 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.FailedPostsTTLCfg:   "0",
 		utils.ConnectTimeoutCfg:   "0",
 		utils.ReplyTimeoutCfg:     "0",
-		utils.MinCallDurationCfg:  "0",
-		utils.MaxCallDurationCfg:  "0",
 	}
 
 	if gencfg.LockingTimeout != 0 {
@@ -197,12 +183,6 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		initialMP[utils.ReplyTimeoutCfg] = gencfg.ReplyTimeout.String()
 	}
 
-	if gencfg.MinCallDuration != 0 {
-		initialMP[utils.MinCallDurationCfg] = gencfg.MinCallDuration.String()
-	}
-	if gencfg.MaxCallDuration != 0 {
-		initialMP[utils.MaxCallDurationCfg] = gencfg.MaxCallDuration.String()
-	}
 	return
 }
 
@@ -228,8 +208,6 @@ func (gencfg GeneralCfg) Clone() *GeneralCfg {
 		ConnectTimeout:   gencfg.ConnectTimeout,
 		ReplyTimeout:     gencfg.ReplyTimeout,
 		LockingTimeout:   gencfg.LockingTimeout,
-		MinCallDuration:  gencfg.MinCallDuration,
-		MaxCallDuration:  gencfg.MaxCallDuration,
 		DigestSeparator:  gencfg.DigestSeparator,
 		DigestEqual:      gencfg.DigestEqual,
 		RSRSep:           gencfg.RSRSep,

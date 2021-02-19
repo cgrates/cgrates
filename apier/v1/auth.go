@@ -51,7 +51,7 @@ func (apierSv1 *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithOpts, m
 	}
 	if usageRecord.Usage == utils.EmptyString {
 		usageRecord.Usage = strconv.FormatFloat(
-			apierSv1.Config.GeneralCfg().MaxCallDuration.Seconds(), 'f', -1, 64)
+			float64(apierSv1.Config.SessionSCfg().GetDefaultUsage(usageRecord.ToR)), 'f', -1, 64)
 	}
 	cd, err := usageRecord.AsCallDescriptor(apierSv1.Config.GeneralCfg().DefaultTimezone, false)
 	if err != nil {

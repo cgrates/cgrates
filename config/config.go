@@ -167,6 +167,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.sessionSCfg.STIRCfg = new(STIRcfg)
+	cfg.sessionSCfg.DefaultUsage = make(map[string]time.Duration)
 	cfg.fsAgentCfg = new(FsAgentCfg)
 	cfg.kamAgentCfg = new(KamAgentCfg)
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)

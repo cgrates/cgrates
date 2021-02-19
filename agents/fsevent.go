@@ -398,8 +398,8 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	if err != nil {
 		return
 	}
-	cgrEv.Event[utils.Usage] = config.CgrConfig().GeneralCfg().MaxCallDuration // no billsec available in auth
-	args = &sessions.V1AuthorizeArgs{                                          // defaults
+	cgrEv.Event[utils.Usage] = config.CgrConfig().SessionSCfg().GetDefaultUsage(utils.IfaceAsString(cgrEv.Event[utils.ToR])) // no billsec available in auth
+	args = &sessions.V1AuthorizeArgs{                                                                                        // defaults
 		CGREvent: cgrEv,
 	}
 	subsystems, has := fsev[VarCGRFlags]
