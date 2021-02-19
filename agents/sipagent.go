@@ -52,10 +52,11 @@ var (
 func NewSIPAgent(connMgr *engine.ConnManager, cfg *config.CGRConfig,
 	filterS *engine.FilterS) (sa *SIPAgent, err error) {
 	sa = &SIPAgent{
-		connMgr: connMgr,
-		filterS: filterS,
-		cfg:     cfg,
-		ackMap:  make(map[string]chan struct{}),
+		connMgr:  connMgr,
+		filterS:  filterS,
+		cfg:      cfg,
+		ackMap:   make(map[string]chan struct{}),
+		stopChan: make(chan struct{}),
 	}
 	msgTemplates := sa.cfg.TemplatesCfg()
 	// Inflate *template field types
@@ -96,7 +97,6 @@ func (sa *SIPAgent) Shutdown() {
 
 // ListenAndServe will run the SIP handler doing also the connection to listen address
 func (sa *SIPAgent) ListenAndServe() (err error) {
-	sa.stopChan = make(chan struct{})
 	utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
 		utils.SIPAgent, sa.cfg.SIPAgentCfg().ListenNet, sa.cfg.SIPAgentCfg().Listen))
 	switch sa.cfg.SIPAgentCfg().ListenNet {
@@ -107,6 +107,9 @@ func (sa *SIPAgent) ListenAndServe() (err error) {
 	default:
 		return fmt.Errorf("Unecepected protocol %s", sa.cfg.SIPAgentCfg().ListenNet)
 	}
+}
+func (sa *SIPAgent) InitStopChan() {
+	sa.stopChan = make(chan struct{})
 }
 
 func (sa *SIPAgent) serveUDP(stop chan struct{}) (err error) {
