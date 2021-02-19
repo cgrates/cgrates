@@ -392,11 +392,16 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []string{},
-		MaxCallDuration:   3 * time.Hour,
 		SessionIndexes:    utils.NewStringMap(),
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
+		DefaultUsage: map[string]time.Duration{
+			utils.META_ANY: 3 * time.Hour,
+			utils.VOICE:    3 * time.Hour,
+			utils.DATA:     1048576,
+			utils.SMS:      1,
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
@@ -948,11 +953,16 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []string{},
-		MaxCallDuration:   3 * time.Hour,
 		SessionIndexes:    utils.NewStringMap(),
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
 		AlterableFields:   utils.NewStringSet([]string{}),
+		DefaultUsage: map[string]time.Duration{
+			utils.META_ANY: 3 * time.Hour,
+			utils.VOICE:    3 * time.Hour,
+			utils.DATA:     1048576,
+			utils.SMS:      1,
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
@@ -989,11 +999,15 @@ func testCGRConfigReloadAll(t *testing.T) {
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []string{},
-		MaxCallDuration:   3 * time.Hour,
 		SessionIndexes:    utils.NewStringMap(),
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
+		AlterableFields:   utils.NewStringSet([]string{}), DefaultUsage: map[string]time.Duration{
+			utils.META_ANY: 3 * time.Hour,
+			utils.VOICE:    3 * time.Hour,
+			utils.DATA:     1048576,
+			utils.SMS:      1,
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))

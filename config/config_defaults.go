@@ -349,8 +349,12 @@ const CGRATES_CFG_JSON = `
 	"replication_conns": [],				// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
 	"store_session_costs": false,			// enable storing of the session costs within CDRs
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+	"default_usage":{						// the usage if the event is missing the usage field
+			"*any": "3h",
+			"*voice": "3h",
+			"*data": "1048576",
+			"*sms": "1",
+	},
 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
 	//"session_ttl_max_delay": "",			// activates session_ttl randomization and limits the maximum possible delay
 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default

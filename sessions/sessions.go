@@ -1306,7 +1306,7 @@ func (sS *SessionS) authEvent(tnt string, evStart engine.MapEvent, forceDuration
 			return
 		}
 		err = nil
-		eventUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
+		eventUsage = sS.cgrCfg.SessionSCfg().GetDefaultUsage(evStart.GetStringIgnoreErrors(utils.ToR))
 		evStart[utils.Usage] = eventUsage // will be used in CD
 	}
 	s := &Session{
@@ -1363,6 +1363,9 @@ func (sS *SessionS) authEvent(tnt string, evStart engine.MapEvent, forceDuration
 func (sS *SessionS) initSession(tnt string, evStart engine.MapEvent, clntConnID string,
 	resID string, dbtItval time.Duration, argDisp *utils.ArgDispatcher, isMsg, forceDuration bool) (s *Session, err error) {
 	cgrID := GetSetCGRID(evStart)
+	if !evStart.HasField(utils.Usage) && evStart.HasField(utils.LastUsed) {
+		evStart[utils.Usage] = evStart[utils.LastUsed]
+	}
 	s = &Session{
 		CGRID:         cgrID,
 		Tenant:        tnt,
@@ -1415,7 +1418,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent, isMsg, for
 			return
 		}
 		err = nil
-		reqMaxUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
+		reqMaxUsage = sS.cgrCfg.SessionSCfg().GetDefaultUsage(updtEv.GetStringIgnoreErrors(utils.ToR))
 		updtEv[utils.Usage] = reqMaxUsage
 	}
 	var maxUsageSet bool // so we know if we have set the 0 on purpose
@@ -2214,7 +2217,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		isPrepaid := s.debitStop != nil
 		s.RUnlock()
 		if isPrepaid { //active debit
-			rply.MaxUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
+			rply.MaxUsage = sS.cgrCfg.SessionSCfg().GetDefaultUsage(ev.GetStringIgnoreErrors(utils.ToR))
 		} else {
 			var maxUsage time.Duration
 			if maxUsage, err = sS.updateSession(s, nil, false, args.ForceDuration); err != nil {
@@ -3169,7 +3172,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				isPrepaid := s.debitStop != nil
 				s.RUnlock()
 				if isPrepaid { //active debit
-					rply.MaxUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
+					rply.MaxUsage = sS.cgrCfg.SessionSCfg().GetDefaultUsage(ev.GetStringIgnoreErrors(utils.ToR))
 				} else {
 					var maxUsage time.Duration
 					if maxUsage, err = sS.updateSession(s, nil, false, ralsFlagsWithParams.HasKey(utils.MetaFD)); err != nil {

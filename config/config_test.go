@@ -603,14 +603,18 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		ReplicationConns:    []string{},
 		DebitInterval:       0 * time.Second,
 		StoreSCosts:         false,
-		MinCallDuration:     0 * time.Second,
-		MaxCallDuration:     3 * time.Hour,
 		SessionTTL:          0 * time.Second,
 		SessionIndexes:      utils.StringMap{},
 		ClientProtocol:      1.0,
 		ChannelSyncInterval: 0,
 		TerminateAttempts:   5,
 		AlterableFields:     utils.NewStringSet([]string{}),
+		DefaultUsage: map[string]time.Duration{
+			utils.META_ANY: 3 * time.Hour,
+			utils.VOICE:    3 * time.Hour,
+			utils.DATA:     1048576,
+			utils.SMS:      1,
+		},
 	}
 	if !reflect.DeepEqual(eSessionSCfg, cgrCfg.sessionSCfg) {
 		t.Errorf("expecting: %s, received: %s",

@@ -1712,8 +1712,6 @@ const (
 	ReplicationConnsCfg    = "replication_conns"
 	DebitIntervalCfg       = "debit_interval"
 	StoreSCostsCfg         = "store_session_costs"
-	MinCallDurationCfg     = "min_call_duration"
-	MaxCallDurationCfg     = "max_call_duration"
 	SessionTTLCfg          = "session_ttl"
 	SessionTTLMaxDelayCfg  = "session_ttl_max_delay"
 	SessionTTLLastUsedCfg  = "session_ttl_last_used"
@@ -1725,6 +1723,7 @@ const (
 	TerminateAttemptsCfg   = "terminate_attempts"
 	AlterableFieldsCfg     = "alterable_fields"
 	MinDurLowBalanceCfg    = "min_dur_low_balance"
+	DefaultUsageCfg        = "default_usage"
 )
 
 // FsAgentCfg

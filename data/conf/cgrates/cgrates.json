@@ -31,6 +31,8 @@
 // 	"digest_equal": ":",									// equal symbol used in case of digests
 // 	"rsr_separator": ";",									// separator used within RSR fields
 // 	"max_parralel_conns": 100,								// the maximum number of connection used by the *parallel strategy
+// 	"concurrent_requests": 0,								// number of active concurrent requests 
+// 	"concurrent_strategy": "*busy",							// strategy for limit active concurrent requests
 // },
 
 
@@ -326,12 +328,17 @@
 // 	"replication_conns": [],				// replicate sessions towards these session services
 // 	"debit_interval": "0s",					// interval to perform debits on.
 // 	"store_session_costs": false,			// enable storing of the session costs within CDRs
-// 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-// 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+// 	"default_usage":{						// the usage if the event is missing the usage field
+// 			"*any": "3h",
+// 			"*voice": "3h",
+// 			"*data": "1048576",
+// 			"*sms": "1",
+// 	},
 // 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
 // 	//"session_ttl_max_delay": "",			// activates session_ttl randomization and limits the maximum possible delay
 // 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
 // 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
+// 	//"session_last_usage": "",				// tweak LastUsage for session timing-out, not defined by default
 // 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 // 	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
 // 	"channel_sync_interval": "0",			// sync channels to detect stale sessions (0 to disable)

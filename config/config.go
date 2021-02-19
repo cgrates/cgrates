@@ -158,6 +158,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.CdreProfiles = make(map[string]*CdreCfg)
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 	cfg.sessionSCfg = new(SessionSCfg)
+	cfg.sessionSCfg.DefaultUsage = make(map[string]time.Duration)
 	cfg.fsAgentCfg = new(FsAgentCfg)
 	cfg.kamAgentCfg = new(KamAgentCfg)
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)

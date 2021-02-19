@@ -72,6 +72,7 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(sescfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, sescfg)
 	}
+	sescfg.DefaultUsage = make(map[string]time.Duration)
 	cfgJSONStr := `{
 "sessions": {
 	"enabled": false,						// starts session manager service: <true|false>
@@ -86,8 +87,6 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
 	"replication_conns": [],				// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
 	//"session_ttl_max_delay": "",			// activates session_ttl randomization and limits the maximum possible delay
 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
@@ -95,6 +94,12 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
 	"channel_sync_interval": "0",			// sync channels regularly (0 to disable sync session)
+	"default_usage":{						// the usage if the event is missing the usage field
+		"*any": "3h",
+		"*voice": "3h",
+		"*data": "1048576",
+		"*sms": "1",
+	},
 },
 }`
 	expected = SessionSCfg{
@@ -108,9 +113,14 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 		AttrSConns:       []string{},
 		CDRsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 		ReplicationConns: []string{},
-		MaxCallDuration:  time.Duration(3 * time.Hour),
 		SessionIndexes:   map[string]bool{},
 		ClientProtocol:   1,
+		DefaultUsage: map[string]time.Duration{
+			utils.META_ANY: 3 * time.Hour,
+			utils.VOICE:    3 * time.Hour,
+			utils.DATA:     1048576,
+			utils.SMS:      1,
+		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -125,6 +135,7 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 
 func TestSessionSCfgAsMapInterface(t *testing.T) {
 	var sescfg SessionSCfg
+	sescfg.DefaultUsage = make(map[string]time.Duration)
 	cfgJSONStr := `{
 	"sessions": {
 		"enabled": false,
@@ -140,8 +151,6 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 		"replication_conns": [],
 		"debit_interval": "0s",
 		"store_session_costs": false,
-		"min_call_duration": "0s",
-		"max_call_duration": "3h",
 		"session_ttl": "0s",
 		"session_indexes": [],
 		"client_protocol": 1.0,
@@ -156,6 +165,12 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 			"privatekey_path": "",
 		},
 		"scheduler_conns": [],
+		"default_usage":{						// the usage if the event is missing the usage field
+			"*any": "3h",
+			"*voice": "3h",
+			"*data": "1048576",
+			"*sms": "1",
+		},
 	},
 }`
 	eMap := map[string]interface{}{
@@ -172,8 +187,6 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 		"replication_conns":      []string{},
 		"debit_interval":         "0",
 		"store_session_costs":    false,
-		"min_call_duration":      "0",
-		"max_call_duration":      "3h0m0s",
 		"session_ttl":            "0",
 		"session_indexes":        []string{},
 		"client_protocol":        1.0,
@@ -184,6 +197,12 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 		"session_ttl_max_delay":  "0",
 		"session_ttl_usage":      "0",
 		"session_ttl_last_usage": "0",
+		utils.DefaultUsageCfg: map[string]interface{}{
+			utils.META_ANY: "3h0m0s",
+			utils.VOICE:    "3h0m0s",
+			utils.DATA:     "1048576",
+			utils.SMS:      "1",
+		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -225,6 +244,12 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 				"privatekey_path": "",
 			},
 			"scheduler_conns": ["*internal"],
+			"default_usage":{						// the usage if the event is missing the usage field
+				"*any": "3h",
+				"*voice": "3h",
+				"*data": "1048576",
+				"*sms": "1",
+			},
 		},
 	}`
 	eMap = map[string]interface{}{
@@ -241,8 +266,6 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 		"replication_conns":      []string{"*localhost"},
 		"debit_interval":         "0",
 		"store_session_costs":    false,
-		"min_call_duration":      "0",
-		"max_call_duration":      "3h0m0s",
 		"session_ttl":            "0",
 		"session_indexes":        []string{},
 		"client_protocol":        1.0,
@@ -253,6 +276,12 @@ func TestSessionSCfgAsMapInterface(t *testing.T) {
 		"session_ttl_max_delay":  "0",
 		"session_ttl_usage":      "0",
 		"session_ttl_last_usage": "0",
+		utils.DefaultUsageCfg: map[string]interface{}{
+			utils.META_ANY: "3h0m0s",
+			utils.VOICE:    "3h0m0s",
+			utils.DATA:     "1048576",
+			utils.SMS:      "1",
+		},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

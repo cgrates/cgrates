@@ -207,8 +207,6 @@ type SessionSJsonCfg struct {
 	Attributes_conns       *[]string
 	Debit_interval         *string
 	Store_session_costs    *bool
-	Min_call_duration      *string
-	Max_call_duration      *string
 	Session_ttl            *string
 	Session_ttl_max_delay  *string
 	Session_ttl_last_used  *string
@@ -219,6 +217,7 @@ type SessionSJsonCfg struct {
 	Channel_sync_interval  *string
 	Terminate_attempts     *int
 	Alterable_fields       *[]string
+	Default_usage          *map[string]string
 }
 
 // FreeSWITCHAgent config section
