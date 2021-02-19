@@ -91,6 +91,7 @@ func (sip *SIPAgent) Reload() (err error) {
 	sip.Lock()
 	sip.sip.Shutdown()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
+	sip.sip.InitStopChan()
 	sip.Unlock()
 	go func() {
 		if err := sip.sip.ListenAndServe(); err != nil {

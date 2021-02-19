@@ -101,6 +101,7 @@ func TestSIPAgentReload(t *testing.T) {
 	}
 	castSrv.oldListen = "test_string"
 	runtime.Gosched()
+	runtime.Gosched()
 	err = srv.Reload()
 	if err != nil {
 		t.Errorf("\nExpecting <err>,\n Received <%+v>", err)

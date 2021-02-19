@@ -112,8 +112,14 @@ func (sS *SessionS) ListenAndServe(stopChan chan struct{}) {
 
 // Shutdown is called by engine to clear states
 func (sS *SessionS) Shutdown() (err error) {
+	var hasErr bool
 	for _, s := range sS.getSessions("", false) { // Force sessions shutdown
-		sS.terminateSession(s, nil, nil, nil, false)
+		if err = sS.terminateSession(s, nil, nil, nil, false); err != nil {
+			hasErr = true
+		}
+	}
+	if hasErr {
+		return utils.ErrPartiallyExecuted
 	}
 	return
 }
