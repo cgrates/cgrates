@@ -52,6 +52,7 @@ type ResourceSv1Interface interface {
 	AllocateResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
 	ReleaseResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
 	GetResource(args *utils.TenantIDWithOpts, reply *engine.Resource) error
+	GetResourceWithConfig(args *utils.TenantIDWithOpts, reply *engine.ResourceWithConfig) error
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 

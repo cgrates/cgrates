@@ -319,6 +319,10 @@ func (dRs *DispatcherResourceSv1) GetResource(args *utils.TenantIDWithOpts, repl
 	return dRs.dRs.ResourceSv1GetResource(args, reply)
 }
 
+func (dRs *DispatcherResourceSv1) GetResourceWithConfig(args *utils.TenantIDWithOpts, reply *engine.ResourceWithConfig) error {
+	return dRs.dRs.ResourceSv1GetResourceWithConfig(args, reply)
+}
+
 func (dRs *DispatcherResourceSv1) AuthorizeResources(args *utils.ArgRSv1ResourceUsage,
 	reply *string) error {
 	return dRs.dRs.ResourceSv1AuthorizeResources(*args, reply)

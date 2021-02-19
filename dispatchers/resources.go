@@ -116,3 +116,21 @@ func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithOpts
 		Opts:   args.Opts,
 	}, utils.MetaResources, utils.ResourceSv1GetResource, args, reply)
 }
+
+func (dS *DispatcherService) ResourceSv1GetResourceWithConfig(args *utils.TenantIDWithOpts, reply *engine.ResourceWithConfig) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
+		tnt = args.TenantID.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ResourceSv1GetResourceWithConfig, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		ID:     args.ID,
+		Opts:   args.Opts,
+	}, utils.MetaResources, utils.ResourceSv1GetResourceWithConfig, args, reply)
+}
