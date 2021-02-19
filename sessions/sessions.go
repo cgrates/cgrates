@@ -3038,14 +3038,14 @@ type V1ProcessEventArgs struct {
 
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
-	MaxUsage           map[string]time.Duration
-	Cost               map[string]float64 // Cost is the cost received from Rater, ignoring accounting part
-	ResourceAllocation map[string]string
-	Attributes         map[string]*engine.AttrSProcessEventReply
-	Routes             map[string]*engine.SortedRoutes
-	ThresholdIDs       map[string][]string
-	StatQueueIDs       map[string][]string
-	STIRIdentity       map[string]string
+	MaxUsage           map[string]time.Duration                  `json:",omitempty"`
+	Cost               map[string]float64                        `json:",omitempty"` // Cost is the cost received from Rater, ignoring accounting part
+	ResourceAllocation map[string]string                         `json:",omitempty"`
+	Attributes         map[string]*engine.AttrSProcessEventReply `json:",omitempty"`
+	Routes             map[string]*engine.SortedRoutes           `json:",omitempty"`
+	ThresholdIDs       map[string][]string                       `json:",omitempty"`
+	StatQueueIDs       map[string][]string                       `json:",omitempty"`
+	STIRIdentity       map[string]string                         `json:",omitempty"`
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
