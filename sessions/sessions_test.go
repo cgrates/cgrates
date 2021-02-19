@@ -2300,3 +2300,71 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
 	}
 }
+
+type clMock func(_ string, _ interface{}, _ interface{}) error
+
+func (c clMock) Call(m string, a interface{}, r interface{}) error {
+	return c(m, a, r)
+}
+func TestInitSession(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	clientConect := make(chan rpcclient.ClientConnector, 1)
+	clientConect <- clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		*rply = []*engine.ChrgSProcessEventReply{
+			{
+				ChargerSProfile:    "raw",
+				AttributeSProfiles: []string{utils.META_NONE},
+				AlteredFields:      []string{"~*req.RunID"},
+				CGREvent:           args.(*utils.CGREventWithArgDispatcher).CGREvent,
+			},
+		}
+		return nil
+	})
+	conMng := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
+	})
+	sS := NewSessionS(cfg, nil, conMng)
+	s, err := sS.initSession("cgrates.org", engine.MapEvent{
+		utils.Category:    "call",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "TestTerminate",
+		utils.RequestType: utils.META_POSTPAID,
+		utils.Account:     "1002",
+		utils.Subject:     "1001",
+		utils.Destination: "1001",
+		utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+		utils.LastUsed:    2 * time.Second,
+	}, "", "", 0, nil, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exp := &Session{
+		CGRID:  "c72b7074ef9375cd19ab7bbceb530e99808c3194",
+		Tenant: "cgrates.org",
+		EventStart: engine.MapEvent{
+			utils.CGRID:       "c72b7074ef9375cd19ab7bbceb530e99808c3194",
+			utils.Category:    "call",
+			utils.ToR:         utils.VOICE,
+			utils.OriginID:    "TestTerminate",
+			utils.RequestType: utils.META_POSTPAID,
+			utils.Account:     "1002",
+			utils.Subject:     "1001",
+			utils.Destination: "1001",
+			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.LastUsed:    2 * time.Second,
+			utils.Usage:       2 * time.Second,
+		},
+		DebitInterval: 0,
+	}
+	s.SRuns = nil
+	if !reflect.DeepEqual(exp, s) {
+		t.Errorf("Expected %v , received: %s", utils.ToJSON(exp), utils.ToJSON(s))
+	}
+}
