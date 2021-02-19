@@ -162,8 +162,8 @@ func (r *Resource) TotalUsage() (tU float64) {
 
 // Available returns the available number of units
 // Exported method to be used by filterS
-func (r *Resource) Available() float64 {
-	return r.rPrf.Limit - r.totalUsage()
+func (r *ResourceWithConfig) Available() float64 {
+	return r.Config.Limit - r.totalUsage()
 }
 
 // recordUsage records a new usage
@@ -813,6 +813,39 @@ func (rS *ResourceService) V1GetResource(arg *utils.TenantIDWithOpts, reply *Res
 	}
 	*reply = *res
 	return nil
+}
+
+type ResourceWithConfig struct {
+	*Resource
+	Config *ResourceProfile
+}
+
+func (rS *ResourceService) V1GetResourceWithConfig(arg *utils.TenantIDWithOpts, reply *ResourceWithConfig) (err error) {
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = rS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	var res *Resource
+	res, err = rS.dm.GetResource(tnt, arg.ID, true, true, utils.NonTransactional)
+	if err != nil {
+		return
+	}
+	if res.rPrf == nil {
+		var cfg *ResourceProfile
+		cfg, err = rS.dm.GetResourceProfile(tnt, arg.ID, true, true, utils.NonTransactional)
+		if err != nil {
+			return
+		}
+		res.rPrf = cfg
+	}
+	*reply = ResourceWithConfig{
+		Resource: res,
+		Config:   res.rPrf,
+	}
+	return
 }
 
 // Reload stops the backupLoop and restarts it

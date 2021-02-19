@@ -1648,16 +1648,17 @@ const (
 
 // ResourceS APIs
 const (
-	ResourceSv1AuthorizeResources   = "ResourceSv1.AuthorizeResources"
-	ResourceSv1GetResourcesForEvent = "ResourceSv1.GetResourcesForEvent"
-	ResourceSv1AllocateResources    = "ResourceSv1.AllocateResources"
-	ResourceSv1ReleaseResources     = "ResourceSv1.ReleaseResources"
-	ResourceSv1Ping                 = "ResourceSv1.Ping"
-	ResourceSv1GetResource          = "ResourceSv1.GetResource"
-	APIerSv1SetResourceProfile      = "APIerSv1.SetResourceProfile"
-	APIerSv1RemoveResourceProfile   = "APIerSv1.RemoveResourceProfile"
-	APIerSv1GetResourceProfile      = "APIerSv1.GetResourceProfile"
-	APIerSv1GetResourceProfileIDs   = "APIerSv1.GetResourceProfileIDs"
+	ResourceSv1AuthorizeResources    = "ResourceSv1.AuthorizeResources"
+	ResourceSv1GetResourcesForEvent  = "ResourceSv1.GetResourcesForEvent"
+	ResourceSv1AllocateResources     = "ResourceSv1.AllocateResources"
+	ResourceSv1ReleaseResources      = "ResourceSv1.ReleaseResources"
+	ResourceSv1Ping                  = "ResourceSv1.Ping"
+	ResourceSv1GetResourceWithConfig = "ResourceSv1.GetResourceWithConfig"
+	ResourceSv1GetResource           = "ResourceSv1.GetResource"
+	APIerSv1SetResourceProfile       = "APIerSv1.SetResourceProfile"
+	APIerSv1RemoveResourceProfile    = "APIerSv1.RemoveResourceProfile"
+	APIerSv1GetResourceProfile       = "APIerSv1.GetResourceProfile"
+	APIerSv1GetResourceProfileIDs    = "APIerSv1.GetResourceProfileIDs"
 )
 
 // SessionS APIs
