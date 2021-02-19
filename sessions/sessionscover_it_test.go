@@ -82,6 +82,7 @@ var (
 		testBiRPCv1AuthorizeEvent,
 		testBiRPCv1AuthorizeEvent2,
 		testBiRPCv1AuthorizeEventWithDigest,
+		testBiRPCv1InitiateSession,
 	}
 )
 
@@ -2740,4 +2741,97 @@ func testBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 	if err := sessions.BiRPCv1AuthorizeEventWithDigest(nil, args, authReply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+}
+
+func testBiRPCv1InitiateSession(t *testing.T) {
+	tmp := engine.Cache
+
+	engine.Cache.Clear(nil)
+	clnt := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				cghrgs := []*engine.ChrgSProcessEventReply{
+					{
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "TestID",
+							Event: map[string]interface{}{
+								utils.Usage: "10s",
+							},
+						},
+					},
+				}
+				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
+				return nil
+			},
+			utils.ResourceSv1AuthorizeResources: func(args interface{}, reply interface{}) error {
+				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "new_tenant" {
+					return utils.ErrNotImplemented
+				}
+				return nil
+			},
+			utils.ResourceSv1AllocateResources: func(args interface{}, reply interface{}) error {
+				return nil
+			},
+			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- clnt
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):  chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
+	})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	cgrEvent := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.Usage:    "10s",
+			utils.OriginID: "TEST_ID",
+		},
+	}
+	args := NewV1InitSessionArgs(true, []string{},
+		false, []string{}, false, []string{}, true, false,
+		nil, true)
+
+	rply := &V1InitSessionReply{}
+
+	expected := "MANDATORY_IE_MISSING: [CGREvent]"
+	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	args.CGREvent = cgrEvent
+	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err != nil {
+		t.Error(err)
+	}
+
+	//get from cache error
+	cgrEvent.ID = "SESSIONS_ID_TEST"
+	args = NewV1InitSessionArgs(true, []string{},
+		false, []string{}, false, []string{}, true, false,
+		cgrEvent, true)
+	caches := engine.NewCacheS(cfg, dm, nil)
+	value := &utils.CachedRPCResponse{
+		Result: &V1InitSessionReply{
+			ResourceAllocation: utils.StringPointer("ROUTE_LEASTCOST_1"),
+		},
+	}
+	engine.SetCache(caches)
+	caches.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, args.CGREvent.ID),
+		value, nil, true, utils.NonTransactional)
+	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err != nil {
+		t.Error(err)
+	}
+	engine.Cache = tmp
 }
