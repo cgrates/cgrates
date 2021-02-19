@@ -557,7 +557,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 		Limit:             23,
 		AllocationMessage: "Test_Available",
 		Stored:            true,
-		Weight:            30,
+		Weight:            25,
 		ThresholdIDs:      []string{utils.MetaNone},
 	}
 
@@ -599,12 +599,17 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	filter := v1.FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
-			ID:     "FLTR_TH_Resource1",
+			ID:     "FLTR_ST_Resource1",
 			Rules: []*engine.FilterRule{
 				{
 					Type:    "*gt",
 					Element: "~*resources.RES_TEST.Available",
-					Values:  []string{"16.0"},
+					Values:  []string{"13.0"},
+				},
+				{
+					Type:    "*gte",
+					Element: "~*resources.RES_TEST.Available",
+					Values:  []string{"14.0"},
 				},
 			},
 		},
@@ -614,6 +619,85 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
+	}
+
+	//set a statQueueProfile with that filter
+	statsPrf := &engine.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "STATS_RES_TEST12",
+			FilterIDs: []string{"FLTR_ST_Resource1", "*string:~*req.Account:1001"},
+			Weight:    50,
+		},
+	}
+	if err := fltrRpc.Call(utils.APIerSv1SetStatQueueProfile, statsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	var replyStats *engine.StatQueueProfile
+	if err := fltrRpc.Call(utils.APIerSv1GetStatQueueProfile, &utils.TenantID{Tenant: "cgrates.org",
+		ID: "STATS_RES_TEST12"}, &replyStats); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(statsPrf.StatQueueProfile, replyStats) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(statsPrf.StatQueueProfile), utils.ToJSON(replyStats))
+	}
+
+	//here will check the event
+	statsEv := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event_nr2",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Usage:        "1",
+			},
+		},
+	}
+	var ids []string
+	expectedIDs := []string{"STATS_RES_TEST12", "Stat_1"}
+	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, statsEv, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedIDs, ids) {
+		t.Errorf("Expected %+v, received %+v", expectedIDs, ids)
+	}
+
+	//set another filter that will not match
+	filter = v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_ST_Resource1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    "*gt",
+					Element: "~*resources.RES_TEST.Available",
+					Values:  []string{"17.0"},
+				},
+			},
+		},
+	}
+
+	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//overwrite the StatQueueProfile
+	if err := fltrRpc.Call(utils.APIerSv1GetStatQueueProfile, &utils.TenantID{Tenant: "cgrates.org",
+		ID: "STATS_RES_TEST12"}, &replyStats); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(statsPrf.StatQueueProfile, replyStats) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(statsPrf.StatQueueProfile), utils.ToJSON(replyStats))
+	}
+
+	//This filter won't match
+	expectedIDs = []string{"Stat_1"}
+	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, statsEv, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedIDs, ids) {
+		t.Errorf("Expected %+v, received %+v", expectedIDs, ids)
 	}
 }
 
