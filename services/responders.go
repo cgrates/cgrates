@@ -130,7 +130,7 @@ func (resp *ResponderService) ShouldRun() bool {
 	return resp.cfg.RalsCfg().Enabled
 }
 
-// RegisterSyncChan used by dependent subsystems to register a chanel to reload only the responder(thread safe)
+// RegisterSyncChan used by dependent subsystems to register a channel to reload only the responder(thread safe)
 func (resp *ResponderService) RegisterSyncChan(srv string, c chan *engine.Responder) {
 	resp.Lock()
 	resp.syncChans[srv] = c
@@ -140,7 +140,7 @@ func (resp *ResponderService) RegisterSyncChan(srv string, c chan *engine.Respon
 	resp.Unlock()
 }
 
-// UnregisterSyncChan used by dependent subsystems to unregister a chanel
+// UnregisterSyncChan used by dependent subsystems to unregister a channel
 func (resp *ResponderService) UnregisterSyncChan(srv string) {
 	resp.Lock()
 	c, has := resp.syncChans[srv]
@@ -151,7 +151,7 @@ func (resp *ResponderService) UnregisterSyncChan(srv string) {
 	resp.Unlock()
 }
 
-// sync sends the responder over syncChansv (not thrad safe)
+// sync sends the responder over syncChansv (not thread safe)
 func (resp *ResponderService) sync() {
 	if resp.isRunning() {
 		for _, c := range resp.syncChans {
