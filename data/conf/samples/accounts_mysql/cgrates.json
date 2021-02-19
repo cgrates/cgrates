@@ -42,7 +42,7 @@
 "accounts": {
 	"enabled": true,
 	"attributes_conns": ["*localhost"],
-	"rates_conns": ["*localhost"],
+	"rates_conns": ["*internal"],
 },
 
 
