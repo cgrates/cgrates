@@ -44,10 +44,10 @@ var (
 // How to run:
 // 1) Start the engine with the following configuration < cgr-engine -config_path=/usr/share/cgrates/conf/samples/accounts_mysql >
 // 2) Load the data with < cgr-loader -config_path=/usr/share/cgrates/conf/samples/accounts_mysql -verbose -path=/usr/share/cgrates/tariffplans/oldaccvsnew >
-// 3) Run the program with  < go run combined_max_usage.go -requests=10000 -goroutines=5 >
+// 3) Run the program with  < go run combined_max_usage2.go -requests=10000 -goroutines=5 >
 // Additional Information
-// In this scenario we compare the old account system vs the new one. The balance contains the RateID in order to access it directly without the needed of matching.
-// For this scenario the account 1002 is used
+// In this scenario we compare the old account system vs the new one. The balance doesn't contains the RateID and will let RateS to discover the rate profile that match the event.
+// For this scenario the account 1003 is used
 
 func main() {
 	flag.Parse()
@@ -84,7 +84,7 @@ func main() {
 				Tenant: "cgrates.org",
 				ID:     utils.UUIDSha1Prefix(),
 				Event: map[string]interface{}{
-					utils.AccountField: "1002",
+					utils.AccountField: "1003",
 					utils.ToR:          utils.MetaVoice,
 					utils.Usage:        usage,
 				}}}
@@ -105,9 +105,9 @@ func main() {
 				CallDescriptor: &engine.CallDescriptor{
 					Category:    "call",
 					Tenant:      "cgrates.org",
-					Subject:     "1002",
-					Account:     "1002",
-					Destination: "1003",
+					Subject:     "1003",
+					Account:     "1003",
+					Destination: "1004",
 					TimeStart:   tStart,
 					TimeEnd:     tStart.Add(usageDur),
 				},
