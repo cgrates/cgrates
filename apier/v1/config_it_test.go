@@ -169,7 +169,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		},
 		"store_session_costs": false,
 		"terminate_attempts":  5.,
-		utils.DefaultUsageCfg: map[string]string{
+		utils.DefaultUsageCfg: map[string]interface{}{
 			utils.MetaAny:   "3h0m0s",
 			utils.MetaVoice: "3h0m0s",
 			utils.MetaData:  "1048576",
@@ -207,6 +207,12 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 				"payload_maxduration": "-1",
 				"privatekey_path":     "",
 				"publickey_path":      "",
+			},
+			utils.DefaultUsageCfg: map[string]string{
+				utils.MetaAny:   "3h0m0s",
+				utils.MetaVoice: "3h0m0s",
+				utils.MetaData:  "1048576",
+				utils.MetaSMS:   "1",
 			},
 		}
 	}
@@ -255,6 +261,12 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 			"privatekey_path":     "",
 			"publickey_path":      "",
 		},
+		utils.DefaultUsageCfg: map[string]interface{}{
+			utils.MetaAny:   "3h0m0s",
+			utils.MetaVoice: "3h0m0s",
+			utils.MetaData:  "1048576",
+			utils.MetaSMS:   "1",
+		},
 	}
 	if *encoding == utils.MetaGOB {
 		var empty []string
@@ -286,6 +298,12 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 				"payload_maxduration": "-1",
 				"privatekey_path":     "",
 				"publickey_path":      "",
+			},
+			utils.DefaultUsageCfg: map[string]string{
+				utils.MetaAny:   "3h0m0s",
+				utils.MetaVoice: "3h0m0s",
+				utils.MetaData:  "1048576",
+				utils.MetaSMS:   "1",
 			},
 		}
 	}
