@@ -349,7 +349,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 }
 
 func (ra *RadiusAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
-	var errListen chan error
+	errListen := make(chan error, 2)
 	go func() {
 		utils.Logger.Info(fmt.Sprintf("<%s> Start listening for auth requests on <%s>", utils.RadiusAgent, ra.cgrCfg.RadiusAgentCfg().ListenAuth))
 		if err := ra.rsAuth.ListenAndServe(stopChan); err != nil {

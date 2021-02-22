@@ -19,7 +19,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"os"
+	"path"
+	"runtime"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/ers"
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 func TestEventReaderSReload(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
@@ -37,6 +53,10 @@ func TestEventReaderSReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
+	defer func() {
+		shdChan.CloseOnce()
+		time.Sleep(10 * time.Millisecond)
+	}()
 	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
@@ -44,14 +64,14 @@ func TestEventReaderSReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
-	attrS := NewEventReaderService(cfg, filterSChan, shdChan, nil, srvDep)
+	erS := NewEventReaderService(cfg, filterSChan, shdChan, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(attrS, sS,
+	srvMngr.AddServices(erS, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
-	if attrS.IsRunning() {
+	if erS.IsRunning() {
 		t.Fatal("Expected service to be down")
 	}
 	var reply string
@@ -64,30 +84,30 @@ func TestEventReaderSReload(t *testing.T) {
 		t.Fatalf("Expecting OK ,received %s", reply)
 	}
 	runtime.Gosched()
-	if !attrS.IsRunning() {
+	if !erS.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
 
 	runtime.Gosched()
-	err := attrS.Start()
+	err := erS.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	time.Sleep(10 * time.Millisecond)
 	runtime.Gosched()
-	err = attrS.Reload()
+	err = erS.Reload()
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ERsCfg().Enabled = false
 	cfg.GetReloadChan(config.ERsJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
-	if attrS.IsRunning() {
+	if erS.IsRunning() {
 		t.Fatal("Expected service to be down")
 	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
+
 }
+
 func TestEventReaderSReload2(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
@@ -101,51 +121,25 @@ func TestEventReaderSReload2(t *testing.T) {
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	cfg.SessionSCfg().Enabled = true
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
-	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	db := NewDataDBService(cfg, nil, srvDep)
-	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
-	attrS := NewEventReaderService(cfg, filterSChan, shdChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(attrS, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
-	if attrS.IsRunning() {
-		t.Fatalf("Expected service to be down")
-	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_reload", "internal"),
-		Section: config.ERsJson,
-	}, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply != utils.OK {
-		t.Fatalf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond)
+	cfg.ERsCfg().Enabled = true
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
 			Type: "bad_type",
 		},
 	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	err := attrS.Reload()
-	if err != nil {
-		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	cfg.ERsCfg().Enabled = false
-	cfg.GetReloadChan(config.ERsJson) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	erS := NewEventReaderService(cfg, filterSChan, shdChan, nil, srvDep)
+	ers := ers.NewERService(cfg, nil, nil)
 
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
+	runtime.Gosched()
+	srv := erS.(*EventReaderService)
+	srv.stopChan = make(chan struct{})
+	srv.rldChan = make(chan struct{})
+	err := srv.listenAndServe(ers, srv.stopChan, srv.rldChan)
+	if err == nil || err.Error() != "unsupported reader type: <bad_type>" {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "unsupported reader type: <bad_type>", err)
+	}
 }
-*/

@@ -19,7 +19,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"path"
+	"runtime"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 func TestHTTPAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
@@ -28,6 +42,10 @@ func TestHTTPAgentReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
+	defer func() {
+		shdChan.CloseOnce()
+		time.Sleep(10 * time.Millisecond)
+	}()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
@@ -47,7 +65,7 @@ func TestHTTPAgentReload(t *testing.T) {
 		t.Fatal(err)
 	}
 	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
@@ -56,31 +74,28 @@ func TestHTTPAgentReload(t *testing.T) {
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
+		t.Fatalf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	runtime.Gosched()
 	if !srv.IsRunning() {
-		t.Errorf("Expected service to be running")
+		t.Fatalf("Expected service to be running")
 	}
 	runtime.Gosched()
 	srvReload := srv.Reload()
 	if srvReload != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", srvReload)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", srvReload)
 	}
 	runtime.Gosched()
 	err := srv.Start()
 	if err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	err = srv.Shutdown()
 	if err != nil {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}
 	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }
-*/

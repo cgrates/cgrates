@@ -76,12 +76,15 @@ func (erS *EventReaderService) Start() (err error) {
 
 	// build the service
 	erS.ers = ers.NewERService(erS.cfg, filterS, erS.connMgr)
-	go func(ers *ers.ERService, stopChan, rldChan chan struct{}) {
-		if err := ers.ListenAndServe(stopChan, rldChan); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
-			erS.shdChan.CloseOnce()
-		}
-	}(erS.ers, erS.stopChan, erS.rldChan)
+	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan)
+	return
+}
+
+func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan chan struct{}, rldChan chan struct{}) (err error) {
+	if err = ers.ListenAndServe(stopChan, rldChan); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
+		erS.shdChan.CloseOnce()
+	}
 	return
 }
 
