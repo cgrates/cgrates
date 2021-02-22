@@ -111,6 +111,7 @@ func TestSTSV1IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		stsV1ConfDIR = "tutinternal"
+		sTestsStatSV1 = sTestsStatSV1[:len(sTestsStatSV1)-4]
 	case utils.MetaMySQL:
 		stsV1ConfDIR = "tutmysql"
 	case utils.MetaMongo:
