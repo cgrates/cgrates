@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -37,7 +38,6 @@ import (
 
 func TestDNSAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
 	cfg.SessionSCfg().Enabled = true
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
@@ -80,6 +80,7 @@ func TestDNSAgentReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Fatalf("Expecting OK ,received %s", reply)
 	}
+	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !srv.IsRunning() {
 		t.Fatalf("Expected service to be running")
@@ -88,6 +89,7 @@ func TestDNSAgentReload(t *testing.T) {
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
+
 	err = srv.Reload()
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
@@ -106,6 +108,104 @@ func TestDNSAgentReload(t *testing.T) {
 
 }
 
+func TestDNSAgentReload2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.DNSAgentCfg().Enabled = true
+	cfg.DNSAgentCfg().ListenNet = "test"
+	cfg.DNSAgentCfg().Listen = "test"
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	agentSrv, err := agents.NewDNSAgent(cfg, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	runtime.Gosched()
+	dnsSrv := srv.(*DNSAgent)
+	dnsSrv.dns = agentSrv
+	err = dnsSrv.listenAndServe()
+	if err == nil || err.Error() != "dns: bad network" {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "dns: bad network", err)
+	}
+}
+
+func TestDNSAgentReload3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.DNSAgentCfg().Enabled = true
+	cfg.DNSAgentCfg().ListenNet = "test"
+	cfg.DNSAgentCfg().Listen = "test"
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	agentSrv, err := agents.NewDNSAgent(cfg, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	runtime.Gosched()
+	dnsSrv := srv.(*DNSAgent)
+	dnsSrv.dns = agentSrv
+	err = dnsSrv.Reload()
+	if err == nil || err.Error() != "dns: server not started" {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "dns: server not started", err)
+	}
+}
+
+func TestDNSAgentReload4(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.DNSAgentCfg().Enabled = true
+	cfg.DNSAgentCfg().ListenNet = "tls"
+
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+
+	runtime.Gosched()
+	dnsSrv := srv.(*DNSAgent)
+	dnsSrv.dns = nil
+	err := dnsSrv.Start()
+	if err == nil || err.Error() != "open : no such file or directory" {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "open : no such file or directory", err)
+	}
+	dnsSrv.dns = nil
+}
+
+func TestDNSAgentReload5(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.DNSAgentCfg().Enabled = true
+
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv.Start()
+	srv.(*DNSAgent).oldListen = ""
+	runtime.Gosched()
+	err := srv.Reload()
+	if err != nil {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
+
+/*
 func TestDNSAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
@@ -327,3 +427,4 @@ func TestDNSAgentReload4(t *testing.T) {
 	}
 
 }
+*/
