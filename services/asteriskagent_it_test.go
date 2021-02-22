@@ -19,7 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"path"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 func TestAsteriskAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
@@ -28,6 +41,10 @@ func TestAsteriskAgentReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
+	defer func() {
+		shdChan.CloseOnce()
+		time.Sleep(10 * time.Millisecond)
+	}()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 
@@ -49,7 +66,7 @@ func TestAsteriskAgentReload(t *testing.T) {
 		t.Fatal(err)
 	}
 	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
@@ -58,28 +75,27 @@ func TestAsteriskAgentReload(t *testing.T) {
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
+		t.Fatalf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !srv.IsRunning() {
-		t.Errorf("Expected service to be running")
+		t.Fatalf("Expected service to be running")
 	}
 	srvReload := srv.Reload()
 	if srvReload != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", srvReload)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", srvReload)
 	}
 	err := srv.Start()
 	if err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	cfg.AsteriskAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.AsteriskAgentJSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
+
 }
 
 func TestAsteriskAgentReload2(t *testing.T) {
@@ -90,6 +106,10 @@ func TestAsteriskAgentReload2(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
+	defer func() {
+		shdChan.CloseOnce()
+		time.Sleep(10 * time.Millisecond)
+	}()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 
@@ -111,7 +131,7 @@ func TestAsteriskAgentReload2(t *testing.T) {
 		t.Fatal(err)
 	}
 	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
@@ -120,19 +140,19 @@ func TestAsteriskAgentReload2(t *testing.T) {
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
+		t.Fatalf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !srv.IsRunning() {
-		t.Errorf("Expected service to be running")
+		t.Fatalf("Expected service to be running")
 	}
 	srvReload := srv.Reload()
 	if srvReload != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", srvReload)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", srvReload)
 	}
 	err := srv.Start()
 	if err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	cfg.AsteriskAgentCfg().AsteriskConns = []*config.AsteriskConnCfg{
 		{
@@ -145,15 +165,12 @@ func TestAsteriskAgentReload2(t *testing.T) {
 		}}
 	srvReload = srv.Reload()
 	if srvReload != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", srvReload)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", srvReload)
 	}
 	cfg.AsteriskAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.AsteriskAgentJSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }
-*/
