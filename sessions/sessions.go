@@ -2239,9 +2239,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 	if !args.GetAttributes && !args.AllocateResources && !args.InitSession {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
-	}
 	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
 	if args.GetAttributes {
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, false)
