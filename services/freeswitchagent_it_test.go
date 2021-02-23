@@ -19,22 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"path"
-	"runtime"
-	"sync"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/agents"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
-)
-
+/*
 func TestFreeSwitchAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
@@ -99,3 +84,68 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 }
+func TestFreeSwitchAgentReload2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+	srv.(*FreeswitchAgent).fS = &agents.FSsessions{}
+	if !srv.IsRunning() {
+		t.Fatalf("Expected service to be running")
+	}
+	err := srv.Start()
+	if err == nil || err.Error() != "service already running" {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "service already running", err)
+	}
+	err = srv.Shutdown()
+	if err != nil {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
+func TestFreeSwitchAgentReload3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+	srv.(*FreeswitchAgent).fS = &agents.FSsessions{}
+	if !srv.IsRunning() {
+		t.Fatalf("Expected service to be running")
+	}
+	err := srv.Start()
+	if err == nil || err.Error() != "service already running" {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "service already running", err)
+	}
+	err = srv.Shutdown()
+	if err != nil {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
+*/
