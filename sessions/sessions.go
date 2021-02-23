@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"reflect"
 	"runtime"
 	"strings"
 	"sync"
@@ -697,7 +696,7 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 	}
 	var reply string
 	// use the v1 because it doesn't do rounding refund
-	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1StoreSessionCost,
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1StoreSessionCost,
 		argSmCost, &reply); err != nil && err == utils.ErrExists {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> refunding session: <%s> error: <%s>",
@@ -708,9 +707,8 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 					"<%s> failed refunding session: <%s>, srIdx: <%d>, error: <%s>",
 					utils.SessionS, s.CGRID, sRunIdx, err.Error()))
 		}
-		err = nil
 	}
-	return err
+	return
 }
 
 // roundCost will round the EventCost and will refund the extra debited increments
@@ -786,7 +784,7 @@ func (sS *SessionS) warnSession(connID string, ev map[string]interface{}) (err e
 }
 
 // replicateSessions will replicate sessions with or without cgrID specified
-func (sS *SessionS) replicateSessions(cgrID string, psv bool, connIDs []string) (err error) {
+func (sS *SessionS) replicateSessions(cgrID string, psv bool, connIDs []string) {
 	if len(connIDs) == 0 {
 		return
 	}
@@ -1673,38 +1671,7 @@ func (sS *SessionS) Call(serviceMethod string, args interface{}, reply interface
 // CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.ClientConnector interface
 func (sS *SessionS) CallBiRPC(clnt rpcclient.ClientConnector,
 	serviceMethod string, args interface{}, reply interface{}) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// get method BiRPCV1.Method
-	method := reflect.ValueOf(sS).MethodByName(
-		"BiRPC" + parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version V1 in the method name and add prefix
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// construct the params
-	var clntVal reflect.Value
-	if clnt == nil {
-		clntVal = reflect.New(
-			reflect.TypeOf(new(rpcclient.BiRPCInternalServer))).Elem() // Kinda cheat since we make up a type here
-	} else {
-		clntVal = reflect.ValueOf(clnt)
-	}
-	params := []reflect.Value{clntVal, reflect.ValueOf(args),
-		reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
+	return utils.BiRPCCall(sS, clnt, serviceMethod, args, reply)
 }
 
 // BiRPCv1GetActiveSessions returns the list of active sessions based on filter
@@ -1792,9 +1759,7 @@ type ArgsReplicateSessions struct {
 // args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
 func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.ClientConnector,
 	args ArgsReplicateSessions, reply *string) (err error) {
-	if err = sS.replicateSessions(args.CGRID, args.Passive, args.ConnIDs); err != nil {
-		return utils.NewErrServerError(err)
-	}
+	sS.replicateSessions(args.CGRID, args.Passive, args.ConnIDs)
 	*reply = utils.OK
 	return
 }
