@@ -5649,15 +5649,16 @@ func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
 			Schedule: "test_schedule",
 			Actions: []*utils.TPAPAction{
 				{
-					ID:        "test_action_id",
-					FilterIDs: []string{"test_action_filter_ids"},
+					ID:            "test_action_id",
+					FilterIDs:     []string{"test_action_filter_ids"},
+					ActionDiktats: []*utils.TPActionDiktat{{}},
 				},
 			},
 		},
 	}
 	result := testStruct.AsTPActionProfile()
 	if !reflect.DeepEqual(result, expStruct) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+		t.Errorf("\nExpecting %s,\n Received %s", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
 
@@ -5697,8 +5698,9 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			},
 			Actions: []*utils.TPAPAction{
 				{
-					ID:        "test_action_id",
-					FilterIDs: []string{"test_action_filter_ids"},
+					ID:            "test_action_id",
+					FilterIDs:     []string{"test_action_filter_ids"},
+					ActionDiktats: []*utils.TPActionDiktat{{}},
 				},
 			},
 		},
@@ -5735,16 +5737,15 @@ func TestAPItoModelTPActionProfileTPActionProfile(t *testing.T) {
 		},
 		Weight:   1,
 		Schedule: "test_schedule",
-		Targets: []*utils.TPActionTarget{
-			&utils.TPActionTarget{
-				TargetType: utils.MetaAccounts,
-				TargetIDs:  []string{"test_account_id1", "test_account_id2"},
-			},
-		},
+		Targets: []*utils.TPActionTarget{{
+			TargetType: utils.MetaAccounts,
+			TargetIDs:  []string{"test_account_id1", "test_account_id2"},
+		}},
 		Actions: []*utils.TPAPAction{
 			{
-				ID:        "test_action_id",
-				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				ID:            "test_action_id",
+				FilterIDs:     []string{"test_action_filter_id1", "test_action_filter_id2"},
+				ActionDiktats: []*utils.TPActionDiktat{{}},
 			},
 		},
 	}
@@ -5764,7 +5765,7 @@ func TestAPItoModelTPActionProfileTPActionProfile(t *testing.T) {
 	}}
 	result := APItoModelTPActionProfile(testStruct)
 	if !reflect.DeepEqual(result, expStruct) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
+		t.Errorf("\nExpecting %s,\n Received %s", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }
 
@@ -5793,8 +5794,10 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				Path:      "test_path",
-				Opts:      "key1:val1;key2:val2",
+				ActionDiktats: []*utils.TPActionDiktat{{
+					Path: "test_path",
+				}},
+				Opts: "key1:val1;key2:val2",
 			},
 		},
 	}
@@ -5817,7 +5820,9 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				Path:      "test_path",
+				ActionDiktats: []*ActionDiktat{{
+					Path: "test_path",
+				}},
 				Opts: map[string]interface{}{
 					"key1": "val1",
 					"key2": "val2",
@@ -5848,7 +5853,9 @@ func TestModelHelpersAPItoActionProfileError1(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				Path:      "test_path",
+				ActionDiktats: []*utils.TPActionDiktat{{
+					Path: "test_path",
+				}},
 			},
 		},
 	}
@@ -5856,32 +5863,6 @@ func TestModelHelpersAPItoActionProfileError1(t *testing.T) {
 	_, err := APItoActionProfile(testStruct, "")
 	if err == nil || err.Error() != "Unsupported time format" {
 		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
-	}
-}
-
-func TestModelHelpersAPItoActionProfileError2(t *testing.T) {
-	testStruct := &utils.TPActionProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
-		Actions: []*utils.TPAPAction{
-			{
-				ID:        "test_action_id",
-				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				Path:      "",
-			},
-		},
-	}
-
-	_, err := APItoActionProfile(testStruct, "")
-	if err == nil || err.Error() != "empty path in ActionProfile <cgrates.org:RP1> for action <test_action_id>" {
-		t.Errorf("\nExpecting <empty path in ActionProfile <cgrates.org:RP1> for action <test_action_id>>,\n Received <%+v>", err)
 	}
 }
 
@@ -5900,8 +5881,10 @@ func TestModelHelpersAPItoActionProfileError3(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				Path:      "test_path",
-				TTL:       "cat",
+				ActionDiktats: []*utils.TPActionDiktat{{
+					Path: "test_path",
+				}},
+				TTL: "cat",
 			},
 		},
 	}
@@ -5927,8 +5910,10 @@ func TestModelHelpersAPItoActionProfileError4(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				Path:      "test_path",
-				Opts:      "test_opt",
+				ActionDiktats: []*utils.TPActionDiktat{{
+					Path: "test_path",
+				}},
+				Opts: "test_opt",
 			},
 		},
 	}
@@ -5954,8 +5939,10 @@ func TestModelHelpersAPItoActionProfileError5(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				Path:      "test_path",
-				Value:     "\"constant;`>;q=0.7;expires=3600constant\"",
+				ActionDiktats: []*utils.TPActionDiktat{{
+					Path:  "test_path",
+					Value: "\"constant;`>;q=0.7;expires=3600constant\"",
+				}},
 			},
 		},
 	}
@@ -5982,7 +5969,9 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				TTL:       time.Second,
-				Path:      "test_path",
+				ActionDiktats: []*ActionDiktat{{
+					Path: "test_path",
+				}},
 				Opts: map[string]interface{}{
 					"key1": "val1",
 				},
@@ -6005,8 +5994,10 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				TTL:       "1s",
-				Path:      "test_path",
-				Opts:      "key1:val1",
+				ActionDiktats: []*utils.TPActionDiktat{{
+					Path: "test_path",
+				}},
+				Opts: "key1:val1",
 			},
 		},
 	}
@@ -7380,8 +7371,10 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
-				Path:      "test_path",
-				Opts:      "key1:val1",
+				ActionDiktats: []*utils.TPActionDiktat{{
+					Path: "test_path",
+				}},
+				Opts: "key1:val1",
 			},
 		},
 	}
@@ -7406,9 +7399,11 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
-				Path:      "test_path",
-				Opts:      "key1:val1",
-				TTL:       "0s",
+				ActionDiktats: []*utils.TPActionDiktat{{
+					Path: "test_path",
+				}},
+				Opts: "key1:val1",
+				TTL:  "0s",
 			},
 		},
 	}

@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/ericlagergren/decimal"
@@ -61,7 +63,7 @@ func (ap *AccountProfile) RestoreFromBackup(abb AccountBalancesBackup) {
 // AccountBalanceBackups is used to create balance snapshots as backups
 type AccountBalancesBackup map[string]*decimal.Big
 
-// AccountBalanceBackup returns a backup of all balance values
+// AccountBalancesBackup returns a backup of all balance values
 func (ap *AccountProfile) AccountBalancesBackup() (abb AccountBalancesBackup) {
 	if ap.Balances != nil {
 		abb = make(AccountBalancesBackup)
@@ -70,6 +72,32 @@ func (ap *AccountProfile) AccountBalancesBackup() (abb AccountBalancesBackup) {
 		}
 	}
 	return
+}
+
+func NewDefaultBalance(id string, val *Decimal) *Balance {
+	const torFltr = "*string:~*req.ToR:"
+	return &Balance{
+		ID:    id,
+		Type:  MetaConcrete,
+		Units: val,
+		CostIncrements: []*CostIncrement{
+			{
+				FilterIDs:    []string{torFltr + MetaVoice},
+				Increment:    NewDecimal(int64(time.Second), 0),
+				RecurrentFee: NewDecimal(0, 0),
+			},
+			{
+				FilterIDs:    []string{torFltr + MetaData},
+				Increment:    NewDecimal(1024*1024, 0),
+				RecurrentFee: NewDecimal(0, 0),
+			},
+			{
+				FilterIDs:    []string{torFltr + MetaSMS},
+				Increment:    NewDecimal(1, 0),
+				RecurrentFee: NewDecimal(0, 0),
+			},
+		},
+	}
 }
 
 // Balance represents one Balance inside an Account
@@ -452,4 +480,90 @@ func (ext *APIUnitFactor) AsUnitFactor() *UnitFactor {
 		FilterIDs: ext.FilterIDs,
 		Factor:    NewDecimalFromFloat64(ext.Factor),
 	}
+}
+
+type ArgsUpdateBalance struct {
+	Tenant    string
+	AccountID string
+	Params    []*ArgsBalParams
+	Reset     bool
+}
+
+type ArgsBalParams struct {
+	Path  string
+	Value string
+}
+
+func (ap *AccountProfile) Set(path []string, value interface{}) (err error) {
+	if len(path) == 0 {
+		return ErrWrongPath
+	}
+	// if len(path) == 1 {
+	// 	return
+	// }
+	switch path[0] {
+	case "*balance":
+		if len(path) < 3 {
+			return ErrWrongPath
+		}
+		return ap.Balances[path[1]].Set(path[2:], value)
+	default:
+		return ErrWrongPath
+	}
+}
+
+func (bal *Balance) Set(path []string, value interface{}) (err error) {
+	if len(path) == 0 {
+		return ErrWrongPath
+	}
+	switch path[0] {
+	case "ID":
+		bal.ID = IfaceAsString(value)
+	case "FilterIDs":
+		var fltrsIDs []string
+		if fltrsIDs, err = IfaceAsSliceString(value); err != nil {
+			err = nil
+			fltrsIDs = NewStringSet(strings.Split(IfaceAsString(value), InfieldSep)).AsSlice()
+		}
+		bal.FilterIDs = fltrsIDs
+	case "Weights":
+		var wg DynamicWeights
+		if wg, err = NewDynamicWeightsFromString(IfaceAsString(value), InfieldSep, ANDSep); err != nil {
+			return
+		}
+		bal.Weights = wg
+	case "Type":
+		bal.Type = IfaceAsString(value)
+	case "Units":
+		switch vl := value.(type) {
+		case *Decimal:
+			bal.Units = vl
+		default:
+			z, ok := new(decimal.Big).SetString(IfaceAsString(value))
+			if !ok {
+				return fmt.Errorf("can't convert <%+v> to decimal", value)
+			}
+			bal.Units.Big = z
+		}
+	case "UnitFactors":
+	case "Opts":
+	case "CostIncrements":
+	case "AttributeIDs":
+		var attrIDs []string
+		if attrIDs, err = IfaceAsSliceString(value); err != nil {
+			err = nil
+			attrIDs = NewStringSet(strings.Split(IfaceAsString(value), InfieldSep)).AsSlice()
+		}
+		bal.AttributeIDs = attrIDs
+	case "RateProfileIDs":
+		var rateIDs []string
+		if rateIDs, err = IfaceAsSliceString(value); err != nil {
+			err = nil
+			rateIDs = NewStringSet(strings.Split(IfaceAsString(value), InfieldSep)).AsSlice()
+		}
+		bal.RateProfileIDs = rateIDs
+	default:
+		return ErrWrongPath
+	}
+	return nil
 }

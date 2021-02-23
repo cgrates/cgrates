@@ -438,35 +438,45 @@ func testExpVerifyActionProfiles(t *testing.T) {
 		},
 		Actions: []*engine.APAction{
 			{
-				ID:    "TOPUP",
-				Type:  utils.MetaTopUp,
-				Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestBalance" + utils.NestingSep + utils.Value,
-				Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+				ID:   "TOPUP",
+				Type: utils.MetaTopUp,
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestBalance" + utils.NestingSep + utils.Value,
+					Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+				}},
 			},
 
 			{
-				ID:    "SET_BALANCE_TEST_DATA",
-				Type:  utils.MetaSetBalance,
-				Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Type,
-				Value: config.NewRSRParsersMustCompile(utils.MetaData, utils.InfieldSep),
+				ID:   "SET_BALANCE_TEST_DATA",
+				Type: utils.MetaSetBalance,
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Type,
+					Value: config.NewRSRParsersMustCompile(utils.MetaData, utils.InfieldSep),
+				}},
 			},
 			{
-				ID:    "TOPUP_TEST_DATA",
-				Type:  utils.MetaTopUp,
-				Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Value,
-				Value: config.NewRSRParsersMustCompile("1024", utils.InfieldSep),
+				ID:   "TOPUP_TEST_DATA",
+				Type: utils.MetaTopUp,
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Value,
+					Value: config.NewRSRParsersMustCompile("1024", utils.InfieldSep),
+				}},
 			},
 			{
-				ID:    "SET_BALANCE_TEST_VOICE",
-				Type:  utils.MetaSetBalance,
-				Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Type,
-				Value: config.NewRSRParsersMustCompile(utils.MetaVoice, utils.InfieldSep),
+				ID:   "SET_BALANCE_TEST_VOICE",
+				Type: utils.MetaSetBalance,
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Type,
+					Value: config.NewRSRParsersMustCompile(utils.MetaVoice, utils.InfieldSep),
+				}},
 			},
 			{
-				ID:    "TOPUP_TEST_VOICE",
-				Type:  utils.MetaTopUp,
-				Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Value,
-				Value: config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
+				ID:   "TOPUP_TEST_VOICE",
+				Type: utils.MetaTopUp,
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  utils.DynamicDataPrefix + utils.MetaCounterBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Value,
+					Value: config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
+				}},
 			},
 		},
 	}
@@ -481,7 +491,9 @@ func testExpVerifyActionProfiles(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		for _, act := range reply.Actions { // the path variable from RSRParsers is with lower letter and need to be compiled manually in tests to pass reflect.DeepEqual
-			act.Value.Compile()
+			for _, actD := range act.ActionDiktats {
+				actD.Value.Compile()
+			}
 		}
 		if !reflect.DeepEqual(actPrf, reply) {
 			t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(actPrf), utils.ToJSON(reply))

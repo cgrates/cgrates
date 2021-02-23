@@ -117,7 +117,9 @@ func testTpACtPrfPopulate(t *testing.T) {
 					ID:        "TOPUP",
 					FilterIDs: []string{},
 					Type:      "*topup",
-					Path:      "~*balance.TestBalance.Value",
+					ActionDiktats: []*utils.TPActionDiktat{{
+						Path: "~*balance.TestBalance.Value",
+					}},
 				},
 			},
 		},

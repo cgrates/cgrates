@@ -136,34 +136,44 @@ func testActionSGetActionProfile(t *testing.T) {
 		},
 		Actions: []*engine.APAction{
 			{
-				ID:    "TOPUP",
-				Type:  "*topup",
-				Path:  "~*balance.TestBalance.Value",
-				Value: config.NewRSRParsersMustCompile("10", actPrfCfg.GeneralCfg().RSRSep),
+				ID:   "TOPUP",
+				Type: "*topup",
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: config.NewRSRParsersMustCompile("10", actPrfCfg.GeneralCfg().RSRSep),
+				}},
 			},
 			{
-				ID:    "SET_BALANCE_TEST_DATA",
-				Type:  "*set_balance",
-				Path:  "~*balance.TestDataBalance.Type",
-				Value: config.NewRSRParsersMustCompile("*data", actPrfCfg.GeneralCfg().RSRSep),
+				ID:   "SET_BALANCE_TEST_DATA",
+				Type: "*set_balance",
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestDataBalance.Type",
+					Value: config.NewRSRParsersMustCompile("*data", actPrfCfg.GeneralCfg().RSRSep),
+				}},
 			},
 			{
-				ID:    "TOPUP_TEST_DATA",
-				Type:  "*topup",
-				Path:  "~*balance.TestDataBalance.Value",
-				Value: config.NewRSRParsersMustCompile("1024", actPrfCfg.GeneralCfg().RSRSep),
+				ID:   "TOPUP_TEST_DATA",
+				Type: "*topup",
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestDataBalance.Value",
+					Value: config.NewRSRParsersMustCompile("1024", actPrfCfg.GeneralCfg().RSRSep),
+				}},
 			},
 			{
-				ID:    "SET_BALANCE_TEST_VOICE",
-				Type:  "*set_balance",
-				Path:  "~*balance.TestVoiceBalance.Type",
-				Value: config.NewRSRParsersMustCompile("*voice", actPrfCfg.GeneralCfg().RSRSep),
+				ID:   "SET_BALANCE_TEST_VOICE",
+				Type: "*set_balance",
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestVoiceBalance.Type",
+					Value: config.NewRSRParsersMustCompile("*voice", actPrfCfg.GeneralCfg().RSRSep),
+				}},
 			},
 			{
-				ID:    "TOPUP_TEST_VOICE",
-				Type:  "*topup",
-				Path:  "~*balance.TestVoiceBalance.Value",
-				Value: config.NewRSRParsersMustCompile("15m15s", actPrfCfg.GeneralCfg().RSRSep),
+				ID:   "TOPUP_TEST_VOICE",
+				Type: "*topup",
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestVoiceBalance.Value",
+					Value: config.NewRSRParsersMustCompile("15m15s", actPrfCfg.GeneralCfg().RSRSep),
+				}},
 			},
 		},
 	}
@@ -179,7 +189,9 @@ func testActionSGetActionProfile(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		for _, act := range reply.Actions { // the path variable from RSRParsers is with lower letter and need to be compiled manually in tests to pass reflect.DeepEqual
-			act.Value.Compile()
+			for _, actD := range act.ActionDiktats {
+				actD.Value.Compile()
+			}
 		}
 		if !reflect.DeepEqual(expected, reply) {
 			t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -214,8 +226,10 @@ func testActionSSettActionProfile(t *testing.T) {
 						TTL:       0,
 						Type:      "",
 						Opts:      nil,
-						Path:      "",
-						Value:     nil,
+						ActionDiktats: []*engine.ActionDiktat{{
+							Path:  "",
+							Value: nil,
+						}},
 					},
 					{
 						ID:        "test_action_id2",
@@ -224,8 +238,10 @@ func testActionSSettActionProfile(t *testing.T) {
 						TTL:       0,
 						Type:      "",
 						Opts:      nil,
-						Path:      "",
-						Value:     nil,
+						ActionDiktats: []*engine.ActionDiktat{{
+							Path:  "",
+							Value: nil,
+						}},
 					},
 				},
 			},

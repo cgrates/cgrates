@@ -3239,21 +3239,30 @@ func (tps ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfil
 		}
 
 		if tp.ActionID != utils.EmptyString {
-			tpAAction := &utils.TPAPAction{
-				ID:      tp.ActionID,
-				Blocker: tp.ActionBlocker,
-				TTL:     tp.ActionTTL,
-				Type:    tp.ActionType,
-				Opts:    tp.ActionOpts,
-				Path:    tp.ActionPath,
-				Value:   tp.ActionValue,
+			var tpAAction *utils.TPAPAction
+			if lacts := len(aPrf.Actions); lacts == 0 ||
+				aPrf.Actions[lacts-1].ID != tp.ActionID {
+				tpAAction = &utils.TPAPAction{
+					ID:      tp.ActionID,
+					Blocker: tp.ActionBlocker,
+					TTL:     tp.ActionTTL,
+					Type:    tp.ActionType,
+					Opts:    tp.ActionOpts,
+					ActionDiktats: []*utils.TPActionDiktat{{
+						Path:  tp.ActionPath,
+						Value: tp.ActionValue,
+					}},
+				}
+				if tp.ActionFilterIDs != utils.EmptyString {
+					tpAAction.FilterIDs = utils.NewStringSet(strings.Split(tp.ActionFilterIDs, utils.InfieldSep)).AsSlice()
+				}
+				aPrf.Actions = append(aPrf.Actions, tpAAction)
+			} else {
+				aPrf.Actions[lacts-1].ActionDiktats = append(aPrf.Actions[lacts-1].ActionDiktats, &utils.TPActionDiktat{
+					Path:  tp.ActionPath,
+					Value: tp.ActionValue,
+				})
 			}
-			if tp.ActionFilterIDs != utils.EmptyString {
-				filterIDs := make(utils.StringSet)
-				filterIDs.AddSlice(strings.Split(tp.ActionFilterIDs, utils.InfieldSep))
-				tpAAction.FilterIDs = filterIDs.AsSlice()
-			}
-			aPrf.Actions = append(aPrf.Actions, tpAAction)
 		}
 		actPrfMap[tenID] = aPrf
 	}
@@ -3274,20 +3283,14 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 	if len(tPrf.Actions) == 0 {
 		return
 	}
-	i := 0
-	for _, action := range tPrf.Actions {
+	for i, action := range tPrf.Actions {
 		mdl := &ActionProfileMdl{
 			Tenant: tPrf.Tenant,
 			Tpid:   tPrf.TPid,
 			ID:     tPrf.ID,
 		}
 		if i == 0 {
-			for i, val := range tPrf.FilterIDs {
-				if i != 0 {
-					mdl.FilterIDs += utils.InfieldSep
-				}
-				mdl.FilterIDs += val
-			}
+			mdl.FilterIDs = strings.Join(tPrf.FilterIDs, utils.InfieldSep)
 
 			if tPrf.ActivationInterval != nil {
 				if tPrf.ActivationInterval.ActivationTime != utils.EmptyString {
@@ -3305,20 +3308,26 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 			}
 		}
 		mdl.ActionID = action.ID
-		for i, val := range action.FilterIDs {
-			if i != 0 {
-				mdl.ActionFilterIDs += utils.InfieldSep
-			}
-			mdl.ActionFilterIDs += val
-		}
+		mdl.ActionFilterIDs = strings.Join(action.FilterIDs, utils.InfieldSep)
+
 		mdl.ActionBlocker = action.Blocker
 		mdl.ActionTTL = action.TTL
 		mdl.ActionType = action.Type
 		mdl.ActionOpts = action.Opts
-		mdl.ActionPath = action.Path
-		mdl.ActionValue = action.Value
-		mdls = append(mdls, mdl)
-		i++
+		for j, actD := range action.ActionDiktats {
+			if j != 0 {
+				mdl = &ActionProfileMdl{
+					Tenant:     mdl.Tenant,
+					Tpid:       mdl.Tpid,
+					ID:         mdl.ID,
+					ActionID:   mdl.ActionID,
+					ActionType: mdl.ActionType,
+				}
+			}
+			mdl.ActionPath = actD.Path
+			mdl.ActionValue = actD.Value
+			mdls = append(mdls, mdl)
+		}
 	}
 	return
 }
@@ -3345,16 +3354,23 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 		ap.Targets[target.TargetType] = utils.NewStringSet(target.TargetIDs)
 	}
 	for i, act := range tpAp.Actions {
-		if act.Path == utils.EmptyString {
-			err = fmt.Errorf("empty path in ActionProfile <%s> for action <%s>", ap.TenantID(), act.ID)
-			return
+		actDs := make([]*ActionDiktat, len(act.ActionDiktats))
+		for j, actD := range act.ActionDiktats {
+			var val config.RSRParsers
+			if val, err = config.NewRSRParsers(actD.Value, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
+				return
+			}
+			actDs[j] = &ActionDiktat{
+				Path:  actD.Path,
+				Value: val,
+			}
 		}
 		ap.Actions[i] = &APAction{
-			ID:        act.ID,
-			FilterIDs: act.FilterIDs,
-			Blocker:   act.Blocker,
-			Type:      act.Type,
-			Path:      act.Path,
+			ID:            act.ID,
+			FilterIDs:     act.FilterIDs,
+			Blocker:       act.Blocker,
+			Type:          act.Type,
+			ActionDiktats: actDs,
 		}
 		if ap.Actions[i].TTL, err = utils.ParseDurationWithNanosecs(act.TTL); err != nil {
 			return
@@ -3370,9 +3386,7 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 				ap.Actions[i].Opts[keyValSls[0]] = keyValSls[1]
 			}
 		}
-		if ap.Actions[i].Value, err = config.NewRSRParsers(act.Value, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
-			return
-		}
+
 	}
 	return
 }
@@ -3403,21 +3417,27 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 		tpAp.Targets = append(tpAp.Targets, &utils.TPActionTarget{TargetType: targetType, TargetIDs: targetIDs.AsSlice()})
 	}
 	for i, act := range ap.Actions {
-		tpAp.Actions[i] = &utils.TPAPAction{
-			ID:        act.ID,
-			FilterIDs: act.FilterIDs,
-			Blocker:   act.Blocker,
-			TTL:       act.TTL.String(),
-			Type:      act.Type,
-			Path:      act.Path,
-			Value:     act.Value.GetRule(config.CgrConfig().GeneralCfg().RSRSep),
+		actDs := make([]*utils.TPActionDiktat, len(act.ActionDiktats))
+		for j, actD := range act.ActionDiktats {
+			actDs[j] = &utils.TPActionDiktat{
+				Path:  actD.Path,
+				Value: actD.Value.GetRule(config.CgrConfig().GeneralCfg().RSRSep),
+			}
 		}
 
 		elems := make([]string, 0, len(act.Opts))
 		for k, v := range act.Opts {
 			elems = append(elems, utils.ConcatenatedKey(k, utils.IfaceAsString(v)))
 		}
-		tpAp.Actions[i].Opts = strings.Join(elems, utils.InfieldSep)
+		tpAp.Actions[i] = &utils.TPAPAction{
+			ID:            act.ID,
+			FilterIDs:     act.FilterIDs,
+			Blocker:       act.Blocker,
+			TTL:           act.TTL.String(),
+			Type:          act.Type,
+			ActionDiktats: actDs,
+			Opts:          strings.Join(elems, utils.InfieldSep),
+		}
 	}
 	return
 }

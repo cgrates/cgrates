@@ -175,3 +175,9 @@ func (aSv1 *AccountSv1) DebitAbstracts(args *utils.ArgsAccountsForEvent,
 	eEc *utils.ExtEventCharges) (err error) {
 	return aSv1.aS.V1DebitAbstracts(args, eEc)
 }
+
+// TopupBalance performs topup for the provided balance
+func (aSv1 *AccountSv1) TopupBalance(args *utils.ArgsUpdateBalance,
+	rply *string) (err error) {
+	return aSv1.aS.V1TopupBalance(args, rply)
+}

@@ -62,8 +62,10 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Path:      "~*balance.TestBalance.Value",
-				Value:     config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+				}},
 			},
 		},
 	}
@@ -169,8 +171,10 @@ func TestScheduledActions(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Path:      "~*balance.TestBalance.Value",
-				Value:     config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+				}},
 			},
 		},
 	}
@@ -182,8 +186,8 @@ func TestScheduledActions(t *testing.T) {
 	if rcv, err := acts.scheduledActions(cgrEv.Tenant, cgrEv, []string{}, false); err != nil {
 		t.Error(err)
 	} else {
-		expSchedActs := newScheduledActs(cgrEv.Tenant, cgrEv.ID, utils.MetaNone, utils.EmptyString,
-			utils.EmptyString, context.Background(), evNM, rcv[0].acts)
+		expSchedActs := newScheduledActs(context.Background(), cgrEv.Tenant, cgrEv.ID, utils.MetaNone, utils.EmptyString,
+			utils.EmptyString, evNM, rcv[0].acts)
 		if reflect.DeepEqual(expSchedActs, rcv) {
 			t.Errorf("Expected %+v, received %+v", expSchedActs, rcv)
 		}
@@ -198,22 +202,6 @@ func TestScheduledActions(t *testing.T) {
 	}
 	if _, err := acts.scheduledActions(cgrEv.Tenant, cgrEv, []string{}, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
-	}
-
-	cgrEv = &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "test_id1",
-		Event: map[string]interface{}{
-			utils.AccountField: "1001",
-			utils.Destination:  1002,
-		},
-	}
-	actPrf.Actions[0].Type = "*topup"
-	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
-		t.Error(err)
-	}
-	if _, err := acts.scheduledActions(cgrEv.Tenant, cgrEv, []string{}, false); err == nil || err != utils.ErrPartiallyExecuted {
-		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 }
 
@@ -245,8 +233,10 @@ func TestScheduleAction(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Path:      "~*balance.TestBalance.Value",
-				Value:     config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+				}},
 			},
 		},
 	}
@@ -305,8 +295,8 @@ func TestAsapExecuteActions(t *testing.T) {
 		utils.MetaOpts: map[string]interface{}{},
 	}
 
-	expSchedActs := newScheduledActs(cgrEv[0].Tenant, cgrEv[0].ID, utils.MetaNone, utils.EmptyString,
-		utils.EmptyString, context.Background(), evNM, nil)
+	expSchedActs := newScheduledActs(context.Background(), cgrEv[0].Tenant, cgrEv[0].ID, utils.MetaNone, utils.EmptyString,
+		utils.EmptyString, evNM, nil)
 
 	if err := acts.asapExecuteActions(expSchedActs); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
@@ -314,8 +304,8 @@ func TestAsapExecuteActions(t *testing.T) {
 
 	data := engine.NewInternalDB(nil, nil, true)
 	acts.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	expSchedActs = newScheduledActs(cgrEv[0].Tenant, "another_id", utils.MetaNone, utils.EmptyString,
-		utils.EmptyString, context.Background(), evNM, nil)
+	expSchedActs = newScheduledActs(context.Background(), cgrEv[0].Tenant, "another_id", utils.MetaNone, utils.EmptyString,
+		utils.EmptyString, evNM, nil)
 	if err := acts.asapExecuteActions(expSchedActs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -369,8 +359,10 @@ func TestV1ScheduleActions(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Path:      "~*balance.TestBalance.Value",
-				Value:     config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+				}},
 			},
 		},
 	}
@@ -425,8 +417,10 @@ func TestV1ExecuteActions(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Path:      "~*balance.TestBalance.Value",
-				Value:     config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+				}},
 			},
 		},
 	}
@@ -473,9 +467,7 @@ func TestActionShutDown(t *testing.T) {
 	acts := NewActionS(defaultCfg, filters, dm, nil)
 	acts.crn = &cron.Cron{}
 
-	if err := acts.Shutdown(); err != nil {
-		t.Error(err)
-	}
+	acts.Shutdown()
 }
 
 type dataDBMockError struct {
@@ -492,8 +484,10 @@ func (dbM *dataDBMockError) GetActionProfileDrv(string, string) (*engine.ActionP
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Path:      "~*balance.TestBalance.Value",
-				Value:     config.NewRSRParsersMustCompile("10", ","),
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: config.NewRSRParsersMustCompile("10", ","),
+				}},
 			},
 		},
 	}, nil
@@ -524,7 +518,7 @@ func TestLogActionExecute(t *testing.T) {
 	}
 
 	logAction := actLog{}
-	if err := logAction.execute(nil, evNM); err != nil {
+	if err := logAction.execute(nil, evNM, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 
@@ -613,7 +607,7 @@ func TestCDRLogActionExecute(t *testing.T) {
 		},
 		utils.MetaOpts: map[string]interface{}{},
 	}
-	if err := cdrLogAction.execute(nil, evNM); err != nil {
+	if err := cdrLogAction.execute(nil, evNM, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 }
@@ -724,7 +718,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 			"EventFieldOpt": "eventValue",
 		},
 	}
-	if err := cdrLogAction.execute(nil, evNM); err != nil {
+	if err := cdrLogAction.execute(nil, evNM, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 }
@@ -776,7 +770,7 @@ func TestExportAction(t *testing.T) {
 			"EventFieldOpt": "eventValue",
 		},
 	}
-	if err := exportAction.execute(nil, evNM); err != nil {
+	if err := exportAction.execute(nil, evNM, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 }
@@ -834,7 +828,7 @@ func TestExportActionWithEeIDs(t *testing.T) {
 			"EventFieldOpt": "eventValue",
 		},
 	}
-	if err := exportAction.execute(nil, evNM); err != nil {
+	if err := exportAction.execute(nil, evNM, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 }
@@ -868,9 +862,9 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
 	})
 	apA := &engine.APAction{
-		ID:    "ACT_RESET_TH",
-		Type:  utils.MetaResetThreshold,
-		Value: config.NewRSRParsersMustCompile("cgrates.org;:;TH1", utils.InfieldSep),
+		ID:            "ACT_RESET_TH",
+		Type:          utils.MetaResetThreshold,
+		ActionDiktats: []*engine.ActionDiktat{{}},
 	}
 	exportAction := &actResetThreshold{
 		tnt:     "cgrates.org",
@@ -881,7 +875,7 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 	evNM := utils.MapStorage{
 		utils.MetaOpts: map[string]interface{}{},
 	}
-	if err := exportAction.execute(nil, evNM); err != nil {
+	if err := exportAction.execute(nil, evNM, "cgrates.org:TH1"); err != nil {
 		t.Error(err)
 	}
 }
@@ -915,9 +909,9 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
 	})
 	apA := &engine.APAction{
-		ID:    "ACT_RESET_TH",
-		Type:  utils.MetaResetThreshold,
-		Value: config.NewRSRParsersMustCompile("TH1", utils.InfieldSep),
+		ID:            "ACT_RESET_TH",
+		Type:          utils.MetaResetThreshold,
+		ActionDiktats: []*engine.ActionDiktat{{}},
 	}
 	exportAction := &actResetThreshold{
 		tnt:     "cgrates.org",
@@ -928,62 +922,7 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 	evNM := utils.MapStorage{
 		utils.MetaOpts: map[string]interface{}{},
 	}
-	if err := exportAction.execute(nil, evNM); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestExportActionResetThresholdVariableID(t *testing.T) {
-	// Clear cache because connManager sets the internal connection in cache
-	engine.Cache.Clear([]string{utils.CacheRPCConnections})
-	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.ThresholdSv1ResetThreshold: func(arg interface{}, rply interface{}) error {
-				argConv, can := arg.(*utils.TenantIDWithOpts)
-				if !can {
-					return fmt.Errorf("Wrong argument type: %T", arg)
-				}
-				if argConv.Tenant != "cgrates.org" {
-					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
-				}
-				if argConv.ID != "TH1" {
-					return fmt.Errorf("Expected %+v, received %+v", "TH1", argConv.ID)
-				}
-				return nil
-			},
-		},
-	}
-	internalChann := make(chan rpcclient.ClientConnector, 1)
-	internalChann <- sMock2
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
-
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
-	})
-	apA := &engine.APAction{
-		ID:    "ACT_RESET_TH",
-		Type:  utils.MetaResetThreshold,
-		Value: config.NewRSRParsersMustCompile("~*req.RandomName", utils.InfieldSep),
-	}
-	exportAction := &actResetThreshold{
-		tnt:     "cgrates.org",
-		config:  cfg,
-		connMgr: connMgr,
-		aCfg:    apA,
-	}
-	evNM := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
-			utils.AccountField: "10",
-			utils.Tenant:       "cgrates.org",
-			utils.BalanceType:  utils.MetaConcrete,
-			utils.Cost:         0.15,
-			utils.ActionType:   utils.MetaTopUp,
-			"RandomName":       "TH1",
-		},
-		utils.MetaOpts: map[string]interface{}{},
-	}
-	if err := exportAction.execute(nil, evNM); err != nil {
+	if err := exportAction.execute(nil, evNM, "TH1"); err != nil {
 		t.Error(err)
 	}
 }
@@ -1017,9 +956,9 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
 	})
 	apA := &engine.APAction{
-		ID:    "ACT_RESET_ST",
-		Type:  utils.MetaResetStatQueue,
-		Value: config.NewRSRParsersMustCompile("cgrates.org;:;ST1", utils.InfieldSep),
+		ID:            "ACT_RESET_ST",
+		Type:          utils.MetaResetStatQueue,
+		ActionDiktats: []*engine.ActionDiktat{{}},
 	}
 	exportAction := &actResetStat{
 		tnt:     "cgrates.org",
@@ -1030,7 +969,7 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 	evNM := utils.MapStorage{
 		utils.MetaOpts: map[string]interface{}{},
 	}
-	if err := exportAction.execute(nil, evNM); err != nil {
+	if err := exportAction.execute(nil, evNM, "cgrates.org:ST1"); err != nil {
 		t.Error(err)
 	}
 }
@@ -1064,9 +1003,11 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
 	})
 	apA := &engine.APAction{
-		ID:    "ACT_RESET_ST",
-		Type:  utils.MetaResetStatQueue,
-		Value: config.NewRSRParsersMustCompile("ST1", utils.InfieldSep),
+		ID:   "ACT_RESET_ST",
+		Type: utils.MetaResetStatQueue,
+		ActionDiktats: []*engine.ActionDiktat{{
+			Value: config.NewRSRParsersMustCompile("ST1", utils.InfieldSep),
+		}},
 	}
 	exportAction := &actResetStat{
 		tnt:     "cgrates.org",
@@ -1077,62 +1018,7 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 	evNM := utils.MapStorage{
 		utils.MetaOpts: map[string]interface{}{},
 	}
-	if err := exportAction.execute(nil, evNM); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestExportActionResetStatVariableID(t *testing.T) {
-	// Clear cache because connManager sets the internal connection in cache
-	engine.Cache.Clear([]string{utils.CacheRPCConnections})
-	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.StatSv1ResetStatQueue: func(arg interface{}, rply interface{}) error {
-				argConv, can := arg.(*utils.TenantIDWithOpts)
-				if !can {
-					return fmt.Errorf("Wrong argument type: %T", arg)
-				}
-				if argConv.Tenant != "cgrates.org" {
-					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
-				}
-				if argConv.ID != "ST1" {
-					return fmt.Errorf("Expected %+v, received %+v", "TH1", argConv.ID)
-				}
-				return nil
-			},
-		},
-	}
-	internalChann := make(chan rpcclient.ClientConnector, 1)
-	internalChann <- sMock2
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
-
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
-	})
-	apA := &engine.APAction{
-		ID:    "ACT_RESET_ST",
-		Type:  utils.MetaResetStatQueue,
-		Value: config.NewRSRParsersMustCompile("~*req.RandomName", utils.InfieldSep),
-	}
-	exportAction := &actResetStat{
-		tnt:     "cgrates.org",
-		config:  cfg,
-		connMgr: connMgr,
-		aCfg:    apA,
-	}
-	evNM := utils.MapStorage{
-		utils.MetaReq: map[string]interface{}{
-			utils.AccountField: "10",
-			utils.Tenant:       "cgrates.org",
-			utils.BalanceType:  utils.MetaConcrete,
-			utils.Cost:         0.15,
-			utils.ActionType:   utils.MetaTopUp,
-			"RandomName":       "ST1",
-		},
-		utils.MetaOpts: map[string]interface{}{},
-	}
-	if err := exportAction.execute(nil, evNM); err != nil {
+	if err := exportAction.execute(nil, evNM, "ST1"); err != nil {
 		t.Error(err)
 	}
 }

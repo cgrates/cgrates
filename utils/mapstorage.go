@@ -186,7 +186,6 @@ func (ms MapStorage) Set(fldPath []string, val interface{}) (err error) {
 	}
 	if len(fldPath) == 1 {
 		ms[fldPath[0]] = val
-
 		return
 	}
 
