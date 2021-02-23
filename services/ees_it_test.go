@@ -69,10 +69,10 @@ func TestEventExporterSReload(t *testing.T) {
 	srvMngr.AddServices(ees, attrS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if ees.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
 	fcTmp := &config.FCTemplate{Tag: "TenantID",
 		Path:      "Tenant",
@@ -88,27 +88,27 @@ func TestEventExporterSReload(t *testing.T) {
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ees"),
 		Section: config.EEsJson,
 	}, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
+		t.Fatalf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !ees.IsRunning() {
-		t.Errorf("Expected service to be running")
+		t.Fatalf("Expected service to be running")
 	}
 	err := ees.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	err = ees.Reload()
 	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.EEsCfg().Enabled = false
 	cfg.GetReloadChan(config.EEsJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if ees.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)

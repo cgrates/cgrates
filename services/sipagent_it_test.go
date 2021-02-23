@@ -107,9 +107,10 @@ WILLFIX
 	if !canCastSrv {
 		t.Fatalf("cannot cast")
 	}
+	castSrv.sip = srvSIP
 	castSrv.oldListen = "test_string"
 	err = srv.Reload()
 	if err != nil {
-		t.Fatalf("\nExpecting <err>,\n Received <%+v>", err)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 */
