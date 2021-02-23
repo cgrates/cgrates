@@ -1,0 +1,4 @@
+#ID,DestinationsID,RatesID,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_10_1CSEC,DST_10,RT_1CSEC,*up,5,,
+DR_10_10C,DST_10,RT_10C,*up,5,,
+DR_10_5C,DST_10,RT_5C,*up,5,,

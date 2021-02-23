@@ -1,0 +1,3 @@
+# Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+
+cgrates.org,CGR_DEFAULT,,,*default,*none,0

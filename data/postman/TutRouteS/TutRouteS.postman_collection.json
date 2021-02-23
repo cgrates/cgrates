@@ -1,0 +1,421 @@
+{
+	"variables": [],
+	"info": {
+		"name": "TutRouteS",
+		"_postman_id": "d5c3040b-e6fa-fc18-61b6-be7ec4b44a2d",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "LoaderS",
+			"description": "",
+			"item": [
+				{
+					"name": "APIerSv1.LoadTariffPlanFromFolder",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.LoadTariffPlanFromFolder\",\n    \"params\": [\n        {\n            \"FolderPath\": \"/usr/local/src/cgrates/data/tariffplans/tutroutes\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CDRs",
+			"description": "",
+			"item": [
+				{
+					"name": "APIerSv2.GetCdrs",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"11111\",\n    \"method\": \"APIerSv2.GetCDRs\",\n    \"params\": [\n        {\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RouteS",
+			"description": "",
+			"item": [
+				{
+					"name": "APIerSv1.GetRouteProfile ACNT_1001",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetRouteProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ROUTE_ACNT_1001\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetRouteProfile ACNT_1002",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetRouteProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ROUTE_ACNT_1002\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetSupplierProfileACNT_1003",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetRouteProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ROUTE_ACNT_1003\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetSupplierProfileACNT_1004",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetRouteProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ROUTE_ACNT_1004\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetSupplierProfileACNT_1004 copy",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetRouteProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"ROUTE_ACNT_1005\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "RouteSv1.GetRoutes",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"method\": \"RouteSv1.GetRoutes\",\n\t\"params\": [{\n\t\t\"IgnoreErrors\": false,\n\t\t\"MaxCost\": \"\",\n\t\t\"Tenant\": \"cgrates.org\",\n\t\t\"ID\": \"99ceb66\",\n\t\t\"Time\": \"2021-02-17T18:20:47+01:00\",\n\t\t\"Event\": {\n\t\t\t\"Account\": \"1005\",\n\t\t\t\"Destination\": \"1002\"\n\t\t},\n\t\t\"Opts\": {},\n\t\t\"Limit\": null,\n\t\t\"Offset\": null\n\t}],\n\t\"id\": 64\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RALs",
+			"description": "",
+			"item": [
+				{
+					"name": "APIerSv1.GetCost 1001 vendor1",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetCost\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"vendor1\",\n            \"Subject\": \"1001\",\n            \"Destination\": \"1002\",\n            \"AnswerTime\": \"2020-09-12T15:12:23.190554134+02:00\",\n            \"Usage\": \"2m17s\"\n        }\n    ],\n    \"id\": 0\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetCost 1001 vendor2",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetCost\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Category\": \"vendor2\",\n            \"Subject\": \"1001\",\n            \"Destination\": \"1002\",\n            \"AnswerTime\": \"2020-09-12T15:12:23.190554134+02:00\",\n            \"Usage\": \"50s\"\n        }\n    ],\n    \"id\": 0\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv2.GetAccount 1001",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv2.GetAccount\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"1001\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "StatS",
+			"description": "",
+			"item": [
+				{
+					"name": "APIerSv1.GetStatQueueProfile VENDOR_1",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetStatQueueProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"id\": \"STATS_VENDOR_1\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "APIerSv1.GetStatQueueProfile VENDOR_2",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"APIerSv1.GetStatQueueProfile\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"id\": \"STATS_VENDOR_2\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "StatSv1.GetQueueStringMetrics VENDOR_1",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.GetQueueStringMetrics\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"id\": \"STATS_VENDOR_1\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "StatSv1.GetQueueStringMetrics VENDOR_2",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.GetQueueStringMetrics\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"id\": \"STATS_VENDOR_2\"\n        }\n    ]\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "StatSv1.ProcessEvent VENDOR_1",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"7094cd19-c893-41d5-b380-40e3a05fd34d\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Category\": \"vendor1\",\n                \"Cost\": 1.10855,\n                \"Usage\": \"1m5s\"\n            }\n        }\n    ],\n    \"id\": 24\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "StatSv1.ProcessEvent VENDOR_2",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"7094cd19-c893-41d5-b380-40e3a05fd34d\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Category\": \"vendor2\",\n                 \"Cost\": 0.1079,\n                \"Usage\": \"2m10s\"\n            }\n        }\n    ],\n    \"id\": 24\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "StatSv1.ProcessEvent VENDOR_1 copy",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"7094cd19-c893-41d5-b380-40e3a05fd34d\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Category\": \"vendor1\",\n                \"Cost\": 0.22879,\n                \"Usage\": \"2m17s\"\n            }\n        }\n    ],\n    \"id\": 24\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "StatSv1.ProcessEvent VENDOR_2 copy",
+					"request": {
+						"url": "{{base_url}}/jsonrpc",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"StatSv1.ProcessEvent\",\n    \"params\": [\n        {\n            \"Tenant\": \"cgrates.org\",\n            \"ID\": \"7094cd19-c893-41d5-b380-40e3a05fd34d\",\n            \"Event\": {\n                \"Account\": \"1001\",\n                \"Category\": \"vendor2\",\n                 \"Cost\": 0.0415,\n                \"Usage\": \"50s\"\n            }\n        }\n    ],\n    \"id\": 24\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

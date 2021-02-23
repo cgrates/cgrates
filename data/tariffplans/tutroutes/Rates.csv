@@ -1,0 +1,5 @@
+#ID,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_1CSEC,0,0.01,1s,1m,0
+RT_1CSEC,0,0.01,1s,1s,1m
+RT_10C,0,0.1,1m,1s,0
+RT_5C,0,0.05,1m,1s,0
