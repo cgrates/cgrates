@@ -114,9 +114,7 @@ func (acts *ActionService) Shutdown() (err error) {
 	acts.Lock()
 	defer acts.Unlock()
 	close(acts.stopChan)
-	if err = acts.acts.Shutdown(); err != nil {
-		return
-	}
+	acts.acts.Shutdown()
 	acts.acts = nil
 	acts.rpc = nil
 	<-acts.connChan

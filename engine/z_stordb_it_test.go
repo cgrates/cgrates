@@ -244,7 +244,9 @@ func testStorDBitCRUDTPActionProfiles(t *testing.T) {
 				{
 					ID:   "TOPUP",
 					Type: "*topup",
-					Path: "~*balance.TestBalance.Value",
+					ActionDiktats: []*utils.TPActionDiktat{{
+						Path: "~*balance.TestBalance.Value",
+					}},
 				},
 			},
 		},
@@ -259,7 +261,9 @@ func testStorDBitCRUDTPActionProfiles(t *testing.T) {
 				{
 					ID:   "TOPUP",
 					Type: "*topup",
-					Path: "~*balance.TestBalance.Value",
+					ActionDiktats: []*utils.TPActionDiktat{{
+						Path: "~*balance.TestBalance.Value",
+					}},
 				},
 			},
 		},

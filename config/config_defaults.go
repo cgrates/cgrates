@@ -1126,6 +1126,7 @@ const CGRATES_CFG_JSON = `
 	"ees_conns": [],						// connections to Ees for exporting event <""|*internal|$rpc_conns_id>
 	"thresholds_conns": [],					// connections to ThresholdS for *reset_threshold action <""|*internal|$rpc_conns_id>
 	"stats_conns": [],						// connections to StatS for *reset_stat_queue action: <""|*internal|$rpc_conns_id>
+	"accounts_conns": [],					// connections to AccountS for *topup/*topup_reset action: <""|*internal|$rpc_conns_id>
 	"tenants":[],							// List of tenants to operate on
 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing

@@ -20,6 +20,7 @@ package accounts
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -94,13 +95,12 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 	for _, acntID := range acntIDs {
 		var refID string
 		if lked {
-			cacheKey := utils.ConcatenatedKey(utils.CacheAccountProfiles, acntID)
+			cacheKey := utils.ConcatenatedKey(utils.CacheAccountProfiles, tnt, acntID)
 			refID = guardian.Guardian.GuardIDs("",
 				aS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		}
 		var qAcnt *utils.AccountProfile
-		if qAcnt, err = aS.dm.GetAccountProfile(tnt, acntID,
-			true, true, utils.NonTransactional); err != nil {
+		if qAcnt, err = aS.dm.GetAccountProfile(tnt, acntID); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			if err == utils.ErrNotFound {
 				err = nil
@@ -301,4 +301,52 @@ func (aS *AccountS) V1DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *util
 
 	*eEc = *rcvEec
 	return
+}
+
+// V1TopupBalance performs a topup for a specific account
+func (aS *AccountS) V1UpdateBalance(args *utils.ArgsUpdateBalance, rply *string) (err error) {
+	if args.AccountID == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing(utils.AccountID)
+	}
+	if len(args.Params) == 0 {
+		return utils.NewErrMandatoryIeMissing("Params")
+	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = aS.cfg.GeneralCfg().DefaultTenant
+	}
+	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
+		return nil, aS.updateBalance(tnt, args.AccountID, args.Params, args.Reset)
+	}, aS.cfg.GeneralCfg().LockingTimeout,
+		utils.ConcatenatedKey(utils.CacheAccountProfiles, tnt, args.AccountID)); err != nil {
+		return
+	}
+
+	*rply = utils.OK
+	return
+}
+
+func (aS *AccountS) updateBalance(tnt, acntID string, params []*utils.ArgsBalParams, reset bool) (err error) {
+	var qAcnt *utils.AccountProfile
+	if qAcnt, err = aS.dm.GetAccountProfile(tnt, acntID); err != nil {
+		return
+	}
+	for _, param := range params {
+		path := strings.Split(param.Path, utils.NestingSep)
+		if len(path) < 3 {
+			return fmt.Errorf("unsupported path:%s ", param.Path)
+		}
+		if path[0] != "~*balance" {
+			return fmt.Errorf("unsupported field prefix: <%s>", path[0])
+		}
+		switch
+		if bal, has := qAcnt.Balances[balID]; !has {
+			qAcnt.Balances[balID] = utils.NewDefaultBalance(balID, value)
+		} else if reset {
+			bal.Units = value
+		} else {
+			bal.Units.Add(bal.Units.Big, value.Big)
+		}
+	}
+	return aS.dm.SetAccountProfile(qAcnt, false)
 }

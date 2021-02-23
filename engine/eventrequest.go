@@ -182,20 +182,18 @@ func (eeR *EventRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 
 // Set implements utils.NMInterface
 func (eeR *EventRequest) Set(fullPath *utils.FullPath, nm utils.NMInterface) (added bool, err error) {
+	if fullPath.PathItems[0].Field == utils.MetaUCH {
+		err = Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm, nil, true, utils.NonTransactional)
+		return
+	}
 	oNM, has := eeR.OrdNavMP[fullPath.PathItems[0].Field]
-	if !has && fullPath.PathItems[0].Field != utils.MetaUCH {
+	if !has {
 		return false, fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0].Field)
 	}
-	switch fullPath.PathItems[0].Field {
-	default:
-		return oNM.Set(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
-			Path:      fullPath.Path[len(fullPath.PathItems[0].Field):],
-		}, nm)
-	case utils.MetaUCH:
-		err = Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm, nil, true, utils.NonTransactional)
-	}
-	return false, err
+	return oNM.Set(&utils.FullPath{
+		PathItems: fullPath.PathItems[1:],
+		Path:      fullPath.Path[len(fullPath.PathItems[0].Field):],
+	}, nm)
 }
 
 // ParseField outputs the value based on the template item

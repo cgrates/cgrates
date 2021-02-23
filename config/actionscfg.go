@@ -27,6 +27,7 @@ type ActionSCfg struct {
 	EEsConns            []string
 	ThresholdSConns     []string
 	StatSConns          []string
+	AccountSConns       []string
 	Tenants             *[]string
 	IndexedSelects      bool
 	StringIndexedFields *[]string
@@ -76,6 +77,16 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 			acS.StatSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				acS.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+			}
+		}
+	}
+	if jsnCfg.Accounts_conns != nil {
+		acS.AccountSConns = make([]string, len(*jsnCfg.Accounts_conns))
+		for idx, connID := range *jsnCfg.Accounts_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			acS.AccountSConns[idx] = connID
+			if connID == utils.MetaInternal {
+				acS.AccountSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)
 			}
 		}
 	}
@@ -156,6 +167,16 @@ func (acS *ActionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.StatSConnsCfg] = statSConns
 	}
+	if acS.AccountSConns != nil {
+		accountSConns := make([]string, len(acS.AccountSConns))
+		for i, item := range acS.AccountSConns {
+			accountSConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts) {
+				accountSConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.AccountSConnsCfg] = accountSConns
+	}
 	if acS.EEsConns != nil {
 		eesConns := make([]string, len(acS.EEsConns))
 		for i, item := range acS.EEsConns {
@@ -220,6 +241,12 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 		cln.StatSConns = make([]string, len(acS.StatSConns))
 		for i, con := range acS.StatSConns {
 			cln.StatSConns[i] = con
+		}
+	}
+	if acS.AccountSConns != nil {
+		cln.AccountSConns = make([]string, len(acS.AccountSConns))
+		for i, con := range acS.AccountSConns {
+			cln.AccountSConns[i] = con
 		}
 	}
 	if acS.EEsConns != nil {

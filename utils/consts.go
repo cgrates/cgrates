@@ -2241,9 +2241,10 @@ const (
 
 // From Config
 const (
-	AddressCfg = "address"
-	Password   = "password"
-	AliasCfg   = "alias"
+	AddressCfg       = "address"
+	Password         = "password"
+	AliasCfg         = "alias"
+	AccountSConnsCfg = "accounts_conns"
 
 	// KamAgentCfg
 	EvapiConnsCfg = "evapi_conns"

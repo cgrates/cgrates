@@ -2542,35 +2542,48 @@ func TestLoaderActionProfile(t *testing.T) {
 			utils.MetaAccounts: utils.NewStringSet([]string{"1001", "1002"}),
 		},
 		Actions: []*engine.APAction{
-			&engine.APAction{
-				ID:    "TOPUP",
-				Type:  "*topup",
-				Path:  "~*balance.TestBalance.Value",
-				Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+			{
+				ID:   "TOPUP",
+				Type: "*add_balance",
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+				}},
 			},
-			&engine.APAction{
-				ID:    "SET_BALANCE_TEST_DATA",
-				Type:  "*set_balance",
-				Path:  "~*balance.TestDataBalance.Type",
-				Value: config.NewRSRParsersMustCompile("*data", utils.InfieldSep),
+			{
+				ID:   "SET_BALANCE_TEST_DATA",
+				Type: "*set_balance",
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestDataBalance.Type",
+					Value: config.NewRSRParsersMustCompile("*data", utils.InfieldSep),
+				}},
 			},
-			&engine.APAction{
-				ID:    "TOPUP_TEST_DATA",
-				Type:  "*topup",
-				Path:  "~*balance.TestDataBalance.Value",
-				Value: config.NewRSRParsersMustCompile("1024", utils.InfieldSep),
+			{
+				ID:   "TOPUP_TEST_DATA",
+				Type: "*add_balance",
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestDataBalance.Value",
+					Value: config.NewRSRParsersMustCompile("1024", utils.InfieldSep),
+				}},
 			},
-			&engine.APAction{
-				ID:    "SET_BALANCE_TEST_VOICE",
-				Type:  "*set_balance",
-				Path:  "~*balance.TestVoiceBalance.Type",
-				Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+			{
+				ID:   "SET_BALANCE_TEST_VOICE",
+				Type: "*set_balance",
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestVoiceBalance.Type",
+					Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+				}},
 			},
-			&engine.APAction{
-				ID:    "TOPUP_TEST_VOICE",
-				Type:  "*topup",
-				Path:  "~*balance.TestVoiceBalance.Value",
-				Value: config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
+			{
+				ID:   "TOPUP_TEST_VOICE",
+				Type: "*add_balance",
+				ActionDiktats: []*engine.ActionDiktat{{
+					Path:  "~*balance.TestVoiceBalance.Value",
+					Value: config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
+				}, {
+					Path:  "~*balance.TestVoiceBalance2.Value",
+					Value: config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
+				}},
 			},
 		},
 	}
@@ -4555,7 +4568,7 @@ cgrates.org,REM_RATEPROFILE_1
 
 	ldr.dryRun = true
 	ldr.flagsTpls = map[string]utils.FlagsWithParams{
-		utils.MetaRateProfiles: utils.FlagsWithParams{
+		utils.MetaRateProfiles: {
 			utils.MetaPartial: nil,
 		},
 	}

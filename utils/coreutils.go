@@ -731,8 +731,8 @@ func NewTenantID(tntID string) *TenantID {
 	if strings.Index(tntID, ConcatenatedKeySep) == -1 { // no :, ID without Tenant
 		return &TenantID{ID: tntID}
 	}
-	tIDSplt := strings.Split(tntID, ConcatenatedKeySep)
-	return &TenantID{Tenant: tIDSplt[0], ID: ConcatenatedKey(tIDSplt[1:]...)}
+	tIDSplt := strings.SplitN(tntID, ConcatenatedKeySep, 2)
+	return &TenantID{Tenant: tIDSplt[0], ID: tIDSplt[1]}
 }
 
 type PaginatorWithTenant struct {

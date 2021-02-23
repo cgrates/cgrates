@@ -53,14 +53,18 @@ func (aps ActionProfiles) Sort() {
 
 // APAction defines action related information used within a ActionProfile
 type APAction struct {
-	ID        string                 // Action ID
-	FilterIDs []string               // Action FilterIDs
-	Blocker   bool                   // Blocker will stop further actions running in the chain
-	TTL       time.Duration          // Cancel Action if not executed within TTL
-	Type      string                 // Type of Action
-	Opts      map[string]interface{} // Extra options to pass depending on action type
-	Path      string                 // Path to execute
-	Value     config.RSRParsers      // Value to execute on path
+	ID            string                 // Action ID
+	FilterIDs     []string               // Action FilterIDs
+	Blocker       bool                   // Blocker will stop further actions running in the chain
+	TTL           time.Duration          // Cancel Action if not executed within TTL
+	Type          string                 // Type of Action
+	Opts          map[string]interface{} // Extra options to pass depending on action type
+	ActionDiktats []*ActionDiktat
+}
+
+type ActionDiktat struct {
+	Path  string            // Path to execute
+	Value config.RSRParsers // Value to execute on path
 }
 
 // ActionProfileWithOpts is used in API calls

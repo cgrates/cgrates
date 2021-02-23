@@ -69,12 +69,11 @@ func (aS *ActionS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 }
 
 // Shutdown is called to shutdown the service
-func (aS *ActionS) Shutdown() (err error) {
+func (aS *ActionS) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.ActionS))
 	aS.crnLk.RLock()
 	aS.crn.Stop()
 	aS.crnLk.RUnlock()
-	return
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
@@ -93,7 +92,6 @@ func (aS *ActionS) schedInit() {
 	for i, tnt := range tnts {
 		cgrEvs[i] = &utils.CGREvent{
 			Tenant: tnt,
-			ID:     utils.GenUUID(),
 			Time:   utils.TimePointer(time.Now()),
 			Opts: map[string]interface{}{
 				utils.EventType: utils.SchedulerInit,
@@ -203,7 +201,6 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
 // scheduledActions is responsible for scheduling the action profiles matching cgrEv
 func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
 	forceASAP bool) (schedActs []*scheduledActs, err error) {
-	var partExec bool
 	var aPfs engine.ActionProfiles
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
@@ -216,12 +213,8 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 	for _, aPf := range aPfs {
 		ctx := context.Background()
 		trgActs := map[string][]actioner{} // build here the list of actioners based on the trgKey
-		var trgKey string
+		var partExec bool
 		for _, aCfg := range aPf.Actions { // create actioners and attach them to the right target
-			if trgTyp := actionTarget(aCfg.Type); trgTyp != utils.MetaNone ||
-				trgKey == utils.EmptyString {
-				trgKey = trgTyp
-			}
 			if act, errAct := newActioner(aS.cfg, aS.fltrS, aS.dm, aS.connMgr, aCfg, tnt); errAct != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf(
@@ -230,7 +223,8 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 				partExec = true
 				break
 			} else {
-				trgActs[trgKey] = append(trgActs[trgKey], act)
+				trgTyp := actionTarget(aCfg.Type)
+				trgActs[trgTyp] = append(trgActs[trgTyp], act)
 			}
 		}
 		if partExec {
@@ -238,21 +232,15 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 		}
 		for trg, acts := range trgActs {
 			if trg == utils.MetaNone { // only one scheduledActs set
-				schedActs = append(schedActs, newScheduledActs(aPf.Tenant, aPf.ID, trg, utils.EmptyString, aPf.Schedule,
-					ctx, evNm.Clone(), acts))
+				schedActs = append(schedActs, newScheduledActs(ctx, aPf.Tenant, aPf.ID, trg, utils.EmptyString, aPf.Schedule,
+					evNm, acts))
 				continue
 			}
-			if len(aPf.Targets[trg]) == 0 {
-				continue // no items selected
-			}
 			for trgID := range aPf.Targets[trg] {
-				schedActs = append(schedActs, newScheduledActs(aPf.Tenant, aPf.ID, trg, trgID, aPf.Schedule,
-					ctx, evNm, acts))
+				schedActs = append(schedActs, newScheduledActs(ctx, aPf.Tenant, aPf.ID, trg, trgID, aPf.Schedule,
+					evNm, acts))
 			}
 		}
-	}
-	if partExec {
-		err = utils.ErrPartiallyExecuted
 	}
 	return
 }

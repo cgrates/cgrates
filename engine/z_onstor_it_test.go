@@ -2253,13 +2253,17 @@ func testOnStorITActionProfile(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Path:      "~*balance.TestBalance.Value",
+				ActionDiktats: []*ActionDiktat{{
+					Path: "~*balance.TestBalance.Value",
+				}},
 			},
 			{
 				ID:        "TOPUP_TEST_VOICE",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Path:      "~*balance.TestVoiceBalance.Value",
+				ActionDiktats: []*ActionDiktat{{
+					Path: "~*balance.TestVoiceBalance.Value",
+				}},
 			},
 		},
 	}
@@ -2345,8 +2349,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 	}
 
 	//empty in database
-	if _, err := onStor.GetAccountProfile("cgrates.org", "RP1",
-		true, false, utils.NonTransactional); err != utils.ErrNotFound {
+	if _, err := onStor.GetAccountProfile("cgrates.org", "RP1"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -2354,8 +2357,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 	if err := onStor.SetAccountProfile(acctPrf, false); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetAccountProfile("cgrates.org", "RP1",
-		true, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAccountProfile("cgrates.org", "RP1"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, acctPrf) {
 		t.Errorf("Expecting: %v, received: %v", acctPrf, rcv)
@@ -2373,8 +2375,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 	acctPrf.FilterIDs = []string{"*prefix:~*req.Destination:10"}
 	if err := onStor.SetAccountProfile(acctPrf, false); err != nil {
 		t.Error(err)
-	} else if rcv, err := onStor.GetAccountProfile("cgrates.org", "RP1",
-		false, false, utils.NonTransactional); err != nil {
+	} else if rcv, err := onStor.GetAccountProfile("cgrates.org", "RP1"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acctPrf, rcv) {
 		t.Errorf("Expecting: %v, received: %v", acctPrf, rcv)
@@ -2384,8 +2385,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 	if err := onStor.RemoveAccountProfile("cgrates.org", "RP1",
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
-	} else if _, err := onStor.GetAccountProfile("cgrates.org", "RP1",
-		false, false, utils.NonTransactional); err != utils.ErrNotFound {
+	} else if _, err := onStor.GetAccountProfile("cgrates.org", "RP1"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
