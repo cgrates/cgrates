@@ -212,7 +212,6 @@ func testCacheSReplicateProcessRateProfile(t *testing.T) {
 	exp := &engine.RateProfileCost{
 		ID:   "RT_SPECIAL_1002",
 		Cost: 0.01,
-
 		RateSIntervals: []*engine.RateSInterval{{
 			UsageStart: 0,
 			Increments: []*engine.RateSIncrement{{

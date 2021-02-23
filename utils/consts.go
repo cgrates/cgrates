@@ -1648,16 +1648,17 @@ const (
 
 // ResourceS APIs
 const (
-	ResourceSv1AuthorizeResources   = "ResourceSv1.AuthorizeResources"
-	ResourceSv1GetResourcesForEvent = "ResourceSv1.GetResourcesForEvent"
-	ResourceSv1AllocateResources    = "ResourceSv1.AllocateResources"
-	ResourceSv1ReleaseResources     = "ResourceSv1.ReleaseResources"
-	ResourceSv1Ping                 = "ResourceSv1.Ping"
-	ResourceSv1GetResource          = "ResourceSv1.GetResource"
-	APIerSv1SetResourceProfile      = "APIerSv1.SetResourceProfile"
-	APIerSv1RemoveResourceProfile   = "APIerSv1.RemoveResourceProfile"
-	APIerSv1GetResourceProfile      = "APIerSv1.GetResourceProfile"
-	APIerSv1GetResourceProfileIDs   = "APIerSv1.GetResourceProfileIDs"
+	ResourceSv1AuthorizeResources    = "ResourceSv1.AuthorizeResources"
+	ResourceSv1GetResourcesForEvent  = "ResourceSv1.GetResourcesForEvent"
+	ResourceSv1AllocateResources     = "ResourceSv1.AllocateResources"
+	ResourceSv1ReleaseResources      = "ResourceSv1.ReleaseResources"
+	ResourceSv1Ping                  = "ResourceSv1.Ping"
+	ResourceSv1GetResourceWithConfig = "ResourceSv1.GetResourceWithConfig"
+	ResourceSv1GetResource           = "ResourceSv1.GetResource"
+	APIerSv1SetResourceProfile       = "APIerSv1.SetResourceProfile"
+	APIerSv1RemoveResourceProfile    = "APIerSv1.RemoveResourceProfile"
+	APIerSv1GetResourceProfile       = "APIerSv1.GetResourceProfile"
+	APIerSv1GetResourceProfileIDs    = "APIerSv1.GetResourceProfileIDs"
 )
 
 // SessionS APIs
@@ -2194,6 +2195,7 @@ const (
 // SessionSCfg
 const (
 	ListenBijsonCfg        = "listen_bijson"
+	ListenBigobCfg         = "listen_bigob"
 	RALsConnsCfg           = "rals_conns"
 	ResSConnsCfg           = "resources_conns"
 	ThreshSConnsCfg        = "thresholds_conns"
@@ -2203,8 +2205,6 @@ const (
 	RemoteConnsCfg         = "remote_conns"
 	DebitIntervalCfg       = "debit_interval"
 	StoreSCostsCfg         = "store_session_costs"
-	MinCallDurationCfg     = "min_call_duration"
-	MaxCallDurationCfg     = "max_call_duration"
 	SessionTTLCfg          = "session_ttl"
 	SessionTTLMaxDelayCfg  = "session_ttl_max_delay"
 	SessionTTLLastUsedCfg  = "session_ttl_last_used"
@@ -2216,6 +2216,7 @@ const (
 	TerminateAttemptsCfg   = "terminate_attempts"
 	AlterableFieldsCfg     = "alterable_fields"
 	MinDurLowBalanceCfg    = "min_dur_low_balance"
+	DefaultUsageCfg        = "default_usage"
 	STIRCfg                = "stir"
 
 	AllowedAtestCfg       = "allowed_attest"
@@ -2500,8 +2501,8 @@ var (
 )
 
 // CGROptionsSet the possible cgr options
-var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSessionTTL,
-	OptsSessionTTLMaxDelay, OptsSessionTTLLastUsed, OptsSessionTTLLastUsage, OptsSessionTTLUsage,
+var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSessionsTTL,
+	OptsSessionsTTLMaxDelay, OptsSessionsTTLLastUsed, OptsSessionsTTLLastUsage, OptsSessionsTTLUsage,
 	OptsDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
@@ -2527,17 +2528,17 @@ const (
 
 // Event Opts
 const (
-	OptsRoutesLimit         = "*routes_limit"
-	OptsRoutesOffset        = "*routes_offset"
-	OptsRatesStartTime      = "*ratesStartTime"
-	OptsRatesUsage          = "*ratesUsage"
-	OptsSessionTTL          = "*sessionTTL"
-	OptsSessionTTLMaxDelay  = "*sessionTTLMaxDelay"
-	OptsSessionTTLLastUsed  = "*sessionTTLLastUsed"
-	OptsSessionTTLLastUsage = "*sessionTTLLastUsage"
-	OptsSessionTTLUsage     = "*sessionTTLUsage"
-	OptsDebitInterval       = "*sessionDebitInterval"
-	OptsChargeable          = "*sessionChargeable"
+	OptsRoutesLimit          = "*routes_limit"
+	OptsRoutesOffset         = "*routes_offset"
+	OptsRatesStartTime       = "*ratesStartTime"
+	OptsRatesUsage           = "*ratesUsage"
+	OptsSessionsTTL          = "*sessionsTTL"
+	OptsSessionsTTLMaxDelay  = "*sessionsTTLMaxDelay"
+	OptsSessionsTTLLastUsed  = "*sessionsTTLLastUsed"
+	OptsSessionsTTLLastUsage = "*sessionsTTLLastUsage"
+	OptsSessionsTTLUsage     = "*sessionsTTLUsage"
+	OptsDebitInterval        = "*sessionsDebitInterval"
+	OptsChargeable           = "*sessionsChargeable"
 	// STIR
 	OptsStirATest              = "*stirATest"
 	OptsStirPayloadMaxDuration = "*stirPayloadMaxDuration"

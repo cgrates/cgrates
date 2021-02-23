@@ -86,21 +86,21 @@ func testTLSRpcConn(t *testing.T) {
 	var err error
 	tlsRpcClientJson, err = rpcclient.NewRPCClient(utils.TCP, "localhost:2022", true, tlsCfg.TLSCfg().ClientKey,
 		tlsCfg.TLSCfg().ClientCerificate, tlsCfg.TLSCfg().CaCertificate, 3, 3,
-		time.Second, 5*time.Minute, rpcclient.JSONrpc, nil, false)
+		time.Second, 5*time.Minute, rpcclient.JSONrpc, nil, false, nil)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}
 
 	tlsRpcClientGob, err = rpcclient.NewRPCClient(utils.TCP, "localhost:2023", true, tlsCfg.TLSCfg().ClientKey,
 		tlsCfg.TLSCfg().ClientCerificate, tlsCfg.TLSCfg().CaCertificate, 3, 3,
-		time.Second, 5*time.Minute, rpcclient.GOBrpc, nil, false)
+		time.Second, 5*time.Minute, rpcclient.GOBrpc, nil, false, nil)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}
 
 	tlsHTTPJson, err = rpcclient.NewRPCClient(utils.TCP, "https://localhost:2280/jsonrpc", true, tlsCfg.TLSCfg().ClientKey,
 		tlsCfg.TLSCfg().ClientCerificate, tlsCfg.TLSCfg().CaCertificate, 3, 3,
-		time.Second, 5*time.Minute, rpcclient.HTTPjson, nil, false)
+		time.Second, 5*time.Minute, rpcclient.HTTPjson, nil, false, nil)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}

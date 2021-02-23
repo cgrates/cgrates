@@ -434,6 +434,7 @@ const CGRATES_CFG_JSON = `
 "sessions": {
 	"enabled": false,						// starts the session service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
+	"listen_bigob": "",						// address where to listen for bidirectional GOB-RPC requests
 	"chargers_conns": [],					// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
 	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|$rpc_conns_id>
 	"cdrs_conns": [],						// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
@@ -445,6 +446,12 @@ const CGRATES_CFG_JSON = `
 	"replication_conns": [],				// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
 	"store_session_costs": false,			// enable storing of the session costs within CDRs
+	"default_usage":{						// the usage if the event is missing the usage field
+			"*any": "3h",
+			"*voice": "3h",
+			"*data": "1048576",
+			"*sms": "1",
+	},
 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
 	//"session_ttl_max_delay": "",			// activates session_ttl randomization and limits the maximum possible delay
 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
@@ -469,7 +476,7 @@ const CGRATES_CFG_JSON = `
 
 "asterisk_agent": {
 	"enabled": false,						// starts the Asterisk agent: <true|false>
-	"sessions_conns": ["*internal"],
+	"sessions_conns": ["*birpc_internal"],
 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
@@ -479,7 +486,7 @@ const CGRATES_CFG_JSON = `
 
 "freeswitch_agent": {
 	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
-	"sessions_conns": ["*internal"],
+	"sessions_conns": ["*birpc_internal"],
 	"subscribe_park": true,					// subscribe via fsock to receive park events
 	"create_cdr": false,					// creates CDR out of events and sends them to CDRS component
 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
@@ -495,7 +502,7 @@ const CGRATES_CFG_JSON = `
 
 "kamailio_agent": {
 	"enabled": false,						// starts Kamailio agent: <true|false>
-	"sessions_conns": ["*internal"],
+	"sessions_conns": ["*birpc_internal"],
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"timezone": "",							// timezone of the Kamailio server
 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
@@ -509,7 +516,7 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
 	"listen_net": "tcp",										// transport type for diameter <tcp|sctp>
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	"sessions_conns": ["*internal"],
+	"sessions_conns": ["*birpc_internal"],
 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies

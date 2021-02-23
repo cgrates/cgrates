@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
@@ -45,6 +46,18 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 			Conns: []*RemoteHost{
 				{
 					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+		rpcclient.BiRPCInternal: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					Address:     rpcclient.BiRPCInternal,
 					Transport:   utils.EmptyString,
 					Synchronous: false,
 					TLS:         false,
@@ -81,6 +94,18 @@ func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
 			Conns: []*RemoteHost{
 				{
 					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+		rpcclient.BiRPCInternal: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					Address:     rpcclient.BiRPCInternal,
 					Transport:   utils.EmptyString,
 					Synchronous: false,
 					TLS:         false,
@@ -140,6 +165,18 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 				},
 			},
 		},
+		rpcclient.BiRPCInternal: map[string]interface{}{
+			utils.StrategyCfg: utils.MetaFirst,
+			utils.PoolSize:    0,
+			utils.Conns: []map[string]interface{}{
+				{
+					utils.AddressCfg:     rpcclient.BiRPCInternal,
+					utils.TransportCfg:   utils.EmptyString,
+					utils.SynchronousCfg: false,
+					utils.TLS:            false,
+				},
+			},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -165,6 +202,18 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 				{
 					utils.TLS:            false,
 					utils.AddressCfg:     utils.MetaInternal,
+					utils.SynchronousCfg: false,
+					utils.TransportCfg:   utils.EmptyString,
+				},
+			},
+			utils.PoolSize:    0,
+			utils.StrategyCfg: utils.MetaFirst,
+		},
+		rpcclient.BiRPCInternal: map[string]interface{}{
+			utils.Conns: []map[string]interface{}{
+				{
+					utils.TLS:            false,
+					utils.AddressCfg:     rpcclient.BiRPCInternal,
 					utils.SynchronousCfg: false,
 					utils.TransportCfg:   utils.EmptyString,
 				},

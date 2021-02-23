@@ -21,6 +21,7 @@ package services
 
 import (
 	"path"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -67,14 +68,15 @@ func TestDispatcherHReload(t *testing.T) {
 
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path: path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatcherh", "all_mongo"),
-
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatcherh", "all_mongo"),
 		Section: config.DispatcherHJson,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+	runtime.Gosched()
+	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")

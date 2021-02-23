@@ -80,12 +80,17 @@ func (rad *RadiusAgent) Start() (err error) {
 		return
 	}
 	rad.stopChan = make(chan struct{})
-	go func(r *agents.RadiusAgent) {
-		if err = r.ListenAndServe(rad.stopChan); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
-			rad.shdChan.CloseOnce()
-		}
-	}(rad.rad)
+
+	go rad.listenAndServe(rad.rad)
+
+	return
+}
+
+func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent) (err error) {
+	if err = r.ListenAndServe(rad.stopChan); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
+		rad.shdChan.CloseOnce()
+	}
 	return
 }
 
@@ -97,19 +102,21 @@ func (rad *RadiusAgent) Reload() (err error) {
 		return
 	}
 
-	if err = rad.Shutdown(); err != nil {
-		return
-	}
+	rad.shutdown()
 	return rad.Start()
 }
 
 // Shutdown stops the service
 func (rad *RadiusAgent) Shutdown() (err error) {
+	rad.shutdown()
+	return // no shutdown for the momment
+}
+
+func (rad *RadiusAgent) shutdown() {
 	rad.Lock()
 	close(rad.stopChan)
 	rad.rad = nil
 	rad.Unlock()
-	return // no shutdown for the momment
 }
 
 // IsRunning returns if the service is running

@@ -39,19 +39,22 @@ type testMockSessionConn struct {
 }
 
 func (s *testMockSessionConn) Call(method string, arg interface{}, rply interface{}) error {
-	if call, has := s.calls[method]; !has {
-		return rpcclient.ErrUnsupporteServiceMethod
-	} else {
+	if call, has := s.calls[method]; has {
 		return call(arg, rply)
 	}
+	return rpcclient.ErrUnsupporteServiceMethod
 }
 
 func (s *testMockSessionConn) CallBiRPC(_ rpcclient.ClientConnector, method string, arg interface{}, rply interface{}) error {
-	if call, has := s.calls[method]; !has {
-		return rpcclient.ErrUnsupporteServiceMethod
-	} else {
-		return call(arg, rply)
+	return s.Call(method, arg, rply)
+}
+
+func (s *testMockSessionConn) Handlers() (b map[string]interface{}) {
+	b = make(map[string]interface{})
+	for n, f := range s.calls {
+		b[n] = f
 	}
+	return
 }
 
 func TestProcessRequest(t *testing.T) {
@@ -446,7 +449,8 @@ func TestProcessRequest(t *testing.T) {
 	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)
 	internalSessionSChan <- sS
 	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS): internalSessionSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):      internalSessionSChan,
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
 	da := &DiameterAgent{
 		cgrCfg:  config.CgrConfig(),

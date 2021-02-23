@@ -146,6 +146,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		"client_protocol":       1.,
 		"debit_interval":        "0",
 		"listen_bijson":         "127.0.0.1:2014",
+		"listen_bigob":          "",
 		"session_ttl":           "0",
 		"session_indexes":       []interface{}{utils.OriginID},
 		"attributes_conns":      []interface{}{utils.MetaLocalHost},
@@ -168,6 +169,104 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		},
 		"store_session_costs": false,
 		"terminate_attempts":  5.,
+		utils.DefaultUsageCfg: map[string]interface{}{
+			utils.MetaAny:   "3h0m0s",
+			utils.MetaVoice: "3h0m0s",
+			utils.MetaData:  "1048576",
+			utils.MetaSMS:   "1",
+		},
+	}
+	if *encoding == utils.MetaGOB {
+		var empty []string
+		exp = map[string]interface{}{
+			"enabled":               true,
+			"listen_bijson":         "127.0.0.1:2014",
+			"listen_bigob":          "",
+			"chargers_conns":        []string{utils.MetaInternal},
+			"rals_conns":            []string{utils.MetaInternal},
+			"resources_conns":       []string{utils.MetaLocalHost},
+			"thresholds_conns":      empty,
+			"stats_conns":           empty,
+			"routes_conns":          []string{utils.MetaLocalHost},
+			"attributes_conns":      []string{utils.MetaLocalHost},
+			"cdrs_conns":            []string{utils.MetaInternal},
+			"replication_conns":     empty,
+			"scheduler_conns":       empty,
+			"session_indexes":       []string{"OriginID"},
+			"client_protocol":       1.,
+			"terminate_attempts":    5,
+			"channel_sync_interval": "0",
+			"debit_interval":        "0",
+			"session_ttl":           "0",
+			"store_session_costs":   false,
+			"min_dur_low_balance":   "0",
+			"alterable_fields":      empty,
+			"stir": map[string]interface{}{
+				"allowed_attest":      []string{utils.MetaAny},
+				"default_attest":      "A",
+				"payload_maxduration": "-1",
+				"privatekey_path":     "",
+				"publickey_path":      "",
+			},
+			utils.DefaultUsageCfg: map[string]string{
+				utils.MetaAny:   "3h0m0s",
+				utils.MetaVoice: "3h0m0s",
+				utils.MetaData:  "1048576",
+				utils.MetaSMS:   "1",
+			},
+		}
+	}
+	exp = map[string]interface{}{
+		config.SessionSJson: exp,
+	}
+	var rpl map[string]interface{}
+	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
+		Tenant:  "cgrates.org",
+		Section: config.SessionSJson,
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rpl) {
+		t.Errorf("Expected %+v , received: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
+	}
+}
+
+func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
+	exp := map[string]interface{}{
+		"enabled":               true,
+		"listen_bijson":         "127.0.0.1:2014",
+		"listen_bigob":          "",
+		"chargers_conns":        []interface{}{utils.MetaInternal},
+		"rals_conns":            []interface{}{utils.MetaInternal},
+		"resources_conns":       []interface{}{utils.MetaLocalHost},
+		"thresholds_conns":      []interface{}{},
+		"stats_conns":           []interface{}{},
+		"routes_conns":          []interface{}{utils.MetaLocalHost},
+		"attributes_conns":      []interface{}{utils.MetaLocalHost},
+		"cdrs_conns":            []interface{}{utils.MetaInternal},
+		"replication_conns":     []interface{}{},
+		"scheduler_conns":       []interface{}{},
+		"session_indexes":       []interface{}{"OriginID"},
+		"client_protocol":       1.,
+		"terminate_attempts":    5.,
+		"channel_sync_interval": "0",
+		"debit_interval":        "0",
+		"session_ttl":           "0",
+		"store_session_costs":   false,
+		"min_dur_low_balance":   "0",
+		"alterable_fields":      []interface{}{},
+		"stir": map[string]interface{}{
+			"allowed_attest":      []interface{}{utils.MetaAny},
+			"default_attest":      "A",
+			"payload_maxduration": "-1",
+			"privatekey_path":     "",
+			"publickey_path":      "",
+		},
+		utils.DefaultUsageCfg: map[string]interface{}{
+			utils.MetaAny:   "3h0m0s",
+			utils.MetaVoice: "3h0m0s",
+			utils.MetaData:  "1048576",
+			utils.MetaSMS:   "1",
+		},
 	}
 	if *encoding == utils.MetaGOB {
 		var empty []string
@@ -200,83 +299,11 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 				"privatekey_path":     "",
 				"publickey_path":      "",
 			},
-		}
-	}
-	exp = map[string]interface{}{
-		config.SessionSJson: exp,
-	}
-	var rpl map[string]interface{}
-	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
-		Tenant:  "cgrates.org",
-		Section: config.SessionSJson,
-	}, &rpl); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(exp, rpl) {
-		t.Errorf("Expected %+v , received: %+v ", utils.ToJSON(exp), utils.ToJSON(rpl))
-	}
-}
-
-func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
-	exp := map[string]interface{}{
-		"enabled":               true,
-		"listen_bijson":         "127.0.0.1:2014",
-		"chargers_conns":        []interface{}{utils.MetaInternal},
-		"rals_conns":            []interface{}{utils.MetaInternal},
-		"resources_conns":       []interface{}{utils.MetaLocalHost},
-		"thresholds_conns":      []interface{}{},
-		"stats_conns":           []interface{}{},
-		"routes_conns":          []interface{}{utils.MetaLocalHost},
-		"attributes_conns":      []interface{}{utils.MetaLocalHost},
-		"cdrs_conns":            []interface{}{utils.MetaInternal},
-		"replication_conns":     []interface{}{},
-		"scheduler_conns":       []interface{}{},
-		"session_indexes":       []interface{}{"OriginID"},
-		"client_protocol":       1.,
-		"terminate_attempts":    5.,
-		"channel_sync_interval": "0",
-		"debit_interval":        "0",
-		"session_ttl":           "0",
-		"store_session_costs":   false,
-		"min_dur_low_balance":   "0",
-		"alterable_fields":      []interface{}{},
-		"stir": map[string]interface{}{
-			"allowed_attest":      []interface{}{utils.MetaAny},
-			"default_attest":      "A",
-			"payload_maxduration": "-1",
-			"privatekey_path":     "",
-			"publickey_path":      "",
-		},
-	}
-	if *encoding == utils.MetaGOB {
-		var empty []string
-		exp = map[string]interface{}{
-			"enabled":               true,
-			"listen_bijson":         "127.0.0.1:2014",
-			"chargers_conns":        []string{utils.MetaInternal},
-			"rals_conns":            []string{utils.MetaInternal},
-			"resources_conns":       []string{utils.MetaLocalHost},
-			"thresholds_conns":      empty,
-			"stats_conns":           empty,
-			"routes_conns":          []string{utils.MetaLocalHost},
-			"attributes_conns":      []string{utils.MetaLocalHost},
-			"cdrs_conns":            []string{utils.MetaInternal},
-			"replication_conns":     empty,
-			"scheduler_conns":       empty,
-			"session_indexes":       []string{"OriginID"},
-			"client_protocol":       1.,
-			"terminate_attempts":    5,
-			"channel_sync_interval": "0",
-			"debit_interval":        "0",
-			"session_ttl":           "0",
-			"store_session_costs":   false,
-			"min_dur_low_balance":   "0",
-			"alterable_fields":      empty,
-			"stir": map[string]interface{}{
-				"allowed_attest":      []string{utils.MetaAny},
-				"default_attest":      "A",
-				"payload_maxduration": "-1",
-				"privatekey_path":     "",
-				"publickey_path":      "",
+			utils.DefaultUsageCfg: map[string]string{
+				utils.MetaAny:   "3h0m0s",
+				utils.MetaVoice: "3h0m0s",
+				utils.MetaData:  "1048576",
+				utils.MetaSMS:   "1",
 			},
 		}
 	}

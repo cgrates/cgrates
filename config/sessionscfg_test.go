@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
@@ -120,6 +121,12 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "randomPath",
 			PublicKeyPath:      "randomPath",
+		},
+		DefaultUsage: map[string]time.Duration{
+			utils.MetaAny:   3 * time.Hour,
+			utils.MetaVoice: 3 * time.Hour,
+			utils.MetaData:  1048576,
+			utils.MetaSMS:   1,
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -257,6 +264,12 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		SessionTTLLastUsage: utils.DurationPointer(1),
 		SessionTTLLastUsed:  utils.DurationPointer(10),
 		SessionTTLUsage:     utils.DurationPointer(1),
+		DefaultUsage: map[string]time.Duration{
+			utils.MetaAny:   3 * time.Hour,
+			utils.MetaVoice: 3 * time.Hour,
+			utils.MetaData:  1048576,
+			utils.MetaSMS:   1,
+		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -297,6 +310,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
 		utils.ListenBijsonCfg:        "127.0.0.1:2014",
+		utils.ListenBigobCfg:         "",
 		utils.ChargerSConnsCfg:       []string{},
 		utils.RALsConnsCfg:           []string{},
 		utils.CDRsConnsCfg:           []string{},
@@ -327,6 +341,12 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.PrivateKeyPathCfg:     "",
 		},
 		utils.SchedulerConnsCfg: []string{},
+		utils.DefaultUsageCfg: map[string]string{
+			utils.MetaAny:   "3h0m0s",
+			utils.MetaVoice: "3h0m0s",
+			utils.MetaData:  "1048576",
+			utils.MetaSMS:   "1",
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -368,6 +388,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
 		utils.ListenBijsonCfg:        "127.0.0.1:2018",
+		utils.ListenBigobCfg:         "",
 		utils.ChargerSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.RALsConnsCfg:           []string{utils.MetaInternal, "*conn1"},
 		utils.CDRsConnsCfg:           []string{utils.MetaInternal, "*conn1"},
@@ -394,6 +415,12 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.PrivateKeyPathCfg:     "",
 		},
 		utils.SchedulerConnsCfg: []string{utils.MetaInternal, "*conn1"},
+		utils.DefaultUsageCfg: map[string]string{
+			utils.MetaAny:   "3h0m0s",
+			utils.MetaVoice: "3h0m0s",
+			utils.MetaData:  "1048576",
+			utils.MetaSMS:   "1",
+		},
 	}
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
 	if err != nil {
@@ -506,7 +533,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
-		utils.SessionSConnsCfg:       []string{"*internal"},
+		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal},
 		utils.SubscribeParkCfg:       true,
 		utils.CreateCdrCfg:           false,
 		utils.ExtraFieldsCfg:         "",
@@ -529,7 +556,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 	cfgJSONStr := `{
 	"freeswitch_agent": {
           "enabled": true,						
-          "sessions_conns": ["*conn1","*conn2"],
+          "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 	      "subscribe_park": false,					
 	      "create_cdr": true,
 	      "max_wait_connection": "7s",			
@@ -539,7 +566,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
-		utils.SessionSConnsCfg:       []string{"*conn1", "*conn2"},
+		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.SubscribeParkCfg:       false,
 		utils.CreateCdrCfg:           true,
 		utils.ExtraFieldsCfg:         "",
@@ -567,7 +594,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
-		utils.SessionSConnsCfg:       []string{"*internal"},
+		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal},
 		utils.SubscribeParkCfg:       true,
 		utils.CreateCdrCfg:           false,
 		utils.ExtraFieldsCfg:         "randomFields",
@@ -685,7 +712,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:       false,
-		utils.SessionSConnsCfg: []string{"*internal"},
+		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal},
 		utils.CreateCdrCfg:     false,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5},
@@ -702,7 +729,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"asterisk_agent": {
 		"enabled": true,
-		"sessions_conns": ["*conn1","*conn2"],
+		"sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 		"create_cdr": true,
 		"asterisk_conns":[
 			{"address": "127.0.0.1:8089","connect_attempts": 5,"reconnects": 8}
@@ -711,7 +738,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:       true,
-		utils.SessionSConnsCfg: []string{"*conn1", "*conn2"},
+		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.CreateCdrCfg:     true,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8},
@@ -844,6 +871,12 @@ func TestSessionSCfgClone(t *testing.T) {
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "randomPath",
 			PublicKeyPath:      "randomPath",
+		},
+		DefaultUsage: map[string]time.Duration{
+			utils.MetaAny:   3 * time.Hour,
+			utils.MetaVoice: 3 * time.Hour,
+			utils.MetaData:  1048576,
+			utils.MetaSMS:   1,
 		},
 	}
 	rcv := ban.Clone()

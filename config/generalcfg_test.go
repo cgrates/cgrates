@@ -33,8 +33,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
-		Min_call_duration:    utils.StringPointer("0s"),
-		Max_call_duration:    utils.StringPointer("3h0m0s"),
 		Default_request_type: utils.StringPointer(utils.MetaRated),
 		Default_category:     utils.StringPointer(utils.Call),
 		Default_tenant:       utils.StringPointer("cgrates.org"),
@@ -65,8 +63,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		Reconnects:       -1,
 		ConnectTimeout:   time.Second,
 		ReplyTimeout:     2 * time.Second,
-		MinCallDuration:  0,
-		MaxCallDuration:  3 * time.Hour,
 		DigestSeparator:  ",",
 		DigestEqual:      ":",
 		MaxParallelConns: 100,
@@ -113,22 +109,6 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 	}
 	jsonCfg = NewDefaultCGRConfig()
 	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %v", expected, err)
-	}
-
-	cfgJSON4 := &GeneralJsonCfg{
-		Min_call_duration: utils.StringPointer("1ss"),
-	}
-	jsonCfg = NewDefaultCGRConfig()
-	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON4); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %v", expected, err)
-	}
-
-	cfgJSON5 := &GeneralJsonCfg{
-		Max_call_duration: utils.StringPointer("1ss"),
-	}
-	jsonCfg = NewDefaultCGRConfig()
-	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON5); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -179,8 +159,6 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.DefaultCachingCfg:   "*reload",
 		utils.ConnectAttemptsCfg:  5,
 		utils.ReconnectsCfg:       -1,
-		utils.MinCallDurationCfg:  "0",
-		utils.MaxCallDurationCfg:  "3h0m0s",
 		utils.ConnectTimeoutCfg:   "1s",
 		utils.ReplyTimeoutCfg:     "2s",
 		utils.LockingTimeoutCfg:   "1s",
@@ -204,7 +182,6 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
             "failed_posts_ttl": "0s",
             "connect_timeout": "0s",
             "reply_timeout": "0s",
-            "min_call_duration": "1s",
             "max_call_duration": "0"
         }
 }`
@@ -228,8 +205,6 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.ConnectTimeoutCfg:   "0",
 		utils.ReplyTimeoutCfg:     "0",
 		utils.LockingTimeoutCfg:   "0",
-		utils.MinCallDurationCfg:  "1s",
-		utils.MaxCallDurationCfg:  "0",
 		utils.DigestSeparatorCfg:  ",",
 		utils.DigestEqualCfg:      ":",
 		utils.RSRSepCfg:           ";",
@@ -260,8 +235,6 @@ func TestGeneralCfgClone(t *testing.T) {
 		Reconnects:       -1,
 		ConnectTimeout:   time.Second,
 		ReplyTimeout:     2 * time.Second,
-		MinCallDuration:  0,
-		MaxCallDuration:  3 * time.Hour,
 		DigestSeparator:  ",",
 		DigestEqual:      ":",
 		MaxParallelConns: 100,

@@ -26,10 +26,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 	"github.com/fiorix/go-diameter/v4/diam"
 	"github.com/fiorix/go-diameter/v4/diam/avp"
 	"github.com/fiorix/go-diameter/v4/diam/datatype"
@@ -367,6 +369,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1AuthorizeReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
+		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -384,6 +387,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1InitSessionReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1InitiateSession,
 			initArgs, rply)
+		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -394,6 +398,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)
+		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -408,9 +413,9 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
-		rply := utils.StringPointer("")
+		var rply string
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1TerminateSession,
-			terminateArgs, rply)
+			terminateArgs, &rply)
 		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
 		}
@@ -439,6 +444,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		} else if msgArgs.Debit {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
+		rply.SetMaxUsageNeeded(msgArgs.Debit)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -464,9 +470,9 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
-		rplyCDRs := utils.StringPointer("")
+		var rplyCDRs string
 		if err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessCDR,
-			cgrEv, rplyCDRs); err != nil {
+			cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}
@@ -742,4 +748,57 @@ func (da *DiameterAgent) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (e
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
 func (*DiameterAgent) V1WarnDisconnect(args map[string]interface{}, reply *string) (err error) {
 	return utils.ErrNotImplemented
+}
+
+// CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.ClientConnector interface
+func (da *DiameterAgent) CallBiRPC(clnt rpcclient.ClientConnector, serviceMethod string, args interface{}, reply interface{}) error {
+	return utils.BiRPCCall(da, clnt, serviceMethod, args, reply)
+}
+
+// BiRPCv1DisconnectSession is internal method to disconnect session in asterisk
+func (da *DiameterAgent) BiRPCv1DisconnectSession(clnt rpcclient.ClientConnector, args utils.AttrDisconnectSession, reply *string) error {
+	return da.V1DisconnectSession(args, reply)
+}
+
+// BiRPCv1GetActiveSessionIDs is internal method to  get all active sessions in asterisk
+func (da *DiameterAgent) BiRPCv1GetActiveSessionIDs(clnt rpcclient.ClientConnector, ignParam string,
+	sessionIDs *[]*sessions.SessionID) error {
+	return da.V1GetActiveSessionIDs(ignParam, sessionIDs)
+
+}
+
+// BiRPCv1ReAuthorize is used to implement the sessions.BiRPClient interface
+func (da *DiameterAgent) BiRPCv1ReAuthorize(clnt rpcclient.ClientConnector, originID string, reply *string) (err error) {
+	return da.V1ReAuthorize(originID, reply)
+}
+
+// BiRPCv1DisconnectPeer is used to implement the sessions.BiRPClient interface
+func (da *DiameterAgent) BiRPCv1DisconnectPeer(clnt rpcclient.ClientConnector, args *utils.DPRArgs, reply *string) (err error) {
+	return da.V1DisconnectPeer(args, reply)
+}
+
+// BiRPCv1WarnDisconnect is used to implement the sessions.BiRPClient interface
+func (da *DiameterAgent) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]interface{}, reply *string) (err error) {
+	return da.V1WarnDisconnect(args, reply)
+}
+
+// Handlers is used to implement the rpcclient.BiRPCConector interface
+func (da *DiameterAgent) Handlers() map[string]interface{} {
+	return map[string]interface{}{
+		utils.SessionSv1DisconnectSession: func(clnt *rpc2.Client, args utils.AttrDisconnectSession, rply *string) error {
+			return da.BiRPCv1DisconnectSession(clnt, args, rply)
+		},
+		utils.SessionSv1GetActiveSessionIDs: func(clnt *rpc2.Client, args string, rply *[]*sessions.SessionID) error {
+			return da.BiRPCv1GetActiveSessionIDs(clnt, args, rply)
+		},
+		utils.SessionSv1ReAuthorize: func(clnt *rpc2.Client, args string, rply *string) (err error) {
+			return da.BiRPCv1ReAuthorize(clnt, args, rply)
+		},
+		utils.SessionSv1DisconnectPeer: func(clnt *rpc2.Client, args *utils.DPRArgs, rply *string) (err error) {
+			return da.BiRPCv1DisconnectPeer(clnt, args, rply)
+		},
+		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]interface{}, rply *string) (err error) {
+			return da.BiRPCv1WarnDisconnect(clnt, args, rply)
+		},
+	}
 }

@@ -64,6 +64,10 @@ func (rsv1 *ResourceSv1) GetResource(args *utils.TenantIDWithOpts, reply *engine
 	return rsv1.rls.V1GetResource(args, reply)
 }
 
+func (rsv1 *ResourceSv1) GetResourceWithConfig(args *utils.TenantIDWithOpts, reply *engine.ResourceWithConfig) error {
+	return rsv1.rls.V1GetResourceWithConfig(args, reply)
+}
+
 // GetResourceProfile returns a resource configuration
 func (apierSv1 *APIerSv1) GetResourceProfile(arg *utils.TenantID, reply *engine.ResourceProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing

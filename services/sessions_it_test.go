@@ -20,7 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"path"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"sync"
 	"testing"
 	"time"
@@ -28,12 +30,114 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
-func TestSessionSReload(t *testing.T) {
+func init() {
+	log.SetOutput(ioutil.Discard)
+}
+
+type testMockClients struct {
+	calls func(args interface{}, reply interface{}) error
+}
+
+func (sT *testMockClients) Call(method string, arg interface{}, rply interface{}) error {
+	return sT.calls(arg, rply)
+}
+
+func TestSessionSReload1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().Enabled = true
+	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	cfg.RPCConns()["cache1"] = &config.RPCConn{
+		Strategy: rpcclient.PoolFirst,
+		PoolSize: 0,
+		Conns: []*config.RemoteHost{
+			{
+				Address:     "127.0.0.1:9999",
+				Transport:   utils.MetaGOB,
+				Synchronous: true,
+			},
+		},
+	}
+	cfg.CacheCfg().ReplicationConns = []string{"cache1"}
+	cfg.CacheCfg().Partitions[utils.CacheClosedSessions].Limit = 0
+	cfg.CacheCfg().Partitions[utils.CacheClosedSessions].Replicate = true
+	temporaryCache := engine.Cache
+	defer func() {
+		engine.Cache = temporaryCache
+	}()
+	engine.Cache = engine.NewCacheS(cfg, nil, nil)
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+
+	clientConect := make(chan rpcclient.ClientConnector, 1)
+	clientConect <- &testMockClients{
+		calls: func(args interface{}, reply interface{}) error {
+			rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
+			if !cancast {
+				return fmt.Errorf("can't cast")
+			}
+			*rply = []*engine.ChrgSProcessEventReply{
+				{
+					ChargerSProfile:    "raw",
+					AttributeSProfiles: []string{utils.MetaNone},
+					AlteredFields:      []string{"~*req.RunID"},
+					CGREvent:           args.(*utils.CGREvent),
+				},
+			}
+			return nil
+		},
+	}
+	conMng := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
+	})
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, new(DataDBService), server, make(chan rpcclient.ClientConnector, 1), shdChan, conMng, nil, anz, srvDep)
+	err := srv.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !srv.IsRunning() {
+		t.Fatal("Expected service to be running")
+	}
+	args := &sessions.V1InitSessionArgs{
+		InitSession:       true,
+		ProcessThresholds: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItProcessEventInitiateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:           "cgrates.org",
+				utils.ToR:              utils.MetaVoice,
+				utils.OriginID:         "testSSv1ItProcessEvent",
+				utils.RequestType:      utils.MetaPostpaid,
+				utils.AccountField:     "1001",
+				utils.CGRDebitInterval: 10,
+				utils.Destination:      "1002",
+				utils.SetupTime:        time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:       time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:            0,
+			},
+		},
+	}
+
+	rply := new(sessions.V1InitSessionReply)
+	srv.(*SessionService).sm.BiRPCv1InitiateSession(nil, args, rply)
+	err = srv.Shutdown()
+	if err == nil || err != utils.ErrPartiallyExecuted {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestSessionSReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.ChargerSCfg().Enabled = true
@@ -44,12 +148,9 @@ func TestSessionSReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
-
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
-
 	close(chS.GetPrecacheChannel(utils.CacheDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheRatingPlans))
@@ -67,67 +168,31 @@ func TestSessionSReload(t *testing.T) {
 	cacheSChan <- chS
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	stordb := NewStorDBService(cfg, srvDep)
-	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	ralS := NewRalService(cfg, chS, server,
-		make(chan rpcclient.ClientConnector, 1), make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
-		make(chan rpcclient.ClientConnector, 1),
-		nil, anz, srvDep)
 	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-	srvMngr.AddServices(srv, chrS, schS, ralS, cdrS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	if db.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	if stordb.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongonew"),
-		Section: config.SessionSJson,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !srv.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	time.Sleep(10 * time.Millisecond)
-	if !db.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	err := srv.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = srv.Reload()
-	if err != nil {
+
+	srv.(*SessionService).sm = &sessions.SessionS{}
+	err := srv.IsRunning()
+	if err != true {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
+	err2 := srv.Start()
+	if err2 != utils.ErrServiceAlreadyRunning {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err2)
 	}
 	cfg.SessionSCfg().Enabled = false
 	cfg.GetReloadChan(config.SessionSJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
+	srv.(*SessionService).sm = nil
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
+
 }

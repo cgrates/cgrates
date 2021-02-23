@@ -99,7 +99,6 @@ func TestDiameterAgentReload1(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
-/*
 func TestDiameterAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
@@ -139,25 +138,40 @@ func TestDiameterAgentReload2(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !srv.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	err := srv.Start()
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = srv.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
+
 	cfg.DiameterAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DA_JSN) <- struct{}{}
+	srv.(*DiameterAgent).stopChan = make(chan struct{}, 1)
+
+	srv.(*DiameterAgent).stopChan = make(chan struct{}, 1)
 	srv.Shutdown()
-	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
-*/
+
+func TestDiameterAgentReload3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, srvDep)
+
+	cfg.DiameterAgentCfg().ListenNet = "bad"
+	cfg.DiameterAgentCfg().DictionariesPath = ""
+	srv.(*DiameterAgent).start(nil)
+
+	cfg.DiameterAgentCfg().Enabled = false
+	cfg.GetReloadChan(config.DA_JSN) <- struct{}{}
+	time.Sleep(10 * time.Millisecond)
+	shdChan.CloseOnce()
+	time.Sleep(10 * time.Millisecond)
+}

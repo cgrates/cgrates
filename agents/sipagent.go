@@ -52,10 +52,11 @@ var (
 func NewSIPAgent(connMgr *engine.ConnManager, cfg *config.CGRConfig,
 	filterS *engine.FilterS) (sa *SIPAgent, err error) {
 	sa = &SIPAgent{
-		connMgr: connMgr,
-		filterS: filterS,
-		cfg:     cfg,
-		ackMap:  make(map[string]chan struct{}),
+		connMgr:  connMgr,
+		filterS:  filterS,
+		cfg:      cfg,
+		ackMap:   make(map[string]chan struct{}),
+		stopChan: make(chan struct{}),
 	}
 	msgTemplates := sa.cfg.TemplatesCfg()
 	// Inflate *template field types
@@ -96,7 +97,6 @@ func (sa *SIPAgent) Shutdown() {
 
 // ListenAndServe will run the SIP handler doing also the connection to listen address
 func (sa *SIPAgent) ListenAndServe() (err error) {
-	sa.stopChan = make(chan struct{})
 	utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
 		utils.SIPAgent, sa.cfg.SIPAgentCfg().ListenNet, sa.cfg.SIPAgentCfg().Listen))
 	switch sa.cfg.SIPAgentCfg().ListenNet {
@@ -107,6 +107,9 @@ func (sa *SIPAgent) ListenAndServe() (err error) {
 	default:
 		return fmt.Errorf("Unecepected protocol %s", sa.cfg.SIPAgentCfg().ListenNet)
 	}
+}
+func (sa *SIPAgent) InitStopChan() {
+	sa.stopChan = make(chan struct{})
 }
 
 func (sa *SIPAgent) serveUDP(stop chan struct{}) (err error) {
@@ -431,83 +434,10 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1AuthorizeReply)
 		err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
+		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
-	// case utils.MetaInitiate:
-	// 	initArgs := sessions.NewV1InitSessionArgs(
-	// 		reqProcessor.Flags.GetBool(utils.MetaAttributes),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaAttributes,utils.MetaIDs),
-	// 		reqProcessor.Flags.GetBool(utils.MetaThresholds),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaThresholds,utils.MetaIDs),
-	// 		reqProcessor.Flags.GetBool(utils.MetaStats),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaStats,utils.MetaIDs),
-	// 		reqProcessor.Flags.GetBool(utils.MetaResources),
-	// 		reqProcessor.Flags.Has(utils.MetaAccounts),
-	// 		cgrEv,  		reqProcessor.Flags.Has(utils.MetaFD),
-	// 		opts)
-	// 	rply := new(sessions.V1InitSessionReply)
-	// 	err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1InitiateSession,
-	// 		initArgs, rply)
-	// 	if err = agReq.setCGRReply(rply, err); err != nil {
-	// 		return
-	// 	}
-	// case utils.MetaUpdate:
-	// 	updateArgs := sessions.NewV1UpdateSessionArgs(
-	// 		reqProcessor.Flags.GetBool(utils.MetaAttributes),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaAttributes,utils.MetaIDs),
-	// 		reqProcessor.Flags.Has(utils.MetaAccounts),
-	// 		cgrEv,  		reqProcessor.Flags.Has(utils.MetaFD),
-	// 		opts)
-	// 	rply := new(sessions.V1UpdateSessionReply)
-	// 	err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1UpdateSession,
-	// 		updateArgs, rply)
-	// 	if err = agReq.setCGRReply(rply, err); err != nil {
-	// 		return
-	// 	}
-	// case utils.MetaTerminate:
-	// 	terminateArgs := sessions.NewV1TerminateSessionArgs(
-	// 		reqProcessor.Flags.Has(utils.MetaAccounts),
-	// 		reqProcessor.Flags.GetBool(utils.MetaResources),
-	// 		reqProcessor.Flags.GetBool(utils.MetaThresholds),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaThresholds,utils.MetaIDs),
-	// 		reqProcessor.Flags.GetBool(utils.MetaStats),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaStats,utils.MetaIDs),
-	// 		cgrEv,  		reqProcessor.Flags.Has(utils.MetaFD),
-	// 		opts)
-	// 	rply := utils.StringPointer("")
-	// 	err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1TerminateSession,
-	// 		terminateArgs, rply)
-	// 	if err = agReq.setCGRReply(nil, err); err != nil {
-	// 		return
-	// 	}
-	// case utils.MetaMessage:
-	// 	evArgs := sessions.NewV1ProcessMessageArgs(
-	// 		reqProcessor.Flags.GetBool(utils.MetaAttributes),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaAttributes,utils.MetaIDs),
-	// 		reqProcessor.Flags.GetBool(utils.MetaThresholds),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaThresholds,utils.MetaIDs),
-	// 		reqProcessor.Flags.GetBool(utils.MetaStats),
-	// 		reqProcessor.Flags.ParamsSlice(utils.MetaStats,utils.MetaIDs),
-	// 		reqProcessor.Flags.GetBool(utils.MetaResources),
-	// 		reqProcessor.Flags.Has(utils.MetaAccounts),
-	// 		reqProcessor.Flags.GetBool(utils.MetaRoutes),
-	// 		reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
-	// 		reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-	// 		cgrEv, cgrArgs,	// 		reqProcessor.Flags.Has(utils.MetaFD),
-	// 		reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
-	// 		opts)
-	// 	rply := new(sessions.V1ProcessMessageReply)
-	// 	err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage,
-	// 		evArgs, rply)
-	// 	if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-	// 		cgrEv.Event[utils.Usage] = 0 // avoid further debits
-	// 	} else if evArgs.Debit {
-	// 		cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-	// 	}
-	// 	if err = agReq.setCGRReply(nil, err); err != nil {
-	// 		return
-	// 	}
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
 			Flags:     reqProcessor.Flags.SliceFlags(),
@@ -526,20 +456,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
-		// case utils.MetaCDRs: // allow CDR processing
 	}
-	// separate request so we can capture the Terminate/Event also here
-	// if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
-	// 	!reqProcessor.Flags.Has(utils.MetaDryRun) {
-	// 	rplyCDRs := utils.StringPointer("")
-	// 	if err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessCDR,
-	// 		&utils.CGREventWithOpts{
-	// CGREvent: cgrEv,
-	// 			Opts: opts,
-	// }, 		rplyCDRs); err != nil {
-	// 		agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
-	// 	}
-	// }
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}

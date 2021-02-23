@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"reflect"
 	"runtime"
 	"strings"
 	"sync"
@@ -112,16 +111,22 @@ func (sS *SessionS) ListenAndServe(stopChan chan struct{}) {
 
 // Shutdown is called by engine to clear states
 func (sS *SessionS) Shutdown() (err error) {
+	var hasErr bool
 	for _, s := range sS.getSessions("", false) { // Force sessions shutdown
-		sS.terminateSession(s, nil, nil, nil, false)
+		if err = sS.terminateSession(s, nil, nil, nil, false); err != nil {
+			hasErr = true
+		}
+	}
+	if hasErr {
+		return utils.ErrPartiallyExecuted
 	}
 	return
 }
 
 // OnBiJSONConnect is called by rpc2.Client on each new connection
 func (sS *SessionS) OnBiJSONConnect(c *rpc2.Client) {
-	sS.biJMux.Lock()
 	nodeID := utils.UUIDSha1Prefix() // connection identifier, should be later updated as login procedure
+	sS.biJMux.Lock()
 	sS.biJClnts[c] = nodeID
 	sS.biJIDs[nodeID] = &biJClient{
 		conn:  c,
@@ -140,9 +145,11 @@ func (sS *SessionS) OnBiJSONDisconnect(c *rpc2.Client) {
 }
 
 // RegisterIntBiJConn is called on internal BiJ connection towards SessionS
-func (sS *SessionS) RegisterIntBiJConn(c rpcclient.ClientConnector) {
+func (sS *SessionS) RegisterIntBiJConn(c rpcclient.ClientConnector, nodeID string) {
+	if nodeID == utils.EmptyString {
+		nodeID = sS.cgrCfg.GeneralCfg().NodeID
+	}
 	sS.biJMux.Lock()
-	nodeID := sS.cgrCfg.GeneralCfg().NodeID
 	sS.biJClnts[c] = nodeID
 	sS.biJIDs[nodeID] = &biJClient{
 		conn:  c,
@@ -206,17 +213,17 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	var err error
 	// TTL
 	var ttl time.Duration
-	if opts.HasField(utils.OptsSessionTTL) {
-		ttl, err = opts.GetDuration(utils.OptsSessionTTL)
-	} else if s.OptsStart.HasField(utils.OptsSessionTTL) {
-		ttl, err = s.OptsStart.GetDuration(utils.OptsSessionTTL)
+	if opts.HasField(utils.OptsSessionsTTL) {
+		ttl, err = opts.GetDuration(utils.OptsSessionsTTL)
+	} else if s.OptsStart.HasField(utils.OptsSessionsTTL) {
+		ttl, err = s.OptsStart.GetDuration(utils.OptsSessionsTTL)
 	} else {
 		ttl = sS.cgrCfg.SessionSCfg().SessionTTL
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSessionTTL, s.CGRID, opts, err))
+				utils.SessionS, utils.OptsSessionsTTL, s.CGRID, opts, err))
 		return
 	}
 	if ttl == 0 {
@@ -224,17 +231,17 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// random delay computation
 	var maxDelay time.Duration
-	if opts.HasField(utils.OptsSessionTTLMaxDelay) {
-		maxDelay, err = opts.GetDuration(utils.OptsSessionTTLMaxDelay)
-	} else if s.OptsStart.HasField(utils.OptsSessionTTLMaxDelay) {
-		maxDelay, err = s.OptsStart.GetDuration(utils.OptsSessionTTLMaxDelay)
+	if opts.HasField(utils.OptsSessionsTTLMaxDelay) {
+		maxDelay, err = opts.GetDuration(utils.OptsSessionsTTLMaxDelay)
+	} else if s.OptsStart.HasField(utils.OptsSessionsTTLMaxDelay) {
+		maxDelay, err = s.OptsStart.GetDuration(utils.OptsSessionsTTLMaxDelay)
 	} else if sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay != nil {
 		maxDelay = *sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSessionTTLMaxDelay, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionsTTLMaxDelay, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	if maxDelay != 0 {
@@ -244,47 +251,47 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// LastUsed
 	var ttlLastUsed *time.Duration
-	if opts.HasField(utils.OptsSessionTTLLastUsed) {
-		ttlLastUsed, err = opts.GetDurationPtr(utils.OptsSessionTTLLastUsed)
-	} else if s.OptsStart.HasField(utils.OptsSessionTTLLastUsed) {
-		ttlLastUsed, err = s.OptsStart.GetDurationPtr(utils.OptsSessionTTLLastUsed)
+	if opts.HasField(utils.OptsSessionsTTLLastUsed) {
+		ttlLastUsed, err = opts.GetDurationPtr(utils.OptsSessionsTTLLastUsed)
+	} else if s.OptsStart.HasField(utils.OptsSessionsTTLLastUsed) {
+		ttlLastUsed, err = s.OptsStart.GetDurationPtr(utils.OptsSessionsTTLLastUsed)
 	} else {
 		ttlLastUsed = sS.cgrCfg.SessionSCfg().SessionTTLLastUsed
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSessionTTLLastUsed, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionsTTLLastUsed, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	// LastUsage
 	var ttlLastUsage *time.Duration
-	if opts.HasField(utils.OptsSessionTTLLastUsage) {
-		ttlLastUsage, err = opts.GetDurationPtr(utils.OptsSessionTTLLastUsage)
-	} else if s.OptsStart.HasField(utils.OptsSessionTTLLastUsage) {
-		ttlLastUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSessionTTLLastUsage)
+	if opts.HasField(utils.OptsSessionsTTLLastUsage) {
+		ttlLastUsage, err = opts.GetDurationPtr(utils.OptsSessionsTTLLastUsage)
+	} else if s.OptsStart.HasField(utils.OptsSessionsTTLLastUsage) {
+		ttlLastUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSessionsTTLLastUsage)
 	} else {
 		ttlLastUsage = sS.cgrCfg.SessionSCfg().SessionTTLLastUsage
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSessionTTLLastUsage, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionsTTLLastUsage, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	// TTLUsage
 	var ttlUsage *time.Duration
-	if opts.HasField(utils.OptsSessionTTLUsage) {
-		ttlUsage, err = opts.GetDurationPtr(utils.OptsSessionTTLUsage)
-	} else if s.OptsStart.HasField(utils.OptsSessionTTLUsage) {
-		ttlUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSessionTTLUsage)
+	if opts.HasField(utils.OptsSessionsTTLUsage) {
+		ttlUsage, err = opts.GetDurationPtr(utils.OptsSessionsTTLUsage)
+	} else if s.OptsStart.HasField(utils.OptsSessionsTTLUsage) {
+		ttlUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSessionsTTLUsage)
 	} else {
 		ttlUsage = sS.cgrCfg.SessionSCfg().SessionTTLUsage
 	}
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSessionTTLUsage, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSessionsTTLUsage, s.CGRID, opts.String(), err.Error()))
 		return
 	}
 	// previously defined, reset
@@ -689,7 +696,7 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 	}
 	var reply string
 	// use the v1 because it doesn't do rounding refund
-	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1StoreSessionCost,
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1StoreSessionCost,
 		argSmCost, &reply); err != nil && err == utils.ErrExists {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> refunding session: <%s> error: <%s>",
@@ -700,9 +707,8 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 					"<%s> failed refunding session: <%s>, srIdx: <%d>, error: <%s>",
 					utils.SessionS, s.CGRID, sRunIdx, err.Error()))
 		}
-		err = nil
 	}
-	return err
+	return
 }
 
 // roundCost will round the EventCost and will refund the extra debited increments
@@ -778,7 +784,7 @@ func (sS *SessionS) warnSession(connID string, ev map[string]interface{}) (err e
 }
 
 // replicateSessions will replicate sessions with or without cgrID specified
-func (sS *SessionS) replicateSessions(cgrID string, psv bool, connIDs []string) (err error) {
+func (sS *SessionS) replicateSessions(cgrID string, psv bool, connIDs []string) {
 	if len(connIDs) == 0 {
 		return
 	}
@@ -1140,11 +1146,15 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREvent, resID, clntConnID string,
 		return
 	}
 	cgrID := GetSetCGRID(cgrEv.Event)
+	evStart := engine.MapEvent(cgrEv.Event)
+	if !evStart.HasField(utils.Usage) && evStart.HasField(utils.LastUsed) {
+		evStart[utils.Usage] = evStart[utils.LastUsed]
+	}
 	s = &Session{
 		CGRID:         cgrID,
 		Tenant:        cgrEv.Tenant,
 		ResourceID:    resID,
-		EventStart:    engine.MapEvent(cgrEv.Event).Clone(), // decouple the event from the request so we can avoid concurrency with debit and ttl
+		EventStart:    evStart.Clone(), // decouple the event from the request so we can avoid concurrency with debit and ttl
 		OptsStart:     engine.MapEvent(cgrEv.Opts).Clone(),
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
@@ -1416,7 +1426,7 @@ func (sS *SessionS) authEvent(cgrEv *utils.CGREvent, forceDuration bool) (usage 
 			return
 		}
 		err = nil
-		eventUsage = sS.cgrCfg.GeneralCfg().MaxCallDuration
+		eventUsage = sS.cgrCfg.SessionSCfg().GetDefaultUsage(evStart.GetStringIgnoreErrors(utils.ToR))
 		evStart[utils.Usage] = eventUsage // will be used in CD
 	}
 	var s *Session
@@ -1491,7 +1501,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 			return
 		}
 		err = nil
-		reqMaxUsage = sS.cgrCfg.GeneralCfg().MaxCallDuration
+		reqMaxUsage = sS.cgrCfg.SessionSCfg().GetDefaultUsage(updtEv.GetStringIgnoreErrors(utils.ToR))
 		updtEv[utils.Usage] = reqMaxUsage
 	}
 	maxUsage = make(map[string]time.Duration)
@@ -1661,38 +1671,7 @@ func (sS *SessionS) Call(serviceMethod string, args interface{}, reply interface
 // CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.ClientConnector interface
 func (sS *SessionS) CallBiRPC(clnt rpcclient.ClientConnector,
 	serviceMethod string, args interface{}, reply interface{}) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// get method BiRPCV1.Method
-	method := reflect.ValueOf(sS).MethodByName(
-		"BiRPC" + parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version V1 in the method name and add prefix
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// construct the params
-	var clntVal reflect.Value
-	if clnt == nil {
-		clntVal = reflect.New(
-			reflect.TypeOf(new(utils.BiRPCInternalClient))).Elem() // Kinda cheat since we make up a type here
-	} else {
-		clntVal = reflect.ValueOf(clnt)
-	}
-	params := []reflect.Value{clntVal, reflect.ValueOf(args),
-		reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
+	return utils.BiRPCCall(sS, clnt, serviceMethod, args, reply)
 }
 
 // BiRPCv1GetActiveSessions returns the list of active sessions based on filter
@@ -1780,9 +1759,7 @@ type ArgsReplicateSessions struct {
 // args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
 func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.ClientConnector,
 	args ArgsReplicateSessions, reply *string) (err error) {
-	if err = sS.replicateSessions(args.CGRID, args.Passive, args.ConnIDs); err != nil {
-		return utils.NewErrServerError(err)
-	}
+	sS.replicateSessions(args.CGRID, args.Passive, args.ConnIDs)
 	*reply = utils.OK
 	return
 }
@@ -1876,12 +1853,23 @@ func (args *V1AuthorizeArgs) ParseFlags(flags string) {
 
 // V1AuthorizeReply are options available in auth reply
 type V1AuthorizeReply struct {
-	Attributes         *engine.AttrSProcessEventReply
-	ResourceAllocation *string
-	MaxUsage           *time.Duration
-	Routes             *engine.SortedRoutes
-	ThresholdIDs       *[]string
-	StatQueueIDs       *[]string
+	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
+	ResourceAllocation *string                        `json:",omitempty"`
+	MaxUsage           *time.Duration                 `json:",omitempty"`
+	Routes             *engine.SortedRoutes           `json:",omitempty"`
+	ThresholdIDs       *[]string                      `json:",omitempty"`
+	StatQueueIDs       *[]string                      `json:",omitempty"`
+
+	needsMaxUsage bool // for gob encoding only
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+// only used for gob encoding
+func (v1AuthReply *V1AuthorizeReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1AuthReply == nil {
+		return
+	}
+	v1AuthReply.needsMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -1902,7 +1890,10 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() utils.NavigableMap2 {
 	}
 	if v1AuthReply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1AuthReply.MaxUsage)
+	} else if v1AuthReply.needsMaxUsage {
+		cgrReply[utils.CapMaxUsage] = utils.NewNMData(0)
 	}
+
 	if v1AuthReply.Routes != nil {
 		cgrReply[utils.CapRoutes] = v1AuthReply.Routes.AsNavigableMap()
 	}
@@ -2148,11 +2139,22 @@ func (args *V1InitSessionArgs) ParseFlags(flags string) {
 
 // V1InitSessionReply are options for initialization reply
 type V1InitSessionReply struct {
-	Attributes         *engine.AttrSProcessEventReply
-	ResourceAllocation *string
-	MaxUsage           *time.Duration
-	ThresholdIDs       *[]string
-	StatQueueIDs       *[]string
+	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
+	ResourceAllocation *string                        `json:",omitempty"`
+	MaxUsage           *time.Duration                 `json:",omitempty"`
+	ThresholdIDs       *[]string                      `json:",omitempty"`
+	StatQueueIDs       *[]string                      `json:",omitempty"`
+
+	needsMaxUsage bool // for gob encoding only
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+// only used for gob encoding
+func (v1Rply *V1InitSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1Rply == nil {
+		return
+	}
+	v1Rply.needsMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2173,6 +2175,8 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap() utils.NavigableMap2 {
 	}
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
+	} else if v1Rply.needsMaxUsage {
+		cgrReply[utils.CapMaxUsage] = utils.NewNMData(0)
 	}
 
 	if v1Rply.ThresholdIDs != nil {
@@ -2229,9 +2233,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 	if !args.GetAttributes && !args.AllocateResources && !args.InitSession {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
-	}
 	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
 	if args.GetAttributes {
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, false)
@@ -2279,7 +2280,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		isPrepaid := s.debitStop != nil
 		s.RUnlock()
 		if isPrepaid { //active debit
-			rply.MaxUsage = &sS.cgrCfg.GeneralCfg().MaxCallDuration
+			rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().GetDefaultUsage(utils.IfaceAsString(args.CGREvent.Event[utils.ToR])))
 		} else {
 			var sRunsUsage map[string]time.Duration
 			if sRunsUsage, err = sS.updateSession(s, nil, args.Opts, false); err != nil {
@@ -2391,8 +2392,19 @@ type V1UpdateSessionArgs struct {
 
 // V1UpdateSessionReply contains options for session update reply
 type V1UpdateSessionReply struct {
-	Attributes *engine.AttrSProcessEventReply
-	MaxUsage   *time.Duration
+	Attributes *engine.AttrSProcessEventReply `json:",omitempty"`
+	MaxUsage   *time.Duration                 `json:",omitempty"`
+
+	needsMaxUsage bool // for gob encoding only
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+// only used for gob encoding
+func (v1Rply *V1UpdateSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1Rply == nil {
+		return
+	}
+	v1Rply.needsMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2410,6 +2422,8 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap() utils.NavigableMap2 {
 	}
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
+	} else if v1Rply.needsMaxUsage {
+		cgrReply[utils.CapMaxUsage] = utils.NewNMData(0)
 	}
 	return cgrReply
 }
@@ -2807,12 +2821,23 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 
 // V1ProcessMessageReply is the reply for the ProcessMessage API
 type V1ProcessMessageReply struct {
-	MaxUsage           *time.Duration
-	ResourceAllocation *string
-	Attributes         *engine.AttrSProcessEventReply
-	Routes             *engine.SortedRoutes
-	ThresholdIDs       *[]string
-	StatQueueIDs       *[]string
+	MaxUsage           *time.Duration                 `json:",omitempty"`
+	ResourceAllocation *string                        `json:",omitempty"`
+	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
+	Routes             *engine.SortedRoutes           `json:",omitempty"`
+	ThresholdIDs       *[]string                      `json:",omitempty"`
+	StatQueueIDs       *[]string                      `json:",omitempty"`
+
+	needsMaxUsage bool // for gob encoding only
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+// only used for gob encoding
+func (v1Rply *V1ProcessMessageReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1Rply == nil {
+		return
+	}
+	v1Rply.needsMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2820,6 +2845,8 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() utils.NavigableMap2 {
 	cgrReply := make(utils.NavigableMap2)
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
+	} else if v1Rply.needsMaxUsage {
+		cgrReply[utils.CapMaxUsage] = utils.NewNMData(0)
 	}
 	if v1Rply.ResourceAllocation != nil {
 		cgrReply[utils.CapResourceAllocation] = utils.NewNMData(*v1Rply.ResourceAllocation)
@@ -2973,14 +3000,14 @@ type V1ProcessEventArgs struct {
 
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
-	MaxUsage           map[string]time.Duration
-	Cost               map[string]float64 // Cost is the cost received from Rater, ignoring accounting part
-	ResourceAllocation map[string]string
-	Attributes         map[string]*engine.AttrSProcessEventReply
-	Routes             map[string]*engine.SortedRoutes
-	ThresholdIDs       map[string][]string
-	StatQueueIDs       map[string][]string
-	STIRIdentity       map[string]string
+	MaxUsage           map[string]time.Duration                  `json:",omitempty"`
+	Cost               map[string]float64                        `json:",omitempty"` // Cost is the cost received from Rater, ignoring accounting part
+	ResourceAllocation map[string]string                         `json:",omitempty"`
+	Attributes         map[string]*engine.AttrSProcessEventReply `json:",omitempty"`
+	Routes             map[string]*engine.SortedRoutes           `json:",omitempty"`
+	ThresholdIDs       map[string][]string                       `json:",omitempty"`
+	StatQueueIDs       map[string][]string                       `json:",omitempty"`
+	STIRIdentity       map[string]string                         `json:",omitempty"`
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -3389,7 +3416,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				s.RUnlock()
 				if isPrepaid { //active debit
 					for _, sr := range s.SRuns {
-						sRunsMaxUsage[sr.CD.RunID] = sS.cgrCfg.GeneralCfg().MaxCallDuration
+						sRunsMaxUsage[sr.CD.RunID] = sS.cgrCfg.SessionSCfg().GetDefaultUsage(ev.GetStringIgnoreErrors(utils.ToR))
 					}
 				} else if sRunsMaxUsage, err = sS.updateSession(s, nil, args.Opts, false); err != nil {
 					return utils.NewErrRALs(err)
@@ -3619,8 +3646,8 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.ClientConnector,
 
 // BiRPCv1RegisterInternalBiJSONConn will register the client for a bidirectional comunication
 func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.ClientConnector,
-	ign string, reply *string) error {
-	sS.RegisterIntBiJConn(clnt)
+	connID string, reply *string) error {
+	sS.RegisterIntBiJConn(clnt, connID)
 	*reply = utils.OK
 	return nil
 }
@@ -4049,4 +4076,85 @@ func (sS *SessionS) BiRPCv1STIRIdentity(clnt rpcclient.ClientConnector,
 		return utils.NewSTIRError(err.Error())
 	}
 	return
+}
+
+// Handlers bidirectional methods following
+func (sS *SessionS) Handlers() map[string]interface{} {
+	return map[string]interface{}{
+		utils.SessionSv1AuthorizeEvent: func(clnt *rpc2.Client, args *V1AuthorizeArgs, rply *V1AuthorizeReply) (err error) {
+			return sS.BiRPCv1AuthorizeEvent(clnt, args, rply)
+		},
+		utils.SessionSv1AuthorizeEventWithDigest: func(clnt *rpc2.Client, args *V1AuthorizeArgs, rply *V1AuthorizeReplyWithDigest) (err error) {
+			return sS.BiRPCv1AuthorizeEventWithDigest(clnt, args, rply)
+		},
+		utils.SessionSv1InitiateSession: func(clnt *rpc2.Client, args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
+			return sS.BiRPCv1InitiateSession(clnt, args, rply)
+		},
+		utils.SessionSv1InitiateSessionWithDigest: func(clnt *rpc2.Client, args *V1InitSessionArgs, rply *V1InitReplyWithDigest) (err error) {
+			return sS.BiRPCv1InitiateSessionWithDigest(clnt, args, rply)
+		},
+		utils.SessionSv1UpdateSession: func(clnt *rpc2.Client, args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
+			return sS.BiRPCv1UpdateSession(clnt, args, rply)
+		},
+		utils.SessionSv1SyncSessions: func(clnt *rpc2.Client, args *utils.TenantWithOpts, rply *string) (err error) {
+			return sS.BiRPCv1SyncSessions(clnt, args, rply)
+		},
+		utils.SessionSv1TerminateSession: func(clnt *rpc2.Client, args *V1TerminateSessionArgs, rply *string) (err error) {
+			return sS.BiRPCv1TerminateSession(clnt, args, rply)
+		},
+		utils.SessionSv1ProcessCDR: func(clnt *rpc2.Client, args *utils.CGREvent, rply *string) (err error) {
+			return sS.BiRPCv1ProcessCDR(clnt, args, rply)
+		},
+		utils.SessionSv1ProcessMessage: func(clnt *rpc2.Client, args *V1ProcessMessageArgs, rply *V1ProcessMessageReply) (err error) {
+			return sS.BiRPCv1ProcessMessage(clnt, args, rply)
+		},
+		utils.SessionSv1ProcessEvent: func(clnt *rpc2.Client, args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
+			return sS.BiRPCv1ProcessEvent(clnt, args, rply)
+		},
+		utils.SessionSv1GetCost: func(clnt *rpc2.Client, args *V1ProcessEventArgs, rply *V1GetCostReply) (err error) {
+			return sS.BiRPCv1GetCost(clnt, args, rply)
+		},
+		utils.SessionSv1GetActiveSessions: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *[]*ExternalSession) (err error) {
+			return sS.BiRPCv1GetActiveSessions(clnt, args, rply)
+		},
+		utils.SessionSv1GetActiveSessionsCount: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *int) (err error) {
+			return sS.BiRPCv1GetActiveSessionsCount(clnt, args, rply)
+		},
+		utils.SessionSv1GetPassiveSessions: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *[]*ExternalSession) (err error) {
+			return sS.BiRPCv1GetPassiveSessions(clnt, args, rply)
+		},
+		utils.SessionSv1GetPassiveSessionsCount: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *int) (err error) {
+			return sS.BiRPCv1GetPassiveSessionsCount(clnt, args, rply)
+		},
+		utils.SessionSv1ForceDisconnect: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *string) (err error) {
+			return sS.BiRPCv1ForceDisconnect(clnt, args, rply)
+		},
+		utils.SessionSv1RegisterInternalBiJSONConn: func(clnt *rpc2.Client, args string, rply *string) (err error) {
+			return sS.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
+		},
+		utils.SessionSv1ReplicateSessions: func(clnt *rpc2.Client, args ArgsReplicateSessions, rply *string) (err error) {
+			return sS.BiRPCv1ReplicateSessions(clnt, args, rply)
+		},
+		utils.SessionSv1SetPassiveSession: func(clnt *rpc2.Client, args *Session, rply *string) (err error) {
+			return sS.BiRPCv1SetPassiveSession(clnt, args, rply)
+		},
+		utils.SessionSv1ActivateSessions: func(clnt *rpc2.Client, args *utils.SessionIDsWithArgsDispatcher, rply *string) (err error) {
+			return sS.BiRPCv1ActivateSessions(clnt, args, rply)
+		},
+		utils.SessionSv1DeactivateSessions: func(clnt *rpc2.Client, args *utils.SessionIDsWithArgsDispatcher, rply *string) (err error) {
+			return sS.BiRPCv1DeactivateSessions(clnt, args, rply)
+		},
+		utils.SessionSv1ReAuthorize: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *string) (err error) {
+			return sS.BiRPCv1ReAuthorize(clnt, args, rply)
+		},
+		utils.SessionSv1DisconnectPeer: func(clnt *rpc2.Client, args *utils.DPRArgs, rply *string) (err error) {
+			return sS.BiRPCv1DisconnectPeer(clnt, args, rply)
+		},
+		utils.SessionSv1STIRAuthenticate: func(clnt *rpc2.Client, args *V1STIRAuthenticateArgs, rply *string) (err error) {
+			return sS.BiRPCv1STIRAuthenticate(clnt, args, rply)
+		},
+		utils.SessionSv1STIRIdentity: func(clnt *rpc2.Client, args *V1STIRIdentityArgs, rply *string) (err error) {
+			return sS.BiRPCv1STIRIdentity(clnt, args, rply)
+		},
+	}
 }

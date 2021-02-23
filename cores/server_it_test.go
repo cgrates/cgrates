@@ -43,6 +43,7 @@ import (
 	sessions2 "github.com/cgrates/cgrates/sessions"
 
 	"github.com/cenkalti/rpc2"
+	jsonrpc2 "github.com/cenkalti/rpc2/jsonrpc"
 
 	"github.com/cgrates/cgrates/config"
 
@@ -68,6 +69,9 @@ var (
 		testServeBiJSON,
 		testServeBiJSONEmptyBiRPCServer,
 		testServeBiJSONInvalidPort,
+		testServeBiGoB,
+		testServeBiGoBEmptyBiRPCServer,
+		testServeBiGoBInvalidPort,
 		testServeGOBTLS,
 		testServeJSONTls,
 		testServeCodecTLSErr,
@@ -333,7 +337,7 @@ func testServeBiJSON(t *testing.T) {
 	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
 
 	go func() {
-		if err := server.ServeBiJSON(":3434", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err != nil {
+		if err := server.ServeBiRPC(":3434", "", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err != nil {
 			t.Error(err)
 		}
 	}()
@@ -353,7 +357,7 @@ func testServeBiJSONEmptyBiRPCServer(t *testing.T) {
 
 	expectedErr := "BiRPCServer should not be nil"
 	go func() {
-		if err := server.ServeBiJSON(":3430", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err == nil || err.Error() != "BiRPCServer should not be nil" {
+		if err := server.ServeBiRPC(":3430", "", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err == nil || err.Error() != "BiRPCServer should not be nil" {
 			t.Errorf("Expected %+v, received %+v", expectedErr, err)
 		}
 	}()
@@ -374,7 +378,69 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
 
 	expectedErr := "listen tcp: address invalid_port_format: missing port in address"
-	if err := server.ServeBiJSON("invalid_port_format", sessions.OnBiJSONConnect,
+	if err := server.ServeBiRPC("invalid_port_format", "", sessions.OnBiJSONConnect,
+		sessions.OnBiJSONDisconnect); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	server.StopBiRPC()
+}
+
+func testServeBiGoB(t *testing.T) {
+	cfgDflt := config.NewDefaultCGRConfig()
+	caps := engine.NewCaps(100, utils.MetaBusy)
+	server = NewServer(caps)
+	server.RpcRegister(new(mockRegister))
+	server.birpcSrv = rpc2.NewServer()
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+
+	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
+
+	go func() {
+		if err := server.ServeBiRPC("", ":9343", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err != nil {
+			t.Error(err)
+		}
+	}()
+	runtime.Gosched()
+}
+
+func testServeBiGoBEmptyBiRPCServer(t *testing.T) {
+	cfgDflt := config.NewDefaultCGRConfig()
+	caps := engine.NewCaps(100, utils.MetaBusy)
+	server = NewServer(caps)
+	server.RpcRegister(new(mockRegister))
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+
+	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
+
+	expectedErr := "BiRPCServer should not be nil"
+	go func() {
+		if err := server.ServeBiRPC("", ":93430", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err == nil || err.Error() != "BiRPCServer should not be nil" {
+			t.Errorf("Expected %+v, received %+v", expectedErr, err)
+		}
+	}()
+
+	runtime.Gosched()
+}
+
+func testServeBiGoBInvalidPort(t *testing.T) {
+	cfgDflt := config.NewDefaultCGRConfig()
+	caps := engine.NewCaps(100, utils.MetaBusy)
+	server = NewServer(caps)
+	server.RpcRegister(new(mockRegister))
+	server.birpcSrv = rpc2.NewServer()
+
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+
+	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
+
+	expectedErr := "listen tcp: address invalid_port_format: missing port in address"
+	if err := server.ServeBiRPC("", "invalid_port_format", sessions.OnBiJSONConnect,
 		sessions.OnBiJSONDisconnect); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -693,7 +759,7 @@ func testAcceptBiRPC(t *testing.T) {
 	l := &mockListener{
 		p1: p1,
 	}
-	go server.acceptBiRPC(l)
+	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, jsonrpc2.NewJSONCodec)
 	rpc := jsonrpc.NewClient(p2)
 	var reply string
 	expected := "rpc2: can't find method AttributeSv1.Ping"
@@ -721,7 +787,7 @@ func testAcceptBiRPCError(t *testing.T) {
 
 	//it will contain "use of closed network connection"
 	l := new(mockListenError)
-	go server.acceptBiRPC(l)
+	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, jsonrpc2.NewJSONCodec)
 	runtime.Gosched()
 }
 

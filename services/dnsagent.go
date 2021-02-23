@@ -61,7 +61,6 @@ func (dns *DNSAgent) Start() (err error) {
 	if dns.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-
 	filterS := <-dns.filterSChan
 	dns.filterSChan <- filterS
 
@@ -71,14 +70,10 @@ func (dns *DNSAgent) Start() (err error) {
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
+		dns.dns = nil
 		return
 	}
-	go func() {
-		if err = dns.dns.ListenAndServe(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
-			dns.shdChan.CloseOnce() // stop the engine here
-		}
-	}()
+	go dns.listenAndServe()
 	return
 }
 
@@ -96,12 +91,15 @@ func (dns *DNSAgent) Reload() (err error) {
 	if err = dns.dns.Reload(); err != nil {
 		return
 	}
-	go func() {
-		if err := dns.dns.ListenAndServe(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
-			dns.shdChan.CloseOnce() // stop the engine here
-		}
-	}()
+	go dns.listenAndServe()
+	return
+}
+
+func (dns *DNSAgent) listenAndServe() (err error) {
+	if err = dns.dns.ListenAndServe(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
+		dns.shdChan.CloseOnce() // stop the engine here
+	}
 	return
 }
 

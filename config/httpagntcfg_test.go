@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
@@ -496,7 +497,7 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 	{
 		"id": "conecto1",
 		"url": "/conecto",
-		"sessions_conns": ["*localhost","*internal"],
+		"sessions_conns": ["*birpc_internal", "*localhost","*internal"],
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
 		"request_processors": [
@@ -528,7 +529,7 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 		{
 			utils.IDCfg:             "conecto1",
 			utils.URLCfg:            "/conecto",
-			utils.SessionSConnsCfg:  []string{"*localhost", "*internal"},
+			utils.SessionSConnsCfg:  []string{rpcclient.BiRPCInternal, "*localhost", "*internal"},
 			utils.RequestPayloadCfg: "*url",
 			utils.ReplyPayloadCfg:   "*xml",
 			utils.RequestProcessorsCfg: []map[string]interface{}{

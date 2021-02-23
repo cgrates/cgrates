@@ -167,6 +167,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.sessionSCfg.STIRCfg = new(STIRcfg)
+	cfg.sessionSCfg.DefaultUsage = make(map[string]time.Duration)
 	cfg.fsAgentCfg = new(FsAgentCfg)
 	cfg.kamAgentCfg = new(KamAgentCfg)
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
@@ -427,6 +428,13 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 		PoolSize: 0,
 		Conns: []*RemoteHost{{
 			Address: utils.MetaInternal,
+		}},
+	}
+	cfg.rpcConns[rpcclient.BiRPCInternal] = &RPCConn{
+		Strategy: rpcclient.PoolFirst,
+		PoolSize: 0,
+		Conns: []*RemoteHost{{
+			Address: rpcclient.BiRPCInternal,
 		}},
 	}
 	for key, val := range jsnRPCConns {

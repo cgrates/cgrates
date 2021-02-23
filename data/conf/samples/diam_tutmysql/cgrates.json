@@ -79,7 +79,7 @@
 "diameter_agent": {
 	"enabled": true,
 	"listen": ":3868",
-	"sessions_conns": ["*internal"],
+	"sessions_conns": ["*birpc_internal"],
 },
 
 

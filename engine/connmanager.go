@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -41,7 +42,7 @@ type ConnManager struct {
 
 // getConn is used to retrieve a connection from cache
 // in case this doesn't exist create it and cache it
-func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnector) (conn rpcclient.ClientConnector, err error) {
+func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.BiRPCConector) (conn rpcclient.ClientConnector, err error) {
 	//try to get the connection from cache
 	if x, ok := Cache.Get(utils.CacheRPCConnections, connID); ok {
 		if x == nil {
@@ -51,12 +52,13 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 	}
 	// in case we don't find in cache create the connection and add this in cache
 	var intChan chan rpcclient.ClientConnector
+	var isInternalRPC bool
 	var connCfg *config.RPCConn
-	isBiRPCCLient := false
-	if internalChan, has := cM.rpcInternal[connID]; has {
-		connCfg = cM.cfg.RPCConns()[utils.MetaInternal]
-		intChan = internalChan
-		isBiRPCCLient = true
+	if intChan, isInternalRPC = cM.rpcInternal[connID]; isInternalRPC {
+		connCfg = cM.cfg.RPCConns()[rpcclient.InternalRPC]
+		if strings.HasPrefix(connID, rpcclient.BiRPCInternal) {
+			connCfg = cM.cfg.RPCConns()[rpcclient.BiRPCInternal]
+		}
 	} else {
 		connCfg = cM.cfg.RPCConns()[connID]
 		for _, rpcConn := range connCfg.Conns {
@@ -66,56 +68,56 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 			}
 		}
 	}
-	switch {
-	case biRPCClient != nil && isBiRPCCLient: // special handling for SessionS BiJSONRPCClient
-		var rply string
-		sSIntConn := <-intChan
-		intChan <- sSIntConn
-		conn = utils.NewBiRPCInternalClient(sSIntConn.(utils.BiRPCServer))
-		conn.(*utils.BiRPCInternalClient).SetClientConn(biRPCClient)
-		if err = conn.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-			utils.EmptyString, &rply); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not register biRPCClient, error: <%s>",
-				utils.SessionS, err.Error()))
-			return
-		}
-	case connCfg.Strategy == rpcclient.PoolParallel:
+	if connCfg.Strategy == rpcclient.PoolParallel {
 		rpcConnCfg := connCfg.Conns[0] // for parrallel we need only the first connection
-		var conPool *rpcclient.RPCParallelClientPool
-		if rpcConnCfg.Address == utils.MetaInternal {
-			conPool, err = rpcclient.NewRPCParallelClientPool("", "", rpcConnCfg.TLS,
-				cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
-				cM.cfg.TLSCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
-				cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout,
-				cM.cfg.GeneralCfg().ReplyTimeout, rpcclient.InternalRPC, intChan, int64(cM.cfg.GeneralCfg().MaxParallelConns), false)
-		} else if utils.SliceHasMember([]string{utils.EmptyString, utils.MetaGOB, utils.MetaJSON}, rpcConnCfg.Transport) {
-			codec := rpcclient.GOBrpc
-			if rpcConnCfg.Transport != "" {
-				codec = rpcConnCfg.Transport
-			}
-			conPool, err = rpcclient.NewRPCParallelClientPool(utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS,
-				cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
-				cM.cfg.TLSCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
-				cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout,
-				cM.cfg.GeneralCfg().ReplyTimeout, codec, nil, int64(cM.cfg.GeneralCfg().MaxParallelConns), false)
-		} else {
+		codec := rpcclient.GOBrpc
+		switch {
+		case rpcConnCfg.Address == rpcclient.InternalRPC:
+			codec = rpcclient.InternalRPC
+		case rpcConnCfg.Address == rpcclient.BiRPCInternal:
+			codec = rpcclient.BiRPCInternal
+		case rpcConnCfg.Transport == utils.EmptyString:
+			intChan = nil
+		case rpcConnCfg.Transport == rpcclient.GOBrpc,
+			rpcConnCfg.Transport == rpcclient.JSONrpc,
+			rpcConnCfg.Transport == rpcclient.BiRPCGOB,
+			rpcConnCfg.Transport == rpcclient.BiRPCJSON:
+			codec = rpcConnCfg.Transport
+			intChan = nil
+		default:
 			err = fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
-		}
-		if err != nil {
 			return
 		}
-		conn = conPool
-	default:
-		var conPool *rpcclient.RPCPool
-		if conPool, err = NewRPCPool(connCfg.Strategy,
+		if conn, err = rpcclient.NewRPCParallelClientPool(utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS,
+			cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
+			cM.cfg.TLSCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
+			cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout,
+			cM.cfg.GeneralCfg().ReplyTimeout, codec, intChan, int64(cM.cfg.GeneralCfg().MaxParallelConns), false, biRPCClient); err != nil {
+			return
+		}
+	} else {
+		if conn, err = NewRPCPool(connCfg.Strategy,
 			cM.cfg.TLSCfg().ClientKey,
 			cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
 			cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,
 			cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
-			connCfg.Conns, intChan, false); err != nil {
+			connCfg.Conns, intChan, false, biRPCClient); err != nil {
 			return
 		}
-		conn = conPool
+	}
+	if biRPCClient != nil {
+		for _, c := range connCfg.Conns {
+			if c.Address == rpcclient.BiRPCInternal { // register only on internal
+				var rply string
+				if err = conn.Call(utils.SessionSv1RegisterInternalBiJSONConn,
+					connID, &rply); err != nil {
+					utils.Logger.Crit(fmt.Sprintf("<%s> Could not register biRPCClient, error: <%s>",
+						utils.SessionS, err.Error()))
+					return
+				}
+				break
+			}
+		}
 	}
 
 	if err = Cache.Set(utils.CacheRPCConnections, connID, conn, nil,
@@ -126,7 +128,7 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 }
 
 // Call gets the connection calls the method on it
-func (cM *ConnManager) Call(connIDs []string, biRPCClient rpcclient.ClientConnector,
+func (cM *ConnManager) Call(connIDs []string, biRPCClient rpcclient.BiRPCConector,
 	method string, arg, reply interface{}) (err error) {
 	if len(connIDs) == 0 {
 		return utils.NewErrMandatoryIeMissing("connIDs")

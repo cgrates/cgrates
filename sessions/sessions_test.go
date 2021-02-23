@@ -1312,6 +1312,11 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
+	v1AuthRpl.needsMaxUsage = true
+	expected[utils.CapMaxUsage] = utils.NewNMData(0)
+	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
 	v1AuthRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
 	expected[utils.CapMaxUsage] = utils.NewNMData(5 * time.Minute)
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
@@ -1351,6 +1356,11 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
+	v1InitRpl.needsMaxUsage = true
+	expected[utils.CapMaxUsage] = utils.NewNMData(0)
+	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
 	v1InitRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
 	expected[utils.CapMaxUsage] = utils.NewNMData(5 * time.Minute)
 	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
@@ -1386,11 +1396,70 @@ func TestSessionSV1UpdateSessionReplyAsNavigableMap(t *testing.T) {
 	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
+
+	v1UpdtRpl.needsMaxUsage = true
+	expected[utils.CapMaxUsage] = utils.NewNMData(0)
+	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+
 	v1UpdtRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
 	expected[utils.CapMaxUsage] = utils.NewNMData(5 * time.Minute)
 	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
+}
+
+func TestSetMaxUsageNeededProcessMessage(t *testing.T) {
+	rplyPocMess := &V1ProcessMessageReply{
+		needsMaxUsage: false,
+	}
+	rplyPocMess.SetMaxUsageNeeded(true)
+	if !rplyPocMess.needsMaxUsage {
+		t.Errorf("Expected to be true")
+	}
+
+	rplyPocMess = nil
+	rplyPocMess.SetMaxUsageNeeded(true)
+}
+
+func TestSetMaxUsageNeededUpdateSessionReply(t *testing.T) {
+	rplySessRply := &V1UpdateSessionReply{
+		needsMaxUsage: false,
+	}
+	rplySessRply.SetMaxUsageNeeded(true)
+	if !rplySessRply.needsMaxUsage {
+		t.Errorf("Expected to be true")
+	}
+
+	rplySessRply = nil
+	rplySessRply.SetMaxUsageNeeded(true)
+}
+
+func TestSetMaxUsageNeededInitSessionReply(t *testing.T) {
+	rplyInitSessRply := &V1InitSessionReply{
+		needsMaxUsage: false,
+	}
+	rplyInitSessRply.SetMaxUsageNeeded(true)
+	if !rplyInitSessRply.needsMaxUsage {
+		t.Errorf("Expected to be true")
+	}
+
+	rplyInitSessRply = nil
+	rplyInitSessRply.SetMaxUsageNeeded(true)
+}
+
+func TestSetMaxUsageNeededAuthorizeReply(t *testing.T) {
+	rplyAuthRply := &V1AuthorizeReply{
+		needsMaxUsage: false,
+	}
+	rplyAuthRply.SetMaxUsageNeeded(true)
+	if !rplyAuthRply.needsMaxUsage {
+		t.Errorf("Expected to be true")
+	}
+
+	rplyAuthRply = nil
+	rplyAuthRply.SetMaxUsageNeeded(true)
 }
 
 func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
@@ -1402,6 +1471,12 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 
 	v1PrcEvRpl.Attributes = attrs
 	expected[utils.CapAttributes] = utils.NavigableMap2{"OfficeGroup": utils.NewNMData("Marketing")}
+	if rply := v1PrcEvRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+
+	v1PrcEvRpl.needsMaxUsage = true
+	expected[utils.CapMaxUsage] = utils.NewNMData(0)
 	if rply := v1PrcEvRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1491,6 +1566,19 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 
+	cost := map[string]float64{"TEST1": 2.0}
+	v1per.Cost = cost
+	v1per.Cost[utils.MetaRaw] = cost["TEST1"]
+	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+
+	v1per.STIRIdentity = make(map[string]string)
+	v1per.STIRIdentity[utils.MetaRaw] = utils.EmptyString
+	expected[utils.OptsStirIdentity] = utils.NavigableMap2{utils.MetaRaw: utils.NewNMData(utils.EmptyString)}
+	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
 }
 
 func TestSessionStransitSState(t *testing.T) {
@@ -1885,9 +1973,10 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
 		ProcessStats:      true,
 		StatIDs:           []string{"st1", "st2", "st3"},
+		ForceDuration:     true,
 	}
 
-	strArg = "*accounts,*resources,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts,*resources,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3,*fd"
 	v1InitSsArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1InitSsArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1InitSsArgs))
@@ -1902,9 +1991,10 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
 		ProcessStats:      true,
 		StatIDs:           []string{"st1", "st2", "st3"},
+		ForceDuration:     true,
 	}
 
-	strArg = "*accounts,*resources,*dispatchers,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts,*resources,*dispatchers,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3,*fd"
 	v1InitSsArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1InitSsArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1InitSsArgs))
@@ -1929,9 +2019,10 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
 		ProcessStats:      true,
 		StatIDs:           []string{"st1", "st2", "st3"},
+		ForceDuration:     true,
 	}
 
-	strArg = "*accounts,*resources,*routes,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts,*resources,*routes,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3,*fd"
 	v1TerminateSsArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
@@ -1944,9 +2035,10 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
 		ProcessStats:      true,
 		StatIDs:           []string{"st1", "st2", "st3"},
+		ForceDuration:     true,
 	}
 
-	strArg = "*accounts,*resources,,*dispatchers,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts,*resources,,*dispatchers,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3,*fd"
 	v1TerminateSsArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
@@ -2003,9 +2095,10 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		ProcessStats:       true,
 		StatIDs:            []string{"st1", "st2", "st3"},
 		CGREvent:           eOut.CGREvent,
+		ForceDuration:      true,
 	}
 
-	strArg = "*accounts,*resources,*dispatchers,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts,*resources,*dispatchers,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3,*fd"
 	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
 	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
 	v1ProcessMsgArgs.ParseFlags(strArg)
@@ -2485,7 +2578,7 @@ func TestWarnSession(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil)
 
 	sTestMock := &mockConnWarnDisconnect1{}
-	sessions.RegisterIntBiJConn(sTestMock)
+	sessions.RegisterIntBiJConn(sTestMock, utils.EmptyString)
 
 	if err := sessions.warnSession("ClientConnIdtest", nil); err != nil {
 		t.Error(err)
@@ -2494,8 +2587,83 @@ func TestWarnSession(t *testing.T) {
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest2"
 	sessions = NewSessionS(cfg, dm, nil)
 	sTestMock2 := &mockConnWarnDisconnect2{}
-	sessions.RegisterIntBiJConn(sTestMock2)
+	sessions.RegisterIntBiJConn(sTestMock2, utils.EmptyString)
 	if err := sessions.warnSession("ClientConnIdtest2", nil); err == nil || err != utils.ErrNoActiveSession {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoActiveSession, err)
 	}
+}
+
+type clMock func(_ string, _ interface{}, _ interface{}) error
+
+func (c clMock) Call(m string, a interface{}, r interface{}) error {
+	return c(m, a, r)
+}
+func TestInitSession(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	clientConect := make(chan rpcclient.ClientConnector, 1)
+	clientConect <- clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		*rply = []*engine.ChrgSProcessEventReply{
+			{
+				ChargerSProfile:    "raw",
+				AttributeSProfiles: []string{utils.MetaNone},
+				AlteredFields:      []string{"~*req.RunID"},
+				CGREvent:           args.(*utils.CGREvent),
+			},
+		}
+		return nil
+	})
+	conMng := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
+	})
+	sS := NewSessionS(cfg, nil, conMng)
+	s, err := sS.initSession(&utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Category:     "call",
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "TestTerminate",
+			utils.RequestType:  utils.MetaPostpaid,
+			utils.AccountField: "1002",
+			utils.Subject:      "1001",
+			utils.Destination:  "1001",
+			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.LastUsed:     2 * time.Second,
+		}}, "", "", 0, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exp := &Session{
+		CGRID:  "c72b7074ef9375cd19ab7bbceb530e99808c3194",
+		Tenant: "cgrates.org",
+		EventStart: engine.MapEvent{
+			utils.CGRID:        "c72b7074ef9375cd19ab7bbceb530e99808c3194",
+			utils.Category:     "call",
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "TestTerminate",
+			utils.RequestType:  utils.MetaPostpaid,
+			utils.AccountField: "1002",
+			utils.Subject:      "1001",
+			utils.Destination:  "1001",
+			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.LastUsed:     2 * time.Second,
+			utils.Usage:        2 * time.Second,
+		},
+		DebitInterval: 0,
+		chargeable:    true,
+	}
+	s.SRuns = nil
+	if !reflect.DeepEqual(exp, s) {
+		t.Errorf("Expected %v , received: %s", utils.ToJSON(exp), utils.ToJSON(s))
+	}
+}
+
+func TestSessionSAsBiRPC(t *testing.T) {
+	_ = rpcclient.BiRPCConector(new(SessionS))
 }

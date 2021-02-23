@@ -1,0 +1,4 @@
+#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
+ACT_TOPUP_RST_10,*topup_reset,,,test,*voice,,*any,,,*unlimited,,3600000000000,10,false,false,10
+ACT_TOPUP_RST_11,*topup_reset,,,,*voice,,*any,RP_ANY,,*unlimited,,3600000000000,10,false,false,10
+ACT_TOPUP_RST_11,*topup_reset,,,,*monetary,,*any,,,*unlimited,,100,10,false,false,10

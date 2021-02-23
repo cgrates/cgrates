@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestDfGeneralJsonCfg(t *testing.T) {
@@ -44,8 +45,6 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_timezone:     utils.StringPointer("Local"),
 		Connect_attempts:     utils.IntPointer(5),
 		Reconnects:           utils.IntPointer(-1),
-		Min_call_duration:    utils.StringPointer("0s"),
-		Max_call_duration:    utils.StringPointer("3h"),
 		Connect_timeout:      utils.StringPointer("1s"),
 		Reply_timeout:        utils.StringPointer("2s"),
 		Locking_timeout:      utils.StringPointer("0"),
@@ -725,6 +724,7 @@ func TestSmgJsonCfg(t *testing.T) {
 	eCfg := &SessionSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
 		Listen_bijson:         utils.StringPointer("127.0.0.1:2014"),
+		Listen_bigob:          utils.StringPointer(""),
 		Chargers_conns:        &[]string{},
 		Rals_conns:            &[]string{},
 		Cdrs_conns:            &[]string{},
@@ -742,6 +742,12 @@ func TestSmgJsonCfg(t *testing.T) {
 		Channel_sync_interval: utils.StringPointer("0"),
 		Terminate_attempts:    utils.IntPointer(5),
 		Alterable_fields:      &[]string{},
+		Default_usage: &map[string]string{
+			utils.MetaAny:   "3h",
+			utils.MetaVoice: "3h",
+			utils.MetaData:  "1048576",
+			utils.MetaSMS:   "1",
+		},
 		Stir: &STIRJsonCfg{
 			Allowed_attest:      &[]string{utils.MetaAny},
 			Payload_maxduration: utils.StringPointer("-1"),
@@ -765,7 +771,7 @@ func TestSmgJsonCfg(t *testing.T) {
 func TestFsAgentJsonCfg(t *testing.T) {
 	eCfg := &FreeswitchAgentJsonCfg{
 		Enabled:                utils.BoolPointer(false),
-		Sessions_conns:         &[]string{utils.MetaInternal},
+		Sessions_conns:         &[]string{rpcclient.BiRPCInternal},
 		Subscribe_park:         utils.BoolPointer(true),
 		Create_cdr:             utils.BoolPointer(false),
 		Extra_fields:           &[]string{},
@@ -795,7 +801,7 @@ func TestFsAgentJsonCfg(t *testing.T) {
 func TestKamAgentJsonCfg(t *testing.T) {
 	eCfg := &KamAgentJsonCfg{
 		Enabled:        utils.BoolPointer(false),
-		Sessions_conns: &[]string{utils.MetaInternal},
+		Sessions_conns: &[]string{rpcclient.BiRPCInternal},
 		Create_cdr:     utils.BoolPointer(false),
 		Evapi_conns: &[]*KamConnJsonCfg{
 			{
@@ -820,7 +826,7 @@ func TestKamAgentJsonCfg(t *testing.T) {
 func TestAsteriskAgentJsonCfg(t *testing.T) {
 	eCfg := &AsteriskAgentJsonCfg{
 		Enabled:        utils.BoolPointer(false),
-		Sessions_conns: &[]string{utils.MetaInternal},
+		Sessions_conns: &[]string{rpcclient.BiRPCInternal},
 		Create_cdr:     utils.BoolPointer(false),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
@@ -849,7 +855,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Listen:               utils.StringPointer("127.0.0.1:3868"),
 		Listen_net:           utils.StringPointer(utils.TCP),
 		Dictionaries_path:    utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		Sessions_conns:       &[]string{utils.MetaInternal},
+		Sessions_conns:       &[]string{rpcclient.BiRPCInternal},
 		Origin_host:          utils.StringPointer("CGR-DA"),
 		Origin_realm:         utils.StringPointer("cgrates.org"),
 		Vendor_id:            utils.IntPointer(0),

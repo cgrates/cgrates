@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
@@ -123,7 +124,7 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		"enabled": false,											
 		"listen": "127.0.0.1:3868",									
 		"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	
-		"sessions_conns": ["*internal:*sessions", "*conn1"],
+		"sessions_conns": ["*birpc_internal","*internal", "*conn1"],
 		"origin_host": "CGR-DA",									
 		"origin_realm": "cgrates.org",								
 		"vendor_id": 0,												
@@ -157,7 +158,7 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		utils.OriginRealmCfg:        "cgrates.org",
 		utils.ProductNameCfg:        "CGRateS",
 		utils.RARTemplateCfg:        "",
-		utils.SessionSConnsCfg:      []string{utils.MetaInternal, "*conn1"},
+		utils.SessionSConnsCfg:      []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"},
 		utils.SyncedConnReqsCfg:     true,
 		utils.VendorIDCfg:           0,
 		utils.RequestProcessorsCfg: []map[string]interface{}{
@@ -220,7 +221,7 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		utils.OriginRealmCfg:        "cgrates.org",
 		utils.ProductNameCfg:        "CGRateS",
 		utils.RARTemplateCfg:        "",
-		utils.SessionSConnsCfg:      []string{"*internal"},
+		utils.SessionSConnsCfg:      []string{rpcclient.BiRPCInternal},
 		utils.SyncedConnReqsCfg:     false,
 		utils.VendorIDCfg:           0,
 		utils.RequestProcessorsCfg:  []map[string]interface{}{},

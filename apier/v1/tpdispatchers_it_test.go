@@ -149,7 +149,7 @@ func testTPDispatcherGetTPDispatcherAfterSet(t *testing.T) {
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDispatcher, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", tpDispatcher, reply)
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpDispatcher), utils.ToJSON(reply))
 	}
 }
 

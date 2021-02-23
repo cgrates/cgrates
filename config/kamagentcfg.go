@@ -20,6 +20,7 @@ package config
 
 import (
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // NewDfltKamConnConfig returns the first cached default value for a KamConnCfg connection
@@ -93,8 +94,9 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 		for idx, attrConn := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			ka.SessionSConns[idx] = attrConn
-			if attrConn == utils.MetaInternal {
-				ka.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			if attrConn == utils.MetaInternal ||
+				attrConn == rpcclient.BiRPCInternal {
+				ka.SessionSConns[idx] = utils.ConcatenatedKey(attrConn, utils.MetaSessionS)
 			}
 		}
 	}
@@ -134,6 +136,8 @@ func (ka *KamAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
 			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 				sessionSConns[i] = utils.MetaInternal
+			} else if item == utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS) {
+				sessionSConns[i] = rpcclient.BiRPCInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns

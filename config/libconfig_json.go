@@ -41,8 +41,6 @@ type GeneralJsonCfg struct {
 	Connect_attempts     *int
 	Reconnects           *int
 	Connect_timeout      *string
-	Min_call_duration    *string
-	Max_call_duration    *string
 	Reply_timeout        *string
 	Locking_timeout      *string
 	Digest_separator     *string
@@ -214,6 +212,7 @@ type EventExporterJsonCfg struct {
 type SessionSJsonCfg struct {
 	Enabled                *bool
 	Listen_bijson          *string
+	Listen_bigob           *string
 	Chargers_conns         *[]string
 	Rals_conns             *[]string
 	Resources_conns        *[]string
@@ -238,6 +237,7 @@ type SessionSJsonCfg struct {
 	Min_dur_low_balance    *string
 	Scheduler_conns        *[]string
 	Stir                   *STIRJsonCfg
+	Default_usage          *map[string]string
 }
 
 // FreeSWITCHAgent config section

@@ -166,6 +166,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1AuthorizeReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
+		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -183,6 +184,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1InitSessionReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
+		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -195,6 +197,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
+		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -207,9 +210,9 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
-		rply := utils.StringPointer("")
+		var rply string
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1TerminateSession,
-			terminateArgs, rply)
+			terminateArgs, &rply)
 		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
 		}
@@ -237,6 +240,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		} else if evArgs.Debit {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
+		rply.SetMaxUsageNeeded(evArgs.Debit)
 		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
 		}
@@ -262,9 +266,9 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
-		rplyCDRs := utils.StringPointer("")
+		var rplyCDRs string
 		if err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessCDR,
-			cgrEv, rplyCDRs); err != nil {
+			cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
 		}
 	}

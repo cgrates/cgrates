@@ -68,7 +68,7 @@
 	"event_socket_conns":[
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
-	"sessions_conns": ["*internal"],
+	"sessions_conns": ["*birpc_internal"],
 	"create_cdr": true
 },
 

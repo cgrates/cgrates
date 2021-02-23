@@ -20,9 +20,11 @@ package config
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // NewDfltFsConnConfig returns the first cached default value for a FreeSWITCHAgent connection
@@ -87,6 +89,7 @@ func (fs FsConnCfg) Clone() *FsConnCfg {
 type SessionSCfg struct {
 	Enabled             bool
 	ListenBijson        string
+	ListenBigob         string
 	ChargerSConns       []string
 	RALsConns           []string
 	ResSConns           []string
@@ -111,6 +114,7 @@ type SessionSCfg struct {
 	MinDurLowBalance    time.Duration
 	SchedulerConns      []string
 	STIRCfg             *STIRcfg
+	DefaultUsage        map[string]time.Duration
 }
 
 func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -122,6 +126,9 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	}
 	if jsnCfg.Listen_bijson != nil {
 		scfg.ListenBijson = *jsnCfg.Listen_bijson
+	}
+	if jsnCfg.Listen_bigob != nil {
+		scfg.ListenBigob = *jsnCfg.Listen_bigob
 	}
 	if jsnCfg.Chargers_conns != nil {
 		scfg.ChargerSConns = make([]string, len(*jsnCfg.Chargers_conns))
@@ -275,6 +282,13 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			return err
 		}
 	}
+	if jsnCfg.Default_usage != nil {
+		for k, v := range *jsnCfg.Default_usage {
+			if scfg.DefaultUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
+				return
+			}
+		}
+	}
 	if jsnCfg.Scheduler_conns != nil {
 		scfg.SchedulerConns = make([]string, len(*jsnCfg.Scheduler_conns))
 		for idx, connID := range *jsnCfg.Scheduler_conns {
@@ -288,11 +302,27 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	return scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir)
 }
 
+func (scfg *SessionSCfg) GetDefaultUsage(tor string) time.Duration {
+	if tor == utils.EmptyString {
+		tor = utils.MetaAny
+	}
+	return scfg.DefaultUsage[tor]
+}
+
 // AsMapInterface returns the config as a map[string]interface{}
 func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	maxComputed := make(map[string]string)
+	for key, item := range scfg.DefaultUsage {
+		if key == utils.MetaAny || key == utils.MetaVoice {
+			maxComputed[key] = item.String()
+		} else {
+			maxComputed[key] = strconv.Itoa(int(item))
+		}
+	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
+		utils.ListenBigobCfg:         scfg.ListenBigob,
 		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
 		utils.StoreSCostsCfg:         scfg.StoreSCosts,
 		utils.SessionIndexesCfg:      scfg.SessionIndexes.AsSlice(),
@@ -304,6 +334,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.DebitIntervalCfg:       "0",
 		utils.SessionTTLCfg:          "0",
+		utils.DefaultUsageCfg:        maxComputed,
 	}
 	if scfg.DebitInterval != 0 {
 		initialMP[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
@@ -438,6 +469,10 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		SessionIndexes:  scfg.SessionIndexes.Clone(),
 		AlterableFields: scfg.AlterableFields.Clone(),
 		STIRCfg:         scfg.STIRCfg.Clone(),
+		DefaultUsage:    make(map[string]time.Duration),
+	}
+	for k, v := range scfg.DefaultUsage {
+		cln.DefaultUsage[k] = v
 	}
 	if scfg.SessionTTLMaxDelay != nil {
 		cln.SessionTTLMaxDelay = utils.DurationPointer(*scfg.SessionTTLMaxDelay)
@@ -543,8 +578,9 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		for idx, connID := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			fscfg.SessionSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				fscfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			if connID == utils.MetaInternal ||
+				connID == rpcclient.BiRPCInternal {
+				fscfg.SessionSConns[idx] = utils.ConcatenatedKey(connID, utils.MetaSessionS)
 			}
 		}
 	}
@@ -600,6 +636,8 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 				sessionSConns[i] = utils.MetaInternal
+			} else if item == utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS) {
+				sessionSConns[i] = rpcclient.BiRPCInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
@@ -738,8 +776,9 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		for idx, attrConn := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			aCfg.SessionSConns[idx] = attrConn
-			if attrConn == utils.MetaInternal {
-				aCfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			if attrConn == utils.MetaInternal ||
+				attrConn == rpcclient.BiRPCInternal {
+				aCfg.SessionSConns[idx] = utils.ConcatenatedKey(attrConn, utils.MetaSessionS)
 			}
 		}
 	}
@@ -776,6 +815,8 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}
 			sessionSConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 				sessionSConns[i] = utils.MetaInternal
+			} else if item == utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS) {
+				sessionSConns[i] = rpcclient.BiRPCInternal
 			}
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionSConns

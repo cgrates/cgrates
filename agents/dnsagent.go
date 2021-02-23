@@ -51,13 +51,11 @@ func (da *DNSAgent) initDNSServer() (err error) {
 	handler := dns.HandlerFunc(func(w dns.ResponseWriter, m *dns.Msg) {
 		go da.handleMessage(w, m)
 	})
-
 	if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().ListenNet, utils.TLSNoCaps) {
 		cert, err := tls.LoadX509KeyPair(da.cgrCfg.TLSCfg().ServerCerificate, da.cgrCfg.TLSCfg().ServerKey)
 		if err != nil {
 			return err
 		}
-
 		config := tls.Config{
 			Certificates: []tls.Certificate{cert},
 		}
@@ -232,6 +230,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
+		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -250,6 +249,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1InitiateSession,
 			initArgs, rply)
+		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -263,6 +263,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1UpdateSession,
 			updateArgs, rply)
+		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -275,10 +276,10 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
-		rply := utils.StringPointer("")
+		var rply string
 		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1TerminateSession,
-			terminateArgs, rply)
+			terminateArgs, &rply)
 		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
 		}
@@ -307,6 +308,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		} else if evArgs.Debit {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
+		rply.SetMaxUsageNeeded(evArgs.Debit)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -333,7 +335,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
-		rplyCDRs := utils.StringPointer("")
+		var rplyCDRs string
 		if err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessCDR,
 			cgrEv, &rplyCDRs); err != nil {

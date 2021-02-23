@@ -59,7 +59,7 @@
 	"enabled": true,
 	"listen_net":"sctp",
 	"listen": "127.0.0.1:3869",									// address where to listen for diameter requests <x.y.z.y:1234>
-	"sessions_conns": ["*internal"],
+	"sessions_conns": ["*birpc_internal"],
 	"rar_template": "*rar",
 },
 

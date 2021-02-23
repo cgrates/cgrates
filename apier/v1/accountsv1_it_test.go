@@ -56,7 +56,10 @@ func TestAccountSv1IT(t *testing.T) {
 		testAccountSv1SimpleDebit,
 		testAccountSv1DebitMultipleAcc,
 		testAccountSv1DebitMultipleAccLimited,
-		testAccountSv1DebitWithAttributeS,
+		testAccountSv1DebitWithAttributeSandRateS,
+		testAccountSv1DebitWithRateS,
+		testAccountSv1DebitWithRateS2,
+		testAccountSv1KillEngine,
 	}
 	switch *dbType {
 	case utils.MetaInternal:
@@ -730,12 +733,12 @@ func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
 	}
 }
 
-func testAccountSv1DebitWithAttributeS(t *testing.T) {
+func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
 	accPrfAPI := &APIAccountProfileWithCache{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
-			ID:        "CustomAccount",
-			FilterIDs: []string{"*string:~*req.Account:CustomAccount"},
+			ID:        "ACC_WITH_ATTRIBUTES",
+			FilterIDs: []string{"*string:~*req.Account:ACC_WITH_ATTRIBUTES"},
 			Weights:   ";10",
 			Balances: map[string]*utils.APIBalance{
 				"Balance1": &utils.APIBalance{
@@ -768,19 +771,51 @@ func testAccountSv1DebitWithAttributeS(t *testing.T) {
 	}
 	var reply2 *utils.AccountProfile
 	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
-		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &reply2); err != nil {
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_ATTRIBUTES"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(convAcc, reply2) {
 		t.Errorf("Expecting : %+v, received: %+v", convAcc, reply2)
+	}
+
+	//set a rate profile to be used in case of debit
+	apiRPrf := &engine.APIRateProfile{
+		Tenant:  "cgrates.org",
+		ID:      "RP_Test",
+		Weights: ";10",
+		Rates: map[string]*engine.APIRate{
+			"RT_ALWAYS": {
+				ID:              "RT_ALWAYS",
+				Weights:         ";0",
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*engine.APIIntervalRate{
+					{
+						IntervalStart: "0",
+						RecurrentFee:  utils.Float64Pointer(0.1),
+						Increment:     utils.Float64Pointer(1),
+						Unit:          utils.Float64Pointer(1),
+					},
+				},
+			},
+		},
+	}
+
+	if err := acntSRPC.Call(utils.APIerSv1SetRateProfile,
+		&APIRateProfileWithCache{
+			APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+				APIRateProfile: apiRPrf},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
 	}
 
 	var eEc *utils.ExtEventCharges
 	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testAccountSv1SimpleDebit",
+			ID:     "testAccountSv1DebitWithAttributeS",
 			Event: map[string]interface{}{
-				utils.AccountField: "CustomAccount",
+				utils.AccountField: "ACC_WITH_ATTRIBUTES",
 				utils.Usage:        "10",
 			}}}, &eEc); err != nil {
 		t.Error(err)
@@ -789,9 +824,218 @@ func testAccountSv1DebitWithAttributeS(t *testing.T) {
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
-		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &reply2); err != nil {
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_ATTRIBUTES"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(99, 0)) != 0 {
 		t.Errorf("Expecting : %+v, received: %s", decimal.New(99, 0), reply2.Balances["Balance1"].Units)
+	}
+}
+
+func testAccountSv1DebitWithRateS(t *testing.T) {
+	accPrfAPI := &APIAccountProfileWithCache{
+		APIAccountProfile: &utils.APIAccountProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ACC_WITH_RATES",
+			FilterIDs: []string{"*string:~*req.Account:ACC_WITH_RATES"},
+			Weights:   ";10",
+			Balances: map[string]*utils.APIBalance{
+				"Balance1": &utils.APIBalance{
+					ID:      "Balance1",
+					Weights: ";10",
+					Type:    utils.MetaConcrete,
+					Units:   100,
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(1),
+							RecurrentFee: utils.Float64Pointer(-1),
+						},
+					},
+				},
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+	var reply string
+	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, accPrfAPI, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var err error
+	var convAcc *utils.AccountProfile
+	if convAcc, err = accPrfAPI.AsAccountProfile(); err != nil {
+		t.Error(err)
+	}
+	var reply2 *utils.AccountProfile
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_RATES"}}, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(convAcc, reply2) {
+		t.Errorf("Expecting : %+v, received: %+v", convAcc, reply2)
+	}
+
+	//set a rate profile to be used in case of debit
+	apiRPrf := &engine.APIRateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP_Test2",
+		FilterIDs: []string{"*string:~*req.Account:ACC_WITH_RATES"},
+		Weights:   ";20",
+		Rates: map[string]*engine.APIRate{
+			"RT_ALWAYS": {
+				ID:              "RT_ALWAYS",
+				Weights:         ";0",
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*engine.APIIntervalRate{
+					{
+						IntervalStart: "0",
+						RecurrentFee:  utils.Float64Pointer(0.5),
+						Increment:     utils.Float64Pointer(2),
+						Unit:          utils.Float64Pointer(2),
+					},
+				},
+			},
+		},
+	}
+
+	if err := acntSRPC.Call(utils.APIerSv1SetRateProfile,
+		&APIRateProfileWithCache{
+			APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+				APIRateProfile: apiRPrf},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
+	}
+
+	var eEc *utils.ExtEventCharges
+	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
+		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAccountSv1DebitWithAttributeS",
+			Event: map[string]interface{}{
+				utils.AccountField: "ACC_WITH_RATES",
+				utils.Usage:        "20",
+			}}}, &eEc); err != nil {
+		t.Error(err)
+	} else if eEc.Usage == nil || *eEc.Usage != 20.0 {
+		t.Fatalf("received usage: %v", *eEc.Usage)
+	}
+
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_RATES"}}, &reply2); err != nil {
+		t.Error(err)
+	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(95, 0)) != 0 {
+		t.Errorf("Expecting : %+v, received: %s", decimal.New(95, 0), reply2.Balances["Balance1"].Units)
+	}
+}
+
+func testAccountSv1DebitWithRateS2(t *testing.T) {
+	accPrfAPI := &APIAccountProfileWithCache{
+		APIAccountProfile: &utils.APIAccountProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ACC_WITH_RATES2",
+			FilterIDs: []string{"*string:~*req.Account:ACC_WITH_RATES2"},
+			Weights:   ";10",
+			Balances: map[string]*utils.APIBalance{
+				"Balance1": &utils.APIBalance{
+					ID:      "Balance1",
+					Weights: ";10",
+					Type:    utils.MetaAbstract,
+					Units:   100,
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(1),
+							RecurrentFee: utils.Float64Pointer(-1),
+						},
+					},
+					RateProfileIDs: []string{"RP_Test22"},
+				},
+				"Balance2": &utils.APIBalance{
+					ID:      "Balance2",
+					Weights: ";10",
+					Type:    utils.MetaConcrete,
+					Units:   100,
+				},
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+	var reply string
+	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, accPrfAPI, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var err error
+	var convAcc *utils.AccountProfile
+	if convAcc, err = accPrfAPI.AsAccountProfile(); err != nil {
+		t.Error(err)
+	}
+	var reply2 *utils.AccountProfile
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_RATES2"}}, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(convAcc, reply2) {
+		t.Errorf("Expecting : %+v, received: %+v", convAcc, reply2)
+	}
+
+	//set a rate profile to be used in case of debit
+	apiRPrf := &engine.APIRateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP_Test22",
+		FilterIDs: []string{"*string:~*req.Account:ACC_WITH_RATES2"},
+		Weights:   ";20",
+		Rates: map[string]*engine.APIRate{
+			"RT_ALWAYS": {
+				ID:              "RT_ALWAYS",
+				Weights:         ";0",
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*engine.APIIntervalRate{
+					{
+						IntervalStart: "0",
+						RecurrentFee:  utils.Float64Pointer(0.5),
+						Increment:     utils.Float64Pointer(2),
+						Unit:          utils.Float64Pointer(2),
+					},
+				},
+			},
+		},
+	}
+
+	if err := acntSRPC.Call(utils.APIerSv1SetRateProfile,
+		&APIRateProfileWithCache{
+			APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+				APIRateProfile: apiRPrf},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
+	}
+
+	var eEc *utils.ExtEventCharges
+	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
+		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAccountSv1DebitWithAttributeS",
+			Event: map[string]interface{}{
+				utils.AccountField: "ACC_WITH_RATES2",
+				utils.Usage:        "20",
+			}}}, &eEc); err != nil {
+		t.Error(err)
+	} else if eEc.Usage == nil || *eEc.Usage != 20.0 {
+		t.Fatalf("received usage: %v", *eEc.Usage)
+	}
+
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_RATES2"}}, &reply2); err != nil {
+		t.Error(err)
+	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(80, 0)) != 0 {
+		t.Errorf("Expecting : %+v, received: %s", decimal.New(80, 0), reply2.Balances["Balance1"].Units)
+	}
+}
+
+func testAccountSv1KillEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
 	}
 }

@@ -27,6 +27,10 @@
 },
 
 
+"rals": {
+	"enabled": true,
+},
+
 
 "accounts": {
 	"enabled": true,
