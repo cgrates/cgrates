@@ -39,6 +39,7 @@ import (
 func TestDNSAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -111,6 +112,7 @@ func TestDNSAgentReload(t *testing.T) {
 func TestDNSAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
 	cfg.DNSAgentCfg().Enabled = true
 	cfg.DNSAgentCfg().ListenNet = "test"
 	cfg.DNSAgentCfg().Listen = "test"
@@ -196,10 +198,14 @@ func TestDNSAgentReload5(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
-	srv.Start()
-	srv.(*DNSAgent).oldListen = ""
+	err := srv.Start()
+	if err != nil {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	srv.(*DNSAgent).oldListen = "127.0.0.1:2093"
 	runtime.Gosched()
-	err := srv.Reload()
+	runtime.Gosched()
+	err = srv.Reload()
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}

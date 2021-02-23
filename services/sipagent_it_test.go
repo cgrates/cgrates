@@ -19,11 +19,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"path"
+	"runtime"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 func TestSIPAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -64,31 +79,14 @@ func TestSIPAgentReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	runtime.Gosched()
 	runtime.Gosched()
-	runtime.Gosched()
-	runtime.Gosched()
 	if !srv.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-	runtime.Gosched()
-	runtime.Gosched()
-	runtime.Gosched()
-	runtime.Gosched()
 	srvStart := srv.Start()
 	if srvStart != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, srvStart)
 	}
 	err := srv.Reload()
-	if err != nil {
-		t.Fatalf("\nExpecting <err>,\n Received <%+v>", err)
-	}
-	castSrv, canCastSrv := srv.(*SIPAgent)
-	if !canCastSrv {
-		t.Fatalf("cannot cast")
-	}
-	castSrv.oldListen = "test_string"
-	runtime.Gosched()
-	runtime.Gosched()
-	err = srv.Reload()
 	if err != nil {
 		t.Fatalf("\nExpecting <err>,\n Received <%+v>", err)
 	}
@@ -102,4 +100,16 @@ func TestSIPAgentReload(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+
+/*
+WILLFIX
+	castSrv, canCastSrv := srv.(*SIPAgent)
+	if !canCastSrv {
+		t.Fatalf("cannot cast")
+	}
+	castSrv.oldListen = "test_string"
+	err = srv.Reload()
+	if err != nil {
+		t.Fatalf("\nExpecting <err>,\n Received <%+v>", err)
+	}
 */
