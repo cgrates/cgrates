@@ -177,16 +177,18 @@ func TestSessionSReload2(t *testing.T) {
 	engine.NewConnManager(cfg, nil)
 
 	srv.(*SessionService).sm = &sessions.SessionS{}
-	err := srv.IsRunning()
-	if err != true {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	if !srv.IsRunning() {
+		t.Errorf("\nExpecting service to be running")
 	}
 	err2 := srv.Start()
 	if err2 != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err2)
 	}
 	cfg.SessionSCfg().Enabled = false
-	cfg.GetReloadChan(config.SessionSJson) <- struct{}{}
+	err := srv.Reload()
+	if err != nil {
+		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	}
 	time.Sleep(10 * time.Millisecond)
 	srv.(*SessionService).sm = nil
 	if srv.IsRunning() {

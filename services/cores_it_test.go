@@ -56,10 +56,10 @@ func TestCoreSReload(t *testing.T) {
 	srvMngr.AddServices(coreS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if coreS.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
 
 	var reply string
@@ -67,9 +67,9 @@ func TestCoreSReload(t *testing.T) {
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "caps_queue"),
 		Section: config.CoreSCfgJson,
 	}, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
+		t.Fatalf("Expecting OK ,received %s", reply)
 	}
 	select {
 	case d := <-coreRPC:
@@ -78,25 +78,24 @@ func TestCoreSReload(t *testing.T) {
 		t.Fatal("It took to long to reload the cache")
 	}
 	if !coreS.IsRunning() {
-		t.Errorf("Expected service to be running")
+		t.Fatalf("Expected service to be running")
 	}
 	err := coreS.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	err = coreS.Reload()
 	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	err = coreS.Shutdown()
 	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.GetReloadChan(config.CoreSCfgJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
-
-	if coreS.IsRunning() {
-		t.Errorf("Expected service to be down")
+	if !coreS.IsRunning() {
+		t.Fatalf("Expected service to be running")
 	}
 
 	shdChan.CloseOnce()

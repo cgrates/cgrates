@@ -36,6 +36,7 @@ import (
 func TestDiameterAgentReload1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -102,6 +103,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 func TestDiameterAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -167,11 +169,15 @@ func TestDiameterAgentReload3(t *testing.T) {
 
 	cfg.DiameterAgentCfg().ListenNet = "bad"
 	cfg.DiameterAgentCfg().DictionariesPath = ""
-	srv.(*DiameterAgent).start(nil)
 
+	err := srv.(*DiameterAgent).start(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfg.DiameterAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.DA_JSN) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
+	err = srv.Reload()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }

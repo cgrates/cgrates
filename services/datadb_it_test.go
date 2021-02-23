@@ -339,6 +339,7 @@ func TestDataDBReload4(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
 	err := db.Start()
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)

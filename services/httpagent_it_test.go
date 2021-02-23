@@ -19,10 +19,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"path"
+	"runtime"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 func TestHTTPAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -64,10 +79,10 @@ func TestHTTPAgentReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	runtime.Gosched()
+	runtime.Gosched()
 	if !srv.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-	runtime.Gosched()
 	srvReload := srv.Reload()
 	if srvReload != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", srvReload)
@@ -85,4 +100,3 @@ func TestHTTPAgentReload(t *testing.T) {
 		t.Fatalf("Expected service to be down")
 	}
 }
-*/

@@ -1414,7 +1414,7 @@ func (cfg *CGRConfig) initChanels() {
 	cfg.rldChans = make(map[string]chan struct{})
 	for _, section := range sortedCfgSections {
 		cfg.lks[section] = new(sync.RWMutex)
-		cfg.rldChans[section] = make(chan struct{}, 1)
+		cfg.rldChans[section] = make(chan struct{})
 	}
 }
 
