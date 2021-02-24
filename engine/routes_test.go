@@ -471,11 +471,8 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg.RouteSCfg().StringIndexedFields = nil
 	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService, err = NewRouteService(dmSPP, &FilterS{
+	routeService = NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 
 	fltrSupp1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -726,11 +723,8 @@ func TestRoutesSortedForEvent(t *testing.T) {
 	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg.RouteSCfg().StringIndexedFields = nil
 	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService, err = NewRouteService(dmSPP, &FilterS{
+	routeService = NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 
 	fltrSupp1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1038,11 +1032,8 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg.RouteSCfg().StringIndexedFields = nil
 	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService, err = NewRouteService(dmSPP, &FilterS{
+	routeService = NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 
 	fltrSupp1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1302,11 +1293,8 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg.RouteSCfg().StringIndexedFields = nil
 	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService, err = NewRouteService(dmSPP, &FilterS{
+	routeService = NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 
 	fltrSupp1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1559,11 +1547,8 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg.RouteSCfg().StringIndexedFields = nil
 	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService, err = NewRouteService(dmSPP, &FilterS{
+	routeService = NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 
 	fltrSupp1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1851,11 +1836,8 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg.RouteSCfg().StringIndexedFields = nil
 	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService, err = NewRouteService(dmSPP, &FilterS{
+	routeService = NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 
 	fltrSupp1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2108,11 +2090,8 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg.RouteSCfg().StringIndexedFields = nil
 	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService, err = NewRouteService(dmSPP, &FilterS{
+	routeService = NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 
 	fltrSupp1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,

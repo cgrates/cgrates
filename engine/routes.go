@@ -115,16 +115,14 @@ func (lps RouteProfiles) Sort() {
 
 // NewRouteService initializes the Route Service
 func NewRouteService(dm *DataManager,
-	filterS *FilterS, cgrcfg *config.CGRConfig, connMgr *ConnManager) (rS *RouteService, err error) {
+	filterS *FilterS, cgrcfg *config.CGRConfig, connMgr *ConnManager) (rS *RouteService) {
 	rS = &RouteService{
 		dm:      dm,
 		filterS: filterS,
 		cgrcfg:  cgrcfg,
 		connMgr: connMgr,
 	}
-	if rS.sorter, err = NewRouteSortDispatcher(rS); err != nil {
-		return nil, err
-	}
+	rS.sorter = NewRouteSortDispatcher(rS)
 	return
 }
 
