@@ -135,7 +135,9 @@ func testNewCGRConfigFromPath(t *testing.T) {
 }
 func testCGRConfigReloadAttributeS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -163,7 +165,9 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 
 func testCGRConfigReloadChargerSDryRun(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -183,7 +187,9 @@ func testCGRConfigReloadChargerSDryRun(t *testing.T) {
 
 func testCGRConfigReloadChargerS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -208,7 +214,9 @@ func testCGRConfigReloadChargerS(t *testing.T) {
 
 func testCGRConfigReloadThresholdS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -232,7 +240,9 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 
 func testCGRConfigReloadStatS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -257,7 +267,9 @@ func testCGRConfigReloadStatS(t *testing.T) {
 
 func testCGRConfigReloadResourceS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -282,7 +294,9 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 
 func testCGRConfigReloadSupplierS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -311,7 +325,9 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 
 func testCGRConfigV1ReloadConfigFromPathInvalidSection(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	expectedErr := "Invalid section: <InvalidSection>"
 	var reply string
 	if err := cfg.V1ReloadConfig(&ReloadArgs{
@@ -333,6 +349,9 @@ func testV1ReloadConfigFromPathConfigSanity(t *testing.T) {
 	expectedErr := "<AttributeS> not enabled but requested by <ChargerS> component"
 	var reply string
 	cfg := NewDefaultCGRConfig()
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	if err := cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutinternal"),
 		Section: ChargerSCfgJson}, &reply); err == nil || err.Error() != expectedErr {
@@ -351,7 +370,9 @@ func testLoadConfigFromHTTPValidURL(t *testing.T) {
 
 func testCGRConfigReloadSchedulerS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -375,7 +396,9 @@ func testCGRConfigReloadSchedulerS(t *testing.T) {
 
 func testCGRConfigReloadCDRs(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	cfg.RalsCfg().Enabled = true
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
@@ -410,7 +433,9 @@ func testCGRConfigReloadCDRs(t *testing.T) {
 
 func testCGRConfigReloadRALs(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	blMap := cfg.RalsCfg().BalanceRatingSubject
 	maxComp := cfg.RalsCfg().MaxComputedUsage
 	var reply string
@@ -441,7 +466,9 @@ func testCGRConfigReloadRALs(t *testing.T) {
 
 func testCGRConfigReloadSessionS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
@@ -500,7 +527,9 @@ func testCGRConfigReloadERs(t *testing.T) {
 	}
 
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	cfg.SessionSCfg().Enabled = true
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
@@ -575,7 +604,9 @@ func testCGRConfigReloadERs(t *testing.T) {
 
 func testCGRConfigReloadDNSAgent(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	cfg.SessionSCfg().Enabled = true
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
@@ -601,7 +632,9 @@ func testCGRConfigReloadDNSAgent(t *testing.T) {
 
 func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	cfg.SessionSCfg().Enabled = true
 	var reply string
 	if err = cfg.V1ReloadConfig(&ReloadArgs{
@@ -774,6 +807,9 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 	}
 
 	cfg := NewDefaultCGRConfig()
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	var reply string
 	var rcv map[string]interface{}
 
@@ -804,7 +840,9 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 
 func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
@@ -863,7 +901,9 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 
 func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
@@ -927,7 +967,9 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 
 func testCGRConfigReloadAll(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
