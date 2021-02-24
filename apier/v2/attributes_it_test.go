@@ -38,7 +38,6 @@ var (
 	alsPrfCfgPath   string
 	alsPrfCfg       *config.CGRConfig
 	attrSRPC        *rpc.Client
-	alsPrfDataDir   = "/usr/share/cgrates"
 	alsPrf          *engine.AttributeProfile
 	alsPrfConfigDIR string //run tests for specific configuration
 
@@ -77,7 +76,7 @@ func TestAttributeSIT(t *testing.T) {
 
 func testAttributeSInitCfg(t *testing.T) {
 	var err error
-	alsPrfCfgPath = path.Join(alsPrfDataDir, "conf", "samples", alsPrfConfigDIR)
+	alsPrfCfgPath = path.Join(*dataDir, "conf", "samples", alsPrfConfigDIR)
 	alsPrfCfg, err = config.NewCGRConfigFromPath(alsPrfCfgPath)
 	if err != nil {
 		t.Error(err)

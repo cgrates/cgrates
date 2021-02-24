@@ -797,7 +797,7 @@ not_a_valid_metric_type,true,
 	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -817,7 +817,7 @@ not_a_valid_metric_type,true,
 	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -2545,43 +2545,43 @@ func TestLoaderActionProfile(t *testing.T) {
 			{
 				ID:   "TOPUP",
 				Type: "*add_balance",
-				ActionDiktats: []*engine.ActionDiktat{{
-					Path:  "~*balance.TestBalance.Value",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestBalance.Value",
 					Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep),
 				}},
 			},
 			{
 				ID:   "SET_BALANCE_TEST_DATA",
 				Type: "*set_balance",
-				ActionDiktats: []*engine.ActionDiktat{{
-					Path:  "~*balance.TestDataBalance.Type",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestDataBalance.Type",
 					Value: config.NewRSRParsersMustCompile("*data", utils.InfieldSep),
 				}},
 			},
 			{
 				ID:   "TOPUP_TEST_DATA",
 				Type: "*add_balance",
-				ActionDiktats: []*engine.ActionDiktat{{
-					Path:  "~*balance.TestDataBalance.Value",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestDataBalance.Value",
 					Value: config.NewRSRParsersMustCompile("1024", utils.InfieldSep),
 				}},
 			},
 			{
 				ID:   "SET_BALANCE_TEST_VOICE",
 				Type: "*set_balance",
-				ActionDiktats: []*engine.ActionDiktat{{
-					Path:  "~*balance.TestVoiceBalance.Type",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestVoiceBalance.Type",
 					Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
 				}},
 			},
 			{
 				ID:   "TOPUP_TEST_VOICE",
 				Type: "*add_balance",
-				ActionDiktats: []*engine.ActionDiktat{{
-					Path:  "~*balance.TestVoiceBalance.Value",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestVoiceBalance.Value",
 					Value: config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
 				}, {
-					Path:  "~*balance.TestVoiceBalance2.Value",
+					Path:  "*balance.TestVoiceBalance2.Value",
 					Value: config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
 				}},
 			},
@@ -2706,11 +2706,11 @@ func TestLoaderWrongCsv(t *testing.T) {
 	//Not a valid comment beginning of csv
 	newCSVContentMiss := `
 //Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionBLocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,,10,*asap,1001;1002,TOPUP,,false,0s,*topup,,~*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,~*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*topup,,~*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,~*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*topup,,~*balance.TestVoiceBalance.Value,15m15s
+cgrates.org,ONE_TIME_ACT,,,10,*asap,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
 `
 
 	rdr := ioutil.NopCloser(strings.NewReader(newCSVContentMiss))
@@ -2732,11 +2732,11 @@ cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*topup,,~*balance.TestV
 	//Missing fields in csv eg:ActionBLocker
 	newCSVContent := `
 //Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,,10,*asap,1001;1002,TOPUP,,false,0s,*topup,,~*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,~*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*topup,,~*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,~*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*topup,,~*balance.TestVoiceBalance.Value,15m15s
+cgrates.org,ONE_TIME_ACT,,,10,*asap,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
 `
 	rdr = ioutil.NopCloser(strings.NewReader(newCSVContent))
 	csvRdr = csv.NewReader(rdr)
@@ -3074,7 +3074,7 @@ NOT_UINT
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStatS: {
+		utils.MetaStats: {
 			utils.StatsCsv: &openedCSVFile{
 				fileName: utils.StatsCsv,
 				rdr:      rdr,
@@ -3083,7 +3083,7 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaStatS, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -3112,7 +3112,7 @@ func TestLoadStatsAsStructErrConversion(t *testing.T) {
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStatS: {
+		utils.MetaStats: {
 			utils.StatsCsv: &openedCSVFile{
 				fileName: utils.StatsCsv,
 				rdr:      rdr,
@@ -3121,7 +3121,7 @@ func TestLoadStatsAsStructErrConversion(t *testing.T) {
 		},
 	}
 	expectedErr := "Unsupported time format"
-	if err := ldr.processContent(utils.MetaStatS, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -3928,7 +3928,7 @@ cgrates.org,REM_STATS_1
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStatS: {
+		utils.MetaStats: {
 			utils.StatsCsv: &openedCSVFile{
 				fileName: utils.StatsCsv,
 				rdr:      rdr,
@@ -3943,12 +3943,12 @@ cgrates.org,REM_STATS_1
 	if err := ldr.dm.SetStatQueueProfile(expStats, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remove from database
-	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3958,7 +3958,7 @@ cgrates.org,REM_STATS_1
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStatS: {
+		utils.MetaStats: {
 			utils.StatsCsv: &openedCSVFile{
 				fileName: utils.StatsCsv,
 				rdr:      rdr,
@@ -3966,7 +3966,7 @@ cgrates.org,REM_STATS_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3977,7 +3977,7 @@ cgrates.org,REM_STATS_1
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStatS: {
+		utils.MetaStats: {
 			utils.StatsCsv: &openedCSVFile{
 				fileName: utils.StatsCsv,
 				rdr:      rdr,
@@ -5049,7 +5049,7 @@ cgrates.org,REM_STATS_1
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStatS: {
+		utils.MetaStats: {
 			utils.StatsCsv: &openedCSVFile{
 				fileName: utils.StatsCsv,
 				rdr:      rdr,
@@ -5070,9 +5070,9 @@ cgrates.org,REM_STATS_1
 	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	expected := "NO_DATA_BASE_CONNECTION"
 
-	if err := ldr.removeContent(utils.MetaStatS, utils.EmptyString); err == nil || err.Error() != expected {
+	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
-	} else if err := ldr.processContent(utils.MetaStatS, utils.EmptyString); err == nil || err.Error() != expected {
+	} else if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

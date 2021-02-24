@@ -50,7 +50,7 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 	expected := &RalsCfg{
 		Enabled:                 true,
 		ThresholdSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StatSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS), "*conn1"},
+		StatSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		CacheSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		RpSubjectPrefixMatching: true,
 		RemoveExpired:           true,
@@ -170,7 +170,7 @@ func TestRalsCfgClone(t *testing.T) {
 	ban := &RalsCfg{
 		Enabled:                 true,
 		ThresholdSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StatSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS), "*conn1"},
+		StatSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		CacheSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		RpSubjectPrefixMatching: true,
 		RemoveExpired:           true,

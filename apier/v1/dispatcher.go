@@ -757,6 +757,11 @@ func (dSv1 DispatcherSv1) Apier(args *utils.MethodParameters, reply *interface{}
 }
 */
 
+func (rS *DispatcherSv1) Ping(ign *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}
+
 func NewDispatcherSCDRsV1(dps *dispatchers.DispatcherService) *DispatcherSCDRsV1 {
 	return &DispatcherSCDRsV1{dS: dps}
 }
@@ -1352,6 +1357,13 @@ func (dR *DispatcherActionSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dR.dR.ActionSv1Ping(args, reply)
 }
 
+func (dR *DispatcherActionSv1) ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error {
+	return dR.dR.ActionSv1ScheduleActions(args, rpl)
+}
+func (dR *DispatcherActionSv1) ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error {
+	return dR.dR.ActionSv1ExecuteActions(args, rpl)
+}
+
 func NewDispatcherAccountSv1(dps *dispatchers.DispatcherService) *DispatcherAccountSv1 {
 	return &DispatcherAccountSv1{dR: dps}
 }
@@ -1378,7 +1390,10 @@ func (dR *DispatcherAccountSv1) DebitAbstracts(args *utils.ArgsAccountsForEvent,
 	return dR.dR.DebitAbstracts(args, eEc)
 }
 
-func (rS *DispatcherSv1) Ping(ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
+func (dR *DispatcherAccountSv1) ActionSetBalance(args *utils.ArgsActSetBalance, eEc *string) (err error) {
+	return dR.dR.AccountSv1ActionSetBalance(args, eEc)
+}
+
+func (dR *DispatcherAccountSv1) ActionRemoveBalance(args *utils.ArgsActRemoveBalances, eEc *string) (err error) {
+	return dR.dR.AccountSv1ActionRemoveBalance(args, eEc)
 }

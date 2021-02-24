@@ -38,7 +38,6 @@ var (
 	precacheCfgPath   string
 	precacheCfg       *config.CGRConfig
 	precacheRPC       *rpc.Client
-	precacheDataDir   = "/usr/share/cgrates"
 	precacheConfigDIR string //run tests for specific configuration
 
 	// use this flag to test the APIBan implemnentation for precache
@@ -83,7 +82,7 @@ func TestPrecacheIT(t *testing.T) {
 
 func testPrecacheInitCfg(t *testing.T) {
 	var err error
-	precacheCfgPath = path.Join(precacheDataDir, "conf", "samples", "precache", precacheConfigDIR)
+	precacheCfgPath = path.Join(*dataDir, "conf", "samples", "precache", precacheConfigDIR)
 	precacheCfg, err = config.NewCGRConfigFromPath(precacheCfgPath)
 	if err != nil {
 		t.Error(err)

@@ -176,7 +176,7 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			scfg.StatSConns[idx] = connID
 			if connID == utils.MetaInternal {
-				scfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+				scfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
 			}
 		}
 	}
@@ -404,7 +404,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		statSConns := make([]string, len(scfg.StatSConns))
 		for i, item := range scfg.StatSConns {
 			statSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
 				statSConns[i] = utils.MetaInternal
 			}
 		}

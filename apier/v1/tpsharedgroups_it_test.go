@@ -36,7 +36,6 @@ var (
 	tpSharedGroupCfgPath   string
 	tpSharedGroupCfg       *config.CGRConfig
 	tpSharedGroupRPC       *rpc.Client
-	tpSharedGroupDataDir   = "/usr/share/cgrates"
 	tpSharedGroups         *utils.TPSharedGroups
 	tpSharedGroupDelay     int
 	tpSharedGroupConfigDIR string //run tests for specific configuration
@@ -79,7 +78,7 @@ func TestTPSharedGroupsIT(t *testing.T) {
 
 func testTPSharedGroupsInitCfg(t *testing.T) {
 	var err error
-	tpSharedGroupCfgPath = path.Join(tpSharedGroupDataDir, "conf", "samples", tpSharedGroupConfigDIR)
+	tpSharedGroupCfgPath = path.Join(*dataDir, "conf", "samples", tpSharedGroupConfigDIR)
 	tpSharedGroupCfg, err = config.NewCGRConfigFromPath(tpSharedGroupCfgPath)
 	if err != nil {
 		t.Error(err)

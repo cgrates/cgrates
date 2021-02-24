@@ -1495,7 +1495,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				TTL:  "0s",
 				Type: "*add_balance",
 				ActionDiktats: []*utils.TPActionDiktat{{
-					Path:  "~*balance.TestBalance.Value",
+					Path:  "*balance.TestBalance.Value",
 					Value: "10",
 				}},
 			},
@@ -1504,7 +1504,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				TTL:  "0s",
 				Type: "*set_balance",
 				ActionDiktats: []*utils.TPActionDiktat{{
-					Path:  "~*balance.TestDataBalance.Type",
+					Path:  "*balance.TestDataBalance.Type",
 					Value: "*data",
 				}},
 			},
@@ -1513,7 +1513,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				TTL:  "0s",
 				Type: "*add_balance",
 				ActionDiktats: []*utils.TPActionDiktat{{
-					Path:  "~*balance.TestDataBalance.Value",
+					Path:  "*balance.TestDataBalance.Value",
 					Value: "1024",
 				}},
 			},
@@ -1522,7 +1522,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				TTL:  "0s",
 				Type: "*set_balance",
 				ActionDiktats: []*utils.TPActionDiktat{{
-					Path:  "~*balance.TestVoiceBalance.Type",
+					Path:  "*balance.TestVoiceBalance.Type",
 					Value: "*voice",
 				}},
 			},
@@ -1531,10 +1531,10 @@ func TestLoadActionProfiles(t *testing.T) {
 				TTL:  "0s",
 				Type: "*add_balance",
 				ActionDiktats: []*utils.TPActionDiktat{{
-					Path:  "~*balance.TestVoiceBalance.Value",
+					Path:  "*balance.TestVoiceBalance.Value",
 					Value: "15m15s",
 				}, {
-					Path:  "~*balance.TestVoiceBalance2.Value",
+					Path:  "*balance.TestVoiceBalance2.Value",
 					Value: "15m15s",
 				}},
 			},

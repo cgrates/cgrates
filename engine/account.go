@@ -722,7 +722,7 @@ func (acc *Account) InitCounters() {
 		}
 		ct := utils.MetaCounterEvent //default
 		if strings.Contains(at.ThresholdType, "balance") {
-			ct = utils.MetaCounterBalance
+			ct = utils.MetaBalance
 		}
 		uc, exists := ucTempMap[at.Balance.GetType()+ct]
 		//log.Print("CT: ", at.Balance.GetType()+ct)

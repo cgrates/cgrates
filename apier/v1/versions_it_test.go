@@ -34,7 +34,6 @@ var (
 	vrsCfgPath     string
 	vrsCfg         *config.CGRConfig
 	vrsRPC         *rpc.Client
-	vrsDataDir     = "/usr/share/cgrates"
 	vrsDelay       int
 	vrsConfigDIR   string //run tests for specific configuration
 	vrsStorageType string
@@ -86,12 +85,12 @@ func TestVrsIT(t *testing.T) {
 
 func testVrsInitCfg(t *testing.T) {
 	var err error
-	vrsCfgPath = path.Join(vrsDataDir, "conf", "samples", vrsConfigDIR)
+	vrsCfgPath = path.Join(*dataDir, "conf", "samples", vrsConfigDIR)
 	vrsCfg, err = config.NewCGRConfigFromPath(vrsCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	vrsCfg.DataFolderPath = vrsDataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	vrsCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	vrsDelay = 1000
 }
 

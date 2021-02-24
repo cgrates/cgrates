@@ -28,11 +28,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var ( //var used in all tests
-	dspDelay   = 1000
-	dspDataDir = "/usr/share/cgrates"
-)
-
 type ArgsReplicateSessionsWithOpts struct {
 	Opts   map[string]interface{}
 	Tenant string

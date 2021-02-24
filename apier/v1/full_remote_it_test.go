@@ -702,7 +702,7 @@ func testFullRemoteITAction(t *testing.T) {
 						TTL:       0,
 						Type:      "",
 						Opts:      nil,
-						ActionDiktats: []*engine.ActionDiktat{{
+						Diktats: []*engine.APDiktat{{
 							Path:  "",
 							Value: nil,
 						}},
@@ -714,7 +714,7 @@ func testFullRemoteITAction(t *testing.T) {
 						TTL:       0,
 						Type:      "",
 						Opts:      nil,
-						ActionDiktats: []*engine.ActionDiktat{{
+						Diktats: []*engine.APDiktat{{
 							Path:  "",
 							Value: nil,
 						}},

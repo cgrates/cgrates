@@ -196,7 +196,7 @@ func testActPrfMigrateAndMove(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				ActionDiktats: []*engine.ActionDiktat{{
+				Diktats: []*engine.APDiktat{{
 					Path: "~*balance.TestBalance.Value",
 				}},
 			},
@@ -204,7 +204,7 @@ func testActPrfMigrateAndMove(t *testing.T) {
 				ID:        "TOPUP_TEST_VOICE",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				ActionDiktats: []*engine.ActionDiktat{{
+				Diktats: []*engine.APDiktat{{
 					Path: "~*balance.TestVoiceBalance.Value",
 				}},
 			},

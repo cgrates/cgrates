@@ -36,7 +36,6 @@ var (
 	filterCfgPath   string
 	filterCfg       *config.CGRConfig
 	filterRPC       *rpc.Client
-	filterDataDir   = "/usr/share/cgrates"
 	filter          *FilterWithCache
 	filterConfigDIR string //run tests for specific configuration
 
@@ -80,7 +79,7 @@ func TestFilterIT(t *testing.T) {
 
 func testFilterInitCfg(t *testing.T) {
 	var err error
-	filterCfgPath = path.Join(filterDataDir, "conf", "samples", filterConfigDIR)
+	filterCfgPath = path.Join(*dataDir, "conf", "samples", filterConfigDIR)
 	filterCfg, err = config.NewCGRConfigFromPath(filterCfgPath)
 	if err != nil {
 		t.Error(err)

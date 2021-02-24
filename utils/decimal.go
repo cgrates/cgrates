@@ -20,6 +20,7 @@ package utils
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -135,4 +136,12 @@ func (d *Decimal) Clone() *Decimal {
 // Compare wraps the decimal.Big.Cmp function. It does not handle nil d2
 func (d *Decimal) Compare(d2 *Decimal) int {
 	return d.Big.Cmp(d2.Big)
+}
+
+func NewDecimalFromString(value string) (*Decimal, error) {
+	z, ok := new(decimal.Big).SetString(value)
+	if !ok {
+		return nil, fmt.Errorf("can't convert <%+v> to decimal", value)
+	}
+	return &Decimal{z}, nil
 }

@@ -90,7 +90,7 @@ func TestApierIT2(t *testing.T) {
 
 func testAPIerInitCfg(t *testing.T) {
 	var err error
-	apierCfgPath = path.Join(costDataDir, "conf", "samples", APIerSv2ConfigDIR)
+	apierCfgPath = path.Join(*dataDir, "conf", "samples", APIerSv2ConfigDIR)
 	apierCfg, err = config.NewCGRConfigFromPath(apierCfgPath)
 	if err != nil {
 		t.Error(err)

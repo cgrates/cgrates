@@ -517,7 +517,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      internalResponderChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler):      internalSchedulerSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       internalSessionSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):          internalStatSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):          internalStatSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):         internalRouteSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     internalThresholdSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): internalServeManagerChan,

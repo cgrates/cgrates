@@ -37,7 +37,6 @@ var (
 	accPrfCfgPath   string
 	accPrfCfg       *config.CGRConfig
 	accSRPC         *rpc.Client
-	accPrfDataDir   = "/usr/share/cgrates"
 	apiAccPrf       *APIAccountProfileWithCache
 	accPrf          *utils.AccountProfile
 	accPrfConfigDIR string //run tests for specific configuration
@@ -81,7 +80,7 @@ func TestAccountSIT(t *testing.T) {
 
 func testAccountSInitCfg(t *testing.T) {
 	var err error
-	accPrfCfgPath = path.Join(accPrfDataDir, "conf", "samples", accPrfConfigDIR)
+	accPrfCfgPath = path.Join(*dataDir, "conf", "samples", accPrfConfigDIR)
 	accPrfCfg, err = config.NewCGRConfigFromPath(accPrfCfgPath)
 	if err != nil {
 		t.Error(err)

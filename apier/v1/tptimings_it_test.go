@@ -36,7 +36,6 @@ var (
 	tpTimingCfgPath   string
 	tpTimingCfg       *config.CGRConfig
 	tpTimingRPC       *rpc.Client
-	tpTimingDataDir   = "/usr/share/cgrates"
 	tpTiming          *utils.ApierTPTiming
 	tpTimingDelay     int
 	tpTimingConfigDIR string //run tests for specific configuration
@@ -79,7 +78,7 @@ func TestTPTimingIT(t *testing.T) {
 
 func testTPTimingsInitCfg(t *testing.T) {
 	var err error
-	tpTimingCfgPath = path.Join(tpTimingDataDir, "conf", "samples", tpTimingConfigDIR)
+	tpTimingCfgPath = path.Join(*dataDir, "conf", "samples", tpTimingConfigDIR)
 	tpTimingCfg, err = config.NewCGRConfigFromPath(tpTimingCfgPath)
 	if err != nil {
 		t.Error(err)

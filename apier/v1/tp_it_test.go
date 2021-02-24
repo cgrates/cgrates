@@ -37,7 +37,6 @@ var (
 	tpCfgPath   string
 	tpCfg       *config.CGRConfig
 	tpRPC       *rpc.Client
-	tpDataDir   = "/usr/share/cgrates"
 	tpConfigDIR string //run tests for specific configuration
 
 	sTestsTP = []func(t *testing.T){
@@ -74,7 +73,7 @@ func TestTPIT(t *testing.T) {
 
 func testTPInitCfg(t *testing.T) {
 	var err error
-	tpCfgPath = path.Join(tpDataDir, "conf", "samples", tpConfigDIR)
+	tpCfgPath = path.Join(*dataDir, "conf", "samples", tpConfigDIR)
 	tpCfg, err = config.NewCGRConfigFromPath(tpCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -108,7 +107,7 @@ func testTPImportTPFromFolderPath(t *testing.T) {
 	var reply string
 	if err := tpRPC.Call(utils.APIerSv1ImportTariffPlanFromFolder,
 		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
-			FolderPath: path.Join(tpDataDir, "tariffplans", "tutorial")}, &reply); err != nil {
+			FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.ImportTarrifPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.ImportTarrifPlanFromFolder got reply: ", reply)

@@ -36,7 +36,6 @@ var (
 	tpDestinationCfgPath   string
 	tpDestinationCfg       *config.CGRConfig
 	tpDestinationRPC       *rpc.Client
-	tpDestinationDataDir   = "/usr/share/cgrates"
 	tpDestination          *utils.TPDestination
 	tpDestinationDelay     int
 	tpDestinationConfigDIR string //run tests for specific configuration
@@ -79,7 +78,7 @@ func TestTPDestinationsIT(t *testing.T) {
 
 func testTPDestinationsInitCfg(t *testing.T) {
 	var err error
-	tpDestinationCfgPath = path.Join(tpDestinationDataDir, "conf", "samples", tpDestinationConfigDIR)
+	tpDestinationCfgPath = path.Join(*dataDir, "conf", "samples", tpDestinationConfigDIR)
 	tpDestinationCfg, err = config.NewCGRConfigFromPath(tpDestinationCfgPath)
 	if err != nil {
 		t.Error(err)

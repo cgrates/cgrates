@@ -38,7 +38,6 @@ var (
 	tpRouteCfgPath   string
 	tpRouteCfg       *config.CGRConfig
 	tpRouteRPC       *rpc.Client
-	tpRouteDataDire  = "/usr/share/cgrates"
 	tpRoutePrf       *utils.TPRouteProfile
 	tpRouteDelay     int
 	tpRouteConfigDIR string //run tests for specific configuration
@@ -81,7 +80,7 @@ func TestTPRouteIT(t *testing.T) {
 
 func testTPRouteInitCfg(t *testing.T) {
 	var err error
-	tpRouteCfgPath = path.Join(tpRouteDataDire, "conf", "samples", tpRouteConfigDIR)
+	tpRouteCfgPath = path.Join(*dataDir, "conf", "samples", tpRouteConfigDIR)
 	tpRouteCfg, err = config.NewCGRConfigFromPath(tpRouteCfgPath)
 	if err != nil {
 		t.Error(err)

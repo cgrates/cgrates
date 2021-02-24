@@ -381,12 +381,12 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 		Tenant: "cgrates.org",
 		ID:     "1001",
 		Balances: map[string]*utils.Balance{
-			"CB1": &utils.Balance{
+			"CB1": {
 				ID:    "CB1",
 				Type:  utils.MetaConcrete,
 				Units: utils.NewDecimal(500, 0),
 			},
-			"CB2": &utils.Balance{
+			"CB2": {
 				ID:    "CB2",
 				Type:  utils.MetaConcrete,
 				Units: utils.NewDecimal(300, 0),
@@ -397,11 +397,11 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 		t.Error(err)
 	}
 	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
-		&utils.AccountProfileWithWeight{acntPrf, 0, utils.EmptyString},
+		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		map[string]*decimal.Big{"CB2": decimal.New(100, 0)},
 	})
-	if rcv, err := dm.GetAccountProfile("cgrates.org", "1001", false, false, utils.EmptyString); err != nil {
+	if rcv, err := dm.GetAccountProfile("cgrates.org", "1001"); err != nil {
 		t.Error(err)
 	} else if len(rcv.Balances) != 2 {
 		t.Errorf("Unexpected number of balances received")
@@ -422,12 +422,12 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 		Tenant: "cgrates.org",
 		ID:     "1001",
 		Balances: map[string]*utils.Balance{
-			"CB1": &utils.Balance{
+			"CB1": {
 				ID:    "CB1",
 				Type:  utils.MetaConcrete,
 				Units: utils.NewDecimal(500, 0), // 500 Units
 			},
-			"CB2": &utils.Balance{
+			"CB2": {
 				ID:    "CB2",
 				Type:  utils.MetaConcrete,
 				Units: utils.NewDecimal(100, 0), // 500 Units
@@ -435,7 +435,7 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 		},
 	}
 	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
-		&utils.AccountProfileWithWeight{acntPrf, 0, utils.EmptyString},
+		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		map[string]*decimal.Big{"CB1": decimal.New(100, 0)},
 	})
@@ -451,12 +451,12 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 		Tenant: "cgrates.org",
 		ID:     "1001",
 		Balances: map[string]*utils.Balance{
-			"CB1": &utils.Balance{
+			"CB1": {
 				ID:    "CB1",
 				Type:  utils.MetaConcrete,
 				Units: utils.NewDecimal(500, 0), // 500 Units
 			},
-			"CB2": &utils.Balance{
+			"CB2": {
 				ID:    "CB2",
 				Type:  utils.MetaConcrete,
 				Units: utils.NewDecimal(100, 0), // 500 Units
@@ -467,7 +467,7 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 		t.Error(err)
 	}
 	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
-		&utils.AccountProfileWithWeight{acntPrf, 0, utils.EmptyString},
+		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		nil,
 	})

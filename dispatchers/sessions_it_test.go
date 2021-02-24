@@ -736,7 +736,7 @@ func testDspSessionReplicate(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Reply: ", reply)
 	}
-	allEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "testit"))
+	allEngine.loadData(t, path.Join(*dataDir, "tariffplans", "testit"))
 	testDspSessionAddBalacne(t)
 	testDspSessionAuthorize(t)
 	testDspSessionInit(t)
@@ -868,7 +868,7 @@ func testDspSessionForceDisconect(t *testing.T) {
 	allEngine.startEngine(t)
 	allEngine.initDataDb(t)
 	allEngine.resetStorDb(t)
-	allEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "testit"))
+	allEngine.loadData(t, path.Join(*dataDir, "tariffplans", "testit"))
 	testDspSessionAddBalacne(t)
 	testDspSessionAuthorize(t)
 	testDspSessionInit(t)

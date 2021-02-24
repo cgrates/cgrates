@@ -35,7 +35,7 @@ func (apierSv1 *APIerSv1) GetAccountProfile(arg *utils.TenantIDWithOpts, reply *
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	ap, err := apierSv1.DataManager.GetAccountProfile(tnt, arg.ID, true, true, utils.NonTransactional)
+	ap, err := apierSv1.DataManager.GetAccountProfile(tnt, arg.ID)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -158,7 +158,7 @@ func (aSv1 *AccountSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	return nil
 }
 
-// AccountProfileForEvent returns the matching AccountProfile for Event
+// AccountProfilesForEvent returns the matching AccountProfile for Event
 func (aSv1 *AccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent,
 	aps *[]*utils.AccountProfile) (err error) {
 	return aSv1.aS.V1AccountProfilesForEvent(args, aps)
@@ -176,8 +176,14 @@ func (aSv1 *AccountSv1) DebitAbstracts(args *utils.ArgsAccountsForEvent,
 	return aSv1.aS.V1DebitAbstracts(args, eEc)
 }
 
-// TopupBalance performs topup for the provided balance
-func (aSv1 *AccountSv1) TopupBalance(args *utils.ArgsUpdateBalance,
-	rply *string) (err error) {
-	return aSv1.aS.V1TopupBalance(args, rply)
+// ActionSetBalance performs a set balance action
+func (aSv1 *AccountSv1) ActionSetBalance(args *utils.ArgsActSetBalance,
+	eEc *string) (err error) {
+	return aSv1.aS.V1ActionSetBalance(args, eEc)
+}
+
+// ActionRemoveBalance removes a blance from an account
+func (aSv1 *AccountSv1) ActionRemoveBalance(args *utils.ArgsActRemoveBalances,
+	eEc *string) (err error) {
+	return aSv1.aS.V1ActionRemoveBalance(args, eEc)
 }

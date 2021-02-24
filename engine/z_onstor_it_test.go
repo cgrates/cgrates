@@ -2253,7 +2253,7 @@ func testOnStorITActionProfile(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				ActionDiktats: []*ActionDiktat{{
+				Diktats: []*APDiktat{{
 					Path: "~*balance.TestBalance.Value",
 				}},
 			},
@@ -2261,7 +2261,7 @@ func testOnStorITActionProfile(t *testing.T) {
 				ID:        "TOPUP_TEST_VOICE",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				ActionDiktats: []*ActionDiktat{{
+				Diktats: []*APDiktat{{
 					Path: "~*balance.TestVoiceBalance.Value",
 				}},
 			},

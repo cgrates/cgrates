@@ -39,7 +39,6 @@ var (
 	attrCfgPath     string
 	attrCfg         *config.CGRConfig
 	attrRPC         *rpc.Client
-	attrDataDir     = "/usr/share/cgrates"
 	alsPrfConfigDIR string
 	sTestsAlsPrf    = []func(t *testing.T){
 		testAttributeSInitCfg,
@@ -83,12 +82,12 @@ func TestAttributeSIT(t *testing.T) {
 
 func testAttributeSInitCfg(t *testing.T) {
 	var err error
-	attrCfgPath = path.Join(attrDataDir, "conf", "samples", alsPrfConfigDIR)
+	attrCfgPath = path.Join(*dataDir, "conf", "samples", alsPrfConfigDIR)
 	attrCfg, err = config.NewCGRConfigFromPath(attrCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	attrCfg.DataFolderPath = attrDataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	attrCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 }
 
 func testAttributeSInitDataDb(t *testing.T) {

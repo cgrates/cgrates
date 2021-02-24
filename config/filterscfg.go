@@ -39,7 +39,7 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			fSCfg.StatSConns[idx] = connID
 			if connID == utils.MetaInternal {
-				fSCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+				fSCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
 			}
 		}
 	}
@@ -73,7 +73,7 @@ func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		statSConns := make([]string, len(fSCfg.StatSConns))
 		for i, item := range fSCfg.StatSConns {
 			statSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
 				statSConns[i] = utils.MetaInternal
 			}
 		}

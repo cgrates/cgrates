@@ -36,7 +36,6 @@ var (
 	actPrfCfgPath   string
 	actPrfCfg       *config.CGRConfig
 	actSRPC         *rpc.Client
-	actPrfDataDir   = "/usr/share/cgrates"
 	actPrf          *ActionProfileWithCache
 	actPrfConfigDIR string //run tests for specific configuration
 
@@ -79,7 +78,7 @@ func TestActionSIT(t *testing.T) {
 
 func testActionSInitCfg(t *testing.T) {
 	var err error
-	actPrfCfgPath = path.Join(actPrfDataDir, "conf", "samples", actPrfConfigDIR)
+	actPrfCfgPath = path.Join(*dataDir, "conf", "samples", actPrfConfigDIR)
 	actPrfCfg, err = config.NewCGRConfigFromPath(actPrfCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -132,47 +131,62 @@ func testActionSGetActionProfile(t *testing.T) {
 		Weight:    10,
 		Schedule:  utils.MetaASAP,
 		Targets: map[string]utils.StringSet{
-			utils.MetaAccounts: utils.StringSet{"1001": {}, "1002": {}},
+			utils.MetaAccounts: {"1001": {}, "1002": {}},
 		},
 		Actions: []*engine.APAction{
 			{
 				ID:   "TOPUP",
-				Type: "*topup",
-				ActionDiktats: []*engine.ActionDiktat{{
-					Path:  "~*balance.TestBalance.Value",
+				Type: "*add_balance",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestBalance.Units",
 					Value: config.NewRSRParsersMustCompile("10", actPrfCfg.GeneralCfg().RSRSep),
 				}},
 			},
 			{
 				ID:   "SET_BALANCE_TEST_DATA",
 				Type: "*set_balance",
-				ActionDiktats: []*engine.ActionDiktat{{
-					Path:  "~*balance.TestDataBalance.Type",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestDataBalance.Type",
 					Value: config.NewRSRParsersMustCompile("*data", actPrfCfg.GeneralCfg().RSRSep),
 				}},
 			},
 			{
 				ID:   "TOPUP_TEST_DATA",
-				Type: "*topup",
-				ActionDiktats: []*engine.ActionDiktat{{
-					Path:  "~*balance.TestDataBalance.Value",
+				Type: "*add_balance",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestDataBalance.Units",
 					Value: config.NewRSRParsersMustCompile("1024", actPrfCfg.GeneralCfg().RSRSep),
 				}},
 			},
 			{
 				ID:   "SET_BALANCE_TEST_VOICE",
 				Type: "*set_balance",
-				ActionDiktats: []*engine.ActionDiktat{{
-					Path:  "~*balance.TestVoiceBalance.Type",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestVoiceBalance.Type",
 					Value: config.NewRSRParsersMustCompile("*voice", actPrfCfg.GeneralCfg().RSRSep),
 				}},
 			},
 			{
 				ID:   "TOPUP_TEST_VOICE",
-				Type: "*topup",
-				ActionDiktats: []*engine.ActionDiktat{{
-					Path:  "~*balance.TestVoiceBalance.Value",
+				Type: "*add_balance",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestVoiceBalance.Units",
 					Value: config.NewRSRParsersMustCompile("15m15s", actPrfCfg.GeneralCfg().RSRSep),
+				}},
+			},
+			{
+				ID:   "SET_BALANCE_TEST_FILTERS",
+				Type: "*set_balance",
+				Diktats: []*engine.APDiktat{{
+					Path:  "*balance.TestVoiceBalance.Filters",
+					Value: config.NewRSRParsersMustCompile("*string:~*req.CustomField:500", actPrfCfg.GeneralCfg().RSRSep),
+				}},
+			},
+			{
+				ID:   "TOPUP_REM_VOICE",
+				Type: "*rem_balance",
+				Diktats: []*engine.APDiktat{{
+					Path: "TestVoiceBalance2",
 				}},
 			},
 		},
@@ -189,7 +203,7 @@ func testActionSGetActionProfile(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		for _, act := range reply.Actions { // the path variable from RSRParsers is with lower letter and need to be compiled manually in tests to pass reflect.DeepEqual
-			for _, actD := range act.ActionDiktats {
+			for _, actD := range act.Diktats {
 				actD.Value.Compile()
 			}
 		}
@@ -226,7 +240,7 @@ func testActionSSettActionProfile(t *testing.T) {
 						TTL:       0,
 						Type:      "",
 						Opts:      nil,
-						ActionDiktats: []*engine.ActionDiktat{{
+						Diktats: []*engine.APDiktat{{
 							Path:  "",
 							Value: nil,
 						}},
@@ -238,7 +252,7 @@ func testActionSSettActionProfile(t *testing.T) {
 						TTL:       0,
 						Type:      "",
 						Opts:      nil,
-						ActionDiktats: []*engine.ActionDiktat{{
+						Diktats: []*engine.APDiktat{{
 							Path:  "",
 							Value: nil,
 						}},
@@ -267,7 +281,6 @@ func testActionSSettActionProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply2) {
 		t.Errorf("Expecting : %+v, received: %+v", actPrf.ActionProfile, reply2)
 	}
-
 }
 
 func testActionSGetActionProfileIDs(t *testing.T) {
@@ -303,7 +316,6 @@ func testActionSGetActionProfileIDsCount(t *testing.T) {
 	} else if reply != 1 {
 		t.Errorf("Expecting: 1, received: %+v", reply)
 	}
-
 }
 
 func testActionSUpdateActionProfile(t *testing.T) {

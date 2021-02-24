@@ -40,7 +40,7 @@ var (
 
 func testCostBenchInitCfg(b *testing.B) {
 	var err error
-	costBenchCfgPath = path.Join(costDataDir, "conf", "samples", costBenchConfigDIR)
+	costBenchCfgPath = path.Join(*dataDir, "conf", "samples", costBenchConfigDIR)
 	costBenchCfg, err = config.NewCGRConfigFromPath(costBenchCfgPath)
 	if err != nil {
 		b.Error(err)

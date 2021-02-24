@@ -1771,7 +1771,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 				}
 			}
 			csvWriter.Flush()
-		case utils.MetaStatS:
+		case utils.MetaStats:
 			prfx := utils.StatQueueProfilePrefix
 			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 			if err != nil {
@@ -1983,8 +1983,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			}
 			for _, key := range keys {
 				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
-				accPrf, err := apierSv1.DataManager.GetAccountProfile(tntID[0], tntID[1],
-					true, false, utils.NonTransactional)
+				accPrf, err := apierSv1.DataManager.GetAccountProfile(tntID[0], tntID[1])
 				if err != nil {
 					return err
 				}

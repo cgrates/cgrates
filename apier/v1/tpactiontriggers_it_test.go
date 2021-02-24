@@ -36,7 +36,6 @@ var (
 	tpActionTriggerCfgPath   string
 	tpActionTriggerCfg       *config.CGRConfig
 	tpActionTriggerRPC       *rpc.Client
-	tpActionTriggerDataDir   = "/usr/share/cgrates"
 	tpActionTriggers         *utils.TPActionTriggers
 	tpActionTriggerDelay     int
 	tpActionTriggerConfigDIR string //run tests for specific configuration
@@ -80,7 +79,7 @@ func TestTPActionTriggersIT(t *testing.T) {
 
 func testTPActionTriggersInitCfg(t *testing.T) {
 	var err error
-	tpActionTriggerCfgPath = path.Join(tpActionTriggerDataDir, "conf", "samples", tpActionTriggerConfigDIR)
+	tpActionTriggerCfgPath = path.Join(*dataDir, "conf", "samples", tpActionTriggerConfigDIR)
 	tpActionTriggerCfg, err = config.NewCGRConfigFromPath(tpActionTriggerCfgPath)
 	if err != nil {
 		t.Error(err)

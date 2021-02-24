@@ -123,6 +123,9 @@ func TestAnalyzerSReload2(t *testing.T) {
 	close(anz.stopChan)
 	anz.start()
 	anz.anz = nil
+	if err := os.RemoveAll("/tmp/analyzers"); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestAnalyzerSReload3(t *testing.T) {
