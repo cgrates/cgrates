@@ -215,7 +215,7 @@ type RoutesSorter interface {
 }
 
 // NewRouteSortDispatcher constructs RouteSortDispatcher
-func NewRouteSortDispatcher(lcrS *RouteService) (rsd RouteSortDispatcher, err error) {
+func NewRouteSortDispatcher(lcrS *RouteService) (rsd RouteSortDispatcher) {
 	rsd = make(map[string]RoutesSorter)
 	rsd[utils.MetaWeight] = NewWeightSorter(lcrS)
 	rsd[utils.MetaLC] = NewLeastCostSorter(lcrS)

@@ -84,13 +84,7 @@ func (routeS *RouteService) Start() (err error) {
 
 	routeS.Lock()
 	defer routeS.Unlock()
-	routeS.routeS, err = engine.NewRouteService(datadb, filterS, routeS.cfg,
-		routeS.connMgr)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",
-			utils.RouteS, err.Error()))
-		return
-	}
+	routeS.routeS = engine.NewRouteService(datadb, filterS, routeS.cfg, routeS.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
 	routeS.rpc = v1.NewRouteSv1(routeS.routeS)
