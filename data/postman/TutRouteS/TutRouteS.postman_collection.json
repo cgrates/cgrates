@@ -25,7 +25,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.LoadTariffPlanFromFolder\",\n    \"params\": [\n        {\n            \"FolderPath\": \"/usr/local/src/cgrates/data/tariffplans/tutroutes\"\n        }\n    ]\n}"
+							"raw": "{\n    \"id\": 6,\n    \"method\": \"APIerSv1.LoadTariffPlanFromFolder\",\n    \"params\": [\n        {\n            \"FolderPath\": \"/usr/share/cgrates/tariffplans/tutroutes/\"\n        }\n    ]\n}"
 						},
 						"description": ""
 					},
