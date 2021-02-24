@@ -133,7 +133,7 @@ func TestSessionSReload1(t *testing.T) {
 	srv.(*SessionService).sm.BiRPCv1InitiateSession(nil, args, rply)
 	err = srv.Shutdown()
 	if err == nil || err != utils.ErrPartiallyExecuted {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrPartiallyExecuted, err)
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrPartiallyExecuted, err)
 	}
 }
 
@@ -178,23 +178,73 @@ func TestSessionSReload2(t *testing.T) {
 
 	srv.(*SessionService).sm = &sessions.SessionS{}
 	if !srv.IsRunning() {
-		t.Errorf("\nExpecting service to be running")
+		t.Fatalf("\nExpecting service to be running")
 	}
 	err2 := srv.Start()
 	if err2 != utils.ErrServiceAlreadyRunning {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err2)
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err2)
 	}
 	cfg.SessionSCfg().Enabled = false
 	err := srv.Reload()
 	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	time.Sleep(10 * time.Millisecond)
 	srv.(*SessionService).sm = nil
 	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
+
+}
+
+func TestSessionSReload3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	cfg.ChargerSCfg().Enabled = true
+	cfg.RalsCfg().Enabled = true
+	cfg.CdrsCfg().Enabled = true
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
+	close(chS.GetPrecacheChannel(utils.CacheDestinations))
+	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
+	close(chS.GetPrecacheChannel(utils.CacheRatingPlans))
+	close(chS.GetPrecacheChannel(utils.CacheRatingProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheActions))
+	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
+	close(chS.GetPrecacheChannel(utils.CacheAccountActionPlans))
+	close(chS.GetPrecacheChannel(utils.CacheActionTriggers))
+	close(chS.GetPrecacheChannel(utils.CacheSharedGroups))
+	close(chS.GetPrecacheChannel(utils.CacheTimings))
+
+	internalChan := make(chan rpcclient.ClientConnector, 1)
+	internalChan <- nil
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+
+	server := cores.NewServer(nil)
+
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	cfg.StorDbCfg().Type = utils.INTERNAL
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
+	engine.NewConnManager(cfg, nil)
+
+	srv.(*SessionService).sm = &sessions.SessionS{}
+	if !srv.IsRunning() {
+		t.Fatalf("\nExpecting service to be running")
+	}
+	err2 := srv.(*SessionService).start()
+	if err2 != nil {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err2)
+	}
 
 }

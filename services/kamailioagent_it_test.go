@@ -68,7 +68,7 @@ func TestKamailioAgentReload(t *testing.T) {
 	}
 
 	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
+		t.Fatalf("Expected service to be down")
 	}
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
@@ -77,7 +77,7 @@ func TestKamailioAgentReload(t *testing.T) {
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
+		t.Fatalf("Expecting OK ,received %s", reply)
 	}
 
 	runtime.Gosched()
@@ -94,11 +94,61 @@ func TestKamailioAgentReload(t *testing.T) {
 
 	err := srv.Reload()
 	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	// the engine should be stoped as we could not connect to kamailio
 
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
+}
+
+func TestKamailioAgentReload2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
+	srvKam := &agents.KamailioAgent{}
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+	srv.(*KamailioAgent).kam = srvKam
+	if !srv.IsRunning() {
+		t.Fatalf("Expected service to be running")
+	}
+	err := srv.Start()
+	if err == nil || err.Error() != "service already running" {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "service already running", err)
+	}
+}
+
+func TestKamailioAgentReload3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
+	srvKam := &agents.KamailioAgent{}
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+	srv.(*KamailioAgent).kam = srvKam
+	if !srv.IsRunning() {
+		t.Fatalf("Expected service to be running")
+	}
+	err := srv.Start()
+	if err == nil || err.Error() != "service already running" {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "service already running", err)
+	}
 }

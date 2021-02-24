@@ -88,7 +88,7 @@ func TestSIPAgentReload(t *testing.T) {
 	}
 	err := srv.Reload()
 	if err != nil {
-		t.Fatalf("\nExpecting <err>,\n Received <%+v>", err)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	time.Sleep(10 * time.Millisecond)
 	cfg.SIPAgentCfg().Enabled = false
@@ -101,16 +101,63 @@ func TestSIPAgentReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
-/*
-WILLFIX
-	castSrv, canCastSrv := srv.(*SIPAgent)
-	if !canCastSrv {
-		t.Fatalf("cannot cast")
+func TestSIPAgentReload2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
 	}
-	castSrv.sip = srvSIP
-	castSrv.oldListen = "test_string"
+	cfg.SIPAgentCfg().RequestProcessors = []*config.RequestProcessor{
+		{
+			RequestFields: []*config.FCTemplate{
+				{
+					Type: utils.MetaTemplate,
+				},
+			},
+		},
+	}
+	err := srv.Start()
+	if err == nil || err.Error() != "no template with id: <>" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "no template with id: <>", err)
+	}
+
+}
+
+func TestSIPAgentReload3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	cfg.SessionSCfg().ListenBijson = ""
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+	err := srv.Start()
+	if err != nil {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+	srv.(*SIPAgent).oldListen = "test"
 	err = srv.Reload()
 	if err != nil {
-		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}
-*/
+}

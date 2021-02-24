@@ -37,7 +37,7 @@ func onCacheEvicted(itmID string, value interface{}) {
 
 // NewEventExporterS instantiates the EventExporterS
 func NewEventExporterS(cfg *config.CGRConfig, filterS *engine.FilterS,
-	connMgr *engine.ConnManager) (eeS *EventExporterS, err error) {
+	connMgr *engine.ConnManager) (eeS *EventExporterS) {
 	eeS = &EventExporterS{
 		cfg:     cfg,
 		filterS: filterS,
@@ -76,10 +76,9 @@ func (eeS *EventExporterS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 }
 
 // Shutdown is called to shutdown the service
-func (eeS *EventExporterS) Shutdown() (err error) {
+func (eeS *EventExporterS) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EventExporterS))
 	eeS.setupCache(nil) // cleanup exporters
-	return
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC

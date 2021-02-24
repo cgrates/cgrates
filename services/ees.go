@@ -95,9 +95,7 @@ func (es *EventExporterService) Shutdown() (err error) {
 	es.Lock()
 	defer es.Unlock()
 	close(es.stopChan)
-	if err = es.eeS.Shutdown(); err != nil {
-		return
-	}
+	es.eeS.Shutdown()
 	es.eeS = nil
 	<-es.intConnChan
 	return
@@ -117,12 +115,7 @@ func (es *EventExporterService) Start() (err error) {
 	es.Lock()
 	defer es.Unlock()
 
-	es.eeS, err = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
-			utils.EventExporterS, err))
-		return
-	}
+	es.eeS = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
 	es.stopChan = make(chan struct{})
 	go es.eeS.ListenAndServe(es.stopChan, es.rldChan)
 

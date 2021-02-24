@@ -19,7 +19,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"path"
+	"runtime"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 func TestRadiusAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
@@ -221,4 +236,3 @@ func TestRadiusAgentReload4(t *testing.T) {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "unsupported network: <test>", err)
 	}
 }
-*/
