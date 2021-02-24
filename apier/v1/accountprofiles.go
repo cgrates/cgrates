@@ -165,13 +165,13 @@ func (aSv1 *AccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent
 }
 
 // MaxUsage returns the maximum usage for the event, based on matching Account
-func (aSv1 *AccountSv1) MaxUsage(args *utils.ArgsAccountsForEvent,
+func (aSv1 *AccountSv1) MaxAbstracts(args *utils.ArgsAccountsForEvent,
 	eEc *utils.ExtEventCharges) (err error) {
-	return aSv1.aS.V1MaxUsage(args, eEc)
+	return aSv1.aS.V1MaxAbstracts(args, eEc)
 }
 
-// DebitUsage performs debit for the provided event
-func (aSv1 *AccountSv1) DebitUsage(args *utils.ArgsAccountsForEvent,
+// DebitAbstracts performs debit for the provided event
+func (aSv1 *AccountSv1) DebitAbstracts(args *utils.ArgsAccountsForEvent,
 	eEc *utils.ExtEventCharges) (err error) {
-	return aSv1.aS.V1DebitUsage(args, eEc)
+	return aSv1.aS.V1DebitAbstracts(args, eEc)
 }

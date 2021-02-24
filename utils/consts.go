@@ -1568,8 +1568,8 @@ const (
 	AccountSv1                        = "AccountSv1"
 	AccountSv1Ping                    = "AccountSv1.Ping"
 	AccountSv1AccountProfilesForEvent = "AccountSv1.AccountProfilesForEvent"
-	AccountSv1MaxUsage                = "AccountSv1.MaxUsage"
-	AccountSv1DebitUsage              = "AccountSv1.DebitUsage"
+	AccountSv1MaxAbstracts            = "AccountSv1.MaxAbstracts"
+	AccountSv1DebitAbstracts          = "AccountSv1.DebitAbstracts"
 )
 
 const (

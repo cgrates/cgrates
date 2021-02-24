@@ -610,7 +610,7 @@ func TestCBSDebitUsage(t *testing.T) {
 		fltrS: new(engine.FilterS),
 	}
 	toDebit := decimal.New(10, 0)
-	if dbted, err := cb.debitUsage(toDebit,
+	if dbted, err := cb.debitAbstracts(toDebit,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if dbted.Usage.Big.Cmp(toDebit) != 0 {
@@ -642,7 +642,7 @@ func TestCBSDebitUsageInvalidFilter(t *testing.T) {
 		fltrS: filterS,
 	}
 	toDebit := decimal.New(10, 0)
-	if _, err := cb.debitUsage(toDebit, new(utils.CGREvent)); err == nil ||
+	if _, err := cb.debitAbstracts(toDebit, new(utils.CGREvent)); err == nil ||
 		err.Error() != "inline parse error for string: <*string>" {
 		t.Error(err)
 	}
@@ -677,7 +677,7 @@ func TestCBSDebitUsageNoMatchFilter(t *testing.T) {
 		},
 	}
 	toDebit := decimal.New(10, 0)
-	if _, err := cb.debitUsage(toDebit, cgrEv); err == nil ||
+	if _, err := cb.debitAbstracts(toDebit, cgrEv); err == nil ||
 		err != utils.ErrFilterNotPassingNoCaps {
 		t.Error(err)
 	}
@@ -705,7 +705,7 @@ func TestCBSDebitUsageInvalidCostIncrementFilter(t *testing.T) {
 		fltrS: filterS,
 	}
 	toDebit := decimal.New(10, 0)
-	if _, err := cb.debitUsage(toDebit, new(utils.CGREvent)); err == nil ||
+	if _, err := cb.debitAbstracts(toDebit, new(utils.CGREvent)); err == nil ||
 		err.Error() != "inline parse error for string: <*string>" {
 		t.Error(err)
 	}
@@ -750,7 +750,7 @@ func TestCBSDebitUsageCoverProcessAttributes(t *testing.T) { // coverage purpose
 		connMgr: connMgr,
 	}
 	toDebit := decimal.New(10, 0)
-	if _, err := cb.debitUsage(toDebit, new(utils.CGREvent)); err == nil ||
+	if _, err := cb.debitAbstracts(toDebit, new(utils.CGREvent)); err == nil ||
 		err.Error() != "NOT_CONNECTED: AttributeS" {
 		t.Error(err)
 	}
@@ -813,7 +813,7 @@ func TestCBSDebitUsageCoverProcessAttributes2(t *testing.T) { // coverage purpos
 		attrSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
 	}
 	toDebit := decimal.New(10, 0)
-	if _, err := cb.debitUsage(toDebit, new(utils.CGREvent)); err == nil ||
+	if _, err := cb.debitAbstracts(toDebit, new(utils.CGREvent)); err == nil ||
 		err.Error() != "RATES_ERROR:NOT_CONNECTED: RateS" {
 		t.Error(err)
 	}
