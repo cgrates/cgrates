@@ -113,16 +113,19 @@ func (smg *SessionService) Start() (err error) {
 			smg.server.BiRPCRegisterName(method, handler)
 		}
 		// run this in it's own goroutine
-		go func() {
-			if err := smg.server.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
-				smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
-				smg.Lock()
-				smg.bircpEnabled = false
-				smg.Unlock()
-				smg.shdChan.CloseOnce()
-			}
-		}()
+		go smg.start()
+	}
+	return
+}
+
+func (smg *SessionService) start() (err error) {
+	if err := smg.server.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
+		smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
+		smg.Lock()
+		smg.bircpEnabled = false
+		smg.Unlock()
+		smg.shdChan.CloseOnce()
 	}
 	return
 }

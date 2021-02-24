@@ -19,7 +19,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-/*
+import (
+	"path"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
+
 func TestFreeSwitchAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
@@ -68,22 +82,9 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	// the engine should be stopped as we could not connect to freeswitch
-	agentCfg := &config.FsAgentCfg{
-		Enabled:          true,
-		CreateCdr:        true,
-		SubscribePark:    true,
-		EventSocketConns: []*config.FsConnCfg{},
-	}
-
-	srv.(*FreeswitchAgent).fS = agents.NewFSsessions(agentCfg, "", nil)
-	runtime.Gosched()
-	err := srv.Reload()
-	if err != nil {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	time.Sleep(10 * time.Millisecond)
 
 }
+
 func TestFreeSwitchAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
@@ -148,4 +149,111 @@ func TestFreeSwitchAgentReload3(t *testing.T) {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 }
-*/
+
+func TestFreeSwitchAgentReload4(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+	agentCfg := &config.FsAgentCfg{
+		Enabled:             true,
+		SessionSConns:       nil,
+		SubscribePark:       true,
+		CreateCdr:           true,
+		ExtraFields:         nil,
+		LowBalanceAnnFile:   "",
+		EmptyBalanceContext: "",
+		EmptyBalanceAnnFile: "",
+		MaxWaitConnection:   0,
+		EventSocketConns: []*config.FsConnCfg{
+			{
+				Address:    "",
+				Password:   "",
+				Reconnects: 0,
+				Alias:      "",
+			},
+		},
+	}
+	srv.(*FreeswitchAgent).fS = agents.NewFSsessions(agentCfg, "", nil)
+	err := srv.(*FreeswitchAgent).reload(srv.(*FreeswitchAgent).fS)
+	if err != nil {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
+
+func TestFreeSwitchAgentReload5(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+
+	srv.(*FreeswitchAgent).fS = nil
+	err := srv.Start()
+	if err != nil {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
+
+func TestFreeSwitchAgentReload6(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().Enabled = true
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan <- chS
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	if srv.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+	agentCfg := &config.FsAgentCfg{
+		Enabled:             true,
+		SessionSConns:       nil,
+		SubscribePark:       true,
+		CreateCdr:           true,
+		ExtraFields:         nil,
+		LowBalanceAnnFile:   "",
+		EmptyBalanceContext: "",
+		EmptyBalanceAnnFile: "",
+		MaxWaitConnection:   0,
+		EventSocketConns: []*config.FsConnCfg{
+			{
+				Address:    "",
+				Password:   "",
+				Reconnects: 0,
+				Alias:      "",
+			},
+		},
+	}
+	srv.(*FreeswitchAgent).fS = agents.NewFSsessions(agentCfg, "", nil)
+	err := srv.Reload()
+	if err != nil {
+		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}

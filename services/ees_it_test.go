@@ -114,3 +114,32 @@ func TestEventExporterSReload(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+
+func TestEventExporterSReload2(t *testing.T) {
+	for _, dir := range []string{"/tmp/testCSV", "/tmp/testComposedCSV", "/tmp/testFWV", "/tmp/testCSVMasked",
+		"/tmp/testCSVfromVirt", "/tmp/testCSVExpTemp"} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal("Error creating folder: ", dir, err)
+		}
+	}
+	cfg := config.NewDefaultCGRConfig()
+
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	cfg.AttributeSCfg().Enabled = true
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil),
+		server, make(chan rpcclient.ClientConnector, 2), anz, srvDep)
+	if ees.IsRunning() {
+		t.Fatalf("Expected service to be down")
+	}
+
+}

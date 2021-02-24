@@ -81,12 +81,15 @@ func (fS *FreeswitchAgent) Reload() (err error) {
 		return
 	}
 	fS.fS.Reload()
-	go func(f *agents.FSsessions) {
-		if err := fS.fS.Connect(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-			fS.shdChan.CloseOnce() // stop the engine here
-		}
-	}(fS.fS)
+	go fS.reload(fS.fS)
+	return
+}
+
+func (fS *FreeswitchAgent) reload(f *agents.FSsessions) (err error) {
+	if err := fS.fS.Connect(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
+		fS.shdChan.CloseOnce() // stop the engine here
+	}
 	return
 }
 
@@ -94,9 +97,7 @@ func (fS *FreeswitchAgent) Reload() (err error) {
 func (fS *FreeswitchAgent) Shutdown() (err error) {
 	fS.Lock()
 	defer fS.Unlock()
-	if err = fS.fS.Shutdown(); err != nil {
-		return
-	}
+	err = fS.fS.Shutdown()
 	fS.fS = nil
 	return
 }
