@@ -92,6 +92,9 @@ var (
 		testBiRPCv1ProcessCDR,
 		testBiRPCv1ProcessMessage1,
 		testBiRPCv1ProcessMessage2,
+		testBiRPCv1ProcessEvent,
+		testBiRPCv1ProcessEventStats,
+		testBiRPCv1ProcessEventResources,
 	}
 )
 
@@ -2156,19 +2159,10 @@ func testCallBiRPC(t *testing.T) {
 
 	valid = "BiRPCv1.TerminateSession"
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
-	if err := sessions.CallBiRPC(sTestMock, valid, args, reply); err == nil || err.Error() != expected {
+	if err := sessions.Call(valid, args, reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	/*
-		//inexistent client
-		args.CGREvent = &utils.CGREvent{}
-		valid = "BiRPCv1.TestCase"
-		if err := sessions.CallBiRPC(sTestMock, valid, args, reply); err == nil || err.Error() != expected {
-			t.Errorf("Expected %+v, received %+v", expected, err)
-		}
-
-	*/
 }
 
 func testBiRPCv1GetActivePassiveSessions(t *testing.T) {
@@ -3701,5 +3695,329 @@ func testBiRPCv1ProcessMessage2(t *testing.T) {
 
 	if err := sessions.BiRPCv1ProcessMessage(nil, args, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Exepected %+v, received %+v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func testBiRPCv1ProcessEvent(t *testing.T) {
+	tmp := engine.Cache
+
+	engine.Cache.Clear(nil)
+	clnt := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				chrgrs := []*engine.ChrgSProcessEventReply{
+					{ChargerSProfile: "TEST_PROFILE1",
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "TEST_ID",
+							Event: map[string]interface{}{
+								utils.Destination: "10",
+							},
+						}},
+				}
+				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				return nil
+			},
+			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				attrs := engine.AttrSProcessEventReply{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "TEST_ID",
+						Event: map[string]interface{}{
+							utils.Destination: "10",
+						},
+					},
+				}
+				if args.(*engine.AttrArgsProcessEvent).ID == "CHANGED_ID" {
+					*reply.(*engine.AttrSProcessEventReply) = attrs
+					return nil
+				}
+				return utils.ErrNotImplemented
+			},
+			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
+				rts := engine.SortedRoutes{
+					ProfileID: "ROUTE_PRFID",
+					SortedRoutes: []*engine.SortedRoute{
+						{
+							RouteID: "ROUTE_ID",
+						},
+					},
+				}
+				if args.(*engine.ArgsGetRoutes).ID == "SECOND_ID" {
+					*reply.(*engine.SortedRoutes) = rts
+					return nil
+				}
+				return utils.ErrNotImplemented
+			},
+			utils.ThresholdSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- clnt
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):     chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): chanInternal,
+	})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	cgrEvent := &utils.CGREvent{
+		ID: "test_id",
+		Event: map[string]interface{}{
+			utils.Usage:    "10s",
+			utils.OriginID: "TEST_ID",
+		},
+	}
+
+	args := &V1ProcessEventArgs{
+		Flags: []string{utils.MetaChargers},
+	}
+	reply := V1ProcessEventReply{}
+	expected := "MANDATORY_IE_MISSING: [CGREvent]"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+	args.CGREvent = cgrEvent
+	caches := engine.NewCacheS(cfg, dm, nil)
+	//value's error will be nil, so the error of the initiate sessions will be the same
+	value := &utils.CachedRPCResponse{
+		Result: &V1ProcessEventReply{
+			MaxUsage: map[string]time.Duration{
+				utils.Usage: time.Hour,
+			},
+		},
+	}
+	engine.SetCache(caches)
+	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1ProcessEvent, args.CGREvent.ID),
+		value, nil, true, utils.NonTransactional)
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err != nil {
+		t.Error(err)
+	}
+	engine.Cache = tmp
+
+	cgrEvent.ID = utils.EmptyString
+	expected = "CHARGERS_ERROR:MANDATORY_IE_MISSING: [connIDs]"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.CGREvent.ID = "TEST_ID"
+	args.Flags = append(args.Flags, utils.MetaAttributes)
+	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	sessions.cgrCfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	expected = "ATTRIBUTES_ERROR:NOT_IMPLEMENTED"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.CGREvent.ID = "CHANGED_ID"
+	args.Flags = append(args.Flags, utils.MetaRoutes)
+	sessions.cgrCfg.SessionSCfg().RouteSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)}
+	expected = "ROUTES_ERROR:NOT_IMPLEMENTED"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.Flags = []string{utils.MetaRoutes, "*routes:*event_cost:2", utils.MetaThresholds}
+	args.CGREvent.ID = "SECOND_ID"
+	sessions.cgrCfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	expected = "PARTIALLY_EXECUTED"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.Flags = []string{utils.MetaThresholds, utils.MetaBlockerError}
+	sessions.cgrCfg.SessionSCfg().ThreshSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	expected = "THRESHOLDS_ERROR:NOT_IMPLEMENTED"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+}
+
+func testBiRPCv1ProcessEventStats(t *testing.T) {
+	engine.Cache.Clear(nil)
+	clnt := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				chrgrs := []*engine.ChrgSProcessEventReply{
+					{ChargerSProfile: "TEST_PROFILE1",
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "TEST_ID",
+							Event: map[string]interface{}{
+								utils.Destination: "10",
+							},
+						}},
+				}
+				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				return nil
+			},
+			utils.StatSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- clnt
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):    chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal,
+	})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	cgrEvent := &utils.CGREvent{
+		ID: "test_id",
+		Event: map[string]interface{}{
+			utils.Usage:    "10s",
+			utils.OriginID: "TEST_ID",
+		},
+	}
+
+	args := &V1ProcessEventArgs{
+		CGREvent: cgrEvent,
+		Flags:    []string{utils.MetaChargers, utils.MetaStats},
+	}
+	reply := V1ProcessEventReply{}
+	expected := "PARTIALLY_EXECUTED"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.Flags = []string{utils.MetaStats, utils.MetaBlockerError}
+	expected = "STATS_ERROR:NOT_IMPLEMENTED"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.Flags = []string{utils.MetaSTIRAuthenticate}
+	args.CGREvent.Opts = make(map[string]interface{})
+	args.CGREvent.Opts[utils.OptsStirATest] = "stir;test;opts"
+	expected = "*stir_authenticate: missing parts of the message header"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.Flags = []string{utils.MetaSTIRInitiate}
+	args.CGREvent.Opts = make(map[string]interface{})
+	args.CGREvent.Opts[utils.OptsStirATest] = "stir;test;opts"
+	expected = "*stir_authenticate: open : no such file or directory"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.CGREvent.Opts[utils.OptsStirOriginatorURI] = "+407590336423;USER_ID"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+}
+func testBiRPCv1ProcessEventResources(t *testing.T) {
+	engine.Cache.Clear(nil)
+	clnt := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				return nil
+			},
+			utils.StatSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- clnt
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):  chanInternal,
+	})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	args := &V1ProcessEventArgs{
+		Flags: []string{
+			utils.ConcatenatedKey(utils.MetaResources, utils.MetaDerivedReply),
+			utils.ConcatenatedKey(utils.MetaResources, utils.MetaAuthorize),
+			utils.MetaChargers},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testBiRPCv1ProcessEventStatsResources",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.AccountField: "1001",
+				utils.Subject:      "ANY2CNT",
+				utils.Destination:  "1002",
+			},
+		},
+	}
+
+	reply := V1ProcessEventReply{}
+	expected := "NOT_CONNECTED: ResourceS"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	args.Flags = append(args.Flags, utils.MetaResources)
+
+	expected = "MANDATORY_IE_MISSING: [OriginID]"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.CGREvent.Event[utils.OriginID] = "ORIGIN_ID"
+	args.Flags = append(args.Flags, utils.MetaBlockerError)
+	expected = "RESOURCES_ERROR:UNSUPPORTED_SERVICE_METHOD"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.Flags = args.Flags[:len(args.Flags)-1]
+	expected = "PARTIALLY_EXECUTED"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.Flags = []string{utils.ConcatenatedKey(utils.MetaResources, utils.MetaDerivedReply),
+		utils.ConcatenatedKey(utils.MetaResources, utils.MetaAllocate),
+		utils.MetaChargers}
+	args.Flags = append(args.Flags, utils.MetaBlockerError)
+	expected = "RESOURCES_ERROR:UNSUPPORTED_SERVICE_METHOD"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.Flags = args.Flags[:len(args.Flags)-1]
+	expected = "PARTIALLY_EXECUTED"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.Flags = []string{utils.ConcatenatedKey(utils.MetaResources, utils.MetaDerivedReply),
+		utils.ConcatenatedKey(utils.MetaResources, utils.MetaRelease),
+		utils.MetaChargers}
+	args.Flags = append(args.Flags, utils.MetaBlockerError)
+	expected = "RESOURCES_ERROR:UNSUPPORTED_SERVICE_METHOD"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.Flags = args.Flags[:len(args.Flags)-1]
+	expected = "PARTIALLY_EXECUTED"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 }

@@ -2667,3 +2667,18 @@ func TestInitSession(t *testing.T) {
 func TestSessionSAsBiRPC(t *testing.T) {
 	_ = rpcclient.BiRPCConector(new(SessionS))
 }
+
+func TestBiJClntID(t *testing.T) {
+	client := &mockConnWarnDisconnect1{}
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+	sessions.biJClnts = map[rpcclient.ClientConnector]string{
+		client: "First_connector",
+	}
+	expected := "First_connector"
+	if rcv := sessions.biJClntID(client); !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+}
