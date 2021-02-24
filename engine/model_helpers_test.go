@@ -6989,6 +6989,7 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 	sort.Strings(exp[0].Balances["VoiceBalance"].RateProfileIDs)
+	sort.Strings(result[0].Balances["VoiceBalance"].RateProfileIDs)
 	if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
 	}
