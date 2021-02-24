@@ -65,7 +65,8 @@ func TestEventExporterSReload(t *testing.T) {
 	attrS := NewAttributeService(cfg, db,
 		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1),
 		anz, srvDep)
-	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil), server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
+	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil),
+		server, make(chan rpcclient.ClientConnector, 2), anz, srvDep)
 	srvMngr.AddServices(ees, attrS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
