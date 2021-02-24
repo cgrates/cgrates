@@ -5578,6 +5578,9 @@ func TestV1GetConfigAsJSONCoreS(t *testing.T) {
 
 	var result string
 	cfgCgr2 := NewDefaultCGRConfig()
+	for _, section := range sortedCfgSections {
+		cfgCgr2.rldChans[section] = make(chan struct{}, 1)
+	}
 	if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: reply, DryRun: true}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -5585,7 +5588,9 @@ func TestV1GetConfigAsJSONCoreS(t *testing.T) {
 	} else if cgrCfg := NewDefaultCGRConfig(); !reflect.DeepEqual(cgrCfg.CoreSCfg(), cfgCgr2.CoreSCfg()) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(cgrCfg.CoreSCfg()), utils.ToJSON(cfgCgr2.CoreSCfg()))
 	}
-
+	for _, section := range sortedCfgSections {
+		cfgCgr2.rldChans[section] = make(chan struct{}, 1)
+	}
 	if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -5605,6 +5610,10 @@ func TestV1GetConfigAsJSONCheckConfigSanity(t *testing.T) {
 }`
 	expected := `<AttributeS> not enabled but requested by <ChargerS> component`
 	cfgCgr2 := NewDefaultCGRConfig()
+	for _, section := range sortedCfgSections {
+		cfgCgr2.rldChans[section] = make(chan struct{}, 1)
+	}
+
 	if err = cfgCgr2.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: args}, &result); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -5647,6 +5656,9 @@ func TestV1GetConfigAsJSONAllConfig(t *testing.T) {
 func TestV1ReloadConfigFromJSONEmptyConfig(t *testing.T) {
 	var reply string
 	cgrCfg := NewDefaultCGRConfig()
+	for _, section := range sortedCfgSections {
+		cgrCfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	if err := cgrCfg.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: utils.EmptyString}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -5658,6 +5670,9 @@ func TestV1ReloadConfigFromJSONInvalidSection(t *testing.T) {
 	var reply string
 	expected := "invalid character 'I' looking for beginning of value around line 1 and position 1\n line: \"InvalidSection\""
 	cgrCfg := NewDefaultCGRConfig()
+	for _, section := range sortedCfgSections {
+		cgrCfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	if err := cgrCfg.V1SetConfigFromJSON(&SetConfigFromJSONArgs{Config: "InvalidSection"}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -5901,6 +5916,9 @@ func TestReloadSections(t *testing.T) {
 		SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson,
 		DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON, RouteSJson,
 		LoaderJson, DispatcherSJson, ApierS, EEsJson, SIPAgentJson, RateSJson, DispatcherHJson, AnalyzerCfgJson} {
+		for _, section := range sortedCfgSections {
+			cfgCgr.rldChans[section] = make(chan struct{}, 1)
+		}
 		cfgCgr.reloadSections(section)
 		// the chan should be populated
 		if len(cfgCgr.GetReloadChan(section)) != 1 {
@@ -5926,6 +5944,9 @@ func TestReloadSections(t *testing.T) {
 
 func TestReloadSectionsSpecialCase(t *testing.T) {
 	cgrCfg = NewDefaultCGRConfig()
+	for _, section := range sortedCfgSections {
+		cgrCfg.rldChans[section] = make(chan struct{}, 1)
+	}
 	cgrCfg.reloadSections(RPCConnsJsonName, RALS_JSN)
 
 	// the chan should be populated
