@@ -75,11 +75,11 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
-	debitUsage(usage *decimal.Big, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
+	debitAbstracts(usage *decimal.Big, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
 }
 
-// roundUsageWithIncrements rounds the usage based on increments
-func roundedUsageWithIncrements(usage, incrm *decimal.Big) (rndedUsage *decimal.Big) {
+// roundUnitsWithIncrements rounds the usage based on increments
+func roundUnitsWithIncrements(usage, incrm *decimal.Big) (rndedUsage *decimal.Big) {
 	usgMaxIncrm := decimal.WithContext(
 		decimal.Context{RoundingMode: decimal.ToZero}).Quo(usage,
 		incrm).RoundToInt()
@@ -187,9 +187,9 @@ func balanceLimit(optsCfg map[string]interface{}) (bL *utils.Decimal, err error)
 	return
 }
 
-// debitUsageFromConcrete attempts to debit the usage out of concrete balances
+// debitAbstractsFromConcretes attempts to debit the usage out of concrete balances
 // returns utils.ErrInsufficientCredit if complete usage cannot be debitted
-func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
+func debitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
 	costIcrm *utils.CostIncrement, cgrEv *utils.CGREvent,
 	connMgr *engine.ConnManager, rateSConns, rpIDs []string) (err error) {
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
@@ -238,8 +238,8 @@ func debitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
 	return utils.ErrInsufficientCredit
 }
 
-// maxDebitUsageFromConcretes will debit the maximum possible usage out of concretes
-func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
+// maxDebitAbstractsFromConcretes will debit the maximum possible usage out of concretes
+func maxDebitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement) (ec *utils.EventCharges, err error) {
@@ -270,7 +270,7 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Bi
 			return nil, utils.ErrMaxIncrementsExceeded
 		}
 		qriedUsage := usage // so we can detect loops
-		if err = debitUsageFromConcretes(cncrtBlncs, usage, costIcrm, cgrEv,
+		if err = debitAbstractsFromConcretes(cncrtBlncs, usage, costIcrm, cgrEv,
 			connMgr, rateSConns, rpIDs); err != nil {
 			if err != utils.ErrInsufficientCredit {
 				return
@@ -281,7 +281,7 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Bi
 			if usagePaid == nil { // going backwards
 				usage = utils.DivideBig( // divide by 2
 					usage, decimal.New(2, 0))
-				usage = roundedUsageWithIncrements(usage, costIcrm.Increment.Big) // make sure usage is multiple of increments
+				usage = roundUnitsWithIncrements(usage, costIcrm.Increment.Big) // make sure usage is multiple of increments
 				if usage.Cmp(usageDenied) >= 0 ||
 					usage.Cmp(decimal.New(0, 0)) == 0 ||
 					usage.Cmp(qriedUsage) == 0 { // loop
@@ -302,7 +302,7 @@ func maxDebitUsageFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Bi
 		if usage.Cmp(usageDenied) >= 0 {
 			usage = utils.SumBig(usagePaid, costIcrm.Increment.Big)
 		}
-		usage = roundedUsageWithIncrements(usage, costIcrm.Increment.Big)
+		usage = roundUnitsWithIncrements(usage, costIcrm.Increment.Big)
 		if usage.Cmp(usagePaid) <= 0 ||
 			usage.Cmp(usageDenied) >= 0 ||
 			usage.Cmp(qriedUsage) == 0 { // loop

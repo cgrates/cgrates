@@ -225,7 +225,7 @@ func testAccountSv1AccountProfilesForEvent(t *testing.T) {
 
 func testAccountSv1MaxUsage(t *testing.T) {
 	var eEc *utils.ExtEventCharges
-	if err := acntSRPC.Call(utils.AccountSv1MaxUsage,
+	if err := acntSRPC.Call(utils.AccountSv1MaxAbstracts,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAccountSv1MaxUsage",
@@ -332,7 +332,7 @@ func testAccountSv1MaxUsage(t *testing.T) {
 
 func testAccountSv1DebitUsage(t *testing.T) {
 	var eEc *utils.ExtEventCharges
-	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
+	if err := acntSRPC.Call(utils.AccountSv1DebitAbstracts,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAccountSv1MaxUsage",
@@ -487,7 +487,7 @@ func testAccountSv1SimpleDebit(t *testing.T) {
 	}
 
 	var eEc *utils.ExtEventCharges
-	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
+	if err := acntSRPC.Call(utils.AccountSv1DebitAbstracts,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAccountSv1SimpleDebit",
@@ -591,7 +591,7 @@ func testAccountSv1DebitMultipleAcc(t *testing.T) {
 	}
 
 	var eEc *utils.ExtEventCharges
-	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
+	if err := acntSRPC.Call(utils.AccountSv1DebitAbstracts,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAccountSv1SimpleDebit",
@@ -705,7 +705,7 @@ func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
 	}
 
 	var eEc *utils.ExtEventCharges
-	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
+	if err := acntSRPC.Call(utils.AccountSv1DebitAbstracts,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAccountSv1SimpleDebit",
@@ -810,7 +810,7 @@ func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
 	}
 
 	var eEc *utils.ExtEventCharges
-	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
+	if err := acntSRPC.Call(utils.AccountSv1DebitAbstracts,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAccountSv1DebitWithAttributeS",
@@ -908,7 +908,7 @@ func testAccountSv1DebitWithRateS(t *testing.T) {
 	}
 
 	var eEc *utils.ExtEventCharges
-	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
+	if err := acntSRPC.Call(utils.AccountSv1DebitAbstracts,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAccountSv1DebitWithAttributeS",
@@ -1013,7 +1013,7 @@ func testAccountSv1DebitWithRateS2(t *testing.T) {
 	}
 
 	var eEc *utils.ExtEventCharges
-	if err := acntSRPC.Call(utils.AccountSv1DebitUsage,
+	if err := acntSRPC.Call(utils.AccountSv1DebitAbstracts,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAccountSv1DebitWithAttributeS",

@@ -110,7 +110,7 @@ func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
 }
 
 // debit implements the balanceOperator interface
-func (cB *concreteBalance) debitUsage(usage *decimal.Big,
+func (cB *concreteBalance) debitAbstracts(usage *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.Opts,
@@ -132,7 +132,7 @@ func (cB *concreteBalance) debitUsage(usage *decimal.Big,
 		return
 	}
 
-	return maxDebitUsageFromConcretes(
+	return maxDebitAbstractsFromConcretes(
 		[]*concreteBalance{cB}, usage,
 		cB.connMgr, cgrEv,
 		cB.attrSConns, cB.blnCfg.AttributeIDs,

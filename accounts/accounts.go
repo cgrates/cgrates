@@ -136,8 +136,8 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 	return
 }
 
-// accountDebitUsage will debit the usage out of an Account
-func (aS *AccountS) accountDebitUsage(acnt *utils.AccountProfile, usage *decimal.Big,
+// accountDebitAbstracts will debit the usage out of an Account
+func (aS *AccountS) accountDebitAbstracts(acnt *utils.AccountProfile, usage *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 	// Find balances matching event
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
@@ -164,7 +164,7 @@ func (aS *AccountS) accountDebitUsage(acnt *utils.AccountProfile, usage *decimal
 			return // no more debit
 		}
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = blncOper.debitUsage(new(decimal.Big).Copy(usage), cgrEv); err != nil {
+		if ecDbt, err = blncOper.debitAbstracts(new(decimal.Big).Copy(usage), cgrEv); err != nil {
 			if err == utils.ErrFilterNotPassingNoCaps {
 				err = nil
 				continue
@@ -177,8 +177,8 @@ func (aS *AccountS) accountDebitUsage(acnt *utils.AccountProfile, usage *decimal
 	return
 }
 
-// accountsDebitUsage will debit an usage out of multiple accounts
-func (aS *AccountS) accountsDebitUsage(acnts []*utils.AccountProfileWithWeight,
+// accountsDebitAbstracts will debit an usage out of multiple accounts
+func (aS *AccountS) accountsDebitAbstracts(acnts []*utils.AccountProfileWithWeight,
 	cgrEv *utils.CGREvent, store bool) (ec *utils.EventCharges, err error) {
 	usage := decimal.New(int64(72*time.Hour), 0)
 	var usgEv time.Duration
@@ -208,7 +208,7 @@ func (aS *AccountS) accountsDebitUsage(acnts []*utils.AccountProfileWithWeight,
 		}
 		acntBkps[i] = acnt.AccountProfile.AccountBalancesBackup()
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = aS.accountDebitUsage(acnt.AccountProfile,
+		if ecDbt, err = aS.accountDebitAbstracts(acnt.AccountProfile,
 			new(decimal.Big).Copy(usage), cgrEv); err != nil {
 			if store {
 				restoreAccounts(aS.dm, acnts, acntBkps)
@@ -247,7 +247,7 @@ func (aS *AccountS) V1AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, 
 }
 
 // V1MaxUsage returns the maximum usage for the event, based on matching Accounts
-func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
 	var acnts utils.AccountProfilesWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
@@ -262,7 +262,7 @@ func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountsForEvent, eEc *utils.ExtE
 		}
 	}()
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebitUsage(acnts, args.CGREvent, false); err != nil {
+	if procEC, err = aS.accountsDebitAbstracts(acnts, args.CGREvent, false); err != nil {
 		return
 	}
 	var rcvEec *utils.ExtEventCharges
@@ -273,8 +273,8 @@ func (aS *AccountS) V1MaxUsage(args *utils.ArgsAccountsForEvent, eEc *utils.ExtE
 	return
 }
 
-// V1DebitUsage performs debit for the provided event
-func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+// V1DebitAbstracts performs debit for the provided event
+func (aS *AccountS) V1DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
 	var acnts utils.AccountProfilesWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
@@ -290,7 +290,7 @@ func (aS *AccountS) V1DebitUsage(args *utils.ArgsAccountsForEvent, eEc *utils.Ex
 	}()
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebitUsage(acnts, args.CGREvent, true); err != nil {
+	if procEC, err = aS.accountsDebitAbstracts(acnts, args.CGREvent, true); err != nil {
 		return
 	}
 

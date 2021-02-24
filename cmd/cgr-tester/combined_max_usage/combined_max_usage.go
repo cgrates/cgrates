@@ -89,7 +89,7 @@ func main() {
 					utils.Usage:        usage,
 				}}}
 			tNow := time.Now()
-			if err := rpc.Call(utils.AccountSv1MaxUsage,
+			if err := rpc.Call(utils.AccountSv1MaxAbstracts,
 				arg, &eEc); err != nil {
 				return
 			}

@@ -223,7 +223,7 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 		},
 		fltrS: filterS,
 	}
-	if err := debitUsageFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
+	if err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
 		FixedFee:     utils.NewDecimal(10, 0),
 		Increment:    utils.NewDecimal(1, 0),
 		RecurrentFee: utils.NewDecimal(1, 0),
@@ -284,7 +284,7 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 		fltrS:   filterS,
 		connMgr: connMgr,
 	}
-	if err := debitUsageFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
+	if err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
 		Increment:    utils.NewDecimal(1, 0),
 		RecurrentFee: utils.NewDecimal(-1, 0),
 	}, new(utils.CGREvent), connMgr, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}, nil); err != nil {
@@ -322,7 +322,7 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 		},
 		fltrS: filterS,
 	}
-	if err := debitUsageFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(200, 0), &utils.CostIncrement{
+	if err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(200, 0), &utils.CostIncrement{
 		Increment:    utils.NewDecimal(1, 0),
 		RecurrentFee: utils.NewDecimal(1, 0),
 	}, new(utils.CGREvent), nil, nil, nil); err == nil || err.Error() != "inline parse error for string: <*string>" {
@@ -359,7 +359,7 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		},
 		fltrS: filterS,
 	}
-	if _, err := maxDebitUsageFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(1100, 0),
+	if _, err := maxDebitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(1100, 0),
 		nil, new(utils.CGREvent), nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(1, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),

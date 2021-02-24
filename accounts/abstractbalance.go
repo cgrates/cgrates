@@ -41,8 +41,8 @@ type abstractBalance struct {
 	rateSConns []string
 }
 
-// debitUsage implements the balanceOperator interface
-func (aB *abstractBalance) debitUsage(usage *decimal.Big,
+// debitAbstracts implements the balanceOperator interface
+func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
@@ -90,7 +90,7 @@ func (aB *abstractBalance) debitUsage(usage *decimal.Big,
 	if aB.blnCfg.Units.Big.Cmp(usage) == -1 && blncLmt != nil {
 		// decrease the usage to match the maximum increments
 		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
-		usage = roundedUsageWithIncrements(aB.blnCfg.Units.Big, costIcrm.Increment.Big)
+		usage = roundUnitsWithIncrements(aB.blnCfg.Units.Big, costIcrm.Increment.Big)
 	}
 	if costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) == 0 &&
 		(costIcrm.FixedFee == nil ||
@@ -99,7 +99,7 @@ func (aB *abstractBalance) debitUsage(usage *decimal.Big,
 		ec = &utils.EventCharges{Usage: &utils.Decimal{usage}}
 	} else {
 		// attempt to debit usage with cost
-		if ec, err = maxDebitUsageFromConcretes(aB.cncrtBlncs, usage,
+		if ec, err = maxDebitAbstractsFromConcretes(aB.cncrtBlncs, usage,
 			aB.connMgr, cgrEv,
 			aB.attrSConns, aB.blnCfg.AttributeIDs,
 			aB.rateSConns, aB.blnCfg.RateProfileIDs,
