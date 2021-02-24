@@ -36,7 +36,6 @@ var (
 	tpRatingProfileCfgPath   string
 	tpRatingProfileCfg       *config.CGRConfig
 	tpRatingProfileRPC       *rpc.Client
-	tpRatingProfileDataDir   = "/usr/share/cgrates"
 	tpRatingProfile          *utils.TPRatingProfile
 	tpRatingProfileDelay     int
 	tpRatingProfileConfigDIR string //run tests for specific configuration
@@ -82,7 +81,7 @@ func TestTPRatingProfilesIT(t *testing.T) {
 
 func testTPRatingProfilesInitCfg(t *testing.T) {
 	var err error
-	tpRatingProfileCfgPath = path.Join(tpRatingProfileDataDir, "conf", "samples", tpRatingProfileConfigDIR)
+	tpRatingProfileCfgPath = path.Join(*dataDir, "conf", "samples", tpRatingProfileConfigDIR)
 	tpRatingProfileCfg, err = config.NewCGRConfigFromPath(tpRatingProfileCfgPath)
 	if err != nil {
 		t.Error(err)

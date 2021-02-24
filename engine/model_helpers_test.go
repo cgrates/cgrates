@@ -5820,7 +5820,7 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				ActionDiktats: []*ActionDiktat{{
+				Diktats: []*APDiktat{{
 					Path: "test_path",
 				}},
 				Opts: map[string]interface{}{
@@ -5969,7 +5969,7 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				TTL:       time.Second,
-				ActionDiktats: []*ActionDiktat{{
+				Diktats: []*APDiktat{{
 					Path: "test_path",
 				}},
 				Opts: map[string]interface{}{

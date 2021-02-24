@@ -3354,23 +3354,23 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 		ap.Targets[target.TargetType] = utils.NewStringSet(target.TargetIDs)
 	}
 	for i, act := range tpAp.Actions {
-		actDs := make([]*ActionDiktat, len(act.ActionDiktats))
+		actDs := make([]*APDiktat, len(act.ActionDiktats))
 		for j, actD := range act.ActionDiktats {
 			var val config.RSRParsers
 			if val, err = config.NewRSRParsers(actD.Value, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
 				return
 			}
-			actDs[j] = &ActionDiktat{
+			actDs[j] = &APDiktat{
 				Path:  actD.Path,
 				Value: val,
 			}
 		}
 		ap.Actions[i] = &APAction{
-			ID:            act.ID,
-			FilterIDs:     act.FilterIDs,
-			Blocker:       act.Blocker,
-			Type:          act.Type,
-			ActionDiktats: actDs,
+			ID:        act.ID,
+			FilterIDs: act.FilterIDs,
+			Blocker:   act.Blocker,
+			Type:      act.Type,
+			Diktats:   actDs,
 		}
 		if ap.Actions[i].TTL, err = utils.ParseDurationWithNanosecs(act.TTL); err != nil {
 			return
@@ -3417,8 +3417,8 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 		tpAp.Targets = append(tpAp.Targets, &utils.TPActionTarget{TargetType: targetType, TargetIDs: targetIDs.AsSlice()})
 	}
 	for i, act := range ap.Actions {
-		actDs := make([]*utils.TPActionDiktat, len(act.ActionDiktats))
-		for j, actD := range act.ActionDiktats {
+		actDs := make([]*utils.TPActionDiktat, len(act.Diktats))
+		for j, actD := range act.Diktats {
 			actDs[j] = &utils.TPActionDiktat{
 				Path:  actD.Path,
 				Value: actD.Value.GetRule(config.CgrConfig().GeneralCfg().RSRSep),
@@ -3501,9 +3501,7 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 			}
 
 			if tp.BalanceFilterIDs != utils.EmptyString {
-				filterIDs := make(utils.StringSet)
-				filterIDs.AddSlice(strings.Split(tp.BalanceFilterIDs, utils.InfieldSep))
-				aPrf.Balances[tp.BalanceID].FilterIDs = filterIDs.AsSlice()
+				aPrf.Balances[tp.BalanceID].FilterIDs = utils.NewStringSet(strings.Split(tp.BalanceFilterIDs, utils.InfieldSep)).AsSlice()
 			}
 			if tp.BalanceCostIncrements != utils.EmptyString {
 				costIncrements := make([]*utils.TPBalanceCostIncrement, 0)
@@ -3521,14 +3519,14 @@ func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 				aPrf.Balances[tp.BalanceID].CostIncrement = costIncrements
 			}
 			if tp.BalanceAttributeIDs != utils.EmptyString {
-				attributeIDs := make(utils.StringSet)
-				attributeIDs.AddSlice(strings.Split(tp.BalanceAttributeIDs, utils.InfieldSep))
-				aPrf.Balances[tp.BalanceID].AttributeIDs = attributeIDs.AsSlice()
+				// the order for attributes is important
+				// also no duplicate check as we would
+				// need to let the user execute the same
+				// attribute twice if needed
+				aPrf.Balances[tp.BalanceID].AttributeIDs = strings.Split(tp.BalanceAttributeIDs, utils.InfieldSep)
 			}
 			if tp.BalanceRateProfileIDs != utils.EmptyString {
-				rateProfileIDs := make(utils.StringSet)
-				rateProfileIDs.AddSlice(strings.Split(tp.BalanceRateProfileIDs, utils.InfieldSep))
-				aPrf.Balances[tp.BalanceID].RateProfileIDs = rateProfileIDs.AsSlice()
+				aPrf.Balances[tp.BalanceID].RateProfileIDs = utils.NewStringSet(strings.Split(tp.BalanceRateProfileIDs, utils.InfieldSep)).AsSlice()
 			}
 			if tp.BalanceUnitFactors != utils.EmptyString {
 				unitFactors := make([]*utils.TPBalanceUnitFactor, 0)

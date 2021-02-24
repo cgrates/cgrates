@@ -51,7 +51,7 @@ func (aL *actHTTPPost) execute(_ context.Context, data utils.MapStorage, _ strin
 		return
 	}
 	var partExec bool
-	for _, actD := range aL.cfg().ActionDiktats {
+	for _, actD := range aL.cfg().Diktats {
 		var pstr *engine.HTTPPoster
 		if pstr, err = engine.NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, actD.Path,
 			utils.ContentJSON, aL.config.GeneralCfg().PosterAttempts); err != nil {

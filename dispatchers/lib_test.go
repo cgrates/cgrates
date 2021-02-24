@@ -72,7 +72,7 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) 
 	if err != nil {
 		t.Fatalf("Error at config init :%v\n", err)
 	}
-	d.Cfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	d.Cfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 
 	if initDataDB {
 		d.initDataDb(t)
@@ -87,7 +87,7 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) 
 
 func (d *testDispatcher) startEngine(t *testing.T) {
 	var err error
-	if d.cmd, err = engine.StartEngine(d.CfgPath, dspDelay); err != nil {
+	if d.cmd, err = engine.StartEngine(d.CfgPath, *waitRater); err != nil {
 		t.Fatalf("Error at engine start:%v\n", err)
 	}
 
@@ -150,12 +150,12 @@ func (d *testDispatcher) loadData2(t *testing.T, path string) {
 
 func testDsp(t *testing.T, tests []func(t *testing.T), testName, all, all2, disp, allTF, all2TF, attrTF string) {
 	engine.KillEngine(0)
-	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", all), true, true)
-	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", all2), true, true)
-	dispEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", disp), true, true)
-	dispEngine.loadData2(t, path.Join(dspDataDir, "tariffplans", attrTF))
-	allEngine.loadData(t, path.Join(dspDataDir, "tariffplans", allTF))
-	allEngine2.loadData(t, path.Join(dspDataDir, "tariffplans", all2TF))
+	allEngine = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", all), true, true)
+	allEngine2 = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", all2), true, true)
+	dispEngine = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", disp), true, true)
+	dispEngine.loadData2(t, path.Join(*dataDir, "tariffplans", attrTF))
+	allEngine.loadData(t, path.Join(*dataDir, "tariffplans", allTF))
+	allEngine2.loadData(t, path.Join(*dataDir, "tariffplans", all2TF))
 	time.Sleep(200 * time.Millisecond)
 	for _, stest := range tests {
 		t.Run(testName, stest)

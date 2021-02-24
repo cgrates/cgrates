@@ -38,7 +38,6 @@ var (
 	acntSCfgPath   string
 	acntSCfg       *config.CGRConfig
 	acntSRPC       *rpc.Client
-	acntSDataDir   = "/usr/share/cgrates"
 )
 
 //Test start here
@@ -80,7 +79,7 @@ func TestAccountSv1IT(t *testing.T) {
 
 func testAccountSv1InitCfg(t *testing.T) {
 	var err error
-	acntSCfgPath = path.Join(acntSDataDir, "conf", "samples", acntSConfigDIR)
+	acntSCfgPath = path.Join(*dataDir, "conf", "samples", acntSConfigDIR)
 	acntSCfg, err = config.NewCGRConfigFromPath(acntSCfgPath)
 	if err != nil {
 		t.Error(err)

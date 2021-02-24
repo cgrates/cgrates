@@ -403,7 +403,7 @@ func TestFlagsWithParamsClone(t *testing.T) {
 		MetaRoutes:     nil,
 		MetaThresholds: {MetaIDs: {"ID1", "ID2", "ID3"}, MetaDerivedReply: {}},
 		MetaAttributes: {"*disabled": {}},
-		MetaStatS:      {MetaIDs: {"ID"}},
+		MetaStats:      {MetaIDs: {"ID"}},
 	}
 
 	cln := fWp.Clone()

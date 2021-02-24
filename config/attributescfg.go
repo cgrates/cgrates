@@ -47,7 +47,7 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			alS.StatSConns[idx] = connID
 			if connID == utils.MetaInternal {
-				alS.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+				alS.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
 			}
 		}
 	}
@@ -137,7 +137,7 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		statSConns := make([]string, len(alS.StatSConns))
 		for i, item := range alS.StatSConns {
 			statSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
 				statSConns[i] = utils.MetaInternal
 			}
 		}

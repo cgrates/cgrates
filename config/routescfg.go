@@ -180,7 +180,7 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		statSConns := make([]string, len(rts.StatSConns))
 		for i, item := range rts.StatSConns {
 			statSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
 				statSConns[i] = utils.MetaInternal
 			}
 		}

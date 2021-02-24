@@ -63,7 +63,7 @@ func (ralsCfg *RalsCfg) loadFromJSONCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			ralsCfg.StatSConns[idx] = conn
 			if conn == utils.MetaInternal {
-				ralsCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+				ralsCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
 			}
 		}
 	}
@@ -131,7 +131,7 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		statS := make([]string, len(ralsCfg.StatSConns))
 		for i, item := range ralsCfg.StatSConns {
 			statS[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
 				statS[i] = utils.MetaInternal
 			}
 		}

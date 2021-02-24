@@ -31,7 +31,11 @@ import (
 // actionTarget returns the target attached to an action
 func actionTarget(act string) string {
 	switch act {
-	case utils.MetaTopUp, utils.MetaTopUpReset:
+	case utils.MetaResetStatQueue:
+		return utils.MetaStats
+	case utils.MetaResetThreshold:
+		return utils.MetaThresholds
+	case utils.MetaAddBalance, utils.MetaSetBalance, utils.MetaRemBalance:
 		return utils.MetaAccounts
 	default:
 		return utils.MetaNone
@@ -122,10 +126,12 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 		return &actResetStat{tnt, cfg, connMgr, aCfg}, nil
 	case utils.MetaResetThreshold:
 		return &actResetThreshold{tnt, cfg, connMgr, aCfg}, nil
-	case utils.MetaTopUp:
-		return &actTopup{cfg, connMgr, aCfg, tnt, false}, nil
-	case utils.MetaTopUpReset:
-		return &actTopup{cfg, connMgr, aCfg, tnt, true}, nil
+	case utils.MetaAddBalance:
+		return &actSetBalance{cfg, connMgr, aCfg, tnt, false}, nil
+	case utils.MetaSetBalance:
+		return &actSetBalance{cfg, connMgr, aCfg, tnt, true}, nil
+	case utils.MetaRemBalance:
+		return &actRemBalance{cfg, connMgr, aCfg, tnt}, nil
 	default:
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)
 

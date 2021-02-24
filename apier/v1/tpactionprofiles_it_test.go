@@ -38,7 +38,6 @@ var (
 	tpActPrfCfgPath   string
 	tpActPrfCfg       *config.CGRConfig
 	tpActPrfRPC       *rpc.Client
-	tpActPrfDataDir   = "/usr/share/cgrates"
 	tpActPrf          *utils.TPActionProfile
 	tpActPrfDelay     int
 	tpActPrfConfigDIR string //run tests for specific configuration
@@ -81,7 +80,7 @@ func TestTPActPrfIT(t *testing.T) {
 
 func testTPActPrfInitCfg(t *testing.T) {
 	var err error
-	tpActPrfCfgPath = path.Join(tpActPrfDataDir, "conf", "samples", tpActPrfConfigDIR)
+	tpActPrfCfgPath = path.Join(*dataDir, "conf", "samples", tpActPrfConfigDIR)
 	tpActPrfCfg, err = config.NewCGRConfigFromPath(tpActPrfCfgPath)
 	if err != nil {
 		t.Error(err)

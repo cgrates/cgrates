@@ -31,5 +31,39 @@ func (dS *DispatcherService) ActionSv1Ping(args *utils.CGREvent, rpl *string) (e
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.ActionS, utils.ActionSv1Ping, args, rpl)
+	return dS.Dispatch(args, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
+}
+
+func (dS *DispatcherService) ActionSv1ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
+	if args == nil {
+		args = new(utils.ArgActionSv1ScheduleActions)
+	}
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ActionSv1ScheduleActions, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaActions, utils.ActionSv1ScheduleActions, args, rpl)
+}
+
+func (dS *DispatcherService) ActionSv1ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
+	if args == nil {
+		args = new(utils.ArgActionSv1ScheduleActions)
+	}
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ActionSv1Ping, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
 }

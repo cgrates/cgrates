@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"time"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 func (dS *DispatcherService) AccountSv1Ping(args *utils.CGREvent, rpl *string) (err error) {
 	if args == nil {
@@ -74,4 +78,38 @@ func (dS *DispatcherService) DebitAbstracts(args *utils.ArgsAccountsForEvent, re
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1DebitAbstracts, args, reply)
+}
+
+func (dS *DispatcherService) AccountSv1ActionSetBalance(args *utils.ArgsActSetBalance, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.AccountSv1ActionSetBalance, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
+	}, utils.MetaAccounts, utils.AccountSv1ActionSetBalance, args, reply)
+}
+
+func (dS *DispatcherService) AccountSv1ActionRemoveBalance(args *utils.ArgsActRemoveBalances, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.AccountSv1ActionRemoveBalance, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: tnt,
+		Opts:   args.Opts,
+	}, utils.MetaAccounts, utils.AccountSv1ActionRemoveBalance, args, reply)
 }

@@ -62,7 +62,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				ActionDiktats: []*engine.ActionDiktat{{
+				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
 				}},
@@ -171,7 +171,7 @@ func TestScheduledActions(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				ActionDiktats: []*engine.ActionDiktat{{
+				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
 				}},
@@ -233,7 +233,7 @@ func TestScheduleAction(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				ActionDiktats: []*engine.ActionDiktat{{
+				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
 				}},
@@ -359,7 +359,7 @@ func TestV1ScheduleActions(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				ActionDiktats: []*engine.ActionDiktat{{
+				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
 				}},
@@ -417,7 +417,7 @@ func TestV1ExecuteActions(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				ActionDiktats: []*engine.ActionDiktat{{
+				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
 				}},
@@ -484,7 +484,7 @@ func (dbM *dataDBMockError) GetActionProfileDrv(string, string) (*engine.ActionP
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				ActionDiktats: []*engine.ActionDiktat{{
+				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: config.NewRSRParsersMustCompile("10", ","),
 				}},
@@ -862,9 +862,9 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
 	})
 	apA := &engine.APAction{
-		ID:            "ACT_RESET_TH",
-		Type:          utils.MetaResetThreshold,
-		ActionDiktats: []*engine.ActionDiktat{{}},
+		ID:      "ACT_RESET_TH",
+		Type:    utils.MetaResetThreshold,
+		Diktats: []*engine.APDiktat{{}},
 	}
 	exportAction := &actResetThreshold{
 		tnt:     "cgrates.org",
@@ -909,9 +909,9 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
 	})
 	apA := &engine.APAction{
-		ID:            "ACT_RESET_TH",
-		Type:          utils.MetaResetThreshold,
-		ActionDiktats: []*engine.ActionDiktat{{}},
+		ID:      "ACT_RESET_TH",
+		Type:    utils.MetaResetThreshold,
+		Diktats: []*engine.APDiktat{{}},
 	}
 	exportAction := &actResetThreshold{
 		tnt:     "cgrates.org",
@@ -956,9 +956,9 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
 	})
 	apA := &engine.APAction{
-		ID:            "ACT_RESET_ST",
-		Type:          utils.MetaResetStatQueue,
-		ActionDiktats: []*engine.ActionDiktat{{}},
+		ID:      "ACT_RESET_ST",
+		Type:    utils.MetaResetStatQueue,
+		Diktats: []*engine.APDiktat{{}},
 	}
 	exportAction := &actResetStat{
 		tnt:     "cgrates.org",
@@ -1005,7 +1005,7 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 	apA := &engine.APAction{
 		ID:   "ACT_RESET_ST",
 		Type: utils.MetaResetStatQueue,
-		ActionDiktats: []*engine.ActionDiktat{{
+		Diktats: []*engine.APDiktat{{
 			Value: config.NewRSRParsersMustCompile("ST1", utils.InfieldSep),
 		}},
 	}

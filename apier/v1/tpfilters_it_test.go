@@ -38,7 +38,6 @@ var (
 	tpFilterCfgPath   string
 	tpFilterCfg       *config.CGRConfig
 	tpFilterRPC       *rpc.Client
-	tpFilterDataDir   = "/usr/share/cgrates"
 	tpFilter          *utils.TPFilterProfile
 	tpFilterDelay     int
 	tpFilterConfigDIR string //run tests for specific configuration
@@ -81,7 +80,7 @@ func TestTPFilterITMySql(t *testing.T) {
 
 func testTPFilterInitCfg(t *testing.T) {
 	var err error
-	tpFilterCfgPath = path.Join(tpFilterDataDir, "conf", "samples", tpFilterConfigDIR)
+	tpFilterCfgPath = path.Join(*dataDir, "conf", "samples", tpFilterConfigDIR)
 	tpFilterCfg, err = config.NewCGRConfigFromPath(tpFilterCfgPath)
 	if err != nil {
 		t.Error(err)

@@ -1041,8 +1041,8 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 		thdS = flgs.GetBool(utils.MetaThresholds)
 	}
 	statS := len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0
-	if flgs.Has(utils.MetaStatS) {
-		statS = flgs.GetBool(utils.MetaStatS)
+	if flgs.Has(utils.MetaStats) {
+		statS = flgs.GetBool(utils.MetaStats)
 	}
 	chrgS := len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0
 	if flgs.Has(utils.MetaChargers) {

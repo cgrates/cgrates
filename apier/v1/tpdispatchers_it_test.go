@@ -36,7 +36,6 @@ var (
 	tpDispatcherCfgPath   string
 	tpDispatcherCfg       *config.CGRConfig
 	tpDispatcherRPC       *rpc.Client
-	tpDispatcherDataDir   = "/usr/share/cgrates"
 	tpDispatcher          *utils.TPDispatcherProfile
 	tpDispatcherDelay     int
 	tpDispatcherConfigDIR string //run tests for specific configuration
@@ -79,7 +78,7 @@ func TestTPDispatcherIT(t *testing.T) {
 
 func testTPDispatcherInitCfg(t *testing.T) {
 	var err error
-	tpDispatcherCfgPath = path.Join(tpDispatcherDataDir, "conf", "samples", tpDispatcherConfigDIR)
+	tpDispatcherCfgPath = path.Join(*dataDir, "conf", "samples", tpDispatcherConfigDIR)
 	tpDispatcherCfg, err = config.NewCGRConfigFromPath(tpDispatcherCfgPath)
 	if err != nil {
 		t.Error(err)

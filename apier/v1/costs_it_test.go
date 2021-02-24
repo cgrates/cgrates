@@ -36,7 +36,6 @@ var (
 	costCfg       *config.CGRConfig
 	costRPC       *rpc.Client
 	costConfigDIR string //run tests for specific configuration
-	costDataDir   = "/usr/share/cgrates"
 
 	sTestsCost = []func(t *testing.T){
 		testCostInitCfg,
@@ -71,7 +70,7 @@ func TestCostIT(t *testing.T) {
 
 func testCostInitCfg(t *testing.T) {
 	var err error
-	costCfgPath = path.Join(costDataDir, "conf", "samples", costConfigDIR)
+	costCfgPath = path.Join(*dataDir, "conf", "samples", costConfigDIR)
 	costCfg, err = config.NewCGRConfigFromPath(costCfgPath)
 	if err != nil {
 		t.Error(err)

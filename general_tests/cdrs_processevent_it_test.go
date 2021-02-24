@@ -318,7 +318,7 @@ func testV1CDRsProcessEventRalS(t *testing.T) {
 
 func testV1CDRsProcessEventSts(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
-		Flags: []string{utils.MetaStatS, "*rals:false", "*attributes:false", "*chargers:false", "*export:false"},
+		Flags: []string{utils.MetaStats, "*rals:false", "*attributes:false", "*chargers:false", "*export:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test4",

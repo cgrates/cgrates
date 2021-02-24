@@ -59,7 +59,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 	return
 }
 
-var filterTypes = utils.NewStringSet([]string{utils.MetaRSR, utils.MetaStatS, utils.MetaResources,
+var filterTypes = utils.NewStringSet([]string{utils.MetaRSR, utils.MetaStats, utils.MetaResources,
 	utils.MetaNotRSR, utils.MetaNotStatS, utils.MetaNotResources})
 
 func migrateFilterV1(fl *v1Filter) (fltr *engine.Filter) {

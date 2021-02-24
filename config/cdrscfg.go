@@ -103,7 +103,7 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			cdrscfg.StatSConns[idx] = connID
 			if connID == utils.MetaInternal {
-				cdrscfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+				cdrscfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
 			}
 		}
 	}
@@ -200,7 +200,7 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		statSConns := make([]string, len(cdrscfg.StatSConns))
 		for i, item := range cdrscfg.StatSConns {
 			statSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS) {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
 				statSConns[i] = utils.MetaInternal
 			}
 		}

@@ -435,7 +435,7 @@ const (
 	MetaSureTax               = "*sure_tax"
 	MetaDynamic               = "*dynamic"
 	MetaCounterEvent          = "*event"
-	MetaCounterBalance        = "*balance"
+	MetaBalance               = "*balance"
 	EventName                 = "EventName"
 	// action trigger threshold types
 	TriggerMinEventCounter   = "*min_event_counter"
@@ -956,6 +956,15 @@ const (
 	MetaExporterIDs       = "*exporterIDs"
 	MetaAsync             = "*async"
 	MetaUsage             = "*usage"
+	Weights               = "Weights"
+	UnitFactors           = "UnitFactors"
+	CostIncrements        = "CostIncrements"
+	Factor                = "Factor"
+	Increment             = "Increment"
+	FixedFee              = "FixedFee"
+	RecurrentFee          = "RecurrentFee"
+	Diktats               = "Diktats"
+	BalanceIDs            = "BalanceIDs"
 )
 
 // Migrator Action
@@ -1060,7 +1069,6 @@ const (
 	MetaDenyNegative            = "*deny_negative"
 	MetaResetAccount            = "*reset_account"
 	MetaRemoveAccount           = "*remove_account"
-	MetaSetBalance              = "*set_balance"
 	MetaRemoveBalance           = "*remove_balance"
 	MetaTopUpReset              = "*topup_reset"
 	MetaTopUp                   = "*topup"
@@ -1092,6 +1100,10 @@ const (
 	BalanceValue                = "BalanceValue"
 	BalanceUnits                = "BalanceUnits"
 	ExtraParameters             = "ExtraParameters"
+
+	MetaAddBalance = "*add_balance"
+	MetaSetBalance = "*set_balance"
+	MetaRemBalance = "*rem_balance"
 )
 
 // Migrator Metas
@@ -1188,7 +1200,6 @@ const (
 	MetaExists             = "*exists"
 	MetaTimings            = "*timings"
 	MetaRSR                = "*rsr"
-	MetaStatS              = "*stats"
 	MetaDestinations       = "*destinations"
 	MetaLessThan           = "*lt"
 	MetaLessOrEqual        = "*lte"
@@ -1570,6 +1581,8 @@ const (
 	AccountSv1AccountProfilesForEvent = "AccountSv1.AccountProfilesForEvent"
 	AccountSv1MaxAbstracts            = "AccountSv1.MaxAbstracts"
 	AccountSv1DebitAbstracts          = "AccountSv1.DebitAbstracts"
+	AccountSv1ActionSetBalance        = "AccountSv1.ActionSetBalance"
+	AccountSv1ActionRemoveBalance     = "AccountSv1.ActionRemoveBalance"
 )
 
 const (
