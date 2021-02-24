@@ -31,5 +31,47 @@ func (dS *DispatcherService) AccountSv1Ping(args *utils.CGREvent, rpl *string) (
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.AccountS, utils.AccountSv1Ping, args, rpl)
+	return dS.Dispatch(args, utils.MetaAccounts, utils.AccountSv1Ping, args, rpl)
+}
+
+func (dS *DispatcherService) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, reply *[]*utils.AccountProfile) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.AccountSv1AccountProfilesForEvent, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1AccountProfilesForEvent, args, reply)
+}
+
+func (dS *DispatcherService) MaxAbstracts(args *utils.ArgsAccountsForEvent, reply *utils.ExtEventCharges) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.AccountSv1MaxAbstracts, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1MaxAbstracts, args, reply)
+}
+
+func (dS *DispatcherService) DebitAbstracts(args *utils.ArgsAccountsForEvent, reply *utils.ExtEventCharges) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.AccountSv1DebitAbstracts, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1DebitAbstracts, args, reply)
 }

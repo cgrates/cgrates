@@ -1366,6 +1366,18 @@ func (dR *DispatcherAccountSv1) Ping(args *utils.CGREvent, reply *string) error 
 	return dR.dR.AccountSv1Ping(args, reply)
 }
 
+func (dR *DispatcherAccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.AccountProfile) error {
+	return dR.dR.AccountProfilesForEvent(args, aps)
+}
+
+func (dR *DispatcherAccountSv1) MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error {
+	return dR.dR.MaxAbstracts(args, eEc)
+}
+
+func (dR *DispatcherAccountSv1) DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error {
+	return dR.dR.DebitAbstracts(args, eEc)
+}
+
 func (rS *DispatcherSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil

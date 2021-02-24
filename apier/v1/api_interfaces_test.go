@@ -125,6 +125,6 @@ func TestAccountSv1Interface(t *testing.T) {
 }
 
 func TestActionSv1Interface(t *testing.T) {
-	_ = AccountSv1Interface(NewDispatcherActionSv1(nil))
-	_ = AccountSv1Interface(NewActionSv1(nil))
+	_ = ActionSv1Interface(NewDispatcherActionSv1(nil))
+	_ = ActionSv1Interface(NewActionSv1(nil))
 }
