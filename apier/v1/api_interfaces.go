@@ -288,4 +288,7 @@ type ActionSv1Interface interface {
 
 type AccountSv1Interface interface {
 	Ping(ign *utils.CGREvent, reply *string) error
+	AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.AccountProfile) error
+	MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error
+	DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error
 }
