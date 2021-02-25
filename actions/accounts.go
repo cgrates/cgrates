@@ -59,9 +59,14 @@ func (aL *actSetBalance) execute(ctx context.Context, data utils.MapStorage, trg
 	}
 	for i, actD := range aL.cfg().Diktats {
 		var val string
-		if val, err = actD.Value.ParseDataProvider(data); err != nil {
+		var rsr config.RSRParsers
+		if rsr, err = actD.RSRValues(aL.config.GeneralCfg().RSRSep); err != nil {
 			return
 		}
+		if val, err = rsr.ParseDataProvider(data); err != nil {
+			return
+		}
+
 		args.Diktats[i] = &utils.BalDiktat{
 			Path:  actD.Path,
 			Value: val,
@@ -69,7 +74,7 @@ func (aL *actSetBalance) execute(ctx context.Context, data utils.MapStorage, trg
 	}
 	var rply string
 	return aL.connMgr.Call(aL.config.ActionSCfg().AccountSConns, nil,
-		utils.AccountSv1UpdateBalance, args, &rply)
+		utils.AccountSv1ActionSetBalance, args, &rply)
 }
 
 // actRemBalance will remove multiple balances from account
@@ -105,5 +110,5 @@ func (aL *actRemBalance) execute(ctx context.Context, data utils.MapStorage, trg
 	}
 	var rply string
 	return aL.connMgr.Call(aL.config.ActionSCfg().AccountSConns, nil,
-		utils.AccountSv1UpdateBalance, args, &rply)
+		utils.AccountSv1ActionRemoveBalance, args, &rply)
 }

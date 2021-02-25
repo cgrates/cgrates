@@ -138,9 +138,12 @@ func (d *Decimal) Compare(d2 *Decimal) int {
 	return d.Big.Cmp(d2.Big)
 }
 
+// NewDecimalFromString converts a string to decimal
 func NewDecimalFromString(value string) (*Decimal, error) {
 	z, ok := new(decimal.Big).SetString(value)
-	if !ok {
+	// verify ok and check if the value was converted successfuly
+	// and the big is a valid number
+	if !ok || z.IsNaN(0) {
 		return nil, fmt.Errorf("can't convert <%+v> to decimal", value)
 	}
 	return &Decimal{z}, nil

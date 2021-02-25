@@ -63,8 +63,21 @@ type APAction struct {
 }
 
 type APDiktat struct {
-	Path  string            // Path to execute
-	Value config.RSRParsers // Value to execute on path
+	Path  string // Path to execute
+	Value string // Value to execute on Path
+
+	valRSR config.RSRParsers
+}
+
+// RSRValues returns the Value as RSRParsers
+func (dk *APDiktat) RSRValues(sep string) (v config.RSRParsers, err error) {
+	if dk.valRSR == nil {
+		dk.valRSR, err = config.NewRSRParsers(dk.Value, sep)
+		if err != nil {
+			return
+		}
+	}
+	return dk.valRSR, nil
 }
 
 // ActionProfileWithOpts is used in API calls

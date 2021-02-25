@@ -127,7 +127,7 @@ func testTPActPrfSetTPActPrf(t *testing.T) {
 		Weight:   10,
 		Schedule: utils.MetaASAP,
 		Targets: []*utils.TPActionTarget{
-			&utils.TPActionTarget{
+			{
 				TargetType: utils.MetaAccounts,
 				TargetIDs:  []string{"1001"},
 			},
@@ -137,8 +137,10 @@ func testTPActPrfSetTPActPrf(t *testing.T) {
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Path:      "~*balance.TestBalance.Value",
-				Value:     "10",
+				Diktats: []*utils.TPAPDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: "10",
+				}},
 			},
 		},
 	}
@@ -180,8 +182,10 @@ func testTPActPrfUpdateTPActPrf(t *testing.T) {
 			ID:        "new_TOPUP",
 			FilterIDs: []string{},
 			Type:      "*topup",
-			Path:      "~*balance.TestBalance.Value",
-			Value:     "10",
+			Diktats: []*utils.TPAPDiktat{{
+				Path:  "~*balance.TestBalance.Value",
+				Value: "10",
+			}},
 		},
 	}
 	var result string
@@ -201,7 +205,7 @@ func testTPActPrfGetTPActPrfAfterUpdate(t *testing.T) {
 		Weight:   10,
 		Schedule: utils.MetaASAP,
 		Targets: []*utils.TPActionTarget{
-			&utils.TPActionTarget{
+			{
 				TargetType: utils.MetaAccounts,
 				TargetIDs:  []string{"1001"},
 			},
@@ -211,14 +215,16 @@ func testTPActPrfGetTPActPrfAfterUpdate(t *testing.T) {
 				ID:        "new_TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Path:      "~*balance.TestBalance.Value",
-				Value:     "10",
+				Diktats: []*utils.TPAPDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: "10",
+				}},
 			},
 		},
 	}
 	sort.Strings(revTPActPrf.FilterIDs)
 	sort.Slice(revTPActPrf.Actions, func(i, j int) bool {
-		return strings.Compare(revTPActPrf.Actions[i].Path, revTPActPrf.Actions[j].Path) == -1
+		return strings.Compare(revTPActPrf.Actions[i].ID, revTPActPrf.Actions[j].ID) == -1
 	})
 	if err := tpActPrfRPC.Call(utils.APIerSv1GetTPActionProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}, &reply); err != nil {
@@ -226,7 +232,7 @@ func testTPActPrfGetTPActPrfAfterUpdate(t *testing.T) {
 	}
 	sort.Strings(reply.FilterIDs)
 	sort.Slice(reply.Actions, func(i, j int) bool {
-		return strings.Compare(reply.Actions[i].Path, reply.Actions[j].Path) == -1
+		return strings.Compare(reply.Actions[i].ID, reply.Actions[j].ID) == -1
 	})
 	if !reflect.DeepEqual(tpActPrf, reply) && !reflect.DeepEqual(revTPActPrf, reply) {
 		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(tpActPrf), utils.ToJSON(reply))

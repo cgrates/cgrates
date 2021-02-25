@@ -61,7 +61,7 @@ type AttrGetTPActionProfileIDs struct {
 	utils.PaginatorWithSearch
 }
 
-// GetTPRouteProfileIDs queries TPActionProfiles identities on specific tariff plan.
+// GetTPActionProfileIDs queries TPActionProfiles identities on specific tariff plan.
 func (apierSv1 *APIerSv1) GetTPActionProfileIDs(attrs *AttrGetTPActionProfileIDs, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

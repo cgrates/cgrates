@@ -31,24 +31,30 @@ import (
 func actSetAccount(dm *engine.DataManager, tnt, acntID string, diktats []*utils.BalDiktat, reset bool) (err error) {
 	var qAcnt *utils.AccountProfile
 	if qAcnt, err = dm.GetAccountProfile(tnt, acntID); err != nil {
-		return
+		if err != utils.ErrNotFound {
+			return
+		}
+		// in case the account doesn't exist create it with minimal information
+		qAcnt = &utils.AccountProfile{
+			Tenant: tnt,
+			ID:     acntID,
+		}
 	}
 	for _, dk := range diktats {
 		// check if we have a valid path(e.g. *balance.Test.ID)
 		path := strings.Split(dk.Path, utils.NestingSep)
-		if len(path) == 0 {
-			return utils.ErrWrongPath
-		}
-		if path[0] != utils.MetaBalance {
-			return utils.ErrWrongPath
-		}
-		if len(path) < 3 {
+		// check the path to be a valid one
+		if len(path) < 3 && path[0] != utils.MetaBalance {
 			return utils.ErrWrongPath
 		}
 		bal, has := qAcnt.Balances[path[1]]
 		if !has {
 			// no balance for that ID create one
-			bal = &utils.Balance{ID: path[1]}
+			bal = utils.NewDefaultBalance(path[1])
+			if qAcnt.Balances == nil {
+				// in case the account has no balance create the balance map
+				qAcnt.Balances = make(map[string]*utils.Balance)
+			}
 			qAcnt.Balances[path[1]] = bal
 		}
 		if err = actSetBalance(bal, path[2:], dk.Value, reset); err != nil {

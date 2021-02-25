@@ -2547,7 +2547,7 @@ func TestLoaderActionProfile(t *testing.T) {
 				Type: "*add_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestBalance.Value",
-					Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+					Value: "10",
 				}},
 			},
 			{
@@ -2555,7 +2555,7 @@ func TestLoaderActionProfile(t *testing.T) {
 				Type: "*set_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestDataBalance.Type",
-					Value: config.NewRSRParsersMustCompile("*data", utils.InfieldSep),
+					Value: "*data",
 				}},
 			},
 			{
@@ -2563,7 +2563,7 @@ func TestLoaderActionProfile(t *testing.T) {
 				Type: "*add_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestDataBalance.Value",
-					Value: config.NewRSRParsersMustCompile("1024", utils.InfieldSep),
+					Value: "1024",
 				}},
 			},
 			{
@@ -2571,7 +2571,7 @@ func TestLoaderActionProfile(t *testing.T) {
 				Type: "*set_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestVoiceBalance.Type",
-					Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+					Value: "*voice",
 				}},
 			},
 			{
@@ -2579,10 +2579,10 @@ func TestLoaderActionProfile(t *testing.T) {
 				Type: "*add_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestVoiceBalance.Value",
-					Value: config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
+					Value: "15m15s",
 				}, {
 					Path:  "*balance.TestVoiceBalance2.Value",
-					Value: config.NewRSRParsersMustCompile("15m15s", utils.InfieldSep),
+					Value: "15m15s",
 				}},
 			},
 		},

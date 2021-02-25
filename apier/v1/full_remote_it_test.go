@@ -688,36 +688,16 @@ func testFullRemoteITAction(t *testing.T) {
 	actPrf = &ActionProfileWithCache{
 		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
 			ActionProfile: &engine.ActionProfile{
-				Tenant:             "cgrates.org",
-				ID:                 "ACT_1",
-				FilterIDs:          nil,
-				ActivationInterval: nil,
-				Weight:             0,
-				Schedule:           "",
+				Tenant: "cgrates.org",
+				ID:     "ACT_1",
 				Actions: []*engine.APAction{
 					{
-						ID:        "test_action_id",
-						FilterIDs: nil,
-						Blocker:   false,
-						TTL:       0,
-						Type:      "",
-						Opts:      nil,
-						Diktats: []*engine.APDiktat{{
-							Path:  "",
-							Value: nil,
-						}},
+						ID:      "test_action_id",
+						Diktats: []*engine.APDiktat{{}},
 					},
 					{
-						ID:        "test_action_id2",
-						FilterIDs: nil,
-						Blocker:   false,
-						TTL:       0,
-						Type:      "",
-						Opts:      nil,
-						Diktats: []*engine.APDiktat{{
-							Path:  "",
-							Value: nil,
-						}},
+						ID:      "test_action_id2",
+						Diktats: []*engine.APDiktat{{}},
 					},
 				},
 			},

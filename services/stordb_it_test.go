@@ -864,7 +864,6 @@ func TestStorDBReloadVersion1(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cfg.StorDbCfg().Password = "CGRateS.org"
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
 	err = stordb.Start()

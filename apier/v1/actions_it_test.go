@@ -139,7 +139,7 @@ func testActionSGetActionProfile(t *testing.T) {
 				Type: "*add_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestBalance.Units",
-					Value: config.NewRSRParsersMustCompile("10", actPrfCfg.GeneralCfg().RSRSep),
+					Value: "10",
 				}},
 			},
 			{
@@ -147,7 +147,7 @@ func testActionSGetActionProfile(t *testing.T) {
 				Type: "*set_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestDataBalance.Type",
-					Value: config.NewRSRParsersMustCompile("*data", actPrfCfg.GeneralCfg().RSRSep),
+					Value: "*data",
 				}},
 			},
 			{
@@ -155,7 +155,7 @@ func testActionSGetActionProfile(t *testing.T) {
 				Type: "*add_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestDataBalance.Units",
-					Value: config.NewRSRParsersMustCompile("1024", actPrfCfg.GeneralCfg().RSRSep),
+					Value: "1024",
 				}},
 			},
 			{
@@ -163,7 +163,7 @@ func testActionSGetActionProfile(t *testing.T) {
 				Type: "*set_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestVoiceBalance.Type",
-					Value: config.NewRSRParsersMustCompile("*voice", actPrfCfg.GeneralCfg().RSRSep),
+					Value: "*voice",
 				}},
 			},
 			{
@@ -171,7 +171,7 @@ func testActionSGetActionProfile(t *testing.T) {
 				Type: "*add_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestVoiceBalance.Units",
-					Value: config.NewRSRParsersMustCompile("15m15s", actPrfCfg.GeneralCfg().RSRSep),
+					Value: "15m15s",
 				}},
 			},
 			{
@@ -179,7 +179,7 @@ func testActionSGetActionProfile(t *testing.T) {
 				Type: "*set_balance",
 				Diktats: []*engine.APDiktat{{
 					Path:  "*balance.TestVoiceBalance.Filters",
-					Value: config.NewRSRParsersMustCompile("*string:~*req.CustomField:500", actPrfCfg.GeneralCfg().RSRSep),
+					Value: "*string:~*req.CustomField:500",
 				}},
 			},
 			{
@@ -201,15 +201,8 @@ func testActionSGetActionProfile(t *testing.T) {
 	if err := actSRPC.Call(utils.APIerSv1GetActionProfile,
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}}, &reply); err != nil {
 		t.Fatal(err)
-	} else {
-		for _, act := range reply.Actions { // the path variable from RSRParsers is with lower letter and need to be compiled manually in tests to pass reflect.DeepEqual
-			for _, actD := range act.Diktats {
-				actD.Value.Compile()
-			}
-		}
-		if !reflect.DeepEqual(expected, reply) {
-			t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-		}
+	} else if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 
@@ -226,36 +219,16 @@ func testActionSSettActionProfile(t *testing.T) {
 	actPrf = &ActionProfileWithCache{
 		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
 			ActionProfile: &engine.ActionProfile{
-				Tenant:             "tenant_test",
-				ID:                 "id_test",
-				FilterIDs:          nil,
-				ActivationInterval: nil,
-				Weight:             0,
-				Schedule:           "",
+				Tenant: "tenant_test",
+				ID:     "id_test",
 				Actions: []*engine.APAction{
 					{
-						ID:        "test_action_id",
-						FilterIDs: nil,
-						Blocker:   false,
-						TTL:       0,
-						Type:      "",
-						Opts:      nil,
-						Diktats: []*engine.APDiktat{{
-							Path:  "",
-							Value: nil,
-						}},
+						ID:      "test_action_id",
+						Diktats: []*engine.APDiktat{{}},
 					},
 					{
-						ID:        "test_action_id2",
-						FilterIDs: nil,
-						Blocker:   false,
-						TTL:       0,
-						Type:      "",
-						Opts:      nil,
-						Diktats: []*engine.APDiktat{{
-							Path:  "",
-							Value: nil,
-						}},
+						ID:      "test_action_id2",
+						Diktats: []*engine.APDiktat{{}},
 					},
 				},
 			},

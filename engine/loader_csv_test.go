@@ -1494,7 +1494,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				ID:   "TOPUP",
 				TTL:  "0s",
 				Type: "*add_balance",
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path:  "*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -1503,7 +1503,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				ID:   "SET_BALANCE_TEST_DATA",
 				TTL:  "0s",
 				Type: "*set_balance",
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path:  "*balance.TestDataBalance.Type",
 					Value: "*data",
 				}},
@@ -1512,7 +1512,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				ID:   "TOPUP_TEST_DATA",
 				TTL:  "0s",
 				Type: "*add_balance",
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path:  "*balance.TestDataBalance.Value",
 					Value: "1024",
 				}},
@@ -1521,7 +1521,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				ID:   "SET_BALANCE_TEST_VOICE",
 				TTL:  "0s",
 				Type: "*set_balance",
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path:  "*balance.TestVoiceBalance.Type",
 					Value: "*voice",
 				}},
@@ -1530,7 +1530,7 @@ func TestLoadActionProfiles(t *testing.T) {
 				ID:   "TOPUP_TEST_VOICE",
 				TTL:  "0s",
 				Type: "*add_balance",
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path:  "*balance.TestVoiceBalance.Value",
 					Value: "15m15s",
 				}, {

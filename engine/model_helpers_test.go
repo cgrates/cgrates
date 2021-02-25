@@ -5649,9 +5649,9 @@ func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
 			Schedule: "test_schedule",
 			Actions: []*utils.TPAPAction{
 				{
-					ID:            "test_action_id",
-					FilterIDs:     []string{"test_action_filter_ids"},
-					ActionDiktats: []*utils.TPActionDiktat{{}},
+					ID:        "test_action_id",
+					FilterIDs: []string{"test_action_filter_ids"},
+					Diktats:   []*utils.TPAPDiktat{{}},
 				},
 			},
 		},
@@ -5698,9 +5698,9 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			},
 			Actions: []*utils.TPAPAction{
 				{
-					ID:            "test_action_id",
-					FilterIDs:     []string{"test_action_filter_ids"},
-					ActionDiktats: []*utils.TPActionDiktat{{}},
+					ID:        "test_action_id",
+					FilterIDs: []string{"test_action_filter_ids"},
+					Diktats:   []*utils.TPAPDiktat{{}},
 				},
 			},
 		},
@@ -5743,9 +5743,9 @@ func TestAPItoModelTPActionProfileTPActionProfile(t *testing.T) {
 		}},
 		Actions: []*utils.TPAPAction{
 			{
-				ID:            "test_action_id",
-				FilterIDs:     []string{"test_action_filter_id1", "test_action_filter_id2"},
-				ActionDiktats: []*utils.TPActionDiktat{{}},
+				ID:        "test_action_id",
+				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
+				Diktats:   []*utils.TPAPDiktat{{}},
 			},
 		},
 	}
@@ -5794,7 +5794,7 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path: "test_path",
 				}},
 				Opts: "key1:val1;key2:val2",
@@ -5853,7 +5853,7 @@ func TestModelHelpersAPItoActionProfileError1(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path: "test_path",
 				}},
 			},
@@ -5881,7 +5881,7 @@ func TestModelHelpersAPItoActionProfileError3(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path: "test_path",
 				}},
 				TTL: "cat",
@@ -5910,7 +5910,7 @@ func TestModelHelpersAPItoActionProfileError4(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path: "test_path",
 				}},
 				Opts: "test_opt",
@@ -5921,35 +5921,6 @@ func TestModelHelpersAPItoActionProfileError4(t *testing.T) {
 	_, err := APItoActionProfile(testStruct, "")
 	if err == nil || err.Error() != "malformed option for ActionProfile <cgrates.org:RP1> for action <test_action_id>" {
 		t.Errorf("\nExpecting <malformed option for ActionProfile <cgrates.org:RP1> for action <test_action_id>>,\n Received <%+v>", err)
-	}
-}
-
-func TestModelHelpersAPItoActionProfileError5(t *testing.T) {
-	testStruct := &utils.TPActionProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
-		Actions: []*utils.TPAPAction{
-			{
-				ID:        "test_action_id",
-				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				ActionDiktats: []*utils.TPActionDiktat{{
-					Path:  "test_path",
-					Value: "\"constant;`>;q=0.7;expires=3600constant\"",
-				}},
-			},
-		},
-	}
-
-	_, err := APItoActionProfile(testStruct, "")
-	if err == nil || err.Error() != "Unclosed unspilit syntax" {
-		t.Errorf("\nExpecting <Unclosed unspilit syntax>,\n Received <%+v>", err)
 	}
 }
 
@@ -5994,7 +5965,7 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				TTL:       "1s",
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path: "test_path",
 				}},
 				Opts: "key1:val1",
@@ -7371,7 +7342,7 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path: "test_path",
 				}},
 				Opts: "key1:val1",
@@ -7399,7 +7370,7 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
-				ActionDiktats: []*utils.TPActionDiktat{{
+				Diktats: []*utils.TPAPDiktat{{
 					Path: "test_path",
 				}},
 				Opts: "key1:val1",
