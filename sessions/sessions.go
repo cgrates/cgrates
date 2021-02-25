@@ -3512,7 +3512,6 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
@@ -3594,9 +3593,6 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 	ec := engine.NewEventCostFromCallCost(&cc, args.CGREvent.ID, me.GetStringIgnoreErrors(utils.RunID))
 	ec.Compute()
 	rply.EventCost = ec
-	if withErrors {
-		err = utils.ErrPartiallyExecuted
-	}
 	return
 }
 
