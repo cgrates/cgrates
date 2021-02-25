@@ -101,9 +101,7 @@ func (rs *RateService) Shutdown() (err error) {
 	rs.Lock()
 	defer rs.Unlock()
 	close(rs.stopChan)
-	if err = rs.rateS.Shutdown(); err != nil {
-		return
-	}
+	rs.rateS.Shutdown() //we don't verify the error because shutdown never returns an err
 	rs.rateS = nil
 	<-rs.intConnChan
 	return

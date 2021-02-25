@@ -141,3 +141,54 @@ func testCleanupFiles(t *testing.T) {
 		}
 	}
 }
+
+func TestLoaderSReload2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	for _, ld := range cfg.LoaderCfg() {
+		ld.Enabled = false
+	}
+	shdChan := utils.NewSyncedChan()
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	db.dbchan <- new(engine.DataManager)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	srv := NewLoaderService(cfg, db, filterSChan,
+		server, make(chan rpcclient.ClientConnector, 1),
+		nil, anz, srvDep)
+	err := srv.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestLoaderSReload3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	for _, ld := range cfg.LoaderCfg() {
+		ld.Enabled = false
+	}
+	cfg.LoaderCfg()[0].Enabled = true
+	cfg.LoaderCfg()[0].TpInDir = "/tmp/TestLoaderSReload3"
+	cfg.LoaderCfg()[0].RunDelay = -1
+	shdChan := utils.NewSyncedChan()
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	db := NewDataDBService(cfg, nil, srvDep)
+	db.dbchan <- new(engine.DataManager)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	srv := NewLoaderService(cfg, db, filterSChan,
+		server, make(chan rpcclient.ClientConnector, 1),
+		nil, anz, srvDep)
+	err := srv.Start()
+	if err == nil || err.Error() != "no such file or directory" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "no such file or directory", err)
+	}
+	err = srv.Reload()
+	if err == nil || err.Error() != "no such file or directory" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "no such file or directory", err)
+	}
+}

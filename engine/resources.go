@@ -345,12 +345,11 @@ type ResourceService struct {
 }
 
 // Shutdown is called to shutdown the service
-func (rS *ResourceService) Shutdown() error {
+func (rS *ResourceService) Shutdown() {
 	utils.Logger.Info("<ResourceS> service shutdown initialized")
 	close(rS.stopBackup)
 	rS.storeResources()
 	utils.Logger.Info("<ResourceS> service shutdown complete")
-	return nil
 }
 
 // StoreResource stores the resource in DB and corrects dirty flag

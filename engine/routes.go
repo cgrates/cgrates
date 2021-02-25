@@ -136,10 +136,9 @@ type RouteService struct {
 }
 
 // Shutdown is called to shutdown the service
-func (rpS *RouteService) Shutdown() error {
+func (rpS *RouteService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.RouteS))
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.RouteS))
-	return nil
 }
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call

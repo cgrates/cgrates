@@ -82,13 +82,7 @@ func (rals *RalService) Start() (err error) {
 	<-rals.cacheS.GetPrecacheChannel(utils.CacheActionTriggers)
 	<-rals.cacheS.GetPrecacheChannel(utils.CacheSharedGroups)
 	<-rals.cacheS.GetPrecacheChannel(utils.CacheTimings)
-
-	if err = rals.responder.Start(); err != nil {
-		if err != utils.ErrServiceAlreadyRunning {
-			return
-		}
-		err = nil
-	}
+	rals.responder.Start() //we don't verify the error because responder.Start() always returns service already running
 
 	rals.rals = v1.NewRALsV1()
 
@@ -103,9 +97,7 @@ func (rals *RalService) Start() (err error) {
 // Reload handles the change of config
 func (rals *RalService) Reload() (err error) {
 	engine.SetRpSubjectPrefixMatching(rals.cfg.RalsCfg().RpSubjectPrefixMatching)
-	if err = rals.responder.Reload(); err != nil {
-		return
-	}
+	rals.responder.Reload() //we don't verify the error because responder.Reload never returns an error
 	return
 }
 
@@ -113,9 +105,7 @@ func (rals *RalService) Reload() (err error) {
 func (rals *RalService) Shutdown() (err error) {
 	rals.Lock()
 	defer rals.Unlock()
-	if err = rals.responder.Shutdown(); err != nil {
-		return
-	}
+	err = rals.responder.Shutdown() //we don't verify the error because responder.Reload never returns an error
 	rals.rals = nil
 	<-rals.connChan
 	return
