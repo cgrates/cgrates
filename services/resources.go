@@ -109,9 +109,7 @@ func (reS *ResourceService) Shutdown() (err error) {
 	defer reS.srvDep[utils.DataDB].Done()
 	reS.Lock()
 	defer reS.Unlock()
-	if err = reS.reS.Shutdown(); err != nil {
-		return
-	}
+	reS.reS.Shutdown() //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
 	reS.rpc = nil
 	<-reS.connChan

@@ -130,3 +130,46 @@ func TestRalsReload(t *testing.T) {
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
+func TestRalsReload2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
+	shdChan := utils.NewSyncedChan()
+	chS := engine.NewCacheS(cfg, nil, nil)
+	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheThresholds))
+	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
+	close(chS.GetPrecacheChannel(utils.CacheDestinations))
+	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
+	close(chS.GetPrecacheChannel(utils.CacheRatingPlans))
+	close(chS.GetPrecacheChannel(utils.CacheRatingProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheActions))
+	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
+	close(chS.GetPrecacheChannel(utils.CacheAccountActionPlans))
+	close(chS.GetPrecacheChannel(utils.CacheActionTriggers))
+	close(chS.GetPrecacheChannel(utils.CacheSharedGroups))
+	close(chS.GetPrecacheChannel(utils.CacheTimings))
+
+	cfg.ThresholdSCfg().Enabled = true
+	server := cores.NewServer(nil)
+	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+	cfg.StorDbCfg().Type = utils.INTERNAL
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	ralS := NewRalService(cfg, chS, server,
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		shdChan, nil, anz, srvDep)
+	ralS.responder.resp = &engine.Responder{
+		ShdChan:          shdChan,
+		Timeout:          0,
+		Timezone:         "",
+		MaxComputedUsage: nil,
+	}
+	err := ralS.Start()
+	if err != nil {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}

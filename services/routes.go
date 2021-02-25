@@ -104,9 +104,7 @@ func (routeS *RouteService) Reload() (err error) {
 func (routeS *RouteService) Shutdown() (err error) {
 	routeS.Lock()
 	defer routeS.Unlock()
-	if err = routeS.routeS.Shutdown(); err != nil {
-		return
-	}
+	routeS.routeS.Shutdown() //we don't verify the error because shutdown never returns an error
 	routeS.routeS = nil
 	routeS.rpc = nil
 	<-routeS.connChan
