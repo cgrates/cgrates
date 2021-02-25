@@ -59,63 +59,10 @@ type concreteBalance struct {
 	rateSConns []string
 }
 
-// debitUnits is a direct debit of balance units
-func (cB *concreteBalance) debitUnits(dUnts *utils.Decimal, tnt string,
-	ev utils.DataProvider) (dbted *utils.Decimal, uF *utils.UnitFactor, err error) {
-
-	// pass the general balance filters
-	var pass bool
-	if pass, err = cB.fltrS.Pass(tnt, cB.blnCfg.FilterIDs, ev); err != nil {
-		return
-	} else if !pass {
-		return nil, nil, utils.ErrFilterNotPassingNoCaps
-	}
-
-	// unitFactor
-	var hasUF bool
-	if uF, err = unitFactor(cB.blnCfg.UnitFactors, cB.fltrS, tnt, ev); err != nil {
-		return
-	}
-	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
-		hasUF = true
-		dUnts = &utils.Decimal{utils.MultiplyBig(dUnts.Big, uF.Factor.Big)}
-	}
-
-	// balanceLimit
-	var hasLmt bool
-	var blncLmt *utils.Decimal
-	if blncLmt, err = balanceLimit(cB.blnCfg.Opts); err != nil {
-		return
-	}
-	if blncLmt != nil && blncLmt.Big.Cmp(decimal.New(0, 0)) != 0 {
-		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, blncLmt.Big)
-		hasLmt = true
-	}
-
-	if cB.blnCfg.Units.Compare(dUnts) <= 0 && blncLmt != nil { // balance smaller than debit and limited
-		dbted = &utils.Decimal{cB.blnCfg.Units.Big}
-		cB.blnCfg.Units.Big = blncLmt.Big
-	} else {
-		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, dUnts.Big)
-		if hasLmt { // put back the limit
-			cB.blnCfg.Units.Big = utils.SumBig(cB.blnCfg.Units.Big, blncLmt.Big)
-		}
-		dbted = dUnts
-	}
-	if hasUF {
-		dbted.Big = utils.DivideBig(dbted.Big, uF.Factor.Big)
-	}
-
-	return
-}
-
-// debit implements the balanceOperator interface
+// debitAbstracts implements the balanceOperator interface
 func (cB *concreteBalance) debitAbstracts(usage *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
-	evNm := utils.MapStorage{
-		utils.MetaOpts: cgrEv.Opts,
-		utils.MetaReq:  cgrEv.Event,
-	}
+	evNm := cgrEv.AsDataProvider()
 
 	// pass the general balance filters
 	var pass bool
@@ -139,4 +86,55 @@ func (cB *concreteBalance) debitAbstracts(usage *decimal.Big,
 		cB.rateSConns, cB.blnCfg.RateProfileIDs,
 		costIcrm)
 
+}
+
+// debitConcretes implements the balanceOperator interface
+func (cB *concreteBalance) debitConcretes(usage *decimal.Big,
+	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+	evNm := cgrEv.AsDataProvider()
+	// pass the general balance filters
+	var pass bool
+	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
+		return
+	} else if !pass {
+		return nil, utils.ErrFilterNotPassingNoCaps
+	}
+
+	// unitFactor
+	var uF *utils.UnitFactor
+	if uF, err = unitFactor(cB.blnCfg.UnitFactors, cB.fltrS, cgrEv.Tenant, evNm); err != nil {
+		return
+	}
+	var hasUF bool
+	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
+		hasUF = true
+		usage = utils.MultiplyBig(usage, uF.Factor.Big)
+	}
+
+	// balanceLimit
+	var hasLmt bool
+	var blncLmt *utils.Decimal
+	if blncLmt, err = balanceLimit(cB.blnCfg.Opts); err != nil {
+		return
+	}
+	if blncLmt != nil && blncLmt.Big.Cmp(decimal.New(0, 0)) != 0 {
+		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, blncLmt.Big)
+		hasLmt = true
+	}
+	var dbted *decimal.Big
+	if cB.blnCfg.Units.Big.Cmp(usage) <= 0 && blncLmt != nil { // balance smaller than debit and limited
+		dbted = cB.blnCfg.Units.Big
+		cB.blnCfg.Units.Big = blncLmt.Big
+	} else {
+		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, usage)
+		if hasLmt { // put back the limit
+			cB.blnCfg.Units.Big = utils.SumBig(cB.blnCfg.Units.Big, blncLmt.Big)
+		}
+		dbted = usage
+	}
+	if hasUF {
+		dbted = utils.DivideBig(dbted, uF.Factor.Big)
+	}
+
+	return &utils.EventCharges{Usage: &utils.Decimal{dbted}}, nil
 }

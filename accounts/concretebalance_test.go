@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/cgrates/rpcclient"
@@ -31,6 +30,7 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
+/*
 func TestCBDebitUnits(t *testing.T) {
 	// with limit and unit factor
 	cb := &concreteBalance{
@@ -128,7 +128,8 @@ func TestCBDebitUnits(t *testing.T) {
 	}
 
 }
-
+*/
+/*
 func TestCBSimpleDebit(t *testing.T) {
 	// debit 10 units from a concrete balance with 500 units
 	cb := &concreteBalance{
@@ -149,7 +150,8 @@ func TestCBSimpleDebit(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitExceed(t *testing.T) {
 	// debit 510 units from a concrete balance with 500 units
 	cb := &concreteBalance{
@@ -169,7 +171,8 @@ func TestCBDebitExceed(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitUnlimited(t *testing.T) {
 	// debit 510 units from an unlimited concrete balance with 100 units
 	cb := &concreteBalance{
@@ -192,7 +195,8 @@ func TestCBDebitUnlimited(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitLimit(t *testing.T) {
 	// debit 190 units from a concrete balance with 500 units and limit of 300
 	cb := &concreteBalance{
@@ -216,7 +220,8 @@ func TestCBDebitLimit(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitLimitExceed(t *testing.T) {
 	// debit 210 units from a concrete balance with 500 units and limit of 300
 	cb := &concreteBalance{
@@ -239,7 +244,8 @@ func TestCBDebitLimitExceed(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitLimitExceed2(t *testing.T) {
 	// debit 510 units from a concrete balance with 500 units but because of limit it will debit only 200
 	cb := &concreteBalance{
@@ -262,7 +268,8 @@ func TestCBDebitLimitExceed2(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithUnitFactor(t *testing.T) {
 	// debit 1 unit from balance but because of unit factor it will debit 100
 	cb := &concreteBalance{
@@ -288,7 +295,8 @@ func TestCBDebitWithUnitFactor(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithUnitFactorWithLimit(t *testing.T) {
 	// debit 3 units from balance but because of unit factor and limit it will debit 200
 	cb := &concreteBalance{
@@ -316,7 +324,8 @@ func TestCBDebitWithUnitFactorWithLimit(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithUnitFactorWithUnlimited(t *testing.T) {
 	// debit 3 units from balance but because of unit factor and limit it will debit 200
 	cb := &concreteBalance{
@@ -344,7 +353,8 @@ func TestCBDebitWithUnitFactorWithUnlimited(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithUnitFactorWithFilters1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -381,7 +391,8 @@ func TestCBDebitWithUnitFactorWithFilters1(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -418,7 +429,8 @@ func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithMultipleUnitFactor(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -456,7 +468,8 @@ func TestCBDebitWithMultipleUnitFactor(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithBalanceFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -485,7 +498,8 @@ func TestCBDebitWithBalanceFilter(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithBalanceFilterNotPassing(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -510,7 +524,8 @@ func TestCBDebitWithBalanceFilterNotPassing(t *testing.T) {
 		t.Error(err)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithBalanceInvalidFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -535,7 +550,8 @@ func TestCBDebitWithBalanceInvalidFilter(t *testing.T) {
 		t.Error(err)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithInvalidUnitFactorFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -565,7 +581,8 @@ func TestCBDebitWithInvalidUnitFactorFilter(t *testing.T) {
 		t.Error(err)
 	}
 }
-
+*/
+/*
 func TestCBDebitWithInvalidLimit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -592,7 +609,7 @@ func TestCBDebitWithInvalidLimit(t *testing.T) {
 		t.Error(err)
 	}
 }
-
+*/
 func TestCBSDebitUsage(t *testing.T) {
 	// debit 10 units from a concrete balance with 500 units
 	cb := &concreteBalance{

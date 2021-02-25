@@ -136,8 +136,9 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 }
 
 // accountDebitAbstracts will debit the usage out of an Account
-func (aS *AccountS) accountDebitAbstracts(acnt *utils.AccountProfile, usage *decimal.Big,
-	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
+	cgrEv *utils.CGREvent, concretes bool) (ec *utils.EventCharges, err error) {
+
 	// Find balances matching event
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
 	for _, blnCfg := range acnt.Balances {
@@ -156,6 +157,10 @@ func (aS *AccountS) accountDebitAbstracts(acnt *utils.AccountProfile, usage *dec
 	}
 
 	for i, blncOper := range blncOpers {
+		debFunc := blncOper.debitAbstracts
+		if concretes {
+			debFunc = blncOper.debitConcretes
+		}
 		if i == 0 {
 			ec = utils.NewEventCharges()
 		}
@@ -163,7 +168,7 @@ func (aS *AccountS) accountDebitAbstracts(acnt *utils.AccountProfile, usage *dec
 			return // no more debit
 		}
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = blncOper.debitAbstracts(new(decimal.Big).Copy(usage), cgrEv); err != nil {
+		if ecDbt, err = debFunc(new(decimal.Big).Copy(usage), cgrEv); err != nil {
 			if err == utils.ErrFilterNotPassingNoCaps {
 				err = nil
 				continue
@@ -177,8 +182,8 @@ func (aS *AccountS) accountDebitAbstracts(acnt *utils.AccountProfile, usage *dec
 }
 
 // accountsDebitAbstracts will debit an usage out of multiple accounts
-func (aS *AccountS) accountsDebitAbstracts(acnts []*utils.AccountProfileWithWeight,
-	cgrEv *utils.CGREvent, store bool) (ec *utils.EventCharges, err error) {
+func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
+	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	usage := decimal.New(int64(72*time.Hour), 0)
 	var usgEv time.Duration
 	if usgEv, err = cgrEv.FieldAsDuration(utils.Usage); err != nil {
@@ -207,8 +212,8 @@ func (aS *AccountS) accountsDebitAbstracts(acnts []*utils.AccountProfileWithWeig
 		}
 		acntBkps[i] = acnt.AccountProfile.AccountBalancesBackup()
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = aS.accountDebitAbstracts(acnt.AccountProfile,
-			new(decimal.Big).Copy(usage), cgrEv); err != nil {
+		if ecDbt, err = aS.accountDebit(acnt.AccountProfile,
+			new(decimal.Big).Copy(usage), cgrEv, concretes); err != nil {
 			if store {
 				restoreAccounts(aS.dm, acnts, acntBkps)
 			}
@@ -226,11 +231,6 @@ func (aS *AccountS) accountsDebitAbstracts(acnts []*utils.AccountProfileWithWeig
 	return
 }
 
-func (aS *AccountS) accountDebitCost(acnt *utils.AccountProfile,
-	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
-	return
-}
-
 // V1AccountProfilesForEvent returns the matching AccountProfiles for Event
 func (aS *AccountS) V1AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.AccountProfile) (err error) {
 	var acnts utils.AccountProfilesWithWeight
@@ -245,7 +245,7 @@ func (aS *AccountS) V1AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, 
 	return
 }
 
-// V1MaxUsage returns the maximum usage for the event, based on matching Accounts
+// V1MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
 func (aS *AccountS) V1MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
 	var acnts utils.AccountProfilesWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
@@ -261,7 +261,7 @@ func (aS *AccountS) V1MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.
 		}
 	}()
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebitAbstracts(acnts, args.CGREvent, false); err != nil {
+	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, false, false); err != nil {
 		return
 	}
 	var rcvEec *utils.ExtEventCharges
@@ -289,7 +289,64 @@ func (aS *AccountS) V1DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *util
 	}()
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebitAbstracts(acnts, args.CGREvent, true); err != nil {
+	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, false, true); err != nil {
+		return
+	}
+
+	var rcvEec *utils.ExtEventCharges
+	if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
+		return
+	}
+
+	*eEc = *rcvEec
+	return
+}
+
+// V1MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
+func (aS *AccountS) V1MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+	var acnts utils.AccountProfilesWithWeight
+	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
+		args.CGREvent, args.AccountIDs, true); err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return
+	}
+	defer func() {
+		for _, lkID := range acnts.LockIDs() {
+			guardian.Guardian.UnguardIDs(lkID)
+		}
+	}()
+	var procEC *utils.EventCharges
+	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, true, false); err != nil {
+		return
+	}
+	var rcvEec *utils.ExtEventCharges
+	if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
+		return
+	}
+	*eEc = *rcvEec
+	return
+}
+
+// V1DebitConcretes performs debit of concrete units for the provided event
+func (aS *AccountS) V1DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+	var acnts utils.AccountProfilesWithWeight
+	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
+		args.CGREvent, args.AccountIDs, true); err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return
+	}
+	defer func() {
+		for _, lkID := range acnts.LockIDs() {
+			guardian.Guardian.UnguardIDs(lkID)
+		}
+	}()
+
+	var procEC *utils.EventCharges
+	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, true, true); err != nil {
 		return
 	}
 

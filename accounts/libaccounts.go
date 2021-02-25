@@ -76,6 +76,7 @@ func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
 	debitAbstracts(usage *decimal.Big, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
+	debitConcretes(usage *decimal.Big, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
 }
 
 // roundUnitsWithIncrements rounds the usage based on increments
@@ -219,16 +220,12 @@ func debitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.B
 	}
 	clnedUnts := cloneUnitsFromConcretes(cncrtBlncs)
 	for _, cB := range cncrtBlncs {
-		ev := utils.MapStorage{
-			utils.MetaOpts: cgrEv.Opts,
-			utils.MetaReq:  cgrEv.Event,
-		}
-		var dbted *utils.Decimal
-		if dbted, _, err = cB.debitUnits(&utils.Decimal{tCost}, cgrEv.Tenant, ev); err != nil {
+		var ecCncrt *utils.EventCharges
+		if ecCncrt, err = cB.debitConcretes(tCost, cgrEv); err != nil {
 			restoreUnitsFromClones(cncrtBlncs, clnedUnts)
 			return
 		}
-		tCost = utils.SubstractBig(tCost, dbted.Big)
+		tCost = utils.SubstractBig(tCost, ecCncrt.Usage.Big)
 		if tCost.Cmp(decimal.New(0, 0)) <= 0 {
 			return // have debited all, total is smaller or equal to 0
 		}
