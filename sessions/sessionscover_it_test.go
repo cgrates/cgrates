@@ -1,5 +1,3 @@
-// +build integration
-
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -31,13 +29,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/rpcclient"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
+/*
 var (
 	sTests = []func(t *testing.T){
 		testDebitLoopSessionLowBalance,
@@ -95,6 +93,7 @@ var (
 		testBiRPCv1ProcessEvent,
 		testBiRPCv1ProcessEventStats,
 		testBiRPCv1ProcessEventResources,
+		testBiRPCv1ProcessEventRalsAndCDRs,
 	}
 )
 
@@ -105,7 +104,10 @@ func TestSessionsIT(t *testing.T) {
 	}
 }
 
-func testSetSTerminator(t *testing.T) {
+*/
+
+func TestSetSTerminator(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().SessionTTL = time.Second
 	data := engine.NewInternalDB(nil, nil, true)
@@ -173,7 +175,8 @@ func testSetSTerminator(t *testing.T) {
 	}
 }
 
-func testSetSTerminatorError(t *testing.T) {
+func TestSetSTerminatorError(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().SessionTTL = time.Second
 	data := engine.NewInternalDB(nil, nil, true)
@@ -182,6 +185,7 @@ func testSetSTerminatorError(t *testing.T) {
 
 	ss := &Session{}
 
+	var err error
 	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
 	if err != nil {
 		t.Error(err)
@@ -269,7 +273,8 @@ func testSetSTerminatorError(t *testing.T) {
 	log.SetOutput(os.Stderr)
 }
 
-func testSetSTerminatorAutomaticTermination(t *testing.T) {
+func TestSetSTerminatorAutomaticTermination(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	ss := &Session{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -290,7 +295,8 @@ func testSetSTerminatorAutomaticTermination(t *testing.T) {
 	}
 }
 
-func testSetSTerminatorManualTermination(t *testing.T) {
+func TestSetSTerminatorManualTermination(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	ss := &Session{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -306,7 +312,8 @@ func testSetSTerminatorManualTermination(t *testing.T) {
 	ss.sTerminator.endChan <- struct{}{}
 }
 
-func testForceSTerminatorManualTermination(t *testing.T) {
+func TestForceSTerminatorManualTermination(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	ss := &Session{
 		CGRID:         "CGRID",
 		Tenant:        "cgrates.org",
@@ -338,7 +345,8 @@ func testForceSTerminatorManualTermination(t *testing.T) {
 	}
 }
 
-func testForceSTerminatorPostCDRs(t *testing.T) {
+func TestForceSTerminatorPostCDRs(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
 	data := engine.NewInternalDB(nil, nil, true)
@@ -374,7 +382,8 @@ func testForceSTerminatorPostCDRs(t *testing.T) {
 	}
 }
 
-func testForceSTerminatorReleaseSession(t *testing.T) {
+func TestForceSTerminatorReleaseSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	data := engine.NewInternalDB(nil, nil, true)
@@ -419,7 +428,8 @@ func (sT *testMockClientConn) Call(method string, arg interface{}, rply interfac
 	return utils.ErrNoActiveSession
 }
 
-func testForceSTerminatorClientCall(t *testing.T) {
+func TestForceSTerminatorClientCall(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	sTestMock := &testMockClientConn{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -461,7 +471,8 @@ func testForceSTerminatorClientCall(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
-func testDebitSession(t *testing.T) {
+func TestDebitSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -522,7 +533,8 @@ func (sT *testMockClients) Call(method string, arg interface{}, rply interface{}
 	}
 }
 
-func testDebitSessionResponderMaxDebit(t *testing.T) {
+func TestDebitSessionResponderMaxDebit(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -594,7 +606,8 @@ func testDebitSessionResponderMaxDebit(t *testing.T) {
 	}
 }
 
-func testDebitSessionResponderMaxDebitError(t *testing.T) {
+func TestDebitSessionResponderMaxDebitError(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	sMock := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -666,7 +679,8 @@ func testDebitSessionResponderMaxDebitError(t *testing.T) {
 	}
 }
 
-func testInitSessionDebitLoops(t *testing.T) {
+func TestInitSessionDebitLoops(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -708,7 +722,8 @@ func (sT *testMockClientConnDiscSess) Call(method string, arg interface{}, rply 
 	return nil
 }
 
-func testDebitLoopSessionErrorDebiting(t *testing.T) {
+func TestDebitLoopSessionErrorDebiting(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest"
 	cfg.SessionSCfg().TerminateAttempts = 1
@@ -774,7 +789,8 @@ func testDebitLoopSessionErrorDebiting(t *testing.T) {
 	}
 }
 
-func testDebitLoopSession(t *testing.T) {
+func TestDebitLoopSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -835,7 +851,8 @@ func testDebitLoopSession(t *testing.T) {
 	time.Sleep(2 * time.Second)
 }
 
-func testDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
+func TestDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -896,7 +913,8 @@ func testDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
 	ss.debitStop <- struct{}{}
 }
 
-func testDebitLoopSessionLowBalance(t *testing.T) {
+func TestDebitLoopSessionLowBalance(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -953,7 +971,8 @@ func testDebitLoopSessionLowBalance(t *testing.T) {
 	time.Sleep(1 * time.Second)
 }
 
-func testDebitLoopSessionWarningSessions(t *testing.T) {
+func TestDebitLoopSessionWarningSessions(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1008,7 +1027,8 @@ func testDebitLoopSessionWarningSessions(t *testing.T) {
 	}
 }
 
-func testDebitLoopSessionDisconnectSession(t *testing.T) {
+func TestDebitLoopSessionDisconnectSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1077,7 +1097,8 @@ func testDebitLoopSessionDisconnectSession(t *testing.T) {
 	ss.debitStop <- struct{}{}
 }
 
-func testStoreSCost(t *testing.T) {
+func TestStoreSCost(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1124,7 +1145,8 @@ func testStoreSCost(t *testing.T) {
 	}
 }
 
-func testRefundSession(t *testing.T) {
+func TestRefundSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1235,7 +1257,8 @@ func testRefundSession(t *testing.T) {
 	}
 }
 
-func testRoundCost(t *testing.T) {
+func TestRoundCost(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1308,7 +1331,8 @@ func testRoundCost(t *testing.T) {
 	}
 }
 
-func testDisconnectSession(t *testing.T) {
+func TestDisconnectSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -1345,7 +1369,8 @@ func testDisconnectSession(t *testing.T) {
 	}
 }
 
-func testReplicateSessions(t *testing.T) {
+func TestReplicateSessions(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1370,7 +1395,8 @@ func testReplicateSessions(t *testing.T) {
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)})
 }
 
-func testNewSession(t *testing.T) {
+func TestNewSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1469,7 +1495,8 @@ func testNewSession(t *testing.T) {
 	}
 }
 
-func testProcessChargerS(t *testing.T) {
+func TestProcessChargerS(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmpCache := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -1528,7 +1555,8 @@ func testProcessChargerS(t *testing.T) {
 	engine.Cache = tmpCache
 }
 
-func testTransitSState(t *testing.T) {
+func TestTransitSState(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -1555,7 +1583,8 @@ func testTransitSState(t *testing.T) {
 	}
 }
 
-func testRelocateSession(t *testing.T) {
+func TestRelocateSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -1609,7 +1638,8 @@ func testRelocateSession(t *testing.T) {
 	}
 }
 
-func testGetRelocateSession(t *testing.T) {
+func TestGetRelocateSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -1637,7 +1667,8 @@ func testGetRelocateSession(t *testing.T) {
 	}
 }
 
-func testLibsessionsSetMockErrors(t *testing.T) {
+func TestLibsessionsSetMockErrors(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -1703,7 +1734,8 @@ func (sT *testMockClientSyncSessions) Call(method string, arg interface{}, rply 
 	return utils.ErrNoActiveSession
 }
 
-func testSyncSessions(t *testing.T) {
+func TestSyncSessions(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmp := engine.Cache
 	engine.Cache.Clear(nil)
 
@@ -1759,7 +1791,9 @@ func testSyncSessions(t *testing.T) {
 	//There are no sessions to be removed
 	sessions.terminateSyncSessions([]string{"no_sesssion"})
 }
-func testAuthEvent(t *testing.T) {
+
+func TestAuthEvent(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockClients{
@@ -1826,7 +1860,8 @@ func testAuthEvent(t *testing.T) {
 
 }
 
-func testAuthEventMockCall(t *testing.T) {
+func TestAuthEventMockCall(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	//mocking the GetMaxSession for checking the error
 	engine.Cache.Clear(nil)
 	sTestMock := &testMockClients{
@@ -1897,7 +1932,8 @@ func testAuthEventMockCall(t *testing.T) {
 	}
 }
 
-func testChargeEvent(t *testing.T) {
+func TestChargeEvent(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -1990,7 +2026,8 @@ func testChargeEvent(t *testing.T) {
 	engine.Cache = tmp
 }
 
-func testUpdateSession(t *testing.T) {
+func TestUpdateSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -2029,7 +2066,8 @@ func testUpdateSession(t *testing.T) {
 	}
 }
 
-func testEndSession(t *testing.T) {
+func TestEndSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	sTestMock := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2133,11 +2171,8 @@ func testEndSession(t *testing.T) {
 	}
 }
 
-func (ss *Session) BiRPCv1TestCase(clnt rpcclient.ClientConnector, args *V1TerminateSessionArgs, authReply *string) (aux string, err error) {
-	return utils.EmptyString, nil
-}
-
-func testCallBiRPC(t *testing.T) {
+func TestCallBiRPC(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -2165,7 +2200,8 @@ func testCallBiRPC(t *testing.T) {
 
 }
 
-func testBiRPCv1GetActivePassiveSessions(t *testing.T) {
+func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	clnt := &testMockClients{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2324,7 +2360,8 @@ func testBiRPCv1GetActivePassiveSessions(t *testing.T) {
 	}
 }
 
-func testBiRPCv1SetPassiveSession(t *testing.T) {
+func TestBiRPCv1SetPassiveSession(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	clnt := &testMockClients{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2371,7 +2408,8 @@ func testBiRPCv1SetPassiveSession(t *testing.T) {
 	}
 }
 
-func testBiRPCv1ReplicateSessions(t *testing.T) {
+func TestBiRPCv1ReplicateSessions(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2407,7 +2445,8 @@ func testBiRPCv1ReplicateSessions(t *testing.T) {
 	}
 }
 
-func testBiRPCv1AuthorizeEvent(t *testing.T) {
+func TestBiRPCv1AuthorizeEvent(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -2501,7 +2540,8 @@ func testBiRPCv1AuthorizeEvent(t *testing.T) {
 	}
 }
 
-func testBiRPCv1AuthorizeEvent2(t *testing.T) {
+func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2636,7 +2676,8 @@ func testBiRPCv1AuthorizeEvent2(t *testing.T) {
 	}
 }
 
-func testBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
+func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2745,7 +2786,8 @@ func testBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 	}
 }
 
-func testBiRPCv1InitiateSession1(t *testing.T) {
+func TestBiRPCv1InitiateSession1(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -2894,7 +2936,8 @@ func testBiRPCv1InitiateSession1(t *testing.T) {
 	}
 }
 
-func testBiRPCv1InitiateSession2(t *testing.T) {
+func TestBiRPCv1InitiateSession2(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3010,7 +3053,8 @@ func testBiRPCv1InitiateSession2(t *testing.T) {
 	}
 
 }
-func testBiRPCv1InitiateSessionWithDigest(t *testing.T) {
+func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3117,7 +3161,8 @@ func testBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 	}
 }
 
-func testBiRPCv1UpdateSession1(t *testing.T) {
+func TestBiRPCv1UpdateSession1(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -3198,7 +3243,8 @@ func testBiRPCv1UpdateSession1(t *testing.T) {
 	}
 }
 
-func testBiRPCv1UpdateSession2(t *testing.T) {
+func TestBiRPCv1UpdateSession2(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3269,7 +3315,8 @@ func testBiRPCv1UpdateSession2(t *testing.T) {
 	}
 }
 
-func testBiRPCv1TerminateSession1(t *testing.T) {
+func TestBiRPCv1TerminateSession1(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -3418,7 +3465,8 @@ func testBiRPCv1TerminateSession1(t *testing.T) {
 	engine.Cache = tmp
 }
 
-func testBiRPCv1TerminateSession2(t *testing.T) {
+func TestBiRPCv1TerminateSession2(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3478,7 +3526,8 @@ func testBiRPCv1TerminateSession2(t *testing.T) {
 	}
 }
 
-func testBiRPCv1ProcessCDR(t *testing.T) {
+func TestBiRPCv1ProcessCDR(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmp := engine.Cache
 
 	cfg := config.NewDefaultCGRConfig()
@@ -3516,7 +3565,8 @@ func testBiRPCv1ProcessCDR(t *testing.T) {
 	engine.Cache = tmp
 }
 
-func testBiRPCv1ProcessMessage1(t *testing.T) {
+func TestBiRPCv1ProcessMessage1(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -3596,7 +3646,8 @@ func testBiRPCv1ProcessMessage1(t *testing.T) {
 	engine.Cache = tmp
 }
 
-func testBiRPCv1ProcessMessage2(t *testing.T) {
+func TestBiRPCv1ProcessMessage2(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3698,7 +3749,8 @@ func testBiRPCv1ProcessMessage2(t *testing.T) {
 	}
 }
 
-func testBiRPCv1ProcessEvent(t *testing.T) {
+func TestBiRPCv1ProcessEvent(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -3842,7 +3894,8 @@ func testBiRPCv1ProcessEvent(t *testing.T) {
 
 }
 
-func testBiRPCv1ProcessEventStats(t *testing.T) {
+func TestBiRPCv1ProcessEventStats(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3923,7 +3976,8 @@ func testBiRPCv1ProcessEventStats(t *testing.T) {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 }
-func testBiRPCv1ProcessEventResources(t *testing.T) {
+func TestBiRPCv1ProcessEventResources(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -4020,4 +4074,126 @@ func testBiRPCv1ProcessEventResources(t *testing.T) {
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
+}
+
+func TestBiRPCv1ProcessEventRalsAndCDRs(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
+	engine.Cache.Clear(nil)
+	clnt := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+				if args.(*utils.CGREvent).ID != "RALS_ID" {
+					return nil
+				}
+				chrgrs := []*engine.ChrgSProcessEventReply{
+					{ChargerSProfile: "TEST_PROFILE1",
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "TEST_ID",
+							Event: map[string]interface{}{
+								utils.Destination: "10",
+							},
+						}},
+				}
+				if args.(*utils.CGREvent).Tenant == "CHANGED_TNT" {
+					chrgrs[0].CGREvent.Event[utils.RequestType] = utils.MetaPrepaid
+				}
+				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				return nil
+			},
+			utils.ResponderGetCost: func(args interface{}, reply interface{}) error {
+				if args.(*engine.CallDescriptorWithOpts).Tenant == "CHANGED_ID" {
+					return nil
+				}
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal <- clnt
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):     chanInternal,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal,
+	})
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+
+	args := &V1ProcessEventArgs{
+		Flags: []string{utils.MetaRALs,
+			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost),
+			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
+			utils.MetaChargers},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testBiRPCv1ProcessEventStatsResources",
+			Event: map[string]interface{}{
+				utils.Tenant:       "cgrates.org",
+				utils.ToR:          utils.MetaVoice,
+				utils.AccountField: "1001",
+				utils.Destination:  "1002",
+			},
+		},
+	}
+
+	reply := V1ProcessEventReply{}
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Exepected %+v, received %+v", utils.ErrNotImplemented, err)
+	}
+
+	args.CGREvent.Tenant = "CHANGED_ID"
+	args.Flags = []string{utils.MetaRALs,
+		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaCost),
+		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
+		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuthorize),
+		utils.MetaChargers}
+	args.CGREvent.Event[utils.Usage] = "invalid_usage_format"
+	expected := "time: invalid duration \"invalid_usage_format\""
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+
+	args.CGREvent.Event[utils.Usage] = "1m"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err != nil {
+		t.Error(expected)
+	}
+
+	args.Flags = []string{utils.MetaRALs,
+		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
+		utils.MetaChargers}
+	args.Opts = make(map[string]interface{})
+	args.Opts[utils.OptsDebitInterval] = "invalid_dbtitrvl_format"
+	expected = "RALS_ERROR:time: invalid duration \"invalid_dbtitrvl_format\""
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+	args.Opts[utils.OptsDebitInterval] = "5s"
+
+	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
+	expected = "ChargerS is disabled"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+
+	args.CGREvent.Event[utils.Usage] = "invalid_format"
+	args.CGREvent.Tenant = "cgrates.org"
+	expected = "RALS_ERROR:time: invalid duration \"invalid_format\""
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Exepected %+v, received %+v", expected, err)
+	}
+	args.CGREvent.Event[utils.Usage] = "10s"
+
+	/*
+		sessions = NewSessionS(cfg, dm, connMgr)
+		engine.Cache.Clear(nil)
+		args.CGREvent.Tenant = "CHANGED_TNT"
+		if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+			t.Errorf("Exepected %+v, received %+v", expected, err)
+		}
+
+	*/
 }
