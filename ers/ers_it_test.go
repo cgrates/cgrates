@@ -1,3 +1,4 @@
+// +build integration
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -65,5 +66,41 @@ func TestERsAddReader(t *testing.T) {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(erS.rdrs))
 	} else if !reflect.DeepEqual(erS.rdrs["file_reader"].Config(), reader) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", reader, erS.rdrs["file_reader"].Config())
+	}
+}
+
+func TestERsListenAndServeErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:                       "",
+			Type:                     "",
+			RowLength:                0,
+			FieldSep:                 "",
+			HeaderDefineChar:         "",
+			RunDelay:                 0,
+			ConcurrentReqs:           0,
+			SourcePath:               "",
+			ProcessedPath:            "",
+			Opts:                     nil,
+			XMLRootPath:              nil,
+			Tenant:                   nil,
+			Timezone:                 "",
+			Filters:                  nil,
+			Flags:                    nil,
+			FailedCallsPrefix:        "",
+			PartialRecordCache:       0,
+			PartialCacheExpiryAction: "",
+			Fields:                   nil,
+			CacheDumpFields:          nil,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+	err := srv.ListenAndServe(stopChan, cfgRldChan)
+	if err == nil || err.Error() != "unsupported reader type: <>" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "unsupported reader type: <>", err)
 	}
 }
