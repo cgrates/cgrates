@@ -119,7 +119,8 @@
 
 
 "actions": {
-	"enabled": true
+	"enabled": true,
+	"accounts_conns": ["*localhost"]
 },
 
 

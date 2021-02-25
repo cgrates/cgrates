@@ -72,12 +72,13 @@ func (ap *AccountProfile) AccountBalancesBackup() (abb AccountBalancesBackup) {
 	return
 }
 
-func NewDefaultBalance(id string, val *Decimal) *Balance {
+// NewDefaultBalance returns a balance with default costIncrements
+func NewDefaultBalance(id string) *Balance {
 	const torFltr = "*string:~*req.ToR:"
 	return &Balance{
 		ID:    id,
 		Type:  MetaConcrete,
-		Units: val,
+		Units: NewDecimal(0, 0),
 		CostIncrements: []*CostIncrement{
 			{
 				FilterIDs:    []string{torFltr + MetaVoice},

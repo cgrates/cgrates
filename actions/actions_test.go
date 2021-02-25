@@ -64,7 +64,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 				Type:      "*topup",
 				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
-					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+					Value: "10",
 				}},
 			},
 		},
@@ -173,7 +173,7 @@ func TestScheduledActions(t *testing.T) {
 				Type:      utils.MetaLog,
 				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
-					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+					Value: "10",
 				}},
 			},
 		},
@@ -235,7 +235,7 @@ func TestScheduleAction(t *testing.T) {
 				Type:      utils.MetaLog,
 				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
-					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+					Value: "10",
 				}},
 			},
 		},
@@ -361,7 +361,7 @@ func TestV1ScheduleActions(t *testing.T) {
 				Type:      utils.MetaLog,
 				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
-					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+					Value: "10",
 				}},
 			},
 		},
@@ -419,7 +419,7 @@ func TestV1ExecuteActions(t *testing.T) {
 				Type:      utils.MetaLog,
 				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
-					Value: config.NewRSRParsersMustCompile("10", defaultCfg.GeneralCfg().RSRSep),
+					Value: "10",
 				}},
 			},
 		},
@@ -486,7 +486,7 @@ func (dbM *dataDBMockError) GetActionProfileDrv(string, string) (*engine.ActionP
 				Type:      utils.MetaLog,
 				Diktats: []*engine.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
-					Value: config.NewRSRParsersMustCompile("10", ","),
+					Value: "10",
 				}},
 			},
 		},
@@ -535,11 +535,11 @@ type testMockCDRsConn struct {
 }
 
 func (s *testMockCDRsConn) Call(method string, arg interface{}, rply interface{}) error {
-	if call, has := s.calls[method]; !has {
+	call, has := s.calls[method]
+	if !has {
 		return rpcclient.ErrUnsupporteServiceMethod
-	} else {
-		return call(arg, rply)
 	}
+	return call(arg, rply)
 }
 
 func TestCDRLogActionExecute(t *testing.T) {
@@ -1006,7 +1006,7 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 		ID:   "ACT_RESET_ST",
 		Type: utils.MetaResetStatQueue,
 		Diktats: []*engine.APDiktat{{
-			Value: config.NewRSRParsersMustCompile("ST1", utils.InfieldSep),
+			Value: "ST1",
 		}},
 	}
 	exportAction := &actResetStat{

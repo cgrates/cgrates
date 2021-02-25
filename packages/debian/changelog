@@ -145,6 +145,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] Added *sessionChargeable session option to control session charging 
   * [SessionS] Replaced max_call_duration config with default_usage for each ToR
   * [SessionS] Added JSON and GOB BiRPC support
+  * [ActionS] Added *add_balance, *set_balance and *rem_balance
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

@@ -1539,16 +1539,16 @@ type TPActionTarget struct {
 }
 
 type TPAPAction struct {
-	ID            string
-	FilterIDs     []string
-	Blocker       bool
-	TTL           string
-	Type          string
-	Opts          string
-	ActionDiktats []*TPActionDiktat
+	ID        string
+	FilterIDs []string
+	Blocker   bool
+	TTL       string
+	Type      string
+	Opts      string
+	Diktats   []*TPAPDiktat
 }
 
-type TPActionDiktat struct {
+type TPAPDiktat struct {
 	Path  string
 	Value string
 }
