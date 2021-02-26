@@ -91,7 +91,7 @@ func testActionsInitCdrsStore(t *testing.T) {
 		if actsCdrStore, err = NewMySQLStorage(actsCfg.StorDbCfg().Host,
 			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,
 			actsCfg.StorDbCfg().User, actsCfg.StorDbCfg().Password,
-			100, 10, 0); err != nil {
+			100, 10, 0, "UTC"); err != nil {
 			t.Fatal("Could not connect to mysql", err.Error())
 		}
 	case utils.MetaMongo:

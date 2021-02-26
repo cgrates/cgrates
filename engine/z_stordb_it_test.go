@@ -86,7 +86,7 @@ func TestStorDBit(t *testing.T) {
 		if storDB, err = NewMySQLStorage(cfg.StorDbCfg().Host,
 			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
 			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
-			100, 10, 0); err != nil {
+			100, 10, 0, "UTC"); err != nil {
 			t.Fatal(err)
 		}
 		storDB.(*SQLStorage).db.Config.Logger = logger.Default.LogMode(logger.Silent)

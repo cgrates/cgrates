@@ -113,7 +113,8 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 		if connMaxLifetime, err = utils.IfaceAsTInt64(opts[utils.ConnMaxLifetimeCfg]); err != nil {
 			return
 		}
-		db, err = NewMySQLStorage(host, port, name, user, pass, int(maxConn), int(maxIdleConn), int(connMaxLifetime))
+		db, err = NewMySQLStorage(host, port, name, user, pass, int(maxConn), int(maxIdleConn),
+			int(connMaxLifetime), utils.IfaceAsString(opts[utils.MysqlLocation]))
 	case utils.INTERNAL:
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false)
 	default:

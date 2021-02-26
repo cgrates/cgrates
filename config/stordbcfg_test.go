@@ -50,6 +50,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			utils.MaxOpenConnsCfg:    100.,
 			utils.MaxIdleConnsCfg:    10.,
 			utils.ConnMaxLifetimeCfg: 0.,
+			utils.MysqlLocation:      "UTC",
 		},
 	}
 	expected := &StorDbCfg{
@@ -79,6 +80,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			utils.ConnMaxLifetimeCfg: 0.,
 			utils.QueryTimeoutCfg:    "10s",
 			utils.SSLModeCfg:         "disable",
+			utils.MysqlLocation:      "UTC",
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -207,7 +209,8 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 				"max_idle_conns": 10,					
 				"conn_max_lifetime": 0, 			
 				"query_timeout":"10s",
-				"sslmode":"disable",					
+				"sslmode":"disable",		
+				"mysql_location": "UTC",			
 			},
 			"items":{
 				"session_costs": {}, 
@@ -233,6 +236,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			utils.ConnMaxLifetimeCfg: 0.,
 			utils.QueryTimeoutCfg:    "10s",
 			utils.SSLModeCfg:         "disable",
+			utils.MysqlLocation:      "UTC",
 		},
 		utils.ItemsCfg: map[string]interface{}{
 			utils.SessionCostsTBL: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false},
