@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package dispatcherh
+package registrarc
 
 import (
 	"fmt"
@@ -27,8 +27,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewDispatcherHService constructs a DispatcherHService
-func NewDispatcherHService(cfg *config.CGRConfig,
+// NewRegistrarCService constructs a DispatcherHService
+func NewRegistrarCService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager) *DispatcherHostsService {
 	return &DispatcherHostsService{
 		cfg:     cfg,
@@ -51,22 +51,22 @@ func (dhS *DispatcherHostsService) ListenAndServe(stopChan chan struct{}) {
 		select {
 		case <-stopChan:
 			return
-		case <-time.After(dhS.cfg.DispatcherHCfg().RegisterInterval):
+		case <-time.After(dhS.cfg.RegistrarCCfg().Dispatcher.RefreshInterval):
 		}
 	}
 }
 
 // Shutdown is called to shutdown the service
 func (dhS *DispatcherHostsService) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.DispatcherH))
+	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.RegistrarC))
 	dhS.unregisterHosts()
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.DispatcherH))
+	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.RegistrarC))
 	return
 }
 
 func (dhS *DispatcherHostsService) registerHosts() {
-	for _, connID := range dhS.cfg.DispatcherHCfg().DispatchersConns {
-		for tnt, hostCfgs := range dhS.cfg.DispatcherHCfg().Hosts {
+	for _, connID := range dhS.cfg.RegistrarCCfg().Dispatcher.RegistrarSConns {
+		for tnt, hostCfgs := range dhS.cfg.RegistrarCCfg().Dispatcher.Hosts {
 			if tnt == utils.MetaDefault {
 				tnt = dhS.cfg.GeneralCfg().DefaultTenant
 			}
@@ -75,9 +75,9 @@ func (dhS *DispatcherHostsService) registerHosts() {
 				continue
 			}
 			var rply string
-			if err := dhS.connMgr.Call([]string{connID}, nil, utils.DispatcherHv1RegisterHosts, args, &rply); err != nil {
+			if err := dhS.connMgr.Call([]string{connID}, nil, utils.RegistrarSv1RegisterDispatcherHosts, args, &rply); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Unable to set the hosts to the conn with ID <%s> because : %s",
-					utils.DispatcherH, connID, err))
+					utils.RegistrarC, connID, err))
 				continue
 			}
 		}
@@ -87,14 +87,14 @@ func (dhS *DispatcherHostsService) registerHosts() {
 
 func (dhS *DispatcherHostsService) unregisterHosts() {
 	var rply string
-	for _, connID := range dhS.cfg.DispatcherHCfg().DispatchersConns {
-		for tnt, hostCfgs := range dhS.cfg.DispatcherHCfg().Hosts {
+	for _, connID := range dhS.cfg.RegistrarCCfg().Dispatcher.RegistrarSConns {
+		for tnt, hostCfgs := range dhS.cfg.RegistrarCCfg().Dispatcher.Hosts {
 			if tnt == utils.MetaDefault {
 				tnt = dhS.cfg.GeneralCfg().DefaultTenant
 			}
-			if err := dhS.connMgr.Call([]string{connID}, nil, utils.DispatcherHv1UnregisterHosts, NewUnregisterArgs(tnt, hostCfgs), &rply); err != nil {
+			if err := dhS.connMgr.Call([]string{connID}, nil, utils.RegistrarSv1UnregisterDispatcherHosts, NewUnregisterArgs(tnt, hostCfgs), &rply); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Unable to set the hosts with tenant<%s> to the conn with ID <%s> because : %s",
-					utils.DispatcherH, tnt, connID, err))
+					utils.RegistrarC, tnt, connID, err))
 				continue
 			}
 		}

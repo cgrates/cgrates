@@ -38,11 +38,11 @@ func TestDispatcherHCoverage(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	rpcInternal := map[string]chan rpcclient.ClientConnector{}
 	cM := engine.NewConnManager(cfg, rpcInternal)
-	srv := NewDispatcherHostsService(cfg, server, cM, anz, srvDep)
+	srv := NewRegistrarCService(cfg, server, cM, anz, srvDep)
 	if srv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
 	}
-	srv2 := &DispatcherHostsService{
+	srv2 := &RegistrarCService{
 		cfg:     cfg,
 		server:  server,
 		connMgr: cM,
@@ -58,8 +58,8 @@ func TestDispatcherHCoverage(t *testing.T) {
 	}
 
 	serviceName := srv2.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.DispatcherH) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.DispatcherH, serviceName)
+	if !reflect.DeepEqual(serviceName, utils.RegistrarC) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.RegistrarC, serviceName)
 	}
 	shouldRun := srv2.ShouldRun()
 	if !reflect.DeepEqual(shouldRun, false) {

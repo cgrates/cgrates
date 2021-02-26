@@ -506,7 +506,7 @@ const (
 	MetaBlockerError         = "*blocker_error"
 	MetaConfig               = "*config"
 	MetaDispatchers          = "*dispatchers"
-	MetaDispatcherh          = "*dispatcherh"
+	MetaRegistrarC           = "*registrarc"
 	MetaDispatcherHosts      = "*dispatcher_hosts"
 	MetaFilters              = "*filters"
 	MetaCDRs                 = "*cdrs"
@@ -1027,7 +1027,7 @@ const (
 	FilterS     = "FilterS"
 	ThresholdS  = "ThresholdS"
 	DispatcherS = "DispatcherS"
-	DispatcherH = "DispatcherH"
+	RegistrarC  = "RegistrarC"
 	LoaderS     = "LoaderS"
 	ChargerS    = "ChargerS"
 	CacheS      = "CacheS"
@@ -1736,10 +1736,13 @@ const (
 	DispatcherServicePing           = "DispatcherService.Ping"
 )
 
-// DispatcherH APIs
+// RegistrarS APIs
 const (
-	DispatcherHv1RegisterHosts   = "DispatcherHv1.RegisterHosts"
-	DispatcherHv1UnregisterHosts = "DispatcherHv1.UnregisterHosts"
+	RegistrarSv1RegisterDispatcherHosts   = "RegistrarSv1.RegisterDispatcherHosts"
+	RegistrarSv1UnregisterDispatcherHosts = "RegistrarSv1.UnregisterDispatcherHosts"
+
+	RegistrarSv1RegisterRPCHosts   = "RegistrarSv1.RegisterRPCHosts"
+	RegistrarSv1UnregisterRPCHosts = "RegistrarSv1.UnregisterRPCHosts"
 )
 
 // RateProfile APIs
@@ -2145,15 +2148,15 @@ const (
 
 // HTTPCfg
 const (
-	HTTPJsonRPCURLCfg          = "json_rpc_url"
-	DispatchersRegistrarURLCfg = "dispatchers_registrar_url"
-	HTTPWSURLCfg               = "ws_url"
-	HTTPFreeswitchCDRsURLCfg   = "freeswitch_cdrs_url"
-	HTTPCDRsURLCfg             = "http_cdrs"
-	HTTPUseBasicAuthCfg        = "use_basic_auth"
-	HTTPAuthUsersCfg           = "auth_users"
-	HTTPClientOptsCfg          = "client_opts"
-	ConfigsURL                 = "configs_url"
+	HTTPJsonRPCURLCfg        = "json_rpc_url"
+	RegistrarSURLCfg         = "registrars_url"
+	HTTPWSURLCfg             = "ws_url"
+	HTTPFreeswitchCDRsURLCfg = "freeswitch_cdrs_url"
+	HTTPCDRsURLCfg           = "http_cdrs"
+	HTTPUseBasicAuthCfg      = "use_basic_auth"
+	HTTPAuthUsersCfg         = "auth_users"
+	HTTPClientOptsCfg        = "client_opts"
+	ConfigsURL               = "configs_url"
 
 	HTTPClientTLSClientConfigCfg       = "skipTlsVerify"
 	HTTPClientTLSHandshakeTimeoutCfg   = "tlsHandshakeTimeout"
@@ -2478,13 +2481,13 @@ const (
 	CacheDumpFieldsCfg          = "cache_dump_fields"
 )
 
-// DispatcherHCfg
+// RegistrarCCfg
 const (
-	DispatchersConnsCfg  = "dispatchers_conns"
-	HostsCfg             = "hosts"
-	RegisterIntervalCfg  = "register_interval"
-	RegisterTransportCfg = "register_transport"
-	RegisterTLSCfg       = "register_tls"
+	RPCCfg             = "rpc"
+	DispatcherCfg      = "dispatcher"
+	RegistrarsConnsCfg = "registrars_conns"
+	HostsCfg           = "hosts"
+	RefreshIntervalCfg = "refresh_interval"
 )
 
 // APIBanCfg

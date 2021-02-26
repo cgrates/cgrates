@@ -1044,60 +1044,62 @@ func TestConfigSanityCache(t *testing.T) {
 	}
 }
 
-func TestConfigSanityDispatcherH(t *testing.T) {
+func TestConfigSanityRegistrarCRPC(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
-	cfg.dispatcherHCfg = &DispatcherHCfg{
-		Enabled: true,
-		Hosts: map[string][]*DispatcherHRegistarCfg{
-			"hosts": {},
+	cfg.registrarCCfg = &RegistrarCCfgs{
+		RPC: &RegistrarCCfg{
+			Enabled: true,
+			Hosts: map[string][]*RemoteHost{
+				"hosts": {},
+			},
 		},
 	}
 
-	expected := "<DispatcherH> the register imterval needs to be bigger than 0"
+	expected := "<RegistrarC> the register imterval needs to be bigger than 0"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dispatcherHCfg.Hosts = nil
-	expected = "<DispatcherH> missing dispatcher host IDs"
+	cfg.registrarCCfg.RPC.Hosts = nil
+	expected = "<RegistrarC> missing RPC host IDs"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dispatcherHCfg.RegisterInterval = 2
-	cfg.dispatcherHCfg.Hosts = map[string][]*DispatcherHRegistarCfg{
+	cfg.registrarCCfg.RPC.RefreshInterval = 2
+	cfg.registrarCCfg.RPC.Hosts = map[string][]*RemoteHost{
 		"hosts": {
 			{
 				ID: "randomID",
 			},
 		},
 	}
-	expected = "<DispatcherH> unsupported transport <> for host <hosts:randomID>"
+	expected = "<RegistrarC> unsupported transport <> for host <hosts:randomID>"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dispatcherHCfg.Hosts["hosts"][0].RegisterTransport = utils.MetaJSON
-	expected = "<DispatcherH> missing dispatcher connection IDs"
+	cfg.registrarCCfg.RPC.Hosts["hosts"][0].Transport = utils.MetaJSON
+	expected = "<RegistrarC> missing RPC connection IDs"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dispatcherHCfg.DispatchersConns = []string{utils.MetaInternal}
-	expected = "<DispatcherH> internal connection IDs are not supported"
+	cfg.registrarCCfg.RPC.RegistrarSConns = []string{utils.MetaInternal}
+	expected = "<RegistrarC> internal connection IDs are not supported"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dispatcherHCfg.DispatchersConns = []string{utils.MetaLocalHost}
-	expected = "<DispatcherH> connection with id: <*localhost> unsupported transport <*json>"
+	cfg.registrarCCfg.RPC.RegistrarSConns = []string{utils.MetaLocalHost}
+	expected = "<RegistrarC> connection with id: <*localhost> unsupported transport <*json>"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dispatcherHCfg.DispatchersConns = []string{"*conn1"}
-	expected = "<DispatcherH> connection with id: <*conn1> not defined"
+	cfg.registrarCCfg.RPC.RegistrarSConns = []string{"*conn1"}
+	expected = "<RegistrarC> connection with id: <*conn1> not defined"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1106,7 +1108,76 @@ func TestConfigSanityDispatcherH(t *testing.T) {
 		utils.MetaLocalHost: {},
 		"*conn1":            {},
 	}
-	expected = "<DispatcherH> connection with id: <*conn1> needs to have only one host"
+	expected = "<RegistrarC> connection with id: <*conn1> needs to have only one host"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+}
+func TestConfigSanityRegistrarCDispatcher(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+
+	cfg.registrarCCfg = &RegistrarCCfgs{
+		Dispatcher: &RegistrarCCfg{
+			Enabled: true,
+			Hosts: map[string][]*RemoteHost{
+				"hosts": {},
+			},
+		},
+	}
+
+	expected := "<RegistrarC> the register imterval needs to be bigger than 0"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.registrarCCfg.Dispatcher.Hosts = nil
+	expected = "<RegistrarC> missing dispatcher host IDs"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.registrarCCfg.Dispatcher.RefreshInterval = 2
+	cfg.registrarCCfg.Dispatcher.Hosts = map[string][]*RemoteHost{
+		"hosts": {
+			{
+				ID: "randomID",
+			},
+		},
+	}
+	expected = "<RegistrarC> unsupported transport <> for host <hosts:randomID>"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.registrarCCfg.Dispatcher.Hosts["hosts"][0].Transport = utils.MetaJSON
+	expected = "<RegistrarC> missing dispatcher connection IDs"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.registrarCCfg.Dispatcher.RegistrarSConns = []string{utils.MetaInternal}
+	expected = "<RegistrarC> internal connection IDs are not supported"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.registrarCCfg.Dispatcher.RegistrarSConns = []string{utils.MetaLocalHost}
+	expected = "<RegistrarC> connection with id: <*localhost> unsupported transport <*json>"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.registrarCCfg.Dispatcher.RegistrarSConns = []string{"*conn1"}
+	expected = "<RegistrarC> connection with id: <*conn1> not defined"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.rpcConns = RPCConns{
+		utils.MetaLocalHost: {},
+		"*conn1":            {},
+	}
+	expected = "<RegistrarC> connection with id: <*conn1> needs to have only one host"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

@@ -75,14 +75,14 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
 		clientOpts[k] = v
 	}
 	return map[string]interface{}{
-		utils.HTTPJsonRPCURLCfg:          httpcfg.HTTPJsonRPCURL,
-		utils.DispatchersRegistrarURLCfg: httpcfg.DispatchersRegistrarURL,
-		utils.HTTPWSURLCfg:               httpcfg.HTTPWSURL,
-		utils.HTTPFreeswitchCDRsURLCfg:   httpcfg.HTTPFreeswitchCDRsURL,
-		utils.HTTPCDRsURLCfg:             httpcfg.HTTPCDRsURL,
-		utils.HTTPUseBasicAuthCfg:        httpcfg.HTTPUseBasicAuth,
-		utils.HTTPAuthUsersCfg:           httpcfg.HTTPAuthUsers,
-		utils.HTTPClientOptsCfg:          clientOpts,
+		utils.HTTPJsonRPCURLCfg:        httpcfg.HTTPJsonRPCURL,
+		utils.RegistrarSURLCfg:         httpcfg.DispatchersRegistrarURL,
+		utils.HTTPWSURLCfg:             httpcfg.HTTPWSURL,
+		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.HTTPFreeswitchCDRsURL,
+		utils.HTTPCDRsURLCfg:           httpcfg.HTTPCDRsURL,
+		utils.HTTPUseBasicAuthCfg:      httpcfg.HTTPUseBasicAuth,
+		utils.HTTPAuthUsersCfg:         httpcfg.HTTPAuthUsers,
+		utils.HTTPClientOptsCfg:        clientOpts,
 	}
 }
 

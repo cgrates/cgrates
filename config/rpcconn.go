@@ -118,6 +118,7 @@ func (rC RPCConn) Clone() (cln *RPCConn) {
 
 // RemoteHost connection config
 type RemoteHost struct {
+	ID          string
 	Address     string
 	Transport   string
 	Synchronous bool
@@ -127,6 +128,9 @@ type RemoteHost struct {
 func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) {
 	if jsnCfg == nil {
 		return
+	}
+	if jsnCfg.Id != nil {
+		rh.ID = *jsnCfg.Id
 	}
 	if jsnCfg.Address != nil {
 		rh.Address = *jsnCfg.Address
@@ -146,6 +150,7 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (rh *RemoteHost) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
+		utils.IDCfg:          rh.ID,
 		utils.AddressCfg:     rh.Address,
 		utils.TransportCfg:   rh.Transport,
 		utils.SynchronousCfg: rh.Synchronous,
@@ -160,5 +165,41 @@ func (rh RemoteHost) Clone() (cln *RemoteHost) {
 		Transport:   rh.Transport,
 		Synchronous: rh.Synchronous,
 		TLS:         rh.TLS,
+	}
+}
+
+// UpdateRPCCons will parse each conn and update only
+// the conns that have the same ID
+func UpdateRPCCons(rpcConns RPCConns, newHosts map[string]*RemoteHost) (connIDs utils.StringSet) {
+	connIDs = make(utils.StringSet)
+	for rpcKey, rpcPool := range rpcConns {
+		for _, rh := range rpcPool.Conns {
+			newHost, has := newHosts[rh.ID]
+			if !has {
+				continue
+			}
+			connIDs.Add(rpcKey)
+			rh.Address = newHost.Address
+			rh.Transport = newHost.Transport
+			rh.Synchronous = newHost.Synchronous
+			rh.TLS = newHost.TLS
+		}
+	}
+	return
+}
+
+// RemoveRPCCons will parse each conn and reset only
+// the conns that have the same ID
+func RemoveRPCCons(rpcConns RPCConns, newHosts utils.StringSet) {
+	for _, rpcPool := range rpcConns {
+		for _, rh := range rpcPool.Conns {
+			if !newHosts.Has(rh.ID) {
+				continue
+			}
+			rh.Address = ""
+			rh.Transport = ""
+			rh.Synchronous = false
+			rh.TLS = false
+		}
 	}
 }

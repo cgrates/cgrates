@@ -133,9 +133,8 @@ func (dps DispatcherProfiles) Sort() {
 
 // DispatcherHost represents one virtual host used by dispatcher
 type DispatcherHost struct {
-	Tenant  string
-	ID      string
-	Conn    *config.RemoteHost
+	Tenant string
+	*config.RemoteHost
 	rpcConn rpcclient.ClientConnector
 }
 
@@ -155,7 +154,7 @@ func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply int
 	if dH.rpcConn == nil {
 		// connect the rpcConn
 		cfg := config.CgrConfig()
-		if dH.rpcConn, err = NewRPCConnection(dH.Conn,
+		if dH.rpcConn, err = NewRPCConnection(dH.RemoteHost,
 			cfg.TLSCfg().ClientKey,
 			cfg.TLSCfg().ClientCerificate, cfg.TLSCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,

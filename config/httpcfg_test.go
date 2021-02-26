@@ -72,13 +72,13 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 	"http": {},
 }`
 	eMap := map[string]interface{}{
-		utils.HTTPJsonRPCURLCfg:          "/jsonrpc",
-		utils.DispatchersRegistrarURLCfg: "/dispatchers_registrar",
-		utils.HTTPWSURLCfg:               "/ws",
-		utils.HTTPFreeswitchCDRsURLCfg:   "/freeswitch_json",
-		utils.HTTPCDRsURLCfg:             "/cdr_http",
-		utils.HTTPUseBasicAuthCfg:        false,
-		utils.HTTPAuthUsersCfg:           map[string]string{},
+		utils.HTTPJsonRPCURLCfg:        "/jsonrpc",
+		utils.RegistrarSURLCfg:         "/dispatchers_registrar",
+		utils.HTTPWSURLCfg:             "/ws",
+		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
+		utils.HTTPCDRsURLCfg:           "/cdr_http",
+		utils.HTTPUseBasicAuthCfg:      false,
+		utils.HTTPAuthUsersCfg:         map[string]string{},
 		utils.HTTPClientOptsCfg: map[string]interface{}{
 			utils.HTTPClientTLSClientConfigCfg:       false,
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
@@ -113,12 +113,12 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
      },
 }`
 	eMap := map[string]interface{}{
-		utils.HTTPJsonRPCURLCfg:          "/rpc",
-		utils.DispatchersRegistrarURLCfg: "/dispatchers_registrar",
-		utils.HTTPWSURLCfg:               "",
-		utils.HTTPFreeswitchCDRsURLCfg:   "/freeswitch_json",
-		utils.HTTPCDRsURLCfg:             "/cdr_http",
-		utils.HTTPUseBasicAuthCfg:        true,
+		utils.HTTPJsonRPCURLCfg:        "/rpc",
+		utils.RegistrarSURLCfg:         "/dispatchers_registrar",
+		utils.HTTPWSURLCfg:             "",
+		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
+		utils.HTTPCDRsURLCfg:           "/cdr_http",
+		utils.HTTPUseBasicAuthCfg:      true,
 		utils.HTTPAuthUsersCfg: map[string]string{
 			"user1": "authenticated",
 			"user2": "authenticated",

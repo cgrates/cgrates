@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package dispatcherh
+package registrarc
 
 import (
 	"bytes"
@@ -56,8 +56,8 @@ func TestRegisterArgsAsDispatcherHosts(t *testing.T) {
 	exp := []*engine.DispatcherHost{
 		{
 			Tenant: "cgrates.org",
-			ID:     "Host1",
-			Conn: &config.RemoteHost{
+			RemoteHost: &config.RemoteHost{
+				ID:        "Host1",
 				Address:   "127.0.0.1:2012",
 				TLS:       true,
 				Transport: utils.MetaJSON,
@@ -65,8 +65,8 @@ func TestRegisterArgsAsDispatcherHosts(t *testing.T) {
 		},
 		{
 			Tenant: "cgrates.org",
-			ID:     "Host2",
-			Conn: &config.RemoteHost{
+			RemoteHost: &config.RemoteHost{
+				ID:        "Host2",
 				Address:   "127.0.0.1:2013",
 				TLS:       false,
 				Transport: utils.MetaGOB,
@@ -149,7 +149,7 @@ func TestRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	args := utils.NewServerRequest(utils.DispatcherHv1RegisterHosts, raJSON, id)
+	args := utils.NewServerRequest(utils.RegistrarSv1RegisterDispatcherHosts, raJSON, id)
 	argsJSON, err := json.Marshal(args)
 	if err != nil {
 		t.Fatal(err)
@@ -168,8 +168,8 @@ func TestRegister(t *testing.T) {
 
 	host1 := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
-		ID:     "Host1",
-		Conn: &config.RemoteHost{
+		RemoteHost: &config.RemoteHost{
+			ID:        "Host1",
 			Address:   "127.0.0.1:2012",
 			TLS:       true,
 			Transport: utils.MetaJSON,
@@ -177,8 +177,8 @@ func TestRegister(t *testing.T) {
 	}
 	host2 := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
-		ID:     "Host2",
-		Conn: &config.RemoteHost{
+		RemoteHost: &config.RemoteHost{
+			ID:        "Host2",
 			Address:   "127.0.0.1:2013",
 			TLS:       false,
 			Transport: utils.MetaGOB,
@@ -210,7 +210,7 @@ func TestRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	uargs := utils.NewServerRequest(utils.DispatcherHv1UnregisterHosts, uaJSON, id)
+	uargs := utils.NewServerRequest(utils.RegistrarSv1UnregisterDispatcherHosts, uaJSON, id)
 	uargsJSON, err := json.Marshal(uargs)
 	if err != nil {
 		t.Fatal(err)
@@ -264,7 +264,7 @@ func TestRegister(t *testing.T) {
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
-	args2 := utils.NewServerRequest(utils.DispatcherHv1RegisterHosts, id, id)
+	args2 := utils.NewServerRequest(utils.RegistrarSv1RegisterDispatcherHosts, id, id)
 	args2JSON, err := json.Marshal(args2)
 	if err != nil {
 		t.Fatal(err)
@@ -273,7 +273,7 @@ func TestRegister(t *testing.T) {
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
-	args2 = utils.NewServerRequest(utils.DispatcherHv1UnregisterHosts, id, id)
+	args2 = utils.NewServerRequest(utils.RegistrarSv1UnregisterDispatcherHosts, id, id)
 	args2JSON, err = json.Marshal(args2)
 	if err != nil {
 		t.Fatal(err)
@@ -301,7 +301,7 @@ func (*errRecorder) Header() http.Header        { return make(http.Header) }
 func (*errRecorder) Write([]byte) (int, error)  { return 0, io.EOF }
 func (*errRecorder) WriteHeader(statusCode int) {}
 
-func TestRegistar(t *testing.T) {
+func TestRegistrar(t *testing.T) {
 	w := httptest.NewRecorder()
 	ra := &RegisterArgs{
 		Tenant: "cgrates.org",
@@ -326,7 +326,7 @@ func TestRegistar(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	args := utils.NewServerRequest(utils.DispatcherHv1RegisterHosts, raJSON, id)
+	args := utils.NewServerRequest(utils.RegistrarSv1RegisterDispatcherHosts, raJSON, id)
 	argsJSON, err := json.Marshal(args)
 	if err != nil {
 		t.Fatal(err)
@@ -337,18 +337,18 @@ func TestRegistar(t *testing.T) {
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
 
-	Registar(w, req)
+	Registrar(w, req)
 	exp := "{\"id\":1,\"result\":\"OK\",\"error\":null}\n"
 	if w.Body.String() != exp {
 		t.Errorf("Expected: %q ,received: %q", exp, w.Body.String())
 	}
 
 	w = httptest.NewRecorder()
-	Registar(w, req)
+	Registrar(w, req)
 	exp = "{\"id\":0,\"result\":null,\"error\":\"EOF\"}\n"
 	if w.Body.String() != exp {
 		t.Errorf("Expected: %q ,received: %q", exp, w.Body.String())
 	}
 
-	Registar(new(errRecorder), req)
+	Registrar(new(errRecorder), req)
 }

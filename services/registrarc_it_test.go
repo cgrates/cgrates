@@ -55,7 +55,7 @@ func TestDispatcherHReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	connMngr := engine.NewConnManager(cfg, nil)
-	srv := NewDispatcherHostsService(cfg, server, connMngr, anz, srvDep)
+	srv := NewRegistrarCService(cfg, server, connMngr, anz, srvDep)
 	srvMngr.AddServices(srv,
 		NewLoaderService(cfg, db, filterSChan, server,
 			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
@@ -69,7 +69,7 @@ func TestDispatcherHReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatcherh", "all_mongo"),
-		Section: config.DispatcherHJson,
+		Section: config.RegistrarCJson,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -90,7 +90,7 @@ func TestDispatcherHReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.DispatcherHCfg().Enabled = false
-	cfg.GetReloadChan(config.DispatcherHJson) <- struct{}{}
+	cfg.GetReloadChan(config.RegistrarCJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")

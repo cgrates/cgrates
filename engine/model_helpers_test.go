@@ -3919,8 +3919,8 @@ func TestAPItoDispatcherHost(t *testing.T) {
 
 	eOut := &DispatcherHost{
 		Tenant: "Tenant1",
-		ID:     "ID1",
-		Conn: &config.RemoteHost{
+		RemoteHost: &config.RemoteHost{
+			ID:        "ID1",
 			Address:   "Address1",
 			Transport: "*json",
 		},
@@ -3940,8 +3940,8 @@ func TestAPItoDispatcherHost(t *testing.T) {
 	}
 	eOut = &DispatcherHost{
 		Tenant: "Tenant2",
-		ID:     "ID2",
-		Conn: &config.RemoteHost{
+		RemoteHost: &config.RemoteHost{
+			ID:        "ID2",
 			Address:   "Address1",
 			Transport: "*json",
 			TLS:       true,
@@ -3955,8 +3955,8 @@ func TestAPItoDispatcherHost(t *testing.T) {
 func TestDispatcherHostToAPI(t *testing.T) {
 	dph := &DispatcherHost{
 		Tenant: "Tenant1",
-		ID:     "ID1",
-		Conn: &config.RemoteHost{
+		RemoteHost: &config.RemoteHost{
+			ID:        "ID1",
 			Address:   "Address1",
 			Transport: "*json",
 			TLS:       true,

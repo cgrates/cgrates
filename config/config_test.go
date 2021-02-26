@@ -1659,7 +1659,7 @@ func TestLoadDispatcherHCfgError(t *testing.T) {
 	}
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err := cgrConfig.loadDispatcherHCfg(cgrCfgJSON); err == nil || err.Error() != expected {
+	} else if err := cgrConfig.loadRegistrarCCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -4045,13 +4045,13 @@ func TestV1GetConfigHTTP(t *testing.T) {
 	var reply map[string]interface{}
 	expected := map[string]interface{}{
 		HTTP_JSN: map[string]interface{}{
-			utils.HTTPJsonRPCURLCfg:          "/jsonrpc",
-			utils.DispatchersRegistrarURLCfg: "/dispatchers_registrar",
-			utils.HTTPWSURLCfg:               "/ws",
-			utils.HTTPFreeswitchCDRsURLCfg:   "/freeswitch_json",
-			utils.HTTPCDRsURLCfg:             "/cdr_http",
-			utils.HTTPUseBasicAuthCfg:        false,
-			utils.HTTPAuthUsersCfg:           map[string]string{},
+			utils.HTTPJsonRPCURLCfg:        "/jsonrpc",
+			utils.RegistrarSURLCfg:         "/dispatchers_registrar",
+			utils.HTTPWSURLCfg:             "/ws",
+			utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
+			utils.HTTPCDRsURLCfg:           "/cdr_http",
+			utils.HTTPUseBasicAuthCfg:      false,
+			utils.HTTPAuthUsersCfg:         map[string]string{},
 			utils.HTTPClientOptsCfg: map[string]interface{}{
 				utils.HTTPClientTLSClientConfigCfg:       false,
 				utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
@@ -4601,15 +4601,15 @@ func TestV1GetConfigDispatcherS(t *testing.T) {
 func TestV1GetConfigDispatcherH(t *testing.T) {
 	var reply map[string]interface{}
 	expected := map[string]interface{}{
-		DispatcherHJson: map[string]interface{}{
-			utils.EnabledCfg:          false,
-			utils.DispatchersConnsCfg: []string{},
-			utils.HostsCfg:            map[string][]map[string]interface{}{},
-			utils.RegisterIntervalCfg: "5m0s",
+		RegistrarCJson: map[string]interface{}{
+			utils.EnabledCfg:         false,
+			utils.RegistrarsConnsCfg: []string{},
+			utils.HostsCfg:           map[string][]map[string]interface{}{},
+			utils.RefreshIntervalCfg: "5m0s",
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
-	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: DispatcherHJson}, &reply); err != nil {
+	if err := cfgCgr.V1GetConfig(&SectionWithOpts{Section: RegistrarCJson}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -5393,7 +5393,7 @@ func TestV1GetConfigAsJSONDispatcherH(t *testing.T) {
 	var reply string
 	expected := `{"dispatcherh":{"dispatchers_conns":[],"enabled":false,"hosts":{},"register_interval":"5m0s"}}`
 	cgrCfg := NewDefaultCGRConfig()
-	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: DispatcherHJson}, &reply); err != nil {
+	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithOpts{Section: RegistrarCJson}, &reply); err != nil {
 		t.Error(err)
 	} else if expected != reply {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
@@ -5916,7 +5916,7 @@ func TestReloadSections(t *testing.T) {
 	for _, section := range []string{RPCConnsJsonName, HTTP_JSN, SCHEDULER_JSN, RALS_JSN, CDRS_JSN, ERsJson,
 		SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson,
 		DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON, RouteSJson,
-		LoaderJson, DispatcherSJson, ApierS, EEsJson, SIPAgentJson, RateSJson, DispatcherHJson, AnalyzerCfgJson} {
+		LoaderJson, DispatcherSJson, ApierS, EEsJson, SIPAgentJson, RateSJson, RegistrarCJson, AnalyzerCfgJson} {
 		for _, section := range sortedCfgSections {
 			cfgCgr.rldChans[section] = make(chan struct{}, 1)
 		}
@@ -6123,8 +6123,8 @@ func TestCGRConfigClone(t *testing.T) {
 	if !reflect.DeepEqual(cfg.dispatcherSCfg, rcv.dispatcherSCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.dispatcherSCfg), utils.ToJSON(rcv.dispatcherSCfg))
 	}
-	if !reflect.DeepEqual(cfg.dispatcherHCfg, rcv.dispatcherHCfg) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.dispatcherHCfg), utils.ToJSON(rcv.dispatcherHCfg))
+	if !reflect.DeepEqual(cfg.registrarCCfg, rcv.registrarCCfg) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.registrarCCfg), utils.ToJSON(rcv.registrarCCfg))
 	}
 	if !reflect.DeepEqual(cfg.loaderCgrCfg, rcv.loaderCgrCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.loaderCgrCfg), utils.ToJSON(rcv.loaderCgrCfg))

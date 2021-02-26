@@ -111,7 +111,7 @@ func DecodeServerRequest(r io.Reader) (req *serverRequest, err error) {
 	return
 }
 
-// NewServerRequest used in dispatcherh tests
+// NewServerRequest used in registrarc tests
 func NewServerRequest(method string, params, id json.RawMessage) *serverRequest {
 	return &serverRequest{
 		Method: method,
