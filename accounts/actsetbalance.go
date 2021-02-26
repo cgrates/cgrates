@@ -44,24 +44,70 @@ func actSetAccount(dm *engine.DataManager, tnt, acntID string, diktats []*utils.
 		// check if we have a valid path(e.g. *balance.Test.ID)
 		path := strings.Split(dk.Path, utils.NestingSep)
 		// check the path to be a valid one
-		if len(path) < 3 && path[0] != utils.MetaBalance {
-			return utils.ErrWrongPath
-		}
-		bal, has := qAcnt.Balances[path[1]]
-		if !has {
-			// no balance for that ID create one
-			bal = utils.NewDefaultBalance(path[1])
-			if qAcnt.Balances == nil {
-				// in case the account has no balance create the balance map
-				qAcnt.Balances = make(map[string]*utils.Balance)
+
+		switch path[0] {
+		case utils.MetaBalance:
+			if len(path) < 3 {
+				return utils.ErrWrongPath
 			}
-			qAcnt.Balances[path[1]] = bal
-		}
-		if err = actSetBalance(bal, path[2:], dk.Value, reset); err != nil {
-			return
+			bal, has := qAcnt.Balances[path[1]]
+			if !has {
+				// no balance for that ID create one
+				bal = utils.NewDefaultBalance(path[1])
+				if qAcnt.Balances == nil {
+					// in case the account has no balance create the balance map
+					qAcnt.Balances = make(map[string]*utils.Balance)
+				}
+				qAcnt.Balances[path[1]] = bal
+			}
+			if err = actSetBalance(bal, path[2:], dk.Value, reset); err != nil {
+				return
+			}
+		case utils.MetaAccount:
+			// special case in order to handle account field set in *set_balance/*add_balance action
+			if len(path) < 2 {
+				return utils.ErrWrongPath
+			}
+			if err = actSetAccountFields(qAcnt, path[1:], dk.Value); err != nil {
+				return
+			}
+		default:
+			return utils.ErrWrongPath
 		}
 	}
 	return dm.SetAccountProfile(qAcnt, false)
+}
+
+// actSetAccountFields sets the fields inside the account
+func actSetAccountFields(ac *utils.AccountProfile, path []string, value string) (err error) {
+	switch path[0] {
+	// the tenant and ID should come from user and should not change
+	case utils.FilterIDs:
+		ac.FilterIDs = utils.NewStringSet(strings.Split(value, utils.InfieldSep)).AsSlice()
+	case utils.ActivationIntervalString:
+		// similar how the TP are loaded split the value based on ;
+		// the first element is ActivationTime and the second if any ExpiryTime
+		ac.ActivationInterval = &utils.ActivationInterval{}
+		valSpl := strings.SplitN(value, utils.InfieldSep, 2)
+		if ac.ActivationInterval.ActivationTime, err = utils.ParseTimeDetectLayout(valSpl[0], utils.EmptyString); err != nil {
+			return
+		}
+		if len(valSpl) == 2 {
+			ac.ActivationInterval.ExpiryTime, err = utils.ParseTimeDetectLayout(valSpl[1], utils.EmptyString)
+		}
+	case utils.Weights:
+		ac.Weights, err = utils.NewDynamicWeightsFromString(value, utils.InfieldSep, utils.ANDSep)
+	case utils.Opts:
+		if ac.Opts == nil { // if the options are not initilized already init them here
+			ac.Opts = make(map[string]interface{})
+		}
+		err = utils.MapStorage(ac.Opts).Set(path[1:], value)
+	case utils.ThresholdIDs:
+		ac.ThresholdIDs = utils.NewStringSet(strings.Split(value, utils.InfieldSep)).AsSlice()
+	default:
+		err = utils.ErrWrongPath
+	}
+	return
 }
 
 // actSetBalance will set the field at path from balance with value
@@ -100,6 +146,9 @@ func actSetBalance(bal *utils.Balance, path []string, value string, reset bool) 
 		// just recreate them from strinf
 		bal.UnitFactors, err = actNewUnitFactorsFromString(value)
 	case utils.Opts:
+		if bal.Opts == nil { // if the options are not initilized already init them here
+			bal.Opts = make(map[string]interface{})
+		}
 		err = utils.MapStorage(bal.Opts).Set(path[1:], value)
 	case utils.CostIncrements:
 		// just recreate them from strinf
