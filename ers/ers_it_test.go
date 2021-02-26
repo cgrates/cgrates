@@ -22,6 +22,7 @@ package ers
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -166,3 +167,182 @@ func TestERsProcessEventErr(t *testing.T) {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "unsupported reqType: <>", err)
 	}
 }
+
+func TestERsCloseAllRdrs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:                       "",
+			Type:                     "",
+			RowLength:                0,
+			FieldSep:                 "",
+			HeaderDefineChar:         "",
+			RunDelay:                 0,
+			ConcurrentReqs:           0,
+			SourcePath:               "",
+			ProcessedPath:            "",
+			Opts:                     nil,
+			XMLRootPath:              nil,
+			Tenant:                   nil,
+			Timezone:                 "",
+			Filters:                  nil,
+			Flags:                    nil,
+			FailedCallsPrefix:        "",
+			PartialRecordCache:       0,
+			PartialCacheExpiryAction: "",
+			Fields:                   nil,
+			CacheDumpFields:          nil,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	srv.stopLsn[""] = make(chan struct{}, 1)
+	srv.closeAllRdrs()
+}
+func TestERsListenAndServeRdrErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:                       "",
+			Type:                     utils.MetaNone,
+			RowLength:                0,
+			FieldSep:                 "",
+			HeaderDefineChar:         "",
+			RunDelay:                 0,
+			ConcurrentReqs:           0,
+			SourcePath:               "",
+			ProcessedPath:            "",
+			Opts:                     nil,
+			XMLRootPath:              nil,
+			Tenant:                   nil,
+			Timezone:                 "",
+			Filters:                  nil,
+			Flags:                    nil,
+			FailedCallsPrefix:        "",
+			PartialRecordCache:       0,
+			PartialCacheExpiryAction: "",
+			Fields:                   nil,
+			CacheDumpFields:          nil,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+	srv.rdrErr = make(chan error, 1)
+	srv.rdrErr <- utils.ErrNotFound
+	time.Sleep(30 * time.Millisecond)
+	err := srv.ListenAndServe(stopChan, cfgRldChan)
+	if err == nil || err != utils.ErrNotFound {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestERsListenAndServeStopchan(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:                       "",
+			Type:                     utils.MetaNone,
+			RowLength:                0,
+			FieldSep:                 "",
+			HeaderDefineChar:         "",
+			RunDelay:                 0,
+			ConcurrentReqs:           0,
+			SourcePath:               "",
+			ProcessedPath:            "",
+			Opts:                     nil,
+			XMLRootPath:              nil,
+			Tenant:                   nil,
+			Timezone:                 "",
+			Filters:                  nil,
+			Flags:                    nil,
+			FailedCallsPrefix:        "",
+			PartialRecordCache:       0,
+			PartialCacheExpiryAction: "",
+			Fields:                   nil,
+			CacheDumpFields:          nil,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+	stopChan <- struct{}{}
+	time.Sleep(30 * time.Millisecond)
+	err := srv.ListenAndServe(stopChan, cfgRldChan)
+	if err != nil {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+
+/*
+func TestERsListenAndServeRdrEvents(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:                       "",
+			Type:                     utils.MetaNone,
+			RowLength:                0,
+			FieldSep:                 "",
+			HeaderDefineChar:         "",
+			RunDelay:                 0,
+			ConcurrentReqs:           0,
+			SourcePath:               "",
+			ProcessedPath:            "",
+			Opts:                     nil,
+			XMLRootPath:              nil,
+			Tenant:                   nil,
+			Timezone:                 "",
+			Filters:                  nil,
+			Flags:                    nil,
+			FailedCallsPrefix:        "",
+			PartialRecordCache:       0,
+			PartialCacheExpiryAction: "",
+			Fields:                   nil,
+			CacheDumpFields:          nil,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+	srv.rdrEvents = make(chan *erEvent, 1)
+	srv.rdrEvents <- &erEvent{
+		cgrEvent: &utils.CGREvent{
+			Tenant: "",
+			ID:     "",
+			Time:   nil,
+			Event:  nil,
+			Opts:   nil,
+		},
+		rdrCfg: &config.EventReaderCfg{
+			ID:                       "",
+			Type:                     "",
+			RowLength:                0,
+			FieldSep:                 "",
+			HeaderDefineChar:         "",
+			RunDelay:                 0,
+			ConcurrentReqs:           0,
+			SourcePath:               "",
+			ProcessedPath:            "",
+			Opts:                     nil,
+			XMLRootPath:              nil,
+			Tenant:                   nil,
+			Timezone:                 "",
+			Filters:                  nil,
+			Flags:                    nil,
+			FailedCallsPrefix:        "",
+			PartialRecordCache:       0,
+			PartialCacheExpiryAction: "",
+			Fields:                   nil,
+			CacheDumpFields:          nil,
+		},
+	}
+	time.Sleep(30 * time.Millisecond)
+	err := srv.ListenAndServe(stopChan, cfgRldChan)
+	if err != nil {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+*/
