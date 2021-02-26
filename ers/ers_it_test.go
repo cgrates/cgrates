@@ -191,8 +191,10 @@ func TestERsListenAndServeRdrEvents(t *testing.T) {
 			ID: "",
 		},
 	}
-	srv.rdrErr <- utils.ErrNotFound
-	time.Sleep(10 * time.Millisecond)
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		srv.rdrErr <- utils.ErrNotFound
+	}()
 	err := srv.ListenAndServe(stopChan, cfgRldChan)
 	if err == nil || err != utils.ErrNotFound {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrNotFound, err)
@@ -213,8 +215,10 @@ func TestERsListenAndServeCfgRldChan(t *testing.T) {
 	cfgRldChan := make(chan struct{}, 1)
 	srv.rdrErr = make(chan error, 1)
 	cfgRldChan <- struct{}{}
-	srv.rdrErr <- utils.ErrNotFound
-	time.Sleep(10 * time.Millisecond)
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		srv.rdrErr <- utils.ErrNotFound
+	}()
 	err := srv.ListenAndServe(stopChan, cfgRldChan)
 	if err == nil || err != utils.ErrNotFound {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrNotFound, err)
@@ -245,10 +249,80 @@ func TestERsListenAndServeCfgRldChan2(t *testing.T) {
 	srv.rdrErr = make(chan error, 1)
 
 	cfgRldChan <- struct{}{}
-	srv.rdrErr <- utils.ErrNotFound
-	time.Sleep(10 * time.Millisecond)
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		srv.rdrErr <- utils.ErrNotFound
+	}()
 	err := srv.ListenAndServe(stopChan, cfgRldChan)
 	if err == nil || err != utils.ErrNotFound {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestERsListenAndServeCfgRldChan3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	exp := &CSVFileER{
+		cgrCfg: cfg,
+		cfgIdx: 0,
+	}
+	var expected EventReader = exp
+	srv.rdrs = map[string]EventReader{
+		"test": expected,
+	}
+	srv.stopLsn["test"] = make(chan struct{})
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+
+	cfgRldChan <- struct{}{}
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		close(stopChan)
+	}()
+	err := srv.ListenAndServe(stopChan, cfgRldChan)
+	if err != nil {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+
+func TestERsListenAndServeCfgRldChan4(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	exp := &CSVFileER{
+		cgrCfg: cfg,
+		cfgIdx: 0,
+	}
+	var evRdr EventReader = exp
+	srv.rdrs = map[string]EventReader{
+		"test": evRdr,
+	}
+	srv.stopLsn["test"] = make(chan struct{})
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+	srv.rdrPaths = map[string]string{
+		"test": "path_test",
+	}
+	cfgRldChan <- struct{}{}
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		close(stopChan)
+	}()
+	err := srv.ListenAndServe(stopChan, cfgRldChan)
+	if err != nil {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}
 }
