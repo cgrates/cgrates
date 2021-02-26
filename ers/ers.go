@@ -87,7 +87,6 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err er
 			erS.closeAllRdrs()
 			return
 		case erEv := <-erS.rdrEvents:
-			fmt.Println("yay")
 			if err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> reading event: <%s> got error: <%s>",
