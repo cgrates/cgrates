@@ -181,7 +181,7 @@ func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
 	return
 }
 
-// accountsDebitAbstracts will debit an usage out of multiple accounts
+// accountsDebit will debit an usage out of multiple accounts
 func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	usage := decimal.New(int64(72*time.Hour), 0)
