@@ -131,6 +131,10 @@ func testAccActionsSetActionProfile(t *testing.T) {
 						Type:      utils.MetaSetBalance,
 						Diktats: []*engine.APDiktat{
 							{
+								Path:  "*account.ThresholdIDs",
+								Value: utils.MetaNone,
+							},
+							{
 								Path:  "*balance.MONETARY.Type",
 								Value: utils.MetaConcrete,
 							},
@@ -267,6 +271,7 @@ func testAccActionsGetAccountAfterActions(t *testing.T) {
 				}},
 			},
 		},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var result *utils.AccountProfile
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
@@ -339,9 +344,10 @@ func testAccActionsExecuteAction3(t *testing.T) {
 
 func testAccActionsGetAccountAfterRemActions(t *testing.T) {
 	accPrf := &utils.AccountProfile{
-		Tenant:   "cgrates.org",
-		ID:       "1001",
-		Balances: map[string]*utils.Balance{},
+		Tenant:       "cgrates.org",
+		ID:           "1001",
+		Balances:     map[string]*utils.Balance{},
+		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var result *utils.AccountProfile
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{

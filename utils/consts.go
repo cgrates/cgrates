@@ -436,6 +436,7 @@ const (
 	MetaDynamic               = "*dynamic"
 	MetaCounterEvent          = "*event"
 	MetaBalance               = "*balance"
+	MetaAccount               = "*account"
 	EventName                 = "EventName"
 	// action trigger threshold types
 	TriggerMinEventCounter   = "*min_event_counter"
