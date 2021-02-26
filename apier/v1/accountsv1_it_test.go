@@ -50,14 +50,16 @@ func TestAccountSv1IT(t *testing.T) {
 		testAccountSv1RPCConn,
 		testAccountSv1LoadFromFolder,
 		testAccountSv1AccountProfilesForEvent,
-		testAccountSv1MaxUsage,
-		testAccountSv1DebitUsage,
+		testAccountSv1MaxAbstracts,
+		testAccountSv1DebitAbstracts,
 		testAccountSv1SimpleDebit,
 		testAccountSv1DebitMultipleAcc,
 		testAccountSv1DebitMultipleAccLimited,
 		testAccountSv1DebitWithAttributeSandRateS,
 		testAccountSv1DebitWithRateS,
 		testAccountSv1DebitWithRateS2,
+		testAccountSv1MaxConcretes,
+		testAccountSv1DebitConcretes,
 		testAccountSv1KillEngine,
 	}
 	switch *dbType {
@@ -222,7 +224,7 @@ func testAccountSv1AccountProfilesForEvent(t *testing.T) {
 	}
 }
 
-func testAccountSv1MaxUsage(t *testing.T) {
+func testAccountSv1MaxAbstracts(t *testing.T) {
 	var eEc *utils.ExtEventCharges
 	if err := acntSRPC.Call(utils.AccountSv1MaxAbstracts,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
@@ -329,7 +331,7 @@ func testAccountSv1MaxUsage(t *testing.T) {
 	}
 }
 
-func testAccountSv1DebitUsage(t *testing.T) {
+func testAccountSv1DebitAbstracts(t *testing.T) {
 	var eEc *utils.ExtEventCharges
 	if err := acntSRPC.Call(utils.AccountSv1DebitAbstracts,
 		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
@@ -1030,6 +1032,183 @@ func testAccountSv1DebitWithRateS2(t *testing.T) {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(80, 0)) != 0 {
 		t.Errorf("Expecting : %+v, received: %s", decimal.New(80, 0), reply2.Balances["Balance1"].Units)
+	}
+}
+
+func testAccountSv1MaxConcretes(t *testing.T) {
+	apiAccPrf = &APIAccountProfileWithCache{
+		APIAccountProfile: &utils.APIAccountProfile{
+			Tenant:    "cgrates.org",
+			ID:        "1004",
+			FilterIDs: []string{"*string:~*req.Account:1004"},
+			Balances: map[string]*utils.APIBalance{
+				"ConcreteBalance1": &utils.APIBalance{
+					ID:      "ConcreteBalance1",
+					Weights: ";20",
+					Type:    utils.MetaConcrete,
+					Units:   float64(20 * time.Second),
+					CostIncrements: []*utils.APICostIncrement{
+						&utils.APICostIncrement{
+							FilterIDs:    []string{"*string:~*req.ToR:*data"},
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(0),
+							RecurrentFee: utils.Float64Pointer(1),
+						},
+					},
+				},
+				"ConcreteBalance2": &utils.APIBalance{
+					ID:      "ConcreteBalance2",
+					Weights: ";10",
+					Type:    utils.MetaConcrete,
+					Units:   float64(20 * time.Second),
+					CostIncrements: []*utils.APICostIncrement{
+						&utils.APICostIncrement{
+							FilterIDs:    []string{"*string:~*req.ToR:*data"},
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(0),
+							RecurrentFee: utils.Float64Pointer(1),
+						},
+					},
+				},
+				/*
+					"AbstractBalance1": &utils.APIBalance{
+						ID:      "AbstractBalance1",
+						Weights: ";10",
+						Type:    utils.MetaAbstract,
+						Units:   float64(30 * time.Minute),
+						CostIncrements: []*utils.APICostIncrement{
+							&utils.APICostIncrement{
+								FilterIDs:    []string{"*string:~*req.ToR:*data"},
+								Increment:    utils.Float64Pointer(float64(time.Second)),
+								FixedFee:     utils.Float64Pointer(0),
+								RecurrentFee: utils.Float64Pointer(1),
+							},
+						},
+					},
+
+				*/
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+
+	var reply string
+	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	exp, err := apiAccPrf.AsAccountProfile()
+	if err != nil {
+		t.Error(err)
+	}
+	var result *utils.AccountProfile
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1004"}}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+
+	var eEc *utils.ExtEventCharges
+	if err := acntSRPC.Call(utils.AccountSv1MaxConcretes,
+		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAccountSv1MaxConcretes",
+			Event: map[string]interface{}{
+				utils.AccountField: "1004",
+				utils.ToR:          utils.MetaData,
+				utils.Usage:        "50s",
+			},
+		}}, &eEc); err != nil {
+		t.Error(err)
+	} else if eEc.Usage == nil || *eEc.Usage != float64(40*time.Second) {
+		t.Errorf("received usage: %v", *eEc.Usage)
+	}
+
+	//make sure we did nto Debit from our Account
+	exp, err = apiAccPrf.AsAccountProfile()
+	if err != nil {
+		t.Error(err)
+	}
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1004"}}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
+func testAccountSv1DebitConcretes(t *testing.T) {
+	var eEc *utils.ExtEventCharges
+	//Now we know the usage, we will debit it from account
+	if err := acntSRPC.Call(utils.AccountSv1DebitConcretes,
+		&utils.ArgsAccountsForEvent{CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAccountSv1MaxConcretes",
+			Event: map[string]interface{}{
+				utils.AccountField: "1004",
+				utils.ToR:          utils.MetaData,
+				utils.Usage:        "50s",
+			},
+		}}, &eEc); err != nil {
+		t.Error(err)
+	} else if eEc.Usage == nil || *eEc.Usage != float64(40*time.Second) {
+		t.Errorf("received usage: %v", *eEc.Usage)
+	}
+
+	exp := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "1004",
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance1": &utils.Balance{
+				ID: "ConcreteBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
+			},
+			"ConcreteBalance2": &utils.Balance{
+				ID: "ConcreteBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
+			},
+		},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+
+	var result *utils.AccountProfile
+	//As we debit, our Account balances are changed now
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1004"}}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(exp), utils.ToJSON(result))
 	}
 }
 
