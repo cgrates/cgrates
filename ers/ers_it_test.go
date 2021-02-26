@@ -74,26 +74,8 @@ func TestERsListenAndServeErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:                       "",
-			Type:                     "",
-			RowLength:                0,
-			FieldSep:                 "",
-			HeaderDefineChar:         "",
-			RunDelay:                 0,
-			ConcurrentReqs:           0,
-			SourcePath:               "",
-			ProcessedPath:            "",
-			Opts:                     nil,
-			XMLRootPath:              nil,
-			Tenant:                   nil,
-			Timezone:                 "",
-			Filters:                  nil,
-			Flags:                    nil,
-			FailedCallsPrefix:        "",
-			PartialRecordCache:       0,
-			PartialCacheExpiryAction: "",
-			Fields:                   nil,
-			CacheDumpFields:          nil,
+			ID:   "",
+			Type: "",
 		},
 	}
 	fltrS := &engine.FilterS{}
@@ -109,58 +91,19 @@ func TestERsProcessEventErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:                       "",
-			Type:                     "",
-			RowLength:                0,
-			FieldSep:                 "",
-			HeaderDefineChar:         "",
-			RunDelay:                 0,
-			ConcurrentReqs:           0,
-			SourcePath:               "",
-			ProcessedPath:            "",
-			Opts:                     nil,
-			XMLRootPath:              nil,
-			Tenant:                   nil,
-			Timezone:                 "",
-			Filters:                  nil,
-			Flags:                    nil,
-			FailedCallsPrefix:        "",
-			PartialRecordCache:       0,
-			PartialCacheExpiryAction: "",
-			Fields:                   nil,
-			CacheDumpFields:          nil,
+			ID:   "",
+			Type: "",
 		},
 	}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
-		ID:                       "",
-		Type:                     "",
-		RowLength:                0,
-		FieldSep:                 "",
-		HeaderDefineChar:         "",
-		RunDelay:                 0,
-		ConcurrentReqs:           0,
-		SourcePath:               "",
-		ProcessedPath:            "",
-		Opts:                     nil,
-		XMLRootPath:              nil,
-		Tenant:                   nil,
-		Timezone:                 "",
-		Filters:                  nil,
-		Flags:                    nil,
-		FailedCallsPrefix:        "",
-		PartialRecordCache:       0,
-		PartialCacheExpiryAction: "",
-		Fields:                   nil,
-		CacheDumpFields:          nil,
+		ID:   "",
+		Type: "",
 	}
 	cgrEvent := &utils.CGREvent{
 		Tenant: "",
 		ID:     "",
-		Time:   nil,
-		Event:  nil,
-		Opts:   nil,
 	}
 	err := srv.processEvent(cgrEvent, rdrCfg)
 	if err == nil || err.Error() != "unsupported reqType: <>" {
@@ -172,26 +115,8 @@ func TestERsCloseAllRdrs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:                       "",
-			Type:                     "",
-			RowLength:                0,
-			FieldSep:                 "",
-			HeaderDefineChar:         "",
-			RunDelay:                 0,
-			ConcurrentReqs:           0,
-			SourcePath:               "",
-			ProcessedPath:            "",
-			Opts:                     nil,
-			XMLRootPath:              nil,
-			Tenant:                   nil,
-			Timezone:                 "",
-			Filters:                  nil,
-			Flags:                    nil,
-			FailedCallsPrefix:        "",
-			PartialRecordCache:       0,
-			PartialCacheExpiryAction: "",
-			Fields:                   nil,
-			CacheDumpFields:          nil,
+			ID:   "",
+			Type: "",
 		},
 	}
 	fltrS := &engine.FilterS{}
@@ -203,26 +128,8 @@ func TestERsListenAndServeRdrErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:                       "",
-			Type:                     utils.MetaNone,
-			RowLength:                0,
-			FieldSep:                 "",
-			HeaderDefineChar:         "",
-			RunDelay:                 0,
-			ConcurrentReqs:           0,
-			SourcePath:               "",
-			ProcessedPath:            "",
-			Opts:                     nil,
-			XMLRootPath:              nil,
-			Tenant:                   nil,
-			Timezone:                 "",
-			Filters:                  nil,
-			Flags:                    nil,
-			FailedCallsPrefix:        "",
-			PartialRecordCache:       0,
-			PartialCacheExpiryAction: "",
-			Fields:                   nil,
-			CacheDumpFields:          nil,
+			ID:   "",
+			Type: utils.MetaNone,
 		},
 	}
 	fltrS := &engine.FilterS{}
@@ -242,26 +149,8 @@ func TestERsListenAndServeStopchan(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:                       "",
-			Type:                     utils.MetaNone,
-			RowLength:                0,
-			FieldSep:                 "",
-			HeaderDefineChar:         "",
-			RunDelay:                 0,
-			ConcurrentReqs:           0,
-			SourcePath:               "",
-			ProcessedPath:            "",
-			Opts:                     nil,
-			XMLRootPath:              nil,
-			Tenant:                   nil,
-			Timezone:                 "",
-			Filters:                  nil,
-			Flags:                    nil,
-			FailedCallsPrefix:        "",
-			PartialRecordCache:       0,
-			PartialCacheExpiryAction: "",
-			Fields:                   nil,
-			CacheDumpFields:          nil,
+			ID:   "",
+			Type: utils.MetaNone,
 		},
 	}
 	fltrS := &engine.FilterS{}
@@ -280,26 +169,8 @@ func TestERsListenAndServeRdrEvents(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:                       "",
-			Type:                     utils.MetaNone,
-			RowLength:                0,
-			FieldSep:                 "",
-			HeaderDefineChar:         "",
-			RunDelay:                 0,
-			ConcurrentReqs:           0,
-			SourcePath:               "",
-			ProcessedPath:            "",
-			Opts:                     nil,
-			XMLRootPath:              nil,
-			Tenant:                   nil,
-			Timezone:                 "",
-			Filters:                  nil,
-			Flags:                    nil,
-			FailedCallsPrefix:        "",
-			PartialRecordCache:       0,
-			PartialCacheExpiryAction: "",
-			Fields:                   nil,
-			CacheDumpFields:          nil,
+			ID:   "",
+			Type: utils.MetaNone,
 		},
 	}
 	fltrS := &engine.FilterS{}
@@ -317,31 +188,11 @@ func TestERsListenAndServeRdrEvents(t *testing.T) {
 			Opts:   nil,
 		},
 		rdrCfg: &config.EventReaderCfg{
-			ID:                       "",
-			Type:                     "",
-			RowLength:                0,
-			FieldSep:                 "",
-			HeaderDefineChar:         "",
-			RunDelay:                 0,
-			ConcurrentReqs:           0,
-			SourcePath:               "",
-			ProcessedPath:            "",
-			Opts:                     nil,
-			XMLRootPath:              nil,
-			Tenant:                   nil,
-			Timezone:                 "",
-			Filters:                  nil,
-			Flags:                    nil,
-			FailedCallsPrefix:        "",
-			PartialRecordCache:       0,
-			PartialCacheExpiryAction: "",
-			Fields:                   nil,
-			CacheDumpFields:          nil,
+			ID: "",
 		},
 	}
-	time.Sleep(10 * time.Millisecond)
 	srv.rdrErr <- utils.ErrNotFound
-	time.Sleep(15 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	err := srv.ListenAndServe(stopChan, cfgRldChan)
 	if err == nil || err != utils.ErrNotFound {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrNotFound, err)
@@ -362,9 +213,8 @@ func TestERsListenAndServeCfgRldChan(t *testing.T) {
 	cfgRldChan := make(chan struct{}, 1)
 	srv.rdrErr = make(chan error, 1)
 	cfgRldChan <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
 	srv.rdrErr <- utils.ErrNotFound
-	time.Sleep(15 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	err := srv.ListenAndServe(stopChan, cfgRldChan)
 	if err == nil || err != utils.ErrNotFound {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrNotFound, err)
@@ -395,9 +245,8 @@ func TestERsListenAndServeCfgRldChan2(t *testing.T) {
 	srv.rdrErr = make(chan error, 1)
 
 	cfgRldChan <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
 	srv.rdrErr <- utils.ErrNotFound
-	time.Sleep(15 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	err := srv.ListenAndServe(stopChan, cfgRldChan)
 	if err == nil || err != utils.ErrNotFound {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrNotFound, err)
