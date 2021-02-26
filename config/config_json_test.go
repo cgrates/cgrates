@@ -523,6 +523,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 			utils.MaxIdleConnsCfg:    10.,
 			utils.ConnMaxLifetimeCfg: 0.,
 			utils.SSLModeCfg:         utils.PostgressSSLModeDisable,
+			utils.MysqlLocation:      "Local",
 		},
 		Items: &map[string]*ItemOptJson{
 			utils.CacheTBLTPTimings: {

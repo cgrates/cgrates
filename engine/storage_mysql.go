@@ -32,8 +32,9 @@ type MySQLStorage struct {
 }
 
 func NewMySQLStorage(host, port, name, user, password string,
-	maxConn, maxIdleConn, connMaxLifetime int) (*SQLStorage, error) {
-	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'", user, password, host, port, name)
+	maxConn, maxIdleConn, connMaxLifetime int, location string) (*SQLStorage, error) {
+	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=%s&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
+		user, password, host, port, name, location)
 	db, err := gorm.Open(mysql.Open(connectString), &gorm.Config{AllowGlobalUpdate: true})
 	if err != nil {
 		return nil, err

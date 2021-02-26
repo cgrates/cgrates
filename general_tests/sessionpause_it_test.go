@@ -264,8 +264,8 @@ func testSesPauseItAllPause(t *testing.T) {
 		Account:     "1001",
 		Subject:     "1001",
 		Destination: "1002",
-		SetupTime:   "2018-01-07T19:00:00+02:00",
-		AnswerTime:  "2018-01-07T19:00:10+02:00",
+		SetupTime:   "2018-01-07 17:00:00 +0000 UTC",
+		AnswerTime:  "2018-01-07 17:00:10 +0000 UTC",
 		Usage:       "5s",
 		ExtraFields: map[string]string{},
 		CostSource:  "*sessions",
@@ -280,6 +280,15 @@ func testSesPauseItAllPause(t *testing.T) {
 	cdrs[0].OrderID = 0
 	cdString := cdrs[0].CostDetails
 	cdrs[0].CostDetails = ""
+	var val time.Time
+	if val, err = utils.ParseTimeDetectLayout(cdrs[0].AnswerTime, ""); err != nil {
+		t.Fatal(err)
+	}
+	cdrs[0].AnswerTime = val.UTC().String()
+	if val, err = utils.ParseTimeDetectLayout(cdrs[0].SetupTime, ""); err != nil {
+		t.Fatal(err)
+	}
+	cdrs[0].SetupTime = val.UTC().String()
 	if !reflect.DeepEqual(exp, cdrs) {
 		t.Errorf("Expected %s \n received: %s", utils.ToJSON(exp), utils.ToJSON(cdrs))
 	}
@@ -391,8 +400,8 @@ func testSesPauseItInitPause(t *testing.T) {
 		Account:     "1001",
 		Subject:     "1001",
 		Destination: "1002",
-		SetupTime:   "2018-01-07T19:00:00+02:00",
-		AnswerTime:  "2018-01-07T19:00:10+02:00",
+		SetupTime:   "2018-01-07 17:00:00 +0000 UTC",
+		AnswerTime:  "2018-01-07 17:00:10 +0000 UTC",
 		Usage:       "5s",
 		ExtraFields: map[string]string{},
 		CostSource:  "*sessions",
@@ -407,6 +416,15 @@ func testSesPauseItInitPause(t *testing.T) {
 	cdrs[0].OrderID = 0
 	cdString := cdrs[0].CostDetails
 	cdrs[0].CostDetails = ""
+	var val time.Time
+	if val, err = utils.ParseTimeDetectLayout(cdrs[0].AnswerTime, ""); err != nil {
+		t.Fatal(err)
+	}
+	cdrs[0].AnswerTime = val.UTC().String()
+	if val, err = utils.ParseTimeDetectLayout(cdrs[0].SetupTime, ""); err != nil {
+		t.Fatal(err)
+	}
+	cdrs[0].SetupTime = val.UTC().String()
 	if !reflect.DeepEqual(exp, cdrs) {
 		t.Errorf("Expected %s \n received: %s", utils.ToJSON(exp), utils.ToJSON(cdrs))
 	}
@@ -568,8 +586,8 @@ func testSesPauseItInitUpdatePause(t *testing.T) {
 		Account:     "1001",
 		Subject:     "1001",
 		Destination: "1002",
-		SetupTime:   "2018-01-07T19:00:00+02:00",
-		AnswerTime:  "2018-01-07T19:00:10+02:00",
+		SetupTime:   "2018-01-07 17:00:00 +0000 UTC",
+		AnswerTime:  "2018-01-07 17:00:10 +0000 UTC",
 		Usage:       "5s",
 		ExtraFields: map[string]string{},
 		CostSource:  "*sessions",
@@ -584,6 +602,15 @@ func testSesPauseItInitUpdatePause(t *testing.T) {
 	cdrs[0].OrderID = 0
 	cdString := cdrs[0].CostDetails
 	cdrs[0].CostDetails = ""
+	var val time.Time
+	if val, err = utils.ParseTimeDetectLayout(cdrs[0].AnswerTime, ""); err != nil {
+		t.Fatal(err)
+	}
+	cdrs[0].AnswerTime = val.UTC().String()
+	if val, err = utils.ParseTimeDetectLayout(cdrs[0].SetupTime, ""); err != nil {
+		t.Fatal(err)
+	}
+	cdrs[0].SetupTime = val.UTC().String()
 	if !reflect.DeepEqual(exp, cdrs) {
 		t.Errorf("Expected %s \n received: %s", utils.ToJSON(exp), utils.ToJSON(cdrs))
 	}
@@ -755,8 +782,8 @@ func testSesPauseItUpdatePause(t *testing.T) {
 		Account:     "1001",
 		Subject:     "1001",
 		Destination: "1002",
-		SetupTime:   "2018-01-07T19:00:00+02:00",
-		AnswerTime:  "2018-01-07T19:00:10+02:00",
+		SetupTime:   "2018-01-07 17:00:00 +0000 UTC",
+		AnswerTime:  "2018-01-07 17:00:10 +0000 UTC",
 		Usage:       "1m5s",
 		ExtraFields: map[string]string{},
 		CostSource:  "*sessions",
@@ -771,6 +798,15 @@ func testSesPauseItUpdatePause(t *testing.T) {
 	cdrs[0].OrderID = 0
 	cdString := cdrs[0].CostDetails
 	cdrs[0].CostDetails = ""
+	var val time.Time
+	if val, err = utils.ParseTimeDetectLayout(cdrs[0].AnswerTime, ""); err != nil {
+		t.Fatal(err)
+	}
+	cdrs[0].AnswerTime = val.UTC().String()
+	if val, err = utils.ParseTimeDetectLayout(cdrs[0].SetupTime, ""); err != nil {
+		t.Fatal(err)
+	}
+	cdrs[0].SetupTime = val.UTC().String()
 	if !reflect.DeepEqual(exp, cdrs) {
 		t.Errorf("Expected %s \n received: %s", utils.ToJSON(exp), utils.ToJSON(cdrs))
 	}

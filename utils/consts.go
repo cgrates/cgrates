@@ -2085,6 +2085,7 @@ const (
 	ItemsCfg               = "items"
 	OptsCfg                = "opts"
 	Tenants                = "tenants"
+	MysqlLocation          = "mysql_location"
 )
 
 // DataDbCfg

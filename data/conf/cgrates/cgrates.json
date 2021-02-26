@@ -45,7 +45,7 @@
 
 // "rpc_conns": {
 // 	"*localhost": {
-// 		"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
+// 		"conns": [{"address": "127.0.0.1:2012", "transport":"*json"},{"id":"dynconn"}],
 // 	},
 // },							// rpc connections definitions
 
@@ -84,6 +84,8 @@
 // 		"*dispatcher_profiles":{"remote":false, "replicate":false}, 
 // 		"*dispatcher_hosts":{"remote":false, "replicate":false}, 
 // 		"*rate_profiles":{"remote":false, "replicate":false},
+// 		"*action_profiles":{"remote":false, "replicate":false},
+// 		"*account_profiles":{"remote":false, "replicate":false},
 // 		"*load_ids":{"remote":false, "replicate":false}, 
 // 		"*indexes":{"remote":false, "replicate":false}, 
 // 	},
@@ -93,10 +95,10 @@
 // 		"redis_cluster_sync": "5s",				// the sync interval for the redis cluster
 // 		"redis_cluster_ondown_delay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
 // 		"query_timeout":"10s",
-// 		"redis_tls": false,					// if true it will use a tls connection and use the redis_client_certificate certificate, redis_client_key and redis_ca_certificate for tls connection
-// 		"redis_client_certificate":"",		// path to client certificate
-// 		"redis_client_key":"",				// path to client key
-// 		"redis_ca_certificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"redis_tls": false,						// if true it will use a tls connection and use the redis_client_certificate certificate, redis_client_key and redis_ca_certificate for tls connection
+// 		"redis_client_certificate":"",			// path to client certificate
+// 		"redis_client_key":"",					// path to client key
+// 		"redis_ca_certificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 // 	}
 // },
 
@@ -111,11 +113,12 @@
 // 	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 // 	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
 // 	"opts": {
-// 		"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
-// 		"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
-// 		"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+// 		"max_open_conns": 100,				// maximum database connections opened, not applying for mongo
+// 		"max_idle_conns": 10,				// maximum database connections idle, not applying for mongo
+// 		"conn_max_lifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 // 		"query_timeout":"10s",
-// 		"sslmode":"disable",					// sslmode in case of *postgres
+// 		"sslmode":"disable",				// sslmode in case of *postgres
+// 		"mysql_location": "Local",			// the location the time from mysql is retrived
 // 	},
 // 	"items":{
 // 		"*session_costs": {"remote":false, "replicate":false}, 
@@ -142,6 +145,8 @@
 // 		"*tp_dispatcher_profiles":{"remote":false, "replicate":false}, 
 // 		"*tp_dispatcher_hosts":{"remote":false, "replicate":false}, 
 // 		"*tp_rate_profiles":{"remote":false, "replicate":false}, 
+// 		"*tp_action_profiles":{"remote":false, "replicate":false},
+// 		"*tp_account_profiles":{"remote":false, "replicate":false},
 // 	},
 // },
 
@@ -231,6 +236,8 @@
 // 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control dispatcher profile caching
 // 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control dispatcher hosts caching
 // 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control rate profile caching
+// 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control action profile caching
+// 		"*account_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control account profile caching
 // 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control resource filter indexes caching
 // 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control stat filter indexes caching
 // 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control threshold filter indexes caching
@@ -240,6 +247,8 @@
 // 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control dispatcher filter indexes caching
 // 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control rate profile filter indexes caching
 // 		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control rate filter indexes caching
+// 		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control action profile filter indexes caching
+// 		"*account_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control coount profile filter indexes caching
 // 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control reverse filter indexes caching used only for set and remove filters 
 // 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 						// control dispatcher routes caching
 // 		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// control dispatcher load( in case of *ratio ConnParams is present)
@@ -280,10 +289,11 @@
 // 		"*tp_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 // 		"*tp_attributes":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 // 		"*tp_chargers":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 // 		"*tp_dispatcher_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 // 		"*tp_dispatcher_hosts":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*tp_rate_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+// 		"*tp_rate_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+// 		"*tp_action_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+// 		"*tp_account_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
 // 	},
 // 	"replication_conns": [],
 // },
@@ -404,6 +414,7 @@
 // "sessions": {
 // 	"enabled": false,						// starts the session service: <true|false>
 // 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
+// 	"listen_bigob": "",						// address where to listen for bidirectional GOB-RPC requests
 // 	"chargers_conns": [],					// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
 // 	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|$rpc_conns_id>
 // 	"cdrs_conns": [],						// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
@@ -415,6 +426,12 @@
 // 	"replication_conns": [],				// replicate sessions towards these session services
 // 	"debit_interval": "0s",					// interval to perform debits on.
 // 	"store_session_costs": false,			// enable storing of the session costs within CDRs
+// 	"default_usage":{						// the usage if the event is missing the usage field
+// 			"*any": "3h",
+// 			"*voice": "3h",
+// 			"*data": "1048576",
+// 			"*sms": "1",
+// 	},
 // 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
 // 	//"session_ttl_max_delay": "",			// activates session_ttl randomization and limits the maximum possible delay
 // 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
@@ -439,7 +456,7 @@
 
 // "asterisk_agent": {
 // 	"enabled": false,						// starts the Asterisk agent: <true|false>
-// 	"sessions_conns": ["*internal"],
+// 	"sessions_conns": ["*birpc_internal"],
 // 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
 // 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
 // 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
@@ -449,7 +466,7 @@
 
 // "freeswitch_agent": {
 // 	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
-// 	"sessions_conns": ["*internal"],
+// 	"sessions_conns": ["*birpc_internal"],
 // 	"subscribe_park": true,					// subscribe via fsock to receive park events
 // 	"create_cdr": false,					// creates CDR out of events and sends them to CDRS component
 // 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
@@ -465,7 +482,7 @@
 
 // "kamailio_agent": {
 // 	"enabled": false,						// starts Kamailio agent: <true|false>
-// 	"sessions_conns": ["*internal"],
+// 	"sessions_conns": ["*birpc_internal"],
 // 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 // 	"timezone": "",							// timezone of the Kamailio server
 // 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
@@ -479,7 +496,7 @@
 // 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
 // 	"listen_net": "tcp",										// transport type for diameter <tcp|sctp>
 // 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-// 	"sessions_conns": ["*internal"],
+// 	"sessions_conns": ["*birpc_internal"],
 // 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
 // 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 // 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
@@ -771,22 +788,64 @@
 // 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
 // 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
 // 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.4"},
-// 					{"tag": "ConnectFee", "path": "ConnectFee", "type": "*variable", "value": "~*req.5"},
-// 					{"tag": "RoundingMethod", "path": "RoundingMethod", "type": "*variable", "value": "~*req.6"},
-// 					{"tag": "RoundingDecimals", "path": "RoundingDecimals", "type": "*variable", "value": "~*req.7"},
-// 					{"tag": "MinCost", "path": "MinCost", "type": "*variable", "value": "~*req.8"},
-// 					{"tag": "MaxCost", "path": "MaxCost", "type": "*variable", "value": "~*req.9"},
-// 					{"tag": "MaxCostStrategy", "path": "MaxCostStrategy", "type": "*variable", "value": "~*req.10"},
-// 					{"tag": "RateID", "path": "RateID", "type": "*variable", "value": "~*req.11"},
-// 					{"tag": "RateFilterIDs", "path": "RateFilterIDs", "type": "*variable", "value": "~*req.12"},
-// 					{"tag": "RateActivationStart", "path": "RateActivationStart", "type": "*variable", "value": "~*req.13"},
-// 					{"tag": "RateWeight", "path": "RateWeight", "type": "*variable", "value": "~*req.14"},
-// 					{"tag": "RateBlocker", "path": "RateBlocker", "type": "*variable", "value": "~*req.15"},
-// 					{"tag": "RateIntervalStart", "path": "RateIntervalStart", "type": "*variable", "value": "~*req.16"},
-// 					{"tag": "RateValue", "path": "RateValue", "type": "*variable", "value": "~*req.17"},
-// 					{"tag": "RateUnit", "path": "RateUnit", "type": "*variable", "value": "~*req.18"},
-// 					{"tag": "RateIncrement", "path": "RateIncrement", "type": "*variable", "value": "~*req.19"},
-					
+// 					{"tag": "MinCost", "path": "MinCost", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "MaxCost", "path": "MaxCost", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "MaxCostStrategy", "path": "MaxCostStrategy", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "RateID", "path": "RateID", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "RateFilterIDs", "path": "RateFilterIDs", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "RateActivationTimes", "path": "RateActivationTimes", "type": "*variable", "value": "~*req.10"},
+// 					{"tag": "RateWeight", "path": "RateWeight", "type": "*variable", "value": "~*req.11"},
+// 					{"tag": "RateBlocker", "path": "RateBlocker", "type": "*variable", "value": "~*req.12"},
+// 					{"tag": "RateIntervalStart", "path": "RateIntervalStart", "type": "*variable", "value": "~*req.13"},
+// 					{"tag": "RateFixedFee", "path": "RateFixedFee", "type": "*variable", "value": "~*req.14"},
+//                     {"tag": "RateRecurrentFee", "path": "RateRecurrentFee", "type": "*variable", "value": "~*req.15"},
+// 					{"tag": "RateUnit", "path": "RateUnit", "type": "*variable", "value": "~*req.16"},
+// 					{"tag": "RateIncrement", "path": "RateIncrement", "type": "*variable", "value": "~*req.17"},
+// 				],
+// 			},
+// 			{
+// 				"type": "*action_profiles",						// data source type
+// 				"file_name": "ActionProfiles.csv",				// file name in the tp_in_dir
+// 				"fields": [
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "Schedule", "path": "Schedule", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "TargetType", "path": "TargetType", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "TargetIDs", "path": "TargetIDs", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "ActionID", "path": "ActionID", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "ActionFilterIDs", "path": "ActionFilterIDs", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "ActionBlocker", "path": "ActionBlocker", "type": "*variable", "value": "~*req.10"},
+// 					{"tag": "ActionTTL", "path": "ActionTTL", "type": "*variable", "value": "~*req.11"},
+// 					{"tag": "ActionType", "path": "ActionType", "type": "*variable", "value": "~*req.12"},
+// 					{"tag": "ActionOpts", "path": "ActionOpts", "type": "*variable", "value": "~*req.13"},
+// 					{"tag": "ActionPath", "path": "ActionPath", "type": "*variable", "value": "~*req.14"},
+// 					{"tag": "ActionValue", "path": "ActionValue", "type": "*variable", "value": "~*req.15"},
+// 				],
+// 			},
+// 			{
+// 				"type": "*account_profiles",						// data source type
+// 				"file_name": "AccountProfiles.csv",				// file name in the tp_in_dir
+// 				"fields": [
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "BalanceID", "path": "BalanceID", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "BalanceFilterIDs", "path": "BalanceFilterIDs", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "BalanceWeight", "path": "BalanceWeight", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "BalanceBlocker", "path": "BalanceBlocker", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "BalanceType", "path": "BalanceType", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "BalanceOpts", "path": "BalanceOpts", "type": "*variable", "value": "~*req.10"},
+// 					{"tag": "BalanceCostIncrements", "path": "BalanceCostIncrements", "type": "*variable", "value": "~*req.11"},
+// 					{"tag": "BalanceAttributeIDs", "path": "BalanceAttributeIDs", "type": "*variable", "value": "~*req.12"},
+// 					{"tag": "BalanceRateProfileIDs", "path": "BalanceRateProfileIDs", "type": "*variable", "value": "~*req.13"},
+// 					{"tag": "BalanceUnitFactors", "path": "BalanceUnitFactors", "type": "*variable", "value": "~*req.14"},
+// 					{"tag": "BalanceUnits", "path": "BalanceUnits", "type": "*variable", "value": "~*req.15"},
+// 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.16"},
 // 				],
 // 			},
 // 		],
@@ -922,6 +981,7 @@
 // 	"rate_prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+//     "verbosity": 1000,                      // number of increment iterations allowed
 // },
 
 
@@ -931,7 +991,7 @@
 // 	"listen_net": "udp",				// network to listen on <udp|tcp|tcp-tls>
 // 	"sessions_conns": ["*internal"],
 // 	"timezone": "",						// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
-// 	"retransmission_timer": "1s",				// the duration to wait to receive an ACK before resending the reply
+// 	"retransmission_timer": "1s",		// the duration to wait to receive an ACK before resending the reply
 // 	"request_processors": [				// request processors to be applied to SIP messages
 // 	],
 // },
@@ -996,6 +1056,34 @@
 // 			{"tag": "Request", "path": "*rep.Request", "type": "*constant",
 // 				"value": "SIP/2.0 500 Internal Server Error", "mandatory": true},
 // 	],
+// 	"*cdrLog": [ // cdrLog template is used in ActionS to build the event that is send to CDRs in case of *cdrLog actionType
+// 		{"tag": "ToR", "path": "*cdr.ToR", "type": "*variable",
+// 			"value": "~*req.BalanceType", "mandatory": true},
+// 		{"tag": "OriginHost", "path": "*cdr.OriginHost", "type": "*constant",
+// 			"value": "127.0.0.1", "mandatory": true},
+// 		{"tag": "RequestType", "path": "*cdr.RequestType", "type": "*constant",
+// 			"value": "*none", "mandatory": true},
+// 		{"tag": "Tenant", "path": "*cdr.Tenant", "type": "*variable",
+// 			"value": "~*req.Tenant", "mandatory": true},
+// 		{"tag": "Account", "path": "*cdr.Account", "type": "*variable",
+// 			"value": "~*req.Account", "mandatory": true},
+// 		{"tag": "Subject", "path": "*cdr.Subject", "type": "*variable",
+// 			"value": "~*req.Account", "mandatory": true},
+// 		{"tag": "Cost", "path": "*cdr.Cost", "type": "*variable",
+// 			"value": "~*req.Cost", "mandatory": true},
+// 		{"tag": "Source", "path": "*cdr.Source", "type": "*constant",
+// 			"value": "*cdrLog", "mandatory": true},
+// 		{"tag": "Usage", "path": "*cdr.Usage", "type": "*constant",
+// 			"value": "1", "mandatory": true},
+// 		{"tag": "RunID", "path": "*cdr.RunID", "type": "*variable",
+// 			"value": "~*req.ActionType", "mandatory": true},
+// 		{"tag": "SetupTime", "path": "*cdr.SetupTime", "type": "*constant",
+// 			"value": "*now", "mandatory": true},
+// 		{"tag": "AnswerTime", "path": "*cdr.AnswerTime", "type": "*constant",
+// 			"value": "*now", "mandatory": true},
+// 		{"tag": "PreRated", "path": "*cdr.PreRated", "type": "*constant",
+// 			"value": "true", "mandatory": true},
+// 	],
 // },
 
 
@@ -1010,5 +1098,37 @@
 // 	"enabled": false,
 // 	"keys": [],
 // },
+
+
+// "actions": {								// ActionS config
+// 	"enabled": false,						// starts attribute service: <true|false>
+// 	"cdrs_conns": [],						// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
+// 	"ees_conns": [],						// connections to Ees for exporting event <""|*internal|$rpc_conns_id>
+// 	"thresholds_conns": [],					// connections to ThresholdS for *reset_threshold action <""|*internal|$rpc_conns_id>
+// 	"stats_conns": [],						// connections to StatS for *reset_stat_queue action: <""|*internal|$rpc_conns_id>
+// 	"accounts_conns": [],					// connections to AccountS for *topup/*topup_reset action: <""|*internal|$rpc_conns_id>
+// 	"tenants":[],							// List of tenants to operate on
+// 	"indexed_selects": true,				// enable profile matching exclusively on indexes
+// 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// },
+
+
+// "accounts": {								// AccountS config
+// 	"enabled": false,						// starts service: <true|false>
+// 	"indexed_selects": true,				// enable profile matching exclusively on indexes
+// 	"attributes_conns": [],					// connections to AttributeS for account/balance updates, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
+// 	"rates_conns": [],						// connections to RatesS for account/balance updates, empty to disable rates functionality: <""|*internal|$rpc_conns_id>
+// 	"thresholds_conns": [],					// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+// 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+//     "max_iterations": 1000,                 // maximum number of iterations
+//     "max_usage": "72h",                     // maximum time of usage
+// },
+
 
 }

@@ -116,10 +116,10 @@ const CGRATES_CFG_JSON = `
 		"redis_cluster_sync": "5s",				// the sync interval for the redis cluster
 		"redis_cluster_ondown_delay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
 		"query_timeout":"10s",
-		"redis_tls": false,					// if true it will use a tls connection and use the redis_client_certificate certificate, redis_client_key and redis_ca_certificate for tls connection
-		"redis_client_certificate":"",		// path to client certificate
-		"redis_client_key":"",				// path to client key
-		"redis_ca_certificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"redis_tls": false,						// if true it will use a tls connection and use the redis_client_certificate certificate, redis_client_key and redis_ca_certificate for tls connection
+		"redis_client_certificate":"",			// path to client certificate
+		"redis_client_key":"",					// path to client key
+		"redis_ca_certificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 	}
 },
 
@@ -134,11 +134,12 @@ const CGRATES_CFG_JSON = `
 	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
 	"opts": {
-		"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
-		"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
-		"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+		"max_open_conns": 100,				// maximum database connections opened, not applying for mongo
+		"max_idle_conns": 10,				// maximum database connections idle, not applying for mongo
+		"conn_max_lifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 		"query_timeout":"10s",
-		"sslmode":"disable",					// sslmode in case of *postgres
+		"sslmode":"disable",				// sslmode in case of *postgres
+		"mysql_location": "Local",			// the location the time from mysql is retrived
 	},
 	"items":{
 		"*session_costs": {"remote":false, "replicate":false}, 
