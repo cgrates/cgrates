@@ -1390,6 +1390,14 @@ func (dR *DispatcherAccountSv1) DebitAbstracts(args *utils.ArgsAccountsForEvent,
 	return dR.dR.DebitAbstracts(args, eEc)
 }
 
+func (dR *DispatcherAccountSv1) MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error {
+	return dR.dR.MaxConcretes(args, eEc)
+}
+
+func (dR *DispatcherAccountSv1) DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error {
+	return dR.dR.DebitConcretes(args, eEc)
+}
+
 func (dR *DispatcherAccountSv1) ActionSetBalance(args *utils.ArgsActSetBalance, eEc *string) (err error) {
 	return dR.dR.AccountSv1ActionSetBalance(args, eEc)
 }

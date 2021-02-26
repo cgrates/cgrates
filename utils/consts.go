@@ -1581,6 +1581,8 @@ const (
 	AccountSv1AccountProfilesForEvent = "AccountSv1.AccountProfilesForEvent"
 	AccountSv1MaxAbstracts            = "AccountSv1.MaxAbstracts"
 	AccountSv1DebitAbstracts          = "AccountSv1.DebitAbstracts"
+	AccountSv1MaxConcretes            = "AccountSv1.MaxConcretes"
+	AccountSv1DebitConcretes          = "AccountSv1.DebitConcretes"
 	AccountSv1ActionSetBalance        = "AccountSv1.ActionSetBalance"
 	AccountSv1ActionRemoveBalance     = "AccountSv1.ActionRemoveBalance"
 )
