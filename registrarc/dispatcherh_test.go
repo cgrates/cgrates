@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package dispatcherh
+package registrarc
 
 import (
 	"net/http"
@@ -54,10 +54,10 @@ func TestDispatcherHostsService(t *testing.T) {
 			},
 		},
 	}
-	cfg.DispatcherHCfg().RegisterInterval = 100 * time.Millisecond
-	cfg.DispatcherHCfg().DispatchersConns = []string{"conn1"}
+	cfg.DispatcherHCfg().RefreshInterval = 100 * time.Millisecond
+	cfg.DispatcherHCfg().RegistrarSConns = []string{"conn1"}
 
-	ds := NewDispatcherHService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
+	ds := NewRegistrarCService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
 
 	ds.registerHosts()
 
@@ -117,7 +117,7 @@ func TestDispatcherHostsService(t *testing.T) {
 	cfg.ListenCfg().RPCJSONListen = "2012"
 	ds.registerHosts()
 
-	ds = NewDispatcherHService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
+	ds = NewRegistrarCService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
 	ds.Shutdown()
 	stopChan := make(chan struct{})
 	close(stopChan)

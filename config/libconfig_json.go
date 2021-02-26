@@ -270,6 +270,7 @@ type RPCConnsJson struct {
 
 // Represents one connection instance towards a rater/cdrs server
 type RemoteHostJson struct {
+	Id          *string
 	Address     *string
 	Transport   *string
 	Synchronous *bool
@@ -534,19 +535,16 @@ type DispatcherSJsonCfg struct {
 	Attributes_conns      *[]string
 }
 
-type DispatcherHJsonCfg struct {
-	Enabled            *bool
-	Dispatchers_conns  *[]string
-	Hosts              map[string][]DispatcherHRegistarJsonCfg
-	Register_interval  *string
-	Register_transport *string
-	Register_tls       *bool
+type RegistrarCJsonCfg struct {
+	Enabled          *bool
+	Registrars_conns *[]string
+	Hosts            map[string][]*RemoteHostJson
+	Refresh_interval *string
 }
 
-type DispatcherHRegistarJsonCfg struct {
-	Id                 *string
-	Register_transport *string
-	Register_tls       *bool
+type RegistrarCJsonCfgs struct {
+	RPC        *RegistrarCJsonCfg
+	Dispatcher *RegistrarCJsonCfg
 }
 
 type LoaderCfgJson struct {

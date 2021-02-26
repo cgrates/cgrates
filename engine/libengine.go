@@ -37,6 +37,9 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 	var atLestOneConnected bool // If one connected we don't longer return errors
 	rpcPool = rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
 	for _, rpcConnCfg := range rpcConnCfgs {
+		if rpcConnCfg.Address == utils.EmptyString {
+			continue
+		}
 		rpcClient, err = NewRPCConnection(rpcConnCfg, keyPath, certPath, caPath, connAttempts, reconnects,
 			connectTimeout, replyTimeout, internalConnChan, lazyConnect, biRPCClient)
 		if err == rpcclient.ErrUnsupportedCodec {

@@ -2869,8 +2869,8 @@ func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
 	}
 	return &DispatcherHost{
 		Tenant: tpDPH.Tenant,
-		ID:     tpDPH.ID,
-		Conn: &config.RemoteHost{
+		RemoteHost: &config.RemoteHost{
+			ID:        tpDPH.ID,
 			Address:   tpDPH.Conn.Address,
 			Transport: tpDPH.Conn.Transport,
 			TLS:       tpDPH.Conn.TLS,
@@ -2883,9 +2883,9 @@ func DispatcherHostToAPI(dph *DispatcherHost) (tpDPH *utils.TPDispatcherHost) {
 		Tenant: dph.Tenant,
 		ID:     dph.ID,
 		Conn: &utils.TPDispatcherHostConn{
-			Address:   dph.Conn.Address,
-			Transport: dph.Conn.Transport,
-			TLS:       dph.Conn.TLS,
+			Address:   dph.Address,
+			Transport: dph.Transport,
+			TLS:       dph.TLS,
 		},
 	}
 }

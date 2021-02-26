@@ -49,7 +49,7 @@ const (
 	MAILER_JSN         = "mailer"
 	SURETAX_JSON       = "suretax"
 	DispatcherSJson    = "dispatchers"
-	DispatcherHJson    = "dispatcherh"
+	RegistrarCJson     = "registrarc"
 	CgrLoaderCfgJson   = "loader"
 	CgrMigratorCfgJson = "migrator"
 	ChargerSCfgJson    = "chargers"
@@ -75,7 +75,7 @@ var (
 		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN,
 		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
-		AnalyzerCfgJson, ApierS, EEsJson, RateSJson, SIPAgentJson, DispatcherHJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson,
+		AnalyzerCfgJson, ApierS, EEsJson, RateSJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson,
 		ActionSJson, AccountSCfgJson}
 )
 
@@ -443,12 +443,12 @@ func (self CgrJsonCfg) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) DispatcherHJsonCfg() (*DispatcherHJsonCfg, error) {
-	rawCfg, hasKey := self[DispatcherHJson]
+func (self CgrJsonCfg) RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error) {
+	rawCfg, hasKey := self[RegistrarCJson]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(DispatcherHJsonCfg)
+	cfg := new(RegistrarCJsonCfgs)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

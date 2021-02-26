@@ -29,11 +29,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewDispatcherHostsService returns the Dispatcher Service
-func NewDispatcherHostsService(cfg *config.CGRConfig, server *cores.Server,
+// NewRegistrarCService returns the Dispatcher Service
+func NewRegistrarCService(cfg *config.CGRConfig, server *cores.Server,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
-	return &DispatcherHostsService{
+	return &RegistrarCService{
 		cfg:     cfg,
 		server:  server,
 		connMgr: connMgr,
@@ -42,8 +42,8 @@ func NewDispatcherHostsService(cfg *config.CGRConfig, server *cores.Server,
 	}
 }
 
-// DispatcherHostsService implements Service interface
-type DispatcherHostsService struct {
+// RegistrarCService implements Service interface
+type RegistrarCService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
 	server   *cores.Server
@@ -56,7 +56,7 @@ type DispatcherHostsService struct {
 }
 
 // Start should handle the sercive start
-func (dspS *DispatcherHostsService) Start() (err error) {
+func (dspS *RegistrarCService) Start() (err error) {
 	if dspS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -72,12 +72,12 @@ func (dspS *DispatcherHostsService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (dspS *DispatcherHostsService) Reload() (err error) {
+func (dspS *RegistrarCService) Reload() (err error) {
 	return // for the momment nothing to reload
 }
 
 // Shutdown stops the service
-func (dspS *DispatcherHostsService) Shutdown() (err error) {
+func (dspS *RegistrarCService) Shutdown() (err error) {
 	dspS.Lock()
 	close(dspS.stopChan)
 	dspS.dspS.Shutdown()
@@ -87,18 +87,18 @@ func (dspS *DispatcherHostsService) Shutdown() (err error) {
 }
 
 // IsRunning returns if the service is running
-func (dspS *DispatcherHostsService) IsRunning() bool {
+func (dspS *RegistrarCService) IsRunning() bool {
 	dspS.RLock()
 	defer dspS.RUnlock()
 	return dspS != nil && dspS.dspS != nil
 }
 
 // ServiceName returns the service name
-func (dspS *DispatcherHostsService) ServiceName() string {
-	return utils.DispatcherH
+func (dspS *RegistrarCService) ServiceName() string {
+	return utils.RegistrarC
 }
 
 // ShouldRun returns if the service should be running
-func (dspS *DispatcherHostsService) ShouldRun() bool {
+func (dspS *RegistrarCService) ShouldRun() bool {
 	return dspS.cfg.DispatcherHCfg().Enabled
 }

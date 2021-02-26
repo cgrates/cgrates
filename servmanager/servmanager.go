@@ -243,8 +243,8 @@ func (srvMngr *ServiceManager) handleReload() {
 			engine.Cache.Clear([]string{utils.CacheRPCConnections})
 		case <-srvMngr.GetConfig().GetReloadChan(config.SIPAgentJson):
 			go srvMngr.reloadService(utils.SIPAgent)
-		case <-srvMngr.GetConfig().GetReloadChan(config.DispatcherHJson):
-			go srvMngr.reloadService(utils.DispatcherH)
+		case <-srvMngr.GetConfig().GetReloadChan(config.RegistrarCJson):
+			go srvMngr.reloadService(utils.RegistrarC)
 		case <-srvMngr.GetConfig().GetReloadChan(config.HTTP_JSN):
 			go srvMngr.reloadService(utils.GlobalVarS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.AccountSCfgJson):

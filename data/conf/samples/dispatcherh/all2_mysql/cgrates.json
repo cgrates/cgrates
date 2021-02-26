@@ -10,7 +10,7 @@
     
     
     "listen": {
-         "rpc_json": ":7012",
+        "rpc_json": ":7012",
         "rpc_gob": ":7013",
         "http": ":7080",
     },
@@ -102,16 +102,24 @@
     },
     
     
-
-    "dispatcherh":{
+"registrarc":{
+    "rpc":{
         "enabled": true,
-        "dispatchers_conns": ["dispConn"],
+        "registrars_conns": ["dispConn"],
         "hosts": {
-            "*default":[{"ID":"ALL2", "register_transport": "*json", "register_tls": false}]
+            "*default":[{"ID":"ALL2", "transport": "*json", "tls": false}]
         },  
-        "register_interval": "1s",
+        "refresh_interval": "1s",
     },
-    
+    "dispatcher":{
+        "enabled": true,
+        "registrars_conns": ["dispConn"],
+        "hosts": {
+            "*default":[{"ID":"ALL2", "transport": "*json", "tls": false}]
+        },  
+        "refresh_interval": "1s",
+    },
+}
     
     }
     

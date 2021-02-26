@@ -718,39 +718,74 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 
-	if cfg.dispatcherHCfg.Enabled {
-		if len(cfg.dispatcherHCfg.Hosts) == 0 {
-			return fmt.Errorf("<%s> missing dispatcher host IDs", utils.DispatcherH)
+	if cfg.registrarCCfg.Dispatcher.Enabled {
+		if len(cfg.registrarCCfg.Dispatcher.Hosts) == 0 {
+			return fmt.Errorf("<%s> missing dispatcher host IDs", utils.RegistrarC)
 		}
-		if cfg.dispatcherHCfg.RegisterInterval <= 0 {
-			return fmt.Errorf("<%s> the register imterval needs to be bigger than 0", utils.DispatcherH)
+		if cfg.registrarCCfg.Dispatcher.RefreshInterval <= 0 {
+			return fmt.Errorf("<%s> the register imterval needs to be bigger than 0", utils.RegistrarC)
 		}
-		for tnt, hosts := range cfg.dispatcherHCfg.Hosts {
+		for tnt, hosts := range cfg.registrarCCfg.Dispatcher.Hosts {
 			for _, host := range hosts {
-				if !utils.SliceHasMember([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON}, host.RegisterTransport) {
-					return fmt.Errorf("<%s> unsupported transport <%s> for host <%s>", utils.DispatcherH, host.RegisterTransport, utils.ConcatenatedKey(tnt, host.ID))
+				if !utils.SliceHasMember([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON, rpcclient.BiRPCJSON, rpcclient.BiRPCGOB}, host.Transport) {
+					return fmt.Errorf("<%s> unsupported transport <%s> for host <%s>", utils.RegistrarC, host.Transport, utils.ConcatenatedKey(tnt, host.ID))
 				}
 			}
 		}
-		if len(cfg.dispatcherHCfg.DispatchersConns) == 0 {
-			return fmt.Errorf("<%s> missing dispatcher connection IDs", utils.DispatcherH)
+		if len(cfg.registrarCCfg.Dispatcher.RegistrarSConns) == 0 {
+			return fmt.Errorf("<%s> missing dispatcher connection IDs", utils.RegistrarC)
 		}
-		for _, connID := range cfg.dispatcherHCfg.DispatchersConns {
+		for _, connID := range cfg.registrarCCfg.Dispatcher.RegistrarSConns {
 			if connID == utils.MetaInternal {
-				return fmt.Errorf("<%s> internal connection IDs are not supported", utils.DispatcherH)
+				return fmt.Errorf("<%s> internal connection IDs are not supported", utils.RegistrarC)
 			}
 			connCfg, has := cfg.rpcConns[connID]
 			if !has {
-				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DispatcherH, connID)
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RegistrarC, connID)
 			}
 			if len(connCfg.Conns) != 1 {
-				return fmt.Errorf("<%s> connection with id: <%s> needs to have only one host", utils.DispatcherH, connID)
+				return fmt.Errorf("<%s> connection with id: <%s> needs to have only one host", utils.RegistrarC, connID)
 			}
 			if connCfg.Conns[0].Transport != rpcclient.HTTPjson {
-				return fmt.Errorf("<%s> connection with id: <%s> unsupported transport <%s>", utils.DispatcherH, connID, connCfg.Conns[0].Transport)
+				return fmt.Errorf("<%s> connection with id: <%s> unsupported transport <%s>", utils.RegistrarC, connID, connCfg.Conns[0].Transport)
 			}
 		}
 	}
+
+	if cfg.registrarCCfg.RPC.Enabled {
+		if len(cfg.registrarCCfg.RPC.Hosts) == 0 {
+			return fmt.Errorf("<%s> missing RPC host IDs", utils.RegistrarC)
+		}
+		if cfg.registrarCCfg.RPC.RefreshInterval <= 0 {
+			return fmt.Errorf("<%s> the register imterval needs to be bigger than 0", utils.RegistrarC)
+		}
+		for tnt, hosts := range cfg.registrarCCfg.RPC.Hosts {
+			for _, host := range hosts {
+				if !utils.SliceHasMember([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON, rpcclient.BiRPCJSON, rpcclient.BiRPCGOB}, host.Transport) {
+					return fmt.Errorf("<%s> unsupported transport <%s> for host <%s>", utils.RegistrarC, host.Transport, utils.ConcatenatedKey(tnt, host.ID))
+				}
+			}
+		}
+		if len(cfg.registrarCCfg.RPC.RegistrarSConns) == 0 {
+			return fmt.Errorf("<%s> missing RPC connection IDs", utils.RegistrarC)
+		}
+		for _, connID := range cfg.registrarCCfg.RPC.RegistrarSConns {
+			if connID == utils.MetaInternal {
+				return fmt.Errorf("<%s> internal connection IDs are not supported", utils.RegistrarC)
+			}
+			connCfg, has := cfg.rpcConns[connID]
+			if !has {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RegistrarC, connID)
+			}
+			if len(connCfg.Conns) != 1 {
+				return fmt.Errorf("<%s> connection with id: <%s> needs to have only one host", utils.RegistrarC, connID)
+			}
+			if connCfg.Conns[0].Transport != rpcclient.HTTPjson {
+				return fmt.Errorf("<%s> connection with id: <%s> unsupported transport <%s>", utils.RegistrarC, connID, connCfg.Conns[0].Transport)
+			}
+		}
+	}
+
 	if cfg.analyzerSCfg.Enabled {
 		if _, err := os.Stat(cfg.analyzerSCfg.DBPath); err != nil && os.IsNotExist(err) {
 			return fmt.Errorf("<%s> nonexistent DB folder: %q", utils.AnalyzerS, cfg.analyzerSCfg.DBPath)

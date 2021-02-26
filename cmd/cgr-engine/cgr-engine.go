@@ -35,8 +35,8 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/dispatcherh"
 	"github.com/cgrates/cgrates/loaders"
+	"github.com/cgrates/cgrates/registrarc"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
@@ -543,7 +543,7 @@ func main() {
 		utils.CoreS:           new(sync.WaitGroup),
 		utils.DataDB:          new(sync.WaitGroup),
 		utils.DiameterAgent:   new(sync.WaitGroup),
-		utils.DispatcherH:     new(sync.WaitGroup),
+		utils.RegistrarC:      new(sync.WaitGroup),
 		utils.DispatcherS:     new(sync.WaitGroup),
 		utils.DNSAgent:        new(sync.WaitGroup),
 		utils.EventExporterS:  new(sync.WaitGroup),
@@ -592,7 +592,7 @@ func main() {
 	// Rpc/http server
 	server := cores.NewServer(caps)
 	if len(cfg.HTTPCfg().DispatchersRegistrarURL) != 0 {
-		server.RegisterHttpFunc(cfg.HTTPCfg().DispatchersRegistrarURL, dispatcherh.Registar)
+		server.RegisterHttpFunc(cfg.HTTPCfg().DispatchersRegistrarURL, registrarc.Registrar)
 	}
 	if cfg.ConfigSCfg().Enabled {
 		server.RegisterHttpFunc(cfg.ConfigSCfg().URL, config.HandlerConfigS)
@@ -633,7 +633,7 @@ func main() {
 	srvManager := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, anz, srvDep)
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager, anz, srvDep)
-	dspH := services.NewDispatcherHostsService(cfg, server, connManager, anz, srvDep)
+	dspH := services.NewRegistrarCService(cfg, server, connManager, anz, srvDep)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
 		internalChargerSChan, connManager, anz, srvDep)
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan, anz, srvDep)
