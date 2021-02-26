@@ -46,7 +46,7 @@ var sTestsTPDispatchers = []func(t *testing.T){
 	testTPDispatcherResetStorDb,
 	testTPDispatcherStartEngine,
 	testTPDispatcherRpcConn,
-	ttestTPDispatcherGetTPDispatcherBeforeSet,
+	testTPDispatcherGetTPDispatcherBeforeSet,
 	testTPDispatcherSetTPDispatcher,
 	testTPDispatcherGetTPDispatcherAfterSet,
 	testTPDispatcherGetTPDispatcherIds,
@@ -110,7 +110,7 @@ func testTPDispatcherRpcConn(t *testing.T) {
 	}
 }
 
-func ttestTPDispatcherGetTPDispatcherBeforeSet(t *testing.T) {
+func testTPDispatcherGetTPDispatcherBeforeSet(t *testing.T) {
 	var reply *utils.TPDispatcherProfile
 	if err := tpDispatcherRPC.Call(utils.APIerSv1GetTPDispatcherProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"},
@@ -190,7 +190,7 @@ func testTPDispatcherGetTPDispatcherAfterUpdate(t *testing.T) {
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDispatcher, reply) && !reflect.DeepEqual(revHosts, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpDispatcher), utils.ToJSON(reply))
+		t.Errorf("Expecting : %+v \n and %+v\n, received: %+v", utils.ToJSON(tpDispatcher), utils.ToJSON(revHosts), utils.ToJSON(reply))
 	}
 }
 

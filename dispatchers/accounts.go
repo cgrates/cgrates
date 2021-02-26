@@ -80,6 +80,34 @@ func (dS *DispatcherService) DebitAbstracts(args *utils.ArgsAccountsForEvent, re
 	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1DebitAbstracts, args, reply)
 }
 
+func (dS *DispatcherService) MaxConcretes(args *utils.ArgsAccountsForEvent, reply *utils.ExtEventCharges) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.AccountSv1MaxConcretes, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1MaxConcretes, args, reply)
+}
+
+func (dS *DispatcherService) DebitConcretes(args *utils.ArgsAccountsForEvent, reply *utils.ExtEventCharges) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.AccountSv1DebitConcretes, tnt,
+			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1DebitConcretes, args, reply)
+}
+
 func (dS *DispatcherService) AccountSv1ActionSetBalance(args *utils.ArgsActSetBalance, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {

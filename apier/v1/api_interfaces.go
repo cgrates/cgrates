@@ -292,5 +292,7 @@ type AccountSv1Interface interface {
 	MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error
 	DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error
 	ActionSetBalance(args *utils.ArgsActSetBalance, eEc *string) (err error)
+	MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error)
+	DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error)
 	ActionRemoveBalance(args *utils.ArgsActRemoveBalances, eEc *string) (err error)
 }

@@ -164,7 +164,7 @@ func (aSv1 *AccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent
 	return aSv1.aS.V1AccountProfilesForEvent(args, aps)
 }
 
-// MaxUsage returns the maximum usage for the event, based on matching Account
+// MaxAbstracts returns the maximum abstracts for the event, based on matching Account
 func (aSv1 *AccountSv1) MaxAbstracts(args *utils.ArgsAccountsForEvent,
 	eEc *utils.ExtEventCharges) (err error) {
 	return aSv1.aS.V1MaxAbstracts(args, eEc)
@@ -174,6 +174,18 @@ func (aSv1 *AccountSv1) MaxAbstracts(args *utils.ArgsAccountsForEvent,
 func (aSv1 *AccountSv1) DebitAbstracts(args *utils.ArgsAccountsForEvent,
 	eEc *utils.ExtEventCharges) (err error) {
 	return aSv1.aS.V1DebitAbstracts(args, eEc)
+}
+
+// MaxConcretes returns the maximum concretes for the event, based on the matching Account
+func (aSv1 *AccountSv1) MaxConcretes(args *utils.ArgsAccountsForEvent,
+	eEc *utils.ExtEventCharges) (err error) {
+	return aSv1.aS.V1MaxConcretes(args, eEc)
+}
+
+// DebitConcretes performs debit of concrete units for the provided event
+func (aSv1 *AccountSv1) DebitConcretes(args *utils.ArgsAccountsForEvent,
+	eEc *utils.ExtEventCharges) (err error) {
+	return aSv1.aS.V1DebitConcretes(args, eEc)
 }
 
 // ActionSetBalance performs a set balance action
