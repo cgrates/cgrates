@@ -1046,11 +1046,11 @@ func testAccountSv1MaxConcretes(t *testing.T) {
 					ID:      "ConcreteBalance1",
 					Weights: ";20",
 					Type:    utils.MetaConcrete,
-					Units:   float64(20 * time.Second),
+					Units:   21,
 					CostIncrements: []*utils.APICostIncrement{
 						&utils.APICostIncrement{
 							FilterIDs:    []string{"*string:~*req.ToR:*data"},
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    utils.Float64Pointer(1),
 							FixedFee:     utils.Float64Pointer(0),
 							RecurrentFee: utils.Float64Pointer(1),
 						},
@@ -1060,7 +1060,21 @@ func testAccountSv1MaxConcretes(t *testing.T) {
 					ID:      "ConcreteBalance2",
 					Weights: ";10",
 					Type:    utils.MetaConcrete,
-					Units:   float64(20 * time.Second),
+					Units:   20,
+					CostIncrements: []*utils.APICostIncrement{
+						&utils.APICostIncrement{
+							FilterIDs:    []string{"*string:~*req.ToR:*data"},
+							Increment:    utils.Float64Pointer(1),
+							FixedFee:     utils.Float64Pointer(0),
+							RecurrentFee: utils.Float64Pointer(1),
+						},
+					},
+				},
+				"AbstractBalance1": &utils.APIBalance{
+					ID:      "AbstractBalance1",
+					Weights: ";5",
+					Type:    utils.MetaAbstract,
+					Units:   20,
 					CostIncrements: []*utils.APICostIncrement{
 						&utils.APICostIncrement{
 							FilterIDs:    []string{"*string:~*req.ToR:*data"},
@@ -1070,23 +1084,6 @@ func testAccountSv1MaxConcretes(t *testing.T) {
 						},
 					},
 				},
-				/*
-					"AbstractBalance1": &utils.APIBalance{
-						ID:      "AbstractBalance1",
-						Weights: ";10",
-						Type:    utils.MetaAbstract,
-						Units:   float64(30 * time.Minute),
-						CostIncrements: []*utils.APICostIncrement{
-							&utils.APICostIncrement{
-								FilterIDs:    []string{"*string:~*req.ToR:*data"},
-								Increment:    utils.Float64Pointer(float64(time.Second)),
-								FixedFee:     utils.Float64Pointer(0),
-								RecurrentFee: utils.Float64Pointer(1),
-							},
-						},
-					},
-
-				*/
 			},
 			ThresholdIDs: []string{utils.MetaNone},
 		},
@@ -1119,15 +1116,15 @@ func testAccountSv1MaxConcretes(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1004",
 				utils.ToR:          utils.MetaData,
-				utils.Usage:        "50s",
+				utils.Usage:        "50ns",
 			},
 		}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != float64(40*time.Second) {
+	} else if eEc.Usage == nil || *eEc.Usage != 41 {
 		t.Errorf("received usage: %v", *eEc.Usage)
 	}
 
-	//make sure we did nto Debit from our Account
+	//make sure we did not Debit from our Account
 	exp, err = apiAccPrf.AsAccountProfile()
 	if err != nil {
 		t.Error(err)
@@ -1149,11 +1146,11 @@ func testAccountSv1DebitConcretes(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1004",
 				utils.ToR:          utils.MetaData,
-				utils.Usage:        "50s",
+				utils.Usage:        "50ns",
 			},
 		}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != float64(40*time.Second) {
+	} else if eEc.Usage == nil || *eEc.Usage != 41 {
 		t.Errorf("received usage: %v", *eEc.Usage)
 	}
 
@@ -1174,7 +1171,7 @@ func testAccountSv1DebitConcretes(t *testing.T) {
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*data"},
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						Increment:    &utils.Decimal{decimal.New(1, 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
 					},
@@ -1189,6 +1186,24 @@ func testAccountSv1DebitConcretes(t *testing.T) {
 				},
 				Type:  utils.MetaConcrete,
 				Units: &utils.Decimal{decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
+			},
+			"AbstractBalance1": &utils.Balance{
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: &utils.Decimal{decimal.New(20, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
 						FilterIDs:    []string{"*string:~*req.ToR:*data"},
