@@ -24,14 +24,14 @@ import (
 
 // HTTPCfg is the HTTP config section
 type HTTPCfg struct {
-	HTTPJsonRPCURL          string            // JSON RPC relative URL ("" to disable)
-	DispatchersRegistrarURL string            // dispatcherH registrar service relative URL
-	HTTPWSURL               string            // WebSocket relative URL ("" to disable)
-	HTTPFreeswitchCDRsURL   string            // Freeswitch CDRS relative URL ("" to disable)
-	HTTPCDRsURL             string            // CDRS relative URL ("" to disable)
-	HTTPUseBasicAuth        bool              // Use basic auth for HTTP API
-	HTTPAuthUsers           map[string]string // Basic auth user:password map (base64 passwords)
-	ClientOpts              map[string]interface{}
+	HTTPJsonRPCURL        string            // JSON RPC relative URL ("" to disable)
+	RegistrarSURL         string            // registrar service relative URL
+	HTTPWSURL             string            // WebSocket relative URL ("" to disable)
+	HTTPFreeswitchCDRsURL string            // Freeswitch CDRS relative URL ("" to disable)
+	HTTPCDRsURL           string            // CDRS relative URL ("" to disable)
+	HTTPUseBasicAuth      bool              // Use basic auth for HTTP API
+	HTTPAuthUsers         map[string]string // Basic auth user:password map (base64 passwords)
+	ClientOpts            map[string]interface{}
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
@@ -42,8 +42,8 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 	if jsnHTTPCfg.Json_rpc_url != nil {
 		httpcfg.HTTPJsonRPCURL = *jsnHTTPCfg.Json_rpc_url
 	}
-	if jsnHTTPCfg.Dispatchers_registrar_url != nil {
-		httpcfg.DispatchersRegistrarURL = *jsnHTTPCfg.Dispatchers_registrar_url
+	if jsnHTTPCfg.Registrars_url != nil {
+		httpcfg.RegistrarSURL = *jsnHTTPCfg.Registrars_url
 	}
 	if jsnHTTPCfg.Ws_url != nil {
 		httpcfg.HTTPWSURL = *jsnHTTPCfg.Ws_url
@@ -76,7 +76,7 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
 	}
 	return map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:        httpcfg.HTTPJsonRPCURL,
-		utils.RegistrarSURLCfg:         httpcfg.DispatchersRegistrarURL,
+		utils.RegistrarSURLCfg:         httpcfg.RegistrarSURL,
 		utils.HTTPWSURLCfg:             httpcfg.HTTPWSURL,
 		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.HTTPFreeswitchCDRsURL,
 		utils.HTTPCDRsURLCfg:           httpcfg.HTTPCDRsURL,
@@ -89,14 +89,14 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
 // Clone returns a deep copy of HTTPCfg
 func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
 	cln = &HTTPCfg{
-		HTTPJsonRPCURL:          httpcfg.HTTPJsonRPCURL,
-		DispatchersRegistrarURL: httpcfg.DispatchersRegistrarURL,
-		HTTPWSURL:               httpcfg.HTTPWSURL,
-		HTTPFreeswitchCDRsURL:   httpcfg.HTTPFreeswitchCDRsURL,
-		HTTPCDRsURL:             httpcfg.HTTPCDRsURL,
-		HTTPUseBasicAuth:        httpcfg.HTTPUseBasicAuth,
-		HTTPAuthUsers:           make(map[string]string),
-		ClientOpts:              make(map[string]interface{}),
+		HTTPJsonRPCURL:        httpcfg.HTTPJsonRPCURL,
+		RegistrarSURL:         httpcfg.RegistrarSURL,
+		HTTPWSURL:             httpcfg.HTTPWSURL,
+		HTTPFreeswitchCDRsURL: httpcfg.HTTPFreeswitchCDRsURL,
+		HTTPCDRsURL:           httpcfg.HTTPCDRsURL,
+		HTTPUseBasicAuth:      httpcfg.HTTPUseBasicAuth,
+		HTTPAuthUsers:         make(map[string]string),
+		ClientOpts:            make(map[string]interface{}),
 	}
 	for u, a := range httpcfg.HTTPAuthUsers {
 		cln.HTTPAuthUsers[u] = a

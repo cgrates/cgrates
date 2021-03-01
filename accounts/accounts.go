@@ -55,9 +55,8 @@ func (aS *AccountS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 }
 
 // Shutdown is called to shutdown the service
-func (aS *AccountS) Shutdown() (err error) {
+func (aS *AccountS) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.AccountS))
-	return
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC

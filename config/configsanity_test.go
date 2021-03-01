@@ -1054,6 +1054,7 @@ func TestConfigSanityRegistrarCRPC(t *testing.T) {
 				"hosts": {},
 			},
 		},
+		Dispatcher: &RegistrarCCfg{},
 	}
 
 	expected := "<RegistrarC> the register imterval needs to be bigger than 0"
@@ -1123,6 +1124,7 @@ func TestConfigSanityRegistrarCDispatcher(t *testing.T) {
 				"hosts": {},
 			},
 		},
+		RPC: &RegistrarCCfg{},
 	}
 
 	expected := "<RegistrarC> the register imterval needs to be bigger than 0"

@@ -148,19 +148,27 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (rh *RemoteHost) AsMapInterface() map[string]interface{} {
-	return map[string]interface{}{
-		utils.IDCfg:          rh.ID,
-		utils.AddressCfg:     rh.Address,
-		utils.TransportCfg:   rh.Transport,
-		utils.SynchronousCfg: rh.Synchronous,
-		utils.TLS:            rh.TLS,
+func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
+	mp = map[string]interface{}{
+		utils.AddressCfg:   rh.Address,
+		utils.TransportCfg: rh.Transport,
 	}
+	if rh.ID != utils.EmptyString {
+		mp[utils.IDCfg] = rh.ID
+	}
+	if rh.Synchronous {
+		mp[utils.SynchronousCfg] = rh.Synchronous
+	}
+	if rh.TLS {
+		mp[utils.TLS] = rh.TLS
+	}
+	return
 }
 
 // Clone returns a deep copy of RemoteHost
 func (rh RemoteHost) Clone() (cln *RemoteHost) {
 	return &RemoteHost{
+		ID:          rh.ID,
 		Address:     rh.Address,
 		Transport:   rh.Transport,
 		Synchronous: rh.Synchronous,

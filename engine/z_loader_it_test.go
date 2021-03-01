@@ -46,13 +46,13 @@ var (
 		testLoaderITInitDataDB,
 		testLoaderITInitStoreDB,
 		testLoaderITRemoveLoad,
-		// testLoaderITLoadFromCSV,
-		// testLoaderITWriteToDatabase,
-		// testLoaderITImportToStorDb,
-		// testLoaderITInitDataDB,
-		// testLoaderITLoadFromStorDb,
-		// testLoaderITInitDataDB,
-		// testLoaderITLoadIndividualProfiles,
+		testLoaderITLoadFromCSV,
+		testLoaderITWriteToDatabase,
+		testLoaderITImportToStorDb,
+		testLoaderITInitDataDB,
+		testLoaderITLoadFromStorDb,
+		testLoaderITInitDataDB,
+		testLoaderITLoadIndividualProfiles,
 	}
 )
 

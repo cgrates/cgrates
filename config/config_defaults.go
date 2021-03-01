@@ -66,7 +66,7 @@ const CGRATES_CFG_JSON = `
 
 "rpc_conns": {
 	"*localhost": {
-		"conns": [{"address": "127.0.0.1:2012", "transport":"*json"},{}],
+		"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
 	},
 },							// rpc connections definitions
 
@@ -195,7 +195,7 @@ const CGRATES_CFG_JSON = `
 
 "http": {													// HTTP server configuration
 	"json_rpc_url": "/jsonrpc",								// JSON RPC relative URL ("" to disable)
-	"dispatchers_registrar_url": "/dispatchers_registrar",	// dispatcherH registrar service relative URL
+	"registrars_url": "/registrar",							// registrar service relative URL
 	"ws_url": "/ws",										// WebSockets relative URL ("" to disable)
 	"freeswitch_cdrs_url": "/freeswitch_json",				// Freeswitch CDRS relative URL ("" to disable)
 	"http_cdrs": "/cdr_http",								// CDRS relative URL ("" to disable)
@@ -964,11 +964,19 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"dispatcherh":{
-    "enabled": false,
-    "dispatchers_conns": [],
-	"hosts": {},  
-	"register_interval": "5m",
+"registrarc":{
+    "rpc":{
+        "enabled": false,
+        "registrars_conns": [],
+        "hosts": {},  
+        "refresh_interval": "5m",
+    },
+    "dispatcher":{
+        "enabled": false,
+        "registrars_conns": [],
+        "hosts": {},  
+        "refresh_interval": "5m",
+    },
 },
 
 

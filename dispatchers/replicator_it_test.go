@@ -24,6 +24,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -437,7 +438,9 @@ func testDspRplDispatcherHost(t *testing.T) {
 	setDispatcherHost := &engine.DispatcherHostWithOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
-			ID:     "ID",
+			RemoteHost: &config.RemoteHost{
+				ID: "ID",
+			},
 		},
 		Opts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",

@@ -637,8 +637,8 @@ func testInternalReplicateITDispatcherHost(t *testing.T) {
 	dispatcherHost = &DispatcherHostWithCache{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
-			ID:     "DspHst1",
-			Conn: &config.RemoteHost{
+			RemoteHost: &config.RemoteHost{
+				ID:      "DspHst1",
 				Address: "*internal",
 			},
 		},

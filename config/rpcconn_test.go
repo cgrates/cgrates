@@ -146,10 +146,8 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 			utils.StrategyCfg: utils.MetaFirst,
 			utils.Conns: []map[string]interface{}{
 				{
-					utils.AddressCfg:     "127.0.0.1:2012",
-					utils.TransportCfg:   "*json",
-					utils.SynchronousCfg: false,
-					utils.TLS:            false,
+					utils.AddressCfg:   "127.0.0.1:2012",
+					utils.TransportCfg: "*json",
 				},
 			},
 		},
@@ -158,10 +156,8 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 			utils.PoolSize:    0,
 			utils.Conns: []map[string]interface{}{
 				{
-					utils.AddressCfg:     utils.MetaInternal,
-					utils.TransportCfg:   utils.EmptyString,
-					utils.SynchronousCfg: false,
-					utils.TLS:            false,
+					utils.AddressCfg:   utils.MetaInternal,
+					utils.TransportCfg: utils.EmptyString,
 				},
 			},
 		},
@@ -170,10 +166,8 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 			utils.PoolSize:    0,
 			utils.Conns: []map[string]interface{}{
 				{
-					utils.AddressCfg:     rpcclient.BiRPCInternal,
-					utils.TransportCfg:   utils.EmptyString,
-					utils.SynchronousCfg: false,
-					utils.TLS:            false,
+					utils.AddressCfg:   rpcclient.BiRPCInternal,
+					utils.TransportCfg: utils.EmptyString,
 				},
 			},
 		},
@@ -200,10 +194,8 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 		utils.MetaInternal: map[string]interface{}{
 			utils.Conns: []map[string]interface{}{
 				{
-					utils.TLS:            false,
-					utils.AddressCfg:     utils.MetaInternal,
-					utils.SynchronousCfg: false,
-					utils.TransportCfg:   utils.EmptyString,
+					utils.AddressCfg:   utils.MetaInternal,
+					utils.TransportCfg: utils.EmptyString,
 				},
 			},
 			utils.PoolSize:    0,
@@ -212,10 +204,8 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 		rpcclient.BiRPCInternal: map[string]interface{}{
 			utils.Conns: []map[string]interface{}{
 				{
-					utils.TLS:            false,
-					utils.AddressCfg:     rpcclient.BiRPCInternal,
-					utils.SynchronousCfg: false,
-					utils.TransportCfg:   utils.EmptyString,
+					utils.AddressCfg:   rpcclient.BiRPCInternal,
+					utils.TransportCfg: utils.EmptyString,
 				},
 			},
 			utils.PoolSize:    0,

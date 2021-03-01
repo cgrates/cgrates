@@ -61,14 +61,14 @@ type ListenJsonCfg struct {
 
 // HTTP config section
 type HTTPJsonCfg struct {
-	Json_rpc_url              *string
-	Dispatchers_registrar_url *string
-	Ws_url                    *string
-	Freeswitch_cdrs_url       *string
-	Http_Cdrs                 *string
-	Use_basic_auth            *bool
-	Auth_users                *map[string]string
-	Client_opts               map[string]interface{}
+	Json_rpc_url        *string
+	Registrars_url      *string
+	Ws_url              *string
+	Freeswitch_cdrs_url *string
+	Http_Cdrs           *string
+	Use_basic_auth      *bool
+	Auth_users          *map[string]string
+	Client_opts         map[string]interface{}
 }
 
 type TlsJsonCfg struct {

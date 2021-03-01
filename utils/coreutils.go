@@ -275,7 +275,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 		return time.ParseInLocation("02/01/2006 15:04:05", tmStr, loc)
 	case broadsoftTimestampRule.MatchString(tmStr):
 		return time.ParseInLocation("20060102150405.999", tmStr, loc)
-	case tmStr == "*now":
+	case tmStr == MetaNow:
 		return time.Now(), nil
 	case strings.HasPrefix(tmStr, "+"):
 		tmStr = strings.TrimPrefix(tmStr, "+")

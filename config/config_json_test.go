@@ -1854,13 +1854,13 @@ func TestDfSureTaxJsonCfg(t *testing.T) {
 
 func TestDfHttpJsonCfg(t *testing.T) {
 	eCfg := &HTTPJsonCfg{
-		Json_rpc_url:              utils.StringPointer("/jsonrpc"),
-		Dispatchers_registrar_url: utils.StringPointer("/dispatchers_registrar"),
-		Ws_url:                    utils.StringPointer("/ws"),
-		Freeswitch_cdrs_url:       utils.StringPointer("/freeswitch_json"),
-		Http_Cdrs:                 utils.StringPointer("/cdr_http"),
-		Use_basic_auth:            utils.BoolPointer(false),
-		Auth_users:                utils.MapStringStringPointer(map[string]string{}),
+		Json_rpc_url:        utils.StringPointer("/jsonrpc"),
+		Registrars_url:      utils.StringPointer("/registrar"),
+		Ws_url:              utils.StringPointer("/ws"),
+		Freeswitch_cdrs_url: utils.StringPointer("/freeswitch_json"),
+		Http_Cdrs:           utils.StringPointer("/cdr_http"),
+		Use_basic_auth:      utils.BoolPointer(false),
+		Auth_users:          utils.MapStringStringPointer(map[string]string{}),
 		Client_opts: map[string]interface{}{
 			utils.HTTPClientTLSClientConfigCfg:       false,
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",

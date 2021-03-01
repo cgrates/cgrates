@@ -36,7 +36,7 @@
 	},
 	"dispConn": {
 		"strategy": "*first",
-		"conns": [{"address": "http://127.0.0.1:2080/dispatchers_registrar", "transport":"*http_jsonrpc"}]
+		"conns": [{"address": "http://127.0.0.1:2080/registrar", "transport":"*http_jsonrpc"}]
 	}
 },
 

@@ -191,8 +191,8 @@ func testDspITMigrateAndMove(t *testing.T) {
 	}
 	dspHost := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
-		ID:     "ALL",
-		Conn: &config.RemoteHost{
+		RemoteHost: &config.RemoteHost{
+			ID:        "ALL",
 			Address:   "127.0.0.1",
 			Transport: utils.MetaJSON,
 		},
