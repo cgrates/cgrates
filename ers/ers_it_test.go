@@ -21,6 +21,7 @@ package ers
 
 import (
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -323,6 +324,311 @@ func TestERsListenAndServeCfgRldChan4(t *testing.T) {
 	}()
 	err := srv.ListenAndServe(stopChan, cfgRldChan)
 	if err != nil {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+
+func TestERsListenAndServeCfgRldChan5(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaFileCSV,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	exp := &CSVFileER{
+		RWMutex:   sync.RWMutex{},
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     nil,
+		rdrDir:    "",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   nil,
+	}
+	var evRdr EventReader = exp
+	srv.rdrs = map[string]EventReader{
+		"test": evRdr,
+	}
+	srv.stopLsn["test"] = make(chan struct{})
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+	srv.rdrPaths = map[string]string{
+		"test": "path_test",
+	}
+	cfgRldChan <- struct{}{}
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		close(stopChan)
+	}()
+	err := srv.ListenAndServe(stopChan, cfgRldChan)
+	if err != nil {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+
+/*
+func TestERsListenAndServeCfgRldChan6(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaFileCSV,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	exp := &CSVFileER{
+		cgrCfg: cfg,
+		cfgIdx: 0,
+	}
+	var evRdr EventReader = exp
+	srv.rdrs = map[string]EventReader{
+		"test": evRdr,
+	}
+	srv.stopLsn["test"] = make(chan struct{})
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+	srv.rdrPaths = map[string]string{
+		"test": "path_test",
+	}
+	cfgRldChan <- struct{}{}
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		close(stopChan)
+	}()
+	err := srv.ListenAndServe(stopChan, cfgRldChan)
+	if err == nil || err.Error() != "unsupported reader type: <badType>" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "unsupported reader type: <badType>", err)
+	}
+}
+*/
+
+func TestERsProcessEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaLog: map[string][]string{
+				"test": {"test"},
+			},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "",
+		ID:     "",
+		Time:   nil,
+		Event:  nil,
+		Opts:   nil,
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "unsupported reqType: <>" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "unsupported reqType: <>", err)
+	}
+}
+func TestERsProcessEvent2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaDryRun: map[string][]string{
+				"test": {"test"},
+			},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "",
+		ID:     "",
+		Time:   nil,
+		Event:  nil,
+		Opts:   nil,
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err != nil {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+func TestERsProcessEvent3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	cfg.ERsCfg().SessionSConns = []string{}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaEvent: map[string][]string{},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Opts: map[string]interface{}{
+			utils.OptsRoutesLimit: true,
+		},
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+
+func TestERsProcessEvent4(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	cfg.ERsCfg().SessionSConns = []string{}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaAuthorize: map[string][]string{},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Opts: map[string]interface{}{
+			utils.OptsRoutesLimit: true,
+		},
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+
+func TestERsProcessEvent5(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	cfg.ERsCfg().SessionSConns = []string{}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaTerminate: map[string][]string{},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "",
+		ID:     "",
+		Time:   nil,
+		Event:  nil,
+		Opts: map[string]interface{}{
+			utils.OptsRoutesLimit: true,
+		},
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+
+func TestERsProcessEvent6(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	cfg.ERsCfg().SessionSConns = []string{}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaInitiate: map[string][]string{},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Opts: map[string]interface{}{
+			utils.OptsRoutesLimit: true,
+		},
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+func TestERsProcessEvent7(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	cfg.ERsCfg().SessionSConns = []string{}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaUpdate: map[string][]string{},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Opts: map[string]interface{}{
+			utils.OptsRoutesLimit: true,
+		},
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+func TestERsProcessEvent8(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	cfg.ERsCfg().SessionSConns = []string{}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaMessage: map[string][]string{},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "",
+		ID:     "",
+		Time:   nil,
+		Event:  nil,
+		Opts: map[string]interface{}{
+			utils.OptsRoutesLimit: true,
+		},
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}
 }
