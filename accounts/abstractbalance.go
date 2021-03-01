@@ -123,5 +123,5 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 // debitConcretes implements the balanceOperator interface
 func (aB *abstractBalance) debitConcretes(usage *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
-	return
+	return nil, utils.ErrNotImplemented
 }

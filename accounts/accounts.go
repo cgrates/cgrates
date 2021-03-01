@@ -135,7 +135,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 	return
 }
 
-// accountDebitAbstracts will debit the usage out of an Account
+// accountDebit will debit the usage out of an Account
 func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
 	cgrEv *utils.CGREvent, concretes bool) (ec *utils.EventCharges, err error) {
 
@@ -169,7 +169,8 @@ func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
 		}
 		var ecDbt *utils.EventCharges
 		if ecDbt, err = debFunc(new(decimal.Big).Copy(usage), cgrEv); err != nil {
-			if err == utils.ErrFilterNotPassingNoCaps {
+			if err == utils.ErrFilterNotPassingNoCaps ||
+				err == utils.ErrNotImplemented {
 				err = nil
 				continue
 			}
