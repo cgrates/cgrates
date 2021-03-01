@@ -26,22 +26,22 @@ import (
 
 func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := &HTTPJsonCfg{
-		Json_rpc_url:              utils.StringPointer("/jsonrpc"),
-		Ws_url:                    utils.StringPointer("/ws"),
-		Dispatchers_registrar_url: utils.StringPointer("/randomUrl"),
-		Freeswitch_cdrs_url:       utils.StringPointer("/freeswitch_json"),
-		Http_Cdrs:                 utils.StringPointer("/cdr_http"),
-		Use_basic_auth:            utils.BoolPointer(false),
-		Auth_users:                utils.MapStringStringPointer(map[string]string{}),
+		Json_rpc_url:        utils.StringPointer("/jsonrpc"),
+		Ws_url:              utils.StringPointer("/ws"),
+		Registrars_url:      utils.StringPointer("/randomUrl"),
+		Freeswitch_cdrs_url: utils.StringPointer("/freeswitch_json"),
+		Http_Cdrs:           utils.StringPointer("/cdr_http"),
+		Use_basic_auth:      utils.BoolPointer(false),
+		Auth_users:          utils.MapStringStringPointer(map[string]string{}),
 	}
 	expected := &HTTPCfg{
-		HTTPJsonRPCURL:          "/jsonrpc",
-		HTTPWSURL:               "/ws",
-		DispatchersRegistrarURL: "/randomUrl",
-		HTTPFreeswitchCDRsURL:   "/freeswitch_json",
-		HTTPCDRsURL:             "/cdr_http",
-		HTTPUseBasicAuth:        false,
-		HTTPAuthUsers:           map[string]string{},
+		HTTPJsonRPCURL:        "/jsonrpc",
+		HTTPWSURL:             "/ws",
+		RegistrarSURL:         "/randomUrl",
+		HTTPFreeswitchCDRsURL: "/freeswitch_json",
+		HTTPCDRsURL:           "/cdr_http",
+		HTTPUseBasicAuth:      false,
+		HTTPAuthUsers:         map[string]string{},
 		ClientOpts: map[string]interface{}{
 			utils.HTTPClientTLSClientConfigCfg:       false,
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
@@ -73,7 +73,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:        "/jsonrpc",
-		utils.RegistrarSURLCfg:         "/dispatchers_registrar",
+		utils.RegistrarSURLCfg:         "/registrar",
 		utils.HTTPWSURLCfg:             "/ws",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
@@ -114,7 +114,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:        "/rpc",
-		utils.RegistrarSURLCfg:         "/dispatchers_registrar",
+		utils.RegistrarSURLCfg:         "/registrar",
 		utils.HTTPWSURLCfg:             "",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
@@ -149,12 +149,12 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 
 func TestHTTPCfgClone(t *testing.T) {
 	ban := &HTTPCfg{
-		HTTPJsonRPCURL:          "/jsonrpc",
-		HTTPWSURL:               "/ws",
-		DispatchersRegistrarURL: "/randomUrl",
-		HTTPFreeswitchCDRsURL:   "/freeswitch_json",
-		HTTPCDRsURL:             "/cdr_http",
-		HTTPUseBasicAuth:        false,
+		HTTPJsonRPCURL:        "/jsonrpc",
+		HTTPWSURL:             "/ws",
+		RegistrarSURL:         "/randomUrl",
+		HTTPFreeswitchCDRsURL: "/freeswitch_json",
+		HTTPCDRsURL:           "/cdr_http",
+		HTTPUseBasicAuth:      false,
 		HTTPAuthUsers: map[string]string{
 			"user": "pass",
 		},

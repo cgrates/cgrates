@@ -1376,8 +1376,8 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 	}
 	eDispHost := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
-		ID:     "ALL1",
-		Conn: &config.RemoteHost{
+		RemoteHost: &config.RemoteHost{
+			ID:        "ALL1",
 			Address:   "127.0.0.1:2012",
 			Transport: utils.MetaJSON,
 			TLS:       true,
@@ -4402,7 +4402,9 @@ cgrates.org,REM_DISPATCHERH_1
 	}
 	expDispatchers := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
-		ID:     "REM_DISPATCHERH_1",
+		RemoteHost: &config.RemoteHost{
+			ID: "REM_DISPATCHERH_1",
+		},
 	}
 	if err := ldr.dm.SetDispatcherHost(expDispatchers); err != nil {
 		t.Error(err)

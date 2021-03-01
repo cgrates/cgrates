@@ -78,7 +78,7 @@ func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error)
 	if jsnCfg.Hosts != nil {
 		for tnt, hosts := range jsnCfg.Hosts {
 			for _, hostJSON := range hosts {
-				conn := NewDfltRemoteHost()
+				conn := new(RemoteHost)
 				conn.loadFromJSONCfg(hostJSON)
 				dps.Hosts[tnt] = append(dps.Hosts[tnt], conn)
 			}
@@ -106,7 +106,9 @@ func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		hosts := make(map[string][]map[string]interface{})
 		for tnt, hs := range dps.Hosts {
 			for _, h := range hs {
-				hosts[tnt] = append(hosts[tnt], h.AsMapInterface())
+				mp := h.AsMapInterface()
+				delete(mp, utils.AddressCfg)
+				hosts[tnt] = append(hosts[tnt], mp)
 			}
 		}
 		initialMP[utils.HostsCfg] = hosts

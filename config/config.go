@@ -713,13 +713,13 @@ func (cfg *CGRConfig) loadDispatcherSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.dispatcherSCfg.loadFromJSONCfg(jsnDispatcherSCfg)
 }
 
-// loadRegistrarCCfg loads the DispatcherH section of the configuration
+// loadRegistrarCCfg loads the RegistrarC section of the configuration
 func (cfg *CGRConfig) loadRegistrarCCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnDispatcherHCfg *RegistrarCJsonCfgs
-	if jsnDispatcherHCfg, err = jsnCfg.RegistrarCJsonCfgs(); err != nil {
+	var jsnRegistrarCCfg *RegistrarCJsonCfgs
+	if jsnRegistrarCCfg, err = jsnCfg.RegistrarCJsonCfgs(); err != nil {
 		return
 	}
-	return cfg.registrarCCfg.loadFromJSONCfg(jsnDispatcherHCfg)
+	return cfg.registrarCCfg.loadFromJSONCfg(jsnRegistrarCCfg)
 }
 
 // loadLoaderCgrCfg loads the Loader section of the configuration

@@ -112,14 +112,12 @@ func (acts *AccountService) Reload() (err error) {
 // Shutdown stops the service
 func (acts *AccountService) Shutdown() (err error) {
 	acts.Lock()
-	defer acts.Unlock()
 	close(acts.stopChan)
-	if err = acts.acts.Shutdown(); err != nil {
-		return
-	}
+	acts.acts.Shutdown()
 	acts.acts = nil
 	acts.rpc = nil
 	<-acts.connChan
+	acts.Unlock()
 	return
 }
 

@@ -21,8 +21,8 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/dispatcherh"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -52,7 +52,7 @@ func TestDispatcherHCoverage(t *testing.T) {
 	if srv2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	srv2.dspS = &dispatcherh.DispatcherHostsService{}
+	srv2.dspS = &registrarc.RegistrarCService{}
 	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
@@ -69,7 +69,7 @@ func TestDispatcherHCoverage(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	srv2.stopChan = make(chan struct{}, 1)
-	srv2.dspS = dispatcherh.NewDispatcherHService(cfg, cM)
+	srv2.dspS = registrarc.NewRegistrarCService(cfg, cM)
 	shutdownSrv := srv2.Shutdown()
 	if shutdownSrv != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutdownSrv)

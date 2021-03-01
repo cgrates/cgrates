@@ -23,8 +23,8 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/dispatcherh"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -49,8 +49,9 @@ type RegistrarCService struct {
 	server   *cores.Server
 	connMgr  *engine.ConnManager
 	stopChan chan struct{}
+	rldChan  chan struct{}
 
-	dspS   *dispatcherh.DispatcherHostsService
+	dspS   *registrarc.RegistrarCService
 	anz    *AnalyzerService
 	srvDep map[string]*sync.WaitGroup
 }
@@ -65,14 +66,16 @@ func (dspS *RegistrarCService) Start() (err error) {
 	defer dspS.Unlock()
 
 	dspS.stopChan = make(chan struct{})
-	dspS.dspS = dispatcherh.NewDispatcherHService(dspS.cfg, dspS.connMgr)
-	go dspS.dspS.ListenAndServe(dspS.stopChan)
+	dspS.rldChan = make(chan struct{})
+	dspS.dspS = registrarc.NewRegistrarCService(dspS.cfg, dspS.connMgr)
+	go dspS.dspS.ListenAndServe(dspS.stopChan, dspS.rldChan)
 
 	return
 }
 
 // Reload handles the change of config
 func (dspS *RegistrarCService) Reload() (err error) {
+	dspS.rldChan <- struct{}{}
 	return // for the momment nothing to reload
 }
 
@@ -100,5 +103,5 @@ func (dspS *RegistrarCService) ServiceName() string {
 
 // ShouldRun returns if the service should be running
 func (dspS *RegistrarCService) ShouldRun() bool {
-	return dspS.cfg.DispatcherHCfg().Enabled
+	return dspS.cfg.RegistrarCCfg().Dispatcher.Enabled || dspS.cfg.RegistrarCCfg().RPC.Enabled
 }

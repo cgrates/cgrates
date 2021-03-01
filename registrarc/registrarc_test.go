@@ -32,7 +32,7 @@ import (
 )
 
 func TestDispatcherHostsService(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(Registar))
+	ts := httptest.NewServer(http.HandlerFunc(Registrar))
 	defer ts.Close()
 	cfg := config.NewDefaultCGRConfig()
 
@@ -45,26 +45,26 @@ func TestDispatcherHostsService(t *testing.T) {
 			Transport:   rpcclient.HTTPjson,
 		}},
 	}
-	cfg.DispatcherHCfg().Enabled = true
-	cfg.DispatcherHCfg().Hosts = map[string][]*config.DispatcherHRegistarCfg{
+	cfg.RegistrarCCfg().Dispatcher.Enabled = true
+	cfg.RegistrarCCfg().Dispatcher.Hosts = map[string][]*config.RemoteHost{
 		utils.MetaDefault: {
 			{
-				ID:                "Host1",
-				RegisterTransport: utils.MetaJSON,
+				ID:        "Host1",
+				Transport: utils.MetaJSON,
 			},
 		},
 	}
-	cfg.DispatcherHCfg().RefreshInterval = 100 * time.Millisecond
-	cfg.DispatcherHCfg().RegistrarSConns = []string{"conn1"}
+	cfg.RegistrarCCfg().Dispatcher.RefreshInterval = 100 * time.Millisecond
+	cfg.RegistrarCCfg().Dispatcher.RegistrarSConns = []string{"conn1"}
 
 	ds := NewRegistrarCService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
 
-	ds.registerHosts()
+	ds.registerDispHosts()
 
 	host1 := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
-		ID:     "Host1",
-		Conn: &config.RemoteHost{
+		RemoteHost: &config.RemoteHost{
+			ID:        "Host1",
 			Address:   "127.0.0.1:2012",
 			Transport: utils.MetaJSON,
 		},
@@ -75,24 +75,24 @@ func TestDispatcherHostsService(t *testing.T) {
 	} else if !reflect.DeepEqual(host1, x) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
 	}
-	cfg.DispatcherHCfg().Hosts = map[string][]*config.DispatcherHRegistarCfg{
+	cfg.RegistrarCCfg().Dispatcher.Hosts = map[string][]*config.RemoteHost{
 		utils.MetaDefault: {
 			{
-				ID:                "Host2",
-				RegisterTransport: utils.MetaJSON,
+				ID:        "Host2",
+				Transport: utils.MetaJSON,
 			},
 		},
 	}
 	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
 	config.CgrConfig().CacheCfg().ReplicationConns = []string{"*localhost"}
-	ds.registerHosts()
+	ds.registerDispHosts()
 	host1.ID = "Host2"
 	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); !ok {
 		t.Errorf("Expected to find Host2 in cache")
 	} else if !reflect.DeepEqual(host1, x) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
 	}
-	ds.unregisterHosts()
+	unregisterHosts(ds.connMgr, cfg.RegistrarCCfg().Dispatcher, "cgrates.org", utils.RegistrarSv1UnregisterDispatcherHosts)
 	if _, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); ok {
 		t.Errorf("Expected to not find Host2 in cache")
 	}
@@ -101,11 +101,11 @@ func TestDispatcherHostsService(t *testing.T) {
 	config.CgrConfig().CacheCfg().ReplicationConns = []string{}
 
 	host1.ID = "Host1"
-	cfg.DispatcherHCfg().Hosts = map[string][]*config.DispatcherHRegistarCfg{
+	cfg.RegistrarCCfg().Dispatcher.Hosts = map[string][]*config.RemoteHost{
 		utils.MetaDefault: {
 			{
-				ID:                "Host1",
-				RegisterTransport: utils.MetaJSON,
+				ID:        "Host1",
+				Transport: utils.MetaJSON,
 			},
 		},
 	}
@@ -115,11 +115,11 @@ func TestDispatcherHostsService(t *testing.T) {
 	}
 
 	cfg.ListenCfg().RPCJSONListen = "2012"
-	ds.registerHosts()
+	ds.registerDispHosts()
 
 	ds = NewRegistrarCService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
 	ds.Shutdown()
 	stopChan := make(chan struct{})
 	close(stopChan)
-	ds.ListenAndServe(stopChan)
+	ds.ListenAndServe(stopChan, make(chan struct{}))
 }

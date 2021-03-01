@@ -591,8 +591,8 @@ func main() {
 
 	// Rpc/http server
 	server := cores.NewServer(caps)
-	if len(cfg.HTTPCfg().DispatchersRegistrarURL) != 0 {
-		server.RegisterHttpFunc(cfg.HTTPCfg().DispatchersRegistrarURL, registrarc.Registrar)
+	if len(cfg.HTTPCfg().RegistrarSURL) != 0 {
+		server.RegisterHttpFunc(cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
 	}
 	if cfg.ConfigSCfg().Enabled {
 		server.RegisterHttpFunc(cfg.ConfigSCfg().URL, config.HandlerConfigS)

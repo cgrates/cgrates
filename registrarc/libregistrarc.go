@@ -165,21 +165,12 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		}
 
 	case utils.RegistrarSv1RegisterDispatcherHosts:
-		var dHs RegisterArgs
-		params := []interface{}{&dHs}
-		if err = json.Unmarshal(*sReq.Params, &params); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
-				utils.RegistrarC, err))
-			return sReq.Id, err
-		}
-		var addr string
-		if addr, err = utils.GetRemoteIP(req); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to obtain the remote IP because: %s",
-				utils.RegistrarC, err))
+		dH, err := unmarshallRegisterArgs(req, *sReq.Params)
+		if err != nil {
 			return sReq.Id, err
 		}
 
-		for _, dH := range dHs.AsDispatcherHosts(addr) {
+		for _, dH := range dH {
 			if err = engine.Cache.Set(utils.CacheDispatcherHosts, dH.TenantID(), dH, nil,
 				true, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to set DispatcherHost <%s> in cache because: %s",
@@ -208,22 +199,12 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		}
 		config.CgrConfig().UnlockSections(config.RPCConnsJsonName)
 	case utils.RegistrarSv1RegisterRPCHosts:
-		var dHs RegisterArgs
-		params := []interface{}{&dHs}
-		if err = json.Unmarshal(*sReq.Params, &params); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
-				utils.RegistrarC, err))
+		dH, err := unmarshallRegisterArgs(req, *sReq.Params)
+		if err != nil {
 			return sReq.Id, err
 		}
-		var addr string
-		if addr, err = utils.GetRemoteIP(req); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to obtain the remote IP because: %s",
-				utils.RegistrarC, err))
-			return sReq.Id, err
-		}
-
 		cfgHosts := make(map[string]*config.RemoteHost)
-		for _, dH := range dHs.AsDispatcherHosts(addr) {
+		for _, dH := range dH {
 			cfgHosts[dH.ID] = dH.RemoteHost
 		}
 		config.CgrConfig().LockSections(config.RPCConnsJsonName)
@@ -266,10 +247,32 @@ func getConnPort(cfg *config.CGRConfig, transport string, tls bool) (port string
 			address = cfg.ListenCfg().HTTPListen
 		}
 		extraPath = cfg.HTTPCfg().HTTPJsonRPCURL
+	case rpcclient.BiRPCJSON:
+		address = cfg.SessionSCfg().ListenBijson
+	case rpcclient.BiRPCGOB:
+		address = cfg.SessionSCfg().ListenBigob
 	}
 	if _, port, err = net.SplitHostPort(address); err != nil {
 		return
 	}
 	port += extraPath
 	return
+}
+
+func unmarshallRegisterArgs(req *http.Request, reqParams json.RawMessage) (dH []*engine.DispatcherHost, err error) {
+	var dHs RegisterArgs
+	params := []interface{}{&dHs}
+	if err = json.Unmarshal(reqParams, &params); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
+			utils.RegistrarC, err))
+		return
+	}
+	var addr string
+	if addr, err = utils.GetRemoteIP(req); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to obtain the remote IP because: %s",
+			utils.RegistrarC, err))
+		return
+	}
+
+	return dHs.AsDispatcherHosts(addr), nil
 }

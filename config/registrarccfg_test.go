@@ -156,44 +156,82 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 
 func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-		"dispatcherh":{
-			"enabled": true,
-			"dispatchers_conns": ["*conn1","*conn2"],
-			"hosts": {
-				"*default": [
-					{
-						"ID": "Host1",
-						"register_transport": "*json",
-						"register_tls": false
-					},
-					{
-						"ID": "Host2",
-						"register_transport": "*gob",
-						"register_tls": false
-					}
-				]
+		"registrarc":{
+			"rpc":{
+				"enabled": true,
+				"registrars_conns": ["*conn1","*conn2"],
+				"hosts": {
+					"*default": [
+						{
+							"ID": "Host1",
+							"transport": "*json",
+							"tls": false
+						},
+						{
+							"ID": "Host2",
+							"transport": "*gob",
+							"tls": false
+						}
+					]
+				},
+				"refresh_interval": "0",
 			},
-			"register_interval": "0",
+			"dispatcher":{
+				"enabled": true,
+				"registrars_conns": ["*conn1","*conn2"],
+				"hosts": {
+					"*default": [
+						{
+							"ID": "Host1",
+							"transport": "*json",
+							"tls": false
+						},
+						{
+							"ID": "Host2",
+							"transport": "*gob",
+							"tls": false
+						}
+					]
+				},
+				"refresh_interval": "0",
+			},
 		},		
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:         true,
-		utils.RegistrarsConnsCfg: []string{"*conn1", "*conn2"},
-		utils.HostsCfg: map[string][]map[string]interface{}{
-			utils.MetaDefault: {
-				{
-					utils.IDCfg:        "Host1",
-					utils.TransportCfg: "*json",
-					utils.TLS:          false,
-				},
-				{
-					utils.IDCfg:        "Host2",
-					utils.TransportCfg: "*gob",
-					utils.TLS:          false,
+		utils.RPCCfg: map[string]interface{}{
+			utils.EnabledCfg:         true,
+			utils.RegistrarsConnsCfg: []string{"*conn1", "*conn2"},
+			utils.HostsCfg: map[string][]map[string]interface{}{
+				utils.MetaDefault: {
+					{
+						utils.IDCfg:        "Host1",
+						utils.TransportCfg: "*json",
+					},
+					{
+						utils.IDCfg:        "Host2",
+						utils.TransportCfg: "*gob",
+					},
 				},
 			},
+			utils.RefreshIntervalCfg: "0",
 		},
-		utils.RefreshIntervalCfg: "0",
+		utils.DispatcherCfg: map[string]interface{}{
+			utils.EnabledCfg:         true,
+			utils.RegistrarsConnsCfg: []string{"*conn1", "*conn2"},
+			utils.HostsCfg: map[string][]map[string]interface{}{
+				utils.MetaDefault: {
+					{
+						utils.IDCfg:        "Host1",
+						utils.TransportCfg: "*json",
+					},
+					{
+						utils.IDCfg:        "Host2",
+						utils.TransportCfg: "*gob",
+					},
+				},
+			},
+			utils.RefreshIntervalCfg: "0",
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -228,73 +266,23 @@ func TestDispatcherCfgParseWithNanoSec2(t *testing.T) {
 	}
 }
 
-func TestDispatcherHCfgAsMapInterface1(t *testing.T) {
-	cfgJSONStr := `{
-     "dispatcherh":{
-          "enabled": true,
-          "dispatchers_conns":["conn1"],
-          "hosts": {
-             "*default": [
-             {
-                  "ID":"",
-                  "register_transport": "*json",
-                  "register_tls":false,
-             },
-             {
-                  "ID":"host2",
-                  "register_transport": "",
-                  "register_tls":true,
-             },
-          ]
-          },
-          "register_interval": "1m",
-     },
-
-}`
-	eMap := map[string]interface{}{
-		utils.EnabledCfg:         true,
-		utils.RegistrarsConnsCfg: []string{"conn1"},
-		utils.HostsCfg: map[string][]map[string]interface{}{
-			utils.MetaDefault: {
-				{
-					utils.IDCfg:        utils.EmptyString,
-					utils.TransportCfg: utils.MetaJSON,
-					utils.TLS:          false,
-				},
-				{
-					utils.IDCfg:        "host2",
-					utils.TransportCfg: utils.EmptyString,
-					utils.TLS:          true,
-				},
-			},
-		},
-		utils.RefreshIntervalCfg: "1m0s",
-	}
-	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
-		t.Error(err)
-	} else {
-		rcv := cgrCfg.registrarCCfg.AsMapInterface()
-		if !reflect.DeepEqual(eMap[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IDCfg],
-			rcv[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IDCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IDCfg],
-				rcv[utils.HostsCfg].(map[string][]map[string]interface{})[utils.IDCfg])
-		} else if !reflect.DeepEqual(eMap[utils.HostsCfg], rcv[utils.HostsCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.HostsCfg], rcv[utils.HostsCfg])
-		} else if !reflect.DeepEqual(eMap, rcv) {
-			t.Errorf("Expected %+v, received %+v", eMap, rcv)
-		}
-	}
-}
-
 func TestDispatcherHCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
-      "dispatcherh": {},
+      "registrarc": {},
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:         false,
-		utils.RegistrarsConnsCfg: []string{},
-		utils.HostsCfg:           map[string][]map[string]interface{}{},
-		utils.RefreshIntervalCfg: "5m0s",
+		utils.DispatcherCfg: map[string]interface{}{
+			utils.EnabledCfg:         false,
+			utils.RegistrarsConnsCfg: []string{},
+			utils.HostsCfg:           map[string][]map[string]interface{}{},
+			utils.RefreshIntervalCfg: "5m0s",
+		},
+		utils.RPCCfg: map[string]interface{}{
+			utils.EnabledCfg:         false,
+			utils.RegistrarsConnsCfg: []string{},
+			utils.HostsCfg:           map[string][]map[string]interface{}{},
+			utils.RefreshIntervalCfg: "5m0s",
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

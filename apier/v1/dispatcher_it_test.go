@@ -265,8 +265,8 @@ func testDispatcherSSetDispatcherHost(t *testing.T) {
 	dispatcherHost = &DispatcherHostWithCache{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
-			ID:     "DspHst1",
-			Conn: &config.RemoteHost{
+			RemoteHost: &config.RemoteHost{
+				ID:      "DspHst1",
 				Address: "*internal",
 			},
 		},
@@ -309,7 +309,7 @@ func testDispatcherSGetDispatcherHostIDs(t *testing.T) {
 
 func testDispatcherSUpdateDispatcherHost(t *testing.T) {
 	var result string
-	dispatcherHost.Conn = &config.RemoteHost{
+	dispatcherHost.RemoteHost = &config.RemoteHost{
 		Address:   ":4012",
 		Transport: utils.MetaGOB,
 		TLS:       false,
@@ -419,8 +419,8 @@ func testDispatcherSRemDispatcherProfileWithoutTenant(t *testing.T) {
 func testDispatcherSSetDispatcherHostWithoutTenant(t *testing.T) {
 	dispatcherHost = &DispatcherHostWithCache{
 		DispatcherHost: &engine.DispatcherHost{
-			ID: "DspHst7",
-			Conn: &config.RemoteHost{
+			RemoteHost: &config.RemoteHost{
+				ID:      "DspHst7",
 				Address: "*internal",
 			},
 		},
