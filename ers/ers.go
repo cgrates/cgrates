@@ -123,11 +123,13 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) (err er
 				if erS.cfg.ERsCfg().Readers[rdrIdx].Type == utils.MetaNone { // ignore *default reader
 					continue
 				}
-				if err := erS.addReader(id, rdrIdx); err != nil {
+				if err = erS.addReader(id, rdrIdx); err != nil {
 					utils.Logger.Crit(
 						fmt.Sprintf("<%s> adding reader <%s> got error: <%s>",
 							utils.ERs, id, err.Error()))
-					erS.rdrErr <- err
+					erS.closeAllRdrs()
+					erS.Unlock()
+					return
 				}
 			}
 			erS.Unlock()

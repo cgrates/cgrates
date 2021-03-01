@@ -370,7 +370,6 @@ func TestERsListenAndServeCfgRldChan5(t *testing.T) {
 	}
 }
 
-/*
 func TestERsListenAndServeCfgRldChan6(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
@@ -395,17 +394,21 @@ func TestERsListenAndServeCfgRldChan6(t *testing.T) {
 	srv.rdrPaths = map[string]string{
 		"test": "path_test",
 	}
-	cfgRldChan <- struct{}{}
 	go func() {
 		time.Sleep(10 * time.Millisecond)
-		close(stopChan)
+		cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+			{
+				ID:   "test",
+				Type: "BadType",
+			},
+		}
+		cfgRldChan <- struct{}{}
 	}()
 	err := srv.ListenAndServe(stopChan, cfgRldChan)
-	if err == nil || err.Error() != "unsupported reader type: <badType>" {
-		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "unsupported reader type: <badType>", err)
+	if err == nil || err.Error() != "unsupported reader type: <BadType>" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "unsupported reader type: <BadType>", err)
 	}
 }
-*/
 
 func TestERsProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
