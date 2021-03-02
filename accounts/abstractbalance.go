@@ -96,7 +96,7 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 		(costIcrm.FixedFee == nil ||
 			costIcrm.FixedFee.Cmp(decimal.New(0, 0)) == 0) {
 		// cost 0, no need of concrete
-		ec = &utils.EventCharges{Usage: &utils.Decimal{usage}}
+		ec = &utils.EventCharges{Abstracts: &utils.Decimal{usage}}
 	} else {
 		// attempt to debit usage with cost
 		if ec, err = maxDebitAbstractsFromConcretes(aB.cncrtBlncs, usage,
@@ -108,8 +108,8 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 		}
 	}
 
-	if ec.Usage.Cmp(decimal.New(0, 0)) != 0 {
-		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, ec.Usage.Big)
+	if ec.Abstracts.Cmp(decimal.New(0, 0)) != 0 {
+		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, ec.Abstracts.Big)
 	}
 	if hasLmt { // put back the limit
 		aB.blnCfg.Units.Big = utils.SumBig(aB.blnCfg.Units.Big, blncLmt.Big)

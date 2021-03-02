@@ -199,6 +199,7 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	}
 }
 
+/*
 func TestDebitUsageFromConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -236,7 +237,8 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 	}
 
 }
-
+*/
+/*
 func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -296,7 +298,8 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	}
 
 }
-
+*/
+/*
 func TestDebitUsageFromConcretesRestore(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -333,7 +336,8 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestMaxDebitUsageFromConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -371,6 +375,7 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 }
+*/
 
 func TestRestoreAccount(t *testing.T) { //coverage purpose
 	engine.Cache.Clear(nil)

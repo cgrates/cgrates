@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
@@ -192,7 +193,7 @@ func balanceLimit(optsCfg map[string]interface{}) (bL *utils.Decimal, err error)
 // returns utils.ErrInsufficientCredit if complete usage cannot be debitted
 func debitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
 	costIcrm *utils.CostIncrement, cgrEv *utils.CGREvent,
-	connMgr *engine.ConnManager, rateSConns, rpIDs []string) (err error) {
+	connMgr *engine.ConnManager, rateSConns, rpIDs []string) (ec *utils.EventCharges, err error) {
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
 		costIcrm.FixedFee == nil {
 		var rplyCost *engine.RateProfileCost
@@ -219,20 +220,24 @@ func debitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.B
 		}
 	}
 	clnedUnts := cloneUnitsFromConcretes(cncrtBlncs)
-	for _, cB := range cncrtBlncs {
+	for i, cB := range cncrtBlncs {
 		var ecCncrt *utils.EventCharges
 		if ecCncrt, err = cB.debitConcretes(tCost, cgrEv); err != nil {
 			restoreUnitsFromClones(cncrtBlncs, clnedUnts)
-			return
+			return nil, err
 		}
-		tCost = utils.SubstractBig(tCost, ecCncrt.Usage.Big)
+		if i == 0 {
+			ec = utils.NewEventCharges()
+		}
+		ec.Merge(ecCncrt)
+		tCost = utils.SubstractBig(tCost, ecCncrt.Abstracts.Big)
 		if tCost.Cmp(decimal.New(0, 0)) <= 0 {
 			return // have debited all, total is smaller or equal to 0
 		}
 	}
 	// we could not debit all, put back what we have debited
 	restoreUnitsFromClones(cncrtBlncs, clnedUnts)
-	return utils.ErrInsufficientCredit
+	return nil, utils.ErrInsufficientCredit
 }
 
 // maxDebitAbstractsFromConcretes will debit the maximum possible usage out of concretes
@@ -240,6 +245,7 @@ func maxDebitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decima
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement) (ec *utils.EventCharges, err error) {
+	ec = utils.NewEventCharges()
 	// process AttributeS if needed
 	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
 		costIcrm.FixedFee == nil &&
@@ -267,7 +273,8 @@ func maxDebitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decima
 			return nil, utils.ErrMaxIncrementsExceeded
 		}
 		qriedUsage := usage // so we can detect loops
-		if err = debitAbstractsFromConcretes(cncrtBlncs, usage, costIcrm, cgrEv,
+		var ecDbt *utils.EventCharges
+		if ecDbt, err = debitAbstractsFromConcretes(cncrtBlncs, usage, costIcrm, cgrEv,
 			connMgr, rateSConns, rpIDs); err != nil {
 			if err != utils.ErrInsufficientCredit {
 				return
@@ -289,6 +296,7 @@ func maxDebitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decima
 		} else {
 			usagePaid = new(decimal.Big).Copy(usage)
 			paidConcrtUnts = cloneUnitsFromConcretes(cncrtBlncs)
+			ec.Merge(ecDbt)
 			if i == 0 { // no estimation done, covering full
 				break
 			}
@@ -312,7 +320,7 @@ func maxDebitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decima
 		usagePaid = decimal.New(0, 0)
 	}
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
-	return &utils.EventCharges{Usage: &utils.Decimal{usagePaid}}, nil
+	return &utils.EventCharges{Abstracts: &utils.Decimal{usagePaid}}, nil
 }
 
 // restoreAccounts will restore the accounts in DataDB out of their backups if present
@@ -328,5 +336,12 @@ func restoreAccounts(dm *engine.DataManager,
 			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> restoring account <%s>",
 				utils.AccountS, err, acnts[i].AccountProfile.TenantID()))
 		}
+	}
+}
+
+// unlockAccountProfiles is used to unlock the accounts based on their lock identifiers
+func unlockAccountProfiles(acnts utils.AccountProfilesWithWeight) {
+	for _, lkID := range acnts.LockIDs() {
+		guardian.Guardian.UnguardIDs(lkID)
 	}
 }

@@ -607,6 +607,8 @@ func TestCBDebitWithInvalidLimit(t *testing.T) {
 	}
 }
 
+/*
+
 func TestCBSDebitUsage(t *testing.T) {
 	// debit 10 units from a concrete balance with 500 units
 	cb := &concreteBalance{
@@ -633,6 +635,7 @@ func TestCBSDebitUsage(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
+*/
 
 func TestCBSDebitUsageInvalidFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

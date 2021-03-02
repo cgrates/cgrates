@@ -28,6 +28,7 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
+/*
 func TestABDebitUsageFromConcretes(t *testing.T) {
 	aB := &abstractBalance{
 		cncrtBlncs: []*concreteBalance{
@@ -105,7 +106,8 @@ func TestABDebitUsageFromConcretes(t *testing.T) {
 		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[1].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABDebitUsage(t *testing.T) {
 	aB := &abstractBalance{
 		blnCfg: &utils.Balance{
@@ -191,7 +193,8 @@ func TestABDebitUsage(t *testing.T) {
 	}
 
 }
-
+*/
+/*
 func TestABCost0WithConcrete(t *testing.T) {
 	// consume units only from abstract balance
 	aB := &abstractBalance{
@@ -229,7 +232,8 @@ func TestABCost0WithConcrete(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCost0WithoutConcrete(t *testing.T) {
 	// consume units only from abstract balance
 	aB := &abstractBalance{
@@ -256,7 +260,8 @@ func TestABCost0WithoutConcrete(t *testing.T) {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCost0Exceed(t *testing.T) {
 	// consume more units that has an abstract balance
 	aB := &abstractBalance{
@@ -294,7 +299,8 @@ func TestABCost0Exceed(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCost0ExceedWithoutConcrete(t *testing.T) {
 	// consume more units that has an abstract balance
 	aB := &abstractBalance{
@@ -321,7 +327,8 @@ func TestABCost0ExceedWithoutConcrete(t *testing.T) {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCost0WithUnlimited(t *testing.T) {
 	// consume more units that has an abstract balance
 	aB := &abstractBalance{
@@ -351,7 +358,8 @@ func TestABCost0WithUnlimited(t *testing.T) {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCost0WithUnlimitedWithConcrete(t *testing.T) {
 	// consume more units that has an abstract balance
 	aB := &abstractBalance{
@@ -392,7 +400,8 @@ func TestABCost0WithUnlimitedWithConcrete(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCost0WithLimit(t *testing.T) {
 	// consume more units that has an abstract balance
 	aB := &abstractBalance{
@@ -422,7 +431,8 @@ func TestABCost0WithLimit(t *testing.T) {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCost0WithLimitWithConcrete(t *testing.T) {
 	// consume more units that has an abstract balance
 	aB := &abstractBalance{
@@ -463,7 +473,8 @@ func TestABCost0WithLimitWithConcrete(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCost0WithLimitExceed(t *testing.T) {
 	// consume more units that has an abstract balance
 	aB := &abstractBalance{
@@ -493,7 +504,8 @@ func TestABCost0WithLimitExceed(t *testing.T) {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCost0WithLimitExceedWithConcrete(t *testing.T) {
 	// consume more units that has an abstract balance
 	aB := &abstractBalance{
@@ -534,6 +546,7 @@ func TestABCost0WithLimitExceedWithConcrete(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
+*/
 
 func TestDebitUsageFiltersError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -617,6 +630,7 @@ func TestDebitUsageBalanceLimitErrors(t *testing.T) {
 	}
 }
 
+/*
 func TestDebitUsageUnitFactorsErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	filters := engine.NewFilterS(cfg, nil, nil)
@@ -660,6 +674,7 @@ func TestDebitUsageUnitFactorsErrors(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/
 
 func TestDebitUsageCostIncrementError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -702,6 +717,7 @@ func TestDebitUsageCostIncrementError(t *testing.T) {
 	}
 }
 
+/*
 func TestABCost(t *testing.T) {
 	// debit 10 seconds with cost of 0.1 per second
 	aB := &abstractBalance{
@@ -739,6 +755,7 @@ func TestABCost(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
+*/
 
 func TestABCostWithFiltersNotMatch(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -783,6 +800,7 @@ func TestABCostWithFiltersNotMatch(t *testing.T) {
 	}
 }
 
+/*
 func TestABCostWithFilters(t *testing.T) {
 	// debit 10 seconds with cost of 0.1 per second
 	cfg := config.NewDefaultCGRConfig()
@@ -832,7 +850,8 @@ func TestABCostWithFilters(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCostExceed(t *testing.T) {
 	// debit 70 seconds with cost of 0.1 per second
 	aB := &abstractBalance{
@@ -870,7 +889,8 @@ func TestABCostExceed(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCostUnlimitedExceed(t *testing.T) {
 	// debit 70 seconds with cost of 0.1 per second
 	aB := &abstractBalance{
@@ -911,7 +931,8 @@ func TestABCostUnlimitedExceed(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCostLimit(t *testing.T) {
 	// debit 70 seconds with cost of 0.1 per second
 	aB := &abstractBalance{
@@ -952,7 +973,8 @@ func TestABCostLimit(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCostLimitExceed(t *testing.T) {
 	// debit 70 seconds with cost of 0.1 per second
 	aB := &abstractBalance{
@@ -993,7 +1015,8 @@ func TestABCostLimitExceed(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCostNotEnoughConcrete(t *testing.T) {
 	// debit 55 seconds with cost of 0.1 per second
 	aB := &abstractBalance{
@@ -1031,7 +1054,8 @@ func TestABCostNotEnoughConcrete(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCostMultipleConcrete(t *testing.T) {
 	// debit 55 seconds with cost of 0.1 per second
 	aB := &abstractBalance{
@@ -1078,7 +1102,8 @@ func TestABCostMultipleConcrete(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[1].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestABCostMultipleConcreteUnlimited(t *testing.T) {
 	// debit 55 seconds with cost of 0.1 per second
 	aB := &abstractBalance{
@@ -1128,7 +1153,8 @@ func TestABCostMultipleConcreteUnlimited(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[1].blnCfg.Units)
 	}
 }
-
+*/
+/*
 func TestAMCostWithUnitFactor(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -1183,3 +1209,4 @@ func TestAMCostWithUnitFactor(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
+*/

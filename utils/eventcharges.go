@@ -30,40 +30,46 @@ func NewEventCharges() (ec *EventCharges) {
 
 // EventCharges records the charges applied to an Event
 type EventCharges struct {
-	Usage      *Decimal
-	Cost       *Decimal
+	Abstracts  *Decimal
+	Concretes  *Decimal
 	Charges    []*ChargedInterval
-	Account    *AccountProfile
 	Accounting *ChargedAccounting
 	Rating     *ChargedRating
+	Accounts   []*AccountProfile
 }
 
 // Merge will merge the event charges into existing
 func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 	for _, nEc := range eCs {
-		if ec.Usage == nil {
-			ec.Usage = nEc.Usage
-			continue
+		if ec.Abstracts != nil {
+			ec.Abstracts = &Decimal{SumBig(ec.Abstracts.Big, nEc.Abstracts.Big)}
+		} else { // initial
+			ec.Abstracts = nEc.Abstracts
 		}
-		ec.Usage = &Decimal{SumBig(ec.Usage.Big, nEc.Usage.Big)}
+		if ec.Concretes != nil {
+			ec.Concretes = &Decimal{SumBig(ec.Concretes.Big, nEc.Concretes.Big)}
+		} else { // initial
+			ec.Concretes = nEc.Concretes
+		}
+
 	}
 }
 
 // AsExtEventCharges converts EventCharges to ExtEventCharges
 func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 	eEc = new(ExtEventCharges)
-	if ec.Usage != nil {
-		if flt, ok := ec.Usage.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal Usage to float64")
+	if ec.Abstracts != nil {
+		if flt, ok := ec.Abstracts.Big.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal Abstracts to float64")
 		} else {
-			eEc.Usage = &flt
+			eEc.Abstracts = &flt
 		}
 	}
-	if ec.Cost != nil {
-		if flt, ok := ec.Cost.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal Cost to float64")
+	if ec.Concretes != nil {
+		if flt, ok := ec.Concretes.Big.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal Concretes to float64")
 		} else {
-			eEc.Cost = &flt
+			eEc.Concretes = &flt
 		}
 	}
 	// add here code for the rest of the fields
@@ -72,6 +78,6 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 
 // ExtEventCharges is a generic EventCharges used in APIs
 type ExtEventCharges struct {
-	Usage *float64
-	Cost  *float64
+	Abstracts *float64
+	Concretes *float64
 }

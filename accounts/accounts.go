@@ -104,6 +104,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 				err = nil
 				continue
 			}
+			unlockAccountProfiles(acnts) // in case of errors will not have unlocks in upper layers
 			return
 		}
 		if _, isDisabled := qAcnt.Opts[utils.Disabled]; isDisabled ||
@@ -115,6 +116,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 		var pass bool
 		if pass, err = aS.fltrS.Pass(tnt, qAcnt.FilterIDs, evNm); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
+			unlockAccountProfiles(acnts)
 			return
 		} else if !pass {
 			guardian.Guardian.UnguardIDs(refID)
@@ -124,6 +126,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 		if weight, err = engine.WeightFromDynamics(qAcnt.Weights,
 			aS.fltrS, cgrEv.Tenant, evNm); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
+			unlockAccountProfiles(acnts)
 			return
 		}
 		acnts = append(acnts, &utils.AccountProfileWithWeight{qAcnt, weight, refID})
@@ -176,7 +179,11 @@ func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
 			}
 			return
 		}
-		usage = utils.SubstractBig(usage, ecDbt.Usage.Big)
+		used := ecDbt.Abstracts.Big
+		if concretes {
+			used = ecDbt.Concretes.Big
+		}
+		usage = utils.SubstractBig(usage, used)
 		ec.Merge(ecDbt)
 	}
 	return
@@ -226,7 +233,11 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 				return
 			}
 		}
-		usage = utils.SubstractBig(usage, ecDbt.Usage.Big)
+		used := ecDbt.Abstracts.Big
+		if concretes {
+			used = ecDbt.Concretes.Big
+		}
+		usage = utils.SubstractBig(usage, used)
 		ec.Merge(ecDbt)
 	}
 	return
@@ -256,11 +267,8 @@ func (aS *AccountS) V1MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.
 		}
 		return
 	}
-	defer func() {
-		for _, lkID := range acnts.LockIDs() {
-			guardian.Guardian.UnguardIDs(lkID)
-		}
-	}()
+	defer unlockAccountProfiles(acnts)
+
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, false, false); err != nil {
 		return
@@ -283,11 +291,7 @@ func (aS *AccountS) V1DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *util
 		}
 		return
 	}
-	defer func() {
-		for _, lkID := range acnts.LockIDs() {
-			guardian.Guardian.UnguardIDs(lkID)
-		}
-	}()
+	defer unlockAccountProfiles(acnts)
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, false, true); err != nil {
@@ -313,11 +317,8 @@ func (aS *AccountS) V1MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.
 		}
 		return
 	}
-	defer func() {
-		for _, lkID := range acnts.LockIDs() {
-			guardian.Guardian.UnguardIDs(lkID)
-		}
-	}()
+	defer unlockAccountProfiles(acnts)
+
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, true, false); err != nil {
 		return
@@ -340,11 +341,7 @@ func (aS *AccountS) V1DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *util
 		}
 		return
 	}
-	defer func() {
-		for _, lkID := range acnts.LockIDs() {
-			guardian.Guardian.UnguardIDs(lkID)
-		}
-	}()
+	defer unlockAccountProfiles(acnts)
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, true, true); err != nil {

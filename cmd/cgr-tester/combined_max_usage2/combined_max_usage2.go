@@ -94,7 +94,7 @@ func main() {
 				return
 			}
 			accountSTime += time.Now().Sub(tNow)
-			sumAccountS += *eEc.Usage
+			sumAccountS += *eEc.Abstracts
 			wgAccountS.Done()
 		}()
 

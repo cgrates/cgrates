@@ -136,5 +136,5 @@ func (cB *concreteBalance) debitConcretes(usage *decimal.Big,
 		dbted = utils.DivideBig(dbted, uF.Factor.Big)
 	}
 
-	return &utils.EventCharges{Usage: &utils.Decimal{dbted}}, nil
+	return &utils.EventCharges{Concretes: &utils.Decimal{dbted}}, nil
 }
