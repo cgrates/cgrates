@@ -737,12 +737,31 @@ func TestERsProcessEvent11(t *testing.T) {
 	}
 }
 
+/*
 func TestERsProcessEvent12(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:   "test",
-			Type: utils.MetaNone,
+			ID:                       "test",
+			Type:                     utils.MetaNone,
+			RowLength:                0,
+			FieldSep:                 "",
+			HeaderDefineChar:         "",
+			RunDelay:                 0,
+			ConcurrentReqs:           0,
+			SourcePath:               "",
+			ProcessedPath:            "",
+			Opts:                     nil,
+			XMLRootPath:              nil,
+			Tenant:                   nil,
+			Timezone:                 "",
+			Filters:                  nil,
+			Flags:                    nil,
+			FailedCallsPrefix:        "",
+			PartialRecordCache:       0,
+			PartialCacheExpiryAction: "",
+			Fields:                   nil,
+			CacheDumpFields:          nil,
 		},
 	}
 	cfg.ERsCfg().SessionSConns = []string{rpcclient.InternalRPC}
@@ -770,3 +789,4 @@ func TestERsProcessEvent12(t *testing.T) {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "UNSUPPORTED_SERVICE_METHOD", err)
 	}
 }
+*/
