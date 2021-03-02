@@ -93,6 +93,7 @@ func TestLoadConfig(t *testing.T) {
 			utils.MaxOpenConnsCfg:    100.,
 			utils.MaxIdleConnsCfg:    10.,
 			utils.SSLModeCfg:         "disable",
+			utils.MysqlLocation:      "Local",
 		},
 	}
 	// Loader

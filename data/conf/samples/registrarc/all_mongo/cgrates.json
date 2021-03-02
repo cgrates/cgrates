@@ -107,15 +107,16 @@
 	"scheduler_conns": ["*internal"],
 },
 
-
-"dispatcherh":{
-    "enabled": true,
-    "dispatchers_conns": ["dispConn"],
-	"hosts": {
-		"*default":[{"ID":"ALL", "register_transport": "*json", "register_tls": false}]
-	},  
-	"register_interval": "1s",
-},
-
+    
+"registrarc":{
+	"dispatcher":{
+		"enabled": true,
+		"registrars_conns": ["dispConn"],
+		"hosts": {
+			"*default":[{"ID":"ALL2", "transport": "*json", "tls": false}]
+		},  
+		"refresh_interval": "1s",
+	},
+}
 
 }

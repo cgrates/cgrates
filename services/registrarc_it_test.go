@@ -68,7 +68,7 @@ func TestDispatcherHReload(t *testing.T) {
 
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatcherh", "all_mongo"),
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "registrarc", "all_mongo"),
 		Section: config.RegistrarCJson,
 	}, &reply); err != nil {
 		t.Fatal(err)

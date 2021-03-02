@@ -82,9 +82,9 @@ func TestDspHosts(t *testing.T) {
 }
 
 func testDsphInitCfg(t *testing.T) {
-	dspCfgPath = path.Join(*dataDir, "conf", "samples", "dispatcherh", dspDir)
-	allCfgPath = path.Join(*dataDir, "conf", "samples", "dispatcherh", allDir)
-	all2CfgPath = path.Join(*dataDir, "conf", "samples", "dispatcherh", all2Dir)
+	dspCfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", dspDir)
+	allCfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", allDir)
+	all2CfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", all2Dir)
 	var err error
 	if dspCfg, err = config.NewCGRConfigFromPath(dspCfgPath); err != nil {
 		t.Error(err)
@@ -112,7 +112,7 @@ func testDsphStartEngine(t *testing.T) {
 }
 
 func testDsphLoadData(t *testing.T) {
-	loader := exec.Command("cgr-loader", "-config_path", dspCfgPath, "-path", path.Join(*dataDir, "tariffplans", "dispatcherh"), "-caches_address=")
+	loader := exec.Command("cgr-loader", "-config_path", dspCfgPath, "-path", path.Join(*dataDir, "tariffplans", "registrarc"), "-caches_address=")
 	output := bytes.NewBuffer(nil)
 	outerr := bytes.NewBuffer(nil)
 	loader.Stdout = output
