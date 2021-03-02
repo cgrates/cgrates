@@ -29,25 +29,6 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
-func TestListenAndServe(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(nil, cfg.CacheCfg(), nil)
-	fltr := engine.NewFilterS(cfg, nil, dm)
-	accnts := NewAccountS(cfg, fltr, nil, dm)
-	stopChan := make(chan struct{}, 1)
-	cfgRld := make(chan struct{}, 1)
-	cfgRld <- struct{}{}
-	go func() {
-		time.Sleep(10)
-		stopChan <- struct{}{}
-	}()
-	accnts.ListenAndServe(stopChan, cfgRld)
-
-	if err := accnts.Shutdown(); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestRPCCall(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(nil, cfg.CacheCfg(), nil)
@@ -432,7 +413,7 @@ func TestAccountsDebit(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
-<<<<<<< HEAD
+
 
 func TestV1AccountProfilesForEvent(t *testing.T) {
 	engine.Cache.Clear(nil)
@@ -1026,6 +1007,5 @@ func TestMultipleAccountsFail(t *testing.T) {
 	}
 
 }
-=======
->>>>>>> AccountS test cancelation
+
 */
