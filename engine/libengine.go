@@ -38,6 +38,9 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 	rpcPool = rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
 	for _, rpcConnCfg := range rpcConnCfgs {
 		if rpcConnCfg.Address == utils.EmptyString {
+			// in case we have only conns with empty addresse
+			// mimic an error to signal that the init was not done
+			err = rpcclient.ErrDisconnected
 			continue
 		}
 		rpcClient, err = NewRPCConnection(rpcConnCfg, keyPath, certPath, caPath, connAttempts, reconnects,

@@ -1,0 +1,49 @@
+{
+// CGRateS Configuration file
+
+
+"general": {
+	"log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"id": "attributes"}],
+	},
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["conn1"],
+},
+
+
+"apiers": {
+	"enabled": true,
+},
+
+}

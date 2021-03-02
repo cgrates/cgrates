@@ -131,6 +131,9 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) {
 	}
 	if jsnCfg.Id != nil {
 		rh.ID = *jsnCfg.Id
+		// ignore defaults if we have ID
+		rh.Address = utils.EmptyString
+		rh.Transport = utils.EmptyString
 	}
 	if jsnCfg.Address != nil {
 		rh.Address = *jsnCfg.Address
@@ -198,16 +201,19 @@ func UpdateRPCCons(rpcConns RPCConns, newHosts map[string]*RemoteHost) (connIDs 
 
 // RemoveRPCCons will parse each conn and reset only
 // the conns that have the same ID
-func RemoveRPCCons(rpcConns RPCConns, newHosts utils.StringSet) {
-	for _, rpcPool := range rpcConns {
+func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.StringSet) {
+	connIDs = make(utils.StringSet)
+	for rpcKey, rpcPool := range rpcConns {
 		for _, rh := range rpcPool.Conns {
-			if !newHosts.Has(rh.ID) {
+			if !hosts.Has(rh.ID) {
 				continue
 			}
+			connIDs.Add(rpcKey)
 			rh.Address = ""
 			rh.Transport = ""
 			rh.Synchronous = false
 			rh.TLS = false
 		}
 	}
+	return
 }
