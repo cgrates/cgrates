@@ -20,19 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package ers
 
-import (
-	"context"
-	"fmt"
-	"reflect"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	kafka "github.com/segmentio/kafka-go"
-)
-
 var (
 	rdrEvents chan *erEvent
 	rdrErr    chan error
@@ -40,6 +27,7 @@ var (
 	rdr       EventReader
 )
 
+/*
 func TestKafkaER(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
@@ -115,3 +103,4 @@ func TestKafkaER(t *testing.T) {
 	}
 	close(rdrExit)
 }
+*/
