@@ -103,14 +103,6 @@
     
     
     "registrarc":{
-        "rpc":{
-            "enabled": true,
-            "registrars_conns": ["dispConn"],
-            "hosts": {
-                "*default":[{"ID":"ALL2", "transport": "*json", "tls": false}]
-            },  
-            "refresh_interval": "1s",
-        },
         "dispatcher":{
             "enabled": true,
             "registrars_conns": ["dispConn"],

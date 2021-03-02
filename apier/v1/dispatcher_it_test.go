@@ -310,6 +310,7 @@ func testDispatcherSGetDispatcherHostIDs(t *testing.T) {
 func testDispatcherSUpdateDispatcherHost(t *testing.T) {
 	var result string
 	dispatcherHost.RemoteHost = &config.RemoteHost{
+		ID:        "DspHst1",
 		Address:   ":4012",
 		Transport: utils.MetaGOB,
 		TLS:       false,
