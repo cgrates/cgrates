@@ -25,6 +25,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/rpcclient"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -633,5 +635,104 @@ func TestERsProcessEvent8(t *testing.T) {
 	err := srv.processEvent(cgrEvent, rdrCfg)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+
+func TestERsProcessEvent9(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	cfg.ERsCfg().SessionSConns = []string{}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaCDRs: map[string][]string{},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "",
+		ID:     "",
+		Time:   nil,
+		Event:  nil,
+		Opts: map[string]interface{}{
+			utils.OptsRoutesLimit: true,
+		},
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "MANDATORY_IE_MISSING: [connIDs]", err)
+	}
+}
+
+func TestERsProcessEvent10(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	cfg.ERsCfg().SessionSConns = []string{rpcclient.InternalRPC}
+	fltrS := &engine.FilterS{}
+	rpcInt := map[string]chan rpcclient.ClientConnector{}
+	connMang := engine.NewConnManager(cfg, rpcInt)
+	srv := NewERService(cfg, fltrS, connMang)
+
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaMessage: map[string][]string{},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "",
+		ID:     "",
+		Time:   nil,
+		Event:  nil,
+		Opts: map[string]interface{}{
+			utils.OptsRoutesLimit: true,
+		},
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "UNSUPPORTED_SERVICE_METHOD" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "UNSUPPORTED_SERVICE_METHOD", err)
+	}
+}
+
+func TestERsProcessEvent11(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	cfg.ERsCfg().SessionSConns = []string{}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, fltrS, nil)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaMessage:  map[string][]string{},
+			utils.MetaAccounts: map[string][]string{},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "",
+		ID:     "",
+		Time:   nil,
+		Event: map[string]interface{}{
+			utils.Usage: time.Second,
+		},
+		Opts: map[string]interface{}{
+			utils.OptsRoutesLimit: true,
+		},
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "MANDATORY_IE_MISSING: [connIDs]", err)
 	}
 }
