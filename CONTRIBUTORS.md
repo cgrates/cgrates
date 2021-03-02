@@ -80,6 +80,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @porosnicuadrian | Porosnicu Adrian |
 | @andronache98 | Andronache Andrei |
 | @ionutboangiu | Boangiu Silviu Ionut |
+| @nickolasdaniel | Filip Nickolas Daniel |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
