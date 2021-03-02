@@ -268,7 +268,6 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		} else if evArgs.Debit {
-			fmt.Println("yay")
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 	case utils.MetaEvent:
