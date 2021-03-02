@@ -124,6 +124,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 		var weight float64
 		if weight, err = engine.WeightFromDynamics(qAcnt.Weights,
 			aS.fltrS, cgrEv.Tenant, evNm); err != nil {
+			guardian.Guardian.UnguardIDs(refID)
 			return
 		}
 		acnts = append(acnts, &utils.AccountProfileWithWeight{qAcnt, weight, refID})
