@@ -265,3 +265,72 @@ func TestAPIBalanceAsBalance(t *testing.T) {
 	}
 
 }
+
+func TestAccountProfileBalancesAlteredCompareLength(t *testing.T) {
+	actPrf := &AccountProfile{
+		Balances: map[string]*Balance{
+			"testString":  {},
+			"testString2": {},
+		},
+	}
+
+	actBk := map[string]*decimal.Big{
+		"testString": {},
+	}
+
+	result := actPrf.BalancesAltered(actBk)
+	if result != true {
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", true, result)
+	}
+
+}
+
+func TestAccountProfileBalancesAlteredCheckKeys(t *testing.T) {
+	actPrf := &AccountProfile{
+		Balances: map[string]*Balance{
+			"testString": {},
+		},
+	}
+
+	actBk := map[string]*decimal.Big{
+		"testString2": {},
+	}
+
+	result := actPrf.BalancesAltered(actBk)
+	if result != true {
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", true, result)
+	}
+
+}
+
+func TestAccountProfileBalancesAlteredCompareValues(t *testing.T) {
+	actPrf := &AccountProfile{
+		Balances: map[string]*Balance{
+			"testString": {
+				Units: &Decimal{decimal.New(1, 1)},
+			},
+		},
+	}
+
+	actBk := map[string]*decimal.Big{
+		"testString": {},
+	}
+
+	result := actPrf.BalancesAltered(actBk)
+	if result != true {
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", true, result)
+	}
+
+}
+
+func TestAccountProfileBalancesAlteredFalse(t *testing.T) {
+	actPrf := &AccountProfile{}
+
+	actBk := AccountBalancesBackup{}
+
+	result := actPrf.BalancesAltered(actBk)
+	if result != false {
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", false, result)
+	}
+
+}
