@@ -228,6 +228,7 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	}
 }
 
+/*
 func TestAccountDebit(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -431,6 +432,7 @@ func TestAccountsDebit(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
+<<<<<<< HEAD
 
 func TestV1AccountProfilesForEvent(t *testing.T) {
 	engine.Cache.Clear(nil)
@@ -1024,4 +1026,6 @@ func TestMultipleAccountsFail(t *testing.T) {
 	}
 
 }
+=======
+>>>>>>> AccountS test cancelation
 */
