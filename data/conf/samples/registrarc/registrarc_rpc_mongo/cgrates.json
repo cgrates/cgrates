@@ -1,0 +1,156 @@
+{
+// CGRateS Configuration file
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "30s",
+},
+
+
+"listen": {
+	"rpc_json": ":3012",
+	"rpc_gob": ":3013",
+	"http": ":3080",
+},
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+"rpc_conns": {
+	"regConn": {
+		"strategy": "*first",
+		"conns": [{"address": "http://127.0.0.1:2080/registrar", "transport":"*http_jsonrpc"}]
+	}
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["*internal"],
+	"max_increments":3000000,
+},
+
+
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
+},
+
+
+"cdrs": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"],
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
+"routes": {
+	"enabled": true,
+	"stats_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"rals_conns": ["*internal"],
+},
+
+
+"attributes": {
+	"enabled": true,
+	"stats_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"apiers_conns": ["*localhost"]
+},
+
+
+"sessions": {
+	"enabled": true,
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+
+"migrator": {
+	"out_datadb_type": "mongo",
+	"out_datadb_port": "27017",
+	"out_datadb_name": "10",
+	"out_stordb_type": "mongo",
+	"out_stordb_port": "27017",
+	"out_stordb_name": "cgrates",
+	"users_filters":["Account"],
+},
+
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+
+"rates": {
+	"enabled": true
+},
+
+
+"actions": {
+	"enabled": true,
+	"accounts_conns": ["*localhost"]
+},
+
+
+"accounts": {
+	"enabled": true,
+},
+
+
+"filters": {								
+	"apiers_conns": ["*internal"],
+},
+
+"registrarc":{
+    "rpc":{
+        "enabled": true,
+        "registrars_conns": ["regConn"],
+        "hosts": {
+			"*default":[{"ID":"attributes", "transport": "*json"}]
+		},  
+        "refresh_interval": "1s",
+    },
+},
+
+}
