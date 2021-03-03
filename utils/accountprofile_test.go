@@ -334,3 +334,24 @@ func TestAccountProfileBalancesAlteredFalse(t *testing.T) {
 	}
 
 }
+
+func TestAP_RestoreFromBackup(t *testing.T) {
+	actPrf := &AccountProfile{
+		Balances: map[string]*Balance{
+			"testString": {
+				Units: &Decimal{},
+			},
+		},
+	}
+
+	actBk := AccountBalancesBackup{
+		"testString": decimal.New(1, 1),
+	}
+
+	actPrf.RestoreFromBackup(actBk)
+	for key, value := range actBk {
+		if actPrf.Balances[key].Units.Big != value {
+			t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", actPrf.Balances[key].Units.Big, value)
+		}
+	}
+}
