@@ -309,3 +309,168 @@ func TestPartialCSVConfig(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
+
+func TestPartialCSVServe1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         0,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Fields:           nil,
+			CacheDumpFields:  nil,
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   nil,
+	}
+	result := testStruct.Serve()
+	if result != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	}
+}
+func TestPartialCSVServe2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         -1,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Fields:           nil,
+			CacheDumpFields:  nil,
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   nil,
+	}
+
+	err := testStruct.Serve()
+	if err == nil || err.Error() != "no such file or directory" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "no such file or directory", err)
+	}
+}
+func TestPartialCSVServe3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         1,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Fields:           nil,
+			CacheDumpFields:  nil,
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   nil,
+	}
+
+	err := testStruct.Serve()
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
+
+func TestPartialCSVServe4(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         1,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Fields:           nil,
+			CacheDumpFields:  nil,
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   make(chan struct{}, 1),
+		conReqs:   nil,
+	}
+	testStruct.rdrExit <- struct{}{}
+	err := testStruct.Serve()
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
