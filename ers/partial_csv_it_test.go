@@ -25,6 +25,7 @@ import (
 	"net/rpc"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -223,5 +224,88 @@ func testPartITAnalyseCDRs(t *testing.T) {
 func testPartITKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestNewPartialCSVFileER(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	result, err := NewPartialCSVFileER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     result.(*PartialCSVFileER).cache,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   result.(*PartialCSVFileER).conReqs,
+	}
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestPartialCSVConfig(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         0,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Fields:           nil,
+			CacheDumpFields:  nil,
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   nil,
+	}
+	expected := &config.EventReaderCfg{
+		ID:               utils.MetaDefault,
+		Type:             utils.MetaNone,
+		RowLength:        0,
+		FieldSep:         ",",
+		HeaderDefineChar: ":",
+		RunDelay:         0,
+		ConcurrentReqs:   1024,
+		SourcePath:       "/var/spool/cgrates/ers/in",
+		ProcessedPath:    "/var/spool/cgrates/ers/out",
+		XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+		Tenant:           nil,
+		Timezone:         utils.EmptyString,
+		Filters:          []string{},
+		Flags:            utils.FlagsWithParams{},
+		Fields:           nil,
+		CacheDumpFields:  nil,
+		Opts:             make(map[string]interface{}),
+	}
+	result := testStruct.Config()
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
