@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -354,4 +355,23 @@ func TestAP_RestoreFromBackup(t *testing.T) {
 			t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", actPrf.Balances[key].Units.Big, value)
 		}
 	}
+}
+
+func TestAP_AccountBalancesBackup(t *testing.T) {
+	actPrf := &AccountProfile{
+		Balances: map[string]*Balance{
+			"testKey": {
+				Units: &Decimal{decimal.New(1234, 3)},
+			},
+		},
+	}
+
+	actBk := actPrf.AccountBalancesBackup()
+	for key, value := range actBk {
+		if actPrf.Balances[key].Units.Big.Cmp(value) != 0 {
+			fmt.Println(actPrf.Balances[key].Units.Big, value)
+			t.Errorf("\ngot: <%+v>, \nwant: <%+v>", value, actPrf.Balances[key].Units.Big)
+		}
+	}
+
 }
