@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -369,7 +368,6 @@ func TestAP_AccountBalancesBackup(t *testing.T) {
 	actBk := actPrf.AccountBalancesBackup()
 	for key, value := range actBk {
 		if actPrf.Balances[key].Units.Big.Cmp(value) != 0 {
-			fmt.Println(actPrf.Balances[key].Units.Big, value)
 			t.Errorf("\ngot: <%+v>, \nwant: <%+v>", value, actPrf.Balances[key].Units.Big)
 		}
 	}
