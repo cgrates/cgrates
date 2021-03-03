@@ -194,7 +194,7 @@ func (aSv1 *AccountSv1) ActionSetBalance(args *utils.ArgsActSetBalance,
 	return aSv1.aS.V1ActionSetBalance(args, eEc)
 }
 
-// ActionRemoveBalance removes a blance from an account
+// ActionRemoveBalance removes a balance from an account
 func (aSv1 *AccountSv1) ActionRemoveBalance(args *utils.ArgsActRemoveBalances,
 	eEc *string) (err error) {
 	return aSv1.aS.V1ActionRemoveBalance(args, eEc)
