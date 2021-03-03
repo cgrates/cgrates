@@ -190,7 +190,7 @@ func balanceLimit(optsCfg map[string]interface{}) (bL *utils.Decimal, err error)
 }
 
 // debitAbstractsFromConcretes attempts to debit the usage out of concrete balances
-// returns utils.ErrInsufficientCredit if complete usage cannot be debitted
+// returns utils.ErrInsufficientCredit if complete usage cannot be debited
 func debitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
 	costIcrm *utils.CostIncrement, cgrEv *utils.CGREvent,
 	connMgr *engine.ConnManager, rateSConns, rpIDs []string) (ec *utils.EventCharges, err error) {
@@ -230,7 +230,7 @@ func debitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.B
 			ec = utils.NewEventCharges()
 		}
 		ec.Merge(ecCncrt)
-		tCost = utils.SubstractBig(tCost, ecCncrt.Abstracts.Big)
+		tCost = utils.SubstractBig(tCost, ecCncrt.Concretes.Big)
 		if tCost.Cmp(decimal.New(0, 0)) <= 0 {
 			return // have debited all, total is smaller or equal to 0
 		}

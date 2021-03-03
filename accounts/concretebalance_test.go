@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/rpcclient"
@@ -30,7 +31,6 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
-/*
 func TestCBDebitUnits(t *testing.T) {
 	// with limit and unit factor
 	cb := &concreteBalance{
@@ -61,8 +61,8 @@ func TestCBDebitUnits(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cb.blnCfg.UnitFactors[0], unitFct) {
 		t.Errorf("received unit factor: %+v", unitFct)
-	} else if evChrgr.Usage.Compare(toDebit) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(toDebit) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(-100, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -83,8 +83,8 @@ func TestCBDebitUnits(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(toDebit.Big,
 		cgrEvent); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Cmp(decimal.New(225, 2)) != 0 { // 2.25 debited
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Cmp(decimal.New(225, 2)) != 0 { // 2.25 debited
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(-1, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -105,8 +105,8 @@ func TestCBDebitUnits(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(toDebit.Big,
 		cgrEvent); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Cmp(decimal.New(25, 1)) != 0 { // debit more than available since we have unlimited
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Cmp(decimal.New(25, 1)) != 0 { // debit more than available since we have unlimited
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(-125, 2)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -127,8 +127,8 @@ func TestCBDebitUnits(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(toDebit.Big,
 		cgrEvent); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Cmp(decimal.New(75, 2)) != 0 { // limit is 0.5
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Cmp(decimal.New(75, 2)) != 0 { // limit is 0.5
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(5, 1)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -148,8 +148,8 @@ func TestCBSimpleDebit(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(toDebit.Big,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(toDebit) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(toDebit) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(490, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -168,8 +168,8 @@ func TestCBDebitExceed(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(utils.NewDecimal(510, 0).Big,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(utils.NewDecimal(500, 0)) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(utils.NewDecimal(500, 0)) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -191,8 +191,8 @@ func TestCBDebitUnlimited(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(utils.NewDecimal(510, 0).Big,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(utils.NewDecimal(510, 0)) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(utils.NewDecimal(510, 0)) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(-410, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -215,8 +215,8 @@ func TestCBDebitLimit(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(toDebit.Big,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(toDebit) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(toDebit) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(310, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -238,8 +238,8 @@ func TestCBDebitLimitExceed(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(utils.NewDecimal(210, 0).Big,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(utils.NewDecimal(200, 0)) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(utils.NewDecimal(200, 0)) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -261,8 +261,8 @@ func TestCBDebitLimitExceed2(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(utils.NewDecimal(510, 0).Big,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(utils.NewDecimal(200, 0)) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(utils.NewDecimal(200, 0)) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -287,8 +287,8 @@ func TestCBDebitWithUnitFactor(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(toDebit.Big,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(toDebit) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(toDebit) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(400, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -315,8 +315,8 @@ func TestCBDebitWithUnitFactorWithLimit(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(utils.NewDecimal(3, 0).Big,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(utils.NewDecimal(2, 0)) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(utils.NewDecimal(2, 0)) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -343,8 +343,8 @@ func TestCBDebitWithUnitFactorWithUnlimited(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(utils.NewDecimal(7, 0).Big,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(utils.NewDecimal(7, 0)) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(utils.NewDecimal(7, 0)) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(-200, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -382,8 +382,8 @@ func TestCBDebitWithUnitFactorWithFilters1(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(utils.NewDecimal(100, 0).Big,
 		cgrEvent); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(utils.NewDecimal(100, 0)) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(utils.NewDecimal(100, 0)) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(400, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -420,8 +420,8 @@ func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(utils.NewDecimal(3, 0).Big,
 		cgrEvent); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(utils.NewDecimal(2, 0)) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(utils.NewDecimal(2, 0)) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -459,8 +459,8 @@ func TestCBDebitWithMultipleUnitFactor(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(utils.NewDecimal(3, 0).Big,
 		cgrEvent); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(utils.NewDecimal(3, 0)) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(utils.NewDecimal(3, 0)) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(350, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -489,8 +489,8 @@ func TestCBDebitWithBalanceFilter(t *testing.T) {
 	if evChrgr, err := cb.debitConcretes(utils.NewDecimal(3, 0).Big,
 		cgrEvent); err != nil {
 		t.Error(err)
-	} else if evChrgr.Usage.Compare(utils.NewDecimal(3, 0)) != 0 {
-		t.Errorf("debited: %s", evChrgr.Usage)
+	} else if evChrgr.Concretes.Compare(utils.NewDecimal(3, 0)) != 0 {
+		t.Errorf("debited: %s", evChrgr.Concretes)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(497, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
@@ -606,11 +606,8 @@ func TestCBDebitWithInvalidLimit(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/
 
-/*
-
-func TestCBSDebitUsage(t *testing.T) {
+func TestCBSDebitAbstracts(t *testing.T) {
 	// debit 10 units from a concrete balance with 500 units
 	cb := &concreteBalance{
 		blnCfg: &utils.Balance{
@@ -630,15 +627,14 @@ func TestCBSDebitUsage(t *testing.T) {
 	if dbted, err := cb.debitAbstracts(toDebit,
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if dbted.Usage.Big.Cmp(toDebit) != 0 {
+	} else if dbted.Abstracts.Big.Cmp(toDebit) != 0 {
 		t.Errorf("debited: %+v", dbted)
 	} else if cb.blnCfg.Units.Cmp(decimal.New(498, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb.blnCfg.Units)
 	}
 }
-*/
 
-func TestCBSDebitUsageInvalidFilter(t *testing.T) {
+func TestCBSDebitAbstractsInvalidFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -666,7 +662,7 @@ func TestCBSDebitUsageInvalidFilter(t *testing.T) {
 	}
 }
 
-func TestCBSDebitUsageNoMatchFilter(t *testing.T) {
+func TestCBSDebitAbstractsNoMatchFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -701,7 +697,7 @@ func TestCBSDebitUsageNoMatchFilter(t *testing.T) {
 	}
 }
 
-func TestCBSDebitUsageInvalidCostIncrementFilter(t *testing.T) {
+func TestCBSDebitAbstractsInvalidCostIncrementFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -729,7 +725,7 @@ func TestCBSDebitUsageInvalidCostIncrementFilter(t *testing.T) {
 	}
 }
 
-func TestCBSDebitUsageCoverProcessAttributes(t *testing.T) { // coverage purpose
+func TestCBSDebitAbstractsCoverProcessAttributes(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -774,7 +770,7 @@ func TestCBSDebitUsageCoverProcessAttributes(t *testing.T) { // coverage purpose
 	}
 }
 
-func TestCBSDebitUsageCoverProcessAttributes2(t *testing.T) { // coverage purpose
+func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)

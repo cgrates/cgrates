@@ -179,9 +179,11 @@ func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
 			}
 			return
 		}
-		used := ecDbt.Abstracts.Big
+		var used *decimal.Big
 		if concretes {
 			used = ecDbt.Concretes.Big
+		} else {
+			used = ecDbt.Abstracts.Big
 		}
 		usage = utils.SubstractBig(usage, used)
 		ec.Merge(ecDbt)
@@ -233,9 +235,11 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 				return
 			}
 		}
-		used := ecDbt.Abstracts.Big
+		var used *decimal.Big
 		if concretes {
 			used = ecDbt.Concretes.Big
+		} else {
+			used = ecDbt.Abstracts.Big
 		}
 		usage = utils.SubstractBig(usage, used)
 		ec.Merge(ecDbt)
