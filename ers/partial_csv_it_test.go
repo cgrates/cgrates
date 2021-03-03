@@ -250,6 +250,56 @@ func TestNewPartialCSVFileER(t *testing.T) {
 	}
 }
 
+func TestNewPartialCSVFileERCase2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].SourcePath = "/"
+	fltr := &engine.FilterS{}
+	result, err := NewPartialCSVFileER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     result.(*PartialCSVFileER).cache,
+		rdrDir:    "",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   result.(*PartialCSVFileER).conReqs,
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestNewPartialCSVFileERCase3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].PartialCacheExpiryAction = utils.MetaDumpToFile
+	fltr := &engine.FilterS{}
+	result, err := NewPartialCSVFileER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     result.(*PartialCSVFileER).cache,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   result.(*PartialCSVFileER).conReqs,
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
 func TestPartialCSVConfig(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
