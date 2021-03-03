@@ -474,3 +474,44 @@ func TestPartialCSVServe4(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 }
+
+func TestPartialCSVProcessFile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   make(chan struct{}, 1),
+		conReqs:   nil,
+	}
+	err := testStruct.processFile("", "")
+	if err == nil || err.Error() != "open : no such file or directory" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "open : no such file or directory", err)
+	}
+}
+
+func TestPartialCSVProcessFile2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   make(chan struct{}, 1),
+		conReqs:   make(chan struct{}, 1),
+	}
+	testStruct.conReqs <- struct{}{}
+	err := testStruct.processFile("", "")
+	if err == nil || err.Error() != "open : no such file or directory" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "open : no such file or directory", err)
+	}
+}
