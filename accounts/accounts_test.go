@@ -209,7 +209,6 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	}
 }
 
-/*
 func TestAccountDebit(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -232,21 +231,20 @@ func TestAccountDebit(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(200, 0)},
+				Units: &utils.Decimal{decimal.New(150, 0)},
 			},
 			"AbstractBalance1": &utils.Balance{
 				ID: "AbstractBalance1",
 				Weights: utils.DynamicWeights{
 					{
-						Weight: 5,
+						Weight: 25,
 					},
 				},
 				Type:  utils.MetaAbstract,
-				Units: &utils.Decimal{decimal.New(20, 0)},
+				Units: &utils.Decimal{decimal.New(200, 0)},
 				CostIncrements: []*utils.CostIncrement{
 					&utils.CostIncrement{
-						FilterIDs:    []string{"*string:~*req.ToR:*data"},
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						Increment:    &utils.Decimal{decimal.New(1, 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
 					},
@@ -263,8 +261,8 @@ func TestAccountDebit(t *testing.T) {
 			utils.AccountField: "1004",
 		},
 	}
-	usage := &utils.Decimal{decimal.New(210, 0)}
 
+	usage := &utils.Decimal{decimal.New(190, 0)}
 	expected := "NOT_FOUND:invalid_filter_format"
 	if _, err := accnts.accountDebit(accPrf, usage.Big, cgrEvent, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -282,7 +280,7 @@ func TestAccountDebit(t *testing.T) {
 	if _, err := accnts.accountDebit(accPrf, usage.Big, cgrEvent, true); err != nil {
 		t.Error(err)
 	}
-	usage = &utils.Decimal{decimal.New(210, 0)}
+	usage = &utils.Decimal{decimal.New(190, 0)}
 
 	accPrf.Balances["ConcreteBalance1"].UnitFactors = []*utils.UnitFactor{
 		{
@@ -296,11 +294,11 @@ func TestAccountDebit(t *testing.T) {
 	}
 	accPrf.Balances["ConcreteBalance1"].UnitFactors[0].FilterIDs = []string{}
 
-	expectedUsage := &utils.Decimal{decimal.New(200, 0)}
+	expectedUsage := &utils.Decimal{decimal.New(150, 0)}
 	if evCh, err := accnts.accountDebit(accPrf, usage.Big, cgrEvent, true); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(evCh.Usage.Big, expectedUsage.Big) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedUsage), utils.ToJSON(evCh.Usage))
+	} else if !reflect.DeepEqual(evCh.Concretes.Big, expectedUsage.Big) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedUsage.Big), utils.ToJSON(evCh.Concretes.Big))
 	}
 }
 
@@ -323,14 +321,14 @@ func TestAccountsDebit(t *testing.T) {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
 							{
-								Weight: 5,
+								Weight: 25,
 							},
 						},
 						Type:  utils.MetaAbstract,
-						Units: &utils.Decimal{decimal.New(int64(40*time.Second), 0)},
+						Units: &utils.Decimal{decimal.New(40, 0)},
 						CostIncrements: []*utils.CostIncrement{
 							&utils.CostIncrement{
-								Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+								Increment:    &utils.Decimal{decimal.New(1, 0)},
 								FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 								RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
 							},
@@ -345,13 +343,6 @@ func TestAccountsDebit(t *testing.T) {
 						},
 						Type:  utils.MetaConcrete,
 						Units: &utils.Decimal{decimal.New(213, 0)},
-						CostIncrements: []*utils.CostIncrement{
-							&utils.CostIncrement{
-								Increment:    &utils.Decimal{decimal.New(1, 0)},
-								FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-								RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
-							},
-						},
 					},
 				},
 			},
@@ -381,7 +372,7 @@ func TestAccountsDebit(t *testing.T) {
 	}
 	delete(cgrEvent.Event, utils.MetaUsage)
 
-	if _, err := accnts.accountsDebit(accntsPrf, cgrEvent, false, false); err != nil {
+	if _, err := accnts.accountsDebit(accntsPrf, cgrEvent, true, false); err != nil {
 		t.Error(err)
 	}
 	cgrEvent.Event[utils.MetaUsage] = "0"
@@ -389,6 +380,7 @@ func TestAccountsDebit(t *testing.T) {
 	if _, err := accnts.accountsDebit(accntsPrf, cgrEvent, false, false); err != nil {
 		t.Error(err)
 	}
+
 	cgrEvent.Event[utils.MetaUsage] = "55s"
 
 	accntsPrf[0].Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{"invalid_filter_format"}
@@ -398,12 +390,12 @@ func TestAccountsDebit(t *testing.T) {
 	}
 	accntsPrf[0].Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
 
-	cgrEvent.Event[utils.Usage] = "200ns"
+	cgrEvent.Event[utils.Usage] = "300ns"
 	expectedUsage := &utils.Decimal{decimal.New(0, 0)}
 	if evCh, err := accnts.accountsDebit(accntsPrf, cgrEvent, true, true); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expectedUsage, evCh.Usage) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedUsage), utils.ToJSON(evCh.Usage))
+	} else if !reflect.DeepEqual(expectedUsage, evCh.Concretes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedUsage), utils.ToJSON(evCh.Concretes))
 	}
 
 	accntsPrf[0].Balances["ConcreteBalance2"].Units = &utils.Decimal{decimal.New(213, 0)}
@@ -412,8 +404,8 @@ func TestAccountsDebit(t *testing.T) {
 	if _, err := accnts.accountsDebit(accntsPrf, cgrEvent, true, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-}
 
+}
 
 func TestV1AccountProfilesForEvent(t *testing.T) {
 	engine.Cache.Clear(nil)
@@ -555,7 +547,7 @@ func TestV1MaxAbstracts(t *testing.T) {
 	delete(accPrf.Balances, "ConcreteBalance2")
 
 	exEvCh := utils.ExtEventCharges{
-		Usage: utils.Float64Pointer(210),
+		Abstracts: utils.Float64Pointer(210),
 	}
 	if err := accnts.V1MaxAbstracts(args, &reply); err != nil {
 		t.Error(err)
@@ -619,6 +611,7 @@ func TestV1DebitAbstracts(t *testing.T) {
 		},
 	}
 	reply := utils.ExtEventCharges{}
+
 	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter"
 	if err := accnts.V1DebitAbstracts(args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -632,12 +625,20 @@ func TestV1DebitAbstracts(t *testing.T) {
 	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
 
 	exEvCh := utils.ExtEventCharges{
-		Usage: utils.Float64Pointer(float64(27 * time.Second)),
+		Abstracts: utils.Float64Pointer(float64(27 * time.Second)),
 	}
 	if err := accnts.V1DebitAbstracts(args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exEvCh, reply) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
+	}
+
+	//now we'll check the debited account
+	accPrf.Balances["AbstractBalance1"].Units = &utils.Decimal{decimal.New(39999999973, 0)}
+	if debitedAcc, err := accnts.dm.GetAccountProfile(accPrf.Tenant, accPrf.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(accPrf, debitedAcc) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(accPrf), utils.ToJSON(debitedAcc))
 	}
 }
 
@@ -743,7 +744,7 @@ func TestV1MaxConcretes(t *testing.T) {
 	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
 
 	exEvCh := utils.ExtEventCharges{
-		Usage: utils.Float64Pointer(float64(time.Minute + 30*time.Second)),
+		Concretes: utils.Float64Pointer(float64(time.Minute + 30*time.Second)),
 	}
 	if err := accnts.V1MaxConcretes(args, &reply); err != nil {
 		t.Error(err)
@@ -854,7 +855,7 @@ func TestV1DebitConcretes(t *testing.T) {
 	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
 
 	exEvCh := utils.ExtEventCharges{
-		Usage: utils.Float64Pointer(float64(time.Minute + 30*time.Second)),
+		Concretes: utils.Float64Pointer(float64(time.Minute + 30*time.Second)),
 	}
 	if err := accnts.V1DebitConcretes(args, &reply); err != nil {
 		t.Error(err)
@@ -875,7 +876,6 @@ func TestV1DebitConcretes(t *testing.T) {
 
 }
 
-/*
 func TestMultipleAccountsFail(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -996,16 +996,14 @@ func TestMultipleAccountsFail(t *testing.T) {
 
 	expected := "NOT_FOUND:invalid_format"
 	if _, err := accnts.matchingAccountsForEvent("cgrates.org", args,
-		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, true); err != nil {
+		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	expected = "NOT_FOUND:invalid_format"
 	if _, err := accnts.matchingAccountsForEvent("cgrates.org", args,
-		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, true); err != nil {
+		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 }
-
-*/
