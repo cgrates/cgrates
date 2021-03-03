@@ -1005,5 +1005,145 @@ func TestMultipleAccountsFail(t *testing.T) {
 		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+}
 
+func TestV1ActionSetBalance(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	args := &utils.ArgsActSetBalance{
+		Reset: false,
+	}
+	var reply string
+
+	args.AccountID = ""
+	expected := "MANDATORY_IE_MISSING: [AccountID]"
+	if err := accnts.V1ActionSetBalance(args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	args.AccountID = "TestV1ActionSetBalance"
+
+	expected = "MANDATORY_IE_MISSING: [Diktats]"
+	if err := accnts.V1ActionSetBalance(args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	args.Diktats = []*utils.BalDiktat{
+		{
+			Path:  "*balance.AbstractBalance1",
+			Value: "10",
+		},
+	}
+
+	expected = "WRONG_PATH"
+	if err := accnts.V1ActionSetBalance(args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	args.Diktats = []*utils.BalDiktat{
+		{
+			Path:  "*balance.AbstractBalance1.Units",
+			Value: "10",
+		},
+	}
+	args.Tenant = "cgrates.org"
+	if err := accnts.V1ActionSetBalance(args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected status reply", reply)
+	}
+
+	expectedAcc := &utils.AccountProfile{
+		Tenant: "cgrates.org",
+		ID:     "TestV1ActionSetBalance",
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:    "AbstractBalance1",
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(10, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+					{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    utils.NewDecimal(1024*1024, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+					{
+						FilterIDs:    []string{"*string:~*req.ToR:*sms"},
+						Increment:    utils.NewDecimal(1, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if rcv, err := accnts.dm.GetAccountProfile(args.Tenant, args.AccountID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedAcc, rcv) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAcc), utils.ToJSON(rcv))
+	}
+}
+
+func TestV1ActionRemoveBalance(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	//firstly we will set a balance in order to remove it
+	argsSet := &utils.ArgsActSetBalance{
+		AccountID: "TestV1ActionRemoveBalance",
+		Tenant:    "cgrates.org",
+		Diktats: []*utils.BalDiktat{
+			{
+				Path:  "*balance.AbstractBalance1.Units",
+				Value: "10",
+			},
+		},
+		Reset: false,
+	}
+	var reply string
+
+	if err := accnts.V1ActionSetBalance(argsSet, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected status reply", reply)
+	}
+
+	//remove it
+	args := &utils.ArgsActRemoveBalances{}
+
+	expected := "MANDATORY_IE_MISSING: [AccountID]"
+	if err := accnts.V1ActionRemoveBalance(args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	args.AccountID = "TestV1ActionRemoveBalance"
+
+	expected = "MANDATORY_IE_MISSING: [BalanceIDs]"
+	if err := accnts.V1ActionRemoveBalance(args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	args.BalanceIDs = []string{"AbstractBalance1"}
+
+	expected = "NO_DATA_BASE_CONNECTION"
+	accnts.dm = nil
+	if err := accnts.V1ActionRemoveBalance(args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	accnts.dm = engine.NewDataManager(data, cfg.CacheCfg(), nil)
+
+	if err := accnts.V1ActionRemoveBalance(args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected status reply", reply)
+	}
 }
