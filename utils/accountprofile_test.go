@@ -335,7 +335,7 @@ func TestAccountProfileBalancesAlteredFalse(t *testing.T) {
 
 }
 
-func TestAP_RestoreFromBackup(t *testing.T) {
+func TestAPRestoreFromBackup(t *testing.T) {
 	actPrf := &AccountProfile{
 		Balances: map[string]*Balance{
 			"testString": {
@@ -356,7 +356,7 @@ func TestAP_RestoreFromBackup(t *testing.T) {
 	}
 }
 
-func TestAP_AccountBalancesBackup(t *testing.T) {
+func TestAPAccountBalancesBackup(t *testing.T) {
 	actPrf := &AccountProfile{
 		Balances: map[string]*Balance{
 			"testKey": {
