@@ -371,7 +371,6 @@ func TestAPAccountBalancesBackup(t *testing.T) {
 			t.Errorf("\ngot: <%+v>, \nwant: <%+v>", value, actPrf.Balances[key].Units.Big)
 		}
 	}
-
 }
 
 func TestAPNewDefaultBalance(t *testing.T) {
@@ -406,5 +405,36 @@ func TestAPNewDefaultBalance(t *testing.T) {
 
 	if !reflect.DeepEqual(received, expected) {
 		t.Errorf("\nReceived: <%+v>,\nExpected: <%+v>", received, expected)
+	}
+}
+
+func TestAPSort(t *testing.T) {
+
+	apS := AccountProfilesWithWeight{
+		{
+			Weight: 2,
+		},
+		{
+			Weight: 1,
+		},
+		{
+			Weight: 3,
+		},
+	}
+	expected := AccountProfilesWithWeight{
+		{
+			Weight: 3,
+		},
+		{
+			Weight: 2,
+		},
+		{
+			Weight: 1,
+		},
+	}
+
+	apS.Sort()
+	if !reflect.DeepEqual(apS, expected) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", ToJSON(apS), ToJSON(expected))
 	}
 }
