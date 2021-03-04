@@ -408,7 +408,7 @@ func TestAPNewDefaultBalance(t *testing.T) {
 	}
 }
 
-func TestAPSort(t *testing.T) {
+func TestAPApsSort(t *testing.T) {
 
 	apS := AccountProfilesWithWeight{
 		{
@@ -610,5 +610,36 @@ func TestAPTenantIDs(t *testing.T) {
 
 	if !reflect.DeepEqual(received, expected) {
 		t.Errorf("\nReceived: <%v>, \nExpected: <%+v>", received, expected)
+	}
+}
+
+func TestAPBlcsSort(t *testing.T) {
+
+	blncS := BalancesWithWeight{
+		{
+			Weight: 2,
+		},
+		{
+			Weight: 1,
+		},
+		{
+			Weight: 3,
+		},
+	}
+	expected := BalancesWithWeight{
+		{
+			Weight: 3,
+		},
+		{
+			Weight: 2,
+		},
+		{
+			Weight: 1,
+		},
+	}
+
+	blncS.Sort()
+	if !reflect.DeepEqual(blncS, expected) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", ToJSON(blncS), ToJSON(expected))
 	}
 }
