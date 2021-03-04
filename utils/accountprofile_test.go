@@ -643,3 +643,70 @@ func TestAPBlcsSort(t *testing.T) {
 		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", ToJSON(blncS), ToJSON(expected))
 	}
 }
+
+func TestAPBalances(t *testing.T) {
+	blncS := BalancesWithWeight{
+		{
+			Balance: &Balance{
+				ID:        "testID1",
+				FilterIDs: []string{"testFID1", "testFID2"},
+				Type:      MetaAbstract,
+				Units:     &Decimal{decimal.New(1234, 3)},
+				Weights:   nil,
+				UnitFactors: []*UnitFactor{
+					{
+						Factor: NewDecimal(1, 1),
+					},
+				},
+				Opts: map[string]interface{}{
+					MetaBalanceLimit: -1.0,
+				},
+				CostIncrements: []*CostIncrement{
+					{
+						Increment:    NewDecimal(int64(time.Duration(time.Second)), 0),
+						RecurrentFee: NewDecimal(0, 0),
+					},
+				},
+				AttributeIDs:   []string{"testString1"},
+				RateProfileIDs: []string{"testString2"},
+			},
+			Weight: 23,
+		},
+		{
+			Balance: &Balance{
+				ID:        "testID2",
+				FilterIDs: []string{"testFID3", "testFID4"},
+				Type:      MetaAbstract,
+				Units:     &Decimal{decimal.New(1234, 3)},
+				Weights:   nil,
+				UnitFactors: []*UnitFactor{
+					{
+						Factor: NewDecimal(1, 1),
+					},
+				},
+				Opts: map[string]interface{}{
+					MetaBalanceLimit: -1.0,
+				},
+				CostIncrements: []*CostIncrement{
+					{
+						Increment:    NewDecimal(int64(time.Duration(time.Second)), 0),
+						RecurrentFee: NewDecimal(0, 0),
+					},
+				},
+				AttributeIDs:   []string{"testString3"},
+				RateProfileIDs: []string{"testString4"},
+			},
+			Weight: 23,
+		},
+	}
+
+	expected := make([]*Balance, 0)
+	for i := range blncS {
+		expected = append(expected, blncS[i].Balance)
+	}
+	received := blncS.Balances()
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>,\nExpected: <%+v>", ToJSON(received), ToJSON(expected))
+	}
+}
