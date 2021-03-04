@@ -123,3 +123,30 @@ func TestDispatcherHostsService(t *testing.T) {
 	close(stopChan)
 	ds.ListenAndServe(stopChan, make(chan struct{}))
 }
+
+func TestRegistrarcListenAndServe(t *testing.T) {
+	//cover purposes only
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RegistrarCCfg().Dispatcher.Enabled = true
+	cfg.RegistrarCCfg().RPC.Enabled = true
+	regStSrv := NewRegistrarCService(cfg, nil)
+	stopChan := make(chan struct{}, 1)
+	rldChan := make(chan struct{}, 1)
+	rldChan <- struct{}{}
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		close(stopChan)
+	}()
+	regStSrv.ListenAndServe(stopChan, rldChan)
+
+}
+
+func TestRegistrarcShutdown(t *testing.T) {
+	//cover purposes only
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RegistrarCCfg().Dispatcher.Enabled = true
+	cfg.RegistrarCCfg().RPC.Enabled = true
+	regStSrv := NewRegistrarCService(cfg, nil)
+	regStSrv.Shutdown()
+
+}
