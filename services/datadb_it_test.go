@@ -553,27 +553,14 @@ func TestDataDBReloadVersion(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
-	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	srvMngr.AddServices(NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep),
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	srvMngr.StartServices()
-	<-shdChan.Done()
-	db.dm = nil
-	err = db.Reload()
-	if err == nil || err.Error() != "can't conver DataDB of type mongo to MongoStorage" {
-		t.Fatal(err)
+	err = db.Start()
+	if err == nil || err.Error() != "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>" {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>", err)
 	}
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)

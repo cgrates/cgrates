@@ -736,33 +736,3 @@ func TestERsProcessEvent11(t *testing.T) {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "MANDATORY_IE_MISSING: [connIDs]", err)
 	}
 }
-
-func TestERsProcessEvent12(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
-		{
-			ID:   "test",
-			Type: utils.MetaNone,
-		},
-	}
-	cfg.ERsCfg().SessionSConns = []string{rpcclient.InternalRPC}
-	fltrS := &engine.FilterS{}
-	rpcInt := map[string]chan rpcclient.ClientConnector{}
-	connMang := engine.NewConnManager(cfg, rpcInt)
-	srv := NewERService(cfg, fltrS, connMang)
-
-	rdrCfg := &config.EventReaderCfg{
-		Flags: map[string]utils.FlagParams{
-			utils.MetaMessage: map[string][]string{},
-		},
-	}
-	cgrEvent := &utils.CGREvent{
-		Opts: map[string]interface{}{
-			utils.OptsRoutesLimit: true,
-		},
-	}
-	err := srv.processEvent(cgrEvent, rdrCfg)
-	if err == nil || err.Error() != "UNSUPPORTED_SERVICE_METHOD" {
-		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "UNSUPPORTED_SERVICE_METHOD", err)
-	}
-}
