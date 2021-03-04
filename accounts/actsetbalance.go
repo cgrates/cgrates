@@ -98,7 +98,7 @@ func actSetAccountFields(ac *utils.AccountProfile, path []string, value string) 
 	case utils.Weights:
 		ac.Weights, err = utils.NewDynamicWeightsFromString(value, utils.InfieldSep, utils.ANDSep)
 	case utils.Opts:
-		if ac.Opts == nil { // if the options are not initilized already init them here
+		if ac.Opts == nil { // if the options are not initialized already init them here
 			ac.Opts = make(map[string]interface{})
 		}
 		err = utils.MapStorage(ac.Opts).Set(path[1:], value)
@@ -125,9 +125,13 @@ func actSetBalance(bal *utils.Balance, path []string, value string, reset bool) 
 	case utils.ID:
 		bal.ID = value
 	case utils.FilterIDs:
-		bal.FilterIDs = utils.NewStringSet(strings.Split(value, utils.InfieldSep)).AsSlice()
+		if value != utils.EmptyString {
+			bal.FilterIDs = utils.NewStringSet(strings.Split(value, utils.InfieldSep)).AsSlice()
+		}
 	case utils.Weights:
-		bal.Weights, err = utils.NewDynamicWeightsFromString(value, utils.InfieldSep, utils.ANDSep)
+		if value != utils.EmptyString {
+			bal.Weights, err = utils.NewDynamicWeightsFromString(value, utils.InfieldSep, utils.ANDSep)
+		}
 	case utils.Type:
 		bal.Type = value
 	case utils.Units:
@@ -143,31 +147,41 @@ func actSetBalance(bal *utils.Balance, path []string, value string, reset bool) 
 			bal.Units = z
 		}
 	case utils.UnitFactors:
-		// just recreate them from strinf
-		bal.UnitFactors, err = actNewUnitFactorsFromString(value)
+		// just recreate them from string
+		if value != utils.EmptyString {
+			bal.UnitFactors, err = actNewUnitFactorsFromString(value)
+		}
 	case utils.Opts:
 		if bal.Opts == nil { // if the options are not initilized already init them here
 			bal.Opts = make(map[string]interface{})
 		}
 		err = utils.MapStorage(bal.Opts).Set(path[1:], value)
 	case utils.CostIncrements:
-		// just recreate them from strinf
-		bal.CostIncrements, err = actNewCostIncrementsFromString(value)
+		// just recreate them from string
+		if value != utils.EmptyString {
+			bal.CostIncrements, err = actNewCostIncrementsFromString(value)
+		}
 	case utils.AttributeIDs:
-		bal.AttributeIDs = strings.Split(value, utils.InfieldSep)
+		if value != utils.EmptyString {
+			bal.AttributeIDs = strings.Split(value, utils.InfieldSep)
+		}
 	case utils.RateProfileIDs:
-		bal.RateProfileIDs = utils.NewStringSet(strings.Split(value, utils.InfieldSep)).AsSlice()
+		if value != utils.EmptyString {
+			bal.RateProfileIDs = utils.NewStringSet(strings.Split(value, utils.InfieldSep)).AsSlice()
+		}
 	default:
 		// we modify the UnitFactors explicit
 		// e.g. *balance.TEST.UnitFactors[0].Factor
 		if strings.HasPrefix(path[0], utils.UnitFactors) {
-			return actSetUnitFactor(bal.UnitFactors, path, value)
+			bal.UnitFactors, err = actSetUnitFactor(bal.UnitFactors, path, value)
+			return
 		}
 
 		// we modify the CostIncrements explicit
 		// e.g. *balance.TEST.CostIncrements[0].Increment
 		if strings.HasPrefix(path[0], utils.CostIncrements) {
-			return actSetCostIncrement(bal.CostIncrements, path, value)
+			bal.CostIncrements, err = actSetCostIncrement(bal.CostIncrements, path, value)
+			return
 		}
 		// not a valid path
 		err = utils.ErrWrongPath
@@ -180,7 +194,7 @@ func actSetBalance(bal *utils.Balance, path []string, value string, reset bool) 
 func actNewUnitFactorsFromString(value string) (units []*utils.UnitFactor, err error) {
 	sls := strings.Split(value, utils.InfieldSep)
 	if len(sls)%2 != 0 {
-		return nil, fmt.Errorf("invlid key: <%s> for BalanceUnitFactors", value)
+		return nil, fmt.Errorf("invalid key: <%s> for BalanceUnitFactors", value)
 	}
 	units = make([]*utils.UnitFactor, 0, len(sls)/2)
 
@@ -189,8 +203,12 @@ func actNewUnitFactorsFromString(value string) (units []*utils.UnitFactor, err e
 		if z, err = utils.NewDecimalFromString(sls[j+1]); err != nil {
 			return
 		}
+		var fltrs []string
+		if sls[j] != utils.EmptyString {
+			fltrs = strings.Split(sls[j], utils.ANDSep)
+		}
 		units = append(units, &utils.UnitFactor{
-			FilterIDs: strings.Split(sls[j], utils.ANDSep),
+			FilterIDs: fltrs,
 			Factor:    z,
 		})
 	}
@@ -202,12 +220,13 @@ func actNewUnitFactorsFromString(value string) (units []*utils.UnitFactor, err e
 func actNewCostIncrementsFromString(value string) (costs []*utils.CostIncrement, err error) {
 	sls := strings.Split(value, utils.InfieldSep)
 	if len(sls)%4 != 0 {
-		return nil, fmt.Errorf("invlid key: <%s> for BalanceCostIncrements", value)
+		return nil, fmt.Errorf("invalid key: <%s> for BalanceCostIncrements", value)
 	}
 	costs = make([]*utils.CostIncrement, 0, len(sls)/4)
 	for j := 0; j < len(sls); j += 4 {
-		cost := &utils.CostIncrement{
-			FilterIDs: strings.Split(sls[j], utils.ANDSep),
+		cost := &utils.CostIncrement{}
+		if sls[j] != utils.EmptyString {
+			cost.FilterIDs = strings.Split(sls[j], utils.ANDSep)
 		}
 		if incrementStr := sls[j+1]; incrementStr != utils.EmptyString {
 			if cost.Increment, err = utils.NewDecimalFromString(incrementStr); err != nil {
@@ -230,16 +249,16 @@ func actNewCostIncrementsFromString(value string) (costs []*utils.CostIncrement,
 }
 
 // actSetUnitFactor will update the UnitFactors
-func actSetUnitFactor(uFs []*utils.UnitFactor, path []string, value string) (err error) {
+func actSetUnitFactor(uFs []*utils.UnitFactor, path []string, value string) (untFctr []*utils.UnitFactor, err error) {
 	pathVal := path[0][11:]
 	lp := len(pathVal)
 	// check path requierments
 	// exact 2 elements
 	// and the first element have an index between brackets
-	if lp != 2 ||
+	if len(path) != 2 ||
 		pathVal[0] != '[' ||
 		pathVal[lp-1] != ']' {
-		return utils.ErrWrongPath
+		return nil, utils.ErrWrongPath
 	}
 	pathVal = pathVal[1 : lp-1]
 	var idx int
@@ -250,7 +269,7 @@ func actSetUnitFactor(uFs []*utils.UnitFactor, path []string, value string) (err
 	if len(uFs) == idx { // special case add a new unitFactor
 		uFs = append(uFs, &utils.UnitFactor{})
 	} else if len(uFs) < idx { // make sure we are in slice range
-		return utils.ErrWrongPath
+		return nil, utils.ErrWrongPath
 	}
 
 	switch path[1] {
@@ -261,19 +280,19 @@ func actSetUnitFactor(uFs []*utils.UnitFactor, path []string, value string) (err
 	default:
 		err = utils.ErrWrongPath
 	}
-	return
+	return uFs, err
 }
 
-func actSetCostIncrement(cIs []*utils.CostIncrement, path []string, value string) (err error) {
+func actSetCostIncrement(cIs []*utils.CostIncrement, path []string, value string) (cstIncr []*utils.CostIncrement, err error) {
 	pathVal := path[0][14:]
 	lp := len(pathVal)
 	// check path requierments
 	// exact 2 elements
 	// and the first element have an index between brackets
-	if lp != 2 ||
+	if len(path) != 2 ||
 		pathVal[0] != '[' ||
 		pathVal[lp-1] != ']' {
-		return utils.ErrWrongPath
+		return nil, utils.ErrWrongPath
 	}
 	pathVal = pathVal[1 : lp-1]
 	var idx int
@@ -284,10 +303,10 @@ func actSetCostIncrement(cIs []*utils.CostIncrement, path []string, value string
 	if len(cIs) == idx { // special case add a new CostIncrement
 		cIs = append(cIs, &utils.CostIncrement{})
 	} else if len(cIs) < idx { // make sure we are in slice range
-		return utils.ErrWrongPath
+		return nil, utils.ErrWrongPath
 	}
 
-	switch path[0] {
+	switch path[1] {
 	case utils.FilterIDs:
 		cIs[idx].FilterIDs = utils.NewStringSet(strings.Split(value, utils.InfieldSep)).AsSlice()
 	case utils.Increment:
@@ -299,5 +318,5 @@ func actSetCostIncrement(cIs []*utils.CostIncrement, path []string, value string
 	default:
 		err = utils.ErrWrongPath
 	}
-	return
+	return cIs, err
 }
