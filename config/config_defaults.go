@@ -80,6 +80,8 @@ const CGRATES_CFG_JSON = `
 	"db_password": "", 						// password to use when connecting to data_db
 	"remote_conns":[],
 	"replication_conns":[],
+	"filtered_replication": false, 			// if this is enabled the replication will be made only to the conns that received a get
+	"remote_conn_id": "",					// the ID to be sent to remote_conns to identify the connection
 	"items":{
 		"*accounts":{"remote":false, "replicate":false}, 					
 		"*reverse_destinations": {"remote":false, "replicate":false},
@@ -285,6 +287,7 @@ const CGRATES_CFG_JSON = `
 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// stirShaken cache keys
 		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "replicate": false}, 
 		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},								// caps cached samples
+		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "replicate": false},							// the replication hosts cache(used when filtered_replication is enbled)
 		
 		// only for *internal database
 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for version storing

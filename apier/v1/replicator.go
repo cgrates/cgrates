@@ -39,6 +39,7 @@ func (rplSv1 *ReplicatorSv1) Call(serviceMethod string, args interface{}, reply 
 
 //GetAccount
 func (rplSv1 *ReplicatorSv1) GetAccount(args *utils.StringWithOpts, reply *engine.Account) error {
+	engine.SetReplicateHost(utils.AccountPrefix, args.Arg, utils.IfaceAsString(args.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.GetAccount(args.Arg); err != nil {
 		return err
 	} else {
@@ -49,6 +50,7 @@ func (rplSv1 *ReplicatorSv1) GetAccount(args *utils.StringWithOpts, reply *engin
 
 //GetDestination
 func (rplSv1 *ReplicatorSv1) GetDestination(key *utils.StringWithOpts, reply *engine.Destination) error {
+	engine.SetReplicateHost(utils.DestinationPrefix, key.Arg, utils.IfaceAsString(key.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetDestinationDrv(key.Arg, utils.NonTransactional); err != nil {
 		return err
 	} else {
@@ -59,6 +61,7 @@ func (rplSv1 *ReplicatorSv1) GetDestination(key *utils.StringWithOpts, reply *en
 
 //GetDestination
 func (rplSv1 *ReplicatorSv1) GetReverseDestination(key *utils.StringWithOpts, reply *[]string) error {
+	engine.SetReplicateHost(utils.ReverseDestinationPrefix, key.Arg, utils.IfaceAsString(key.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetReverseDestinationDrv(key.Arg, utils.NonTransactional); err != nil {
 		return err
 	} else {
@@ -69,6 +72,7 @@ func (rplSv1 *ReplicatorSv1) GetReverseDestination(key *utils.StringWithOpts, re
 
 //GetStatQueue
 func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithOpts, reply *engine.StatQueue) error {
+	engine.SetReplicateHost(utils.StatQueuePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetStatQueueDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -79,6 +83,7 @@ func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithOpts, reply *
 
 //GetFilter
 func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantIDWithOpts, reply *engine.Filter) error {
+	engine.SetReplicateHost(utils.FilterPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetFilterDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -89,6 +94,7 @@ func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantIDWithOpts, reply *eng
 
 //GetThreshold
 func (rplSv1 *ReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithOpts, reply *engine.Threshold) error {
+	engine.SetReplicateHost(utils.ThresholdPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetThresholdDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -99,6 +105,7 @@ func (rplSv1 *ReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithOpts, reply *
 
 //GetThresholdProfile
 func (rplSv1 *ReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithOpts, reply *engine.ThresholdProfile) error {
+	engine.SetReplicateHost(utils.ThresholdProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetThresholdProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -109,6 +116,7 @@ func (rplSv1 *ReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithOpts, 
 
 //GetStatQueueProfile
 func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWithOpts, reply *engine.StatQueueProfile) error {
+	engine.SetReplicateHost(utils.StatQueueProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetStatQueueProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -119,6 +127,7 @@ func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWithOpts, 
 
 //GetTiming
 func (rplSv1 *ReplicatorSv1) GetTiming(id *utils.StringWithOpts, reply *utils.TPTiming) error {
+	engine.SetReplicateHost(utils.TimingsPrefix, id.Arg, utils.IfaceAsString(id.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetTimingDrv(id.Arg); err != nil {
 		return err
 	} else {
@@ -129,6 +138,7 @@ func (rplSv1 *ReplicatorSv1) GetTiming(id *utils.StringWithOpts, reply *utils.TP
 
 //GetResource
 func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantIDWithOpts, reply *engine.Resource) error {
+	engine.SetReplicateHost(utils.ResourcesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetResourceDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -139,6 +149,7 @@ func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantIDWithOpts, reply *e
 
 //GetResourceProfile
 func (rplSv1 *ReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithOpts, reply *engine.ResourceProfile) error {
+	engine.SetReplicateHost(utils.ResourceProfilesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetResourceProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -149,6 +160,7 @@ func (rplSv1 *ReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithOpts, r
 
 //GetActionTriggers
 func (rplSv1 *ReplicatorSv1) GetActionTriggers(id *utils.StringWithOpts, reply *engine.ActionTriggers) error {
+	engine.SetReplicateHost(utils.ActionTriggerPrefix, id.Arg, utils.IfaceAsString(id.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetActionTriggersDrv(id.Arg); err != nil {
 		return err
 	} else {
@@ -159,6 +171,7 @@ func (rplSv1 *ReplicatorSv1) GetActionTriggers(id *utils.StringWithOpts, reply *
 
 //GetSharedGroup
 func (rplSv1 *ReplicatorSv1) GetSharedGroup(id *utils.StringWithOpts, reply *engine.SharedGroup) error {
+	engine.SetReplicateHost(utils.SharedGroupPrefix, id.Arg, utils.IfaceAsString(id.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetSharedGroupDrv(id.Arg); err != nil {
 		return err
 	} else {
@@ -169,6 +182,7 @@ func (rplSv1 *ReplicatorSv1) GetSharedGroup(id *utils.StringWithOpts, reply *eng
 
 //GetActions
 func (rplSv1 *ReplicatorSv1) GetActions(id *utils.StringWithOpts, reply *engine.Actions) error {
+	engine.SetReplicateHost(utils.ActionPrefix, id.Arg, utils.IfaceAsString(id.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetActionsDrv(id.Arg); err != nil {
 		return err
 	} else {
@@ -179,6 +193,7 @@ func (rplSv1 *ReplicatorSv1) GetActions(id *utils.StringWithOpts, reply *engine.
 
 //GetActions
 func (rplSv1 *ReplicatorSv1) GetActionPlan(id *utils.StringWithOpts, reply *engine.ActionPlan) error {
+	engine.SetReplicateHost(utils.ActionPlanPrefix, id.Arg, utils.IfaceAsString(id.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetActionPlanDrv(id.Arg, true, utils.NonTransactional); err != nil {
 		return err
 	} else {
@@ -188,10 +203,13 @@ func (rplSv1 *ReplicatorSv1) GetActionPlan(id *utils.StringWithOpts, reply *engi
 }
 
 //GetAllActionPlans
-func (rplSv1 *ReplicatorSv1) GetAllActionPlans(_ *utils.StringWithOpts, reply *map[string]*engine.ActionPlan) error {
+func (rplSv1 *ReplicatorSv1) GetAllActionPlans(id *utils.StringWithOpts, reply *map[string]*engine.ActionPlan) error {
 	if rcv, err := rplSv1.dm.DataDB().GetAllActionPlansDrv(); err != nil {
 		return err
 	} else {
+		for _, ap := range rcv {
+			engine.SetReplicateHost(utils.ActionPlanPrefix, ap.Id, utils.IfaceAsString(id.Opts[utils.RemoteHostOpt]))
+		}
 		*reply = rcv
 	}
 	return nil
@@ -199,6 +217,7 @@ func (rplSv1 *ReplicatorSv1) GetAllActionPlans(_ *utils.StringWithOpts, reply *m
 
 //GetAccountActionPlans
 func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(id *utils.StringWithOpts, reply *[]string) error {
+	engine.SetReplicateHost(utils.AccountActionPlansPrefix, id.Arg, utils.IfaceAsString(id.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetAccountActionPlansDrv(id.Arg, false, utils.NonTransactional); err != nil {
 		return err
 	} else {
@@ -209,6 +228,7 @@ func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(id *utils.StringWithOpts, rep
 
 //GetAllActionPlans
 func (rplSv1 *ReplicatorSv1) GetRatingPlan(id *utils.StringWithOpts, reply *engine.RatingPlan) error {
+	engine.SetReplicateHost(utils.RatingPlanPrefix, id.Arg, utils.IfaceAsString(id.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetRatingPlanDrv(id.Arg); err != nil {
 		return err
 	} else {
@@ -219,6 +239,7 @@ func (rplSv1 *ReplicatorSv1) GetRatingPlan(id *utils.StringWithOpts, reply *engi
 
 //GetAllActionPlans
 func (rplSv1 *ReplicatorSv1) GetRatingProfile(id *utils.StringWithOpts, reply *engine.RatingProfile) error {
+	engine.SetReplicateHost(utils.RatingProfilePrefix, id.Arg, utils.IfaceAsString(id.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetRatingProfileDrv(id.Arg); err != nil {
 		return err
 	} else {
@@ -229,6 +250,7 @@ func (rplSv1 *ReplicatorSv1) GetRatingProfile(id *utils.StringWithOpts, reply *e
 
 //GetResourceProfile
 func (rplSv1 *ReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithOpts, reply *engine.RouteProfile) error {
+	engine.SetReplicateHost(utils.RouteProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetRouteProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -239,6 +261,7 @@ func (rplSv1 *ReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithOpts, repl
 
 //GetResourceProfile
 func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithOpts, reply *engine.AttributeProfile) error {
+	engine.SetReplicateHost(utils.AttributeProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetAttributeProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -249,6 +272,7 @@ func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithOpts, 
 
 //GetResourceProfile
 func (rplSv1 *ReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithOpts, reply *engine.ChargerProfile) error {
+	engine.SetReplicateHost(utils.ChargerProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetChargerProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -259,6 +283,7 @@ func (rplSv1 *ReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithOpts, re
 
 //GetResourceProfile
 func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithOpts, reply *engine.DispatcherProfile) error {
+	engine.SetReplicateHost(utils.DispatcherProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetDispatcherProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -269,6 +294,7 @@ func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithOpts,
 
 //GetResourceProfile
 func (rplSv1 *ReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithOpts, reply *engine.DispatcherHost) error {
+	engine.SetReplicateHost(utils.DispatcherHostPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetDispatcherHostDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -278,6 +304,7 @@ func (rplSv1 *ReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithOpts, re
 }
 
 func (rplSv1 *ReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithOpts, reply *engine.RateProfile) error {
+	engine.SetReplicateHost(utils.RateProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetRateProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -287,6 +314,7 @@ func (rplSv1 *ReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithOpts, reply
 }
 
 func (rplSv1 *ReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithOpts, reply *engine.ActionProfile) error {
+	engine.SetReplicateHost(utils.ActionProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetActionProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -296,6 +324,7 @@ func (rplSv1 *ReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithOpts, rep
 }
 
 func (rplSv1 *ReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithOpts, reply *utils.AccountProfile) error {
+	engine.SetReplicateHost(utils.AccountProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetAccountProfileDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
@@ -306,6 +335,7 @@ func (rplSv1 *ReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithOpts, re
 
 //GetResourceProfile
 func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithOpts, reply *map[string]int64) error {
+	engine.SetReplicateHost(utils.LoadIDPrefix, itemID.Arg, utils.IfaceAsString(itemID.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetItemLoadIDsDrv(itemID.Arg); err != nil {
 		return err
 	} else {
@@ -771,6 +801,7 @@ func (rplSv1 *ReplicatorSv1) Ping(ign *utils.CGREvent, reply *string) error {
 
 // GetIndexes .
 func (rplSv1 *ReplicatorSv1) GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
+	engine.SetReplicateHost(utils.CacheInstanceToPrefix[args.IdxItmType], args.TntCtx, utils.IfaceAsString(args.Opts[utils.RemoteHostOpt]))
 	indx, err := rplSv1.dm.DataDB().GetIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey)
 	if err != nil {
 		return err

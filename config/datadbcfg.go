@@ -28,16 +28,18 @@ import (
 
 // DataDbCfg Database config
 type DataDbCfg struct {
-	DataDbType string
-	DataDbHost string   // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDbPort string   // The port to bind to.
-	DataDbName string   // The name of the database to connect to.
-	DataDbUser string   // The user to sign in as.
-	DataDbPass string   // The user's password.
-	RmtConns   []string // Remote DataDB  connIDs
-	RplConns   []string // Replication connIDs
-	Items      map[string]*ItemOpt
-	Opts       map[string]interface{}
+	DataDbType  string
+	DataDbHost  string   // The host to connect to. Values that start with / are for UNIX domain sockets.
+	DataDbPort  string   // The port to bind to.
+	DataDbName  string   // The name of the database to connect to.
+	DataDbUser  string   // The user to sign in as.
+	DataDbPass  string   // The user's password.
+	RmtConns    []string // Remote DataDB  connIDs
+	RplConns    []string // Replication connIDs
+	RplFiltered bool
+	RmtConnID   string
+	Items       map[string]*ItemOpt
+	Opts        map[string]interface{}
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
@@ -102,20 +104,28 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			dbcfg.Opts[k] = v
 		}
 	}
-	return nil
+	if jsnDbCfg.Filtered_replication != nil {
+		dbcfg.RplFiltered = *jsnDbCfg.Filtered_replication
+	}
+	if jsnDbCfg.Remote_conn_id != nil {
+		dbcfg.RmtConnID = *jsnDbCfg.Remote_conn_id
+	}
+	return
 }
 
 // Clone returns the cloned object
 func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 	cln = &DataDbCfg{
-		DataDbType: dbcfg.DataDbType,
-		DataDbHost: dbcfg.DataDbHost,
-		DataDbPort: dbcfg.DataDbPort,
-		DataDbName: dbcfg.DataDbName,
-		DataDbUser: dbcfg.DataDbUser,
-		DataDbPass: dbcfg.DataDbPass,
-		Items:      make(map[string]*ItemOpt),
-		Opts:       make(map[string]interface{}),
+		DataDbType:  dbcfg.DataDbType,
+		DataDbHost:  dbcfg.DataDbHost,
+		DataDbPort:  dbcfg.DataDbPort,
+		DataDbName:  dbcfg.DataDbName,
+		DataDbUser:  dbcfg.DataDbUser,
+		DataDbPass:  dbcfg.DataDbPass,
+		RplFiltered: dbcfg.RplFiltered,
+		RmtConnID:   dbcfg.RmtConnID,
+		Items:       make(map[string]*ItemOpt),
+		Opts:        make(map[string]interface{}),
 	}
 	for k, itm := range dbcfg.Items {
 		cln.Items[k] = itm.Clone()
@@ -142,13 +152,15 @@ func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.DataDbTypeCfg: utils.Meta + dbcfg.DataDbType,
-		utils.DataDbHostCfg: dbcfg.DataDbHost,
-		utils.DataDbNameCfg: dbcfg.DataDbName,
-		utils.DataDbUserCfg: dbcfg.DataDbUser,
-		utils.DataDbPassCfg: dbcfg.DataDbPass,
-		utils.RmtConnsCfg:   dbcfg.RmtConns,
-		utils.RplConnsCfg:   dbcfg.RplConns,
+		utils.DataDbTypeCfg:          utils.Meta + dbcfg.DataDbType,
+		utils.DataDbHostCfg:          dbcfg.DataDbHost,
+		utils.DataDbNameCfg:          dbcfg.DataDbName,
+		utils.DataDbUserCfg:          dbcfg.DataDbUser,
+		utils.DataDbPassCfg:          dbcfg.DataDbPass,
+		utils.RmtConnsCfg:            dbcfg.RmtConns,
+		utils.RplConnsCfg:            dbcfg.RplConns,
+		utils.FilteredReplicationCfg: dbcfg.RplFiltered,
+		utils.RemoteConnIDCfg:        dbcfg.RmtConnID,
 	}
 	opts := make(map[string]interface{})
 	for k, v := range dbcfg.Opts {

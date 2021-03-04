@@ -112,8 +112,7 @@ func (dm *DataManager) DataDB() DataDB {
 
 func (dm *DataManager) LoadDataDBCache(attr map[string][]string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if dm.DataDB().GetStorageType() == utils.INTERNAL {
 		return // all the data is in cache already
@@ -389,8 +388,9 @@ func (dm *DataManager) GetDestination(key string, cacheRead, cacheWrite bool, tr
 					Arg:    key,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, &dest); err == nil {
 				err = dm.dataDB.SetDestinationDrv(dest, utils.NonTransactional)
@@ -418,15 +418,15 @@ func (dm *DataManager) GetDestination(key string, cacheRead, cacheWrite bool, tr
 
 func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.dataDB.SetDestinationDrv(dest, transactionID); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.DestinationPrefix, dest.Id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetDestination,
 			&DestinationWithOpts{
 				Destination: dest,
@@ -434,18 +434,14 @@ func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveDestination(destID string, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 
 	var oldDst *Destination
@@ -472,23 +468,24 @@ func (dm *DataManager) RemoveDestination(destID string, transactionID string) (e
 	}
 
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveDestination,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.DestinationPrefix, destID, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveDestination,
 			&utils.StringWithOpts{
 				Arg:    destID,
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) SetReverseDestination(destID string, prefixes []string, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.dataDB.SetReverseDestinationDrv(destID, prefixes, transactionID); err != nil {
 		return
@@ -526,8 +523,9 @@ func (dm *DataManager) GetReverseDestination(prefix string,
 					Arg:    prefix,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, &ids); err == nil {
 				err = dm.dataDB.SetReverseDestinationDrv(prefix, ids, transactionID)
@@ -614,8 +612,9 @@ func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {
 					Arg:    id,
 					Tenant: tenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, &acc); err == nil {
 				err = dm.dataDB.SetAccountDrv(acc)
@@ -631,40 +630,37 @@ func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {
 
 func (dm *DataManager) SetAccount(acc *Account) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.dataDB.SetAccountDrv(acc); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.AccountPrefix, acc.ID, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAccount,
 			&AccountWithOpts{
 				Account: acc,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveAccount(id string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.dataDB.RemoveAccountDrv(id); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.AccountPrefix, id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveAccount,
 			&utils.StringWithOpts{
 				Arg:    id,
@@ -672,7 +668,7 @@ func (dm *DataManager) RemoveAccount(id string) (err error) {
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -701,8 +697,9 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &sq); err == nil {
 				var ssq *StoredStatQueue
 				if dm.dataDB.GetStorageType() != utils.MetaInternal {
@@ -738,8 +735,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
 	minItems int, ttl *time.Duration, queueLength int, simpleSet bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if !simpleSet {
 		tnt := sq.Tenant // save the tenant
@@ -811,18 +807,16 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.StatQueuePrefix, sq.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueue,
 			&StoredStatQueueWithOpts{
 				StoredStatQueue: ssq,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -830,22 +824,22 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
 // RemoveStatQueue removes the StoredStatQueue
 func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.dataDB.RemStatQueueDrv(tenant, id); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.StatQueuePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveStatQueue,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -877,8 +871,9 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 					&utils.TenantIDWithOpts{
 						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 						Opts: map[string]interface{}{
-							utils.OptsAPIKey:  itm.APIKey,
-							utils.OptsRouteID: itm.RouteID,
+							utils.OptsAPIKey:    itm.APIKey,
+							utils.OptsRouteID:   itm.RouteID,
+							utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 						}}, &fltr); err == nil {
 					err = dm.dataDB.SetFilterDrv(fltr)
 				}
@@ -909,8 +904,7 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 
 func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	var oldFlt *Filter
 	if oldFlt, err = dm.GetFilter(fltr.Tenant, fltr.ID, true, false,
@@ -926,26 +920,23 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.FilterPrefix, fltr.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetFilter,
 			&FilterWithOpts{
 				Filter: fltr,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	var oldFlt *Filter
 	if oldFlt, err = dm.GetFilter(tenant, id, true, false,
@@ -974,15 +965,16 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex 
 		return utils.ErrNotFound
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.FilterPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveFilter,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -1009,8 +1001,9 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 				utils.ReplicatorSv1GetThreshold, &utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &th); err == nil {
 				err = dm.dataDB.SetThresholdDrv(th)
 			}
@@ -1037,8 +1030,7 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 
 func (dm *DataManager) SetThreshold(th *Threshold, snooze time.Duration, simpleSet bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if !simpleSet {
 		tnt := th.Tenant // save the tenant
@@ -1062,39 +1054,38 @@ func (dm *DataManager) SetThreshold(th *Threshold, snooze time.Duration, simpleS
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ThresholdPrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThreshold,
 			&ThresholdWithOpts{
 				Threshold: th,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().RemoveThresholdDrv(tenant, id); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveThreshold,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ThresholdPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveThreshold,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -1122,8 +1113,9 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &th); err == nil {
 				err = dm.dataDB.SetThresholdProfileDrv(th)
 			}
@@ -1151,8 +1143,7 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 
 func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		if brokenReference := dm.checkFilters(th.Tenant, th.FilterIDs); len(brokenReference) != 0 {
@@ -1179,19 +1170,16 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ThresholdProfilePrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThresholdProfile,
 			&ThresholdProfileWithOpts{
 				ThresholdProfile: th,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				},
-			}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -1199,8 +1187,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldTh, err := dm.GetThresholdProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -1222,14 +1209,16 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveThresholdProfile,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ThresholdProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveThresholdProfile,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -1257,8 +1246,9 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &sqp); err == nil {
 				err = dm.dataDB.SetStatQueueProfileDrv(sqp)
 			}
@@ -1286,8 +1276,7 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 
 func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		if brokenReference := dm.checkFilters(sqp.Tenant, sqp.FilterIDs); len(brokenReference) != 0 {
@@ -1314,18 +1303,16 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.StatQueueProfilePrefix, sqp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueueProfile,
 			&StatQueueProfileWithOpts{
 				StatQueueProfile: sqp,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -1333,8 +1320,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldSts, err := dm.GetStatQueueProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -1356,14 +1342,16 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveStatQueueProfile,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.StatQueueProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveStatQueueProfile,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -1390,8 +1378,9 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 					Arg:    id,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, &t); err == nil {
 				err = dm.dataDB.SetTimingDrv(t)
@@ -1418,8 +1407,7 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 
 func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().SetTimingDrv(t); err != nil {
 		return
@@ -1428,26 +1416,23 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTimings]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.TimingsPrefix, t.ID, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetTiming,
 			&utils.TPTimingWithOpts{
 				TPTiming: t,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().RemoveTimingDrv(id); err != nil {
 		return
@@ -1487,8 +1472,9 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &rs); err == nil {
 				err = dm.dataDB.SetResourceDrv(rs)
 			}
@@ -1516,8 +1502,7 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 
 func (dm *DataManager) SetResource(rs *Resource, ttl *time.Duration, usageLimit float64, simpleSet bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if !simpleSet {
 		// do stuff
@@ -1549,40 +1534,38 @@ func (dm *DataManager) SetResource(rs *Resource, ttl *time.Duration, usageLimit 
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ResourcesPrefix, rs.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetResource,
 			&ResourceWithOpts{
 				Resource: rs,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().RemoveResourceDrv(tenant, id); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ResourcesPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveResource,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -1609,8 +1592,9 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 				utils.ReplicatorSv1GetResourceProfile, &utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &rp); err == nil {
 				err = dm.dataDB.SetResourceProfileDrv(rp)
 			}
@@ -1638,8 +1622,7 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 
 func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		if brokenReference := dm.checkFilters(rp.Tenant, rp.FilterIDs); len(brokenReference) != 0 {
@@ -1667,26 +1650,23 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		Cache.Clear([]string{utils.CacheEventResources})
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ResourceProfilesPrefix, rp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetResourceProfile,
 			&ResourceProfileWithOpts{
 				ResourceProfile: rp,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldRes, err := dm.GetResourceProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -1708,14 +1688,16 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveResourceProfile, &utils.TenantIDWithOpts{
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ResourceProfilesPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveResourceProfile,
+			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -1742,8 +1724,9 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
 					Arg:    id,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, attrs); err == nil {
 				err = dm.dataDB.SetActionTriggersDrv(id, attrs)
@@ -1769,8 +1752,7 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
 
 func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().RemoveActionTriggersDrv(id); err != nil {
 		return
@@ -1780,8 +1762,9 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 		return errCh
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ActionTriggerPrefix, id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveActionTriggers,
 			&utils.StringWithOpts{
 				Arg:    id,
@@ -1789,7 +1772,7 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -1805,8 +1788,7 @@ type SetActionTriggersArgWithOpts struct {
 func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
 	transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().SetActionTriggersDrv(key, attr); err != nil {
 		return
@@ -1815,19 +1797,18 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1SetActionTriggers,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ActionTriggerPrefix, key, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1SetActionTriggers,
 			&SetActionTriggersArgWithOpts{
-				Attrs: attr, Key: key,
+				Attrs:  attr,
+				Key:    key,
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				},
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -1854,8 +1835,9 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 					Arg:    key,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, &sg); err == nil {
 				err = dm.dataDB.SetSharedGroupDrv(sg)
@@ -1882,8 +1864,7 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 	transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().SetSharedGroupDrv(sg); err != nil {
 		return
@@ -1893,8 +1874,9 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.SharedGroupPrefix, sg.Id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetSharedGroup,
 			&SharedGroupWithOpts{
 				SharedGroup: sg,
@@ -1902,18 +1884,14 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().RemoveSharedGroupDrv(id); err != nil {
 		return
@@ -1923,8 +1901,9 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 		return errCh
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.SharedGroupPrefix, id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveSharedGroup,
 			&utils.StringWithOpts{
 				Arg:    id,
@@ -1932,7 +1911,7 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -1961,8 +1940,9 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 					Arg:    key,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, &as); err == nil {
 				err = dm.dataDB.SetActionsDrv(key, as)
@@ -1996,47 +1976,47 @@ type SetActionsArgsWithOpts struct {
 
 func (dm *DataManager) SetActions(key string, as Actions, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().SetActionsDrv(key, as); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1SetActions,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ActionPrefix, key, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1SetActions,
 			&SetActionsArgsWithOpts{
-				Key: key, Acs: as,
+				Key:    key,
+				Acs:    as,
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().RemoveActionsDrv(key); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveActions, &utils.StringWithOpts{
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ActionPrefix, key, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveActions,
+			&utils.StringWithOpts{
 				Arg:    key,
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -2053,8 +2033,9 @@ func (dm *DataManager) GetActionPlan(key string, skipCache bool, transactionID s
 				Arg:    key,
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				Opts: map[string]interface{}{
-					utils.OptsAPIKey:  itm.APIKey,
-					utils.OptsRouteID: itm.RouteID,
+					utils.OptsAPIKey:    itm.APIKey,
+					utils.OptsRouteID:   itm.RouteID,
+					utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 				},
 			}, &ats); err == nil {
 			err = dm.dataDB.SetActionPlanDrv(key, ats, true, utils.NonTransactional)
@@ -2079,16 +2060,17 @@ type SetActionPlanArgWithOpts struct {
 func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 	overwrite bool, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.dataDB.SetActionPlanDrv(key, ats, overwrite, transactionID); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetActionPlan, &SetActionPlanArgWithOpts{
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ActionPlanPrefix, key, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1SetActionPlan,
+			&SetActionPlanArgWithOpts{
 				Key:       key,
 				Ats:       ats,
 				Overwrite: overwrite,
@@ -2096,10 +2078,7 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -2117,8 +2096,9 @@ func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err erro
 				Arg:    utils.EmptyString,
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				Opts: map[string]interface{}{
-					utils.OptsAPIKey:  itm.APIKey,
-					utils.OptsRouteID: itm.RouteID,
+					utils.OptsAPIKey:    itm.APIKey,
+					utils.OptsRouteID:   itm.RouteID,
+					utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 				},
 			}, &ats)
 	}
@@ -2131,15 +2111,15 @@ func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err erro
 
 func (dm *DataManager) RemoveActionPlan(key string, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.dataDB.RemoveActionPlanDrv(key, transactionID); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ActionPlanPrefix, key, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveActionPlan,
 			&utils.StringWithOpts{
 				Arg:    key,
@@ -2147,7 +2127,7 @@ func (dm *DataManager) RemoveActionPlan(key string, transactionID string) (err e
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -2165,8 +2145,9 @@ func (dm *DataManager) GetAccountActionPlans(acntID string,
 				Arg:    acntID,
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				Opts: map[string]interface{}{
-					utils.OptsAPIKey:  itm.APIKey,
-					utils.OptsRouteID: itm.RouteID,
+					utils.OptsAPIKey:    itm.APIKey,
+					utils.OptsRouteID:   itm.RouteID,
+					utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 				},
 			}, &apIDs); err == nil {
 			err = dm.dataDB.SetAccountActionPlansDrv(acntID, apIDs, true)
@@ -2190,16 +2171,17 @@ type SetAccountActionPlansArgWithOpts struct {
 
 func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.dataDB.SetAccountActionPlansDrv(acntID, aPlIDs, overwrite); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetAccountActionPlans, &SetAccountActionPlansArgWithOpts{
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.AccountActionPlansPrefix, acntID, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1SetAccountActionPlans,
+			&SetAccountActionPlansArgWithOpts{
 				AcntID:    acntID,
 				AplIDs:    aPlIDs,
 				Overwrite: overwrite,
@@ -2207,10 +2189,7 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -2225,23 +2204,24 @@ type RemAccountActionPlansArgsWithOpts struct {
 
 func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.dataDB.RemAccountActionPlansDrv(acntID, apIDs); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.AccountActionPlansPrefix, acntID, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemAccountActionPlans,
 			&RemAccountActionPlansArgsWithOpts{
-				AcntID: acntID, ApIDs: apIDs,
+				AcntID: acntID,
+				ApIDs:  apIDs,
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -2269,8 +2249,9 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
 					Arg:    key,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, &rp); err == nil {
 				err = dm.dataDB.SetRatingPlanDrv(rp)
@@ -2296,8 +2277,7 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
 
 func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().SetRatingPlanDrv(rp); err != nil {
 		return
@@ -2306,8 +2286,9 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RatingPlanPrefix, rp.Id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRatingPlan,
 			&RatingPlanWithOpts{
 				RatingPlan: rp,
@@ -2315,18 +2296,14 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().RemoveRatingPlanDrv(key); err != nil {
 		return
@@ -2336,8 +2313,9 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 		return errCh
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RatingPlanPrefix, key, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveRatingPlan,
 			&utils.StringWithOpts{
 				Arg:    key,
@@ -2345,7 +2323,7 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -2376,8 +2354,9 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 					Arg:    key,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, &rpf); err == nil {
 				err = dm.dataDB.SetRatingProfileDrv(rpf)
@@ -2404,15 +2383,15 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 	transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().SetRatingProfileDrv(rpf); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RatingProfilePrefix, rpf.Id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRatingProfile,
 			&RatingProfileWithOpts{
 				RatingProfile: rpf,
@@ -2420,10 +2399,7 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -2431,15 +2407,15 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 func (dm *DataManager) RemoveRatingProfile(key string,
 	transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().RemoveRatingProfileDrv(key); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RatingProfilePrefix, key, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveRatingProfile,
 			&utils.StringWithOpts{
 				Arg:    key,
@@ -2447,7 +2423,7 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -2482,8 +2458,9 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &rpp); err == nil {
 				err = dm.dataDB.SetRouteProfileDrv(rpp)
 			}
@@ -2515,8 +2492,7 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 
 func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		if brokenReference := dm.checkFilters(rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
@@ -2543,26 +2519,23 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RouteProfilePrefix, rpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRouteProfile,
 			&RouteProfileWithOpts{
 				RouteProfile: rpp,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveRouteProfile(tenant, id, transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldRpp, err := dm.GetRouteProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -2584,15 +2557,16 @@ func (dm *DataManager) RemoveRouteProfile(tenant, id, transactionID string, with
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RouteProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveRouteProfile,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -2623,8 +2597,9 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 					&utils.TenantIDWithOpts{
 						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 						Opts: map[string]interface{}{
-							utils.OptsAPIKey:  itm.APIKey,
-							utils.OptsRouteID: itm.RouteID,
+							utils.OptsAPIKey:    itm.APIKey,
+							utils.OptsRouteID:   itm.RouteID,
+							utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 						}}, &attrPrfl); err == nil {
 					err = dm.dataDB.SetAttributeProfileDrv(attrPrfl)
 				}
@@ -2656,8 +2631,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 
 func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		if brokenReference := dm.checkFilters(ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
@@ -2686,26 +2660,23 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.AttributeProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAttributeProfile,
 			&AttributeProfileWithOpts{
 				AttributeProfile: ap,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldAttr, err := dm.GetAttributeProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil {
@@ -2729,15 +2700,16 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.AttributeProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveAttributeProfile,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -2765,8 +2737,9 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &cpp); err == nil {
 				err = dm.dataDB.SetChargerProfileDrv(cpp)
 			}
@@ -2794,8 +2767,7 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 
 func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		if brokenReference := dm.checkFilters(cpp.Tenant, cpp.FilterIDs); len(brokenReference) != 0 {
@@ -2822,18 +2794,16 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ChargerProfilePrefix, cpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetChargerProfile,
 			&ChargerProfileWithOpts{
 				ChargerProfile: cpp,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -2841,8 +2811,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldCpp, err := dm.GetChargerProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -2864,15 +2833,16 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ChargerProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveChargerProfile,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -2900,8 +2870,9 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &dpp); err == nil {
 				err = dm.dataDB.SetDispatcherProfileDrv(dpp)
 			}
@@ -2929,8 +2900,7 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 
 func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		if brokenReference := dm.checkFilters(dpp.Tenant, dpp.FilterIDs); len(brokenReference) != 0 {
@@ -2959,18 +2929,16 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.DispatcherProfilePrefix, dpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetDispatcherProfile,
 			&DispatcherProfileWithOpts{
 				DispatcherProfile: dpp,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -2978,8 +2946,7 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldDpp, err := dm.GetDispatcherProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -3003,15 +2970,16 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.DispatcherProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveDispatcherProfile,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -3039,8 +3007,9 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &dH); err == nil {
 				err = dm.dataDB.SetDispatcherHostDrv(dH)
 			}
@@ -3068,25 +3037,22 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 
 func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().SetDispatcherHostDrv(dpp); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.DispatcherHostPrefix, dpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetDispatcherHost,
 			&DispatcherHostWithOpts{
 				DispatcherHost: dpp,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -3094,8 +3060,7 @@ func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 	transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldDpp, err := dm.GetDispatcherHost(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -3108,15 +3073,16 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 		return utils.ErrNotFound
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.DispatcherHostPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveDispatcherHost,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -3135,8 +3101,9 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 					Arg:    itemIDPrefix,
 					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, &loadIDs); err == nil {
 				err = dm.dataDB.SetLoadIDsDrv(loadIDs)
@@ -3167,17 +3134,22 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 	return
 }
 
+// SetLoadIDs sets the loadIDs in the DB
 func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().SetLoadIDsDrv(loadIDs); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaLoadIDs]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		objIDs := make([]string, 0, len(loadIDs))
+		for k := range loadIDs {
+			objIDs = append(objIDs, k)
+		}
+		err = replicateMultipleIDs(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.LoadIDPrefix, objIDs, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetLoadIDs,
 			&utils.LoadIDsWithOpts{
 				LoadIDs: loadIDs,
@@ -3185,10 +3157,7 @@ func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -3216,8 +3185,9 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &rpp); err == nil {
 				rpp.Sort()
 				err = dm.dataDB.SetRateProfileDrv(rpp)
@@ -3249,8 +3219,7 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 
 func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		if brokenReference := dm.checkFilters(rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
@@ -3305,18 +3274,16 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RateProfilePrefix, rpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
 			&RateProfileWithOpts{
 				RateProfile: rpp,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -3324,8 +3291,7 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 func (dm *DataManager) RemoveRateProfile(tenant, id string,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldRpp, err := dm.GetRateProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -3350,23 +3316,23 @@ func (dm *DataManager) RemoveRateProfile(tenant, id string,
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RateProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveRateProfile,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldRpp, err := dm.GetRateProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil {
@@ -3402,26 +3368,23 @@ func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []strin
 	}
 
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RateProfilePrefix, oldRpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
 			&RateProfileWithOpts{
 				RateProfile: oldRpp,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		for _, rate := range rpp.Rates {
@@ -3457,18 +3420,16 @@ func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (er
 	}
 
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RateProfilePrefix, oldRpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
 			&RateProfileWithOpts{
 				RateProfile: oldRpp,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -3496,8 +3457,9 @@ func (dm *DataManager) GetActionProfile(tenant, id string, cacheRead, cacheWrite
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &ap); err == nil {
 				err = dm.dataDB.SetActionProfileDrv(ap)
 			}
@@ -3525,8 +3487,7 @@ func (dm *DataManager) GetActionProfile(tenant, id string, cacheRead, cacheWrite
 
 func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		if brokenReference := dm.checkFilters(ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
@@ -3553,18 +3514,16 @@ func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err 
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ActionProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetActionProfile,
 			&ActionProfileWithOpts{
 				ActionProfile: ap,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -3572,8 +3531,7 @@ func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err 
 func (dm *DataManager) RemoveActionProfile(tenant, id string,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldRpp, err := dm.GetActionProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
@@ -3592,15 +3550,16 @@ func (dm *DataManager) RemoveActionProfile(tenant, id string,
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ActionProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveActionProfile,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }
@@ -3645,8 +3604,9 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 					IdxKey:     idxKey,
 					Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					},
 				}, &indexes); err == nil {
 				err = dm.dataDB.SetIndexesDrv(idxItmType, tntCtx, indexes, true, utils.NonTransactional)
@@ -3680,16 +3640,16 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().SetIndexesDrv(idxItmType, tntCtx,
 		indexes, commit, transactionID); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.CacheInstanceToPrefix[idxItmType], tntCtx, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetIndexes,
 			&utils.SetIndexesArg{
 				IdxItmType: idxItmType,
@@ -3699,25 +3659,22 @@ func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				},
-			}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-		}
+				}})
 	}
 	return
 }
 
 func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.CacheInstanceToPrefix[idxItmType], tntCtx, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveIndexes,
 			&utils.GetIndexesArg{
 				IdxItmType: idxItmType,
@@ -3727,10 +3684,7 @@ func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err err
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				},
-			}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-		}
+				}})
 	}
 	return
 }
@@ -3796,8 +3750,9 @@ func (dm *DataManager) checkFilters(tenant string, ids []string) (brokenReferenc
 					&utils.TenantIDWithOpts{
 						TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 						Opts: map[string]interface{}{
-							utils.OptsAPIKey:  itm.APIKey,
-							utils.OptsRouteID: itm.RouteID,
+							utils.OptsAPIKey:    itm.APIKey,
+							utils.OptsRouteID:   itm.RouteID,
+							utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 						}}, &fltr)
 				has = fltr == nil
 			}
@@ -3823,8 +3778,9 @@ func (dm *DataManager) GetAccountProfile(tenant, id string) (ap *utils.AccountPr
 				&utils.TenantIDWithOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					Opts: map[string]interface{}{
-						utils.OptsAPIKey:  itm.APIKey,
-						utils.OptsRouteID: itm.RouteID,
+						utils.OptsAPIKey:    itm.APIKey,
+						utils.OptsRouteID:   itm.RouteID,
+						utils.RemoteHostOpt: utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID, config.CgrConfig().GeneralCfg().NodeID),
 					}}, &ap); err == nil {
 				err = dm.dataDB.SetAccountProfileDrv(ap)
 			}
@@ -3838,8 +3794,7 @@ func (dm *DataManager) GetAccountProfile(tenant, id string) (ap *utils.AccountPr
 
 func (dm *DataManager) SetAccountProfile(ap *utils.AccountProfile, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		if brokenReference := dm.checkFilters(ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
@@ -3866,18 +3821,16 @@ func (dm *DataManager) SetAccountProfile(ap *utils.AccountProfile, withIndex boo
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountProfiles]; itm.Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.AccountProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAccountProfile,
 			&utils.AccountProfileWithOpts{
 				AccountProfile: ap,
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+				}})
 	}
 	return
 }
@@ -3885,8 +3838,7 @@ func (dm *DataManager) SetAccountProfile(ap *utils.AccountProfile, withIndex boo
 func (dm *DataManager) RemoveAccountProfile(tenant, id string,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
+		return utils.ErrNoDatabaseConn
 	}
 	oldRpp, err := dm.GetAccountProfile(tenant, id)
 	if err != nil && err != utils.ErrNotFound {
@@ -3905,15 +3857,16 @@ func (dm *DataManager) RemoveAccountProfile(tenant, id string,
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountProfiles]; itm.Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.AccountProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveAccountProfile,
 			&utils.TenantIDWithOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				Opts: map[string]interface{}{
 					utils.OptsAPIKey:  itm.APIKey,
 					utils.OptsRouteID: itm.RouteID,
-				}}, &reply)
+				}})
 	}
 	return
 }

@@ -45,7 +45,7 @@ var (
 	extraDBPartition = NewStringSet([]string{CacheDispatchers,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan,
-		CacheCapsEvents, CacheVersions})
+		CacheCapsEvents, CacheVersions, CacheReplicationHosts})
 
 	dataDBPartition = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
 		CacheRatingProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
@@ -1974,6 +1974,7 @@ const (
 	CacheAccounts                     = "*accounts"
 	CacheVersions                     = "*versions"
 	CacheCapsEvents                   = "*caps_events"
+	CacheReplicationHosts             = "*replication_hosts"
 
 	// storDB
 	CacheTBLTPTimings          = "*tp_timings"
@@ -2112,6 +2113,8 @@ const (
 	RedisClientCertificate     = "redis_client_certificate"
 	RedisClientKey             = "redis_client_key"
 	RedisCACertificate         = "redis_ca_certificate"
+	FilteredReplicationCfg     = "filtered_replication"
+	RemoteConnIDCfg            = "remote_conn_id"
 )
 
 // ItemOpt
@@ -2605,6 +2608,8 @@ const (
 	MetaEventType             = "*eventType"
 	EventType                 = "EventType"
 	SchedulerInit             = "SchedulerInit"
+
+	RemoteHostOpt = "*rmtHost"
 )
 
 // Event Flags

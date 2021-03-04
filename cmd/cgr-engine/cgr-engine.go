@@ -630,7 +630,7 @@ func main() {
 	initGuardianSv1(internalGuardianSChan, server, anz)
 
 	// Start ServiceManager
-	srvManager := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvManager := servmanager.NewServiceManager(cfg, shdChan, shdWg, connManager)
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, anz, srvDep)
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager, anz, srvDep)
 	dspH := services.NewRegistrarCService(cfg, server, connManager, anz, srvDep)

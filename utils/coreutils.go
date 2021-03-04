@@ -928,8 +928,10 @@ type StringWithOpts struct {
 }
 
 func CastRPCErr(err error) error {
-	if _, has := ErrMap[err.Error()]; has {
-		return ErrMap[err.Error()]
+	if err != nil {
+		if _, has := ErrMap[err.Error()]; has {
+			return ErrMap[err.Error()]
+		}
 	}
 	return err
 }

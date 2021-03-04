@@ -50,7 +50,7 @@ func TestDataDBReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
