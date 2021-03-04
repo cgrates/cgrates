@@ -164,8 +164,8 @@ func (dbcfg *StorDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.DataDbPassCfg:          dbcfg.Password,
 		utils.StringIndexedFieldsCfg: dbcfg.StringIndexedFields,
 		utils.PrefixIndexedFieldsCfg: dbcfg.PrefixIndexedFields,
-		utils.RmtConnsCfg:            dbcfg.RmtConns,
-		utils.RplConnsCfg:            dbcfg.RplConns,
+		utils.RemoteConnsCfg:         dbcfg.RmtConns,
+		utils.ReplicationConnsCfg:    dbcfg.RplConns,
 	}
 	opts := make(map[string]interface{})
 	for k, v := range dbcfg.Opts {

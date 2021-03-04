@@ -325,6 +325,9 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.MetaAPIBan: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer("2m"), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
+			utils.CacheReplicationHosts: {Limit: utils.IntPointer(0),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
 		},
 		Replication_conns: &[]string{},
 	}
@@ -362,14 +365,16 @@ func TestDfListenJsonCfg(t *testing.T) {
 
 func TestDfDataDbJsonCfg(t *testing.T) {
 	eCfg := &DbJsonCfg{
-		Db_type:           utils.StringPointer("*redis"),
-		Db_host:           utils.StringPointer("127.0.0.1"),
-		Db_port:           utils.IntPointer(6379),
-		Db_name:           utils.StringPointer("10"),
-		Db_user:           utils.StringPointer("cgrates"),
-		Db_password:       utils.StringPointer(""),
-		Replication_conns: &[]string{},
-		Remote_conns:      &[]string{},
+		Db_type:              utils.StringPointer("*redis"),
+		Db_host:              utils.StringPointer("127.0.0.1"),
+		Db_port:              utils.IntPointer(6379),
+		Db_name:              utils.StringPointer("10"),
+		Db_user:              utils.StringPointer("cgrates"),
+		Db_password:          utils.StringPointer(""),
+		Replication_conns:    &[]string{},
+		Remote_conns:         &[]string{},
+		Filtered_replication: utils.BoolPointer(false),
+		Remote_conn_id:       utils.StringPointer(""),
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg:       "",
 			utils.QueryTimeoutCfg:            "10s",
