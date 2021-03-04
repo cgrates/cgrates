@@ -438,3 +438,38 @@ func TestAPSort(t *testing.T) {
 		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", ToJSON(apS), ToJSON(expected))
 	}
 }
+
+func TestAPAccountProfiles(t *testing.T) {
+
+	apS := AccountProfilesWithWeight{
+		{
+			AccountProfile: &AccountProfile{
+				Tenant:    "testTenant",
+				ID:        "testID",
+				FilterIDs: []string{"testFID1", "testFID2"},
+				ActivationInterval: &ActivationInterval{
+					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
+					ExpiryTime:     time.Date(2020, time.April, 12, 10, 0, 0, 0, time.UTC),
+				},
+				Weights: nil,
+				Balances: map[string]*Balance{
+					"testBalance": &Balance{
+						ID:    "testBalance",
+						Type:  MetaAbstract,
+						Units: &Decimal{decimal.New(0, 0)},
+					},
+				},
+			},
+			Weight: 15,
+			LockID: "testString",
+		},
+	}
+	expected := []*AccountProfile{
+		apS[0].AccountProfile,
+	}
+	received := apS.AccountProfiles()
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>,\nExpected: <%+v>", ToJSON(received), ToJSON(expected))
+	}
+}
