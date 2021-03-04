@@ -148,5 +148,4 @@ func TestRegistrarcShutdown(t *testing.T) {
 	cfg.RegistrarCCfg().RPC.Enabled = true
 	regStSrv := NewRegistrarCService(cfg, nil)
 	regStSrv.Shutdown()
-
 }
