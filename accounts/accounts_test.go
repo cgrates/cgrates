@@ -41,6 +41,21 @@ func TestRPCCall(t *testing.T) {
 	}
 }
 
+func TestListenAndServe(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	stopChan := make(chan struct{}, 1)
+	cfgRld := make(chan struct{}, 1)
+	cfgRld <- struct{}{}
+	go func() {
+		time.Sleep(10)
+		stopChan <- struct{}{}
+	}()
+	accnts.ListenAndServe(stopChan, cfgRld)
+}
+
 type dataDBMockErrorNotFound struct {
 	*engine.DataDBMock
 }
