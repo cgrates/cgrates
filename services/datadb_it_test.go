@@ -432,73 +432,127 @@ func TestDataDBReload5(t *testing.T) {
 
 func TestDataDBReload6(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-
+	cfg.GeneralCfg().DBDataEncoding = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
-
 	shdChan := utils.NewSyncedChan()
-	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
-	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	srvMngr.AddServices(NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep),
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	var reply string
-	cfg.AttributeSCfg().Enabled = true
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.DATADB_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !db.IsRunning() {
-		t.Errorf("Expected service to be running")
+	db.oldDBCfg = &config.DataDbCfg{
+		DataDbType: utils.Mongo,
+		DataDbHost: "127.0.0.1",
+		DataDbPort: "27017",
+		DataDbName: "10",
+		DataDbUser: "cgrates",
+		Opts: map[string]interface{}{
+			utils.QueryTimeoutCfg:            "10s",
+			utils.RedisClusterOnDownDelayCfg: "0",
+			utils.RedisClusterSyncCfg:        "5s",
+			utils.RedisClusterCfg:            false,
+			utils.RedisSentinelNameCfg:       "",
+			utils.RedisTLS:                   false,
+			utils.RedisClientCertificate:     "",
+			utils.RedisClientKey:             "",
+			utils.RedisCACertificate:         "",
+		},
+		RmtConns: []string{},
+		RplConns: []string{},
+		Items: map[string]*config.ItemOpt{
+			utils.MetaAccounts: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaReverseDestinations: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaDestinations: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaRatingPlans: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaRatingProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaActions: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaActionPlans: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaAccountActionPlans: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaActionTriggers: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaSharedGroups: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaTimings: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaResourceProfile: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaStatQueues: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaResources: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaStatQueueProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaThresholds: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaThresholdProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaFilters: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaRouteProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaAttributeProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaDispatcherHosts: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaChargerProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaDispatcherProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaLoadIDs: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaIndexes: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaRateProfiles: {
+				Replicate: false,
+				Remote:    false},
+			utils.MetaActionProfiles: {
+				Replicate: false,
+				Remote:    false},
+		},
 	}
 
 	err := db.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+	if err == nil || err.Error() != "Unsupported marshaler: " {
+		t.Fatal(err)
 	}
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.DATADB_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond)
-	err = db.Reload()
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	db.cfg.DataDbCfg().DataDbType = utils.Mongo
-	db.cfg.DataDbCfg().Opts = map[string]interface{}{
-		utils.QueryTimeoutCfg: false,
-	}
-	err = db.Reload()
-	if err == nil {
-		t.Errorf("\nExpecting <cannot convert field: false to time.Duration>,\n Received <%+v>", err)
-	}
-
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
@@ -520,7 +574,6 @@ func TestDataDBReloadVersion(t *testing.T) {
 		dbConn.Flush("")
 		dbConn.Close()
 	}()
-
 	err = dbConn.SetVersions(engine.Versions{
 		utils.StatS:          4,
 		utils.Accounts:       3,
@@ -729,6 +782,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 	if err == nil || err.Error() != "can't conver DataDB of type mongo to MongoStorage" {
 		t.Fatal(err)
 	}
+
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
 }
