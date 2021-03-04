@@ -84,7 +84,7 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 func TestKamAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"kamailio_agent": {
-			"sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
+			"sessions_conns": ["*birpc_internal", "*conn1","*conn2", "*internal"],
 			"create_cdr": true,
 			"timezone": "UTC",
 			"evapi_conns":[
@@ -94,7 +94,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 	}`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:       false,
-		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
+		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2", utils.MetaInternal},
 		utils.CreateCdrCfg:     true,
 		utils.TimezoneCfg:      "UTC",
 		utils.EvapiConnsCfg: []map[string]interface{}{
@@ -104,7 +104,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.kamAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 

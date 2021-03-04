@@ -108,6 +108,7 @@ func TestActionSCfgClone(t *testing.T) {
 		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+		AccountSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
 		Tenants:             &[]string{"itsyscom.com"},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{"*req.index1"},
@@ -119,28 +120,31 @@ func TestActionSCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if (*rcv.Tenants)[0] = ""; (*ban.Tenants)[0] != "itsyscom.com" {
+	if (*rcv.Tenants)[0] = utils.EmptyString; (*ban.Tenants)[0] != "itsyscom.com" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
+	if (*rcv.StringIndexedFields)[0] = utils.EmptyString; (*ban.StringIndexedFields)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (*rcv.PrefixIndexedFields)[0] = ""; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
+	if (*rcv.PrefixIndexedFields)[0] = utils.EmptyString; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
+	if (*rcv.SuffixIndexedFields)[0] = utils.EmptyString; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.EEsConns[0] = ""; ban.EEsConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
+	if rcv.EEsConns[0] = utils.EmptyString; ban.EEsConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.CDRsConns[0] = ""; ban.CDRsConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
+	if rcv.CDRsConns[0] = utils.EmptyString; ban.CDRsConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ThresholdSConns[0] = ""; ban.ThresholdSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
+	if rcv.ThresholdSConns[0] = utils.EmptyString; ban.ThresholdSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.StatSConns[0] = ""; ban.StatSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
+	if rcv.StatSConns[0] = utils.EmptyString; ban.StatSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.AccountSConns[0] = utils.EmptyString; ban.AccountSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

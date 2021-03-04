@@ -139,22 +139,22 @@ func TestAccountSCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if (rcv.AttributeSConns)[0] = ""; (ban.AttributeSConns)[0] != "*req.index1" {
+	if (rcv.AttributeSConns)[0] = utils.EmptyString; (ban.AttributeSConns)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (rcv.RateSConns)[0] = ""; (ban.RateSConns)[0] != "*req.index1" {
+	if (rcv.RateSConns)[0] = utils.EmptyString; (ban.RateSConns)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (rcv.ThresholdSConns)[0] = ""; (ban.ThresholdSConns)[0] != "*req.index1" {
+	if (rcv.ThresholdSConns)[0] = utils.EmptyString; (ban.ThresholdSConns)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {
+	if (*rcv.StringIndexedFields)[0] = utils.EmptyString; (*ban.StringIndexedFields)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (*rcv.PrefixIndexedFields)[0] = ""; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
+	if (*rcv.PrefixIndexedFields)[0] = utils.EmptyString; (*ban.PrefixIndexedFields)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
+	if (*rcv.SuffixIndexedFields)[0] = utils.EmptyString; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

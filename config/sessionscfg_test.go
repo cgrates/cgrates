@@ -292,6 +292,39 @@ func TestSessionSCfgloadFromJsonCfgCase11(t *testing.T) {
 	}
 }
 
+func TestSessionSCfgloadFromJsonCfgCase12(t *testing.T) {
+	cfgJSON := &SessionSJsonCfg{
+		Default_usage: &map[string]string{
+			utils.MetaAny:   "1ss",
+			utils.MetaVoice: "1ss",
+			utils.MetaData:  "1ss",
+			utils.MetaSMS:   "1ss",
+		},
+	}
+	expected := "time: unknown unit \"ss\" in duration \"1ss\""
+	jsonCfg := NewDefaultCGRConfig()
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestGetDefaultUsage(t *testing.T) {
+	session := &SessionSCfg{
+		DefaultUsage: map[string]time.Duration{
+			"test":        time.Hour,
+			utils.MetaAny: time.Second,
+		},
+	}
+	expected := time.Hour
+	if rcv := session.GetDefaultUsage("test"); !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+	expected = time.Second
+	if rcv := session.GetDefaultUsage(utils.EmptyString); !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+}
+
 func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 	"sessions": {
@@ -590,11 +623,12 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 	"freeswitch_agent": {
           "extra_fields": ["randomFields"],		
           "max_wait_connection": "0",
+		  "sessions_conns": ["*internal"]
     }
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             false,
-		utils.SessionSConnsCfg:       []string{rpcclient.BiRPCInternal},
+		utils.SessionSConnsCfg:       []string{utils.MetaInternal},
 		utils.SubscribeParkCfg:       true,
 		utils.CreateCdrCfg:           false,
 		utils.ExtraFieldsCfg:         "randomFields",
@@ -708,11 +742,13 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 
 func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-	"asterisk_agent": {},
+	"asterisk_agent": {
+		"sessions_conns": ["*internal"],
+	},
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:       false,
-		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal},
+		utils.SessionSConnsCfg: []string{utils.MetaInternal},
 		utils.CreateCdrCfg:     false,
 		utils.AsteriskConnsCfg: []map[string]interface{}{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5},
