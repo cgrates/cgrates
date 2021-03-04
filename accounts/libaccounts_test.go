@@ -199,7 +199,6 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	}
 }
 
-/*
 func TestDebitUsageFromConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -224,7 +223,11 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 		},
 		fltrS: filterS,
 	}
-	if err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
+	expectedEvCh := &utils.EventCharges{
+		Concretes: utils.NewDecimal(710, 0),
+	}
+
+	if evCh, err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
 		FixedFee:     utils.NewDecimal(10, 0),
 		Increment:    utils.NewDecimal(1, 0),
 		RecurrentFee: utils.NewDecimal(1, 0),
@@ -234,11 +237,12 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
 	} else if cb2.blnCfg.Units.Cmp(decimal.New(290, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
+	} else if !reflect.DeepEqual(expectedEvCh, evCh) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCh), utils.ToJSON(evCh))
 	}
 
 }
-*/
-/*
+
 func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -286,7 +290,12 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 		fltrS:   filterS,
 		connMgr: connMgr,
 	}
-	if err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
+
+	expectedEvCh := &utils.EventCharges{
+		Concretes: utils.NewDecimal(100, 0),
+	}
+
+	if evCh, err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
 		Increment:    utils.NewDecimal(1, 0),
 		RecurrentFee: utils.NewDecimal(-1, 0),
 	}, new(utils.CGREvent), connMgr, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}, nil); err != nil {
@@ -295,11 +304,11 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
 	} else if cb2.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
+	} else if !reflect.DeepEqual(expectedEvCh, evCh) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCh), utils.ToJSON(evCh))
 	}
-
 }
-*/
-/*
+
 func TestDebitUsageFromConcretesRestore(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -325,7 +334,8 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 		},
 		fltrS: filterS,
 	}
-	if err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(200, 0), &utils.CostIncrement{
+
+	if _, err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(200, 0), &utils.CostIncrement{
 		Increment:    utils.NewDecimal(1, 0),
 		RecurrentFee: utils.NewDecimal(1, 0),
 	}, new(utils.CGREvent), nil, nil, nil); err == nil || err.Error() != "inline parse error for string: <*string>" {
@@ -336,8 +346,7 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 }
-*/
-/*
+
 func TestMaxDebitUsageFromConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -375,7 +384,6 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 }
-*/
 
 func TestRestoreAccount(t *testing.T) { //coverage purpose
 	engine.Cache.Clear(nil)

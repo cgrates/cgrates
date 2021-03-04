@@ -179,9 +179,11 @@ func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
 			}
 			return
 		}
-		used := ecDbt.Abstracts.Big
+		var used *decimal.Big
 		if concretes {
 			used = ecDbt.Concretes.Big
+		} else {
+			used = ecDbt.Abstracts.Big
 		}
 		usage = utils.SubstractBig(usage, used)
 		ec.Merge(ecDbt)
@@ -233,9 +235,11 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 				return
 			}
 		}
-		used := ecDbt.Abstracts.Big
+		var used *decimal.Big
 		if concretes {
 			used = ecDbt.Concretes.Big
+		} else {
+			used = ecDbt.Abstracts.Big
 		}
 		usage = utils.SubstractBig(usage, used)
 		ec.Merge(ecDbt)
@@ -357,7 +361,7 @@ func (aS *AccountS) V1DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *util
 	return
 }
 
-// V1ActionSetBalance performs a update for a specific balance in account
+// V1ActionSetBalance performs an update for a specific balance in account
 func (aS *AccountS) V1ActionSetBalance(args *utils.ArgsActSetBalance, rply *string) (err error) {
 	if args.AccountID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AccountID)
@@ -380,7 +384,7 @@ func (aS *AccountS) V1ActionSetBalance(args *utils.ArgsActSetBalance, rply *stri
 	return
 }
 
-// V1RemoveBalance removes a blance for a specific account
+// V1RemoveBalance removes a balance for a specific account
 func (aS *AccountS) V1ActionRemoveBalance(args *utils.ArgsActRemoveBalances, rply *string) (err error) {
 	if args.AccountID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AccountID)

@@ -25,6 +25,7 @@ import (
 	"net/rpc"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -223,5 +224,344 @@ func testPartITAnalyseCDRs(t *testing.T) {
 func testPartITKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestNewPartialCSVFileER(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	result, err := NewPartialCSVFileER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     result.(*PartialCSVFileER).cache,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   result.(*PartialCSVFileER).conReqs,
+	}
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestNewPartialCSVFileERCase2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].SourcePath = "/"
+	fltr := &engine.FilterS{}
+	result, err := NewPartialCSVFileER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     result.(*PartialCSVFileER).cache,
+		rdrDir:    "",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   result.(*PartialCSVFileER).conReqs,
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestNewPartialCSVFileERCase3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].PartialCacheExpiryAction = utils.MetaDumpToFile
+	fltr := &engine.FilterS{}
+	result, err := NewPartialCSVFileER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     result.(*PartialCSVFileER).cache,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   result.(*PartialCSVFileER).conReqs,
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestPartialCSVConfig(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         0,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Fields:           nil,
+			CacheDumpFields:  nil,
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   nil,
+	}
+	expected := &config.EventReaderCfg{
+		ID:               utils.MetaDefault,
+		Type:             utils.MetaNone,
+		RowLength:        0,
+		FieldSep:         ",",
+		HeaderDefineChar: ":",
+		RunDelay:         0,
+		ConcurrentReqs:   1024,
+		SourcePath:       "/var/spool/cgrates/ers/in",
+		ProcessedPath:    "/var/spool/cgrates/ers/out",
+		XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+		Tenant:           nil,
+		Timezone:         utils.EmptyString,
+		Filters:          []string{},
+		Flags:            utils.FlagsWithParams{},
+		Fields:           nil,
+		CacheDumpFields:  nil,
+		Opts:             make(map[string]interface{}),
+	}
+	result := testStruct.Config()
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestPartialCSVServe1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         0,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Fields:           nil,
+			CacheDumpFields:  nil,
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   nil,
+	}
+	result := testStruct.Serve()
+	if result != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	}
+}
+func TestPartialCSVServe2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         -1,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Fields:           nil,
+			CacheDumpFields:  nil,
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   nil,
+	}
+
+	err := testStruct.Serve()
+	if err == nil || err.Error() != "no such file or directory" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "no such file or directory", err)
+	}
+}
+func TestPartialCSVServe3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         1,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Fields:           nil,
+			CacheDumpFields:  nil,
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   nil,
+	}
+
+	err := testStruct.Serve()
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
+
+func TestPartialCSVServe4(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         1,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Fields:           nil,
+			CacheDumpFields:  nil,
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   make(chan struct{}, 1),
+		conReqs:   nil,
+	}
+	testStruct.rdrExit <- struct{}{}
+	err := testStruct.Serve()
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
+
+func TestPartialCSVProcessFile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   make(chan struct{}, 1),
+		conReqs:   nil,
+	}
+	err := testStruct.processFile("", "")
+	if err == nil || err.Error() != "open : no such file or directory" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "open : no such file or directory", err)
+	}
+}
+
+func TestPartialCSVProcessFile2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	testStruct := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		cache:     nil,
+		rdrDir:    "/var/spool/cgrates/ers/in",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   make(chan struct{}, 1),
+		conReqs:   make(chan struct{}, 1),
+	}
+	testStruct.conReqs <- struct{}{}
+	err := testStruct.processFile("", "")
+	if err == nil || err.Error() != "open : no such file or directory" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "open : no such file or directory", err)
 	}
 }

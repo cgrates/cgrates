@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// actSetAccount updates the balances base on the diktas
+// actSetAccount updates the balances base on the diktat
 func actSetAccount(dm *engine.DataManager, tnt, acntID string, diktats []*utils.BalDiktat, reset bool) (err error) {
 	var qAcnt *utils.AccountProfile
 	if qAcnt, err = dm.GetAccountProfile(tnt, acntID); err != nil {

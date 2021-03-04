@@ -236,8 +236,8 @@ func testAccountSv1MaxAbstracts(t *testing.T) {
 				utils.Usage:        "15m",
 			}}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != 800000000000.0 { // 500s from first monetary + 300s from last monetary
-		t.Errorf("received usage: %v", *eEc.Usage)
+	} else if eEc.Abstracts == nil || *eEc.Abstracts != 800000000000.0 { // 500s from first monetary + 300s from last monetary
+		t.Errorf("received usage: %v", *eEc.Abstracts)
 	}
 
 	// Make sure we did not Debit anything from Account
@@ -343,8 +343,8 @@ func testAccountSv1DebitAbstracts(t *testing.T) {
 				utils.Usage:        "15m",
 			}}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != 800000000000.0 { // 500s from first monetary + 300s from last monetary
-		t.Fatalf("received usage: %v", *eEc.Usage)
+	} else if eEc.Abstracts == nil || *eEc.Abstracts != 800000000000.0 { // 500s from first monetary + 300s from last monetary
+		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
 	// Make sure we did not Debit anything from Account
@@ -497,8 +497,8 @@ func testAccountSv1SimpleDebit(t *testing.T) {
 				utils.Usage:        "10",
 			}}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != 10.0 {
-		t.Fatalf("received usage: %v", *eEc.Usage)
+	} else if eEc.Abstracts == nil || *eEc.Abstracts != 10.0 {
+		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
@@ -601,8 +601,8 @@ func testAccountSv1DebitMultipleAcc(t *testing.T) {
 				utils.Usage:        "1400",
 			}}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != 1400.0 {
-		t.Fatalf("received usage: %v", *eEc.Usage)
+	} else if eEc.Abstracts == nil || *eEc.Abstracts != 1400.0 {
+		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
@@ -715,8 +715,8 @@ func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
 				utils.Usage:        "900",
 			}}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != 900.0 {
-		t.Fatalf("received usage: %v", *eEc.Usage)
+	} else if eEc.Abstracts == nil || *eEc.Abstracts != 900.0 {
+		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
@@ -820,8 +820,8 @@ func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
 				utils.Usage:        "10",
 			}}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != 10.0 {
-		t.Fatalf("received usage: %v", *eEc.Usage)
+	} else if eEc.Abstracts == nil || *eEc.Abstracts != 10.0 {
+		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
@@ -918,8 +918,8 @@ func testAccountSv1DebitWithRateS(t *testing.T) {
 				utils.Usage:        "20",
 			}}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != 20.0 {
-		t.Fatalf("received usage: %v", *eEc.Usage)
+	} else if eEc.Abstracts == nil || *eEc.Abstracts != 20.0 {
+		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
@@ -1023,8 +1023,8 @@ func testAccountSv1DebitWithRateS2(t *testing.T) {
 				utils.Usage:        "20",
 			}}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != 20.0 {
-		t.Fatalf("received usage: %v", *eEc.Usage)
+	} else if eEc.Abstracts == nil || *eEc.Abstracts != 20.0 {
+		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
@@ -1120,8 +1120,8 @@ func testAccountSv1MaxConcretes(t *testing.T) {
 			},
 		}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != 41 {
-		t.Errorf("received usage: %v", *eEc.Usage)
+	} else if eEc.Concretes == nil || *eEc.Concretes != 41 {
+		t.Errorf("received usage: %v", *eEc.Concretes)
 	}
 
 	//make sure we did not Debit from our Account
@@ -1150,8 +1150,8 @@ func testAccountSv1DebitConcretes(t *testing.T) {
 			},
 		}}, &eEc); err != nil {
 		t.Error(err)
-	} else if eEc.Usage == nil || *eEc.Usage != 41 {
-		t.Errorf("received usage: %v", *eEc.Usage)
+	} else if eEc.Concretes == nil || *eEc.Concretes != 41 {
+		t.Errorf("received usage: %v", *eEc.Concretes)
 	}
 
 	exp := &utils.AccountProfile{
