@@ -147,7 +147,7 @@ func (cCfg *CacheCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	}
 	initialMP[utils.PartitionsCfg] = partitions
 	if cCfg.ReplicationConns != nil {
-		initialMP[utils.RplConnsCfg] = cCfg.ReplicationConns
+		initialMP[utils.ReplicationConnsCfg] = cCfg.ReplicationConns
 	}
 	return
 }

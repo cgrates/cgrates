@@ -228,8 +228,8 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		utils.DataDbPassCfg:          "",
 		utils.StringIndexedFieldsCfg: []string{},
 		utils.PrefixIndexedFieldsCfg: []string{},
-		utils.RmtConnsCfg:            []string{"*conn1"},
-		utils.RplConnsCfg:            []string{"*conn1"},
+		utils.RemoteConnsCfg:         []string{"*conn1"},
+		utils.ReplicationConnsCfg:    []string{"*conn1"},
 		utils.OptsCfg: map[string]interface{}{
 			utils.MaxOpenConnsCfg:    100.,
 			utils.MaxIdleConnsCfg:    10.,
@@ -255,10 +255,10 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			t.Errorf("Expected %+v \n, received %+v", eMap[utils.OptsCfg], rcv[utils.OptsCfg])
 		} else if !reflect.DeepEqual(eMap[utils.PrefixIndexedFieldsCfg], rcv[utils.PrefixIndexedFieldsCfg]) {
 			t.Errorf("Expected %+v \n, received %+v", eMap[utils.PrefixIndexedFieldsCfg], rcv[utils.PrefixIndexedFieldsCfg])
-		} else if !reflect.DeepEqual(eMap[utils.RmtConnsCfg], rcv[utils.RmtConnsCfg]) {
-			t.Errorf("Expected %+v \n, received %+v", eMap[utils.RmtConnsCfg], rcv[utils.RmtConnsCfg])
-		} else if !reflect.DeepEqual(eMap[utils.RplConnsCfg], rcv[utils.RplConnsCfg]) {
-			t.Errorf("Expected %+v \n, received %+v", eMap[utils.RplConnsCfg], rcv[utils.RplConnsCfg])
+		} else if !reflect.DeepEqual(eMap[utils.RemoteConnsCfg], rcv[utils.RemoteConnsCfg]) {
+			t.Errorf("Expected %+v \n, received %+v", eMap[utils.RemoteConnsCfg], rcv[utils.RemoteConnsCfg])
+		} else if !reflect.DeepEqual(eMap[utils.ReplicationConnsCfg], rcv[utils.ReplicationConnsCfg]) {
+			t.Errorf("Expected %+v \n, received %+v", eMap[utils.ReplicationConnsCfg], rcv[utils.ReplicationConnsCfg])
 		}
 	}
 }

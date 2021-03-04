@@ -62,7 +62,6 @@ var (
 )
 
 func TestAttributeSIT(t *testing.T) {
-	attrsTests := sTestsAlsPrf
 	switch *dbType {
 	case utils.MetaInternal:
 		alsPrfConfigDIR = "tutinternal"
@@ -75,7 +74,7 @@ func TestAttributeSIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range attrsTests {
+	for _, stest := range sTestsAlsPrf {
 		t.Run(alsPrfConfigDIR, stest)
 	}
 }

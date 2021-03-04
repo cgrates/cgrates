@@ -157,8 +157,8 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.DataDbNameCfg:          dbcfg.DataDbName,
 		utils.DataDbUserCfg:          dbcfg.DataDbUser,
 		utils.DataDbPassCfg:          dbcfg.DataDbPass,
-		utils.RmtConnsCfg:            dbcfg.RmtConns,
-		utils.RplConnsCfg:            dbcfg.RplConns,
+		utils.RemoteConnsCfg:         dbcfg.RmtConns,
+		utils.ReplicationConnsCfg:    dbcfg.RplConns,
 		utils.FilteredReplicationCfg: dbcfg.RplFiltered,
 		utils.RemoteConnIDCfg:        dbcfg.RmtConnID,
 	}
