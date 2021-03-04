@@ -373,3 +373,38 @@ func TestAP_AccountBalancesBackup(t *testing.T) {
 	}
 
 }
+
+func TestAPNewDefaultBalance(t *testing.T) {
+
+	const torFltr = "*string:~*req.ToR:"
+	id := "testID"
+
+	expected := &Balance{
+		ID:    id,
+		Type:  MetaConcrete,
+		Units: NewDecimal(0, 0),
+		CostIncrements: []*CostIncrement{
+			{
+				FilterIDs:    []string{torFltr + MetaVoice},
+				Increment:    NewDecimal(int64(time.Second), 0),
+				RecurrentFee: NewDecimal(0, 0),
+			},
+			{
+				FilterIDs:    []string{torFltr + MetaData},
+				Increment:    NewDecimal(1024*1024, 0),
+				RecurrentFee: NewDecimal(0, 0),
+			},
+			{
+				FilterIDs:    []string{torFltr + MetaSMS},
+				Increment:    NewDecimal(1, 0),
+				RecurrentFee: NewDecimal(0, 0),
+			},
+		},
+	}
+
+	received := NewDefaultBalance(id)
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>,\nExpected: <%+v>", received, expected)
+	}
+}
