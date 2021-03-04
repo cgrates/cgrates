@@ -444,8 +444,8 @@ func TestAPAccountProfiles(t *testing.T) {
 	apS := AccountProfilesWithWeight{
 		{
 			AccountProfile: &AccountProfile{
-				Tenant:    "testTenant",
-				ID:        "testID",
+				Tenant:    "testTenant1",
+				ID:        "testID1",
 				FilterIDs: []string{"testFID1", "testFID2"},
 				ActivationInterval: &ActivationInterval{
 					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
@@ -453,23 +453,103 @@ func TestAPAccountProfiles(t *testing.T) {
 				},
 				Weights: nil,
 				Balances: map[string]*Balance{
-					"testBalance": &Balance{
-						ID:    "testBalance",
+					"testBalance1": &Balance{
+						ID:    "testBalance1",
+						Type:  MetaAbstract,
+						Units: &Decimal{decimal.New(0, 0)},
+					},
+				},
+			},
+			Weight: 23,
+			LockID: "testString1",
+		},
+		{
+			AccountProfile: &AccountProfile{
+				Tenant:    "testTenant2",
+				ID:        "testID2",
+				FilterIDs: []string{"testFID1", "testFID2"},
+				ActivationInterval: &ActivationInterval{
+					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
+					ExpiryTime:     time.Date(2020, time.April, 12, 10, 0, 0, 0, time.UTC),
+				},
+				Weights: nil,
+				Balances: map[string]*Balance{
+					"testBalance2": &Balance{
+						ID:    "testBalance2",
 						Type:  MetaAbstract,
 						Units: &Decimal{decimal.New(0, 0)},
 					},
 				},
 			},
 			Weight: 15,
-			LockID: "testString",
+			LockID: "testString2",
 		},
 	}
-	expected := []*AccountProfile{
-		apS[0].AccountProfile,
+
+	expected := make([]*AccountProfile, 0)
+	for i := range apS {
+		expected = append(expected, apS[i].AccountProfile)
 	}
 	received := apS.AccountProfiles()
 
 	if !reflect.DeepEqual(received, expected) {
 		t.Errorf("\nReceived: <%+v>,\nExpected: <%+v>", ToJSON(received), ToJSON(expected))
+	}
+}
+
+func TestAPLockIDs(t *testing.T) {
+	apS := AccountProfilesWithWeight{
+		{
+			AccountProfile: &AccountProfile{
+				Tenant:    "testTenant1",
+				ID:        "testID1",
+				FilterIDs: []string{"testFID1", "testFID2"},
+				ActivationInterval: &ActivationInterval{
+					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
+					ExpiryTime:     time.Date(2020, time.April, 12, 10, 0, 0, 0, time.UTC),
+				},
+				Weights: nil,
+				Balances: map[string]*Balance{
+					"testBalance1": &Balance{
+						ID:    "testBalance1",
+						Type:  MetaAbstract,
+						Units: &Decimal{decimal.New(0, 0)},
+					},
+				},
+			},
+			Weight: 23,
+			LockID: "testString1",
+		},
+		{
+			AccountProfile: &AccountProfile{
+				Tenant:    "testTenant2",
+				ID:        "testID2",
+				FilterIDs: []string{"testFID1", "testFID2"},
+				ActivationInterval: &ActivationInterval{
+					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
+					ExpiryTime:     time.Date(2020, time.April, 12, 10, 0, 0, 0, time.UTC),
+				},
+				Weights: nil,
+				Balances: map[string]*Balance{
+					"testBalance2": &Balance{
+						ID:    "testBalance2",
+						Type:  MetaAbstract,
+						Units: &Decimal{decimal.New(0, 0)},
+					},
+				},
+			},
+			Weight: 15,
+			LockID: "testString2",
+		},
+	}
+
+	expected := make([]string, 0)
+	for i := range apS {
+		expected = append(expected, apS[i].LockID)
+	}
+	received := apS.LockIDs()
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%v>, \nExpected: <%+v>", received, expected)
 	}
 }
