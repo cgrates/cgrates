@@ -72,7 +72,6 @@ func (db *DataDBService) Start() (err error) {
 		err = nil // reset the error in case of only SessionS active
 		return
 	}
-
 	db.dm = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
 	engine.SetDataStorage(db.dm)
 	if err = engine.CheckVersions(db.dm.DataDB()); err != nil {
