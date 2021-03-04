@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -32,7 +33,7 @@ import (
 func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
 	internalConnChan chan rpcclient.ClientConnector, lazyConnect bool,
-	biRPCClient rpcclient.BiRPCConector) (rpcPool *rpcclient.RPCPool, err error) {
+	biRPCClient rpcclient.BiRPCConector, poolID string, connCache *ltcache.Cache) (rpcPool *rpcclient.RPCPool, err error) {
 	var rpcClient rpcclient.ClientConnector
 	var atLestOneConnected bool // If one connected we don't longer return errors
 	rpcPool = rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
@@ -43,9 +44,9 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 			err = rpcclient.ErrDisconnected
 			continue
 		}
-		rpcClient, err = NewRPCConnection(rpcConnCfg, keyPath, certPath, caPath, connAttempts, reconnects,
-			connectTimeout, replyTimeout, internalConnChan, lazyConnect, biRPCClient)
-		if err == rpcclient.ErrUnsupportedCodec {
+		if rpcClient, err = NewRPCConnection(rpcConnCfg, keyPath, certPath, caPath, connAttempts, reconnects,
+			connectTimeout, replyTimeout, internalConnChan, lazyConnect, biRPCClient,
+			poolID, rpcConnCfg.ID, connCache); err == rpcclient.ErrUnsupportedCodec {
 			return nil, fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
 		}
 		if err == nil {
@@ -60,17 +61,31 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 }
 
 // NewRPCConnection creates a new connection based on the RemoteHost structure
+// connCache is used to cache the connection with ID
 func NewRPCConnection(cfg *config.RemoteHost, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, internalConnChan chan rpcclient.ClientConnector, lazyConnect bool,
-	biRPCClient rpcclient.BiRPCConector) (client rpcclient.ClientConnector, err error) {
+	biRPCClient rpcclient.BiRPCConector, poolID, connID string, connCache *ltcache.Cache) (client rpcclient.ClientConnector, err error) {
+	var id string
+	if connID != utils.EmptyString {
+		id = poolID + utils.ConcatenatedKeySep + connID
+		if x, ok := connCache.Get(id); ok && x != nil {
+			return x.(rpcclient.ClientConnector), nil
+		}
+	}
 	if cfg.Address == rpcclient.InternalRPC ||
 		cfg.Address == rpcclient.BiRPCInternal {
-		return rpcclient.NewRPCClient("", "", cfg.TLS, keyPath, certPath, caPath, connAttempts,
+		client, err = rpcclient.NewRPCClient("", "", cfg.TLS, keyPath, certPath, caPath, connAttempts,
 			reconnects, connectTimeout, replyTimeout, cfg.Address, internalConnChan, lazyConnect, biRPCClient)
+	} else {
+		client, err = rpcclient.NewRPCClient(utils.TCP, cfg.Address, cfg.TLS, keyPath, certPath, caPath,
+			connAttempts, reconnects, connectTimeout, replyTimeout,
+			utils.FirstNonEmpty(cfg.Transport, rpcclient.GOBrpc), nil, lazyConnect, biRPCClient)
 	}
-	return rpcclient.NewRPCClient(utils.TCP, cfg.Address, cfg.TLS, keyPath, certPath, caPath,
-		connAttempts, reconnects, connectTimeout, replyTimeout,
-		utils.FirstNonEmpty(cfg.Transport, rpcclient.GOBrpc), nil, lazyConnect, biRPCClient)
+	if connID != utils.EmptyString &&
+		err == nil {
+		connCache.Set(id, client, nil)
+	}
+	return
 }
 
 // IntRPC is the global variable that is used to comunicate with all the subsystems internally

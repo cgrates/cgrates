@@ -48,7 +48,7 @@ func TestAccountSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheAccountProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAccountProfilesFilterIndexes))
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	acctRPC := make(chan rpcclient.ClientConnector, 1)

@@ -32,12 +32,13 @@ import (
 )
 
 // NewServiceManager returns a service manager
-func NewServiceManager(cfg *config.CGRConfig, shdChan *utils.SyncedChan, shdWg *sync.WaitGroup) *ServiceManager {
+func NewServiceManager(cfg *config.CGRConfig, shdChan *utils.SyncedChan, shdWg *sync.WaitGroup, connMgr *engine.ConnManager) *ServiceManager {
 	sm := &ServiceManager{
 		cfg:        cfg,
 		subsystems: make(map[string]Service),
 		shdChan:    shdChan,
 		shdWg:      shdWg,
+		connMgr:    connMgr,
 	}
 	return sm
 }
@@ -50,6 +51,7 @@ type ServiceManager struct {
 
 	shdChan *utils.SyncedChan
 	shdWg   *sync.WaitGroup
+	connMgr *engine.ConnManager
 }
 
 // Call .
@@ -240,7 +242,7 @@ func (srvMngr *ServiceManager) handleReload() {
 		case <-srvMngr.GetConfig().GetReloadChan(config.RateSJson):
 			go srvMngr.reloadService(utils.RateS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJsonName):
-			engine.Cache.Clear([]string{utils.CacheRPCConnections})
+			go srvMngr.connMgr.Reload()
 		case <-srvMngr.GetConfig().GetReloadChan(config.SIPAgentJson):
 			go srvMngr.reloadService(utils.SIPAgent)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RegistrarCJson):

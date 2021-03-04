@@ -44,7 +44,7 @@ func TestStorDBReload(t *testing.T) {
 	chS := engine.NewCacheS(cfg, nil, nil)
 	cfg.ChargerSCfg().Enabled = true
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg)
+	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Password = "CGRateS.org"
