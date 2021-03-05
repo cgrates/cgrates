@@ -61,10 +61,12 @@ func (rplSv1 *ReplicatorSv1) GetDestination(key *utils.StringWithOpts, reply *en
 
 //GetDestination
 func (rplSv1 *ReplicatorSv1) GetReverseDestination(key *utils.StringWithOpts, reply *[]string) error {
-	engine.SetReplicateHost(utils.ReverseDestinationPrefix, key.Arg, utils.IfaceAsString(key.Opts[utils.RemoteHostOpt]))
 	if rcv, err := rplSv1.dm.DataDB().GetReverseDestinationDrv(key.Arg, utils.NonTransactional); err != nil {
 		return err
 	} else {
+		for _, dstID := range rcv {
+			engine.SetReplicateHost(utils.ReverseDestinationPrefix, dstID, utils.IfaceAsString(key.Opts[utils.RemoteHostOpt]))
+		}
 		*reply = rcv
 	}
 	return nil

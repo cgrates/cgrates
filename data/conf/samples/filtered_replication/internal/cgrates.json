@@ -1,0 +1,103 @@
+{
+"general": {
+	"log_level": 7,
+	"node_id": "InternalEngine",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"rpc_conns": {
+	"conn2": {
+		"strategy": "*broadcast_sync",
+		"conns": [
+			{"id": "engine1", "address": "127.0.0.1:2022", "transport":"*json"},
+			{"id": "engine2", "address": "127.0.0.1:2032", "transport":"*json"}
+		],
+	},
+},
+
+
+"data_db": {
+	"db_type": "*internal",
+	"replication_conns": ["conn2"],
+	"filtered_replication": true,
+	"items":{
+		"*accounts":{"remote":false,"replicate":true},
+		"*reverse_destinations": {"remote":false,"replicate":true},
+		"*destinations": {"remote":false,"replicate":true},
+		"*rating_plans": {"remote":false,"replicate":true},
+		"*rating_profiles":{"remote":false,"replicate":true},
+		"*actions":{"remote":false,"replicate":true},
+		"*action_plans": {"remote":false,"replicate":true},
+		"*account_action_plans":{"remote":false,"replicate":true},
+		"*action_triggers":{"remote":false,"replicate":true},
+		"*shared_groups":{"remote":false,"replicate":true},
+		"*timings": {"remote":false,"replicate":true},
+		"*resource_profiles":{"remote":false,"replicate":true},
+		"*resources":{"remote":false,"replicate":true},
+		"*statqueue_profiles": {"remote":false,"replicate":true},
+		"*statqueues": {"remote":false,"replicate":true},
+		"*threshold_profiles": {"remote":false,"replicate":true},
+		"*thresholds": {"remote":false,"replicate":true},
+		"*filters": {"remote":false,"replicate":true},
+		"*route_profiles":{"remote":false,"replicate":true},
+		"*attribute_profiles":{"remote":false,"replicate":true},
+		"*charger_profiles": {"remote":false,"replicate":true},
+		"*dispatcher_profiles":{"remote":false,"replicate":true},
+		"*dispatcher_hosts":{"remote":false,"replicate":true},
+		"*indexes" :{"remote":false,"replicate":true},
+		"*rate_profiles":{"remote":false,"replicate":true},
+		"*load_ids":{"remote":false,"replicate":true},
+		"*action_profiles":{"remote":false,"replicate":true},
+		"*account_profiles":{"remote":false,"replicate":true},
+	},
+},
+
+
+"caches":{
+	"partitions": {
+		"*replication_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+	}
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*internal"],
+},
+
+
+"schedulers": {
+	"enabled": true,
+},
+
+
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+
+}
