@@ -1237,3 +1237,20 @@ func TestBalanceUnitFactor(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
 }
+
+func TestATDUsage(t *testing.T) {
+	args := &ArgsCostForEvent{
+		CGREvent: &CGREvent{
+			ID: "testID",
+			Event: map[string]interface{}{
+				Usage: true,
+			},
+		},
+	}
+
+	_, err := args.Usage()
+	expected := "cannot convert field: true to time.Duration"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err.Error(), expected)
+	}
+}
