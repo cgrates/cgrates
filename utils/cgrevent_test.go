@@ -19,6 +19,7 @@ package utils
 
 import (
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -434,4 +435,38 @@ func TestCGREventWithOptsCache(t *testing.T) {
 		t.Errorf("Expectred nil")
 	}
 	event.CacheClear()
+}
+
+func TestCGREventOptAsStringEmpty(t *testing.T) {
+	ev := &CGREvent{}
+
+	expstr := ""
+	experr := ErrNotFound
+	received, err := ev.OptAsString("testString")
+
+	if !reflect.DeepEqual(received, expstr) {
+		t.Errorf("\nReceived: %q, \nExpected: %q", received, expstr)
+	}
+	if err == nil || err != experr {
+		t.Errorf("\nReceived: %q, \nExpected: %q", err, experr)
+	}
+}
+
+func TestCGREventOptAsString(t *testing.T) {
+	ev := &CGREvent{
+		Opts: map[string]interface{}{
+			"testKey": 13,
+		},
+	}
+
+	received, err := ev.OptAsString("testKey")
+	if err != nil {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, nil)
+	}
+	expected := strconv.Itoa(13)
+
+	if received != expected {
+		t.Errorf("\nReceived: %q, \nExpected: %q", received, expected)
+	}
+
 }
