@@ -501,3 +501,27 @@ func TestCGREventOptAsDuration(t *testing.T) {
 		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
 	}
 }
+
+func TestCGREventAsDataProvider(t *testing.T) {
+	ev := &CGREvent{
+		Opts: map[string]interface{}{
+			"testKey1": 13,
+			"testKey2": "testString1",
+		},
+		Event: map[string]interface{}{
+			"testKey1": 30,
+			"testKey2": "testString2",
+		},
+	}
+
+	expected := MapStorage{
+		MetaOpts: ev.Opts,
+		MetaReq:  ev.Event,
+	}
+
+	received := ev.AsDataProvider()
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+	}
+}
