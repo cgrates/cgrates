@@ -272,7 +272,9 @@ func TestCGREventClone(t *testing.T) {
 			"PddInterval":      "1s",
 			"Weight":           20.0,
 		},
-		Opts: map[string]interface{}{},
+		Opts: map[string]interface{}{
+			"testKey": 12,
+		},
 	}
 	cloned := ev.Clone()
 	if !reflect.DeepEqual(ev, cloned) {
