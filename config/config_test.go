@@ -6255,3 +6255,9 @@ func TestCGRConfigGetDP(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", exp, err)
 	}
 }
+
+func TestLockUnlockSectionsID(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.LockSections(HttpAgentJson, LoaderJson, ChargerSCfgJson)
+	cfg.UnlockSections(HttpAgentJson, LoaderJson, ChargerSCfgJson)
+}

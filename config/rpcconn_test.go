@@ -266,3 +266,115 @@ func TestRPCConnsClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestUpdateRPCCons(t *testing.T) {
+	rpc := RPCConns{
+		utils.MetaInternal: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					ID:          "RPC1",
+					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: false,
+					TLS:         false,
+				},
+				{
+					ID:          "RPC2",
+					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: true,
+					TLS:         true,
+				},
+			},
+		},
+	}
+
+	newHosts := map[string]*RemoteHost{
+		"RPC1": {
+			ID:          "RPC1",
+			Address:     utils.MetaInternal,
+			Transport:   utils.EmptyString,
+			Synchronous: true,
+			TLS:         true,
+		},
+	}
+	expectedID := utils.StringSet{utils.MetaInternal: {}}
+	expectedRPCCons := RPCConns{
+		utils.MetaInternal: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					ID:          "RPC1",
+					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: true,
+					TLS:         true,
+				},
+				{
+					ID:          "RPC2",
+					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: true,
+					TLS:         true,
+				},
+			},
+		},
+	}
+
+	if rcv := UpdateRPCCons(rpc, newHosts); !reflect.DeepEqual(rcv, expectedID) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(expectedID), utils.ToJSON(rcv))
+	} else if !reflect.DeepEqual(rpc, expectedRPCCons) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(expectedRPCCons), utils.ToJSON(rpc))
+	}
+}
+
+func TestRemoveRPCCons(t *testing.T) {
+	rpc := RPCConns{
+		utils.MetaInternal: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					ID:          "RPC1",
+					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: false,
+					TLS:         false,
+				},
+				{
+					ID:          "RPC2",
+					Address:     utils.MetaInternal,
+					Transport:   utils.EmptyString,
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+	}
+
+	expectedID := utils.StringSet{utils.MetaInternal: {}}
+	expectedRPCCons := RPCConns{
+		utils.MetaInternal: {
+			Strategy: utils.MetaFirst,
+			PoolSize: 0,
+			Conns: []*RemoteHost{
+				{
+					ID:      "RPC1",
+					Address: utils.MetaInternal,
+				},
+				{
+					ID: "RPC2",
+				},
+			},
+		},
+	}
+	host := utils.StringSet{"RPC2": {}}
+	if rcv := RemoveRPCCons(rpc, host); !reflect.DeepEqual(rcv, expectedID) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(expectedID), utils.ToJSON(rcv))
+	} else if !reflect.DeepEqual(rpc, expectedRPCCons) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(expectedRPCCons), utils.ToJSON(rpc))
+	}
+}
