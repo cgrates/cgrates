@@ -19,7 +19,6 @@ package utils
 
 import (
 	"reflect"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -463,10 +462,42 @@ func TestCGREventOptAsString(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, nil)
 	}
-	expected := strconv.Itoa(13)
+	expected := "13"
 
 	if received != expected {
 		t.Errorf("\nReceived: %q, \nExpected: %q", received, expected)
 	}
+}
 
+func TestCGREventOptAsDurationEmpty(t *testing.T) {
+	ev := &CGREvent{}
+
+	var expdur time.Duration
+	experr := ErrNotFound
+	received, err := ev.OptAsDuration("testString")
+
+	if !reflect.DeepEqual(received, expdur) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expdur)
+	}
+	if err == nil || err != experr {
+		t.Errorf("\nReceived: %q, \nExpected: %q", err, experr)
+	}
+}
+
+func TestCGREventOptAsDuration(t *testing.T) {
+	ev := &CGREvent{
+		Event: map[string]interface{}{
+			"testKey": 30,
+		},
+	}
+
+	received, err := ev.OptAsDuration("testKey")
+	if err != nil {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, nil)
+	}
+	expected := 30 * time.Nanosecond
+
+	if received != expected {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+	}
 }
