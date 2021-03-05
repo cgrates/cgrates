@@ -491,12 +491,11 @@ func (dm *DataManager) SetReverseDestination(destID string, prefixes []string, t
 		return
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaReverseDestinations].Replicate {
-		var reply string
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetReverseDestination, &Destination{Id: destID, Prefixes: prefixes}, &reply); err != nil {
-			err = utils.CastRPCErr(err)
-			return
-		}
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ReverseDestinationPrefix, destID, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1SetReverseDestination,
+			&Destination{Id: destID, Prefixes: prefixes})
 	}
 	return
 }
@@ -1442,9 +1441,11 @@ func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
 		return errCh
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaTimings].Replicate {
-		var reply string
-		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1RemoveTiming, id, &reply)
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.TimingsPrefix, id, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveTiming,
+			id)
 	}
 	return
 }
