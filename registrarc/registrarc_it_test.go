@@ -184,3 +184,38 @@ func testDsphStopDispatcher(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestRegistrarcListenAndServe(t *testing.T) {
+	//cover purposes only
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RegistrarCCfg().Dispatcher.Enabled = true
+	cfg.RegistrarCCfg().RPC.Enabled = true
+	regStSrv := NewRegistrarCService(cfg, nil)
+	stopChan := make(chan struct{}, 1)
+	rldChan := make(chan struct{}, 1)
+	rldChan <- struct{}{}
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		close(stopChan)
+	}()
+	regStSrv.ListenAndServe(stopChan, rldChan)
+	regStSrv.Shutdown()
+}
+
+func TestRegistrarcregisterRPCHostsErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RegistrarCCfg().RPC.RegistrarSConns = []string{"testConnID"}
+	cfg.RegistrarCCfg().RPC.Hosts = map[string][]*config.RemoteHost{
+		utils.MetaDefault: {
+			{
+				ID:          "",
+				Address:     "",
+				Transport:   "",
+				Synchronous: false,
+				TLS:         false,
+			},
+		},
+	}
+	regStSrv := NewRegistrarCService(cfg, nil)
+	regStSrv.registerRPCHosts()
+}
