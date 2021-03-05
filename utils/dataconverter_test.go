@@ -900,3 +900,87 @@ func TestRandomConverter(t *testing.T) {
 		t.Errorf("Expecting bigger than 10 and smaller than 20, received: %+v", rcv)
 	}
 }
+
+func TestDCNewDataConverterRandomPrefixEmpty(t *testing.T) {
+
+	a, err := NewDataConverter(MetaRandom)
+	if err != nil {
+		t.Error(err)
+	}
+	b, err := NewRandomConverter(EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(a, b) {
+		t.Error("Error reflect")
+	}
+
+}
+
+func TestDCNewDataConverterRandomPrefix(t *testing.T) {
+	params := "*random:1:2"
+	a, err := NewDataConverter(params)
+	if err != nil {
+		t.Error(err)
+	}
+
+	b, err := NewRandomConverter(params[len(MetaRandom)+1:])
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(a, b) {
+		t.Error("Error reflect")
+	}
+}
+
+func TestDCNewRandomConverterCase2Begin(t *testing.T) {
+	params := "test:15"
+
+	_, err := NewRandomConverter(params)
+	expected := "strconv.Atoi: parsing \"test\": invalid syntax"
+
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err.Error(), expected)
+	}
+}
+
+func TestDCNewRandomConverterCase2End(t *testing.T) {
+	params := "15:test"
+
+	_, err := NewRandomConverter(params)
+	expected := "strconv.Atoi: parsing \"test\": invalid syntax"
+
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err.Error(), expected)
+	}
+}
+
+func TestDCNewRandomConverterCase1Begin(t *testing.T) {
+	params := "test"
+
+	_, err := NewRandomConverter(params)
+	expected := "strconv.Atoi: parsing \"test\": invalid syntax"
+
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err.Error(), expected)
+	}
+}
+
+func TestDCrCConvert(t *testing.T) {
+	randConv := &RandomConverter{
+		begin: 0,
+		end:   2,
+	}
+
+	received, err := randConv.Convert(randConv.begin)
+	if err != nil {
+		t.Error(err)
+	}
+	receivedAsInt, err := IfaceAsInt64(received)
+	if err != nil {
+		t.Error(err)
+	}
+	if receivedAsInt != 0 && receivedAsInt != 1 {
+		t.Errorf("\nReceived: <%+v>, \nExpected 0 or 1", received)
+	}
+}
