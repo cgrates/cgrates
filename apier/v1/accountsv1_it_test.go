@@ -60,6 +60,8 @@ func TestAccountSv1IT(t *testing.T) {
 		testAccountSv1DebitWithRateS2,
 		testAccountSv1MaxConcretes,
 		testAccountSv1DebitConcretes,
+		testAccountSv1ActionSetBalance,
+		testAccountSv1ActionRemoveBalance,
 		testAccountSv1KillEngine,
 	}
 	switch *dbType {
@@ -1224,6 +1226,195 @@ func testAccountSv1DebitConcretes(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
+
+func testAccountSv1ActionSetBalance(t *testing.T) {
+	expectedSetBalance := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "1004",
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance1": &utils.Balance{
+				ID: "ConcreteBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{"fltr1", "fltr2"},
+						Weight:    20,
+					},
+					{
+						FilterIDs: []string{"fltr1"},
+						Weight:    30,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
+			},
+			"ConcreteBalance2": &utils.Balance{
+				ID: "ConcreteBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
+			},
+			"AbstractBalance1": &utils.Balance{
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: &utils.Decimal{decimal.New(120, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
+			},
+		},
+		ThresholdIDs: []string{"TH_ID1"},
+	}
+	var reply string
+	if err := acntSRPC.Call(utils.AccountSv1ActionSetBalance, &utils.ArgsActSetBalance{
+		Tenant: "cgrates.org", AccountID: "1004",
+		Diktats: []*utils.BalDiktat{
+			{
+				Path:  "*account.ThresholdIDs",
+				Value: "TH_ID1",
+			},
+		},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	if err := acntSRPC.Call(utils.AccountSv1ActionSetBalance, &utils.ArgsActSetBalance{
+		Tenant: "cgrates.org", AccountID: "1004",
+		Diktats: []*utils.BalDiktat{
+			{
+				Path:  "*balance.AbstractBalance1.Units",
+				Value: "120",
+			},
+		},
+		Reset: true,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	if err := acntSRPC.Call(utils.AccountSv1ActionSetBalance, &utils.ArgsActSetBalance{
+		Tenant: "cgrates.org", AccountID: "1004",
+		Diktats: []*utils.BalDiktat{
+			{
+				Path:  "*balance.ConcreteBalance1.Weights",
+				Value: "fltr1&fltr2;20;fltr1;30",
+			},
+		},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	var result *utils.AccountProfile
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1004"}}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedSetBalance, result) {
+		t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(expectedSetBalance), utils.ToJSON(result))
+	}
+}
+
+func testAccountSv1ActionRemoveBalance(t *testing.T) {
+	var reply string
+	if err := acntSRPC.Call(utils.AccountSv1ActionRemoveBalance, &utils.ArgsActRemoveBalances{
+		Tenant: "cgrates.org", AccountID: "1004",
+		BalanceIDs: []string{"AbstractBalance1"},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	expectedSetBalance := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "1004",
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance1": &utils.Balance{
+				ID: "ConcreteBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{"fltr1", "fltr2"},
+						Weight:    20,
+					},
+					{
+						FilterIDs: []string{"fltr1"},
+						Weight:    30,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
+			},
+			"ConcreteBalance2": &utils.Balance{
+				ID: "ConcreteBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: &utils.Decimal{decimal.New(0, 0)},
+				CostIncrements: []*utils.CostIncrement{
+					&utils.CostIncrement{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    &utils.Decimal{decimal.New(1, 0)},
+						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
+						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+					},
+				},
+			},
+		},
+		ThresholdIDs: []string{"TH_ID1"},
+	}
+
+	var result *utils.AccountProfile
+	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1004"}}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedSetBalance, result) {
+		t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(expectedSetBalance), utils.ToJSON(result))
 	}
 }
 
