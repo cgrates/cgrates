@@ -352,3 +352,61 @@ func TestRegistrar(t *testing.T) {
 
 	Registrar(new(errRecorder), req)
 }
+
+func TestLibRegistrarcRegister(t *testing.T) {
+	req := &http.Request{
+		Method:           "",
+		URL:              nil,
+		Proto:            "",
+		ProtoMajor:       0,
+		ProtoMinor:       0,
+		Header:           nil,
+		Body:             http.NoBody,
+		GetBody:          nil,
+		ContentLength:    0,
+		TransferEncoding: nil,
+		Close:            false,
+		Host:             "",
+		Form:             nil,
+		PostForm:         nil,
+		MultipartForm:    nil,
+		Trailer:          nil,
+		RemoteAddr:       "",
+		RequestURI:       "",
+		TLS:              nil,
+		Cancel:           nil,
+		Response:         nil,
+	}
+	result, err := register(req)
+	expected := &json.RawMessage{}
+	if reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, result)
+	}
+	if err == nil || err.Error() != "EOF" {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "EOF", err)
+	}
+}
+
+func TestGetConnPortHTTPJson(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	expected := "2014"
+	result, err := getConnPort(cfg, rpcclient.BiRPCJSON, false)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, result)
+	}
+	if err != nil {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+	}
+}
+
+func TestGetConnPortBiRPCGOB(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	expected := ""
+	result, err := getConnPort(cfg, rpcclient.BiRPCGOB, false)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, result)
+	}
+	if err == nil || err.Error() != "missing port in address" {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "missing port in address", err)
+	}
+}
