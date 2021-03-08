@@ -306,10 +306,10 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*voice,3600000000000,,,,,,
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	d, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
-		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+	d, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.DataDbCfg().Opts)
 	if err != nil {
 		return err

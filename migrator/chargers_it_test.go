@@ -124,18 +124,18 @@ func TestChargersITMoveEncoding2(t *testing.T) {
 }
 
 func testChrgITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(chrgCfgIn.DataDbCfg().DataDbType,
-		chrgCfgIn.DataDbCfg().DataDbHost, chrgCfgIn.DataDbCfg().DataDbPort,
-		chrgCfgIn.DataDbCfg().DataDbName, chrgCfgIn.DataDbCfg().DataDbUser,
-		chrgCfgIn.DataDbCfg().DataDbPass, chrgCfgIn.GeneralCfg().DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(chrgCfgIn.DataDbCfg().Type,
+		chrgCfgIn.DataDbCfg().Host, chrgCfgIn.DataDbCfg().Port,
+		chrgCfgIn.DataDbCfg().Name, chrgCfgIn.DataDbCfg().User,
+		chrgCfgIn.DataDbCfg().Password, chrgCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), chrgCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(chrgCfgOut.DataDbCfg().DataDbType,
-		chrgCfgOut.DataDbCfg().DataDbHost, chrgCfgOut.DataDbCfg().DataDbPort,
-		chrgCfgOut.DataDbCfg().DataDbName, chrgCfgOut.DataDbCfg().DataDbUser,
-		chrgCfgOut.DataDbCfg().DataDbPass, chrgCfgOut.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(chrgCfgOut.DataDbCfg().Type,
+		chrgCfgOut.DataDbCfg().Host, chrgCfgOut.DataDbCfg().Port,
+		chrgCfgOut.DataDbCfg().Name, chrgCfgOut.DataDbCfg().User,
+		chrgCfgOut.DataDbCfg().Password, chrgCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), chrgCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)

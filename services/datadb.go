@@ -59,10 +59,10 @@ func (db *DataDBService) Start() (err error) {
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
-	d, err := engine.NewDataDBConn(db.cfg.DataDbCfg().DataDbType,
-		db.cfg.DataDbCfg().DataDbHost, db.cfg.DataDbCfg().DataDbPort,
-		db.cfg.DataDbCfg().DataDbName, db.cfg.DataDbCfg().DataDbUser,
-		db.cfg.DataDbCfg().DataDbPass, db.cfg.GeneralCfg().DBDataEncoding,
+	d, err := engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
+		db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
+		db.cfg.DataDbCfg().Name, db.cfg.DataDbCfg().User,
+		db.cfg.DataDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
 		db.cfg.DataDbCfg().Opts)
 	if db.mandatoryDB() && err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
@@ -93,7 +93,7 @@ func (db *DataDBService) Reload() (err error) {
 		db.oldDBCfg = db.cfg.DataDbCfg().Clone()
 		return
 	}
-	if db.cfg.DataDbCfg().DataDbType == utils.Mongo {
+	if db.cfg.DataDbCfg().Type == utils.Mongo {
 		var ttl time.Duration
 		if ttl, err = utils.IfaceAsDuration(db.cfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]); err != nil {
 			return
@@ -101,7 +101,7 @@ func (db *DataDBService) Reload() (err error) {
 		mgo, canCast := db.dm.DataDB().(*engine.MongoStorage)
 		if !canCast {
 			return fmt.Errorf("can't conver DataDB of type %s to MongoStorage",
-				db.cfg.DataDbCfg().DataDbType)
+				db.cfg.DataDbCfg().Type)
 		}
 		mgo.SetTTL(ttl)
 	}
@@ -153,15 +153,15 @@ func (db *DataDBService) GetDM() *engine.DataManager {
 
 // needsConnectionReload returns if the DB connection needs to reloaded
 func (db *DataDBService) needsConnectionReload() bool {
-	if db.oldDBCfg.DataDbType != db.cfg.DataDbCfg().DataDbType ||
-		db.oldDBCfg.DataDbHost != db.cfg.DataDbCfg().DataDbHost ||
-		db.oldDBCfg.DataDbName != db.cfg.DataDbCfg().DataDbName ||
-		db.oldDBCfg.DataDbPort != db.cfg.DataDbCfg().DataDbPort ||
-		db.oldDBCfg.DataDbUser != db.cfg.DataDbCfg().DataDbUser ||
-		db.oldDBCfg.DataDbPass != db.cfg.DataDbCfg().DataDbPass {
+	if db.oldDBCfg.Type != db.cfg.DataDbCfg().Type ||
+		db.oldDBCfg.Host != db.cfg.DataDbCfg().Host ||
+		db.oldDBCfg.Name != db.cfg.DataDbCfg().Name ||
+		db.oldDBCfg.Port != db.cfg.DataDbCfg().Port ||
+		db.oldDBCfg.User != db.cfg.DataDbCfg().User ||
+		db.oldDBCfg.Password != db.cfg.DataDbCfg().Password {
 		return true
 	}
-	return db.oldDBCfg.DataDbType == utils.Redis &&
+	return db.oldDBCfg.Type == utils.Redis &&
 		(db.oldDBCfg.Opts[utils.RedisSentinelNameCfg] != db.cfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] ||
 			db.oldDBCfg.Opts[utils.RedisClusterCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterCfg] ||
 			db.oldDBCfg.Opts[utils.RedisClusterSyncCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] ||

@@ -82,11 +82,11 @@ func TestDataDBReload(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", db.dm, getDm)
 	}
 	oldcfg := &config.DataDbCfg{
-		DataDbType: utils.Mongo,
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "27017",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
+		Type: utils.Mongo,
+		Host: "127.0.0.1",
+		Port: "27017",
+		Name: "10",
+		User: "cgrates",
 		Opts: map[string]interface{}{
 			utils.QueryTimeoutCfg:            "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
@@ -210,10 +210,10 @@ func TestDataDBReloadBadType(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().DataDbType,
-		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.DataDbCfg().Opts)
 	if err != nil {
 		t.Fatal(err)
@@ -260,11 +260,11 @@ func TestDataDBReloadBadType(t *testing.T) {
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
 	db.oldDBCfg = &config.DataDbCfg{
-		DataDbType: utils.Mongo,
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "27017",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
+		Type: utils.Mongo,
+		Host: "127.0.0.1",
+		Port: "27017",
+		Name: "10",
+		User: "cgrates",
 		Opts: map[string]interface{}{
 			utils.QueryTimeoutCfg:            "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
@@ -362,7 +362,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 				Remote:    false},
 		},
 	}
-	cfg.DataDbCfg().DataDbType = "dbtype"
+	cfg.DataDbCfg().Type = "dbtype"
 	db.dm = nil
 	err = db.Reload()
 	if err == nil || err.Error() != "unsupported db_type <dbtype>" {
@@ -389,11 +389,11 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	db.oldDBCfg = &config.DataDbCfg{
-		DataDbType: utils.Mongo,
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "27017",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
+		Type: utils.Mongo,
+		Host: "127.0.0.1",
+		Port: "27017",
+		Name: "10",
+		User: "cgrates",
 		Opts: map[string]interface{}{
 			utils.QueryTimeoutCfg:            "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
@@ -505,10 +505,10 @@ func TestDataDBStartVersion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().DataDbType,
-		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.DataDbCfg().Opts)
 	if err != nil {
 		t.Fatal(err)
@@ -567,10 +567,10 @@ func TestDataDBReloadCastError(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().DataDbType,
-		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.DataDbCfg().Opts)
 	if err != nil {
 		t.Fatal(err)
@@ -617,11 +617,11 @@ func TestDataDBReloadCastError(t *testing.T) {
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
 	db.oldDBCfg = &config.DataDbCfg{
-		DataDbType: utils.Mongo,
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "27017",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
+		Type: utils.Mongo,
+		Host: "127.0.0.1",
+		Port: "27017",
+		Name: "10",
+		User: "cgrates",
 		Opts: map[string]interface{}{
 			utils.QueryTimeoutCfg:            "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
@@ -735,10 +735,10 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().DataDbType,
-		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.DataDbCfg().Opts)
 	if err != nil {
 		t.Fatal(err)
@@ -785,11 +785,11 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
 	db.oldDBCfg = &config.DataDbCfg{
-		DataDbType: utils.Mongo,
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "27017",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
+		Type: utils.Mongo,
+		Host: "127.0.0.1",
+		Port: "27017",
+		Name: "10",
+		User: "cgrates",
 		Opts: map[string]interface{}{
 			utils.QueryTimeoutCfg:            "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
@@ -903,7 +903,7 @@ func TestDataDBStartSessionSCfgErr(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
-	cfg.DataDbCfg().DataDbType = "badtype"
+	cfg.DataDbCfg().Type = "badtype"
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
 	err := db.Start()
@@ -917,7 +917,7 @@ func TestDataDBStartRalsSCfgErr(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
-	cfg.DataDbCfg().DataDbType = "badtype"
+	cfg.DataDbCfg().Type = "badtype"
 	db.cfg.RalsCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
 	err := db.Start()
@@ -933,11 +933,11 @@ func TestDataDBReloadError(t *testing.T) {
 	db := NewDataDBService(cfg, cM, srvDep)
 	cfg.GeneralCfg().DBDataEncoding = utils.JSON
 	db.oldDBCfg = &config.DataDbCfg{
-		DataDbType: utils.Mongo,
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "27017",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
+		Type: utils.Mongo,
+		Host: "127.0.0.1",
+		Port: "27017",
+		Name: "10",
+		User: "cgrates",
 		Opts: map[string]interface{}{
 			utils.QueryTimeoutCfg:            "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",

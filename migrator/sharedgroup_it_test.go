@@ -142,18 +142,18 @@ func TestSharedGroupITMoveEncoding2(t *testing.T) {
 }
 
 func testShrGrpITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(shrGrpCfgIn.DataDbCfg().DataDbType,
-		shrGrpCfgIn.DataDbCfg().DataDbHost, shrGrpCfgIn.DataDbCfg().DataDbPort,
-		shrGrpCfgIn.DataDbCfg().DataDbName, shrGrpCfgIn.DataDbCfg().DataDbUser,
-		shrGrpCfgIn.DataDbCfg().DataDbPass, shrGrpCfgIn.GeneralCfg().DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(shrGrpCfgIn.DataDbCfg().Type,
+		shrGrpCfgIn.DataDbCfg().Host, shrGrpCfgIn.DataDbCfg().Port,
+		shrGrpCfgIn.DataDbCfg().Name, shrGrpCfgIn.DataDbCfg().User,
+		shrGrpCfgIn.DataDbCfg().Password, shrGrpCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), shrGrpCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(shrGrpCfgOut.DataDbCfg().DataDbType,
-		shrGrpCfgOut.DataDbCfg().DataDbHost, shrGrpCfgOut.DataDbCfg().DataDbPort,
-		shrGrpCfgOut.DataDbCfg().DataDbName, shrGrpCfgOut.DataDbCfg().DataDbUser,
-		shrGrpCfgOut.DataDbCfg().DataDbPass, shrGrpCfgOut.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(shrGrpCfgOut.DataDbCfg().Type,
+		shrGrpCfgOut.DataDbCfg().Host, shrGrpCfgOut.DataDbCfg().Port,
+		shrGrpCfgOut.DataDbCfg().Name, shrGrpCfgOut.DataDbCfg().User,
+		shrGrpCfgOut.DataDbCfg().Password, shrGrpCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), shrGrpCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)

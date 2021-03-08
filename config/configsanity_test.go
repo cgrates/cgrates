@@ -1234,7 +1234,7 @@ func TestConfigSanityAnalyzer(t *testing.T) {
 
 func TestConfigSanityDataDB(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
-	cfg.dataDbCfg.DataDbType = utils.INTERNAL
+	cfg.dataDbCfg.Type = utils.INTERNAL
 
 	cfg.cacheCfg = &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{

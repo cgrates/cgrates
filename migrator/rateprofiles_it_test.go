@@ -123,18 +123,18 @@ func TestRatePrfITMoveEncoding2(t *testing.T) {
 }
 
 func testRatePrfITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(ratePrfCfgIn.DataDbCfg().DataDbType,
-		ratePrfCfgIn.DataDbCfg().DataDbHost, ratePrfCfgIn.DataDbCfg().DataDbPort,
-		ratePrfCfgIn.DataDbCfg().DataDbName, ratePrfCfgIn.DataDbCfg().DataDbUser,
-		ratePrfCfgIn.DataDbCfg().DataDbPass, ratePrfCfgIn.GeneralCfg().DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(ratePrfCfgIn.DataDbCfg().Type,
+		ratePrfCfgIn.DataDbCfg().Host, ratePrfCfgIn.DataDbCfg().Port,
+		ratePrfCfgIn.DataDbCfg().Name, ratePrfCfgIn.DataDbCfg().User,
+		ratePrfCfgIn.DataDbCfg().Password, ratePrfCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), ratePrfCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(ratePrfCfgOut.DataDbCfg().DataDbType,
-		ratePrfCfgOut.DataDbCfg().DataDbHost, ratePrfCfgOut.DataDbCfg().DataDbPort,
-		ratePrfCfgOut.DataDbCfg().DataDbName, ratePrfCfgOut.DataDbCfg().DataDbUser,
-		ratePrfCfgOut.DataDbCfg().DataDbPass, ratePrfCfgOut.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(ratePrfCfgOut.DataDbCfg().Type,
+		ratePrfCfgOut.DataDbCfg().Host, ratePrfCfgOut.DataDbCfg().Port,
+		ratePrfCfgOut.DataDbCfg().Name, ratePrfCfgOut.DataDbCfg().User,
+		ratePrfCfgOut.DataDbCfg().Password, ratePrfCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), ratePrfCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)

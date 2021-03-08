@@ -124,18 +124,18 @@ func TestDispatcherITMoveEncoding2(t *testing.T) {
 }
 
 func testDspITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(dspCfgIn.DataDbCfg().DataDbType,
-		dspCfgIn.DataDbCfg().DataDbHost, dspCfgIn.DataDbCfg().DataDbPort,
-		dspCfgIn.DataDbCfg().DataDbName, dspCfgIn.DataDbCfg().DataDbUser,
-		dspCfgIn.DataDbCfg().DataDbPass, dspCfgIn.GeneralCfg().DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(dspCfgIn.DataDbCfg().Type,
+		dspCfgIn.DataDbCfg().Host, dspCfgIn.DataDbCfg().Port,
+		dspCfgIn.DataDbCfg().Name, dspCfgIn.DataDbCfg().User,
+		dspCfgIn.DataDbCfg().Password, dspCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), dspCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(dspCfgOut.DataDbCfg().DataDbType,
-		dspCfgOut.DataDbCfg().DataDbHost, dspCfgOut.DataDbCfg().DataDbPort,
-		dspCfgOut.DataDbCfg().DataDbName, dspCfgOut.DataDbCfg().DataDbUser,
-		dspCfgOut.DataDbCfg().DataDbPass, dspCfgOut.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(dspCfgOut.DataDbCfg().Type,
+		dspCfgOut.DataDbCfg().Host, dspCfgOut.DataDbCfg().Port,
+		dspCfgOut.DataDbCfg().Name, dspCfgOut.DataDbCfg().User,
+		dspCfgOut.DataDbCfg().Password, dspCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), dspCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)

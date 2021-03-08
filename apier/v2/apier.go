@@ -57,7 +57,7 @@ func (apiv2 *APIerSv2) LoadRatingProfile(attrs *AttrLoadRatingProfile, reply *st
 	dbReader, err := engine.NewTpReader(apiv2.DataManager.DataDB(), apiv2.StorDb,
 		attrs.TPid, apiv2.Config.GeneralCfg().DefaultTimezone,
 		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().SchedulerConns,
-		apiv2.Config.DataDbCfg().DataDbType == utils.INTERNAL)
+		apiv2.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -87,7 +87,7 @@ func (apiv2 *APIerSv2) LoadAccountActions(attrs *AttrLoadAccountActions, reply *
 	dbReader, err := engine.NewTpReader(apiv2.DataManager.DataDB(), apiv2.StorDb,
 		attrs.TPid, apiv2.Config.GeneralCfg().DefaultTimezone,
 		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().SchedulerConns,
-		apiv2.Config.DataDbCfg().DataDbType == utils.INTERNAL)
+		apiv2.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -121,7 +121,7 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolde
 	loader, err := engine.NewTpReader(apiv2.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath), "", apiv2.Config.GeneralCfg().DefaultTimezone,
 		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().SchedulerConns,
-		apiv2.Config.DataDbCfg().DataDbType == utils.INTERNAL)
+		apiv2.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

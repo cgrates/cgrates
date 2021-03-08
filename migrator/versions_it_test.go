@@ -64,7 +64,7 @@ func TestVersionITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	vrsCfg.StorDbCfg().Name = vrsCfg.DataDbCfg().DataDbName
+	vrsCfg.StorDbCfg().Name = vrsCfg.DataDbCfg().Name
 	vrsSameOutDB = true
 	for _, stest := range sTestsVrsIT {
 		t.Run("TestVrsionITMigrateMongo", stest)
@@ -73,10 +73,10 @@ func TestVersionITMongo(t *testing.T) {
 }
 
 func testVrsITConnect(t *testing.T) {
-	dataDBOut, err := NewMigratorDataDB(vrsCfg.DataDbCfg().DataDbType,
-		vrsCfg.DataDbCfg().DataDbHost, vrsCfg.DataDbCfg().DataDbPort,
-		vrsCfg.DataDbCfg().DataDbName, vrsCfg.DataDbCfg().DataDbUser,
-		vrsCfg.DataDbCfg().DataDbPass, vrsCfg.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(vrsCfg.DataDbCfg().Type,
+		vrsCfg.DataDbCfg().Host, vrsCfg.DataDbCfg().Port,
+		vrsCfg.DataDbCfg().Name, vrsCfg.DataDbCfg().User,
+		vrsCfg.DataDbCfg().Password, vrsCfg.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), vrsCfg.DataDbCfg().Opts)
 	if err != nil {
 		t.Fatal(err)

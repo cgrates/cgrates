@@ -47,11 +47,11 @@ func TestDataDBCoverage(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	oldcfg := &config.DataDbCfg{
-		DataDbType: utils.Mongo,
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "27017",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
+		Type: utils.Mongo,
+		Host: "127.0.0.1",
+		Port: "27017",
+		Name: "10",
+		User: "cgrates",
 		Opts: map[string]interface{}{
 			utils.QueryTimeoutCfg:            "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",

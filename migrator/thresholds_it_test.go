@@ -143,18 +143,18 @@ func TestThresholdsITMoveEncoding2(t *testing.T) {
 }
 
 func testTrsITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(trsCfgIn.DataDbCfg().DataDbType,
-		trsCfgIn.DataDbCfg().DataDbHost, trsCfgIn.DataDbCfg().DataDbPort,
-		trsCfgIn.DataDbCfg().DataDbName, trsCfgIn.DataDbCfg().DataDbUser,
-		trsCfgIn.DataDbCfg().DataDbPass, trsCfgIn.GeneralCfg().DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(trsCfgIn.DataDbCfg().Type,
+		trsCfgIn.DataDbCfg().Host, trsCfgIn.DataDbCfg().Port,
+		trsCfgIn.DataDbCfg().Name, trsCfgIn.DataDbCfg().User,
+		trsCfgIn.DataDbCfg().Password, trsCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), trsCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(trsCfgOut.DataDbCfg().DataDbType,
-		trsCfgOut.DataDbCfg().DataDbHost, trsCfgOut.DataDbCfg().DataDbPort,
-		trsCfgOut.DataDbCfg().DataDbName, trsCfgOut.DataDbCfg().DataDbUser,
-		trsCfgOut.DataDbCfg().DataDbPass, trsCfgOut.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(trsCfgOut.DataDbCfg().Type,
+		trsCfgOut.DataDbCfg().Host, trsCfgOut.DataDbCfg().Port,
+		trsCfgOut.DataDbCfg().Name, trsCfgOut.DataDbCfg().User,
+		trsCfgOut.DataDbCfg().Password, trsCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), trsCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)

@@ -158,7 +158,7 @@ func main() {
 			if strings.HasPrefix(line, name) {
 				// get last word
 				lastSpace := strings.LastIndex(line, utils.SepCgr)
-				lastSpace += 1
+				lastSpace++
 				for _, arg := range cmd.ClientArgs() {
 					if strings.HasPrefix(arg, line[lastSpace:]) {
 						comp = append(comp, line[:lastSpace]+arg)

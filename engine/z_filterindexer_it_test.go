@@ -87,13 +87,14 @@ func TestFilterIndexerIT(t *testing.T) {
 	case utils.MetaMySQL:
 		cfg := config.NewDefaultCGRConfig()
 		redisDB, err := NewRedisStorage(
-			fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-			4, cfg.DataDbCfg().DataDbUser, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+			fmt.Sprintf("%s:%s", cfg.DataDbCfg().Host, cfg.DataDbCfg().Port),
+			4, cfg.DataDbCfg().User, cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 			utils.RedisMaxConns, "", false, 0, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}
-		cfgDBName = cfg.DataDbCfg().DataDbName
+		cfgDBName = cfg.DataDbCfg().Name
+		defer redisDB.Close()
 		dataManager = NewDataManager(redisDB, config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMongo:
 		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
@@ -101,15 +102,16 @@ func TestFilterIndexerIT(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		mongoDB, err := NewMongoStorage(mgoITCfg.StorDbCfg().Host,
-			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
-			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
+		mongoDB, err := NewMongoStorage(mgoITCfg.DataDbCfg().Host,
+			mgoITCfg.DataDbCfg().Port, mgoITCfg.DataDbCfg().Name,
+			mgoITCfg.DataDbCfg().User, mgoITCfg.DataDbCfg().Password,
 			mgoITCfg.GeneralCfg().DBDataEncoding,
 			utils.StorDB, nil, 10*time.Second)
 		if err != nil {
 			t.Fatal(err)
 		}
-		cfgDBName = mgoITCfg.StorDbCfg().Name
+		cfgDBName = mgoITCfg.DataDbCfg().Name
+		defer mongoDB.Close()
 		dataManager = NewDataManager(mongoDB, config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaPostgres:
 		t.SkipNow()
