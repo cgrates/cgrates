@@ -291,7 +291,37 @@ func TestRegister(t *testing.T) {
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
-
+	args2 = utils.NewServerRequest(utils.DispatcherSv1GetProfileForEvent, id, id)
+	args2JSON, err = json.Marshal(args2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(args2JSON))
+	if _, err := register(req); err == nil {
+		t.Errorf("Expected error,received: nil")
+	}
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(argsJSON))
+	if _, err := register(req); err == nil {
+		t.Errorf("Expected error,received: nil")
+	}
+	args2 = utils.NewServerRequest(utils.RegistrarSv1RegisterRPCHosts, id, id)
+	args2JSON, err = json.Marshal(args2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(args2JSON))
+	if _, err := register(req); err == nil {
+		t.Errorf("Expected error,received: nil")
+	}
+	args2 = utils.NewServerRequest(utils.RegistrarSv1UnregisterRPCHosts, id, id)
+	args2JSON, err = json.Marshal(args2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(args2JSON))
+	if _, err := register(req); err == nil {
+		t.Errorf("Expected error,received: nil")
+	}
 	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
 }
 
@@ -409,4 +439,89 @@ func TestGetConnPortBiRPCGOB(t *testing.T) {
 	if err == nil || err.Error() != "missing port in address" {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "missing port in address", err)
 	}
+}
+
+func TestRegisterRegistrarSv1UnregisterRPCHosts(t *testing.T) {
+	ra := &RegisterArgs{
+		Tenant: "cgrates.org",
+		Hosts: []*RegisterHostCfg{
+			{
+				ID:        "Host1",
+				Port:      "2012",
+				TLS:       true,
+				Transport: utils.MetaJSON,
+			},
+			{
+				ID:        "Host2",
+				Port:      "2013",
+				TLS:       false,
+				Transport: utils.MetaGOB,
+			},
+		},
+		Opts: make(map[string]interface{}),
+	}
+	raJSON, err := json.Marshal([]interface{}{ra})
+	id := json.RawMessage("1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	args := utils.NewServerRequest(utils.RegistrarSv1UnregisterRPCHosts, raJSON, id)
+	argsJSON, err := json.Marshal(args)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(argsJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.RemoteAddr = "127.0.0.1:2356"
+	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
+	if rplyID, err := register(req); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(id, *rplyID) {
+		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
+	}
+}
+
+func TestRegisterRegistrarSv1RegisterRPCHosts(t *testing.T) {
+	ra := &RegisterArgs{
+		Tenant: "cgrates.org",
+		Hosts: []*RegisterHostCfg{
+			{
+				ID:        "Host1",
+				Port:      "2012",
+				TLS:       true,
+				Transport: utils.MetaJSON,
+			},
+			{
+				ID:        "Host2",
+				Port:      "2013",
+				TLS:       false,
+				Transport: utils.MetaGOB,
+			},
+		},
+		Opts: make(map[string]interface{}),
+	}
+	raJSON, err := json.Marshal([]interface{}{ra})
+	id := json.RawMessage("1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	args := utils.NewServerRequest(utils.RegistrarSv1RegisterRPCHosts, raJSON, id)
+	argsJSON, err := json.Marshal(args)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(argsJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.RemoteAddr = "127.0.0.1:2356"
+	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
+	if rplyID, err := register(req); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(id, *rplyID) {
+		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
+	}
+	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
 }
