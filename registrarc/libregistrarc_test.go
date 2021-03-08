@@ -522,10 +522,9 @@ func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{"errCon"}
 	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
 	engine.Cache = engine.NewCacheS(cfg, nil, nil)
-	if rplyID, err := register(req); err != nil {
+	_, err = register(req)
+	if err == nil || err != utils.ErrPartiallyExecuted {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(id, *rplyID) {
-		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
 	}
 	delete(config.CgrConfig().RPCConns(), "errCon")
 }
