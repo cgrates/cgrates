@@ -152,3 +152,25 @@ func TestNewDecimalFromUsage(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
+
+func TestDecimalNewDecimalFromString(t *testing.T) {
+	str := "123.4"
+	received, err := NewDecimalFromString(str)
+	if err != nil {
+		t.Error(err)
+	}
+	expected := &Decimal{decimal.New(1234, 1)}
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+	}
+}
+
+func TestDecimalNewDecimalFromStringFail(t *testing.T) {
+	str := "testString"
+	_, err := NewDecimalFromString(str)
+	expected := "can't convert <" + str + "> to decimal"
+
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, expected)
+	}
+}
