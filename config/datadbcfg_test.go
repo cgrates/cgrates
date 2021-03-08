@@ -51,14 +51,14 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := &DataDbCfg{
-		DataDbType: "redis",
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "6379",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
-		DataDbPass: "password",
-		RmtConns:   []string{"*conn1"},
-		RplConns:   []string{"*conn1"},
+		Type:     "redis",
+		Host:     "127.0.0.1",
+		Port:     "6379",
+		Name:     "10",
+		User:     "cgrates",
+		Password: "password",
+		RmtConns: []string{"*conn1"},
+		RplConns: []string{"*conn1"},
 		Items: map[string]*ItemOpt{
 			utils.MetaAccounts: {
 				Replicate: true,
@@ -143,8 +143,8 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected := DataDbCfg{
-		DataDbType: "mongo",
-		Opts:       make(map[string]interface{}),
+		Type: "mongo",
+		Opts: make(map[string]interface{}),
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -162,9 +162,9 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected = DataDbCfg{
-		DataDbType: "mongo",
-		DataDbPort: "27017",
-		Opts:       make(map[string]interface{}),
+		Type: "mongo",
+		Port: "27017",
+		Opts: make(map[string]interface{}),
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -182,9 +182,9 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 }`
 	expected = DataDbCfg{
-		DataDbType: "internal",
-		DataDbPort: "internal",
-		Opts:       make(map[string]interface{}),
+		Type: "internal",
+		Port: "internal",
+		Opts: make(map[string]interface{}),
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -216,13 +216,13 @@ func TestDataDBRemoteReplication(t *testing.T) {
 
 	dbcfg.Opts = make(map[string]interface{})
 	expected = DataDbCfg{
-		DataDbType: "redis",
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "6379",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
-		DataDbPass: "password",
-		RmtConns:   []string{"Conn1"},
+		Type:     "redis",
+		Host:     "127.0.0.1",
+		Port:     "6379",
+		Name:     "10",
+		User:     "cgrates",
+		Password: "password",
+		RmtConns: []string{"Conn1"},
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg: "sentinel",
 		},
@@ -246,12 +246,12 @@ func TestDataDBRemoteReplication(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		DataDbType: utils.INTERNAL,
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "6379",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
-		DataDbPass: "password",
+		Type:     utils.INTERNAL,
+		Host:     "127.0.0.1",
+		Port:     "6379",
+		Name:     "10",
+		User:     "cgrates",
+		Password: "password",
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg: "sentinel",
 		},
@@ -277,12 +277,12 @@ func TestDataDBRemoteReplication(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		DataDbType: utils.INTERNAL,
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "6379",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
-		DataDbPass: "password",
+		Type:     utils.INTERNAL,
+		Host:     "127.0.0.1",
+		Port:     "6379",
+		Name:     "10",
+		User:     "cgrates",
+		Password: "password",
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg: "sentinel",
 		},
@@ -323,13 +323,13 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		DataDbType: "redis",
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "6379",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
-		DataDbPass: "password",
-		RmtConns:   []string{"Conn1"},
+		Type:     "redis",
+		Host:     "127.0.0.1",
+		Port:     "6379",
+		Name:     "10",
+		User:     "cgrates",
+		Password: "password",
+		RmtConns: []string{"Conn1"},
 		Items: map[string]*ItemOpt{
 			utils.MetaAccounts: {
 				Replicate: true,
@@ -379,12 +379,12 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		}`
 
 	expected = DataDbCfg{
-		DataDbType: "redis",
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "6379",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
-		DataDbPass: "password",
+		Type:     "redis",
+		Host:     "127.0.0.1",
+		Port:     "6379",
+		Name:     "10",
+		User:     "cgrates",
+		Password: "password",
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg: "sentinel",
 		},
@@ -437,12 +437,12 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		}`
 
 	expected = DataDbCfg{
-		DataDbType: "redis",
-		DataDbHost: "127.0.0.1",
-		DataDbPort: "6379",
-		DataDbName: "10",
-		DataDbUser: "cgrates",
-		DataDbPass: "password",
+		Type:     "redis",
+		Host:     "127.0.0.1",
+		Port:     "6379",
+		Name:     "10",
+		User:     "cgrates",
+		Password: "password",
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg: "sentinel",
 		},

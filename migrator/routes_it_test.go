@@ -123,18 +123,18 @@ func TestSuppliersITMoveEncoding2(t *testing.T) {
 }
 
 func testSupITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(supCfgIn.DataDbCfg().DataDbType,
-		supCfgIn.DataDbCfg().DataDbHost, supCfgIn.DataDbCfg().DataDbPort,
-		supCfgIn.DataDbCfg().DataDbName, supCfgIn.DataDbCfg().DataDbUser,
-		supCfgIn.DataDbCfg().DataDbPass, supCfgIn.GeneralCfg().DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(supCfgIn.DataDbCfg().Type,
+		supCfgIn.DataDbCfg().Host, supCfgIn.DataDbCfg().Port,
+		supCfgIn.DataDbCfg().Name, supCfgIn.DataDbCfg().User,
+		supCfgIn.DataDbCfg().Password, supCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), supCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(supCfgOut.DataDbCfg().DataDbType,
-		supCfgOut.DataDbCfg().DataDbHost, supCfgOut.DataDbCfg().DataDbPort,
-		supCfgOut.DataDbCfg().DataDbName, supCfgOut.DataDbCfg().DataDbUser,
-		supCfgOut.DataDbCfg().DataDbPass, supCfgOut.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(supCfgOut.DataDbCfg().Type,
+		supCfgOut.DataDbCfg().Host, supCfgOut.DataDbCfg().Port,
+		supCfgOut.DataDbCfg().Name, supCfgOut.DataDbCfg().User,
+		supCfgOut.DataDbCfg().Password, supCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), supCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)

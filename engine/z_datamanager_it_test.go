@@ -51,8 +51,8 @@ func TestDMitinitDB(t *testing.T) {
 		t.SkipNow()
 	case utils.MetaMySQL:
 		dataDB, err = NewRedisStorage(
-			fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-			4, cfg.DataDbCfg().DataDbUser, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+			fmt.Sprintf("%s:%s", cfg.DataDbCfg().Host, cfg.DataDbCfg().Port),
+			4, cfg.DataDbCfg().User, cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 			utils.RedisMaxConns, "", false, 0, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())

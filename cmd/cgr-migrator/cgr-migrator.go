@@ -49,17 +49,17 @@ var (
 		"<*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*filters|*stordb|*datadb>")
 	version = cgrMigratorFlags.Bool(utils.ElsVersionLow, false, "prints the application version")
 
-	inDataDBType = cgrMigratorFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().DataDbType,
+	inDataDBType = cgrMigratorFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().Type,
 		"the type of the DataDB Database <*redis|*mongo>")
-	inDataDBHost = cgrMigratorFlags.String(utils.DataDBHostCgr, dfltCfg.DataDbCfg().DataDbHost,
+	inDataDBHost = cgrMigratorFlags.String(utils.DataDBHostCgr, dfltCfg.DataDbCfg().Host,
 		"the DataDB host")
-	inDataDBPort = cgrMigratorFlags.String(utils.DataDBPortCgr, dfltCfg.DataDbCfg().DataDbPort,
+	inDataDBPort = cgrMigratorFlags.String(utils.DataDBPortCgr, dfltCfg.DataDbCfg().Port,
 		"the DataDB port")
-	inDataDBName = cgrMigratorFlags.String(utils.DataDBNameCgr, dfltCfg.DataDbCfg().DataDbName,
+	inDataDBName = cgrMigratorFlags.String(utils.DataDBNameCgr, dfltCfg.DataDbCfg().Name,
 		"the name/number of the DataDB")
-	inDataDBUser = cgrMigratorFlags.String(utils.DataDBUserCgr, dfltCfg.DataDbCfg().DataDbUser,
+	inDataDBUser = cgrMigratorFlags.String(utils.DataDBUserCgr, dfltCfg.DataDbCfg().User,
 		"the DataDB user")
-	inDataDBPass = cgrMigratorFlags.String(utils.DataDBPasswdCgr, dfltCfg.DataDbCfg().DataDbPass,
+	inDataDBPass = cgrMigratorFlags.String(utils.DataDBPasswdCgr, dfltCfg.DataDbCfg().Password,
 		"the DataDB password")
 	inDBDataEncoding = cgrMigratorFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
 		"the encoding used to store object Data in strings")
@@ -148,23 +148,23 @@ func main() {
 	}
 
 	// inDataDB
-	if *inDataDBType != dfltCfg.DataDbCfg().DataDbType {
-		mgrCfg.DataDbCfg().DataDbType = strings.TrimPrefix(*inDataDBType, utils.MaskChar)
+	if *inDataDBType != dfltCfg.DataDbCfg().Type {
+		mgrCfg.DataDbCfg().Type = strings.TrimPrefix(*inDataDBType, utils.MaskChar)
 	}
-	if *inDataDBHost != dfltCfg.DataDbCfg().DataDbHost {
-		mgrCfg.DataDbCfg().DataDbHost = *inDataDBHost
+	if *inDataDBHost != dfltCfg.DataDbCfg().Host {
+		mgrCfg.DataDbCfg().Host = *inDataDBHost
 	}
-	if *inDataDBPort != dfltCfg.DataDbCfg().DataDbPort {
-		mgrCfg.DataDbCfg().DataDbPort = *inDataDBPort
+	if *inDataDBPort != dfltCfg.DataDbCfg().Port {
+		mgrCfg.DataDbCfg().Port = *inDataDBPort
 	}
-	if *inDataDBName != dfltCfg.DataDbCfg().DataDbName {
-		mgrCfg.DataDbCfg().DataDbName = *inDataDBName
+	if *inDataDBName != dfltCfg.DataDbCfg().Name {
+		mgrCfg.DataDbCfg().Name = *inDataDBName
 	}
-	if *inDataDBUser != dfltCfg.DataDbCfg().DataDbUser {
-		mgrCfg.DataDbCfg().DataDbUser = *inDataDBUser
+	if *inDataDBUser != dfltCfg.DataDbCfg().User {
+		mgrCfg.DataDbCfg().User = *inDataDBUser
 	}
-	if *inDataDBPass != dfltCfg.DataDbCfg().DataDbPass {
-		mgrCfg.DataDbCfg().DataDbPass = *inDataDBPass
+	if *inDataDBPass != dfltCfg.DataDbCfg().Password {
+		mgrCfg.DataDbCfg().Password = *inDataDBPass
 	}
 	if *inDBDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
 		mgrCfg.GeneralCfg().DBDataEncoding = *inDBDataEncoding
@@ -203,7 +203,7 @@ func main() {
 	// outDataDB
 	if *outDataDBType == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrCfg().OutDataDBType == mgrCfg.MigratorCgrCfg().OutDataDBType {
-			mgrCfg.MigratorCgrCfg().OutDataDBType = mgrCfg.DataDbCfg().DataDbType
+			mgrCfg.MigratorCgrCfg().OutDataDBType = mgrCfg.DataDbCfg().Type
 		}
 	} else {
 		mgrCfg.MigratorCgrCfg().OutDataDBType = strings.TrimPrefix(*outDataDBType, utils.MaskChar)
@@ -211,35 +211,35 @@ func main() {
 
 	if *outDataDBHost == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrCfg().OutDataDBHost == mgrCfg.MigratorCgrCfg().OutDataDBHost {
-			mgrCfg.MigratorCgrCfg().OutDataDBHost = mgrCfg.DataDbCfg().DataDbHost
+			mgrCfg.MigratorCgrCfg().OutDataDBHost = mgrCfg.DataDbCfg().Host
 		}
 	} else {
 		mgrCfg.MigratorCgrCfg().OutDataDBHost = *outDataDBHost
 	}
 	if *outDataDBPort == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrCfg().OutDataDBPort == mgrCfg.MigratorCgrCfg().OutDataDBPort {
-			mgrCfg.MigratorCgrCfg().OutDataDBPort = mgrCfg.DataDbCfg().DataDbPort
+			mgrCfg.MigratorCgrCfg().OutDataDBPort = mgrCfg.DataDbCfg().Port
 		}
 	} else {
 		mgrCfg.MigratorCgrCfg().OutDataDBPort = *outDataDBPort
 	}
 	if *outDataDBName == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrCfg().OutDataDBName == mgrCfg.MigratorCgrCfg().OutDataDBName {
-			mgrCfg.MigratorCgrCfg().OutDataDBName = mgrCfg.DataDbCfg().DataDbName
+			mgrCfg.MigratorCgrCfg().OutDataDBName = mgrCfg.DataDbCfg().Name
 		}
 	} else {
 		mgrCfg.MigratorCgrCfg().OutDataDBName = *outDataDBName
 	}
 	if *outDataDBUser == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrCfg().OutDataDBUser == mgrCfg.MigratorCgrCfg().OutDataDBUser {
-			mgrCfg.MigratorCgrCfg().OutDataDBUser = mgrCfg.DataDbCfg().DataDbUser
+			mgrCfg.MigratorCgrCfg().OutDataDBUser = mgrCfg.DataDbCfg().User
 		}
 	} else {
 		mgrCfg.MigratorCgrCfg().OutDataDBUser = *outDataDBUser
 	}
 	if *outDataDBPass == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrCfg().OutDataDBPassword == mgrCfg.MigratorCgrCfg().OutDataDBPassword {
-			mgrCfg.MigratorCgrCfg().OutDataDBPassword = mgrCfg.DataDbCfg().DataDbPass
+			mgrCfg.MigratorCgrCfg().OutDataDBPassword = mgrCfg.DataDbCfg().Password
 		}
 	} else {
 		mgrCfg.MigratorCgrCfg().OutDataDBPassword = *outDataDBPass
@@ -259,16 +259,16 @@ func main() {
 		mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg] = *outDataDBRedisSentinel
 	}
 
-	sameDataDB = mgrCfg.MigratorCgrCfg().OutDataDBType == mgrCfg.DataDbCfg().DataDbType &&
-		mgrCfg.MigratorCgrCfg().OutDataDBHost == mgrCfg.DataDbCfg().DataDbHost &&
-		mgrCfg.MigratorCgrCfg().OutDataDBPort == mgrCfg.DataDbCfg().DataDbPort &&
-		mgrCfg.MigratorCgrCfg().OutDataDBName == mgrCfg.DataDbCfg().DataDbName &&
+	sameDataDB = mgrCfg.MigratorCgrCfg().OutDataDBType == mgrCfg.DataDbCfg().Type &&
+		mgrCfg.MigratorCgrCfg().OutDataDBHost == mgrCfg.DataDbCfg().Host &&
+		mgrCfg.MigratorCgrCfg().OutDataDBPort == mgrCfg.DataDbCfg().Port &&
+		mgrCfg.MigratorCgrCfg().OutDataDBName == mgrCfg.DataDbCfg().Name &&
 		mgrCfg.MigratorCgrCfg().OutDataDBEncoding == mgrCfg.GeneralCfg().DBDataEncoding
 
-	if dmIN, err = migrator.NewMigratorDataDB(mgrCfg.DataDbCfg().DataDbType,
-		mgrCfg.DataDbCfg().DataDbHost, mgrCfg.DataDbCfg().DataDbPort,
-		mgrCfg.DataDbCfg().DataDbName, mgrCfg.DataDbCfg().DataDbUser,
-		mgrCfg.DataDbCfg().DataDbPass, mgrCfg.GeneralCfg().DBDataEncoding,
+	if dmIN, err = migrator.NewMigratorDataDB(mgrCfg.DataDbCfg().Type,
+		mgrCfg.DataDbCfg().Host, mgrCfg.DataDbCfg().Port,
+		mgrCfg.DataDbCfg().Name, mgrCfg.DataDbCfg().User,
+		mgrCfg.DataDbCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
 		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().Opts); err != nil {
 		log.Fatal(err)
 	}

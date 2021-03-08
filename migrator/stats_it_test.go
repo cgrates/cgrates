@@ -106,18 +106,18 @@ func TestStatsQueueITMove(t *testing.T) {
 }
 
 func testStsITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(stsCfgIn.DataDbCfg().DataDbType,
-		stsCfgIn.DataDbCfg().DataDbHost, stsCfgIn.DataDbCfg().DataDbPort,
-		stsCfgIn.DataDbCfg().DataDbName, stsCfgIn.DataDbCfg().DataDbUser,
-		stsCfgIn.DataDbCfg().DataDbPass, stsCfgIn.GeneralCfg().DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(stsCfgIn.DataDbCfg().Type,
+		stsCfgIn.DataDbCfg().Host, stsCfgIn.DataDbCfg().Port,
+		stsCfgIn.DataDbCfg().Name, stsCfgIn.DataDbCfg().User,
+		stsCfgIn.DataDbCfg().Password, stsCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), stsCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(stsCfgOut.DataDbCfg().DataDbType,
-		stsCfgOut.DataDbCfg().DataDbHost, stsCfgOut.DataDbCfg().DataDbPort,
-		stsCfgOut.DataDbCfg().DataDbName, stsCfgOut.DataDbCfg().DataDbUser,
-		stsCfgOut.DataDbCfg().DataDbPass, stsCfgOut.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(stsCfgOut.DataDbCfg().Type,
+		stsCfgOut.DataDbCfg().Host, stsCfgOut.DataDbCfg().Port,
+		stsCfgOut.DataDbCfg().Name, stsCfgOut.DataDbCfg().User,
+		stsCfgOut.DataDbCfg().Password, stsCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), stsCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)

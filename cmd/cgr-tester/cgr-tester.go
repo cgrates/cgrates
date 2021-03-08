@@ -47,12 +47,12 @@ var (
 		"Configuration directory path.")
 
 	parallel       = cgrTesterFlags.Int("parallel", 0, "run n requests in parallel")
-	datadbType     = cgrTesterFlags.String("datadb_type", cgrConfig.DataDbCfg().DataDbType, "The type of the DataDb database <redis>")
-	datadbHost     = cgrTesterFlags.String("datadb_host", cgrConfig.DataDbCfg().DataDbHost, "The DataDb host to connect to.")
-	datadbPort     = cgrTesterFlags.String("datadb_port", cgrConfig.DataDbCfg().DataDbPort, "The DataDb port to bind to.")
-	datadbName     = cgrTesterFlags.String("datadb_name", cgrConfig.DataDbCfg().DataDbName, "The name/number of the DataDb to connect to.")
-	datadbUser     = cgrTesterFlags.String("datadb_user", cgrConfig.DataDbCfg().DataDbUser, "The DataDb user to sign in as.")
-	datadbPass     = cgrTesterFlags.String("datadb_pass", cgrConfig.DataDbCfg().DataDbPass, "The DataDb user's password.")
+	datadbType     = cgrTesterFlags.String("datadb_type", cgrConfig.DataDbCfg().Type, "The type of the DataDb database <redis>")
+	datadbHost     = cgrTesterFlags.String("datadb_host", cgrConfig.DataDbCfg().Host, "The DataDb host to connect to.")
+	datadbPort     = cgrTesterFlags.String("datadb_port", cgrConfig.DataDbCfg().Port, "The DataDb port to bind to.")
+	datadbName     = cgrTesterFlags.String("datadb_name", cgrConfig.DataDbCfg().Name, "The name/number of the DataDb to connect to.")
+	datadbUser     = cgrTesterFlags.String("datadb_user", cgrConfig.DataDbCfg().User, "The DataDb user to sign in as.")
+	datadbPass     = cgrTesterFlags.String("datadb_pass", cgrConfig.DataDbCfg().Password, "The DataDb user's password.")
 	dbdataEncoding = cgrTesterFlags.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
 	redisSentinel  = cgrTesterFlags.String("redis_sentinel", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisSentinelNameCfg]), "The name of redis sentinel")
 	dbRedisCluster = cgrTesterFlags.Bool("redis_cluster", false,
@@ -80,10 +80,10 @@ var (
 )
 
 func durInternalRater(cd *engine.CallDescriptorWithOpts) (time.Duration, error) {
-	dbConn, err := engine.NewDataDBConn(tstCfg.DataDbCfg().DataDbType,
-		tstCfg.DataDbCfg().DataDbHost, tstCfg.DataDbCfg().DataDbPort,
-		tstCfg.DataDbCfg().DataDbName, tstCfg.DataDbCfg().DataDbUser,
-		tstCfg.DataDbCfg().DataDbPass, tstCfg.GeneralCfg().DBDataEncoding,
+	dbConn, err := engine.NewDataDBConn(tstCfg.DataDbCfg().Type,
+		tstCfg.DataDbCfg().Host, tstCfg.DataDbCfg().Port,
+		tstCfg.DataDbCfg().Name, tstCfg.DataDbCfg().User,
+		tstCfg.DataDbCfg().Password, tstCfg.GeneralCfg().DBDataEncoding,
 		tstCfg.DataDbCfg().Opts)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
@@ -180,23 +180,23 @@ func main() {
 		}
 	}
 
-	if *datadbType != cgrConfig.DataDbCfg().DataDbType {
-		tstCfg.DataDbCfg().DataDbType = *datadbType
+	if *datadbType != cgrConfig.DataDbCfg().Type {
+		tstCfg.DataDbCfg().Type = *datadbType
 	}
-	if *datadbHost != cgrConfig.DataDbCfg().DataDbHost {
-		tstCfg.DataDbCfg().DataDbHost = *datadbHost
+	if *datadbHost != cgrConfig.DataDbCfg().Host {
+		tstCfg.DataDbCfg().Host = *datadbHost
 	}
-	if *datadbPort != cgrConfig.DataDbCfg().DataDbPort {
-		tstCfg.DataDbCfg().DataDbPort = *datadbPort
+	if *datadbPort != cgrConfig.DataDbCfg().Port {
+		tstCfg.DataDbCfg().Port = *datadbPort
 	}
-	if *datadbName != cgrConfig.DataDbCfg().DataDbName {
-		tstCfg.DataDbCfg().DataDbName = *datadbName
+	if *datadbName != cgrConfig.DataDbCfg().Name {
+		tstCfg.DataDbCfg().Name = *datadbName
 	}
-	if *datadbUser != cgrConfig.DataDbCfg().DataDbUser {
-		tstCfg.DataDbCfg().DataDbUser = *datadbUser
+	if *datadbUser != cgrConfig.DataDbCfg().User {
+		tstCfg.DataDbCfg().User = *datadbUser
 	}
-	if *datadbPass != cgrConfig.DataDbCfg().DataDbPass {
-		tstCfg.DataDbCfg().DataDbPass = *datadbPass
+	if *datadbPass != cgrConfig.DataDbCfg().Password {
+		tstCfg.DataDbCfg().Password = *datadbPass
 	}
 	if *dbdataEncoding != "" {
 		tstCfg.GeneralCfg().DBDataEncoding = *dbdataEncoding

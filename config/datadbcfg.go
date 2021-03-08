@@ -28,12 +28,12 @@ import (
 
 // DataDbCfg Database config
 type DataDbCfg struct {
-	DataDbType  string
-	DataDbHost  string   // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDbPort  string   // The port to bind to.
-	DataDbName  string   // The name of the database to connect to.
-	DataDbUser  string   // The user to sign in as.
-	DataDbPass  string   // The user's password.
+	Type        string
+	Host        string   // The host to connect to. Values that start with / are for UNIX domain sockets.
+	Port        string   // The port to bind to.
+	Name        string   // The name of the database to connect to.
+	User        string   // The user to sign in as.
+	Password    string   // The user's password.
 	RmtConns    []string // Remote DataDB  connIDs
 	RplConns    []string // Replication connIDs
 	RplFiltered bool
@@ -48,26 +48,26 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		return nil
 	}
 	if jsnDbCfg.Db_type != nil {
-		dbcfg.DataDbType = strings.TrimPrefix(*jsnDbCfg.Db_type, "*")
+		dbcfg.Type = strings.TrimPrefix(*jsnDbCfg.Db_type, "*")
 	}
 	if jsnDbCfg.Db_host != nil {
-		dbcfg.DataDbHost = *jsnDbCfg.Db_host
+		dbcfg.Host = *jsnDbCfg.Db_host
 	}
 	if jsnDbCfg.Db_port != nil {
 		port := strconv.Itoa(*jsnDbCfg.Db_port)
 		if port == "-1" {
 			port = utils.MetaDynamic
 		}
-		dbcfg.DataDbPort = dbDefaultsCfg.dbPort(dbcfg.DataDbType, port)
+		dbcfg.Port = dbDefaultsCfg.dbPort(dbcfg.Type, port)
 	}
 	if jsnDbCfg.Db_name != nil {
-		dbcfg.DataDbName = *jsnDbCfg.Db_name
+		dbcfg.Name = *jsnDbCfg.Db_name
 	}
 	if jsnDbCfg.Db_user != nil {
-		dbcfg.DataDbUser = *jsnDbCfg.Db_user
+		dbcfg.User = *jsnDbCfg.Db_user
 	}
 	if jsnDbCfg.Db_password != nil {
-		dbcfg.DataDbPass = *jsnDbCfg.Db_password
+		dbcfg.Password = *jsnDbCfg.Db_password
 	}
 	if jsnDbCfg.Remote_conns != nil {
 		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
@@ -116,12 +116,12 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 // Clone returns the cloned object
 func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 	cln = &DataDbCfg{
-		DataDbType:  dbcfg.DataDbType,
-		DataDbHost:  dbcfg.DataDbHost,
-		DataDbPort:  dbcfg.DataDbPort,
-		DataDbName:  dbcfg.DataDbName,
-		DataDbUser:  dbcfg.DataDbUser,
-		DataDbPass:  dbcfg.DataDbPass,
+		Type:        dbcfg.Type,
+		Host:        dbcfg.Host,
+		Port:        dbcfg.Port,
+		Name:        dbcfg.Name,
+		User:        dbcfg.User,
+		Password:    dbcfg.Password,
 		RplFiltered: dbcfg.RplFiltered,
 		RmtConnID:   dbcfg.RmtConnID,
 		Items:       make(map[string]*ItemOpt),
@@ -152,11 +152,11 @@ func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.DataDbTypeCfg:          utils.Meta + dbcfg.DataDbType,
-		utils.DataDbHostCfg:          dbcfg.DataDbHost,
-		utils.DataDbNameCfg:          dbcfg.DataDbName,
-		utils.DataDbUserCfg:          dbcfg.DataDbUser,
-		utils.DataDbPassCfg:          dbcfg.DataDbPass,
+		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
+		utils.DataDbHostCfg:          dbcfg.Host,
+		utils.DataDbNameCfg:          dbcfg.Name,
+		utils.DataDbUserCfg:          dbcfg.User,
+		utils.DataDbPassCfg:          dbcfg.Password,
 		utils.RemoteConnsCfg:         dbcfg.RmtConns,
 		utils.ReplicationConnsCfg:    dbcfg.RplConns,
 		utils.FilteredReplicationCfg: dbcfg.RplFiltered,
@@ -174,8 +174,8 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.ItemsCfg] = items
 	}
-	if dbcfg.DataDbPort != "" {
-		initialMP[utils.DataDbPortCfg], _ = strconv.Atoi(dbcfg.DataDbPort)
+	if dbcfg.Port != "" {
+		initialMP[utils.DataDbPortCfg], _ = strconv.Atoi(dbcfg.Port)
 	}
 	return
 }

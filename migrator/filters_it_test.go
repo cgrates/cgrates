@@ -100,18 +100,18 @@ func testFltrStart(testName, action string, t *testing.T) {
 }
 
 func testFltrITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(fltrCfgIn.DataDbCfg().DataDbType,
-		fltrCfgIn.DataDbCfg().DataDbHost, fltrCfgIn.DataDbCfg().DataDbPort,
-		fltrCfgIn.DataDbCfg().DataDbName, fltrCfgIn.DataDbCfg().DataDbUser,
-		fltrCfgIn.DataDbCfg().DataDbPass, fltrCfgIn.GeneralCfg().DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(fltrCfgIn.DataDbCfg().Type,
+		fltrCfgIn.DataDbCfg().Host, fltrCfgIn.DataDbCfg().Port,
+		fltrCfgIn.DataDbCfg().Name, fltrCfgIn.DataDbCfg().User,
+		fltrCfgIn.DataDbCfg().Password, fltrCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), fltrCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(fltrCfgOut.DataDbCfg().DataDbType,
-		fltrCfgOut.DataDbCfg().DataDbHost, fltrCfgOut.DataDbCfg().DataDbPort,
-		fltrCfgOut.DataDbCfg().DataDbName, fltrCfgOut.DataDbCfg().DataDbUser,
-		fltrCfgOut.DataDbCfg().DataDbPass, fltrCfgOut.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(fltrCfgOut.DataDbCfg().Type,
+		fltrCfgOut.DataDbCfg().Host, fltrCfgOut.DataDbCfg().Port,
+		fltrCfgOut.DataDbCfg().Name, fltrCfgOut.DataDbCfg().User,
+		fltrCfgOut.DataDbCfg().Password, fltrCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), fltrCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)

@@ -103,10 +103,10 @@ func testAPIerSv2itResetStorDb(t *testing.T) {
 }
 
 func testAPIerSv2itConnectDataDB(t *testing.T) {
-	rdsITdb, err := engine.NewDataDBConn(apierCfg.DataDbCfg().DataDbType,
-		apierCfg.DataDbCfg().DataDbHost, apierCfg.DataDbCfg().DataDbPort,
-		apierCfg.DataDbCfg().DataDbName, apierCfg.DataDbCfg().DataDbUser,
-		apierCfg.DataDbCfg().DataDbPass, apierCfg.GeneralCfg().DBDataEncoding,
+	rdsITdb, err := engine.NewDataDBConn(apierCfg.DataDbCfg().Type,
+		apierCfg.DataDbCfg().Host, apierCfg.DataDbCfg().Port,
+		apierCfg.DataDbCfg().Name, apierCfg.DataDbCfg().User,
+		apierCfg.DataDbCfg().Password, apierCfg.GeneralCfg().DBDataEncoding,
 		apierCfg.DataDbCfg().Opts)
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())

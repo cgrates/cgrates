@@ -123,18 +123,18 @@ func TestRatingPlanITMoveEncoding2(t *testing.T) {
 }
 
 func testRtPlITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(rtplCfgIn.DataDbCfg().DataDbType,
-		rtplCfgIn.DataDbCfg().DataDbHost, rtplCfgIn.DataDbCfg().DataDbPort,
-		rtplCfgIn.DataDbCfg().DataDbName, rtplCfgIn.DataDbCfg().DataDbUser,
-		rtplCfgIn.DataDbCfg().DataDbPass, rtplCfgIn.GeneralCfg().DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(rtplCfgIn.DataDbCfg().Type,
+		rtplCfgIn.DataDbCfg().Host, rtplCfgIn.DataDbCfg().Port,
+		rtplCfgIn.DataDbCfg().Name, rtplCfgIn.DataDbCfg().User,
+		rtplCfgIn.DataDbCfg().Password, rtplCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), ratePrfCfgIn.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(rtplCfgOut.DataDbCfg().DataDbType,
-		rtplCfgOut.DataDbCfg().DataDbHost, rtplCfgOut.DataDbCfg().DataDbPort,
-		rtplCfgOut.DataDbCfg().DataDbName, rtplCfgOut.DataDbCfg().DataDbUser,
-		rtplCfgOut.DataDbCfg().DataDbPass, rtplCfgOut.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(rtplCfgOut.DataDbCfg().Type,
+		rtplCfgOut.DataDbCfg().Host, rtplCfgOut.DataDbCfg().Port,
+		rtplCfgOut.DataDbCfg().Name, rtplCfgOut.DataDbCfg().User,
+		rtplCfgOut.DataDbCfg().Password, rtplCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), ratePrfCfgOut.DataDbCfg().Opts)
 	if err != nil {
 		log.Fatal(err)

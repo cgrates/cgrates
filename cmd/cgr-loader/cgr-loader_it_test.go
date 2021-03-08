@@ -51,12 +51,12 @@ func TestLoadConfig(t *testing.T) {
 	*dataDBPasswd = "toor"
 	*dbRedisSentinel = "sentinel1"
 	expDBcfg := &config.DataDbCfg{
-		DataDbType: utils.Redis,
-		DataDbHost: "localhost",
-		DataDbPort: "2012",
-		DataDbName: "100",
-		DataDbUser: "cgrates2",
-		DataDbPass: "toor",
+		Type:     utils.Redis,
+		Host:     "localhost",
+		Port:     "2012",
+		Name:     "100",
+		User:     "cgrates2",
+		Password: "toor",
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg:       "sentinel1",
 			utils.QueryTimeoutCfg:            "10s",
@@ -273,10 +273,10 @@ func testLoadItStartLoader(t *testing.T) {
 
 func testLoadItConnectToDB(t *testing.T) {
 	var err error
-	if db, err = engine.NewDataDBConn(ldrItCfg.DataDbCfg().DataDbType,
-		ldrItCfg.DataDbCfg().DataDbHost, ldrItCfg.DataDbCfg().DataDbPort,
-		ldrItCfg.DataDbCfg().DataDbName, ldrItCfg.DataDbCfg().DataDbUser,
-		ldrItCfg.DataDbCfg().DataDbPass, ldrItCfg.GeneralCfg().DBDataEncoding,
+	if db, err = engine.NewDataDBConn(ldrItCfg.DataDbCfg().Type,
+		ldrItCfg.DataDbCfg().Host, ldrItCfg.DataDbCfg().Port,
+		ldrItCfg.DataDbCfg().Name, ldrItCfg.DataDbCfg().User,
+		ldrItCfg.DataDbCfg().Password, ldrItCfg.GeneralCfg().DBDataEncoding,
 		ldrItCfg.DataDbCfg().Opts); err != nil {
 		t.Fatal(err)
 	}

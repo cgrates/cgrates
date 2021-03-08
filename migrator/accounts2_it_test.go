@@ -65,18 +65,18 @@ func TestAccMigrateWithInternal(t *testing.T) {
 }
 
 func testAcc2ITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(acc2CfgIn.DataDbCfg().DataDbType,
-		acc2CfgIn.DataDbCfg().DataDbHost, acc2CfgIn.DataDbCfg().DataDbPort,
-		acc2CfgIn.DataDbCfg().DataDbName, acc2CfgIn.DataDbCfg().DataDbUser,
-		acc2CfgIn.DataDbCfg().DataDbPass, acc2CfgIn.GeneralCfg().DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(acc2CfgIn.DataDbCfg().Type,
+		acc2CfgIn.DataDbCfg().Host, acc2CfgIn.DataDbCfg().Port,
+		acc2CfgIn.DataDbCfg().Name, acc2CfgIn.DataDbCfg().User,
+		acc2CfgIn.DataDbCfg().Password, acc2CfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), acc2CfgIn.DataDbCfg().Opts)
 	if err != nil {
 		t.Error(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(acc2CfgOut.DataDbCfg().DataDbType,
-		acc2CfgOut.DataDbCfg().DataDbHost, acc2CfgOut.DataDbCfg().DataDbPort,
-		acc2CfgOut.DataDbCfg().DataDbName, acc2CfgOut.DataDbCfg().DataDbUser,
-		acc2CfgOut.DataDbCfg().DataDbPass, acc2CfgOut.GeneralCfg().DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(acc2CfgOut.DataDbCfg().Type,
+		acc2CfgOut.DataDbCfg().Host, acc2CfgOut.DataDbCfg().Port,
+		acc2CfgOut.DataDbCfg().Name, acc2CfgOut.DataDbCfg().User,
+		acc2CfgOut.DataDbCfg().Password, acc2CfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), acc2CfgOut.DataDbCfg().Opts)
 	if err != nil {
 		t.Error(err)

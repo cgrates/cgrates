@@ -107,10 +107,10 @@ func TestCgrCfgDataDBPortWithoutDynamic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.DataDbCfg().DataDbType != utils.Mongo {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbType, utils.Mongo)
-	} else if cgrCfg.DataDbCfg().DataDbPort != "6379" {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbPort, "6379")
+	} else if cgrCfg.DataDbCfg().Type != utils.Mongo {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.Mongo)
+	} else if cgrCfg.DataDbCfg().Port != "6379" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Port, "6379")
 	}
 	jsnCfg = `
 {
@@ -121,10 +121,10 @@ func TestCgrCfgDataDBPortWithoutDynamic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.DataDbCfg().DataDbType != utils.INTERNAL {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbType, utils.INTERNAL)
-	} else if cgrCfg.DataDbCfg().DataDbPort != "6379" {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbPort, "6379")
+	} else if cgrCfg.DataDbCfg().Type != utils.INTERNAL {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.INTERNAL)
+	} else if cgrCfg.DataDbCfg().Port != "6379" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Port, "6379")
 	}
 }
 
@@ -139,10 +139,10 @@ func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.DataDbCfg().DataDbType != utils.Mongo {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbType, utils.Mongo)
-	} else if cgrCfg.DataDbCfg().DataDbPort != "27017" {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbPort, "27017")
+	} else if cgrCfg.DataDbCfg().Type != utils.Mongo {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.Mongo)
+	} else if cgrCfg.DataDbCfg().Port != "27017" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Port, "27017")
 	}
 	jsnCfg = `
 {
@@ -154,10 +154,10 @@ func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.DataDbCfg().DataDbType != utils.INTERNAL {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbType, utils.INTERNAL)
-	} else if cgrCfg.DataDbCfg().DataDbPort != "internal" {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().DataDbPort, "internal")
+	} else if cgrCfg.DataDbCfg().Type != utils.INTERNAL {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.INTERNAL)
+	} else if cgrCfg.DataDbCfg().Port != "internal" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Port, "internal")
 	}
 }
 
@@ -331,23 +331,23 @@ func TestCgrCfgJSONDefaultsListen(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
-	if cgrCfg.DataDbCfg().DataDbType != "redis" {
-		t.Errorf("Expecting: redis , received: %+v", cgrCfg.DataDbCfg().DataDbType)
+	if cgrCfg.DataDbCfg().Type != "redis" {
+		t.Errorf("Expecting: redis , received: %+v", cgrCfg.DataDbCfg().Type)
 	}
-	if cgrCfg.DataDbCfg().DataDbHost != "127.0.0.1" {
-		t.Errorf("Expecting: 127.0.0.1 , received: %+v", cgrCfg.DataDbCfg().DataDbHost)
+	if cgrCfg.DataDbCfg().Host != "127.0.0.1" {
+		t.Errorf("Expecting: 127.0.0.1 , received: %+v", cgrCfg.DataDbCfg().Host)
 	}
-	if cgrCfg.DataDbCfg().DataDbPort != "6379" {
-		t.Errorf("Expecting: 6379 , received: %+v", cgrCfg.DataDbCfg().DataDbPort)
+	if cgrCfg.DataDbCfg().Port != "6379" {
+		t.Errorf("Expecting: 6379 , received: %+v", cgrCfg.DataDbCfg().Port)
 	}
-	if cgrCfg.DataDbCfg().DataDbName != "10" {
-		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.DataDbCfg().DataDbName)
+	if cgrCfg.DataDbCfg().Name != "10" {
+		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.DataDbCfg().Name)
 	}
-	if cgrCfg.DataDbCfg().DataDbUser != "cgrates" {
-		t.Errorf("Expecting: cgrates , received: %+v", cgrCfg.DataDbCfg().DataDbUser)
+	if cgrCfg.DataDbCfg().User != "cgrates" {
+		t.Errorf("Expecting: cgrates , received: %+v", cgrCfg.DataDbCfg().User)
 	}
-	if cgrCfg.DataDbCfg().DataDbPass != "" {
-		t.Errorf("Expecting:  , received: %+v", cgrCfg.DataDbCfg().DataDbPass)
+	if cgrCfg.DataDbCfg().Password != "" {
+		t.Errorf("Expecting:  , received: %+v", cgrCfg.DataDbCfg().Password)
 	}
 	if len(cgrCfg.DataDbCfg().RmtConns) != 0 {
 		t.Errorf("Expecting:  0, received: %+v", len(cgrCfg.DataDbCfg().RmtConns))
