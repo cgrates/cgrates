@@ -6249,15 +6249,11 @@ func TestLoadAccountSCfgError(t *testing.T) {
 
 func TestCGRConfigGetDP(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
+	cfg.LockSections(HttpAgentJson, LoaderJson, ChargerSCfgJson)
+	cfg.UnlockSections(HttpAgentJson, LoaderJson, ChargerSCfgJson)
 	exp := utils.MapStorage(cfg.AsMapInterface(cfg.generalCfg.RSRSep))
 	dp := cfg.GetDataProvider()
 	if !reflect.DeepEqual(dp, exp) {
 		t.Errorf("Expected %+v, received %+v", exp, err)
 	}
-}
-
-func TestLockUnlockSectionsID(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	cfg.LockSections(HttpAgentJson, LoaderJson, ChargerSCfgJson)
-	cfg.UnlockSections(HttpAgentJson, LoaderJson, ChargerSCfgJson)
 }
