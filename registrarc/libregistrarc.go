@@ -190,7 +190,6 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		}
 		rpcConns := config.CgrConfig().RPCConns()
 		config.CgrConfig().LockSections(config.RPCConnsJsonName)
-		fmt.Println(args.IDs)
 		for connID := range config.RemoveRPCCons(rpcConns, utils.NewStringSet(args.IDs)) {
 			if err = engine.Cache.Remove(utils.CacheRPCConnections, connID,
 				true, utils.NonTransactional); err != nil {
