@@ -53,6 +53,15 @@ var sTests = []func(t *testing.T){
 	testITTestStoreFilterIndexesWithTransID,
 	testITFlush,
 	testITIsDBEmpty,
+	testITAccountProfileIndexes,
+	testITFlush,
+	testITIsDBEmpty,
+	testITResourceProfileIndexes,
+	testITFlush,
+	testITIsDBEmpty,
+	testITStatQueueProfileIndexes,
+	testITFlush,
+	testITIsDBEmpty,
 	testITTestStoreFilterIndexesWithTransID2,
 	testITFlush,
 	testITIsDBEmpty,
@@ -236,8 +245,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ID:     "Filter1",
 		Rules: []*FilterRule{
 			{
-				Element: "~*req.EventType",
 				Type:    utils.MetaString,
+				Element: "~*req.EventType",
 				Values:  []string{"Event1", "Event2"},
 			},
 		},
@@ -301,8 +310,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ID:     "Filter2",
 		Rules: []*FilterRule{
 			{
-				Element: "~*req.Account",
 				Type:    utils.MetaString,
+				Element: "~*req.Account",
 				Values:  []string{"1001", "1002"},
 			},
 		},
@@ -347,8 +356,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ID:     "Filter3",
 		Rules: []*FilterRule{
 			{
-				Element: "~*req.Destination",
 				Type:    utils.MetaString,
+				Element: "~*req.Destination",
 				Values:  []string{"10", "20"},
 			},
 		},
@@ -475,8 +484,8 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		ID:     "AttrFilter",
 		Rules: []*FilterRule{
 			{
-				Element: "~*req.EventType",
 				Type:    utils.MetaString,
+				Element: "~*req.EventType",
 				Values:  []string{"Event1", "Event2"},
 			},
 		},
@@ -504,7 +513,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	//Set AttributeProfile with 2 contexts ( con1 , con2)
+	//Set AttributeProfile with 2 contexts (con1 , con2)
 	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
 		t.Error(err)
 	}
@@ -571,8 +580,8 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		ID:     "AttrFilter",
 		Rules: []*FilterRule{
 			{
-				Element: "~*req.EventType",
 				Type:    utils.MetaString,
+				Element: "~*req.EventType",
 				Values:  []string{"Event3", "~*req.Event4"},
 			},
 		},
@@ -640,8 +649,8 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 		ID:     "AttrFilter",
 		Rules: []*FilterRule{
 			{
-				Element: "EventType",
 				Type:    utils.MetaString,
+				Element: "EventType",
 				Values:  []string{"~*req.Event1", "~*req.Event2"},
 			},
 		},
@@ -736,8 +745,8 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 		ID:     "AttrFilter",
 		Rules: []*FilterRule{
 			{
-				Element: "~*req.EventType",
 				Type:    utils.MetaString,
+				Element: "~*req.EventType",
 				Values:  []string{"Event3", "~*req.Event4"},
 			},
 		},
@@ -805,8 +814,8 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		ID:     "Filter1",
 		Rules: []*FilterRule{
 			{
-				Element: "~*req.EventType",
 				Type:    utils.MetaString,
+				Element: "~*req.EventType",
 				Values:  []string{"Event1", "Event2"},
 			},
 		},
@@ -954,6 +963,350 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdx, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdx, rcv)
+	}
+}
+
+func testITAccountProfileIndexes(t *testing.T) {
+	fltr1 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FIRST",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Destination",
+				Values:  []string{"DEST1", "DEST2", "~DynamicValue"},
+			},
+		},
+	}
+	if err := dataManager.SetFilter(fltr1, true); err != nil {
+		t.Error(err)
+	}
+
+	accPrf1 := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "test_ID1",
+		FilterIDs: []string{"FIRST", "*string:~*req.Account:DAN"},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID:    "VoiceBalance",
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(100, 0),
+			},
+		},
+	}
+
+	accPrf2 := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "test_ID2",
+		FilterIDs: []string{"FIRST"},
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance": {
+				ID:    "ConcreteBalance",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(200, 0),
+			},
+		},
+	}
+
+	if err := dataManager.SetAccountProfile(accPrf1, true); err != nil {
+		t.Error(err)
+	}
+
+	if err := dataManager.SetAccountProfile(accPrf2, true); err != nil {
+		t.Error(err)
+	}
+
+	eIdxes := map[string]utils.StringSet{
+		"*string:*req.Account:DAN": {
+			"test_ID1": struct{}{},
+		},
+		"*string:*req.Destination:DEST1": {
+			"test_ID1": struct{}{},
+			"test_ID2": struct{}{},
+		},
+		"*string:*req.Destination:DEST2": {
+			"test_ID1": struct{}{},
+			"test_ID2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountProfilesFilterIndexes,
+		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
+	//add another filter for matching
+	fltr2 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "SECOND",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "dan",
+				Values:  []string{"DEST3", "~*req.Accounts", "~*req.Owner"},
+			},
+		},
+	}
+	if err := dataManager.SetFilter(fltr2, true); err != nil {
+		t.Error(err)
+	}
+
+	accPrf3 := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "test_ID3",
+		FilterIDs: []string{"SECOND", "*string:~*req.Account:DAN"},
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance": {
+				ID:    "ConcreteBalance",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(200, 0),
+			},
+		},
+	}
+	if err := dataManager.SetAccountProfile(accPrf3, true); err != nil {
+		t.Error(err)
+	}
+
+	eIdxes = map[string]utils.StringSet{
+		"*string:*req.Accounts:dan": {
+			"test_ID3": struct{}{},
+		},
+		"*string:*req.Owner:dan": {
+			"test_ID3": struct{}{},
+		},
+		"*string:*req.Account:DAN": {
+			"test_ID1": struct{}{},
+			"test_ID3": struct{}{},
+		},
+		"*string:*req.Destination:DEST1": {
+			"test_ID1": struct{}{},
+			"test_ID2": struct{}{},
+		},
+		"*string:*req.Destination:DEST2": {
+			"test_ID1": struct{}{},
+			"test_ID2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountProfilesFilterIndexes,
+		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
+	eIdxes = map[string]utils.StringSet{
+		"*string:*req.Destination:DEST1": {
+			"test_ID1": struct{}{},
+			"test_ID2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountProfilesFilterIndexes,
+		"cgrates.org", "*string:*req.Destination:DEST1", false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
+	eIdxes = nil
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountProfilesFilterIndexes,
+		"cgrates.org", "*string:*req.Destination:DEST5", false, false); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+}
+
+func testITResourceProfileIndexes(t *testing.T) {
+	fltr1 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "RES_FLTR1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Destinations",
+				Values:  []string{"DEST_RES1", "~DynamicValue", "DEST_RES2"},
+			},
+		},
+	}
+	if err := dataManager.SetFilter(fltr1, true); err != nil {
+		t.Error(err)
+	}
+
+	resPref1 := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RES_PRF1",
+		FilterIDs: []string{"FIRST", "RES_FLTR1", "*string:~*req.Account:DAN"},
+		Limit:     23,
+		Stored:    true,
+	}
+	resPref2 := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RES_PRF2",
+		FilterIDs: []string{"RES_FLTR1"},
+		Limit:     23,
+		Stored:    true,
+	}
+
+	expected := "broken reference to filter: FIRST for item with ID: cgrates.org:RES_PRF1"
+	if err := dataManager.SetResourceProfile(resPref1, true); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
+	resPref1.FilterIDs = []string{"RES_FLTR1", "*string:~*req.Account:DAN"}
+	if err := dataManager.SetResourceProfile(resPref1, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetResourceProfile(resPref2, true); err != nil {
+		t.Error(err)
+	}
+
+	eIdxes := map[string]utils.StringSet{
+		"*string:*req.Account:DAN": {
+			"RES_PRF1": struct{}{},
+		},
+		"*string:*req.Destinations:DEST_RES1": {
+			"RES_PRF1": struct{}{},
+			"RES_PRF2": struct{}{},
+		},
+		"*string:*req.Destinations:DEST_RES2": {
+			"RES_PRF1": struct{}{},
+			"RES_PRF2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheResourceFilterIndexes,
+		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
+	//we will change the rules of our filter, to be updated
+	fltr1 = &Filter{
+		Tenant: "cgrates.org",
+		ID:     "RES_FLTR1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Usage",
+				Values:  []string{"10m"},
+			},
+		},
+	}
+	if err := dataManager.SetFilter(fltr1, true); err != nil {
+		t.Error(err)
+	}
+	resPref1.ID = "RES_PRF_CHANGED1"
+	resPref2.ID = "RES_PRF_CHANGED2"
+	if err := dataManager.SetResourceProfile(resPref1, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetResourceProfile(resPref2, true); err != nil {
+		t.Error(err)
+	}
+
+	eIdxes = map[string]utils.StringSet{
+		"*string:*req.Account:DAN": {
+			"RES_PRF1":         struct{}{},
+			"RES_PRF_CHANGED1": struct{}{},
+		},
+		"*string:*req.Usage:10m": {
+			"RES_PRF1":         struct{}{},
+			"RES_PRF2":         struct{}{},
+			"RES_PRF_CHANGED1": struct{}{},
+			"RES_PRF_CHANGED2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheResourceFilterIndexes,
+		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
+	//as we updated our filter, the old one is deleted
+	if _, err := dataManager.GetIndexes(utils.CacheResourceFilterIndexes,
+		"cgrates.org", "*string:*req.Destinations:DEST_RES1", false, false); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, receive %+v", utils.ErrNotFound, err)
+	}
+}
+
+func testITStatQueueProfileIndexes(t *testing.T) {
+	fltr1 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "SQUEUE1",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Usage", Values: []string{"10m"}}},
+	}
+	fltr2 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "SQUEUE2",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Destination", Values: []string{"~*req.Owner", "Dan1", "Dan2"}}},
+	}
+	if err := dataManager.SetFilter(fltr1, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetFilter(fltr2, true); err != nil {
+		t.Error(err)
+	}
+
+	statQueue1 := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQUEUE_PRF1",
+		FilterIDs: []string{"SQUEUE1", "*string:~*opts.ToR:*data"},
+		TTL:       time.Minute,
+	}
+	statQueue2 := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQUEUE_PRF2",
+		FilterIDs: []string{"SQUEUE2", "*string:~*opts.ToR:*voice"},
+		TTL:       time.Minute,
+	}
+	statQueue3 := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQUEUE_PRF3",
+		FilterIDs: []string{"SQUEUE2", "SQUEUE1", "*string:~*opts.ToR:~*req.Usage"},
+		TTL:       time.Minute,
+	}
+	if err := dataManager.SetStatQueueProfile(statQueue1, true); err != nil {
+		t.Error(err)
+	} else if err := dataManager.SetStatQueueProfile(statQueue2, true); err != nil {
+		t.Error(err)
+	} else if err := dataManager.SetStatQueueProfile(statQueue3, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringSet{
+		"*string:*req.Usage:10m": {
+			"SQUEUE_PRF1": struct{}{},
+			"SQUEUE_PRF3": struct{}{},
+		},
+		"*string:*req.Destination:Dan1": {
+			"SQUEUE_PRF2": struct{}{},
+			"SQUEUE_PRF3": struct{}{},
+		},
+		"*string:*req.Destination:Dan2": {
+			"SQUEUE_PRF2": struct{}{},
+			"SQUEUE_PRF3": struct{}{},
+		},
+		"*string:*opts.ToR:*voice": {
+			"SQUEUE_PRF2": struct{}{},
+		},
+		"*string:*opts.ToR:*data": {
+			"SQUEUE_PRF1": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheStatFilterIndexes,
+		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
+	eIdxes = nil
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheStatFilterIndexes,
+		"cgrates.org", "*string:~*opts.ToR:~*req.Usage", false, false); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, receive %+v", utils.ErrNotFound, err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
 	}
 }
 

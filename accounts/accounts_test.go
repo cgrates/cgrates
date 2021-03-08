@@ -56,6 +56,12 @@ func TestListenAndServe(t *testing.T) {
 	accnts.ListenAndServe(stopChan, cfgRld)
 }
 
+func TestShutDownCoverage(t *testing.T) {
+	//this is called in order to cover the ShutDown method
+	accnts := new(AccountS)
+	accnts.Shutdown()
+}
+
 type dataDBMockErrorNotFound struct {
 	*engine.DataDBMock
 }
