@@ -78,7 +78,7 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 	if filterIDs == nil { // in case we remove a profile we do not need to reload the indexes
 		return
 	}
-	// popultate the indexes
+	// populate the indexes
 	idxCacheID := utils.CacheInstanceToArg[utils.CacheInstanceToCacheIndex[cacheID]]
 	if len(*filterIDs) == 0 { // in case we do not have any filters reload the *none filter indexes
 		indxID := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)

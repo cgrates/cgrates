@@ -41,7 +41,8 @@ func TestRPCCall(t *testing.T) {
 	}
 }
 
-func TestListenAndServe(t *testing.T) {
+func TestShutDownCoverage(t *testing.T) {
+	//this is called in order to cover the ListenAndServe method
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(nil, cfg.CacheCfg(), nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
@@ -54,11 +55,8 @@ func TestListenAndServe(t *testing.T) {
 		stopChan <- struct{}{}
 	}()
 	accnts.ListenAndServe(stopChan, cfgRld)
-}
 
-func TestShutDownCoverage(t *testing.T) {
 	//this is called in order to cover the ShutDown method
-	accnts := new(AccountS)
 	accnts.Shutdown()
 }
 
