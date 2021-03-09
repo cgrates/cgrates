@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -60,6 +61,15 @@ var sTests = []func(t *testing.T){
 	testITFlush,
 	testITIsDBEmpty,
 	testITStatQueueProfileIndexes,
+	testITFlush,
+	testITIsDBEmpty,
+	testITChargerProfileIndexes,
+	testITFlush,
+	testITIsDBEmpty,
+	testITDispatcherProfileIndexes,
+	testITFlush,
+	testITIsDBEmpty,
+	testITActionProfileIndexes,
 	testITFlush,
 	testITIsDBEmpty,
 	testITTestStoreFilterIndexesWithTransID2,
@@ -1310,6 +1320,243 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 	}
 }
 
+func testITChargerProfileIndexes(t *testing.T) {
+	fltr1 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "CHARGER_FLTR",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Usage", Values: []string{"10m", "20m", "~*req.Usage"}}},
+	}
+	if err := dataManager.SetFilter(fltr1, true); err != nil {
+		t.Error(err)
+	}
+
+	chrgr1 := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "CHARGER_PRF1",
+		FilterIDs: []string{"CHARGER_FLTR"},
+		Weight:    10,
+	}
+	chrgr2 := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "CHARGER_PRF2",
+		FilterIDs: []string{"CHARGER_FLTR", "*string:~*req.Usage:~*req.Debited"},
+		Weight:    10,
+	}
+	if err := dataManager.SetChargerProfile(chrgr1, true); err != nil {
+		t.Error(err)
+	} else if err := dataManager.SetChargerProfile(chrgr2, true); err != nil {
+		t.Error(err)
+	}
+
+	expIdx := map[string]utils.StringSet{
+		"*string:*req.Usage:10m": {
+			"CHARGER_PRF1": struct{}{},
+			"CHARGER_PRF2": struct{}{},
+		},
+		"*string:*req.Usage:20m": {
+			"CHARGER_PRF1": struct{}{},
+			"CHARGER_PRF2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheChargerFilterIndexes,
+		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
+	}
+
+	//update the filter and the chargerProfiles for matching
+	fltr1 = &Filter{
+		Tenant: "cgrates.org",
+		ID:     "CHARGER_FLTR",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.CGRID", Values: []string{"~*req.Usage", "DAN1"}}},
+	}
+	if err := dataManager.SetFilter(fltr1, true); err != nil {
+		t.Error(err)
+	}
+	chrgr1.ID = "CHANGED_CHARGER_PRF1"
+	chrgr2.ID = "CHANGED_CHARGER_PRF2"
+	if err := dataManager.SetChargerProfile(chrgr1, true); err != nil {
+		t.Error(err)
+	} else if err := dataManager.SetChargerProfile(chrgr2, true); err != nil {
+		t.Error(err)
+	}
+
+	expIdx = map[string]utils.StringSet{
+		"*string:*req.CGRID:DAN1": {
+			"CHARGER_PRF1":         struct{}{},
+			"CHARGER_PRF2":         struct{}{},
+			"CHANGED_CHARGER_PRF1": struct{}{},
+			"CHANGED_CHARGER_PRF2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheChargerFilterIndexes,
+		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
+	}
+
+	//the old filter is deleted
+	expIdx = nil
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheChargerFilterIndexes,
+		"cgrates.org", "*string:*req.Usage", false, false); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.Error, err)
+	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
+	}
+}
+
+func testITDispatcherProfileIndexes(t *testing.T) {
+	fltr1 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "DISPATCHER_FLTR1",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Destination", Values: []string{"ACC1", "ACC2", "~*req.Account"}}},
+	}
+	fltr2 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "DISPATCHER_FLTR2",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "10m", Values: []string{"USAGE", "~*opts.Debited", "~*req.Usage", "~*opts.Usage"}}},
+	}
+	if err := dataManager.SetFilter(fltr1, true); err != nil {
+		t.Error(err)
+	} else if err := dataManager.SetFilter(fltr2, true); err != nil {
+		t.Error(err)
+	}
+
+	dspPrf1 := &DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DISPATCHER_PRF1",
+		Subsystems: []string{"thresholds"},
+		FilterIDs:  []string{"DISPATCHER_FLTR1"},
+	}
+	dspPrf2 := &DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DISPATCHER_PRF2",
+		Subsystems: []string{"thresholds"},
+		FilterIDs:  []string{"DISPATCHER_FLTR2", "*prefix:23:~*req.Destination"},
+	}
+	if err := dataManager.SetDispatcherProfile(dspPrf1, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetDispatcherProfile(dspPrf2, true); err != nil {
+		t.Error(err)
+	}
+
+	expIdx := map[string]utils.StringSet{
+		"*string:*req.Destination:ACC1": {
+			"DISPATCHER_PRF1": struct{}{},
+		},
+		"*string:*req.Destination:ACC2": {
+			"DISPATCHER_PRF1": struct{}{},
+		},
+		"*string:*opts.Debited:10m": {
+			"DISPATCHER_PRF2": struct{}{},
+		},
+		"*string:*req.Usage:10m": {
+			"DISPATCHER_PRF2": struct{}{},
+		},
+		"*string:*opts.Usage:10m": {
+			"DISPATCHER_PRF2": struct{}{},
+		},
+		"*prefix:*req.Destination:23": {
+			"DISPATCHER_PRF2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheDispatcherFilterIndexes,
+		"cgrates.org:thresholds", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
+	}
+
+	expIdx = nil
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheDispatcherFilterIndexes,
+		"cgrates.org:attributes", utils.EmptyString, false, false); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expectedd %+v, received %+v", utils.ErrNotFound, err)
+	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
+	}
+}
+
+func testITActionProfileIndexes(t *testing.T) {
+	fltr1 := &Filter{
+		Tenant: "itsyscom",
+		ID:     "ACTPRF_FLTR1",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Destination", Values: []string{"ACC1", "ACC2", "~*req.Account"}}},
+	}
+	fltr2 := &Filter{
+		Tenant: "itsyscom",
+		ID:     "ACTPRF_FLTR2",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "20m", Values: []string{"USAGE", "~*opts.Debited", "~*req.Usage"}}},
+	}
+	if err := dataManager.SetFilter(fltr1, false); err != nil {
+		t.Error(err)
+	} else if err := dataManager.SetFilter(fltr2, false); err != nil {
+		t.Error(err)
+	}
+
+	actPrf1 := &ActionProfile{
+		Tenant:    "itsyscom",
+		ID:        "ACTPRF1",
+		FilterIDs: []string{"ACTPRF_FLTR1", "*prefix:~*req.Destination:123"},
+	}
+	actPrf2 := &ActionProfile{
+		Tenant:    "itsyscom",
+		ID:        "ACTPRF2",
+		FilterIDs: []string{"ACTPRF_FLTR2"},
+	}
+	if err := dataManager.SetActionProfile(actPrf1, true); err != nil {
+		t.Error(err)
+	} else if err := dataManager.SetActionProfile(actPrf2, true); err != nil {
+		t.Error(err)
+	}
+
+	expIdx := map[string]utils.StringSet{
+		"*string:*req.Destination:ACC1": {
+			"ACTPRF1": struct{}{},
+		},
+		"*string:*req.Destination:ACC2": {
+			"ACTPRF1": struct{}{},
+		},
+		"*prefix:*req.Destination:123": {
+			"ACTPRF1": struct{}{},
+		},
+		"*string:*opts.Debited:20m": {
+			"ACTPRF2": struct{}{},
+		},
+		"*string:*req.Usage:20m": {
+			"ACTPRF2": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(utils.CacheActionProfilesFilterIndexes,
+		"itsyscom", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
+	}
+
+	expIdx = map[string]utils.StringSet{
+		"*string:*req.Destination:ACC1": {
+			"ACTPRF1": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(utils.CacheActionProfilesFilterIndexes,
+		"itsyscom", "*string:*req.Destination:ACC1", false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
+	}
+
+	expIdx = nil
+	if rcvIdx, err := dataManager.GetIndexes(utils.CacheActionProfilesFilterIndexes,
+		"itsyscom", "*string:*req.Destination:ACC7", false, false); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
+	}
+}
+
 func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 	idxes := map[string]utils.StringSet{
 		"*string:Event:Event1": {
@@ -1490,6 +1737,74 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
+	}
+
+	//make a filter for getting the indexes
+	fltr1 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FIRST",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "ORG_ID",
+				Values:  []string{"~*req.OriginID", "~*opts.CGRID", "DAN"},
+			},
+		},
+	}
+	if err := dataManager.SetFilter(fltr1, true); err != nil {
+		t.Error(err)
+	}
+
+	splProfile.ID = "SPL_WITH_FILTER1"
+	splProfile.FilterIDs = []string{"FIRST", "*prefix:~*req.Account:123"}
+	splProfile2.ID = "SPL_WITH_FILTER2"
+	splProfile2.FilterIDs = []string{"FIRST"}
+	if err := dataManager.SetRouteProfile(splProfile, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetRouteProfile(splProfile2, true); err != nil {
+		t.Error(err)
+	}
+	expIdx := map[string]utils.StringSet{
+		"*none:*any:*any": {
+			"SPL_Weight":  struct{}{},
+			"SPL_Weight2": struct{}{},
+		},
+		"*string:*req.OriginID:ORG_ID": {
+			"SPL_WITH_FILTER1": struct{}{},
+			"SPL_WITH_FILTER2": struct{}{},
+		},
+		"*string:*opts.CGRID:ORG_ID": {
+			"SPL_WITH_FILTER1": struct{}{},
+			"SPL_WITH_FILTER2": struct{}{},
+		},
+		"*prefix:*req.Account:123": {
+			"SPL_WITH_FILTER1": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(utils.CacheRouteFilterIndexes,
+		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIdx, rcvIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
+	}
+
+	expIdx = map[string]utils.StringSet{
+		"*string:*opts.CGRID:ORG_ID": {
+			"SPL_WITH_FILTER1": struct{}{},
+			"SPL_WITH_FILTER2": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(utils.CacheRouteFilterIndexes,
+		"cgrates.org", "*string:*opts.CGRID:ORG_ID", false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIdx, rcvIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
+	}
+
+	if _, err := dataManager.GetIndexes(utils.CacheRouteFilterIndexes,
+		"cgrates.org", "*string:DAN:ORG_ID", false, false); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 }
 
