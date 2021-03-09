@@ -17,14 +17,3 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package utils
-
-// AccountCharge represents one Account charge
-type AccountCharge struct {
-	BalanceID string
-	Units     *Decimal
-
-	UnitFactorID    string   // identificator in unit factors
-	AttributeIDs    []string // list of attribute profiles matched
-	CostID          string   // identificator in cost increments
-	JoinedChargeIDs []string // identificator of extra account charges
-}

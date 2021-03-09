@@ -30,12 +30,14 @@ func NewEventCharges() (ec *EventCharges) {
 
 // EventCharges records the charges applied to an Event
 type EventCharges struct {
-	Abstracts  *Decimal
-	Concretes  *Decimal
-	Charges    []*ChargedInterval
-	Accounting *ChargedAccounting
-	Rating     *ChargedRating
-	Accounts   []*AccountProfile
+	Abstracts *Decimal // total abstract units charged
+	Concretes *Decimal // total concrete units charged
+
+	ChargingIntervals []*ChargingInterval
+	Accounts          []*AccountProfile
+
+	Accounting *ChargingAccountS
+	Rating     *ChargingRateS
 }
 
 // Merge will merge the event charges into existing
