@@ -21,6 +21,7 @@ package ees
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"sync"
@@ -45,7 +46,7 @@ type FileCSVee struct {
 	cgrCfg    *config.CGRConfig
 	cfgIdx    int // index of config instance within ERsCfg.Readers
 	filterS   *engine.FilterS
-	file      *os.File
+	file      io.WriteCloser
 	csvWriter *csv.Writer
 	sync.RWMutex
 	dc utils.MapStorage
