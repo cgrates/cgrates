@@ -41,7 +41,7 @@ const CGRATES_CFG_JSON = `
 	"default_category": "call",								// default category to consider when missing from requests
 	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests
 	"default_timezone": "Local",							// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	"default_caching":"*reload",							// default actions to do when caching items
+	"default_caching": "*reload",							// default actions to do when caching items
 	"min_call_duration": "0s",				                // only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				                // maximum call duration a prepaid call can last
 	"connect_attempts": 5,									// initial server connect attempts
@@ -78,10 +78,11 @@ const CGRATES_CFG_JSON = `
 	"db_name": "10", 						// data_db database name to connect to
 	"db_user": "cgrates", 					// username to use when connecting to data_db
 	"db_password": "", 						// password to use when connecting to data_db
-	"remote_conns":[],
-	"replication_conns":[],
-	"filtered_replication": false, 			// if this is enabled the replication will be made only to the conns that received a get
+	"remote_conns":[],						// the conns that are queried when the items are not found in local DB 
 	"remote_conn_id": "",					// the ID to be sent to remote_conns to identify the connection
+	"replication_conns":[],					// the conns the items are replicated
+	"replication_filtered": false, 			// if this is enabled the replication will be made only to the conns that received a get
+	"replication_cache": "", 				// the caching action that is executed on the replication_conns when the items are replicated 
 	"items":{
 		"*accounts":{"remote":false, "replicate":false}, 					
 		"*reverse_destinations": {"remote":false, "replicate":false},
@@ -287,7 +288,7 @@ const CGRATES_CFG_JSON = `
 		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},									// stirShaken cache keys
 		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "replicate": false}, 
 		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},								// caps cached samples
-		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "replicate": false},							// the replication hosts cache(used when filtered_replication is enbled)
+		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "replicate": false},							// the replication hosts cache(used when replication_filtered is enbled)
 		
 		// only for *internal database
 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for version storing

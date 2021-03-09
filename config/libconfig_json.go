@@ -92,9 +92,10 @@ type DbJsonCfg struct {
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Remote_conns          *[]string
-	Replication_conns     *[]string
-	Filtered_replication  *bool
 	Remote_conn_id        *string
+	Replication_conns     *[]string
+	Replication_filtered  *bool
+	Replication_cache     *string
 	Items                 *map[string]*ItemOptJson
 	Opts                  map[string]interface{}
 }

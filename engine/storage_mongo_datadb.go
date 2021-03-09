@@ -1658,6 +1658,11 @@ func (ms *MongoStorage) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err e
 
 // SetStatQueueDrv stores the metrics for a StoredStatQueue
 func (ms *MongoStorage) SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err error) {
+	if ssq == nil {
+		if ssq, err = NewStoredStatQueue(sq, ms.ms); err != nil {
+			return
+		}
+	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColSqs).UpdateOne(sctx, bson.M{"tenant": ssq.Tenant, "id": ssq.ID},
 			bson.M{"$set": ssq},

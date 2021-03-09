@@ -120,7 +120,7 @@ func (apiService *APIerSv1Service) Start() (err error) {
 	if !apiService.cfg.DispatcherSCfg().Enabled {
 		apiService.server.RpcRegister(apiService.api)
 		apiService.server.RpcRegisterName(utils.ApierV1, apiService.api)
-		apiService.server.RpcRegister(v1.NewReplicatorSv1(datadb))
+		apiService.server.RpcRegister(v1.NewReplicatorSv1(datadb, apiService.api))
 	}
 
 	//backwards compatible

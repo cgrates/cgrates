@@ -2111,7 +2111,8 @@ const (
 	RedisClientCertificate     = "redis_client_certificate"
 	RedisClientKey             = "redis_client_key"
 	RedisCACertificate         = "redis_ca_certificate"
-	FilteredReplicationCfg     = "filtered_replication"
+	ReplicationFilteredCfg     = "replication_filtered"
+	ReplicationCache           = "replication_cache"
 	RemoteConnIDCfg            = "remote_conn_id"
 )
 
@@ -2528,7 +2529,8 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, Op
 	OptsDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
-	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsChargeable})
+	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsChargeable,
+	RemoteHostOpt, CacheOpt})
 
 // EventExporter metrics
 const (
@@ -2608,6 +2610,7 @@ const (
 	SchedulerInit             = "SchedulerInit"
 
 	RemoteHostOpt = "*rmtHost"
+	CacheOpt      = "*cache"
 )
 
 // Event Flags

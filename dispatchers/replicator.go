@@ -597,9 +597,9 @@ func (dS *DispatcherService) ReplicatorSv1SetReverseDestination(args *engine.Des
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetReverseDestination, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetStatQueue(args *engine.StoredStatQueueWithOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1SetStatQueue(args *engine.StatQueueWithOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.StoredStatQueueWithOpts{}
+		args = &engine.StatQueueWithOpts{}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {

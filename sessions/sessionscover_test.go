@@ -1472,7 +1472,7 @@ func TestProcessChargerS(t *testing.T) {
 		Replicate: true,
 	}
 	cacheS := engine.NewCacheS(cfg, nil, nil)
-	engine.SetCache(cacheS)
+	engine.Cache = cacheS
 	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): sMock})
 	engine.SetConnManager(connMgr)
@@ -1616,7 +1616,7 @@ func TestLibsessionsSetMockErrors(t *testing.T) {
 		Replicate: true,
 	}
 	cacheS := engine.NewCacheS(cfg, nil, nil)
-	engine.SetCache(cacheS)
+	engine.Cache = cacheS
 	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
 	engine.SetConnManager(connMgr)
@@ -1706,7 +1706,7 @@ func TestSyncSessions(t *testing.T) {
 
 	sessions.cgrCfg.GeneralCfg().ReplyTimeout = 1
 	cacheS := engine.NewCacheS(cfg, nil, nil)
-	engine.SetCache(cacheS)
+	engine.Cache = cacheS
 	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
 	engine.SetConnManager(connMgr)
@@ -1931,7 +1931,7 @@ func TestChargeEvent(t *testing.T) {
 	}
 
 	cacheS := engine.NewCacheS(cfg, nil, nil)
-	engine.SetCache(cacheS)
+	engine.Cache = cacheS
 	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
 	engine.SetConnManager(connMgr)
@@ -2443,7 +2443,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 			ResourceAllocation: utils.StringPointer("ROUTE_LEASTCOST_1"),
 		},
 	}
-	engine.SetCache(caches)
+	engine.Cache = caches
 	caches.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
 	if err := sessions.BiRPCv1AuthorizeEvent(nil, args, rply); err != nil {
@@ -2812,7 +2812,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 			ResourceAllocation: utils.StringPointer("ROUTE_LEASTCOST_1"),
 		},
 	}
-	engine.SetCache(caches)
+	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1InitiateSession, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
 	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err != nil {
@@ -3148,7 +3148,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	cgrEvent.ID = "test_id"
 	args = NewV1UpdateSessionArgs(true, []string{}, false,
 		cgrEvent, true)
-	engine.SetCache(caches)
+	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1UpdateSession, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
 	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err != nil {
@@ -3318,7 +3318,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	value := &utils.CachedRPCResponse{
 		Result: utils.StringPointer("ROUTE_LEASTCOST_1"),
 	}
-	engine.SetCache(caches)
+	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1TerminateSession, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
 	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err != nil {
@@ -3391,7 +3391,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	})
 	sessions = NewSessionS(cfg, dm, connMgr)
 	caches = engine.NewCacheS(cfg, dm, nil)
-	engine.SetCache(caches)
+	engine.Cache = caches
 	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
 	expected = "RALS_ERROR:NOT_IMPLEMENTED"
 	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
@@ -3491,7 +3491,7 @@ func TestBiRPCv1ProcessCDR(t *testing.T) {
 	value := &utils.CachedRPCResponse{
 		Result: utils.StringPointer("ROUTE_LEASTCOST_1"),
 	}
-	engine.SetCache(caches)
+	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1ProcessCDR, cgrEvent.ID),
 		value, nil, true, utils.NonTransactional)
 	if err := sessions.BiRPCv1ProcessCDR(nil, cgrEvent, &reply); err != nil {
@@ -3569,7 +3569,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 			MaxUsage: utils.DurationPointer(time.Hour),
 		},
 	}
-	engine.SetCache(caches)
+	engine.Cache = caches
 	args = NewV1ProcessMessageArgs(true, []string{},
 		false, []string{}, false, []string{}, true, false,
 		false, false, false, cgrEvent, utils.Paginator{}, false, "1")
@@ -3781,7 +3781,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	engine.SetCache(caches)
+	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1ProcessEvent, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err != nil {
@@ -4241,7 +4241,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 		Replicate: true,
 	}
 	cacheS := engine.NewCacheS(cfg, nil, nil)
-	engine.SetCache(cacheS)
+	engine.Cache = cacheS
 	engine.SetConnManager(connMgr)
 	expected = "RALS_ERROR:NOT_IMPLEMENTED"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
@@ -4398,7 +4398,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 			},
 		},
 	}
-	engine.SetCache(caches)
+	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1GetCost, args.CGREvent.ID),
 		value, nil, true, utils.NonTransactional)
 	if err := sessions.BiRPCv1GetCost(nil, args, &reply); err != nil {

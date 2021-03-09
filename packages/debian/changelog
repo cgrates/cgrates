@@ -147,6 +147,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] Added JSON and GOB BiRPC support
   * [ActionS] Added *add_balance, *set_balance and *rem_balance
   * [RegistrarC] Renamed DispatcherH to RegistrarC
+  * [DataDB] Added replication filtering
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

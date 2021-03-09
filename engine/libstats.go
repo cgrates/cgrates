@@ -97,8 +97,8 @@ type StoredStatQueue struct {
 	Compressed bool
 }
 
-type StoredStatQueueWithOpts struct {
-	*StoredStatQueue
+type StatQueueWithOpts struct {
+	*StatQueue
 	Opts map[string]interface{}
 }
 

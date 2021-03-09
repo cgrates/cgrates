@@ -141,6 +141,9 @@ func testFltrRplStartEngine(t *testing.T) {
 
 func testFltrRplRPCConn(t *testing.T) {
 	var err error
+	tmp := *encoding
+	// run only under *gob encoding
+	*encoding = utils.MetaGOB
 	if fltrRplInternalRPC, err = newRPCClient(fltrRplInternalCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
@@ -150,6 +153,7 @@ func testFltrRplRPCConn(t *testing.T) {
 	if fltrRplEngine2RPC, err = newRPCClient(fltrRplEngine2Cfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
+	*encoding = tmp
 }
 
 func testFltrRplAttributeProfile(t *testing.T) {
@@ -247,7 +251,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: attrID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -295,7 +299,7 @@ func testFltrRplFilters(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetFilter,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: fltrID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -314,7 +318,7 @@ func testFltrRplFilters(t *testing.T) {
 	}
 
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetFilter,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: fltrID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -329,7 +333,7 @@ func testFltrRplFilters(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetFilter,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: fltrID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -354,7 +358,7 @@ func testFltrRplFilters(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveFilter,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: fltrID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -376,15 +380,25 @@ func testFltrRplThresholdProfile(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        thID,
 			FilterIDs: []string{"*string:~*req.Account:dan"},
-			MinHits:   1,
 			MaxHits:   -1,
-			MinSleep:  5 * time.Minute,
 			Weight:    20,
 		},
+	}
+	th := engine.Threshold{
+		Tenant: "cgrates.org",
+		ID:     thID,
 	}
 	var result string
 	var replyPrfl *engine.ThresholdProfile
 	var rplyIDs []string
+	var replyTh engine.Threshold
+
+	argsTh := &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     thID,
+		},
+	}
 	// empty
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -395,13 +409,22 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
+	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetThresholdProfile, thPrfl, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: thID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(thPrfl.ThresholdProfile, replyPrfl) {
@@ -418,13 +441,29 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
+	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetThresholdProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: thID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(thPrfl.ThresholdProfile, replyPrfl) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(thPrfl.ThresholdProfile), utils.ToJSON(replyPrfl))
 	}
+
+	if err := fltrRplEngine1RPC.Call(utils.ThresholdSv1GetThreshold, argsTh, &replyTh); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(th, replyTh) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(th), utils.ToJSON(replyTh))
+	}
+
 	replyPrfl = nil
 	thPrfl.Weight = 10
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetThresholdProfile, thPrfl, &result); err != nil {
@@ -433,7 +472,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: thID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(thPrfl.ThresholdProfile, replyPrfl) {
@@ -455,8 +494,34 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
+	tEv := &engine.ThresholdsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "dan",
+			},
+		},
+	}
+	var thIDs []string
+	//Testing ProcessEvent on set thresholdprofile using apier
+	if err := fltrRplInternalRPC.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err != nil {
+		t.Fatal(err)
+	} else if expected := []string{thID}; !reflect.DeepEqual(expected, thIDs) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expected), utils.ToJSON(thIDs))
+	}
+
+	if err := fltrRplEngine1RPC.Call(utils.ThresholdSv1GetThreshold, argsTh, &replyTh); err != nil {
+		t.Fatal(err)
+	}
+	th.Hits = 1
+	replyTh.Snooze = th.Snooze // ignore the snooze as this is relative to time.Now
+	if !reflect.DeepEqual(th, replyTh) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(th), utils.ToJSON(replyTh))
+	}
+
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveThresholdProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: thID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -466,6 +531,15 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetThreshold, argsTh, &replyTh); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -482,8 +556,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 			TTL:         time.Second,
 			Metrics: []*engine.MetricWithFilters{
 				{
-					MetricID:  utils.MetaACD,
-					FilterIDs: []string{"*gt:~*req.Usage:10s"},
+					MetricID: utils.MetaACD,
 				},
 			},
 			ThresholdIDs: []string{"*none"},
@@ -493,9 +566,23 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 			MinItems:     1,
 		},
 	}
+	sq := engine.StatQueue{
+		Tenant:    "cgrates.org",
+		ID:        stID,
+		SQItems:   []engine.SQItem{},
+		SQMetrics: map[string]engine.StatMetric{},
+	}
 	var result string
 	var replyPrfl *engine.StatQueueProfile
 	var rplyIDs []string
+	var replySq engine.StatQueue
+
+	argsSq := &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     stID,
+		},
+	}
 	// empty
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -506,13 +593,22 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
+	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetStatQueueProfile, stPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: stID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(stPrf.StatQueueProfile, replyPrfl) {
@@ -529,13 +625,34 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
+	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetStatQueueProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: stID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(stPrf.StatQueueProfile, replyPrfl) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(stPrf.StatQueueProfile), utils.ToJSON(replyPrfl))
 	}
+	replySq = engine.StatQueue{}
+	sq.SQItems = nil
+	s, _ := engine.NewACD(1, "", nil)
+	sq.SQMetrics = map[string]engine.StatMetric{
+		utils.MetaACD: s,
+	}
+	if err := fltrRplEngine1RPC.Call(utils.StatSv1GetStatQueue, argsSq, &replySq); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(sq, replySq) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(sq), utils.ToJSON(replySq))
+	}
+
 	replyPrfl = nil
 	stPrf.Weight = 15
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetStatQueueProfile, stPrf, &result); err != nil {
@@ -544,7 +661,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: stID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(stPrf.StatQueueProfile, replyPrfl) {
@@ -566,8 +683,38 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
+	sEv := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.AccountField: "dan",
+				utils.Usage:        45 * time.Second,
+			},
+		},
+	}
+	var sqIDs []string
+	//Testing ProcessEvent on set thresholdprofile using apier
+	if err := fltrRplInternalRPC.Call(utils.StatSv1ProcessEvent, sEv, &sqIDs); err != nil {
+		t.Fatal(err)
+	} else if expected := []string{stID}; !reflect.DeepEqual(expected, sqIDs) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expected), utils.ToJSON(sqIDs))
+	}
+
+	if err := fltrRplEngine1RPC.Call(utils.StatSv1GetStatQueue, argsSq, &replySq); err != nil {
+		t.Fatal(err)
+	}
+	sq.SQItems = []engine.SQItem{{
+		EventID: "event1",
+	}}
+	s.AddEvent("event1", utils.MapStorage{utils.MetaReq: map[string]interface{}{utils.Usage: 45 * time.Second}})
+	replySq.SQItems[0].ExpiryTime = sq.SQItems[0].ExpiryTime
+	if !reflect.DeepEqual(sq, replySq) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(sq), utils.ToJSON(replySq))
+	}
+
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveStatQueueProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: stID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -577,6 +724,15 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetStatQueue, argsSq, &replySq); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -597,9 +753,22 @@ func testFltrRplResourceProfile(t *testing.T) {
 			ThresholdIDs:      []string{utils.MetaNone},
 		},
 	}
+	rs := engine.Resource{
+		Tenant: "cgrates.org",
+		ID:     resID,
+		Usages: make(map[string]*engine.ResourceUsage),
+	}
 	var result string
 	var replyPrfl *engine.ResourceProfile
 	var rplyIDs []string
+	var replyRs engine.Resource
+
+	argsRs := &utils.TenantIDWithOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     resID,
+		},
+	}
 	// empty
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -610,13 +779,21 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
+	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetResourceProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: resID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(resPrf.ResourceProfile, replyPrfl) {
@@ -633,13 +810,29 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
+	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetResourceProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: resID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(resPrf.ResourceProfile, replyPrfl) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(resPrf.ResourceProfile), utils.ToJSON(replyPrfl))
 	}
+
+	if err := fltrRplEngine1RPC.Call(utils.ResourceSv1GetResource, argsRs, &replyRs); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rs, replyRs) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(rs), utils.ToJSON(replyRs))
+	}
+
 	replyPrfl = nil
 	resPrf.Weight = 15
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetResourceProfile, resPrf, &result); err != nil {
@@ -648,7 +841,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetResourceProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: resID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(resPrf.ResourceProfile, replyPrfl) {
@@ -670,8 +863,43 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
+	rEv := utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.AccountField: "dan",
+			},
+		},
+		Units: 6,
+	}
+	var rsIDs string
+	//Testing ProcessEvent on set thresholdprofile using apier
+	if err := fltrRplInternalRPC.Call(utils.ResourceSv1AllocateResources, rEv, &rsIDs); err != nil {
+		t.Fatal(err)
+	} else if expected := resPrf.AllocationMessage; !reflect.DeepEqual(expected, rsIDs) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rsIDs))
+	}
+
+	if err := fltrRplEngine1RPC.Call(utils.ResourceSv1GetResource, argsRs, &replyRs); err != nil {
+		t.Fatal(err)
+	}
+	rs.TTLIdx = []string{rEv.UsageID}
+	rs.Usages = map[string]*engine.ResourceUsage{
+		rEv.UsageID: {
+			Tenant: "cgrates.org",
+			ID:     rEv.UsageID,
+			Units:  6,
+		},
+	}
+	replyRs.Usages[rEv.UsageID].ExpiryTime = time.Time{}
+	if !reflect.DeepEqual(rs, replyRs) {
+		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(rs), utils.ToJSON(replyRs))
+	}
+
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveResourceProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: resID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -681,6 +909,15 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if err := fltrRplEngine2RPC.Call(utils.ReplicatorSv1GetResource, argsRs, &replyRs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -728,7 +965,7 @@ func testFltrRplRouteProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetRouteProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: rpID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -747,7 +984,7 @@ func testFltrRplRouteProfile(t *testing.T) {
 	}
 
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetRouteProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: rpID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -762,7 +999,7 @@ func testFltrRplRouteProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetRouteProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: rpID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -787,7 +1024,7 @@ func testFltrRplRouteProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveRouteProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: rpID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -833,7 +1070,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetChargerProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: chID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(chPrf.ChargerProfile, replyPrfl) {
@@ -851,7 +1088,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 	}
 
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetChargerProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: chID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(chPrf.ChargerProfile, replyPrfl) {
@@ -865,7 +1102,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetChargerProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: chID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(chPrf.ChargerProfile, replyPrfl) {
@@ -888,7 +1125,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveChargerProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: chID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -933,7 +1170,7 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(dspPrf.DispatcherProfile, replyPrfl) {
@@ -951,7 +1188,7 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 	}
 
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDispatcherProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(dspPrf.DispatcherProfile, replyPrfl) {
@@ -965,7 +1202,7 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(dspPrf.DispatcherProfile, replyPrfl) {
@@ -988,7 +1225,7 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: dspID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1033,7 +1270,7 @@ func testFltrRplDispatcherHost(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetDispatcherHost,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(dspPrf.DispatcherHost, replyPrfl) {
@@ -1051,7 +1288,7 @@ func testFltrRplDispatcherHost(t *testing.T) {
 	}
 
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetDispatcherHost,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(dspPrf.DispatcherHost, replyPrfl) {
@@ -1065,7 +1302,7 @@ func testFltrRplDispatcherHost(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetDispatcherHost,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: dspID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(dspPrf.DispatcherHost, replyPrfl) {
@@ -1088,7 +1325,7 @@ func testFltrRplDispatcherHost(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveDispatcherHost,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: dspID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1230,7 +1467,7 @@ func testFltrRplRateProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: rpID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1336,7 +1573,7 @@ func testFltrRplActionProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveActionProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: acID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1457,7 +1694,7 @@ func testFltrRplAccountProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveAccountProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &result); err != nil {
+		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: acID}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

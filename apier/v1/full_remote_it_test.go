@@ -137,15 +137,11 @@ func testFullRemoteITAttribute(t *testing.T) {
 			ID:        "ATTR_1001_SIMPLEAUTH",
 			Contexts:  []string{"simpleauth"},
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-
-			Attributes: []*engine.Attribute{
-				{
-					Path:      utils.MetaReq + utils.NestingSep + "Password",
-					FilterIDs: []string{},
-					Type:      utils.MetaConstant,
-					Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
-				},
-			},
+			Attributes: []*engine.Attribute{{
+				Path:  utils.MetaReq + utils.NestingSep + "Password",
+				Type:  utils.MetaConstant,
+				Value: config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
+			}},
 			Weight: 20,
 		},
 	}
@@ -385,18 +381,14 @@ func testFullRemoteITRoute(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
 		},
-		Sorting:           utils.MetaWeight,
-		SortingParameters: []string{},
-		Routes: []*engine.Route{
-			{
-				ID:     "route1",
-				Weight: 10,
-			},
-			{
-				ID:     "route2",
-				Weight: 20,
-			},
-		},
+		Sorting: utils.MetaWeight,
+		Routes: []*engine.Route{{
+			ID:     "route1",
+			Weight: 10,
+		}, {
+			ID:     "route2",
+			Weight: 20,
+		}},
 		Weight: 20,
 	}
 	// add a threshold profile in engine1 and verify it internal
@@ -509,7 +501,6 @@ func testFullRemoteITCharger(t *testing.T) {
 	chargerProfile := &engine.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "DEFAULT",
-		FilterIDs:    []string{},
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{utils.MetaNone},
 		Weight:       0,
