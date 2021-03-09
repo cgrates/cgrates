@@ -566,71 +566,12 @@ func TestRegisterRegistrarSv1RegisterRPCHosts(t *testing.T) {
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
 	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil)
+	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
 	if rplyID, err := register(req); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(id, *rplyID) {
 		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
 	}
-	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil)
-}
-
-func TestRegisterRegistrarSv1RegisterRPCHostsError(t *testing.T) {
-	ra := &RegisterArgs{
-		Tenant: "cgrates.org",
-		Hosts: []*RegisterHostCfg{
-			{
-				ID:        "Host1",
-				Port:      "2012",
-				TLS:       true,
-				Transport: utils.MetaJSON,
-			},
-			{
-				ID:        "Host2",
-				Port:      "2013",
-				TLS:       false,
-				Transport: utils.MetaGOB,
-			},
-		},
-		Opts: make(map[string]interface{}),
-	}
-	raJSON, err := json.Marshal([]interface{}{ra})
-	id := json.RawMessage("1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	args := utils.NewServerRequest(utils.RegistrarSv1RegisterRPCHosts, raJSON, id)
-	argsJSON, err := json.Marshal(args)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(argsJSON))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.RemoteAddr = "127.0.0.1:3000"
-	cfg := config.NewDefaultCGRConfig()
-	config.CgrConfig().RPCConns()["errCon1"] = &config.RPCConn{
-		Strategy: utils.MetaFirst,
-		PoolSize: 1,
-		Conns: []*config.RemoteHost{
-			{
-				ID:          "Host1",
-				Address:     "127.0.0.1:9999",
-				Transport:   "*json",
-				Synchronous: true,
-			},
-		},
-	}
-	engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
-	cfg.RPCConns()["errCon1"] = config.CgrConfig().RPCConns()["errCon1"]
-	cfg.CacheCfg().ReplicationConns = []string{"errCon1"}
-	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
-	engine.Cache = engine.NewCacheS(cfg, nil, nil)
-	_, err = register(req)
-	if err == nil || err != utils.ErrPartiallyExecuted {
-		t.Fatal(err)
-	}
-	delete(config.CgrConfig().RPCConns(), "errCon1")
 	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
 }
-*/
+
