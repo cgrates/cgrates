@@ -541,3 +541,28 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 	}
 
 }
+
+func TestCsvInitFileCSV(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].ExportPath = "/tmp/TestInitFileCSV"
+	if err := os.MkdirAll("/tmp/TestInitFileCSV", 0666); err != nil {
+		t.Error(err)
+	}
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	fCsv := &FileCSVee{
+		cgrCfg: cgrCfg,
+		dc:     dc,
+	}
+	if err := fCsv.init(); err != nil {
+		t.Error(err)
+	}
+	if err := os.RemoveAll("/tmp/TestInitFileCSV"); err != nil {
+		t.Error(err)
+	}
+}
