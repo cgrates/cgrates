@@ -24,6 +24,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestNavMapGetFieldAsString(t *testing.T) {
@@ -737,5 +738,189 @@ func TestNavMapGetFieldAsDataProvider(t *testing.T) {
 		t.Errorf("Expecting: <nil>, received: %+v", err)
 	} else if !reflect.DeepEqual(result, "Val2") {
 		t.Errorf("Expecting: <Val2>, received: %+v", result)
+	}
+}
+
+func TestMSGetKeys(t *testing.T) {
+	m := MapStorage{
+		"testKey1": false,
+		"testKey2": true,
+		"testKey3": false,
+	}
+
+	expected := []string{"testKey1", "testKey2", "testKey3"}
+	received := m.GetKeys(false, 2, EmptyString)
+	sort.Strings(received)
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf(
+			"\nCase bool: \nReceived: <%+v>, \nExpected: <%+v>",
+			received,
+			expected,
+		)
+	}
+
+	m = MapStorage{
+		"testKey1": 1,
+		"testKey2": 3,
+		"testKey3": 2,
+	}
+
+	received = m.GetKeys(false, 2, EmptyString)
+	sort.Strings(received)
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf(
+			"\nCase Int: \nReceived: <%+v>, \nExpected: <%+v>",
+			received,
+			expected,
+		)
+	}
+
+	m = MapStorage{
+		"testKey1": []uint8{1},
+		"testKey2": []uint8{3},
+		"testKey3": []uint8{2},
+	}
+
+	received = m.GetKeys(false, 2, EmptyString)
+	sort.Strings(received)
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf(
+			"\nCase []uint8: \nReceived: <%+v>, \nExpected: <%+v>",
+			received,
+			expected,
+		)
+	}
+	m = MapStorage{
+		"testKey1": "testString1",
+		"testKey2": "testString2",
+		"testKey3": "testString3",
+	}
+
+	received = m.GetKeys(false, 2, EmptyString)
+	sort.Strings(received)
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf(
+			"\nCase string: \nReceived: <%+v>, \nExpected: <%+v>",
+			received,
+			expected,
+		)
+	}
+	m = MapStorage{
+		"testKey1": 2 * time.Second,
+		"testKey2": time.Second,
+		"testKey3": 3 * time.Second,
+	}
+
+	received = m.GetKeys(false, 2, EmptyString)
+	sort.Strings(received)
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf(
+			"\nCase time: \nReceived: <%+v>, \nExpected: <%+v>",
+			received,
+			expected,
+		)
+	}
+	m = MapStorage{
+		"testKey1": 3.0,
+		"testKey2": 1.0,
+		"testKey3": 2.0,
+	}
+
+	received = m.GetKeys(false, 2, EmptyString)
+	sort.Strings(received)
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf(
+			"\nCase float: \nReceived: <%+v>, \nExpected: <%+v>",
+			received,
+			expected,
+		)
+	}
+
+	m = MapStorage{
+		"testKey1": nil,
+		"testKey2": nil,
+		"testKey3": nil,
+	}
+
+	received = m.GetKeys(false, 2, EmptyString)
+	sort.Strings(received)
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf(
+			"\nCase nil: \nReceived: <%+v>, \nExpected: <%+v>",
+			received,
+			expected,
+		)
+	}
+}
+
+func TestMSgetPathFromValue(t *testing.T) {
+	var v reflect.Value
+	pref := "testPrefix."
+	sl := []int{1, 2}
+	v = reflect.ValueOf(sl)
+
+	expected := []string{pref[:len(pref)-1] + "[0]", pref[:len(pref)-1] + "[1]"}
+	received := getPathFromValue(v, pref)
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf(
+			"\nCase reflect.Array: \nReceived: <%+v>, \nExpected: <%+v>",
+			received,
+			expected,
+		)
+	}
+
+	arr := [2]int{1, 2}
+	v = reflect.ValueOf(arr)
+
+	received = getPathFromValue(v, pref)
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf(
+			"\nCase reflect.Array: \nReceived: <%+v>, \nExpected: <%+v>",
+			received,
+			expected,
+		)
+	}
+
+	m1 := map[string]int{
+		"testKey1": 1,
+		"testKey2": 2,
+		"testKey3": 3,
+	}
+	v = reflect.ValueOf(m1)
+
+	expected = []string{pref + "testKey1", pref + "testKey2", pref + "testKey3"}
+	received = getPathFromValue(v, pref)
+	sort.Strings(received)
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf(
+			"\nCase string key values: \nReceived: %v, \nExpected: %v",
+			received,
+			expected,
+		)
+	}
+
+	m2 := map[int]bool{
+		1: false,
+		2: true,
+	}
+	v = reflect.ValueOf(m2)
+	expected = []string{pref + "<int Value>", pref + "<int Value>"}
+	received = getPathFromValue(v, pref)
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf(
+			"\nCase non-string key values: \nReceived: %v, \nExpected: %v",
+			received,
+			expected,
+		)
 	}
 }
