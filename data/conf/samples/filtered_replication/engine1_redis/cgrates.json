@@ -15,7 +15,7 @@
 "rpc_conns": {
 	"conn1": {
 		"strategy": "*first",
-		"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
 	},
 },
 
@@ -76,7 +76,16 @@
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
+
 "thresholds": {
+	"enabled": true,
+},
+
+"stats": {
+	"enabled": true,
+},
+
+"resources": {
 	"enabled": true,
 },
 

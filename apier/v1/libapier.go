@@ -54,12 +54,19 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt *string, tnt, cacheID, itemID strin
 			return
 		}
 	case utils.MetaClear:
+		cacheIDs := make([]string, 1, 2)
+		cacheIDs[0] = cacheID
+		// do not send a EmptyString if the item doesn't have indexes
+		if cIdx, has := utils.CacheInstanceToCacheIndex[cacheID]; has {
+			cacheIDs = append(cacheIDs, cIdx)
+		}
 		method = utils.CacheSv1Clear
 		args = &utils.AttrCacheIDsWithOpts{
 			Tenant:   tnt,
-			CacheIDs: []string{cacheID, utils.CacheInstanceToCacheIndex[cacheID]},
+			CacheIDs: cacheIDs,
 			Opts:     opts,
 		}
+
 	}
 	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 		method, args, &reply)
@@ -131,4 +138,53 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 		}
 	}
 	return
+}
+
+// callCacheRevDestinations used for reverse destination, loadIDs and indexes replication
+func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]interface{}) (err error) {
+	if len(itemIDs) == 0 {
+		return
+	}
+	var reply, method string
+	var args interface{}
+	switch utils.FirstNonEmpty(cacheopt, apierSv1.Config.GeneralCfg().DefaultCaching) {
+	case utils.MetaNone:
+		return
+	case utils.MetaReload:
+		method = utils.CacheSv1ReloadCache
+		args = utils.AttrReloadCacheWithOpts{
+			Tenant: tnt,
+			ArgsCache: map[string][]string{
+				utils.CacheInstanceToArg[cacheID]: itemIDs,
+			},
+			Opts: opts,
+		}
+	case utils.MetaLoad:
+		method = utils.CacheSv1LoadCache
+		args = utils.AttrReloadCacheWithOpts{
+			Tenant: tnt,
+			ArgsCache: map[string][]string{
+				utils.CacheInstanceToArg[cacheID]: itemIDs,
+			},
+			Opts: opts,
+		}
+	case utils.MetaRemove:
+		method = utils.CacheSv1RemoveItems
+		args = utils.AttrReloadCacheWithOpts{
+			Tenant: tnt,
+			ArgsCache: map[string][]string{
+				utils.CacheInstanceToArg[cacheID]: itemIDs,
+			},
+			Opts: opts,
+		}
+	case utils.MetaClear:
+		method = utils.CacheSv1Clear
+		args = &utils.AttrCacheIDsWithOpts{
+			Tenant:   tnt,
+			CacheIDs: []string{cacheID},
+			Opts:     opts,
+		}
+	}
+	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		method, args, &reply)
 }

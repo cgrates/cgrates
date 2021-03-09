@@ -35,9 +35,10 @@ type DataDbCfg struct {
 	User        string   // The user to sign in as.
 	Password    string   // The user's password.
 	RmtConns    []string // Remote DataDB  connIDs
+	RmtConnID   string
 	RplConns    []string // Replication connIDs
 	RplFiltered bool
-	RmtConnID   string
+	RplCache    string
 	Items       map[string]*ItemOpt
 	Opts        map[string]interface{}
 }
@@ -104,11 +105,14 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			dbcfg.Opts[k] = v
 		}
 	}
-	if jsnDbCfg.Filtered_replication != nil {
-		dbcfg.RplFiltered = *jsnDbCfg.Filtered_replication
+	if jsnDbCfg.Replication_filtered != nil {
+		dbcfg.RplFiltered = *jsnDbCfg.Replication_filtered
 	}
 	if jsnDbCfg.Remote_conn_id != nil {
 		dbcfg.RmtConnID = *jsnDbCfg.Remote_conn_id
+	}
+	if jsnDbCfg.Replication_cache != nil {
+		dbcfg.RplCache = *jsnDbCfg.Replication_cache
 	}
 	return
 }
@@ -123,6 +127,7 @@ func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 		User:        dbcfg.User,
 		Password:    dbcfg.Password,
 		RplFiltered: dbcfg.RplFiltered,
+		RplCache:    dbcfg.RplCache,
 		RmtConnID:   dbcfg.RmtConnID,
 		Items:       make(map[string]*ItemOpt),
 		Opts:        make(map[string]interface{}),
@@ -158,9 +163,10 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.DataDbUserCfg:          dbcfg.User,
 		utils.DataDbPassCfg:          dbcfg.Password,
 		utils.RemoteConnsCfg:         dbcfg.RmtConns,
-		utils.ReplicationConnsCfg:    dbcfg.RplConns,
-		utils.FilteredReplicationCfg: dbcfg.RplFiltered,
 		utils.RemoteConnIDCfg:        dbcfg.RmtConnID,
+		utils.ReplicationConnsCfg:    dbcfg.RplConns,
+		utils.ReplicationFilteredCfg: dbcfg.RplFiltered,
+		utils.ReplicationCache:       dbcfg.RplCache,
 	}
 	opts := make(map[string]interface{})
 	for k, v := range dbcfg.Opts {

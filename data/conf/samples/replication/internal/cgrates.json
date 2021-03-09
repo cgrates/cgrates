@@ -16,8 +16,8 @@
 	"conn2": {
 		"strategy": "*broadcast_sync",
 		"conns": [
-			{"address": "127.0.0.1:2022", "transport":"*json"},
-			{"address": "127.0.0.1:2032", "transport":"*json"}
+			{"address": "127.0.0.1:2023", "transport":"*gob"},
+			{"address": "127.0.0.1:2033", "transport":"*gob"}
 		],
 	},
 	"connCache": {

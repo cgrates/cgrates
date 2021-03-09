@@ -19,7 +19,7 @@
     },
     "rmtConn": {
       "strategy": "*first",
-      "conns": [{"address": "127.0.0.1:4012", "transport":"*json"}],
+      "conns": [{"address": "127.0.0.1:4013", "transport":"*gob"}],
     },
     "*internal": {
       "strategy": "*first",

@@ -223,7 +223,7 @@ type ReplicatorSv1Interface interface {
 	SetAccount(acc *engine.AccountWithOpts, reply *string) error
 	SetDestination(dst *engine.DestinationWithOpts, reply *string) error
 	SetReverseDestination(dst *engine.DestinationWithOpts, reply *string) error
-	SetStatQueue(ssq *engine.StoredStatQueueWithOpts, reply *string) error
+	SetStatQueue(ssq *engine.StatQueueWithOpts, reply *string) error
 	SetFilter(fltr *engine.FilterWithOpts, reply *string) error
 	SetStatQueueProfile(sq *engine.StatQueueProfileWithOpts, reply *string) error
 	SetTiming(tm *utils.TPTimingWithOpts, reply *string) error

@@ -993,6 +993,11 @@ func (rs *RedisStorage) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err e
 
 // SetStatQueueDrv stores the metrics for a StatsQueue
 func (rs *RedisStorage) SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err error) {
+	if ssq == nil {
+		if ssq, err = NewStoredStatQueue(sq, rs.ms); err != nil {
+			return
+		}
+	}
 	var result []byte
 	if result, err = rs.ms.Marshal(ssq); err != nil {
 		return

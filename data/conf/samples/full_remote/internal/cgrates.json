@@ -15,7 +15,7 @@
 "rpc_conns": {
 	"conn1": {
 		"strategy": "*first",
-		"conns": [{"address": "127.0.0.1:2022", "transport":"*json"}],
+		"conns": [{"address": "127.0.0.1:2023", "transport":"*gob"}],
 	},
 },
 

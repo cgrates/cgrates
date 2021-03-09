@@ -673,8 +673,8 @@ func testDspRplThresholdProfile(t *testing.T) {
 func testDspRplStatQueue(t *testing.T) {
 	// Set StatQueue
 	var replyStr string
-	setStatQueue := &engine.StoredStatQueueWithOpts{
-		StoredStatQueue: &engine.StoredStatQueue{
+	setStatQueue := &engine.StatQueueWithOpts{
+		StatQueue: &engine.StatQueue{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},

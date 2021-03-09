@@ -159,7 +159,7 @@ func TestRegister(t *testing.T) {
 		t.Fatal(err)
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
-	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
+	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil)
 	if rplyID, err := register(req); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(id, *rplyID) {
@@ -248,7 +248,7 @@ func TestRegister(t *testing.T) {
 		},
 	}
 	errCfg.CacheCfg().ReplicationConns = []string{"errCon"}
-	engine.SetCache(engine.NewCacheS(errCfg, nil, nil))
+	engine.Cache = engine.NewCacheS(errCfg, nil, nil)
 	req.Body = ioutil.NopCloser(bytes.NewBuffer(uargsJSON))
 	if _, err := register(req); err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected error: %s ,received: %v", utils.ErrPartiallyExecuted, err)
@@ -322,7 +322,7 @@ func TestRegister(t *testing.T) {
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
-	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
+	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil)
 }
 
 type errRecorder struct{}
@@ -475,7 +475,7 @@ func TestRegisterRegistrarSv1UnregisterRPCHosts(t *testing.T) {
 		t.Fatal(err)
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
-	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
+	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil)
 	if rplyID, err := register(req); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(id, *rplyID) {
@@ -563,11 +563,11 @@ func TestRegisterRegistrarSv1RegisterRPCHosts(t *testing.T) {
 		t.Fatal(err)
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
-	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
+	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil)
 	if rplyID, err := register(req); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(id, *rplyID) {
 		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
 	}
-	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
+	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil)
 }

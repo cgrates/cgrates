@@ -1066,7 +1066,7 @@ func (dS *DispatcherReplicatorSv1) SetReverseDestination(args *engine.Destinatio
 }
 
 // SetStatQueue
-func (dS *DispatcherReplicatorSv1) SetStatQueue(args *engine.StoredStatQueueWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetStatQueue(args *engine.StatQueueWithOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetStatQueue(args, reply)
 }
 

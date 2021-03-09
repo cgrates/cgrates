@@ -1049,3 +1049,22 @@ func (b *boolGen) RandomBool() bool {
 	b.remaining--
 	return result
 }
+
+// GenerateDBItemOpts will create the options for DB replication
+// if they are empty they should be omitted
+func GenerateDBItemOpts(apiKey, routeID, cache, rmtHost string) (mp map[string]interface{}) {
+	mp = make(map[string]interface{})
+	if apiKey != EmptyString {
+		mp[OptsAPIKey] = apiKey
+	}
+	if routeID != EmptyString {
+		mp[OptsRouteID] = routeID
+	}
+	if cache != EmptyString {
+		mp[CacheOpt] = cache
+	}
+	if rmtHost != EmptyString {
+		mp[RemoteHostOpt] = rmtHost
+	}
+	return
+}

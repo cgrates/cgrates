@@ -647,6 +647,28 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("replicate connections required by: <%s>", item)
 		}
 	}
+	for _, connID := range cfg.dataDbCfg.RplConns {
+		conn, has := cfg.rpcConns[connID]
+		if !has {
+			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DataDB, connID)
+		}
+		for _, rpc := range conn.Conns {
+			if rpc.Transport != utils.MetaGOB {
+				return fmt.Errorf("<%s> unsuported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
+			}
+		}
+	}
+	for _, connID := range cfg.dataDbCfg.RmtConns {
+		conn, has := cfg.rpcConns[connID]
+		if !has {
+			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DataDB, connID)
+		}
+		for _, rpc := range conn.Conns {
+			if rpc.Transport != utils.MetaGOB {
+				return fmt.Errorf("<%s> unsuported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
+			}
+		}
+	}
 	// APIer sanity checks
 	for _, connID := range cfg.apier.AttributeSConns {
 		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {

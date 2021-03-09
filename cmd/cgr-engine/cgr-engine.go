@@ -624,7 +624,7 @@ func main() {
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), shdChan, anz, coreS.GetCoreS().CapsStats)
-	engine.SetCache(cacheS)
+	engine.Cache = cacheS
 
 	// init GuardianSv1
 	initGuardianSv1(internalGuardianSChan, server, anz)

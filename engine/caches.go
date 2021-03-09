@@ -105,11 +105,6 @@ func init() {
 	gob.Register(utils.StringSet{})
 }
 
-//SetCache shared the cache from other subsystems
-func SetCache(chS *CacheS) {
-	Cache = chS
-}
-
 // NewCacheS initializes the Cache service and executes the precaching
 func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *CacheS) {
 	cfg.CacheCfg().AddTmpCaches()

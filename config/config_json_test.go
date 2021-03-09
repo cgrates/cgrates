@@ -373,8 +373,9 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Db_password:          utils.StringPointer(""),
 		Replication_conns:    &[]string{},
 		Remote_conns:         &[]string{},
-		Filtered_replication: utils.BoolPointer(false),
+		Replication_filtered: utils.BoolPointer(false),
 		Remote_conn_id:       utils.StringPointer(""),
+		Replication_cache:    utils.StringPointer(""),
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg:       "",
 			utils.QueryTimeoutCfg:            "10s",
