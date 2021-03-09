@@ -130,3 +130,95 @@ func TestS3ER(t *testing.T) {
 	}
 	close(rdrExit)
 }
+
+func TestNewS3ER(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	expected := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    1,
+		fltrS:     nil,
+		rdrEvents: nil,
+		rdrExit:   nil,
+		rdrErr:    nil,
+		cap:       nil,
+		awsRegion: "",
+		awsID:     "",
+		awsKey:    "",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
+	}
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         0,
+			ConcurrentReqs:   -1,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			Filters:          []string{},
+			Opts:             make(map[string]interface{}),
+		},
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        1,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         0,
+			ConcurrentReqs:   -1,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			Filters:          []string{},
+			Opts:             make(map[string]interface{}),
+		},
+	}
+
+	rdr, err := NewS3ER(cfg, 1, nil,
+		nil, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rdr, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, rdr)
+	}
+}
+
+func TestNewS3ERCase2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	expected := &S3ER{
+		cgrCfg:  cfg,
+		cfgIdx:  0,
+		cap:     nil,
+		queueID: "cgrates_cdrs",
+	}
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         0,
+			ConcurrentReqs:   1,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			Filters:          []string{},
+			Opts:             make(map[string]interface{}),
+		},
+	}
+
+	rdr, err := NewS3ER(cfg, 0, nil,
+		nil, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected.cap = rdr.(*S3ER).cap
+	if !reflect.DeepEqual(rdr, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, rdr)
+	}
+}
