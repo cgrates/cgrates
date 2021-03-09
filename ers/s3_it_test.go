@@ -191,10 +191,20 @@ func TestNewS3ER(t *testing.T) {
 func TestNewS3ERCase2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	expected := &S3ER{
-		cgrCfg:  cfg,
-		cfgIdx:  0,
-		cap:     nil,
-		queueID: "cgrates_cdrs",
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     nil,
+		rdrEvents: nil,
+		rdrExit:   nil,
+		rdrErr:    nil,
+		cap:       nil,
+		awsRegion: "",
+		awsID:     "",
+		awsKey:    "",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
