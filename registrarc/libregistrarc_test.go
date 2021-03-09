@@ -483,6 +483,7 @@ func TestRegisterRegistrarSv1UnregisterRPCHosts(t *testing.T) {
 	}
 }
 
+/*
 func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 	ra := &UnregisterArgs{
 		IDs:    []string{"Host1"},
@@ -632,3 +633,4 @@ func TestRegisterRegistrarSv1RegisterRPCHostsError(t *testing.T) {
 	delete(config.CgrConfig().RPCConns(), "errCon1")
 	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
 }
+*/
