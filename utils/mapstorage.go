@@ -211,7 +211,7 @@ func (ms MapStorage) GetKeys(nested bool, nestedLimit int, prefix string) (keys 
 		prefix += NestingSep
 	}
 	if !nested {
-		// this is a special case for the filter matching were we have the full map:
+		// this is a special case for the filter matching where we have the full map:
 		/*
 			ms:=MapStorage{
 				"*req":MapStorage{

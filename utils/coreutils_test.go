@@ -1610,3 +1610,35 @@ func TestMonthlyEstimated(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedTime, rcv)
 	}
 }
+
+func TestCoreUtilsBiRPCCallSplitErr(t *testing.T) {
+	type Server struct{}
+	var srv Server
+	var clnt rpcclient.ClientConnector
+	var args int
+	var reply *int
+	serviceMethod := "test.err.call"
+
+	expected := rpcclient.ErrUnsupporteServiceMethod
+	err := BiRPCCall(srv, clnt, serviceMethod, args, reply)
+
+	if err == nil || err != expected {
+		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+	}
+}
+
+func TestCoreUtilsBiRPCCallMethodNotValid(t *testing.T) {
+	type Server struct{}
+	var srv Server
+	var clnt rpcclient.ClientConnector
+	var args int
+	var reply *int
+	serviceMethod := "test.com"
+
+	expected := rpcclient.ErrUnsupporteServiceMethod
+	err := BiRPCCall(srv, clnt, serviceMethod, args, reply)
+
+	if err == nil || err != expected {
+		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+	}
+}
