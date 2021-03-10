@@ -1710,10 +1710,11 @@ func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {
 	expected := map[string]interface{}{
 		OptsAPIKey:    apiKey,
 		OptsRouteID:   routeID,
-		CacheOpt:      cache + ".",
+		CacheOpt:      cache,
 		RemoteHostOpt: rmtHost,
 	}
 	received := GenerateDBItemOpts(apiKey, routeID, cache, rmtHost)
+
 	if len(received) != len(expected) {
 		t.Fatalf("The maps differ in length")
 	}
@@ -1722,6 +1723,4 @@ func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {
 			t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", value, expected[key])
 		}
 	}
-	fmt.Println(received)
-
 }
