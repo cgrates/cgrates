@@ -380,7 +380,7 @@ func splitFilterIndex(tntCtxIdxKey string) (tntCtx, idxKey string, err error) {
 	return
 }
 
-// ComputeIndexes gets the indexes from tha DB and ensure that the items are indexed
+// ComputeIndexes gets the indexes from the DB and ensure that the items are indexed
 // getFilters returns a list of filters IDs for the given profile id
 func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
 	transactionID string, getFilters func(tnt, id, ctx string) (*[]string, error)) (processed bool, err error) {
@@ -729,7 +729,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						fltrIDs[i] = fltrID
 					}
 					return &fltrIDs, nil
-				}); err != nil || err != utils.ErrNotFound {
+				}); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheRateProfilesFilterIndexes:
@@ -749,7 +749,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						fltrIDs[i] = fltrID
 					}
 					return &fltrIDs, nil
-				}); err != nil || err != utils.ErrNotFound {
+				}); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheAttributeFilterIndexes:
