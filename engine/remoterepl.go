@@ -22,8 +22,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// SetReplicateHost will set the connID in cache
-func SetReplicateHost(objType, objID, connID string) {
+// UpdateReplicationFilters will set the connID in cache
+func UpdateReplicationFilters(objType, objID, connID string) {
 	if connID == utils.EmptyString {
 		return
 	}
