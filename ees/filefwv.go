@@ -43,7 +43,7 @@ type FileFWVee struct {
 	cgrCfg  *config.CGRConfig
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
-	file    *os.File
+	file    io.WriteCloser
 	dc      utils.MapStorage
 	sync.RWMutex
 }
