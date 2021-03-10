@@ -129,3 +129,72 @@ func TestAMQPERv1(t *testing.T) {
 
 	close(rdrExit)
 }
+
+func TestAmqpv1NewAMQPv1ER(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	expected := &AMQPv1ER{
+		cgrCfg: cfg,
+		cfgIdx: cfgIdx,
+		poster: nil,
+	}
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         0,
+			ConcurrentReqs:   -1,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			Filters:          []string{},
+			Opts:             make(map[string]interface{}),
+		},
+	}
+
+	result, err := NewAMQPv1ER(cfg, cfgIdx, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected.poster = result.(*AMQPv1ER).poster
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestAmqpv1NewAMQPv1ER2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	expected := &AMQPv1ER{
+		cgrCfg: cfg,
+		cfgIdx: cfgIdx,
+		poster: nil,
+	}
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               utils.MetaDefault,
+			Type:             utils.MetaNone,
+			RowLength:        0,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         0,
+			ConcurrentReqs:   1,
+			SourcePath:       "/var/spool/cgrates/ers/in",
+			ProcessedPath:    "/var/spool/cgrates/ers/out",
+			Filters:          []string{},
+			Opts:             make(map[string]interface{}),
+		},
+	}
+
+	result, err := NewAMQPv1ER(cfg, cfgIdx, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected.poster = result.(*AMQPv1ER).poster
+	expected.cap = result.(*AMQPv1ER).cap
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
