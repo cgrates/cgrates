@@ -223,6 +223,7 @@ func testITGetFilterIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(eIdxes, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
 	}
+	//invalid tnt:context or index key
 	if _, err := dataManager.GetIndexes(
 		"unknown_key", "unkonwn_tenant",
 		utils.EmptyString, false, false); err == nil || err != utils.ErrNotFound {
@@ -245,6 +246,8 @@ func testITMatchFilterIndex(t *testing.T) {
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
+
+	//invalid tnt:context or index key
 	if _, err := dataManager.GetIndexes(
 		utils.CacheResourceFilterIndexes, "cgrates.org",
 		utils.ConcatenatedKey(utils.MetaString, "NonexistentField", "1002"),
@@ -1009,7 +1012,6 @@ func testITAccountProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-
 	accPrf2 := &utils.AccountProfile{
 		Tenant:    "cgrates.org",
 		ID:        "test_ID2",
@@ -1025,9 +1027,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 
 	if err := dataManager.SetAccountProfile(accPrf1, true); err != nil {
 		t.Error(err)
-	}
-
-	if err := dataManager.SetAccountProfile(accPrf2, true); err != nil {
+	} else if err := dataManager.SetAccountProfile(accPrf2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1160,6 +1160,33 @@ func testITAccountProfileIndexes(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
 	}
 
+	// here we will get the reverse indexing
+	eIdxes = map[string]utils.StringSet{
+		utils.CacheAccountProfilesFilterIndexes: {
+			"test_ID1": struct{}{},
+			"test_ID2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"cgrates.org:FIRST", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
+	eIdxes = map[string]utils.StringSet{
+		utils.CacheAccountProfilesFilterIndexes: {
+			"test_ID3": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"cgrates.org:SECOND", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
+	//invalid tnt:context or index key
 	eIdxes = nil
 	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountProfilesFilterIndexes,
 		"cgrates.org", "*string:*req.Destination:DEST6", false, false); err == nil || err != utils.ErrNotFound {
@@ -1276,6 +1303,22 @@ func testITResourceProfileIndexes(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
 	}
 
+	//here we will check the reverse indexing
+	eIdxes = map[string]utils.StringSet{
+		utils.CacheResourceFilterIndexes: {
+			"RES_PRF1":         struct{}{},
+			"RES_PRF2":         struct{}{},
+			"RES_PRF_CHANGED1": struct{}{},
+			"RES_PRF_CHANGED2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"cgrates.org:RES_FLTR1", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
 	//as we updated our filter, the old one is deleted
 	if _, err := dataManager.GetIndexes(utils.CacheResourceFilterIndexes,
 		"cgrates.org", "*string:*req.Destinations:DEST_RES1", false, false); err == nil || err != utils.ErrNotFound {
@@ -1353,6 +1396,34 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
 	}
 
+	//here we will check the reverse indexing
+	eIdxes = map[string]utils.StringSet{
+		utils.CacheStatFilterIndexes: {
+			"SQUEUE_PRF1": struct{}{},
+			"SQUEUE_PRF3": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"cgrates.org:SQUEUE1", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
+	eIdxes = map[string]utils.StringSet{
+		utils.CacheStatFilterIndexes: {
+			"SQUEUE_PRF2": struct{}{},
+			"SQUEUE_PRF3": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"cgrates.org:SQUEUE2", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
+	}
+
+	//invalid tnt:context or index key
 	eIdxes = nil
 	if rcvIDx, err := dataManager.GetIndexes(utils.CacheStatFilterIndexes,
 		"cgrates.org", "*string:~*opts.ToR:~*req.Usage", false, false); err == nil || err != utils.ErrNotFound {
@@ -1439,6 +1510,22 @@ func testITChargerProfileIndexes(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
 	}
 
+	//here we will check the reverse indexing
+	expIdx = map[string]utils.StringSet{
+		utils.CacheChargerFilterIndexes: {
+			"CHARGER_PRF1":         struct{}{},
+			"CHARGER_PRF2":         struct{}{},
+			"CHANGED_CHARGER_PRF1": struct{}{},
+			"CHANGED_CHARGER_PRF2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"cgrates.org:CHARGER_FLTR", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
+	}
+
 	//the old filter is deleted
 	expIdx = nil
 	if rcvIDx, err := dataManager.GetIndexes(utils.CacheChargerFilterIndexes,
@@ -1512,6 +1599,32 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
 	}
 
+	//here we will get the reverse indexes
+	expIdx = map[string]utils.StringSet{
+		utils.CacheDispatcherFilterIndexes: {
+			"DISPATCHER_PRF1": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"cgrates.org:DISPATCHER_FLTR1", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
+	}
+
+	expIdx = map[string]utils.StringSet{
+		utils.CacheDispatcherFilterIndexes: {
+			"DISPATCHER_PRF2": struct{}{},
+		},
+	}
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"cgrates.org:DISPATCHER_FLTR2", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
+	}
+
+	//invalid tnt:context or index key
 	expIdx = nil
 	if rcvIDx, err := dataManager.GetIndexes(utils.CacheDispatcherFilterIndexes,
 		"cgrates.org:attributes", utils.EmptyString, false, false); err == nil || err != utils.ErrNotFound {
@@ -1645,6 +1758,34 @@ func testITActionProfileIndexes(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
 	}
 
+	//here we will get the reverse indexes
+	expIdx = map[string]utils.StringSet{
+		utils.CacheActionProfilesFilterIndexes: {
+			"ACTPRF1":         struct{}{},
+			"CHANGED_ACTPRF1": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"itsyscom:ACTPRF_FLTR1", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
+	}
+
+	expIdx = map[string]utils.StringSet{
+		utils.CacheActionProfilesFilterIndexes: {
+			"ACTPRF2":         struct{}{},
+			"CHANGED_ACTPRF2": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"itsyscom:ACTPRF_FLTR2", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
+	}
+
+	//invalid tnt:context or index key
 	expIdx = nil
 	if rcvIdx, err := dataManager.GetIndexes(utils.CacheActionProfilesFilterIndexes,
 		"itsyscom", "*string:*req.Destination:ACC7", false, false); err == nil || err != utils.ErrNotFound {
@@ -1900,6 +2041,21 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
 	}
 
+	//here we will check the reverse indexing
+	expIdx = map[string]utils.StringSet{
+		utils.CacheRouteFilterIndexes: {
+			"SPL_WITH_FILTER1": struct{}{},
+			"SPL_WITH_FILTER2": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"cgrates.org:FIRST", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIdx, rcvIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
+	}
+
+	//invalid tnt:context or index key
 	if _, err := dataManager.GetIndexes(utils.CacheRouteFilterIndexes,
 		"cgrates.org", "*string:DAN:ORG_ID", false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
@@ -2307,6 +2463,19 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 	}
 	if rcv, err := dataManager.GetIndexes(utils.CacheRateProfilesFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expIdx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcv))
+	}
+
+	//here we will get the reverse indexes
+	expIdx = map[string]utils.StringSet{
+		utils.CacheRateProfilesFilterIndexes: {
+			"RP1": struct{}{},
+		},
+	}
+	if rcv, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+		"cgrates.org:FLTR", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcv))
