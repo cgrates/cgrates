@@ -1611,13 +1611,38 @@ func TestMonthlyEstimated(t *testing.T) {
 	}
 }
 
-func TestCoreUtilsBiRPCCallSplitErr(t *testing.T) {
-	type Server struct{}
-	var srv Server
+type server struct{}
+
+type client struct{}
+
+func (c client) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+	err = ErrExists
+	return
+}
+
+func (srv *server) BiRPCv1ValidMethod(cl rpcclient.ClientConnector, args interface{}, req interface{}) error {
+	return nil
+}
+
+func (srv *server) BiRPCv1MultipleParams(cl rpcclient.ClientConnector, args interface{}, req interface{}) (int, error) {
+	return 1, nil
+}
+
+func (srv *server) BiRPCv1NoErrorReturn(cl rpcclient.ClientConnector, args interface{}, req interface{}) int {
+	return 1
+}
+
+func (srv *server) BiRPCv1FinalError(cl rpcclient.ClientConnector, args interface{}, req interface{}) (err error) {
+	err = ErrExists
+	return
+}
+
+func TestCoreUtilsBiRPCCall(t *testing.T) {
+	srv := new(server)
 	var clnt rpcclient.ClientConnector
 	var args int
 	var reply *int
-	serviceMethod := "test.err.call"
+	serviceMethod := "testv1.v2.v3"
 
 	expected := rpcclient.ErrUnsupporteServiceMethod
 	err := BiRPCCall(srv, clnt, serviceMethod, args, reply)
@@ -1625,19 +1650,52 @@ func TestCoreUtilsBiRPCCallSplitErr(t *testing.T) {
 	if err == nil || err != expected {
 		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
 	}
-}
 
-func TestCoreUtilsBiRPCCallMethodNotValid(t *testing.T) {
-	type Server struct{}
-	var srv Server
-	var clnt rpcclient.ClientConnector
-	var args int
-	var reply *int
-	serviceMethod := "test.com"
+	serviceMethod = "testv1.fail"
 
-	expected := rpcclient.ErrUnsupporteServiceMethod
-	err := BiRPCCall(srv, clnt, serviceMethod, args, reply)
+	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
 
+	if err == nil || err != expected {
+		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+	}
+
+	serviceMethod = "Testv1.ValidMethod"
+
+	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
+
+	if err != nil {
+		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, nil)
+	}
+
+	serviceMethod = "Testv1.MultipleParams"
+
+	expected = ErrServerError
+	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
+
+	if err == nil || err != expected {
+		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+	}
+
+	serviceMethod = "Testv1.NoErrorReturn"
+	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
+
+	expected = ErrServerError
+	if err == nil || err != expected {
+		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+	}
+
+	serviceMethod = "Testv1.FinalError"
+	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
+
+	expected = ErrExists
+	if err == nil || err != expected {
+		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+	}
+
+	var c client
+	c.Call("testString", args, reply)
+
+	err = BiRPCCall(srv, c, serviceMethod, args, reply)
 	if err == nil || err != expected {
 		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
 	}
