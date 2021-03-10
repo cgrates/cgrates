@@ -1700,3 +1700,28 @@ func TestCoreUtilsBiRPCCall(t *testing.T) {
 		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
 	}
 }
+
+func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {
+	apiKey := "testKey1"
+	routeID := "testKey2"
+	cache := "testKey3"
+	rmtHost := "testKey4"
+
+	expected := map[string]interface{}{
+		OptsAPIKey:    apiKey,
+		OptsRouteID:   routeID,
+		CacheOpt:      cache + ".",
+		RemoteHostOpt: rmtHost,
+	}
+	received := GenerateDBItemOpts(apiKey, routeID, cache, rmtHost)
+	if len(received) != len(expected) {
+		t.Fatalf("The maps differ in length")
+	}
+	for key, value := range received {
+		if expected[key] != value {
+			t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", value, expected[key])
+		}
+	}
+	fmt.Println(received)
+
+}
