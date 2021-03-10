@@ -483,7 +483,6 @@ func TestRegisterRegistrarSv1UnregisterRPCHosts(t *testing.T) {
 	}
 }
 
-/*
 func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 	ra := &UnregisterArgs{
 		IDs:    []string{"Host1"},
@@ -528,7 +527,7 @@ func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 		t.Fatal(err)
 	}
 	delete(config.CgrConfig().RPCConns(), "errCon")
-	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
+	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil)
 }
 
 func TestRegisterRegistrarSv1RegisterRPCHosts(t *testing.T) {
@@ -631,6 +630,5 @@ func TestRegisterRegistrarSv1RegisterRPCHostsError(t *testing.T) {
 		t.Fatal(err)
 	}
 	delete(config.CgrConfig().RPCConns(), "errCon1")
-	engine.SetCache(engine.NewCacheS(config.CgrConfig(), nil, nil))
+	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil)
 }
-*/
