@@ -25,6 +25,7 @@ import (
 	"net/rpc"
 	"os"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -197,5 +198,74 @@ func testFWVITAnalyseCDRs(t *testing.T) {
 func testFWVITKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestNewFWVFileER(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	cfg.ERsCfg().Readers[cfgIdx].SourcePath = "/"
+	expected := &FWVFileER{
+		cgrCfg: cfg,
+		cfgIdx: cfgIdx,
+		rdrDir: "",
+	}
+	cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs = 1
+	result, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	result.(*FWVFileER).conReqs = nil
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestFWVFileConfig(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               "file_reader1",
+			Type:             utils.MetaFileCSV,
+			RowLength:        5,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         -1,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/tmp/ers/in",
+			ProcessedPath:    "/tmp/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Opts:             make(map[string]interface{}),
+		},
+		{
+			ID:               "file_reader2",
+			Type:             utils.MetaFileCSV,
+			RowLength:        5,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         -1,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/tmp/ers/in",
+			ProcessedPath:    "/tmp/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	expected := cfg.ERsCfg().Readers[0]
+	rdr, err := NewFWVFileER(cfg, 0, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	result := rdr.Config()
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
