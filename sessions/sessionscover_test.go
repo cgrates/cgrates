@@ -4145,6 +4145,9 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
 				return utils.ErrNotImplemented
 			},
+			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+				return nil
+			},
 		},
 	}
 	chanInternal := make(chan rpcclient.ClientConnector, 1)
@@ -4212,8 +4215,12 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	}
 	args.CGREvent.Event[utils.Usage] = "10"
 
+	args.Flags = []string{utils.MetaRALs,
+		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaUpdate),
+		utils.MetaChargers}
+	delete(args.Opts, utils.OptsDebitInterval)
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err != nil {
-		t.Errorf("Exepected %+v, received %+v", expected, err)
+		t.Error(err)
 	}
 
 	args.Flags = []string{utils.MetaRALs,
