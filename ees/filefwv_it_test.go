@@ -155,3 +155,28 @@ func testFwvVerifyExports(t *testing.T) {
 		t.Errorf("Expecting: \n <%+v> \n, received: \n<%+v>\n", eHdr+eTrl+eCnt, string(outContent1))
 	}
 }
+
+func TestFileFwvInit(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].ExportPath = "/tmp/TestInitFileFWV"
+	if err := os.MkdirAll("/tmp/TestInitFileFWV", 0666); err != nil {
+		t.Error(err)
+	}
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	fFwv := &FileFWVee{
+		cgrCfg: cgrCfg,
+		dc:     dc,
+	}
+	if err := fFwv.init(); err != nil {
+		t.Error(err)
+	}
+	if err := os.RemoveAll("/tmp/TestInitFileCSV"); err != nil {
+		t.Error(err)
+	}
+}
