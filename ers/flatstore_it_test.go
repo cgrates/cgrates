@@ -25,6 +25,7 @@ import (
 	"net/rpc"
 	"os"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -207,5 +208,71 @@ func testFlatstoreITAnalyseCDRs(t *testing.T) {
 func testFlatstoreITKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestNewFlatstoreER(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	expected := &FlatstoreER{
+		cgrCfg: cfg,
+	}
+	cfg.ERsCfg().Readers[0].SourcePath = "/"
+	result, err := NewFlatstoreER(cfg, 0, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	result.(*FlatstoreER).cache = nil
+	result.(*FlatstoreER).conReqs = nil
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestFlatstoreConfig(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:               "file_reader1",
+			Type:             utils.MetaFileCSV,
+			RowLength:        5,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         -1,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/tmp/ers/in",
+			ProcessedPath:    "/tmp/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Opts:             make(map[string]interface{}),
+		},
+		{
+			ID:               "file_reader2",
+			Type:             utils.MetaFileCSV,
+			RowLength:        5,
+			FieldSep:         ",",
+			HeaderDefineChar: ":",
+			RunDelay:         -1,
+			ConcurrentReqs:   1024,
+			SourcePath:       "/tmp/ers/in",
+			ProcessedPath:    "/tmp/ers/out",
+			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
+			Tenant:           nil,
+			Timezone:         utils.EmptyString,
+			Filters:          []string{},
+			Flags:            utils.FlagsWithParams{},
+			Opts:             make(map[string]interface{}),
+		},
+	}
+	expected := cfg.ERsCfg().Readers[0]
+	rdr, err := NewFlatstoreER(cfg, 0, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	result := rdr.Config()
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }

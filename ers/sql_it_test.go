@@ -325,3 +325,28 @@ func testSQLStop(t *testing.T) {
 	}
 
 }
+
+func TestSQLPostCDR(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &SQLEventReader{
+		cgrCfg:        cfg,
+		cfgIdx:        1,
+		fltrS:         &engine.FilterS{},
+		connString:    "testString",
+		connType:      "testType",
+		tableName:     "testName",
+		expConnString: "testExpConnString",
+		expConnType:   "testExpConnType",
+		expTableName:  "testExpTableName",
+		rdrEvents:     nil,
+		rdrExit:       nil,
+		rdrErr:        nil,
+		cap:           nil,
+	}
+	in := make([]interface{}, 2)
+	err := rdr.postCDR(in)
+	expected := "db type <testExpConnType> not supported"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
