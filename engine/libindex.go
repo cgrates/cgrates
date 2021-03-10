@@ -172,9 +172,21 @@ func removeItemFromFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID str
 }
 
 // updatedIndexes will compare the old filtersIDs with the new ones and only update the filters indexes that are added/removed
-func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFilterIds *[]string, newFilterIDs []string) (err error) {
+// idxItmType - the index object type(e.g.*attribute_filter_indexes, *rate_filter_indexes, *threshold_filter_indexes)
+// tnt - the tenant of the object
+// ctx - the rate profile id for rate from RateProfile(sub indexes); for all the rest the ctx is ""(AttributePrf and DispatcherPrf have a separate function)
+// itemID - the object id
+// oldFilterIds - the filtersIDs that the old object had; this is optional if the object did not exist
+// newFilterIDs - the filtersIDs for the object that will be set
+// useCtx - in case of subindexes(e.g. Rate from RateProfiles) need to add the ctx to the itemID when reverse filter indexes are set
+// 			used when updating the filters
+func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFilterIds *[]string, newFilterIDs []string, useCtx bool) (err error) {
+	itmCtx := itemID
+	if useCtx {
+		itmCtx = utils.ConcatenatedKey(itemID, ctx)
+	}
 	if oldFilterIds == nil { // nothing to remove so just create the new indexes
-		if err = addIndexFiltersItem(dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
+		if err = addIndexFiltersItem(dm, idxItmType, tnt, itmCtx, newFilterIDs); err != nil {
 			return
 		}
 		return addItemToFilterIndex(dm, idxItmType, tnt, ctx, itemID, newFilterIDs)
@@ -205,7 +217,7 @@ func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFil
 	if len(oldFilterIDs) != 0 || oldFltrs.Size() == 0 {
 		// has some indexes to remove or
 		// the old profile doesn't have filters but the new one has so remove the *none index
-		if err = removeIndexFiltersItem(dm, idxItmType, tnt, itemID, oldFilterIDs); err != nil {
+		if err = removeIndexFiltersItem(dm, idxItmType, tnt, itmCtx, oldFilterIDs); err != nil {
 			return
 		}
 		if err = removeItemFromFilterIndex(dm, idxItmType, tnt, ctx, itemID, oldFilterIDs); err != nil {
@@ -216,7 +228,7 @@ func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFil
 	if len(newFilterIDs) != 0 || newFltrs.Size() == 0 {
 		// has some indexes to add or
 		// the old profile has filters but the new one does not so add the *none index
-		if err = addIndexFiltersItem(dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
+		if err = addIndexFiltersItem(dm, idxItmType, tnt, itmCtx, newFilterIDs); err != nil {
 			return
 		}
 		if err = addItemToFilterIndex(dm, idxItmType, tnt, ctx, itemID, newFilterIDs); err != nil {
@@ -228,6 +240,13 @@ func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFil
 
 // updatedIndexesWithContexts will compare the old contexts with the new ones and only update what is needed
 // this is used by the profiles that have context(e.g. AttributeProfile)
+// idxItmType - the index object type(e.g.*attribute_filter_indexes, *rate_filter_indexes, *threshold_filter_indexes)
+// tnt - the tenant of the object
+// itemID - the object id
+// oldContexts -  the old contexts/subsystems for profile; this is optional if the object did not exist
+// oldFilterIds - the filtersIDs that the old object had; this is optional if the object did not exist
+// newContexts -  the new contexts/subsystems for profile that will be set
+// newFilterIDs - the filtersIDs for the object that will be set
 func updatedIndexesWithContexts(dm *DataManager, idxItmType, tnt, itemID string,
 	oldContexts, oldFilterIDs *[]string, newContexts, newFilterIDs []string) (err error) {
 	if oldContexts == nil { // new profile add all indexes

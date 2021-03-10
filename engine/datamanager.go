@@ -1133,7 +1133,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 			oldFiltersIDs = &oldTh.FilterIDs
 		}
 		if err := updatedIndexes(dm, utils.CacheThresholdFilterIndexes, th.Tenant,
-			utils.EmptyString, th.ID, oldFiltersIDs, th.FilterIDs); err != nil {
+			utils.EmptyString, th.ID, oldFiltersIDs, th.FilterIDs, false); err != nil {
 			return err
 		}
 	}
@@ -1261,7 +1261,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			oldFiltersIDs = &oldSts.FilterIDs
 		}
 		if err := updatedIndexes(dm, utils.CacheStatFilterIndexes, sqp.Tenant,
-			utils.EmptyString, sqp.ID, oldFiltersIDs, sqp.FilterIDs); err != nil {
+			utils.EmptyString, sqp.ID, oldFiltersIDs, sqp.FilterIDs, false); err != nil {
 			return err
 		}
 	}
@@ -1595,7 +1595,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 			oldFiltersIDs = &oldRes.FilterIDs
 		}
 		if err := updatedIndexes(dm, utils.CacheResourceFilterIndexes, rp.Tenant,
-			utils.EmptyString, rp.ID, oldFiltersIDs, rp.FilterIDs); err != nil {
+			utils.EmptyString, rp.ID, oldFiltersIDs, rp.FilterIDs, false); err != nil {
 			return err
 		}
 		Cache.Clear([]string{utils.CacheEventResources})
@@ -2416,7 +2416,7 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
 		if err := updatedIndexes(dm, utils.CacheRouteFilterIndexes, rpp.Tenant,
-			utils.EmptyString, rpp.ID, oldFiltersIDs, rpp.FilterIDs); err != nil {
+			utils.EmptyString, rpp.ID, oldFiltersIDs, rpp.FilterIDs, false); err != nil {
 			return err
 		}
 	}
@@ -2681,7 +2681,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 			oldFiltersIDs = &oldCpp.FilterIDs
 		}
 		if err := updatedIndexes(dm, utils.CacheChargerFilterIndexes, cpp.Tenant,
-			utils.EmptyString, cpp.ID, oldFiltersIDs, cpp.FilterIDs); err != nil {
+			utils.EmptyString, cpp.ID, oldFiltersIDs, cpp.FilterIDs, false); err != nil {
 			return err
 		}
 	}
@@ -3115,7 +3115,7 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
 		if err := updatedIndexes(dm, utils.CacheRateProfilesFilterIndexes, rpp.Tenant,
-			utils.EmptyString, rpp.ID, oldFiltersIDs, rpp.FilterIDs); err != nil {
+			utils.EmptyString, rpp.ID, oldFiltersIDs, rpp.FilterIDs, false); err != nil {
 			return err
 		}
 		// remove indexes for old rates
@@ -3140,7 +3140,7 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 			}
 			// when we create the indexes for rates we use RateProfile ID as context
 			if err := updatedIndexes(dm, utils.CacheRateFilterIndexes, rpp.Tenant,
-				rpp.ID, key, oldRateFiltersIDs, rate.FilterIDs); err != nil {
+				rpp.ID, key, oldRateFiltersIDs, rate.FilterIDs, true); err != nil {
 				return err
 			}
 		}
@@ -3275,7 +3275,7 @@ func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (er
 			}
 			// when we create the indexes for rates we use RateProfile ID as context
 			if err := updatedIndexes(dm, utils.CacheRateFilterIndexes, rpp.Tenant,
-				rpp.ID, key, oldRateFiltersIDs, rate.FilterIDs); err != nil {
+				rpp.ID, key, oldRateFiltersIDs, rate.FilterIDs, true); err != nil {
 				return err
 			}
 		}
@@ -3373,7 +3373,7 @@ func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err 
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
 		if err := updatedIndexes(dm, utils.CacheActionProfilesFilterIndexes, ap.Tenant,
-			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs); err != nil {
+			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs, false); err != nil {
 			return err
 		}
 	}
@@ -3668,7 +3668,7 @@ func (dm *DataManager) SetAccountProfile(ap *utils.AccountProfile, withIndex boo
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
 		if err := updatedIndexes(dm, utils.CacheAccountProfilesFilterIndexes, ap.Tenant,
-			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs); err != nil {
+			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs, false); err != nil {
 			return err
 		}
 	}
