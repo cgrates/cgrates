@@ -20,6 +20,12 @@ package ers
 
 import (
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+
+	"github.com/cgrates/cgrates/utils"
+	"gorm.io/gorm/logger"
 )
 
 func TestSQLSetURL(t *testing.T) {
@@ -138,4 +144,74 @@ func TestSQLSetURL(t *testing.T) {
 	if err := sql.setURL(inURL, outURL, make(map[string]interface{})); err == nil || err.Error() != "unknown db_type postgres2" {
 		t.Errorf("Expected error: 'unknown db_type postgres2' ,received: %v", err)
 	}
+}
+
+func TestSQLPostCDR(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &SQLEventReader{
+		cgrCfg:        cfg,
+		cfgIdx:        1,
+		fltrS:         &engine.FilterS{},
+		connString:    "testString",
+		connType:      "testType",
+		tableName:     "testName",
+		expConnString: "testExpConnString",
+		expConnType:   "testExpConnType",
+		expTableName:  "testExpTableName",
+		rdrEvents:     nil,
+		rdrExit:       nil,
+		rdrErr:        nil,
+		cap:           nil,
+	}
+	in := make([]interface{}, 2)
+	err := rdr.postCDR(in)
+	expected := "db type <testExpConnType> not supported"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestSQLReaderServePostgresErr(t *testing.T) {
+	tmp := logger.Default
+	logger.Default = logger.Default.LogMode(logger.Silent)
+	rdr := &SQLEventReader{
+		connType:   utils.Postgres,
+		connString: "host=127.0.0.1 port=9999 dbname=cdrs user=cgrates password=CGRateS.org sslmode=disabled",
+	}
+	expected := "cannot parse `host=127.0.0.1 port=9999 dbname=cdrs user=cgrates password=xxxxx sslmode=disabled`: failed to configure TLS (sslmode is invalid)"
+	err := rdr.Serve()
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
+	}
+	logger.Default = tmp
+}
+
+func TestSQLReaderServeBadType(t *testing.T) {
+	tmp := logger.Default
+	logger.Default = logger.Default.LogMode(logger.Silent)
+	rdr := &SQLEventReader{
+		connType:   utils.Postgres,
+		connString: "host=127.0.0.1 port=9999 dbname=cdrs user=cgrates password=CGRateS.org sslmode=disabled",
+	}
+	expected := "cannot parse `host=127.0.0.1 port=9999 dbname=cdrs user=cgrates password=xxxxx sslmode=disabled`: failed to configure TLS (sslmode is invalid)"
+	err := rdr.Serve()
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
+	}
+	logger.Default = tmp
+}
+
+func TestSQLReaderServeBadType2(t *testing.T) {
+	tmp := logger.Default
+	logger.Default = logger.Default.LogMode(logger.Silent)
+	rdr := &SQLEventReader{
+		connType:   utils.MySQL,
+		connString: "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates2?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
+	}
+	expected := "Error 1049: Unknown database 'cgrates2'"
+	err := rdr.Serve()
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
+	}
+	logger.Default = tmp
 }
