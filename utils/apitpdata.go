@@ -936,27 +936,35 @@ func (attr *ArgRSv1ResourceUsage) Clone() *ArgRSv1ResourceUsage {
 }
 
 type ArgsComputeFilterIndexIDs struct {
-	Tenant        string
-	Context       string
-	AttributeIDs  []string
-	ResourceIDs   []string
-	StatIDs       []string
-	RouteIDs      []string
-	ThresholdIDs  []string
-	ChargerIDs    []string
-	DispatcherIDs []string
+	Tenant            string
+	Context           string
+	AttributeIDs      []string
+	ResourceIDs       []string
+	StatIDs           []string
+	RouteIDs          []string
+	ThresholdIDs      []string
+	ChargerIDs        []string
+	DispatcherIDs     []string
+	RateIDs           []string
+	RateProfileIDs    []string
+	AccountProfileIDs []string
+	ActionProfileIDs  []string
 }
 
 type ArgsComputeFilterIndexes struct {
-	Tenant      string
-	Context     string
-	AttributeS  bool
-	ResourceS   bool
-	StatS       bool
-	RouteS      bool
-	ThresholdS  bool
-	ChargerS    bool
-	DispatcherS bool
+	Tenant         string
+	Context        string
+	AttributeS     bool
+	ResourceS      bool
+	StatS          bool
+	RouteS         bool
+	ThresholdS     bool
+	ChargerS       bool
+	DispatcherS    bool
+	RateS          bool
+	RateProfile    bool
+	AccountProfile bool
+	ActionProfile  bool
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval
