@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -752,6 +753,53 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				}); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
+
+		case utils.CacheRateFilterIndexes:
+			itemIDs := make(map[string]utils.StringSet)
+			for itemID := range indx {
+				idSplit := strings.SplitN(itemID, utils.ConcatenatedKeySep, 2)
+				if len(idSplit) < 2 {
+					return errors.New("Expected to be 2 values")
+				}
+				if itemIDs[idSplit[1]] == nil {
+					itemIDs[idSplit[1]] = make(utils.StringSet)
+				}
+				itemIDs[idSplit[1]].Add(idSplit[0])
+			}
+			for rpID, ids := range itemIDs {
+				tntCtx := utils.ConcatenatedKey(newFlt.Tenant, rpID)
+				if err = removeFilterIndexesForFilter(dm, idxItmType, tntCtx,
+					removeIndexKeys, ids); err != nil {
+					return
+				}
+				var rp *RateProfile
+				if rp, err = dm.GetRateProfile(newFlt.Tenant, rpID, true, false, utils.NonTransactional); err != nil {
+					return
+				}
+				for itemID := range ids {
+					rate, has := rp.Rates[itemID]
+					if !has {
+						return utils.ErrNotFound
+					}
+					refID := guardian.Guardian.GuardIDs(utils.EmptyString,
+						config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
+					var updIdx map[string]utils.StringSet
+					if updIdx, err = newFilterIndex(dm, idxItmType,
+						newFlt.Tenant, rpID, itemID, rate.FilterIDs); err != nil {
+						guardian.Guardian.UnguardIDs(refID)
+						return
+					}
+					for _, idx := range updIdx {
+						idx.Add(itemID)
+					}
+					if err = dm.SetIndexes(idxItmType, tntCtx,
+						updIdx, false, utils.NonTransactional); err != nil {
+						guardian.Guardian.UnguardIDs(refID)
+						return
+					}
+					guardian.Guardian.UnguardIDs(refID)
+				}
+			}
 		case utils.CacheAttributeFilterIndexes:
 			for itemID := range indx {
 				var ap *AttributeProfile
@@ -843,6 +891,7 @@ func removeFilterIndexesForFilter(dm *DataManager, idxItmType, tnt string,
 		for idx := range itemIDs {
 			remIndx[idxKey].Remove(idx)
 		}
+
 		if err = dm.SetIndexes(idxItmType, tnt, remIndx, true, utils.NonTransactional); err != nil {
 			return
 		}

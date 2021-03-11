@@ -2238,6 +2238,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 		}
 	}
+
 	// update the RateProfile by adding a new Rate
 	rPrf = &RateProfile{ // recreate the profile because if we test on internal
 		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
@@ -2305,6 +2306,16 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 		}
 	}
+
+	//here we will set a filter
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "Dan", Values: []string{"~*req.Account", "~*req.Destination", "DAN2"}}},
+	}
+	if err := dataManager.SetFilter(fltr, true); err != nil {
+		t.Error(err)
+	}
 	rPrf2 := &RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RP2",
@@ -2317,7 +2328,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 		Rates: map[string]*Rate{
 			"CUSTOM_RATE1": {
 				ID:        "CUSTOM_RATE1",
-				FilterIDs: []string{"*string:~*req.Subject:1001"},
+				FilterIDs: []string{"*string:~*req.Subject:1001", "FLTR"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 0,
@@ -2348,16 +2359,78 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 		"*string:*req.Category:call": {
 			"CUSTOM_RATE2": struct{}{},
 		},
+		"*string:*req.Account:Dan": {
+			"CUSTOM_RATE1": struct{}{},
+		},
+		"*string:*req.Destination:Dan": {
+			"CUSTOM_RATE1": struct{}{},
+		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(
 		utils.CacheRateFilterIndexes, "cgrates.org:RP2",
 		utils.EmptyString, true, true); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
+
+	//here we will check the reverse indexes
+	eIdxes = map[string]utils.StringSet{
+		utils.CacheRateFilterIndexes: {
+			"CUSTOM_RATE1:RP2": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheReverseFilterIndexes, "cgrates.org:FLTR",
+		utils.EmptyString, true, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
+	}
+
+	//now we will update the filter
+	fltr = &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR",
+		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "10m", Values: []string{"~*req.Usage", "~*req.Debited", "DAN2"}}},
+	}
+	if err := dataManager.SetFilter(fltr, true); err != nil {
+		t.Error(err)
+	}
+
+	eIdxes = map[string]utils.StringSet{
+		"*string:*req.Subject:1001": {
+			"CUSTOM_RATE1": struct{}{},
+			"CUSTOM_RATE2": struct{}{},
+		},
+		"*string:*req.Category:call": {
+			"CUSTOM_RATE2": struct{}{},
+		},
+		"*string:*req.Usage:10m": {
+			"CUSTOM_RATE1": struct{}{},
+		},
+		"*string:*req.Debited:10m": {
+			"CUSTOM_RATE1": struct{}{},
+		},
+	}
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheRateFilterIndexes, "cgrates.org:RP2",
+		utils.EmptyString, true, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
+	}
+
+	//invalid or inexisting tenant:context or index key
+	eIdxes = nil
+	if rcvIdx, err := dataManager.GetIndexes(
+		utils.CacheRateFilterIndexes, "cgrates.org:RP4",
+		utils.EmptyString, true, true); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
+	}
+
 }
 
 func testITIndexRateProfileIndexes(t *testing.T) {
