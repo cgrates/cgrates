@@ -19,7 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"reflect"
 	"testing"
+	"time"
+
+	"github.com/cgrates/cron"
 )
 
 func TestLibratesTenantID(t *testing.T) {
@@ -34,7 +38,7 @@ func TestLibratesTenantID(t *testing.T) {
 	}
 }
 
-func TestLibratesCompile(t *testing.T) {
+func TestLibratesCompilerp(t *testing.T) {
 	// empty struct
 	rp := &RateProfile{}
 	err := rp.Compile()
@@ -76,4 +80,120 @@ func TestLibratesUID(t *testing.T) {
 		t.Errorf("\nReceived: %q, \nExpected: %q", received, expected)
 	}
 
+}
+
+func TestLibratesCompilert(t *testing.T) {
+	rt := &Rate{
+		ActivationTimes: EmptyString,
+	}
+
+	err := rt.Compile()
+
+	if err != nil {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, nil)
+	}
+}
+
+func TestLibratesRunTimes(t *testing.T) {
+	var (
+		sTime     time.Time
+		eTime     time.Time
+		verbosity int
+	)
+
+	// memory leak test
+	verbosity = 0
+
+	rt := &Rate{}
+
+	received, err := rt.RunTimes(sTime, eTime, verbosity)
+	var expected [][]time.Time
+
+	if err == nil || err != ErrMaxIterationsReached {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, ErrMaxIterationsReached)
+	}
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+	}
+
+	// aTime after eTime test
+	schd, err := cron.ParseStandard("* * * * *")
+	if err != nil {
+		t.Errorf("\ndidn't expect error, got %v", err)
+	}
+
+	rt.sched = schd
+	verbosity = 10
+	eTime = sTime.Add(10 * time.Minute)
+
+	received, err = rt.RunTimes(sTime, eTime, verbosity)
+
+	if err != nil {
+		t.Errorf("\ndidn't expect error, got %v", err)
+	}
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+	}
+
+	// eTime before iTime test
+	schd, err = cron.ParseStandard("* * 12 3 *")
+	if err != nil {
+		t.Errorf("\ndidn't expect error, got %v", err)
+	}
+
+	rt.sched = schd
+	sTime, err = time.Parse(time.RFC3339, "2022-03-11T15:04:05Z")
+	if err != nil {
+		t.Errorf("\ndidn't expect error, got %v", err)
+	}
+	eTime = sTime.Add(24 * time.Hour)
+
+	received, err = rt.RunTimes(sTime, eTime, verbosity)
+
+	aT1, err := time.Parse(time.RFC3339, "2022-03-12T00:00:00Z")
+	if err != nil {
+		t.Errorf("\ndidn't expect error, got %v", err)
+	}
+
+	aT2, err := time.Parse(time.RFC3339, "2022-03-13T00:00:00Z")
+	if err != nil {
+		t.Errorf("\ndidn't expect error, got %v", err)
+	}
+
+	aTsl := make([]time.Time, 0)
+	aTsl = append(aTsl, aT1, aT2)
+	expected = append(expected, aTsl)
+
+	if err != nil {
+		t.Errorf("\ndidn't expect error, got %v", err)
+	}
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+	}
+
+	//eTime after iTime
+	schd, err = cron.ParseStandard("* * 12 3 *")
+	if err != nil {
+		t.Errorf("\ndidn't expect error, got %v", err)
+	}
+
+	rt.sched = schd
+	sTime, err = time.Parse(time.RFC3339, "2022-03-11T15:04:05Z")
+	if err != nil {
+		t.Errorf("\ndidn't expect error, got %v", err)
+	}
+	eTime = sTime.Add(48 * time.Hour)
+
+	received, err = rt.RunTimes(sTime, eTime, verbosity)
+
+	if err != nil {
+		t.Errorf("\ndidn't expect error, got %v", err)
+	}
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+	}
 }
