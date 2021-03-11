@@ -19,9 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"bytes"
+	"encoding/csv"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -48,5 +52,205 @@ func TestFileFwvGetMetrics(t *testing.T) {
 
 	if rcv := fFwv.GetMetrics(); !reflect.DeepEqual(rcv, fFwv.dc) {
 		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(fFwv.dc))
+	}
+}
+
+func TestFilveFwvComposeHeader(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	byteBuff := new(bytes.Buffer)
+	csvNW := csv.NewWriter(byteBuff)
+	fFwv := &FileFWVee{
+		id:      "string",
+		cgrCfg:  cgrCfg,
+		cfgIdx:  0,
+		filterS: filterS,
+		file:    nopCloser{byteBuff},
+		dc:      utils.MapStorage{},
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*hdr.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+		},
+		{
+			Path: "*hdr.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	if err := fFwv.composeHeader(); err != nil {
+		t.Error(err)
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	if err := fFwv.composeHeader(); err != nil {
+		t.Error(err)
+	}
+	csvNW.Flush()
+	expected := "field1field2\n"
+	if expected != byteBuff.String() {
+		t.Errorf("Expected %q but received %q", expected, byteBuff.String())
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*hdr.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+		{
+			Path: "*hdr.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	byteBuff.Reset()
+	errExpect := "inline parse error for string: <*wrong-type>"
+	if err := fFwv.composeHeader(); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but received %q", errExpect, err)
+	}
+}
+
+func TestFileFwvComposeTrailer(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	byteBuff := new(bytes.Buffer)
+	csvNW := csv.NewWriter(byteBuff)
+	fFwv := &FileFWVee{
+		id:      "string",
+		cgrCfg:  cgrCfg,
+		cfgIdx:  0,
+		filterS: filterS,
+		file:    nopCloser{byteBuff},
+		dc:      utils.MapStorage{},
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*trl.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+		},
+		{
+			Path: "*trl.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	if err := fFwv.composeTrailer(); err != nil {
+		t.Error(err)
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	if err := fFwv.composeTrailer(); err != nil {
+		t.Error(err)
+	}
+	csvNW.Flush()
+	expected := "field1field2\n"
+	if expected != byteBuff.String() {
+		t.Errorf("Expected %q but received %q", expected, byteBuff.String())
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*trl.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+		{
+			Path: "*trl.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	byteBuff.Reset()
+	errExpect := "inline parse error for string: <*wrong-type>"
+	if err := fFwv.composeTrailer(); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but received %q", errExpect, err)
+	}
+}
+
+func TestFileFwvExportEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	byteBuff := new(bytes.Buffer)
+	csvNW := csv.NewWriter(byteBuff)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	fFwv := &FileFWVee{
+		id:      "string",
+		cgrCfg:  cgrCfg,
+		cfgIdx:  0,
+		filterS: filterS,
+		file:    nopCloser{byteBuff},
+		dc:      dc,
+	}
+	cgrEv.Event = map[string]interface{}{
+		"test1": "value",
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+		},
+		{
+			Path: "*exp.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	if err := fFwv.ExportEvent(cgrEv); err != nil {
+		t.Error(err)
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	if err := fFwv.ExportEvent(cgrEv); err != nil {
+		t.Error(err)
+	}
+	csvNW.Flush()
+	expected := "value\n\n"
+	if expected != byteBuff.String() {
+		t.Errorf("Expected %q but received %q", expected, byteBuff.String())
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	byteBuff.Reset()
+	errExpect := "inline parse error for string: <*wrong-type>"
+	if err := fFwv.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 }

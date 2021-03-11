@@ -1296,7 +1296,41 @@ func TestConfigSanityDataDB(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	//RpcConns
+	cfg.dataDbCfg.RplConns = []string{"test1"}
+	expected = "<data_db> connection with id: <test1> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dataDbCfg.RplConns = []string{utils.MetaInternal}
+	cfg.rpcConns[utils.MetaInternal].Conns = []*RemoteHost{
+		{
+			Transport: utils.MetaNone,
+		},
+	}
+	expected = "<data_db> unsuported transport <*none> for connection with ID: <*internal>"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dataDbCfg.RplConns = []string{}
+	cfg.dataDbCfg.Items = map[string]*ItemOpt{}
+	//RmtConns
+	cfg.dataDbCfg.RmtConns = []string{"test2"}
+	expected = "<data_db> connection with id: <test2> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dataDbCfg.RmtConns = []string{utils.MetaInternal}
+	cfg.rpcConns[utils.MetaInternal].Conns = []*RemoteHost{
+		{
+			Transport: utils.MetaNone,
+		},
+	}
+	expected = "<data_db> unsuported transport <*none> for connection with ID: <*internal>"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 }
 
 func TestConfigSanityAPIer(t *testing.T) {
