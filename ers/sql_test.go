@@ -200,18 +200,3 @@ func TestSQLReaderServeBadType(t *testing.T) {
 	}
 	logger.Default = tmp
 }
-
-func TestSQLReaderServeBadType2(t *testing.T) {
-	tmp := logger.Default
-	logger.Default = logger.Default.LogMode(logger.Silent)
-	rdr := &SQLEventReader{
-		connType:   utils.MySQL,
-		connString: "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates2?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
-	}
-	expected := "Error 1049: Unknown database 'cgrates2'"
-	err := rdr.Serve()
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
-	}
-	logger.Default = tmp
-}
