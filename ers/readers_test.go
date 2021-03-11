@@ -119,3 +119,20 @@ func TestNewSQLReader(t *testing.T) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
 	}
 }
+
+func TestNewSQLReaderError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	reader := cfg.ERsCfg().Readers[0].Clone()
+	reader.Type = utils.MetaSQL
+	reader.ID = "file_reader"
+	reader.ConcurrentReqs = -1
+	reader.Opts = map[string]interface{}{"db_name": "cgrates2"}
+	reader.SourcePath = "#"
+	reader.ProcessedPath = ""
+	expected := "unknown db_type "
+	_, err := NewSQLEventReader(cfg, 0, nil, nil, fltr, nil)
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, err)
+	}
+}
