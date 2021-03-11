@@ -223,9 +223,6 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		eeC.FieldSep = *jsnEec.Field_separator
 	}
 	if jsnEec.Fields != nil {
-		eeC.headerFields = make([]*FCTemplate, 0)
-		eeC.contentFields = make([]*FCTemplate, 0)
-		eeC.trailerFields = make([]*FCTemplate, 0)
 		eeC.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnEec.Fields, separator)
 		if err != nil {
 			return
@@ -235,19 +232,7 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		} else if tpls != nil {
 			eeC.Fields = tpls
 		}
-		for _, field := range eeC.Fields {
-			switch field.GetPathSlice()[0] {
-			case utils.MetaHdr:
-				eeC.headerFields = append(eeC.headerFields, field)
-			case utils.MetaExp:
-				eeC.contentFields = append(eeC.contentFields, field)
-			case utils.MetaTrl:
-				eeC.trailerFields = append(eeC.trailerFields, field)
-			}
-			if strings.HasPrefix(field.GetPathSlice()[0], utils.MetaUCH) { // special cache when loading fields that contains *uch in path
-				eeC.contentFields = append(eeC.contentFields, field)
-			}
-		}
+		eeC.ComputeFields()
 	}
 	if jsnEec.Opts != nil {
 		for k, v := range jsnEec.Opts {
@@ -255,6 +240,27 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		}
 	}
 	return
+}
+
+// ComputeFields will split the fields in header trailer or content
+// exported for ees testing
+func (eeC *EventExporterCfg) ComputeFields() {
+	eeC.headerFields = make([]*FCTemplate, 0)
+	eeC.contentFields = make([]*FCTemplate, 0)
+	eeC.trailerFields = make([]*FCTemplate, 0)
+	for _, field := range eeC.Fields {
+		switch field.GetPathSlice()[0] {
+		case utils.MetaHdr:
+			eeC.headerFields = append(eeC.headerFields, field)
+		case utils.MetaExp:
+			eeC.contentFields = append(eeC.contentFields, field)
+		case utils.MetaTrl:
+			eeC.trailerFields = append(eeC.trailerFields, field)
+		}
+		if strings.HasPrefix(field.GetPathSlice()[0], utils.MetaUCH) { // special cache when loading fields that contains *uch in path
+			eeC.contentFields = append(eeC.contentFields, field)
+		}
+	}
 }
 
 // HeaderFields returns the fields that have *hdr prefix
