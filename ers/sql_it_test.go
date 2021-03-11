@@ -326,6 +326,17 @@ func testSQLStop(t *testing.T) {
 
 }
 
+func TestSQLReaderServeBadTypeErr(t *testing.T) {
+	rdr := &SQLEventReader{
+		connType: "badType",
+	}
+	expected := "db type <badType> not supported"
+	err := rdr.Serve()
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
+	}
+}
+
 func TestSQLPostCDR(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	rdr := &SQLEventReader{

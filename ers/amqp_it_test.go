@@ -129,3 +129,17 @@ func TestAMQPER(t *testing.T) {
 	}
 	close(rdrExit)
 }
+
+func TestAMQPERServeError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	expected := "AMQP scheme must be either 'amqp://' or 'amqps://'"
+	rdr, err := NewAMQPER(cfg, cfgIdx, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	err2 := rdr.Serve()
+	if err2 == nil || err2.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err2)
+	}
+}
