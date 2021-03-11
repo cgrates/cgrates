@@ -113,17 +113,18 @@ var (
 	}
 	CachePrefixToInstance map[string]string    // will be built on init
 	CacheIndexesToPrefix  = map[string]string{ // used by match index to get all the ids when index selects is disabled and for compute indexes
-		CacheThresholdFilterIndexes:      ThresholdProfilePrefix,
-		CacheResourceFilterIndexes:       ResourceProfilesPrefix,
-		CacheStatFilterIndexes:           StatQueueProfilePrefix,
-		CacheRouteFilterIndexes:          RouteProfilePrefix,
-		CacheAttributeFilterIndexes:      AttributeProfilePrefix,
-		CacheChargerFilterIndexes:        ChargerProfilePrefix,
-		CacheDispatcherFilterIndexes:     DispatcherProfilePrefix,
-		CacheRateProfilesFilterIndexes:   RateProfilePrefix,
-		CacheRateFilterIndexes:           RatePrefix,
-		CacheActionProfilesFilterIndexes: ActionProfilePrefix,
-		CacheReverseFilterIndexes:        FilterPrefix,
+		CacheThresholdFilterIndexes:       ThresholdProfilePrefix,
+		CacheResourceFilterIndexes:        ResourceProfilesPrefix,
+		CacheStatFilterIndexes:            StatQueueProfilePrefix,
+		CacheRouteFilterIndexes:           RouteProfilePrefix,
+		CacheAttributeFilterIndexes:       AttributeProfilePrefix,
+		CacheChargerFilterIndexes:         ChargerProfilePrefix,
+		CacheDispatcherFilterIndexes:      DispatcherProfilePrefix,
+		CacheRateProfilesFilterIndexes:    RateProfilePrefix,
+		CacheRateFilterIndexes:            RatePrefix,
+		CacheActionProfilesFilterIndexes:  ActionProfilePrefix,
+		CacheAccountProfilesFilterIndexes: AccountProfilePrefix,
+		CacheReverseFilterIndexes:         FilterPrefix,
 	}
 
 	CacheInstanceToCacheIndex = map[string]string{
