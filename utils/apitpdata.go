@@ -945,26 +945,24 @@ type ArgsComputeFilterIndexIDs struct {
 	ThresholdIDs      []string
 	ChargerIDs        []string
 	DispatcherIDs     []string
-	RateIDs           []string
 	RateProfileIDs    []string
 	AccountProfileIDs []string
 	ActionProfileIDs  []string
 }
 
 type ArgsComputeFilterIndexes struct {
-	Tenant         string
-	Context        string
-	AttributeS     bool
-	ResourceS      bool
-	StatS          bool
-	RouteS         bool
-	ThresholdS     bool
-	ChargerS       bool
-	DispatcherS    bool
-	RateS          bool
-	RateProfile    bool
-	AccountProfile bool
-	ActionProfile  bool
+	Tenant      string
+	Context     string
+	AttributeS  bool
+	ResourceS   bool
+	StatS       bool
+	RouteS      bool
+	ThresholdS  bool
+	ChargerS    bool
+	DispatcherS bool
+	RateS       bool
+	AccountS    bool
+	ActionS     bool
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval
