@@ -52,11 +52,11 @@ func TestLibratesCompilerp(t *testing.T) {
 	rp.ID = "test"
 	rp.Tenant = "tenant"
 	rp.Rates = map[string]*Rate{
-		"testKey1": &Rate{
+		"testKey1": {
 			ID:              "ID1",
 			ActivationTimes: fail,
 		},
-		"testKey2": &Rate{
+		"testKey2": {
 			ID: "ID2",
 		},
 	}
@@ -1061,7 +1061,7 @@ func TestRateSIncrementCompressEquals(t *testing.T) {
 	}
 	inCr2 := &RateSIncrement{
 		IncrementStart:    NewDecimal(0, 0),
-		Usage:             inCr1.Usage,
+		Usage:             NewDecimal(int64(time.Minute), 0),
 		Rate:              rate1,
 		IntervalRateIndex: 0,
 		CompressFactor:    1,
@@ -1432,8 +1432,8 @@ func TestRateSIntervalCompressEqualsCase3(t *testing.T) {
 		Increments: []*RateSIncrement{
 			{
 				IncrementStart:    NewDecimal(0, 0),
-				Usage:             rateSintrv1.Increments[0].Usage,
 				Rate:              rate1,
+				Usage:             NewDecimal(int64(time.Minute), 0),
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 			},
@@ -1443,5 +1443,105 @@ func TestRateSIntervalCompressEqualsCase3(t *testing.T) {
 	result := rateSintrv1.CompressEquals(rateSintrv2)
 	if result != true {
 		t.Errorf("\nExpecting <true>,\nReceived <%+v>", result)
+	}
+}
+
+func TestLibratesAsRateProfile(t *testing.T) {
+	// Invalid DynamicWeights string
+	ext := &APIRateProfile{
+		Weights: "testWeight",
+	}
+	rp := &RateProfile{
+		Tenant:             ext.Tenant,
+		ID:                 ext.ID,
+		FilterIDs:          ext.FilterIDs,
+		ActivationInterval: ext.ActivationInterval,
+		MaxCostStrategy:    ext.MaxCostStrategy,
+	}
+
+	received, err := ext.AsRateProfile()
+	experr := "invalid DynamicWeight format for string <testWeight>"
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, experr)
+	}
+
+	if received != nil {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, nil)
+	}
+
+	// No changes
+	ext.Weights = EmptyString
+
+	expected := rp
+	received, err = ext.AsRateProfile()
+
+	if err != nil {
+		t.Errorf("\nExpected nil, got <%+v>", err)
+	}
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+	}
+
+	// assign MinCost to rp
+	ext.MinCost = Float64Pointer(1)
+
+	expected.MinCost = NewDecimal(1, 0)
+	received, err = ext.AsRateProfile()
+
+	if err != nil {
+		t.Errorf("\nExpected nil, got <%+v>", err)
+	}
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+	}
+
+	// assign MaxCost to rp
+	ext.MaxCost = Float64Pointer(2)
+
+	expected.MaxCost = NewDecimal(2, 0)
+	received, err = ext.AsRateProfile()
+
+	if err != nil {
+		t.Errorf("\nExpected nil, got <%+v>", err)
+	}
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+	}
+}
+
+func TestLibratesAsRateProfileNon0Len(t *testing.T) {
+	id := "testID"
+	ext := &APIRateProfile{
+		Rates: map[string]*APIRate{
+			"testKey": {
+				ID:      id,
+				Weights: "testWeight",
+			},
+		},
+	}
+	rp := &RateProfile{
+		Tenant:             ext.Tenant,
+		ID:                 ext.ID,
+		FilterIDs:          ext.FilterIDs,
+		ActivationInterval: ext.ActivationInterval,
+		MaxCostStrategy:    ext.MaxCostStrategy,
+	}
+
+	expected := rp
+	expected.Rates = map[string]*Rate{
+		"testKey": nil,
+	}
+	received, err := ext.AsRateProfile()
+
+	if err.Error() != "invalid DynamicWeight format for string <testWeight>" {
+		t.Errorf("\nExpected nil, got <%+v>", err)
+	}
+
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", received, expected)
 	}
 }
