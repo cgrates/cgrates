@@ -78,6 +78,13 @@ var (
 		testV1FISetSecondFilterForAccountProfile,
 		testV1FIComputeIDsAccountProfileIndexes,
 		testV1FIRemoveAccountProfile,
+
+		testV1FIdxdxInitDataDb,
+		testV1FISetActionProfileIndexes,
+		testV1FIComputeActionProfileIndexes,
+		testVF1SetSecondActionProfile,
+		testVF1ComputeIDsActionProfileIndexes,
+		testV1FIRemoveActionProfile,
 		testV1FIdxdxInitDataDb,
 
 		testV1FIdxSetAttributeProfileIndexes,
@@ -1228,7 +1235,7 @@ func testV1FIComputeAccountProfileIndexes(t *testing.T) {
 	}
 
 	var indexes []string
-	//nothing to get from db, as we removed them,
+	//nothing to get from db, as we removed them
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1399,9 +1406,366 @@ func testV1FIRemoveAccountProfile(t *testing.T) {
 	}
 
 	var indexes []string
-	//there are no indexes in db, as we removed accprf from db
+	//there are no indexes in db, as we removed actprf from db
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+//ActionProfile
+func testV1FISetActionProfileIndexes(t *testing.T) {
+	//set a new filter in db
+	filter = &FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "ACTION_FLTR",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.ToR",
+					Values:  []string{"*sms", "*data", "~*req.Voice"},
+				},
+			},
+		},
+	}
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected result returned", result)
+	}
+
+	//there is not an actPrf in db, so we will get NOT_FOUND
+	var reply *engine.ActionProfile
+	if err := tFIdxRpc.Call(utils.APIerSv1GetActionProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	//set an actPrf in db, so we will get it without any problems
+	actPrf := &ActionProfileWithCache{
+		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
+			ActionProfile: &engine.ActionProfile{
+				Tenant:    tenant,
+				ID:        "ACT_PRF",
+				FilterIDs: []string{"*prefix:~*req.Account:1001|1002", "ACTION_FLTR"},
+				Schedule:  "* * * * *",
+				Actions: []*engine.APAction{
+					{
+						ID:        "TOPUP",
+						FilterIDs: []string{},
+						Type:      utils.MetaLog,
+						Diktats: []*engine.APDiktat{{
+							Path:  "~*balance.TestBalance.Value",
+							Value: "10",
+						}},
+					},
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetActionProfile, actPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//get it from db and compare
+	if err := tFIdxRpc.Call(utils.APIerSv1GetActionProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, actPrf.ActionProfile) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(actPrf.ActionProfile), utils.ToJSON(reply))
+	}
+
+	//get indexes to verify if these are indexed well
+	var indexes []string
+	expectedIDx := []string{"*string:*req.ToR:*sms:ACT_PRF", "*string:*req.ToR:*data:ACT_PRF",
+		"*prefix:*req.Account:1001:ACT_PRF", "*prefix:*req.Account:1002:ACT_PRF"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+
+	//get indexes only for that inline actPRf filter (with Type *prefix)
+	expectedIDx = []string{"*prefix:*req.Account:1001:ACT_PRF", "*prefix:*req.Account:1002:ACT_PRF"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant, FilterType: utils.MetaPrefix},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+
+	//get indexes only with Field ToR
+	expectedIDx = []string{"*string:*req.ToR:*sms:ACT_PRF", "*string:*req.ToR:*data:ACT_PRF"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant, FilterField: "*req.ToR"},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+
+	//get the indexes only with Value 1001
+	expectedIDx = []string{"*prefix:*req.Account:1001:ACT_PRF"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant, FilterValue: "1001"},
+		&indexes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(indexes, expectedIDx) {
+		t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+	}
+}
+
+func testV1FIComputeActionProfileIndexes(t *testing.T) {
+	//remove indexes from db
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected result returned", result)
+	}
+
+	//nothing to get from db
+	var indexes []string
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant},
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	//compute them, to put indexes again in db for the right subsystem
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{
+			Tenant:        tenant,
+			ActionProfile: true,
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	expectedIDx := []string{"*string:*req.ToR:*sms:ACT_PRF", "*string:*req.ToR:*data:ACT_PRF",
+		"*prefix:*req.Account:1001:ACT_PRF", "*prefix:*req.Account:1002:ACT_PRF"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+}
+
+func testVF1SetSecondActionProfile(t *testing.T) {
+	//second filter in db
+	filter = &FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "ACTION_FLTR2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.OriginID",
+					Values:  []string{"Dan1"},
+				},
+			},
+		},
+	}
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//set athe second actPrf in db with our filter
+	actPrf := &ActionProfileWithCache{
+		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
+			ActionProfile: &engine.ActionProfile{
+				Tenant:    tenant,
+				ID:        "ACT_PRF2",
+				FilterIDs: []string{"ACTION_FLTR2"},
+				Actions: []*engine.APAction{
+					{
+						ID:        "TORESET",
+						FilterIDs: []string{},
+						Type:      utils.MetaLog,
+					},
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetActionProfile, actPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//get it from db and compare
+	var reply *engine.ActionProfile
+	if err := tFIdxRpc.Call(utils.APIerSv1GetActionProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF2"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, actPrf.ActionProfile) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(actPrf.ActionProfile), utils.ToJSON(reply))
+	}
+
+	//get indexes to verify if these are indexed well
+	var indexes []string
+	expectedIDx := []string{"*string:*req.ToR:*sms:ACT_PRF", "*string:*req.ToR:*data:ACT_PRF",
+		"*prefix:*req.Account:1001:ACT_PRF", "*prefix:*req.Account:1002:ACT_PRF", "*string:*req.OriginID:Dan1:ACT_PRF2"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+}
+
+func testVF1ComputeIDsActionProfileIndexes(t *testing.T) {
+	//remove indexes from db for both actPrf
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	var indexes []string
+	//nothing to get from db, as we removed them,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant},
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	//firstly, compute indexes for "ACT_PRF"
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{
+			Tenant:           tenant,
+			ActionProfileIDs: []string{"ACT_PRF"},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	expectedIDx := []string{"*string:*req.ToR:*sms:ACT_PRF", "*string:*req.ToR:*data:ACT_PRF",
+		"*prefix:*req.Account:1001:ACT_PRF", "*prefix:*req.Account:1002:ACT_PRF"}
+	//as we compute them, next we will try to get them again from db
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+
+	//secondly, compute indexes for "ACT_PRF2"
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{
+			Tenant:           tenant,
+			ActionProfileIDs: []string{"ACT_PRF2"},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	expectedIDx = []string{"*string:*req.ToR:*sms:ACT_PRF", "*string:*req.ToR:*data:ACT_PRF",
+		"*prefix:*req.Account:1001:ACT_PRF", "*prefix:*req.Account:1002:ACT_PRF", "*string:*req.OriginID:Dan1:ACT_PRF2"}
+	//as we compute them, next we will try to get them again from db
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+}
+
+func testV1FIRemoveActionProfile(t *testing.T) {
+	//we will remove actionProfiles 1 by one(ACT_PRF) first
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveActionProfile,
+		&utils.TenantIDWithCache{Tenant: tenant, ID: "ACT_PRF"},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected result returned", result)
+	}
+
+	var reply *engine.ActionProfile
+	//there is not an actPrf in database, so we will get NOT_FOUND
+	if err := tFIdxRpc.Call(utils.APIerSv1GetActionProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	//we will remove actionProfiles 1 by one(ACT_PRF2) second
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveActionProfile,
+		&utils.TenantIDWithCache{Tenant: tenant, ID: "ACT_PRF2"},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected result returned", result)
+	}
+
+	//there is not an actPrf in database, so we will get NOT_FOUND
+	if err := tFIdxRpc.Call(utils.APIerSv1GetActionProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF2"}},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	//bcs both profiles are removed, there are not any indexes in db
+	var indexes []string
+	//there are no indexes in db, as we removed actprf from db
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaActionProfiles, Tenant: tenant},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
