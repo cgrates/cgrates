@@ -106,6 +106,7 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 
 	var csvRecord []string
 	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()) == 0 {
+		csvRecord = make([]string, 0, len(cgrEv.Event))
 		for _, val := range cgrEv.Event {
 			csvRecord = append(csvRecord, utils.IfaceAsString(val))
 		}
@@ -124,13 +125,7 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
-			var strVal string
-			if strVal, err = eeReq.OrdNavMP[utils.MetaExp].FieldAsString(el.Value.Slice()); err != nil {
-				return
-			}
-			csvRecord = append(csvRecord, strVal)
-		}
+		csvRecord = eeReq.OrdNavMP[utils.MetaExp].OrderedFieldsAsStrings()
 	}
 
 	updateEEMetrics(fCsv.dc, cgrEv.Event, utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
@@ -143,7 +138,6 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields()) == 0 {
 		return
 	}
-	var csvRecord []string
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaHdr: utils.NewOrderedNavigableMap(),
 	}
@@ -156,14 +150,7 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 	if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields()); err != nil {
 		return
 	}
-	for el := eeReq.OrdNavMP[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
-		var strVal string
-		if strVal, err = eeReq.OrdNavMP[utils.MetaHdr].FieldAsString(el.Value.Slice()); err != nil {
-			return
-		}
-		csvRecord = append(csvRecord, strVal)
-	}
-	return fCsv.csvWriter.Write(csvRecord)
+	return fCsv.csvWriter.Write(eeReq.OrdNavMP[utils.MetaHdr].OrderedFieldsAsStrings())
 }
 
 // Compose and cache the trailer
@@ -171,7 +158,6 @@ func (fCsv *FileCSVee) composeTrailer() (err error) {
 	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields()) == 0 {
 		return
 	}
-	var csvRecord []string
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaTrl: utils.NewOrderedNavigableMap(),
 	}
@@ -184,14 +170,8 @@ func (fCsv *FileCSVee) composeTrailer() (err error) {
 	if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields()); err != nil {
 		return
 	}
-	for el := eeReq.OrdNavMP[utils.MetaTrl].GetFirstElement(); el != nil; el = el.Next() {
-		var strVal string
-		if strVal, err = eeReq.OrdNavMP[utils.MetaTrl].FieldAsString(el.Value.Slice()); err != nil {
-			return
-		}
-		csvRecord = append(csvRecord, strVal)
-	}
-	return fCsv.csvWriter.Write(csvRecord)
+
+	return fCsv.csvWriter.Write(eeReq.OrdNavMP[utils.MetaTrl].OrderedFieldsAsStrings())
 }
 
 func (fCsv *FileCSVee) GetMetrics() utils.MapStorage {

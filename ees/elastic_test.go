@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -243,4 +244,68 @@ func TestInitCase10(t *testing.T) {
 	if !reflect.DeepEqual(ee.opts.WaitForActiveShards, eeExpect) {
 		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.opts.WaitForActiveShards))
 	}
+}
+
+func TestElasticExportEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	eEe, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	if err != nil {
+		t.Error(err)
+	}
+	cgrEv.Event = map[string]interface{}{
+		"test1": "value",
+	}
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+		},
+		{
+			Path: "*exp.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	errExpect := `unsupported protocol scheme ""`
+	if err := eEe.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but got %q", errExpect, err)
+	}
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	if err := eEe.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but got %q", errExpect, err)
+	}
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	errExpect = "inline parse error for string: <*wrong-type>"
+	if err := eEe.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but received %q", errExpect, err)
+	}
+	eEe.OnEvicted("test", "test")
 }

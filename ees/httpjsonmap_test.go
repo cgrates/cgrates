@@ -27,16 +27,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestHttpPostID(t *testing.T) {
-	httpPost := &HTTPPost{
+func TestHttpJsonMapID(t *testing.T) {
+	httpEE := &HTTPjsonMapEE{
 		id: "3",
 	}
-	if rcv := httpPost.ID(); !reflect.DeepEqual(rcv, "3") {
+	if rcv := httpEE.ID(); !reflect.DeepEqual(rcv, "3") {
 		t.Errorf("Expected %+v but got %+v", "3", rcv)
 	}
 }
 
-func TestHttpPostGetMetrics(t *testing.T) {
+func TestHttpJsonMapGetMetrics(t *testing.T) {
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
 		"Local",
 		utils.EmptyString,
@@ -44,18 +44,18 @@ func TestHttpPostGetMetrics(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	httpPost := &HTTPPost{
+	httpEE := &HTTPjsonMapEE{
 		dc: dc,
 	}
 
-	if rcv := httpPost.GetMetrics(); !reflect.DeepEqual(rcv, httpPost.dc) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(httpPost.dc))
+	if rcv := httpEE.GetMetrics(); !reflect.DeepEqual(rcv, httpEE.dc) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(httpEE.dc))
 	}
 }
 
-func TestHttpPostExportEvent(t *testing.T) {
+func TestHttpJsonMapExportEvent(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
 	cgrEv := new(utils.CGREvent)
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
@@ -67,12 +67,13 @@ func TestHttpPostExportEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	httpPost, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+
+	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
 	cgrEv.Event = map[string]interface{}{
-		"Test1": 3,
+		"test": "string",
 	}
 	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
 		{
@@ -88,11 +89,11 @@ func TestHttpPostExportEvent(t *testing.T) {
 		field.ComputePath()
 	}
 	errExpect := `Post "/var/spool/cgrates/ees": unsupported protocol scheme ""`
-	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+	if err := httpEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+	if err := httpEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
@@ -112,7 +113,7 @@ func TestHttpPostExportEvent(t *testing.T) {
 	}
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
 	errExpect = "inline parse error for string: <*wrong-type>"
-	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+	if err := httpEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
@@ -135,15 +136,15 @@ func TestHttpPostExportEvent(t *testing.T) {
 	}
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
 	errExpect = "inline parse error for string: <*wrong-type>"
-	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+	if err := httpEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
-	httpPost.OnEvicted("test", "test")
+	httpEE.OnEvicted("test", "test")
 }
 
-func TestHttpPostComposeHeader(t *testing.T) {
+func TestHttpJsonMapComposeHeader(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPjson
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
@@ -154,7 +155,7 @@ func TestHttpPostComposeHeader(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	httpPost, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -171,11 +172,11 @@ func TestHttpPostComposeHeader(t *testing.T) {
 	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
 		field.ComputePath()
 	}
-	if _, err := httpPost.composeHeader(); err != nil {
+	if _, err := httpEE.composeHeader(); err != nil {
 		t.Error(err)
 	}
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if _, err := httpPost.composeHeader(); err != nil {
+	if _, err := httpEE.composeHeader(); err != nil {
 		t.Error(err)
 	}
 	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
@@ -195,7 +196,7 @@ func TestHttpPostComposeHeader(t *testing.T) {
 	}
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
 	errExpect := "inline parse error for string: <*wrong-type>"
-	if _, err := httpPost.composeHeader(); err == nil || err.Error() != errExpect {
+	if _, err := httpEE.composeHeader(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 }

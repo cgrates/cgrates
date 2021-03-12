@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -96,17 +95,8 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			return
 		}
 		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
-			var nmIt utils.NMInterface
-			if nmIt, err = eeReq.OrdNavMP[utils.MetaExp].Field(el.Value); err != nil {
-				return
-			}
-			itm, isNMItem := nmIt.(*config.NMItem)
-			if !isNMItem {
-				return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
-			}
-			if itm == nil {
-				continue // all attributes, not writable to diameter packet
-			}
+			nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
+			itm := nmIt.(*config.NMItem)
 			urlVals.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
 		}
 		if hdr, err = httpPost.composeHeader(); err != nil {
@@ -150,18 +140,8 @@ func (httpPost *HTTPPost) composeHeader() (hdr http.Header, err error) {
 		return
 	}
 	for el := eeReq.OrdNavMP[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
-		var nmIt utils.NMInterface
-		if nmIt, err = eeReq.OrdNavMP[utils.MetaHdr].Field(el.Value); err != nil {
-			return
-		}
-		itm, isNMItem := nmIt.(*config.NMItem)
-		if !isNMItem {
-			err = fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
-			return
-		}
-		if itm == nil {
-			continue // all attributes, not writable to diameter packet
-		}
+		nmIt, _ := eeReq.OrdNavMP[utils.MetaHdr].Field(el.Value)
+		itm := nmIt.(*config.NMItem)
 		hdr.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
 	}
 	return

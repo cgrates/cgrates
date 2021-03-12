@@ -219,11 +219,11 @@ func TestFileCsvExportEvent(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields = []*config.FCTemplate{
 		{
 			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+			Value: config.NewRSRParsersMustCompile("~*req.test1", utils.InfieldSep),
 		},
 		{
 			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
+			Value: config.NewRSRParsersMustCompile("3", utils.InfieldSep),
 		},
 	}
 	for _, field := range cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields {
@@ -232,12 +232,18 @@ func TestFileCsvExportEvent(t *testing.T) {
 	if err := fCsv.ExportEvent(cgrEv); err != nil {
 		t.Error(err)
 	}
+	csvNW.Flush()
+	expected := "value\n"
+	if expected != byteBuff.String() {
+		t.Errorf("Expected %q but received %q", expected, byteBuff.String())
+	}
+	byteBuff.Reset()
 	cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ComputeFields()
 	if err := fCsv.ExportEvent(cgrEv); err != nil {
 		t.Error(err)
 	}
 	csvNW.Flush()
-	expected := "value\n\n"
+	expected = "value,3\n"
 	if expected != byteBuff.String() {
 		t.Errorf("Expected %q but received %q", expected, byteBuff.String())
 	}
@@ -263,5 +269,5 @@ func TestFileCsvExportEvent(t *testing.T) {
 	if err := fCsv.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
-
+	fCsv.OnEvicted("test", "test")
 }
