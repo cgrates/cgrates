@@ -327,8 +327,8 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 		}
 	}
 	//AccountProfile Indexes
-	if args.AccountProfile {
-		if args.AccountProfile, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAccountProfilesFilterIndexes,
+	if args.AccountS {
+		if args.AccountS, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAccountProfilesFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				acp, e := apierSv1.DataManager.GetAccountProfile(tnt, id)
 				if e != nil {
@@ -344,8 +344,8 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 		}
 	}
 	//ActionProfile Indexes
-	if args.ActionProfile {
-		if args.ActionProfile, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheActionProfilesFilterIndexes,
+	if args.ActionS {
+		if args.ActionS, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheActionProfilesFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				atp, e := apierSv1.DataManager.GetActionProfile(tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -362,41 +362,32 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 		}
 	}
 	//RateProfile Indexes
-	if args.RateProfile {
-		if args.RateProfile, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheRateProfilesFilterIndexes,
-			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				rtp, e := apierSv1.DataManager.GetRateProfile(tnt, id, true, false, utils.NonTransactional)
-				if e != nil {
-					return nil, e
-				}
-				fltrIDs := make([]string, len(rtp.FilterIDs))
-				for i, fltrID := range rtp.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
-				return &fltrIDs, nil
-
-			}); err != nil && err != utils.ErrNotFound {
-			return utils.APIErrorHandler(err)
-		}
-	}
-	//RateProfileRates Indexes
 	if args.RateS {
-		if args.RateProfile, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheRateProfilesFilterIndexes,
+		if args.RateS, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheRateProfilesFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				rpr, e := apierSv1.DataManager.GetRateProfile(tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
-				rate, has := rpr.Rates[id]
-				if !has {
-					return nil, nil
-				}
-				fltrIDs := make([]string, len(rate.FilterIDs))
-				for i, fltrID := range rate.FilterIDs {
+				fltrIDs := make([]string, len(rpr.FilterIDs))
+				for i, fltrID := range rpr.FilterIDs {
 					fltrIDs[i] = fltrID
 				}
-				return &fltrIDs, nil
 
+				ids := make([]string, 0, len(rpr.Rates))
+
+				for key := range rpr.Rates {
+					ids = append(ids, key)
+				}
+				_, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, id, utils.CacheRateFilterIndexes,
+					&ids, transactionID, func(_, id, _ string) (*[]string, error) {
+						rateFilters := make([]string, len(rpr.Rates[id].FilterIDs))
+						for i, fltrID := range rpr.Rates[id].FilterIDs {
+							rateFilters[i] = fltrID
+						}
+						return &rateFilters, nil
+					})
+				return &fltrIDs, nil
 			}); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -469,26 +460,20 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 		}
 	}
 	//AccountProfile Indexes
-	if args.AccountProfile {
+	if args.AccountS {
 		if err = apierSv1.DataManager.SetIndexes(utils.CacheAccountProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//ActionProfile Indexes
-	if args.ActionProfile {
+	if args.ActionS {
 		if err = apierSv1.DataManager.SetIndexes(utils.CacheActionProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//RateProfile Indexes
-	if args.RateProfile {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheRateProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
-			return
-		}
-	}
-	//RateProfileRate Indexes
 	if args.RateS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheRateFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(utils.CacheRateProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
@@ -628,7 +613,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 	}
 	//RateProfileRateIndexes
 	if _, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheRateFilterIndexes,
-		&args.RateIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+		&args.RateProfileIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			rpr, e := apierSv1.DataManager.GetRateProfile(tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
