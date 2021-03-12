@@ -128,20 +128,17 @@ type RouteSv1 struct {
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
-func (rS *RouteSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+func (rS *RouteSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(rS, serviceMethod, args, reply)
 }
 
 // GetRoutes returns sorted list of routes for Event
-func (rS *RouteSv1) GetRoutes(args *engine.ArgsGetRoutes,
-	reply *engine.SortedRoutes) error {
+func (rS *RouteSv1) GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutesSet) error {
 	return rS.rS.V1GetRoutes(args, reply)
 }
 
 // GetRouteProfilesForEvent returns a list of route profiles that match for Event
-func (rS *RouteSv1) GetRouteProfilesForEvent(args *utils.CGREvent,
-	reply *[]*engine.RouteProfile) error {
+func (rS *RouteSv1) GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
 	return rS.rS.V1GetRouteProfilesForEvent(args, reply)
 }
 

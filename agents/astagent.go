@@ -214,7 +214,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		}
 	}
 	if authReply.Routes != nil {
-		for i, route := range authReply.Routes.SortedRoutes {
+		for i, route := range authReply.Routes.Routes {
 			if !sma.setChannelVar(ev.ChannelID(),
 				CGRRoute+strconv.Itoa(i+1), route.RouteID) {
 				return

@@ -38,8 +38,8 @@ type LeastCostSorter struct {
 func (lcs *LeastCostSorter) SortRoutes(prflID string, routes map[string]*Route,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
-		Sorting:      lcs.sorting,
-		SortedRoutes: make([]*SortedRoute, 0)}
+		Sorting: lcs.sorting,
+		Routes:  make([]*SortedRoute, 0)}
 	for _, s := range routes {
 		if len(s.RatingPlanIDs) == 0 && len(s.AccountIDs) == 0 {
 			utils.Logger.Warning(
@@ -50,7 +50,7 @@ func (lcs *LeastCostSorter) SortRoutes(prflID string, routes map[string]*Route,
 		if srtSpl, pass, err := lcs.rS.populateSortingData(ev, s, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
-			sortedRoutes.SortedRoutes = append(sortedRoutes.SortedRoutes, srtSpl)
+			sortedRoutes.Routes = append(sortedRoutes.Routes, srtSpl)
 		}
 	}
 	sortedRoutes.SortLeastCost()

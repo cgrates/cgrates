@@ -1285,7 +1285,7 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 	splrs := &engine.SortedRoutes{
 		ProfileID: "SPL_ACNT_1001",
 		Sorting:   utils.MetaWeight,
-		SortedRoutes: []*engine.SortedRoute{
+		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "supplier1",
 				SortingData: map[string]interface{}{

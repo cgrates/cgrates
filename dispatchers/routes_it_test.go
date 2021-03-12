@@ -129,7 +129,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 		ProfileID: "ROUTE_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedRoutes: []*engine.SortedRoute{
+		Routes: []*engine.SortedRoute{
 			{
 				RouteID:         "route1",
 				RouteParameters: "",
@@ -143,7 +143,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
-		SortedRoutes: []*engine.SortedRoute{
+		Routes: []*engine.SortedRoute{
 			{
 				RouteID:         "route1",
 				RouteParameters: "",
@@ -230,7 +230,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
-		SortedRoutes: []*engine.SortedRoute{
+		Routes: []*engine.SortedRoute{
 			{
 				RouteID:         "route1",
 				RouteParameters: "",
@@ -283,7 +283,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 		ProfileID: "ROUTE_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedRoutes: []*engine.SortedRoute{
+		Routes: []*engine.SortedRoute{
 			{
 				RouteID:         "route1",
 				RouteParameters: "",
@@ -297,7 +297,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
-		SortedRoutes: []*engine.SortedRoute{
+		Routes: []*engine.SortedRoute{
 			{
 				RouteID:         "route1",
 				RouteParameters: "",

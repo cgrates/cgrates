@@ -2503,7 +2503,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 			},
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
 				routesReply := engine.SortedRoutes{
-					SortedRoutes: []*engine.SortedRoute{
+					Routes: []*engine.SortedRoute{
 						{
 							RouteID: "RouteID",
 						},
@@ -2650,7 +2650,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 			},
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
 				routesReply := engine.SortedRoutes{
-					SortedRoutes: []*engine.SortedRoute{
+					Routes: []*engine.SortedRoute{
 						{
 							RouteID: "RouteID",
 						},
@@ -3024,7 +3024,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 			},
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
 				routesReply := engine.SortedRoutes{
-					SortedRoutes: []*engine.SortedRoute{
+					Routes: []*engine.SortedRoute{
 						{
 							RouteID: "RouteID",
 						},
@@ -3594,7 +3594,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 			},
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
 				rts := &engine.SortedRoutes{
-					SortedRoutes: []*engine.SortedRoute{
+					Routes: []*engine.SortedRoute{
 						{
 							RouteID: "ROUTE_ID",
 						},
@@ -3724,7 +3724,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
 				rts := engine.SortedRoutes{
 					ProfileID: "ROUTE_PRFID",
-					SortedRoutes: []*engine.SortedRoute{
+					Routes: []*engine.SortedRoute{
 						{
 							RouteID: "ROUTE_ID",
 						},

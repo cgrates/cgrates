@@ -2554,6 +2554,7 @@ const (
 
 // Event Opts
 const (
+	OptsRouteProfilesCount   = "*routeProfilesCount"
 	OptsRoutesLimit          = "*routes_limit"
 	OptsRoutesOffset         = "*routes_offset"
 	OptsRatesStartTime       = "*ratesStartTime"

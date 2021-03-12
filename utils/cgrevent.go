@@ -65,6 +65,15 @@ func (ev *CGREvent) OptAsString(optName string) (val string, err error) {
 	return IfaceAsString(iface), nil
 }
 
+// OptAsInt64 returns an option as int64
+func (ev *CGREvent) OptAsInt64(optName string) (int64, error) {
+	iface, has := ev.Opts[optName]
+	if !has {
+		return 0, ErrNotFound
+	}
+	return IfaceAsTInt64(iface)
+}
+
 // FieldAsTime returns a field as Time instance
 func (ev *CGREvent) FieldAsTime(fldName string, timezone string) (t time.Time, err error) {
 	iface, has := ev.Event[fldName]

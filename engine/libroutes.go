@@ -35,16 +35,16 @@ type SortedRoute struct {
 
 // SortedRoutes is returned as part of GetRoutes call
 type SortedRoutes struct {
-	ProfileID    string         // Profile matched
-	Sorting      string         // Sorting algorithm
-	Count        int            // number of routes returned
-	SortedRoutes []*SortedRoute // list of route IDs and SortingData data
+	ProfileID string         // Profile matched
+	Sorting   string         // Sorting algorithm
+	Count     int            // number of routes returned
+	Routes    []*SortedRoute // list of route IDs and SortingData data
 }
 
 // RouteIDs returns a list of route IDs
 func (sRoutes *SortedRoutes) RouteIDs() (rIDs []string) {
-	rIDs = make([]string, len(sRoutes.SortedRoutes))
-	for i, sRoute := range sRoutes.SortedRoutes {
+	rIDs = make([]string, len(sRoutes.Routes))
+	for i, sRoute := range sRoutes.Routes {
 		rIDs[i] = sRoute.RouteID
 	}
 	return
@@ -52,8 +52,8 @@ func (sRoutes *SortedRoutes) RouteIDs() (rIDs []string) {
 
 // RoutesWithParams returns a list of routes IDs with Parameters
 func (sRoutes *SortedRoutes) RoutesWithParams() (sPs []string) {
-	sPs = make([]string, len(sRoutes.SortedRoutes))
-	for i, spl := range sRoutes.SortedRoutes {
+	sPs = make([]string, len(sRoutes.Routes))
+	for i, spl := range sRoutes.Routes {
 		sPs[i] = spl.RouteID
 		if spl.RouteParameters != "" {
 			sPs[i] += utils.InInFieldSep + spl.RouteParameters
@@ -64,39 +64,39 @@ func (sRoutes *SortedRoutes) RoutesWithParams() (sPs []string) {
 
 // SortWeight is part of sort interface, sort based on Weight
 func (sRoutes *SortedRoutes) SortWeight() {
-	sort.Slice(sRoutes.SortedRoutes, func(i, j int) bool {
-		if sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		if sRoutes.Routes[i].SortingData[utils.Weight].(float64) == sRoutes.Routes[j].SortingData[utils.Weight].(float64) {
 			return utils.BoolGenerator().RandomBool()
 		}
-		return sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) > sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64)
+		return sRoutes.Routes[i].SortingData[utils.Weight].(float64) > sRoutes.Routes[j].SortingData[utils.Weight].(float64)
 	})
 }
 
 // SortLeastCost is part of sort interface,
 // sort ascendent based on Cost with fallback on Weight
 func (sRoutes *SortedRoutes) SortLeastCost() {
-	sort.Slice(sRoutes.SortedRoutes, func(i, j int) bool {
-		if sRoutes.SortedRoutes[i].SortingData[utils.Cost].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.Cost].(float64) {
-			if sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		if sRoutes.Routes[i].SortingData[utils.Cost].(float64) == sRoutes.Routes[j].SortingData[utils.Cost].(float64) {
+			if sRoutes.Routes[i].SortingData[utils.Weight].(float64) == sRoutes.Routes[j].SortingData[utils.Weight].(float64) {
 				return utils.BoolGenerator().RandomBool()
 			}
-			return sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) > sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64)
+			return sRoutes.Routes[i].SortingData[utils.Weight].(float64) > sRoutes.Routes[j].SortingData[utils.Weight].(float64)
 		}
-		return sRoutes.SortedRoutes[i].SortingData[utils.Cost].(float64) < sRoutes.SortedRoutes[j].SortingData[utils.Cost].(float64)
+		return sRoutes.Routes[i].SortingData[utils.Cost].(float64) < sRoutes.Routes[j].SortingData[utils.Cost].(float64)
 	})
 }
 
 // SortHighestCost is part of sort interface,
 // sort descendent based on Cost with fallback on Weight
 func (sRoutes *SortedRoutes) SortHighestCost() {
-	sort.Slice(sRoutes.SortedRoutes, func(i, j int) bool {
-		if sRoutes.SortedRoutes[i].SortingData[utils.Cost].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.Cost].(float64) {
-			if sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		if sRoutes.Routes[i].SortingData[utils.Cost].(float64) == sRoutes.Routes[j].SortingData[utils.Cost].(float64) {
+			if sRoutes.Routes[i].SortingData[utils.Weight].(float64) == sRoutes.Routes[j].SortingData[utils.Weight].(float64) {
 				return utils.BoolGenerator().RandomBool()
 			}
-			return sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) > sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64)
+			return sRoutes.Routes[i].SortingData[utils.Weight].(float64) > sRoutes.Routes[j].SortingData[utils.Weight].(float64)
 		}
-		return sRoutes.SortedRoutes[i].SortingData[utils.Cost].(float64) > sRoutes.SortedRoutes[j].SortingData[utils.Cost].(float64)
+		return sRoutes.Routes[i].SortingData[utils.Cost].(float64) > sRoutes.Routes[j].SortingData[utils.Cost].(float64)
 	})
 }
 
@@ -104,20 +104,20 @@ func (sRoutes *SortedRoutes) SortHighestCost() {
 // sort based on Stats
 func (sRoutes *SortedRoutes) SortQOS(params []string) {
 	//sort routes
-	sort.Slice(sRoutes.SortedRoutes, func(i, j int) bool {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
 		for _, param := range params {
 			//in case we have the same value for the current param we skip to the next one
-			if sRoutes.SortedRoutes[i].SortingData[param].(float64) == sRoutes.SortedRoutes[j].SortingData[param].(float64) {
+			if sRoutes.Routes[i].SortingData[param].(float64) == sRoutes.Routes[j].SortingData[param].(float64) {
 				continue
 			}
 			switch param {
 			default:
-				if sRoutes.SortedRoutes[i].SortingData[param].(float64) > sRoutes.SortedRoutes[j].SortingData[param].(float64) {
+				if sRoutes.Routes[i].SortingData[param].(float64) > sRoutes.Routes[j].SortingData[param].(float64) {
 					return true
 				}
 				return false
 			case utils.MetaPDD: //in case of pdd the smallest value if the best
-				if sRoutes.SortedRoutes[i].SortingData[param].(float64) < sRoutes.SortedRoutes[j].SortingData[param].(float64) {
+				if sRoutes.Routes[i].SortingData[param].(float64) < sRoutes.Routes[j].SortingData[param].(float64) {
 					return true
 				}
 				return false
@@ -125,52 +125,52 @@ func (sRoutes *SortedRoutes) SortQOS(params []string) {
 
 		}
 		//in case that we have the same value for all params we sort base on weight
-		if sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+		if sRoutes.Routes[i].SortingData[utils.Weight].(float64) == sRoutes.Routes[j].SortingData[utils.Weight].(float64) {
 			return utils.BoolGenerator().RandomBool()
 		}
-		return sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) > sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64)
+		return sRoutes.Routes[i].SortingData[utils.Weight].(float64) > sRoutes.Routes[j].SortingData[utils.Weight].(float64)
 	})
 }
 
 // SortResourceAscendent is part of sort interface,
 // sort ascendent based on ResourceUsage with fallback on Weight
 func (sRoutes *SortedRoutes) SortResourceAscendent() {
-	sort.Slice(sRoutes.SortedRoutes, func(i, j int) bool {
-		if sRoutes.SortedRoutes[i].SortingData[utils.ResourceUsage].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.ResourceUsage].(float64) {
-			if sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		if sRoutes.Routes[i].SortingData[utils.ResourceUsage].(float64) == sRoutes.Routes[j].SortingData[utils.ResourceUsage].(float64) {
+			if sRoutes.Routes[i].SortingData[utils.Weight].(float64) == sRoutes.Routes[j].SortingData[utils.Weight].(float64) {
 				return utils.BoolGenerator().RandomBool()
 			}
-			return sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) > sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64)
+			return sRoutes.Routes[i].SortingData[utils.Weight].(float64) > sRoutes.Routes[j].SortingData[utils.Weight].(float64)
 		}
-		return sRoutes.SortedRoutes[i].SortingData[utils.ResourceUsage].(float64) < sRoutes.SortedRoutes[j].SortingData[utils.ResourceUsage].(float64)
+		return sRoutes.Routes[i].SortingData[utils.ResourceUsage].(float64) < sRoutes.Routes[j].SortingData[utils.ResourceUsage].(float64)
 	})
 }
 
 // SortResourceDescendent is part of sort interface,
 // sort descendent based on ResourceUsage with fallback on Weight
 func (sRoutes *SortedRoutes) SortResourceDescendent() {
-	sort.Slice(sRoutes.SortedRoutes, func(i, j int) bool {
-		if sRoutes.SortedRoutes[i].SortingData[utils.ResourceUsage].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.ResourceUsage].(float64) {
-			if sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		if sRoutes.Routes[i].SortingData[utils.ResourceUsage].(float64) == sRoutes.Routes[j].SortingData[utils.ResourceUsage].(float64) {
+			if sRoutes.Routes[i].SortingData[utils.Weight].(float64) == sRoutes.Routes[j].SortingData[utils.Weight].(float64) {
 				return utils.BoolGenerator().RandomBool()
 			}
-			return sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) > sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64)
+			return sRoutes.Routes[i].SortingData[utils.Weight].(float64) > sRoutes.Routes[j].SortingData[utils.Weight].(float64)
 		}
-		return sRoutes.SortedRoutes[i].SortingData[utils.ResourceUsage].(float64) > sRoutes.SortedRoutes[j].SortingData[utils.ResourceUsage].(float64)
+		return sRoutes.Routes[i].SortingData[utils.ResourceUsage].(float64) > sRoutes.Routes[j].SortingData[utils.ResourceUsage].(float64)
 	})
 }
 
 // SortLoadDistribution is part of sort interface,
 // sort based on the following formula (float64(ratio + metricVal) / float64(ratio)) -1 with fallback on Weight
 func (sRoutes *SortedRoutes) SortLoadDistribution() {
-	sort.Slice(sRoutes.SortedRoutes, func(i, j int) bool {
-		splIVal := ((sRoutes.SortedRoutes[i].SortingData[utils.Ratio].(float64)+sRoutes.SortedRoutes[i].SortingData[utils.Load].(float64))/sRoutes.SortedRoutes[i].SortingData[utils.Ratio].(float64) - 1.0)
-		splJVal := ((sRoutes.SortedRoutes[j].SortingData[utils.Ratio].(float64)+sRoutes.SortedRoutes[j].SortingData[utils.Load].(float64))/sRoutes.SortedRoutes[j].SortingData[utils.Ratio].(float64) - 1.0)
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		splIVal := ((sRoutes.Routes[i].SortingData[utils.Ratio].(float64)+sRoutes.Routes[i].SortingData[utils.Load].(float64))/sRoutes.Routes[i].SortingData[utils.Ratio].(float64) - 1.0)
+		splJVal := ((sRoutes.Routes[j].SortingData[utils.Ratio].(float64)+sRoutes.Routes[j].SortingData[utils.Load].(float64))/sRoutes.Routes[j].SortingData[utils.Ratio].(float64) - 1.0)
 		if splIVal == splJVal {
-			if sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) == sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64) {
+			if sRoutes.Routes[i].SortingData[utils.Weight].(float64) == sRoutes.Routes[j].SortingData[utils.Weight].(float64) {
 				return utils.BoolGenerator().RandomBool()
 			}
-			return sRoutes.SortedRoutes[i].SortingData[utils.Weight].(float64) > sRoutes.SortedRoutes[j].SortingData[utils.Weight].(float64)
+			return sRoutes.Routes[i].SortingData[utils.Weight].(float64) > sRoutes.Routes[j].SortingData[utils.Weight].(float64)
 		}
 		return splIVal < splJVal
 	})
@@ -201,8 +201,8 @@ func (sRoutes *SortedRoutes) AsNavigableMap() (nm utils.NavigableMap2) {
 		utils.Sorting:   utils.NewNMData(sRoutes.Sorting),
 		utils.Count:     utils.NewNMData(sRoutes.Count),
 	}
-	sr := make(utils.NMSlice, len(sRoutes.SortedRoutes))
-	for i, ss := range sRoutes.SortedRoutes {
+	sr := make(utils.NMSlice, len(sRoutes.Routes))
+	for i, ss := range sRoutes.Routes {
 		sr[i] = ss.AsNavigableMap()
 	}
 	nm[utils.SortedRoutes] = &sr
@@ -240,8 +240,50 @@ func (ssd RouteSortDispatcher) SortRoutes(prflID, strategy string,
 	if sortedRoutes, err = sd.SortRoutes(prflID, suppls, suplEv, extraOpts); err != nil {
 		return
 	}
-	if len(sortedRoutes.SortedRoutes) == 0 {
+	if len(sortedRoutes.Routes) == 0 {
 		return nil, utils.ErrNotFound
+	}
+	return
+}
+
+// SortedRoutesSet represents the list of matched routes grouped based of profile
+type SortedRoutesSet []*SortedRoutes
+
+// RouteIDs returns a list of route IDs
+func (sRs SortedRoutesSet) RouteIDs() (rIDs []string) {
+	for _, sR := range sRs {
+		for _, r := range sR.Routes {
+			rIDs = append(rIDs, r.RouteID)
+		}
+	}
+	return
+}
+
+// RoutesWithParams returns a list of routes IDs with Parameters
+func (sRs SortedRoutesSet) RoutesWithParams() (sPs []string) {
+	for _, sR := range sRs {
+		for _, spl := range sR.Routes {
+			route := spl.RouteID
+			if spl.RouteParameters != "" {
+				route += utils.InInFieldSep + spl.RouteParameters
+			}
+			sPs = append(sPs, route)
+		}
+	}
+	return
+}
+
+// Digest returns list of routeIDs + parameters for easier outside access
+// format route1:route1params,route2:route2params
+func (sRs SortedRoutesSet) Digest() string {
+	return strings.Join(sRs.RoutesWithParams(), utils.FieldsSep)
+}
+
+// AsNavigableMap returns the SortedRoutesSet as NMInterface object
+func (sRs SortedRoutesSet) AsNavigableMap() (nm utils.NMSlice) {
+	nm = make(utils.NMSlice, len(sRs))
+	for i, ss := range sRs {
+		nm[i] = ss.AsNavigableMap()
 	}
 	return
 }

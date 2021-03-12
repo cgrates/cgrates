@@ -1856,7 +1856,7 @@ type V1AuthorizeReply struct {
 	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                        `json:",omitempty"`
 	MaxUsage           *time.Duration                 `json:",omitempty"`
-	Routes             *engine.SortedRoutes           `json:",omitempty"`
+	Routes             engine.SortedRoutesSet         `json:",omitempty"`
 	ThresholdIDs       *[]string                      `json:",omitempty"`
 	StatQueueIDs       *[]string                      `json:",omitempty"`
 
@@ -2003,8 +2003,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		if err != nil {
 			return err
 		}
-		if routesReply.SortedRoutes != nil {
-			authReply.Routes = &routesReply
+		if routesReply != nil {
+			authReply.Routes = routesReply
 		}
 	}
 	if args.ProcessThresholds {
@@ -2824,7 +2824,7 @@ type V1ProcessMessageReply struct {
 	MaxUsage           *time.Duration                 `json:",omitempty"`
 	ResourceAllocation *string                        `json:",omitempty"`
 	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
-	Routes             *engine.SortedRoutes           `json:",omitempty"`
+	Routes             engine.SortedRoutesSet         `json:",omitempty"`
 	ThresholdIDs       *[]string                      `json:",omitempty"`
 	StatQueueIDs       *[]string                      `json:",omitempty"`
 
@@ -2952,8 +2952,8 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		if err != nil {
 			return err
 		}
-		if routesReply.SortedRoutes != nil {
-			rply.Routes = &routesReply
+		if routesReply != nil {
+			rply.Routes = routesReply
 		}
 	}
 	if args.Debit {
@@ -3004,7 +3004,7 @@ type V1ProcessEventReply struct {
 	Cost               map[string]float64                        `json:",omitempty"` // Cost is the cost received from Rater, ignoring accounting part
 	ResourceAllocation map[string]string                         `json:",omitempty"`
 	Attributes         map[string]*engine.AttrSProcessEventReply `json:",omitempty"`
-	Routes             map[string]*engine.SortedRoutes           `json:",omitempty"`
+	Routes             map[string]engine.SortedRoutesSet         `json:",omitempty"`
 	ThresholdIDs       map[string][]string                       `json:",omitempty"`
 	StatQueueIDs       map[string][]string                       `json:",omitempty"`
 	STIRIdentity       map[string]string                         `json:",omitempty"`
@@ -3158,7 +3158,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 
 	// get routes if required
 	if argsFlagsWithParams.GetBool(utils.MetaRoutes) {
-		rply.Routes = make(map[string]*engine.SortedRoutes)
+		rply.Routes = make(map[string]engine.SortedRoutesSet)
 		// check in case we have options for suppliers
 		flags := argsFlagsWithParams[utils.MetaRoutes]
 		ignoreErrors := flags.Has(utils.MetaIgnoreErrors)
@@ -3173,8 +3173,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			if err != nil {
 				return err
 			}
-			if routesReply.SortedRoutes != nil {
-				rply.Routes[runID] = &routesReply
+			if routesReply != nil {
+				rply.Routes[runID] = routesReply
 			}
 		}
 	}
@@ -3794,7 +3794,7 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, stsIDs []string, clnb bo
 
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
 func (sS *SessionS) getRoutes(cgrEv *utils.CGREvent, pag utils.Paginator, ignoreErrors bool,
-	maxCost string, clnb bool) (routesReply engine.SortedRoutes, err error) {
+	maxCost string, clnb bool) (routesReply engine.SortedRoutesSet, err error) {
 	if len(sS.cgrCfg.SessionSCfg().RouteSConns) == 0 {
 		return routesReply, utils.NewErrNotConnected(utils.RouteS)
 	}
