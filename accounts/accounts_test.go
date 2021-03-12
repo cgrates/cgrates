@@ -19,7 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -54,10 +58,25 @@ func TestShutDownCoverage(t *testing.T) {
 		time.Sleep(10)
 		stopChan <- struct{}{}
 	}()
+
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buff := new(bytes.Buffer)
+	log.SetOutput(buff)
 	accnts.ListenAndServe(stopChan, cfgRld)
 
 	//this is called in order to cover the ShutDown method
 	accnts.Shutdown()
+	expected := "CGRateS <> [INFO] <CoreS> shutdown <AccountS>"
+	if rcv := buff.String(); !strings.Contains(rcv, expected) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+
+	log.SetOutput(os.Stderr)
 }
 
 type dataDBMockErrorNotFound struct {
