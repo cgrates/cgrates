@@ -202,16 +202,9 @@ func (rIv *RateSInterval) Cost() *decimal.Big {
 
 // CompressEquals compares two RateSIncrement for Compress function
 func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
-	if rIcr.Rate.UID() != rIcr2.Rate.UID() {
-		return
-	}
-	if rIcr.IntervalRateIndex != rIcr2.IntervalRateIndex {
-		return
-	}
-	if rIcr.Usage != rIcr2.Usage {
-		return
-	}
-	return true
+	return rIcr.Rate.UID() == rIcr2.Rate.UID() &&
+		rIcr.IntervalRateIndex == rIcr2.IntervalRateIndex &&
+		rIcr.Usage.Big.Cmp(rIcr2.Usage.Big) == 0
 }
 
 // Cost computes the Cost on RateSIncrement
