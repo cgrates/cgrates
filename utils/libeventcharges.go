@@ -17,29 +17,3 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package utils
-
-type ChargingRateS map[string]*RateSInterval
-
-type ChargingInterval struct {
-	Increments     []*ChargingIncrement // specific increments applied to this interval
-	CompressFactor int
-}
-
-// ChargingIncrement represents one unit charged inside an interval
-type ChargingIncrement struct {
-	Units           *Decimal
-	AccountChargeID string // Account charged information
-	CompressFactor  int
-}
-
-type ChargingAccountS map[string]*AccountCharge
-
-// AccountCharge represents one Account charge
-type AccountCharge struct {
-	BalanceID       string
-	Units           *Decimal
-	UnitFactorID    string   // identificator in unit factors
-	AttributeIDs    []string // list of attribute profiles matched
-	CostID          string   // identificator in cost increments
-	JoinedChargeIDs []string // identificator of extra account charges
-}

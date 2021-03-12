@@ -56,7 +56,7 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 	}
 	filters := engine.NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
 
-	concrete, err := newBalanceOperator(acntPrf.Balances["BL1"], nil, filters, nil, nil, nil)
+	concrete, err := newBalanceOperator(acntPrf.ID, acntPrf.Balances["BL1"], nil, filters, nil, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,12 +64,13 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 	cncrtBlncs = append(cncrtBlncs, concrete.(*concreteBalance))
 
 	expected := &abstractBalance{
+		acntID:     acntPrf.ID,
 		blnCfg:     acntPrf.Balances["BL0"],
 		fltrS:      filters,
 		cncrtBlncs: cncrtBlncs,
 	}
 	blnCfgs := []*utils.Balance{acntPrf.Balances["BL0"], acntPrf.Balances["BL1"]}
-	if blcOp, err := newBalanceOperators(blnCfgs, filters, nil,
+	if blcOp, err := newBalanceOperators(acntPrf.ID, blnCfgs, filters, nil,
 		nil, nil); err != nil {
 		t.Error(err)
 	} else {
@@ -84,7 +85,7 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 
 	acntPrf.Balances["BL1"].Type = "INVALID_TYPE"
 	expectedErr := "unsupported balance type: <INVALID_TYPE>"
-	if _, err := newBalanceOperators(blnCfgs, filters, nil,
+	if _, err := newBalanceOperators(acntPrf.ID, blnCfgs, filters, nil,
 		nil, nil); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -224,7 +225,10 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 		fltrS: filterS,
 	}
 	expectedEvCh := &utils.EventCharges{
-		Concretes: utils.NewDecimal(710, 0),
+		Concretes:   utils.NewDecimal(710, 0),
+		Accounting:  make(map[string]*utils.AccountCharge),
+		UnitFactors: make(map[string]*utils.UnitFactor),
+		Rating:      make(map[string]*utils.RateSInterval),
 	}
 
 	if evCh, err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
@@ -292,7 +296,10 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	}
 
 	expectedEvCh := &utils.EventCharges{
-		Concretes: utils.NewDecimal(100, 0),
+		Concretes:   utils.NewDecimal(100, 0),
+		Accounting:  make(map[string]*utils.AccountCharge),
+		UnitFactors: make(map[string]*utils.UnitFactor),
+		Rating:      make(map[string]*utils.RateSInterval),
 	}
 
 	if evCh, err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{

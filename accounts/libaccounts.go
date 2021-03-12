@@ -31,7 +31,7 @@ import (
 )
 
 // newAccountBalances constructs accountBalances
-func newBalanceOperators(blnCfgs []*utils.Balance,
+func newBalanceOperators(acntID string, blnCfgs []*utils.Balance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) (blncOpers []balanceOperator, err error) {
 
@@ -41,7 +41,7 @@ func newBalanceOperators(blnCfgs []*utils.Balance,
 		if blnCfg.Type != utils.MetaConcrete {
 			continue
 		}
-		blncOpers[i] = newConcreteBalanceOperator(blnCfg,
+		blncOpers[i] = newConcreteBalanceOperator(acntID, blnCfg,
 			fltrS, connMgr, attrSConns, rateSConns)
 		cncrtBlncs = append(cncrtBlncs, blncOpers[i].(*concreteBalance))
 	}
@@ -50,8 +50,8 @@ func newBalanceOperators(blnCfgs []*utils.Balance,
 		if blnCfg.Type == utils.MetaConcrete {
 			continue
 		}
-		if blncOpers[i], err = newBalanceOperator(blnCfg, cncrtBlncs, fltrS, connMgr,
-			attrSConns, rateSConns); err != nil {
+		if blncOpers[i], err = newBalanceOperator(acntID, blnCfg, cncrtBlncs,
+			fltrS, connMgr, attrSConns, rateSConns); err != nil {
 			return
 		}
 	}
@@ -61,16 +61,16 @@ func newBalanceOperators(blnCfgs []*utils.Balance,
 
 // newBalanceOperator instantiates balanceOperator interface
 // cncrtBlncs are needed for abstract balance debits
-func newBalanceOperator(blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
+func newBalanceOperator(acntID string, blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) (bP balanceOperator, err error) {
 	switch blncCfg.Type {
 	default:
 		return nil, fmt.Errorf("unsupported balance type: <%s>", blncCfg.Type)
 	case utils.MetaConcrete:
-		return newConcreteBalanceOperator(blncCfg, fltrS, connMgr, attrSConns, rateSConns), nil
+		return newConcreteBalanceOperator(acntID, blncCfg, fltrS, connMgr, attrSConns, rateSConns), nil
 	case utils.MetaAbstract:
-		return newAbstractBalanceOperator(blncCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns), nil
+		return newAbstractBalanceOperator(acntID, blncCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns), nil
 	}
 }
 

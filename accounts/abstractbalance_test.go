@@ -59,7 +59,10 @@ func TestABDebitUsageFromConcretes(t *testing.T) {
 			},
 		}}
 	expectedEvCharg := &utils.EventCharges{
-		Concretes: utils.NewDecimal(5, 0),
+		Concretes:   utils.NewDecimal(5, 0),
+		Accounting:  make(map[string]*utils.AccountCharge),
+		UnitFactors: make(map[string]*utils.UnitFactor),
+		Rating:      make(map[string]*utils.RateSInterval),
 	}
 	// consume only from first balance
 	if evCh, err := debitAbstractsFromConcretes(aB.cncrtBlncs,
@@ -81,7 +84,10 @@ func TestABDebitUsageFromConcretes(t *testing.T) {
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(500, 0)
 	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 	expectedEvCharg = &utils.EventCharges{
-		Concretes: utils.NewDecimal(9, 0),
+		Concretes:   utils.NewDecimal(9, 0),
+		Accounting:  make(map[string]*utils.AccountCharge),
+		UnitFactors: make(map[string]*utils.UnitFactor),
+		Rating:      make(map[string]*utils.RateSInterval),
 	}
 
 	if evCh, err := debitAbstractsFromConcretes(aB.cncrtBlncs,

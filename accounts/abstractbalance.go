@@ -25,14 +25,16 @@ import (
 )
 
 // newAbstractBalance constructs an abstractBalanceOperator
-func newAbstractBalanceOperator(blnCfg *utils.Balance, cncrtBlncs []*concreteBalance,
+func newAbstractBalanceOperator(acntID string, blnCfg *utils.Balance,
+	cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) balanceOperator {
-	return &abstractBalance{blnCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns}
+	return &abstractBalance{acntID, blnCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns}
 }
 
 // abstractBalance is the operator for *abstract balance type
 type abstractBalance struct {
+	acntID     string
 	blnCfg     *utils.Balance
 	cncrtBlncs []*concreteBalance // paying balances
 	fltrS      *engine.FilterS
@@ -96,7 +98,56 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 		(costIcrm.FixedFee == nil ||
 			costIcrm.FixedFee.Cmp(decimal.New(0, 0)) == 0) {
 		// cost 0, no need of concrete
-		ec = &utils.EventCharges{Abstracts: &utils.Decimal{usage}}
+		ec = utils.NewEventCharges()
+		ec.Abstracts = &utils.Decimal{usage}
+		// UnitFactors
+		var ufID string
+		if hasUF {
+			ufID = utils.UUIDSha1Prefix()
+			ec.UnitFactors[ufID] = uF
+		}
+		// Rating
+		ratingID := utils.UUIDSha1Prefix()
+		ec.Rating[ratingID] = &utils.RateSInterval{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
+				{
+					IncrementStart: utils.NewDecimal(0, 0),
+					Rate: &utils.Rate{
+						ID: utils.MetaCostIncrement,
+						IntervalRates: []*utils.IntervalRate{
+							{
+								FixedFee: utils.NewDecimal(0, 0),
+							},
+						},
+					},
+					CompressFactor: 1,
+					Usage:          &utils.Decimal{usage},
+				},
+			},
+			CompressFactor: 1,
+		}
+		acntID := utils.UUIDSha1Prefix()
+		ec.Accounting[acntID] = &utils.AccountCharge{
+			AccountID:    aB.acntID,
+			BalanceID:    aB.blnCfg.ID,
+			Units:        &utils.Decimal{usage},
+			BalanceLimit: blncLmt,
+			UnitFactorID: ufID,
+			RatingID:     ratingID,
+		}
+		ec.ChargingIntervals = []*utils.ChargingInterval{
+			{
+				Increments: []*utils.ChargingIncrement{
+					{
+						Units:           &utils.Decimal{usage},
+						AccountChargeID: acntID,
+						CompressFactor:  1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		}
 	} else {
 		// attempt to debit usage with cost
 		if ec, err = maxDebitAbstractsFromConcretes(aB.cncrtBlncs, usage,

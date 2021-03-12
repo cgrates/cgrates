@@ -58,9 +58,6 @@ func (ap *AccountProfile) RestoreFromBackup(abb AccountBalancesBackup) {
 	}
 }
 
-// AccountBalanceBackups is used to create balance snapshots as backups
-type AccountBalancesBackup map[string]*decimal.Big
-
 // AccountBalancesBackup returns a backup of all balance values
 func (ap *AccountProfile) AccountBalancesBackup() (abb AccountBalancesBackup) {
 	if ap.Balances != nil {
@@ -71,6 +68,9 @@ func (ap *AccountProfile) AccountBalancesBackup() (abb AccountBalancesBackup) {
 	}
 	return
 }
+
+// AccountBalanceBackups is used to create balance snapshots as backups
+type AccountBalancesBackup map[string]*decimal.Big
 
 // NewDefaultBalance returns a balance with default costIncrements
 func NewDefaultBalance(id string) *Balance {

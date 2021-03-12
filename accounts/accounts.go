@@ -138,59 +138,6 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 	return
 }
 
-// accountDebit will debit the usage out of an Account
-func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
-	cgrEv *utils.CGREvent, concretes bool) (ec *utils.EventCharges, err error) {
-
-	// Find balances matching event
-	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
-	for _, blnCfg := range acnt.Balances {
-		var weight float64
-		if weight, err = engine.WeightFromDynamics(blnCfg.Weights,
-			aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
-			return
-		}
-		blcsWithWeight = append(blcsWithWeight, &utils.BalanceWithWeight{blnCfg, weight})
-	}
-	blcsWithWeight.Sort()
-	var blncOpers []balanceOperator
-	if blncOpers, err = newBalanceOperators(blcsWithWeight.Balances(), aS.fltrS, aS.connMgr,
-		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
-		return
-	}
-
-	for i, blncOper := range blncOpers {
-		debFunc := blncOper.debitAbstracts
-		if concretes {
-			debFunc = blncOper.debitConcretes
-		}
-		if i == 0 {
-			ec = utils.NewEventCharges()
-		}
-		if usage.Cmp(decimal.New(0, 0)) == 0 {
-			return // no more debit
-		}
-		var ecDbt *utils.EventCharges
-		if ecDbt, err = debFunc(new(decimal.Big).Copy(usage), cgrEv); err != nil {
-			if err == utils.ErrFilterNotPassingNoCaps ||
-				err == utils.ErrNotImplemented {
-				err = nil
-				continue
-			}
-			return
-		}
-		var used *decimal.Big
-		if concretes {
-			used = ecDbt.Concretes.Big
-		} else {
-			used = ecDbt.Abstracts.Big
-		}
-		usage = utils.SubstractBig(usage, used)
-		ec.Merge(ecDbt)
-	}
-	return
-}
-
 // accountsDebit will debit an usage out of multiple accounts
 func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
@@ -212,11 +159,9 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 	} else {
 		usage = decimal.New(int64(usgEv), 0)
 	}
+	ec = utils.NewEventCharges()
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts))
 	for i, acnt := range acnts {
-		if i == 0 {
-			ec = utils.NewEventCharges()
-		}
 		if usage.Cmp(decimal.New(0, 0)) == 0 {
 			return // no more debits
 		}
@@ -234,6 +179,56 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 				restoreAccounts(aS.dm, acnts, acntBkps)
 				return
 			}
+		}
+		var used *decimal.Big
+		if concretes {
+			used = ecDbt.Concretes.Big
+		} else {
+			used = ecDbt.Abstracts.Big
+		}
+		usage = utils.SubstractBig(usage, used)
+		ec.Merge(ecDbt)
+	}
+	return
+}
+
+// accountDebit will debit the usage out of an Account
+func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
+	cgrEv *utils.CGREvent, concretes bool) (ec *utils.EventCharges, err error) {
+
+	// Find balances matching event
+	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
+	for _, blnCfg := range acnt.Balances {
+		var weight float64
+		if weight, err = engine.WeightFromDynamics(blnCfg.Weights,
+			aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
+			return
+		}
+		blcsWithWeight = append(blcsWithWeight, &utils.BalanceWithWeight{blnCfg, weight})
+	}
+	blcsWithWeight.Sort()
+	var blncOpers []balanceOperator
+	if blncOpers, err = newBalanceOperators(acnt.ID, blcsWithWeight.Balances(), aS.fltrS, aS.connMgr,
+		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
+		return
+	}
+	ec = utils.NewEventCharges()
+	for _, blncOper := range blncOpers {
+		debFunc := blncOper.debitAbstracts
+		if concretes {
+			debFunc = blncOper.debitConcretes
+		}
+		if usage.Cmp(decimal.New(0, 0)) == 0 {
+			return // no more debit
+		}
+		var ecDbt *utils.EventCharges
+		if ecDbt, err = debFunc(new(decimal.Big).Copy(usage), cgrEv); err != nil {
+			if err == utils.ErrFilterNotPassingNoCaps ||
+				err == utils.ErrNotImplemented {
+				err = nil
+				continue
+			}
+			return
 		}
 		var used *decimal.Big
 		if concretes {

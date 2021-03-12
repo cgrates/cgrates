@@ -967,6 +967,7 @@ const (
 	RecurrentFee          = "RecurrentFee"
 	Diktats               = "Diktats"
 	BalanceIDs            = "BalanceIDs"
+	MetaCostIncrement     = "*costIncrement"
 )
 
 // Migrator Action

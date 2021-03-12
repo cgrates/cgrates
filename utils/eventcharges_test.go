@@ -26,7 +26,11 @@ import (
 )
 
 func TestECNewEventCharges(t *testing.T) {
-	expected := &EventCharges{}
+	expected := &EventCharges{
+		Accounting:  make(map[string]*AccountCharge),
+		UnitFactors: make(map[string]*UnitFactor),
+		Rating:      make(map[string]*RateSInterval),
+	}
 	received := NewEventCharges()
 
 	if !reflect.DeepEqual(expected, received) {

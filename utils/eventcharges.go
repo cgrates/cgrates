@@ -24,7 +24,11 @@ import (
 
 // NewEventChargers instantiates the EventChargers in a central place
 func NewEventCharges() (ec *EventCharges) {
-	ec = new(EventCharges)
+	ec = &EventCharges{
+		Accounting:  make(map[string]*AccountCharge),
+		UnitFactors: make(map[string]*UnitFactor),
+		Rating:      make(map[string]*RateSInterval),
+	}
 	return
 }
 
@@ -36,8 +40,9 @@ type EventCharges struct {
 	ChargingIntervals []*ChargingInterval
 	Accounts          []*AccountProfile
 
-	Accounting *ChargingAccountS
-	Rating     *ChargingRateS
+	Accounting  map[string]*AccountCharge
+	UnitFactors map[string]*UnitFactor
+	Rating      map[string]*RateSInterval
 }
 
 // Merge will merge the event charges into existing
@@ -82,4 +87,28 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 type ExtEventCharges struct {
 	Abstracts *float64
 	Concretes *float64
+}
+
+type ChargingInterval struct {
+	Increments     []*ChargingIncrement // specific increments applied to this interval
+	CompressFactor int
+}
+
+// ChargingIncrement represents one unit charged inside an interval
+type ChargingIncrement struct {
+	Units           *Decimal
+	AccountChargeID string // Account charging information
+	CompressFactor  int
+}
+
+// AccountCharge represents one Account charge
+type AccountCharge struct {
+	AccountID       string
+	BalanceID       string
+	Units           *Decimal
+	BalanceLimit    *Decimal // the minimum balance value accepted
+	UnitFactorID    string   // identificator in ChargingUnitFactors
+	AttributeIDs    []string // list of attribute profiles matched
+	RatingID        string   // identificator in cost increments
+	JoinedChargeIDs []string // identificator of extra account charges
 }
