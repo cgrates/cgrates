@@ -20,7 +20,6 @@ package ees
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -111,18 +110,8 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			return
 		}
 		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
-			var nmIt utils.NMInterface
-			if nmIt, err = eeReq.OrdNavMP[utils.MetaExp].Field(el.Value); err != nil {
-				return
-			}
-			itm, isNMItem := nmIt.(*config.NMItem)
-			if !isNMItem {
-				err = fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
-				return
-			}
-			if itm == nil {
-				continue // all attributes, not writable to diameter packet
-			}
+			nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
+			itm := nmIt.(*config.NMItem)
 			valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 		}
 	}

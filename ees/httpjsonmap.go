@@ -20,7 +20,6 @@ package ees
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"sync"
@@ -100,18 +99,8 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			return
 		}
 		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
-			var nmIt utils.NMInterface
-			if nmIt, err = eeReq.OrdNavMP[utils.MetaExp].Field(el.Value); err != nil {
-				return
-			}
-			itm, isNMItem := nmIt.(*config.NMItem)
-			if !isNMItem {
-				err = fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
-				return
-			}
-			if itm == nil {
-				continue // all attributes, not writable to diameter packet
-			}
+			nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
+			itm := nmIt.(*config.NMItem)
 			valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 		}
 		if hdr, err = httpEE.composeHeader(); err != nil {
@@ -157,18 +146,8 @@ func (httpEE *HTTPjsonMapEE) composeHeader() (hdr http.Header, err error) {
 		return
 	}
 	for el := eeReq.OrdNavMP[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
-		var nmIt utils.NMInterface
-		if nmIt, err = eeReq.OrdNavMP[utils.MetaHdr].Field(el.Value); err != nil {
-			return
-		}
-		itm, isNMItem := nmIt.(*config.NMItem)
-		if !isNMItem {
-			err = fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(el.Value))
-			return
-		}
-		if itm == nil {
-			continue // all attributes, not writable to diameter packet
-		}
+		nmIt, _ := eeReq.OrdNavMP[utils.MetaHdr].Field(el.Value) //Safe to ignore error, since the path always exists
+		itm := nmIt.(*config.NMItem)                             //We only store nmItems in the map
 		hdr.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
 	}
 	return

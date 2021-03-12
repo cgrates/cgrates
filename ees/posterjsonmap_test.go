@@ -171,7 +171,7 @@ func TestPosterJsonMapExportEvent(t *testing.T) {
 		},
 		{
 			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
+			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
 		},
 	}
 	for _, field := range cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Fields {
@@ -185,5 +185,25 @@ func TestPosterJsonMapExportEvent(t *testing.T) {
 	if err := pstrEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
-	////////
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	errExpect = "inline parse error for string: <*wrong-type>"
+	if err := pstrEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but received %q", errExpect, err)
+	}
+	pstrEE.OnEvicted("test", "test")
 }

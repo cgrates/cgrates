@@ -192,3 +192,13 @@ func (onm *OrderedNavigableMap) RemoveAll() {
 	onm.orderIdx = NewPathItemList()
 	onm.orderRef = make(map[string][]*PathItemElement)
 }
+
+// OrderedFieldsAsStrings returns the elements as strings in order they were inserted
+func (onm *OrderedNavigableMap) OrderedFieldsAsStrings() (flds []string) {
+	flds = make([]string, 0, onm.Len())
+	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
+		fld, _ := onm.Field(el.Value)
+		flds = append(flds, IfaceAsString(fld.Interface()))
+	}
+	return
+}

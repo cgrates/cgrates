@@ -967,4 +967,9 @@ func TestOrderedNavigableMapOrderedFields(t *testing.T) {
 	if !reflect.DeepEqual(exp, rcv) {
 		t.Errorf("Expected %+v, received %+v", exp, rcv)
 	}
+	exp2 := []string{"1003", "1004", "1006"}
+	rcv2 := nm.OrderedFieldsAsStrings()
+	if !reflect.DeepEqual(exp2, rcv2) {
+		t.Errorf("Expected %+v, received %+v", exp2, rcv2)
+	}
 }

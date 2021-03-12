@@ -115,4 +115,5 @@ func TestVirtualEeExportEvent(t *testing.T) {
 	if err := vEe.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
+	vEe.OnEvicted("test", "test")
 }

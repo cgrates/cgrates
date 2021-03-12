@@ -55,7 +55,16 @@ func TestFileFwvGetMetrics(t *testing.T) {
 	}
 }
 
-func TestFilveFwvComposeHeader(t *testing.T) {
+// type MyError struct{}
+
+// func (m *MyError) Error() string {
+// 	return "ERR"
+// }
+
+// func (nopCloser) WriteString(w io.Writer, s string) error {
+// 	return &MyError{}
+// }
+func TestFileFwvComposeHeader(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
@@ -116,6 +125,7 @@ func TestFilveFwvComposeHeader(t *testing.T) {
 	if err := fFwv.composeHeader(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
+
 }
 
 func TestFileFwvComposeTrailer(t *testing.T) {
@@ -210,11 +220,11 @@ func TestFileFwvExportEvent(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
 		{
 			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+			Value: config.NewRSRParsersMustCompile("~*req.test1", utils.InfieldSep),
 		},
 		{
 			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
+			Value: config.NewRSRParsersMustCompile("3", utils.InfieldSep),
 		},
 	}
 	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
@@ -223,12 +233,18 @@ func TestFileFwvExportEvent(t *testing.T) {
 	if err := fFwv.ExportEvent(cgrEv); err != nil {
 		t.Error(err)
 	}
+	csvNW.Flush()
+	expected := "value\n"
+	if expected != byteBuff.String() {
+		t.Errorf("Expected %q but received %q", expected, byteBuff.String())
+	}
 	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	byteBuff.Reset()
 	if err := fFwv.ExportEvent(cgrEv); err != nil {
 		t.Error(err)
 	}
 	csvNW.Flush()
-	expected := "value\n\n"
+	expected = "value3\n"
 	if expected != byteBuff.String() {
 		t.Errorf("Expected %q but received %q", expected, byteBuff.String())
 	}
