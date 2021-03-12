@@ -38,8 +38,8 @@ type ResourceAscendentSorter struct {
 func (ws *ResourceAscendentSorter) SortRoutes(prflID string,
 	routes map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
-		Sorting:      ws.sorting,
-		SortedRoutes: make([]*SortedRoute, 0)}
+		Sorting: ws.sorting,
+		Routes:  make([]*SortedRoute, 0)}
 	for _, route := range routes {
 		if len(route.ResourceIDs) == 0 {
 			utils.Logger.Warning(
@@ -50,7 +50,7 @@ func (ws *ResourceAscendentSorter) SortRoutes(prflID string,
 		if srtSpl, pass, err := ws.rS.populateSortingData(suplEv, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
-			sortedRoutes.SortedRoutes = append(sortedRoutes.SortedRoutes, srtSpl)
+			sortedRoutes.Routes = append(sortedRoutes.Routes, srtSpl)
 		}
 	}
 	sortedRoutes.SortResourceAscendent()

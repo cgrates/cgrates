@@ -39,9 +39,11 @@ type LoadDistributionSorter struct {
 // SortRoutes .
 func (ws *LoadDistributionSorter) SortRoutes(prflID string,
 	routes map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	sortedRoutes = &SortedRoutes{ProfileID: prflID,
-		Sorting:      ws.sorting,
-		SortedRoutes: make([]*SortedRoute, 0)}
+	sortedRoutes = &SortedRoutes{
+		ProfileID: prflID,
+		Sorting:   ws.sorting,
+		Routes:    make([]*SortedRoute, 0),
+	}
 	for _, route := range routes {
 		// we should have at least 1 statID defined for counting CDR (a.k.a *sum:1)
 		if len(route.StatIDs) == 0 {
@@ -61,7 +63,7 @@ func (ws *LoadDistributionSorter) SortRoutes(prflID string,
 						utils.RouteS, route.cacheRoute[utils.MetaRatio], route.ID))
 			}
 			srtSpl.SortingData[utils.Ratio] = floatRatio
-			sortedRoutes.SortedRoutes = append(sortedRoutes.SortedRoutes, srtSpl)
+			sortedRoutes.Routes = append(sortedRoutes.Routes, srtSpl)
 		}
 	}
 	sortedRoutes.SortLoadDistribution()

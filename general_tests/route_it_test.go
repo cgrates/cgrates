@@ -450,8 +450,8 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.SortedRoutes))
-		for i, supl := range suplsReply.SortedRoutes {
+		rcvSupl := make([]string, len(suplsReply.Routes))
+		for i, supl := range suplsReply.Routes {
 			rcvSupl[i] = supl.RouteID
 		}
 		if suplsReply.ProfileID != "ROUTE_ResourceTest" {
@@ -534,8 +534,8 @@ func testV1SplSGetSortedSuppliers2(t *testing.T) {
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.SortedRoutes))
-		for i, supl := range suplsReply.SortedRoutes {
+		rcvSupl := make([]string, len(suplsReply.Routes))
+		for i, supl := range suplsReply.Routes {
 			rcvSupl[i] = supl.RouteID
 		}
 		if suplsReply.ProfileID != "ROUTE_ResourceDescendent" {
@@ -752,9 +752,9 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 			t.Errorf("Expecting: ROUTE_LOAD_DIST, received: %s",
 				suplsReply.ProfileID)
 		}
-		if !reflect.DeepEqual(suplsReply.SortedRoutes, expSuppliers) {
+		if !reflect.DeepEqual(suplsReply.Routes, expSuppliers) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
-				utils.ToJSON(expSuppliers), utils.ToJSON(suplsReply.SortedRoutes))
+				utils.ToJSON(expSuppliers), utils.ToJSON(suplsReply.Routes))
 		}
 	}
 }

@@ -236,7 +236,7 @@ func testSSv1ItAuth(t *testing.T) {
 		ProfileID: "ROUTE_ACNT_1001",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
-		SortedRoutes: []*engine.SortedRoute{
+		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{

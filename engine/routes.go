@@ -505,65 +505,6 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	return sortedSpl, true, nil
 }
 
-// sortedRoutesForEvent will return the list of valid route IDs
-// for event based on filters and sorting algorithms
-func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	if _, has := args.CGREvent.Event[utils.Usage]; !has {
-		args.CGREvent.Event[utils.Usage] = time.Minute // make sure we have default set for Usage
-	}
-	var rPrfs []*RouteProfile
-	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args.CGREvent, true); err != nil {
-		return
-	}
-	rPrfl := rPrfs[0]
-	extraOpts, err := args.asOptsGetRoutes() // convert routes arguments into internal options used to limit data
-	if err != nil {
-		return nil, err
-	}
-	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
-	extraOpts.sortingStragety = rPrfl.Sorting             // populate sortingStrategy in extraOpts
-
-	//construct the DP and pass it to filterS
-	nM := utils.MapStorage{utils.MetaReq: args.Event}
-	passedRoutes := make(map[string]*Route)
-	// apply filters for event
-	for _, route := range rPrfl.Routes {
-		pass, lazyCheckRules, err := rpS.filterS.LazyPass(tnt,
-			route.FilterIDs, nM,
-			[]string{utils.DynamicDataPrefix + utils.MetaReq,
-				utils.DynamicDataPrefix + utils.MetaAccounts,
-				utils.DynamicDataPrefix + utils.MetaResources,
-				utils.DynamicDataPrefix + utils.MetaStats})
-		if err != nil {
-			return nil, err
-		} else if !pass {
-			continue
-		}
-		route.lazyCheckRules = lazyCheckRules
-		if prev, has := passedRoutes[route.ID]; has && prev.Weight >= route.Weight {
-			continue
-		}
-		passedRoutes[route.ID] = route
-	}
-	sortedRoutes, err = rpS.sorter.SortRoutes(rPrfl.ID, rPrfl.Sorting,
-		passedRoutes, args.CGREvent, extraOpts)
-	if err != nil {
-		return nil, err
-	}
-	if args.Paginator.Offset != nil {
-		if *args.Paginator.Offset <= len(sortedRoutes.SortedRoutes) {
-			sortedRoutes.SortedRoutes = sortedRoutes.SortedRoutes[*args.Paginator.Offset:]
-		}
-	}
-	if args.Paginator.Limit != nil {
-		if *args.Paginator.Limit <= len(sortedRoutes.SortedRoutes) {
-			sortedRoutes.SortedRoutes = sortedRoutes.SortedRoutes[:*args.Paginator.Limit]
-		}
-	}
-	sortedRoutes.Count = len(sortedRoutes.SortedRoutes)
-	return
-}
-
 // ArgsGetRoutes the argument for GetRoutes API
 type ArgsGetRoutes struct {
 	IgnoreErrors bool
@@ -630,7 +571,7 @@ type optsGetRoutes struct {
 }
 
 // V1GetRoutes returns the list of valid routes
-func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (err error) {
+func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesSet) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -677,7 +618,7 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutes) (
 		}
 		return err
 	}
-	*reply = *sSps
+	*reply = sSps
 	return
 }
 
@@ -700,5 +641,115 @@ func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREvent, reply 
 		return err
 	}
 	*reply = sPs
+	return
+}
+
+// sortedRoutesForEvent will return the list of valid route IDs
+// for event based on filters and sorting algorithms
+func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile, ev *utils.CGREvent, pag utils.Paginator, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
+	extraOpts.sortingStragety = rPrfl.Sorting             // populate sortingStrategy in extraOpts
+	//construct the DP and pass it to filterS
+	nM := utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.Opts,
+	}
+	passedRoutes := make(map[string]*Route)
+	// apply filters for event
+	for _, route := range rPrfl.Routes {
+		pass, lazyCheckRules, err := rpS.filterS.LazyPass(tnt,
+			route.FilterIDs, nM,
+			[]string{utils.DynamicDataPrefix + utils.MetaReq,
+				utils.DynamicDataPrefix + utils.MetaAccounts,
+				utils.DynamicDataPrefix + utils.MetaResources,
+				utils.DynamicDataPrefix + utils.MetaStats})
+		if err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
+		route.lazyCheckRules = lazyCheckRules
+		if prev, has := passedRoutes[route.ID]; has && prev.Weight >= route.Weight {
+			continue
+		}
+		passedRoutes[route.ID] = route
+	}
+
+	if sortedRoutes, err = rpS.sorter.SortRoutes(rPrfl.ID, rPrfl.Sorting,
+		passedRoutes, ev, extraOpts); err != nil {
+		return nil, err
+	}
+	if pag.Offset != nil {
+		if *pag.Offset <= len(sortedRoutes.Routes) {
+			sortedRoutes.Routes = sortedRoutes.Routes[*pag.Offset:]
+		}
+	}
+	if pag.Limit != nil {
+		if *pag.Limit <= len(sortedRoutes.Routes) {
+			sortedRoutes.Routes = sortedRoutes.Routes[:*pag.Limit]
+		}
+	}
+	sortedRoutes.Count = len(sortedRoutes.Routes)
+	return
+}
+
+// sortedRoutesForEvent will return the list of valid route IDs
+// for event based on filters and sorting algorithms
+func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (sortedRoutes SortedRoutesSet, err error) {
+	if _, has := args.CGREvent.Event[utils.Usage]; !has {
+		args.CGREvent.Event[utils.Usage] = time.Minute // make sure we have default set for Usage
+	}
+	var rPrfs []*RouteProfile
+	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args.CGREvent, true); err != nil {
+		return
+	}
+	prfCount := len(rPrfs) // if the option is not present return for all profiles
+	if prfCountOpt, err := args.OptAsInt64(utils.OptsRouteProfilesCount); err != nil {
+		if err != utils.ErrNotFound { // is an conversion error
+			return nil, err
+		}
+	} else if prfCount > int(prfCountOpt) { // it has the option and is smaller that the current number of profiles
+		prfCount = int(prfCountOpt)
+	}
+	var extraOpts *optsGetRoutes
+	if extraOpts, err = args.asOptsGetRoutes(); err != nil { // convert routes arguments into internal options used to limit data
+		return
+	}
+
+	var startIdx, noSrtRoutes int
+	if args.Paginator.Offset != nil { // save the offset in a varible to not duble check if we have offset and is still not 0
+		startIdx = *args.Paginator.Offset
+	}
+	sortedRoutes = make(SortedRoutesSet, 0, prfCount)
+	for _, rPrfl := range rPrfs {
+		var prfPag utils.Paginator
+		if args.Paginator.Limit != nil { // we have a limit
+			if noSrtRoutes >= *args.Paginator.Limit { // the limit was reached return
+				return
+			}
+			if noSrtRoutes+len(rPrfl.Routes) > *args.Paginator.Limit { // the limit will be reached in this profile
+				limit := *args.Paginator.Limit - noSrtRoutes // make it relative to current profile
+				prfPag.Limit = &limit                        // add the limit to the paginator
+			}
+		}
+		if startIdx > 0 { // we have offest
+			if startIdx -= len(rPrfl.Routes); startIdx >= 0 { // we still have offset so try the next profile
+				continue
+			}
+			// we have offset but is in the range of this profile
+			offset := -startIdx
+			prfPag.Offset = &offset
+		}
+		var sr *SortedRoutes
+		if sr, err = rpS.sortedRoutesForProfile(tnt, rPrfl, args.CGREvent, prfPag, extraOpts); err != nil {
+			return
+		}
+		noSrtRoutes += sr.Count
+		sortedRoutes = append(sortedRoutes, sr)
+		if len(sortedRoutes) == prfCount { // the profile count was reached
+			return
+		}
+
+	}
 	return
 }

@@ -145,7 +145,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
 			Count:     3,
-			SortedRoutes: []*engine.SortedRoute{
+			Routes: []*engine.SortedRoute{
 				{
 					RouteID:         "route3",
 					RouteParameters: "",
@@ -196,7 +196,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
 			Count:     2,
-			SortedRoutes: []*engine.SortedRoute{
+			Routes: []*engine.SortedRoute{
 				{
 					RouteID:         "route3",
 					RouteParameters: "",
@@ -278,7 +278,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
 			Count:     3,
-			SortedRoutes: []*engine.SortedRoute{
+			Routes: []*engine.SortedRoute{
 				{
 					RouteID:         "route3",
 					RouteParameters: "",
@@ -330,7 +330,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
 			Count:     2,
-			SortedRoutes: []*engine.SortedRoute{
+			Routes: []*engine.SortedRoute{
 				{
 					RouteID:         "route3",
 					RouteParameters: "",
@@ -414,7 +414,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 				ProfileID: "ROUTE_LEASTCOST_1",
 				Sorting:   "*lc",
 				Count:     3,
-				SortedRoutes: []*engine.SortedRoute{
+				Routes: []*engine.SortedRoute{
 					{
 						RouteID:         "route3",
 						RouteParameters: "",
@@ -470,7 +470,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 				ProfileID: "ROUTE_LEASTCOST_1",
 				Sorting:   "*lc",
 				Count:     2,
-				SortedRoutes: []*engine.SortedRoute{
+				Routes: []*engine.SortedRoute{
 					{
 						RouteID:         "route3",
 						RouteParameters: "",

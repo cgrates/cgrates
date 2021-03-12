@@ -36,13 +36,13 @@ type WeightSorter struct {
 func (ws *WeightSorter) SortRoutes(prflID string,
 	routes map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
-		Sorting:      ws.sorting,
-		SortedRoutes: make([]*SortedRoute, 0)}
+		Sorting: ws.sorting,
+		Routes:  make([]*SortedRoute, 0)}
 	for _, route := range routes {
 		if srtRoute, pass, err := ws.rS.populateSortingData(suplEv, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtRoute != nil {
-			sortedRoutes.SortedRoutes = append(sortedRoutes.SortedRoutes, srtRoute)
+			sortedRoutes.Routes = append(sortedRoutes.Routes, srtRoute)
 		}
 	}
 	sortedRoutes.SortWeight()

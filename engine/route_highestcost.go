@@ -38,8 +38,8 @@ type HightCostSorter struct {
 func (hcs *HightCostSorter) SortRoutes(prflID string, routes map[string]*Route,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
-		Sorting:      hcs.sorting,
-		SortedRoutes: make([]*SortedRoute, 0)}
+		Sorting: hcs.sorting,
+		Routes:  make([]*SortedRoute, 0)}
 	for _, route := range routes {
 		if len(route.RatingPlanIDs) == 0 && len(route.AccountIDs) == 0 {
 			utils.Logger.Warning(
@@ -50,7 +50,7 @@ func (hcs *HightCostSorter) SortRoutes(prflID string, routes map[string]*Route,
 		if srtSpl, pass, err := hcs.rS.populateSortingData(ev, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
-			sortedRoutes.SortedRoutes = append(sortedRoutes.SortedRoutes, srtSpl)
+			sortedRoutes.Routes = append(sortedRoutes.Routes, srtSpl)
 		}
 	}
 	sortedRoutes.SortHighestCost()

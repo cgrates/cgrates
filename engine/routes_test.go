@@ -800,7 +800,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		ProfileID: "RouteProfile1",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -822,7 +822,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     3,
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -859,7 +859,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		ProfileID: "RouteProfilePrefix",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -1111,7 +1111,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -1372,7 +1372,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route3",
 				SortingData: map[string]interface{}{
@@ -1626,7 +1626,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
 				SortingData: map[string]interface{}{

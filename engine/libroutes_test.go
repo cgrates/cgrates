@@ -28,7 +28,7 @@ import (
 
 func TestLibSuppliersSortCost(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -57,7 +57,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 	}
 	sSpls.SortLeastCost()
 	eOrderedSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route3",
 				SortingData: map[string]interface{}{
@@ -92,7 +92,7 @@ func TestLibSuppliersSortCost(t *testing.T) {
 
 func TestLibRoutesSortWeight(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -118,7 +118,7 @@ func TestLibRoutesSortWeight(t *testing.T) {
 	}
 	sSpls.SortWeight()
 	eOrderedSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
 				SortingData: map[string]interface{}{
@@ -152,7 +152,7 @@ func TestSortedRoutesDigest(t *testing.T) {
 	eSpls := SortedRoutes{
 		ProfileID: "SPL_WEIGHT_1",
 		Sorting:   utils.MetaWeight,
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
 				SortingData: map[string]interface{}{
@@ -180,7 +180,7 @@ func TestSortedRoutesDigest2(t *testing.T) {
 	eSpls := SortedRoutes{
 		ProfileID: "SPL_WEIGHT_1",
 		Sorting:   utils.MetaWeight,
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -206,9 +206,9 @@ func TestSortedRoutesDigest2(t *testing.T) {
 
 func TestSortedRoutesDigest3(t *testing.T) {
 	eSpls := SortedRoutes{
-		ProfileID:    "SPL_WEIGHT_1",
-		Sorting:      utils.MetaWeight,
-		SortedRoutes: []*SortedRoute{},
+		ProfileID: "SPL_WEIGHT_1",
+		Sorting:   utils.MetaWeight,
+		Routes:    []*SortedRoute{},
 	}
 	exp := ""
 	rcv := eSpls.Digest()
@@ -219,7 +219,7 @@ func TestSortedRoutesDigest3(t *testing.T) {
 
 func TestLibRoutesSortHighestCost(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -248,7 +248,7 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 	}
 	sSpls.SortHighestCost()
 	eOrderedSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
 				SortingData: map[string]interface{}{
@@ -284,7 +284,7 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 //sort based on *acd and *tcd
 func TestLibRoutesSortQOS(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				//the average value for route1 for *acd is 0.5 , *tcd  1.1
 				RouteID: "route1",
@@ -320,9 +320,9 @@ func TestLibRoutesSortQOS(t *testing.T) {
 
 	//sort base on *acd and *tcd
 	sSpls.SortQOS([]string{utils.MetaACD, utils.MetaTCD})
-	rcv := make([]string, len(sSpls.SortedRoutes))
+	rcv := make([]string, len(sSpls.Routes))
 	eIds := []string{"route2", "route1", "route3"}
-	for i, spl := range sSpls.SortedRoutes {
+	for i, spl := range sSpls.Routes {
 		rcv[i] = spl.RouteID
 
 	}
@@ -335,7 +335,7 @@ func TestLibRoutesSortQOS(t *testing.T) {
 //sort based on *acd and *tcd
 func TestLibRoutesSortQOS2(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				//the average value for route1 for *acd is 0.5 , *tcd  1.1
 				RouteID: "route1",
@@ -369,9 +369,9 @@ func TestLibRoutesSortQOS2(t *testing.T) {
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaACD, utils.MetaTCD})
-	rcv := make([]string, len(sSpls.SortedRoutes))
+	rcv := make([]string, len(sSpls.Routes))
 	eIds := []string{"route3", "route2", "route1"}
-	for i, spl := range sSpls.SortedRoutes {
+	for i, spl := range sSpls.Routes {
 		rcv[i] = spl.RouteID
 
 	}
@@ -384,7 +384,7 @@ func TestLibRoutesSortQOS2(t *testing.T) {
 //sort based on *pdd
 func TestLibRoutesSortQOS3(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				//the worst value for route1 for *pdd is 0.7 , *tcd  1.1
 				//route1 and route3 have the same value for *pdd
@@ -417,9 +417,9 @@ func TestLibRoutesSortQOS3(t *testing.T) {
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaPDD})
-	rcv := make([]string, len(sSpls.SortedRoutes))
+	rcv := make([]string, len(sSpls.Routes))
 	eIds := []string{"route1", "route3", "route2"}
-	for i, spl := range sSpls.SortedRoutes {
+	for i, spl := range sSpls.Routes {
 		rcv[i] = spl.RouteID
 
 	}
@@ -431,7 +431,7 @@ func TestLibRoutesSortQOS3(t *testing.T) {
 
 func TestLibRoutesSortQOS4(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -459,9 +459,9 @@ func TestLibRoutesSortQOS4(t *testing.T) {
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaASR, utils.MetaACD, utils.MetaTCD})
-	rcv := make([]string, len(sSpls.SortedRoutes))
+	rcv := make([]string, len(sSpls.Routes))
 	eIds := []string{"route1", "route3", "route2"}
-	for i, spl := range sSpls.SortedRoutes {
+	for i, spl := range sSpls.Routes {
 		rcv[i] = spl.RouteID
 
 	}
@@ -473,7 +473,7 @@ func TestLibRoutesSortQOS4(t *testing.T) {
 
 func TestLibRoutesSortQOS5(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -504,9 +504,9 @@ func TestLibRoutesSortQOS5(t *testing.T) {
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaTCC, utils.MetaASR, utils.MetaACD, utils.MetaTCD})
-	rcv := make([]string, len(sSpls.SortedRoutes))
+	rcv := make([]string, len(sSpls.Routes))
 	eIds := []string{"route2", "route3", "route1"}
-	for i, spl := range sSpls.SortedRoutes {
+	for i, spl := range sSpls.Routes {
 		rcv[i] = spl.RouteID
 
 	}
@@ -518,7 +518,7 @@ func TestLibRoutesSortQOS5(t *testing.T) {
 
 func TestLibRoutesSortQOS6(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -543,9 +543,9 @@ func TestLibRoutesSortQOS6(t *testing.T) {
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaACD})
-	rcv := make([]string, len(sSpls.SortedRoutes))
+	rcv := make([]string, len(sSpls.Routes))
 	eIds := []string{"route2", "route1", "route3"}
-	for i, spl := range sSpls.SortedRoutes {
+	for i, spl := range sSpls.Routes {
 		rcv[i] = spl.RouteID
 
 	}
@@ -557,7 +557,7 @@ func TestLibRoutesSortQOS6(t *testing.T) {
 
 func TestLibRoutesSortQOS7(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -582,9 +582,9 @@ func TestLibRoutesSortQOS7(t *testing.T) {
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaACD})
-	rcv := make([]string, len(sSpls.SortedRoutes))
+	rcv := make([]string, len(sSpls.Routes))
 	eIds := []string{"route2", "route3", "route1"}
-	for i, spl := range sSpls.SortedRoutes {
+	for i, spl := range sSpls.Routes {
 		rcv[i] = spl.RouteID
 
 	}
@@ -596,7 +596,7 @@ func TestLibRoutesSortQOS7(t *testing.T) {
 
 func TestLibRoutesSortQOS8(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -621,9 +621,9 @@ func TestLibRoutesSortQOS8(t *testing.T) {
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaACD})
-	rcv := make([]string, len(sSpls.SortedRoutes))
+	rcv := make([]string, len(sSpls.Routes))
 	eIds := []string{"route3", "route2", "route1"}
-	for i, spl := range sSpls.SortedRoutes {
+	for i, spl := range sSpls.Routes {
 		rcv[i] = spl.RouteID
 
 	}
@@ -635,7 +635,7 @@ func TestLibRoutesSortQOS8(t *testing.T) {
 
 func TestLibRoutesSortLoadDistribution(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -663,9 +663,9 @@ func TestLibRoutesSortLoadDistribution(t *testing.T) {
 		},
 	}
 	sSpls.SortLoadDistribution()
-	rcv := make([]string, len(sSpls.SortedRoutes))
+	rcv := make([]string, len(sSpls.Routes))
 	eIds := []string{"route2", "route1", "route3"}
-	for i, spl := range sSpls.SortedRoutes {
+	for i, spl := range sSpls.Routes {
 		rcv[i] = spl.RouteID
 	}
 	if !reflect.DeepEqual(eIds, rcv) {
@@ -682,8 +682,8 @@ func TestLibRoutesLCSameWeight(t *testing.T) {
 			utils.Cost:   0.1,
 			utils.Weight: 10.0,
 		}}
-		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
-		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+		sSpls.Routes = append(sSpls.Routes, route)
+		sortedSlice.Routes = append(sortedSlice.Routes, route)
 	}
 	for i := 0; i < 3; i++ {
 		sSpls.SortLeastCost()
@@ -704,8 +704,8 @@ func TestLibRoutesHCSameWeight(t *testing.T) {
 			utils.Cost:   0.1,
 			utils.Weight: 10.0,
 		}}
-		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
-		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+		sSpls.Routes = append(sSpls.Routes, route)
+		sortedSlice.Routes = append(sortedSlice.Routes, route)
 	}
 	for i := 0; i < 3; i++ {
 		sSpls.SortHighestCost()
@@ -726,8 +726,8 @@ func TestLibRoutesResAscSameWeight(t *testing.T) {
 			utils.ResourceUsage: 5.0,
 			utils.Weight:        10.0,
 		}}
-		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
-		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+		sSpls.Routes = append(sSpls.Routes, route)
+		sortedSlice.Routes = append(sortedSlice.Routes, route)
 	}
 	for i := 0; i < 3; i++ {
 		sSpls.SortResourceAscendent()
@@ -748,8 +748,8 @@ func TestLibRoutesResDescSameWeight(t *testing.T) {
 			utils.ResourceUsage: 5.0,
 			utils.Weight:        10.0,
 		}}
-		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
-		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+		sSpls.Routes = append(sSpls.Routes, route)
+		sortedSlice.Routes = append(sortedSlice.Routes, route)
 	}
 	for i := 0; i < 3; i++ {
 		sSpls.SortResourceDescendent()
@@ -772,8 +772,8 @@ func TestLibRoutesLoadDistSameWeight(t *testing.T) {
 			utils.Load:   3.0,
 			utils.Weight: 10.0,
 		}}
-		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
-		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+		sSpls.Routes = append(sSpls.Routes, route)
+		sortedSlice.Routes = append(sortedSlice.Routes, route)
 	}
 	for i := 0; i < 3; i++ {
 		sSpls.SortLoadDistribution()
@@ -794,8 +794,8 @@ func TestLibRoutesQOSSameWeight(t *testing.T) {
 			utils.Weight:  10.0,
 			utils.MetaACD: -1.0,
 		}}
-		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
-		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+		sSpls.Routes = append(sSpls.Routes, route)
+		sortedSlice.Routes = append(sortedSlice.Routes, route)
 	}
 	for i := 0; i < 3; i++ {
 		sSpls.SortQOS([]string{utils.MetaACD})
@@ -815,8 +815,8 @@ func TestLibRoutesSameWeight(t *testing.T) {
 		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
 			utils.Weight: 10.0,
 		}}
-		sSpls.SortedRoutes = append(sSpls.SortedRoutes, route)
-		sortedSlice.SortedRoutes = append(sortedSlice.SortedRoutes, route)
+		sSpls.Routes = append(sSpls.Routes, route)
+		sortedSlice.Routes = append(sortedSlice.Routes, route)
 	}
 	for i := 0; i < 3; i++ {
 		sSpls.SortWeight()
@@ -831,7 +831,7 @@ func TestLibRoutesSameWeight(t *testing.T) {
 
 func BenchmarkRouteSortCost(b *testing.B) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -866,7 +866,7 @@ func BenchmarkRouteSortCost(b *testing.B) {
 
 func TestRouteIDsGetIDs(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -904,7 +904,7 @@ func TestRouteIDsGetIDs(t *testing.T) {
 
 func TestSortHighestCost(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
 				SortingData: map[string]interface{}{
@@ -930,7 +930,7 @@ func TestSortHighestCost(t *testing.T) {
 
 func TestSortResourceAscendentDescendent(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
 				SortingData: map[string]interface{}{
@@ -961,7 +961,7 @@ func TestSortResourceAscendentDescendent(t *testing.T) {
 	}
 
 	//SortingResourceAscendent/Descendent while ResourceUsages are not equal
-	sSpls.SortedRoutes[0].SortingData[utils.ResourceUsage] = 11.0
+	sSpls.Routes[0].SortingData[utils.ResourceUsage] = 11.0
 	expSRts = sSpls
 	sSpls.SortResourceAscendent()
 	if !reflect.DeepEqual(expSRts, sSpls) {
@@ -976,7 +976,7 @@ func TestSortResourceAscendentDescendent(t *testing.T) {
 
 func TestSortLoadDistribution(t *testing.T) {
 	sSpls := &SortedRoutes{
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID: "ROUTE1",
 				SortingData: map[string]interface{}{
@@ -1031,7 +1031,7 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 		ProfileID: "TEST_ID1",
 		Sorting:   utils.MetaWeight,
 		Count:     100,
-		SortedRoutes: []*SortedRoute{
+		Routes: []*SortedRoute{
 			{
 				RouteID:         "ROUTE1",
 				RouteParameters: "SORTING_PARAMETER",
