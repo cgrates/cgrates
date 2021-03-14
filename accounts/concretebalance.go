@@ -80,8 +80,8 @@ func (cB *concreteBalance) debitAbstracts(usage *decimal.Big,
 		return
 	}
 
-	return maxDebitAbstractsFromConcretes(
-		[]*concreteBalance{cB}, usage,
+	return maxDebitAbstractsFromConcretes(usage,
+		cB.acntID, []*concreteBalance{cB},
 		cB.connMgr, cgrEv,
 		cB.attrSConns, cB.blnCfg.AttributeIDs,
 		cB.rateSConns, cB.blnCfg.RateProfileIDs,

@@ -150,7 +150,8 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 		}
 	} else {
 		// attempt to debit usage with cost
-		if ec, err = maxDebitAbstractsFromConcretes(aB.cncrtBlncs, usage,
+		if ec, err = maxDebitAbstractsFromConcretes(usage,
+			aB.acntID, aB.cncrtBlncs,
 			aB.connMgr, cgrEv,
 			aB.attrSConns, aB.blnCfg.AttributeIDs,
 			aB.rateSConns, aB.blnCfg.RateProfileIDs,

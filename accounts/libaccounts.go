@@ -189,40 +189,16 @@ func balanceLimit(optsCfg map[string]interface{}) (bL *utils.Decimal, err error)
 	return
 }
 
-// debitAbstractsFromConcretes attempts to debit the usage out of concrete balances
+// debitConcreteUnits debits concrete units out of concrete balances
 // returns utils.ErrInsufficientCredit if complete usage cannot be debited
-func debitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
-	costIcrm *utils.CostIncrement, cgrEv *utils.CGREvent,
-	connMgr *engine.ConnManager, rateSConns, rpIDs []string) (ec *utils.EventCharges, err error) {
-	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
-		costIcrm.FixedFee == nil {
-		var rplyCost *engine.RateProfileCost
-		if rplyCost, err = rateSCostForEvent(connMgr, cgrEv, rateSConns, rpIDs); err != nil {
-			err = utils.NewErrRateS(err)
-			return
-		}
-		costIcrm = costIcrm.Clone() // so we don't modify the original
-		costIcrm.FixedFee = utils.NewDecimalFromFloat64(rplyCost.Cost)
-	}
-	var tCost *decimal.Big
-	if costIcrm.FixedFee != nil {
-		tCost = costIcrm.FixedFee.Big
-	}
-	// RecurrentFee is configured, used it with increments
-	if costIcrm.RecurrentFee.Big.Cmp(decimal.New(-1, 0)) != 0 {
-		rcrntCost := utils.MultiplyBig(
-			utils.DivideBig(usage, costIcrm.Increment.Big),
-			costIcrm.RecurrentFee.Big)
-		if tCost == nil {
-			tCost = rcrntCost
-		} else {
-			tCost = utils.SumBig(tCost, rcrntCost)
-		}
-	}
+func debitConcreteUnits(cUnits *decimal.Big,
+	acntID string, cncrtBlncs []*concreteBalance,
+	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+
 	clnedUnts := cloneUnitsFromConcretes(cncrtBlncs)
 	for i, cB := range cncrtBlncs {
 		var ecCncrt *utils.EventCharges
-		if ecCncrt, err = cB.debitConcretes(tCost, cgrEv); err != nil {
+		if ecCncrt, err = cB.debitConcretes(cUnits, cgrEv); err != nil {
 			restoreUnitsFromClones(cncrtBlncs, clnedUnts)
 			return nil, err
 		}
@@ -230,8 +206,8 @@ func debitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.B
 			ec = utils.NewEventCharges()
 		}
 		ec.Merge(ecCncrt)
-		tCost = utils.SubstractBig(tCost, ecCncrt.Concretes.Big)
-		if tCost.Cmp(decimal.New(0, 0)) <= 0 {
+		cUnits = utils.SubstractBig(cUnits, ecCncrt.Concretes.Big)
+		if cUnits.Cmp(decimal.New(0, 0)) <= 0 {
 			return // have debited all, total is smaller or equal to 0
 		}
 	}
@@ -240,16 +216,19 @@ func debitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.B
 	return nil, utils.ErrInsufficientCredit
 }
 
-// maxDebitAbstractsFromConcretes will debit the maximum possible usage out of concretes
-func maxDebitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decimal.Big,
+// maxDebitAbstractsFromConcretes will debit the maximum possible abstract units out of concretes
+func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
+	acndID string, cncrtBlncs []*concreteBalance,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement) (ec *utils.EventCharges, err error) {
+
+	// Init EventCharges
 	ec = utils.NewEventCharges()
+	calculateCost := costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 && costIcrm.FixedFee == nil
+	//var attrIDs []string // will be populated if attributes are processed successfully
 	// process AttributeS if needed
-	if costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 &&
-		costIcrm.FixedFee == nil &&
-		len(attributeIDs) != 0 { // cost unknown, apply AttributeS to query from RateS
+	if calculateCost && len(attributeIDs) != 0 { // cost unknown, apply AttributeS to query from RateS
 		var rplyAttrS *engine.AttrSProcessEventReply
 		if rplyAttrS, err = processAttributeS(connMgr, cgrEv, attrSConns,
 			attributeIDs); err != nil {
@@ -257,13 +236,13 @@ func maxDebitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decima
 		}
 		if len(rplyAttrS.AlteredFields) != 0 { // event was altered
 			cgrEv = rplyAttrS.CGREvent
+			//attrIDs = rplyAttrS.MatchedProfiles
 		}
 	}
-
 	// fix the maximum number of iterations
 	origConcrtUnts := cloneUnitsFromConcretes(cncrtBlncs) // so we can revert on errors
-	paidConcrtUnts := origConcrtUnts                      // so we can revert when higher usages are not possible
-	var usagePaid, usageDenied *decimal.Big
+	paidConcrtUnts := origConcrtUnts                      // so we can revert when higher abstracts are not possible
+	var aPaid, aDenied *decimal.Big
 	maxItr := config.CgrConfig().AccountSCfg().MaxIterations
 	for i := 0; i <= maxItr; i++ {
 		if i != 0 {
@@ -272,29 +251,52 @@ func maxDebitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decima
 		if i == maxItr {
 			return nil, utils.ErrMaxIncrementsExceeded
 		}
-		qriedUsage := usage // so we can detect loops
+		if calculateCost {
+			var rplyCost *engine.RateProfileCost
+			if rplyCost, err = rateSCostForEvent(connMgr, cgrEv, rateSConns, rpIDs); err != nil {
+				err = utils.NewErrRateS(err)
+				return
+			}
+			costIcrm = costIcrm.Clone() // so we don't modify the original
+			costIcrm.FixedFee = utils.NewDecimalFromFloat64(rplyCost.Cost)
+		}
+		var cUnits *decimal.Big // concrete units to debit
+		if costIcrm.FixedFee != nil {
+			cUnits = costIcrm.FixedFee.Big
+		}
+		// RecurrentFee is configured, used it with increments
+		if costIcrm.RecurrentFee.Big.Cmp(decimal.New(-1, 0)) != 0 {
+			rcrntCost := utils.MultiplyBig(
+				utils.DivideBig(aUnits, costIcrm.Increment.Big),
+				costIcrm.RecurrentFee.Big)
+			if cUnits == nil {
+				cUnits = rcrntCost
+			} else {
+				cUnits = utils.SumBig(cUnits, rcrntCost)
+			}
+		}
+		aQried := aUnits // so we can detect loops
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = debitAbstractsFromConcretes(cncrtBlncs, usage, costIcrm, cgrEv,
-			connMgr, rateSConns, rpIDs); err != nil {
+		if ecDbt, err = debitConcreteUnits(cUnits, acndID, cncrtBlncs, cgrEv); err != nil {
 			if err != utils.ErrInsufficientCredit {
 				return
 			}
 			err = nil
 			// ErrInsufficientCredit
-			usageDenied = new(decimal.Big).Copy(usage)
-			if usagePaid == nil { // going backwards
-				usage = utils.DivideBig( // divide by 2
-					usage, decimal.New(2, 0))
-				usage = roundUnitsWithIncrements(usage, costIcrm.Increment.Big) // make sure usage is multiple of increments
-				if usage.Cmp(usageDenied) >= 0 ||
-					usage.Cmp(decimal.New(0, 0)) == 0 ||
-					usage.Cmp(qriedUsage) == 0 { // loop
+			aDenied = new(decimal.Big).Copy(aUnits)
+			if aPaid == nil { // going backwards
+				aUnits = utils.DivideBig( // divide by 2
+					aUnits, decimal.New(2, 0))
+				aUnits = roundUnitsWithIncrements(aUnits, costIcrm.Increment.Big) // make sure abstracts are multiple of increments
+				if aUnits.Cmp(aDenied) >= 0 ||
+					aUnits.Cmp(decimal.New(0, 0)) == 0 ||
+					aUnits.Cmp(aQried) == 0 { // loop
 					break
 				}
 				continue
 			}
-		} else {
-			usagePaid = new(decimal.Big).Copy(usage)
+		} else { // debit for the usage succeeded
+			aPaid = new(decimal.Big).Copy(aUnits)
 			paidConcrtUnts = cloneUnitsFromConcretes(cncrtBlncs)
 			ec.Merge(ecDbt)
 			if i == 0 { // no estimation done, covering full
@@ -302,25 +304,25 @@ func maxDebitAbstractsFromConcretes(cncrtBlncs []*concreteBalance, usage *decima
 			}
 		}
 		// going upwards
-		usage = utils.SumBig(usagePaid,
-			utils.DivideBig(usagePaid, decimal.New(2, 0)).RoundToInt())
-		if usage.Cmp(usageDenied) >= 0 {
-			usage = utils.SumBig(usagePaid, costIcrm.Increment.Big)
+		aUnits = utils.SumBig(aPaid,
+			utils.DivideBig(aPaid, decimal.New(2, 0)).RoundToInt())
+		if aUnits.Cmp(aDenied) >= 0 {
+			aUnits = utils.SumBig(aPaid, costIcrm.Increment.Big)
 		}
-		usage = roundUnitsWithIncrements(usage, costIcrm.Increment.Big)
-		if usage.Cmp(usagePaid) <= 0 ||
-			usage.Cmp(usageDenied) >= 0 ||
-			usage.Cmp(qriedUsage) == 0 { // loop
+		aUnits = roundUnitsWithIncrements(aUnits, costIcrm.Increment.Big)
+		if aUnits.Cmp(aPaid) <= 0 ||
+			aUnits.Cmp(aDenied) >= 0 ||
+			aUnits.Cmp(aQried) == 0 { // loop
 			break
 		}
 	}
 	// Nothing paid
-	if usagePaid == nil {
+	if aPaid == nil {
 		// since we are erroring, we restore the concerete balances
-		usagePaid = decimal.New(0, 0)
+		aPaid = decimal.New(0, 0)
 	}
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
-	return &utils.EventCharges{Abstracts: &utils.Decimal{usagePaid}}, nil
+	return &utils.EventCharges{Abstracts: &utils.Decimal{aPaid}}, nil
 }
 
 // restoreAccounts will restore the accounts in DataDB out of their backups if present
