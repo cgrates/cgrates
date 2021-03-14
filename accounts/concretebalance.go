@@ -90,7 +90,7 @@ func (cB *concreteBalance) debitAbstracts(usage *decimal.Big,
 }
 
 // debitConcretes implements the balanceOperator interface
-func (cB *concreteBalance) debitConcretes(usage *decimal.Big,
+func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters
@@ -109,7 +109,7 @@ func (cB *concreteBalance) debitConcretes(usage *decimal.Big,
 	var hasUF bool
 	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
 		hasUF = true
-		usage = utils.MultiplyBig(usage, uF.Factor.Big)
+		cUnits = utils.MultiplyBig(cUnits, uF.Factor.Big)
 	}
 
 	// balanceLimit
@@ -123,19 +123,35 @@ func (cB *concreteBalance) debitConcretes(usage *decimal.Big,
 		hasLmt = true
 	}
 	var dbted *decimal.Big
-	if cB.blnCfg.Units.Big.Cmp(usage) <= 0 && blncLmt != nil { // balance smaller than debit and limited
+	if cB.blnCfg.Units.Big.Cmp(cUnits) <= 0 && blncLmt != nil { // balance smaller than debit and limited
 		dbted = cB.blnCfg.Units.Big
 		cB.blnCfg.Units.Big = blncLmt.Big
 	} else {
-		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, usage)
+		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, cUnits)
 		if hasLmt { // put back the limit
 			cB.blnCfg.Units.Big = utils.SumBig(cB.blnCfg.Units.Big, blncLmt.Big)
 		}
-		dbted = usage
+		dbted = cUnits
 	}
 	if hasUF {
 		dbted = utils.DivideBig(dbted, uF.Factor.Big)
 	}
 
+	ec = utils.NewEventCharges()
+	ec.Concretes = &utils.Decimal{dbted}
+	// UnitFactors
+	var ufID string
+	if hasUF {
+		ufID = utils.UUIDSha1Prefix()
+		ec.UnitFactors[ufID] = uF
+	}
+	acntID := utils.UUIDSha1Prefix()
+	ec.Accounting[acntID] = &utils.AccountCharge{
+		AccountID:    cB.acntID,
+		BalanceID:    cB.blnCfg.ID,
+		Units:        &utils.Decimal{dbted},
+		BalanceLimit: blncLmt,
+		UnitFactorID: ufID,
+	}
 	return &utils.EventCharges{Concretes: &utils.Decimal{dbted}}, nil
 }
