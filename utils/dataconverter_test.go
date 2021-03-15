@@ -940,7 +940,7 @@ func TestDCNewRandomConverterCase2Begin(t *testing.T) {
 	expected := "strconv.Atoi: parsing \"test\": invalid syntax"
 
 	if err == nil || err.Error() != expected {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err.Error(), expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err.Error())
 	}
 }
 
@@ -951,7 +951,7 @@ func TestDCNewRandomConverterCase2End(t *testing.T) {
 	expected := "strconv.Atoi: parsing \"test\": invalid syntax"
 
 	if err == nil || err.Error() != expected {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err.Error(), expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err.Error())
 	}
 }
 
@@ -962,7 +962,7 @@ func TestDCNewRandomConverterCase1Begin(t *testing.T) {
 	expected := "strconv.Atoi: parsing \"test\": invalid syntax"
 
 	if err == nil || err.Error() != expected {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err.Error(), expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err.Error())
 	}
 }
 
@@ -981,6 +981,6 @@ func TestDCrCConvert(t *testing.T) {
 		t.Error(err)
 	}
 	if receivedAsInt != 0 && receivedAsInt != 1 {
-		t.Errorf("\nReceived: <%+v>, \nExpected 0 or 1", received)
+		t.Errorf("\nExpected 0 or 1, \nReceived: <%+v>", received)
 	}
 }

@@ -1251,6 +1251,6 @@ func TestATDUsage(t *testing.T) {
 	_, err := args.Usage()
 	expected := "cannot convert field: true to time.Duration"
 	if err == nil || err.Error() != expected {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err.Error(), expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err.Error())
 	}
 }

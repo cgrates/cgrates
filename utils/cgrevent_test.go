@@ -446,10 +446,10 @@ func TestCGREventOptAsStringEmpty(t *testing.T) {
 	received, err := ev.OptAsString("testString")
 
 	if !reflect.DeepEqual(received, expstr) {
-		t.Errorf("\nReceived: %q, \nExpected: %q", received, expstr)
+		t.Errorf("\nExpected: %q, \nReceived: %q", expstr, received)
 	}
 	if err == nil || err != experr {
-		t.Errorf("\nReceived: %q, \nExpected: %q", err, experr)
+		t.Errorf("\nExpected: %q, \nReceived: %q", experr, err)
 	}
 }
 
@@ -462,12 +462,12 @@ func TestCGREventOptAsString(t *testing.T) {
 
 	received, err := ev.OptAsString("testKey")
 	if err != nil {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, nil)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", nil, err)
 	}
 	expected := "13"
 
 	if received != expected {
-		t.Errorf("\nReceived: %q, \nExpected: %q", received, expected)
+		t.Errorf("\nExpected: %q, \nReceived: %q", expected, received)
 	}
 }
 
@@ -479,10 +479,10 @@ func TestCGREventOptAsDurationEmpty(t *testing.T) {
 	received, err := ev.OptAsDuration("testString")
 
 	if !reflect.DeepEqual(received, expdur) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expdur)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expdur, received)
 	}
 	if err == nil || err != experr {
-		t.Errorf("\nReceived: %q, \nExpected: %q", err, experr)
+		t.Errorf("\nExpected: %q, \nReceived: %q", experr, err)
 	}
 }
 
@@ -495,12 +495,12 @@ func TestCGREventOptAsDuration(t *testing.T) {
 
 	received, err := ev.OptAsDuration("testKey")
 	if err != nil {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, nil)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", nil, err)
 	}
 	expected := 30 * time.Nanosecond
 
 	if received != expected {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
@@ -524,6 +524,6 @@ func TestCGREventAsDataProvider(t *testing.T) {
 	received := ev.AsDataProvider()
 
 	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }

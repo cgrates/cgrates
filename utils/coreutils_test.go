@@ -1648,7 +1648,7 @@ func TestCoreUtilsBiRPCCall(t *testing.T) {
 	err := BiRPCCall(srv, clnt, serviceMethod, args, reply)
 
 	if err == nil || err != expected {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
 	}
 
 	serviceMethod = "testv1.fail"
@@ -1656,7 +1656,7 @@ func TestCoreUtilsBiRPCCall(t *testing.T) {
 	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
 
 	if err == nil || err != expected {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
 	}
 
 	serviceMethod = "Testv1.ValidMethod"
@@ -1664,7 +1664,7 @@ func TestCoreUtilsBiRPCCall(t *testing.T) {
 	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
 
 	if err != nil {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, nil)
+		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", nil, err)
 	}
 
 	serviceMethod = "Testv1.MultipleParams"
@@ -1673,7 +1673,7 @@ func TestCoreUtilsBiRPCCall(t *testing.T) {
 	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
 
 	if err == nil || err != expected {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
 	}
 
 	serviceMethod = "Testv1.NoErrorReturn"
@@ -1681,7 +1681,7 @@ func TestCoreUtilsBiRPCCall(t *testing.T) {
 
 	expected = ErrServerError
 	if err == nil || err != expected {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
 	}
 
 	serviceMethod = "Testv1.FinalError"
@@ -1689,7 +1689,7 @@ func TestCoreUtilsBiRPCCall(t *testing.T) {
 
 	expected = ErrExists
 	if err == nil || err != expected {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
 	}
 
 	var c client
@@ -1697,7 +1697,7 @@ func TestCoreUtilsBiRPCCall(t *testing.T) {
 
 	err = BiRPCCall(srv, c, serviceMethod, args, reply)
 	if err == nil || err != expected {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err)
 	}
 }
 
@@ -1720,7 +1720,7 @@ func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {
 	}
 	for key, value := range received {
 		if expected[key] != value {
-			t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", value, expected[key])
+			t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected[key], value)
 		}
 	}
 }

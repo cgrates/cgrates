@@ -368,7 +368,7 @@ func TestAPAccountBalancesBackup(t *testing.T) {
 	actBk := actPrf.AccountBalancesBackup()
 	for key, value := range actBk {
 		if actPrf.Balances[key].Units.Big.Cmp(value) != 0 {
-			t.Errorf("\ngot: <%+v>, \nwant: <%+v>", value, actPrf.Balances[key].Units.Big)
+			t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", actPrf.Balances[key].Units.Big, value)
 		}
 	}
 }
@@ -404,7 +404,7 @@ func TestAPNewDefaultBalance(t *testing.T) {
 	received := NewDefaultBalance(id)
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>,\nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
@@ -435,7 +435,7 @@ func TestAPApsSort(t *testing.T) {
 
 	apS.Sort()
 	if !reflect.DeepEqual(apS, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", ToJSON(apS), ToJSON(expected))
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ToJSON(expected), ToJSON(apS))
 	}
 }
 
@@ -493,7 +493,7 @@ func TestAPAccountProfiles(t *testing.T) {
 	received := apS.AccountProfiles()
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>,\nExpected: <%+v>", ToJSON(received), ToJSON(expected))
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ToJSON(expected), ToJSON(received))
 	}
 }
 
@@ -550,7 +550,7 @@ func TestAPLockIDs(t *testing.T) {
 	received := apS.LockIDs()
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
@@ -609,7 +609,7 @@ func TestAPTenantIDs(t *testing.T) {
 	received := apS.TenantIDs()
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
@@ -640,7 +640,7 @@ func TestAPBlcsSort(t *testing.T) {
 
 	blncS.Sort()
 	if !reflect.DeepEqual(blncS, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", ToJSON(blncS), ToJSON(expected))
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ToJSON(expected), ToJSON(blncS))
 	}
 }
 
@@ -707,6 +707,6 @@ func TestAPBalances(t *testing.T) {
 	received := blncS.Balances()
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>,\nExpected: <%+v>", ToJSON(received), ToJSON(expected))
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ToJSON(expected), ToJSON(received))
 	}
 }
