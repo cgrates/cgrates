@@ -224,3 +224,79 @@ func testJSONKillEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+/*
+func TestFileJSONServeErrTimeDuration0(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	rdr.Config().RunDelay = time.Duration(0)
+	result := rdr.Serve()
+	if !reflect.DeepEqual(result, nil) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	}
+}
+
+
+func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	rdr.Config().RunDelay = time.Duration(-1)
+	expected := "no such file or directory"
+	err = rdr.Serve()
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestFileJSONServeTimeDefault(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	rdr.Config().RunDelay = time.Duration(1)
+	result := rdr.Serve()
+	if !reflect.DeepEqual(result, nil) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	}
+}
+
+func TestFileJSONServeTimeDefaultChanExit(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	rdrExit := make(chan struct{}, 1)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, rdrExit)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	rdrExit <- struct{}{}
+	rdr.Config().RunDelay = time.Duration(1)
+	result := rdr.Serve()
+	if !reflect.DeepEqual(result, nil) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	}
+}
+
+func TestFileJSONProcessFile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected := "open : no such file or directory"
+	err2 := rdr.(*JSONFileER).processFile("", "")
+	if err2 == nil || err2.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err2)
+	}
+}
+*/
