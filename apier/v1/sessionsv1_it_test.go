@@ -232,7 +232,7 @@ func testSSv1ItAuth(t *testing.T) {
 	if *rply.ResourceAllocation == "" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
-	eSplrs := &engine.SortedRoutes{
+	eSplrs := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_ACNT_1001",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
@@ -250,7 +250,17 @@ func testSSv1ItAuth(t *testing.T) {
 				},
 			},
 		},
-	}
+	}, {
+		ProfileID: "ROUTE_WEIGHT_2",
+		Sorting:   utils.MetaWeight,
+		Count:     1,
+		Routes: []*engine.SortedRoute{{
+			RouteID: "route1",
+			SortingData: map[string]interface{}{
+				"Weight": 10.0,
+			},
+		}},
+	}}
 	if !reflect.DeepEqual(eSplrs, rply.Routes) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Routes))
 	}
@@ -303,6 +313,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.Usage:        authUsage,
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest

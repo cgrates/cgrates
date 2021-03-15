@@ -141,7 +141,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := sessions.V1AuthorizeReply{
-		Routes: &engine.SortedRoutes{
+		Routes: engine.SortedRoutesList{{
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
 			Count:     3,
@@ -173,7 +173,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 				},
 			},
 		},
-	}
+		}}
 	if !reflect.DeepEqual(rply, expected) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -192,7 +192,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 	}
 
 	expected = sessions.V1AuthorizeReply{
-		Routes: &engine.SortedRoutes{
+		Routes: engine.SortedRoutesList{{
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
 			Count:     2,
@@ -216,7 +216,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 				},
 			},
 		},
-	}
+		}}
 
 	args = sessions.NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
@@ -274,7 +274,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := sessions.V1ProcessMessageReply{
-		Routes: &engine.SortedRoutes{
+		Routes: engine.SortedRoutesList{{
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
 			Count:     3,
@@ -306,7 +306,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 				},
 			},
 		},
-	}
+		}}
 	if !reflect.DeepEqual(rply, expected) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -326,7 +326,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 	}
 
 	expected = sessions.V1ProcessMessageReply{
-		Routes: &engine.SortedRoutes{
+		Routes: engine.SortedRoutesList{{
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
 			Count:     2,
@@ -350,7 +350,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 				},
 			},
 		},
-	}
+		}}
 
 	args = sessions.NewV1ProcessMessageArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
@@ -409,8 +409,8 @@ func testSesRoutesProcessEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := sessions.V1ProcessEventReply{
-		Routes: map[string]*engine.SortedRoutes{
-			utils.MetaRaw: {
+		Routes: map[string]engine.SortedRoutesList{
+			utils.MetaRaw: {{
 				ProfileID: "ROUTE_LEASTCOST_1",
 				Sorting:   "*lc",
 				Count:     3,
@@ -442,8 +442,8 @@ func testSesRoutesProcessEvent(t *testing.T) {
 					},
 				},
 			},
-		},
-	}
+			},
+		}}
 	if !reflect.DeepEqual(rply, expected) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
@@ -465,8 +465,8 @@ func testSesRoutesProcessEvent(t *testing.T) {
 	}
 
 	expected = sessions.V1ProcessEventReply{
-		Routes: map[string]*engine.SortedRoutes{
-			utils.MetaRaw: {
+		Routes: map[string]engine.SortedRoutesList{
+			utils.MetaRaw: {{
 				ProfileID: "ROUTE_LEASTCOST_1",
 				Sorting:   "*lc",
 				Count:     2,
@@ -490,8 +490,8 @@ func testSesRoutesProcessEvent(t *testing.T) {
 					},
 				},
 			},
-		},
-	}
+			},
+		}}
 
 	args = sessions.V1ProcessEventArgs{
 		Flags:     []string{"*routes:*maxcost:1"},

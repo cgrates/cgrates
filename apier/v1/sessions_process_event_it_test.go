@@ -195,7 +195,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	if rply.ResourceAllocation == nil || rply.ResourceAllocation["CustomerCharges"] == utils.EmptyString {
 		t.Errorf("Unexpected ResourceAllocation: %s", rply.ResourceAllocation)
 	}
-	eSplrs := &engine.SortedRoutes{
+	eSplrs := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_ACNT_1001",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
@@ -213,7 +213,17 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 				},
 			},
 		},
-	}
+	}, {
+		ProfileID: "ROUTE_WEIGHT_2",
+		Sorting:   utils.MetaWeight,
+		Count:     1,
+		Routes: []*engine.SortedRoute{{
+			RouteID: "route1",
+			SortingData: map[string]interface{}{
+				"Weight": 10.0,
+			},
+		}},
+	}}
 	if !reflect.DeepEqual(eSplrs, rply.Routes[utils.MetaRaw]) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Routes[utils.MetaRaw]))
 	}
