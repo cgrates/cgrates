@@ -89,6 +89,16 @@ var (
 
 		testV1FISetRateProfileRatesIndexes,
 		testV1FIComputeRateProfileRatesIndexes,
+		testV1FISetSecondRateProfileRate,
+		testVF1ComputeIDsRateProfileRateIndexes,
+		testVF1RemoveRateProfileRates,
+		testV1FIdxdxInitDataDb,
+
+		testV1FISetRateProfileIndexes,
+		testV1FIComputeRateProfileIndexes,
+		testV1FISetSecondRateProfile,
+		testV1FIComputeIDsRateProfileIndexes,
+		testVF1RemoveRateProfile,
 		testV1FIdxdxInitDataDb,
 
 		testV1FIdxSetAttributeProfileIndexes,
@@ -1608,7 +1618,7 @@ func testVF1SetSecondActionProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	//set athe second actPrf in db with our filter
+	//set the second actPrf in db with our filter
 	actPrf := &ActionProfileWithCache{
 		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
 			ActionProfile: &engine.ActionProfile{
@@ -1775,6 +1785,7 @@ func testV1FIRemoveActionProfile(t *testing.T) {
 	}
 }
 
+//RateProfileRate Indexes
 func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 	//set a filter for our rates
 	filter = &FilterWithCache{
@@ -1865,7 +1876,7 @@ func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 		}
 	}
 
-	//get indexes only with Type *string)
+	//get indexes only with Type *string
 	expectedIDx = []string{"*string:*req.Destination:234:RT_WEEK", "*string:*req.Destination:234:RT_MONTH"}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfileRates, Tenant: tenant,
@@ -1943,26 +1954,631 @@ func testV1FIComputeRateProfileRatesIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	/*
-		expectedIDx := []string{"*string:*req.ToR:*sms:ACT_PRF", "*string:*req.ToR:*data:ACT_PRF",
-			"*prefix:*req.Account:1001:ACT_PRF", "*prefix:*req.Account:1002:ACT_PRF"}
-		if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
-			&AttrGetFilterIndexes{ItemType: utils.MetaRateProfileRates,
-				Tenant: tenant, Context: "RP1"},
-			&indexes); err != nil {
-			t.Error(err)
-		} else {
-			sort.Strings(expectedIDx)
-			sort.Strings(indexes)
-			if !reflect.DeepEqual(indexes, expectedIDx) {
-				t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
-			}
+	expectedIDx := []string{"*string:*req.Destination:234:RT_WEEK",
+		"*string:*req.Destination:234:RT_MONTH", "*suffix:*req.Account:1009:RT_WEEK"}
+	//as we compute them, next we will try to get them again from db
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfileRates,
+			Tenant: tenant, Context: "RP1"},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
 		}
-
-	*/
+	}
 }
 
-//AttributeProfile
+func testV1FISetSecondRateProfileRate(t *testing.T) {
+	//second filter for a new rate in the same rate profile
+	filter = &FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "RTPRF_FLTR3",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Usage",
+					Values:  []string{"10m", "40m", "~*opts.Usage"},
+				},
+			},
+		},
+	}
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//append a new rate in the same rate profile
+	ratePrfRates := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+			APIRateProfile: &engine.APIRateProfile{
+				Tenant:          "cgrates.org",
+				ID:              "RP1",
+				FilterIDs:       []string{"*string:~*req.Usage:10m"},
+				MaxCostStrategy: "*free",
+				Rates: map[string]*engine.APIRate{
+					"RT_YEAR": {
+						ID:              "RT_YEAR",
+						FilterIDs:       []string{"RTPRF_FLTR3"},
+						ActivationTimes: "* * * * *",
+					},
+				},
+			},
+		},
+	}
+	expRatePrf := utils.RateProfile{
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Usage:10m"},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				FilterIDs:       []string{"RATE_FLTR1", "*suffix:~*req.Account:1009"},
+				ActivationTimes: "* * * * 1-5",
+			},
+			"RT_MONTH": {
+				ID:              "RT_MONTH",
+				FilterIDs:       []string{"RATE_FLTR1"},
+				ActivationTimes: "* * * * *",
+			},
+			"RT_YEAR": {
+				ID:              "RT_YEAR",
+				FilterIDs:       []string{"RTPRF_FLTR3"},
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetRateProfileRates, ratePrfRates, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("unexpected reply returned")
+	}
+
+	//get it from db and compare
+	var reply utils.RateProfile
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else {
+		expRatePrf.Compile()
+		reply.Compile()
+		if !reflect.DeepEqual(reply, expRatePrf) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRatePrf), utils.ToJSON(reply))
+		}
+	}
+
+	var indexes []string
+	expectedIDx := []string{"*string:*req.Destination:234:RT_WEEK",
+		"*string:*req.Destination:234:RT_MONTH", "*suffix:*req.Account:1009:RT_WEEK",
+		"*string:*req.Usage:10m:RT_YEAR", "*string:*req.Usage:40m:RT_YEAR"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfileRates,
+			Tenant: tenant, Context: "RP1"},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+}
+
+func testVF1ComputeIDsRateProfileRateIndexes(t *testing.T) {
+	//remove indexes
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfileRates,
+			Tenant: tenant, Context: "RP1"},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	var indexes []string
+	//nothing to get from db, as we removed them,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfileRates,
+			Tenant: tenant, Context: "RP1"},
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	//compute indexes for all three rates by ids
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{
+			Tenant:         tenant,
+			RateProfileIDs: []string{"RP1"},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	expectedIDx := []string{"*string:*req.Destination:234:RT_WEEK",
+		"*string:*req.Destination:234:RT_MONTH", "*suffix:*req.Account:1009:RT_WEEK",
+		"*string:*req.Usage:10m:RT_YEAR", "*string:*req.Usage:40m:RT_YEAR"}
+	//as we compute them, next we will try to get them again from db
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfileRates,
+			Tenant: tenant, Context: "RP1"},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+}
+
+func testVF1RemoveRateProfileRates(t *testing.T) {
+	//removing rates from db will delete the indexes from db
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfileRates,
+		&RemoveRPrfRates{ID: "RP1",
+			Tenant: tenant, RateIDs: []string{"RT_WEEK", "RT_YEAR"}},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected result returned", result)
+	}
+
+	expRatePrf := utils.RateProfile{
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Usage:10m"},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"RT_MONTH": {
+				ID:              "RT_MONTH",
+				FilterIDs:       []string{"RATE_FLTR1"},
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+
+	var reply utils.RateProfile
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else {
+		expRatePrf.Compile()
+		reply.Compile()
+		if !reflect.DeepEqual(reply, expRatePrf) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRatePrf), utils.ToJSON(reply))
+		}
+	}
+
+	//compute the indexes only for the left rate
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{
+			Tenant:         tenant,
+			RateProfileIDs: []string{"RP1"},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	expectedIDx := []string{"*string:*req.Destination:234:RT_MONTH"}
+	//as we compute them, next we will try to get them again from db
+	var indexes []string
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfileRates,
+			Tenant: tenant, Context: "RP1"},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+
+	//no we will remove the left rate and the profile
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfileRates,
+		&RemoveRPrfRates{ID: "RP1",
+			Tenant: tenant, RateIDs: []string{"RT_MONTH"}},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected result returned", result)
+	}
+
+	//no indexes in db
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfileRates,
+			Tenant: tenant, Context: "RP1"},
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+//RateProfile Indexes
+func testV1FISetRateProfileIndexes(t *testing.T) {
+	//set a filter for our rates
+	filter = &FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "RATEFLTR_FLTR1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.OriginID",
+					Values:  []string{"~*opts.Account", "ID1"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destination",
+					Values:  []string{"~*opts.Account", "123"},
+				},
+			},
+		},
+	}
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//there are not any rates in db
+	var reply *engine.RateProfile
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP2"}}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	//set in db a ratePrf with with our filterS
+	ratePrfRates := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+			APIRateProfile: &engine.APIRateProfile{
+				Tenant:          "cgrates.org",
+				ID:              "RP2",
+				FilterIDs:       []string{"*string:~*req.Usage:10m", "RATEFLTR_FLTR1"},
+				MaxCostStrategy: "*free",
+				Rates: map[string]*engine.APIRate{
+					"RT_WEEK": {
+						ID:              "RT_WEEK",
+						FilterIDs:       []string{"*suffix:~*req.Account:1009"},
+						ActivationTimes: "* * * * 1-5",
+					},
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetRateProfile, ratePrfRates, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	expRtPrf, err := ratePrfRates.AsRateProfile()
+	if err != nil {
+		t.Error(err)
+	}
+
+	//get it from db and compare
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP2"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else {
+		expRtPrf.Compile()
+		reply.Compile()
+		if !reflect.DeepEqual(reply, expRtPrf) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRtPrf), utils.ToJSON(reply))
+		}
+	}
+
+	//get indexes to verify if these are indexed well
+	var indexes []string
+	expectedIDx := []string{"*string:*req.OriginID:ID1:RP2", "*prefix:*req.Destination:123:RP2",
+		"*string:*req.Usage:10m:RP2"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfiles,
+			Tenant: tenant},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+
+	//get indexes only with Type *string
+	expectedIDx = []string{"*string:*req.OriginID:ID1:RP2",
+		"*string:*req.Usage:10m:RP2"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfiles, Tenant: tenant,
+			FilterType: utils.MetaString},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+
+	//get indexes only with Field OriginID
+	expectedIDx = []string{"*string:*req.OriginID:ID1:RP2"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfiles, Tenant: tenant,
+			FilterField: "*req.OriginID"},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+
+	//get indexes only with 10m
+	expectedIDx = []string{"*string:*req.Usage:10m:RP2"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfiles, Tenant: tenant,
+			FilterValue: "10m"},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+}
+
+func testV1FIComputeRateProfileIndexes(t *testing.T) {
+	//remove indexes from db
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{ItemType: utils.MetaRateProfiles,
+			Tenant: tenant},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected result returned", result)
+	}
+
+	//nothing to get from db
+	var indexes []string
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfiles,
+			Tenant: tenant},
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	//compute them, to put indexes again in db for the right subsystem
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{
+			Tenant: tenant,
+			RateS:  true,
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	expectedIDx := []string{"*string:*req.OriginID:ID1:RP2", "*prefix:*req.Destination:123:RP2",
+		"*string:*req.Usage:10m:RP2"}
+	//as we compute them, next we will try to get them again from db
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfiles,
+			Tenant: tenant},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+}
+
+func testV1FISetSecondRateProfile(t *testing.T) {
+	//second filter for a new rate profile
+	filter = &FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "RTPRF_FLTR6",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.ToR",
+					Values:  []string{"*sms", "~*opts.Usage"},
+				},
+			},
+		},
+	}
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//another rate profile
+	ratePrfRates := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
+			APIRateProfile: &engine.APIRateProfile{
+				Tenant:          "cgrates.org",
+				ID:              "RP3",
+				FilterIDs:       []string{"RTPRF_FLTR6"},
+				MaxCostStrategy: "*free",
+				Rates: map[string]*engine.APIRate{
+					"RT_WEEK": {
+						ID:              "RT_WEEK",
+						FilterIDs:       []string{"*suffix:~*req.Account:1019"},
+						ActivationTimes: "* * * * 1-5",
+					},
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetRateProfile, ratePrfRates, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("unexpected reply returned")
+	}
+	expRatePrf := utils.RateProfile{
+		Tenant:          "cgrates.org",
+		ID:              "RP3",
+		FilterIDs:       []string{"RTPRF_FLTR6"},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				FilterIDs:       []string{"*suffix:~*req.Account:1019"},
+				ActivationTimes: "* * * * 1-5",
+			},
+		},
+	}
+	//get it from db and compare
+	var reply utils.RateProfile
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP3"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else {
+		expRatePrf.Compile()
+		reply.Compile()
+		if !reflect.DeepEqual(reply, expRatePrf) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRatePrf), utils.ToJSON(reply))
+		}
+	}
+
+	var indexes []string
+	expectedIDx := []string{"*string:*req.OriginID:ID1:RP2", "*prefix:*req.Destination:123:RP2",
+		"*string:*req.Usage:10m:RP2", "*string:*req.ToR:*sms:RP3"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfiles,
+			Tenant: tenant},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+}
+
+func testV1FIComputeIDsRateProfileIndexes(t *testing.T) {
+	//remove indexes from db
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{ItemType: utils.MetaRateProfiles,
+			Tenant: tenant},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected result returned", result)
+	}
+
+	//nothing to get from db
+	var indexes []string
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfiles,
+			Tenant: tenant},
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	//compute them, to put indexes again in db for the right subsystem
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{
+			Tenant:         tenant,
+			RateProfileIDs: []string{"RP3", "RP2"},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	expectedIDx := []string{"*string:*req.OriginID:ID1:RP2", "*prefix:*req.Destination:123:RP2",
+		"*string:*req.Usage:10m:RP2", "*string:*req.ToR:*sms:RP3"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{ItemType: utils.MetaRateProfiles,
+			Tenant: tenant},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(indexes)
+		if !reflect.DeepEqual(indexes, expectedIDx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, indexes)
+		}
+	}
+}
+
+func testVF1RemoveRateProfile(t *testing.T) {
+	//removing rate profile from db will delete the indexes from db
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfile,
+		&utils.TenantIDWithCache{ID: "RP2",
+			Tenant: tenant},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected result returned", result)
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfile,
+		&utils.TenantIDWithCache{ID: "RP3",
+			Tenant: tenant},
+		&result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected result returned", result)
+	}
+
+	//nothing to get from db
+	var reply utils.RateProfile
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP2"}},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP3"}},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	//as we removed our profiles, the indexes are removed as well
+	var indexes []string
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaRateProfiles, Tenant: tenant},
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+//AttributeProfile Indexes
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
 	filter = &FilterWithCache{
