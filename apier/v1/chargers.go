@@ -70,8 +70,13 @@ type ChargerWithCache struct {
 	Opts  map[string]interface{}
 }
 
+type ChargerWithOpts struct {
+	*engine.ChargerProfile
+	Opts map[string]interface{}
+}
+
 //SetChargerProfile add/update a new Charger Profile
-func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -86,7 +91,7 @@ func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
-	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheChargerProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheChargerProfiles,
 		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -95,7 +100,7 @@ func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string
 }
 
 //RemoveChargerProfile remove a specific Charger Profile
-func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -112,7 +117,7 @@ func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, rep
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
-	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheChargerProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheChargerProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

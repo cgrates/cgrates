@@ -125,7 +125,7 @@ func TestCallCache(t *testing.T) {
 		ConnMgr: cn,
 		Config:  config.CgrConfig(),
 	}
-	if err := apv1.CallCache(utils.StringPointer(utils.MetaNone), "", "", "", nil, nil, nil); err != nil {
+	if err := apv1.CallCache(utils.MetaNone, "", "", "", nil, nil, nil); err != nil {
 		t.Fatal(err)
 	} else if len(cache) != 0 {
 		t.Fatal("Expected call cache to not be called")
@@ -138,7 +138,7 @@ func TestCallCache(t *testing.T) {
 			Opts:     make(map[string]interface{}),
 		},
 	}
-	if err := apv1.CallCache(utils.StringPointer(utils.MetaClear), "cgrates.org", utils.CacheStatQueueProfiles, "", nil, nil, make(map[string]interface{})); err != nil {
+	if err := apv1.CallCache(utils.MetaClear, "cgrates.org", utils.CacheStatQueueProfiles, "", nil, nil, make(map[string]interface{})); err != nil {
 		t.Fatal(err)
 	} else if len(cache) != 1 {
 		t.Fatal("Expected call cache to be called")
@@ -161,7 +161,7 @@ func TestCallCache(t *testing.T) {
 		},
 	}
 
-	if err := apv1.CallCache(utils.StringPointer(utils.MetaReload), "cgrates.org", utils.CacheStatQueueProfiles,
+	if err := apv1.CallCache(utils.MetaReload, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"},
 		nil, make(map[string]interface{})); err != nil {
 		t.Fatal(err)
@@ -171,7 +171,7 @@ func TestCallCache(t *testing.T) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 	exp.Method = utils.CacheSv1LoadCache
-	if err := apv1.CallCache(utils.StringPointer(utils.MetaLoad), "cgrates.org", utils.CacheStatQueueProfiles,
+	if err := apv1.CallCache(utils.MetaLoad, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"},
 		nil, make(map[string]interface{})); err != nil {
 		t.Fatal(err)
@@ -181,7 +181,7 @@ func TestCallCache(t *testing.T) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 	exp.Method = utils.CacheSv1RemoveItems
-	if err := apv1.CallCache(utils.StringPointer(utils.MetaRemove), "cgrates.org", utils.CacheStatQueueProfiles,
+	if err := apv1.CallCache(utils.MetaRemove, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"},
 		nil, make(map[string]interface{})); err != nil {
 		t.Fatal(err)
@@ -191,21 +191,21 @@ func TestCallCache(t *testing.T) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 
-	if err := apv1.CallCache(utils.StringPointer(utils.MetaLoad), "cgrates.org", utils.CacheStatQueueProfiles,
+	if err := apv1.CallCache(utils.MetaLoad, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", &[]string{"FLTR1", "*prefix:1001:~*req.Destination"},
 		nil, make(map[string]interface{})); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	} else if len(cache) != 0 {
 		t.Fatal("Expected call cache to not be called")
 	}
-	if err := apv1.CallCache(utils.StringPointer(utils.MetaRemove), "cgrates.org", utils.CacheStatQueueProfiles,
+	if err := apv1.CallCache(utils.MetaRemove, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", &[]string{"FLTR1", "*prefix:1001:~*req.Destination"},
 		nil, make(map[string]interface{})); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	} else if len(cache) != 0 {
 		t.Fatal("Expected call cache to not be called")
 	}
-	if err := apv1.CallCache(utils.StringPointer(utils.MetaReload), "cgrates.org", utils.CacheStatQueueProfiles,
+	if err := apv1.CallCache(utils.MetaReload, "cgrates.org", utils.CacheStatQueueProfiles,
 		"cgrates.org:Stat2", &[]string{"FLTR1", "*prefix:1001:~*req.Destination"},
 		nil, make(map[string]interface{})); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)

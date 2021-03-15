@@ -116,7 +116,7 @@ func (apierSv1 *APIerSv1) SetAccountProfile(extAp *APIAccountProfileWithCache, r
 }
 
 // RemoveAccountProfile remove a specific Account Profile
-func (apierSv1 *APIerSv1) RemoveAccountProfile(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveAccountProfile(arg *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -141,7 +141,7 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, r
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
-	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheThresholdProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), args.Tenant, utils.CacheThresholdProfiles,
 		args.TenantID(), &args.FilterIDs, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -149,7 +149,7 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, r
 		return err
 	}
 	//handle caching for Threshold
-	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheThresholds,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), args.Tenant, utils.CacheThresholds,
 		args.TenantID(), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -171,7 +171,7 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
-	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheThresholdProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), tnt, utils.CacheThresholdProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -185,7 +185,7 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Threshold
-	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheThresholds,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), tnt, utils.CacheThresholds,
 		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

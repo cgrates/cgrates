@@ -94,7 +94,7 @@ type ActionProfileWithCache struct {
 }
 
 //SetActionProfile add/update a new Action Profile
-func (apierSv1 *APIerSv1) SetActionProfile(ap *ActionProfileWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetActionProfile(ap *engine.ActionProfileWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(ap.ActionProfile, []string{utils.ID, utils.Actions}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -109,7 +109,7 @@ func (apierSv1 *APIerSv1) SetActionProfile(ap *ActionProfileWithCache, reply *st
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(ap.Cache, ap.Tenant, utils.CacheActionProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(ap.Opts[utils.CacheOpt]), ap.Tenant, utils.CacheActionProfiles,
 		ap.TenantID(), &ap.FilterIDs, nil, ap.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -118,7 +118,7 @@ func (apierSv1 *APIerSv1) SetActionProfile(ap *ActionProfileWithCache, reply *st
 }
 
 // RemoveActionProfile remove a specific Action Profile
-func (apierSv1 *APIerSv1) RemoveActionProfile(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveActionProfile(arg *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -134,7 +134,7 @@ func (apierSv1 *APIerSv1) RemoveActionProfile(arg *utils.TenantIDWithCache, repl
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheActionProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheActionProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

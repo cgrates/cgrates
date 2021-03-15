@@ -1002,7 +1002,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 }
 
 func testV1FltrAttributesPrefix(t *testing.T) {
-	chargerProfile := &v1.AttributeWithCache{
+	chargerProfile := &engine.AttributeProfileWithOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.new",
 			ID:        "ATTR_1001",

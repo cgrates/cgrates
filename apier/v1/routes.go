@@ -86,7 +86,7 @@ func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithCache, reply *string) e
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
-	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheRouteProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), args.Tenant, utils.CacheRouteProfiles,
 		args.TenantID(), &args.FilterIDs, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -111,7 +111,7 @@ func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithCache, repl
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
-	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheRouteProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), tnt, utils.CacheRouteProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

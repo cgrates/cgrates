@@ -158,7 +158,7 @@ func testFltrRplRPCConn(t *testing.T) {
 
 func testFltrRplAttributeProfile(t *testing.T) {
 	attrID := "ATTR1"
-	attrPrf := &v1.AttributeWithCache{
+	attrPrf := &engine.AttributeProfileWithOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        attrID,

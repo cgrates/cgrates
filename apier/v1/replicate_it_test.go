@@ -205,7 +205,7 @@ func testInternalReplicateITDestination(t *testing.T) {
 
 func testInternalReplicateITAttributeProfile(t *testing.T) {
 	//set
-	alsPrf := &AttributeWithCache{
+	alsPrf := &engine.AttributeProfileWithOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_CDRE",
@@ -1456,7 +1456,7 @@ func testInternalReplicateITLoadIds(t *testing.T) {
 		t.Errorf("Expecting same LoadIDs for both engines")
 	}
 	// set AttributeProfile
-	alsPrf = &AttributeWithCache{
+	alsPrf = &engine.AttributeProfileWithOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "AttributeWithNonSubstitute",

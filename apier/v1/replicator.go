@@ -380,7 +380,7 @@ func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.DestinationWithOpts, rep
 	if err = rplSv1.dm.DataDB().SetDestinationDrv(dst.Destination, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(dst.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dst.Opts[utils.CacheOpt]),
 		dst.Tenant, utils.CacheDestinations, dst.Id, nil, nil, dst.Opts); err != nil {
 		return
 	}
@@ -406,7 +406,7 @@ func (rplSv1 *ReplicatorSv1) SetThresholdProfile(th *engine.ThresholdProfileWith
 	if err = rplSv1.dm.DataDB().SetThresholdProfileDrv(th.ThresholdProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(th.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(th.Opts[utils.CacheOpt]),
 		th.Tenant, utils.CacheThresholdProfiles, th.TenantID(), &th.FilterIDs, nil, th.Opts); err != nil {
 		return
 	}
@@ -419,7 +419,7 @@ func (rplSv1 *ReplicatorSv1) SetThreshold(th *engine.ThresholdWithOpts, reply *s
 	if err = rplSv1.dm.DataDB().SetThresholdDrv(th.Threshold); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(th.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(th.Opts[utils.CacheOpt]),
 		th.Tenant, utils.CacheThresholds, th.TenantID(), nil, nil, th.Opts); err != nil {
 		return
 	}
@@ -432,7 +432,7 @@ func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(sq *engine.StatQueueProfileWith
 	if err = rplSv1.dm.DataDB().SetStatQueueProfileDrv(sq.StatQueueProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(sq.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sq.Opts[utils.CacheOpt]),
 		sq.Tenant, utils.CacheStatQueueProfiles, sq.TenantID(), &sq.FilterIDs, nil, sq.Opts); err != nil {
 		return
 	}
@@ -445,7 +445,7 @@ func (rplSv1 *ReplicatorSv1) SetStatQueue(sq *engine.StatQueueWithOpts, reply *s
 	if err = rplSv1.dm.DataDB().SetStatQueueDrv(nil, sq.StatQueue); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(sq.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sq.Opts[utils.CacheOpt]),
 		sq.Tenant, utils.CacheStatQueues, sq.TenantID(), nil, nil, sq.Opts); err != nil {
 		return
 	}
@@ -458,7 +458,7 @@ func (rplSv1 *ReplicatorSv1) SetFilter(fltr *engine.FilterWithOpts, reply *strin
 	if err = rplSv1.dm.DataDB().SetFilterDrv(fltr.Filter); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(fltr.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(fltr.Opts[utils.CacheOpt]),
 		fltr.Tenant, utils.CacheFilters, fltr.TenantID(), nil, nil, fltr.Opts); err != nil {
 		return
 	}
@@ -471,7 +471,7 @@ func (rplSv1 *ReplicatorSv1) SetTiming(tm *utils.TPTimingWithOpts, reply *string
 	if err = rplSv1.dm.DataDB().SetTimingDrv(tm.TPTiming); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(tm.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(tm.Opts[utils.CacheOpt]),
 		tm.Tenant, utils.CacheTimings, tm.ID, nil, nil, tm.Opts); err != nil {
 		return
 	}
@@ -484,7 +484,7 @@ func (rplSv1 *ReplicatorSv1) SetResourceProfile(rs *engine.ResourceProfileWithOp
 	if err = rplSv1.dm.DataDB().SetResourceProfileDrv(rs.ResourceProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(rs.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rs.Opts[utils.CacheOpt]),
 		rs.Tenant, utils.CacheResourceProfiles, rs.TenantID(), &rs.FilterIDs, nil, rs.Opts); err != nil {
 		return
 	}
@@ -497,7 +497,7 @@ func (rplSv1 *ReplicatorSv1) SetResource(rs *engine.ResourceWithOpts, reply *str
 	if err = rplSv1.dm.DataDB().SetResourceDrv(rs.Resource); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(rs.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rs.Opts[utils.CacheOpt]),
 		rs.Tenant, utils.CacheResources, rs.TenantID(), nil, nil, rs.Opts); err != nil {
 		return
 	}
@@ -510,7 +510,7 @@ func (rplSv1 *ReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArg
 	if err = rplSv1.dm.DataDB().SetActionTriggersDrv(args.Key, args.Attrs); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheActionTriggers, args.Key, nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -523,7 +523,7 @@ func (rplSv1 *ReplicatorSv1) SetSharedGroup(shg *engine.SharedGroupWithOpts, rep
 	if err = rplSv1.dm.DataDB().SetSharedGroupDrv(shg.SharedGroup); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(shg.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(shg.Opts[utils.CacheOpt]),
 		shg.Tenant, utils.CacheSharedGroups, shg.Id, nil, nil, shg.Opts); err != nil {
 		return
 	}
@@ -536,7 +536,7 @@ func (rplSv1 *ReplicatorSv1) SetActions(args *engine.SetActionsArgsWithOpts, rep
 	if err = rplSv1.dm.DataDB().SetActionsDrv(args.Key, args.Acs); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheActions, args.Key, nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -549,7 +549,7 @@ func (rplSv1 *ReplicatorSv1) SetRatingPlan(rp *engine.RatingPlanWithOpts, reply 
 	if err = rplSv1.dm.DataDB().SetRatingPlanDrv(rp.RatingPlan); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(rp.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rp.Opts[utils.CacheOpt]),
 		rp.Tenant, utils.CacheRatingPlans, rp.Id, nil, nil, rp.Opts); err != nil {
 		return
 	}
@@ -562,7 +562,7 @@ func (rplSv1 *ReplicatorSv1) SetRatingProfile(rp *engine.RatingProfileWithOpts, 
 	if err = rplSv1.dm.DataDB().SetRatingProfileDrv(rp.RatingProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(rp.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rp.Opts[utils.CacheOpt]),
 		rp.Tenant, utils.CacheRatingProfiles, rp.Id, nil, nil, rp.Opts); err != nil {
 		return
 	}
@@ -575,7 +575,7 @@ func (rplSv1 *ReplicatorSv1) SetRouteProfile(sp *engine.RouteProfileWithOpts, re
 	if err = rplSv1.dm.DataDB().SetRouteProfileDrv(sp.RouteProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(sp.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sp.Opts[utils.CacheOpt]),
 		sp.Tenant, utils.CacheRouteProfiles, sp.TenantID(), &sp.FilterIDs, nil, sp.Opts); err != nil {
 		return
 	}
@@ -588,7 +588,7 @@ func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ap *engine.AttributeProfileWith
 	if err = rplSv1.dm.DataDB().SetAttributeProfileDrv(ap.AttributeProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(ap.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(ap.Opts[utils.CacheOpt]),
 		ap.Tenant, utils.CacheAttributeProfiles, ap.TenantID(), &ap.FilterIDs, ap.Contexts, ap.Opts); err != nil {
 		return
 	}
@@ -601,7 +601,7 @@ func (rplSv1 *ReplicatorSv1) SetChargerProfile(cp *engine.ChargerProfileWithOpts
 	if err = rplSv1.dm.DataDB().SetChargerProfileDrv(cp.ChargerProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(cp.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(cp.Opts[utils.CacheOpt]),
 		cp.Tenant, utils.CacheChargerProfiles, cp.TenantID(), &cp.FilterIDs, nil, cp.Opts); err != nil {
 		return
 	}
@@ -614,7 +614,7 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfileW
 	if err = rplSv1.dm.DataDB().SetDispatcherProfileDrv(dpp.DispatcherProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(dpp.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dpp.Opts[utils.CacheOpt]),
 		dpp.Tenant, utils.CacheDispatcherProfiles, dpp.TenantID(), &dpp.FilterIDs, dpp.Subsystems, dpp.Opts); err != nil {
 		return
 	}
@@ -627,7 +627,7 @@ func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithOpts
 	if err = rplSv1.dm.DataDB().SetActionPlanDrv(args.Key, args.Ats, args.Overwrite, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheActionPlans, args.Key, nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -640,7 +640,7 @@ func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountAction
 	if err = rplSv1.dm.DataDB().SetAccountActionPlansDrv(args.AcntID, args.AplIDs, args.Overwrite); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheAccountActionPlans, args.AcntID, nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -653,7 +653,7 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherHost(dpp *engine.DispatcherHostWithOpt
 	if err = rplSv1.dm.DataDB().SetDispatcherHostDrv(dpp.DispatcherHost); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(dpp.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dpp.Opts[utils.CacheOpt]),
 		dpp.Tenant, utils.CacheDispatcherHosts, dpp.TenantID(), nil, nil, dpp.Opts); err != nil {
 		return
 	}
@@ -666,7 +666,7 @@ func (rplSv1 *ReplicatorSv1) SetRateProfile(dpp *engine.RateProfileWithOpts, rep
 	if err = rplSv1.dm.DataDB().SetRateProfileDrv(dpp.RateProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(dpp.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dpp.Opts[utils.CacheOpt]),
 		dpp.Tenant, utils.CacheRateProfiles, dpp.TenantID(), &dpp.FilterIDs, nil, dpp.Opts); err != nil {
 		return
 	}
@@ -679,7 +679,7 @@ func (rplSv1 *ReplicatorSv1) SetActionProfile(acp *engine.ActionProfileWithOpts,
 	if err = rplSv1.dm.DataDB().SetActionProfileDrv(acp.ActionProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(acp.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(acp.Opts[utils.CacheOpt]),
 		acp.Tenant, utils.CacheActionProfiles, acp.TenantID(), &acp.FilterIDs, nil, acp.Opts); err != nil {
 		return
 	}
@@ -692,7 +692,7 @@ func (rplSv1 *ReplicatorSv1) SetAccountProfile(acp *utils.AccountProfileWithOpts
 	if err = rplSv1.dm.DataDB().SetAccountProfileDrv(acp.AccountProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(acp.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(acp.Opts[utils.CacheOpt]),
 		acp.Tenant, utils.CacheAccountProfiles, acp.TenantID(), &acp.FilterIDs, nil, acp.Opts); err != nil {
 		return
 	}
@@ -739,7 +739,7 @@ func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithOpts, reply
 	if err = rplSv1.dm.DataDB().RemoveThresholdDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheThresholds, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -752,7 +752,7 @@ func (rplSv1 *ReplicatorSv1) RemoveDestination(id *utils.StringWithOpts, reply *
 	if err = rplSv1.dm.DataDB().RemoveDestinationDrv(id.Arg, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(id.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.Opts[utils.CacheOpt]),
 		id.Tenant, utils.CacheDestinations, id.Arg, nil, nil, id.Opts); err != nil {
 		return
 	}
@@ -775,7 +775,7 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithOpts, reply
 	if err = rplSv1.dm.DataDB().RemStatQueueDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheStatQueues, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -788,7 +788,7 @@ func (rplSv1 *ReplicatorSv1) RemoveFilter(args *utils.TenantIDWithOpts, reply *s
 	if err = rplSv1.dm.DataDB().RemoveFilterDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheFilters, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -801,7 +801,7 @@ func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithOpts
 	if err = rplSv1.dm.DataDB().RemThresholdProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheThresholdProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -814,7 +814,7 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWithOpts
 	if err = rplSv1.dm.DataDB().RemStatQueueProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheStatQueueProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -827,7 +827,7 @@ func (rplSv1 *ReplicatorSv1) RemoveTiming(id *utils.StringWithOpts, reply *strin
 	if err = rplSv1.dm.DataDB().RemoveTimingDrv(id.Arg); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(id.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.Opts[utils.CacheOpt]),
 		id.Tenant, utils.CacheTimings, id.Arg, nil, nil, id.Opts); err != nil {
 		return
 	}
@@ -840,7 +840,7 @@ func (rplSv1 *ReplicatorSv1) RemoveResource(args *utils.TenantIDWithOpts, reply 
 	if err = rplSv1.dm.DataDB().RemoveResourceDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheResources, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -853,7 +853,7 @@ func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithOpts,
 	if err = rplSv1.dm.DataDB().RemoveResourceProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheResourceProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -866,7 +866,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActionTriggers(id *utils.StringWithOpts, repl
 	if err = rplSv1.dm.DataDB().RemoveActionTriggersDrv(id.Arg); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(id.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.Opts[utils.CacheOpt]),
 		id.Tenant, utils.CacheActionTriggers, id.Arg, nil, nil, id.Opts); err != nil {
 		return
 	}
@@ -879,7 +879,7 @@ func (rplSv1 *ReplicatorSv1) RemoveSharedGroup(id *utils.StringWithOpts, reply *
 	if err = rplSv1.dm.DataDB().RemoveSharedGroupDrv(id.Arg); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(id.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.Opts[utils.CacheOpt]),
 		id.Tenant, utils.CacheSharedGroups, id.Arg, nil, nil, id.Opts); err != nil {
 		return
 	}
@@ -892,7 +892,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActions(id *utils.StringWithOpts, reply *stri
 	if err = rplSv1.dm.DataDB().RemoveActionsDrv(id.Arg); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(id.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.Opts[utils.CacheOpt]),
 		id.Tenant, utils.CacheActions, id.Arg, nil, nil, id.Opts); err != nil {
 		return
 	}
@@ -905,7 +905,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id *utils.StringWithOpts, reply *s
 	if err = rplSv1.dm.DataDB().RemoveActionPlanDrv(id.Arg, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(id.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.Opts[utils.CacheOpt]),
 		id.Tenant, utils.CacheActionPlans, id.Arg, nil, nil, id.Opts); err != nil {
 		return
 	}
@@ -918,7 +918,7 @@ func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountAction
 	if err = rplSv1.dm.DataDB().RemAccountActionPlansDrv(args.AcntID, args.ApIDs); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheAccountActionPlans, args.AcntID, nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -931,7 +931,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRatingPlan(id *utils.StringWithOpts, reply *s
 	if err = rplSv1.dm.DataDB().RemoveRatingPlanDrv(id.Arg); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(id.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.Opts[utils.CacheOpt]),
 		id.Tenant, utils.CacheRatingPlans, id.Arg, nil, nil, id.Opts); err != nil {
 		return
 	}
@@ -944,7 +944,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRatingProfile(id *utils.StringWithOpts, reply
 	if err = rplSv1.dm.DataDB().RemoveRatingProfileDrv(id.Arg); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(id.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.Opts[utils.CacheOpt]),
 		id.Tenant, utils.CacheRatingProfiles, id.Arg, nil, nil, id.Opts); err != nil {
 		return
 	}
@@ -957,7 +957,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithOpts, re
 	if err = rplSv1.dm.DataDB().RemoveRouteProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheRouteProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -970,7 +970,7 @@ func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithOpts
 	if err = rplSv1.dm.DataDB().RemoveAttributeProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheAttributeProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -983,7 +983,7 @@ func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithOpts, 
 	if err = rplSv1.dm.DataDB().RemoveChargerProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheChargerProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -996,7 +996,7 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithOpt
 	if err = rplSv1.dm.DataDB().RemoveDispatcherProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheDispatcherProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -1009,7 +1009,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRateProfile(args *utils.TenantIDWithOpts, rep
 	if err = rplSv1.dm.DataDB().RemoveRateProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheRateProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -1022,7 +1022,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithOpts, r
 	if err = rplSv1.dm.DataDB().RemoveActionProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheActionProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -1035,7 +1035,7 @@ func (rplSv1 *ReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithOpts, 
 	if err = rplSv1.dm.DataDB().RemoveAccountProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheAccountProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -1048,7 +1048,7 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithOpts, 
 	if err = rplSv1.dm.DataDB().RemoveDispatcherHostDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, utils.CacheDispatcherHosts, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
 		return
 	}
@@ -1061,7 +1061,7 @@ func (rplSv1 *ReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, reply *str
 	if err = rplSv1.dm.DataDB().RemoveIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.StringPointer(utils.IfaceAsString(args.Opts[utils.CacheOpt])),
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
 		args.Tenant, args.IdxItmType, utils.ConcatenatedKey(args.TntCtx, args.IdxKey), nil, nil, args.Opts); err != nil {
 		return
 	}

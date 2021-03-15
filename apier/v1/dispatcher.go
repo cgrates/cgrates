@@ -74,8 +74,13 @@ type DispatcherWithCache struct {
 	Opts  map[string]interface{}
 }
 
+type DispatcherWithOpts struct {
+	*engine.DispatcherProfile
+	Opts map[string]interface{}
+}
+
 //SetDispatcherProfile add/update a new Dispatcher Profile
-func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -90,7 +95,7 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheDispatcherProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), args.Tenant, utils.CacheDispatcherProfiles,
 		args.TenantID(), &args.FilterIDs, args.Subsystems, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -99,7 +104,7 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply 
 }
 
 //RemoveDispatcherProfile remove a specific Dispatcher Profile
-func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -116,7 +121,7 @@ func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheDispatcherProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheDispatcherProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -170,7 +175,7 @@ type DispatcherHostWithCache struct {
 }
 
 //SetDispatcherHost add/update a new Dispatcher Host
-func (apierSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetDispatcherHost(args *engine.DispatcherHostWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherHost, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -185,7 +190,7 @@ func (apierSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	if err := apierSv1.CallCache(args.Cache, args.Tenant, utils.CacheDispatcherHosts,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), args.Tenant, utils.CacheDispatcherHosts,
 		args.TenantID(), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -194,7 +199,7 @@ func (apierSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply
 }
 
 //RemoveDispatcherHost remove a specific Dispatcher Host
-func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -211,7 +216,7 @@ func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, rep
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheDispatcherHosts,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheDispatcherHosts,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

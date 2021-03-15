@@ -27,15 +27,11 @@ import (
 
 // CallCache caching the item based on cacheopt
 // visible in APIerSv2
-func (apierSv1 *APIerSv1) CallCache(cacheopt *string, tnt, cacheID, itemID string,
+func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID string,
 	filters *[]string, contexts []string, opts map[string]interface{}) (err error) {
 	var reply, method string
 	var args interface{}
-	cacheOpt := apierSv1.Config.GeneralCfg().DefaultCaching
-	if cacheopt != nil && *cacheopt != utils.EmptyString {
-		cacheOpt = *cacheopt
-	}
-	switch cacheOpt {
+	switch utils.FirstNonEmpty(cacheopt, apierSv1.Config.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
 	case utils.MetaReload:

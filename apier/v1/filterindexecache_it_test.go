@@ -995,7 +995,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	alsPrf := &AttributeWithCache{
+	alsPrf := &engine.AttributeProfileWithOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -1088,7 +1088,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	alsPrf := &AttributeWithCache{
+	alsPrf := &engine.AttributeProfileWithOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -1168,7 +1168,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 		t.Error(err)
 	}
 	reply.FilterIDs = []string{"TestFilter3"}
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetAttributeProfile, &AttributeWithCache{AttributeProfile: &reply}, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.APIerSv1SetAttributeProfile, &engine.AttributeProfileWithOpts{AttributeProfile: &reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

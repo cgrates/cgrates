@@ -83,7 +83,7 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	if err = apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheStatQueueProfiles,
+	if err = apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueueProfiles,
 		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -108,7 +108,7 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 		return err
 	}
 	//handle caching for StatQueues
-	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheStatQueues,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueues,
 		arg.TenantID(), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -130,7 +130,7 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheStatQueueProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), tnt, utils.CacheStatQueueProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -144,7 +144,7 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueues
-	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheStatQueues,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), tnt, utils.CacheStatQueues,
 		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
