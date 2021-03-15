@@ -766,10 +766,6 @@ type TenantIDWithCache struct {
 	Opts   map[string]interface{}
 }
 
-func (tID *TenantIDWithOpts) TenantID() string {
-	return ConcatenatedKey(tID.Tenant, tID.ID)
-}
-
 func (tID *TenantIDWithOpts) TenantIDConcatenated() string {
 	return ConcatenatedKey(tID.Tenant, tID.ID)
 }

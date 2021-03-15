@@ -761,7 +761,7 @@ func testInternalReplicateITResourceProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	rlsConfig = &ResourceWithCache{
+	rlsConfig = &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RES_GR_TEST",

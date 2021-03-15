@@ -25,7 +25,6 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -105,7 +104,7 @@ func testV1RsRpcConn(t *testing.T) {
 }
 
 func testV1RsSetProfile(t *testing.T) {
-	rls := &v1.ResourceWithCache{
+	rls := &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RES_GR_TEST",

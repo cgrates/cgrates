@@ -1330,7 +1330,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	rlsConfig = &ResourceWithCache{
+	rlsConfig = &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RCFG1",
@@ -1459,7 +1459,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	rlsConfig = &ResourceWithCache{
+	rlsConfig = &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RCFG1",
@@ -1543,7 +1543,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 	reply.FilterIDs = []string{"FLTR_RES_RCFG3"}
 	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
 
-	if err := tFIdxCaRpc.Call(utils.APIerSv1SetResourceProfile, &ResourceWithCache{ResourceProfile: &reply}, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithOpts{ResourceProfile: &reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

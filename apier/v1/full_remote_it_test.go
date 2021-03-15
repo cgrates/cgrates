@@ -317,7 +317,7 @@ func testFullRemoteITResource(t *testing.T) {
 	}
 
 	var replySet string
-	rlsPrf := &ResourceWithCache{
+	rlsPrf := &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup1",

@@ -442,7 +442,9 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 			Blocker: false,
 			Weight:  10,
 		},
-		Cache: utils.StringPointer(utils.MetaReload),
+		Opts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaReload,
+		},
 	}
 	alsPrf.Compile()
 	var result string

@@ -245,7 +245,7 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 func testV1SplSAddNewResPrf(t *testing.T) {
 	var result string
 	//add ResourceSupplier1
-	rPrf := &v1.ResourceWithCache{
+	rPrf := &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResourceSupplier1",
@@ -268,7 +268,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add Resource2Supplier1
-	rPrf2 := &v1.ResourceWithCache{
+	rPrf2 := &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Resource2Supplier1",
@@ -291,7 +291,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add ResourceSupplier2
-	rPrf3 := &v1.ResourceWithCache{
+	rPrf3 := &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResourceSupplier2",
@@ -314,7 +314,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add ResourceSupplier2
-	rPrf4 := &v1.ResourceWithCache{
+	rPrf4 := &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResourceSupplier3",
