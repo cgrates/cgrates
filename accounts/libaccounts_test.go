@@ -19,7 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -421,11 +425,13 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 	if err := dm.SetAccountProfile(acntPrf, false); err != nil {
 		t.Error(err)
 	}
+
 	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
 		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		map[string]*decimal.Big{"CB2": decimal.New(100, 0)},
 	})
+
 	if rcv, err := dm.GetAccountProfile("cgrates.org", "1001"); err != nil {
 		t.Error(err)
 	} else if len(rcv.Balances) != 2 {
@@ -459,12 +465,27 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 			},
 		},
 	}
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buff := new(bytes.Buffer)
+	log.SetOutput(buff)
+
 	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
 		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		map[string]*decimal.Big{"CB1": decimal.New(100, 0)},
 	})
 
+	subString := "<AccountS> error <NOT_IMPLEMENTED> restoring account <cgrates.org:1001>"
+	if rcv := buff.String(); !strings.Contains(rcv, subString) {
+		t.Errorf("Expected %+q, received %+q", subString, rcv)
+	}
+
+	log.SetOutput(os.Stderr)
 }
 
 func TestRestoreAccount3(t *testing.T) { //coverage purpose
@@ -491,10 +512,10 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 	if err := dm.SetAccountProfile(acntPrf, false); err != nil {
 		t.Error(err)
 	}
+
 	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
 		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		nil,
 	})
-
 }

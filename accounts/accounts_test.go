@@ -436,6 +436,15 @@ func TestAccountsDebit(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedUsage), utils.ToJSON(evCh.Concretes))
 	}
 
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buff := new(bytes.Buffer)
+	log.SetOutput(buff)
+
 	accntsPrf[0].Balances["ConcreteBalance2"].Units = &utils.Decimal{decimal.New(213, 0)}
 	accnts.dm = nil
 	expected = "NO_DATA_BASE_CONNECTION"
@@ -443,6 +452,12 @@ func TestAccountsDebit(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
+	subString := "<AccountS> error <NO_DATA_BASE_CONNECTION> restoring account <cgrates.org:TestAccountsDebit>"
+	if rcv := buff.String(); !strings.Contains(rcv, subString) {
+		t.Errorf("Expected %+q, received %+q", subString, rcv)
+	}
+
+	log.SetOutput(os.Stderr)
 }
 
 func TestV1AccountProfilesForEvent(t *testing.T) {

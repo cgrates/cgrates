@@ -35,7 +35,7 @@ func init() {
 	}
 }
 
-// Newlogger  creates the Loggerr object
+// Newlogger  creates the Logger object
 func Newlogger(loggertype, id string) (lgr LoggerInterface, err error) {
 	lgr = &StdLogger{nodeID: id}
 	switch loggertype {
