@@ -417,7 +417,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &v1.ResourceWithCache{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -562,7 +562,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &v1.ResourceWithCache{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

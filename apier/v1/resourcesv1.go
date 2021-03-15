@@ -107,14 +107,8 @@ func (apierSv1 *APIerSv1) GetResourceProfileIDs(args *utils.PaginatorWithTenant,
 	return nil
 }
 
-type ResourceWithCache struct {
-	*engine.ResourceProfile
-	Cache *string
-	Opts  map[string]interface{}
-}
-
 //SetResourceProfile adds a new resource configuration
-func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -1260,12 +1260,12 @@ func TestTenantID(t *testing.T) {
 func TestTenantIDWithCache(t *testing.T) {
 	tID := &TenantIDWithOpts{TenantID: &TenantID{Tenant: EmptyString, ID: EmptyString}}
 	eOut := ":"
-	if rcv := tID.TenantID(); rcv != eOut {
+	if rcv := tID.TenantID.TenantID(); rcv != eOut {
 		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
 	}
 	tID = &TenantIDWithOpts{TenantID: &TenantID{Tenant: "cgrates.org", ID: "id"}}
 	eOut = "cgrates.org:id"
-	if rcv := tID.TenantID(); rcv != eOut {
+	if rcv := tID.TenantID.TenantID(); rcv != eOut {
 		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
 	}
 }

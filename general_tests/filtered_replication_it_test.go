@@ -740,7 +740,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 
 func testFltrRplResourceProfile(t *testing.T) {
 	resID := "RES1"
-	resPrf := &v1.ResourceWithCache{
+	resPrf := &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                resID,

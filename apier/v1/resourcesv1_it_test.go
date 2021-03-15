@@ -37,7 +37,7 @@ var (
 	rlsV1Cfg     *config.CGRConfig
 	rlsV1Rpc     *rpc.Client
 	rlsV1ConfDIR string //run tests for specific configuration
-	rlsConfig    *ResourceWithCache
+	rlsConfig    *engine.ResourceProfileWithOpts
 
 	sTestsRLSV1 = []func(t *testing.T){
 		testV1RsLoadConfig,
@@ -664,7 +664,7 @@ func testV1RsGetResourceProfileBeforeSet(t *testing.T) {
 }
 
 func testV1RsSetResourceProfile(t *testing.T) {
-	rlsConfig = &ResourceWithCache{
+	rlsConfig = &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RES_GR_TEST",
@@ -780,7 +780,7 @@ func testV1RsResourcePing(t *testing.T) {
 }
 
 func testV1RsMatchNotFound(t *testing.T) {
-	rlsConfig = &ResourceWithCache{
+	rlsConfig = &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "Res_NotFound",
@@ -821,7 +821,7 @@ func testV1RsMatchNotFound(t *testing.T) {
 }
 
 func testV1RsAllocateUnlimited(t *testing.T) {
-	rlsConfig = &ResourceWithCache{
+	rlsConfig = &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RES_ULTIMITED",
@@ -891,7 +891,7 @@ func testV1RsStopEngine(t *testing.T) {
 }
 
 func testV1RsGetResourceProfileWithoutTenant(t *testing.T) {
-	rlsConfig = &ResourceWithCache{
+	rlsConfig = &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			ID:        "RES_ULTIMITED2",
 			FilterIDs: []string{"*string:~*req.CustomField:UnlimitedEvent"},
@@ -943,7 +943,7 @@ func testV1RsRemResourceProfileWithoutTenant(t *testing.T) {
 }
 
 func testV1RsSetResourceProfileWithOpts(t *testing.T) {
-	rlsCfg := &ResourceWithCache{
+	rlsCfg := &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_WITH_OPTS",

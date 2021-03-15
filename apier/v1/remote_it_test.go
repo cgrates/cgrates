@@ -321,7 +321,7 @@ func testInternalRemoteITGetResource(t *testing.T) {
 }
 
 func testInternalRemoteITGetResourceProfile(t *testing.T) {
-	rlsPrf := &ResourceWithCache{
+	rlsPrf := &engine.ResourceProfileWithOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup1",

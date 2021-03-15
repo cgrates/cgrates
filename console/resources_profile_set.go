@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -28,7 +27,7 @@ func init() {
 	c := &CmdSetResource{
 		name:      "resources_profile_set",
 		rpcMethod: utils.APIerSv1SetResourceProfile,
-		rpcParams: &v1.ResourceWithCache{},
+		rpcParams: &engine.ResourceProfileWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +37,7 @@ func init() {
 type CmdSetResource struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.ResourceWithCache
+	rpcParams *engine.ResourceProfileWithOpts
 	*CommandExecuter
 }
 
@@ -52,7 +51,7 @@ func (self *CmdSetResource) RpcMethod() string {
 
 func (self *CmdSetResource) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.ResourceWithCache{
+		self.rpcParams = &engine.ResourceProfileWithOpts{
 			ResourceProfile: new(engine.ResourceProfile),
 			Opts:            make(map[string]interface{}),
 		}
