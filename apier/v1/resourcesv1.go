@@ -133,7 +133,7 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	if err = apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheResourceProfiles,
+	if err = apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheResourceProfiles,
 		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -150,7 +150,7 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 		return
 	}
 	//handle caching for Resource
-	if err = apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheResources,
+	if err = apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheResources,
 		arg.TenantID(), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -172,7 +172,7 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheResourceProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheResourceProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -186,7 +186,7 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Resource
-	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheResources,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheResources,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

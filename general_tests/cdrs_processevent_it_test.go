@@ -30,7 +30,6 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -172,7 +171,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		},
 	}
 	var cdrs []*engine.CDR
-	alsPrf := &v1.AttributeWithCache{
+	alsPrf := &engine.AttributeProfileWithOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",

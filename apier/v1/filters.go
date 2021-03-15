@@ -32,7 +32,7 @@ type FilterWithCache struct {
 }
 
 //SetFilter add a new Filter
-func (apierSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -47,7 +47,7 @@ func (apierSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	if err := apierSv1.CallCache(arg.Cache, arg.Tenant, utils.CacheFilters,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheFilters,
 		arg.TenantID(), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -95,7 +95,7 @@ func (apierSv1 *APIerSv1) GetFilterIDs(args *utils.PaginatorWithTenant, fltrIDs 
 }
 
 //RemoveFilter  remove a specific filter
-func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -111,7 +111,7 @@ func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithCache, reply *stri
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheFilters,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheFilters,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

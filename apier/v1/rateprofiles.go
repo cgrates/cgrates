@@ -94,7 +94,7 @@ type APIRateProfileWithCache struct {
 }
 
 //SetRateProfile add/update a new Rate Profile
-func (apierSv1 *APIerSv1) SetRateProfile(ext *APIRateProfileWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetRateProfile(ext *engine.APIRateProfileWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(ext.APIRateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -112,7 +112,7 @@ func (apierSv1 *APIerSv1) SetRateProfile(ext *APIRateProfileWithCache, reply *st
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(ext.Cache, rPrf.Tenant, utils.CacheRateProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(ext.Opts[utils.CacheOpt]), rPrf.Tenant, utils.CacheRateProfiles,
 		rPrf.TenantID(), &rPrf.FilterIDs, nil, ext.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -121,7 +121,7 @@ func (apierSv1 *APIerSv1) SetRateProfile(ext *APIRateProfileWithCache, reply *st
 }
 
 //SetRateProfileRates add/update Rates from existing RateProfiles
-func (apierSv1 *APIerSv1) SetRateProfileRates(ext *APIRateProfileWithCache, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetRateProfileRates(ext *engine.APIRateProfileWithOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(ext.APIRateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -139,7 +139,7 @@ func (apierSv1 *APIerSv1) SetRateProfileRates(ext *APIRateProfileWithCache, repl
 	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err = apierSv1.CallCache(ext.Cache, rPrf.Tenant, utils.CacheRateProfiles,
+	if err = apierSv1.CallCache(utils.IfaceAsString(ext.Opts[utils.CacheOpt]), rPrf.Tenant, utils.CacheRateProfiles,
 		rPrf.TenantID(), &rPrf.FilterIDs, nil, ext.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -155,7 +155,14 @@ type RemoveRPrfRates struct {
 	Opts    map[string]interface{}
 }
 
-func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRates, reply *string) (err error) {
+type RemoveRPrfRatesWithOpts struct {
+	Tenant  string
+	ID      string
+	RateIDs []string
+	Opts    map[string]interface{}
+}
+
+func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRatesWithOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -170,7 +177,7 @@ func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRates, reply *s
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(args.Cache, tnt, utils.CacheRateProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), tnt, utils.CacheRateProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -179,7 +186,7 @@ func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRates, reply *s
 }
 
 // RemoveRateProfile remove a specific Rate Profile
-func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -195,7 +202,7 @@ func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithCache, reply 
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheRateProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheRateProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

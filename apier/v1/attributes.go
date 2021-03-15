@@ -86,15 +86,8 @@ func (apierSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantWithOpts
 	return
 }
 
-// AttributeWithCache the arguments for SetAttributeProfile
-type AttributeWithCache struct {
-	*engine.AttributeProfile
-	Cache *string
-	Opts  map[string]interface{}
-}
-
 //SetAttributeProfile add/update a new Attribute Profile
-func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *engine.AttributeProfileWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{utils.ID, utils.Attributes}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -122,7 +115,7 @@ func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply 
 		return utils.APIErrorHandler(err)
 	}
 
-	if err := apierSv1.CallCache(alsWrp.Cache, alsWrp.Tenant, utils.CacheAttributeProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(alsWrp.Opts[utils.CacheOpt]), alsWrp.Tenant, utils.CacheAttributeProfiles,
 		alsWrp.TenantID(), &alsWrp.FilterIDs, alsWrp.Contexts, alsWrp.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -131,7 +124,7 @@ func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply 
 }
 
 //RemoveAttributeProfile remove a specific Attribute Profile
-func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -147,7 +140,7 @@ func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithCache, r
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(arg.Cache, tnt, utils.CacheAttributeProfiles,
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheAttributeProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

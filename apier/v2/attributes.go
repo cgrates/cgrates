@@ -51,7 +51,7 @@ func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithCache, reply *st
 		map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := APIerSv2.APIerSv1.CallCache(arg.Cache, alsPrf.Tenant, utils.CacheAttributeProfiles,
+	if err := APIerSv2.APIerSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), alsPrf.Tenant, utils.CacheAttributeProfiles,
 		alsPrf.TenantID(), &alsPrf.FilterIDs, alsPrf.Contexts, arg.Opts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

@@ -232,7 +232,7 @@ func testInternalRemoteITGetAccount(t *testing.T) {
 }
 
 func testInternalRemoteITGetAttribute(t *testing.T) {
-	alsPrf = &AttributeWithCache{
+	alsPrf = &engine.AttributeProfileWithOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_1001_SIMPLEAUTH",
