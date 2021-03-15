@@ -1,5 +1,3 @@
-// +build integration
-
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -48,7 +46,7 @@ func TestSqlGetMetrics(t *testing.T) {
 		dc: dc,
 	}
 
-	if rcv := sqlEe.ID(); !reflect.DeepEqual(rcv, "3") {
-		t.Errorf("Expected %+v but got %+v", "3", rcv)
+	if rcv := sqlEe.GetMetrics(); !reflect.DeepEqual(rcv, sqlEe.dc) {
+		t.Errorf("Expected %+v but got %+v", utils.ToJSON(rcv), utils.ToJSON(sqlEe.dc))
 	}
 }

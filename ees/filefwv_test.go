@@ -21,6 +21,7 @@ package ees
 import (
 	"bytes"
 	"encoding/csv"
+	"io"
 	"reflect"
 	"testing"
 
@@ -125,7 +126,6 @@ func TestFileFwvComposeHeader(t *testing.T) {
 	if err := fFwv.composeHeader(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
-
 }
 
 func TestFileFwvComposeTrailer(t *testing.T) {
@@ -269,4 +269,183 @@ func TestFileFwvExportEvent(t *testing.T) {
 	if err := fFwv.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
+}
+
+type nopCloserWrite struct {
+	io.Writer
+}
+
+func (nopCloserWrite) Close() error { return nil }
+func (nopCloserWrite) Write(s []byte) (n int, err error) {
+	return 0, utils.ErrNotImplemented
+}
+
+func TestFileFwvExportEventWriteError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	byteBuff := new(bytes.Buffer)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	fFwv := &FileFWVee{
+		id:      "string",
+		cgrCfg:  cgrCfg,
+		cfgIdx:  0,
+		filterS: filterS,
+		file:    nopCloserWrite{byteBuff},
+		dc:      dc,
+	}
+	cgrEv.Event = map[string]interface{}{
+		"test1": "value",
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{{}}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	if err := fFwv.ExportEvent(cgrEv); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %q but received %q", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestFileFwvComposeHeaderWriteError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	byteBuff := new(bytes.Buffer)
+	fFwv := &FileFWVee{
+		id:      "string",
+		cgrCfg:  cgrCfg,
+		cfgIdx:  0,
+		filterS: filterS,
+		file:    nopCloserWrite{byteBuff},
+		dc:      utils.MapStorage{},
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*hdr.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+		},
+		{
+			Path: "*hdr.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	if err := fFwv.composeHeader(); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %q but received %q", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestFileFwvComposeTrailerWriteError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	byteBuff := new(bytes.Buffer)
+	fFwv := &FileFWVee{
+		id:      "string",
+		cgrCfg:  cgrCfg,
+		cfgIdx:  0,
+		filterS: filterS,
+		file:    nopCloserWrite{byteBuff},
+		dc:      utils.MapStorage{},
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*trl.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+		},
+		{
+			Path: "*trl.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	if err := fFwv.composeTrailer(); err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %q but received %q", utils.ErrNotImplemented, err)
+	}
+}
+func TestFileFwvOnEvictedTrailer(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	byteBuff := new(bytes.Buffer)
+	fFwv := &FileFWVee{
+		id:      "string",
+		cgrCfg:  cgrCfg,
+		cfgIdx:  0,
+		filterS: filterS,
+		file:    nopCloserWrite{byteBuff},
+		dc:      utils.MapStorage{},
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*trl.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+		},
+		{
+			Path: "*trl.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	fFwv.OnEvicted("test", "test")
+}
+
+type nopCloserError struct {
+	io.Writer
+}
+
+func (nopCloserError) Close() error { return utils.ErrNotImplemented }
+func (nopCloserError) Write(s []byte) (n int, err error) {
+	return 0, utils.ErrNotImplemented
+}
+func TestFileFwvOnEvictedClose(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	byteBuff := new(bytes.Buffer)
+	fFwv := &FileFWVee{
+		id:      "string",
+		cgrCfg:  cgrCfg,
+		cfgIdx:  0,
+		filterS: filterS,
+		file:    nopCloserError{byteBuff},
+		dc:      utils.MapStorage{},
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*trl.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+		},
+		{
+			Path: "*trl.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ComputeFields()
+	fFwv.OnEvicted("test", "test")
 }

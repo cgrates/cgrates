@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 
@@ -53,7 +56,7 @@ func TestHttpJsonMapGetMetrics(t *testing.T) {
 	}
 }
 
-func TestHttpJsonMapExportEvent(t *testing.T) {
+func TestHttpJsonMapExportEvent1(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
 	cgrEv := new(utils.CGREvent)
@@ -139,7 +142,76 @@ func TestHttpJsonMapExportEvent(t *testing.T) {
 	if err := httpEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
+	//test marshal invalid input
+	cgrEv.Event = map[string]interface{}{
+		"test": make(chan int),
+	}
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{{}}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	errExpect = "json: unsupported type: chan int"
+	if err := httpEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but received %q", errExpect, err)
+	}
 	httpEE.OnEvicted("test", "test")
+}
+
+func TestHttpJsonMapExportEvent2(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	bodyExpect := map[string]interface{}{
+		"2": "*req.field2",
+	}
+	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		var body map[string]interface{}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(body, bodyExpect) {
+			t.Errorf("Expected %q but received %q", bodyExpect, body)
+		}
+		rw.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+	cgrCfg.EEsCfg().Exporters[0].ExportPath = srv.URL + "/"
+	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
+	if err != nil {
+		t.Error(err)
+	}
+	cgrEv.Event = map[string]interface{}{
+		"test": "string",
+	}
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+		},
+		{
+			Path: "*exp.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	if err := httpEE.ExportEvent(cgrEv); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestHttpJsonMapComposeHeader(t *testing.T) {

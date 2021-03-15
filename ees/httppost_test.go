@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 
@@ -139,6 +142,65 @@ func TestHttpPostExportEvent(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	httpPost.OnEvicted("test", "test")
+}
+
+func TestHttpPostExportEvent2(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	// hdrExpect := map[string][]string {
+	// 	"Accept-Encoding": []string{"gzip"},
+	// 	"Content-Type": []string{"application/x-www-form-urlencoded"},
+
+	// }
+	bodyExpect := "2=%2Areq.field2"
+	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Error(err)
+		}
+		if strBody := string(body); strBody != bodyExpect {
+			t.Errorf("Expected %q but received %q", bodyExpect, strBody)
+		}
+		rw.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+	cgrCfg.EEsCfg().Exporters[0].ExportPath = srv.URL + "/"
+	httpPost, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+	if err != nil {
+		t.Error(err)
+	}
+	cgrEv.Event = map[string]interface{}{
+		"test": "string",
+	}
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+		},
+		{
+			Path: "*exp.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	if err := httpPost.ExportEvent(cgrEv); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestHttpPostComposeHeader(t *testing.T) {
