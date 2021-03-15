@@ -122,7 +122,7 @@ func NewRouteSv1(rS *engine.RouteService) *RouteSv1 {
 	return &RouteSv1{rS: rS}
 }
 
-// Exports RPC from RouteS
+// RouteSv1 exports RPC from RouteS
 type RouteSv1 struct {
 	rS *engine.RouteService
 }
@@ -133,7 +133,7 @@ func (rS *RouteSv1) Call(serviceMethod string, args interface{}, reply interface
 }
 
 // GetRoutes returns sorted list of routes for Event
-func (rS *RouteSv1) GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutesSet) error {
+func (rS *RouteSv1) GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutesList) error {
 	return rS.rS.V1GetRoutes(args, reply)
 }
 
@@ -145,4 +145,9 @@ func (rS *RouteSv1) GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*eng
 func (rS *RouteSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
+}
+
+// GetRoutesList returns sorted list of routes for Event as a string slice
+func (rS *RouteSv1) GetRoutesList(args *engine.ArgsGetRoutes, reply *[]string) error {
+	return rS.rS.V1GetRoutesList(args, reply)
 }

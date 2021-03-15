@@ -57,8 +57,9 @@ type ResourceSv1Interface interface {
 }
 
 type RouteSv1Interface interface {
-	GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutes) error
+	GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutesList) error
 	GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*engine.RouteProfile) error
+	GetRoutesList(args *engine.ArgsGetRoutes, reply *[]string) error
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 

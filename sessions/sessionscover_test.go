@@ -2422,7 +2422,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 
 	rply := &V1AuthorizeReply{
 		Attributes:   &engine.AttrSProcessEventReply{},
-		Routes:       &engine.SortedRoutes{},
+		Routes:       engine.SortedRoutesList{},
 		StatQueueIDs: &[]string{},
 		ThresholdIDs: &[]string{},
 	}
@@ -2502,14 +2502,13 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 				return nil
 			},
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
-				routesReply := engine.SortedRoutes{
+				*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 					Routes: []*engine.SortedRoute{
 						{
 							RouteID: "RouteID",
 						},
 					},
-				}
-				*reply.(*engine.SortedRoutes) = routesReply
+				}}
 				return nil
 			},
 			utils.ThresholdSv1ProcessEvent: func(args interface{}, reply interface{}) error {
@@ -2543,7 +2542,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 
 	rply := &V1AuthorizeReply{
 		Attributes:   &engine.AttrSProcessEventReply{},
-		Routes:       &engine.SortedRoutes{},
+		Routes:       engine.SortedRoutesList{},
 		StatQueueIDs: &[]string{},
 		ThresholdIDs: &[]string{},
 	}
@@ -2649,14 +2648,13 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 				return nil
 			},
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
-				routesReply := engine.SortedRoutes{
+				*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 					Routes: []*engine.SortedRoute{
 						{
 							RouteID: "RouteID",
 						},
 					},
-				}
-				*reply.(*engine.SortedRoutes) = routesReply
+				}}
 				return nil
 			},
 			utils.ThresholdSv1ProcessEvent: func(args interface{}, reply interface{}) error {
@@ -3023,14 +3021,13 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 				return nil
 			},
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
-				routesReply := engine.SortedRoutes{
+				*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 					Routes: []*engine.SortedRoute{
 						{
 							RouteID: "RouteID",
 						},
 					},
-				}
-				*reply.(*engine.SortedRoutes) = routesReply
+				}}
 				return nil
 			},
 			utils.ThresholdSv1ProcessEvent: func(args interface{}, reply interface{}) error {
@@ -3593,14 +3590,13 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 				return utils.ErrNotImplemented
 			},
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
-				rts := &engine.SortedRoutes{
+				*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 					Routes: []*engine.SortedRoute{
 						{
 							RouteID: "ROUTE_ID",
 						},
 					},
-				}
-				*reply.(*engine.SortedRoutes) = *rts
+				}}
 				return nil
 			},
 			utils.ChargerSv1ProcessEvent: func(args interface{}, reply interface{}) error {
@@ -3722,16 +3718,15 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 				return utils.ErrNotImplemented
 			},
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
-				rts := engine.SortedRoutes{
-					ProfileID: "ROUTE_PRFID",
-					Routes: []*engine.SortedRoute{
-						{
-							RouteID: "ROUTE_ID",
-						},
-					},
-				}
 				if args.(*engine.ArgsGetRoutes).ID == "SECOND_ID" {
-					*reply.(*engine.SortedRoutes) = rts
+					*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
+						ProfileID: "ROUTE_PRFID",
+						Routes: []*engine.SortedRoute{
+							{
+								RouteID: "ROUTE_ID",
+							},
+						},
+					}}
 					return nil
 				}
 				return utils.ErrNotImplemented

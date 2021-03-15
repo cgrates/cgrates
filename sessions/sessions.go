@@ -1856,7 +1856,7 @@ type V1AuthorizeReply struct {
 	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                        `json:",omitempty"`
 	MaxUsage           *time.Duration                 `json:",omitempty"`
-	Routes             engine.SortedRoutesSet         `json:",omitempty"`
+	Routes             engine.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       *[]string                      `json:",omitempty"`
 	StatQueueIDs       *[]string                      `json:",omitempty"`
 
@@ -1895,7 +1895,8 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() utils.NavigableMap2 {
 	}
 
 	if v1AuthReply.Routes != nil {
-		cgrReply[utils.CapRoutes] = v1AuthReply.Routes.AsNavigableMap()
+		nm := v1AuthReply.Routes.AsNavigableMap()
+		cgrReply[utils.CapRoutes] = &nm
 	}
 	if v1AuthReply.ThresholdIDs != nil {
 		thIDs := make(utils.NMSlice, len(*v1AuthReply.ThresholdIDs))
@@ -2824,7 +2825,7 @@ type V1ProcessMessageReply struct {
 	MaxUsage           *time.Duration                 `json:",omitempty"`
 	ResourceAllocation *string                        `json:",omitempty"`
 	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
-	Routes             engine.SortedRoutesSet         `json:",omitempty"`
+	Routes             engine.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       *[]string                      `json:",omitempty"`
 	StatQueueIDs       *[]string                      `json:",omitempty"`
 
@@ -2862,7 +2863,8 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() utils.NavigableMap2 {
 		cgrReply[utils.CapAttributes] = attrs
 	}
 	if v1Rply.Routes != nil {
-		cgrReply[utils.CapRoutes] = v1Rply.Routes.AsNavigableMap()
+		nm := v1Rply.Routes.AsNavigableMap()
+		cgrReply[utils.CapRoutes] = &nm
 	}
 	if v1Rply.ThresholdIDs != nil {
 		thIDs := make(utils.NMSlice, len(*v1Rply.ThresholdIDs))
@@ -3004,7 +3006,7 @@ type V1ProcessEventReply struct {
 	Cost               map[string]float64                        `json:",omitempty"` // Cost is the cost received from Rater, ignoring accounting part
 	ResourceAllocation map[string]string                         `json:",omitempty"`
 	Attributes         map[string]*engine.AttrSProcessEventReply `json:",omitempty"`
-	Routes             map[string]engine.SortedRoutesSet         `json:",omitempty"`
+	Routes             map[string]engine.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       map[string][]string                       `json:",omitempty"`
 	StatQueueIDs       map[string][]string                       `json:",omitempty"`
 	STIRIdentity       map[string]string                         `json:",omitempty"`
@@ -3044,7 +3046,8 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap2 {
 	if v1Rply.Routes != nil {
 		routes := make(utils.NavigableMap2)
 		for k, route := range v1Rply.Routes {
-			routes[k] = route.AsNavigableMap()
+			nm := route.AsNavigableMap()
+			routes[k] = &nm
 		}
 		cgrReply[utils.CapRoutes] = routes
 	}
@@ -3158,7 +3161,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 
 	// get routes if required
 	if argsFlagsWithParams.GetBool(utils.MetaRoutes) {
-		rply.Routes = make(map[string]engine.SortedRoutesSet)
+		rply.Routes = make(map[string]engine.SortedRoutesList)
 		// check in case we have options for suppliers
 		flags := argsFlagsWithParams[utils.MetaRoutes]
 		ignoreErrors := flags.Has(utils.MetaIgnoreErrors)
@@ -3794,7 +3797,7 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, stsIDs []string, clnb bo
 
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
 func (sS *SessionS) getRoutes(cgrEv *utils.CGREvent, pag utils.Paginator, ignoreErrors bool,
-	maxCost string, clnb bool) (routesReply engine.SortedRoutesSet, err error) {
+	maxCost string, clnb bool) (routesReply engine.SortedRoutesList, err error) {
 	if len(sS.cgrCfg.SessionSCfg().RouteSConns) == 0 {
 		return routesReply, utils.NewErrNotConnected(utils.RouteS)
 	}

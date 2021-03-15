@@ -346,13 +346,18 @@ func (dRoute *DispatcherRouteSv1) Ping(args *utils.CGREvent, reply *string) erro
 }
 
 // GetRoutes implements RouteSv1GetRoutes
-func (dRoute *DispatcherRouteSv1) GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutesSet) error {
+func (dRoute *DispatcherRouteSv1) GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutesList) error {
 	return dRoute.dRoute.RouteSv1GetRoutes(args, reply)
 }
 
 // GetRouteProfilesForEvent returns a list of route profiles that match for Event
 func (dRoute *DispatcherRouteSv1) GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
 	return dRoute.dRoute.RouteSv1GetRouteProfilesForEvent(args, reply)
+}
+
+// GetRoutesList returns sorted list of routes for Event as a string slice
+func (dRoute *DispatcherRouteSv1) GetRoutesList(args *engine.ArgsGetRoutes, reply *[]string) error {
+	return dRoute.dRoute.RouteSv1GetRoutesList(args, reply)
 }
 
 func NewDispatcherAttributeSv1(dps *dispatchers.DispatcherService) *DispatcherAttributeSv1 {

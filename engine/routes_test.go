@@ -544,7 +544,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
 		}
 	}
-	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent, true)
+	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -552,7 +552,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -560,7 +560,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -796,7 +796,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
 		}
 	}
-	eFirstRouteProfile := &SortedRoutes{
+	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile1",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
@@ -809,7 +809,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				RouteParameters: "param1",
 			},
 		},
-	}
+	}}
 	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -818,7 +818,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eFirstRouteProfile, sprf)
 	}
 
-	eFirstRouteProfile = &SortedRoutes{
+	eFirstRouteProfile = SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     3,
@@ -845,7 +845,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				RouteParameters: "param3",
 			},
 		},
-	}
+	}}
 
 	sprf, err = routeService.sortedRoutesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
@@ -855,7 +855,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eFirstRouteProfile, sprf)
 	}
 
-	eFirstRouteProfile = &SortedRoutes{
+	eFirstRouteProfile = SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfilePrefix",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
@@ -868,7 +868,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 				RouteParameters: "param1",
 			},
 		},
-	}
+	}}
 
 	sprf, err = routeService.sortedRoutesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2])
 	if err != nil {
@@ -1107,7 +1107,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 		}
 	}
 
-	eFirstRouteProfile := &SortedRoutes{
+	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
@@ -1127,7 +1127,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 				RouteParameters: "param2",
 			},
 		},
-	}
+	}}
 	argsGetRoutes[1].Paginator = utils.Paginator{
 		Limit: utils.IntPointer(2),
 	}
@@ -1368,7 +1368,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 		}
 	}
 
-	eFirstRouteProfile := &SortedRoutes{
+	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
@@ -1381,7 +1381,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 				RouteParameters: "param3",
 			},
 		},
-	}
+	}}
 	argsGetRoutes[1].Paginator = utils.Paginator{
 		Offset: utils.IntPointer(2),
 	}
@@ -1622,7 +1622,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 		}
 	}
 
-	eFirstRouteProfile := &SortedRoutes{
+	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
@@ -1635,7 +1635,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 				RouteParameters: "param2",
 			},
 		},
-	}
+	}}
 	argsGetRoutes[1].Paginator = utils.Paginator{
 		Limit:  utils.IntPointer(1),
 		Offset: utils.IntPointer(1),
@@ -1912,7 +1912,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 	}
 
 	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
-	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent, true)
+	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1920,7 +1920,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1928,7 +1928,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2166,7 +2166,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	}
 
 	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
-	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent, true)
+	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2174,7 +2174,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2182,11 +2182,149 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent, true)
+	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(sppTest[2], sprf[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[2], sprf[0])
+	}
+}
+
+func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
+	var routeService *RouteService
+	sppTest := RouteProfiles{
+		&RouteProfile{
+			Tenant:  "cgrates.org",
+			ID:      "RouteProfile1",
+			Sorting: utils.MetaWeight,
+			Routes: []*Route{
+				{
+					ID:              "route2",
+					Weight:          10.0,
+					RouteParameters: "param1",
+				},
+			},
+			Weight: 10,
+		},
+		&RouteProfile{
+			Tenant:  "cgrates.org",
+			ID:      "RouteProfile2",
+			Sorting: utils.MetaWeight,
+			Routes: []*Route{
+				{
+					ID:              "route2",
+					Weight:          20.0,
+					RouteParameters: "param2",
+				},
+				{
+					ID:              "route3",
+					Weight:          10.0,
+					RouteParameters: "param3",
+				},
+				{
+					ID:              "route1",
+					Weight:          30.0,
+					RouteParameters: "param1",
+				},
+			},
+			Weight: 5,
+		},
+		&RouteProfile{
+			Tenant:  "cgrates.org",
+			ID:      "RouteProfilePrefix",
+			Sorting: utils.MetaWeight,
+			Routes: []*Route{
+				{
+					ID:              "route1",
+					Weight:          10.0,
+					RouteParameters: "param1",
+				},
+			},
+			Weight: 20,
+		},
+		&RouteProfile{
+			Tenant:  "cgrates.org",
+			ID:      "RouteProfilePrefix4",
+			Sorting: utils.MetaWeight,
+			Routes: []*Route{
+				{
+					ID:              "route1",
+					Weight:          10.0,
+					RouteParameters: "param1",
+				},
+			},
+			Weight: 0,
+		},
+	}
+	argsGetRoutes := &ArgsGetRoutes{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "utils.CGREvent1",
+			Event:  map[string]interface{}{},
+			Opts:   map[string]interface{}{utils.OptsRouteProfilesCount: 3},
+		},
+	}
+
+	defaultCfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	defaultCfg.RouteSCfg().StringIndexedFields = nil
+	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
+	routeService = NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
+
+	for _, spp := range sppTest {
+		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
+			spp.ID, true, true, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(spp, tempSpp) {
+			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
+		}
+	}
+
+	eFirstRouteProfile := SortedRoutesList{
+		{
+			ProfileID: "RouteProfile1",
+			Sorting:   utils.MetaWeight,
+			Count:     1,
+			Routes: []*SortedRoute{
+				{
+					RouteID: "route2",
+					SortingData: map[string]interface{}{
+						"Weight": 10.,
+					},
+					RouteParameters: "param1",
+				},
+			},
+		},
+		{
+			ProfileID: "RouteProfile2",
+			Sorting:   utils.MetaWeight,
+			Count:     1,
+			Routes: []*SortedRoute{
+				{
+					RouteID: "route1",
+					SortingData: map[string]interface{}{
+						"Weight": 30.,
+					},
+					RouteParameters: "param1",
+				},
+			},
+		},
+	}
+	argsGetRoutes.Paginator = utils.Paginator{
+		Limit:  utils.IntPointer(2),
+		Offset: utils.IntPointer(1),
+	}
+	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes.Tenant, argsGetRoutes)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
+		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
 	}
 }
