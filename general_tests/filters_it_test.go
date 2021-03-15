@@ -704,7 +704,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 func testV1FltrAccounts(t *testing.T) {
 	var resp string
 	if err := fltrRpc.Call(utils.APIerSv1RemoveThresholdProfile,
-		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &resp); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -813,7 +813,7 @@ func testV1FltrAccounts(t *testing.T) {
 func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	var resp string
 	if err := fltrRpc.Call(utils.APIerSv1RemoveThresholdProfile,
-		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TH_Account"}, &resp); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TH_Account"}}, &resp); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() { // no error if the threshold is already removed
 			t.Error(err)
 		}

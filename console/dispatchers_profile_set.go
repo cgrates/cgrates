@@ -37,7 +37,7 @@ func init() {
 type CmdSetDispatcherProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.DispatcherWithCache
+	rpcParams *v1.DispatcherWithOpts
 	*CommandExecuter
 }
 
@@ -51,7 +51,7 @@ func (self *CmdSetDispatcherProfile) RpcMethod() string {
 
 func (self *CmdSetDispatcherProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.DispatcherWithCache{
+		self.rpcParams = &v1.DispatcherWithOpts{
 			DispatcherProfile: new(engine.DispatcherProfile),
 			Opts:              make(map[string]interface{}),
 		}

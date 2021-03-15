@@ -251,7 +251,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: attrID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -358,7 +358,7 @@ func testFltrRplFilters(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveFilter,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: fltrID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -521,7 +521,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveThresholdProfile,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: thID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -714,7 +714,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveStatQueueProfile,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: stID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -899,7 +899,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveResourceProfile,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: resID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1024,7 +1024,7 @@ func testFltrRplRouteProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveRouteProfile,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: rpID}, &result); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1125,7 +1125,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveChargerProfile,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: chID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1225,7 +1225,7 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: dspID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1325,7 +1325,7 @@ func testFltrRplDispatcherHost(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveDispatcherHost,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: dspID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1467,7 +1467,7 @@ func testFltrRplRateProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveRateProfile,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: rpID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1573,7 +1573,7 @@ func testFltrRplActionProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveActionProfile,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: acID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1694,7 +1694,7 @@ func testFltrRplAccountProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveAccountProfile,
-		utils.TenantIDWithCache{Tenant: "cgrates.org", ID: acID}, &result); err != nil {
+		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

@@ -95,7 +95,7 @@ func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithCache, reply *string) e
 }
 
 //RemoveRouteProfile remove a specific Route configuration
-func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

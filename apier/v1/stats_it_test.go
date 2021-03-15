@@ -1298,7 +1298,7 @@ func testV1STSGetStatQueueProfileWithoutTenant(t *testing.T) {
 func testV1STSRemStatQueueProfileWithoutTenant(t *testing.T) {
 	var reply string
 	if err := stsV1Rpc.Call(utils.APIerSv1RemoveStatQueueProfile,
-		&utils.TenantIDWithCache{ID: "TEST_PROFILE10"},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "TEST_PROFILE10"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

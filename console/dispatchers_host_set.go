@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,7 +36,7 @@ func init() {
 type CmdSetDispatcherHost struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.DispatcherHostWithCache
+	rpcParams *engine.DispatcherHostWithOpts
 	*CommandExecuter
 }
 
@@ -51,7 +50,7 @@ func (self *CmdSetDispatcherHost) RpcMethod() string {
 
 func (self *CmdSetDispatcherHost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.DispatcherHostWithCache{
+		self.rpcParams = &engine.DispatcherHostWithOpts{
 			DispatcherHost: new(engine.DispatcherHost),
 			Opts:           make(map[string]interface{}),
 		}

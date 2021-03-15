@@ -310,7 +310,7 @@ func testActionSUpdateActionProfile(t *testing.T) {
 
 func testActionSRemoveActionProfile(t *testing.T) {
 	var reply string
-	if err := actSRPC.Call(utils.APIerSv1RemoveActionProfile, &utils.TenantIDWithCache{Tenant: "tenant_test", ID: "id_test"}, &reply); err != nil {
+	if err := actSRPC.Call(utils.APIerSv1RemoveActionProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -321,7 +321,7 @@ func testActionSRemoveActionProfile(t *testing.T) {
 		TenantID: &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}}, &reply2); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %v received: %v", expErr, err)
 	}
-	if err := actSRPC.Call(utils.APIerSv1RemoveActionProfile, &utils.TenantIDWithCache{Tenant: "tenant_test", ID: "id_test"}, &reply2); err == nil || err.Error() != expErr {
+	if err := actSRPC.Call(utils.APIerSv1RemoveActionProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "tenant_test", ID: "id_test"}}, &reply2); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %v received: %v", expErr, err)
 	}
 }

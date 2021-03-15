@@ -1404,7 +1404,7 @@ func testV1FIRemoveAccountProfile(t *testing.T) {
 	//removing accPrf from db will delete the indexes from dB
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAccountProfile,
-		&utils.TenantIDWithCache{Tenant: tenant, ID: "ACC_PRF"},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1744,7 +1744,7 @@ func testV1FIRemoveActionProfile(t *testing.T) {
 	//we will remove actionProfiles 1 by one(ACT_PRF) first
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveActionProfile,
-		&utils.TenantIDWithCache{Tenant: tenant, ID: "ACT_PRF"},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1761,7 +1761,7 @@ func testV1FIRemoveActionProfile(t *testing.T) {
 
 	//we will remove actionProfiles 1 by one(ACT_PRF2) second
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveActionProfile,
-		&utils.TenantIDWithCache{Tenant: tenant, ID: "ACT_PRF2"},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF2"}},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -2837,16 +2837,16 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithCache{
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{
 		Tenant: tenant,
-		ID:     "ApierTest"}, &result); err != nil {
+		ID:     "ApierTest"}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithCache{
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{
 		Tenant: tenant,
-		ID:     "ApierTest2"}, &result); err != nil {
+		ID:     "ApierTest2"}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

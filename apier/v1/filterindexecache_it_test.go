@@ -1224,8 +1224,8 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form api
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithCache{Tenant: "cgrates.org",
-		ID: "TEST_PROFILE1"}, &resp); err != nil {
+	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org",
+		ID: "TEST_PROFILE1"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -1239,8 +1239,8 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form tariffplan
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithCache{Tenant: "cgrates.org",
-		ID: "ATTR_1"}, &resp); err != nil {
+	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org",
+		ID: "ATTR_1"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)

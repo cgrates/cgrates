@@ -202,7 +202,7 @@ func testFilterGetFilterAfterUpdate(t *testing.T) {
 func testFilterRemoveFilter(t *testing.T) {
 	var resp string
 	if err := filterRPC.Call(utils.APIerSv1RemoveFilter,
-		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -261,7 +261,7 @@ func testFilterSetFilterWithoutTenant(t *testing.T) {
 func testFilterRemoveFilterWithoutTenant(t *testing.T) {
 	var reply string
 	if err := filterRPC.Call(utils.APIerSv1RemoveFilter,
-		&utils.TenantIDWithCache{ID: "FilterWithoutTenant"},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "FilterWithoutTenant"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
