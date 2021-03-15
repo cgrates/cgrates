@@ -61,6 +61,7 @@ type nopCloser struct {
 }
 
 func (nopCloser) Close() error { return nil }
+
 func TestFileCsvComposeHeader(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	newIDb := engine.NewInternalDB(nil, nil, true)
@@ -269,5 +270,72 @@ func TestFileCsvExportEvent(t *testing.T) {
 	if err := fCsv.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
+}
+
+func TestFileCsvOnEvictedTrailer(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	byteBuff := new(bytes.Buffer)
+	csvNW := csv.NewWriter(byteBuff)
+	fCsv := &FileCSVee{
+		id:        "string",
+		cgrCfg:    cgrCfg,
+		cfgIdx:    0,
+		filterS:   filterS,
+		file:      nopCloserWrite{byteBuff},
+		csvWriter: csvNW,
+		dc:        utils.MapStorage{},
+	}
+	cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*trl.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+		{
+			Path: "*trl.2", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ComputeFields()
+	fCsv.OnEvicted("test", "test")
+}
+
+func TestFileCsvOnEvictedClose(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	byteBuff := new(bytes.Buffer)
+	csvNW := csv.NewWriter(byteBuff)
+	fCsv := &FileCSVee{
+		id:        "string",
+		cgrCfg:    cgrCfg,
+		cfgIdx:    0,
+		filterS:   filterS,
+		file:      nopCloserError{byteBuff},
+		csvWriter: csvNW,
+		dc:        utils.MapStorage{},
+	}
+	cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields = []*config.FCTemplate{
+		{
+			Path: "*trl.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+		},
+		{
+			Path: "*trl.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ComputeFields()
 	fCsv.OnEvicted("test", "test")
 }
