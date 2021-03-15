@@ -349,7 +349,7 @@ func testAccountSv1DebitAbstracts(t *testing.T) {
 		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
-	// Make sure we did not Debit anything from Account
+	// Make sure we debit the right units from Account
 	eAcnt := &utils.AccountProfile{
 		Tenant:    "cgrates.org",
 		ID:        "1001",
