@@ -161,7 +161,7 @@ func TestDecimalNewDecimalFromString(t *testing.T) {
 	}
 	expected := &Decimal{decimal.New(1234, 1)}
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
@@ -171,6 +171,6 @@ func TestDecimalNewDecimalFromStringFail(t *testing.T) {
 	expected := "can't convert <" + str + "> to decimal"
 
 	if err == nil || err.Error() != expected {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err)
 	}
 }

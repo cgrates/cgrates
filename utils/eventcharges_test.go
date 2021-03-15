@@ -34,7 +34,7 @@ func TestECNewEventCharges(t *testing.T) {
 	received := NewEventCharges()
 
 	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
@@ -57,7 +57,7 @@ func TestECMergeAbstractsEmpty(t *testing.T) {
 	received.Merge(ec1, ec2)
 
 	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
@@ -84,7 +84,7 @@ func TestECMergeAbstracts(t *testing.T) {
 	received.Merge(ec1, ec2)
 
 	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
@@ -104,7 +104,7 @@ func TestECAsExtEventChargesEmpty(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 
 }
@@ -125,14 +125,14 @@ func TestECAsExtEventChargesSuccess(t *testing.T) {
 	}
 	received, err := ec.AsExtEventCharges()
 	if err != nil {
-		t.Errorf("\nReceived: %v,\nExpected: %v", err, nil)
+		t.Errorf("\nExpected: %v,\nReceived: %v", nil, err)
 	}
 
 	if !reflect.DeepEqual(received, expected) {
 		t.Errorf(
-			"\nReceived: <%v>,\nExpected: <%v>",
-			ToJSON(received),
+			"\nExpected: <%v>,\nReceived: <%v>",
 			ToJSON(expected),
+			ToJSON(received),
 		)
 	}
 }
@@ -149,7 +149,7 @@ func TestECAsExtEventChargesFailAbstracts(t *testing.T) {
 	_, err := ec.AsExtEventCharges()
 
 	if err == nil || err.Error() != expected {
-		t.Errorf("\nReceived: %v,\nExpected: %v", err, expected)
+		t.Errorf("\nExpected: %v,\nReceived: %v", expected, err)
 	}
 }
 
@@ -165,6 +165,6 @@ func TestECAsExtEventChargesFailConcretes(t *testing.T) {
 	_, err := ec.AsExtEventCharges()
 
 	if err == nil || err.Error() != expected {
-		t.Errorf("\nReceived: %v,\nExpected: %v", err, expected)
+		t.Errorf("\nExpected: %v,\nReceived: %v", expected, err)
 	}
 }

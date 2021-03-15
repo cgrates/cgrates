@@ -35,7 +35,7 @@ func TestLibratesTenantID(t *testing.T) {
 	expected := rp.Tenant + ":" + rp.ID
 	received := rp.TenantID()
 	if received != expected {
-		t.Errorf("\nReceived: <%v>,\nExpected: <%v>", received, expected)
+		t.Errorf("\nExpected: <%v>,\nReceived: <%v>", expected, received)
 	}
 }
 
@@ -44,7 +44,7 @@ func TestLibratesCompilerp(t *testing.T) {
 	rp := &RateProfile{}
 	err := rp.Compile()
 	if err != nil {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, nil)
+		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", nil, err)
 	}
 
 	// non-empty
@@ -65,7 +65,7 @@ func TestLibratesCompilerp(t *testing.T) {
 	err = rp.Compile()
 
 	if err == nil || err.Error() != expected {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", err, expected)
+		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
 	}
 }
 
@@ -78,7 +78,7 @@ func TestLibratesUID(t *testing.T) {
 	received := rt.UID()
 
 	if received != expected {
-		t.Errorf("\nReceived: %q, \nExpected: %q", received, expected)
+		t.Errorf("\nExpected: %q, \nReceived: %q", expected, received)
 	}
 
 }
@@ -91,7 +91,7 @@ func TestLibratesCompilert(t *testing.T) {
 	err := rt.Compile()
 
 	if err != nil {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, nil)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", nil, err)
 	}
 }
 
@@ -111,11 +111,11 @@ func TestLibratesRunTimes(t *testing.T) {
 	var expected [][]time.Time
 
 	if err == nil || err != ErrMaxIterationsReached {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, ErrMaxIterationsReached)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ErrMaxIterationsReached, err)
 	}
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 
 	// aTime after eTime test
@@ -135,7 +135,7 @@ func TestLibratesRunTimes(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 
 	// eTime before iTime test
@@ -172,7 +172,7 @@ func TestLibratesRunTimes(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 
 	//eTime after iTime
@@ -195,7 +195,7 @@ func TestLibratesRunTimes(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
@@ -218,7 +218,7 @@ func TestLibratesCorrectCost(t *testing.T) {
 	rPc.CorrectCost(nil, "")
 
 	if !reflect.DeepEqual(rPc, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", rPc, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, rPc)
 	}
 
 	//CorrectCost rounds the cost
@@ -232,7 +232,7 @@ func TestLibratesCorrectCost(t *testing.T) {
 	rPc.CorrectCost(IntPointer(2), MetaRoundingUp)
 
 	if !reflect.DeepEqual(rPc, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", rPc, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, rPc)
 	}
 
 	//CorrectCost assigns MaxCost to Cost when Cost > MaxCost
@@ -247,7 +247,7 @@ func TestLibratesCorrectCost(t *testing.T) {
 	rPc.CorrectCost(nil, "")
 
 	if !reflect.DeepEqual(rPc, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", rPc, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, rPc)
 	}
 
 	//CorrectCost assigns MinCost to Cost when Cost < MinCost
@@ -262,7 +262,7 @@ func TestLibratesCorrectCost(t *testing.T) {
 	rPc.CorrectCost(nil, "")
 
 	if !reflect.DeepEqual(rPc, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", rPc, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, rPc)
 	}
 }
 
@@ -1463,11 +1463,11 @@ func TestLibratesAsRateProfile(t *testing.T) {
 	experr := "invalid DynamicWeight format for string <testWeight>"
 
 	if err == nil || err.Error() != experr {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", err, experr)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", experr, err)
 	}
 
 	if received != nil {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, nil)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", nil, received)
 	}
 
 	// No changes
@@ -1481,7 +1481,7 @@ func TestLibratesAsRateProfile(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 
 	// assign MinCost to rp
@@ -1495,7 +1495,7 @@ func TestLibratesAsRateProfile(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 
 	// assign MaxCost to rp
@@ -1509,7 +1509,7 @@ func TestLibratesAsRateProfile(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%+v>, \nExpected: <%+v>", received, expected)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
@@ -1542,6 +1542,6 @@ func TestLibratesAsRateProfileNon0Len(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nReceived: <%v>, \nExpected: <%v>", received, expected)
+		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, received)
 	}
 }
