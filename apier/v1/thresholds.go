@@ -159,7 +159,7 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, r
 }
 
 // RemoveThresholdProfile removes a specific Threshold Profile
-func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

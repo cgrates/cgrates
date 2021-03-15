@@ -237,7 +237,7 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 func testV1RatePrfRemoveRateProfile(t *testing.T) {
 	var reply string
 	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfile,
-		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "RP1"}, &reply); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -680,7 +680,7 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 func testV1RatePrfRemoveRateProfileWithoutTenant(t *testing.T) {
 	var reply string
 	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfile,
-		&utils.TenantIDWithCache{ID: "RPWithoutTenant"},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "RPWithoutTenant"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

@@ -976,7 +976,7 @@ func testV1RouteUpdateRouteProfiles(t *testing.T) {
 func testV1RouteRemRouteProfiles(t *testing.T) {
 	var resp string
 	if err := routeSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
-		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -988,7 +988,7 @@ func testV1RouteRemRouteProfiles(t *testing.T) {
 		t.Error(err)
 	}
 	if err := routeSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
-		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
@@ -1606,7 +1606,7 @@ func testV1RouteSetRouteProfilesWithoutTenant(t *testing.T) {
 func testV1RouteRemRouteProfilesWithoutTenant(t *testing.T) {
 	var reply string
 	if err := routeSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile,
-		&utils.TenantIDWithCache{ID: "TEST_PROFILE10"},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "TEST_PROFILE10"}},
 		&reply); err != nil {
 		t.Error(err)
 	}

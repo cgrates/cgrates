@@ -928,7 +928,7 @@ func testV1RsGetResourceProfileWithoutTenant(t *testing.T) {
 func testV1RsRemResourceProfileWithoutTenant(t *testing.T) {
 	var reply string
 	if err := rlsV1Rpc.Call(utils.APIerSv1RemoveResourceProfile,
-		&utils.TenantIDWithCache{ID: rlsConfig.ID},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: rlsConfig.ID}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

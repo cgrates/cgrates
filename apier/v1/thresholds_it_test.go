@@ -526,7 +526,7 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 func testV1TSRemoveThresholdProfile(t *testing.T) {
 	var resp string
 	if err := tSv1Rpc.Call(utils.APIerSv1RemoveThresholdProfile,
-		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err != nil {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -538,7 +538,7 @@ func testV1TSRemoveThresholdProfile(t *testing.T) {
 		t.Errorf("Received %s and the error:%+v", utils.ToJSON(sqp), err)
 	}
 	if err := tSv1Rpc.Call(utils.APIerSv1RemoveThresholdProfile,
-		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
@@ -773,7 +773,7 @@ func testV1TSGetThresholdProfileWithoutTenant(t *testing.T) {
 func testV1TSRemThresholdProfileWithoutTenant(t *testing.T) {
 	var reply string
 	if err := tSv1Rpc.Call(utils.APIerSv1RemoveThresholdProfile,
-		&utils.TenantIDWithCache{ID: "randomID"},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "randomID"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

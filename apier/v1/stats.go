@@ -118,7 +118,7 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 }
 
 // RemoveStatQueueProfile remove a specific stat configuration
-func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
