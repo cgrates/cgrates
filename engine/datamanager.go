@@ -3100,6 +3100,13 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
 				brokenReference, rpp.TenantID())
 		}
+		for _, rate := range rpp.Rates {
+			if brokenReference := dm.checkFilters(rpp.Tenant, rate.FilterIDs); len(brokenReference) != 0 {
+				// if we get a broken filter do not update the rates
+				return fmt.Errorf("broken reference to filter: %+v for rate with ID: %+v",
+					brokenReference, rate.ID)
+			}
+		}
 	}
 	oldRpp, err := dm.GetRateProfile(rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
