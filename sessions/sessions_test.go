@@ -1282,20 +1282,22 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 }
 
 func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
-	splrs := &engine.SortedRoutes{
-		ProfileID: "SPL_ACNT_1001",
-		Sorting:   utils.MetaWeight,
-		Routes: []*engine.SortedRoute{
-			{
-				RouteID: "supplier1",
-				SortingData: map[string]interface{}{
-					"Weight": 20.0,
+	splrs := engine.SortedRoutesList{
+		{
+			ProfileID: "SPL_ACNT_1001",
+			Sorting:   utils.MetaWeight,
+			Routes: []*engine.SortedRoute{
+				{
+					RouteID: "supplier1",
+					SortingData: map[string]interface{}{
+						"Weight": 20.0,
+					},
 				},
-			},
-			{
-				RouteID: "supplier2",
-				SortingData: map[string]interface{}{
-					"Weight": 10.0,
+				{
+					RouteID: "supplier2",
+					SortingData: map[string]interface{}{
+						"Weight": 10.0,
+					},
 				},
 			},
 		},
@@ -1330,11 +1332,12 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 		ThresholdIDs:       thIDs,
 		StatQueueIDs:       statIDs,
 	}
+	nm := splrs.AsNavigableMap()
 	expected = utils.NavigableMap2{
 		utils.CapAttributes:         utils.NavigableMap2{"OfficeGroup": utils.NewNMData("Marketing")},
 		utils.CapResourceAllocation: utils.NewNMData("ResGr1"),
 		utils.CapMaxUsage:           utils.NewNMData(5 * time.Minute),
-		utils.CapRoutes:             splrs.AsNavigableMap(),
+		utils.CapRoutes:             &nm,
 		utils.CapThresholds:         &utils.NMSlice{utils.NewNMData("THD_RES_1"), utils.NewNMData("THD_STATS_1"), utils.NewNMData("THD_STATS_2"), utils.NewNMData("THD_CDRS_1")},
 		utils.CapStatQueues:         &utils.NMSlice{utils.NewNMData("Stats2"), utils.NewNMData("Stats1"), utils.NewNMData("Stats3")},
 	}
@@ -1496,15 +1499,16 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 	//test with Routes, ThresholdIDs, StatQueueIDs != nil
 	tmpTresholdIDs := []string{"ID1", "ID2"}
 	tmpStatQueueIDs := []string{"Que1", "Que2"}
-	tmpRoutes := &engine.SortedRoutes{
+	tmpRoutes := engine.SortedRoutesList{{
 		ProfileID: "Route1",
 		Count:     1,
-	}
+	}}
 	v1PrcEvRpl.Routes = tmpRoutes
 	v1PrcEvRpl.ThresholdIDs = &tmpTresholdIDs
 	v1PrcEvRpl.StatQueueIDs = &tmpStatQueueIDs
 	expected[utils.CapResourceAllocation] = utils.NewNMData("ResGr1")
-	expected[utils.CapRoutes] = tmpRoutes.AsNavigableMap()
+	nm := tmpRoutes.AsNavigableMap()
+	expected[utils.CapRoutes] = &nm
 	expected[utils.CapThresholds] = &utils.NMSlice{utils.NewNMData("ID1"), utils.NewNMData("ID2")}
 	expected[utils.CapStatQueues] = &utils.NMSlice{utils.NewNMData("Que1"), utils.NewNMData("Que2")}
 	if rply := v1PrcEvRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
@@ -1539,13 +1543,14 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//routes check
-	tmpRoutes := &engine.SortedRoutes{
+	tmpRoutes := engine.SortedRoutesList{{
 		ProfileID: "Route1",
 		Count:     1,
-	}
-	v1per.Routes = make(map[string]*engine.SortedRoutes)
+	}}
+	nm := tmpRoutes.AsNavigableMap()
+	v1per.Routes = make(map[string]engine.SortedRoutesList)
 	v1per.Routes[utils.MetaRaw] = tmpRoutes
-	expected[utils.CapRoutes] = utils.NavigableMap2{utils.MetaRaw: tmpRoutes.AsNavigableMap()}
+	expected[utils.CapRoutes] = utils.NavigableMap2{utils.MetaRaw: &nm}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}

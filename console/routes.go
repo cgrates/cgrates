@@ -68,6 +68,6 @@ func (self *CmdRoutesSort) PostprocessRpcParams() error {
 }
 
 func (self *CmdRoutesSort) RpcResult() interface{} {
-	var atr []engine.SortedRoutes
+	var atr engine.SortedRoutesList
 	return &atr
 }

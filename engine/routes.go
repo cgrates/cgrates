@@ -142,7 +142,7 @@ func (rpS *RouteService) Shutdown() {
 }
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGREvent, singleResult bool) (matchingRPrf []*RouteProfile, err error) {
+func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGREvent) (matchingRPrf []*RouteProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.Opts,
@@ -158,11 +158,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 	if err != nil {
 		return nil, err
 	}
-	if singleResult {
-		matchingRPrf = make([]*RouteProfile, 1)
-	} else {
-		matchingRPrf = make([]*RouteProfile, 0, len(rPrfIDs))
-	}
+	matchingRPrf = make([]*RouteProfile, 0, len(rPrfIDs))
 	for lpID := range rPrfIDs {
 		rPrf, err := rpS.dm.GetRouteProfile(tnt, lpID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -181,24 +177,12 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 		} else if !pass {
 			continue
 		}
-		if singleResult {
-			if matchingRPrf[0] == nil || matchingRPrf[0].Weight < rPrf.Weight {
-				matchingRPrf[0] = rPrf
-			}
-		} else {
-			matchingRPrf = append(matchingRPrf, rPrf)
-		}
+		matchingRPrf = append(matchingRPrf, rPrf)
 	}
-	if singleResult {
-		if matchingRPrf[0] == nil {
-			return nil, utils.ErrNotFound
-		}
-	} else {
-		if len(matchingRPrf) == 0 {
-			return nil, utils.ErrNotFound
-		}
-		sort.Slice(matchingRPrf, func(i, j int) bool { return matchingRPrf[i].Weight > matchingRPrf[j].Weight })
+	if len(matchingRPrf) == 0 {
+		return nil, utils.ErrNotFound
 	}
+	sort.Slice(matchingRPrf, func(i, j int) bool { return matchingRPrf[i].Weight > matchingRPrf[j].Weight })
 	return
 }
 
@@ -571,7 +555,7 @@ type optsGetRoutes struct {
 }
 
 // V1GetRoutes returns the list of valid routes
-func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesSet) (err error) {
+func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesList) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -608,15 +592,15 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesSet
 			args.CGREvent = rplyEv.CGREvent
 			args.Opts = rplyEv.Opts
 		} else if err.Error() != utils.ErrNotFound.Error() {
-			return utils.NewErrAttributeS(err)
+			return utils.NewErrRouteS(err)
 		}
 	}
-	sSps, err := rpS.sortedRoutesForEvent(tnt, args)
-	if err != nil {
+	var sSps SortedRoutesList
+	if sSps, err = rpS.sortedRoutesForEvent(tnt, args); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
-		return err
+		return
 	}
 	*reply = sSps
 	return
@@ -633,7 +617,7 @@ func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREvent, reply 
 	if tnt == utils.EmptyString {
 		tnt = rpS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	sPs, err := rpS.matchingRouteProfilesForEvent(tnt, args, false)
+	sPs, err := rpS.matchingRouteProfilesForEvent(tnt, args)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -646,7 +630,8 @@ func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREvent, reply 
 
 // sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
-func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile, ev *utils.CGREvent, pag utils.Paginator, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile, ev *utils.CGREvent,
+	pag utils.Paginator, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
 	extraOpts.sortingStragety = rPrfl.Sorting             // populate sortingStrategy in extraOpts
 	//construct the DP and pass it to filterS
@@ -695,12 +680,12 @@ func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile,
 
 // sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
-func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (sortedRoutes SortedRoutesSet, err error) {
+func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (sortedRoutes SortedRoutesList, err error) {
 	if _, has := args.CGREvent.Event[utils.Usage]; !has {
 		args.CGREvent.Event[utils.Usage] = time.Minute // make sure we have default set for Usage
 	}
 	var rPrfs []*RouteProfile
-	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args.CGREvent, true); err != nil {
+	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args.CGREvent); err != nil {
 		return
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
@@ -720,12 +705,12 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 	if args.Paginator.Offset != nil { // save the offset in a varible to not duble check if we have offset and is still not 0
 		startIdx = *args.Paginator.Offset
 	}
-	sortedRoutes = make(SortedRoutesSet, 0, prfCount)
+	sortedRoutes = make(SortedRoutesList, 0, prfCount)
 	for _, rPrfl := range rPrfs {
 		var prfPag utils.Paginator
 		if args.Paginator.Limit != nil { // we have a limit
-			if noSrtRoutes >= *args.Paginator.Limit { // the limit was reached return
-				return
+			if noSrtRoutes >= *args.Paginator.Limit { // the limit was reached
+				break
 			}
 			if noSrtRoutes+len(rPrfl.Routes) > *args.Paginator.Limit { // the limit will be reached in this profile
 				limit := *args.Paginator.Limit - noSrtRoutes // make it relative to current profile
@@ -733,11 +718,13 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 			}
 		}
 		if startIdx > 0 { // we have offest
-			if startIdx -= len(rPrfl.Routes); startIdx >= 0 { // we still have offset so try the next profile
+			if idx := startIdx - len(rPrfl.Routes); idx >= 0 { // we still have offset so try the next profile
+				startIdx = idx
 				continue
 			}
 			// we have offset but is in the range of this profile
-			offset := -startIdx
+			offset := startIdx // store in a seoarate var so when startIdx is updated the prfPag.Offset remains the same
+			startIdx = 0       // set it to 0 for the following loop
 			prfPag.Offset = &offset
 		}
 		var sr *SortedRoutes
@@ -747,9 +734,18 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 		noSrtRoutes += sr.Count
 		sortedRoutes = append(sortedRoutes, sr)
 		if len(sortedRoutes) == prfCount { // the profile count was reached
-			return
+			break
 		}
-
 	}
+	return
+}
+
+// V1GetRoutesList returns the list of valid routes
+func (rpS *RouteService) V1GetRoutesList(args *ArgsGetRoutes, reply *[]string) (err error) {
+	sR := new(SortedRoutesList)
+	if err = rpS.V1GetRoutes(args, sR); err != nil {
+		return
+	}
+	*reply = sR.RoutesWithParams()
 	return
 }

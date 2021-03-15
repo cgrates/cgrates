@@ -246,11 +246,11 @@ func (ssd RouteSortDispatcher) SortRoutes(prflID, strategy string,
 	return
 }
 
-// SortedRoutesSet represents the list of matched routes grouped based of profile
-type SortedRoutesSet []*SortedRoutes
+// SortedRoutesList represents the list of matched routes grouped based of profile
+type SortedRoutesList []*SortedRoutes
 
 // RouteIDs returns a list of route IDs
-func (sRs SortedRoutesSet) RouteIDs() (rIDs []string) {
+func (sRs SortedRoutesList) RouteIDs() (rIDs []string) {
 	for _, sR := range sRs {
 		for _, r := range sR.Routes {
 			rIDs = append(rIDs, r.RouteID)
@@ -260,7 +260,7 @@ func (sRs SortedRoutesSet) RouteIDs() (rIDs []string) {
 }
 
 // RoutesWithParams returns a list of routes IDs with Parameters
-func (sRs SortedRoutesSet) RoutesWithParams() (sPs []string) {
+func (sRs SortedRoutesList) RoutesWithParams() (sPs []string) {
 	for _, sR := range sRs {
 		for _, spl := range sR.Routes {
 			route := spl.RouteID
@@ -275,12 +275,12 @@ func (sRs SortedRoutesSet) RoutesWithParams() (sPs []string) {
 
 // Digest returns list of routeIDs + parameters for easier outside access
 // format route1:route1params,route2:route2params
-func (sRs SortedRoutesSet) Digest() string {
+func (sRs SortedRoutesList) Digest() string {
 	return strings.Join(sRs.RoutesWithParams(), utils.FieldsSep)
 }
 
 // AsNavigableMap returns the SortedRoutesSet as NMInterface object
-func (sRs SortedRoutesSet) AsNavigableMap() (nm utils.NMSlice) {
+func (sRs SortedRoutesList) AsNavigableMap() (nm utils.NMSlice) {
 	nm = make(utils.NMSlice, len(sRs))
 	for i, ss := range sRs {
 		nm[i] = ss.AsNavigableMap()

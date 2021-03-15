@@ -1601,6 +1601,7 @@ const (
 // RouteS APIs
 const (
 	RouteSv1GetRoutes                = "RouteSv1.GetRoutes"
+	RouteSv1GetRoutesList            = "RouteSv1.GetRoutesList"
 	RouteSv1GetRouteProfilesForEvent = "RouteSv1.GetRouteProfilesForEvent"
 	RouteSv1Ping                     = "RouteSv1.Ping"
 	APIerSv1GetRouteProfile          = "APIerSv1.GetRouteProfile"
