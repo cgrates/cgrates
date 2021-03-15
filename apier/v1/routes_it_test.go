@@ -163,9 +163,10 @@ func testV1RouteGetWeightRoutes(t *testing.T) {
 				utils.AccountField: "1007",
 				utils.Destination:  "+491511231234",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
-	eSpls := engine.SortedRoutes{
+	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_WEIGHT_1",
 		Sorting:   utils.MetaWeight,
 		Count:     2,
@@ -183,8 +184,8 @@ func testV1RouteGetWeightRoutes(t *testing.T) {
 				},
 			},
 		},
-	}
-	var suplsReply engine.SortedRoutes
+	}}
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -215,9 +216,10 @@ func testV1RouteGetLeastCostRoutes(t *testing.T) {
 				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 				utils.Usage:        "1m20s",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
-	eSpls := engine.SortedRoutes{
+	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
 		Count:     3,
@@ -247,8 +249,8 @@ func testV1RouteGetLeastCostRoutes(t *testing.T) {
 				},
 			},
 		},
-	}
-	var suplsReply engine.SortedRoutes
+	}}
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -269,9 +271,10 @@ func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 				utils.Destination:  "1002",
 				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
-	eSpls := engine.SortedRoutes{
+	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
 		Count:     3,
@@ -301,8 +304,8 @@ func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 				},
 			},
 		},
-	}
-	var suplsReply engine.SortedRoutes
+	}}
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -325,9 +328,10 @@ func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 				utils.Usage:        "1m20s",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
-	eSpls := engine.SortedRoutes{
+	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
 		Count:     2,
@@ -349,8 +353,8 @@ func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 				},
 			},
 		},
-	}
-	var suplsReply engine.SortedRoutes
+	}}
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -375,7 +379,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCostNotFound(t *testing.T) {
 			},
 		},
 	}
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -396,9 +400,10 @@ func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 				utils.Usage:        "10m20s",
 				utils.Category:     "call",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
-	eSpls := engine.SortedRoutes{
+	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
 		Count:     2,
@@ -420,8 +425,8 @@ func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 				},
 			},
 		},
-	}
-	var suplsReply engine.SortedRoutes
+	}}
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -443,9 +448,10 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 				utils.Usage:        "1m20s",
 				"DistinctMatch":    "*highest_cost",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
-	eSpls := engine.SortedRoutes{
+	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_HIGHESTCOST_1",
 		Sorting:   utils.MetaHC,
 		Count:     3,
@@ -475,8 +481,8 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 				},
 			},
 		},
-	}
-	var suplsReply engine.SortedRoutes
+	}}
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -500,7 +506,7 @@ func testV1RouteGetLeastCostRoutesErr(t *testing.T) {
 			},
 		},
 	}
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -656,18 +662,18 @@ func testV1RouteGetQOSRoutes(t *testing.T) {
 		},
 	}
 	expRouteIDs := []string{"route1", "route3", "route2"}
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.Routes))
-		for i, supl := range suplsReply.Routes {
+		rcvSupl := make([]string, len(suplsReply[0].Routes))
+		for i, supl := range suplsReply[0].Routes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "ROUTE_QOS_1" {
+		if suplsReply[0].ProfileID != "ROUTE_QOS_1" {
 			t.Errorf("Expecting: ROUTE_QOS_1, received: %s",
-				suplsReply.ProfileID)
+				suplsReply[0].ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
@@ -687,18 +693,18 @@ func testV1RouteGetQOSRoutes2(t *testing.T) {
 		},
 	}
 	expRouteIDs := []string{"route3", "route2", "route1"}
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.Routes))
-		for i, supl := range suplsReply.Routes {
+		rcvSupl := make([]string, len(suplsReply[0].Routes))
+		for i, supl := range suplsReply[0].Routes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "ROUTE_QOS_2" {
+		if suplsReply[0].ProfileID != "ROUTE_QOS_2" {
 			t.Errorf("Expecting: ROUTE_QOS_2, received: %s",
-				suplsReply.ProfileID)
+				suplsReply[0].ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
@@ -718,18 +724,18 @@ func testV1RouteGetQOSRoutes3(t *testing.T) {
 		},
 	}
 	expRouteIDs := []string{"route1", "route3", "route2"}
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.Routes))
-		for i, supl := range suplsReply.Routes {
+		rcvSupl := make([]string, len(suplsReply[0].Routes))
+		for i, supl := range suplsReply[0].Routes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "ROUTE_QOS_3" {
+		if suplsReply[0].ProfileID != "ROUTE_QOS_3" {
 			t.Errorf("Expecting: ROUTE_QOS_3, received: %s",
-				suplsReply.ProfileID)
+				suplsReply[0].ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
@@ -749,18 +755,18 @@ func testV1RouteGetQOSRoutesFiltred(t *testing.T) {
 		},
 	}
 	expRouteIDs := []string{"route1", "route3"}
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.Routes))
-		for i, supl := range suplsReply.Routes {
+		rcvSupl := make([]string, len(suplsReply[0].Routes))
+		for i, supl := range suplsReply[0].Routes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "ROUTE_QOS_FILTRED" {
+		if suplsReply[0].ProfileID != "ROUTE_QOS_FILTRED" {
 			t.Errorf("Expecting: ROUTE_QOS_FILTRED, received: %s",
-				suplsReply.ProfileID)
+				suplsReply[0].ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
@@ -784,18 +790,18 @@ func testV1RouteGetQOSRoutesFiltred2(t *testing.T) {
 		},
 	}
 	expRouteIDs := []string{"route3", "route2"}
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.Routes))
-		for i, supl := range suplsReply.Routes {
+		rcvSupl := make([]string, len(suplsReply[0].Routes))
+		for i, supl := range suplsReply[0].Routes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "ROUTE_QOS_FILTRED2" {
+		if suplsReply[0].ProfileID != "ROUTE_QOS_FILTRED2" {
 			t.Errorf("Expecting: ROUTE_QOS_FILTRED2, received: %s",
-				suplsReply.ProfileID)
+				suplsReply[0].ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
@@ -815,7 +821,7 @@ func testV1RouteGetRouteWithoutFilter(t *testing.T) {
 			},
 		},
 	}
-	eSpls := engine.SortedRoutes{
+	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
@@ -827,8 +833,8 @@ func testV1RouteGetRouteWithoutFilter(t *testing.T) {
 				},
 			},
 		},
-	}
-	var suplsReply engine.SortedRoutes
+	}}
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -1143,7 +1149,7 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 			},
 		},
 	}
-	eSpls := engine.SortedRoutes{
+	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_DESTINATION",
 		Sorting:   utils.MetaLC,
 		Count:     1,
@@ -1157,8 +1163,8 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 				},
 			},
 		},
-	}
-	var suplsReply engine.SortedRoutes
+	}}
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -1220,7 +1226,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 			},
 		},
 	}
-	eSpls := engine.SortedRoutes{
+	eSpls := engine.SortedRoutesList{{
 		ProfileID: "MULTIPLE_ROUTES",
 		Sorting:   utils.MetaLC,
 		Count:     1,
@@ -1234,8 +1240,8 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 				},
 			},
 		},
-	}
-	var suplsReply engine.SortedRoutes
+	}}
+	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -1258,7 +1264,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 			},
 		},
 	}
-	eSpls = engine.SortedRoutes{
+	eSpls = engine.SortedRoutesList{{
 		ProfileID: "MULTIPLE_ROUTES",
 		Sorting:   utils.MetaLC,
 		Count:     1,
@@ -1272,7 +1278,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 				},
 			},
 		},
-	}
+	}}
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -1356,7 +1362,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			},
 		},
 	}
-	eSpls := &engine.SortedRoutes{
+	eSpls := &engine.SortedRoutesList{{
 		ProfileID: "RouteWithAccAndRP",
 		Sorting:   utils.MetaLC,
 		Count:     2,
@@ -1379,9 +1385,9 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				},
 			},
 		},
-	}
+	}}
 	if *encoding == utils.MetaGOB {
-		eSpls.Routes = []*engine.SortedRoute{
+		(*eSpls)[0].Routes = []*engine.SortedRoute{
 			{
 				RouteID: "RouteWithAccAndRP",
 				SortingData: map[string]interface{}{
@@ -1401,7 +1407,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			},
 		}
 	}
-	var suplsReply *engine.SortedRoutes
+	var suplsReply *engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -1426,7 +1432,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			},
 		},
 	}
-	eSpls = &engine.SortedRoutes{
+	eSpls = &engine.SortedRoutesList{{
 		ProfileID: "RouteWithAccAndRP",
 		Sorting:   utils.MetaLC,
 		Count:     2,
@@ -1450,9 +1456,9 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				},
 			},
 		},
-	}
+	}}
 	if *encoding == utils.MetaGOB {
-		eSpls.Routes = []*engine.SortedRoute{
+		(*eSpls)[0].Routes = []*engine.SortedRoute{
 			{
 				RouteID: "RouteWithAccAndRP",
 				SortingData: map[string]interface{}{
@@ -1473,7 +1479,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			},
 		}
 	}
-	var routeRply *engine.SortedRoutes
+	var routeRply *engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &routeRply); err != nil {
 		t.Error(err)
@@ -1498,7 +1504,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			},
 		},
 	}
-	eSpls = &engine.SortedRoutes{
+	eSpls = &engine.SortedRoutesList{{
 		ProfileID: "RouteWithAccAndRP",
 		Sorting:   utils.MetaLC,
 		Count:     2,
@@ -1522,9 +1528,9 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				},
 			},
 		},
-	}
+	}}
 	if *encoding == utils.MetaGOB {
-		eSpls.Routes = []*engine.SortedRoute{
+		(*eSpls)[0].Routes = []*engine.SortedRoute{
 			{
 				RouteID: "RouteWithRP",
 				SortingData: map[string]interface{}{
@@ -1545,7 +1551,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 			},
 		}
 	}
-	var routeRply2 *engine.SortedRoutes
+	var routeRply2 *engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &routeRply2); err != nil {
 		t.Error(err)

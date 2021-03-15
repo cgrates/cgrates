@@ -149,7 +149,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [RegistrarC] Renamed DispatcherH to RegistrarC
   * [DataDB] Added replication filtering
   * [ApierS] Moved Cache field as options
-
+  * [RouteS] Updated RouteSv1.GetRoutes API to return multiple profiles 
+  
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
 cgrates (0.10.0) UNRELEASED; urgency=medium

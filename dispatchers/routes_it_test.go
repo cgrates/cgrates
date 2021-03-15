@@ -124,8 +124,8 @@ func testDspSupPingFailover(t *testing.T) {
 }
 
 func testDspSupGetSupFailover(t *testing.T) {
-	var rpl *engine.SortedRoutes
-	eRpl1 := &engine.SortedRoutes{
+	var rpl engine.SortedRoutesList
+	eRpl1 := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
@@ -138,8 +138,8 @@ func testDspSupGetSupFailover(t *testing.T) {
 				},
 			},
 		},
-	}
-	eRpl := &engine.SortedRoutes{
+	}}
+	eRpl := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
@@ -163,7 +163,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 				},
 			},
 		},
-	}
+	}}
 	args := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -200,7 +200,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 }
 
 func testDspSupTestAuthKey(t *testing.T) {
-	var rpl *engine.SortedRoutes
+	var rpl engine.SortedRoutesList
 	args := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			ID:   utils.UUIDSha1Prefix(),
@@ -225,8 +225,8 @@ func testDspSupTestAuthKey(t *testing.T) {
 }
 
 func testDspSupTestAuthKey2(t *testing.T) {
-	var rpl *engine.SortedRoutes
-	eRpl := &engine.SortedRoutes{
+	var rpl engine.SortedRoutesList
+	eRpl := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
@@ -250,7 +250,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				},
 			},
 		},
-	}
+	}}
 	args := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -278,8 +278,8 @@ func testDspSupTestAuthKey2(t *testing.T) {
 }
 
 func testDspSupGetSupRoundRobin(t *testing.T) {
-	var rpl *engine.SortedRoutes
-	eRpl1 := &engine.SortedRoutes{
+	var rpl engine.SortedRoutesList
+	eRpl1 := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
 		Count:     1,
@@ -292,8 +292,8 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 				},
 			},
 		},
-	}
-	eRpl := &engine.SortedRoutes{
+	}}
+	eRpl := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
 		Count:     2,
@@ -317,7 +317,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 				},
 			},
 		},
-	}
+	}}
 	args := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
