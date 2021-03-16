@@ -19,13 +19,130 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"bytes"
+	"log"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
+
+func TestListenAndServer(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Cache = make(map[string]*config.CacheParamCfg)
+	cgrCfg.EEsCfg().Cache = map[string]*config.CacheParamCfg{
+		utils.MetaFileCSV: {
+			Limit: -1,
+			TTL:   5 * time.Second,
+		},
+		utils.MetaNone: {
+			Limit: 0,
+		},
+	}
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	stopChan := make(chan struct{}, 1)
+	cfgRld := make(chan struct{}, 1)
+	cfgRld <- struct{}{}
+	go func() {
+		time.Sleep(10)
+		stopChan <- struct{}{}
+	}()
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(6)
+	logBuf := new(bytes.Buffer)
+	log.SetOutput(logBuf)
+	eeS.ListenAndServe(stopChan, cfgRld)
+	logExpect := "[INFO] <CoreS> starting <EventExporterS>"
+	if rcv := logBuf.String(); !strings.Contains(rcv, logExpect) {
+		t.Errorf("Expected %q but received %q", logExpect, rcv)
+	}
+	logBuf.Reset()
+}
+
+func TestCall(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	errExpect := "UNSUPPORTED_SERVICE_METHOD"
+	if err := eeS.Call("test", 24532, 43643); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but received %q", errExpect, err)
+	}
+}
+
+type testMockEvent struct {
+	calls map[string]func(args interface{}, reply interface{}) error
+}
+
+func (sT *testMockEvent) Call(method string, arg interface{}, rply interface{}) error {
+	if call, has := sT.calls[method]; !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	} else {
+		return call(arg, rply)
+	}
+}
+func TestAttrSProcessEvent(t *testing.T) {
+	testMock := &testMockEvent{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+				rplyEv := &engine.AttrSProcessEventReply{
+					AlteredFields: []string{"testcase"},
+				}
+				*reply.(*engine.AttrSProcessEventReply) = *rplyEv
+				return nil
+			},
+		},
+	}
+	cgrEv := &utils.CGREvent{
+		Opts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: "10",
+		},
+	}
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsNoLksCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- testMock
+	connMgr := engine.NewConnManager(cgrCfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
+	})
+	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
+	// cgrEv := &utils.CGREvent{}
+	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestShutdown(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	logBuf := new(bytes.Buffer)
+	log.SetOutput(logBuf)
+	eeS.Shutdown()
+	logExpect := "[INFO] <CoreS> shutdown <EventExporterS>"
+	if rcv := logBuf.String(); !strings.Contains(rcv, logExpect) {
+		t.Errorf("Expected %q but received %q", logExpect, rcv)
+	}
+	logBuf.Reset()
+}
 
 func TestUpdateEEMetrics(t *testing.T) {
 	dc, _ := newEEMetrics(utils.EmptyString)

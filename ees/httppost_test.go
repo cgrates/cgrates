@@ -77,71 +77,14 @@ func TestHttpPostExportEvent(t *testing.T) {
 	cgrEv.Event = map[string]interface{}{
 		"Test1": 3,
 	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
 	errExpect := `Post "/var/spool/cgrates/ees": unsupported protocol scheme ""`
 	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
+	dcExpect := int64(1)
+	if !reflect.DeepEqual(dcExpect, httpPost.dc[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc[utils.NumberOfEvents])
 	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect = "inline parse error for string: <*wrong-type>"
-	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
-		},
-		{
-			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect = "inline parse error for string: <*wrong-type>"
-	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-	httpPost.OnEvicted("test", "test")
 }
 
 func TestHttpPostExportEvent2(t *testing.T) {
@@ -158,11 +101,6 @@ func TestHttpPostExportEvent2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// hdrExpect := map[string][]string {
-	// 	"Accept-Encoding": []string{"gzip"},
-	// 	"Content-Type": []string{"application/x-www-form-urlencoded"},
-
-	// }
 	bodyExpect := "2=%2Areq.field2"
 	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -201,6 +139,108 @@ func TestHttpPostExportEvent2(t *testing.T) {
 	if err := httpPost.ExportEvent(cgrEv); err != nil {
 		t.Error(err)
 	}
+	dcExpect := int64(1)
+	if !reflect.DeepEqual(dcExpect, httpPost.dc[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc[utils.NumberOfEvents])
+	}
+}
+
+func TestHttpPostExportEvent3(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	httpPost, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+	if err != nil {
+		t.Error(err)
+	}
+	cgrEv.Event = map[string]interface{}{
+		"Test1": 3,
+	}
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	errExpect := "inline parse error for string: <*wrong-type>"
+	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but received %q", errExpect, err)
+	}
+	dcExpect := int64(1)
+	if !reflect.DeepEqual(dcExpect, httpPost.dc[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc[utils.NumberOfEvents])
+	}
+}
+
+func TestHttpPostExportEvent4(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	httpPost, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+	if err != nil {
+		t.Error(err)
+	}
+	cgrEv.Event = map[string]interface{}{
+		"Test1": 3,
+	}
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+		},
+		{
+			Path: "*exp.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
+		},
+		{
+			Path: "*hdr.1", Type: utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
+			Filters: []string{"*wrong-type"},
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	errExpect := "inline parse error for string: <*wrong-type>"
+	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %q but received %q", errExpect, err)
+	}
+	dcExpect := int64(1)
+	if !reflect.DeepEqual(dcExpect, httpPost.dc[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc[utils.NumberOfEvents])
+	}
+	httpPost.OnEvicted("test", "test")
 }
 
 func TestHttpPostComposeHeader(t *testing.T) {
