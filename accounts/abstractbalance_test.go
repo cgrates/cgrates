@@ -372,6 +372,11 @@ func TestABCost0WithLimit(t *testing.T) {
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
+			UnitFactors: []*utils.UnitFactor{
+				{
+					Factor: utils.NewDecimal(int64(2*time.Second), 0),
+				},
+			},
 			CostIncrements: []*utils.CostIncrement{
 				{
 					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
@@ -385,10 +390,10 @@ func TestABCost0WithLimit(t *testing.T) {
 	if ec, err := aB.debitAbstracts(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if ec.Abstracts.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
-		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
 	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
+	} else if ec.Abstracts.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
+		t.Errorf("Expected %+v, received %+v", decimal.New(int64(30*time.Second), 0), ec.Abstracts)
 	}
 }
 

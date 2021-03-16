@@ -326,7 +326,20 @@ func TestActionSListenAndServe(t *testing.T) {
 		time.Sleep(10)
 		stopChan <- struct{}{}
 	}()
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buff := new(bytes.Buffer)
+	log.SetOutput(buff)
 	acts.ListenAndServe(stopChan, cfgRld)
+	expString := "CGRateS <> [INFO] <CoreS> starting <ActionS>"
+	if rcv := buff.String(); !strings.Contains(rcv, expString) {
+		t.Errorf("Expected %+v, received %+v", expString, rcv)
+	}
+	buff.Reset()
 }
 
 func TestV1ScheduleActions(t *testing.T) {
