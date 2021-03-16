@@ -29,13 +29,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// ThresholdWithCache used in api to determine how to reload cache
-type ThresholdWithCache struct {
-	*ThresholdProfile
-	Cache *string
-	Opts  map[string]interface{}
-}
-
 // ThresholdProfileWithOpts is used in replicatorV1 for dispatcher
 type ThresholdProfileWithOpts struct {
 	*ThresholdProfile

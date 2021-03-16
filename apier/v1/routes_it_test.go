@@ -36,7 +36,7 @@ var (
 	routeSv1CfgPath string
 	routeSv1Cfg     *config.CGRConfig
 	routeSv1Rpc     *rpc.Client
-	routePrf        *RouteWithCache
+	routePrf        *RouteWithOpts
 	routeSv1ConfDIR string //run tests for specific configuration
 
 	sTestsRouteSV1 = []func(t *testing.T){
@@ -839,7 +839,7 @@ func testV1RouteGetRouteWithoutFilter(t *testing.T) {
 }
 
 func testV1RouteSetRouteProfiles(t *testing.T) {
-	routePrf = &RouteWithCache{
+	routePrf = &RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "TEST_PROFILE1",
@@ -1101,7 +1101,7 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	routePrf = &RouteWithCache{
+	routePrf = &RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ROUTE_DESTINATION",
@@ -1175,7 +1175,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	routePrf = &RouteWithCache{
+	routePrf = &RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "MULTIPLE_ROUTES",
@@ -1283,7 +1283,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 }
 
 func testV1RouteAccountWithRatingPlan(t *testing.T) {
-	routePrf = &RouteWithCache{
+	routePrf = &RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RouteWithAccAndRP",
@@ -1563,7 +1563,7 @@ func testV1RouteStopEngine(t *testing.T) {
 }
 
 func testV1RouteSetRouteProfilesWithoutTenant(t *testing.T) {
-	routePrf = &RouteWithCache{
+	routePrf = &RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "TEST_PROFILE10",

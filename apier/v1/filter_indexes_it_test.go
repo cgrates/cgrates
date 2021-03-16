@@ -208,7 +208,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdWithCache{
+	tPrfl = &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE1",
@@ -304,7 +304,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdWithCache{
+	tPrfl = &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE2",
@@ -947,7 +947,7 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rPrf := &RouteWithCache{
+	rPrf := &RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            tenant,
 			ID:                "TEST_PROFILE1",
@@ -1045,7 +1045,7 @@ func testV1FIdxSetSecondRouteProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rPrf := &RouteWithCache{
+	rPrf := &RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            tenant,
 			ID:                "TEST_PROFILE2",
@@ -1460,23 +1460,21 @@ func testV1FISetActionProfileIndexes(t *testing.T) {
 	}
 
 	//set an actPrf in db, so we will get it without any problems
-	actPrf := &ActionProfileWithCache{
-		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
-			ActionProfile: &engine.ActionProfile{
-				Tenant:    tenant,
-				ID:        "ACT_PRF",
-				FilterIDs: []string{"*prefix:~*req.Account:1001|1002", "ACTION_FLTR"},
-				Schedule:  "* * * * *",
-				Actions: []*engine.APAction{
-					{
-						ID:        "TOPUP",
-						FilterIDs: []string{},
-						Type:      utils.MetaLog,
-						Diktats: []*engine.APDiktat{{
-							Path:  "~*balance.TestBalance.Value",
-							Value: "10",
-						}},
-					},
+	actPrf := &engine.ActionProfileWithOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant:    tenant,
+			ID:        "ACT_PRF",
+			FilterIDs: []string{"*prefix:~*req.Account:1001|1002", "ACTION_FLTR"},
+			Schedule:  "* * * * *",
+			Actions: []*engine.APAction{
+				{
+					ID:        "TOPUP",
+					FilterIDs: []string{},
+					Type:      utils.MetaLog,
+					Diktats: []*engine.APDiktat{{
+						Path:  "~*balance.TestBalance.Value",
+						Value: "10",
+					}},
 				},
 			},
 		},
@@ -1619,18 +1617,16 @@ func testVF1SetSecondActionProfile(t *testing.T) {
 	}
 
 	//set the second actPrf in db with our filter
-	actPrf := &ActionProfileWithCache{
-		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
-			ActionProfile: &engine.ActionProfile{
-				Tenant:    tenant,
-				ID:        "ACT_PRF2",
-				FilterIDs: []string{"ACTION_FLTR2"},
-				Actions: []*engine.APAction{
-					{
-						ID:        "TORESET",
-						FilterIDs: []string{},
-						Type:      utils.MetaLog,
-					},
+	actPrf := &engine.ActionProfileWithOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant:    tenant,
+			ID:        "ACT_PRF2",
+			FilterIDs: []string{"ACTION_FLTR2"},
+			Actions: []*engine.APAction{
+				{
+					ID:        "TORESET",
+					FilterIDs: []string{},
+					Type:      utils.MetaLog,
 				},
 			},
 		},
@@ -1814,24 +1810,22 @@ func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 	}
 
 	//set in db a ratePrf with double populated rates with our filter
-	ratePrfRates := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
-			APIRateProfile: &engine.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP1",
-				FilterIDs:       []string{"*string:~*req.Usage:10m"},
-				MaxCostStrategy: "*free",
-				Rates: map[string]*engine.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						FilterIDs:       []string{"RATE_FLTR1", "*suffix:~*req.Account:1009"},
-						ActivationTimes: "* * * * 1-5",
-					},
-					"RT_MONTH": {
-						ID:              "RT_MONTH",
-						FilterIDs:       []string{"RATE_FLTR1"},
-						ActivationTimes: "* * * * *",
-					},
+	ratePrfRates := &engine.APIRateProfileWithOpts{
+		APIRateProfile: &engine.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       []string{"*string:~*req.Usage:10m"},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*engine.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					FilterIDs:       []string{"RATE_FLTR1", "*suffix:~*req.Account:1009"},
+					ActivationTimes: "* * * * 1-5",
+				},
+				"RT_MONTH": {
+					ID:              "RT_MONTH",
+					FilterIDs:       []string{"RATE_FLTR1"},
+					ActivationTimes: "* * * * *",
 				},
 			},
 		},
@@ -1994,19 +1988,17 @@ func testV1FISetSecondRateProfileRate(t *testing.T) {
 	}
 
 	//append a new rate in the same rate profile
-	ratePrfRates := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
-			APIRateProfile: &engine.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP1",
-				FilterIDs:       []string{"*string:~*req.Usage:10m"},
-				MaxCostStrategy: "*free",
-				Rates: map[string]*engine.APIRate{
-					"RT_YEAR": {
-						ID:              "RT_YEAR",
-						FilterIDs:       []string{"RTPRF_FLTR3"},
-						ActivationTimes: "* * * * *",
-					},
+	ratePrfRates := &engine.APIRateProfileWithOpts{
+		APIRateProfile: &engine.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       []string{"*string:~*req.Usage:10m"},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*engine.APIRate{
+				"RT_YEAR": {
+					ID:              "RT_YEAR",
+					FilterIDs:       []string{"RTPRF_FLTR3"},
+					ActivationTimes: "* * * * *",
 				},
 			},
 		},
@@ -2243,19 +2235,17 @@ func testV1FISetRateProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	//set in db a ratePrf with with our filterS
-	ratePrfRates := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
-			APIRateProfile: &engine.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP2",
-				FilterIDs:       []string{"*string:~*req.Usage:10m", "RATEFLTR_FLTR1"},
-				MaxCostStrategy: "*free",
-				Rates: map[string]*engine.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						FilterIDs:       []string{"*suffix:~*req.Account:1009"},
-						ActivationTimes: "* * * * 1-5",
-					},
+	ratePrfRates := &engine.APIRateProfileWithOpts{
+		APIRateProfile: &engine.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP2",
+			FilterIDs:       []string{"*string:~*req.Usage:10m", "RATEFLTR_FLTR1"},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*engine.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					FilterIDs:       []string{"*suffix:~*req.Account:1009"},
+					ActivationTimes: "* * * * 1-5",
 				},
 			},
 		},
@@ -2420,19 +2410,17 @@ func testV1FISetSecondRateProfile(t *testing.T) {
 	}
 
 	//another rate profile
-	ratePrfRates := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
-			APIRateProfile: &engine.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP3",
-				FilterIDs:       []string{"RTPRF_FLTR6"},
-				MaxCostStrategy: "*free",
-				Rates: map[string]*engine.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						FilterIDs:       []string{"*suffix:~*req.Account:1019"},
-						ActivationTimes: "* * * * 1-5",
-					},
+	ratePrfRates := &engine.APIRateProfileWithOpts{
+		APIRateProfile: &engine.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP3",
+			FilterIDs:       []string{"RTPRF_FLTR6"},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*engine.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					FilterIDs:       []string{"*suffix:~*req.Account:1019"},
+					ActivationTimes: "* * * * 1-5",
 				},
 			},
 		},
@@ -3053,7 +3041,7 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 func testV1FIdxSetDispatcherProfile(t *testing.T) {
 	var reply string
 	//add a dispatcherProfile for 2 subsystems and verify if the index was created for both
-	dispatcherProfile = &DispatcherWithCache{
+	dispatcherProfile = &DispatcherWithOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         "DSP_Test1",
@@ -3196,7 +3184,7 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 	var reply string
 	//add a new dispatcherProfile with empty filterIDs
 	//should create an index of type *none:*any:*any for *attributes subsystem
-	dispatcherProfile = &DispatcherWithCache{
+	dispatcherProfile = &DispatcherWithOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         "DSP_Test2",
@@ -3215,7 +3203,7 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 
 	//add a new dispatcherProfile with empty filterIDs
 	//should create an index of type *none:*any:*any for *sessions subsystem
-	dispatcherProfile2 := DispatcherWithCache{
+	dispatcherProfile2 := DispatcherWithOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         "DSP_Test3",

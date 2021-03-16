@@ -95,31 +95,29 @@ func testCostBenchLoadFromFolder2(b *testing.B) {
 }
 
 func testCostBenchSetRateProfile(b *testing.B) {
-	rPrf := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
-			APIRateProfile: &engine.APIRateProfile{
-				ID:        "DefaultRate",
-				FilterIDs: []string{"*string:~*req.Subject:1001"},
-				Weights:   ";10",
-				Rates: map[string]*engine.APIRate{
-					"RATE1": &engine.APIRate{
-						ID:              "RATE1",
-						Weights:         ";0",
-						ActivationTimes: "* * * * *",
-						IntervalRates: []*engine.APIIntervalRate{
-							{
-								IntervalStart: "0",
-								FixedFee:      utils.Float64Pointer(0.4),
-								RecurrentFee:  utils.Float64Pointer(0.2),
-								Unit:          utils.Float64Pointer(60000000000),
-								Increment:     utils.Float64Pointer(60000000000),
-							},
-							{
-								IntervalStart: "1m",
-								RecurrentFee:  utils.Float64Pointer(0.1),
-								Unit:          utils.Float64Pointer(60000000000),
-								Increment:     utils.Float64Pointer(1000000000),
-							},
+	rPrf := &engine.APIRateProfileWithOpts{
+		APIRateProfile: &engine.APIRateProfile{
+			ID:        "DefaultRate",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Weights:   ";10",
+			Rates: map[string]*engine.APIRate{
+				"RATE1": &engine.APIRate{
+					ID:              "RATE1",
+					Weights:         ";0",
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*engine.APIIntervalRate{
+						{
+							IntervalStart: "0",
+							FixedFee:      utils.Float64Pointer(0.4),
+							RecurrentFee:  utils.Float64Pointer(0.2),
+							Unit:          utils.Float64Pointer(60000000000),
+							Increment:     utils.Float64Pointer(60000000000),
+						},
+						{
+							IntervalStart: "1m",
+							RecurrentFee:  utils.Float64Pointer(0.1),
+							Unit:          utils.Float64Pointer(60000000000),
+							Increment:     utils.Float64Pointer(1000000000),
 						},
 					},
 				},
@@ -165,16 +163,14 @@ func testCostBenchSetRateProfile2(b *testing.B) {
 			Increment:     utils.Float64Pointer(1000000000),
 		}},
 	}
-	rPrf := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
-			APIRateProfile: &engine.APIRateProfile{
-				ID:        "RateChristmas",
-				FilterIDs: []string{"*string:~*req.Subject:1010"},
-				Weights:   ";50",
-				Rates: map[string]*engine.APIRate{
-					"RATE1":          rate1,
-					"RATE_CHRISTMAS": rtChristmas,
-				},
+	rPrf := &engine.APIRateProfileWithOpts{
+		APIRateProfile: &engine.APIRateProfile{
+			ID:        "RateChristmas",
+			FilterIDs: []string{"*string:~*req.Subject:1010"},
+			Weights:   ";50",
+			Rates: map[string]*engine.APIRate{
+				"RATE1":          rate1,
+				"RATE_CHRISTMAS": rtChristmas,
 			},
 		},
 	}

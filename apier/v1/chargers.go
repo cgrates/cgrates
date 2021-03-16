@@ -64,12 +64,6 @@ func (apierSv1 *APIerSv1) GetChargerProfileIDs(args *utils.PaginatorWithTenant, 
 	return nil
 }
 
-type ChargerWithCache struct {
-	*engine.ChargerProfile
-	Cache *string
-	Opts  map[string]interface{}
-}
-
 type ChargerWithOpts struct {
 	*engine.ChargerProfile
 	Opts map[string]interface{}

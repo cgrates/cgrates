@@ -36,7 +36,7 @@ var (
 	actPrfCfgPath   string
 	actPrfCfg       *config.CGRConfig
 	actSRPC         *rpc.Client
-	actPrf          *ActionProfileWithCache
+	actPrf          *engine.ActionProfileWithOpts
 	actPrfConfigDIR string //run tests for specific configuration
 
 	sTestsActPrf = []func(t *testing.T){
@@ -216,24 +216,22 @@ func testActionSPing(t *testing.T) {
 }
 
 func testActionSSettActionProfile(t *testing.T) {
-	actPrf = &ActionProfileWithCache{
-		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
-			ActionProfile: &engine.ActionProfile{
-				Tenant: "tenant_test",
-				ID:     "id_test",
-				Actions: []*engine.APAction{
-					{
-						ID:      "test_action_id",
-						Diktats: []*engine.APDiktat{{}},
-					},
-					{
-						ID:      "test_action_id2",
-						Diktats: []*engine.APDiktat{{}},
-					},
+	actPrf = &engine.ActionProfileWithOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "tenant_test",
+			ID:     "id_test",
+			Actions: []*engine.APAction{
+				{
+					ID:      "test_action_id",
+					Diktats: []*engine.APDiktat{{}},
+				},
+				{
+					ID:      "test_action_id2",
+					Diktats: []*engine.APDiktat{{}},
 				},
 			},
-			Opts: map[string]interface{}{},
 		},
+		Opts: map[string]interface{}{},
 	}
 	var result string
 	expErr := utils.ErrNotFound.Error()

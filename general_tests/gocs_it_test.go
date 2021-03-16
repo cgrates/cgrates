@@ -135,7 +135,7 @@ func testGOCSApierRpcConn(t *testing.T) {
 }
 
 func testGOCSLoadData(t *testing.T) {
-	chargerProfile := &v1.ChargerWithCache{
+	chargerProfile := &v1.ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "DEFAULT",

@@ -130,7 +130,7 @@ func testJSONRpcConn(t *testing.T) {
 func testJSONAddData(t *testing.T) {
 	var reply string
 	//add a charger
-	chargerProfile := &v1.ChargerWithCache{
+	chargerProfile := &v1.ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "cgrates.org",
 			ID:     "Default",
@@ -141,7 +141,9 @@ func testJSONAddData(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		Cache: utils.StringPointer(utils.MetaReload),
+		Opts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaReload,
+		},
 	}
 	if err := jsonRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
 		t.Error(err)

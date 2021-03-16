@@ -37,7 +37,7 @@ var (
 	splSv1CfgPath string
 	splSv1Cfg     *config.CGRConfig
 	splSv1Rpc     *rpc.Client
-	splPrf        *v1.RouteWithCache
+	splPrf        *v1.RouteWithOpts
 	splSv1ConfDIR string //run tests for specific configuration
 
 	sTestsSupplierSV1 = []func(t *testing.T){
@@ -133,7 +133,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &v1.RouteWithCache{
+	splPrf = &v1.RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:  "cgrates.org",
 			ID:      "TEST_PROFILE2",
@@ -197,7 +197,7 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 		t.Error(err)
 	}
 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-	splPrf = &v1.RouteWithCache{
+	splPrf = &v1.RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ROUTE_ResourceTest",
@@ -473,7 +473,7 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 		t.Error(err)
 	}
 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-	splPrf = &v1.RouteWithCache{
+	splPrf = &v1.RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ROUTE_ResourceDescendent",

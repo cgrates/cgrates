@@ -1681,7 +1681,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 
 func testApierSetChargerS(t *testing.T) {
 	//add a default charger
-	chargerProfile := &ChargerWithCache{
+	chargerProfile := &ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",

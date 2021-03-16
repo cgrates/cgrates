@@ -64,14 +64,13 @@ func (apierSv1 *APIerSv1) GetRouteProfileIDs(args *utils.PaginatorWithTenant, sp
 	return nil
 }
 
-type RouteWithCache struct {
+type RouteWithOpts struct {
 	*engine.RouteProfile
-	Cache *string
-	Opts  map[string]interface{}
+	Opts map[string]interface{}
 }
 
 //SetRouteProfile add a new Route configuration
-func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -339,7 +339,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl := ThresholdWithCache{
+	tPrfl := ThresholdProfileWithOpts{
 		ThresholdProfile: &ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
@@ -558,7 +558,7 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl := &ThresholdWithCache{
+	tPrfl := &ThresholdProfileWithOpts{
 		ThresholdProfile: &ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_CGRRPC",
@@ -623,7 +623,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl := &ThresholdWithCache{
+	tPrfl := &ThresholdProfileWithOpts{
 		ThresholdProfile: &ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "THD_PostEvent",

@@ -37,8 +37,8 @@ var (
 	dispatcherCfgPath   string
 	dispatcherCfg       *config.CGRConfig
 	dispatcherRPC       *rpc.Client
-	dispatcherProfile   *DispatcherWithCache
-	dispatcherHost      *DispatcherHostWithCache
+	dispatcherProfile   *DispatcherWithOpts
+	dispatcherHost      *engine.DispatcherHostWithOpts
 	dispatcherConfigDIR string //run tests for specific configuration
 
 	sTestsDispatcher = []func(t *testing.T){
@@ -129,7 +129,7 @@ func testDispatcherSRPCConn(t *testing.T) {
 
 func testDispatcherSSetDispatcherProfile(t *testing.T) {
 	var reply string
-	dispatcherProfile = &DispatcherWithCache{
+	dispatcherProfile = &DispatcherWithOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",
@@ -262,7 +262,7 @@ func testDispatcherSSetDispatcherHost(t *testing.T) {
 		t.Error(err)
 	}
 
-	dispatcherHost = &DispatcherHostWithCache{
+	dispatcherHost = &engine.DispatcherHostWithOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
@@ -375,7 +375,7 @@ func testDispatcherSKillEngine(t *testing.T) {
 }
 
 func testDispatcherSSetDispatcherProfileWithoutTenant(t *testing.T) {
-	dispatcherProfile = &DispatcherWithCache{
+	dispatcherProfile = &DispatcherWithOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			ID:        "Dsp1",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -418,7 +418,7 @@ func testDispatcherSRemDispatcherProfileWithoutTenant(t *testing.T) {
 }
 
 func testDispatcherSSetDispatcherHostWithoutTenant(t *testing.T) {
-	dispatcherHost = &DispatcherHostWithCache{
+	dispatcherHost = &engine.DispatcherHostWithOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			RemoteHost: &config.RemoteHost{
 				ID:      "DspHst7",

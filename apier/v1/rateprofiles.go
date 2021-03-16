@@ -88,11 +88,6 @@ func (apierSv1 *APIerSv1) GetRateProfileIDsCount(args *utils.TenantWithOpts, rep
 	return
 }
 
-type APIRateProfileWithCache struct {
-	*engine.APIRateProfileWithOpts
-	Cache *string
-}
-
 //SetRateProfile add/update a new Rate Profile
 func (apierSv1 *APIerSv1) SetRateProfile(ext *engine.APIRateProfileWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(ext.APIRateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {

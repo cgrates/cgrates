@@ -274,7 +274,7 @@ func testInternalRemoteITGetThreshold(t *testing.T) {
 
 func testInternalRemoteITGetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	tPrfl = &engine.ThresholdWithCache{
+	tPrfl = &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_ACNT_1001",
@@ -599,7 +599,7 @@ func testInternalRemoteITGetDispatcherProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	dispatcherProfile = &DispatcherWithCache{
+	dispatcherProfile = &DispatcherWithOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",
@@ -635,7 +635,7 @@ func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 		t.Error(err)
 	}
 
-	dispatcherHost = &DispatcherHostWithCache{
+	dispatcherHost = &engine.DispatcherHostWithOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
@@ -711,30 +711,28 @@ func testInternalRemoteITGetRateProfile(t *testing.T) {
 			},
 		},
 	}
-	apiRPrf := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
-			APIRateProfile: &engine.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP1",
-				FilterIDs:       []string{"*string:~*req.Subject:1001"},
-				Weights:         ";0",
-				MaxCostStrategy: "*free",
-				Rates: map[string]*engine.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						Weights:         ";0",
-						ActivationTimes: "* * * * 1-5",
-					},
-					"RT_WEEKEND": {
-						ID:              "RT_WEEKEND",
-						Weights:         ";10",
-						ActivationTimes: "* * * * 0,6",
-					},
-					"RT_CHRISTMAS": {
-						ID:              "RT_CHRISTMAS",
-						Weights:         ";30",
-						ActivationTimes: "* * 24 12 *",
-					},
+	apiRPrf := &engine.APIRateProfileWithOpts{
+		APIRateProfile: &engine.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       []string{"*string:~*req.Subject:1001"},
+			Weights:         ";0",
+			MaxCostStrategy: "*free",
+			Rates: map[string]*engine.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					Weights:         ";0",
+					ActivationTimes: "* * * * 1-5",
+				},
+				"RT_WEEKEND": {
+					ID:              "RT_WEEKEND",
+					Weights:         ";10",
+					ActivationTimes: "* * * * 0,6",
+				},
+				"RT_CHRISTMAS": {
+					ID:              "RT_CHRISTMAS",
+					Weights:         ";30",
+					ActivationTimes: "* * 24 12 *",
 				},
 			},
 		},
@@ -791,7 +789,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			expectedIDX, utils.ToJSON(indexes))
 	}
 
-	tPrfl := &engine.ThresholdWithCache{
+	tPrfl := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Replication",
