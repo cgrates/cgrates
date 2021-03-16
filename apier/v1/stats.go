@@ -66,7 +66,7 @@ func (apierSv1 *APIerSv1) GetStatQueueProfileIDs(args *utils.PaginatorWithTenant
 }
 
 // SetStatQueueProfile alters/creates a StatQueueProfile
-func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueProfileWithOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

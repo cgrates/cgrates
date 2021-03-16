@@ -36,7 +36,7 @@ var (
 	filterCfgPath   string
 	filterCfg       *config.CGRConfig
 	filterRPC       *rpc.Client
-	filter          *FilterWithCache
+	filter          *engine.FilterWithOpts
 	filterConfigDIR string //run tests for specific configuration
 
 	sTestsFilter = []func(t *testing.T){
@@ -118,7 +118,7 @@ func testFilterGetFilterBeforeSet(t *testing.T) {
 }
 
 func testFilterSetFilter(t *testing.T) {
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "Filter1",
@@ -225,7 +225,7 @@ func testFilterKillEngine(t *testing.T) {
 }
 
 func testFilterSetFilterWithoutTenant(t *testing.T) {
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			ID: "FilterWithoutTenant",
 			Rules: []*engine.FilterRule{

@@ -50,12 +50,6 @@ type StatQueueProfileWithOpts struct {
 	Opts map[string]interface{}
 }
 
-type StatQueueWithCache struct {
-	*StatQueueProfile
-	Cache *string
-	Opts  map[string]interface{}
-}
-
 func (sqp *StatQueueProfile) TenantID() string {
 	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
 }

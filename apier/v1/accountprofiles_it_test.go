@@ -37,7 +37,7 @@ var (
 	accPrfCfgPath   string
 	accPrfCfg       *config.CGRConfig
 	accSRPC         *rpc.Client
-	apiAccPrf       *APIAccountProfileWithCache
+	apiAccPrf       *utils.APIAccountProfileWithOpts
 	accPrf          *utils.AccountProfile
 	accPrfConfigDIR string //run tests for specific configuration
 
@@ -225,7 +225,7 @@ func testAccountSPing(t *testing.T) {
 }
 
 func testAccountSSettAccountProfile(t *testing.T) {
-	apiAccPrf = &APIAccountProfileWithCache{
+	apiAccPrf = &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:  "cgrates.org",
 			ID:      "id_test",

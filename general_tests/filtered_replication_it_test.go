@@ -268,7 +268,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 
 func testFltrRplFilters(t *testing.T) {
 	fltrID := "FLTR1"
-	fltr := &v1.FilterWithCache{
+	fltr := &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     fltrID,
@@ -547,7 +547,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 
 func testFltrRplStatQueueProfile(t *testing.T) {
 	stID := "ST1"
-	stPrf := &engine.StatQueueWithCache{
+	stPrf := &engine.StatQueueProfileWithOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          stID,
@@ -1586,7 +1586,7 @@ func testFltrRplActionProfile(t *testing.T) {
 
 func testFltrRplAccountProfile(t *testing.T) {
 	acID := "ATTR1"
-	acPrf := &v1.APIAccountProfileWithCache{
+	acPrf := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
 			ID:        acID,

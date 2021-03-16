@@ -112,7 +112,7 @@ func testAttributeSRPCConn(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrf(t *testing.T) {
-	extAlsPrf := &AttributeWithCache{
+	extAlsPrf := &AttributeWithOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
@@ -170,7 +170,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 }
 
 func testAttributeSUpdateAlsPrf(t *testing.T) {
-	extAlsPrf := &AttributeWithCache{
+	extAlsPrf := &AttributeWithOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
@@ -244,7 +244,7 @@ func testAttributeSKillEngine(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrfWithoutTenant(t *testing.T) {
-	extAlsPrf := &AttributeWithCache{
+	extAlsPrf := &AttributeWithOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			ID:        "ExternalAttribute",
 			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},

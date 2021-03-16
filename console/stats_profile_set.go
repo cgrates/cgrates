@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSetStatQueue{
 		name:      "stats_profile_set",
 		rpcMethod: utils.APIerSv1SetStatQueueProfile,
-		rpcParams: &engine.StatQueueWithCache{},
+		rpcParams: &engine.StatQueueProfileWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdSetStatQueue struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.StatQueueWithCache
+	rpcParams *engine.StatQueueProfileWithOpts
 	*CommandExecuter
 }
 
@@ -51,7 +51,7 @@ func (self *CmdSetStatQueue) RpcMethod() string {
 
 func (self *CmdSetStatQueue) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.StatQueueWithCache{
+		self.rpcParams = &engine.StatQueueProfileWithOpts{
 			StatQueueProfile: new(engine.StatQueueProfile),
 			Opts:             make(map[string]interface{}),
 		}

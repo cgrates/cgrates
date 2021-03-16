@@ -740,7 +740,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 	}
 
 	// set a StatQueueProfile and simulate process event
-	statConfig := &StatQueueWithCache{
+	statConfig := &StatQueueProfileWithOpts{
 		StatQueueProfile: &StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          "DistinctMetricProfile",

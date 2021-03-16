@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	c := &CmdSetAccountProfile{
 		name:      "accounts_profile_set",
 		rpcMethod: utils.APIerSv1SetAccountProfile,
-		rpcParams: &v1.APIAccountProfileWithCache{},
+		rpcParams: &utils.APIAccountProfileWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +35,7 @@ func init() {
 type CmdSetAccountProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.APIAccountProfileWithCache
+	rpcParams *utils.APIAccountProfileWithOpts
 	*CommandExecuter
 }
 
@@ -50,7 +49,7 @@ func (self *CmdSetAccountProfile) RpcMethod() string {
 
 func (self *CmdSetAccountProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.APIAccountProfileWithCache{APIAccountProfile: new(utils.APIAccountProfile)}
+		self.rpcParams = &utils.APIAccountProfileWithOpts{APIAccountProfile: new(utils.APIAccountProfile)}
 	}
 	return self.rpcParams
 }
