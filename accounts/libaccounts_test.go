@@ -27,6 +27,8 @@ import (
 	"testing"
 	"time"
 
+	rates2 "github.com/cgrates/cgrates/rates"
+
 	"github.com/ericlagergren/decimal"
 
 	"github.com/cgrates/cgrates/config"
@@ -204,7 +206,6 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	}
 }
 
-/*
 func TestDebitUsageFromConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -230,29 +231,36 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 		fltrS: filterS,
 	}
 	expectedEvCh := &utils.EventCharges{
-		Concretes:   utils.NewDecimal(710, 0),
+		Concretes:   utils.NewDecimal(700, 0),
 		Accounting:  make(map[string]*utils.AccountCharge),
 		UnitFactors: make(map[string]*utils.UnitFactor),
 		Rating:      make(map[string]*utils.RateSInterval),
 	}
 
-	if evCh, err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
-		FixedFee:     utils.NewDecimal(10, 0),
-		Increment:    utils.NewDecimal(1, 0),
-		RecurrentFee: utils.NewDecimal(1, 0),
-	}, new(utils.CGREvent), nil, nil, nil); err != nil {
+	if evCh, err := debitConcreteUnits(decimal.New(700, 0), utils.EmptyString,
+		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
-	} else if cb2.blnCfg.Units.Cmp(decimal.New(290, 0)) != 0 {
+	} else if cb2.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	} else if !reflect.DeepEqual(expectedEvCh, evCh) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCh), utils.ToJSON(evCh))
 	}
 
+	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
+	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
+
+	if _, err := debitConcreteUnits(decimal.New(1100, 0), utils.EmptyString,
+		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
+		t.Errorf("Expected %+v, received %+v", utils.ErrInsufficientCredit, err)
+	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
+	} else if cb2.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
+	}
 }
-*/
-/*
+
 func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -302,27 +310,37 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	}
 
 	expectedEvCh := &utils.EventCharges{
-		Concretes:   utils.NewDecimal(100, 0),
+		Concretes:   utils.NewDecimal(700, 0),
 		Accounting:  make(map[string]*utils.AccountCharge),
 		UnitFactors: make(map[string]*utils.UnitFactor),
 		Rating:      make(map[string]*utils.RateSInterval),
 	}
 
-	if evCh, err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(700, 0), &utils.CostIncrement{
-		Increment:    utils.NewDecimal(1, 0),
-		RecurrentFee: utils.NewDecimal(-1, 0),
-	}, new(utils.CGREvent), connMgr, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}, nil); err != nil {
+	if evCh, err := debitConcreteUnits(decimal.New(700, 0), utils.EmptyString,
+		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if cb1.blnCfg.Units.Cmp(decimal.New(400, 0)) != 0 {
+	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
-	} else if cb2.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+	} else if cb2.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	} else if !reflect.DeepEqual(expectedEvCh, evCh) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCh), utils.ToJSON(evCh))
 	}
+
+	// debit all the units from balances
+	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
+	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
+
+	if _, err := debitConcreteUnits(decimal.New(1000, 0), utils.EmptyString,
+		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err != nil {
+		t.Error(err)
+	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
+	} else if cb2.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
+	}
 }
-*/
-/*
+
 func TestDebitUsageFromConcretesRestore(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -349,10 +367,9 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 		fltrS: filterS,
 	}
 
-	if _, err := debitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(200, 0), &utils.CostIncrement{
-		Increment:    utils.NewDecimal(1, 0),
-		RecurrentFee: utils.NewDecimal(1, 0),
-	}, new(utils.CGREvent), nil, nil, nil); err == nil || err.Error() != "inline parse error for string: <*string>" {
+	if _, err := debitConcreteUnits(decimal.New(200, 0), utils.EmptyString,
+		[]*concreteBalance{cb1, cb2},
+		new(utils.CGREvent)); err == nil || err.Error() != "inline parse error for string: <*string>" {
 		t.Error(err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
@@ -360,8 +377,7 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 }
-*/
-/*
+
 func TestMaxDebitUsageFromConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 
@@ -387,8 +403,9 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		},
 		fltrS: filterS,
 	}
-	if _, err := maxDebitAbstractsFromConcretes([]*concreteBalance{cb1, cb2}, decimal.New(1100, 0),
-		nil, new(utils.CGREvent), nil, nil, nil, nil, &utils.CostIncrement{
+	if _, err := maxDebitAbstractsFromConcretes(decimal.New(1100, 0), utils.EmptyString,
+		[]*concreteBalance{cb1, cb2}, nil, new(utils.CGREvent),
+		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(1, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
 		}); err == nil || err != utils.ErrMaxIncrementsExceeded {
@@ -399,7 +416,6 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 }
-*/
 
 func TestRestoreAccount(t *testing.T) { //coverage purpose
 	engine.Cache.Clear(nil)
@@ -518,4 +534,127 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 	}, []utils.AccountBalancesBackup{
 		nil,
 	})
+}
+
+func TestDebitFromBothBalances(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	rates := rates2.NewRateS(cfg, fltr, dm)
+	//RateS
+	rpcClientConn := make(chan rpcclient.ClientConnector, 1)
+	rpcClientConn <- rates
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): rpcClientConn,
+	})
+	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
+	//AccountS
+	accnts := NewAccountS(cfg, fltr, connMngr, dm)
+
+	accPrf := &utils.AccountProfile{
+		Tenant:    "cgrates.org",
+		ID:        "1002",
+		FilterIDs: []string{"*string:~*req.Account:2003"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance": {
+				ID:    "AbstractBalance",
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(1500, 0),
+				Weights: []*utils.DynamicWeight{
+					{
+						Weight: 50,
+					},
+				},
+			},
+			"ConcreteBalance1": {
+				ID:   "ConcreteCalance1",
+				Type: utils.MetaConcrete,
+				Weights: []*utils.DynamicWeight{
+					{
+						Weight: 10,
+					},
+				},
+				Units: utils.NewDecimal(20, 0),
+			},
+			"ConcreteBalance2": {
+				ID:   "ConcreteCalance2",
+				Type: utils.MetaConcrete,
+				Weights: []*utils.DynamicWeight{
+					{
+						Weight: 20,
+					},
+				},
+				Units: utils.NewDecimal(50, 0),
+			},
+		},
+	}
+
+	if err := dm.SetAccountProfile(accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	minDecimal, err := utils.NewDecimalFromUsage("1s")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUsage("1ns")
+	if err != nil {
+		t.Error(err)
+	}
+	rtPrf := &engine.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RATE_1",
+		FilterIDs: []string{"*string:~*req.Account:2003"},
+		Rates: map[string]*engine.Rate{
+			"RT_ALWAYS": {
+				ID:              "RT_ALWAYS",
+				FilterIDs:       nil,
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*engine.IntervalRate{
+					{
+						IntervalStart: 0 * time.Second,
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          minDecimal,
+						Increment:     secDecimal,
+						FixedFee:      utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetRateProfile(rtPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			ID:     "TestV1DebitID",
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "2003",
+				utils.Usage:        "300",
+			},
+		},
+	}
+
+	var reply utils.ExtEventCharges
+	exEvCh := utils.ExtEventCharges{
+		Abstracts: utils.Float64Pointer(300),
+	}
+	if err := accnts.V1DebitAbstracts(args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exEvCh, reply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
+	}
+
+	accPrf.Balances["AbstractBalance"].Units = utils.NewDecimal(1200, 0)
+	accPrf.Balances["ConcreteBalance2"].Units = utils.NewDecimal(49999999997, 9)
+	//as we debited, the account is changed
+	if rcvAcc, err := dm.GetAccountProfile(accPrf.Tenant, accPrf.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvAcc, accPrf) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(accPrf), utils.ToJSON(rcvAcc))
+	}
 }
