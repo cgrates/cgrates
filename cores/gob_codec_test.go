@@ -21,7 +21,7 @@ package cores
 import (
 	"bufio"
 	"encoding/gob"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/rpc"
 	"testing"
@@ -53,7 +53,7 @@ func (mk *mockReadWriteCloserErrorNilInterface) Write(p []byte) (n int, err erro
 }
 
 func TestWriteResponseInterface(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	resp := &rpc.Response{
 		ServiceMethod: utils.APIerSv1Ping,
 		Seq:           123,
@@ -75,7 +75,7 @@ func (mk *mockReadWriteCloserErrorNilResponse) Write(p []byte) (n int, err error
 }
 
 func TestWriteResponseResponse(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	resp := &rpc.Response{
 		ServiceMethod: utils.APIerSv1Ping,
 		Seq:           123,

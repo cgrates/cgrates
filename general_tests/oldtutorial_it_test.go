@@ -21,7 +21,6 @@
 package general_tests
 
 // import (
-// 	"io/ioutil"
 // 	"net/rpc"
 // 	"net/rpc/jsonrpc"
 // 	"os"
@@ -1448,7 +1447,7 @@ package general_tests
 // f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.33340,RETA
 // `
 // 	expFilePath := path.Join(*exportArgs.ExportPath, *exportArgs.ExportFileName)
-// 	if expContent, err := ioutil.ReadFile(expFilePath); err != nil {
+// 	if expContent, err := os.ReadFile(expFilePath); err != nil {
 // 		t.Error(err)
 // 	} else if eExportContent != string(expContent) && eExportContent2 != string(expContent) { // CDRs are showing up randomly so we cannot predict order of export
 // 		t.Errorf("Expecting: <%q> or <%q> received: <%q>", eExportContent, eExportContent2, string(expContent))

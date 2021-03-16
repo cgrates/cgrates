@@ -25,7 +25,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"io"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"time"
 
@@ -106,7 +106,7 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 		}
 		if tlsCACert != "" {
 			var ca []byte
-			if ca, err = ioutil.ReadFile(tlsCACert); err != nil {
+			if ca, err = os.ReadFile(tlsCACert); err != nil {
 				return
 			}
 
@@ -292,7 +292,7 @@ func (rs *RedisStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error)
 		return
 	}
 	var out []byte
-	if out, err = ioutil.ReadAll(r); err != nil {
+	if out, err = io.ReadAll(r); err != nil {
 		return
 	}
 	r.Close()
@@ -374,7 +374,7 @@ func (rs *RedisStorage) GetDestinationDrv(key, transactionID string) (dest *Dest
 		return
 	}
 	var out []byte
-	if out, err = ioutil.ReadAll(r); err != nil {
+	if out, err = io.ReadAll(r); err != nil {
 		return
 	}
 	r.Close()
@@ -652,7 +652,7 @@ func (rs *RedisStorage) GetActionPlanDrv(key string, skipCache bool,
 		return
 	}
 	var out []byte
-	if out, err = ioutil.ReadAll(r); err != nil {
+	if out, err = io.ReadAll(r); err != nil {
 		return
 	}
 	r.Close()

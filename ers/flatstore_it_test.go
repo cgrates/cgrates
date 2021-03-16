@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"io/ioutil"
 	"net/rpc"
 	"os"
 	"path"
@@ -151,16 +150,16 @@ func testFlatstoreITLoadTPFromFolder(t *testing.T) {
 
 // The default scenario, out of ers defined in .cfg file
 func testFlatstoreITHandleCdr1File(t *testing.T) {
-	if err := ioutil.WriteFile(path.Join("/tmp", "acc_1.log"), []byte(fullSuccessfull), 0644); err != nil {
+	if err := os.WriteFile(path.Join("/tmp", "acc_1.log"), []byte(fullSuccessfull), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := ioutil.WriteFile(path.Join("/tmp", "missed_calls_1.log"), []byte(fullMissed), 0644); err != nil {
+	if err := os.WriteFile(path.Join("/tmp", "missed_calls_1.log"), []byte(fullMissed), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := ioutil.WriteFile(path.Join("/tmp", "acc_2.log"), []byte(part1), 0644); err != nil {
+	if err := os.WriteFile(path.Join("/tmp", "acc_2.log"), []byte(part1), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := ioutil.WriteFile(path.Join("/tmp", "acc_3.log"), []byte(part2), 0644); err != nil {
+	if err := os.WriteFile(path.Join("/tmp", "acc_3.log"), []byte(part2), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	//Rename(oldpath, newpath string)
@@ -171,11 +170,11 @@ func testFlatstoreITHandleCdr1File(t *testing.T) {
 	}
 	time.Sleep(time.Second)
 	// check the files to be processed
-	filesInDir, _ := ioutil.ReadDir("/tmp/flatstoreErs/in")
+	filesInDir, _ := os.ReadDir("/tmp/flatstoreErs/in")
 	if len(filesInDir) != 0 {
 		t.Errorf("Files in ersInDir: %+v", filesInDir)
 	}
-	filesOutDir, _ := ioutil.ReadDir("/tmp/flatstoreErs/out")
+	filesOutDir, _ := os.ReadDir("/tmp/flatstoreErs/out")
 	if len(filesOutDir) != 5 {
 		ids := []string{}
 		for _, fD := range filesOutDir {
@@ -184,7 +183,7 @@ func testFlatstoreITHandleCdr1File(t *testing.T) {
 		t.Errorf("Unexpected number of files in output directory: %+v, %q", len(filesOutDir), ids)
 	}
 	ePartContent := "INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475\n"
-	if partContent, err := ioutil.ReadFile(path.Join("/tmp/flatstoreErs/out", "acc_3.log.tmp")); err != nil {
+	if partContent, err := os.ReadFile(path.Join("/tmp/flatstoreErs/out", "acc_3.log.tmp")); err != nil {
 		t.Error(err)
 	} else if (ePartContent) != (string(partContent)) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", ePartContent, string(partContent))

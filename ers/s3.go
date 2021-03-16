@@ -21,7 +21,7 @@ package ers
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -214,7 +214,7 @@ func (rdr *S3ER) readMsg(scv *s3.S3, key string) (err error) {
 		return
 	}
 	var msg []byte
-	if msg, err = ioutil.ReadAll(obj.Body); err != nil {
+	if msg, err = io.ReadAll(obj.Body); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> decoding message %s error: %s",
 				utils.ERs, key, err.Error()))

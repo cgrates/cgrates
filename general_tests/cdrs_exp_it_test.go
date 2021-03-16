@@ -25,7 +25,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/rpc"
 	"net/url"
@@ -253,7 +252,7 @@ func testCDRsExpExportEvent(t *testing.T) {
 		t.Error("Unexpected error: ", err)
 	}
 	time.Sleep(100 * time.Millisecond)
-	filesInDir, _ := ioutil.ReadDir(cdrsExpCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(cdrsExpCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) != 0 {
 		t.Fatalf("Should be no files in directory: %s", cdrsExpCfg.GeneralCfg().FailedPostsDir)
 	}
@@ -358,7 +357,7 @@ func checkContent(ev *engine.ExportEvents, content []interface{}) error {
 }
 func testCDRsExpFileFailover(t *testing.T) {
 	time.Sleep(time.Second)
-	filesInDir, _ := ioutil.ReadDir(cdrsExpCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(cdrsExpCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsExpCfg.GeneralCfg().FailedPostsDir)
 	}

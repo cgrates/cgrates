@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"io/ioutil"
 	"net/rpc"
 	"os"
 	"path"
@@ -257,7 +256,7 @@ var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
 func testXMLITHandleCdr1File(t *testing.T) {
 	fileName := "file1.xml"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(cdrXmlBroadsoft), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(cdrXmlBroadsoft), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/xmlErs/in", fileName)); err != nil {

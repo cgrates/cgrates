@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"io/ioutil"
 	"net/rpc"
 	"os"
 	"path"
@@ -152,7 +151,7 @@ func testCsvITLoadTPFromFolder(t *testing.T) {
 func testCsvITHandleCdr1File(t *testing.T) {
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/ers/in", fileName)); err != nil {
@@ -164,7 +163,7 @@ func testCsvITHandleCdr1File(t *testing.T) {
 func testCsvITHandleCdr2File(t *testing.T) {
 	fileName := "file2.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent2), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(fileContent2), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/ers2/in", fileName)); err != nil {
@@ -190,7 +189,7 @@ func testCsvITHandleSessionFile(t *testing.T) {
 	}
 	fileName := "file3.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent3), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(fileContent3), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/init_session/in", fileName)); err != nil {
@@ -279,7 +278,7 @@ func testCsvITAnalyseCDRs(t *testing.T) {
 func testCsvITProcessFilteredCDR(t *testing.T) {
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContentForFilter), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(fileContentForFilter), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/ers_with_filters/in", fileName)); err != nil {
@@ -310,22 +309,22 @@ func testCsvITAnalyzeFilteredCDR(t *testing.T) {
 
 func testCsvITProcessedFiles(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
-	if outContent1, err := ioutil.ReadFile("/tmp/ers/out/file1.csv"); err != nil {
+	if outContent1, err := os.ReadFile("/tmp/ers/out/file1.csv"); err != nil {
 		t.Error(err)
 	} else if fileContent1 != string(outContent1) {
 		t.Errorf("Expecting: %q, received: %q", fileContent1, string(outContent1))
 	}
-	if outContent2, err := ioutil.ReadFile("/tmp/ers2/out/file2.csv"); err != nil {
+	if outContent2, err := os.ReadFile("/tmp/ers2/out/file2.csv"); err != nil {
 		t.Error(err)
 	} else if fileContent2 != string(outContent2) {
 		t.Errorf("Expecting: %q, received: %q", fileContent2, string(outContent2))
 	}
-	if outContent3, err := ioutil.ReadFile("/tmp/cdrs/out/file3.csv"); err != nil {
+	if outContent3, err := os.ReadFile("/tmp/cdrs/out/file3.csv"); err != nil {
 		t.Error(err)
 	} else if fileContent3 != string(outContent3) {
 		t.Errorf("Expecting: %q, received: %q", fileContent3, string(outContent3))
 	}
-	if outContent4, err := ioutil.ReadFile("/tmp/ers_with_filters/out/file1.csv"); err != nil {
+	if outContent4, err := os.ReadFile("/tmp/ers_with_filters/out/file1.csv"); err != nil {
 		t.Error(err)
 	} else if fileContentForFilter != string(outContent4) {
 		t.Errorf("Expecting: %q, received: %q", fileContentForFilter, string(outContent4))
@@ -335,7 +334,7 @@ func testCsvITProcessedFiles(t *testing.T) {
 func testCsvITReaderWithFilter(t *testing.T) {
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/readerWithTemplate/in", fileName)); err != nil {

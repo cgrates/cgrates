@@ -22,7 +22,6 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
@@ -1385,7 +1384,7 @@ func (apierSv1 *APIerSv1) ReplayFailedPosts(args *ArgsReplyFailedPosts, reply *s
 	if args.FailedRequestsOutDir != nil && *args.FailedRequestsOutDir != "" {
 		failedReqsOutDir = *args.FailedRequestsOutDir
 	}
-	filesInDir, _ := ioutil.ReadDir(failedReqsInDir)
+	filesInDir, _ := os.ReadDir(failedReqsInDir)
 	if len(filesInDir) == 0 {
 		return utils.ErrNotFound
 	}

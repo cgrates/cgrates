@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/rpc"
@@ -940,7 +940,7 @@ func testActionsitremoteSetAccount(t *testing.T) {
 	}
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		accStr := utils.ToJSON(acc) + "\n"
-		val, err := ioutil.ReadAll(r.Body)
+		val, err := io.ReadAll(r.Body)
 		r.Body.Close()
 		if err != nil {
 			t.Error(err)

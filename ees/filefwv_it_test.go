@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"io/ioutil"
 	"net/rpc"
 	"os"
 	"path"
@@ -148,7 +147,7 @@ func testFwvVerifyExports(t *testing.T) {
 	eHdr := "10   VOI02062016520001                                                                                                         \n"
 	eCnt := "201001        1001 cli            1002                    0211  071113084200100000      1op3dsafdsaf                        002.34567\n"
 	eTrl := "90   VOI0000010000010s071113084200                                                                                             \n"
-	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
+	if outContent1, err := os.ReadFile(files[0]); err != nil {
 		t.Error(err)
 	} else if len(eHdr+eTrl+eCnt) != len(outContent1) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", len(eHdr+eTrl+eCnt), len(outContent1))

@@ -23,7 +23,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -97,7 +96,7 @@ func (rdr *CSVFileER) Serve() (err error) {
 					return
 				case <-tm.C:
 				}
-				filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
+				filesInDir, _ := os.ReadDir(rdr.rdrDir)
 				for _, file := range filesInDir {
 					if !strings.HasSuffix(file.Name(), utils.CSVSuffix) { // hardcoded file extension for csv event reader
 						continue // used in order to filter the files from directory

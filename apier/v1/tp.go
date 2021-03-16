@@ -22,7 +22,6 @@ package v1
 
 import (
 	"encoding/base64"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -51,13 +50,13 @@ type AttrImportTPZipFile struct {
 }
 
 func (apierSv1 *APIerSv1) ImportTPZipFile(attrs *AttrImportTPZipFile, reply *string) error {
-	tmpDir, err := ioutil.TempDir("/tmp", "cgr_")
+	tmpDir, err := os.MkdirTemp("/tmp", "cgr_")
 	if err != nil {
 		*reply = "ERROR: creating temp directory!"
 		return err
 	}
 	zipFile := filepath.Join(tmpDir, "/file.zip")
-	if err = ioutil.WriteFile(zipFile, attrs.File, os.ModePerm); err != nil {
+	if err = os.WriteFile(zipFile, attrs.File, os.ModePerm); err != nil {
 		*reply = "ERROR: writing zip file!"
 		return err
 	}

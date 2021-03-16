@@ -21,7 +21,7 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -1024,7 +1024,7 @@ func testHttpHandlerConfigSForNotExistFile(t *testing.T) {
 	HandlerConfigS(w, req)
 
 	resp := w.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	if resp.Status != "404 Not Found" {
 		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
@@ -1041,7 +1041,7 @@ func testHandleConfigSFolderError(t *testing.T) {
 	handleConfigSFolder(flPath, w)
 
 	resp := w.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	expected := "path:\"/usr/share/cgrates/conf/samples/NotExists/cgrates.json\" is not reachable"
 	if expected != string(body) {
@@ -1056,7 +1056,7 @@ func testHttpHandlerConfigSInvalidPath(t *testing.T) {
 	HandlerConfigS(w, req)
 
 	resp := w.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	if resp.Status != "500 Internal Server Error" {
 		t.Errorf("Expected:%+v, received:%+v", "200 OK", resp.Status)
@@ -1074,12 +1074,12 @@ func testHttpHandlerConfigSForFile(t *testing.T) {
 	HandlerConfigS(w, req)
 
 	resp := w.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	if resp.Status != "200 OK" {
 		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
 	}
-	if dat, err := ioutil.ReadFile("/usr/share/cgrates/conf/samples/tutmysql/cgrates.json"); err != nil {
+	if dat, err := os.ReadFile("/usr/share/cgrates/conf/samples/tutmysql/cgrates.json"); err != nil {
 		t.Error(err)
 	} else if string(dat) != string(body) {
 		t.Errorf("Expected %s , received: %s ", string(dat), string(body))
@@ -1093,7 +1093,7 @@ func testHttpHandlerConfigSForNotExistFolder(t *testing.T) {
 	HandlerConfigS(w, req)
 
 	resp := w.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	if resp.Status != "404 Not Found" {
 		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
@@ -1111,7 +1111,7 @@ func testHttpHandlerConfigSForFolder(t *testing.T) {
 	HandlerConfigS(w, req)
 
 	resp := w.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	if resp.Status != "200 OK" {
 		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
@@ -1228,7 +1228,7 @@ func testHandleConfigSFilesError(t *testing.T) {
 	handleConfigSFile(flPath, w)
 
 	resp := w.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	expected := "open /usr/share/cgrates/conf/samples/NotExists/cgrates.json: no such file or directory"
 	if expected != string(body) {

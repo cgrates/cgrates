@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -850,7 +849,7 @@ func getCfgJSONData(raw json.RawMessage) (data []byte, err error) {
 	if !strings.HasSuffix(dataPath, utils.JSNSuffix) {
 		dataPath = path.Join(dataPath, utils.GoogleCredentialsFileName)
 	}
-	return ioutil.ReadFile(dataPath)
+	return os.ReadFile(dataPath)
 }
 
 func newSheet() (sht *sheets.Service, err error) { //*google_api

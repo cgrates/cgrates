@@ -22,7 +22,7 @@ package loaders
 
 import (
 	"encoding/csv"
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 	"reflect"
@@ -104,7 +104,7 @@ cgrates.org,NewRes1
 #Tenant[0],ID[1]
 cgrates.org,NewRes1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(resCsv))
+	rdr := io.NopCloser(strings.NewReader(resCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldrs.ldrs["testV1LoadResource"].rdrs = map[string]map[string]*openedCSVFile{
@@ -269,7 +269,7 @@ NOT_UINT
 //PK
 NOT_UINT
 `
-	rdr := ioutil.NopCloser(strings.NewReader(resCsv))
+	rdr := io.NopCloser(strings.NewReader(resCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldrs.ldrs["testV1LoadResource"].rdrs = map[string]map[string]*openedCSVFile{
@@ -345,7 +345,7 @@ cgrates.org,NewRes1
 #Tenant[0],ID[1]
 cgrates.org,NewRes1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(resCsv))
+	rdr := io.NopCloser(strings.NewReader(resCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldrs.ldrs["testV1RemoveResource"].rdrs = map[string]map[string]*openedCSVFile{

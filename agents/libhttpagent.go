@@ -21,7 +21,7 @@ package agents
 import (
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -100,7 +100,7 @@ func (hU *httpUrlDP) RemoteHost() net.Addr {
 }
 
 func newHTTPXmlDP(req *http.Request) (dP utils.DataProvider, err error) {
-	byteData, err := ioutil.ReadAll(req.Body)
+	byteData, err := io.ReadAll(req.Body)
 	if err != nil {
 		return nil, err
 	}

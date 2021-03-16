@@ -21,7 +21,7 @@ package services
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"sync"
 	"testing"
@@ -36,7 +36,7 @@ import (
 )
 
 func init() {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 }
 
 type testMockClients struct {

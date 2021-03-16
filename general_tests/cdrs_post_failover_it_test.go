@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"io/ioutil"
 	"net/rpc"
 	"os"
 	"path"
@@ -185,7 +184,7 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 
 func testCDRsPostFailoverToFile(t *testing.T) {
 	time.Sleep(2 * time.Second)
-	filesInDir, _ := ioutil.ReadDir(cdrsPostFailCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(cdrsPostFailCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsPostFailCfg.GeneralCfg().FailedPostsDir)
 	}

@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -35,7 +34,7 @@ import (
 // NewECDSAPrvKeyFromReader creates a private key from io.Reader
 func NewECDSAPrvKeyFromReader(reader io.Reader) (prvKey *ecdsa.PrivateKey, err error) {
 	var prvkeyBuf []byte
-	if prvkeyBuf, err = ioutil.ReadAll(reader); err != nil {
+	if prvkeyBuf, err = io.ReadAll(reader); err != nil {
 		return
 	}
 	return jwt.ParseECPrivateKeyFromPEM(prvkeyBuf)
@@ -44,7 +43,7 @@ func NewECDSAPrvKeyFromReader(reader io.Reader) (prvKey *ecdsa.PrivateKey, err e
 // NewECDSAPubKeyFromReader returns a public key from io.Reader
 func NewECDSAPubKeyFromReader(reader io.Reader) (pubKey *ecdsa.PublicKey, err error) {
 	var pubkeyBuf []byte
-	if pubkeyBuf, err = ioutil.ReadAll(reader); err != nil {
+	if pubkeyBuf, err = io.ReadAll(reader); err != nil {
 		return
 	}
 	return jwt.ParseECPublicKeyFromPEM(pubkeyBuf)

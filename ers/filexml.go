@@ -20,7 +20,6 @@ package ers
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -97,7 +96,7 @@ func (rdr *XMLFileER) Serve() (err error) {
 					return
 				case <-tm.C:
 				}
-				filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
+				filesInDir, _ := os.ReadDir(rdr.rdrDir)
 				for _, file := range filesInDir {
 					if !strings.HasSuffix(file.Name(), utils.XMLSuffix) { // hardcoded file extension for xml event reader
 						continue // used in order to filter the files from directory

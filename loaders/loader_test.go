@@ -20,7 +20,7 @@ package loaders
 
 import (
 	"encoding/csv"
-	"io/ioutil"
+	"io"
 	"reflect"
 	"sort"
 	"strings"
@@ -91,7 +91,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -108,7 +108,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 
 	//processContent successfully when dryrun is false
 	ldr.dryRun = false
-	rdr = ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -157,7 +157,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 	//cannot set AttributeProfile when dataManager is nil
 	ldr.dm = nil
 	ldr.dryRun = false
-	rdr = ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -211,10 +211,10 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
 		},
 	}
-	rdr1 := ioutil.NopCloser(strings.NewReader(file1CSV))
+	rdr1 := io.NopCloser(strings.NewReader(file1CSV))
 	csvRdr1 := csv.NewReader(rdr1)
 	csvRdr1.Comment = '#'
-	rdr2 := ioutil.NopCloser(strings.NewReader(file2CSV))
+	rdr2 := io.NopCloser(strings.NewReader(file2CSV))
 	csvRdr2 := csv.NewReader(rdr2)
 	csvRdr2.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -310,7 +310,7 @@ func TestLoaderProcessResource(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.ResourcesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.ResourcesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -408,7 +408,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.FiltersCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.FiltersCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -425,7 +425,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 
 	//processContent when dryrun is false
 	ldr.dryRun = false
-	rdr = ioutil.NopCloser(strings.NewReader(engine.FiltersCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.FiltersCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -571,7 +571,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -612,7 +612,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 
 	//cannot set thresholdProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -692,7 +692,7 @@ func TestLoaderProcessStats(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.StatsCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.StatsCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -748,7 +748,7 @@ func TestLoaderProcessStats(t *testing.T) {
 
 	//cannot set statsProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(engine.StatsCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.StatsCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -785,7 +785,7 @@ func TestLoaderProcessStatsWrongMetrics(t *testing.T) {
 #Metrics[0],Stored[1]
 not_a_valid_metric_type,true,
 `
-	rdr := ioutil.NopCloser(strings.NewReader(statsCsv))
+	rdr := io.NopCloser(strings.NewReader(statsCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -806,7 +806,7 @@ not_a_valid_metric_type,true,
 #Metrics[0],Stored[1]
 *sum#~*req.Value,false
 `
-	rdr = ioutil.NopCloser(strings.NewReader(statsCsv))
+	rdr = io.NopCloser(strings.NewReader(statsCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -900,7 +900,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.RoutesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.RoutesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -980,7 +980,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 
 	//cannot set RoutesProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(engine.RoutesCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.RoutesCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1019,7 +1019,7 @@ func TestLoaderProcessAccountProfiles(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,ACTPRF_ID1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(actPrflCsv))
+	rdr := io.NopCloser(strings.NewReader(actPrflCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1036,7 +1036,7 @@ cgrates.org,ACTPRF_ID1
 
 	//cannot set an AccountProfile while dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(actPrflCsv))
+	rdr = io.NopCloser(strings.NewReader(actPrflCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1094,7 +1094,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.ChargersCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.ChargersCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1130,7 +1130,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 
 	//cannot set chargerProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(engine.ChargersCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.ChargersCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1235,7 +1235,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 			},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1295,7 +1295,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 
 	//cannot set DispatchersProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1356,7 +1356,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 			},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1395,7 +1395,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 
 	//cannot set DispatcherHostProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1434,7 +1434,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 				Mandatory: true},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1502,7 +1502,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 
 	//cannot remove when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1601,7 +1601,7 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.17", utils.InfieldSep)},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1712,7 +1712,7 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 
 	//cannot set RateProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1823,7 +1823,7 @@ cgrates.org,RP1,,,,,,,RT_WEEK,,,,,1m,,0.06,1m,1s
 cgrates.org,RP1,,,,,,,RT_WEEKEND,,"* * * * 0,6",;10,false,0s,,0.06,1m,1s
 cgrates.org,RP1,,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
 `
-	rdr1 := ioutil.NopCloser(strings.NewReader(ratePrfCnt1))
+	rdr1 := io.NopCloser(strings.NewReader(ratePrfCnt1))
 	csvRdr1 := csv.NewReader(rdr1)
 	csvRdr1.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1896,7 +1896,7 @@ cgrates.org,RP1,,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
 	}
 
-	rdr2 := ioutil.NopCloser(strings.NewReader(ratePrfCnt2))
+	rdr2 := io.NopCloser(strings.NewReader(ratePrfCnt2))
 	csvRdr2 := csv.NewReader(rdr2)
 	csvRdr2.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2160,7 +2160,7 @@ cgrates.org,RP1,RT_WEEKEND
 cgrates.org,RP2,RT_WEEKEND;RT_CHRISTMAS
 cgrates.org,RP1,
 `
-	rdr1 := ioutil.NopCloser(strings.NewReader(ratePrfCnt1))
+	rdr1 := io.NopCloser(strings.NewReader(ratePrfCnt1))
 	csvRdr1 := csv.NewReader(rdr1)
 	csvRdr1.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2231,7 +2231,7 @@ cgrates.org,RP1,
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
 	}
 
-	rdr2 := ioutil.NopCloser(strings.NewReader(ratePrfCnt2))
+	rdr2 := io.NopCloser(strings.NewReader(ratePrfCnt2))
 	csvRdr2 := csv.NewReader(rdr2)
 	csvRdr2.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2347,7 +2347,7 @@ cgrates.org,RP2
 		t.Error(err)
 	}
 
-	rdr1 := ioutil.NopCloser(strings.NewReader(ratePrfCnt1))
+	rdr1 := io.NopCloser(strings.NewReader(ratePrfCnt1))
 	csvRdr1 := csv.NewReader(rdr1)
 	csvRdr1.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2517,7 +2517,7 @@ func TestLoaderActionProfile(t *testing.T) {
 				Layout: time.RFC3339},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.ActionProfileCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.ActionProfileCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2600,7 +2600,7 @@ func TestLoaderActionProfile(t *testing.T) {
 
 	//cannot set ActionProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(engine.ActionProfileCSVContent))
+	rdr = io.NopCloser(strings.NewReader(engine.ActionProfileCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2713,7 +2713,7 @@ cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*ba
 cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
 `
 
-	rdr := ioutil.NopCloser(strings.NewReader(newCSVContentMiss))
+	rdr := io.NopCloser(strings.NewReader(newCSVContentMiss))
 	csvRdr := csv.NewReader(rdr)
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
@@ -2738,7 +2738,7 @@ cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.T
 cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
 cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
 `
-	rdr = ioutil.NopCloser(strings.NewReader(newCSVContent))
+	rdr = io.NopCloser(strings.NewReader(newCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
@@ -2788,7 +2788,7 @@ func TestLoaderActionProfileAsStructErrType(t *testing.T) {
 #Tenant,ID,ActionBlocker
 cgrates.org,12,NOT_A_BOOLEAN
 `
-	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2824,7 +2824,7 @@ func TestLoaderActionProfileAsStructErrTConversion(t *testing.T) {
 #ActivationInterval
 * * * * * *
 `
-	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2858,7 +2858,7 @@ func TestLoaderAttributesAsStructErrType(t *testing.T) {
 #Weight
 true
 `
-	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr := io.NopCloser(strings.NewReader(attributeCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2892,7 +2892,7 @@ func TestLoaderAttributesAsStructErrConversion(t *testing.T) {
 #ActivationInterval
 * * * * * *
 `
-	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr := io.NopCloser(strings.NewReader(attributeCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2926,7 +2926,7 @@ func TestLoadResourcesAsStructErrType(t *testing.T) {
 #Blocker
 NOT_A_BOOLEAN
 `
-	rdr := ioutil.NopCloser(strings.NewReader(resourcesCsv))
+	rdr := io.NopCloser(strings.NewReader(resourcesCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2960,7 +2960,7 @@ func TestLoadResourcesAsStructErrConversion(t *testing.T) {
 #UsageTTL
 12ss
 `
-	rdr := ioutil.NopCloser(strings.NewReader(resourcesCsv))
+	rdr := io.NopCloser(strings.NewReader(resourcesCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2994,7 +2994,7 @@ func TestLoadFiltersAsStructErrType(t *testing.T) {
 #PK
 NOT_UINT
 `
-	rdr := ioutil.NopCloser(strings.NewReader(filtersCsv))
+	rdr := io.NopCloser(strings.NewReader(filtersCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3032,7 +3032,7 @@ func TestLoadFiltersAsStructErrConversion(t *testing.T) {
 #ActivationInterval
 * * * * * *
 `
-	rdr := ioutil.NopCloser(strings.NewReader(filtersCsv))
+	rdr := io.NopCloser(strings.NewReader(filtersCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3070,7 +3070,7 @@ func TestLoadStatsAsStructErrType(t *testing.T) {
 #PK
 NOT_UINT
 `
-	rdr := ioutil.NopCloser(strings.NewReader(statsCsv))
+	rdr := io.NopCloser(strings.NewReader(statsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3108,7 +3108,7 @@ func TestLoadStatsAsStructErrConversion(t *testing.T) {
 #ActivationInterval
 * * * * * *
 `
-	rdr := ioutil.NopCloser(strings.NewReader(statsCsv))
+	rdr := io.NopCloser(strings.NewReader(statsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3146,7 +3146,7 @@ func TestLoadThresholdsAsStructErrType(t *testing.T) {
 #PK
 NOT_UINT
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3184,7 +3184,7 @@ func TestLoadThresholdsAsStructErrConversion(t *testing.T) {
 #ActivationInterval
 * * * * * *
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3222,7 +3222,7 @@ func TestLoadRoutesAsStructErrType(t *testing.T) {
 #PK
 NOT_UINT
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3260,7 +3260,7 @@ func TestLoadRoutesAsStructErrConversion(t *testing.T) {
 #ActivationInterval
 * * * * * *
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3298,7 +3298,7 @@ func TestLoadChargersAsStructErrType(t *testing.T) {
 #PK
 NOT_UINT
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3336,7 +3336,7 @@ func TestLoadChargersAsStructErrConversion(t *testing.T) {
 #ActivationInterval
 * * * * * *
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3374,7 +3374,7 @@ func TestLoadDispatchersAsStructErrType(t *testing.T) {
 #PK
 NOT_UINT
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3412,7 +3412,7 @@ func TestLoadDispatcherAsStructErrConversion(t *testing.T) {
 #ActivationInterval
 * * * * * *
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3450,7 +3450,7 @@ func TestLoadDispatcherHostsAsStructErrType(t *testing.T) {
 #PK
 NOT_UINT
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3488,7 +3488,7 @@ func TestLoadRateProfilesAsStructErrType(t *testing.T) {
 #PK
 NOT_UINT
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3526,7 +3526,7 @@ func TestLoadRateProfilesAsStructErrConversion(t *testing.T) {
 #ActivationInterval
 * * * * * *
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3564,7 +3564,7 @@ func TestLoadAccountProfilesAsStructErrConversion(t *testing.T) {
 #ActivationInterval
 * * * * * * *
 `
-	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3615,7 +3615,7 @@ func TestProcessContentAccountProfileAsTPError(t *testing.T) {
 #Tenant,ID,BalanceID,BalanceUnitFactors
 cgrates.org,1001,MonetaryBalance,fltr1&fltr2;100;fltr3
 `
-	rdr := ioutil.NopCloser(strings.NewReader(accPrfCSv))
+	rdr := io.NopCloser(strings.NewReader(accPrfCSv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3653,7 +3653,7 @@ func TestLoadAccountProfilesAsStructErrType(t *testing.T) {
 #PK
 NOT_UINT
 `
-	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3698,7 +3698,7 @@ func TestLoadAndRemoveResources(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,NewRes1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdr := io.NopCloser(strings.NewReader(resourcesCSV))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3718,7 +3718,7 @@ cgrates.org,NewRes1
 
 	ldr.dryRun = false
 	//reinitialized reader because after first process the reader is at the end of the file
-	rdr = ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdr = io.NopCloser(strings.NewReader(resourcesCSV))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3750,7 +3750,7 @@ cgrates.org,NewRes1
 	}
 
 	//reinitialized reader because seeker it s at the end of the file
-	rdr = ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdr = io.NopCloser(strings.NewReader(resourcesCSV))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3767,7 +3767,7 @@ cgrates.org,NewRes1
 
 	//remove successfully when dryrun is false
 	ldr.dryRun = false
-	rdr = ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdr = io.NopCloser(strings.NewReader(resourcesCSV))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3791,7 +3791,7 @@ cgrates.org,NewRes1
 
 	//cannot set again ResourceProfile when dataManager is nil
 	ldr.dm = nil
-	rdr = ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdr = io.NopCloser(strings.NewReader(resourcesCSV))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3831,7 +3831,7 @@ func TestRemoveFilterContent(t *testing.T) {
 #Tenant[0],ID[0]
 cgrates.org,FILTERS_REM_1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(filtersCsv))
+	rdr := io.NopCloser(strings.NewReader(filtersCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3861,7 +3861,7 @@ cgrates.org,FILTERS_REM_1
 
 	//cannot remove Filter when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(filtersCsv))
+	rdr = io.NopCloser(strings.NewReader(filtersCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3880,7 +3880,7 @@ cgrates.org,FILTERS_REM_1
 	//cannot set again FiltersProfile when dataManager is nil
 	ldr.dm = nil
 	ldr.dryRun = false
-	rdr = ioutil.NopCloser(strings.NewReader(filtersCsv))
+	rdr = io.NopCloser(strings.NewReader(filtersCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3924,7 +3924,7 @@ func TestRemoveStatsContent(t *testing.T) {
 #Tenant[0],ProfileID[1]
 cgrates.org,REM_STATS_1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(statsCsv))
+	rdr := io.NopCloser(strings.NewReader(statsCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3954,7 +3954,7 @@ cgrates.org,REM_STATS_1
 
 	//cannot remove statsQueueProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(statsCsv))
+	rdr = io.NopCloser(strings.NewReader(statsCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -3973,7 +3973,7 @@ cgrates.org,REM_STATS_1
 	//cannot set again StatsProfile when dataManager is nil
 	ldr.dm = nil
 	ldr.dryRun = false
-	rdr = ioutil.NopCloser(strings.NewReader(statsCsv))
+	rdr = io.NopCloser(strings.NewReader(statsCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4017,7 +4017,7 @@ func TestRemoveThresholdsContent(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,REM_THRESHOLDS_1,
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4047,7 +4047,7 @@ cgrates.org,REM_THRESHOLDS_1,
 
 	//cannot remove statsQueueProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr = io.NopCloser(strings.NewReader(thresholdsCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4066,7 +4066,7 @@ cgrates.org,REM_THRESHOLDS_1,
 	//cannot set again ThresholdsProfile when dataManager is nil
 	ldr.dm = nil
 	ldr.dryRun = false
-	rdr = ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr = io.NopCloser(strings.NewReader(thresholdsCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4110,7 +4110,7 @@ func TestRemoveRoutesContent(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,ROUTES_REM_1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(routesCsv))
+	rdr := io.NopCloser(strings.NewReader(routesCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4140,7 +4140,7 @@ cgrates.org,ROUTES_REM_1
 
 	//cannot remove routeProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(routesCsv))
+	rdr = io.NopCloser(strings.NewReader(routesCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4159,7 +4159,7 @@ cgrates.org,ROUTES_REM_1
 	//cannot set again RoutesProfile when dataManager is nil
 	ldr.dm = nil
 	ldr.dryRun = false
-	rdr = ioutil.NopCloser(strings.NewReader(routesCsv))
+	rdr = io.NopCloser(strings.NewReader(routesCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4203,7 +4203,7 @@ func TestRemoveChargersContent(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,REM_ROUTES_1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(routesCsv))
+	rdr := io.NopCloser(strings.NewReader(routesCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4232,7 +4232,7 @@ cgrates.org,REM_ROUTES_1
 
 	//cannot remove ChargersProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(routesCsv))
+	rdr = io.NopCloser(strings.NewReader(routesCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4251,8 +4251,8 @@ cgrates.org,REM_ROUTES_1
 	//cannot set again ChargersProfile when dataManager is nil
 	ldr.dm = nil
 	ldr.dryRun = false
-	rdr = ioutil.NopCloser(strings.NewReader(routesCsv))
-	rdr = ioutil.NopCloser(strings.NewReader(routesCsv))
+	rdr = io.NopCloser(strings.NewReader(routesCsv))
+	rdr = io.NopCloser(strings.NewReader(routesCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4296,7 +4296,7 @@ func TestRemoveDispatchersContent(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,REM_DISPATCHERS_1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(dispatchersCsv))
+	rdr := io.NopCloser(strings.NewReader(dispatchersCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4325,7 +4325,7 @@ cgrates.org,REM_DISPATCHERS_1
 
 	//cannot remove DispatchersProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(dispatchersCsv))
+	rdr = io.NopCloser(strings.NewReader(dispatchersCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4344,7 +4344,7 @@ cgrates.org,REM_DISPATCHERS_1
 	//cannot set again DispatchersProfile when dataManager is nil
 	ldr.dm = nil
 	ldr.dryRun = false
-	rdr = ioutil.NopCloser(strings.NewReader(dispatchersCsv))
+	rdr = io.NopCloser(strings.NewReader(dispatchersCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4388,7 +4388,7 @@ func TestRemoveDispatcherHostsContent(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,REM_DISPATCHERH_1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(dispatchersHostsCsv))
+	rdr := io.NopCloser(strings.NewReader(dispatchersHostsCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4419,7 +4419,7 @@ cgrates.org,REM_DISPATCHERH_1
 
 	//cannot remove DispatcherHosts when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(dispatchersHostsCsv))
+	rdr = io.NopCloser(strings.NewReader(dispatchersHostsCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4479,7 +4479,7 @@ func TestProcessContentEmptyDataBase(t *testing.T) {
 			},
 		},
 	}
-	rdr := ioutil.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
+	rdr := io.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4523,7 +4523,7 @@ func TestRemoveRateProfileContent(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,REM_RATEPROFILE_1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(rtPrfCsv))
+	rdr := io.NopCloser(strings.NewReader(rtPrfCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4552,7 +4552,7 @@ cgrates.org,REM_RATEPROFILE_1
 
 	//cannot remove DispatcherHosts when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(rtPrfCsv))
+	rdr = io.NopCloser(strings.NewReader(rtPrfCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4574,7 +4574,7 @@ cgrates.org,REM_RATEPROFILE_1
 			utils.MetaPartial: nil,
 		},
 	}
-	rdr = ioutil.NopCloser(strings.NewReader(rtPrfCsv))
+	rdr = io.NopCloser(strings.NewReader(rtPrfCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4618,7 +4618,7 @@ cgrates.org,REM_ACTPROFILE_1
 `
 	//cannot set ActionProfile when dataManager is nil
 	ldr.dm = nil
-	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4654,7 +4654,7 @@ cgrates.org,REM_ACTPROFILE_1
 
 	//cannot remove DispatcherHosts when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	rdr = io.NopCloser(strings.NewReader(actPrfCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4697,7 +4697,7 @@ func TestRemoveAccountProfileContent(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,REM_ACTPROFILE_1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(acntPrfCsv))
+	rdr := io.NopCloser(strings.NewReader(acntPrfCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4733,7 +4733,7 @@ cgrates.org,REM_ACTPROFILE_1
 
 	//cannot remove AccountProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = ioutil.NopCloser(strings.NewReader(acntPrfCsv))
+	rdr = io.NopCloser(strings.NewReader(acntPrfCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4778,7 +4778,7 @@ func TestRemoveContentError1(t *testing.T) {
 //Tenant[0]
 cgrates.org,REM_ACTPROFILE_s
 `
-	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4830,7 +4830,7 @@ func TestRemoveContentError2(t *testing.T) {
 Tenant[0],ID[1]
 cgrates.org,REM_ACTPROFILE_s
 `
-	rdr := ioutil.NopCloser(strings.NewReader(actPrfCsv))
+	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4908,7 +4908,7 @@ func TestRemoveRateProfileRatesError(t *testing.T) {
 #Tenant[0],ID[1],RateIDs[2]
 cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 `
-	rdr := ioutil.NopCloser(strings.NewReader(rtPrfCsv))
+	rdr := io.NopCloser(strings.NewReader(rtPrfCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4931,7 +4931,7 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
 	}
 
-	rdr = ioutil.NopCloser(strings.NewReader(rtPrfCsv))
+	rdr = io.NopCloser(strings.NewReader(rtPrfCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4988,7 +4988,7 @@ func TestRemoveThresholdsMockError(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,REM_THRESHOLDS_1,
 `
-	rdr := ioutil.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -5047,7 +5047,7 @@ func TestRemoveStatQueueMockError(t *testing.T) {
 #Tenant[0],ProfileID[1]
 cgrates.org,REM_STATS_1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(statsCsv))
+	rdr := io.NopCloser(strings.NewReader(statsCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -5105,7 +5105,7 @@ func TestRemoveResourcesMockError(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,NewRes1
 `
-	rdr := ioutil.NopCloser(strings.NewReader(resourcesCSV))
+	rdr := io.NopCloser(strings.NewReader(resourcesCSV))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{

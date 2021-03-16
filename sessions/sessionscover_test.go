@@ -21,7 +21,7 @@ package sessions
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"reflect"
@@ -36,7 +36,7 @@ import (
 )
 
 func TestSetSTerminator(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().SessionTTL = time.Second
 	data := engine.NewInternalDB(nil, nil, true)
@@ -105,7 +105,7 @@ func TestSetSTerminator(t *testing.T) {
 }
 
 func TestSetSTerminatorError(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().SessionTTL = time.Second
 	data := engine.NewInternalDB(nil, nil, true)
@@ -203,7 +203,7 @@ func TestSetSTerminatorError(t *testing.T) {
 }
 
 func TestSetSTerminatorAutomaticTermination(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	ss := &Session{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -225,7 +225,7 @@ func TestSetSTerminatorAutomaticTermination(t *testing.T) {
 }
 
 func TestSetSTerminatorManualTermination(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	ss := &Session{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -242,7 +242,7 @@ func TestSetSTerminatorManualTermination(t *testing.T) {
 }
 
 func TestForceSTerminatorManualTermination(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	ss := &Session{
 		CGRID:         "CGRID",
 		Tenant:        "cgrates.org",
@@ -275,7 +275,7 @@ func TestForceSTerminatorManualTermination(t *testing.T) {
 }
 
 func TestForceSTerminatorPostCDRs(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
 	data := engine.NewInternalDB(nil, nil, true)
@@ -312,7 +312,7 @@ func TestForceSTerminatorPostCDRs(t *testing.T) {
 }
 
 func TestForceSTerminatorReleaseSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	data := engine.NewInternalDB(nil, nil, true)
@@ -358,7 +358,7 @@ func (sT *testMockClientConn) Call(method string, arg interface{}, rply interfac
 }
 
 func TestForceSTerminatorClientCall(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	sTestMock := &testMockClientConn{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -401,7 +401,7 @@ func TestForceSTerminatorClientCall(t *testing.T) {
 }
 
 func TestDebitSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -463,7 +463,7 @@ func (sT *testMockClients) Call(method string, arg interface{}, rply interface{}
 }
 
 func TestDebitSessionResponderMaxDebit(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -536,7 +536,7 @@ func TestDebitSessionResponderMaxDebit(t *testing.T) {
 }
 
 func TestDebitSessionResponderMaxDebitError(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	sMock := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -609,7 +609,7 @@ func TestDebitSessionResponderMaxDebitError(t *testing.T) {
 }
 
 func TestInitSessionDebitLoops(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -652,7 +652,7 @@ func (sT *testMockClientConnDiscSess) Call(method string, arg interface{}, rply 
 }
 
 func TestDebitLoopSessionErrorDebiting(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest"
 	cfg.SessionSCfg().TerminateAttempts = 1
@@ -719,7 +719,7 @@ func TestDebitLoopSessionErrorDebiting(t *testing.T) {
 }
 
 func TestDebitLoopSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -781,7 +781,7 @@ func TestDebitLoopSession(t *testing.T) {
 }
 
 func TestDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -843,7 +843,7 @@ func TestDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
 }
 
 func TestDebitLoopSessionLowBalance(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -901,7 +901,7 @@ func TestDebitLoopSessionLowBalance(t *testing.T) {
 }
 
 func TestDebitLoopSessionWarningSessions(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -957,7 +957,7 @@ func TestDebitLoopSessionWarningSessions(t *testing.T) {
 }
 
 func TestDebitLoopSessionDisconnectSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1027,7 +1027,7 @@ func TestDebitLoopSessionDisconnectSession(t *testing.T) {
 }
 
 func TestStoreSCost(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1075,7 +1075,7 @@ func TestStoreSCost(t *testing.T) {
 }
 
 func TestRefundSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1187,7 +1187,7 @@ func TestRefundSession(t *testing.T) {
 }
 
 func TestRoundCost(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1261,7 +1261,7 @@ func TestRoundCost(t *testing.T) {
 }
 
 func TestDisconnectSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -1299,7 +1299,7 @@ func TestDisconnectSession(t *testing.T) {
 }
 
 func TestReplicateSessions(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1325,7 +1325,7 @@ func TestReplicateSessions(t *testing.T) {
 }
 
 func TestNewSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1425,7 +1425,7 @@ func TestNewSession(t *testing.T) {
 }
 
 func TestProcessChargerS(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmpCache := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -1485,7 +1485,7 @@ func TestProcessChargerS(t *testing.T) {
 }
 
 func TestTransitSState(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -1513,7 +1513,7 @@ func TestTransitSState(t *testing.T) {
 }
 
 func TestRelocateSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -1568,7 +1568,7 @@ func TestRelocateSession(t *testing.T) {
 }
 
 func TestGetRelocateSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -1597,7 +1597,7 @@ func TestGetRelocateSession(t *testing.T) {
 }
 
 func TestLibsessionsSetMockErrors(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -1664,7 +1664,7 @@ func (sT *testMockClientSyncSessions) Call(method string, arg interface{}, rply 
 }
 
 func TestSyncSessions(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 	engine.Cache.Clear(nil)
 
@@ -1728,7 +1728,7 @@ func TestSyncSessions(t *testing.T) {
 }
 
 func TestAuthEvent(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockClients{
@@ -1796,7 +1796,7 @@ func TestAuthEvent(t *testing.T) {
 }
 
 func TestAuthEventMockCall(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	//mocking the GetMaxSession for checking the error
 	engine.Cache.Clear(nil)
 	sTestMock := &testMockClients{
@@ -1868,7 +1868,7 @@ func TestAuthEventMockCall(t *testing.T) {
 }
 
 func TestChargeEvent(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -1962,7 +1962,7 @@ func TestChargeEvent(t *testing.T) {
 }
 
 func TestUpdateSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -2002,7 +2002,7 @@ func TestUpdateSession(t *testing.T) {
 }
 
 func TestEndSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	sTestMock := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2107,7 +2107,7 @@ func TestEndSession(t *testing.T) {
 }
 
 func TestCallBiRPC(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -2136,7 +2136,7 @@ func TestCallBiRPC(t *testing.T) {
 }
 
 func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	clnt := &testMockClients{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2296,7 +2296,7 @@ func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 }
 
 func TestBiRPCv1SetPassiveSession(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	clnt := &testMockClients{}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2344,7 +2344,7 @@ func TestBiRPCv1SetPassiveSession(t *testing.T) {
 }
 
 func TestBiRPCv1ReplicateSessions(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2381,7 +2381,7 @@ func TestBiRPCv1ReplicateSessions(t *testing.T) {
 }
 
 func TestBiRPCv1AuthorizeEvent(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -2476,7 +2476,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 }
 
 func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2611,7 +2611,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 }
 
 func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2720,7 +2720,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 }
 
 func TestBiRPCv1InitiateSession1(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -2870,7 +2870,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 }
 
 func TestBiRPCv1InitiateSession2(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2987,7 +2987,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 
 }
 func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3094,7 +3094,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 }
 
 func TestBiRPCv1UpdateSession1(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -3176,7 +3176,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 }
 
 func TestBiRPCv1UpdateSession2(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3248,7 +3248,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 }
 
 func TestBiRPCv1TerminateSession1(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -3398,7 +3398,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 }
 
 func TestBiRPCv1TerminateSession2(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3459,7 +3459,7 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 }
 
 func TestBiRPCv1ProcessCDR(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 
 	cfg := config.NewDefaultCGRConfig()
@@ -3498,7 +3498,7 @@ func TestBiRPCv1ProcessCDR(t *testing.T) {
 }
 
 func TestBiRPCv1ProcessMessage1(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -3579,7 +3579,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 }
 
 func TestBiRPCv1ProcessMessage2(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3681,7 +3681,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 }
 
 func TestBiRPCv1ProcessEvent(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)
@@ -3825,7 +3825,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 }
 
 func TestBiRPCv1ProcessEventStats(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3907,7 +3907,7 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 	}
 }
 func TestBiRPCv1ProcessEventResources(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -4007,7 +4007,7 @@ func TestBiRPCv1ProcessEventResources(t *testing.T) {
 }
 
 func TestBiRPCv1ProcessEventRals1(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -4117,7 +4117,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 
 func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	tmp := engine.Cache
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
@@ -4254,7 +4254,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 }
 
 func TestBiRPCv1ProcessEventCDRs(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 
 	engine.Cache.Clear(nil)
 	clnt := &testMockClients{
@@ -4332,7 +4332,7 @@ func TestBiRPCv1ProcessEventCDRs(t *testing.T) {
 }
 
 func TestBiRPCv1GetCost(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 
 	engine.Cache.Clear(nil)

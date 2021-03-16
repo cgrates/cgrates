@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"sync"
@@ -46,7 +45,7 @@ func testCreateDirs(t *testing.T) {
 			t.Fatal("Error creating folder: ", dir, err)
 		}
 	}
-	if err := ioutil.WriteFile(path.Join("/tmp/In", utils.AttributesCsv), []byte(engine.AttributesCSVContent), 0644); err != nil {
+	if err := os.WriteFile(path.Join("/tmp/In", utils.AttributesCsv), []byte(engine.AttributesCSVContent), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 }
