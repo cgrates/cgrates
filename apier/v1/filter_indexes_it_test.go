@@ -93,6 +93,7 @@ var (
 		testVF1ComputeIDsRateProfileRateIndexes,
 		testVF1RemoveRateProfileRates,
 		testV1FIdxdxInitDataDb,
+		testV1IndexClearCache,
 
 		testV1FISetRateProfileIndexes,
 		testV1FIComputeRateProfileIndexes,
@@ -154,6 +155,13 @@ func testV1FIdxLoadConfig(t *testing.T) {
 
 func testV1FIdxdxInitDataDb(t *testing.T) {
 	if err := engine.InitDataDb(tSv1Cfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testV1IndexClearCache(t *testing.T) {
+	var reply string
+	if err := tFIdxRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{}, &reply); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -1804,7 +1812,7 @@ func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 	//there are not any rates in db
 	var reply *engine.RateProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RRATE_PRF"}}, &reply); err == nil ||
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -2197,6 +2205,7 @@ func testVF1RemoveRateProfileRates(t *testing.T) {
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+
 }
 
 //RateProfile Indexes

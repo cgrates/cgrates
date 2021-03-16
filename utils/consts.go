@@ -66,7 +66,7 @@ var (
 		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccountProfiles})
 
 	// CachePartitions enables creation of cache partitions
-	CachePartitions = Join(extraDBPartition, dataDBPartition, storDBPartition)
+	CachePartitions = JoinStringSet(extraDBPartition, dataDBPartition, storDBPartition)
 
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:                 DestinationPrefix,
