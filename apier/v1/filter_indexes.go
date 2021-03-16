@@ -381,6 +381,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 				for key := range rpr.Rates {
 					rtIds = append(rtIds, key)
 				}
+
 				_, e = engine.ComputeIndexes(apierSv1.DataManager, tnt, id, utils.CacheRateFilterIndexes,
 					&rtIds, transactionID, func(_, id, _ string) (*[]string, error) {
 						rateFilters := make([]string, len(rpr.Rates[id].FilterIDs))

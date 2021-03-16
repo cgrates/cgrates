@@ -253,7 +253,7 @@ func TestStringSetJoin(t *testing.T) {
 	set3 := StringSet{
 		"test3": struct{}{},
 	}
-	rcv := Join(set1, set2, set3)
+	rcv := JoinStringSet(set1, set2, set3)
 
 	expected := StringSet{
 		"test1": struct{}{},

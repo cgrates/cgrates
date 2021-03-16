@@ -921,6 +921,10 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 			continue
 		}
+		//to be the same as HMSET
+		if x, ok := Cache.Get(idxItmType, dbKey); ok && x != nil {
+			indx = utils.JoinStringSet(indx, x.(utils.StringSet))
+		}
 		Cache.SetWithoutReplicate(idxItmType, dbKey, indx, []string{tntCtx},
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}

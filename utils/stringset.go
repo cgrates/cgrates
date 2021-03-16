@@ -115,7 +115,8 @@ func (s StringSet) GetOne() string {
 	return EmptyString
 }
 
-func Join(s ...StringSet) (conc StringSet) {
+// JoinStringSet intersect multiple StringSets in one
+func JoinStringSet(s ...StringSet) (conc StringSet) {
 	conc = make(StringSet)
 	for _, k := range s {
 		for key := range k {
