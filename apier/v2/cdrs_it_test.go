@@ -463,7 +463,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 	}
 	//add a charger
-	chargerProfile := &v1.ChargerWithCache{
+	chargerProfile := &v1.ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "CustomTenant",
 			ID:     "CustomCharger",
@@ -475,7 +475,9 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		Cache: utils.StringPointer(utils.MetaReload),
+		Opts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaReload,
+		},
 	}
 	if err := cdrsRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
@@ -728,7 +730,7 @@ func testV2CDRsSetThreshold(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
-	tPrfl := engine.ThresholdWithCache{
+	tPrfl := engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "THD_Test",
@@ -858,7 +860,7 @@ func testV2CDRsRerate(t *testing.T) {
 		t.Error("Reply: ", reply)
 	}
 	//add a charger
-	chargerProfile := &v1.ChargerWithCache{
+	chargerProfile := &v1.ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "cgrates.org",
 			ID:     "Default",
@@ -869,7 +871,9 @@ func testV2CDRsRerate(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		Cache: utils.StringPointer(utils.MetaReload),
+		Opts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaReload,
+		},
 	}
 	if err := cdrsRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
 		t.Error(err)
@@ -1022,7 +1026,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 		t.Error("Reply: ", reply)
 	}
 	//add a charger
-	chargerProfile := &v1.ChargerWithCache{
+	chargerProfile := &v1.ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "cgrates.org",
 			ID:     "Default",
@@ -1033,7 +1037,9 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		Cache: utils.StringPointer(utils.MetaReload),
+		Opts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaReload,
+		},
 	}
 	if err := cdrsRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
 		t.Error(err)

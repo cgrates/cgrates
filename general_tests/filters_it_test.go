@@ -293,7 +293,7 @@ func testV1FltrPopulateThreshold(t *testing.T) {
 	}
 
 	//Add a threshold with filter from above and an inline filter for Account 1010
-	tPrfl := &engine.ThresholdWithCache{
+	tPrfl := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_Stats1",
@@ -367,7 +367,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	}
 
 	//update the threshold with new filter
-	tPrfl := &engine.ThresholdWithCache{
+	tPrfl := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_Stats1",
@@ -470,7 +470,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tPrfl := &engine.ThresholdWithCache{
+	tPrfl := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_ResTest",
@@ -742,7 +742,7 @@ func testV1FltrAccounts(t *testing.T) {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", result)
 	}
 	//Add a threshold with filter from above and an inline filter for Account 1010
-	tPrfl := &engine.ThresholdWithCache{
+	tPrfl := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_Account",
@@ -830,7 +830,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 		t.Error("Got error on APIerSv2.SetActions: ", err.Error())
 	}
 	//Add a threshold with filter from above and an inline filter for Account 1010
-	tPrfl := &engine.ThresholdWithCache{
+	tPrfl := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_AccountDinamic",
@@ -893,7 +893,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Reply: ", reply)
 	}
-	chargerProfile := &v1.ChargerWithCache{
+	chargerProfile := &v1.ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "IntraCharger",
@@ -910,7 +910,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	chargerProfile2 := &v1.ChargerWithCache{
+	chargerProfile2 := &v1.ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "InterCharger",

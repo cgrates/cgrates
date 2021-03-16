@@ -124,7 +124,7 @@ func (apierSv1 *APIerSv1) GetThresholdProfileIDsCount(args *utils.TenantWithOpts
 }
 
 // SetThresholdProfile alters/creates a ThresholdProfile
-func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdWithCache, reply *string) error {
+func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdProfileWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.ThresholdProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

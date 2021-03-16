@@ -132,7 +132,7 @@ func testFlatstoreITRpcConn(t *testing.T) {
 
 func testFlatstoreITLoadTPFromFolder(t *testing.T) {
 	//add a default charger
-	chargerProfile := &v1.ChargerWithCache{
+	chargerProfile := &v1.ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",

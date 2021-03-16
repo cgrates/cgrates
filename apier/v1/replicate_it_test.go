@@ -347,7 +347,7 @@ func testInternalReplicateITRouteProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rPrf := &RouteWithCache{
+	rPrf := &RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "TEST_PROFILE1",
@@ -501,7 +501,7 @@ func testInternalReplicateITDispatcherProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	dispatcherProfile = &DispatcherWithCache{
+	dispatcherProfile = &DispatcherWithOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",
@@ -568,7 +568,7 @@ func testInternalReplicateITChargerProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	chargerProfile = &ChargerWithCache{
+	chargerProfile = &ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
@@ -634,7 +634,7 @@ func testInternalReplicateITDispatcherHost(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	dispatcherHost = &DispatcherHostWithCache{
+	dispatcherHost = &engine.DispatcherHostWithOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
@@ -1002,7 +1002,7 @@ func testInternalReplicateITThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tPrfl = &engine.ThresholdWithCache{
+	tPrfl = &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE1",
@@ -1231,7 +1231,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
-	tPrfl := engine.ThresholdWithCache{
+	tPrfl := engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "THD_Test",

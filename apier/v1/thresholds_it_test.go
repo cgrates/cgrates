@@ -36,7 +36,7 @@ var (
 	tSv1CfgPath string
 	tSv1Cfg     *config.CGRConfig
 	tSv1Rpc     *rpc.Client
-	tPrfl       *engine.ThresholdWithCache
+	tPrfl       *engine.ThresholdProfileWithOpts
 	tSv1ConfDIR string //run tests for specific configuration
 
 	tEvs = []*engine.ThresholdsArgsProcessEvent{
@@ -421,7 +421,7 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 func testV1TSSetThresholdProfileBrokenReference(t *testing.T) {
 	var reply *engine.ThresholdProfile
 	var result string
-	tPrfl = &engine.ThresholdWithCache{
+	tPrfl = &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
@@ -472,7 +472,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdWithCache{
+	tPrfl = &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
@@ -551,7 +551,7 @@ func testV1TSMaxHits(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdWithCache{
+	tPrfl = &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:  "cgrates.org",
 			ID:      "TH3",
@@ -656,7 +656,7 @@ func testV1TSUpdateSnooze(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	customTh := &engine.ThresholdWithCache{
+	customTh := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH4",
@@ -703,7 +703,7 @@ func testV1TSUpdateSnooze(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", tNow.Add(10*time.Minute), td.Snooze)
 	}
 
-	customTh2 := &engine.ThresholdWithCache{
+	customTh2 := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH4",
@@ -737,7 +737,7 @@ func testV1TSStopEngine(t *testing.T) {
 }
 
 func testV1TSGetThresholdProfileWithoutTenant(t *testing.T) {
-	tPrfl = &engine.ThresholdWithCache{
+	tPrfl = &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			ID:        "randomID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -846,7 +846,7 @@ func testV1TSGetThresholdsWithoutTenant(t *testing.T) {
 
 func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 	var result string
-	thAcntUpdate := &engine.ThresholdWithCache{
+	thAcntUpdate := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "TH_ACNT_UPDATE_EV",

@@ -211,7 +211,7 @@ func testExpVerifyFilters(t *testing.T) {
 }
 
 func testExpVerifyThresholds(t *testing.T) {
-	tPrfl := &engine.ThresholdWithCache{
+	tPrfl := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_ACNT_1001",

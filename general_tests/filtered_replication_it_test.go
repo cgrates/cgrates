@@ -375,7 +375,7 @@ func testFltrRplFilters(t *testing.T) {
 
 func testFltrRplThresholdProfile(t *testing.T) {
 	thID := "TH1"
-	thPrfl := &engine.ThresholdWithCache{
+	thPrfl := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        thID,
@@ -925,7 +925,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 
 func testFltrRplRouteProfile(t *testing.T) {
 	rpID := "RT1"
-	rpPrf := &v1.RouteWithCache{
+	rpPrf := &v1.RouteWithOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        rpID,
@@ -1041,7 +1041,7 @@ func testFltrRplRouteProfile(t *testing.T) {
 
 func testFltrRplChargerProfile(t *testing.T) {
 	chID := "CH1"
-	chPrf := &v1.ChargerWithCache{
+	chPrf := &v1.ChargerWithOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           chID,
@@ -1142,7 +1142,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 
 func testFltrRplDispatcherProfile(t *testing.T) {
 	dspID := "DSP1"
-	dspPrf := &v1.DispatcherWithCache{
+	dspPrf := &v1.DispatcherWithOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         dspID,
@@ -1242,7 +1242,7 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 
 func testFltrRplDispatcherHost(t *testing.T) {
 	dspID := "DSH1"
-	dspPrf := &v1.DispatcherHostWithCache{
+	dspPrf := &engine.DispatcherHostWithOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
@@ -1342,23 +1342,21 @@ func testFltrRplDispatcherHost(t *testing.T) {
 
 func testFltrRplRateProfile(t *testing.T) {
 	rpID := "RP1"
-	rpPrf := &v1.APIRateProfileWithCache{
-		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
-			APIRateProfile: &engine.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              rpID,
-				FilterIDs:       []string{"*string:~*req.Account:dan"},
-				Weights:         ";0",
-				MaxCostStrategy: "*free",
-				Rates: map[string]*engine.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						Weights:         ";0",
-						ActivationTimes: "* * * * 1-5",
-						IntervalRates: []*engine.APIIntervalRate{
-							{
-								IntervalStart: "0",
-							},
+	rpPrf := &engine.APIRateProfileWithOpts{
+		APIRateProfile: &engine.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              rpID,
+			FilterIDs:       []string{"*string:~*req.Account:dan"},
+			Weights:         ";0",
+			MaxCostStrategy: "*free",
+			Rates: map[string]*engine.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					Weights:         ";0",
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*engine.APIIntervalRate{
+						{
+							IntervalStart: "0",
 						},
 					},
 				},
@@ -1484,19 +1482,17 @@ func testFltrRplRateProfile(t *testing.T) {
 
 func testFltrRplActionProfile(t *testing.T) {
 	acID := "ATTR1"
-	acPrf := &v1.ActionProfileWithCache{
-		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
-			ActionProfile: &engine.ActionProfile{
-				Tenant: "cgrates.org",
-				ID:     acID,
-				Actions: []*engine.APAction{
-					{
-						ID:      "test_action_id",
-						Diktats: []*engine.APDiktat{{}},
-					},
+	acPrf := &engine.ActionProfileWithOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     acID,
+			Actions: []*engine.APAction{
+				{
+					ID:      "test_action_id",
+					Diktats: []*engine.APDiktat{{}},
 				},
-				Weight: 10,
 			},
+			Weight: 10,
 		},
 	}
 	var result string

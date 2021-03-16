@@ -163,7 +163,7 @@ func testRPCMethodsAddData(t *testing.T) {
 	}
 
 	//Add a thresholdProfile to disable account
-	tPrfl := &engine.ThresholdWithCache{
+	tPrfl := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_AccDisableAndLog",
@@ -180,7 +180,7 @@ func testRPCMethodsAddData(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	//Add a thresholdProfile to enable account
-	tPrfl2 := &engine.ThresholdWithCache{
+	tPrfl2 := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_AccEnableAndLog",

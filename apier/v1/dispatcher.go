@@ -68,12 +68,6 @@ func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.PaginatorWith
 	return nil
 }
 
-type DispatcherWithCache struct {
-	*engine.DispatcherProfile
-	Cache *string
-	Opts  map[string]interface{}
-}
-
 type DispatcherWithOpts struct {
 	*engine.DispatcherProfile
 	Opts map[string]interface{}
@@ -166,12 +160,6 @@ func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.PaginatorWithTen
 	}
 	*dPrfIDs = tenantArg.PaginateStringSlice(retIDs)
 	return nil
-}
-
-type DispatcherHostWithCache struct {
-	*engine.DispatcherHost
-	Cache *string
-	Opts  map[string]interface{}
 }
 
 //SetDispatcherHost add/update a new Dispatcher Host

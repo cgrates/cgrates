@@ -259,7 +259,7 @@ func testFullRemoteITThreshold(t *testing.T) {
 	}
 
 	var replySet string
-	tPrfl := &engine.ThresholdWithCache{
+	tPrfl := &engine.ThresholdProfileWithOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
@@ -546,7 +546,7 @@ func testFullRemoteITDispatcher(t *testing.T) {
 	}
 
 	var replySet string
-	dispatcherProfile = &DispatcherWithCache{
+	dispatcherProfile = &DispatcherWithOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",
@@ -596,30 +596,28 @@ func testFullRemoteITRate(t *testing.T) {
 	}
 
 	var replySet string
-	apiRPrf := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &engine.APIRateProfileWithOpts{
-			APIRateProfile: &engine.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP1",
-				FilterIDs:       []string{"*string:~*req.Subject:1001"},
-				Weights:         ";0",
-				MaxCostStrategy: "*free",
-				Rates: map[string]*engine.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						Weights:         ";0",
-						ActivationTimes: "* * * * 1-5",
-					},
-					"RT_WEEKEND": {
-						ID:              "RT_WEEKEND",
-						Weights:         ";10",
-						ActivationTimes: "* * * * 0,6",
-					},
-					"RT_CHRISTMAS": {
-						ID:              "RT_CHRISTMAS",
-						Weights:         ";30",
-						ActivationTimes: "* * 24 12 *",
-					},
+	apiRPrf := &engine.APIRateProfileWithOpts{
+		APIRateProfile: &engine.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       []string{"*string:~*req.Subject:1001"},
+			Weights:         ";0",
+			MaxCostStrategy: "*free",
+			Rates: map[string]*engine.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					Weights:         ";0",
+					ActivationTimes: "* * * * 1-5",
+				},
+				"RT_WEEKEND": {
+					ID:              "RT_WEEKEND",
+					Weights:         ";10",
+					ActivationTimes: "* * * * 0,6",
+				},
+				"RT_CHRISTMAS": {
+					ID:              "RT_CHRISTMAS",
+					Weights:         ";30",
+					ActivationTimes: "* * 24 12 *",
 				},
 			},
 		},
@@ -676,24 +674,22 @@ func testFullRemoteITAction(t *testing.T) {
 	}
 
 	var replySet string
-	actPrf = &ActionProfileWithCache{
-		ActionProfileWithOpts: &engine.ActionProfileWithOpts{
-			ActionProfile: &engine.ActionProfile{
-				Tenant: "cgrates.org",
-				ID:     "ACT_1",
-				Actions: []*engine.APAction{
-					{
-						ID:      "test_action_id",
-						Diktats: []*engine.APDiktat{{}},
-					},
-					{
-						ID:      "test_action_id2",
-						Diktats: []*engine.APDiktat{{}},
-					},
+	actPrf = &engine.ActionProfileWithOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "ACT_1",
+			Actions: []*engine.APAction{
+				{
+					ID:      "test_action_id",
+					Diktats: []*engine.APDiktat{{}},
+				},
+				{
+					ID:      "test_action_id2",
+					Diktats: []*engine.APDiktat{{}},
 				},
 			},
-			Opts: map[string]interface{}{},
 		},
+		Opts: map[string]interface{}{},
 	}
 	// add a threshold profile in engine1 and verify it internal
 	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &replySet); err != nil {
@@ -706,8 +702,8 @@ func testFullRemoteITAction(t *testing.T) {
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
 		&reply); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(actPrf.ActionProfileWithOpts.ActionProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(actPrf.ActionProfileWithOpts.ActionProfile), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(actPrf.ActionProfile), utils.ToJSON(reply))
 	}
 	// update the threshold profile and verify it to be updated
 	actPrf.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
@@ -720,8 +716,8 @@ func testFullRemoteITAction(t *testing.T) {
 		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
 		&reply); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(actPrf.ActionProfileWithOpts.ActionProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(actPrf.ActionProfileWithOpts.ActionProfile), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(actPrf.ActionProfile), utils.ToJSON(reply))
 	}
 }
 

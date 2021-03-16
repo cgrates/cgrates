@@ -88,11 +88,6 @@ func (apierSv1 *APIerSv1) GetActionProfileIDsCount(args *utils.TenantWithOpts, r
 	return
 }
 
-type ActionProfileWithCache struct {
-	*engine.ActionProfileWithOpts
-	Cache *string
-}
-
 //SetActionProfile add/update a new Action Profile
 func (apierSv1 *APIerSv1) SetActionProfile(ap *engine.ActionProfileWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(ap.ActionProfile, []string{utils.ID, utils.Actions}); len(missing) != 0 {
