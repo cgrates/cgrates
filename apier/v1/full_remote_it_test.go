@@ -192,7 +192,7 @@ func testFullRemoteITStatQueue(t *testing.T) {
 	}
 
 	var replySet string
-	stat := &engine.StatQueueWithCache{
+	stat := &engine.StatQueueProfileWithOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -730,7 +730,7 @@ func testFullRemoteITAccount(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	apiAccPrf := &APIAccountProfileWithCache{
+	apiAccPrf := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:  "cgrates.org",
 			ID:      "1001",

@@ -423,7 +423,7 @@ func testInternalReplicateITStatQueueProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	statConfig = &engine.StatQueueWithCache{
+	statConfig = &engine.StatQueueProfileWithOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant: tenant,
 			ID:     "TEST_PROFILE1",
@@ -698,7 +698,7 @@ func testInternalReplicateITFilter(t *testing.T) {
 		t.Error(err)
 	}
 	//set
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "Filter1",
@@ -981,7 +981,7 @@ func testInternalReplicateITThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter",

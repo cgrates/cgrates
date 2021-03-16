@@ -125,7 +125,7 @@ func testSCncrLoadTP(t *testing.T) {
 			*dataDir, "tariffplans", "tp1cnt")}, &loadInst); err != nil {
 		t.Error(err)
 	}
-	attrPrfl := &v2.AttributeWithCache{
+	attrPrfl := &v2.AttributeWithOpts{
 		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
 			Tenant:   "cgrates.org",
 			ID:       "AttrConcurrentSessions",

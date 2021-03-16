@@ -261,7 +261,7 @@ func testV1FltrAddStats(t *testing.T) {
 func testV1FltrPopulateThreshold(t *testing.T) {
 	//Add a filter of type *stats and check if acd metric is minim 10 ( greater than 10)
 	//we expect that acd from Stat_1 to be 11 so the filter should pass (11 > 10)
-	filter := &v1.FilterWithCache{
+	filter := &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_TH_Stats1",
@@ -345,7 +345,7 @@ func testV1FltrGetThresholdForEvent(t *testing.T) {
 func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	//Add a filter of type *stats and check if acd metric is maximum 10 ( lower than 10)
 	//we expect that acd from Stat_1 to be 11 so the filter should not pass (11 > 10)
-	filter := &v1.FilterWithCache{
+	filter := &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_TH_Stats1",
@@ -450,7 +450,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 
 	//we allocate 3 units to resource and add a filter for Usages > 2
 	//should match (3>2)
-	filter := v1.FilterWithCache{
+	filter := engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_TH_Resource",
@@ -596,7 +596,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 
 	//as we allocate 9 units, there should be available 14 more
 	//our filter should match for *gt or *gte
-	filter := v1.FilterWithCache{
+	filter := engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_ST_Resource1",
@@ -622,7 +622,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	//set a statQueueProfile with that filter
-	statsPrf := &engine.StatQueueWithCache{
+	statsPrf := &engine.StatQueueProfileWithOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "STATS_RES_TEST12",
@@ -664,7 +664,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	//set another filter that will not match
-	filter = v1.FilterWithCache{
+	filter = engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_ST_Resource1",
@@ -712,7 +712,7 @@ func testV1FltrAccounts(t *testing.T) {
 	// Add a filter with fieldName taken value from account 1001
 	// and check if *monetary balance is minim 9 ( greater than 9)
 	// we expect that the balance to be 10 so the filter should pass (10 > 9)
-	filter := v1.FilterWithCache{
+	filter := engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_TH_Accounts",

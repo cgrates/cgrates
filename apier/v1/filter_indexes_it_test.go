@@ -182,7 +182,7 @@ func testV1FIdxRpcConn(t *testing.T) {
 //ThresholdProfile
 func testV1FIdxSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter",
@@ -277,7 +277,7 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter2",
@@ -442,7 +442,7 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 //StatQueueProfile
 func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -468,7 +468,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &engine.StatQueueWithCache{
+	statConfig = &engine.StatQueueProfileWithOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE1",
@@ -545,7 +545,7 @@ func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -571,7 +571,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &engine.StatQueueWithCache{
+	statConfig = &engine.StatQueueProfileWithOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE2",
@@ -691,7 +691,7 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 //ResourceProfile
 func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	var reply *engine.ResourceProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_RES_RCFG1",
@@ -784,7 +784,7 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -919,7 +919,7 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 //RouteProfile
 func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 	var reply *engine.RouteProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -1019,7 +1019,7 @@ func testV1FIdxComputeRouteProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondRouteProfileIndexes(t *testing.T) {
 	var reply *engine.RouteProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -1162,7 +1162,7 @@ func testV1FIdxRemoveRouteProfile(t *testing.T) {
 //AccountProfile
 func testV1FISetAccountProfileIndexes(t *testing.T) {
 	var reply *utils.AccountProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "ACCPRF_FLTR",
@@ -1190,7 +1190,7 @@ func testV1FISetAccountProfileIndexes(t *testing.T) {
 	}
 
 	//set in db an accPrf then we will get it without errors
-	accPrf := &APIAccountProfileWithCache{
+	accPrf := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    tenant,
 			ID:        "ACC_PRF",
@@ -1284,7 +1284,7 @@ func testV1FIComputeAccountProfileIndexes(t *testing.T) {
 
 func testV1FISetSecondFilterForAccountProfile(t *testing.T) {
 	//new filter
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "ACCPRF_FLTR2",
@@ -1305,7 +1305,7 @@ func testV1FISetSecondFilterForAccountProfile(t *testing.T) {
 	}
 
 	//we will overwrite this AccPrf with our new filter
-	accPrf := &APIAccountProfileWithCache{
+	accPrf := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    tenant,
 			ID:        "ACC_PRF",
@@ -1431,7 +1431,7 @@ func testV1FIRemoveAccountProfile(t *testing.T) {
 //ActionProfile
 func testV1FISetActionProfileIndexes(t *testing.T) {
 	//set a new filter in db
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "ACTION_FLTR",
@@ -1596,7 +1596,7 @@ func testV1FIComputeActionProfileIndexes(t *testing.T) {
 
 func testVF1SetSecondActionProfile(t *testing.T) {
 	//second filter in db
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "ACTION_FLTR2",
@@ -1784,7 +1784,7 @@ func testV1FIRemoveActionProfile(t *testing.T) {
 //RateProfileRate Indexes
 func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 	//set a filter for our rates
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "RATE_FLTR1",
@@ -1967,7 +1967,7 @@ func testV1FIComputeRateProfileRatesIndexes(t *testing.T) {
 
 func testV1FISetSecondRateProfileRate(t *testing.T) {
 	//second filter for a new rate in the same rate profile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "RTPRF_FLTR3",
@@ -2118,7 +2118,7 @@ func testVF1RemoveRateProfileRates(t *testing.T) {
 	//removing rates from db will delete the indexes from db
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfileRates,
-		&RemoveRPrfRates{ID: "RP1",
+		&RemoveRPrfRatesWithOpts{ID: "RP1",
 			Tenant: tenant, RateIDs: []string{"RT_WEEK", "RT_YEAR"}},
 		&result); err != nil {
 		t.Error(err)
@@ -2182,7 +2182,7 @@ func testVF1RemoveRateProfileRates(t *testing.T) {
 
 	//no we will remove the left rate and the profile
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfileRates,
-		&RemoveRPrfRates{ID: "RP1",
+		&RemoveRPrfRatesWithOpts{ID: "RP1",
 			Tenant: tenant, RateIDs: []string{"RT_MONTH"}},
 		&result); err != nil {
 		t.Error(err)
@@ -2202,7 +2202,7 @@ func testVF1RemoveRateProfileRates(t *testing.T) {
 //RateProfile Indexes
 func testV1FISetRateProfileIndexes(t *testing.T) {
 	//set a filter for our rates
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "RATEFLTR_FLTR1",
@@ -2389,7 +2389,7 @@ func testV1FIComputeRateProfileIndexes(t *testing.T) {
 
 func testV1FISetSecondRateProfile(t *testing.T) {
 	//second filter for a new rate profile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "RTPRF_FLTR6",
@@ -2526,8 +2526,10 @@ func testVF1RemoveRateProfile(t *testing.T) {
 	//removing rate profile from db will delete the indexes from db
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfile,
-		&utils.TenantIDWithCache{ID: "RP2",
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+			ID:     "RP2",
 			Tenant: tenant},
+		},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -2535,8 +2537,9 @@ func testVF1RemoveRateProfile(t *testing.T) {
 	}
 
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfile,
-		&utils.TenantIDWithCache{ID: "RP3",
-			Tenant: tenant},
+		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+			ID:     "RP3",
+			Tenant: tenant}},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -2569,7 +2572,7 @@ func testVF1RemoveRateProfile(t *testing.T) {
 //AttributeProfile Indexes
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -2677,7 +2680,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
-	filter = &FilterWithCache{
+	filter = &engine.FilterWithOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",

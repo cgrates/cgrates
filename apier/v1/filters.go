@@ -25,12 +25,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type FilterWithCache struct {
-	*engine.Filter
-	Cache *string
-	Opts  map[string]interface{}
-}
-
 //SetFilter add a new Filter
 func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {

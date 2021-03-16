@@ -25,14 +25,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type AttributeWithCache struct {
+type AttributeWithOpts struct {
 	*engine.APIAttributeProfile
-	Cache *string
-	Opts  map[string]interface{}
+	Opts map[string]interface{}
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithCache, reply *string) error {
+func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.APIAttributeProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -142,14 +142,6 @@ func (apierSv1 *APIerSv1) SetRateProfileRates(ext *engine.APIRateProfileWithOpts
 	return nil
 }
 
-type RemoveRPrfRates struct {
-	Tenant  string
-	ID      string
-	RateIDs []string
-	Cache   *string
-	Opts    map[string]interface{}
-}
-
 type RemoveRPrfRatesWithOpts struct {
 	Tenant  string
 	ID      string

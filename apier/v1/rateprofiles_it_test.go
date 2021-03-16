@@ -493,7 +493,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	}
 
 	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfileRates,
-		&RemoveRPrfRates{
+		&RemoveRPrfRatesWithOpts{
 			Tenant:  "cgrates.org",
 			ID:      "SpecialRate",
 			RateIDs: []string{"RT_WEEKEND"},
@@ -557,7 +557,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	}
 
 	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfileRates,
-		&RemoveRPrfRates{
+		&RemoveRPrfRatesWithOpts{
 			Tenant: "cgrates.org",
 			ID:     "SpecialRate",
 		}, &reply); err != nil {
@@ -814,7 +814,7 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 func testV1RatePrfRemoveRateProfileRatesWithoutTenant(t *testing.T) {
 	var reply string
 	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfileRates,
-		&RemoveRPrfRates{ID: "SpecialRate"},
+		&RemoveRPrfRatesWithOpts{ID: "SpecialRate"},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1339,7 +1339,7 @@ func testV1RateCostForEventSpecial(t *testing.T) {
 			Increment:     secDecimal,
 		}},
 	}
-	rPrf := &RateProfileWithCache{
+	rPrf := &engine.RateProfileWithOpts{
 		RateProfileWithOpts: &engine.RateProfileWithOpts{
 			RateProfile: &engine.RateProfile{
 				ID:        "RateChristmas",
@@ -1490,7 +1490,7 @@ func testV1RateCostForEventThreeRates(t *testing.T) {
 			},
 		},
 	}
-	rPrf := &RateProfileWithCache{
+	rPrf := &engine.RateProfileWithOpts{
 		RateProfileWithOpts: &engine.RateProfileWithOpts{
 			RateProfile: &engine.RateProfile{
 				ID:        "RateNewYear",

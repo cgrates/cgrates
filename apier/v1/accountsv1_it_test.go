@@ -441,7 +441,7 @@ func testAccountSv1DebitAbstracts(t *testing.T) {
 }
 
 func testAccountSv1SimpleDebit(t *testing.T) {
-	accPrfAPI := &APIAccountProfileWithCache{
+	accPrfAPI := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomAccount",
@@ -512,7 +512,7 @@ func testAccountSv1SimpleDebit(t *testing.T) {
 }
 
 func testAccountSv1DebitMultipleAcc(t *testing.T) {
-	accPrfAPI := &APIAccountProfileWithCache{
+	accPrfAPI := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomAccount",
@@ -554,7 +554,7 @@ func testAccountSv1DebitMultipleAcc(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", convAcc, reply2)
 	}
 
-	accPrfAPI2 := &APIAccountProfileWithCache{
+	accPrfAPI2 := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomAccount2",
@@ -623,7 +623,7 @@ func testAccountSv1DebitMultipleAcc(t *testing.T) {
 }
 
 func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
-	accPrfAPI := &APIAccountProfileWithCache{
+	accPrfAPI := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomAccount",
@@ -668,7 +668,7 @@ func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", convAcc, reply2)
 	}
 
-	accPrfAPI2 := &APIAccountProfileWithCache{
+	accPrfAPI2 := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomAccount2",
@@ -737,7 +737,7 @@ func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
 }
 
 func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
-	accPrfAPI := &APIAccountProfileWithCache{
+	accPrfAPI := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ACC_WITH_ATTRIBUTES",
@@ -834,7 +834,7 @@ func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
 }
 
 func testAccountSv1DebitWithRateS(t *testing.T) {
-	accPrfAPI := &APIAccountProfileWithCache{
+	accPrfAPI := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ACC_WITH_RATES",
@@ -931,7 +931,7 @@ func testAccountSv1DebitWithRateS(t *testing.T) {
 }
 
 func testAccountSv1DebitWithRateS2(t *testing.T) {
-	accPrfAPI := &APIAccountProfileWithCache{
+	accPrfAPI := &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ACC_WITH_RATES2",
@@ -1035,7 +1035,7 @@ func testAccountSv1DebitWithRateS2(t *testing.T) {
 }
 
 func testAccountSv1MaxConcretes(t *testing.T) {
-	apiAccPrf = &APIAccountProfileWithCache{
+	apiAccPrf = &utils.APIAccountProfileWithOpts{
 		APIAccountProfile: &utils.APIAccountProfile{
 			Tenant:    "cgrates.org",
 			ID:        "1004",
