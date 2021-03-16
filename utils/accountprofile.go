@@ -337,7 +337,7 @@ func (bWws BalancesWithWeight) Balances() (blncs []*Balance) {
 // APIAccountProfileWithOpts is used in API calls
 type APIAccountProfileWithOpts struct {
 	*APIAccountProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // AccountProfileWithOpts is used in API calls
