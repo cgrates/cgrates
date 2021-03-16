@@ -25,12 +25,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"net/http/pprof"
 	"net/rpc"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -373,7 +373,7 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 	}
 
 	if caCert != "" {
-		ca, err := ioutil.ReadFile(caCert)
+		ca, err := os.ReadFile(caCert)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("Error: %s when read CA", err))
 			return config, err

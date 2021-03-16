@@ -21,7 +21,7 @@ package ers
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 	"strings"
@@ -96,7 +96,7 @@ func (rdr *JSONFileER) Serve() (err error) {
 					return
 				case <-tm.C:
 				}
-				filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
+				filesInDir, _ := os.ReadDir(rdr.rdrDir)
 				for _, file := range filesInDir {
 					if !strings.HasSuffix(file.Name(), utils.JSNSuffix) { // hardcoded file extension for json event reader
 						continue // used in order to filter the files from directory
@@ -132,7 +132,7 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 	defer file.Close()
 	timeStart := time.Now()
 	var byteValue []byte
-	if byteValue, err = ioutil.ReadAll(file); err != nil {
+	if byteValue, err = io.ReadAll(file); err != nil {
 		return
 	}
 

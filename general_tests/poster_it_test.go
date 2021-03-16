@@ -22,8 +22,8 @@ package general_tests
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/rpc"
+	"os"
 	"path"
 	"testing"
 	"time"
@@ -112,7 +112,7 @@ func testPosterITRpcConn(t *testing.T) {
 }
 
 func testPosterReadFolder(format string) (expEv *engine.ExportEvents, err error) {
-	filesInDir, _ := ioutil.ReadDir(pstrCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(pstrCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		err = fmt.Errorf("No files in directory: %s", pstrCfg.GeneralCfg().FailedPostsDir)
 		return

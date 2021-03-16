@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"io/ioutil"
 	"net/rpc"
 	"os"
 	"path"
@@ -236,7 +235,7 @@ func testEEsVerifyExports(t *testing.T) {
 		"Cdr2,*raw,*voice,OriginCDR2,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,5,1.01\n" +
 		"Cdr3,*raw,*voice,OriginCDR3,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,30,1.01\n" +
 		"Cdr4,*raw,*voice,OriginCDR4,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,0,1.01\n"
-	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
+	if outContent1, err := os.ReadFile(files[0]); err != nil {
 		t.Error(err)
 	} else if len(eCnt) != len(string(outContent1)) {
 		t.Errorf("Expecting: \n<%+v>, \nreceived: \n<%+v>", len(eCnt), len(string(outContent1)))
@@ -302,7 +301,7 @@ func testEEsVerifyExportsMultipleExporters(t *testing.T) {
 		"Cdr2,*raw,*voice,OriginCDR2,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,5,1.01\n" +
 		"Cdr3,*raw,*voice,OriginCDR3,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,30,1.01\n" +
 		"Cdr4,*raw,*voice,OriginCDR4,*none,cgrates.org,call,1001,1001,+4986517174963,2018-10-04T15:03:10Z,2018-10-04T15:03:10Z,0,1.01\n"
-	if outContent1, err := ioutil.ReadFile(files[0]); err != nil {
+	if outContent1, err := os.ReadFile(files[0]); err != nil {
 		t.Error(err)
 	} else if len(eCnt) != len(string(outContent1)) {
 		t.Errorf("Expecting: \n<%q>, \nreceived: \n<%q>", eCnt, string(outContent1))

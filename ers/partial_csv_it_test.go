@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"io/ioutil"
 	"net/rpc"
 	"os"
 	"path"
@@ -150,7 +149,7 @@ func testPartITLoadTPFromFolder(t *testing.T) {
 func testPartITHandleCdr1File(t *testing.T) {
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent1), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(partCsvFileContent1), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/partErs1/in", fileName)); err != nil {
@@ -162,7 +161,7 @@ func testPartITHandleCdr1File(t *testing.T) {
 func testPartITHandleCdr2File(t *testing.T) {
 	fileName := "file2.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent2), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(partCsvFileContent2), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/partErs1/in", fileName)); err != nil {
@@ -174,7 +173,7 @@ func testPartITHandleCdr2File(t *testing.T) {
 func testPartITHandleCdr3File(t *testing.T) {
 	fileName := "file3.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent3), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(partCsvFileContent3), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/partErs2/in", fileName)); err != nil {
@@ -184,7 +183,7 @@ func testPartITHandleCdr3File(t *testing.T) {
 }
 
 func testPartITVerifyFiles(t *testing.T) {
-	filesInDir, _ := ioutil.ReadDir("/tmp/partErs1/out/")
+	filesInDir, _ := os.ReadDir("/tmp/partErs1/out/")
 	if len(filesInDir) == 0 {
 		t.Errorf("No files found in folder: <%s>", "/tmp/partErs1/out")
 	}
@@ -195,7 +194,7 @@ func testPartITVerifyFiles(t *testing.T) {
 			break
 		}
 	}
-	if contentCacheDump, err := ioutil.ReadFile(path.Join("/tmp/partErs1/out", fileName)); err != nil {
+	if contentCacheDump, err := os.ReadFile(path.Join("/tmp/partErs1/out", fileName)); err != nil {
 		t.Error(err)
 	} else if len(eCacheDumpFile1) != len(string(contentCacheDump)) {
 		t.Errorf("Expecting: %q, \n received: %q", eCacheDumpFile1, string(contentCacheDump))

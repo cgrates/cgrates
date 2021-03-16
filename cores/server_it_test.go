@@ -24,7 +24,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -92,7 +92,7 @@ var (
 func TestServerIT(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	for _, test := range sTestsServer {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 		t.Run("Running IT serve tests", test)
 	}
 }

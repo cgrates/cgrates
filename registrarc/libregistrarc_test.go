@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -249,18 +248,18 @@ func TestRegister(t *testing.T) {
 	}
 	errCfg.CacheCfg().ReplicationConns = []string{"errCon"}
 	engine.Cache = engine.NewCacheS(errCfg, nil, nil)
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(uargsJSON))
+	req.Body = io.NopCloser(bytes.NewBuffer(uargsJSON))
 	if _, err := register(req); err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected error: %s ,received: %v", utils.ErrPartiallyExecuted, err)
 	}
 
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(argsJSON))
+	req.Body = io.NopCloser(bytes.NewBuffer(argsJSON))
 	if _, err := register(req); err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected error: %s ,received: %v", utils.ErrPartiallyExecuted, err)
 	}
 
 	req.RemoteAddr = "127.0.0"
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(argsJSON))
+	req.Body = io.NopCloser(bytes.NewBuffer(argsJSON))
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
@@ -269,7 +268,7 @@ func TestRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(args2JSON))
+	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
@@ -278,7 +277,7 @@ func TestRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(args2JSON))
+	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
@@ -287,7 +286,7 @@ func TestRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(args2JSON))
+	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
@@ -296,11 +295,11 @@ func TestRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(args2JSON))
+	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(argsJSON))
+	req.Body = io.NopCloser(bytes.NewBuffer(argsJSON))
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
@@ -309,7 +308,7 @@ func TestRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(args2JSON))
+	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
@@ -318,7 +317,7 @@ func TestRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(args2JSON))
+	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}

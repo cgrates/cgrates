@@ -21,7 +21,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"sync"
@@ -39,7 +39,7 @@ func main() {
 			if err != nil {
 				log.Print("Post error: ", err)
 			}
-			contents, err := ioutil.ReadAll(resp.Body)
+			contents, err := io.ReadAll(resp.Body)
 			if err != nil {
 				log.Print("Body error: ", err)
 			}
@@ -53,7 +53,7 @@ func main() {
 		if err != nil {
 			log.Print("Post error: ", err)
 		}
-		contents, err := ioutil.ReadAll(resp.Body)
+		contents, err := io.ReadAll(resp.Body)
 		if err != nil {
 			log.Print("Body error: ", err)
 		}

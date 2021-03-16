@@ -23,7 +23,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -80,7 +80,7 @@ func (SQLStorage) RemoveKeysForPrefix(string) error {
 }
 
 func (sqls *SQLStorage) CreateTablesFromScript(scriptPath string) error {
-	fileContent, err := ioutil.ReadFile(scriptPath)
+	fileContent, err := os.ReadFile(scriptPath)
 	if err != nil {
 		return err
 	}

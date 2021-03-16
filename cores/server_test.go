@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cores
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -62,7 +62,7 @@ func TestNewServer(t *testing.T) {
 }
 
 func TestRegisterHttpFunc(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	cfgDflt := config.NewDefaultCGRConfig()
 	cfgDflt.CoreSCfg().CapsStatsInterval = 1
 	caps := engine.NewCaps(0, utils.MetaBusy)

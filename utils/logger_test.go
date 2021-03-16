@@ -20,7 +20,7 @@ package utils
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"log"
 	syslog "log/syslog"
 	"os"
@@ -287,7 +287,7 @@ func TestWriteLogger(t *testing.T) {
 }
 
 func TestCloseLogger(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 
 	loggertype := MetaStdLog
 	if _, err := Newlogger(loggertype, EmptyString); err != nil {
@@ -316,7 +316,7 @@ func TestLogStackLogger(t *testing.T) {
 }
 
 func TestNewLoggerInvalidLoggerType(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 
 	loggertype := "Invalid_TYPE"
 	expected := "unsuported logger: <Invalid_TYPE>"

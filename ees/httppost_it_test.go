@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/rpc"
 	"net/url"
@@ -99,7 +99,7 @@ func testHTTPPostRPCConn(t *testing.T) {
 
 func testHTTPStartHTTPServer(t *testing.T) {
 	http.HandleFunc("/event_http", func(writer http.ResponseWriter, r *http.Request) {
-		b, err := ioutil.ReadAll(r.Body)
+		b, err := io.ReadAll(r.Body)
 		r.Body.Close()
 		if err != nil {
 			t.Error(err)

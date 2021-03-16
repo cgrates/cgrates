@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -33,7 +32,7 @@ import (
 // NewRjReader creates a new rjReader from a io.Reader
 func NewRjReader(rdr io.Reader) (r *RjReader, err error) {
 	var b []byte
-	b, err = ioutil.ReadAll(rdr)
+	b, err = io.ReadAll(rdr)
 	if err != nil {
 		return
 	}

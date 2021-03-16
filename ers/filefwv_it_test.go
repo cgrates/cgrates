@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"io/ioutil"
 	"net/rpc"
 	"os"
 	"path"
@@ -172,7 +171,7 @@ TRL0001DDB     ABC                                     Some Connect A.B.        
 func testFWVITHandleCdr1File(t *testing.T) {
 	fileName := "file1.fwv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(fwvContent), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(fwvContent), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/fwvErs/in", fileName)); err != nil {

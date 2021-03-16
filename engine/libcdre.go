@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"sync"
@@ -88,7 +87,7 @@ func AddFailedPost(expPath, format, module string, ev interface{}, opts map[stri
 func NewExportEventsFromFile(filePath string) (expEv *ExportEvents, err error) {
 	var fileContent []byte
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		if fileContent, err = ioutil.ReadFile(filePath); err != nil {
+		if fileContent, err = os.ReadFile(filePath); err != nil {
 			return 0, err
 		}
 		return 0, os.Remove(filePath)

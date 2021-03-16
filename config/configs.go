@@ -17,7 +17,6 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -95,7 +94,7 @@ func handleConfigSFolder(path string, w http.ResponseWriter) {
 
 func handleConfigSFile(path string, w http.ResponseWriter) {
 	// if the config is a file read the file and send it directly
-	dat, err := ioutil.ReadFile(path)
+	dat, err := os.ReadFile(path)
 	if err != nil {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, err.Error())

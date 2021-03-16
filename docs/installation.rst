@@ -123,14 +123,14 @@ Install GO Lang
 
 First we have to setup the GO Lang to our OS. Feel free to download 
 the latest GO binary release from https://golang.org/dl/
-In this Tutorial we are going to install Go 1.15
+In this Tutorial we are going to install Go 1.16
 
 ::
 
    sudo rm -rf /usr/local/go
    cd /tmp
-   wget https://golang.org/dl/go1.15.linux-amd64.tar.gz
-   sudo tar -xvf go1.15.linux-amd64.tar.gz -C /usr/local/
+   wget https://golang.org/dl/go1.16.linux-amd64.tar.gz
+   sudo tar -xvf go1.16.linux-amd64.tar.gz -C /usr/local/
    export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 
 

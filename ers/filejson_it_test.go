@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"io/ioutil"
 	"net/rpc"
 	"os"
 	"path"
@@ -186,7 +185,7 @@ func testJSONAddData(t *testing.T) {
 func testJSONHandleFile(t *testing.T) {
 	fileName := "file1.json"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/ErsJSON/in", fileName)); err != nil {

@@ -21,8 +21,8 @@ package general_tests
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/rpc"
+	"os"
 	"path"
 	"reflect"
 	"sort"
@@ -570,7 +570,7 @@ func testV1CDRsProcessEventExport(t *testing.T) {
 }
 func testV1CDRsProcessEventExportCheck(t *testing.T) {
 	failoverContent := []byte(fmt.Sprintf(`{"CGRID":"%s"}`, utils.Sha1("test7_processEvent", "OriginHost7")))
-	filesInDir, _ := ioutil.ReadDir(pecdrsCfg.GeneralCfg().FailedPostsDir)
+	filesInDir, _ := os.ReadDir(pecdrsCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", pecdrsCfg.GeneralCfg().FailedPostsDir)
 	}

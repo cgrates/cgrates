@@ -23,7 +23,7 @@ import (
 	"compress/zlib"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"reflect"
 	"strings"
 	"sync"
@@ -758,7 +758,7 @@ func (ms *MongoStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error)
 	if err != nil {
 		return nil, err
 	}
-	out, err := ioutil.ReadAll(r)
+	out, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
@@ -858,7 +858,7 @@ func (ms *MongoStorage) GetDestinationDrv(key, transactionID string) (result *De
 	if err != nil {
 		return nil, err
 	}
-	out, err := ioutil.ReadAll(r)
+	out, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
@@ -1266,7 +1266,7 @@ func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
 	if err != nil {
 		return nil, err
 	}
-	out, err := ioutil.ReadAll(r)
+	out, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

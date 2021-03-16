@@ -22,7 +22,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"flag"
-	"io/ioutil"
+	"io"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"strings"
@@ -126,7 +126,7 @@ func TestProcessContentCallsLoadCache(t *testing.T) {
 #Tenant[0],ID[1],Weight[2]
 cgrates.org,MOCK_RELOAD_ID,20
 `
-	rdr := ioutil.NopCloser(strings.NewReader(ratePrfCsv))
+	rdr := io.NopCloser(strings.NewReader(ratePrfCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -144,7 +144,7 @@ cgrates.org,MOCK_RELOAD_ID,20
 
 	// Calling the method again while cacheConnsID is not valid
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = ioutil.NopCloser(strings.NewReader(ratePrfCsv))
+	rdr = io.NopCloser(strings.NewReader(ratePrfCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -224,7 +224,7 @@ func TestProcessContentCallsReloadCache(t *testing.T) {
 #Tenant[0],ID[1],Weight[2]
 cgrates.org,MOCK_RELOAD_ID,20
 `
-	rdr := ioutil.NopCloser(strings.NewReader(ratePrfCsv))
+	rdr := io.NopCloser(strings.NewReader(ratePrfCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -242,7 +242,7 @@ cgrates.org,MOCK_RELOAD_ID,20
 
 	// Calling the method again while cacheConnsID is not valid
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = ioutil.NopCloser(strings.NewReader(ratePrfCsv))
+	rdr = io.NopCloser(strings.NewReader(ratePrfCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -318,7 +318,7 @@ func TestProcessContentCallsRemoveItems(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,MOCK_RELOAD_ID
 `
-	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr := io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -336,7 +336,7 @@ cgrates.org,MOCK_RELOAD_ID
 
 	// Calling the method again while cacheConnsID is not valid
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr = io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -355,7 +355,7 @@ cgrates.org,MOCK_RELOAD_ID
 
 	// Calling the method again while caching method is invalid
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr = io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -422,7 +422,7 @@ func TestProcessContentCallsClear(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,MOCK_RELOAD_ID
 `
-	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr := io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -439,7 +439,7 @@ cgrates.org,MOCK_RELOAD_ID
 	}
 
 	//inexisting method(*none) of cache and reinitialized the reader will do nothing
-	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr = io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -457,7 +457,7 @@ cgrates.org,MOCK_RELOAD_ID
 
 	// Calling the method again while cacheConnsID is not valid
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr = io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -533,7 +533,7 @@ func TestRemoveContentCallsReload(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,MOCK_RELOAD_2
 `
-	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr := io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -558,7 +558,7 @@ cgrates.org,MOCK_RELOAD_2
 
 	//Calling the method again while cacheConnsID is not valid
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr = io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -639,7 +639,7 @@ func TestRemoveContentCallsLoad(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,MOCK_RELOAD_3
 `
-	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr := io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -664,7 +664,7 @@ cgrates.org,MOCK_RELOAD_3
 
 	//Calling the method again while cacheConnsID is not valid
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr = io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -745,7 +745,7 @@ func TestRemoveContentCallsRemove(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,MOCK_RELOAD_4
 `
-	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr := io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -770,7 +770,7 @@ cgrates.org,MOCK_RELOAD_4
 
 	//Calling the method again while cacheConnsID is not valid
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr = io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -793,7 +793,7 @@ cgrates.org,MOCK_RELOAD_4
 	}
 
 	//inexisting method(*none) of cache and reinitialized the reader will do nothing
-	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr = io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -862,7 +862,7 @@ func TestRemoveContentCallsClear(t *testing.T) {
 #Tenant[0],ID[1]
 cgrates.org,MOCK_RELOAD_3
 `
-	rdr := ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr := io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -887,7 +887,7 @@ cgrates.org,MOCK_RELOAD_3
 
 	//Calling the method again while cacheConnsID is not valid
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr = io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -910,7 +910,7 @@ cgrates.org,MOCK_RELOAD_3
 	}
 
 	// Calling the method again while caching method is invalid
-	rdr = ioutil.NopCloser(strings.NewReader(attributeCsv))
+	rdr = io.NopCloser(strings.NewReader(attributeCsv))
 	rdrCsv = csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{

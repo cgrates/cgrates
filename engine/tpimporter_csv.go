@@ -20,8 +20,8 @@ package engine
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -67,7 +67,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 
 func (self *TPCSVImporter) Run() error {
 	self.csvr = NewFileCSVStorage(self.Sep, self.DirPath)
-	files, _ := ioutil.ReadDir(self.DirPath)
+	files, _ := os.ReadDir(self.DirPath)
 	var withErrors bool
 	for _, f := range files {
 		fHandler, hasName := fileHandlers[f.Name()]

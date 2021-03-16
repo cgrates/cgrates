@@ -22,7 +22,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
@@ -63,14 +62,14 @@ func (frt *FileReaderTester) connSendReq(req []byte) (err error) {
 	if _, err = frt.conn.Write(req); err != nil {
 		return
 	}
-	ioutil.ReadAll(frt.conn)
+	io.ReadAll(frt.conn)
 	return
 }
 
 // Test reads from rdr, split the content based on lineSep and sends individual lines to remote
 func (frt *FileReaderTester) Test() (err error) {
 	var fContent []byte
-	if fContent, err = ioutil.ReadAll(frt.rdr); err != nil {
+	if fContent, err = io.ReadAll(frt.rdr); err != nil {
 		return
 	}
 	reqs := bytes.Split(fContent, frt.reqSep)

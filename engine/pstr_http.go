@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -43,7 +42,7 @@ func HTTPPostJSON(url string, content []byte) (respBody []byte, err error) {
 	if resp, err = client.Post(url, "application/json", bytes.NewBuffer(content)); err != nil {
 		return
 	}
-	respBody, err = ioutil.ReadAll(resp.Body)
+	respBody, err = io.ReadAll(resp.Body)
 	resp.Body.Close()
 	if err != nil {
 		return
@@ -108,7 +107,7 @@ func (pstr *HTTPPoster) do(req *http.Request) (respBody []byte, err error) {
 		utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", pstr.addr, err.Error()))
 		return
 	}
-	respBody, err = ioutil.ReadAll(resp.Body)
+	respBody, err = io.ReadAll(resp.Body)
 	resp.Body.Close()
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", pstr.addr, err.Error()))

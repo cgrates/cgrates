@@ -19,7 +19,7 @@ package engine
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -2750,7 +2750,7 @@ func TestRemoteSetAccountAction(t *testing.T) {
 	}
 	ts = httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		accStr := utils.ToJSON(acc) + "\n"
-		val, err := ioutil.ReadAll(r.Body)
+		val, err := io.ReadAll(r.Body)
 		r.Body.Close()
 		if err != nil {
 			t.Error(err)
