@@ -819,15 +819,15 @@ func (iDB *InternalDB) RemoveDispatcherHostDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetRateProfileDrv(tenant, id string) (rpp *RateProfile, err error) {
+func (iDB *InternalDB) GetRateProfileDrv(tenant, id string) (rpp *utils.RateProfile, err error) {
 	x, ok := Cache.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*RateProfile), nil
+	return x.(*utils.RateProfile), nil
 }
 
-func (iDB *InternalDB) SetRateProfileDrv(rpp *RateProfile) (err error) {
+func (iDB *InternalDB) SetRateProfileDrv(rpp *utils.RateProfile) (err error) {
 	if err = rpp.Compile(); err != nil {
 		return
 	}

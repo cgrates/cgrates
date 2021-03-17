@@ -772,7 +772,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 					removeIndexKeys, ids); err != nil {
 					return
 				}
-				var rp *RateProfile
+				var rp *utils.RateProfile
 				if rp, err = dm.GetRateProfile(newFlt.Tenant, rpID, true, false, utils.NonTransactional); err != nil {
 					return
 				}

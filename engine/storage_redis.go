@@ -1245,7 +1245,7 @@ func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
 	return rs.Cmd(nil, redis_DEL, utils.LoadIDs)
 }
 
-func (rs *RedisStorage) GetRateProfileDrv(tenant, id string) (rpp *RateProfile, err error) {
+func (rs *RedisStorage) GetRateProfileDrv(tenant, id string) (rpp *utils.RateProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redis_GET, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -1257,7 +1257,7 @@ func (rs *RedisStorage) GetRateProfileDrv(tenant, id string) (rpp *RateProfile, 
 	return
 }
 
-func (rs *RedisStorage) SetRateProfileDrv(rpp *RateProfile) (err error) {
+func (rs *RedisStorage) SetRateProfileDrv(rpp *utils.RateProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(rpp); err != nil {
 		return

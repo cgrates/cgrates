@@ -32,6 +32,10 @@ func DivideBig(x, y *decimal.Big) *decimal.Big {
 	return new(decimal.Big).Quo(x, y)
 }
 
+func DivideBigWithReminder(x, y *decimal.Big) (q *decimal.Big, r *decimal.Big) {
+	return new(decimal.Big).QuoRem(x, y, new(decimal.Big))
+}
+
 func MultiplyBig(x, y *decimal.Big) *decimal.Big {
 	return new(decimal.Big).Mul(x, y)
 }

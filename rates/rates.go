@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ericlagergren/decimal"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -69,7 +71,7 @@ func (rS *RateS) Call(serviceMethod string, args interface{}, reply interface{})
 }
 
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
-func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *utils.ArgsCostForEvent) (rtPfl *engine.RateProfile, err error) {
+func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *utils.ArgsCostForEvent) (rtPfl *utils.RateProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.Opts,
@@ -93,7 +95,7 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *
 	}
 	var rpWw *rpWithWeight
 	for _, rPfID := range rPfIDs {
-		var rPf *engine.RateProfile
+		var rPf *utils.RateProfile
 		if rPf, err = rS.dm.GetRateProfile(tnt, rPfID,
 			true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
@@ -129,7 +131,7 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *
 }
 
 // rateProfileCostForEvent computes the rateProfileCost for an event based on a preselected rate profile
-func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.ArgsCostForEvent, verbosity int) (rpCost *engine.RateProfileCost, err error) {
+func (rS *RateS) rateProfileCostForEvent(rtPfl *utils.RateProfile, args *utils.ArgsCostForEvent, verbosity int) (rpCost *utils.RateProfileCost, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.Opts,
@@ -148,7 +150,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 	); err != nil {
 		return
 	}
-	aRates := make([]*engine.Rate, 0, len(rtIDs))
+	aRates := make([]*utils.Rate, 0, len(rtIDs))
 	for rtID := range rtIDs {
 		rt := rtPfl.Rates[rtID] // pick the rate directly from map based on matched ID
 		var pass bool
@@ -171,7 +173,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 	if sTime, err = args.StartTime(rS.cfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
 	}
-	var usage time.Duration
+	var usage *decimal.Big
 	if usage, err = args.Usage(); err != nil {
 		return
 	}
@@ -179,7 +181,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 	if ordRts, err = orderRatesOnIntervals(aRates, wghts, sTime, usage, true, verbosity); err != nil {
 		return
 	}
-	rpCost = &engine.RateProfileCost{
+	rpCost = &utils.RateProfileCost{
 		ID: rtPfl.ID,
 	}
 	var ok bool
@@ -194,30 +196,30 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *engine.RateProfile, args *utils.
 		}
 	}
 
-	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, 0, usage); err != nil {
+	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, decimal.New(0, 0), usage); err != nil {
 		return nil, err
 	}
 	// in case we have error it is returned in the function from above
 	// this came to light in coverage tests
-	rpCost.Cost, _ = engine.CostForIntervals(rpCost.RateSIntervals).Float64()
+	rpCost.Cost, _ = utils.CostForIntervals(rpCost.RateSIntervals).Float64()
 
 	return
 }
 
 // V1CostForEvent will be called to calculate the cost for an event
-func (rS *RateS) V1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) (err error) {
+func (rS *RateS) V1CostForEvent(args *utils.ArgsCostForEvent, rpCost *utils.RateProfileCost) (err error) {
 	rPfIDs := make([]string, len(args.RateProfileIDs))
 	for i, rpID := range args.RateProfileIDs {
 		rPfIDs[i] = rpID
 	}
-	var rtPrl *engine.RateProfile
+	var rtPrl *utils.RateProfile
 	if rtPrl, err = rS.matchingRateProfileForEvent(args.Tenant, rPfIDs, args); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	var rcvCost *engine.RateProfileCost
+	var rcvCost *utils.RateProfileCost
 	if rcvCost, err = rS.rateProfileCostForEvent(rtPrl, args, rS.cfg.RateSCfg().Verbosity); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)

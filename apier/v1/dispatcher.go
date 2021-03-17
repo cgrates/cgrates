@@ -1137,7 +1137,7 @@ func (dS *DispatcherReplicatorSv1) SetDispatcherProfile(args *engine.DispatcherP
 }
 
 // SetRateProfile
-func (dS *DispatcherReplicatorSv1) SetRateProfile(args *engine.RateProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetRateProfile(args *utils.RateProfileWithOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetRateProfile(args, reply)
 }
 
@@ -1335,7 +1335,7 @@ func (dR *DispatcherRateSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dR.dR.RateSv1Ping(args, reply)
 }
 
-func (dR *DispatcherRateSv1) CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) error {
+func (dR *DispatcherRateSv1) CostForEvent(args *utils.ArgsCostForEvent, rpCost *utils.RateProfileCost) error {
 	return dR.dR.RateSv1CostForEvent(args, rpCost)
 }
 

@@ -852,9 +852,9 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherProfile(args *engine.Disp
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetDispatcherProfile, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetRateProfile(args *engine.RateProfileWithOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1SetRateProfile(args *utils.RateProfileWithOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.RateProfileWithOpts{}
+		args = &utils.RateProfileWithOpts{}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {

@@ -184,7 +184,7 @@ type CoreSv1Interface interface {
 
 type RateSv1Interface interface {
 	Ping(ign *utils.CGREvent, reply *string) error
-	CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) error
+	CostForEvent(args *utils.ArgsCostForEvent, rpCost *utils.RateProfileCost) error
 }
 
 type RateProfileSv1Interface interface {
@@ -239,7 +239,7 @@ type ReplicatorSv1Interface interface {
 	SetAttributeProfile(ap *engine.AttributeProfileWithOpts, reply *string) error
 	SetChargerProfile(cp *engine.ChargerProfileWithOpts, reply *string) error
 	SetDispatcherProfile(dpp *engine.DispatcherProfileWithOpts, reply *string) error
-	SetRateProfile(dpp *engine.RateProfileWithOpts, reply *string) error
+	SetRateProfile(dpp *utils.RateProfileWithOpts, reply *string) error
 	SetActionPlan(args *engine.SetActionPlanArgWithOpts, reply *string) error
 	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithOpts, reply *string) error
 	SetDispatcherHost(dpp *engine.DispatcherHostWithOpts, reply *string) error

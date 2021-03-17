@@ -918,6 +918,7 @@ const (
 	HashtagSep            = "#"
 	MetaRounding          = "*rounding"
 	StatsNA               = -1.0
+	InvalidUsage          = -1
 	RateProfileMatched    = "RateProfileMatched"
 	InvalidDuration       = time.Duration(-1)
 	ActionS               = "ActionS"
