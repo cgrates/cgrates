@@ -89,7 +89,7 @@ func (apierSv1 *APIerSv1) GetFilterIDs(args *utils.PaginatorWithTenant, fltrIDs 
 }
 
 //RemoveFilter  remove a specific filter
-func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -105,8 +105,8 @@ func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithOpts, reply *strin
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheFilters,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheFilters,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

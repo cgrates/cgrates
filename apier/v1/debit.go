@@ -78,9 +78,9 @@ func (apierSv1 *APIerSv1) DebitUsageWithOptions(args *AttrDebitUsageWithOptions,
 
 	// Calculate the cost for usage and debit the account
 	var cc engine.CallCost
-	if err := apierSv1.Responder.Debit(&engine.CallDescriptorWithOpts{
+	if err := apierSv1.Responder.Debit(&engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: cd,
-		Opts:           args.UsageRecord.Opts,
+		APIOpts:        args.UsageRecord.Opts,
 	}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}

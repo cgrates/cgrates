@@ -185,7 +185,7 @@ func testV1STSGetStats(t *testing.T) {
 		utils.MetaAverage + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage: utils.NotAvailable,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}},
 		&metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -213,7 +213,7 @@ func testV1STSV1StatSv1GetQueueStringMetricsWithoutTenant(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.CustomValue: "10",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: expectedIDs[0]}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: expectedIDs[0]}},
 		&metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -241,7 +241,7 @@ func testV1STSV1StatSv1ResetAction(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.CustomValue: utils.NotAvailable,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomStatProfile"}}, &metrics); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomStatProfile"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", utils.ToJSON(expectedMetrics), utils.ToJSON(metrics))
@@ -282,7 +282,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	var metrics map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &metrics); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -301,7 +301,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	var floatMetrics map[string]float64
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &floatMetrics); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &floatMetrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedFloatMetrics, floatMetrics) {
 		t.Errorf("expecting: %+v, received reply: %+v", expectedFloatMetrics, floatMetrics)
@@ -353,7 +353,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	var metrics2 map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &metrics2); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &metrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
@@ -371,14 +371,14 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	var floatMetrics2 map[string]float64
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &floatMetrics2); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &floatMetrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedFloatMetrics2, floatMetrics2) {
 		t.Errorf("expecting: %+v, received reply: %+v", expectedFloatMetrics2, floatMetrics2)
 	}
 
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "Stats1"}}, &floatMetrics2); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "Stats1"}}, &floatMetrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedFloatMetrics2, floatMetrics2) {
 		t.Errorf("expecting: %+v, received reply: %+v", expectedFloatMetrics2, floatMetrics2)
@@ -414,7 +414,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	}
 	var metrics2 map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &metrics2); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &metrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
@@ -631,7 +631,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "CustomValue": utils.NotAvailable,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -662,7 +662,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "CustomValue": utils.NotAvailable,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -692,7 +692,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "CustomValue": "10",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -770,7 +770,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 		utils.MetaAverage + utils.HashtagSep + "2": "2",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -787,7 +787,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 		utils.MetaAverage + utils.HashtagSep + "2": "2",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -795,7 +795,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 	}
 
 	if err := stsV1Rpc.Call(utils.StatSv1ResetStatQueue,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -806,7 +806,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 		utils.MetaAverage + utils.HashtagSep + "2": utils.NotAvailable,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -896,7 +896,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_Stat", Hits: 1}
 	if err := stsV1Rpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Stat"}}, &td); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Stat"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
@@ -1014,7 +1014,7 @@ func testV1STSProcessCDRStat(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + "~*req.CostDetails.Usage": "10000000000",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatForCDR"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -1030,7 +1030,7 @@ func testV1STSProcessCDRStat(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + "~*req.CostDetails.Usage": "20000000000",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatForCDR"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -1082,7 +1082,7 @@ func testV1STSOverWriteStats(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + "1": utils.NotAvailable,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "InitStat"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -1122,7 +1122,7 @@ func testV1STSOverWriteStats(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + "~*req.Test": utils.NotAvailable,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "InitStat"}}, &metrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
@@ -1203,7 +1203,7 @@ func testV1STSProcessStatWithThreshold2(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_Stat2", Hits: 1}
 	if err := stsV1Rpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Stat"}}, &td); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Stat"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
@@ -1245,7 +1245,7 @@ func BenchmarkSTSV1GetQueueStringMetrics(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var metrics map[string]string
 		if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-			&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "STATS_1"}},
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "STATS_1"}},
 			&metrics); err != nil {
 			b.Error(err)
 		}
@@ -1298,7 +1298,7 @@ func testV1STSGetStatQueueProfileWithoutTenant(t *testing.T) {
 func testV1STSRemStatQueueProfileWithoutTenant(t *testing.T) {
 	var reply string
 	if err := stsV1Rpc.Call(utils.APIerSv1RemoveStatQueueProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "TEST_PROFILE10"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "TEST_PROFILE10"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1459,7 +1459,7 @@ func testV1STSSimulateAccountUpdate(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + "~*asm.BalanceSummaries.HolidayBalance.Value": "1.5",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatForAccountUpdate"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -1475,7 +1475,7 @@ func testV1STSSimulateAccountUpdate(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + "~*asm.BalanceSummaries.HolidayBalance.Value": "3",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatForAccountUpdate"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -1538,7 +1538,7 @@ func testV1STSGetStatQueueWithoutExpired(t *testing.T) {
 	}
 	//verify metrics after first process
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Sq1Nanao"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -1600,7 +1600,7 @@ func testV1STSGetStatQueueWithoutStored(t *testing.T) {
 	}
 	//verify metrics after first process
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Sq1NotStored"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -1618,7 +1618,7 @@ func testV1STSGetStatQueueWithoutStored(t *testing.T) {
 	}
 	//verify metrics after first process
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Sq1NotStored"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -1633,7 +1633,7 @@ func testV1STSCheckMetricsAfterRestart(t *testing.T) {
 		utils.MetaSum + utils.HashtagSep + "~*asm.BalanceSummaries.HolidayBalance.Value": "3",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "StatForAccountUpdate"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -1644,7 +1644,7 @@ func testV1STSCheckMetricsAfterRestart(t *testing.T) {
 	}
 	metrics = map[string]string{}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Sq1NotStored"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {

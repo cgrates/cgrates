@@ -1163,7 +1163,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 	}
 	var reply engine.AttributeProfile
 	if err := tFIdxCaRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}},
 		&reply); err != nil {
 		t.Error(err)
 	}
@@ -1224,7 +1224,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form api
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org",
+	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org",
 		ID: "TEST_PROFILE1"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -1233,13 +1233,13 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	var sqp *engine.AttributeProfile
 	//Test the remove
 	if err := tFIdxCaRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
 		&sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form tariffplan
-	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org",
+	if err := tFIdxCaRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org",
 		ID: "ATTR_1"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -1247,7 +1247,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	}
 	//Test the remove
 	if err := tFIdxCaRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}},
 		&sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

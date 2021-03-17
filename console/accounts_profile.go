@@ -26,7 +26,7 @@ func init() {
 	c := &CmdGetAccountsProfile{
 		name:      "accounts_profile",
 		rpcMethod: utils.APIerSv1GetAccountProfile,
-		rpcParams: &utils.TenantIDWithOpts{},
+		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetAccountsProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithOpts
+	rpcParams *utils.TenantIDWithAPIOpts
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdGetAccountsProfile) RpcMethod() string {
 
 func (self *CmdGetAccountsProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithOpts{}
+		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
 	return self.rpcParams
 }

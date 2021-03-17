@@ -145,7 +145,7 @@ func testSessionsDataLastUsedData(t *testing.T) {
 	}
 	var cc engine.CallCost
 	// Make sure the cost is what we expect to be for 1MB of data
-	if err := sDataRPC.Call(utils.ResponderGetCost, &engine.CallDescriptorWithOpts{CallDescriptor: &cd}, &cc); err != nil {
+	if err := sDataRPC.Call(utils.ResponderGetCost, &engine.CallDescriptorWithAPIOpts{CallDescriptor: &cd}, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.Cost != 1024 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)

@@ -119,7 +119,7 @@ func testA1itLoadTPFromFolder(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	tStart := time.Date(2017, 3, 3, 10, 39, 33, 0, time.UTC)
 	tEnd := time.Date(2017, 3, 3, 10, 39, 33, 10240, time.UTC)
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:    "data1",
 			Tenant:      "cgrates.org",

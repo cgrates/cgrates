@@ -233,7 +233,7 @@ func testDispatcherSGetDispatcherProfileCache(t *testing.T) {
 func testDispatcherSRemDispatcherProfile(t *testing.T) {
 	var result string
 	if err := dispatcherRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -248,7 +248,7 @@ func testDispatcherSRemDispatcherProfile(t *testing.T) {
 	}
 
 	if err := dispatcherRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
 		&result); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
@@ -347,7 +347,7 @@ func testDispatcherSGetDispatcherHostCache(t *testing.T) {
 func testDispatcherSRemDispatcherHost(t *testing.T) {
 	var result string
 	if err := dispatcherRPC.Call(utils.APIerSv1RemoveDispatcherHost,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"}},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -362,7 +362,7 @@ func testDispatcherSRemDispatcherHost(t *testing.T) {
 	}
 
 	if err := dispatcherRPC.Call(utils.APIerSv1RemoveDispatcherHost,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"}},
 		&result); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
@@ -403,7 +403,7 @@ func testDispatcherSSetDispatcherProfileWithoutTenant(t *testing.T) {
 func testDispatcherSRemDispatcherProfileWithoutTenant(t *testing.T) {
 	var reply string
 	if err := dispatcherRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "Dsp1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "Dsp1"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -446,7 +446,7 @@ func testDispatcherSSetDispatcherHostWithoutTenant(t *testing.T) {
 func testDispatcherSRemDispatcherHostWithoutTenant(t *testing.T) {
 	var reply string
 	if err := dispatcherRPC.Call(utils.APIerSv1RemoveDispatcherHost,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "DspHst7"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "DspHst7"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

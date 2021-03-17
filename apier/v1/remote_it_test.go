@@ -249,7 +249,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := internalRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
@@ -265,7 +265,7 @@ func testInternalRemoteITGetThreshold(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}
 	if err := internalRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd, td) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
@@ -306,14 +306,14 @@ func testInternalRemoteITGetResource(t *testing.T) {
 		Usages: map[string]*engine.ResourceUsage{},
 	}
 	if err := internalRPC.Call(utils.ResourceSv1GetResource,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}}, &reply); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expectedResources) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedResources), utils.ToJSON(reply))
 	}
 
 	if err := internalRPC.Call(utils.ResourceSv1GetResource,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "ResGroup1"}}, &reply); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ResGroup1"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expectedResources) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedResources), utils.ToJSON(reply))
@@ -666,7 +666,7 @@ func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 func testInternalRemoteITGetRateProfile(t *testing.T) {
 	var rcv *engine.RateProfile
 	if err := internalRPC.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
 		&rcv); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -747,7 +747,7 @@ func testInternalRemoteITGetRateProfile(t *testing.T) {
 
 	var rPfrg *engine.RateProfile
 	if err := internalRPC.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
 		&rPfrg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rPrf, rPfrg) {

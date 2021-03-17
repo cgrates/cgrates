@@ -750,16 +750,16 @@ type TenantID struct {
 	ID     string
 }
 
-type TenantIDWithOpts struct {
+type TenantIDWithAPIOpts struct {
 	*TenantID
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 func (tID *TenantID) TenantID() string {
 	return ConcatenatedKey(tID.Tenant, tID.ID)
 }
 
-func (tID *TenantIDWithOpts) TenantIDConcatenated() string {
+func (tID *TenantIDWithAPIOpts) TenantIDConcatenated() string {
 	return ConcatenatedKey(tID.Tenant, tID.ID)
 }
 

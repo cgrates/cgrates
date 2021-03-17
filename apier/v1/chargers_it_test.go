@@ -637,7 +637,7 @@ func testChargerSSetChargerProfileWithoutTenant(t *testing.T) {
 func testChargerSRemChargerProfileWithoutTenant(t *testing.T) {
 	var reply string
 	if err := chargerRPC.Call(utils.APIerSv1RemoveChargerProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "randomID"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "randomID"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

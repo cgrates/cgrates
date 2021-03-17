@@ -276,9 +276,9 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithOpts) (*CallCost, error) {
 	if reqTypes.Has(cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
 		err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 			utils.ResponderDebit,
-			&CallDescriptorWithOpts{
+			&CallDescriptorWithAPIOpts{
 				CallDescriptor: cd,
-				Opts:           cdr.Opts,
+				APIOpts:        cdr.Opts,
 			}, cc)
 		if err != nil && err.Error() == utils.ErrAccountNotFound.Error() &&
 			cdr.RequestType == utils.MetaDynaprepaid {
@@ -294,17 +294,17 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithOpts) (*CallCost, error) {
 			// execute again the Debit operation
 			err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 				utils.ResponderDebit,
-				&CallDescriptorWithOpts{
+				&CallDescriptorWithAPIOpts{
 					CallDescriptor: cd,
-					Opts:           cdr.Opts,
+					APIOpts:        cdr.Opts,
 				}, cc)
 		}
 	} else {
 		err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 			utils.ResponderGetCost,
-			&CallDescriptorWithOpts{
+			&CallDescriptorWithAPIOpts{
 				CallDescriptor: cd,
-				Opts:           cdr.Opts,
+				APIOpts:        cdr.Opts,
 			}, cc)
 	}
 	if err != nil {
@@ -341,7 +341,7 @@ func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (rfnd
 	var acnt Account
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 		utils.ResponderRefundIncrements,
-		&CallDescriptorWithOpts{CallDescriptor: cd}, &acnt); err != nil {
+		&CallDescriptorWithAPIOpts{CallDescriptor: cd}, &acnt); err != nil {
 		return
 	}
 	return true, nil
@@ -983,7 +983,7 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 		var response float64
 		if err := cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 			utils.ResponderRefundRounding,
-			&CallDescriptorWithOpts{CallDescriptor: cd},
+			&CallDescriptorWithAPIOpts{CallDescriptor: cd},
 			&response); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<CDRS> RefundRounding for cc: %+v, got error: %s",

@@ -53,20 +53,20 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgs
 	return dS.Dispatch(args.CGREvent, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWithOpts,
+func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts,
 	reply *map[string]string) (err error) {
 
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetQueueStringMetrics,
 			args.TenantID.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
 		ID:     args.ID,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaStats, utils.StatSv1GetQueueStringMetrics, args, reply)
 }
 
@@ -83,19 +83,19 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEv
 	return dS.Dispatch(args.CGREvent, utils.MetaStats, utils.StatSv1ProcessEvent, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWithOpts,
+func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWithAPIOpts,
 	reply *map[string]float64) (err error) {
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetQueueFloatMetrics,
 			args.TenantID.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
 		ID:     args.ID,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaStats, utils.StatSv1GetQueueFloatMetrics, args, reply)
 }
 

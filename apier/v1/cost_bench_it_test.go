@@ -193,7 +193,7 @@ func BenchmarkCostWithRALs(b *testing.B) {
 	testCostBenchLoadFromFolder(b)
 
 	tNow := time.Now()
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -228,7 +228,7 @@ func BenchmarkCostDiffPeriodWithRALs(b *testing.B) {
 
 	tStart, _ := utils.ParseTimeDetectLayout("2020-12-09T07:00:00Z", utils.EmptyString)
 	tEnd, _ := utils.ParseTimeDetectLayout("2020-12-09T09:00:00Z", utils.EmptyString)
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",

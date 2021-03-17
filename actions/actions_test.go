@@ -852,7 +852,7 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(arg interface{}, rply interface{}) error{
 			utils.ThresholdSv1ResetThreshold: func(arg interface{}, rply interface{}) error {
-				argConv, can := arg.(*utils.TenantIDWithOpts)
+				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
@@ -899,7 +899,7 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(arg interface{}, rply interface{}) error{
 			utils.ThresholdSv1ResetThreshold: func(arg interface{}, rply interface{}) error {
-				argConv, can := arg.(*utils.TenantIDWithOpts)
+				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
@@ -946,7 +946,7 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(arg interface{}, rply interface{}) error{
 			utils.StatSv1ResetStatQueue: func(arg interface{}, rply interface{}) error {
-				argConv, can := arg.(*utils.TenantIDWithOpts)
+				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
@@ -993,7 +993,7 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(arg interface{}, rply interface{}) error{
 			utils.StatSv1ResetStatQueue: func(arg interface{}, rply interface{}) error {
-				argConv, can := arg.(*utils.TenantIDWithOpts)
+				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}

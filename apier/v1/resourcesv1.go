@@ -60,11 +60,11 @@ func (rsv1 *ResourceSv1) ReleaseResources(args *utils.ArgRSv1ResourceUsage, repl
 }
 
 // GetResource returns a resource configuration
-func (rsv1 *ResourceSv1) GetResource(args *utils.TenantIDWithOpts, reply *engine.Resource) error {
+func (rsv1 *ResourceSv1) GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
 	return rsv1.rls.V1GetResource(args, reply)
 }
 
-func (rsv1 *ResourceSv1) GetResourceWithConfig(args *utils.TenantIDWithOpts, reply *engine.ResourceWithConfig) error {
+func (rsv1 *ResourceSv1) GetResourceWithConfig(args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error {
 	return rsv1.rls.V1GetResourceWithConfig(args, reply)
 }
 
@@ -154,7 +154,7 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithOpts
 }
 
 //RemoveResourceProfile remove a specific resource configuration
-func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -166,8 +166,8 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithOpts, rep
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheResourceProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheResourceProfiles,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.DataManager.RemoveResource(tnt, arg.ID, utils.NonTransactional); err != nil {
@@ -180,8 +180,8 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithOpts, rep
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Resource
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheResources,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheResources,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

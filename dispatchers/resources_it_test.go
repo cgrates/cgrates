@@ -301,9 +301,9 @@ func testDspResTestAuthKey3(t *testing.T) {
 		}
 	}
 	var r *engine.Resource
-	argsGetResource := &utils.TenantIDWithOpts{
+	argsGetResource := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "res12345",
 		},
 	}

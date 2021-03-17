@@ -32,7 +32,7 @@ import (
 type ThresholdSv1Interface interface {
 	GetThresholdIDs(tenant *utils.TenantWithOpts, tIDs *[]string) error
 	GetThresholdsForEvent(args *engine.ThresholdsArgsProcessEvent, reply *engine.Thresholds) error
-	GetThreshold(tntID *utils.TenantIDWithOpts, t *engine.Threshold) error
+	GetThreshold(tntID *utils.TenantIDWithAPIOpts, t *engine.Threshold) error
 	ProcessEvent(args *engine.ThresholdsArgsProcessEvent, tIDs *[]string) error
 	Ping(ign *utils.CGREvent, reply *string) error
 }
@@ -41,8 +41,8 @@ type StatSv1Interface interface {
 	GetQueueIDs(tenant *utils.TenantWithOpts, qIDs *[]string) error
 	ProcessEvent(args *engine.StatsArgsProcessEvent, reply *[]string) error
 	GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, reply *[]string) (err error)
-	GetQueueStringMetrics(args *utils.TenantIDWithOpts, reply *map[string]string) (err error)
-	GetQueueFloatMetrics(args *utils.TenantIDWithOpts, reply *map[string]float64) (err error)
+	GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error)
+	GetQueueFloatMetrics(args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error)
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 
@@ -51,8 +51,8 @@ type ResourceSv1Interface interface {
 	AuthorizeResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
 	AllocateResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
 	ReleaseResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
-	GetResource(args *utils.TenantIDWithOpts, reply *engine.Resource) error
-	GetResourceWithConfig(args *utils.TenantIDWithOpts, reply *engine.ResourceWithConfig) error
+	GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error
+	GetResourceWithConfig(args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 
@@ -102,12 +102,12 @@ type SessionSv1Interface interface {
 }
 
 type ResponderInterface interface {
-	GetCost(arg *engine.CallDescriptorWithOpts, reply *engine.CallCost) (err error)
-	Debit(arg *engine.CallDescriptorWithOpts, reply *engine.CallCost) (err error)
-	MaxDebit(arg *engine.CallDescriptorWithOpts, reply *engine.CallCost) (err error)
-	RefundIncrements(arg *engine.CallDescriptorWithOpts, reply *engine.Account) (err error)
-	RefundRounding(arg *engine.CallDescriptorWithOpts, reply *float64) (err error)
-	GetMaxSessionTime(arg *engine.CallDescriptorWithOpts, reply *time.Duration) (err error)
+	GetCost(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
+	Debit(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
+	MaxDebit(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
+	RefundIncrements(arg *engine.CallDescriptorWithAPIOpts, reply *engine.Account) (err error)
+	RefundRounding(arg *engine.CallDescriptorWithAPIOpts, reply *float64) (err error)
+	GetMaxSessionTime(arg *engine.CallDescriptorWithAPIOpts, reply *time.Duration) (err error)
 	Shutdown(arg *utils.TenantWithOpts, reply *string) (err error)
 	Ping(ign *utils.CGREvent, reply *string) error
 }
@@ -195,14 +195,14 @@ type ReplicatorSv1Interface interface {
 	GetAccount(args *utils.StringWithOpts, reply *engine.Account) error
 	GetDestination(key *utils.StringWithOpts, reply *engine.Destination) error
 	GetReverseDestination(key *utils.StringWithOpts, reply *[]string) error
-	GetStatQueue(tntID *utils.TenantIDWithOpts, reply *engine.StatQueue) error
-	GetFilter(tntID *utils.TenantIDWithOpts, reply *engine.Filter) error
-	GetThreshold(tntID *utils.TenantIDWithOpts, reply *engine.Threshold) error
-	GetThresholdProfile(tntID *utils.TenantIDWithOpts, reply *engine.ThresholdProfile) error
-	GetStatQueueProfile(tntID *utils.TenantIDWithOpts, reply *engine.StatQueueProfile) error
+	GetStatQueue(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) error
+	GetFilter(tntID *utils.TenantIDWithAPIOpts, reply *engine.Filter) error
+	GetThreshold(tntID *utils.TenantIDWithAPIOpts, reply *engine.Threshold) error
+	GetThresholdProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) error
+	GetStatQueueProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) error
 	GetTiming(id *utils.StringWithOpts, reply *utils.TPTiming) error
-	GetResource(tntID *utils.TenantIDWithOpts, reply *engine.Resource) error
-	GetResourceProfile(tntID *utils.TenantIDWithOpts, reply *engine.ResourceProfile) error
+	GetResource(tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error
+	GetResourceProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error
 	GetActionTriggers(id *utils.StringWithOpts, reply *engine.ActionTriggers) error
 	GetSharedGroup(id *utils.StringWithOpts, reply *engine.SharedGroup) error
 	GetActions(id *utils.StringWithOpts, reply *engine.Actions) error
@@ -211,12 +211,12 @@ type ReplicatorSv1Interface interface {
 	GetAccountActionPlans(id *utils.StringWithOpts, reply *[]string) error
 	GetRatingPlan(id *utils.StringWithOpts, reply *engine.RatingPlan) error
 	GetRatingProfile(id *utils.StringWithOpts, reply *engine.RatingProfile) error
-	GetRouteProfile(tntID *utils.TenantIDWithOpts, reply *engine.RouteProfile) error
-	GetAttributeProfile(tntID *utils.TenantIDWithOpts, reply *engine.AttributeProfile) error
-	GetChargerProfile(tntID *utils.TenantIDWithOpts, reply *engine.ChargerProfile) error
-	GetDispatcherProfile(tntID *utils.TenantIDWithOpts, reply *engine.DispatcherProfile) error
-	GetRateProfile(tntID *utils.TenantIDWithOpts, reply *engine.RateProfile) error
-	GetDispatcherHost(tntID *utils.TenantIDWithOpts, reply *engine.DispatcherHost) error
+	GetRouteProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error
+	GetAttributeProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error
+	GetChargerProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error
+	GetDispatcherProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error
+	GetRateProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RateProfile) error
+	GetDispatcherHost(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error
 	GetItemLoadIDs(itemID *utils.StringWithOpts, reply *map[string]int64) error
 	SetThresholdProfile(th *engine.ThresholdProfileWithOpts, reply *string) error
 	SetThreshold(th *engine.ThresholdWithOpts, reply *string) error
@@ -242,17 +242,17 @@ type ReplicatorSv1Interface interface {
 	SetActionPlan(args *engine.SetActionPlanArgWithOpts, reply *string) error
 	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithOpts, reply *string) error
 	SetDispatcherHost(dpp *engine.DispatcherHostWithOpts, reply *string) error
-	RemoveThreshold(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveThreshold(args *utils.TenantIDWithAPIOpts, reply *string) error
 	SetLoadIDs(args *utils.LoadIDsWithOpts, reply *string) error
 	RemoveDestination(id *utils.StringWithOpts, reply *string) error
 	RemoveAccount(id *utils.StringWithOpts, reply *string) error
-	RemoveStatQueue(args *utils.TenantIDWithOpts, reply *string) error
-	RemoveFilter(args *utils.TenantIDWithOpts, reply *string) error
-	RemoveThresholdProfile(args *utils.TenantIDWithOpts, reply *string) error
-	RemoveStatQueueProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveStatQueue(args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveFilter(args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveTiming(id *utils.StringWithOpts, reply *string) error
-	RemoveResource(args *utils.TenantIDWithOpts, reply *string) error
-	RemoveResourceProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveResource(args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveResourceProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveActionTriggers(id *utils.StringWithOpts, reply *string) error
 	RemoveSharedGroup(id *utils.StringWithOpts, reply *string) error
 	RemoveActions(id *utils.StringWithOpts, reply *string) error
@@ -260,24 +260,24 @@ type ReplicatorSv1Interface interface {
 	RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithOpts, reply *string) error
 	RemoveRatingPlan(id *utils.StringWithOpts, reply *string) error
 	RemoveRatingProfile(id *utils.StringWithOpts, reply *string) error
-	RemoveRouteProfile(args *utils.TenantIDWithOpts, reply *string) error
-	RemoveAttributeProfile(args *utils.TenantIDWithOpts, reply *string) error
-	RemoveChargerProfile(args *utils.TenantIDWithOpts, reply *string) error
-	RemoveDispatcherProfile(args *utils.TenantIDWithOpts, reply *string) error
-	RemoveDispatcherHost(args *utils.TenantIDWithOpts, reply *string) error
-	RemoveRateProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveAttributeProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveChargerProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveDispatcherProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveDispatcherHost(args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveRateProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 
 	GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error
 	SetIndexes(args *utils.SetIndexesArg, reply *string) error
 	RemoveIndexes(args *utils.GetIndexesArg, reply *string) error
 
-	GetAccountProfile(tntID *utils.TenantIDWithOpts, reply *utils.AccountProfile) error
+	GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error
 	SetAccountProfile(args *utils.AccountProfileWithAPIOpts, reply *string) error
-	RemoveAccountProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 
-	GetActionProfile(tntID *utils.TenantIDWithOpts, reply *engine.ActionProfile) error
+	GetActionProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error
 	SetActionProfile(args *engine.ActionProfileWithOpts, reply *string) error
-	RemoveActionProfile(args *utils.TenantIDWithOpts, reply *string) error
+	RemoveActionProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 }
 
 type ActionSv1Interface interface {

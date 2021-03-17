@@ -27,7 +27,7 @@ import (
 )
 
 // GetAccountProfile returns an Account Profile
-func (apierSv1 *APIerSv1) GetAccountProfile(arg *utils.TenantIDWithOpts, reply *utils.AccountProfile) error {
+func (apierSv1 *APIerSv1) GetAccountProfile(arg *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -111,7 +111,7 @@ func (apierSv1 *APIerSv1) SetAccountProfile(extAp *utils.APIAccountProfileWithOp
 }
 
 // RemoveAccountProfile remove a specific Account Profile
-func (apierSv1 *APIerSv1) RemoveAccountProfile(arg *utils.TenantIDWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveAccountProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -60,9 +60,9 @@ func (apierSv1 *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) erro
 	}
 	var cc engine.CallCost
 	if err := apierSv1.Responder.GetCost(
-		&engine.CallDescriptorWithOpts{
+		&engine.CallDescriptorWithAPIOpts{
 			CallDescriptor: cd,
-			Opts:           attrs.Opts,
+			APIOpts:        attrs.Opts,
 		}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -99,9 +99,9 @@ func (apierSv1 *APIerSv1) GetDataCost(attrs *AttrGetDataCost, reply *engine.Data
 		ToR:           utils.MetaData,
 	}
 	var cc engine.CallCost
-	if err := apierSv1.Responder.GetCost(&engine.CallDescriptorWithOpts{
+	if err := apierSv1.Responder.GetCost(&engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: cd,
-		Opts:           attrs.Opts,
+		APIOpts:        attrs.Opts,
 	}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}

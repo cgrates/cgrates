@@ -798,7 +798,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 }
 
 // V1GetResource returns a resource configuration
-func (rS *ResourceService) V1GetResource(arg *utils.TenantIDWithOpts, reply *Resource) error {
+func (rS *ResourceService) V1GetResource(arg *utils.TenantIDWithAPIOpts, reply *Resource) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -819,7 +819,7 @@ type ResourceWithConfig struct {
 	Config *ResourceProfile
 }
 
-func (rS *ResourceService) V1GetResourceWithConfig(arg *utils.TenantIDWithOpts, reply *ResourceWithConfig) (err error) {
+func (rS *ResourceService) V1GetResourceWithConfig(arg *utils.TenantIDWithAPIOpts, reply *ResourceWithConfig) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

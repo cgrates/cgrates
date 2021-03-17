@@ -98,7 +98,7 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithAPIOpts, repl
 }
 
 //RemoveDispatcherProfile remove a specific Dispatcher Profile
-func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -115,8 +115,8 @@ func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithOpts, r
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheDispatcherProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheDispatcherProfiles,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -187,7 +187,7 @@ func (apierSv1 *APIerSv1) SetDispatcherHost(args *engine.DispatcherHostWithOpts,
 }
 
 //RemoveDispatcherHost remove a specific Dispatcher Host
-func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -204,8 +204,8 @@ func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithOpts, repl
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheDispatcherHosts,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheDispatcherHosts,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -243,7 +243,7 @@ func (dT *DispatcherThresholdSv1) GetThresholdIDs(args *utils.TenantWithOpts,
 	return dT.dS.ThresholdSv1GetThresholdIDs(args, tIDs)
 }
 
-func (dT *DispatcherThresholdSv1) GetThreshold(args *utils.TenantIDWithOpts,
+func (dT *DispatcherThresholdSv1) GetThreshold(args *utils.TenantIDWithAPIOpts,
 	th *engine.Threshold) error {
 	return dT.dS.ThresholdSv1GetThreshold(args, th)
 }
@@ -268,12 +268,12 @@ func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(args *engine.StatsArgsProce
 }
 
 // GetQueueStringMetrics implements StatSv1GetQueueStringMetrics
-func (dSts *DispatcherStatSv1) GetQueueStringMetrics(args *utils.TenantIDWithOpts,
+func (dSts *DispatcherStatSv1) GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts,
 	reply *map[string]string) error {
 	return dSts.dS.StatSv1GetQueueStringMetrics(args, reply)
 }
 
-func (dSts *DispatcherStatSv1) GetQueueFloatMetrics(args *utils.TenantIDWithOpts,
+func (dSts *DispatcherStatSv1) GetQueueFloatMetrics(args *utils.TenantIDWithAPIOpts,
 	reply *map[string]float64) error {
 	return dSts.dS.StatSv1GetQueueFloatMetrics(args, reply)
 }
@@ -308,11 +308,11 @@ func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args *utils.ArgRSv1Resour
 	return dRs.dRs.ResourceSv1GetResourcesForEvent(*args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) GetResource(args *utils.TenantIDWithOpts, reply *engine.Resource) error {
+func (dRs *DispatcherResourceSv1) GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
 	return dRs.dRs.ResourceSv1GetResource(args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) GetResourceWithConfig(args *utils.TenantIDWithOpts, reply *engine.ResourceWithConfig) error {
+func (dRs *DispatcherResourceSv1) GetResourceWithConfig(args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error {
 	return dRs.dRs.ResourceSv1GetResourceWithConfig(args, reply)
 }
 
@@ -545,27 +545,27 @@ type DispatcherResponder struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherResponder) GetCost(args *engine.CallDescriptorWithOpts, reply *engine.CallCost) error {
+func (dS *DispatcherResponder) GetCost(args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
 	return dS.dS.ResponderGetCost(args, reply)
 }
 
-func (dS *DispatcherResponder) Debit(args *engine.CallDescriptorWithOpts, reply *engine.CallCost) error {
+func (dS *DispatcherResponder) Debit(args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
 	return dS.dS.ResponderDebit(args, reply)
 }
 
-func (dS *DispatcherResponder) MaxDebit(args *engine.CallDescriptorWithOpts, reply *engine.CallCost) error {
+func (dS *DispatcherResponder) MaxDebit(args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
 	return dS.dS.ResponderMaxDebit(args, reply)
 }
 
-func (dS *DispatcherResponder) RefundIncrements(args *engine.CallDescriptorWithOpts, reply *engine.Account) error {
+func (dS *DispatcherResponder) RefundIncrements(args *engine.CallDescriptorWithAPIOpts, reply *engine.Account) error {
 	return dS.dS.ResponderRefundIncrements(args, reply)
 }
 
-func (dS *DispatcherResponder) RefundRounding(args *engine.CallDescriptorWithOpts, reply *float64) error {
+func (dS *DispatcherResponder) RefundRounding(args *engine.CallDescriptorWithAPIOpts, reply *float64) error {
 	return dS.dS.ResponderRefundRounding(args, reply)
 }
 
-func (dS *DispatcherResponder) GetMaxSessionTime(args *engine.CallDescriptorWithOpts, reply *time.Duration) error {
+func (dS *DispatcherResponder) GetMaxSessionTime(args *engine.CallDescriptorWithAPIOpts, reply *time.Duration) error {
 	return dS.dS.ResponderGetMaxSessionTime(args, reply)
 }
 
@@ -917,27 +917,27 @@ func (dS *DispatcherReplicatorSv1) GetReverseDestination(key *utils.StringWithOp
 }
 
 // GetStatQueue
-func (dS *DispatcherReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithOpts, reply *engine.StatQueue) error {
+func (dS *DispatcherReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) error {
 	return dS.dS.ReplicatorSv1GetStatQueue(tntID, reply)
 }
 
 // GetFilter
-func (dS *DispatcherReplicatorSv1) GetFilter(tntID *utils.TenantIDWithOpts, reply *engine.Filter) error {
+func (dS *DispatcherReplicatorSv1) GetFilter(tntID *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
 	return dS.dS.ReplicatorSv1GetFilter(tntID, reply)
 }
 
 // GetThreshold
-func (dS *DispatcherReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithOpts, reply *engine.Threshold) error {
+func (dS *DispatcherReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithAPIOpts, reply *engine.Threshold) error {
 	return dS.dS.ReplicatorSv1GetThreshold(tntID, reply)
 }
 
 // GetThresholdProfile
-func (dS *DispatcherReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithOpts, reply *engine.ThresholdProfile) error {
+func (dS *DispatcherReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) error {
 	return dS.dS.ReplicatorSv1GetThresholdProfile(tntID, reply)
 }
 
 // GetStatQueueProfile
-func (dS *DispatcherReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWithOpts, reply *engine.StatQueueProfile) error {
+func (dS *DispatcherReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) error {
 	return dS.dS.ReplicatorSv1GetStatQueueProfile(tntID, reply)
 }
 
@@ -947,12 +947,12 @@ func (dS *DispatcherReplicatorSv1) GetTiming(id *utils.StringWithOpts, reply *ut
 }
 
 // GetResource
-func (dS *DispatcherReplicatorSv1) GetResource(tntID *utils.TenantIDWithOpts, reply *engine.Resource) error {
+func (dS *DispatcherReplicatorSv1) GetResource(tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
 	return dS.dS.ReplicatorSv1GetResource(tntID, reply)
 }
 
 // GetResourceProfile
-func (dS *DispatcherReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithOpts, reply *engine.ResourceProfile) error {
+func (dS *DispatcherReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
 	return dS.dS.ReplicatorSv1GetResourceProfile(tntID, reply)
 }
 
@@ -997,32 +997,32 @@ func (dS *DispatcherReplicatorSv1) GetRatingProfile(id *utils.StringWithOpts, re
 }
 
 // GetRouteProfile
-func (dS *DispatcherReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithOpts, reply *engine.RouteProfile) error {
+func (dS *DispatcherReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
 	return dS.dS.ReplicatorSv1GetRouteProfile(tntID, reply)
 }
 
 // GetAttributeProfile
-func (dS *DispatcherReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithOpts, reply *engine.AttributeProfile) error {
+func (dS *DispatcherReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error {
 	return dS.dS.ReplicatorSv1GetAttributeProfile(tntID, reply)
 }
 
 // GetChargerProfile
-func (dS *DispatcherReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithOpts, reply *engine.ChargerProfile) error {
+func (dS *DispatcherReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error {
 	return dS.dS.ReplicatorSv1GetChargerProfile(tntID, reply)
 }
 
 // GetDispatcherProfile
-func (dS *DispatcherReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithOpts, reply *engine.DispatcherProfile) error {
+func (dS *DispatcherReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error {
 	return dS.dS.ReplicatorSv1GetDispatcherProfile(tntID, reply)
 }
 
 // GetRateProfile
-func (dS *DispatcherReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithOpts, reply *engine.RateProfile) error {
+func (dS *DispatcherReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RateProfile) error {
 	return dS.dS.ReplicatorSv1GetRateProfile(tntID, reply)
 }
 
 // GetDispatcherHost
-func (dS *DispatcherReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithOpts, reply *engine.DispatcherHost) error {
+func (dS *DispatcherReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error {
 	return dS.dS.ReplicatorSv1GetDispatcherHost(tntID, reply)
 }
 
@@ -1154,7 +1154,7 @@ func (dS *DispatcherReplicatorSv1) SetDispatcherHost(args *engine.DispatcherHost
 }
 
 // RemoveThreshold
-func (dS *DispatcherReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveThreshold(args, reply)
 }
 
@@ -1174,22 +1174,22 @@ func (dS *DispatcherReplicatorSv1) RemoveAccount(args *utils.StringWithOpts, rep
 }
 
 // RemoveStatQueue
-func (dS *DispatcherReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveStatQueue(args, reply)
 }
 
 // RemoveFilter
-func (dS *DispatcherReplicatorSv1) RemoveFilter(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveFilter(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveFilter(args, reply)
 }
 
 // RemoveThresholdProfile
-func (dS *DispatcherReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveThresholdProfile(args, reply)
 }
 
 // RemoveStatQueueProfile
-func (dS *DispatcherReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveStatQueueProfile(args, reply)
 }
 
@@ -1199,12 +1199,12 @@ func (dS *DispatcherReplicatorSv1) RemoveTiming(args *utils.StringWithOpts, repl
 }
 
 // RemoveResource
-func (dS *DispatcherReplicatorSv1) RemoveResource(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveResource(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveResource(args, reply)
 }
 
 // RemoveResourceProfile
-func (dS *DispatcherReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveResourceProfile(args, reply)
 }
 
@@ -1244,32 +1244,32 @@ func (dS *DispatcherReplicatorSv1) RemoveRatingProfile(args *utils.StringWithOpt
 }
 
 // RemoveRouteProfile
-func (dS *DispatcherReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveRouteProfile(args, reply)
 }
 
 // RemoveAttributeProfile
-func (dS *DispatcherReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveAttributeProfile(args, reply)
 }
 
 // RemoveChargerProfile
-func (dS *DispatcherReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveChargerProfile(args, reply)
 }
 
 // RemoveDispatcherProfile
-func (dS *DispatcherReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveDispatcherProfile(args, reply)
 }
 
 // RemoveDispatcherHost
-func (dS *DispatcherReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveDispatcherHost(args, reply)
 }
 
 // RemoveRateProfile
-func (dS *DispatcherReplicatorSv1) RemoveRateProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveRateProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveRateProfile(args, reply)
 }
 
@@ -1289,7 +1289,7 @@ func (dS *DispatcherReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, repl
 }
 
 // GetAccountProfile .
-func (dS *DispatcherReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithOpts, reply *utils.AccountProfile) error {
+func (dS *DispatcherReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error {
 	return dS.dS.ReplicatorSv1GetAccountProfile(tntID, reply)
 }
 
@@ -1299,12 +1299,12 @@ func (dS *DispatcherReplicatorSv1) SetAccountProfile(args *utils.AccountProfileW
 }
 
 // RemoveAccountProfile .
-func (dS *DispatcherReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveAccountProfile(args, reply)
 }
 
 // GetActionProfile .
-func (dS *DispatcherReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithOpts, reply *engine.ActionProfile) error {
+func (dS *DispatcherReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error {
 	return dS.dS.ReplicatorSv1GetActionProfile(tntID, reply)
 }
 
@@ -1314,7 +1314,7 @@ func (dS *DispatcherReplicatorSv1) SetActionProfile(args *engine.ActionProfileWi
 }
 
 //  RemoveActionProfile .
-func (dS *DispatcherReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveActionProfile(args, reply)
 }
 

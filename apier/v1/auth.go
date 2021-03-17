@@ -58,9 +58,9 @@ func (apierSv1 *APIerSv1) GetMaxUsage(usageRecord *engine.UsageRecordWithOpts, m
 		return utils.NewErrServerError(err)
 	}
 	var maxDur time.Duration
-	if err := apierSv1.Responder.GetMaxSessionTime(&engine.CallDescriptorWithOpts{
+	if err := apierSv1.Responder.GetMaxSessionTime(&engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: cd,
-		Opts:           usageRecord.Opts,
+		APIOpts:        usageRecord.Opts,
 	}, &maxDur); err != nil {
 		return err
 	}

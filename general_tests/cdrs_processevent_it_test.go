@@ -194,7 +194,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var replyAt *engine.AttributeProfile
-	if err := pecdrsRpc.Call(utils.APIerSv1GetAttributeProfile, &utils.TenantIDWithOpts{
+	if err := pecdrsRpc.Call(utils.APIerSv1GetAttributeProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &replyAt); err != nil {
 		t.Fatal(err)
 	}
@@ -392,7 +392,7 @@ func testV1CDRsProcessEventSts(t *testing.T) {
 	}
 
 	if err := pecdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(statMetrics, metrics) {
@@ -527,7 +527,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	}
 	var td engine.Threshold
 	if err := pecdrsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &td); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &td); err != nil {
 		t.Error(err)
 	} else if td.Hits != 1 {
 		t.Errorf("Expecting threshold to be hit once received: %v", td.Hits)

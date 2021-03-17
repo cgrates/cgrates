@@ -114,7 +114,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		var statValues map[string]float64
 
 		if err := connMgr.Call(dDP.stsConns, nil, utils.StatSv1GetQueueFloatMetrics,
-			&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}},
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}},
 			&statValues); err != nil {
 			return nil, err
 		}

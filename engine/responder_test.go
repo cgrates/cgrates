@@ -152,7 +152,7 @@ func TestResponderGetCostMaxUsageANY(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -179,7 +179,7 @@ func TestResponderGetCostMaxUsageVOICE(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -206,7 +206,7 @@ func TestResponderDebitMaxUsageANY(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -233,7 +233,7 @@ func TestResponderDebitMaxUsageVOICE(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -260,7 +260,7 @@ func TestResponderMaxDebitMaxUsageANY(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -287,7 +287,7 @@ func TestResponderMaxDebitMaxUsageVOICE(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -314,7 +314,7 @@ func TestResponderRefundIncrementsMaxUsageANY(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -341,7 +341,7 @@ func TestResponderRefundIncrementsMaxUsageVOICE(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -368,7 +368,7 @@ func TestResponderRefundRoundingMaxUsageANY(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -395,7 +395,7 @@ func TestResponderRefundRoundingMaxUsageVOICE(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -422,7 +422,7 @@ func TestResponderGetMaxSessionTimeMaxUsageANY(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -449,7 +449,7 @@ func TestResponderGetMaxSessionTimeMaxUsageVOICE(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
-	cd := &CallDescriptorWithOpts{
+	cd := &CallDescriptorWithAPIOpts{
 		CallDescriptor: &CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",

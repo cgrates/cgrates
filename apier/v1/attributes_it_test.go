@@ -153,7 +153,7 @@ func testAttributeSRPCConn(t *testing.T) {
 func testAttributeSGetAlsPrfBeforeSet(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -271,7 +271,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -323,7 +323,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -769,7 +769,7 @@ func testAttributeSSetAlsPrfBrokenReference(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err == nil ||
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -804,7 +804,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -833,7 +833,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -849,7 +849,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 func testAttributeSRemAlsPrf(t *testing.T) {
 	var resp string
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &resp); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -859,14 +859,14 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// remove twice shoud return not found
 	resp = ""
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
 	}
 }
@@ -905,7 +905,7 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "golant", ID: "ATTR_972587832508_SESSIONAUTH"}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "golant", ID: "ATTR_972587832508_SESSIONAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -1283,11 +1283,11 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 	}
 	var resp string
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ATTR_1",
 		},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.CacheOpt: utils.MetaRemove,
 			}}, &resp); err != nil {
 		t.Error(err)
@@ -1301,11 +1301,11 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Errorf("Expecting: 6, received: %+v", reply)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ATTR_2",
 		},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.CacheOpt: utils.MetaRemove,
 			}}, &resp); err != nil {
 		t.Error(err)
@@ -1319,11 +1319,11 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Errorf("Expecting: 5, received: %+v", reply)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ATTR_3",
 		},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.CacheOpt: utils.MetaRemove,
 			}}, &resp); err != nil {
 		t.Error(err)
@@ -1337,11 +1337,11 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Errorf("Expecting: 4, received: %+v", reply)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ATTR_Header",
 		},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.CacheOpt: utils.MetaRemove,
 			}}, &resp); err != nil {
 		t.Error(err)
@@ -1355,11 +1355,11 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Errorf("Expecting: 3, received: %+v", reply)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ATTR_PASS",
 		},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.CacheOpt: utils.MetaRemove,
 			}}, &resp); err != nil {
 		t.Error(err)
@@ -1373,11 +1373,11 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Errorf("Expecting: 2, received: %+v", reply)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ATTR_Search_and_replace",
 		},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.CacheOpt: utils.MetaRemove,
 			}},
 		&resp); err != nil {
@@ -1392,11 +1392,11 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Errorf("Expecting: 1, received: %+v", reply)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "AttributeWithNonSubstitute",
 		},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.CacheOpt: utils.MetaRemove,
 			}},
 		&resp); err != nil {
@@ -1552,8 +1552,8 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 	//remove from cache and DataManager the profile
 	var resp string
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: attrPrf1.Tenant, ID: attrPrf1.ID},
-			Opts: map[string]interface{}{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: attrPrf1.Tenant, ID: attrPrf1.ID},
+			APIOpts: map[string]interface{}{
 				utils.CacheOpt: utils.MetaRemove,
 			}}, &resp); err != nil {
 		t.Error(err)
@@ -1679,7 +1679,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrPrf1.Compile()
@@ -1719,7 +1719,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 	}
 
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrPrf2.Compile()
@@ -1918,7 +1918,7 @@ func testAttributeSSetAlsPrfWithoutTenant(t *testing.T) {
 	alsPrf.AttributeProfile.Tenant = "cgrates.org"
 	var result *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "ApierTest1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ApierTest1"}},
 		&result); err != nil {
 		t.Error(err)
 	} else if result.Compile(); !reflect.DeepEqual(alsPrf.AttributeProfile, result) {
@@ -1929,7 +1929,7 @@ func testAttributeSSetAlsPrfWithoutTenant(t *testing.T) {
 func testAttributeSRmvAlsPrfWithoutTenant(t *testing.T) {
 	var reply string
 	if err := attrSRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "ApierTest1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ApierTest1"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1937,7 +1937,7 @@ func testAttributeSRmvAlsPrfWithoutTenant(t *testing.T) {
 	}
 	var result *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "ApierTest1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ApierTest1"}},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
