@@ -12,6 +12,13 @@
 },
 
 
+"rpc_conns": {
+	"*jsonbirpc": {
+		"conns": [{"address": "127.0.0.1:2014", "transport":"*birpc_json"}],
+	},
+},				
+
+
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "*internal",					// stor database type to use: <mysql|postgres>
 },

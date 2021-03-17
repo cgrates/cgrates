@@ -79,11 +79,11 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccessAccept
-	cgrRplyNM := utils.NavigableMap2{}
+	cgrRplyNM := utils.NavigableMap{}
 	rplyNM := utils.NewOrderedNavigableMap()
 	opts := utils.NewOrderedNavigableMap()
 	var processed bool
-	reqVars := utils.NavigableMap2{utils.RemoteHost: utils.NewNMData(req.RemoteAddr().String())}
+	reqVars := utils.NavigableMap{utils.RemoteHost: utils.NewNMData(req.RemoteAddr().String())}
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, &cgrRplyNM, rplyNM, opts,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
@@ -124,11 +124,11 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccountingResponse
-	cgrRplyNM := utils.NavigableMap2{}
+	cgrRplyNM := utils.NavigableMap{}
 	rplyNM := utils.NewOrderedNavigableMap()
 	opts := utils.NewOrderedNavigableMap()
 	var processed bool
-	reqVars := utils.NavigableMap2{utils.RemoteHost: utils.NewNMData(req.RemoteAddr().String())}
+	reqVars := utils.NavigableMap{utils.RemoteHost: utils.NewNMData(req.RemoteAddr().String())}
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, &cgrRplyNM, rplyNM, opts,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,

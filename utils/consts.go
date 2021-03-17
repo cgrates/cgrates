@@ -792,6 +792,7 @@ const (
 	ProductName              = "ProductName"
 	IdxStart                 = "["
 	IdxEnd                   = "]"
+	IdxCombination           = "]["
 
 	MetaRemoteHost        = "*remote_host"
 	RemoteHost            = "RemoteHost"
@@ -968,6 +969,7 @@ const (
 	Diktats               = "Diktats"
 	BalanceIDs            = "BalanceIDs"
 	MetaCostIncrement     = "*costIncrement"
+	Length                = "Length"
 )
 
 // Migrator Action
@@ -1139,6 +1141,7 @@ const (
 	CapResourceAllocation   = "ResourceAllocation"
 	CapMaxUsage             = "MaxUsage"
 	CapRoutes               = "Routes"
+	CapRouteProfiles        = "RouteProfiles"
 	CapThresholds           = "Thresholds"
 	CapStatQueues           = "StatQueues"
 )

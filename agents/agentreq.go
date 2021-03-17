@@ -33,18 +33,18 @@ import (
 
 // NewAgentRequest returns a new AgentRequest
 func NewAgentRequest(req utils.DataProvider,
-	vars utils.NavigableMap2,
-	cgrRply *utils.NavigableMap2,
+	vars utils.NavigableMap,
+	cgrRply *utils.NavigableMap,
 	rply, opts *utils.OrderedNavigableMap,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS,
 	header, trailer utils.DataProvider) (ar *AgentRequest) {
 	if cgrRply == nil {
-		cgrRply = &utils.NavigableMap2{}
+		cgrRply = &utils.NavigableMap{}
 	}
 	if vars == nil {
-		vars = make(utils.NavigableMap2)
+		vars = make(utils.NavigableMap)
 	}
 	if rply == nil {
 		rply = utils.NewOrderedNavigableMap()
@@ -82,9 +82,9 @@ func NewAgentRequest(req utils.DataProvider,
 // implements utils.DataProvider so we can pass it to filters
 type AgentRequest struct {
 	Request    utils.DataProvider         // request
-	Vars       utils.NavigableMap2        // shared data
+	Vars       utils.NavigableMap         // shared data
 	CGRRequest *utils.OrderedNavigableMap // Used in reply to access the request that was send
-	CGRReply   *utils.NavigableMap2
+	CGRReply   *utils.NavigableMap
 	Reply      *utils.OrderedNavigableMap
 	Tenant     string
 	Timezone   string
@@ -92,7 +92,7 @@ type AgentRequest struct {
 	Header     utils.DataProvider
 	Trailer    utils.DataProvider
 	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
-	tmp        utils.NavigableMap2        // used in case you want to store temporary items and access them later
+	tmp        utils.NavigableMap         // used in case you want to store temporary items and access them later
 	Opts       *utils.OrderedNavigableMap
 	Cfg        utils.DataProvider
 }
@@ -184,7 +184,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 
 //SetFields will populate fields of AgentRequest out of templates
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
-	ar.tmp = utils.NavigableMap2{}
+	ar.tmp = utils.NavigableMap{}
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
@@ -295,17 +295,17 @@ func (ar *AgentRequest) RemoveAll(prefix string) error {
 	default:
 		return fmt.Errorf("unsupported field prefix: <%s> when set fields", prefix)
 	case utils.MetaVars:
-		ar.Vars = utils.NavigableMap2{}
+		ar.Vars = utils.NavigableMap{}
 	case utils.MetaCgreq:
 		ar.CGRRequest.RemoveAll()
 	case utils.MetaCgrep:
-		ar.CGRReply = &utils.NavigableMap2{}
+		ar.CGRReply = &utils.NavigableMap{}
 	case utils.MetaRep:
 		ar.Reply.RemoveAll()
 	case utils.MetaDiamreq:
 		ar.diamreq.RemoveAll()
 	case utils.MetaTmp:
-		ar.tmp = utils.NavigableMap2{}
+		ar.tmp = utils.NavigableMap{}
 	case utils.MetaUCH:
 		engine.Cache.Clear([]string{utils.CacheUCH})
 	case utils.MetaOpts:
@@ -509,11 +509,11 @@ func (ar *AgentRequest) ParseField(
 // setCGRReply will set the aReq.cgrReply based on reply coming from upstream or error
 // returns error in case of reply not converting to NavigableMap
 func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (err error) {
-	var nm utils.NavigableMap2
+	var nm utils.NavigableMap
 	if errRply != nil {
-		nm = utils.NavigableMap2{utils.Error: utils.NewNMData(errRply.Error())}
+		nm = utils.NavigableMap{utils.Error: utils.NewNMData(errRply.Error())}
 	} else {
-		nm = utils.NavigableMap2{}
+		nm = utils.NavigableMap{}
 		if rply != nil {
 			nm = rply.AsNavigableMap()
 		}

@@ -303,10 +303,10 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 	}
 	dp := utils.MapStorage(sipMessageIface)
 	var processed bool
-	cgrRplyNM := utils.NavigableMap2{}
+	cgrRplyNM := utils.NavigableMap{}
 	rplyNM := utils.NewOrderedNavigableMap()
 	opts := utils.NewOrderedNavigableMap()
-	reqVars := utils.NavigableMap2{
+	reqVars := utils.NavigableMap{
 		utils.RemoteHost: utils.NewNMData(remoteHost),
 		method:           utils.NewNMData(sipMessage.MethodFrom(requestHeader)),
 	}

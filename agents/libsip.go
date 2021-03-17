@@ -50,7 +50,7 @@ func updateSIPMsgFromNavMap(m sipingo.Message, navMp *utils.OrderedNavigableMap)
 }
 
 func sipErr(m utils.DataProvider, sipMessage sipingo.Message,
-	reqVars utils.NavigableMap2,
+	reqVars utils.NavigableMap,
 	tpl []*config.FCTemplate, tnt, tmz string,
 	filterS *engine.FilterS) (a sipingo.Message, err error) {
 	aReq := NewAgentRequest(

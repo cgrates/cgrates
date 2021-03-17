@@ -5,7 +5,6 @@
 
 "general": {
 	"log_level": 7,
-	//"dbdata_encoding": "*json",
 	"reply_timeout": "50s",
 },
 
@@ -74,6 +73,7 @@
 	"thresholds_conns": ["*internal"],
 },
 
+
 "thresholds": {
 	"enabled": true,
 	"store_interval": "1s",
@@ -104,7 +104,6 @@
 	"out_stordb_password": "CGRateS.org",
 	"users_filters":["Account"],
 },
-
 
 
 "apiers": {

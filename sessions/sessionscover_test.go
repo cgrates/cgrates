@@ -2421,10 +2421,10 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 		false, false, false, nil, utils.Paginator{}, false, "")
 
 	rply := &V1AuthorizeReply{
-		Attributes:   &engine.AttrSProcessEventReply{},
-		Routes:       engine.SortedRoutesList{},
-		StatQueueIDs: &[]string{},
-		ThresholdIDs: &[]string{},
+		Attributes:    &engine.AttrSProcessEventReply{},
+		RouteProfiles: engine.SortedRoutesList{},
+		StatQueueIDs:  &[]string{},
+		ThresholdIDs:  &[]string{},
 	}
 
 	expected := "MANDATORY_IE_MISSING: [CGREvent]"
@@ -2541,10 +2541,10 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 		false, false, false, cgrEvent, utils.Paginator{}, false, "")
 
 	rply := &V1AuthorizeReply{
-		Attributes:   &engine.AttrSProcessEventReply{},
-		Routes:       engine.SortedRoutesList{},
-		StatQueueIDs: &[]string{},
-		ThresholdIDs: &[]string{},
+		Attributes:    &engine.AttrSProcessEventReply{},
+		RouteProfiles: engine.SortedRoutesList{},
+		StatQueueIDs:  &[]string{},
+		ThresholdIDs:  &[]string{},
 	}
 
 	//GetMaxUsage

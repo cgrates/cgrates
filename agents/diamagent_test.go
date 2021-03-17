@@ -62,7 +62,7 @@ func TestProcessRequest(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, dm) // no need for filterS but still try to configure the dm :D
 
-	cgrRplyNM := utils.NavigableMap2{}
+	cgrRplyNM := utils.NavigableMap{}
 	rply := utils.NewOrderedNavigableMap()
 	diamDP := utils.MapStorage{
 		"SessionId":   "123456",
@@ -112,7 +112,7 @@ func TestProcessRequest(t *testing.T) {
 	for _, v := range reqProcessor.ReplyFields {
 		v.ComputePath()
 	}
-	reqVars := utils.NavigableMap2{
+	reqVars := utils.NavigableMap{
 		utils.OriginHost:  utils.NewNMData(config.CgrConfig().DiameterAgentCfg().OriginHost),
 		utils.OriginRealm: utils.NewNMData(config.CgrConfig().DiameterAgentCfg().OriginRealm),
 		utils.ProductName: utils.NewNMData(config.CgrConfig().DiameterAgentCfg().ProductName),
@@ -467,7 +467,7 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = utils.NavigableMap2{}
+	cgrRplyNM = utils.NavigableMap{}
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
@@ -484,7 +484,7 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaUpdate, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = utils.NavigableMap2{}
+	cgrRplyNM = utils.NavigableMap{}
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
@@ -507,7 +507,7 @@ func TestProcessRequest(t *testing.T) {
 	for _, v := range reqProcessor.ReplyFields {
 		v.ComputePath()
 	}
-	cgrRplyNM = utils.NavigableMap2{}
+	cgrRplyNM = utils.NavigableMap{}
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
@@ -524,7 +524,7 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = utils.NavigableMap2{}
+	cgrRplyNM = utils.NavigableMap{}
 	rply = utils.NewOrderedNavigableMap()
 
 	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,

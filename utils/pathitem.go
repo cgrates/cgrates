@@ -52,7 +52,7 @@ type FullPath struct {
 func NewPathItems(path []string) (pItms PathItems) {
 	pItms = make(PathItems, len(path))
 	for i, v := range path {
-		field, indx := GetPathIndexString(v)
+		field, indx := GetPathIndexSlice(v)
 		pItms[i] = PathItem{
 			Field: field,
 			Index: indx,
@@ -98,39 +98,25 @@ func (path PathItems) Slice() (out []string) {
 // PathItem used by the NM interface to store the path information
 type PathItem struct {
 	Field string
-	Index *string
-}
-
-// Equal returns true if p==p2
-func (p PathItem) Equal(p2 PathItem) bool {
-	if p.Field != p2.Field {
-		return false
-	}
-	if p.Index == nil && p2.Index == nil {
-		return true
-	}
-	if p.Index != nil && p2.Index != nil {
-		return *p.Index == *p2.Index
-	}
-	return false
+	Index []string
 }
 
 func (p PathItem) String() (out string) {
 	out = p.Field
-	if p.Index != nil {
-		out += IdxStart + *p.Index + IdxEnd
+	for _, indx := range p.Index {
+		out += IdxStart + indx + IdxEnd
 	}
 	return
 }
 
 // Clone creates a copy
 func (p PathItem) Clone() (c PathItem) {
-	// if p == nil {
-	// 	return
-	// }
 	c.Field = p.Field
 	if p.Index != nil {
-		c.Index = StringPointer(*p.Index)
+		c.Index = make([]string, len(p.Index))
+		for i, indx := range p.Index {
+			c.Index[i] = indx
+		}
 	}
 	return
 }
@@ -175,4 +161,17 @@ func GetPathIndexString(spath string) (opath string, idx *string) {
 	idxVal := spath[idxStart+1 : len(spath)-1]
 	opath = spath[:idxStart]
 	return opath, &idxVal
+}
+
+// GetPathIndexSlice returns the path and index as string if index present
+// path[index]=>path,[index1,index2]
+// path=>path,nil
+func GetPathIndexSlice(spath string) (opath string, idx []string) {
+	idxStart := strings.Index(spath, IdxStart)
+	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
+		return spath, nil
+	}
+	idxVal := spath[idxStart+1 : len(spath)-1]
+	opath = spath[:idxStart]
+	return opath, strings.Split(idxVal, IdxCombination)
 }

@@ -74,11 +74,11 @@ func TestFCTemplatePathItems(t *testing.T) {
 		},
 		{
 			Field: "Account",
-			Index: utils.StringPointer("1"),
+			Index: []string{"1"},
 		},
 		{
 			Field: "Balance",
-			Index: utils.StringPointer("*monetary"),
+			Index: []string{"*monetary"},
 		},
 		{
 			Field: "Value",

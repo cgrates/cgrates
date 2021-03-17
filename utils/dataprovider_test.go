@@ -23,10 +23,10 @@ import (
 )
 
 func TestDPDynamicInterface(t *testing.T) {
-	nm := NavigableMap2{
+	nm := NavigableMap{
 		"Field1": NewNMData("1001"),
 		"Field2": NewNMData("1003"),
-		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
+		"Field3": NavigableMap{"Field4": NewNMData("Val")},
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
 	var expected interface{} = "Field5[1]"
@@ -46,10 +46,10 @@ func TestDPDynamicInterface(t *testing.T) {
 }
 
 func TestDPDynamicString(t *testing.T) {
-	nm := NavigableMap2{
+	nm := NavigableMap{
 		"Field1": NewNMData("1001"),
 		"Field2": NewNMData("1003"),
-		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
+		"Field3": NavigableMap{"Field4": NewNMData("Val")},
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
 	var expected interface{} = "Field5[1]"
@@ -70,17 +70,17 @@ func TestDPDynamicString(t *testing.T) {
 
 func TestAppendNavMapVal(t *testing.T) {
 	onm := NewOrderedNavigableMap()
-	nm := NavigableMap2{
+	nm := NavigableMap{
 		"Field1": NewNMData("1001"),
 		"Field2": NewNMData("1003"),
-		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
+		"Field3": NavigableMap{"Field4": NewNMData("Val")},
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
 	onm.nm = nm
-	expected := NavigableMap2{
+	expected := NavigableMap{
 		"Field1": NewNMData("1001"),
 		"Field2": NewNMData("1003"),
-		"Field3": NavigableMap2{"Field4": NewNMData("Val")},
+		"Field3": NavigableMap{"Field4": NewNMData("Val")},
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101), NewNMData(18)},
 	}
 	if err := AppendNavMapVal(onm, &FullPath{Path: "Field5", PathItems: PathItems{{Field: "Field5"}}}, NewNMData(18)); err != nil {
@@ -96,7 +96,7 @@ func TestAppendNavMapVal(t *testing.T) {
 
 func TestComposeNavMapVal(t *testing.T) {
 	onm := NewOrderedNavigableMap()
-	nm := NavigableMap2{
+	nm := NavigableMap{
 		"Field4": &NMSlice{},
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}
@@ -104,7 +104,7 @@ func TestComposeNavMapVal(t *testing.T) {
 	if err := ComposeNavMapVal(onm, &FullPath{Path: "Field4", PathItems: PathItems{{Field: "Field4"}}}, NewNMData(18)); err != ErrWrongPath {
 		t.Error(err)
 	}
-	expected := NavigableMap2{
+	expected := NavigableMap{
 		"Field4": &NMSlice{},
 		"Field5": &NMSlice{NewNMData(10), NewNMData("10118")},
 	}
@@ -114,7 +114,7 @@ func TestComposeNavMapVal(t *testing.T) {
 		t.Errorf("Expected %v ,received: %v", expected, nm)
 	}
 
-	expected = NavigableMap2{
+	expected = NavigableMap{
 		"Field4": &NMSlice{},
 		"Field5": &NMSlice{NewNMData(10), NewNMData("10118")},
 		"Field6": &NMSlice{NewNMData(10)},
@@ -125,7 +125,7 @@ func TestComposeNavMapVal(t *testing.T) {
 		t.Errorf("Expected %v ,received: %v", expected, nm)
 	}
 
-	onm.nm = NavigableMap2{
+	onm.nm = NavigableMap{
 		"Field4": NewNMData(1),
 		"Field5": &NMSlice{NewNMData(10), NewNMData(101)},
 	}

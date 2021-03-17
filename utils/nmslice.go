@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "strconv"
+import (
+	"strconv"
+)
 
 // NMSlice is the basic slice of NM interface
 type NMSlice []NMInterface
@@ -45,11 +47,19 @@ func (nms *NMSlice) Field(path PathItems) (val NMInterface, err error) {
 	if len(path) == 0 {
 		return nil, ErrWrongPath
 	}
-	if nms.Empty() || path[0].Index == nil {
+	if len(path[0].Index) == 0 {
+		if len(path) != 2 ||
+			path[1].Field != Length ||
+			path[1].Index != nil {
+			return nil, ErrNotFound
+		}
+		return NewNMData(nms.Len()), nil
+	}
+	if nms.Empty() {
 		return nil, ErrNotFound
 	}
 	var idx int
-	if idx, err = strconv.Atoi(*path[0].Index); err != nil {
+	if idx, err = strconv.Atoi(path[0].Index[0]); err != nil {
 		return
 	}
 	if idx < 0 {
@@ -57,6 +67,11 @@ func (nms *NMSlice) Field(path PathItems) (val NMInterface, err error) {
 	}
 	if idx < 0 || idx >= len(*nms) {
 		return nil, ErrNotFound
+	}
+	if len(path[0].Index) != 1 {
+		path[0].Field = path[0].Index[0]
+		path[0].Index = path[0].Index[1:]
+		return (*nms)[idx].Field(path)
 	}
 	if len(path) == 1 {
 		return (*nms)[idx], nil
@@ -70,7 +85,8 @@ func (nms *NMSlice) Set(path PathItems, val NMInterface) (addedNew bool, err err
 		return false, ErrWrongPath
 	}
 	var idx int
-	if idx, err = strconv.Atoi(*path[0].Index); err != nil {
+	// for the moment we do not support nested indexes for set
+	if idx, err = strconv.Atoi(path[0].Index[0]); err != nil {
 		return
 	}
 	if idx == len(*nms) { // append element
@@ -79,7 +95,7 @@ func (nms *NMSlice) Set(path PathItems, val NMInterface) (addedNew bool, err err
 			*nms = append(*nms, val)
 			return
 		}
-		nel := NavigableMap2{}
+		nel := NavigableMap{}
 		if _, err = nel.Set(path[1:], val); err != nil {
 			return
 		}
@@ -92,7 +108,7 @@ func (nms *NMSlice) Set(path PathItems, val NMInterface) (addedNew bool, err err
 	if idx < 0 || idx >= len(*nms) {
 		return false, ErrWrongPath
 	}
-	path[0].Index = StringPointer(strconv.Itoa(idx))
+	path[0].Index = []string{strconv.Itoa(idx)}
 	if len(path) == 1 {
 		(*nms)[idx] = val
 		return
@@ -109,7 +125,8 @@ func (nms *NMSlice) Remove(path PathItems) (err error) {
 		return ErrWrongPath
 	}
 	var idx int
-	if idx, err = strconv.Atoi(*path[0].Index); err != nil {
+	// we do not support nested indexes for remove in similar way we do not support them for set
+	if idx, err = strconv.Atoi(path[0].Index[0]); err != nil {
 		return
 	}
 	if idx < 0 {
@@ -118,7 +135,7 @@ func (nms *NMSlice) Remove(path PathItems) (err error) {
 	if idx < 0 || idx >= len(*nms) { // already removed
 		return
 	}
-	path[0].Index = StringPointer(strconv.Itoa(idx))
+	path[0].Index = []string{strconv.Itoa(idx)}
 	if len(path) == 1 {
 		*nms = append((*nms)[:idx], (*nms)[idx+1:]...)
 		return

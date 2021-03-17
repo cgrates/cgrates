@@ -128,7 +128,6 @@ func testDspSupGetSupFailover(t *testing.T) {
 	eRpl1 := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
-		Count:     1,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID:         "route1",
@@ -142,7 +141,6 @@ func testDspSupGetSupFailover(t *testing.T) {
 	eRpl := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
-		Count:     2,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID:         "route1",
@@ -229,7 +227,6 @@ func testDspSupTestAuthKey2(t *testing.T) {
 	eRpl := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
-		Count:     2,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID:         "route1",
@@ -282,7 +279,6 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 	eRpl1 := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
-		Count:     1,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID:         "route1",
@@ -296,7 +292,6 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 	eRpl := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_ACNT_1002",
 		Sorting:   utils.MetaLC,
-		Count:     2,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID:         "route1",

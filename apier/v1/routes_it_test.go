@@ -71,6 +71,7 @@ var (
 		testV1RouteRemRouteProfilesWithoutTenant,
 		// reset the database and load the TP again
 		testV1RouteInitDataDb,
+		testV1RouteClearCache, // reset the cache so the indexes are created corectly
 		testV1RouteFromFolder,
 		testV1RoutesOneRouteWithoutDestination,
 		testV1RouteRoutePing,
@@ -109,6 +110,13 @@ func testV1RouteLoadConfig(t *testing.T) {
 
 func testV1RouteInitDataDb(t *testing.T) {
 	if err := engine.InitDataDb(routeSv1Cfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testV1RouteClearCache(t *testing.T) {
+	var reply string
+	if err := routeSv1Rpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{}, &reply); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -169,7 +177,6 @@ func testV1RouteGetWeightRoutes(t *testing.T) {
 	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_WEIGHT_1",
 		Sorting:   utils.MetaWeight,
-		Count:     2,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "route2",
@@ -222,7 +229,6 @@ func testV1RouteGetLeastCostRoutes(t *testing.T) {
 	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
-		Count:     3,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "route3",
@@ -277,7 +283,6 @@ func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
-		Count:     3,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "route3",
@@ -334,7 +339,6 @@ func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
-		Count:     2,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "route3",
@@ -406,7 +410,6 @@ func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_LEASTCOST_1",
 		Sorting:   utils.MetaLC,
-		Count:     2,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "route3",
@@ -454,7 +457,6 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_HIGHESTCOST_1",
 		Sorting:   utils.MetaHC,
-		Count:     3,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "route2",
@@ -824,7 +826,6 @@ func testV1RouteGetRouteWithoutFilter(t *testing.T) {
 	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
-		Count:     1,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "route1",
@@ -1147,12 +1148,12 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 				utils.SetupTime:    utils.MetaNow,
 				utils.Usage:        "2m",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
 	eSpls := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_DESTINATION",
 		Sorting:   utils.MetaLC,
-		Count:     1,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "local",
@@ -1224,12 +1225,12 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 				utils.Usage:        "2m",
 				"Month":            "April",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
 	eSpls := engine.SortedRoutesList{{
 		ProfileID: "MULTIPLE_ROUTES",
 		Sorting:   utils.MetaLC,
-		Count:     1,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "Route1",
@@ -1262,12 +1263,12 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 				utils.Usage:        "2m",
 				"Month":            "May",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
 	eSpls = engine.SortedRoutesList{{
 		ProfileID: "MULTIPLE_ROUTES",
 		Sorting:   utils.MetaLC,
-		Count:     1,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "Route1",
@@ -1360,12 +1361,12 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				utils.Usage:        "30s",
 				"EventType":        "testV1RouteAccountWithRatingPlan",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
 	eSpls := &engine.SortedRoutesList{{
 		ProfileID: "RouteWithAccAndRP",
 		Sorting:   utils.MetaLC,
-		Count:     2,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "RouteWithAccAndRP",
@@ -1430,12 +1431,12 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				utils.Usage:        "60s",
 				"EventType":        "testV1RouteAccountWithRatingPlan",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
 	eSpls = &engine.SortedRoutesList{{
 		ProfileID: "RouteWithAccAndRP",
 		Sorting:   utils.MetaLC,
-		Count:     2,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "RouteWithAccAndRP",
@@ -1502,12 +1503,12 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				utils.Usage:        "1m1s",
 				"EventType":        "testV1RouteAccountWithRatingPlan",
 			},
+			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
 	eSpls = &engine.SortedRoutesList{{
 		ProfileID: "RouteWithAccAndRP",
 		Sorting:   utils.MetaLC,
-		Count:     2,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "RouteWithRP",

@@ -32,7 +32,8 @@
 			{
 				"id": "RoutesQueryOneRoute",
 				"filters": ["*string:~*vars.Method:INVITE",
-					"*gte:~*cgrep.Routes[*raw].Count:1",
+					"*gte:~*cgrep.RouteProfiles[*raw].Length:1",
+					"*gte:~*cgrep.RouteProfiles[*raw][0].Routes.Length:1",
 				],
 				"flags": ["*none","*continue"], // do not send request to CGRateS
 				"reply_fields":[
@@ -49,24 +50,25 @@
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"@"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value": "~*cgrep.Routes[*raw].SortedRoutes[0].RouteParameters"},
+						"value": "~*cgrep.RouteProfiles[*raw][0].Routes[0].RouteParameters"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"`>;q=0.7; expires=3600;cgr_cost=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value":"~*cgrep.Routes[*raw].SortedRoutes[0].SortingData.Cost"},
+						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[0].SortingData.Cost"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"`;cgr_maxusage=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value":"~*cgrep.Routes[*raw].SortedRoutes[0].SortingData.MaxUsage"},
+						"value":"~*cgrep.RouteProfiles[*raw][0].Routes[0].SortingData.MaxUsage"},
 					{"tag": "P-Charge-Info", "path": "*rep.P-Charge-Info", "type": "*composed",
-                  		"filters": ["*notempty:~*cgrep.Attributes[<~*cgrep.Routes[*raw].SortedRoutes[0].RouteID>].P-Charge-Info:"],
-						"value": "~*cgrep.Attributes[<~*cgrep.Routes[*raw].SortedRoutes[0].RouteID>].P-Charge-Info"},
+                  		"filters": ["*notempty:~*cgrep.Attributes[<~*cgrep.RouteProfiles[*raw][0].Routes[0].RouteID>].P-Charge-Info:"],
+						"value": "~*cgrep.Attributes[<~*cgrep.RouteProfiles[*raw][0].Routes[0].RouteID>].P-Charge-Info"},
 				]
 			},
 			{
 				"id": "RoutesQueryTwoRoutes",
 				"filters": ["*string:~*vars.Method:INVITE",
-					"*gte:~*cgrep.Routes[*raw].Count:2",
+					"*gte:~*cgrep.RouteProfiles[*raw].Length:1",
+					"*gte:~*cgrep.RouteProfiles[*raw][0].Routes.Length:2",
 				],
 				"flags": ["*none","*continue"],
 				"reply_fields":[
@@ -81,21 +83,22 @@
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"@"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-						"value": "~*cgrep.Routes[*raw].SortedRoutes[1].RouteParameters"},
+						"value": "~*cgrep.RouteProfiles[*raw][0].Routes[1].RouteParameters"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"`>;q=0.2;cgr_cost=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"~*cgrep.Routes[*raw].SortedRoutes[1].SortingData.Cost"},
+							"value":"~*cgrep.RouteProfiles[*raw][0].Routes[1].SortingData.Cost"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"`;cgr_maxusage=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"~*cgrep.Routes[*raw].SortedRoutes[1].SortingData.MaxUsage"}
+							"value":"~*cgrep.RouteProfiles[*raw][0].Routes[1].SortingData.MaxUsage"}
 				]
 			},
 			{
 				"id": "RoutesQueryThreeRoutes",
 				"filters": ["*string:~*vars.Method:INVITE",
-					"*gte:~*cgrep.Routes[*raw].Count:3",
+					"*gte:~*cgrep.RouteProfiles[*raw].Length:1",
+					"*gte:~*cgrep.RouteProfiles[*raw][0].Routes.Length:3",
 				],
 				"flags": ["*none","*continue"],
 				"reply_fields":[
@@ -110,15 +113,15 @@
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"@"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value": "~*cgrep.Routes[*raw].SortedRoutes[2].RouteParameters"},
+							"value": "~*cgrep.RouteProfiles[*raw][0].Routes[2].RouteParameters"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"`>;q=0.1;cgr_cost=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"~*cgrep.Routes[*raw].SortedRoutes[2].SortingData.Cost"},
+							"value":"~*cgrep.RouteProfiles[*raw][0].Routes[2].SortingData.Cost"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
 							"value":"`;cgr_maxusage=`"},
 					{"tag": "Contact", "path": "*rep.Contact", "type": "*composed",
-							"value":"~*cgrep.Routes[*raw].SortedRoutes[2].SortingData.MaxUsage"}
+							"value":"~*cgrep.RouteProfiles[*raw][0].Routes[2].SortingData.MaxUsage"}
 				]
 			}
 		]
