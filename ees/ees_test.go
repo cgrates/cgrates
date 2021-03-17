@@ -21,6 +21,7 @@ package ees
 import (
 	"bytes"
 	"log"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -32,7 +33,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestListenAndServer(t *testing.T) {
+func TestListenAndServe(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Cache = make(map[string]*config.CacheParamCfg)
 	cgrCfg.EEsCfg().Cache = map[string]*config.CacheParamCfg{
@@ -124,6 +125,86 @@ func TestAttrSProcessEvent(t *testing.T) {
 	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
 	// cgrEv := &utils.CGREvent{}
 	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestAttrSProcessEvent2(t *testing.T) {
+	engine.Cache.Clear(nil)
+	testMock := &testMockEvent{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+				return utils.ErrNotFound
+			},
+		},
+	}
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsNoLksCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn <- testMock
+	connMgr := engine.NewConnManager(cgrCfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
+	})
+	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
+	cgrEv := &utils.CGREvent{}
+	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestV1ProcessEvent(t *testing.T) {
+	filePath := "/tmp/TestV1ProcessEvent"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = "*file_csv"
+	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cgrCfg.EEsCfg().Exporters[0].ExportPath = filePath
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cgrEv := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"SQLExporterFull"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "dsafdsaf",
+				utils.OriginHost:   "192.168.1.1",
+				utils.RequestType:  utils.MetaRated,
+				utils.Tenant:       "cgrates.org",
+				utils.Category:     "call",
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
+				utils.Usage:        10 * time.Second,
+				utils.RunID:        utils.MetaDefault,
+				utils.Cost:         1.01,
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+		},
+	}
+	var rply map[string]map[string]interface{}
+	rplyExpect := map[string]map[string]interface{}{
+		"SQLExporterFull": map[string]interface{}{},
+	}
+	if err := eeS.V1ProcessEvent(cgrEv, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, rplyExpect) {
+		t.Errorf("Expected %q but received %q", rplyExpect, rply)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
 		t.Error(err)
 	}
 }
