@@ -272,7 +272,7 @@ type ReplicatorSv1Interface interface {
 	RemoveIndexes(args *utils.GetIndexesArg, reply *string) error
 
 	GetAccountProfile(tntID *utils.TenantIDWithOpts, reply *utils.AccountProfile) error
-	SetAccountProfile(args *utils.AccountProfileWithOpts, reply *string) error
+	SetAccountProfile(args *utils.AccountProfileWithAPIOpts, reply *string) error
 	RemoveAccountProfile(args *utils.TenantIDWithOpts, reply *string) error
 
 	GetActionProfile(tntID *utils.TenantIDWithOpts, reply *engine.ActionProfile) error

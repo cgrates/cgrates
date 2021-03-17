@@ -37,7 +37,7 @@ var (
 	dispatcherCfgPath   string
 	dispatcherCfg       *config.CGRConfig
 	dispatcherRPC       *rpc.Client
-	dispatcherProfile   *DispatcherWithOpts
+	dispatcherProfile   *DispatcherWithAPIOpts
 	dispatcherHost      *engine.DispatcherHostWithOpts
 	dispatcherConfigDIR string //run tests for specific configuration
 
@@ -129,7 +129,7 @@ func testDispatcherSRPCConn(t *testing.T) {
 
 func testDispatcherSSetDispatcherProfile(t *testing.T) {
 	var reply string
-	dispatcherProfile = &DispatcherWithOpts{
+	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",
@@ -375,7 +375,7 @@ func testDispatcherSKillEngine(t *testing.T) {
 }
 
 func testDispatcherSSetDispatcherProfileWithoutTenant(t *testing.T) {
-	dispatcherProfile = &DispatcherWithOpts{
+	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			ID:        "Dsp1",
 			FilterIDs: []string{"*string:~*req.Account:1001"},

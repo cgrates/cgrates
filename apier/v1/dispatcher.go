@@ -68,13 +68,13 @@ func (apierSv1 *APIerSv1) GetDispatcherProfileIDs(tenantArg *utils.PaginatorWith
 	return nil
 }
 
-type DispatcherWithOpts struct {
+type DispatcherWithAPIOpts struct {
 	*engine.DispatcherProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 //SetDispatcherProfile add/update a new Dispatcher Profile
-func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -89,8 +89,8 @@ func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithOpts, reply *
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), args.Tenant, utils.CacheDispatcherProfiles,
-		args.TenantID(), &args.FilterIDs, args.Subsystems, args.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheDispatcherProfiles,
+		args.TenantID(), &args.FilterIDs, args.Subsystems, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -1294,7 +1294,7 @@ func (dS *DispatcherReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithOp
 }
 
 // SetAccountProfile .
-func (dS *DispatcherReplicatorSv1) SetAccountProfile(args *utils.AccountProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetAccountProfile(args *utils.AccountProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetAccountProfile(args, reply)
 }
 

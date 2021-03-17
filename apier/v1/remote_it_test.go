@@ -599,7 +599,7 @@ func testInternalRemoteITGetDispatcherProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	dispatcherProfile = &DispatcherWithOpts{
+	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",

@@ -1434,9 +1434,9 @@ func (dS *DispatcherService) ReplicatorSv1GetAccountProfile(args *utils.TenantID
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetAccountProfile, args, reply)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetAccountProfile(args *utils.AccountProfileWithOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1SetAccountProfile(args *utils.AccountProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.AccountProfileWithOpts{}
+		args = &utils.AccountProfileWithAPIOpts{}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {

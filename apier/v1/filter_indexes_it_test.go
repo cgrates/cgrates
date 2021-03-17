@@ -3053,7 +3053,7 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 func testV1FIdxSetDispatcherProfile(t *testing.T) {
 	var reply string
 	//add a dispatcherProfile for 2 subsystems and verify if the index was created for both
-	dispatcherProfile = &DispatcherWithOpts{
+	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         "DSP_Test1",
@@ -3196,7 +3196,7 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 	var reply string
 	//add a new dispatcherProfile with empty filterIDs
 	//should create an index of type *none:*any:*any for *attributes subsystem
-	dispatcherProfile = &DispatcherWithOpts{
+	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         "DSP_Test2",
@@ -3215,7 +3215,7 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 
 	//add a new dispatcherProfile with empty filterIDs
 	//should create an index of type *none:*any:*any for *sessions subsystem
-	dispatcherProfile2 := DispatcherWithOpts{
+	dispatcherProfile2 := DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         "DSP_Test3",

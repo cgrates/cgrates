@@ -501,7 +501,7 @@ func testInternalReplicateITDispatcherProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	dispatcherProfile = &DispatcherWithOpts{
+	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",

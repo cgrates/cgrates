@@ -3684,9 +3684,9 @@ func (dm *DataManager) SetAccountProfile(ap *utils.AccountProfile, withIndex boo
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.AccountProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAccountProfile,
-			&utils.AccountProfileWithOpts{
+			&utils.AccountProfileWithAPIOpts{
 				AccountProfile: ap,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
