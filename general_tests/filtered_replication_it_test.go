@@ -1142,7 +1142,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 
 func testFltrRplDispatcherProfile(t *testing.T) {
 	dspID := "DSP1"
-	dspPrf := &v1.DispatcherWithOpts{
+	dspPrf := &v1.DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         dspID,

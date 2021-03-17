@@ -1560,12 +1560,12 @@ func testDspRplRateProfile(t *testing.T) {
 func testDspRplAccountProfile(t *testing.T) {
 	// Set RateProfile
 	var replyStr string
-	rPrf := &utils.AccountProfileWithOpts{
+	rPrf := &utils.AccountProfileWithAPIOpts{
 		AccountProfile: &utils.AccountProfile{
 			Tenant: "cgrates.org",
 			ID:     "RP1",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}

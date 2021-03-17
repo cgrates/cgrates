@@ -688,7 +688,7 @@ func (rplSv1 *ReplicatorSv1) SetActionProfile(acp *engine.ActionProfileWithOpts,
 }
 
 // SetAccountProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAccountProfile(acp *utils.AccountProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetAccountProfile(acp *utils.AccountProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetAccountProfileDrv(acp.AccountProfile); err != nil {
 		return
 	}

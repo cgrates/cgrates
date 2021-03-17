@@ -340,10 +340,9 @@ type APIAccountProfileWithOpts struct {
 	APIOpts map[string]interface{}
 }
 
-// AccountProfileWithOpts is used in API calls
-type AccountProfileWithOpts struct {
+type AccountProfileWithAPIOpts struct {
 	*AccountProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // ArgsAccountForEvent arguments used for process event

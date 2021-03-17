@@ -546,7 +546,7 @@ func testFullRemoteITDispatcher(t *testing.T) {
 	}
 
 	var replySet string
-	dispatcherProfile = &DispatcherWithOpts{
+	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",
