@@ -3060,13 +3060,13 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 	return
 }
 
-func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfile, err error) {
-	rp = &RateProfile{
+func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *utils.RateProfile, err error) {
+	rp = &utils.RateProfile{
 		Tenant:          tpRp.Tenant,
 		ID:              tpRp.ID,
 		FilterIDs:       make([]string, len(tpRp.FilterIDs)),
 		MaxCostStrategy: tpRp.MaxCostStrategy,
-		Rates:           make(map[string]*Rate),
+		Rates:           make(map[string]*utils.Rate),
 		MinCost:         utils.NewDecimalFromFloat64(tpRp.MinCost),
 		MaxCost:         utils.NewDecimalFromFloat64(tpRp.MaxCost),
 	}
@@ -3086,12 +3086,12 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 		}
 	}
 	for key, rate := range tpRp.Rates {
-		rp.Rates[key] = &Rate{
+		rp.Rates[key] = &utils.Rate{
 			ID:              rate.ID,
 			Blocker:         rate.Blocker,
 			FilterIDs:       rate.FilterIDs,
 			ActivationTimes: rate.ActivationTimes,
-			IntervalRates:   make([]*IntervalRate, len(rate.IntervalRates)),
+			IntervalRates:   make([]*utils.IntervalRate, len(rate.IntervalRates)),
 		}
 		if rate.Weights != utils.EmptyString {
 			weight, err := utils.NewDynamicWeightsFromString(rate.Weights, ";", "&")
@@ -3101,8 +3101,8 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 			rp.Rates[key].Weights = weight
 		}
 		for i, iRate := range rate.IntervalRates {
-			rp.Rates[key].IntervalRates[i] = new(IntervalRate)
-			if rp.Rates[key].IntervalRates[i].IntervalStart, err = utils.ParseDurationWithNanosecs(iRate.IntervalStart); err != nil {
+			rp.Rates[key].IntervalRates[i] = new(utils.IntervalRate)
+			if rp.Rates[key].IntervalRates[i].IntervalStart, err = utils.NewDecimalFromUsage(iRate.IntervalStart); err != nil {
 				return nil, err
 			}
 			rp.Rates[key].IntervalRates[i].FixedFee = utils.NewDecimalFromFloat64(iRate.FixedFee)
@@ -3118,7 +3118,7 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *RateProfi
 	return rp, nil
 }
 
-func RateProfileToAPI(rp *RateProfile) (tpRp *utils.TPRateProfile) {
+func RateProfileToAPI(rp *utils.RateProfile) (tpRp *utils.TPRateProfile) {
 	tpRp = &utils.TPRateProfile{
 		Tenant:             rp.Tenant,
 		ID:                 rp.ID,

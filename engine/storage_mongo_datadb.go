@@ -2015,8 +2015,8 @@ func (ms *MongoStorage) RemoveLoadIDsDrv() (err error) {
 	})
 }
 
-func (ms *MongoStorage) GetRateProfileDrv(tenant, id string) (rpp *RateProfile, err error) {
-	rpp = new(RateProfile)
+func (ms *MongoStorage) GetRateProfileDrv(tenant, id string) (rpp *utils.RateProfile, err error) {
+	rpp = new(utils.RateProfile)
 	err = ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColRpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(rpp); err != nil {
@@ -2031,7 +2031,7 @@ func (ms *MongoStorage) GetRateProfileDrv(tenant, id string) (rpp *RateProfile, 
 	return
 }
 
-func (ms *MongoStorage) SetRateProfileDrv(rpp *RateProfile) (err error) {
+func (ms *MongoStorage) SetRateProfileDrv(rpp *utils.RateProfile) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColRpp).UpdateOne(sctx, bson.M{"tenant": rpp.Tenant, "id": rpp.ID},
 			bson.M{"$set": rpp},

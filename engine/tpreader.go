@@ -1867,7 +1867,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("RateProfiles:")
 	}
 	for _, tpTH := range tpr.rateProfiles {
-		var th *RateProfile
+		var th *utils.RateProfile
 		if th, err = APItoRateProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}

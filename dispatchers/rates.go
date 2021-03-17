@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,7 +36,7 @@ func (dS *DispatcherService) RateSv1Ping(args *utils.CGREvent, rpl *string) (err
 	return dS.Dispatch(args, utils.RateS, utils.RateSv1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) RateSv1CostForEvent(args *utils.ArgsCostForEvent, rpCost *engine.RateProfileCost) (err error) {
+func (dS *DispatcherService) RateSv1CostForEvent(args *utils.ArgsCostForEvent, rpCost *utils.RateProfileCost) (err error) {
 	if args == nil {
 		args = new(utils.ArgsCostForEvent)
 	}

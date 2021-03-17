@@ -29,14 +29,14 @@ import (
 )
 
 func TestOrderRatesOnIntervals(t *testing.T) {
-	rt0 := &engine.Rate{
+	rt0 := &utils.Rate{
 		ID: "RATE0",
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 0,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
 				IntervalStart: 0,
 			},

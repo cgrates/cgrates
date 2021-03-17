@@ -382,11 +382,11 @@ func (dbM *DataDBMock) RemoveDispatcherHostDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRateProfileDrv(string, string) (*RateProfile, error) {
+func (dbM *DataDBMock) GetRateProfileDrv(string, string) (*utils.RateProfile, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRateProfileDrv(*RateProfile) error {
+func (dbM *DataDBMock) SetRateProfileDrv(*utils.RateProfile) error {
 	return utils.ErrNotImplemented
 }
 

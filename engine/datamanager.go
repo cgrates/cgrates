@@ -3037,14 +3037,14 @@ func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 }
 
 func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (rpp *RateProfile, err error) {
+	transactionID string) (rpp *utils.RateProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheRateProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*RateProfile), nil
+			return x.(*utils.RateProfile), nil
 		}
 	}
 	if dm == nil {
@@ -3090,7 +3090,7 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 	return
 }
 
-func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetRateProfile(rpp *utils.RateProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -3158,7 +3158,7 @@ func (dm *DataManager) SetRateProfile(rpp *RateProfile, withIndex bool) (err err
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RateProfilePrefix, rpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
-			&RateProfileWithOpts{
+			&utils.RateProfileWithOpts{
 				RateProfile: rpp,
 				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
@@ -3223,7 +3223,7 @@ func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []strin
 				}
 			}
 		}
-		oldRpp.Rates = map[string]*Rate{}
+		oldRpp.Rates = map[string]*utils.Rate{}
 	} else {
 		for _, rateID := range rateIDs {
 			if _, has := oldRpp.Rates[rateID]; !has {
@@ -3248,7 +3248,7 @@ func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []strin
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RateProfilePrefix, oldRpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
-			&RateProfileWithOpts{
+			&utils.RateProfileWithOpts{
 				RateProfile: oldRpp,
 				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
@@ -3256,7 +3256,7 @@ func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []strin
 	return
 }
 
-func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetRateProfileRates(rpp *utils.RateProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -3298,7 +3298,7 @@ func (dm *DataManager) SetRateProfileRates(rpp *RateProfile, withIndex bool) (er
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RateProfilePrefix, oldRpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
-			&RateProfileWithOpts{
+			&utils.RateProfileWithOpts{
 				RateProfile: oldRpp,
 				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})

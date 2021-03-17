@@ -24,7 +24,10 @@ import (
 	"net"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/ericlagergren/decimal"
 )
 
 // StringToInterface will parse string into supported types
@@ -121,6 +124,61 @@ func IfaceAsTime(itm interface{}, timezone string) (t time.Time, err error) {
 		return ParseTimeDetectLayout(itm.(string), timezone)
 	default:
 		err = fmt.Errorf("cannot convert field: %+v to time.Time", itm)
+	}
+	return
+}
+
+func IfaceAsBig(itm interface{}) (b *decimal.Big, err error) {
+	switch it := itm.(type) {
+	case time.Duration:
+		return decimal.New(int64(it), 0), nil
+	case int: // check every int type
+		return decimal.New(int64(it), 0), nil
+	case int8:
+		return decimal.New(int64(it), 0), nil
+	case int16:
+		return decimal.New(int64(it), 0), nil
+	case int32:
+		return decimal.New(int64(it), 0), nil
+	case int64:
+		return decimal.New(it, 0), nil
+	case uint:
+		return new(decimal.Big).SetUint64(uint64(it)), nil
+	case uint8:
+		return new(decimal.Big).SetUint64(uint64(it)), nil
+	case uint16:
+		return new(decimal.Big).SetUint64(uint64(it)), nil
+	case uint32:
+		return new(decimal.Big).SetUint64(uint64(it)), nil
+	case uint64:
+		return new(decimal.Big).SetUint64(it), nil
+	case float32: // automatically hitting here also ints
+		return new(decimal.Big).SetFloat64(float64(it)), nil
+	case float64: // automatically hitting here also ints
+		return new(decimal.Big).SetFloat64(it), nil
+	case string:
+		if strings.HasSuffix(it, NsSuffix) ||
+			strings.HasSuffix(it, UsSuffix) ||
+			strings.HasSuffix(it, µSuffix) ||
+			strings.HasSuffix(it, MsSuffix) ||
+			strings.HasSuffix(it, SSuffix) ||
+			strings.HasSuffix(it, MSuffix) ||
+			strings.HasSuffix(it, HSuffix) {
+			var tm time.Duration
+			if tm, err = time.ParseDuration(it); err != nil {
+				return
+			}
+			return decimal.New(int64(tm), 0), nil
+		}
+		z, ok := new(decimal.Big).SetString(it)
+		// verify ok and check if the value was converted successfuly
+		// and the big is a valid number
+		if !ok || z.IsNaN(0) {
+			return nil, fmt.Errorf("can't convert <%+v> to decimal", it)
+		}
+		return z, nil
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to time.Duration", it)
 	}
 	return
 }
