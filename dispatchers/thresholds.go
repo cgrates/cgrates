@@ -82,20 +82,20 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithO
 	}, utils.MetaThresholds, utils.ThresholdSv1GetThresholdIDs, args, tIDs)
 }
 
-func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithOpts, th *engine.Threshold) (err error) {
+func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithAPIOpts, th *engine.Threshold) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
 		tnt = args.TenantID.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1GetThreshold, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tnt,
 		ID:     args.ID,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaThresholds, utils.ThresholdSv1GetThreshold, args, th)
 }

@@ -1043,7 +1043,7 @@ func (cd *CallDescriptor) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
 
-type CallDescriptorWithOpts struct {
+type CallDescriptorWithAPIOpts struct {
 	*CallDescriptor
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }

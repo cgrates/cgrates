@@ -214,12 +214,12 @@ func testDspRplSupplierProfile(t *testing.T) {
 
 	// Get RouteProfile
 	var reply *engine.RouteProfile
-	argRouteProfile := &utils.TenantIDWithOpts{
+	argRouteProfile := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -274,12 +274,12 @@ func testDspRplAttributeProfile(t *testing.T) {
 
 	// Get AttributeProfile
 	var reply engine.AttributeProfile
-	argAttributeProfile := &utils.TenantIDWithOpts{
+	argAttributeProfile := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "id",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -333,12 +333,12 @@ func testDspRplChargerProfile(t *testing.T) {
 	}
 	// Get ChargerProfile
 	var reply engine.ChargerProfile
-	argsChargerProfile := &utils.TenantIDWithOpts{
+	argsChargerProfile := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "id",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -392,12 +392,12 @@ func testDspRplDispatcherProfile(t *testing.T) {
 	}
 	// Get DispatcherProfile
 	var reply engine.DispatcherProfile
-	argsDispatcherProfile := &utils.TenantIDWithOpts{
+	argsDispatcherProfile := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -453,12 +453,12 @@ func testDspRplDispatcherHost(t *testing.T) {
 	}
 	// Get DispatcherHost
 	var reply engine.DispatcherHost
-	argsDispatcherHost := &utils.TenantIDWithOpts{
+	argsDispatcherHost := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -512,12 +512,12 @@ func testDspRplFilter(t *testing.T) {
 	}
 	// Get Filter
 	var reply engine.Filter
-	argsFilter := &utils.TenantIDWithOpts{
+	argsFilter := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -571,12 +571,12 @@ func testDspRplThreshold(t *testing.T) {
 	}
 	// Get Threshold
 	var reply engine.Threshold
-	argsThreshold := &utils.TenantIDWithOpts{
+	argsThreshold := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -630,12 +630,12 @@ func testDspRplThresholdProfile(t *testing.T) {
 	}
 	// Get ThresholdProfile
 	var reply engine.ThresholdProfile
-	argsThresholdProfile := &utils.TenantIDWithOpts{
+	argsThresholdProfile := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -689,12 +689,12 @@ func testDspRplStatQueue(t *testing.T) {
 	}
 	// Get StatQueue
 	var reply engine.StatQueue
-	argsStatQueue := &utils.TenantIDWithOpts{
+	argsStatQueue := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -748,12 +748,12 @@ func testDspRplStatQueueProfile(t *testing.T) {
 	}
 	// Get StatQueueProfile
 	var reply engine.StatQueueProfile
-	argsStatQueueProfile := &utils.TenantIDWithOpts{
+	argsStatQueueProfile := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -807,12 +807,12 @@ func testDspRplResource(t *testing.T) {
 	}
 	// Get Resource
 	var reply engine.Resource
-	argsResource := &utils.TenantIDWithOpts{
+	argsResource := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -866,12 +866,12 @@ func testDspRplResourceProfile(t *testing.T) {
 	}
 	// Get ResourceProfile
 	var reply engine.ResourceProfile
-	argsResourceProfile := &utils.TenantIDWithOpts{
+	argsResourceProfile := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1518,12 +1518,12 @@ func testDspRplRateProfile(t *testing.T) {
 	}
 	// Get RateProfile
 	var reply *engine.RateProfile
-	args := &utils.TenantIDWithOpts{
+	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "RP1",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1576,12 +1576,12 @@ func testDspRplAccountProfile(t *testing.T) {
 	}
 	// Get RateProfile
 	var reply *utils.AccountProfile
-	args := &utils.TenantIDWithOpts{
+	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "RP1",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1636,12 +1636,12 @@ func testDspRplActionProfile(t *testing.T) {
 	}
 	// Get RateProfile
 	var reply *engine.ActionProfile
-	args := &utils.TenantIDWithOpts{
+	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "RP1",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}

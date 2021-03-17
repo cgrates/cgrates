@@ -205,7 +205,7 @@ func testSes3ItThreshold1002After(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 1}
 	if err := ses3RPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
 		t.Errorf("expecting: %+v, received: %+v", eTd.Tenant, td.Tenant)
@@ -225,7 +225,7 @@ func testSes3ItStatMetricsAfter(t *testing.T) {
 	}
 
 	if err := ses3RPC.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(statMetrics, metrics) {
@@ -237,7 +237,7 @@ func testSes3ItThreshold1002After2(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 2}
 	if err := ses3RPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
 		t.Errorf("expecting: %+v, received: %+v", eTd.Tenant, td.Tenant)
@@ -257,7 +257,7 @@ func testSes3ItStatMetricsAfter2(t *testing.T) {
 	}
 
 	if err := ses3RPC.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(statMetrics, metrics) {

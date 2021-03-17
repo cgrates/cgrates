@@ -455,7 +455,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := cdrsRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.com", ID: "ATTR_Tenant"}}, &reply); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.com", ID: "ATTR_Tenant"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -805,7 +805,7 @@ func testV2CDRsProcessCDRWithThreshold(t *testing.T) {
 func testV2CDRsGetThreshold(t *testing.T) {
 	var td engine.Threshold
 	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &td); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &td); err != nil {
 		t.Error(err)
 	} else if td.Hits != 1 {
 		t.Errorf("Expecting threshold to be hit once received: %v", td.Hits)
@@ -1171,7 +1171,7 @@ func testV2CDRsResetThresholdAction(t *testing.T) {
 	}
 	var td engine.Threshold
 	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &td); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &td); err != nil {
 		t.Error(err)
 	} else if td.Hits != 0 {
 		t.Errorf("Expecting threshold to be reset received: %v", td.Hits)

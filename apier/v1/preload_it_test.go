@@ -149,7 +149,7 @@ func testPreloadITVerifyAttributes(t *testing.T) {
 
 	var reply *engine.AttributeProfile
 	if err := preloadRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()

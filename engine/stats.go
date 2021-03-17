@@ -407,7 +407,7 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 }
 
 // V1GetStatQueue returns a StatQueue object
-func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithOpts, reply *StatQueue) (err error) {
+func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithAPIOpts, reply *StatQueue) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

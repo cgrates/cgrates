@@ -198,7 +198,7 @@ func testAPIerRemoveTPFromFolder(t *testing.T) {
 func testAPIerAfterDelete(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := apierRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err == nil ||
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}

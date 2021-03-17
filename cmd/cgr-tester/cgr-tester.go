@@ -79,7 +79,7 @@ var (
 	err error
 )
 
-func durInternalRater(cd *engine.CallDescriptorWithOpts) (time.Duration, error) {
+func durInternalRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, error) {
 	dbConn, err := engine.NewDataDBConn(tstCfg.DataDbCfg().Type,
 		tstCfg.DataDbCfg().Host, tstCfg.DataDbCfg().Port,
 		tstCfg.DataDbCfg().Name, tstCfg.DataDbCfg().User,
@@ -120,7 +120,7 @@ func durInternalRater(cd *engine.CallDescriptorWithOpts) (time.Duration, error) 
 	return time.Since(start), nil
 }
 
-func durRemoteRater(cd *engine.CallDescriptorWithOpts) (time.Duration, error) {
+func durRemoteRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, error) {
 	result := engine.CallCost{}
 	var client *rpc.Client
 	var err error
@@ -243,7 +243,7 @@ func main() {
 	tstart := time.Now()
 	timeparsed, err = utils.ParseDurationWithNanosecs(*usage)
 	tend := tstart.Add(timeparsed)
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			TimeStart:     tstart,
 			TimeEnd:       tend,

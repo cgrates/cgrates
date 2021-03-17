@@ -128,8 +128,8 @@ func testDspStsGetStatFailover(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	args2 := utils.TenantIDWithOpts{
-		Opts: map[string]interface{}{
+	args2 := utils.TenantIDWithAPIOpts{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "stat12345",
 		},
 		TenantID: &utils.TenantID{
@@ -194,8 +194,8 @@ func testDspStsTestAuthKey(t *testing.T) {
 		t.Error(err)
 	}
 
-	args2 := utils.TenantIDWithOpts{
-		Opts: map[string]interface{}{
+	args2 := utils.TenantIDWithAPIOpts{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "12345",
 		},
 		TenantID: &utils.TenantID{
@@ -237,8 +237,8 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	args2 := utils.TenantIDWithOpts{
-		Opts: map[string]interface{}{
+	args2 := utils.TenantIDWithAPIOpts{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "stat12345",
 		},
 		TenantID: &utils.TenantID{
@@ -297,8 +297,8 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	var reply []string
 	var metrics map[string]float64
 
-	args2 := utils.TenantIDWithOpts{
-		Opts: map[string]interface{}{
+	args2 := utils.TenantIDWithAPIOpts{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "stat12345",
 		},
 		TenantID: &utils.TenantID{

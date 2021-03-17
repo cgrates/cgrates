@@ -127,7 +127,7 @@ func testV1RatePrfRpcConn(t *testing.T) {
 func testV1RatePrfNotFound(t *testing.T) {
 	var reply *engine.RateProfile
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -145,7 +145,7 @@ func testV1RatePrfFromFolder(t *testing.T) {
 func testV1RatePrfVerifyRateProfile(t *testing.T) {
 	var reply *engine.RateProfile
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
@@ -237,7 +237,7 @@ func testV1RatePrfVerifyRateProfile(t *testing.T) {
 func testV1RatePrfRemoveRateProfile(t *testing.T) {
 	var reply string
 	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &reply); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -431,7 +431,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 	}
 	var rply *engine.RateProfile
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &rply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &rply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rPrfUpdated, rply) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
@@ -549,7 +549,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	}
 	var rply *engine.RateProfile
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "SpecialRate"}}, &rply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "SpecialRate"}}, &rply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rPrfUpdated, rply) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
@@ -580,7 +580,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	}
 	var rply2 *engine.RateProfile
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "SpecialRate"}}, &rply2); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "SpecialRate"}}, &rply2); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rPrfUpdated2, rply2) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
@@ -662,7 +662,7 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 	var result *engine.RateProfile
 	rateProfile.Tenant = "cgrates.org"
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "RPWithoutTenant"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "RPWithoutTenant"}},
 		&result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, rateProfile) {
@@ -673,7 +673,7 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 func testV1RatePrfRemoveRateProfileWithoutTenant(t *testing.T) {
 	var reply string
 	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "RPWithoutTenant"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "RPWithoutTenant"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -681,7 +681,7 @@ func testV1RatePrfRemoveRateProfileWithoutTenant(t *testing.T) {
 	}
 	var result *engine.RateProfile
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "RPWithoutTenant"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "RPWithoutTenant"}},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -803,7 +803,7 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 	rPrf.Tenant = "cgrates.org"
 	var rply *engine.RateProfile
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: "SpecialRate"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SpecialRate"}},
 		&rply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rPrf, rply) {

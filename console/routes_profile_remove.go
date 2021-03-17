@@ -24,7 +24,7 @@ func init() {
 	c := &CmdRemoveRoute{
 		name:      "routes_profile_remove",
 		rpcMethod: utils.APIerSv1RemoveRouteProfile,
-		rpcParams: &utils.TenantIDWithOpts{},
+		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -33,7 +33,7 @@ func init() {
 type CmdRemoveRoute struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithOpts
+	rpcParams *utils.TenantIDWithAPIOpts
 	*CommandExecuter
 }
 
@@ -47,7 +47,7 @@ func (self *CmdRemoveRoute) RpcMethod() string {
 
 func (self *CmdRemoveRoute) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithOpts{Opts: make(map[string]interface{})}
+		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }

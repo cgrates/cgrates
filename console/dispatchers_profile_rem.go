@@ -35,7 +35,7 @@ func init() {
 type CmdRemoveDispatcherProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithOpts
+	rpcParams *utils.TenantIDWithAPIOpts
 	*CommandExecuter
 }
 
@@ -49,7 +49,7 @@ func (self *CmdRemoveDispatcherProfile) RpcMethod() string {
 
 func (self *CmdRemoveDispatcherProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithOpts{Opts: make(map[string]interface{})}
+		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }

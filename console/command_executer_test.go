@@ -244,13 +244,13 @@ func TestGetFormatedSliceResult(t *testing.T) {
 }
 
 func TestFromJSONInterestingFields2(t *testing.T) {
-	jsn := utils.ToJSON(&utils.TenantIDWithOpts{
+	jsn := utils.ToJSON(&utils.TenantIDWithAPIOpts{
 		TenantID: new(utils.TenantID),
-		Opts:     make(map[string]interface{}),
+		APIOpts:  make(map[string]interface{}),
 	})
 
-	line := FromJSON([]byte(jsn), []string{"Tenant", "ID", "Opts"})
-	expected := `Tenant="" ID="" Opts={}`
+	line := FromJSON([]byte(jsn), []string{"Tenant", "ID", "APIOpts"})
+	expected := `Tenant="" ID="" APIOpts={}`
 	if line != expected {
 		t.Log(jsn)
 		t.Errorf("Expected: %s got: '%s'", expected, line)

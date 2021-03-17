@@ -125,7 +125,7 @@ func testFullRemoteITAttribute(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.AttributeProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func testFullRemoteITAttribute(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	}
@@ -172,7 +172,7 @@ func testFullRemoteITAttribute(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	}
@@ -186,7 +186,7 @@ func testFullRemoteITStatQueue(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.StatQueueProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -226,7 +226,7 @@ func testFullRemoteITStatQueue(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(stat.StatQueueProfile, reply) {
@@ -241,7 +241,7 @@ func testFullRemoteITStatQueue(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(stat.StatQueueProfile, reply) {
@@ -253,7 +253,7 @@ func testFullRemoteITThreshold(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.ThresholdProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -284,7 +284,7 @@ func testFullRemoteITThreshold(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -299,7 +299,7 @@ func testFullRemoteITThreshold(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetThresholdProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -311,7 +311,7 @@ func testFullRemoteITResource(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.ResourceProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetResourceProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -341,7 +341,7 @@ func testFullRemoteITResource(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetResourceProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rlsPrf.ResourceProfile, reply) {
@@ -356,7 +356,7 @@ func testFullRemoteITResource(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetResourceProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rlsPrf.ResourceProfile, reply) {
@@ -368,7 +368,7 @@ func testFullRemoteITRoute(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.RouteProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRouteProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -399,7 +399,7 @@ func testFullRemoteITRoute(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRouteProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(routePrf, reply) {
@@ -414,7 +414,7 @@ func testFullRemoteITRoute(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRouteProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(routePrf, reply) {
@@ -426,7 +426,7 @@ func testFullRemoteITFilter(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.Filter
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetFilter,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -454,7 +454,7 @@ func testFullRemoteITFilter(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetFilter,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(fltr, reply) {
@@ -480,7 +480,7 @@ func testFullRemoteITFilter(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetFilter,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(fltr, reply) {
@@ -492,7 +492,7 @@ func testFullRemoteITCharger(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.ChargerProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetChargerProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -513,7 +513,7 @@ func testFullRemoteITCharger(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetChargerProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(chargerProfile, reply) {
@@ -528,7 +528,7 @@ func testFullRemoteITCharger(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetChargerProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(chargerProfile, reply) {
@@ -540,7 +540,7 @@ func testFullRemoteITDispatcher(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.DispatcherProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -563,7 +563,7 @@ func testFullRemoteITDispatcher(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, reply) {
@@ -578,7 +578,7 @@ func testFullRemoteITDispatcher(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetDispatcherProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, reply) {
@@ -590,7 +590,7 @@ func testFullRemoteITRate(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.RateProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -634,7 +634,7 @@ func testFullRemoteITRate(t *testing.T) {
 		t.Error(err)
 	}
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	}
@@ -654,7 +654,7 @@ func testFullRemoteITRate(t *testing.T) {
 		t.Error(err)
 	}
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	}
@@ -668,7 +668,7 @@ func testFullRemoteITAction(t *testing.T) {
 	// verify for not found in internal
 	var reply *engine.ActionProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetActionProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -699,7 +699,7 @@ func testFullRemoteITAction(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetActionProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply) {
@@ -713,7 +713,7 @@ func testFullRemoteITAction(t *testing.T) {
 		t.Error("Unexpected reply returned", replySet)
 	}
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetActionProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply) {
@@ -725,7 +725,7 @@ func testFullRemoteITAccount(t *testing.T) {
 	// verify for not found in internal
 	var reply *utils.AccountProfile
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccountProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
@@ -793,7 +793,7 @@ func testFullRemoteITAccount(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccountProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(accPrf, reply) {
@@ -814,7 +814,7 @@ func testFullRemoteITAccount(t *testing.T) {
 	}
 
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccountProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(accPrf, reply) {

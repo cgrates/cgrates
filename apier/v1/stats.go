@@ -118,7 +118,7 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueProfileWithOp
 }
 
 // RemoveStatQueueProfile remove a specific stat configuration
-func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -130,8 +130,8 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithOpts, r
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), tnt, utils.CacheStatQueueProfiles,
-		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheStatQueueProfiles,
+		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.DataManager.RemoveStatQueue(tnt, args.ID, utils.NonTransactional); err != nil {
@@ -144,8 +144,8 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithOpts, r
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueues
-	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), tnt, utils.CacheStatQueues,
-		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheStatQueues,
+		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -183,22 +183,22 @@ func (stsv1 *StatSv1) GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, 
 }
 
 // GetStatQueue returns a StatQueue object
-func (stsv1 *StatSv1) GetStatQueue(args *utils.TenantIDWithOpts, reply *engine.StatQueue) (err error) {
+func (stsv1 *StatSv1) GetStatQueue(args *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) (err error) {
 	return stsv1.sS.V1GetStatQueue(args, reply)
 }
 
 // GetQueueStringMetrics returns the string metrics for a Queue
-func (stsv1 *StatSv1) GetQueueStringMetrics(args *utils.TenantIDWithOpts, reply *map[string]string) (err error) {
+func (stsv1 *StatSv1) GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
 	return stsv1.sS.V1GetQueueStringMetrics(args.TenantID, reply)
 }
 
 // GetQueueFloatMetrics returns the float metrics for a Queue
-func (stsv1 *StatSv1) GetQueueFloatMetrics(args *utils.TenantIDWithOpts, reply *map[string]float64) (err error) {
+func (stsv1 *StatSv1) GetQueueFloatMetrics(args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
 	return stsv1.sS.V1GetQueueFloatMetrics(args.TenantID, reply)
 }
 
 // ResetStatQueue resets the stat queue
-func (stsv1 *StatSv1) ResetStatQueue(tntID *utils.TenantIDWithOpts, reply *string) error {
+func (stsv1 *StatSv1) ResetStatQueue(tntID *utils.TenantIDWithAPIOpts, reply *string) error {
 	return stsv1.sS.V1ResetStatQueue(tntID.TenantID, reply)
 }
 

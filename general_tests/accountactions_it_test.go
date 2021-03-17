@@ -188,7 +188,7 @@ func testAccActionsSetActionProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var result *engine.ActionProfile
-	if err := accSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithOpts{
+	if err := accSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: actPrf.Tenant, ID: actPrf.ID}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(actPrf.ActionProfile, result) {
@@ -271,7 +271,7 @@ func testAccActionsGetAccountAfterActions(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var result *utils.AccountProfile
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(accPrf, result) {
@@ -312,7 +312,7 @@ func testAccActionsSetActionProfile2(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var result *engine.ActionProfile
-	if err := accSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithOpts{
+	if err := accSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: actPrf.Tenant, ID: actPrf.ID}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(actPrf.ActionProfile, result) {
@@ -345,7 +345,7 @@ func testAccActionsGetAccountAfterRemActions(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var result *utils.AccountProfile
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(accPrf, result) {

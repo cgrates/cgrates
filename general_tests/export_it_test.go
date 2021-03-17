@@ -170,7 +170,7 @@ func testExpVerifyAttributes(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := expRpc.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{
+		utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -415,7 +415,7 @@ func testExpVerifyRateProfiles(t *testing.T) {
 	if *encoding == utils.MetaGOB {
 		splPrf.FilterIDs = nil
 	}
-	if err := expRpc.Call(utils.APIerSv1GetRateProfile, &utils.TenantIDWithOpts{
+	if err := expRpc.Call(utils.APIerSv1GetRateProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RT_SPECIAL_1002"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -501,7 +501,7 @@ func testExpVerifyActionProfiles(t *testing.T) {
 			act.FilterIDs = nil
 		}
 	}
-	if err := expRpc.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithOpts{
+	if err := expRpc.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(actPrf, reply) {
@@ -556,7 +556,7 @@ func testExpVerifyAccountProfiles(t *testing.T) {
 	sort.Strings(acctPrf.Balances["MonetaryBalance"].CostIncrements[0].FilterIDs)
 	sort.Strings(acctPrf.Balances["MonetaryBalance"].UnitFactors[0].FilterIDs)
 	sort.Strings(acctPrf.Balances["MonetaryBalance"].AttributeIDs)
-	if err := expRpc.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithOpts{
+	if err := expRpc.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_PRF_1"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else {

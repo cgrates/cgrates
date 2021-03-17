@@ -229,12 +229,12 @@ func testDspThTestAuthKey3(t *testing.T) {
 		ID:     "THD_ACNT_1002",
 		Hits:   1,
 	}
-	if err := dispEngine.RPC.Call(utils.ThresholdSv1GetThreshold, &utils.TenantIDWithOpts{
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1GetThreshold, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "THD_ACNT_1002",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "thr12345",
 		},
 	}, &th); err != nil {

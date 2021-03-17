@@ -78,8 +78,8 @@ func (rplSv1 *ReplicatorSv1) GetReverseDestination(key *utils.StringWithOpts, re
 }
 
 // GetStatQueue is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithOpts, reply *engine.StatQueue) error {
-	engine.UpdateReplicationFilters(utils.StatQueuePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) error {
+	engine.UpdateReplicationFilters(utils.StatQueuePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetStatQueueDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -89,8 +89,8 @@ func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithOpts, reply *
 }
 
 // GetFilter is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantIDWithOpts, reply *engine.Filter) error {
-	engine.UpdateReplicationFilters(utils.FilterPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
+	engine.UpdateReplicationFilters(utils.FilterPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetFilterDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -100,8 +100,8 @@ func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantIDWithOpts, reply *eng
 }
 
 // GetThreshold is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithOpts, reply *engine.Threshold) error {
-	engine.UpdateReplicationFilters(utils.ThresholdPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithAPIOpts, reply *engine.Threshold) error {
+	engine.UpdateReplicationFilters(utils.ThresholdPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetThresholdDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -111,8 +111,8 @@ func (rplSv1 *ReplicatorSv1) GetThreshold(tntID *utils.TenantIDWithOpts, reply *
 }
 
 // GetThresholdProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithOpts, reply *engine.ThresholdProfile) error {
-	engine.UpdateReplicationFilters(utils.ThresholdProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) error {
+	engine.UpdateReplicationFilters(utils.ThresholdProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetThresholdProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -122,8 +122,8 @@ func (rplSv1 *ReplicatorSv1) GetThresholdProfile(tntID *utils.TenantIDWithOpts, 
 }
 
 // GetStatQueueProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWithOpts, reply *engine.StatQueueProfile) error {
-	engine.UpdateReplicationFilters(utils.StatQueueProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) error {
+	engine.UpdateReplicationFilters(utils.StatQueueProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetStatQueueProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -144,8 +144,8 @@ func (rplSv1 *ReplicatorSv1) GetTiming(id *utils.StringWithOpts, reply *utils.TP
 }
 
 // GetResource is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantIDWithOpts, reply *engine.Resource) error {
-	engine.UpdateReplicationFilters(utils.ResourcesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
+	engine.UpdateReplicationFilters(utils.ResourcesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetResourceDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -155,8 +155,8 @@ func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantIDWithOpts, reply *e
 }
 
 // GetResourceProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithOpts, reply *engine.ResourceProfile) error {
-	engine.UpdateReplicationFilters(utils.ResourceProfilesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
+	engine.UpdateReplicationFilters(utils.ResourceProfilesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetResourceProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -256,8 +256,8 @@ func (rplSv1 *ReplicatorSv1) GetRatingProfile(id *utils.StringWithOpts, reply *e
 }
 
 // GetRouteProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithOpts, reply *engine.RouteProfile) error {
-	engine.UpdateReplicationFilters(utils.RouteProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
+	engine.UpdateReplicationFilters(utils.RouteProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetRouteProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -267,8 +267,8 @@ func (rplSv1 *ReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithOpts, repl
 }
 
 // GetAttributeProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithOpts, reply *engine.AttributeProfile) error {
-	engine.UpdateReplicationFilters(utils.AttributeProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error {
+	engine.UpdateReplicationFilters(utils.AttributeProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetAttributeProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -278,8 +278,8 @@ func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithOpts, 
 }
 
 // GetChargerProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithOpts, reply *engine.ChargerProfile) error {
-	engine.UpdateReplicationFilters(utils.ChargerProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error {
+	engine.UpdateReplicationFilters(utils.ChargerProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetChargerProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -289,8 +289,8 @@ func (rplSv1 *ReplicatorSv1) GetChargerProfile(tntID *utils.TenantIDWithOpts, re
 }
 
 // GetDispatcherProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithOpts, reply *engine.DispatcherProfile) error {
-	engine.UpdateReplicationFilters(utils.DispatcherProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error {
+	engine.UpdateReplicationFilters(utils.DispatcherProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetDispatcherProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -300,8 +300,8 @@ func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWithOpts,
 }
 
 // GetDispatcherHost is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithOpts, reply *engine.DispatcherHost) error {
-	engine.UpdateReplicationFilters(utils.DispatcherHostPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error {
+	engine.UpdateReplicationFilters(utils.DispatcherHostPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetDispatcherHostDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -311,8 +311,8 @@ func (rplSv1 *ReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithOpts, re
 }
 
 // GetRateProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithOpts, reply *engine.RateProfile) error {
-	engine.UpdateReplicationFilters(utils.RateProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RateProfile) error {
+	engine.UpdateReplicationFilters(utils.RateProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetRateProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -322,8 +322,8 @@ func (rplSv1 *ReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithOpts, reply
 }
 
 // GetActionProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithOpts, reply *engine.ActionProfile) error {
-	engine.UpdateReplicationFilters(utils.ActionProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error {
+	engine.UpdateReplicationFilters(utils.ActionProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetActionProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -333,8 +333,8 @@ func (rplSv1 *ReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithOpts, rep
 }
 
 // GetAccountProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithOpts, reply *utils.AccountProfile) error {
-	engine.UpdateReplicationFilters(utils.AccountProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.Opts[utils.RemoteHostOpt]))
+func (rplSv1 *ReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error {
+	engine.UpdateReplicationFilters(utils.AccountProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetAccountProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
@@ -692,8 +692,8 @@ func (rplSv1 *ReplicatorSv1) SetAccountProfile(acp *utils.AccountProfileWithAPIO
 	if err = rplSv1.dm.DataDB().SetAccountProfileDrv(acp.AccountProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(acp.Opts[utils.CacheOpt]),
-		acp.Tenant, utils.CacheAccountProfiles, acp.TenantID(), &acp.FilterIDs, nil, acp.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(acp.APIOpts[utils.CacheOpt]),
+		acp.Tenant, utils.CacheAccountProfiles, acp.TenantID(), &acp.FilterIDs, nil, acp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -735,12 +735,12 @@ func (rplSv1 *ReplicatorSv1) SetIndexes(args *utils.SetIndexesArg, reply *string
 }
 
 // RemoveThreshold is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveThresholdDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheThresholds, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheThresholds, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -771,12 +771,12 @@ func (rplSv1 *ReplicatorSv1) RemoveAccount(id *utils.StringWithOpts, reply *stri
 }
 
 // RemoveStatQueue is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemStatQueueDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheStatQueues, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheStatQueues, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -784,12 +784,12 @@ func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithOpts, reply
 }
 
 // RemoveFilter is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveFilter(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveFilter(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveFilterDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheFilters, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheFilters, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -797,12 +797,12 @@ func (rplSv1 *ReplicatorSv1) RemoveFilter(args *utils.TenantIDWithOpts, reply *s
 }
 
 // RemoveThresholdProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemThresholdProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheThresholdProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheThresholdProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -810,12 +810,12 @@ func (rplSv1 *ReplicatorSv1) RemoveThresholdProfile(args *utils.TenantIDWithOpts
 }
 
 // RemoveStatQueueProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemStatQueueProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheStatQueueProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheStatQueueProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -836,12 +836,12 @@ func (rplSv1 *ReplicatorSv1) RemoveTiming(id *utils.StringWithOpts, reply *strin
 }
 
 // RemoveResource is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveResource(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveResource(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveResourceDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheResources, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheResources, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -849,12 +849,12 @@ func (rplSv1 *ReplicatorSv1) RemoveResource(args *utils.TenantIDWithOpts, reply 
 }
 
 // RemoveResourceProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveResourceProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheResourceProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheResourceProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -953,12 +953,12 @@ func (rplSv1 *ReplicatorSv1) RemoveRatingProfile(id *utils.StringWithOpts, reply
 }
 
 // RemoveRouteProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveRouteProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheRouteProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheRouteProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -966,12 +966,12 @@ func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithOpts, re
 }
 
 // RemoveAttributeProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveAttributeProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheAttributeProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheAttributeProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -979,12 +979,12 @@ func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithOpts
 }
 
 // RemoveChargerProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveChargerProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheChargerProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheChargerProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -992,12 +992,12 @@ func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(args *utils.TenantIDWithOpts, 
 }
 
 // RemoveDispatcherProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveDispatcherProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheDispatcherProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheDispatcherProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -1005,12 +1005,12 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(args *utils.TenantIDWithOpt
 }
 
 // RemoveRateProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveRateProfile(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveRateProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveRateProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheRateProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheRateProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -1018,12 +1018,12 @@ func (rplSv1 *ReplicatorSv1) RemoveRateProfile(args *utils.TenantIDWithOpts, rep
 }
 
 // RemoveActionProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveActionProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheActionProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheActionProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -1031,12 +1031,12 @@ func (rplSv1 *ReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithOpts, r
 }
 
 // RemoveAccountProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveAccountProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheAccountProfiles, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheAccountProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -1044,12 +1044,12 @@ func (rplSv1 *ReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithOpts, 
 }
 
 // RemoveDispatcherHost is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemoveDispatcherHostDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheDispatcherHosts, args.TenantID.TenantID(), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheDispatcherHosts, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

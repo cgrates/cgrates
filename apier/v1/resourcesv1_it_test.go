@@ -874,7 +874,7 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 			},
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithOpts{
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ULTIMITED"},
 	}, &rplyRes); err != nil {
 		t.Error(err)
@@ -928,7 +928,7 @@ func testV1RsGetResourceProfileWithoutTenant(t *testing.T) {
 func testV1RsRemResourceProfileWithoutTenant(t *testing.T) {
 	var reply string
 	if err := rlsV1Rpc.Call(utils.APIerSv1RemoveResourceProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{ID: rlsConfig.ID}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: rlsConfig.ID}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1017,7 +1017,7 @@ func testV1RsCheckAuthorizeResourcesAfterRestart(t *testing.T) {
 			},
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithOpts{
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ULTIMITED"},
 	}, &rplyRes); err != nil {
 		t.Error(err)
@@ -1031,7 +1031,7 @@ func testV1RsCheckAuthorizeResourcesAfterRestart(t *testing.T) {
 		ID:     "TEST_WITH_OPTS",
 		Usages: map[string]*engine.ResourceUsage{},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithOpts{
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_WITH_OPTS"},
 	}, &rplyRes); err != nil {
 		t.Error(err)

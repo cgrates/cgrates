@@ -43,9 +43,9 @@ func (aL *actResetStat) cfg() *engine.APAction {
 
 // execute implements actioner interface
 func (aL *actResetStat) execute(_ context.Context, data utils.MapStorage, trgID string) (err error) {
-	args := &utils.TenantIDWithOpts{
+	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID(trgID),
-		Opts:     data[utils.MetaOpts].(map[string]interface{}),
+		APIOpts:  data[utils.MetaOpts].(map[string]interface{}),
 	}
 	if args.Tenant == utils.EmptyString { // in case that user pass only ID we populate the tenant from the event
 		args.Tenant = aL.tnt
@@ -72,9 +72,9 @@ func (aL *actResetThreshold) cfg() *engine.APAction {
 
 // execute implements actioner interface
 func (aL *actResetThreshold) execute(_ context.Context, data utils.MapStorage, trgID string) (err error) {
-	args := &utils.TenantIDWithOpts{
+	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID(trgID),
-		Opts:     data[utils.MetaOpts].(map[string]interface{}),
+		APIOpts:  data[utils.MetaOpts].(map[string]interface{}),
 	}
 	if args.Tenant == utils.EmptyString { // in case that user pass only ID we populate the tenant from the event
 		args.Tenant = aL.tnt

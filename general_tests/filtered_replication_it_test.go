@@ -192,7 +192,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -211,7 +211,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	}
 
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -226,7 +226,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -237,7 +237,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -251,7 +251,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: attrID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -344,7 +344,7 @@ func testFltrRplFilters(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetFilter,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -358,7 +358,7 @@ func testFltrRplFilters(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveFilter,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: fltrID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -393,7 +393,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	var rplyIDs []string
 	var replyTh engine.Threshold
 
-	argsTh := &utils.TenantIDWithOpts{
+	argsTh := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     thID,
@@ -482,7 +482,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetThresholdProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(thPrfl.ThresholdProfile, replyPrfl) {
@@ -521,7 +521,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveThresholdProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: thID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -577,7 +577,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 	var rplyIDs []string
 	var replySq engine.StatQueue
 
-	argsSq := &utils.TenantIDWithOpts{
+	argsSq := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     stID,
@@ -671,7 +671,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetStatQueueProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(stPrf.StatQueueProfile, replyPrfl) {
@@ -714,7 +714,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveStatQueueProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -763,7 +763,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 	var rplyIDs []string
 	var replyRs engine.Resource
 
-	argsRs := &utils.TenantIDWithOpts{
+	argsRs := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     resID,
@@ -851,7 +851,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetResourceProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(resPrf.ResourceProfile, replyPrfl) {
@@ -899,7 +899,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveResourceProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: resID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1010,7 +1010,7 @@ func testFltrRplRouteProfile(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetRouteProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	replyPrfl.Compile()
@@ -1024,7 +1024,7 @@ func testFltrRplRouteProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveRouteProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &result); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1112,7 +1112,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetChargerProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(chPrf.ChargerProfile, replyPrfl) {
@@ -1125,7 +1125,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveChargerProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: chID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1212,7 +1212,7 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetDispatcherProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(dspPrf.DispatcherProfile, replyPrfl) {
@@ -1225,7 +1225,7 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1312,7 +1312,7 @@ func testFltrRplDispatcherHost(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetDispatcherHost,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(dspPrf.DispatcherHost, replyPrfl) {
@@ -1325,7 +1325,7 @@ func testFltrRplDispatcherHost(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveDispatcherHost,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: dspID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1409,7 +1409,7 @@ func testFltrRplRateProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
@@ -1427,7 +1427,7 @@ func testFltrRplRateProfile(t *testing.T) {
 	}
 
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
@@ -1442,7 +1442,7 @@ func testFltrRplRateProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
@@ -1452,7 +1452,7 @@ func testFltrRplRateProfile(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
@@ -1465,7 +1465,7 @@ func testFltrRplRateProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: rpID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1514,7 +1514,7 @@ func testFltrRplActionProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetActionProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(acPrf.ActionProfile, replyPrfl) {
@@ -1532,7 +1532,7 @@ func testFltrRplActionProfile(t *testing.T) {
 	}
 
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetActionProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(acPrf.ActionProfile, replyPrfl) {
@@ -1546,7 +1546,7 @@ func testFltrRplActionProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetActionProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(acPrf.ActionProfile, replyPrfl) {
@@ -1556,7 +1556,7 @@ func testFltrRplActionProfile(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetActionProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(acPrf.ActionProfile, replyPrfl) {
@@ -1569,7 +1569,7 @@ func testFltrRplActionProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveActionProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1632,7 +1632,7 @@ func testFltrRplAccountProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetAccountProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
@@ -1650,7 +1650,7 @@ func testFltrRplAccountProfile(t *testing.T) {
 	}
 
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetAccountProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
@@ -1667,7 +1667,7 @@ func testFltrRplAccountProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetAccountProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
@@ -1677,7 +1677,7 @@ func testFltrRplAccountProfile(t *testing.T) {
 
 	// use replicator to see if the attribute was changed in the DB
 	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetAccountProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expPrf, replyPrfl) {
@@ -1690,7 +1690,7 @@ func testFltrRplAccountProfile(t *testing.T) {
 	}
 
 	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveAccountProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &result); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: acID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

@@ -94,7 +94,7 @@ func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithOpts, reply *string) er
 }
 
 //RemoveRouteProfile remove a specific Route configuration
-func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -110,8 +110,8 @@ func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithOpts, reply
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), tnt, utils.CacheRouteProfiles,
-		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheRouteProfiles,
+		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

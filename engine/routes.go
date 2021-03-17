@@ -302,7 +302,7 @@ func (rpS *RouteService) statMetrics(statIDs []string, tenant string) (stsMetric
 		for _, statID := range statIDs {
 			var metrics map[string]float64
 			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
-				&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
+				&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s getting statMetrics for stat : %s", utils.RouteS, err.Error(), statID))
@@ -335,7 +335,7 @@ func (rpS *RouteService) statMetricsForLoadDistribution(statIDs []string, tenant
 			if err = rpS.connMgr.Call(
 				rpS.cgrcfg.RouteSCfg().StatSConns, nil,
 				utils.StatSv1GetQueueFloatMetrics,
-				&utils.TenantIDWithOpts{
+				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{
 						Tenant: tenant, ID: statWithMetric[0]}},
 				&metrics); err != nil &&
@@ -376,7 +376,7 @@ func (rpS *RouteService) resourceUsage(resIDs []string, tenant string) (tUsage f
 		for _, resID := range resIDs {
 			var res Resource
 			if err = rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
-				&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: resID}}, &res); err != nil && err.Error() != utils.ErrNotFound.Error() {
+				&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: resID}}, &res); err != nil && err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s getting resource for ID : %s", utils.RouteS, err.Error(), resID))
 				continue

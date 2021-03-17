@@ -486,7 +486,7 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 			}
 			var sts StatQueue
 			if err = connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil, utils.StatSv1GetStatQueue,
-				&utils.TenantIDWithOpts{
+				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{
 						Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 						ID:     statID,
@@ -1051,7 +1051,7 @@ func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err err
 }
 
 func resetThreshold(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
-	args := &utils.TenantIDWithOpts{
+	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID(a.ExtraParameters),
 	}
 	var rply string
@@ -1060,7 +1060,7 @@ func resetThreshold(ub *Account, a *Action, acs Actions, extraData interface{}) 
 }
 
 func resetStatQueue(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
-	args := &utils.TenantIDWithOpts{
+	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID(a.ExtraParameters),
 	}
 	var rply string

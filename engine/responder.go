@@ -65,7 +65,7 @@ func (rs *Responder) usageAllowed(tor string, reqUsage time.Duration) (allowed b
 /*
 RPC method that provides the external RPC interface for getting the rating information.
 */
-func (rs *Responder) GetCost(arg *CallDescriptorWithOpts, reply *CallCost) (err error) {
+func (rs *Responder) GetCost(arg *CallDescriptorWithAPIOpts, reply *CallCost) (err error) {
 	// RPC caching
 	if arg.CgrID != utils.EmptyString && config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderGetCost, arg.CgrID)
@@ -171,7 +171,7 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 	return
 }
 
-func (rs *Responder) Debit(arg *CallDescriptorWithOpts, reply *CallCost) (err error) {
+func (rs *Responder) Debit(arg *CallDescriptorWithAPIOpts, reply *CallCost) (err error) {
 	// RPC caching
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -212,7 +212,7 @@ func (rs *Responder) Debit(arg *CallDescriptorWithOpts, reply *CallCost) (err er
 	return
 }
 
-func (rs *Responder) MaxDebit(arg *CallDescriptorWithOpts, reply *CallCost) (err error) {
+func (rs *Responder) MaxDebit(arg *CallDescriptorWithAPIOpts, reply *CallCost) (err error) {
 	// RPC caching
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -252,7 +252,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptorWithOpts, reply *CallCost) (err
 	return
 }
 
-func (rs *Responder) RefundIncrements(arg *CallDescriptorWithOpts, reply *Account) (err error) {
+func (rs *Responder) RefundIncrements(arg *CallDescriptorWithAPIOpts, reply *Account) (err error) {
 	// RPC caching
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -293,7 +293,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptorWithOpts, reply *Accoun
 	return
 }
 
-func (rs *Responder) RefundRounding(arg *CallDescriptorWithOpts, reply *float64) (err error) {
+func (rs *Responder) RefundRounding(arg *CallDescriptorWithAPIOpts, reply *float64) (err error) {
 	// RPC caching
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -327,7 +327,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptorWithOpts, reply *float64)
 	return
 }
 
-func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithOpts, reply *time.Duration) (err error) {
+func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithAPIOpts, reply *time.Duration) (err error) {
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
 	}

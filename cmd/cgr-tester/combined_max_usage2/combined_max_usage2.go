@@ -101,7 +101,7 @@ func main() {
 		go func() {
 			tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
 			usageDur, _ := utils.ParseDurationWithNanosecs(usage)
-			cd := &engine.CallDescriptorWithOpts{
+			cd := &engine.CallDescriptorWithAPIOpts{
 				CallDescriptor: &engine.CallDescriptor{
 					Category:    "call",
 					Tenant:      "cgrates.org",

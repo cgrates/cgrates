@@ -1192,7 +1192,7 @@ func testV1FISetAccountProfileIndexes(t *testing.T) {
 
 	//there is not an accPrf in database, so we will get NOT_FOUND
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAccountProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1222,7 +1222,7 @@ func testV1FISetAccountProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAccountProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, newAccPrf) {
@@ -1338,7 +1338,7 @@ func testV1FISetSecondFilterForAccountProfile(t *testing.T) {
 	}
 	var reply *utils.AccountProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAccountProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, newAccPrf) {
@@ -1412,7 +1412,7 @@ func testV1FIRemoveAccountProfile(t *testing.T) {
 	//removing accPrf from db will delete the indexes from dB
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAccountProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1422,7 +1422,7 @@ func testV1FIRemoveAccountProfile(t *testing.T) {
 	var reply *utils.AccountProfile
 	//there is not an accPrf in database, so we will get NOT_FOUND
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAccountProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1462,7 +1462,7 @@ func testV1FISetActionProfileIndexes(t *testing.T) {
 	//there is not an actPrf in db, so we will get NOT_FOUND
 	var reply *engine.ActionProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetActionProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -1495,7 +1495,7 @@ func testV1FISetActionProfileIndexes(t *testing.T) {
 
 	//get it from db and compare
 	if err := tFIdxRpc.Call(utils.APIerSv1GetActionProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, actPrf.ActionProfile) {
@@ -1648,7 +1648,7 @@ func testVF1SetSecondActionProfile(t *testing.T) {
 	//get it from db and compare
 	var reply *engine.ActionProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetActionProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF2"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF2"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, actPrf.ActionProfile) {
@@ -1748,7 +1748,7 @@ func testV1FIRemoveActionProfile(t *testing.T) {
 	//we will remove actionProfiles 1 by one(ACT_PRF) first
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveActionProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1758,14 +1758,14 @@ func testV1FIRemoveActionProfile(t *testing.T) {
 	var reply *engine.ActionProfile
 	//there is not an actPrf in database, so we will get NOT_FOUND
 	if err := tFIdxRpc.Call(utils.APIerSv1GetActionProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	//we will remove actionProfiles 1 by one(ACT_PRF2) second
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveActionProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF2"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF2"}},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1774,7 +1774,7 @@ func testV1FIRemoveActionProfile(t *testing.T) {
 
 	//there is not an actPrf in database, so we will get NOT_FOUND
 	if err := tFIdxRpc.Call(utils.APIerSv1GetActionProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF2"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACT_PRF2"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1850,7 +1850,7 @@ func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 
 	//get it from db and compare
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -2043,7 +2043,7 @@ func testV1FISetSecondRateProfileRate(t *testing.T) {
 	//get it from db and compare
 	var reply utils.RateProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -2150,7 +2150,7 @@ func testVF1RemoveRateProfileRates(t *testing.T) {
 
 	var reply utils.RateProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -2239,7 +2239,7 @@ func testV1FISetRateProfileIndexes(t *testing.T) {
 	//there are not any rates in db
 	var reply *engine.RateProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP2"}}, &reply); err == nil ||
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP2"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -2272,7 +2272,7 @@ func testV1FISetRateProfileIndexes(t *testing.T) {
 
 	//get it from db and compare
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP2"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP2"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -2455,7 +2455,7 @@ func testV1FISetSecondRateProfile(t *testing.T) {
 	//get it from db and compare
 	var reply utils.RateProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP3"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP3"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -2535,7 +2535,7 @@ func testVF1RemoveRateProfile(t *testing.T) {
 	//removing rate profile from db will delete the indexes from db
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			ID:     "RP2",
 			Tenant: tenant},
 		},
@@ -2546,7 +2546,7 @@ func testVF1RemoveRateProfile(t *testing.T) {
 	}
 
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			ID:     "RP3",
 			Tenant: tenant}},
 		&result); err != nil {
@@ -2558,13 +2558,13 @@ func testVF1RemoveRateProfile(t *testing.T) {
 	//nothing to get from db
 	var reply utils.RateProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP2"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP2"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP3"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP3"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -2603,7 +2603,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ApierTest"}}, &reply); err == nil ||
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ApierTest"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -2633,7 +2633,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ApierTest"}}, &reply); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ApierTest"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
@@ -2711,7 +2711,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest2"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -2740,7 +2740,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest2"}}, &reply); err != nil {
 		t.Error(err)
 		t.Error(err)
@@ -2837,14 +2837,14 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 		Tenant: tenant,
 		ID:     "ApierTest"}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 		Tenant: tenant,
 		ID:     "ApierTest2"}}, &result); err != nil {
 		t.Error(err)
@@ -2853,13 +2853,13 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest2"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1GetAttributeProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 			Tenant: tenant, ID: "ApierTest"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

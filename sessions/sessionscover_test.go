@@ -1080,7 +1080,7 @@ func TestRefundSession(t *testing.T) {
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ResponderRefundIncrements: func(args interface{}, reply interface{}) error {
-				if args.(*engine.CallDescriptorWithOpts).Opts != nil {
+				if args.(*engine.CallDescriptorWithAPIOpts).APIOpts != nil {
 					return utils.ErrNotImplemented
 				}
 				acnt := &engine.Account{
@@ -1802,7 +1802,7 @@ func TestAuthEventMockCall(t *testing.T) {
 	sTestMock := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ResponderGetMaxSessionTime: func(args interface{}, reply interface{}) error {
-				usage := args.(*engine.CallDescriptorWithOpts).Opts[utils.Usage]
+				usage := args.(*engine.CallDescriptorWithAPIOpts).APIOpts[utils.Usage]
 				if usage != 10 {
 					return utils.ErrNoMoreData
 				}
@@ -4034,7 +4034,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 				return nil
 			},
 			utils.ResponderGetCost: func(args interface{}, reply interface{}) error {
-				if args.(*engine.CallDescriptorWithOpts).Tenant == "CHANGED_ID" {
+				if args.(*engine.CallDescriptorWithAPIOpts).Tenant == "CHANGED_ID" {
 					return nil
 				}
 				return utils.ErrNotImplemented

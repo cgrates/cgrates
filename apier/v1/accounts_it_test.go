@@ -667,7 +667,7 @@ func testAccITCountAccounts(t *testing.T) {
 func testAccITCountAccountsWithoutTenant(t *testing.T) {
 	var reply int
 	if err := accRPC.Call(utils.APIerSv1GetAccountsCount,
-		&utils.TenantIDWithOpts{},
+		&utils.TenantIDWithAPIOpts{},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != 11 {
@@ -892,7 +892,7 @@ func testAccITAddBalanceWithDestinations(t *testing.T) {
 	}
 
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "sms",
 			Tenant:        "cgrates.org",
@@ -912,7 +912,7 @@ func testAccITAddBalanceWithDestinations(t *testing.T) {
 	}
 
 	tStart = time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd = &engine.CallDescriptorWithOpts{
+	cd = &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "sms",
 			Tenant:        "cgrates.org",
@@ -1330,7 +1330,7 @@ func testAccITAddVoiceBalanceWithDestinations(t *testing.T) {
 	}
 
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.com",

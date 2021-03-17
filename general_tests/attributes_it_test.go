@@ -201,7 +201,7 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 	}
 	var replyAttr *engine.AttributeProfile
 	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACCOUNT"}}, &replyAttr); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACCOUNT"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
 	replyAttr.Compile()
@@ -283,7 +283,7 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 	}
 	var replyAttr *engine.AttributeProfile
 	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACCOUNT2"}}, &replyAttr); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACCOUNT2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
 	replyAttr.Compile()
@@ -414,7 +414,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	}
 	var replyAttr *engine.AttributeProfile
 	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS"}}, &replyAttr); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
 	replyAttr.Compile()
@@ -497,7 +497,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 	}
 	var replyAttr *engine.AttributeProfile
 	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS2"}}, &replyAttr); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
 	replyAttr.Compile()
@@ -642,7 +642,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 	var replyAttr *engine.AttributeProfile
 	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE"}}, &replyAttr); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
 	replyAttr.Compile()
@@ -725,7 +725,7 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 	}
 	var replyAttr *engine.AttributeProfile
 	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE2"}}, &replyAttr); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
 	replyAttr.Compile()
@@ -816,7 +816,7 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 	}
 	var replyAttr *engine.AttributeProfile
 	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER2"}}, &replyAttr); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
 	replyAttr.Compile()
@@ -918,7 +918,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 	}
 	var replyAttr *engine.AttributeProfile
 	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER_COMPOSED"}}, &replyAttr); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER_COMPOSED"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
 	replyAttr.Compile()
@@ -1002,7 +1002,7 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 	}
 	var replyAttr *engine.AttributeProfile
 	if err := attrRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER"}}, &replyAttr); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
 	replyAttr.Compile()

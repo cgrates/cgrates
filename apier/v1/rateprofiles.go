@@ -28,7 +28,7 @@ import (
 )
 
 // GetRateProfile returns an Rate Profile
-func (apierSv1 *APIerSv1) GetRateProfile(arg *utils.TenantIDWithOpts, reply *engine.RateProfile) error {
+func (apierSv1 *APIerSv1) GetRateProfile(arg *utils.TenantIDWithAPIOpts, reply *engine.RateProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -173,7 +173,7 @@ func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRatesWithOpts, 
 }
 
 // RemoveRateProfile remove a specific Rate Profile
-func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -189,8 +189,8 @@ func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithOpts, reply *
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheRateProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheRateProfiles,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

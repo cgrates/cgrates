@@ -451,9 +451,9 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	cc := new(engine.CallCost)
 	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 		utils.ResponderMaxDebit,
-		&engine.CallDescriptorWithOpts{
+		&engine.CallDescriptorWithAPIOpts{
 			CallDescriptor: cd,
-			Opts:           s.OptsStart,
+			APIOpts:        s.OptsStart,
 		}, cc)
 	if err != nil {
 		// verify in case of *dynaprepaid RequestType
@@ -471,9 +471,9 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 			// execute again the MaxDebit operation
 			err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 				utils.ResponderMaxDebit,
-				&engine.CallDescriptorWithOpts{
+				&engine.CallDescriptorWithAPIOpts{
 					CallDescriptor: cd,
-					Opts:           s.OptsStart,
+					APIOpts:        s.OptsStart,
 				}, cc)
 		}
 		if err != nil {
@@ -661,9 +661,9 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 	}
 	var acnt engine.Account
 	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderRefundIncrements,
-		&engine.CallDescriptorWithOpts{
+		&engine.CallDescriptorWithAPIOpts{
 			CallDescriptor: cd,
-			Opts:           s.OptsStart,
+			APIOpts:        s.OptsStart,
 		}, &acnt); err != nil {
 		return
 	}
@@ -727,7 +727,7 @@ func (sS *SessionS) roundCost(s *Session, sRunIdx int) (err error) {
 		var response float64
 		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 			utils.ResponderRefundRounding,
-			&engine.CallDescriptorWithOpts{CallDescriptor: cd},
+			&engine.CallDescriptorWithAPIOpts{CallDescriptor: cd},
 			&response); err != nil {
 			return
 		}
@@ -1441,9 +1441,9 @@ func (sS *SessionS) authEvent(cgrEv *utils.CGREvent, forceDuration bool) (usage 
 			rplyMaxUsage = eventUsage
 		} else if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 			utils.ResponderGetMaxSessionTime,
-			&engine.CallDescriptorWithOpts{
+			&engine.CallDescriptorWithAPIOpts{
 				CallDescriptor: sr.CD,
-				Opts:           s.OptsStart,
+				APIOpts:        s.OptsStart,
 			}, &rplyMaxUsage); err != nil {
 			err = utils.NewErrRALs(err)
 			return
@@ -1567,9 +1567,9 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 						sr.CD.DurationIndex += notCharged
 						cc := new(engine.CallCost)
 						if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderDebit,
-							&engine.CallDescriptorWithOpts{
+							&engine.CallDescriptorWithAPIOpts{
 								CallDescriptor: sr.CD,
-								Opts:           s.OptsStart,
+								APIOpts:        s.OptsStart,
 							}, cc); err == nil {
 							sr.EventCost.Merge(
 								engine.NewEventCostFromCallCost(cc, s.CGRID,
@@ -3378,9 +3378,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					var cc engine.CallCost
 					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 						utils.ResponderGetCost,
-						&engine.CallDescriptorWithOpts{
+						&engine.CallDescriptorWithAPIOpts{
 							CallDescriptor: cd,
-							Opts:           cgrEv.Opts,
+							APIOpts:        cgrEv.Opts,
 						}, &cc); err != nil {
 						return err
 					}
@@ -3584,9 +3584,9 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 	var cc engine.CallCost
 	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 		utils.ResponderGetCost,
-		&engine.CallDescriptorWithOpts{
+		&engine.CallDescriptorWithAPIOpts{
 			CallDescriptor: cd,
-			Opts:           args.Opts,
+			APIOpts:        args.Opts,
 		}, &cc); err != nil {
 		return
 	}

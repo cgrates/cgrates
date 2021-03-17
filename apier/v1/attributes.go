@@ -26,7 +26,7 @@ import (
 )
 
 // GetAttributeProfile returns an Attribute Profile
-func (apierSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithOpts, reply *engine.AttributeProfile) (err error) {
+func (apierSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -124,7 +124,7 @@ func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *engine.AttributeProfileWit
 }
 
 //RemoveAttributeProfile remove a specific Attribute Profile
-func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -140,8 +140,8 @@ func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithOpts, re
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), tnt, utils.CacheAttributeProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheAttributeProfiles,
+		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

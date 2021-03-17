@@ -895,7 +895,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	// Test here ResponderGetCost
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", utils.EmptyString)
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", utils.EmptyString)
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -1714,7 +1714,7 @@ func testApierGetAccountAfterLoad(t *testing.T) {
 func testApierResponderGetCost(t *testing.T) {
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", utils.EmptyString)
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", utils.EmptyString)
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "call",
 			Tenant:        "cgrates.org",
@@ -1737,7 +1737,7 @@ func testApierResponderGetCost(t *testing.T) {
 
 func testApierMaxDebitInexistentAcnt(t *testing.T) {
 	cc := &engine.CallCost{}
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			Tenant:      "cgrates.org",
 			Category:    "call",

@@ -238,7 +238,7 @@ func testInternalReplicateITAttributeProfile(t *testing.T) {
 	// check
 	var reply *engine.AttributeProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -246,7 +246,7 @@ func testInternalReplicateITAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -255,7 +255,7 @@ func testInternalReplicateITAttributeProfile(t *testing.T) {
 	}
 	reply = &engine.AttributeProfile{}
 	//remove
-	if err := internalRPC.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+	if err := internalRPC.Call(utils.APIerSv1RemoveAttributeProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 		Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -263,11 +263,11 @@ func testInternalReplicateITAttributeProfile(t *testing.T) {
 	}
 	//check again
 	if err := engineOneRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
 	}
 }
@@ -391,7 +391,7 @@ func testInternalReplicateITRouteProfile(t *testing.T) {
 	// remove
 	var resp string
 	if err := internalRPC.Call(utils.APIerSv1RemoveRouteProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}}, &resp); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -535,14 +535,14 @@ func testInternalReplicateITDispatcherProfile(t *testing.T) {
 	// remove
 	var result string
 	if err := internalRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}}, &result); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Expecting : %+v, received: %+v", utils.OK, result)
 	}
 	// remove again
 	if err := internalRPC.Call(utils.APIerSv1RemoveDispatcherProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"}}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// check again
@@ -669,7 +669,7 @@ func testInternalReplicateITDispatcherHost(t *testing.T) {
 	}
 	// remove
 	if err := internalRPC.Call(utils.APIerSv1RemoveDispatcherHost,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"}},
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -735,7 +735,7 @@ func testInternalReplicateITFilter(t *testing.T) {
 	// remove
 	var resp string
 	if err := internalRPC.Call(utils.APIerSv1RemoveFilter,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}}, &resp); err != nil {
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -1189,7 +1189,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	// get threshold
 	var td engine.Threshold
 	if err := engineOneRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1198,7 +1198,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	if err := engineTwoRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1249,7 +1249,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	}
 	//get
 	if err := internalRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1295,7 +1295,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	}
 	//get
 	if err := internalRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1315,7 +1315,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	}
 
 	if err := engineOneRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1324,7 +1324,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	if err := engineTwoRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithOpts{
+		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: tenant,
 				ID:     "THD_Test"},
@@ -1411,19 +1411,19 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 	// check
 	var reply *engine.RateProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", rPrf, reply)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", rPrf, reply)
 	}
 	//remove
-	if err := internalRPC.Call(utils.APIerSv1RemoveRateProfile, &utils.TenantIDWithOpts{TenantID: &utils.TenantID{
+	if err := internalRPC.Call(utils.APIerSv1RemoveRateProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 		Tenant: rPrf.Tenant, ID: rPrf.ID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1431,12 +1431,12 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 	}
 	//check again
 	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
 	}
 	if err := engineTwoRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
 	}
@@ -1490,7 +1490,7 @@ func testInternalReplicateITLoadIds(t *testing.T) {
 	// check AttributeProfile
 	var reply *engine.AttributeProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetAttributeProfile,
-		utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: alsPrf.Tenant, ID: alsPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()

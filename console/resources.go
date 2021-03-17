@@ -27,7 +27,7 @@ func init() {
 	c := &CmdGetResource{
 		name:      "resources",
 		rpcMethod: utils.ResourceSv1GetResource,
-		rpcParams: &utils.TenantIDWithOpts{},
+		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdGetResource struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWithOpts
+	rpcParams *utils.TenantIDWithAPIOpts
 	*CommandExecuter
 }
 
@@ -51,9 +51,9 @@ func (self *CmdGetResource) RpcMethod() string {
 
 func (self *CmdGetResource) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithOpts{
+		self.rpcParams = &utils.TenantIDWithAPIOpts{
 			TenantID: new(utils.TenantID),
-			Opts:     map[string]interface{}{},
+			APIOpts:  map[string]interface{}{},
 		}
 	}
 	return self.rpcParams

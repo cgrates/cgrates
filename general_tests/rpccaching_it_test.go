@@ -827,7 +827,7 @@ func testRPCMethodsLoadData(t *testing.T) {
 
 func testRPCMethodsResponderDebit(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			CgrID:         "testRPCMethodsResponderDebit",
 			Category:      "call",
@@ -850,7 +850,7 @@ func testRPCMethodsResponderDebit(t *testing.T) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
 			15, cc.Cost)
 	}
-	cd2 := &engine.CallDescriptorWithOpts{
+	cd2 := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			CgrID: "testRPCMethodsResponderDebit",
 		},
@@ -872,7 +872,7 @@ func testRPCMethodsResponderDebit(t *testing.T) {
 
 func testRPCMethodsResponderMaxDebit(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := &engine.CallDescriptorWithOpts{
+	cd := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			CgrID:         "testRPCMethodsResponderMaxDebit",
 			Category:      "call",
@@ -896,7 +896,7 @@ func testRPCMethodsResponderMaxDebit(t *testing.T) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
 			0, cc.Cost)
 	}
-	cd2 := &engine.CallDescriptorWithOpts{
+	cd2 := &engine.CallDescriptorWithAPIOpts{
 		CallDescriptor: &engine.CallDescriptor{
 			CgrID: "testRPCMethodsResponderMaxDebit",
 		},
