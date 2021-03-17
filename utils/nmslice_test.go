@@ -52,29 +52,29 @@ func TestNMSliceField(t *testing.T) {
 	nm = &NMSlice{
 		NewNMData("1001"),
 		NewNMData("1003"),
-		&NavigableMap2{"Field1": NewNMData("Val")},
+		&NavigableMap{"Field1": NewNMData("Val")},
 	}
 	if _, err := nm.Field(PathItems{{}}); err != ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := nm.Field(PathItems{{Index: StringPointer("4")}}); err != ErrNotFound {
+	if _, err := nm.Field(PathItems{{Index: []string{"4"}}}); err != ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := nm.Field(nil); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if val, err := nm.Field(PathItems{{Field: "None", Index: StringPointer("-1")}, {Field: "Field1"}}); err != nil {
+	if val, err := nm.Field(PathItems{{Field: "None", Index: []string{"-1"}}, {Field: "Field1"}}); err != nil {
 		t.Error(err)
 	} else if val.Interface() != "Val" {
 		t.Errorf("Expected %q ,received: %q", "Val", val.Interface())
 	}
-	if val, err := nm.Field(PathItems{{Field: "1234", Index: StringPointer("1")}}); err != nil {
+	if val, err := nm.Field(PathItems{{Field: "1234", Index: []string{"1"}}}); err != nil {
 		t.Error(err)
 	} else if val.Interface() != "1003" {
 		t.Errorf("Expected %q ,received: %q", "Val", val.Interface())
 	}
 	expError := `strconv.Atoi: parsing "nan": invalid syntax`
-	if _, err := nm.Field(PathItems{{Field: "1234", Index: StringPointer("nan")}}); err == nil || err.Error() != expError {
+	if _, err := nm.Field(PathItems{{Field: "1234", Index: []string{"nan"}}}); err == nil || err.Error() != expError {
 		t.Errorf("Expected error %s received: %v", expError, err)
 	}
 }
@@ -85,36 +85,36 @@ func TestNMSliceSet(t *testing.T) {
 		t.Error(err)
 	}
 	expected := &NMSlice{NewNMData("1001")}
-	if _, err := nm.Set(PathItems{{Field: "1234", Index: StringPointer("0")}}, NewNMData("1001")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: []string{"0"}}}, NewNMData("1001")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
-	if _, err := nm.Set(PathItems{{Field: "1234", Index: StringPointer("1")}, {Field: "Field1", Index: StringPointer("1")}},
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: []string{"1"}}, {Field: "Field1", Index: []string{"1"}}},
 		NewNMData("1001")); err != ErrWrongPath {
 		t.Error(err)
 	}
-	expected = &NMSlice{NewNMData("1001"), NavigableMap2{"Field1": NewNMData("1001")}}
-	if _, err := nm.Set(PathItems{{Field: "1234", Index: StringPointer("1")}, {Field: "Field1"}},
+	expected = &NMSlice{NewNMData("1001"), NavigableMap{"Field1": NewNMData("1001")}}
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: []string{"1"}}, {Field: "Field1"}},
 		NewNMData("1001")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 	expected = &NMSlice{NewNMData("1001"), NewNMData("1001")}
-	if _, err := nm.Set(PathItems{{Field: "1234", Index: StringPointer("-1")}}, NewNMData("1001")); err != nil {
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: []string{"-1"}}}, NewNMData("1001")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 
 	nm = &NMSlice{&NMSlice{}}
-	if _, err := nm.Set(PathItems{{Field: "1234", Index: StringPointer("0")}, {}}, NewNMData("1001")); err != ErrWrongPath {
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: []string{"0"}}, {}}, NewNMData("1001")); err != ErrWrongPath {
 		t.Error(err)
 	}
 
 	expError := `strconv.Atoi: parsing "nan": invalid syntax`
-	if _, err := nm.Set(PathItems{{Field: "1234", Index: StringPointer("nan")}, {}}, NewNMData("1001")); err == nil || err.Error() != expError {
+	if _, err := nm.Set(PathItems{{Field: "1234", Index: []string{"nan"}}, {}}, NewNMData("1001")); err == nil || err.Error() != expError {
 		t.Errorf("Expected error %s received: %v", expError, err)
 	}
 }
@@ -152,7 +152,7 @@ func TestNMSliceRemove(t *testing.T) {
 	nm := &NMSlice{
 		NewNMData("1001"),
 		NewNMData("1003"),
-		&NavigableMap2{"Field1": NewNMData("Val")},
+		&NavigableMap{"Field1": NewNMData("Val")},
 		&NMSlice{},
 	}
 	if err := nm.Remove(nil); err != ErrWrongPath {
@@ -165,55 +165,55 @@ func TestNMSliceRemove(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := nm.Remove(PathItems{{Index: StringPointer("-1")}, {}}); err != ErrWrongPath {
+	if err := nm.Remove(PathItems{{Index: []string{"-1"}}, {}}); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected := &NMSlice{
 		NewNMData("1001"),
 		NewNMData("1003"),
-		&NavigableMap2{"Field1": NewNMData("Val")},
+		&NavigableMap{"Field1": NewNMData("Val")},
 	}
 
-	if err := nm.Remove(PathItems{{Index: StringPointer("-1")}}); err != nil {
+	if err := nm.Remove(PathItems{{Index: []string{"-1"}}}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 
-	if err := nm.Remove(PathItems{{Index: StringPointer("1")}, {}}); err != ErrWrongPath {
+	if err := nm.Remove(PathItems{{Index: []string{"1"}}, {}}); err != ErrWrongPath {
 		t.Error(err)
 	}
 
 	expected = &NMSlice{
 		NewNMData("1001"),
-		&NavigableMap2{"Field1": NewNMData("Val")},
+		&NavigableMap{"Field1": NewNMData("Val")},
 	}
-	if err := nm.Remove(PathItems{{Index: StringPointer("1")}}); err != nil {
+	if err := nm.Remove(PathItems{{Index: []string{"1"}}}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 
-	if err := nm.Remove(PathItems{{Index: StringPointer("10")}}); err != nil {
+	if err := nm.Remove(PathItems{{Index: []string{"10"}}}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 
-	if err := nm.Remove(PathItems{{Index: StringPointer("1")}, {Field: "Field1", Index: StringPointer("1")}}); err != ErrWrongPath {
+	if err := nm.Remove(PathItems{{Index: []string{"1"}}, {Field: "Field1", Index: []string{"1"}}}); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expected = &NMSlice{
 		NewNMData("1001"),
 	}
-	if err := nm.Remove(PathItems{{Index: StringPointer("1")}, {Field: "Field1"}}); err != nil {
+	if err := nm.Remove(PathItems{{Index: []string{"1"}}, {Field: "Field1"}}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
 
 	expError := `strconv.Atoi: parsing "nan": invalid syntax`
-	if err := nm.Remove(PathItems{{Field: "1234", Index: StringPointer("nan")}}); err == nil || err.Error() != expError {
+	if err := nm.Remove(PathItems{{Field: "1234", Index: []string{"nan"}}}); err == nil || err.Error() != expError {
 		t.Errorf("Expected error %s received: %v", expError, err)
 	}
 

@@ -150,6 +150,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [DataDB] Added replication filtering
   * [ApierS] Moved Cache field as options
   * [RouteS] Updated RouteSv1.GetRoutes API to return multiple profiles 
+  * [Templates] Added support for Length Field in case of NMSlice
+  * [Templates] Added support for multiple indexes
   
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

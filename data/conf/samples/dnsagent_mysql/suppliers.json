@@ -19,7 +19,8 @@
 				"id": "NAPTRSuppliersOneSupplier",
 				"filters": ["*string:~*vars.QueryType:NAPTR",
 					"*string:~*vars.E164Address:4986517174965",
-					"*gte:~*cgrep.Routes.Count:1"],
+					"*gte:~*cgrep.RouteProfiles.Length:1",
+					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:1"],
 				"flags": ["*none","*continue"], // do not send request to CGRateS
 				"reply_fields":[
 					{"tag": "NAPTROrder", "path": "*rep.Order",
@@ -31,7 +32,7 @@
 					{"tag": "NAPTRService", "path": "*rep.Service",
 						"type": "*group", "value": "E2U+SIP"},
 					{"tag": "NAPTRRegexp", "path": "*rep.Regexp", "type": "*group",
-						"value": "~*cgrep.Routes.SortedRoutes[0].RouteParameters"},
+						"value": "~*cgrep.RouteProfiles[0].Routes[0].RouteParameters"},
 					{"tag": "NAPTRReplacement", "path": "*rep.Replacement",
 						"type": "*group", "value": "."},
 				],
@@ -40,7 +41,8 @@
 				"id": "NAPTRSuppliersTwoSuppliers",
 				"filters": ["*string:~*vars.QueryType:NAPTR",
 					"*string:~*vars.E164Address:4986517174965",
-					"*gte:~*cgrep.Routes.Count:2"],
+					"*gte:~*cgrep.RouteProfiles.Length:1",
+					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
 				"flags": ["*none","*continue"],
 				"reply_fields":[
 					{"tag": "NAPTROrder", "type": "*group", "new_branch": true,
@@ -52,7 +54,7 @@
 					{"tag": "NAPTRService", "path": "*rep.Service",
 						"type": "*group", "value": "E2U+SIP"},
 					{"tag": "NAPTRRegexp", "path": "*rep.Regexp", "type": "*group",
-						"value": "~*cgrep.Routes.SortedRoutes[1].RouteParameters"},
+						"value": "~*cgrep.RouteProfiles[0].Routes[1].RouteParameters"},
 					{"tag": "NAPTRReplacement", "path": "*rep.Replacement",
 						"type": "*group", "value": "."},
 				],

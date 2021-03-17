@@ -174,7 +174,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 			},
 		},
 	}
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err == nil || err.Error() != utils.NewErrServerError(utils.ErrAccountNotFound).Error() {
 		t.Error(err)
@@ -445,18 +445,18 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 		},
 	}
 	expSupplierIDs := []string{"route3", "route2", "route1"}
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.Routes))
-		for i, supl := range suplsReply.Routes {
+		rcvSupl := make([]string, len(suplsReply[0].Routes))
+		for i, supl := range suplsReply[0].Routes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "ROUTE_ResourceTest" {
+		if suplsReply[0].ProfileID != "ROUTE_ResourceTest" {
 			t.Errorf("Expecting: ROUTE_ResourceTest, received: %s",
-				suplsReply.ProfileID)
+				suplsReply[0].ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expSupplierIDs) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
@@ -529,18 +529,18 @@ func testV1SplSGetSortedSuppliers2(t *testing.T) {
 		},
 	}
 	expSupplierIDs := []string{"route1", "route3", "route2"}
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		rcvSupl := make([]string, len(suplsReply.Routes))
-		for i, supl := range suplsReply.Routes {
+		rcvSupl := make([]string, len(suplsReply[0].Routes))
+		for i, supl := range suplsReply[0].Routes {
 			rcvSupl[i] = supl.RouteID
 		}
-		if suplsReply.ProfileID != "ROUTE_ResourceDescendent" {
+		if suplsReply[0].ProfileID != "ROUTE_ResourceDescendent" {
 			t.Errorf("Expecting: ROUTE_ResourceDescendent, received: %s",
-				suplsReply.ProfileID)
+				suplsReply[0].ProfileID)
 		}
 		if !reflect.DeepEqual(rcvSupl, expSupplierIDs) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
@@ -743,18 +743,18 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 		},
 	}
 
-	var suplsReply engine.SortedRoutes
+	var suplsReply engine.SortedRoutesList
 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
 	} else {
-		if suplsReply.ProfileID != "ROUTE_LOAD_DIST" {
+		if suplsReply[0].ProfileID != "ROUTE_LOAD_DIST" {
 			t.Errorf("Expecting: ROUTE_LOAD_DIST, received: %s",
-				suplsReply.ProfileID)
+				suplsReply[0].ProfileID)
 		}
-		if !reflect.DeepEqual(suplsReply.Routes, expSuppliers) {
+		if !reflect.DeepEqual(suplsReply[0].Routes, expSuppliers) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
-				utils.ToJSON(expSuppliers), utils.ToJSON(suplsReply.Routes))
+				utils.ToJSON(expSuppliers), utils.ToJSON(suplsReply[0].Routes))
 		}
 	}
 }

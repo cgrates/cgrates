@@ -140,7 +140,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := utils.NavigableMap2{utils.FileName: utils.NewNMData(fName)}
+	reqVars := utils.NavigableMap{utils.FileName: utils.NewNMData(fName)}
 
 	for {
 		var hasHeader, hasTrailer bool

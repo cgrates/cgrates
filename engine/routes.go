@@ -674,7 +674,6 @@ func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile,
 			sortedRoutes.Routes = sortedRoutes.Routes[:*pag.Limit]
 		}
 	}
-	sortedRoutes.Count = len(sortedRoutes.Routes)
 	return
 }
 
@@ -731,7 +730,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 		if sr, err = rpS.sortedRoutesForProfile(tnt, rPrfl, args.CGREvent, prfPag, extraOpts); err != nil {
 			return
 		}
-		noSrtRoutes += sr.Count
+		noSrtRoutes += len(sr.Routes)
 		sortedRoutes = append(sortedRoutes, sr)
 		if len(sortedRoutes) == prfCount { // the profile count was reached
 			break

@@ -466,7 +466,7 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 
 // negDiamAnswer is used to return the negative answer we need previous to
 func diamErr(m *diam.Message, resCode uint32,
-	reqVars utils.NavigableMap2,
+	reqVars utils.NavigableMap,
 	tpl []*config.FCTemplate, tnt, tmz string,
 	filterS *engine.FilterS) (a *diam.Message, err error) {
 	aReq := NewAgentRequest(
@@ -502,5 +502,5 @@ func disectDiamListen(addrs string) (ipAddrs []net.IP) {
 type diamMsgData struct {
 	c    diam.Conn
 	m    *diam.Message
-	vars utils.NavigableMap2
+	vars utils.NavigableMap
 }

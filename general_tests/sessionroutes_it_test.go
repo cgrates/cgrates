@@ -131,6 +131,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
+		Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
@@ -141,10 +142,9 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := sessions.V1AuthorizeReply{
-		Routes: engine.SortedRoutesList{{
+		RouteProfiles: engine.SortedRoutesList{{
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
-			Count:     3,
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID:         "route3",
@@ -192,10 +192,9 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 	}
 
 	expected = sessions.V1AuthorizeReply{
-		Routes: engine.SortedRoutesList{{
+		RouteProfiles: engine.SortedRoutesList{{
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
-			Count:     2,
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID:         "route3",
@@ -263,6 +262,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
+		Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 	}
 	args := sessions.NewV1ProcessMessageArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
@@ -274,10 +274,9 @@ func testSesRoutesProcessMessage(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := sessions.V1ProcessMessageReply{
-		Routes: engine.SortedRoutesList{{
+		RouteProfiles: engine.SortedRoutesList{{
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
-			Count:     3,
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID:         "route3",
@@ -326,10 +325,9 @@ func testSesRoutesProcessMessage(t *testing.T) {
 	}
 
 	expected = sessions.V1ProcessMessageReply{
-		Routes: engine.SortedRoutesList{{
+		RouteProfiles: engine.SortedRoutesList{{
 			ProfileID: "ROUTE_LEASTCOST_1",
 			Sorting:   "*lc",
-			Count:     2,
 			Routes: []*engine.SortedRoute{
 				{
 					RouteID:         "route3",
@@ -397,6 +395,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
+		Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 	}
 	args := sessions.V1ProcessEventArgs{
 		Flags:     []string{"*routes"},
@@ -409,11 +408,10 @@ func testSesRoutesProcessEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := sessions.V1ProcessEventReply{
-		Routes: map[string]engine.SortedRoutesList{
+		RouteProfiles: map[string]engine.SortedRoutesList{
 			utils.MetaRaw: {{
 				ProfileID: "ROUTE_LEASTCOST_1",
 				Sorting:   "*lc",
-				Count:     3,
 				Routes: []*engine.SortedRoute{
 					{
 						RouteID:         "route3",
@@ -465,11 +463,10 @@ func testSesRoutesProcessEvent(t *testing.T) {
 	}
 
 	expected = sessions.V1ProcessEventReply{
-		Routes: map[string]engine.SortedRoutesList{
+		RouteProfiles: map[string]engine.SortedRoutesList{
 			utils.MetaRaw: {{
 				ProfileID: "ROUTE_LEASTCOST_1",
 				Sorting:   "*lc",
-				Count:     2,
 				Routes: []*engine.SortedRoute{
 					{
 						RouteID:         "route3",

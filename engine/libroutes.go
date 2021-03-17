@@ -37,7 +37,6 @@ type SortedRoute struct {
 type SortedRoutes struct {
 	ProfileID string         // Profile matched
 	Sorting   string         // Sorting algorithm
-	Count     int            // number of routes returned
 	Routes    []*SortedRoute // list of route IDs and SortingData data
 }
 
@@ -182,12 +181,12 @@ func (sRoutes *SortedRoutes) Digest() string {
 	return strings.Join(sRoutes.RoutesWithParams(), utils.FieldsSep)
 }
 
-func (ss *SortedRoute) AsNavigableMap() (nm utils.NavigableMap2) {
-	nm = utils.NavigableMap2{
+func (ss *SortedRoute) AsNavigableMap() (nm utils.NavigableMap) {
+	nm = utils.NavigableMap{
 		utils.RouteID:         utils.NewNMData(ss.RouteID),
 		utils.RouteParameters: utils.NewNMData(ss.RouteParameters),
 	}
-	sd := utils.NavigableMap2{}
+	sd := utils.NavigableMap{}
 	for k, d := range ss.SortingData {
 		sd[k] = utils.NewNMData(d)
 	}
@@ -195,17 +194,16 @@ func (ss *SortedRoute) AsNavigableMap() (nm utils.NavigableMap2) {
 	return
 }
 
-func (sRoutes *SortedRoutes) AsNavigableMap() (nm utils.NavigableMap2) {
-	nm = utils.NavigableMap2{
+func (sRoutes *SortedRoutes) AsNavigableMap() (nm utils.NavigableMap) {
+	nm = utils.NavigableMap{
 		utils.ProfileID: utils.NewNMData(sRoutes.ProfileID),
 		utils.Sorting:   utils.NewNMData(sRoutes.Sorting),
-		utils.Count:     utils.NewNMData(sRoutes.Count),
 	}
 	sr := make(utils.NMSlice, len(sRoutes.Routes))
 	for i, ss := range sRoutes.Routes {
 		sr[i] = ss.AsNavigableMap()
 	}
-	nm[utils.SortedRoutes] = &sr
+	nm[utils.CapRoutes] = &sr
 	return
 }
 

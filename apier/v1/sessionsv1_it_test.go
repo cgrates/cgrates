@@ -235,7 +235,6 @@ func testSSv1ItAuth(t *testing.T) {
 	eSplrs := engine.SortedRoutesList{{
 		ProfileID: "ROUTE_ACNT_1001",
 		Sorting:   utils.MetaWeight,
-		Count:     2,
 		Routes: []*engine.SortedRoute{
 			{
 				RouteID: "route1",
@@ -253,7 +252,6 @@ func testSSv1ItAuth(t *testing.T) {
 	}, {
 		ProfileID: "ROUTE_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
-		Count:     1,
 		Routes: []*engine.SortedRoute{{
 			RouteID: "route1",
 			SortingData: map[string]interface{}{
@@ -261,8 +259,8 @@ func testSSv1ItAuth(t *testing.T) {
 			},
 		}},
 	}}
-	if !reflect.DeepEqual(eSplrs, rply.Routes) {
-		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Routes))
+	if !reflect.DeepEqual(eSplrs, rply.RouteProfiles) {
+		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.RouteProfiles))
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},

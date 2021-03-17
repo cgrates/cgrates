@@ -198,7 +198,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	diamDP := newDADataProvider(c, m)
-	reqVars := utils.NavigableMap2{
+	reqVars := utils.NavigableMap{
 		utils.OriginHost:  utils.NewNMData(da.cgrCfg.DiameterAgentCfg().OriginHost), // used in templates
 		utils.OriginRealm: utils.NewNMData(da.cgrCfg.DiameterAgentCfg().OriginRealm),
 		utils.ProductName: utils.NewNMData(da.cgrCfg.DiameterAgentCfg().ProductName),
@@ -258,7 +258,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			da.aReqsLck.Unlock()
 		}()
 	}
-	cgrRplyNM := utils.NavigableMap2{}
+	cgrRplyNM := utils.NavigableMap{}
 	rply := utils.NewOrderedNavigableMap() // share it among different processors
 	opts := utils.NewOrderedNavigableMap()
 	var processed bool

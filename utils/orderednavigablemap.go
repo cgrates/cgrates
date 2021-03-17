@@ -27,7 +27,7 @@ import (
 // NewOrderedNavigableMap initializates a structure of OrderedNavigableMap with a NavigableMap2
 func NewOrderedNavigableMap() *OrderedNavigableMap {
 	return &OrderedNavigableMap{
-		nm:       NavigableMap2{},
+		nm:       NavigableMap{},
 		orderIdx: NewPathItemList(),
 		orderRef: make(map[string][]*PathItemElement),
 	}
@@ -109,7 +109,7 @@ func (onm *OrderedNavigableMap) Set(fullPath *FullPath, val NMInterface) (addedN
 		pathItmsSet = make([]PathItems, len(*val.(*NMSlice)))
 		for i := 0; i < val.Len(); i++ {
 			pathItms := fullPath.PathItems.Clone()
-			pathItms[len(pathItms)-1].Index = StringPointer(strconv.Itoa(i))
+			pathItms[len(pathItms)-1].Index = []string{(strconv.Itoa(i))}
 			pathItmsSet[i] = pathItms
 		}
 	} else {
@@ -188,7 +188,7 @@ func (onm *OrderedNavigableMap) OrderedFields() (flds []interface{}) {
 
 // RemoveAll will clean the data and the odrder from OrderedNavigableMap
 func (onm *OrderedNavigableMap) RemoveAll() {
-	onm.nm = NavigableMap2{}
+	onm.nm = NavigableMap{}
 	onm.orderIdx = NewPathItemList()
 	onm.orderRef = make(map[string][]*PathItemElement)
 }

@@ -89,7 +89,7 @@ func (da *DNSAgent) Reload() (err error) {
 // requests are reaching here asynchronously
 func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 	dnsDP := newDNSDataProvider(req, w)
-	reqVars := make(utils.NavigableMap2)
+	reqVars := make(utils.NavigableMap)
 	reqVars[QueryType] = utils.NewNMData(dns.TypeToString[req.Question[0].Qtype])
 	rply := new(dns.Msg)
 	rply.SetReply(req)
@@ -110,7 +110,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		reqVars[DomainName] = utils.NewNMData(domainNameFromNAPTR(req.Question[0].Name))
 	}
 	reqVars[utils.RemoteHost] = utils.NewNMData(w.RemoteAddr().String())
-	cgrRplyNM := utils.NavigableMap2{}
+	cgrRplyNM := utils.NavigableMap{}
 	rplyNM := utils.NewOrderedNavigableMap() // share it among different processors
 	opts := utils.NewOrderedNavigableMap()
 	var processed bool

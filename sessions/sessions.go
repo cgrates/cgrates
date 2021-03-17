@@ -1856,7 +1856,7 @@ type V1AuthorizeReply struct {
 	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                        `json:",omitempty"`
 	MaxUsage           *time.Duration                 `json:",omitempty"`
-	Routes             engine.SortedRoutesList        `json:",omitempty"`
+	RouteProfiles      engine.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       *[]string                      `json:",omitempty"`
 	StatQueueIDs       *[]string                      `json:",omitempty"`
 
@@ -1873,10 +1873,10 @@ func (v1AuthReply *V1AuthorizeReply) SetMaxUsageNeeded(getMaxUsage bool) {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() utils.NavigableMap2 {
-	cgrReply := make(utils.NavigableMap2)
+func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() utils.NavigableMap {
+	cgrReply := make(utils.NavigableMap)
 	if v1AuthReply.Attributes != nil {
-		attrs := make(utils.NavigableMap2)
+		attrs := make(utils.NavigableMap)
 		for _, fldName := range v1AuthReply.Attributes.AlteredFields {
 			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 			if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
@@ -1894,9 +1894,9 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() utils.NavigableMap2 {
 		cgrReply[utils.CapMaxUsage] = utils.NewNMData(0)
 	}
 
-	if v1AuthReply.Routes != nil {
-		nm := v1AuthReply.Routes.AsNavigableMap()
-		cgrReply[utils.CapRoutes] = &nm
+	if v1AuthReply.RouteProfiles != nil {
+		nm := v1AuthReply.RouteProfiles.AsNavigableMap()
+		cgrReply[utils.CapRouteProfiles] = &nm
 	}
 	if v1AuthReply.ThresholdIDs != nil {
 		thIDs := make(utils.NMSlice, len(*v1AuthReply.ThresholdIDs))
@@ -2005,7 +2005,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 			return err
 		}
 		if routesReply != nil {
-			authReply.Routes = routesReply
+			authReply.RouteProfiles = routesReply
 		}
 	}
 	if args.ProcessThresholds {
@@ -2063,7 +2063,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.ClientConnect
 		authReply.MaxUsage = initAuthRply.MaxUsage.Seconds()
 	}
 	if args.GetRoutes {
-		authReply.RoutesDigest = utils.StringPointer(initAuthRply.Routes.Digest())
+		authReply.RoutesDigest = utils.StringPointer(initAuthRply.RouteProfiles.Digest())
 	}
 	if args.ProcessThresholds {
 		authReply.Thresholds = utils.StringPointer(
@@ -2159,10 +2159,10 @@ func (v1Rply *V1InitSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1InitSessionReply) AsNavigableMap() utils.NavigableMap2 {
-	cgrReply := make(utils.NavigableMap2)
+func (v1Rply *V1InitSessionReply) AsNavigableMap() utils.NavigableMap {
+	cgrReply := make(utils.NavigableMap)
 	if v1Rply.Attributes != nil {
-		attrs := make(utils.NavigableMap2)
+		attrs := make(utils.NavigableMap)
 		for _, fldName := range v1Rply.Attributes.AlteredFields {
 			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 			if v1Rply.Attributes.CGREvent.HasField(fldName) {
@@ -2409,10 +2409,10 @@ func (v1Rply *V1UpdateSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1UpdateSessionReply) AsNavigableMap() utils.NavigableMap2 {
-	cgrReply := make(utils.NavigableMap2)
+func (v1Rply *V1UpdateSessionReply) AsNavigableMap() utils.NavigableMap {
+	cgrReply := make(utils.NavigableMap)
 	if v1Rply.Attributes != nil {
-		attrs := make(utils.NavigableMap2)
+		attrs := make(utils.NavigableMap)
 		for _, fldName := range v1Rply.Attributes.AlteredFields {
 			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 			if v1Rply.Attributes.CGREvent.HasField(fldName) {
@@ -2825,7 +2825,7 @@ type V1ProcessMessageReply struct {
 	MaxUsage           *time.Duration                 `json:",omitempty"`
 	ResourceAllocation *string                        `json:",omitempty"`
 	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
-	Routes             engine.SortedRoutesList        `json:",omitempty"`
+	RouteProfiles      engine.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       *[]string                      `json:",omitempty"`
 	StatQueueIDs       *[]string                      `json:",omitempty"`
 
@@ -2842,8 +2842,8 @@ func (v1Rply *V1ProcessMessageReply) SetMaxUsageNeeded(getMaxUsage bool) {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessMessageReply) AsNavigableMap() utils.NavigableMap2 {
-	cgrReply := make(utils.NavigableMap2)
+func (v1Rply *V1ProcessMessageReply) AsNavigableMap() utils.NavigableMap {
+	cgrReply := make(utils.NavigableMap)
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = utils.NewNMData(*v1Rply.MaxUsage)
 	} else if v1Rply.needsMaxUsage {
@@ -2853,7 +2853,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() utils.NavigableMap2 {
 		cgrReply[utils.CapResourceAllocation] = utils.NewNMData(*v1Rply.ResourceAllocation)
 	}
 	if v1Rply.Attributes != nil {
-		attrs := make(utils.NavigableMap2)
+		attrs := make(utils.NavigableMap)
 		for _, fldName := range v1Rply.Attributes.AlteredFields {
 			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 			if v1Rply.Attributes.CGREvent.HasField(fldName) {
@@ -2862,9 +2862,9 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() utils.NavigableMap2 {
 		}
 		cgrReply[utils.CapAttributes] = attrs
 	}
-	if v1Rply.Routes != nil {
-		nm := v1Rply.Routes.AsNavigableMap()
-		cgrReply[utils.CapRoutes] = &nm
+	if v1Rply.RouteProfiles != nil {
+		nm := v1Rply.RouteProfiles.AsNavigableMap()
+		cgrReply[utils.CapRouteProfiles] = &nm
 	}
 	if v1Rply.ThresholdIDs != nil {
 		thIDs := make(utils.NMSlice, len(*v1Rply.ThresholdIDs))
@@ -2955,7 +2955,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 			return err
 		}
 		if routesReply != nil {
-			rply.Routes = routesReply
+			rply.RouteProfiles = routesReply
 		}
 	}
 	if args.Debit {
@@ -3006,33 +3006,33 @@ type V1ProcessEventReply struct {
 	Cost               map[string]float64                        `json:",omitempty"` // Cost is the cost received from Rater, ignoring accounting part
 	ResourceAllocation map[string]string                         `json:",omitempty"`
 	Attributes         map[string]*engine.AttrSProcessEventReply `json:",omitempty"`
-	Routes             map[string]engine.SortedRoutesList        `json:",omitempty"`
+	RouteProfiles      map[string]engine.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       map[string][]string                       `json:",omitempty"`
 	StatQueueIDs       map[string][]string                       `json:",omitempty"`
 	STIRIdentity       map[string]string                         `json:",omitempty"`
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap2 {
-	cgrReply := make(utils.NavigableMap2)
+func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap {
+	cgrReply := make(utils.NavigableMap)
 	if v1Rply.MaxUsage != nil {
-		usage := make(utils.NavigableMap2)
+		usage := make(utils.NavigableMap)
 		for k, v := range v1Rply.MaxUsage {
 			usage[k] = utils.NewNMData(v)
 		}
 		cgrReply[utils.CapMaxUsage] = usage
 	}
 	if v1Rply.ResourceAllocation != nil {
-		res := make(utils.NavigableMap2)
+		res := make(utils.NavigableMap)
 		for k, v := range v1Rply.ResourceAllocation {
 			res[k] = utils.NewNMData(v)
 		}
 		cgrReply[utils.CapResourceAllocation] = res
 	}
 	if v1Rply.Attributes != nil {
-		atts := make(utils.NavigableMap2)
+		atts := make(utils.NavigableMap)
 		for k, att := range v1Rply.Attributes {
-			attrs := make(utils.NavigableMap2)
+			attrs := make(utils.NavigableMap)
 			for _, fldName := range att.AlteredFields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if att.CGREvent.HasField(fldName) {
@@ -3043,16 +3043,16 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap2 {
 		}
 		cgrReply[utils.CapAttributes] = atts
 	}
-	if v1Rply.Routes != nil {
-		routes := make(utils.NavigableMap2)
-		for k, route := range v1Rply.Routes {
+	if v1Rply.RouteProfiles != nil {
+		routes := make(utils.NavigableMap)
+		for k, route := range v1Rply.RouteProfiles {
 			nm := route.AsNavigableMap()
 			routes[k] = &nm
 		}
-		cgrReply[utils.CapRoutes] = routes
+		cgrReply[utils.CapRouteProfiles] = routes
 	}
 	if v1Rply.ThresholdIDs != nil {
-		th := make(utils.NavigableMap2)
+		th := make(utils.NavigableMap)
 		for k, thr := range v1Rply.ThresholdIDs {
 			thIDs := make(utils.NMSlice, len(thr))
 			for i, v := range thr {
@@ -3063,7 +3063,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap2 {
 		cgrReply[utils.CapThresholds] = th
 	}
 	if v1Rply.StatQueueIDs != nil {
-		st := make(utils.NavigableMap2)
+		st := make(utils.NavigableMap)
 		for k, sts := range v1Rply.StatQueueIDs {
 			stIDs := make(utils.NMSlice, len(sts))
 			for i, v := range sts {
@@ -3074,13 +3074,13 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() utils.NavigableMap2 {
 		cgrReply[utils.CapStatQueues] = st
 	}
 	if v1Rply.Cost != nil {
-		costs := make(utils.NavigableMap2)
+		costs := make(utils.NavigableMap)
 		for k, cost := range v1Rply.Cost {
 			costs[k] = utils.NewNMData(cost)
 		}
 	}
 	if v1Rply.STIRIdentity != nil {
-		stir := make(utils.NavigableMap2)
+		stir := make(utils.NavigableMap)
 		for k, v := range v1Rply.STIRIdentity {
 			stir[k] = utils.NewNMData(v)
 		}
@@ -3161,7 +3161,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 
 	// get routes if required
 	if argsFlagsWithParams.GetBool(utils.MetaRoutes) {
-		rply.Routes = make(map[string]engine.SortedRoutesList)
+		rply.RouteProfiles = make(map[string]engine.SortedRoutesList)
 		// check in case we have options for suppliers
 		flags := argsFlagsWithParams[utils.MetaRoutes]
 		ignoreErrors := flags.Has(utils.MetaIgnoreErrors)
@@ -3177,7 +3177,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				return err
 			}
 			if routesReply != nil {
-				rply.Routes[runID] = routesReply
+				rply.RouteProfiles[runID] = routesReply
 			}
 		}
 	}

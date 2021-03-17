@@ -54,8 +54,8 @@ func TestAgReqSetFields(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: utils.PathItems{{Field: utils.Usage}}}, utils.NewNMData(3*time.Minute))
 
-	cgrRply := utils.NavigableMap2{
-		utils.CapAttributes: utils.NavigableMap2{
+	cgrRply := utils.NavigableMap{
+		utils.CapAttributes: utils.NavigableMap{
 			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
 		utils.CapMaxUsage: utils.NewNMData(120 * time.Second),
@@ -498,7 +498,7 @@ func TestAgReqMaxCost(t *testing.T) {
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CapMaxUsage, PathItems: utils.PathItems{{Field: utils.CapMaxUsage}}}, utils.NewNMData("120s"))
 
-	cgrRply := utils.NavigableMap2{
+	cgrRply := utils.NavigableMap{
 		utils.CapMaxUsage: utils.NewNMData(120 * time.Second),
 	}
 	agReq.CGRReply = &cgrRply
@@ -759,7 +759,7 @@ func TestAgReqEmptyFilter(t *testing.T) {
 	for _, v := range tplFlds {
 		v.ComputePath()
 	}
-	eMp := &utils.NavigableMap2{}
+	eMp := &utils.NavigableMap{}
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -792,7 +792,7 @@ func TestAgReqMetaExponent(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Value;~*cgreq.Exponent", utils.InfieldSep)},
 	}
 	tplFlds[0].ComputePath()
-	eMp := &utils.NavigableMap2{}
+	eMp := &utils.NavigableMap{}
 	eMp.Set(utils.PathItems{{Field: "TestExpo"}}, &utils.NMSlice{
 		&config.NMItem{Data: "200", Path: []string{"TestExpo"},
 			Config: tplFlds[0]}})
@@ -830,7 +830,7 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	for _, v := range tplFlds {
 		v.ComputePath()
 	}
-	eMp := &utils.NavigableMap2{}
+	eMp := &utils.NavigableMap{}
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -870,7 +870,7 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	for _, v := range tplFlds {
 		v.ComputePath()
 	}
-	eMp := &utils.NavigableMap2{}
+	eMp := &utils.NavigableMap{}
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -901,7 +901,7 @@ func TestAgReqSetField2(t *testing.T) {
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 
-	agReq.CGRReply = &utils.NavigableMap2{}
+	agReq.CGRReply = &utils.NavigableMap{}
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -924,7 +924,7 @@ func TestAgReqSetField2(t *testing.T) {
 	for _, v := range tplFlds {
 		v.ComputePath()
 	}
-	eMp := &utils.NavigableMap2{}
+	eMp := &utils.NavigableMap{}
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -1009,8 +1009,8 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 			{Field: "SecondLevel"},
 			{Field: "Fld1"},
 		}}, utils.NewNMData("Val1"))
-	cgrRply := &utils.NavigableMap2{
-		utils.CapAttributes: utils.NavigableMap2{
+	cgrRply := &utils.NavigableMap{
+		utils.CapAttributes: utils.NavigableMap{
 			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
 		utils.CapMaxUsage: utils.NewNMData(120 * time.Second),
@@ -1084,8 +1084,8 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 
 type myEv map[string]utils.NMInterface
 
-func (ev myEv) AsNavigableMap() utils.NavigableMap2 {
-	return utils.NavigableMap2(ev)
+func (ev myEv) AsNavigableMap() utils.NavigableMap {
+	return utils.NavigableMap(ev)
 }
 
 func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
@@ -1104,7 +1104,7 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 		}}, utils.NewNMData("Val1"))
 
 	myEv := myEv{
-		utils.CapAttributes: utils.NavigableMap2{
+		utils.CapAttributes: utils.NavigableMap{
 			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
 		utils.CapMaxUsage: utils.NewNMData(120 * time.Second),
@@ -1547,7 +1547,7 @@ func TestAgReqOverwrite(t *testing.T) {
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 
-	agReq.CGRReply = &utils.NavigableMap2{}
+	agReq.CGRReply = &utils.NavigableMap{}
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Account",
@@ -1599,7 +1599,7 @@ func TestAgReqGroupType(t *testing.T) {
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 
-	agReq.CGRReply = &utils.NavigableMap2{}
+	agReq.CGRReply = &utils.NavigableMap{}
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Account",
@@ -1648,7 +1648,7 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 	for _, v := range tplFlds {
 		v.ComputePath()
 	}
-	eMp := utils.NavigableMap2{}
+	eMp := utils.NavigableMap{}
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -1679,7 +1679,7 @@ func TestAgReqSetFieldsIp2Hex(t *testing.T) {
 	for _, v := range tplFlds {
 		v.ComputePath()
 	}
-	eMp := utils.NavigableMap2{}
+	eMp := utils.NavigableMap{}
 	eMp.Set(utils.PathItems{{Field: "IP"}}, &utils.NMSlice{
 		&config.NMItem{Data: "0x3e5772f4", Path: []string{"IP"},
 			Config: tplFlds[0]}})
@@ -1707,7 +1707,7 @@ func TestAgReqSetFieldsString2Hex(t *testing.T) {
 	for _, v := range tplFlds {
 		v.ComputePath()
 	}
-	eMp := utils.NavigableMap2{}
+	eMp := utils.NavigableMap{}
 	eMp.Set(utils.PathItems{{Field: "CustomField"}}, &utils.NMSlice{
 		&config.NMItem{Data: "0x947102310159", Path: []string{"CustomField"},
 			Config: tplFlds[0]}})
@@ -1736,8 +1736,8 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: utils.PathItems{{Field: utils.Usage}}}, utils.NewNMData(3*time.Minute))
 
-	agReq.CGRReply = &utils.NavigableMap2{
-		utils.CapAttributes: utils.NavigableMap2{
+	agReq.CGRReply = &utils.NavigableMap{
+		utils.CapAttributes: utils.NavigableMap{
 			"PaypalAccount": utils.NewNMData("cgrates@paypal.com"),
 		},
 		utils.CapMaxUsage: utils.NewNMData(120 * time.Second),
@@ -2041,7 +2041,7 @@ func TestAgReqDynamicPath(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: "Routes.CGR_ROUTE2", PathItems: utils.PathItems{{Field: "Routes"}, {Field: "CGR_ROUTE2"}}}, utils.NewNMData(1002))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: "BestRoute", PathItems: utils.PathItems{{Field: "BestRoute"}}}, utils.NewNMData("ROUTE1"))
 
-	agReq.CGRReply = &utils.NavigableMap2{}
+	agReq.CGRReply = &utils.NavigableMap{}
 	val1, err := config.NewRSRParsersFromSlice([]string{"~*cgreq.Routes.<CGR_;~*cgreq.BestRoute>"})
 	if err != nil {
 		t.Error(err)
@@ -2071,7 +2071,7 @@ func TestAgReqDynamicPath(t *testing.T) {
 	for _, v := range tplFlds {
 		v.ComputePath()
 	}
-	eMp := &utils.NavigableMap2{}
+	eMp := &utils.NavigableMap{}
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
@@ -2113,7 +2113,7 @@ func TestAgReqRoundingDecimals(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Cost, PathItems: utils.PathItems{{Field: utils.Cost}}}, utils.NewNMData(12.12645))
 
-	agReq.CGRReply = &utils.NavigableMap2{}
+	agReq.CGRReply = &utils.NavigableMap{}
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Cost",
@@ -2169,14 +2169,14 @@ func BenchmarkAgReqSetField(b *testing.B) {
 	for _, v := range tplFlds {
 		v.ComputePath()
 	}
-	eMp := &utils.NavigableMap2{}
+	eMp := &utils.NavigableMap{}
 	eMp.Set(utils.PathItems{{Field: utils.Tenant}}, &utils.NMSlice{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}})
-	eMp.Set(utils.PathItems{{Field: utils.AccountField, Index: utils.StringPointer("0")}, {Field: "ID"}}, &utils.NMSlice{
+	eMp.Set(utils.PathItems{{Field: utils.AccountField, Index: []string{"0"}}, {Field: "ID"}}, &utils.NMSlice{
 		&config.NMItem{Data: "1001", Path: []string{utils.AccountField + "[0]", "ID"},
 			Config: tplFlds[1]}})
-	eMp.Set(utils.PathItems{{Field: utils.AccountField, Index: utils.StringPointer("1")}, {Field: "ID"}}, &utils.NMSlice{
+	eMp.Set(utils.PathItems{{Field: utils.AccountField, Index: []string{"1"}}, {Field: "ID"}}, &utils.NMSlice{
 		&config.NMItem{Data: "1003", Path: []string{utils.AccountField + "[1]", "ID"},
 			Config: tplFlds[2]}})
 
@@ -2190,7 +2190,7 @@ func BenchmarkAgReqSetField(b *testing.B) {
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: utils.PathItems{{Field: utils.AnswerTime}}}, utils.NewNMData(
 			time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
 		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: utils.PathItems{{Field: utils.RequestType}}}, utils.NewNMData(utils.MetaPrepaid))
-		agReq.CGRReply = &utils.NavigableMap2{}
+		agReq.CGRReply = &utils.NavigableMap{}
 
 		if err := agReq.SetFields(tplFlds); err != nil {
 			b.Error(err)

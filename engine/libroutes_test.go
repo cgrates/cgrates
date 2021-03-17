@@ -1012,10 +1012,10 @@ func TestSortedRouteAsNavigableMap(t *testing.T) {
 			utils.Weight: 15.5,
 		},
 	}
-	expNavMap := utils.NavigableMap2{
+	expNavMap := utils.NavigableMap{
 		utils.RouteID:         utils.NewNMData("ROUTE1"),
 		utils.RouteParameters: utils.NewNMData("SORTING_PARAMETER"),
-		utils.SortingData: utils.NavigableMap2{
+		utils.SortingData: utils.NavigableMap{
 			utils.Ratio:  utils.NewNMData(6.0),
 			utils.Load:   utils.NewNMData(10.0),
 			utils.Weight: utils.NewNMData(15.5),
@@ -1030,7 +1030,6 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 	sSpls := &SortedRoutes{
 		ProfileID: "TEST_ID1",
 		Sorting:   utils.MetaWeight,
-		Count:     100,
 		Routes: []*SortedRoute{
 			{
 				RouteID:         "ROUTE1",
@@ -1052,24 +1051,23 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 		},
 	}
 
-	expNavMap := utils.NavigableMap2{
+	expNavMap := utils.NavigableMap{
 		utils.ProfileID: utils.NewNMData("TEST_ID1"),
 		utils.Sorting:   utils.NewNMData(utils.MetaWeight),
-		utils.Count:     utils.NewNMData(100),
-		utils.SortedRoutes: &utils.NMSlice{
-			utils.NavigableMap2{
+		utils.CapRoutes: &utils.NMSlice{
+			utils.NavigableMap{
 				utils.RouteID:         utils.NewNMData("ROUTE1"),
 				utils.RouteParameters: utils.NewNMData("SORTING_PARAMETER"),
-				utils.SortingData: utils.NavigableMap2{
+				utils.SortingData: utils.NavigableMap{
 					utils.Ratio:  utils.NewNMData(6.0),
 					utils.Load:   utils.NewNMData(10.0),
 					utils.Weight: utils.NewNMData(15.5),
 				},
 			},
-			utils.NavigableMap2{
+			utils.NavigableMap{
 				utils.RouteID:         utils.NewNMData("ROUTE2"),
 				utils.RouteParameters: utils.NewNMData("SORTING_PARAMETER_SECOND"),
-				utils.SortingData: utils.NavigableMap2{
+				utils.SortingData: utils.NavigableMap{
 					utils.Ratio: utils.NewNMData(7.0),
 					utils.Load:  utils.NewNMData(10.0),
 				},

@@ -56,7 +56,7 @@ func TestStripIdxFromLastPathElm(t *testing.T) {
 
 func TestNewPathItems(t *testing.T) {
 	pathSlice := strings.Split("*req.Field1[0].Account", NestingSep)
-	expected := PathItems{{Field: MetaReq}, {Field: "Field1", Index: StringPointer("0")}, {Field: AccountField}}
+	expected := PathItems{{Field: MetaReq}, {Field: "Field1", Index: []string{"0"}}, {Field: AccountField}}
 	if rply := NewPathItems(pathSlice); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
 	}
@@ -73,38 +73,18 @@ func TestPathItemString(t *testing.T) {
 	if rply := path.String(); expected != rply {
 		t.Errorf("Expected: %q, received: %q", expected, rply)
 	}
-	path = PathItem{Field: MetaReq, Index: StringPointer("10")}
+	path = PathItem{Field: MetaReq, Index: []string{"10"}}
 	expected = MetaReq + "[10]"
 	if rply := path.String(); expected != rply {
 		t.Errorf("Expected: %q, received: %q", expected, rply)
 	}
 }
 
-func TestPathItemEqual(t *testing.T) {
-	path := PathItem{Field: MetaReq}
-	p1 := PathItem{Field: MetaReq}
-	if !path.Equal(p1) {
-		t.Errorf("Expected %s to be equal to %s", ToJSON(path), ToJSON(p1))
-	}
-	p1 = PathItem{Field: MetaRep}
-	if path.Equal(p1) {
-		t.Errorf("Expected %s to not be equal to %s", ToJSON(path), ToJSON(p1))
-	}
-	p1 = PathItem{Field: MetaReq, Index: StringPointer("0")}
-	if path.Equal(p1) {
-		t.Errorf("Expected %s to not be equal to %s", ToJSON(path), ToJSON(p1))
-	}
-	path = PathItem{Field: MetaReq, Index: StringPointer("0")}
-	if !path.Equal(p1) {
-		t.Errorf("Expected %s to be equal to %s", ToJSON(path), ToJSON(p1))
-	}
-}
-
 func TestPathItemClone(t *testing.T) {
-	path := PathItem{Field: MetaReq, Index: StringPointer("0")}
-	expected := PathItem{Field: MetaReq, Index: StringPointer("0")}
+	path := PathItem{Field: MetaReq, Index: []string{"0"}}
+	expected := PathItem{Field: MetaReq, Index: []string{"0"}}
 	rply := path.Clone()
-	*path.Index = "1"
+	path.Index[0] = "1"
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
 	}

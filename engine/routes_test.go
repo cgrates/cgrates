@@ -799,7 +799,6 @@ func TestRoutesSortedForEvent(t *testing.T) {
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile1",
 		Sorting:   utils.MetaWeight,
-		Count:     1,
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
@@ -821,7 +820,6 @@ func TestRoutesSortedForEvent(t *testing.T) {
 	eFirstRouteProfile = SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
-		Count:     3,
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
@@ -858,7 +856,6 @@ func TestRoutesSortedForEvent(t *testing.T) {
 	eFirstRouteProfile = SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfilePrefix",
 		Sorting:   utils.MetaWeight,
-		Count:     1,
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
@@ -1110,7 +1107,6 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
-		Count:     2,
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
@@ -1371,7 +1367,6 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
-		Count:     1,
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route3",
@@ -1625,7 +1620,6 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
-		Count:     1,
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
@@ -2290,7 +2284,6 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 		{
 			ProfileID: "RouteProfile1",
 			Sorting:   utils.MetaWeight,
-			Count:     1,
 			Routes: []*SortedRoute{
 				{
 					RouteID: "route2",
@@ -2304,7 +2297,6 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 		{
 			ProfileID: "RouteProfile2",
 			Sorting:   utils.MetaWeight,
-			Count:     1,
 			Routes: []*SortedRoute{
 				{
 					RouteID: "route1",
