@@ -1812,7 +1812,7 @@ func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 	//there are not any rates in db
 	var reply *engine.RateProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}}, &reply); err == nil ||
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
