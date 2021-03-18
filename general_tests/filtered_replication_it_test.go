@@ -375,7 +375,7 @@ func testFltrRplFilters(t *testing.T) {
 
 func testFltrRplThresholdProfile(t *testing.T) {
 	thID := "TH1"
-	thPrfl := &engine.ThresholdProfileWithOpts{
+	thPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        thID,
@@ -1482,7 +1482,7 @@ func testFltrRplRateProfile(t *testing.T) {
 
 func testFltrRplActionProfile(t *testing.T) {
 	acID := "ATTR1"
-	acPrf := &engine.ActionProfileWithOpts{
+	acPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     acID,

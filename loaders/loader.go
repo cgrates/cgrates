@@ -681,19 +681,19 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			return
 		case utils.MetaReload:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1RemoveItems, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1RemoveItems, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
@@ -1037,19 +1037,19 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			return
 		case utils.MetaReload:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1RemoveItems, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1RemoveItems, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}

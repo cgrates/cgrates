@@ -24,7 +24,7 @@ func init() {
 	c := &CmdReloadCache{
 		name:      "cache_reload",
 		rpcMethod: utils.CacheSv1ReloadCache,
-		rpcParams: &utils.AttrReloadCacheWithOpts{},
+		rpcParams: &utils.AttrReloadCacheWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +34,7 @@ func init() {
 type CmdReloadCache struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrReloadCacheWithOpts
+	rpcParams *utils.AttrReloadCacheWithAPIOpts
 	rpcResult string
 	*CommandExecuter
 }
@@ -49,7 +49,7 @@ func (self *CmdReloadCache) RpcMethod() string {
 
 func (self *CmdReloadCache) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrReloadCacheWithOpts{}
+		self.rpcParams = &utils.AttrReloadCacheWithAPIOpts{}
 	}
 	return self.rpcParams
 }

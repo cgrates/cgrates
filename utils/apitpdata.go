@@ -1288,21 +1288,21 @@ type RPCCDRsFilterWithOpts struct {
 	Tenant string
 }
 
-type ArgsGetCacheItemIDsWithOpts struct {
-	Opts   map[string]interface{}
-	Tenant string
+type ArgsGetCacheItemIDsWithAPIOpts struct {
+	APIOpts map[string]interface{}
+	Tenant  string
 	ArgsGetCacheItemIDs
 }
 
-type ArgsGetCacheItemWithOpts struct {
-	Opts   map[string]interface{}
-	Tenant string
+type ArgsGetCacheItemWithAPIOpts struct {
+	APIOpts map[string]interface{}
+	Tenant  string
 	ArgsGetCacheItem
 }
 
 // NewAttrReloadCacheWithOpts returns the ArgCache populated with nil
-func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithOpts {
-	return &AttrReloadCacheWithOpts{
+func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
+	return &AttrReloadCacheWithAPIOpts{
 		ArgsCache: map[string][]string{
 			DestinationIDs:             nil,
 			ReverseDestinationIDs:      nil,
@@ -1341,14 +1341,14 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithOpts {
 	}
 }
 
-type AttrReloadCacheWithOpts struct {
-	Opts      map[string]interface{}
+type AttrReloadCacheWithAPIOpts struct {
+	APIOpts   map[string]interface{}
 	Tenant    string
 	ArgsCache map[string][]string
 }
 
 type AttrCacheIDsWithOpts struct {
-	Opts     map[string]interface{}
+	APIOpts  map[string]interface{}
 	Tenant   string
 	CacheIDs []string
 }

@@ -61,9 +61,9 @@ func TestDspCoreIT(t *testing.T) {
 
 func testDspCoreLoad(t *testing.T) {
 	var status map[string]interface{}
-	statusTnt := utils.TenantWithOpts{
+	statusTnt := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey:  "core12345",
 			utils.OptsRouteID: "core1",
 			"EventType":       "LoadDispatcher",
@@ -85,9 +85,9 @@ func testDspCoreLoad(t *testing.T) {
 		},
 	}
 	var rply string
-	statusTnt2 := utils.TenantWithOpts{
+	statusTnt2 := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "core12345",
 			"EventType":      "LoadDispatcher",
 		},

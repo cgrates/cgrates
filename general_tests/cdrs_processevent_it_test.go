@@ -450,7 +450,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
-	tPrfl := engine.ThresholdProfileWithOpts{
+	tPrfl := engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "THD_Test",

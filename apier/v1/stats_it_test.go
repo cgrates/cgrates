@@ -168,7 +168,7 @@ func testV1STSGetStats(t *testing.T) {
 	var reply []string
 	expectedIDs := []string{"Stats1"}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedIDs, reply) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, reply)
@@ -197,7 +197,7 @@ func testV1STSV1StatSv1GetQueueStringMetricsWithoutTenant(t *testing.T) {
 	var reply []string
 	expectedIDs := []string{"CustomStatProfile", "Stats1", "StaticStatQueue", "StatWithThreshold"}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
-		&utils.TenantWithOpts{}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{}, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply)
@@ -853,7 +853,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	thSts := &engine.ThresholdProfileWithOpts{
+	thSts := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "THD_Stat",
@@ -1160,7 +1160,7 @@ func testV1STSProcessStatWithThreshold2(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	thSts := &engine.ThresholdProfileWithOpts{
+	thSts := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "THD_Stat2",
@@ -1317,7 +1317,7 @@ func testV1STSV1GetQueueIDs(t *testing.T) {
 	sort.Strings(expected)
 	var qIDs []string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
-		&utils.TenantWithOpts{},
+		&utils.TenantWithAPIOpts{},
 		&qIDs); err != nil {
 		t.Error(err)
 	} else {
@@ -1326,7 +1326,7 @@ func testV1STSV1GetQueueIDs(t *testing.T) {
 			t.Errorf("Expected %+v \n ,received %+v", expected, qIDs)
 		}
 		if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
-			&utils.TenantWithOpts{Tenant: "cgrates.org"},
+			&utils.TenantWithAPIOpts{Tenant: "cgrates.org"},
 			&qIDs); err != nil {
 			t.Error(err)
 		} else {

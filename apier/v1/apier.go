@@ -101,7 +101,7 @@ func (apierSv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *
 					return
 				}
 				if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 						ArgsCache: map[string][]string{utils.ReverseDestinationIDs: oldDst.Prefixes,
 							utils.DestinationIDs: {dstID}},
 					}, reply); err != nil {
@@ -114,7 +114,7 @@ func (apierSv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *
 			return
 		}
 		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 				ArgsCache: map[string][]string{utils.ReverseDestinationIDs: oldDst.Prefixes,
 					utils.DestinationIDs: {dstID}},
 			}, reply); err != nil {
@@ -187,7 +187,7 @@ func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply 
 		return
 	}
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 			ArgsCache: map[string][]string{utils.ReverseDestinationIDs: dest.Prefixes,
 				utils.DestinationIDs: {attrs.Id}},
 		}, reply); err != nil {
@@ -218,7 +218,7 @@ func (apierSv1 *APIerSv1) RemoveRatingPlan(ID *string, reply *string) error {
 		return utils.NewErrServerError(err)
 	}
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 			ArgsCache: map[string][]string{utils.RatingPlanIDs: {*ID}},
 		}, reply); err != nil {
 		return err
@@ -273,7 +273,7 @@ func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *str
 		return utils.ErrNotFound
 	}
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 			ArgsCache: map[string][]string{utils.DestinationIDs: {attrs.ID}},
 		}, reply); err != nil {
 		return err
@@ -497,7 +497,7 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 	}
 	//CacheReload
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 			ArgsCache: map[string][]string{utils.RatingProfileIDs: {rpfl.Id}},
 		}, reply); err != nil {
 		return err
@@ -648,7 +648,7 @@ func (apierSv1 *APIerSv1) SetActions(attrs *V1AttrSetActions, reply *string) (er
 	}
 	//CacheReload
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 			ArgsCache: map[string][]string{utils.ActionIDs: {attrs.ActionsId}},
 		}, reply); err != nil {
 		return err
@@ -795,7 +795,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			return 0, utils.NewErrServerError(err)
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 				ArgsCache: map[string][]string{utils.ActionPlanIDs: {ap.Id}},
 			}, reply); err != nil {
 			return 0, err
@@ -808,7 +808,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 		if len(prevAccountIDs) != 0 {
 			sl := prevAccountIDs.Slice()
 			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: sl},
 				}, reply); err != nil {
 				return 0, err
@@ -994,7 +994,7 @@ func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *strin
 		if len(prevAccountIDs) != 0 {
 			sl := prevAccountIDs.Slice()
 			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: sl},
 				}, reply); err != nil {
 				return 0, err
@@ -1259,7 +1259,7 @@ func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, rep
 		return utils.NewErrServerError(err)
 	}
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 			ArgsCache: map[string][]string{utils.RatingProfileIDs: {attr.GetId()}},
 		}, reply); err != nil {
 		return err
@@ -1356,7 +1356,7 @@ func (apierSv1 *APIerSv1) RemoveActions(attr *AttrRemoveActions, reply *string) 
 	}
 	//CacheReload
 	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 			ArgsCache: map[string][]string{utils.ActionIDs: attr.ActionIDs},
 		}, reply); err != nil {
 		return err

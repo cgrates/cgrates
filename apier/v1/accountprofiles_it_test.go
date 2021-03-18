@@ -319,7 +319,7 @@ func testAccountSGetAccountProfileIDs(t *testing.T) {
 func testAccountSGetAccountProfileIDsCount(t *testing.T) {
 	var reply int
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 3 {
 		t.Errorf("Expecting: 3, received: %+v", reply)

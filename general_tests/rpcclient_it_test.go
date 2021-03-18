@@ -135,12 +135,12 @@ func testRPCITLclRpcConnPoolFirst(t *testing.T) {
 // Connect rpc client to rater
 func testRPCITLclStatusSecondEngine(t *testing.T) {
 	var status map[string]interface{}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
 	}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil { // Make sure second time we land on the same instance
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
 	} else if status[utils.NodeID].(string) != node2 {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", node2, status[utils.NodeID].(string))
@@ -157,14 +157,14 @@ func testRPCITLclStartFirstEngine(t *testing.T) {
 // Connect rpc client to rater
 func testRPCITLclStatusFirstInitial(t *testing.T) {
 	var status map[string]interface{}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
 	} else if status[utils.NodeID].(string) == node2 {
 		t.Fatalf("Should receive ralID different than second one, got: %s", status[utils.NodeID].(string))
 	}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil { // Make sure second time we land on the same instance
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
 	} else if status[utils.NodeID].(string) != node1 {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", node1, status[utils.NodeID].(string))
@@ -178,14 +178,14 @@ func testRPCITLclStatusFirstFailover(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	var status map[string]interface{}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
 	} else if status[utils.NodeID].(string) == node1 {
 		t.Fatalf("Should receive ralID different than first one, got: %s", status[utils.NodeID].(string))
 	}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil { // Make sure second time we land on the same instance
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
 	} else if status[utils.NodeID].(string) != node2 {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", node2, status[utils.NodeID].(string))
@@ -197,12 +197,12 @@ func testRPCITLclStatusFirstFailback(t *testing.T) {
 		t.Fatal(err)
 	}
 	var status map[string]interface{}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == node2 {
 		t.Error("Should receive new ID")
 	}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil { // Make sure second time we land on the same instance
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
 	} else if status[utils.NodeID].(string) != node1 {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", node2, status[utils.NodeID].(string))
@@ -235,12 +235,12 @@ func testRPCITLclRpcConnPoolBcast(t *testing.T) {
 
 func testRPCITLclBcastStatusInitial(t *testing.T) {
 	var status map[string]interface{}
-	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
 	}
-	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
@@ -253,12 +253,12 @@ func testRPCITLclBcastStatusNoRals1(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	var status map[string]interface{}
-	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
 	}
-	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
@@ -271,7 +271,7 @@ func testRPCITLclBcastStatusBcastNoRals(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	var status map[string]interface{}
-	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err == nil {
+	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err == nil {
 		t.Error("Should get error")
 	}
 }
@@ -281,12 +281,12 @@ func testRPCITLclBcastStatusRALs2Up(t *testing.T) {
 		t.Fatal(err)
 	}
 	var status map[string]interface{}
-	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
 	}
-	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
@@ -298,12 +298,12 @@ func testRPCITLclStatusBcastRALs1Up(t *testing.T) {
 		t.Fatal(err)
 	}
 	var status map[string]interface{}
-	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty InstanceID received")
 	}
-	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty InstanceID received")
@@ -371,12 +371,12 @@ func TestRPCITRmtStatusFirstInitial(t *testing.T) {
 		return
 	}
 	var status map[string]interface{}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
 	}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil { // Make sure second time we land on the same instance
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
 	} else if status[utils.NodeID].(string) != node1 {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", node1, status[utils.NodeID].(string))
@@ -395,14 +395,14 @@ func TestRPCITRmtStatusFirstFailover(t *testing.T) {
 	}
 	fmt.Println("\n\nExecuting query ...")
 	var status map[string]interface{}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
 	} else if status[utils.NodeID].(string) == node1 {
 		t.Fatal("Did not failover")
 	}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
@@ -423,14 +423,14 @@ func TestRPCITRmtStatusFirstFailback(t *testing.T) {
 	}
 	fmt.Println("\n\nExecuting query ...")
 	var status map[string]interface{}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")
 	} else if status[utils.NodeID].(string) == node2 {
 		t.Fatal("Did not do failback")
 	}
-	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil {
+	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
 		t.Error(err)
 	} else if status[utils.NodeID].(string) == "" {
 		t.Error("Empty NodeID received")

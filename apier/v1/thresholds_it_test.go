@@ -36,7 +36,7 @@ var (
 	tSv1CfgPath string
 	tSv1Cfg     *config.CGRConfig
 	tSv1Rpc     *rpc.Client
-	tPrfl       *engine.ThresholdProfileWithOpts
+	tPrfl       *engine.ThresholdProfileWithAPIOpts
 	tSv1ConfDIR string //run tests for specific configuration
 
 	tEvs = []*engine.ThresholdsArgsProcessEvent{
@@ -300,13 +300,13 @@ func testV1TSGetThresholds(t *testing.T) {
 	var tIDs []string
 	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED", "THD_STATS_3", "THD_CDRS_1"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThresholdIDs,
-		&utils.TenantWithOpts{}, &tIDs); err != nil {
+		&utils.TenantWithAPIOpts{}, &tIDs); err != nil {
 		t.Error(err)
 	} else if len(expectedIDs) != len(tIDs) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, tIDs)
 	}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThresholdIDs,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &tIDs); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &tIDs); err != nil {
 		t.Error(err)
 	} else if len(expectedIDs) != len(tIDs) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, tIDs)
@@ -381,7 +381,7 @@ func testV1TSGetThresholdsAfterProcess(t *testing.T) {
 	var tIDs []string
 	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThresholdIDs,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &tIDs); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &tIDs); err != nil {
 		t.Error(err)
 	} else if len(expectedIDs) != len(tIDs) { // THD_STATS_3 is not reccurent, so it was removed
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, tIDs)
@@ -421,7 +421,7 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 func testV1TSSetThresholdProfileBrokenReference(t *testing.T) {
 	var reply *engine.ThresholdProfile
 	var result string
-	tPrfl = &engine.ThresholdProfileWithOpts{
+	tPrfl = &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
@@ -472,7 +472,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdProfileWithOpts{
+	tPrfl = &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
@@ -551,7 +551,7 @@ func testV1TSMaxHits(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdProfileWithOpts{
+	tPrfl = &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:  "cgrates.org",
 			ID:      "TH3",
@@ -656,7 +656,7 @@ func testV1TSUpdateSnooze(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	customTh := &engine.ThresholdProfileWithOpts{
+	customTh := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH4",
@@ -703,7 +703,7 @@ func testV1TSUpdateSnooze(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", tNow.Add(10*time.Minute), td.Snooze)
 	}
 
-	customTh2 := &engine.ThresholdProfileWithOpts{
+	customTh2 := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH4",
@@ -737,7 +737,7 @@ func testV1TSStopEngine(t *testing.T) {
 }
 
 func testV1TSGetThresholdProfileWithoutTenant(t *testing.T) {
-	tPrfl = &engine.ThresholdProfileWithOpts{
+	tPrfl = &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			ID:        "randomID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -790,14 +790,14 @@ func testV1TSRemThresholdProfileWithoutTenant(t *testing.T) {
 func testv1TSGetThresholdProfileIDsCount(t *testing.T) {
 	var reply int
 	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfileIDsCount,
-		&utils.TenantWithOpts{},
+		&utils.TenantWithAPIOpts{},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != 7 {
 		t.Errorf("Expected 7, received %+v", reply)
 	}
 	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"},
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != 7 {
@@ -846,7 +846,7 @@ func testV1TSGetThresholdsWithoutTenant(t *testing.T) {
 
 func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 	var result string
-	thAcntUpdate := &engine.ThresholdProfileWithOpts{
+	thAcntUpdate := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "TH_ACNT_UPDATE_EV",

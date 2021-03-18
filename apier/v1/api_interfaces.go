@@ -30,7 +30,7 @@ import (
 )
 
 type ThresholdSv1Interface interface {
-	GetThresholdIDs(tenant *utils.TenantWithOpts, tIDs *[]string) error
+	GetThresholdIDs(tenant *utils.TenantWithAPIOpts, tIDs *[]string) error
 	GetThresholdsForEvent(args *engine.ThresholdsArgsProcessEvent, reply *engine.Thresholds) error
 	GetThreshold(tntID *utils.TenantIDWithAPIOpts, t *engine.Threshold) error
 	ProcessEvent(args *engine.ThresholdsArgsProcessEvent, tIDs *[]string) error
@@ -38,7 +38,7 @@ type ThresholdSv1Interface interface {
 }
 
 type StatSv1Interface interface {
-	GetQueueIDs(tenant *utils.TenantWithOpts, qIDs *[]string) error
+	GetQueueIDs(tenant *utils.TenantWithAPIOpts, qIDs *[]string) error
 	ProcessEvent(args *engine.StatsArgsProcessEvent, reply *[]string) error
 	GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, reply *[]string) (err error)
 	GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error)
@@ -80,7 +80,7 @@ type SessionSv1Interface interface {
 	InitiateSession(args *sessions.V1InitSessionArgs, rply *sessions.V1InitSessionReply) error
 	InitiateSessionWithDigest(args *sessions.V1InitSessionArgs, rply *sessions.V1InitReplyWithDigest) error
 	UpdateSession(args *sessions.V1UpdateSessionArgs, rply *sessions.V1UpdateSessionReply) error
-	SyncSessions(args *utils.TenantWithOpts, rply *string) error
+	SyncSessions(args *utils.TenantWithAPIOpts, rply *string) error
 	TerminateSession(args *sessions.V1TerminateSessionArgs, rply *string) error
 	ProcessCDR(cgrEv *utils.CGREvent, rply *string) error
 	ProcessMessage(args *sessions.V1ProcessMessageArgs, rply *sessions.V1ProcessMessageReply) error
@@ -92,7 +92,7 @@ type SessionSv1Interface interface {
 	GetPassiveSessions(args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetPassiveSessionsCount(args *utils.SessionFilter, rply *int) error
 	Ping(ign *utils.CGREvent, reply *string) error
-	ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithOpts, rply *string) error
+	ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithAPIOpts, rply *string) error
 	SetPassiveSession(args *sessions.Session, reply *string) error
 	ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
 	DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
@@ -108,24 +108,24 @@ type ResponderInterface interface {
 	RefundIncrements(arg *engine.CallDescriptorWithAPIOpts, reply *engine.Account) (err error)
 	RefundRounding(arg *engine.CallDescriptorWithAPIOpts, reply *float64) (err error)
 	GetMaxSessionTime(arg *engine.CallDescriptorWithAPIOpts, reply *time.Duration) (err error)
-	Shutdown(arg *utils.TenantWithOpts, reply *string) (err error)
+	Shutdown(arg *utils.TenantWithAPIOpts, reply *string) (err error)
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type CacheSv1Interface interface {
-	GetItemIDs(args *utils.ArgsGetCacheItemIDsWithOpts, reply *[]string) error
-	HasItem(args *utils.ArgsGetCacheItemWithOpts, reply *bool) error
-	GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts, reply *time.Time) error
-	RemoveItem(args *utils.ArgsGetCacheItemWithOpts, reply *string) error
-	RemoveItems(args utils.AttrReloadCacheWithOpts, reply *string) error
+	GetItemIDs(args *utils.ArgsGetCacheItemIDsWithAPIOpts, reply *[]string) error
+	HasItem(args *utils.ArgsGetCacheItemWithAPIOpts, reply *bool) error
+	GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts, reply *time.Time) error
+	RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts, reply *string) error
+	RemoveItems(args utils.AttrReloadCacheWithAPIOpts, reply *string) error
 	Clear(cacheIDs *utils.AttrCacheIDsWithOpts, reply *string) error
 	GetCacheStats(cacheIDs *utils.AttrCacheIDsWithOpts, rply *map[string]*ltcache.CacheStats) error
 	PrecacheStatus(cacheIDs *utils.AttrCacheIDsWithOpts, rply *map[string]string) error
 	HasGroup(args *utils.ArgsGetGroupWithOpts, rply *bool) error
 	GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts, rply *[]string) error
 	RemoveGroup(args *utils.ArgsGetGroupWithOpts, rply *string) error
-	ReloadCache(attrs *utils.AttrReloadCacheWithOpts, reply *string) error
-	LoadCache(args *utils.AttrReloadCacheWithOpts, reply *string) error
+	ReloadCache(attrs *utils.AttrReloadCacheWithAPIOpts, reply *string) error
+	LoadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) error
 	ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error)
 	ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error)
 	Ping(ign *utils.CGREvent, reply *string) error
@@ -176,7 +176,7 @@ type ConfigSv1Interface interface {
 }
 
 type CoreSv1Interface interface {
-	Status(arg *utils.TenantWithOpts, reply *map[string]interface{}) error
+	Status(arg *utils.TenantWithAPIOpts, reply *map[string]interface{}) error
 	Ping(ign *utils.CGREvent, reply *string) error
 	Sleep(arg *utils.DurationArgs, reply *string) error
 }
@@ -218,12 +218,12 @@ type ReplicatorSv1Interface interface {
 	GetRateProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RateProfile) error
 	GetDispatcherHost(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error
 	GetItemLoadIDs(itemID *utils.StringWithOpts, reply *map[string]int64) error
-	SetThresholdProfile(th *engine.ThresholdProfileWithOpts, reply *string) error
-	SetThreshold(th *engine.ThresholdWithOpts, reply *string) error
+	SetThresholdProfile(th *engine.ThresholdProfileWithAPIOpts, reply *string) error
+	SetThreshold(th *engine.ThresholdWithAPIOpts, reply *string) error
 	SetAccount(acc *engine.AccountWithOpts, reply *string) error
 	SetDestination(dst *engine.DestinationWithOpts, reply *string) error
 	SetReverseDestination(dst *engine.DestinationWithOpts, reply *string) error
-	SetStatQueue(ssq *engine.StatQueueWithOpts, reply *string) error
+	SetStatQueue(ssq *engine.StatQueueWithAPIOpts, reply *string) error
 	SetFilter(fltr *engine.FilterWithOpts, reply *string) error
 	SetStatQueueProfile(sq *engine.StatQueueProfileWithOpts, reply *string) error
 	SetTiming(tm *utils.TPTimingWithOpts, reply *string) error
@@ -276,7 +276,7 @@ type ReplicatorSv1Interface interface {
 	RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 
 	GetActionProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error
-	SetActionProfile(args *engine.ActionProfileWithOpts, reply *string) error
+	SetActionProfile(args *engine.ActionProfileWithAPIOpts, reply *string) error
 	RemoveActionProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 }
 

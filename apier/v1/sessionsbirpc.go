@@ -120,7 +120,7 @@ func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V
 	return ssv1.sS.BiRPCv1UpdateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.TenantWithOpts,
+func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.TenantWithAPIOpts,
 	rply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -128,7 +128,7 @@ func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.Tenan
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1SyncSessions(clnt, &utils.TenantWithOpts{}, rply)
+	return ssv1.sS.BiRPCv1SyncSessions(clnt, &utils.TenantWithAPIOpts{}, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *sessions.V1TerminateSessionArgs,

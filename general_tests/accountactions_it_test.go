@@ -114,7 +114,7 @@ func testAccActionsRPCConn(t *testing.T) {
 }
 
 func testAccActionsSetActionProfile(t *testing.T) {
-	actPrf := &engine.ActionProfileWithOpts{
+	actPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CREATE_ACC",
@@ -179,7 +179,7 @@ func testAccActionsSetActionProfile(t *testing.T) {
 				},
 			},
 		},
-		Opts: map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
 	}
 	var reply string
 	if err := accSRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &reply); err != nil {
@@ -280,7 +280,7 @@ func testAccActionsGetAccountAfterActions(t *testing.T) {
 }
 
 func testAccActionsSetActionProfile2(t *testing.T) {
-	actPrf := &engine.ActionProfileWithOpts{
+	actPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "REM_ACC",
@@ -303,7 +303,7 @@ func testAccActionsSetActionProfile2(t *testing.T) {
 				},
 			},
 		},
-		Opts: map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
 	}
 	var reply string
 	if err := accSRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &reply); err != nil {

@@ -96,7 +96,7 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSess
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1UpdateSession, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithOpts,
+func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -104,13 +104,13 @@ func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithOpts,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SessionSv1SyncSessions, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tnt,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1SyncSessions, args, reply)
 }
 
@@ -264,7 +264,7 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *utils.Sessi
 	}, utils.MetaSessionS, utils.SessionSv1GetPassiveSessionsCount, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ReplicateSessions(args ArgsReplicateSessionsWithOpts,
+func (dS *DispatcherService) SessionSv1ReplicateSessions(args ArgsReplicateSessionsWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -272,13 +272,13 @@ func (dS *DispatcherService) SessionSv1ReplicateSessions(args ArgsReplicateSessi
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SessionSv1ReplicateSessions, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tnt,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1ReplicateSessions, args, reply)
 }
 

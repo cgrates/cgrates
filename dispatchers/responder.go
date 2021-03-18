@@ -107,17 +107,17 @@ func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescrip
 	return dS.Dispatch(args.AsCGREvent(args.APIOpts), utils.MetaResponder, utils.ResponderGetMaxSessionTime, args, reply)
 }
 
-func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithOpts,
+func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithAPIOpts,
 	reply *string) (err error) {
 	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderShutdown, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tnt,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaResponder, utils.ResponderShutdown, args, reply)
 }

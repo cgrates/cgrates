@@ -36,7 +36,7 @@ var (
 	actPrfCfgPath   string
 	actPrfCfg       *config.CGRConfig
 	actSRPC         *rpc.Client
-	actPrf          *engine.ActionProfileWithOpts
+	actPrf          *engine.ActionProfileWithAPIOpts
 	actPrfConfigDIR string //run tests for specific configuration
 
 	sTestsActPrf = []func(t *testing.T){
@@ -216,7 +216,7 @@ func testActionSPing(t *testing.T) {
 }
 
 func testActionSSettActionProfile(t *testing.T) {
-	actPrf = &engine.ActionProfileWithOpts{
+	actPrf = &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
 			Tenant: "tenant_test",
 			ID:     "id_test",
@@ -231,7 +231,7 @@ func testActionSSettActionProfile(t *testing.T) {
 				},
 			},
 		},
-		Opts: map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
 	}
 	var result string
 	expErr := utils.ErrNotFound.Error()
@@ -282,7 +282,7 @@ func testActionSGetActionProfileIDs(t *testing.T) {
 func testActionSGetActionProfileIDsCount(t *testing.T) {
 	var reply int
 	if err := actSRPC.Call(utils.APIerSv1GetActionProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "tenant_test"}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "tenant_test"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 1 {
 		t.Errorf("Expecting: 1, received: %+v", reply)

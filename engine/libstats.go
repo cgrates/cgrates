@@ -91,9 +91,9 @@ type StoredStatQueue struct {
 	Compressed bool
 }
 
-type StatQueueWithOpts struct {
+type StatQueueWithAPIOpts struct {
 	*StatQueue
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID

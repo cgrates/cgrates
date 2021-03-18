@@ -238,7 +238,7 @@ func (dT *DispatcherThresholdSv1) ProcessEvent(args *engine.ThresholdsArgsProces
 	return dT.dS.ThresholdSv1ProcessEvent(args, tIDs)
 }
 
-func (dT *DispatcherThresholdSv1) GetThresholdIDs(args *utils.TenantWithOpts,
+func (dT *DispatcherThresholdSv1) GetThresholdIDs(args *utils.TenantWithAPIOpts,
 	tIDs *[]string) error {
 	return dT.dS.ThresholdSv1GetThresholdIDs(args, tIDs)
 }
@@ -278,7 +278,7 @@ func (dSts *DispatcherStatSv1) GetQueueFloatMetrics(args *utils.TenantIDWithAPIO
 	return dSts.dS.StatSv1GetQueueFloatMetrics(args, reply)
 }
 
-func (dSts *DispatcherStatSv1) GetQueueIDs(args *utils.TenantWithOpts,
+func (dSts *DispatcherStatSv1) GetQueueIDs(args *utils.TenantWithAPIOpts,
 	reply *[]string) error {
 	return dSts.dS.StatSv1GetQueueIDs(args, reply)
 }
@@ -507,7 +507,7 @@ func (dS *DispatcherSessionSv1) GetPassiveSessionsCount(args *utils.SessionFilte
 	return dS.dS.SessionSv1GetPassiveSessionsCount(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithOpts,
+func (dS *DispatcherSessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithAPIOpts,
 	reply *string) (err error) {
 	return dS.dS.SessionSv1ReplicateSessions(*args, reply)
 }
@@ -525,7 +525,7 @@ func (dS *DispatcherSessionSv1) DeactivateSessions(args *utils.SessionIDsWithArg
 	return dS.dS.SessionSv1DeactivateSessions(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) SyncSessions(args *utils.TenantWithOpts, rply *string) error {
+func (dS *DispatcherSessionSv1) SyncSessions(args *utils.TenantWithAPIOpts, rply *string) error {
 	return dS.dS.SessionSv1SyncSessions(args, rply)
 }
 
@@ -569,7 +569,7 @@ func (dS *DispatcherResponder) GetMaxSessionTime(args *engine.CallDescriptorWith
 	return dS.dS.ResponderGetMaxSessionTime(args, reply)
 }
 
-func (dS *DispatcherResponder) Shutdown(args *utils.TenantWithOpts, reply *string) error {
+func (dS *DispatcherResponder) Shutdown(args *utils.TenantWithAPIOpts, reply *string) error {
 	return dS.dS.ResponderShutdown(args, reply)
 }
 
@@ -588,31 +588,31 @@ type DispatcherCacheSv1 struct {
 }
 
 // GetItemIDs returns the IDs for cacheID with given prefix
-func (dS *DispatcherCacheSv1) GetItemIDs(args *utils.ArgsGetCacheItemIDsWithOpts,
+func (dS *DispatcherCacheSv1) GetItemIDs(args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 	reply *[]string) error {
 	return dS.dS.CacheSv1GetItemIDs(args, reply)
 }
 
 // HasItem verifies the existence of an Item in cache
-func (dS *DispatcherCacheSv1) HasItem(args *utils.ArgsGetCacheItemWithOpts,
+func (dS *DispatcherCacheSv1) HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *bool) error {
 	return dS.dS.CacheSv1HasItem(args, reply)
 }
 
 // GetItemExpiryTime returns the expiryTime for an item
-func (dS *DispatcherCacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts,
+func (dS *DispatcherCacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *time.Time) error {
 	return dS.dS.CacheSv1GetItemExpiryTime(args, reply)
 }
 
 // RemoveItem removes the Item with ID from cache
-func (dS *DispatcherCacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithOpts,
+func (dS *DispatcherCacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *string) error {
 	return dS.dS.CacheSv1RemoveItem(args, reply)
 }
 
 // RemoveItems removes the Item with ID from cache
-func (dS *DispatcherCacheSv1) RemoveItems(args utils.AttrReloadCacheWithOpts,
+func (dS *DispatcherCacheSv1) RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
 	reply *string) error {
 	return dS.dS.CacheSv1RemoveItems(args, reply)
 }
@@ -653,12 +653,12 @@ func (dS *DispatcherCacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithOpts,
 }
 
 // ReloadCache reloads cache from DB for a prefix or completely
-func (dS *DispatcherCacheSv1) ReloadCache(args *utils.AttrReloadCacheWithOpts, reply *string) (err error) {
+func (dS *DispatcherCacheSv1) ReloadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	return dS.dS.CacheSv1ReloadCache(*args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
-func (dS *DispatcherCacheSv1) LoadCache(args *utils.AttrReloadCacheWithOpts, reply *string) (err error) {
+func (dS *DispatcherCacheSv1) LoadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	return dS.dS.CacheSv1LoadCache(*args, reply)
 }
 
@@ -857,7 +857,7 @@ type DispatcherCoreSv1 struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithOpts, reply *map[string]interface{}) error {
+func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) error {
 	return dS.dS.CoreSv1Status(args, reply)
 }
 
@@ -1034,12 +1034,12 @@ func (dS *DispatcherReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithOpts, 
 //finished all the above
 
 // SetThresholdProfile
-func (dS *DispatcherReplicatorSv1) SetThresholdProfile(args *engine.ThresholdProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetThresholdProfile(args *engine.ThresholdProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetThresholdProfile(args, reply)
 }
 
 // SetThreshold
-func (dS *DispatcherReplicatorSv1) SetThreshold(args *engine.ThresholdWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetThreshold(args *engine.ThresholdWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetThreshold(args, reply)
 }
 
@@ -1059,7 +1059,7 @@ func (dS *DispatcherReplicatorSv1) SetReverseDestination(args *engine.Destinatio
 }
 
 // SetStatQueue
-func (dS *DispatcherReplicatorSv1) SetStatQueue(args *engine.StatQueueWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetStatQueue(args *engine.StatQueueWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetStatQueue(args, reply)
 }
 
@@ -1309,7 +1309,7 @@ func (dS *DispatcherReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithAPI
 }
 
 // SetActionProfile .
-func (dS *DispatcherReplicatorSv1) SetActionProfile(args *engine.ActionProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetActionProfile(args *engine.ActionProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetActionProfile(args, reply)
 }
 

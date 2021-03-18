@@ -67,14 +67,14 @@ func TestDspResponder(t *testing.T) {
 
 func testDspResponderStatus(t *testing.T) {
 	var reply map[string]interface{}
-	if err := allEngine.RPC.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "ALL" {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := utils.TenantWithOpts{
+	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "rsp12345",
 		},
 	}
@@ -106,9 +106,9 @@ func getNodeWithRoute(route string, t *testing.T) string {
 			utils.OptsRouteID: route,
 		},
 	}
-	ev := utils.TenantWithOpts{
+	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey:  "rsp12345",
 			utils.OptsRouteID: route,
 		},
@@ -141,9 +141,9 @@ func testDspResponderRandom(t *testing.T) {
 func testDspResponderShutdown(t *testing.T) {
 	var reply string
 	var statusReply map[string]interface{}
-	ev := utils.TenantWithOpts{
+	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "rsp12345",
 		},
 	}
@@ -216,9 +216,9 @@ func testDspResponderInternal(t *testing.T) {
 			utils.OptsRouteID: route,
 		},
 	}
-	ev := utils.TenantWithOpts{
+	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey:  "rsp12345",
 			utils.OptsRouteID: route,
 		},

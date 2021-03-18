@@ -793,7 +793,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			}
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{
 						utils.AccountActionPlanIDs: {id},
 						utils.ActionPlanIDs:        {accountAction.ActionPlanId},
@@ -902,7 +902,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			}
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{
 						utils.ActionTriggerIDs: {accountAction.ActionTriggersId},
 					},
@@ -1020,7 +1020,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			}
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{
 						utils.ActionIDs: {k},
 					},
@@ -2602,8 +2602,8 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	accountPrfIDs, _ := tpr.GetLoadedIds(utils.AccountProfilePrefix)
 
 	//compose Reload Cache argument
-	cacheArgs := utils.AttrReloadCacheWithOpts{
-		Opts: opts,
+	cacheArgs := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: opts,
 		ArgsCache: map[string][]string{
 			utils.DestinationIDs:        dstIds,
 			utils.ReverseDestinationIDs: revDstIDs,
@@ -2696,7 +2696,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 		log.Print("Clearing indexes")
 	}
 	clearArgs := &utils.AttrCacheIDsWithOpts{
-		Opts:     opts,
+		APIOpts:  opts,
 		CacheIDs: cacheIDs,
 	}
 	if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, clearArgs, &reply); err != nil {

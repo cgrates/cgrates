@@ -526,7 +526,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl := &engine.ThresholdProfileWithOpts{
+	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_PoccessCDR",

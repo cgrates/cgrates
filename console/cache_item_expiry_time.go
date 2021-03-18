@@ -28,7 +28,7 @@ func init() {
 	c := &CmdCacheGetItemExpiryTime{
 		name:      "cache_item_expiry_time",
 		rpcMethod: utils.CacheSv1GetItemExpiryTime,
-		rpcParams: &utils.ArgsGetCacheItemWithOpts{},
+		rpcParams: &utils.ArgsGetCacheItemWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +38,7 @@ func init() {
 type CmdCacheGetItemExpiryTime struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.ArgsGetCacheItemWithOpts
+	rpcParams *utils.ArgsGetCacheItemWithAPIOpts
 	*CommandExecuter
 }
 
@@ -52,7 +52,7 @@ func (self *CmdCacheGetItemExpiryTime) RpcMethod() string {
 
 func (self *CmdCacheGetItemExpiryTime) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.ArgsGetCacheItemWithOpts{}
+		self.rpcParams = &utils.ArgsGetCacheItemWithAPIOpts{}
 	}
 	return self.rpcParams
 }

@@ -29,10 +29,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// ThresholdProfileWithOpts is used in replicatorV1 for dispatcher
-type ThresholdProfileWithOpts struct {
+// ThresholdProfileWithAPIOpts is used in replicatorV1 for dispatcher
+type ThresholdProfileWithAPIOpts struct {
 	*ThresholdProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // ThresholdProfile the profile for threshold
@@ -55,10 +55,10 @@ func (tp *ThresholdProfile) TenantID() string {
 	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
 }
 
-// ThresholdWithOpts is used in replicatorV1 for dispatcher
-type ThresholdWithOpts struct {
+// ThresholdWithAPIOpts is used in replicatorV1 for dispatcher
+type ThresholdWithAPIOpts struct {
 	*Threshold
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // Threshold is the unit matched by filters

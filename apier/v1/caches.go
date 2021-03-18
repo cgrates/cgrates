@@ -36,31 +36,31 @@ type CacheSv1 struct {
 }
 
 // GetItemIDs returns the IDs for cacheID with given prefix
-func (chSv1 *CacheSv1) GetItemIDs(args *utils.ArgsGetCacheItemIDsWithOpts,
+func (chSv1 *CacheSv1) GetItemIDs(args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 	reply *[]string) error {
 	return chSv1.cacheS.V1GetItemIDs(args, reply)
 }
 
 // HasItem verifies the existence of an Item in cache
-func (chSv1 *CacheSv1) HasItem(args *utils.ArgsGetCacheItemWithOpts,
+func (chSv1 *CacheSv1) HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *bool) error {
 	return chSv1.cacheS.V1HasItem(args, reply)
 }
 
 // GetItemExpiryTime returns the expiryTime for an item
-func (chSv1 *CacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts,
+func (chSv1 *CacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *time.Time) error {
 	return chSv1.cacheS.V1GetItemExpiryTime(args, reply)
 }
 
 // RemoveItem removes the Item with ID from cache
-func (chSv1 *CacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithOpts,
+func (chSv1 *CacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *string) error {
 	return chSv1.cacheS.V1RemoveItem(args, reply)
 }
 
 // RemoveItems removes the Items with ID from cache
-func (chSv1 *CacheSv1) RemoveItems(args utils.AttrReloadCacheWithOpts,
+func (chSv1 *CacheSv1) RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
 	reply *string) error {
 	return chSv1.cacheS.V1RemoveItems(args, reply)
 }
@@ -101,12 +101,12 @@ func (chSv1 *CacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithOpts,
 }
 
 // ReloadCache reloads cache from DB for a prefix or completely
-func (chSv1 *CacheSv1) ReloadCache(args *utils.AttrReloadCacheWithOpts, reply *string) (err error) {
+func (chSv1 *CacheSv1) ReloadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	return chSv1.cacheS.V1ReloadCache(*args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
-func (chSv1 *CacheSv1) LoadCache(args *utils.AttrReloadCacheWithOpts, reply *string) (err error) {
+func (chSv1 *CacheSv1) LoadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	return chSv1.cacheS.V1LoadCache(*args, reply)
 }
 

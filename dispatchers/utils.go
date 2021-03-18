@@ -28,9 +28,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ArgsReplicateSessionsWithOpts struct {
-	Opts   map[string]interface{}
-	Tenant string
+type ArgsReplicateSessionsWithAPIOpts struct {
+	APIOpts map[string]interface{}
+	Tenant  string
 	sessions.ArgsReplicateSessions
 }
 

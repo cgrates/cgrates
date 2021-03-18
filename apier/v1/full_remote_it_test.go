@@ -259,7 +259,7 @@ func testFullRemoteITThreshold(t *testing.T) {
 	}
 
 	var replySet string
-	tPrfl := &engine.ThresholdProfileWithOpts{
+	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
@@ -674,7 +674,7 @@ func testFullRemoteITAction(t *testing.T) {
 	}
 
 	var replySet string
-	actPrf = &engine.ActionProfileWithOpts{
+	actPrf = &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "ACT_1",
@@ -689,7 +689,7 @@ func testFullRemoteITAction(t *testing.T) {
 				},
 			},
 		},
-		Opts: map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
 	}
 	// add a threshold profile in engine1 and verify it internal
 	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &replySet); err != nil {
